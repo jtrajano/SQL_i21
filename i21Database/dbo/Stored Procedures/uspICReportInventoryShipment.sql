@@ -52,23 +52,13 @@ BEGIN TRY
 	BEGIN
 		SELECT SM.strLocationName [Ship From Address]
 			,S.strShipmentNumber [Shipment Number]
-			,E.strLocationName [Ship To Address]
+			,E.strLocationName +' '+ E.strAddress +' '+ E.strCity +' '+ E.strCountry +' '+ E.strState +' '+ E.strZipCode [Ship To Address]
 			,SO.strSalesOrderNumber [SalesOrder No]
 			,I.strItemNo [Item No]
 			,I.strDescription [Item]
 			,UM.strUnitMeasure [UOM]
-			--	,SI.dblQuantity [Quantity]
-			,CASE 
-				WHEN CEILING(SI.dblQuantity) = FLOOR(SI.dblQuantity)
-					THEN CONVERT(VARCHAR, CAST(SI.dblQuantity AS DECIMAL))
-				ELSE CONVERT(VARCHAR, SI.dblQuantity)
-				END [Quantity]
-			--,(
-			--	SELECT count(*)
-			--	FROM tblICInventoryShipmentItemLot IL
-			--	WHERE IL.intInventoryShipmentItemId = SI.intInventoryShipmentItemId
-			--	) 
-				,'' [Pallets]
+			,ISNULL(SI.dblQuantity,0) [Quantity]
+			,'' [Pallets]
 		FROM tblICInventoryShipment S
 		LEFT JOIN tblICInventoryShipmentItem SI ON S.intInventoryShipmentId = SI.intInventoryShipmentId
 		LEFT JOIN tblICItem I ON I.intItemId = SI.intItemId
