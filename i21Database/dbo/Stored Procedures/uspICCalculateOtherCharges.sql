@@ -3,6 +3,13 @@
 AS
 BEGIN
 
+	-- Update the currency fields 
+	UPDATE	ReceiptCharges
+	SET		intCent = Currency.intCent
+			,ysnSubCurrency = Currency.ysnSubCurrency
+	FROM	dbo.tblICInventoryReceiptCharge ReceiptCharges INNER JOIN dbo.tblSMCurrency Currency
+				ON ReceiptCharges.intCurrencyId = Currency.intCurrencyID
+
 	-- Calculate the other charges. 
 	BEGIN 
 		-- Calculate the other charges. 
@@ -16,14 +23,24 @@ BEGIN
 			@intInventoryReceiptId
 	END
 
-	UPDATE tblICInventoryReceiptCharge
-	SET dblAmount = ROUND (ComputedCharges.dblCalculatedAmount, 2) 
-	FROM (
-		SELECT intInventoryReceiptChargeId, dblCalculatedAmount = SUM(dblCalculatedAmount) FROM tblICInventoryReceiptChargePerItem
-		WHERE intInventoryReceiptId = @intInventoryReceiptId
-		GROUP BY intInventoryReceiptChargeId
-		) ComputedCharges
-		WHERE tblICInventoryReceiptCharge.intInventoryReceiptChargeId = ComputedCharges.intInventoryReceiptChargeId
-	
+	UPDATE	ReceiptCharge
+	SET		dblAmount = ROUND(	
+							ISNULL(ComputedCharges.dblCalculatedAmount, 0)
+							/ 
+							CASE	WHEN ReceiptCharge.ysnSubCurrency = 1 THEN 
+										CASE WHEN ISNULL(ReceiptCharge.intCent, 1) <> 0 THEN ISNULL(ReceiptCharge.intCent, 1) ELSE 1 END 
+									ELSE 
+										1
+							END 
+						, 2)
+	FROM	dbo.tblICInventoryReceiptCharge ReceiptCharge INNER JOIN  (
+				SELECT	intInventoryReceiptChargeId
+						, dblCalculatedAmount = SUM(dblCalculatedAmount) 
+				FROM	tblICInventoryReceiptChargePerItem
+				WHERE	intInventoryReceiptId = @intInventoryReceiptId
+				GROUP BY intInventoryReceiptChargeId
+			) ComputedCharges
+				ON ReceiptCharge.intInventoryReceiptChargeId = ComputedCharges.intInventoryReceiptChargeId
+	WHERE	ReceiptCharge.intInventoryReceiptId = @intInventoryReceiptId
 
 END

@@ -10,6 +10,9 @@
     [dblRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intCostUOMId] INT NULL, 
 	[ysnSubCurrency] BIT NULL DEFAULT ((0)),
+	[intCurrencyId] INT NULL,
+	[dblExchangeRate] NUMERIC(38, 20) DEFAULT((1)), 
+	[intCent] INT NULL,
     [dblAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [strAllocateCostBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT (''), 
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
@@ -25,5 +28,5 @@
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICItem] FOREIGN KEY ([intChargeId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICItemUOM] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-    --CONSTRAINT [FK_tblICInventoryReceiptCharge_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+    CONSTRAINT [FK_tblICInventoryReceiptCharge_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )

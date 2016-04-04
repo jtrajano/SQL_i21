@@ -221,7 +221,7 @@ BEGIN
 							ISNULL(CalculatedCharges.dblAmount, 0)
 							/ 
 							CASE	WHEN Charge.ysnSubCurrency = 1 THEN 
-										CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
+										CASE WHEN ISNULL(Charge.intCent, 1) <> 0 THEN ISNULL(Charge.intCent, 1) ELSE 1 END 
 									ELSE 
 										1
 							END 
