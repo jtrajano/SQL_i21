@@ -175,6 +175,7 @@
     <Folder Include="Scripts\Post-Deployment\PR\Reports" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports\SubReports" />
     <Folder Include="Scripts\Post-Deployment\CF" />
+    <Folder Include="Scripts\Post-Deployment\IP" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3582,6 +3583,7 @@
     <Build Include="dbo\Views\vyuIPGetLog.sql" />
     <Build Include="dbo\Views\vyuIPGetProcess.sql" />
     <Build Include="dbo\Views\vyuIPGetConnection.sql" />
+    <None Include="Scripts\Post-Deployment\IP\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
