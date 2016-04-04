@@ -52,7 +52,11 @@ BEGIN TRY
 	BEGIN
 		SELECT SM.strLocationName [Ship From Address]
 			,S.strShipmentNumber [Shipment Number]
-			,E.strLocationName +' '+ E.strAddress +' '+ E.strCity +' '+ E.strCountry +' '+ E.strState +' '+ E.strZipCode [Ship To Address]
+			,CASE WHEN S.intOrderType=3 then
+			ISNULL(SM.strLocationName,'')+' '+ ISNULL(SM.strAddress,'') + ' '+ISNULL(SM.strCity,'')+' '+ ISNULL(SM.strCountry,'') + ' ' + ISNULL(SM.strStateProvince,'')+' ' +ISNULL(SM.strZipPostalCode,'')
+			ELSE
+			ISNULL(E.strLocationName,'') +' '+ ISNULL(E.strAddress,'') +' '+ ISNULL(E.strCity,'') +' '+ ISNULL(E.strCountry,'') +' '+ ISNULL(E.strState,'') +' '+ ISNULL(E.strZipCode,'') 
+			END [Ship To Address]
 			,SO.strSalesOrderNumber [SalesOrder No]
 			,I.strItemNo [Item No]
 			,I.strDescription [Item]
@@ -65,9 +69,9 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM U ON SI.intItemUOMId = U.intItemUOMId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
 		LEFT JOIN tblEntityLocation E ON E.intEntityLocationId = S.intShipToLocationId
-		LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = S.intShipFromLocationId
+		LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = S.intShipToCompanyLocationId
 		LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SI.intOrderId
-		WHERE S.strShipmentNumber = @strShipmentNo
+		WHERE S.strShipmentNumber =@strShipmentNo
 	END
 END TRY
 
