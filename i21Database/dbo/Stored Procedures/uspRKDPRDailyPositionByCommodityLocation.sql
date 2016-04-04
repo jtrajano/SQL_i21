@@ -34,7 +34,7 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    isnull(OpenPurQty,0) OpenPurQty,
 
    isnull(invQty,0) + isnull(dblGrainBalance ,0) +
-  CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end   AS InHouse             
+  CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end +isnull(OnHold,0)  AS InHouse             
                  
 FROM(  
 SELECT distinct c.intCommodityId, strLocationName, intLocationId,    
@@ -207,14 +207,20 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 		INNER JOIN tblSMCompanyLocation  cl1 on cl1.intCompanyLocationId=st.intProcessingLocationId 
 		WHERE cd.intCommodityId = c.intCommodityId 	and
 		cl1.intCompanyLocationId=cl.intCompanyLocationId 		
-		)t) AS PurBasisDelivary		
+		)t) AS PurBasisDelivary,
+		(SELECT	dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal
+		FROM tblSCTicket st
+		JOIN tblICItem i1 on i1.intItemId=st.intItemId and st.strDistributionOption='HLD'
+		JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
+		WHERE st.intCommodityId  = c.intCommodityId	AND st.intProcessingLocationId  = cl.intCompanyLocationId) OnHold  		
 	               
 FROM tblSMCompanyLocation cl  
 JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId     
 JOIN tblICItem i ON lo.intItemId = i.intItemId    
 JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId   
-JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId   
-JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId   
+LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId   
+LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId   
 WHERE  ysnDefault=1   
  GROUP BY   
   c.intCommodityId   

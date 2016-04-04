@@ -27,7 +27,7 @@ SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
    isnull(OpenPurchasesQty,0) OpenPurchasesQty,
    isnull(OpenSalesQty,0) OpenSalesQty,
    isnull(OpenPurQty,0) OpenPurQty,
-      isnull(invQty,0) + isnull(dblGrainBalance,0)+CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end   AS InHouse     
+      isnull(invQty,0) + isnull(dblGrainBalance,0)+CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end + isnull(OnHold,0)   AS InHouse     
 FROM(  
 SELECT DISTINCT c.intCommodityId,              
   strCommodityCode,              
@@ -190,10 +190,18 @@ SELECT DISTINCT c.intCommodityId,
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 		INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 		WHERE cd.intCommodityId = c.intCommodityId 	
-		)t) AS PurBasisDelivary	       
+		)t) AS PurBasisDelivary,
+		
+		(SELECT	dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal
+				FROM tblSCTicket st
+				JOIN tblICItem i1 on i1.intItemId=st.intItemId and st.strDistributionOption='HLD'
+				JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
+				WHERE st.intCommodityId  = c.intCommodityId) OnHold
+			       
 FROM tblICCommodity c              
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId and ysnDefault=1                
-JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId          
+LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId          
 GROUP BY c.intCommodityId,              
   strCommodityCode,              
   u.intUnitMeasureId,              
