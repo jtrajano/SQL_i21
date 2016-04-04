@@ -28,5 +28,24 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemLocationViews(param));
         }
+
+        [HttpPost]
+        [ActionName("CheckCostingMethod")]
+        public HttpResponseMessage CheckCostingMethod(int ItemId, int ItemLocationId, int CostingMethod)
+        {
+            var result = _bl.CheckCostingMethod(ItemId, ItemLocationId, CostingMethod);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    //statusText = result.Exception.Message,
+                    statusText = "Costing Method cannot be changed due to Stock already Exists.",
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }

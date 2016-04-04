@@ -297,6 +297,34 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             current.set('intStorageLocationId', null);
         }
     },
+   
+    onCostingMethodSelect: function(combo, records)
+    {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        
+        
+        Ext.Ajax.request({
+        url: '../Inventory/api/ItemLocation/CheckCostingMethod?ItemId=' + current.get('intItemId') + 
+            '&ItemLocationId=' + current.get('intItemLocationId') +
+            '&CostingMethod=' + current.get('intCostingMethod'),
+        method: 'post',
+        success: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    if (!jsonData.success) 
+                    {
+                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                    }
+                },
+        failure: function(response)
+            {
+                var jsonData = Ext.decode(response.responseText);
+                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            }
+        
+        }); 
+
+    },
 
     init: function(application) {
         this.control({
@@ -327,6 +355,10 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             },
             "#cboInventoryGroupField": {
                 drilldown: this.onCountGroupDrilldown
+            },
+            
+            "#cboCostingMethod": {
+                select: this.onCostingMethodSelect
             }
         });
     }

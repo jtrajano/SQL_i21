@@ -48,6 +48,53 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public SaveResult CheckCostingMethod(int ItemId, int ItemLocationId, int CostingMethod)
+        {
+            SaveResult saveResult = new SaveResult();
+            var msg = "";
+
+                //Check if Stock exists for the item
+                var query = _db.GetQuery<tblICItemStock>()
+                         .Where(t => t.intItemId == ItemId && t.intItemLocationId == ItemLocationId && t.dblUnitOnHand > 0);
+
+                var totalItemWithStock = query.Count();
+
+                //Stock Exists
+                if (totalItemWithStock > 0)
+                {
+                    //Check if Costing Method is Changed
+                    var query2 = _db.GetQuery<tblICItemLocation>()
+                         .Where(t => t.intItemLocationId == ItemLocationId && t.intCostingMethod != CostingMethod);
+
+                    var totalItemCostingMethodChange = query2.Count();
+
+                    //Costing Method is Changed
+                    if (totalItemCostingMethodChange > 0)
+                    {
+                        msg += "Costing Method cannot be changed due to Stock already Exists.";
+
+                        saveResult.HasError = true;
+                    }
+
+                    //Costing Method is not changed
+                    else
+                    {
+                        msg = "success";
+                        saveResult.HasError = false;
+                    }
+
+                }
+
+                //Stock Don't Exists
+                else
+                {
+                    msg = "success";
+                    saveResult.HasError = false;
+                }
+
+                return saveResult;
+        }
+
         public override BusinessResult<tblICItemLocation> Validate(IEnumerable<tblICItemLocation> entities, ValidateAction action)
         {
             var msg = "";
