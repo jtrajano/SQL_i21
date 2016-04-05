@@ -118,14 +118,14 @@ BEGIN
 	BEGIN
 		/* If it exists, update the values */
 		UPDATE tblPRForm941 
-		SET intEmployees = PCHK.intEmployees
-			,dblAdjustedGross = PCHK.dblGrossSum
-			,dblFIT = FIT.dblTotal
-			,dblTaxableSS = SS.dblTotal
-			,dblTaxableMed = MED.dblTotal
-			,dblMonth1 = MONTH1.dblTotal
-			,dblMonth2 = MONTH2.dblTotal 
-			,dblMonth3 = MONTH3.dblTotal
+		SET intEmployees = ISNULL(PCHK.intEmployees, 0)
+			,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
+			,dblFIT = ISNULL(FIT.dblTotal, 0)
+			,dblTaxableSS = ISNULL(SS.dblTotal, 0)
+			,dblTaxableMed = ISNULL(MED.dblTotal, 0)
+			,dblMonth1 = ISNULL(MONTH1.dblTotal, 0)
+			,dblMonth2 = ISNULL(MONTH2.dblTotal, 0)
+			,dblMonth3 = ISNULL(MONTH3.dblTotal, 0)
 		FROM (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax') FIT,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Social Security') SS,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Medicare') MED,
