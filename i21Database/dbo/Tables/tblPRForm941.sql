@@ -262,7 +262,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPRForm941',
     @level2type = N'COLUMN',
-    @level2name = N'intDesigneePIN'
+    @level2name = N'strDesigneePIN'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Print Name',
