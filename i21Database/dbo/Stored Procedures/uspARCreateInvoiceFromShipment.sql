@@ -30,7 +30,7 @@ SELECT @ShipmentNumber = [strShipmentNumber] FROM tblICInventoryShipment WHERE [
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
 	BEGIN			
-		RAISERROR('There is no setup for AR Account in the Company Preference.', 11, 1) 
+		RAISERROR('There is no setup for AR Account in the Company Configuration.', 11, 1) 
 		RETURN 0
 	END
 

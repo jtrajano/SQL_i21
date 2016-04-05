@@ -232,7 +232,7 @@ SET @batchIdUsed = @batchId
 				INSERT INTO 
 					@ARReceivableInvalidData
 				SELECT 
-					'The AR Account in Company Preference was not set.'
+					'The AR Account in Company Configuration was not set.'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
@@ -422,7 +422,7 @@ SET @batchIdUsed = @batchId
 				INSERT INTO 
 					@ARReceivableInvalidData
 				SELECT 
-					'The Discounts account in Company Preference was not set.'
+					'The Discounts account in Company Configuration was not set.'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
@@ -443,7 +443,7 @@ SET @batchIdUsed = @batchId
 				INSERT INTO 
 					@ARReceivableInvalidData
 				SELECT 
-					'The Income Interest account in Company Preference was not set.'
+					'The Income Interest account in Company Configuration was not set.'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
@@ -496,7 +496,7 @@ SET @batchIdUsed = @batchId
 				INSERT INTO 
 					@ARReceivableInvalidData
 				SELECT 
-					'The Write Off account in Company Preference was not set.'
+					'The Write Off account in Company Configuration was not set.'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId

@@ -21,7 +21,7 @@ BEGIN TRY
        select top 1 @strRackPriceToUse = strRackPriceToUse from tblTRCompanyPreference
 	   IF @strRackPriceToUse IS NULL 
        BEGIN
-		RAISERROR('Rack Price to Use Setup is missing in Company Preference', 16, 1);
+		RAISERROR('Rack Price to Use Setup is missing in Company Configuration', 16, 1);
 	   END
        select top 1 @dblIndexPrice = CASE
 								  WHEN @strRackPriceToUse = 'Vendor'

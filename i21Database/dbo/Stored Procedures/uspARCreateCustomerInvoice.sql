@@ -113,7 +113,7 @@ IF @Comment IS NULL OR LTRIM(RTRIM(@Comment)) = ''
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)
 	BEGIN
-		SET @ErrorMessage = 'There is no setup for AR Account in the Company Preference.';
+		SET @ErrorMessage = 'There is no setup for AR Account in the Company Configuration.';
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;

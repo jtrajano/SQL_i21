@@ -21,13 +21,13 @@ AS
 	--VALIDATION
 	IF ISNULL(@arAccountId, 0) = 0
 		BEGIN
-			RAISERROR('There is no setup for AR Account in the Company Preference.', 11, 1) 
+			RAISERROR('There is no setup for AR Account in the Company Configuration.', 11, 1) 
 			RETURN 0
 		END
 
 	IF ISNULL(@scAccountId, 0) = 0
 		BEGIN
-			RAISERROR('There is no setup for Service Charge Account in the Company Preference.', 11, 1) 
+			RAISERROR('There is no setup for Service Charge Account in the Company Configuration.', 11, 1) 
 			RETURN 0
 		END
 

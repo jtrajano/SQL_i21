@@ -167,7 +167,7 @@
 	ELSE
 	BEGIN
 		SET @Sucess = 0
-		SET @Message = 'The AR Account in the Company Preferences was not set.'
+		SET @Message = 'The AR Account in the Company Configuration was not set.'
 		RETURN;	
 	END
 

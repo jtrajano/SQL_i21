@@ -23,7 +23,7 @@ SET @ARAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHER
 
 IF @ARAccountId IS NULL OR @ARAccountId = 0
 	BEGIN
-		RAISERROR('There is no setup for AR Account in the Company Preference.', 16, 1);
+		RAISERROR('There is no setup for AR Account in the Company Configuration.', 16, 1);
 		RETURN;
 	END
 
