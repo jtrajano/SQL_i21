@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[dblDeferPayRate] [numeric](5, 2) NULL,
 	[intContractTextId] [int] NULL,
 	[ysnSigned] [bit] NOT NULL CONSTRAINT [DF_tblCTContractHeader_ysnSigned]  DEFAULT ((0)),
+	[dtmSigned] DATETIME,
 	[ysnPrinted] [bit] NOT NULL CONSTRAINT [DF_tblCTContractHeader_ysnPrinted]  DEFAULT ((0)),
 	[intSalespersonId] [int] NOT NULL,
 	[intGradeId] [int] NULL,

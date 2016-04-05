@@ -22,7 +22,7 @@ AS
 				CH.strApprovalBasis,				CH.strContractBasis,			CH.strPricingType,
 				CH.strPricingLevelName,				CH.strLoadUnitMeasure,			CH.strCategoryUnitMeasure,
 				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				BL.dblAppliedQty,
-				CH.dtmCreated,						CH.strContractPlan,
+				CH.dtmCreated,						CH.strContractPlan,				CH.dtmSigned,
 				CH.strCreatedBy,					CH.strLastModifiedBy,
 
 				CH.intContractPlanId,				CH.intEntityId,					CH.intCommodityId,
