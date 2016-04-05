@@ -24,7 +24,7 @@ A.intPurchaseId
 ,CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover
 FROM dbo.tblPOPurchase A
 	INNER JOIN dbo.tblAPVendor B ON A.[intEntityVendorId] = B.[intEntityVendorId]
-	INNER JOIN dbo.tblEntity B1 ON B.intEntityVendorId = B1.intEntityId
+	INNER JOIN dbo.tblEMEntity B1 ON B.intEntityVendorId = B1.intEntityId
 	INNER JOIN dbo.tblPOOrderStatus C ON A.intOrderStatusId = C.intOrderStatusId
 	INNER JOIN dbo.tblSMCompanyLocation D ON A.intShipToId = D.intCompanyLocationId
 	LEFT JOIN dbo.tblSMApprovalList G ON G.intApprovalListId = ISNULL(B.intApprovalListId , (SELECT intApprovalListId FROM dbo.tblAPCompanyPreference))

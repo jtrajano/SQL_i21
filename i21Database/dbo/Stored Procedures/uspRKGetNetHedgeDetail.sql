@@ -46,7 +46,7 @@ BEGIN
 	JOIN tblRKFutOptTransaction ft on t.intFutOptTransactionId=ft.intFutOptTransactionId
 	JOIN tblSMCompanyLocation l on l.intCompanyLocationId=ft.intLocationId
 	JOIN tblRKFuturesMonth fm on ft.intFutureMonthId=fm.intFutureMonthId
-	JOIN tblEntity e on e.intEntityId=ft.intEntityId
+	JOIN tblEMEntity e on e.intEntityId=ft.intEntityId
 	JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=ft.intBrokerageAccountId
 END
 ELSE
@@ -74,7 +74,7 @@ SELECT l.strLocationName,ft.dtmFilledDate,ft.strInternalTradeNo,fm.strFutureMont
 	JOIN tblRKFutOptTransaction ft on t.intFutOptTransactionId=ft.intFutOptTransactionId
 	JOIN tblSMCompanyLocation l on l.intCompanyLocationId=ft.intLocationId
 	JOIN tblRKFuturesMonth fm on ft.intFutureMonthId=fm.intFutureMonthId
-	JOIN tblEntity e on e.intEntityId=ft.intEntityId
+	JOIN tblEMEntity e on e.intEntityId=ft.intEntityId
 	JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=ft.intBrokerageAccountId
 END
 

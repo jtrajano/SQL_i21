@@ -121,9 +121,9 @@ FROM	[dbo].[tblCMBankTransaction] H INNER JOIN [dbo].[tblCMBankTransactionDetail
 			ON H.intBankAccountId = BA.intBankAccountId
 		INNER JOIN [dbo].[tblCMBank] B
 			ON BA.intBankId = B.intBankId			
-		LEFT JOIN [dbo].[tblEntity] EH
+		LEFT JOIN [dbo].tblEMEntity EH
 			ON H.intPayeeId = EH.intEntityId			
-		LEFT JOIN [dbo].[tblEntity] ED
+		LEFT JOIN [dbo].tblEMEntity ED
 			ON D.intEntityId = ED.intEntityId
 		LEFT JOIN [dbo].[tblCMUndepositedFund] UF
 			ON D.intUndepositedFundId = UF.intUndepositedFundId

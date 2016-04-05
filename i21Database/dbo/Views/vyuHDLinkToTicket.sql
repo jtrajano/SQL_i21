@@ -4,7 +4,7 @@
 		intLinkToTicketId=tblHDTicket.intTicketId
 		,strLinkToTicketNumber=tblHDTicket.strTicketNumber
 		,strLinkToTicketSubject=tblHDTicket.strSubject
-		,strLinkToTicketAssignee=tblEntity.strName
+		,strLinkToTicketAssignee=tblEMEntity.strName
 		,strLinkToTicketStatus=tblHDTicketStatus.strStatus
 		,tblHDTicket.intCustomerId
 		,tblHDTicketStatus.strBackColor
@@ -12,8 +12,8 @@
 		,tblHDTicketStatus.strIcon
 	from
 		tblHDTicket
-		,tblEntity
+		,tblEMEntity
 		,tblHDTicketStatus
 	where
-		tblEntity.intEntityId = tblHDTicket.intAssignedToEntity
+		tblEMEntity.intEntityId = tblHDTicket.intAssignedToEntity
 		and tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId

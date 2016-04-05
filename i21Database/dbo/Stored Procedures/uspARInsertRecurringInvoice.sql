@@ -19,7 +19,7 @@ AS
 							   WHEN @frequency = 'Annually' THEN 12
 							   ELSE 0
 						  END
-	SELECT @responsibleUser = strName FROM tblEntity WHERE intEntityId = @UserId
+	SELECT @responsibleUser = strName FROM tblEMEntity WHERE intEntityId = @UserId
 
 	INSERT INTO [tblSMRecurringTransaction]
 		([intTransactionId]

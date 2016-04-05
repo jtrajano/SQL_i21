@@ -1,56 +1,56 @@
-﻿DELETE FROM tblEntityImportSchemaCSV
+﻿DELETE FROM [tblEMEntityImportSchemaCSV]
 
-SET IDENTITY_INSERT tblEntityImportSchemaCSV ON
+SET IDENTITY_INSERT [tblEMEntityImportSchemaCSV] ON
 
-INSERT INTO tblEntityImportSchemaCSV(intEntityImportSchemaCSV,strObject, strProperty, strCSVProp)
+INSERT INTO [tblEMEntityImportSchemaCSV](intEntityImportSchemaCSV,strObject, strProperty, strCSVProp)
 
-SELECT 1001, 'tblEntity', 'strName', 'name'
+SELECT 1001, 'tblEMEntity', 'strName', 'name'
 UNION
-SELECT 1002, 'tblEntity', 'strEmail', 'email'
+SELECT 1002, 'tblEMEntity', 'strEmail', 'email'
 UNION
-SELECT 1003, 'tblEntity', 'strMobile', 'mobile'
-
-UNION
-SELECT 1101, 'tblEntity.tblEntityToContact.tblEntityContact', 'strName', 'con_name'
-UNION
-SELECT 1102, 'tblEntity.tblEntityToContact.tblEntityContact', 'strEmail', 'con_email'
-UNION
-SELECT 1103, 'tblEntity.tblEntityToContact.tblEntityContact', 'strMobile', 'con_mobile'
-UNION
-SELECT 1104, 'tblEntity.tblEntityToContact.tblEntityContact', 'strPhone', 'con_phone'
-UNION
-SELECT 1105, 'tblEntity.tblEntityToContact.tblEntityContact', 'strFax', 'con_fax'
+SELECT 1003, 'tblEMEntity', 'strMobile', 'mobile'
 
 UNION
-SELECT 1201, 'tblEntity.tblEntityLocations', 'strLocationName', 'loc_name'
+SELECT 1101, 'tblEMEntity.tblEMEntityToContact.tblEMEntityContact', 'strName', 'con_name'
 UNION
-SELECT 1202, 'tblEntity.tblEntityLocations', 'strAddress', 'loc_address'
+SELECT 1102, 'tblEMEntity.tblEMEntityToContact.tblEMEntityContact', 'strEmail', 'con_email'
 UNION
-SELECT 1203, 'tblEntity.tblEntityLocations', 'strTermCodeId', 'loc_termsId'
+SELECT 1103, 'tblEMEntity.tblEMEntityToContact.tblEMEntityContact', 'strMobile', 'con_mobile'
 UNION
-SELECT 1204, 'tblEntity.tblEntityLocations', 'strCity', 'loc_city'
+SELECT 1104, 'tblEMEntity.tblEMEntityToContact.tblEMEntityContact', 'strPhone', 'con_phone'
 UNION
-SELECT 1205, 'tblEntity.tblEntityLocations', 'strState', 'loc_state'
-UNION
-SELECT 1206, 'tblEntity.tblEntityLocations', 'strZipCode', 'loc_zipcode'
-UNION
-SELECT 1207, 'tblEntity.tblEntityLocations', 'strCountry', 'loc_country'
-UNION
-SELECT 1208, 'tblEntity.tblEntityLocations', 'strPricingLevel', 'loc_pricelevel'
+SELECT 1105, 'tblEMEntity.tblEMEntityToContact.tblEMEntityContact', 'strFax', 'con_fax'
 
+UNION
+SELECT 1201, 'tblEMEntity.tblEMEntityLocations', 'strLocationName', 'loc_name'
+UNION
+SELECT 1202, 'tblEMEntity.tblEMEntityLocations', 'strAddress', 'loc_address'
+UNION
+SELECT 1203, 'tblEMEntity.tblEMEntityLocations', 'strTermCodeId', 'loc_termsId'
+UNION
+SELECT 1204, 'tblEMEntity.tblEMEntityLocations', 'strCity', 'loc_city'
+UNION
+SELECT 1205, 'tblEMEntity.tblEMEntityLocations', 'strState', 'loc_state'
+UNION
+SELECT 1206, 'tblEMEntity.tblEMEntityLocations', 'strZipCode', 'loc_zipcode'
+UNION
+SELECT 1207, 'tblEMEntity.tblEMEntityLocations', 'strCountry', 'loc_country'
+UNION
+SELECT 1208, 'tblEMEntity.tblEMEntityLocations', 'strPricingLevel', 'loc_pricelevel'
 
-UNION	
-SELECT 1301, 'tblEntity.tblVendor', 'strGLAccountExpenseId', 'ven_expenseId'
-UNION	
-SELECT 1302, 'tblEntity.tblVendor', 'strVendorId', 'ven_vendorId'
 
 UNION	
-SELECT 1401, 'tblEntity.tblCustomer', 'strCustomerNumber', 'cus_number'
+SELECT 1301, 'tblEMEntity.tblVendor', 'strGLAccountExpenseId', 'ven_expenseId'
 UNION	
-SELECT 1402, 'tblEntity.tblCustomer', 'strType', 'cus_type'
-UNION	
-SELECT 1403, 'tblEntity.tblCustomer', 'dblCreditLimit', 'cus_creditlimit'
-UNION	
-SELECT 1405, 'tblEntity.tblCustomer', 'ysnPORequired', 'cus_porequired'
+SELECT 1302, 'tblEMEntity.tblVendor', 'strVendorId', 'ven_vendorId'
 
-SET IDENTITY_INSERT tblEntityImportSchemaCSV OFF
+UNION	
+SELECT 1401, 'tblEMEntity.tblCustomer', 'strCustomerNumber', 'cus_number'
+UNION	
+SELECT 1402, 'tblEMEntity.tblCustomer', 'strType', 'cus_type'
+UNION	
+SELECT 1403, 'tblEMEntity.tblCustomer', 'dblCreditLimit', 'cus_creditlimit'
+UNION	
+SELECT 1405, 'tblEMEntity.tblCustomer', 'ysnPORequired', 'cus_porequired'
+
+SET IDENTITY_INSERT [tblEMEntityImportSchemaCSV] OFF

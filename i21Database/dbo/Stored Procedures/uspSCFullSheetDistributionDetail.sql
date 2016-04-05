@@ -74,7 +74,7 @@ CASE	WHEN	TS.strDistributionOption  ='SPT'
 END		AS	strDetail,
 @intTicketId
  FROM tblSCTicketSplit TS
-LEFT JOIN tblEntity ET on ET.intEntityId = TS.intCustomerId
+LEFT JOIN tblEMEntity ET on ET.intEntityId = TS.intCustomerId
 LEFT JOIN tblGRStorageType ST on ST.strStorageTypeCode = TS.strDistributionOption
 LEFT JOIN tblICCommodityUnitMeasure TCU on TCU.intCommodityId = @intCommdityId AND TCU.ysnStockUnit = 1
 LEFT JOIN tblICUnitMeasure ICU on ICU.intUnitMeasureId = TCU.intUnitMeasureId
@@ -96,7 +96,7 @@ CASE	WHEN	TIC.strDistributionOption  ='SPT'
 END		AS	strDetail,
 @intTicketId
 FROM tblSCTicket TIC
-LEFT JOIN tblEntity ET on ET.intEntityId = TIC.intEntityId
+LEFT JOIN tblEMEntity ET on ET.intEntityId = TIC.intEntityId
 LEFT JOIN tblGRStorageType ST on ST.strStorageTypeCode = TIC.strDistributionOption
 LEFT JOIN tblICCommodityUnitMeasure TCU on TCU.intCommodityId = TIC.intCommodityId AND TCU.ysnStockUnit = 1
 LEFT JOIN tblICUnitMeasure ICU on ICU.intUnitMeasureId = TCU.intUnitMeasureId 

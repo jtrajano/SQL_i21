@@ -61,7 +61,7 @@ FROM tblSMTaxCode TC
 	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
 	INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
-	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId
+	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 GROUP BY
 	 TC.intTaxCodeId
 	,TC.strTaxAgency

@@ -95,7 +95,7 @@ SET @query = 'SELECT * FROM
 	  , strXmlParam			= '''+@xmlParam+'''
       , dtmAsOfDate			= CONVERT(DATE, GETDATE())
 FROM tblARCustomer C INNER JOIN
-       tblEntity E ON C.intEntityCustomerId = E.intEntityId
+       tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 ) MainQuery'
 
 IF ISNULL(@filter,'') != ''

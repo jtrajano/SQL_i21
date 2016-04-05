@@ -16,7 +16,7 @@ AS
 				JOIN	tblLGAllocationDetail			AD	ON	AD.intAllocationDetailId		=	PL.intAllocationDetailId
 				JOIN	tblICInventoryShipmentItem		SI	ON	SI.intLineNo					=	PL.intPickLotDetailId
 				JOIN	tblICInventoryShipment			SH	ON	SH.intInventoryShipmentId		=	SI.intInventoryShipmentId AND SH.intOrderType = 1 AND intSourceType = 3
-				JOIN	tblEntity						EY	ON	EY.intEntityId					=	SH.intEntityCustomerId
+				JOIN	tblEMEntity						EY	ON	EY.intEntityId					=	SH.intEntityCustomerId
 				JOIN	tblICInventoryShipmentItemLot	IL	ON	IL.intInventoryShipmentItemId	=	SI.intInventoryShipmentItemId
 				JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId					=	SI.intItemUOMId
 				JOIN	tblICUnitMeasure				UM	ON	UM.intUnitMeasureId				=	IU.intUnitMeasureId		
@@ -46,7 +46,7 @@ AS
 				JOIN	tblLGAllocationDetail			AD	ON	AD.intAllocationDetailId		=	PL.intAllocationDetailId
 				JOIN	tblICInventoryShipmentItem		SI	ON	SI.intLineNo					=	PL.intPickLotDetailId
 				JOIN	tblICInventoryShipment			SH	ON	SH.intInventoryShipmentId		=	SI.intInventoryShipmentId AND SH.intOrderType = 1 AND intSourceType = 3
-				JOIN	tblEntity						EY	ON	EY.intEntityId					=	SH.intEntityCustomerId
+				JOIN	tblEMEntity						EY	ON	EY.intEntityId					=	SH.intEntityCustomerId
 				JOIN	tblICInventoryShipmentItemLot	IL	ON	IL.intInventoryShipmentItemId	=	SI.intInventoryShipmentItemId
 				JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId					=	SI.intItemUOMId
 				JOIN	tblICUnitMeasure				UM	ON	UM.intUnitMeasureId				=	IU.intUnitMeasureId		

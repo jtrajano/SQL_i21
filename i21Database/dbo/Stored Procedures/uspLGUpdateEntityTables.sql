@@ -31,7 +31,7 @@ DECLARE @intIdentityEntityLocationId INT
 BEGIN TRY
 	IF @intTransType = 1
 	BEGIN
-		INSERT INTO tblEntity 
+		INSERT INTO tblEMEntity 
 		(
 			strName,
 			strEmail,
@@ -92,7 +92,7 @@ BEGIN TRY
 
 		SET @intIdentityEntityId = SCOPE_IDENTITY()
 
-		INSERT INTO tblEntityLocation 
+		INSERT INTO [tblEMEntityLocation] 
 		(
 			intEntityId,
 			strLocationName,
@@ -135,9 +135,9 @@ BEGIN TRY
 
 		SET @intIdentityEntityLocationId = SCOPE_IDENTITY()
 
-		UPDATE tblEntity SET intDefaultLocationId = @intIdentityEntityLocationId WHERE intEntityId=@intIdentityEntityId
+		UPDATE tblEMEntity SET intDefaultLocationId = @intIdentityEntityLocationId WHERE intEntityId=@intIdentityEntityId
 
-		INSERT INTO tblEntityType
+		INSERT INTO [tblEMEntityType]
 		(
 			intEntityId,
 			strType,
@@ -158,17 +158,17 @@ BEGIN TRY
 
 	IF @intTransType = 2
 	BEGIN
-		IF NOT EXISTS(SELECT 1 FROM tblEntity WHERE intEntityId=@intEntityId) AND @intEntityId IS NOT NULL
+		IF NOT EXISTS(SELECT 1 FROM tblEMEntity WHERE intEntityId=@intEntityId) AND @intEntityId IS NOT NULL
 		BEGIN
 			RAISERROR('Invalid EntityId', 16, 1)
 		END
 
-		IF NOT EXISTS(SELECT 1 FROM tblEntityLocation WHERE intEntityLocationId=@intEntityLocationId) AND @intEntityLocationId IS NOT NULL
+		IF NOT EXISTS(SELECT 1 FROM [tblEMEntityLocation] WHERE intEntityLocationId=@intEntityLocationId) AND @intEntityLocationId IS NOT NULL
 		BEGIN
 			RAISERROR('Invalid EntityLocationId', 16, 1)
 		END
 
-		UPDATE tblEntity SET 
+		UPDATE tblEMEntity SET 
 			strName = @strName,
 			strEmail = @strEmail,
 			strWebsite = @strWebsite,
@@ -182,7 +182,7 @@ BEGIN TRY
 			intConcurrencyId = @intConcurrencyId
 		WHERE intEntityId=@intEntityId
 
-		UPDATE tblEntityLocation SET
+		UPDATE [tblEMEntityLocation] SET
 			strLocationName = @strName,
 			strAddress = @strAddress,
 			strCity = @strCity,
@@ -198,11 +198,11 @@ BEGIN TRY
 
 	IF @intTransType = 3
 	BEGIN
-		IF NOT EXISTS(SELECT 1 FROM tblEntity WHERE intEntityId=@intEntityId) AND @intEntityId IS NOT NULL
+		IF NOT EXISTS(SELECT 1 FROM tblEMEntity WHERE intEntityId=@intEntityId) AND @intEntityId IS NOT NULL
 		BEGIN
 			RAISERROR('Invalid EntityId', 16, 1)
 		END
-		DELETE FROM tblEntity WHERE intEntityId=@intEntityId
+		DELETE FROM tblEMEntity WHERE intEntityId=@intEntityId
 	END
 
 END TRY

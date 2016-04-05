@@ -53,11 +53,11 @@ INNER JOIN
 	dbo.tblARCustomer AS ARC 
 		ON ARI.[intEntityCustomerId] = ARC.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	dbo.tblEntityToContact AS EC ON ARC.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
+	dbo.[tblEMEntityToContact] AS EC ON ARC.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
 LEFT OUTER JOIN
-	dbo.tblEntity AS E ON EC.intEntityContactId = E.intEntityId
+	dbo.tblEMEntity AS E ON EC.intEntityContactId = E.intEntityId
 INNER JOIN
-	dbo.tblEntity AS CE 
+	dbo.tblEMEntity AS CE 
 		ON ARC.[intEntityCustomerId] = CE.intEntityId 
 LEFT OUTER JOIN
 	dbo.tblSMTerm AS SMT 

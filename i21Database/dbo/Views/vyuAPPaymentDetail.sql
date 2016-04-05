@@ -25,7 +25,7 @@ FROM dbo.tblAPPaymentDetail A
 		ON A.intBillId = C.intBillId
 	INNER JOIN dbo.tblAPVendor D
 		ON B.[intEntityVendorId] = D.[intEntityVendorId]
-	INNER JOIN dbo.tblEntity E
+	INNER JOIN dbo.tblEMEntity E
 		ON D.[intEntityVendorId] = E.intEntityId
 	INNER JOIN dbo.tblGLAccount F
 		ON A.intAccountId = F.intAccountId

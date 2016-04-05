@@ -122,7 +122,7 @@ BEGIN TRY
 
 	SELECT TOP 1 @strVendorNo = a.strName
 	FROM tblWHOrderHeader oh
-	JOIN tblEntity a ON oh.intShipFromAddressId = a.intEntityId
+	JOIN tblEMEntity a ON oh.intShipFromAddressId = a.intEntityId
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
 	--Check that the location exists                                        

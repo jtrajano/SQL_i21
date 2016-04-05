@@ -10,6 +10,6 @@
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblHDTicketEscalation] PRIMARY KEY CLUSTERED ([intTicketEscalationId] ASC),
  CONSTRAINT [FK_Escalation_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]),
- CONSTRAINT [FK_Create_Escalation_Entity] FOREIGN KEY ([intRequestedByEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
- CONSTRAINT [FK_Response_Escalation_Entity] FOREIGN KEY ([intRespondedByEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+ CONSTRAINT [FK_Create_Escalation_Entity] FOREIGN KEY ([intRequestedByEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+ CONSTRAINT [FK_Response_Escalation_Entity] FOREIGN KEY ([intRespondedByEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )

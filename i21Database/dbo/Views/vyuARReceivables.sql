@@ -20,7 +20,7 @@ INNER JOIN
 	tblARCustomer C
 		ON C.[intEntityCustomerId] = I.[intEntityCustomerId]
 INNER JOIN 
-	tblEntity E 
+	tblEMEntity E 
 		ON C.[intEntityCustomerId] = E.[intEntityId]
 WHERE
 	I.[ysnPosted] = 1
@@ -47,7 +47,7 @@ INNER JOIN
 	tblARCustomer C
 		ON P.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId] 			
 LEFT JOIN 
 	tblARPaymentDetail PD

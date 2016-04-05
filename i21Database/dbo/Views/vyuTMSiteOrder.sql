@@ -48,14 +48,14 @@ SELECT
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
-INNER JOIN tblEntity C
+INNER JOIN tblEMEntity C
 	ON B.intCustomerNumber = C.intEntityId
 LEFT JOIN (
 	SELECT 
 		A.intEntityId
 		,A.strEntityNo
-	FROM tblEntity A
-	INNER JOIN tblEntityType C
+	FROM tblEMEntity A
+	INNER JOIN [tblEMEntityType] C
 		ON A.intEntityId = C.intEntityId
 	WHERE strType = 'Salesperson'
 	) E
@@ -75,7 +75,7 @@ INNER JOIN (
 		,dblBalance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
 		,dblTotalDue = ISNULL(CI.dblTotalDue,0.0)
 		,dblCreditLimit = ISNULL(CI.dblCreditLimit,0.0)
-	FROM tblEntity Ent
+	FROM tblEMEntity Ent
 	INNER JOIN tblARCustomer Cus 
 		ON Ent.intEntityId = Cus.intEntityCustomerId
 	LEFT JOIN [vyuARCustomerInquiryReport] CI

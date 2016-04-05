@@ -60,6 +60,6 @@ FROM
 ) AS tmpAgingSummaryTotal
 LEFT JOIN dbo.tblAPBill A
 ON A.intBillId = tmpAgingSummaryTotal.intBillId
-LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.[intEntityVendorId] = C.intEntityId)
+LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityVendorId] = C.intEntityId)
 ON B.[intEntityVendorId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId

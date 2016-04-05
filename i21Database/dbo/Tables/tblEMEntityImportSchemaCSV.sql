@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityImportSchemaCSV]
+﻿CREATE TABLE [dbo].[tblEMEntityImportSchemaCSV]
 (
 	[intEntityImportSchemaCSV]		INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
 	[strObject]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,

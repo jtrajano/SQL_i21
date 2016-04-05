@@ -65,7 +65,7 @@ JOIN tblRKOptionsMonth om on ot.intOptionMonthId=om.intOptionMonthId and ysnMont
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId   
 JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId   
  AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId IN(2,3) AND ba.intBrokerageAccountId=bc.intBrokerageAccountId   
-JOIN tblEntity e on e.intEntityId=ba.intEntityId    
+JOIN tblEMEntity e on e.intEntityId=ba.intEntityId    
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId  
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId  
  )t)t1  where dblOpenLots > 0 and strBuySell='S'

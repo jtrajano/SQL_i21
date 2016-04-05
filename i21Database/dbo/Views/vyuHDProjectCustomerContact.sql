@@ -3,19 +3,19 @@
 		select
 			tblARCustomer.intEntityCustomerId
 			,tblARCustomer.strCustomerNumber
-			,tblEntity.intEntityId
-			,tblEntity.strName
-			,tblEntity.strTitle
-			,tblEntity.strEmail
-			,tblEntityLocation.intEntityLocationId
-			,tblEntityLocation.strLocationName
-			,tblEntity.ysnActive
-			,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = tblARCustomer.intEntityCustomerId and et.strType in ('Customer','Prospect'))
+			,tblEMEntity.intEntityId
+			,tblEMEntity.strName
+			,tblEMEntity.strTitle
+			,tblEMEntity.strEmail
+			,[tblEMEntityLocation].intEntityLocationId
+			,[tblEMEntityLocation].strLocationName
+			,tblEMEntity.ysnActive
+			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = tblARCustomer.intEntityCustomerId and et.strType in ('Customer','Prospect'))
 		from tblARCustomer
-			,tblEntityToContact
-			,tblEntity
-			,tblEntityLocation
+			,[tblEMEntityToContact]
+			,tblEMEntity
+			,[tblEMEntityLocation]
 		where
-			tblEntityToContact.intEntityId = tblARCustomer.intEntityCustomerId
-			and tblEntity.intEntityId = tblEntityToContact.intEntityContactId
-			and tblEntityLocation.intEntityLocationId = tblEntityToContact.intEntityLocationId
+			[tblEMEntityToContact].intEntityId = tblARCustomer.intEntityCustomerId
+			and tblEMEntity.intEntityId = [tblEMEntityToContact].intEntityContactId
+			and [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId

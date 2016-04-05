@@ -93,7 +93,7 @@ AS
 				ysnSubCurrency				=	SubCurrency.ysnSubCurrency 
 				
 		FROM	vyuCTContractDetailView		CD	
-		JOIN	tblEntityLocation			EL	ON	EL.intEntityId			=	CD.intEntityId	AND
+		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CD.intEntityId	AND
 													EL.ysnDefaultLocation	=	1				LEFT
 		JOIN	vyuICGetItemStock			SK	ON	SK.intItemId			=	CD.intItemId	AND		
 													SK.intLocationId		=	CD.intCompanyLocationId
@@ -138,7 +138,7 @@ AS
 				SubCurrency.ysnSubCurrency 
 		FROM		vyuCTContractCostView	CC
 		JOIN		vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
-		JOIN		tblEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
+		JOIN		tblEMEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
 												EL.ysnDefaultLocation	=	1
 		LEFT JOIN tblSMCurrency				SubCurrency  ON SubCurrency.intCurrencyID = CASE WHEN CD.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
 

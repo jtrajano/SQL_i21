@@ -18,7 +18,7 @@ INNER JOIN
 	vyuGLAccountDetail GL
 		ON A.intAccountId = GL.intAccountId  
 INNER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON B.intEntityCustomerId = E.intEntityId 
 LEFT OUTER JOIN
 	tblCMUndepositedFund CM

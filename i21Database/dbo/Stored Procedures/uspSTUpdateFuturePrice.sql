@@ -139,7 +139,7 @@ BEGIN
 		                BEGIN 
 		                      set @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
 		                      IN (select intItemLocationId from tblICItemLocation where intVendorId
-		                      IN (select intEntityId from tblEntity 
+		                      IN (select intEntityId from tblEMEntity 
 							  where intEntityId IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 		                END
 
@@ -217,7 +217,7 @@ BEGIN
 		                BEGIN 
 		                      set @SQL1 = @SQL1 +  ' and  tblICItemPricing.intItemLocationId
 		                      IN (select intItemLocationId from tblICItemLocation where intVendorId
-		                      IN (select intEntityId from tblEntity 
+		                      IN (select intEntityId from tblEMEntity 
 							  where intEntityId IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 		                END
 

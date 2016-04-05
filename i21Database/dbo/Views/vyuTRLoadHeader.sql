@@ -36,7 +36,7 @@ SELECT TL.intLoadHeaderId
 	, DD.strReceiptLink
 	, 'Distribution' AS strRecordType
 	, (select  top 1 CS.strName from dbo.vyuEMEntity CS where CS.intEntityId = DH.intEntityCustomerId) AS strCustomer
-	, (select  top 1 EL.strLocationName from dbo.tblEntityLocation EL where EL.intEntityLocationId = DH.intShipToLocationId) AS strCustomerLocation
+	, (select  top 1 EL.strLocationName from dbo.[tblEMEntityLocation] EL where EL.intEntityLocationId = DH.intShipToLocationId) AS strCustomerLocation
 	, (select top 1 SM.strLocationName from dbo.tblSMCompanyLocation SM where SM.intCompanyLocationId = DH.intCompanyLocationId) AS strCustomerCompanyLocation
 	, ee.strFuelSupplier
 	, ee.strSupplyPoint

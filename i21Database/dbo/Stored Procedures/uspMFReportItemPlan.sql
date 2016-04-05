@@ -390,7 +390,7 @@ BEGIN
 		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 			AND II.strType = @strBlendAttributeValue
 		JOIN @tblICItem I ON I.intItemId = II.intItemId
-		--JOIN dbo.tblEntity E ON E.intEntityId = I.intOwnerId
+		--JOIN dbo.tblEMEntity E ON E.intEntityId = I.intOwnerId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 		WHERE S.intLocationId = @intCompanyLocationId
 			AND S.ysnStandard = 1

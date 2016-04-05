@@ -65,14 +65,14 @@
 
 CONSTRAINT [PK_tblLGShippingInstruction_intShippingInstructionId] PRIMARY KEY ([intShippingInstructionId]), 
 
-CONSTRAINT [FK_tblLGShippingInstruction_tblEntity_intVendorEntityId_intEntityId] FOREIGN KEY ([intVendorEntityId]) REFERENCES [tblEntity]([intEntityId]),
-CONSTRAINT [FK_tblLGShippingInstruction_tblEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES [tblEntity]([intEntityId]),
-CONSTRAINT [FK_tblLGShippingInstruction_tblEntity_intShippingLineEntityId_intEntityId] FOREIGN KEY ([intShippingLineEntityId]) REFERENCES [tblEntity]([intEntityId]),
-CONSTRAINT [FK_tblLGShippingInstruction_tblEntity_intThroughShippingLineEntityId_intEntityId] FOREIGN KEY ([intThroughShippingLineEntityId]) REFERENCES [tblEntity]([intEntityId]),
+CONSTRAINT [FK_tblLGShippingInstruction_tblEMEntity_intVendorEntityId_intEntityId] FOREIGN KEY ([intVendorEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGShippingInstruction_tblEMEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGShippingInstruction_tblEMEntity_intShippingLineEntityId_intEntityId] FOREIGN KEY ([intShippingLineEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGShippingInstruction_tblEMEntity_intThroughShippingLineEntityId_intEntityId] FOREIGN KEY ([intThroughShippingLineEntityId]) REFERENCES tblEMEntity([intEntityId]),
 
 CONSTRAINT [FK_tblLGShippingInstruction_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),
 
-CONSTRAINT [FK_tblLGShippingInstruction_tblEntity_intForwardingAgentEntityId_intEntityId] FOREIGN KEY ([intForwardingAgentEntityId]) REFERENCES [tblEntity]([intEntityId]),
+CONSTRAINT [FK_tblLGShippingInstruction_tblEMEntity_intForwardingAgentEntityId_intEntityId] FOREIGN KEY ([intForwardingAgentEntityId]) REFERENCES tblEMEntity([intEntityId]),
 CONSTRAINT [FK_tblLGShippingInstruction_tblSMCurrency_intDemurrageCurrencyId_intCurrencyID] FOREIGN KEY ([intDemurrageCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGShippingInstruction_tblSMCurrency_intDespatchCurrencyId_intCurrencyID] FOREIGN KEY ([intDespatchCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGShippingInstruction_tblICUnitMeasure_intLoadingUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intLoadingUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

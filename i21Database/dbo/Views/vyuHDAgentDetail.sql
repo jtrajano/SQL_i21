@@ -8,7 +8,7 @@
 		intEntityId = us.[intEntityUserSecurityId],
 		ysnDisabled = us.ysnDisabled
 	from
-		tblSMUserSecurity us, vyuEMEntityContact en, tblEntityCredential ec
+		tblSMUserSecurity us, vyuEMEntityContact en, [tblEMEntityCredential] ec
 	where
 		us.[intEntityUserSecurityId] is not null
 		and en.intEntityId = us.[intEntityUserSecurityId]
@@ -25,7 +25,7 @@
 		,intEntityId = us.intEntitySalespersonId
 		,ysnDisabled = (case when convert(bit, us.ysnActive) = 0 then convert(bit, 1) else convert(bit, 0) end)
 	from
-		tblARSalesperson us, tblEntityToContact etc, tblEntity en, tblEntityCredential ec
+		tblARSalesperson us, [tblEMEntityToContact] etc, tblEMEntity en, [tblEMEntityCredential] ec
 	where
 		us.intEntitySalespersonId is not null
 		and etc.intEntityId = us.intEntitySalespersonId
@@ -40,7 +40,7 @@
 		intEntityId = us.[intEntityUserSecurityId],
 		ysnDisabled = us.ysnDisabled
 	from
-		tblSMUserSecurity us, vyuEMEntityContact en, tblEntityCredential ec
+		tblSMUserSecurity us, vyuEMEntityContact en, tblEMEntityCredential ec
 	where
 		us.[intEntityUserSecurityId] is not null
 		and en.intEntityId = us.[intEntityUserSecurityId]

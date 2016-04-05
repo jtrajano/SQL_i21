@@ -1,6 +1,6 @@
 ﻿PRINT '******   Check if forwarding agent is not yet run   ******'
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Move forwarding agent' AND strValue = '1')
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Move forwarding agent' AND strValue = '1')
 BEGIN
 
 	PRINT '******   Move forwarding agent data   ******'
@@ -11,9 +11,9 @@ BEGIN
 	END 
 
 
-	SELECT intEntityId INTO #tmpForwardingAgentEntity FROM tblEntityType 
+	SELECT intEntityId INTO #tmpForwardingAgentEntity FROM [tblEMEntityType] 
 								WHERE strType = 'Forwarding Agent'
-									AND intEntityId NOT IN ( SELECT intEntityId FROM tblEntityToContact)
+									AND intEntityId NOT IN ( SELECT intEntityId FROM [tblEMEntityToContact])
 
 
 	DECLARE @intForwardingAgentEntityId INT
@@ -28,7 +28,7 @@ BEGIN
 		SET @intFAEntityLocationId = null
 
 				
-		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, ysnActive)	
+		INSERT INTO tblEMEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, ysnActive)	
 		SELECT ISNULL(strName,''), 
 				'',
 				ISNULL(strEmail,''), 
@@ -42,12 +42,12 @@ BEGIN
 		SELECT @intFAEntityContactId = @@IDENTITY
 
 		SELECT @intFAEntityLocationId = intEntityLocationId 
-			FROM tblEntityLocation 
+			FROM [tblEMEntityLocation] 
 				WHERE intEntityId = @intForwardingAgentEntityId
 					and ysnDefaultLocation = 1
 
 	
-		INSERT INTO tblEntityToContact ( intEntityId, intEntityContactId, intEntityLocationId, ysnDefaultContact, ysnPortalAccess, intConcurrencyId)
+		INSERT INTO [tblEMEntityToContact] ( intEntityId, intEntityContactId, intEntityLocationId, ysnDefaultContact, ysnPortalAccess, intConcurrencyId)
 		VALUES ( @intForwardingAgentEntityId, @intFAEntityContactId, @intFAEntityLocationId, 1, 0, 0)
 		
 
@@ -60,6 +60,6 @@ BEGIN
 		DROP TABLE #tmpForwardingAgentEntity
 	END 
 	
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Move forwarding agent', '1' )
 END

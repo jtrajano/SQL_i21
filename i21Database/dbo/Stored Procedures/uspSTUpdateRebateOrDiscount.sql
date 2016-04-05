@@ -99,7 +99,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -162,7 +162,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -229,7 +229,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -286,7 +286,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -344,7 +344,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -403,7 +403,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -460,7 +460,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -517,7 +517,7 @@ BEGIN TRY
           BEGIN 
             SET @SQL1 = @SQL1 +  ' and  a.intItemLocationId
             IN (select intItemLocationId from tblICItemLocation where intVendorId
-            IN (select intEntityId from tblEntity where intEntityId 
+            IN (select intEntityId from tblEMEntity where intEntityId 
 	      IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
           END
 
@@ -675,7 +675,7 @@ AND(@UpdateCount > 0))
 		     BEGIN 
 		           set @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
 		           IN (select intItemLocationId from tblICItemLocation where intVendorId
-		           IN (select intEntityId from tblEntity where intEntityId 
+		           IN (select intEntityId from tblEMEntity where intEntityId 
 			       IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 		     END
 

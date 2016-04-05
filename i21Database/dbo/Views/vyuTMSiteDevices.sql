@@ -95,7 +95,7 @@ AS
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B	
 		ON A.intCustomerID = B.intCustomerID
-	INNER JOIN tblEntity C
+	INNER JOIN tblEMEntity C
 		ON B.intCustomerNumber = C.intEntityId
 	INNER JOIN tblTMSiteDevice D
 		ON A.intSiteID = D.intSiteID
@@ -116,7 +116,7 @@ AS
 	LEFT JOIN tblTMTankType K
 		ON E.intTankTypeId = K.intTankTypeId
 	----Start Getting Site Driver	
-	LEFT JOIN tblEntity L
+	LEFT JOIN tblEMEntity L
 		ON A.intDriverID = L.intEntityId	
 	----End Getting Driver
 	LEFT JOIN tblTMRoute N

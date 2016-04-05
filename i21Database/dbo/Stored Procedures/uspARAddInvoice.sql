@@ -199,12 +199,12 @@ LEFT OUTER JOIN (SELECT [intEntityLocationId]
 					  , [strCity]
 					  , [intTermsId]
 					  , [intShipViaId]
-					FROM tblEntityLocation
+					FROM [tblEMEntityLocation]
 					WHERE ysnDefaultLocation = 1 ) EL
 						ON AC.[intEntityCustomerId] = EL.[intEntityId]
-LEFT OUTER JOIN tblEntityLocation SL
+LEFT OUTER JOIN [tblEMEntityLocation] SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
-LEFT OUTER JOIN tblEntityLocation BL
+LEFT OUTER JOIN [tblEMEntityLocation] BL
 		ON AC.[intBillToId] = BL.intEntityLocationId	
 WHERE IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
 GROUP BY TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber,IE.strSourceScreenName;				
@@ -282,14 +282,14 @@ LEFT OUTER JOIN
 						,[intTermsId]
 						,[intShipViaId]
 					FROM 
-					tblEntityLocation
+					[tblEMEntityLocation]
 					WHERE
 						ysnDefaultLocation = 1
 				) EL
 					ON AC.[intEntityCustomerId] = EL.[intEntityId]
-LEFT OUTER JOIN tblEntityLocation SL
+LEFT OUTER JOIN [tblEMEntityLocation] SL
 		ON IE.[intShipToLocationId] = SL.intEntityLocationId
-LEFT OUTER JOIN tblEntityLocation BL
+LEFT OUTER JOIN [tblEMEntityLocation] BL
 		ON AC.[intBillToId] = BL.intEntityLocationId	
 WHERE IE.intInvoiceId IS NOT NULL AND IE.intInvoiceId <> 0
 	

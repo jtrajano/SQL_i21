@@ -187,7 +187,7 @@ BEGIN
 
 	--Sales Person
 	SELECT @intSalesPersonId = intEntityId  
-	FROM tblEntity E
+	FROM tblEMEntity E
 	INNER JOIN tblARSalesperson S
 	ON E.intEntityId = S.intEntitySalespersonId
 	WHERE E.strName = @strSalesPersonId

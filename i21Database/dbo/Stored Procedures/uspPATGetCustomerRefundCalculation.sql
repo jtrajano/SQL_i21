@@ -69,7 +69,7 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 						 ON AC.intEntityCustomerId = B.intCustomerPatronId
 				  LEFT JOIN tblSMTaxCode TC
 						 ON TC.intTaxCodeId = AC.intTaxCodeId
-				 INNER JOIN tblEntity ENT
+				 INNER JOIN tblEMEntity ENT
 						 ON ENT.intEntityId = B.intCustomerPatronId
 				 INNER JOIN tblPATPatronageCategory PC
 						 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
@@ -85,7 +85,7 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 			 ON AC.intEntityCustomerId = CV.intCustomerPatronId
 	  LEFT JOIN tblSMTaxCode TC
 			 ON TC.intTaxCodeId = AC.intTaxCodeId
-	 INNER JOIN tblEntity ENT
+	 INNER JOIN tblEMEntity ENT
 			 ON ENT.intEntityId = CV.intCustomerPatronId
 	 INNER JOIN tblPATPatronageCategory PC
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId

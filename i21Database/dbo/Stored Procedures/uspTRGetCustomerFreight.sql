@@ -107,9 +107,9 @@ set @dblInvoiceSurchargeRate =0;
 		 IF @ysnToBulkPlant = 0
 		    BEGIN
 	 
-	           select top 1 @dblInvoiceRatePerUnit = TM.dblInvoiceRatePerUnit from tblEntityTariff TA
-	                       join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId					   
-	  	       		      left join tblEntityTariffMileage TM on TM.intEntityTariffId = TC.intEntityTariffId
+	           select top 1 @dblInvoiceRatePerUnit = TM.dblInvoiceRatePerUnit from [tblEMEntityTariff] TA
+	                       join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
+	  	       		      left join [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId
 	  	       		      where (@intMiles  >= TM.intFromMiles 
 		       		        and @intMiles  <= TM.intToMiles)
 	  	       		            and TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
@@ -118,9 +118,9 @@ set @dblInvoiceSurchargeRate =0;
 								and TA.intEntityTariffTypeId = @intTariffType 
 	 	                   order by TA.dtmEffectiveDate DESC
 			   
-			   select top 1 @dblCostRatePerUnit =TM.dblCostRatePerUnit from tblEntityTariff TA
-	                       join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId					   
-	  	       		      left join tblEntityTariffMileage TM on TM.intEntityTariffId = TC.intEntityTariffId
+			   select top 1 @dblCostRatePerUnit =TM.dblCostRatePerUnit from [tblEMEntityTariff] TA
+	                       join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
+	  	       		      left join [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId
 	  	       		      where (@intMiles  >= TM.intFromMiles 
 		       		        and @intMiles  <= TM.intToMiles)
 	  	       		            and TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
@@ -129,9 +129,9 @@ set @dblInvoiceSurchargeRate =0;
 								and TA.intEntityTariffTypeId = @intTariffType 
 	 	                   order by TA.dtmEffectiveDate DESC
 
-	           select Top 1 @dblInvoiceSurchargeRate=FS.dblFuelSurcharge from tblEntityTariff TA
-	                       join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId
-	  	       		      left join tblEntityTariffFuelSurcharge FS on FS.intEntityTariffId = TC.intEntityTariffId				   
+	           select Top 1 @dblInvoiceSurchargeRate=FS.dblFuelSurcharge from [tblEMEntityTariff] TA
+	                       join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId
+	  	       		      left join [tblEMEntityTariffFuelSurcharge] FS on FS.intEntityTariffId = TC.intEntityTariffId				   
 	  	       		      where TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
 	  	       			    	 and TC.intCategoryId = @intCategoryid
 								 and TA.dtmEffectiveDate <= @dtmInvoiceDate
@@ -139,9 +139,9 @@ set @dblInvoiceSurchargeRate =0;
 								 and TA.intEntityTariffTypeId = @intTariffType 
 	  	       		      order by TA.dtmEffectiveDate DESC,FS.dtmEffectiveDate DESC	  
 		       
-		       select Top 1 @dblReceiptSurchargeRate=FS.dblFuelSurcharge from tblEntityTariff TA
-	                       join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId
-	  	       		      left join tblEntityTariffFuelSurcharge FS on FS.intEntityTariffId = TC.intEntityTariffId				   
+		       select Top 1 @dblReceiptSurchargeRate=FS.dblFuelSurcharge from [tblEMEntityTariff] TA
+	                       join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId
+	  	       		      left join [tblEMEntityTariffFuelSurcharge] FS on FS.intEntityTariffId = TC.intEntityTariffId				   
 	  	       		      where TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
 	  	       			    	 and TC.intCategoryId = @intCategoryid
 								 and TA.dtmEffectiveDate <= @dtmReceiptDate
@@ -151,9 +151,9 @@ set @dblInvoiceSurchargeRate =0;
              END
 		 ELSE
 		     BEGIN
-			      select top 1 @dblInvoiceRatePerUnit = TM.dblInvoiceRatePerUnit from tblEntityTariff TA
-	                            join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId					   
-	  	            		      left join tblEntityTariffMileage TM on TM.intEntityTariffId = TC.intEntityTariffId
+			      select top 1 @dblInvoiceRatePerUnit = TM.dblInvoiceRatePerUnit from [tblEMEntityTariff] TA
+	                            join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
+	  	            		      left join [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId
 	  	            		      where (@intMiles  >= TM.intFromMiles 
 		            		        and @intMiles  <= TM.intToMiles)
 									and TA.dtmEffectiveDate <= @dtmInvoiceDate
@@ -162,9 +162,9 @@ set @dblInvoiceSurchargeRate =0;
 									and TA.intEntityTariffTypeId = @intTariffType
                                    order by TA.dtmEffectiveDate DESC
 				  
-				   select top 1 @dblCostRatePerUnit =TM.dblCostRatePerUnit from tblEntityTariff TA
-	                            join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId					   
-	  	            		      left join tblEntityTariffMileage TM on TM.intEntityTariffId = TC.intEntityTariffId
+				   select top 1 @dblCostRatePerUnit =TM.dblCostRatePerUnit from [tblEMEntityTariff] TA
+	                            join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
+	  	            		      left join [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId
 	  	            		      where (@intMiles  >= TM.intFromMiles 
 		            		        and @intMiles  <= TM.intToMiles)
 									and TA.dtmEffectiveDate <= @dtmReceiptDate
@@ -173,9 +173,9 @@ set @dblInvoiceSurchargeRate =0;
 									and TA.intEntityTariffTypeId = @intTariffType
 									order by TA.dtmEffectiveDate DESC
 	 	            
-	              select Top 1 @dblInvoiceSurchargeRate=FS.dblFuelSurcharge from tblEntityTariff TA
-	                            join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId
-	  	            		      left join tblEntityTariffFuelSurcharge FS on FS.intEntityTariffId = TC.intEntityTariffId				   
+	              select Top 1 @dblInvoiceSurchargeRate=FS.dblFuelSurcharge from [tblEMEntityTariff] TA
+	                            join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId
+	  	            		      left join [tblEMEntityTariffFuelSurcharge] FS on FS.intEntityTariffId = TC.intEntityTariffId				   
 	  	            		      where TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
 	  	            			    	 and TC.intCategoryId = @intCategoryid
 	  	            			    	 and FS.dtmEffectiveDate <= @dtmInvoiceDate
@@ -183,9 +183,9 @@ set @dblInvoiceSurchargeRate =0;
 										 and TA.intEntityTariffTypeId = @intTariffType
 	  	            		      order by TA.dtmEffectiveDate DESC,FS.dtmEffectiveDate DESC	  
 		            
-		          select Top 1 @dblReceiptSurchargeRate=FS.dblFuelSurcharge from tblEntityTariff TA
-	                            join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId
-	  	            		      left join tblEntityTariffFuelSurcharge FS on FS.intEntityTariffId = TC.intEntityTariffId				   
+		          select Top 1 @dblReceiptSurchargeRate=FS.dblFuelSurcharge from [tblEMEntityTariff] TA
+	                            join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId
+	  	            		      left join [tblEMEntityTariffFuelSurcharge] FS on FS.intEntityTariffId = TC.intEntityTariffId				   
 	  	            		      where TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
 	  	            			    	 and TC.intCategoryId = @intCategoryid
 	  	            			    	 and FS.dtmEffectiveDate <= @dtmReceiptDate

@@ -24,7 +24,7 @@ FROM
 	    ON G.intPaymentMethodID = C.intPaymentMethodId
     LEFT JOIN dbo.tblARCustomer H
 	    ON H.intEntityCustomerId = C.intCustomerId
-	LEFT JOIN dbo.tblEntity I
+	LEFT JOIN dbo.tblEMEntity I
 	    ON I.intEntityId = H.intEntityCustomerId
 UNION ALL
 SELECT
@@ -50,7 +50,7 @@ FROM
 	    ON J.intPaymentMethodID = F.intPaymentMethodId
     LEFT JOIN dbo.tblARCustomer K
 	    ON K.intEntityCustomerId = F.intCustomerId
-	LEFT JOIN dbo.tblEntity L
+	LEFT JOIN dbo.tblEMEntity L
 	    ON L.intEntityId = K.intEntityCustomerId
 	
 	

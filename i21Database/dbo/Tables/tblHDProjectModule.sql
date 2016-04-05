@@ -12,8 +12,8 @@
 	CONSTRAINT [UNQ_ProjectModule] UNIQUE ([intProjectId],[intModuleId]),
     CONSTRAINT [FK_Project_ProjectModule] FOREIGN KEY ([intProjectId]) REFERENCES [dbo].[tblHDProject] ([intProjectId]) on delete cascade,
     CONSTRAINT [FK_Module_ProjectModule] FOREIGN KEY ([intModuleId]) REFERENCES [dbo].[tblHDModule] ([intModuleId]),
-	CONSTRAINT [FK_UserEntity_ProjectModule] FOREIGN KEY ([intProjectManagerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	--CONSTRAINT [FK_EntityContact_ProjectModule] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId])
-	CONSTRAINT [FK_Entity_ProjectModule] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+	CONSTRAINT [FK_UserEntity_ProjectModule] FOREIGN KEY ([intProjectManagerId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	--CONSTRAINT [FK_EntityContact_ProjectModule] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEMEntityContact] ([intEntityContactId])
+	CONSTRAINT [FK_Entity_ProjectModule] FOREIGN KEY ([intContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 
 )

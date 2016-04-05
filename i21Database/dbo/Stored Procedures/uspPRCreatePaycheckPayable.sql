@@ -46,8 +46,8 @@ IF (@ysnVoid = 1)
 
 /* Validate Vendor Invoice No */
 DECLARE @strMsg NVARCHAR(200) = ''
-SELECT TOP 1 @strMsg = 'Invoice No. already exists for Vendor ''' + tblEntity.strEntityNo + '''!'
-	FROM tblAPBill INNER JOIN tblEntity ON tblAPBill.intEntityVendorId = tblEntity.intEntityId
+SELECT TOP 1 @strMsg = 'Invoice No. already exists for Vendor ''' + tblEMEntity.strEntityNo + '''!'
+	FROM tblAPBill INNER JOIN tblEMEntity ON tblAPBill.intEntityVendorId = tblEMEntity.intEntityId
 WHERE strVendorOrderNumber = @strInvoiceNo AND intEntityVendorId IN (SELECT intVendorId FROM #tmpVendors)
 
 IF (LEN(@strMsg) > 0)
@@ -191,7 +191,7 @@ BEGIN
 			GROUP BY TD.intVendorId, PD.intExpenseAccountId, TD.strDeduction
 		) A
 		INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
-		INNER JOIN tblEntity C ON B.intEntityVendorId = C.intEntityId
+		INNER JOIN tblEMEntity C ON B.intEntityVendorId = C.intEntityId
 		LEFT JOIN tblAP1099Category D ON C.str1099Type = D.strCategory
 
 	/* Update Voucher Total */

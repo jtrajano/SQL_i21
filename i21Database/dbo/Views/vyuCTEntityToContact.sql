@@ -15,7 +15,7 @@ AS
 			CY.ysnActive,
 			CY.ysnReceiveEmail,
 			EC.ysnDefaultContact 
-	FROM	dbo.tblEntity			AS EY 
-	JOIN	dbo.tblEntityToContact	AS EC ON EY.intEntityId			=	EC.intEntityId 
-	JOIN	dbo.tblEntity			AS CY ON EC.intEntityContactId	=	CY.intEntityId			LEFT  
-	JOIN	dbo.tblEntityLocation	AS EL ON EC.intEntityLocationId =	EL.intEntityLocationId
+	FROM	dbo.tblEMEntity			AS EY 
+	JOIN	dbo.[tblEMEntityToContact]	AS EC ON EY.intEntityId			=	EC.intEntityId 
+	JOIN	dbo.tblEMEntity			AS CY ON EC.intEntityContactId	=	CY.intEntityId			LEFT  
+	JOIN	dbo.[tblEMEntityLocation]	AS EL ON EC.intEntityLocationId =	EL.intEntityLocationId

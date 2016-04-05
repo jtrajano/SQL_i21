@@ -14,7 +14,7 @@ SELECT
 FROM
     
 	 dbo.tblAPVendor A
-	INNER JOIN dbo.tblEntity C
+	INNER JOIN dbo.tblEMEntity C
 		ON A.intEntityVendorId = C.intEntityId and A.ysnTransportTerminal = 1
 		
 	

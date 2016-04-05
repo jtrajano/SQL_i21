@@ -36,13 +36,13 @@ CONSTRAINT [UK_tblLGGenerateLoad_intReferenceNumber] UNIQUE ([intReferenceNumber
 
 CONSTRAINT [FK_tblLGGenerateLoad_tblCTContractDetail_intPContractDetailId] FOREIGN KEY ([intPContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
 CONSTRAINT [FK_tblLGGenerateLoad_tblLGEquipmentType_intPEquipmentTypeId] FOREIGN KEY ([intPEquipmentTypeId]) REFERENCES [tblLGEquipmentType]([intEquipmentTypeId]),
-CONSTRAINT [FK_tblLGGenerateLoad_tblEntity_intPHaulerEntityId] FOREIGN KEY ([intPHaulerEntityId]) REFERENCES [tblEntity]([intEntityId]),
-CONSTRAINT [FK_tblLGGenerateLoad_tblEntityLocation_intPEntityLocationId] FOREIGN KEY ([intPEntityLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
+CONSTRAINT [FK_tblLGGenerateLoad_tblEMEntity_intPHaulerEntityId] FOREIGN KEY ([intPHaulerEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGGenerateLoad_tblEMEntityLocation_intPEntityLocationId] FOREIGN KEY ([intPEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 
 CONSTRAINT [FK_tblLGGenerateLoad_tblCTContractDetail_intSContractDetailId] FOREIGN KEY ([intSContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
 CONSTRAINT [FK_tblLGGenerateLoad_tblLGEquipmentType_intSEquipmentTypeId] FOREIGN KEY ([intSEquipmentTypeId]) REFERENCES [tblLGEquipmentType]([intEquipmentTypeId]),
-CONSTRAINT [FK_tblLGGenerateLoad_tblEntity_intSHaulerEntityId] FOREIGN KEY ([intSHaulerEntityId]) REFERENCES [tblEntity]([intEntityId]),
-CONSTRAINT [FK_tblLGGenerateLoad_tblEntityLocation_intSEntityLocationId] FOREIGN KEY ([intSEntityLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
+CONSTRAINT [FK_tblLGGenerateLoad_tblEMEntity_intSHaulerEntityId] FOREIGN KEY ([intSHaulerEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGGenerateLoad_tblEMEntityLocation_intSEntityLocationId] FOREIGN KEY ([intSEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 
 CONSTRAINT [FK_tblLGGenerateLoad_tblLGAllocationDetail_intAllocationDetailId] FOREIGN KEY ([intAllocationDetailId]) REFERENCES [tblLGAllocationDetail]([intAllocationDetailId]), 
 CONSTRAINT [FK_tblLGGenerateLoad_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

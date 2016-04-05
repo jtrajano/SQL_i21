@@ -49,7 +49,7 @@ BEGIN
 		select @CurMergeId = SUBSTRING(@CurMergeItem,0,CHARINDEX('.',@CurMergeItem))
 		,@CurMergeType = SUBSTRING(@CurMergeItem, CHARINDEX('.',@CurMergeItem)+ 1 , LEN(@CurMergeItem))
 
-		if exists(select top 1 1 from tblEntityType where intEntityId = @PrimaryKey and strType = @CurMergeType)
+		if exists(select top 1 1 from [tblEMEntityType] where intEntityId = @PrimaryKey and strType = @CurMergeType)
 			goto GoHere
 
 		if @CurMergeType = 'Customer' or @CurMergeType = 'Prospect'
@@ -87,7 +87,7 @@ BEGIN
 			ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
 			AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
 			AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
-		WHERE U.TABLE_NAME = @CurTableName --OR U.TABLE_NAME = 'tblEntity'
+		WHERE U.TABLE_NAME = @CurTableName --OR U.TABLE_NAME = 'tblEMEntity'
 
 		insert into @EntityRelationShips
 		SELECT
@@ -101,7 +101,7 @@ BEGIN
 			ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
 			AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
 			AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME		
-		WHERE U.TABLE_NAME = 'tblEntity'  AND R.TABLE_NAME <> @CurTableName
+		WHERE U.TABLE_NAME = 'tblEMEntity'  AND R.TABLE_NAME <> @CurTableName
 
 		BEGIN TRANSACTION
 		BEGIN TRY
@@ -109,14 +109,14 @@ BEGIN
 			BEGIN 
 				EXEC('alter table tblSMUserSecurity drop constraint AK_tblSMUserSecurity_strUserName')
 			END 
-			EXEC ( 'insert into tblEntityType ( intEntityId, strType, intConcurrencyId) values ('+ @PrimaryKeyString +','''+@CurMergeType+''',0 )
+			EXEC ( 'insert into tblEMEntityType ( intEntityId, strType, intConcurrencyId) values ('+ @PrimaryKeyString +','''+@CurMergeType+''',0 )
 					insert into '+ @CurTableName +'(' + @CurTableKey +@Columns + ') 
 							select '+ @PrimaryKeyString + @Columns + ' 
 								from ' + @CurTableName + ' 
 									where ' + @CurTableKey + ' = ' +  @CurMergeId)
-			EXEC('delete from tblEntityType where intEntityId = ' + @CurMergeId + ' and strType = ''' + @CurMergeType + '''' )
-			EXEC('update tblEntityLocation set ysnDefaultLocation = 0 where intEntityId = ' + @CurMergeId)
-			EXEC('update tblEntityToContact set ysnDefaultContact = 0 where intEntityId = ' + @CurMergeId)
+			EXEC('delete from tblEMEntityType where intEntityId = ' + @CurMergeId + ' and strType = ''' + @CurMergeType + '''' )
+			EXEC('update tblEMEntityLocation set ysnDefaultLocation = 0 where intEntityId = ' + @CurMergeId)
+			EXEC('update tblEMEntityToContact set ysnDefaultContact = 0 where intEntityId = ' + @CurMergeId)
 			--PRINT 'Execute relationships'
 			SET @CurStatement = ''
 			WHILE EXISTS(SELECT TOP 1 1 FROM  @RelationShips)

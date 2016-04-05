@@ -53,15 +53,15 @@ so as
 		From
 		(
 		select
-			RepId = tblEntity.intEntityId
-			,RepName = tblEntity.strName
+			RepId = tblEMEntity.intEntityId
+			,RepName = tblEMEntity.strName
 			,tblHDProject.intProjectId
 			,tblHDProject.strProjectName
 			,tblHDProject.strProjectStatus
 		from
 			tblHDProject
 			left outer join tblARSalesperson on tblARSalesperson.intEntitySalespersonId = tblHDProject.intInternalSalesPerson
-			left outer join tblEntity on tblEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
+			left outer join tblEMEntity on tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
 			left outer join tblHDOpportunityQuote on tblHDOpportunityQuote.intProjectId = tblHDProject.intProjectId
 		where
 			tblHDProject.strType = 'CRM'

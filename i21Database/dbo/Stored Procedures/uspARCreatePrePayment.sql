@@ -127,16 +127,16 @@ INNER JOIN
 			,[intShipViaId]
 			,[intTermsId]
 		FROM 
-			tblEntityLocation
+			[tblEMEntityLocation]
 		WHERE
 			ysnDefaultLocation = 1
 	) EL
 		ON C.[intEntityCustomerId] = EL.[intEntityId] 
 LEFT OUTER JOIN
-	[tblEntityLocation] SL
+	[tblEMEntityLocation] SL
 		ON C.[intShipToId] = SL.[intEntityLocationId]  	
 LEFT OUTER JOIN
-	[tblEntityLocation] BL
+	[tblEMEntityLocation] BL
 		ON C.[intBillToId] = BL.[intEntityLocationId]  			 
 WHERE 
 	A.[intPaymentId] = @PaymentId 

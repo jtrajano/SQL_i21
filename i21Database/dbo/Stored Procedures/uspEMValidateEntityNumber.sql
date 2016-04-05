@@ -10,7 +10,7 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblEntity where strEntityNo = @Identification AND intEntityId != @EntityId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where strEntityNo = @Identification AND intEntityId != @EntityId)
 	BEGIN
 		Set @Message = 'Entity No already exists'
 		GOTO ExitHere

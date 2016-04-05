@@ -79,7 +79,7 @@ BEGIN
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
-				INNER JOIN tblEntity C
+				INNER JOIN tblEMEntity C
 					ON B.intCustomerNumber = C.intEntityId
 				LEFT JOIN tblSMCompanyLocation D
 					ON A.intLocationId = D.intCompanyLocationId

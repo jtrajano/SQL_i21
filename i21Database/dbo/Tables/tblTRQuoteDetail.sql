@@ -22,6 +22,6 @@
 	CONSTRAINT [FK_tblTRQuoteDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
 	CONSTRAINT [FK_tblTRQuoteDetail_tblAPVendor_intTerminalId] FOREIGN KEY ([intTerminalId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]),
     CONSTRAINT [FK_tblTRQuoteDetail_tblTRSupplyPoint_intSupplyPointId] FOREIGN KEY ([intSupplyPointId]) REFERENCES [dbo].[tblTRSupplyPoint] ([intSupplyPointId]),
-	CONSTRAINT [FK_tblTRQuoteDetail_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+	CONSTRAINT [FK_tblTRQuoteDetail_tblEMEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblTRQuoteDetail_tblARCustomerSpecialPrice_intSpecialPriceId] FOREIGN KEY ([intSpecialPriceId]) REFERENCES [dbo].[tblARCustomerSpecialPrice] ([intSpecialPriceId])
 )

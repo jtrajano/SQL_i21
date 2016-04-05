@@ -100,7 +100,7 @@ IF (@Vendor IS NOT NULL)
     BEGIN 
          set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
          IN (select intItemLocationId from tblICItemLocation where intVendorId
-         IN (select intEntityId from tblEntity where intEntityId 
+         IN (select intEntityId from tblEMEntity where intEntityId 
    	     IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
     END
 
@@ -195,7 +195,7 @@ IF (@Vendor IS NOT NULL)
     BEGIN 
          set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
          IN (select intItemLocationId from tblICItemLocation where intVendorId
-         IN (select intEntityId from tblEntity where intEntityId 
+         IN (select intEntityId from tblEMEntity where intEntityId 
    	     IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
     END
 
@@ -290,7 +290,7 @@ IF (@Vendor IS NOT NULL)
        BEGIN 
              set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
              IN (select intItemLocationId from tblICItemLocation where intVendorId
-             IN (select intEntityId from tblEntity where intEntityId 
+             IN (select intEntityId from tblEMEntity where intEntityId 
 			 IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
        END
 
@@ -387,7 +387,7 @@ IF (@Vendor IS NOT NULL)
        BEGIN 
              set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
              IN (select intItemLocationId from tblICItemLocation where intVendorId
-             IN (select intEntityId from tblEntity where intEntityId 
+             IN (select intEntityId from tblEMEntity where intEntityId 
 			 IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
        END
 
@@ -484,7 +484,7 @@ IF (@Vendor IS NOT NULL)
        BEGIN 
              set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
              IN (select intItemLocationId from tblICItemLocation where intVendorId
-             IN (select intEntityId from tblEntity where intEntityId 
+             IN (select intEntityId from tblEMEntity where intEntityId 
 			 IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
        END
 
@@ -601,7 +601,7 @@ SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster WHERE OldData !=
 	           BEGIN 
 	                 set @SQL1 = @SQL1 +  ' and  tblICItemPricing.intItemLocationId
 	                 IN (select intItemLocationId from tblICItemLocation where intVendorId
-	                 IN (select intEntityId from tblEntity where intEntityId 
+	                 IN (select intEntityId from tblEMEntity where intEntityId 
 				     IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 	           END
 
@@ -717,7 +717,7 @@ SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster WHERE OldData !=
 	           BEGIN 
 	                 set @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
 	                 IN (select intItemLocationId from tblICItemLocation where intVendorId
-	                 IN (select intEntityId from tblEntity where intEntityId 
+	                 IN (select intEntityId from tblEMEntity where intEntityId 
 					 IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 	           END
 

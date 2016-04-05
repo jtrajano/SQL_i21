@@ -27,7 +27,7 @@ LEFT OUTER JOIN
 	tblSMPaymentMethod PM 
 		ON P.intPaymentMethodId = PM.intPaymentMethodID
 LEFT OUTER JOIN 
-	(tblARCustomer C INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) 
+	(tblARCustomer C INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) 
 		ON C.intEntityCustomerId = P.intEntityCustomerId
 LEFT OUTER JOIN 
 	tblCMBankAccount BA 
@@ -49,7 +49,7 @@ LEFT OUTER JOIN
 	FROM
 		tblGLDetail G
 	LEFT OUTER JOIN
-		tblEntity E
+		tblEMEntity E
 			ON G.intEntityId = E.intEntityId
 	WHERE
 			G.strTransactionType IN ('Receive Payments')

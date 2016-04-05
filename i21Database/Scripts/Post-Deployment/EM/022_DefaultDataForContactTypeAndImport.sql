@@ -1,7 +1,7 @@
 ﻿PRINT '*** Start Defaults for Contact Type And Import***'
 IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMContactDetailType')	
 	AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMContactDetail')	
-	AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Defaults for Contact Type And Import')
+	AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Defaults for Contact Type And Import')
 
 BEGIN
 	/* Creating Default Values for Contact Detail Type */
@@ -45,7 +45,7 @@ BEGIN
 
 	insert into tblEMContactDetail
 			(	intEntityId,		intContactDetailTypeId,			strValue )
-	SELECT		a.intEntityId,		b.intContactDetailTypeId,		a.strPhone2  FROM tblEntity a
+	SELECT		a.intEntityId,		b.intContactDetailTypeId,		a.strPhone2  FROM tblEMEntity a
 		JOIN tblEMContactDetailType b 
 			on  b.strField = 'Work'
 		where a.strPhone2 is not null and a.strPhone2<> ''
@@ -56,7 +56,7 @@ BEGIN
 
 	insert into tblEMContactDetail
 			(	intEntityId,		intContactDetailTypeId,			strValue )
-	SELECT		a.intEntityId,		b.intContactDetailTypeId,		a.strEmail2  FROM tblEntity a
+	SELECT		a.intEntityId,		b.intContactDetailTypeId,		a.strEmail2  FROM tblEMEntity a
 		JOIN tblEMContactDetailType b 
 			on  b.strField = 'Alt Email'
 		where a.strEmail2 is not null and a.strEmail2<> ''
@@ -67,7 +67,7 @@ BEGIN
 
 	insert into tblEMContactDetail
 			(	intEntityId,		intContactDetailTypeId,			strValue )
-	SELECT		a.intEntityId,		b.intContactDetailTypeId,		a.strFax  FROM tblEntity a
+	SELECT		a.intEntityId,		b.intContactDetailTypeId,		a.strFax  FROM tblEMEntity a
 		JOIN tblEMContactDetailType b 
 			on  b.strField = 'Fax'
 		where a.strFax is not null and a.strFax<> ''
@@ -78,17 +78,17 @@ BEGIN
 
 	insert into tblEMContactDetail
 			(	intEntityId,		intContactDetailTypeId,			strValue )
-	SELECT		a.intEntityId,		b.intContactDetailTypeId,		d.strWebsite  FROM tblEntity a
+	SELECT		a.intEntityId,		b.intContactDetailTypeId,		d.strWebsite  FROM tblEMEntity a
 		JOIN tblEMContactDetailType b 
 			on  b.strField = 'Website'
-		JOIN tblEntityToContact c 
+		JOIN [tblEMEntityToContact] c 
 			on a.intEntityId = c.intEntityContactId
-		JOIN tblEntity d
+		JOIN tblEMEntity d
 			on d.intEntityId = c.intEntityId
 		where d.strWebsite is not null and d.strWebsite<> ''
 		and a.intEntityId not in ( select intEntityId from tblEMContactDetail e_type where e_type.intContactDetailTypeId = 5)
 	
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Defaults for Contact Type And Import', 1)
 	
 END

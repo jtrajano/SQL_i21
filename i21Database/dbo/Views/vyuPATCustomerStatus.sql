@@ -6,5 +6,5 @@
 		   ARC.dtmLastActivityDate,
 		   ARC.intConcurrencyId
 	  FROM tblARCustomer ARC
-INNER JOIN tblEntity ENT
+INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = ARC.intEntityCustomerId

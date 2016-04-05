@@ -81,10 +81,10 @@ INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId]
 LEFT JOIN
-	tblEntity ESP
+	tblEMEntity ESP
 		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN
 	tblSMTerm T
@@ -202,10 +202,10 @@ INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId] 
 LEFT JOIN
-	tblEntity ESP
+	tblEMEntity ESP
 		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
 LEFT OUTER JOIN
 	tblSMTerm T
@@ -318,10 +318,10 @@ INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
 INNER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId]
 LEFT JOIN
-	tblEntity ESP
+	tblEMEntity ESP
 		ON SO.[intEntitySalespersonId] = ESP.[intEntityId] 
 LEFT OUTER JOIN
 	tblSMTerm T
@@ -569,7 +569,7 @@ LEFT JOIN
 	tblICUnitMeasure ICUM3
 		ON ICIU1.[intWeightUOMId] = ICUM3.[intUnitMeasureId]					
 INNER JOIN
-	tblEntity EME
+	tblEMEntity EME
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
@@ -677,7 +677,7 @@ LEFT JOIN
 	tblICUnitMeasure ICUM
 		ON ICIU.[intUnitMeasureId] = ICUM.[intUnitMeasureId]		
 INNER JOIN
-	tblEntity EME
+	tblEMEntity EME
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
 LEFT OUTER JOIN
 	vyuARGetItemAccount ARIA
@@ -769,7 +769,7 @@ INNER JOIN
 	tblARCustomer C
 		ON LGS.[intCustomerEntityId] = C.[intEntityCustomerId] 
 INNER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON C.[intEntityCustomerId]  = E.[intEntityId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
@@ -787,13 +787,13 @@ LEFT OUTER JOIN
 				,[intTermsId]
 				,[intShipViaId]
 			FROM 
-				tblEntityLocation
+				[tblEMEntityLocation]
 			WHERE
 				ysnDefaultLocation = 1
 		) EL
 			ON LGS.[intCustomerEntityId] = EL.[intEntityId]
 LEFT OUTER JOIN
-	tblEntityLocation SL
+	[tblEMEntityLocation] SL
 		ON C.intShipToId = SL.intEntityLocationId
 LEFT OUTER JOIN
 	tblARInvoiceDetail ARID

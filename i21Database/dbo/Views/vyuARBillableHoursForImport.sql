@@ -40,8 +40,8 @@ INNER JOIN
 	tblARCustomer C
 		ON T.[intCustomerId] = C.[intEntityCustomerId]
 INNER JOIN
-	tblEntity E
+	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId]	
 INNER JOIN
-	tblEntity U
+	tblEMEntity U
 		ON HW.[intAgentEntityId] = U.[intEntityId]

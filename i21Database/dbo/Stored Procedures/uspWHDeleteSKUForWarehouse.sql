@@ -57,7 +57,7 @@ BEGIN TRY
 	INNER JOIN tblSMCompanyLocationSubLocation loc ON loc.intCompanyLocationSubLocationId = l.intSubLocationId
 	INNER JOIN tblWHTaskType tt ON tt.intTaskTypeId = 12
 	INNER JOIN tblSMCompanyLocation a ON a.intCompanyLocationId = loc.intCompanyLocationId
-	LEFT OUTER JOIN tblEntity a2 ON a2.intEntityId = s.intOwnerId
+	LEFT OUTER JOIN tblEMEntity a2 ON a2.intEntityId = s.intOwnerId
 	LEFT OUTER JOIN tblWHTask t ON t.intSKUId = s.intSKUId
 	LEFT OUTER JOIN tblWHOrderHeader h ON h.intOrderHeaderId = t.intOrderHeaderId
 	WHERE s.intSKUId = @intSKUId

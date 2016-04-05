@@ -27,7 +27,7 @@ FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 JOIN tblRKFuturesMonth fmh on ot.intFutureMonthId=fmh.intFutureMonthId and ot.intFutureMarketId=fmh.intFutureMarketId
 JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId 
-JOIN tblEntity e on ot.intEntityId=e.intEntityId
+JOIN tblEMEntity e on ot.intEntityId=e.intEntityId
 JOIN tblICCommodity c on ot.intCommodityId=c.intCommodityId
 JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=ot.intLocationId
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId

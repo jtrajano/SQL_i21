@@ -1,54 +1,54 @@
 ﻿PRINT '*** CHECKING ENTITY SHIP VIA ***'
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity')
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strEntityNo')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strEntityNo')
 	BEGIN
-		EXEC('ALTER TABLE tblEntity ADD strEntityNo NVARCHAR(MAX)')
+		EXEC('ALTER TABLE tblEMEntity ADD strEntityNo NVARCHAR(MAX)')
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strContactNumber')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strContactNumber')
 	BEGIN
-		EXEC('ALTER TABLE tblEntity ADD strContactNumber NVARCHAR(MAX)')
+		EXEC('ALTER TABLE tblEMEntity ADD strContactNumber NVARCHAR(MAX)')
 	END
 
 END
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation')
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityLocation ADD ysnDefaultContact BIT')
+		EXEC('ALTER TABLE tblEMEntityLocation ADD ysnDefaultContact BIT')
 	END
 END
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact')
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'intEntityContactId')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'intEntityContactId')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityToContact ADD intEntityContactId INT')
+		EXEC('ALTER TABLE tblEMEntityToContact ADD intEntityContactId INT')
 	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityToContact ADD ysnDefaultContact BIT')
+		EXEC('ALTER TABLE tblEMEntityToContact ADD ysnDefaultContact BIT')
 	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityToContact ADD ysnPortalAccess BIT')
+		EXEC('ALTER TABLE tblEMEntityToContact ADD ysnPortalAccess BIT')
 	END
 END
 
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMShipVia')  
 AND NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMShipVia' and [COLUMN_NAME] = 'intEntityShipViaId')
 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strEntityNo') 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strContactNumber') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strEntityNo') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strContactNumber') 
 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact') 
 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'intEntityContactId') 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact') 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'intEntityContactId') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess') 
  
 BEGIN
 	PRINT '*** UPDATING ENTITY SHIP VIA ***'
@@ -108,12 +108,12 @@ BEGIN
 		
 		select @Name = strShipVia from #TmpShipVia WHERE intShipViaID = @CurShipViaId 
 
-		INSERT INTO tblEntity(strName,strEntityNo,strContactNumber)
+		INSERT INTO tblEMEntity(strName,strEntityNo,strContactNumber)
 		VALUES (@Name, @StartingNumber, '''')
 		
 		SET @EntityId = @@IDENTITY
 
-		INSERT INTO tblEntity(strName,strContactNumber)
+		INSERT INTO tblEMEntity(strName,strContactNumber)
 		VALUES (@Name, '''')
 
 		SET @EntityContactId = @@IDENTITY		
@@ -123,13 +123,13 @@ BEGIN
 				@State = strState, 
 				@ZipCode = strZipCode from #TmpShipVia WHERE intShipViaID = @CurShipViaId
 
-		INSERT INTO tblEntityLocation(intEntityId, strLocationName,strAddress,strCity,strState,strZipCode,ysnDefaultLocation )
+		INSERT INTO tblEMEntityLocation(intEntityId, strLocationName,strAddress,strCity,strState,strZipCode,ysnDefaultLocation )
 		select @EntityId, @Name,@Address,@City,@State,@ZipCode,1
 
-		INSERT INTO tblEntityType(intEntityId , strType, intConcurrencyId)
+		INSERT INTO tblEMEntityType(intEntityId , strType, intConcurrencyId)
 		VALUES( @EntityId, ''Ship Via'',0 ) 
 
-		INSERT INTO tblEntityToContact(intEntityId,intEntityContactId,ysnDefaultContact,ysnPortalAccess)
+		INSERT INTO tblEMEntityToContact(intEntityId,intEntityContactId,ysnDefaultContact,ysnPortalAccess)
 		VALUES(@EntityId, @EntityContactId, 1 ,0 ) 
 		
 

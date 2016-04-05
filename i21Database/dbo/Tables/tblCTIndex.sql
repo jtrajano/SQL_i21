@@ -8,6 +8,6 @@
     [ysnActive] BIT NULL, 
 	[intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblCTIndex_intIndexId] PRIMARY KEY CLUSTERED ([intIndexId] ASC),
-	CONSTRAINT [FK_tblCTIndex_tblEntity_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEntity]([intEntityId]),
-	CONSTRAINT [FK_tblCTIndex_tblEntityLocation_intVendorLocationId] FOREIGN KEY ([intVendorLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId])
+	CONSTRAINT [FK_tblCTIndex_tblEMEntity_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblCTIndex_tblEMEntityLocation_intVendorLocationId] FOREIGN KEY ([intVendorLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId])
 )

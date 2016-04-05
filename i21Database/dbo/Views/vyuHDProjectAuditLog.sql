@@ -14,7 +14,7 @@
 		,strLastUpdated = CONVERT(VARCHAR(10),a.dtmLastUpdated,101)
 	from
 		tblHDProjectAuditLog a
-		,tblEntity b
+		,tblEMEntity b
 		,tblHDTicket c
 		,tblHDProject d
 	where

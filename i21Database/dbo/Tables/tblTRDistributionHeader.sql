@@ -15,7 +15,7 @@
 	CONSTRAINT [PK_tblTRDistributionHeader] PRIMARY KEY ([intDistributionHeaderId]),
 	CONSTRAINT [FK_tblTRDistributionHeader_tblTRTransportReceipt_intTransportReceiptId] FOREIGN KEY ([intTransportReceiptId]) REFERENCES [dbo].[tblTRTransportReceipt] ([intTransportReceiptId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRDistributionHeader_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
-	CONSTRAINT [FK_tblTRDistributionHeader_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+	CONSTRAINT [FK_tblTRDistributionHeader_tblEMEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblTRDistributionHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblTRDistributionHeader_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
 	CONSTRAINT [FK_tblTRDistributionHeader_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])			

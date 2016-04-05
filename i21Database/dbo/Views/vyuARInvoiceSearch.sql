@@ -53,11 +53,11 @@ INNER JOIN
 	dbo.tblARCustomer AS C 
 		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	dbo.tblEntityToContact AS EC ON C.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
+	dbo.[tblEMEntityToContact] AS EC ON C.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
 LEFT OUTER JOIN
-	dbo.tblEntity AS E ON EC.intEntityContactId = E.intEntityId	
+	dbo.tblEMEntity AS E ON EC.intEntityContactId = E.intEntityId	
 INNER JOIN
-	dbo.tblEntity AS CE 
+	dbo.tblEMEntity AS CE 
 		ON C.[intEntityCustomerId] = CE.intEntityId 
 LEFT OUTER JOIN
 	dbo.tblSMTerm AS T 
@@ -72,13 +72,13 @@ LEFT OUTER JOIN
 	dbo.tblSMShipVia AS SV 
 		ON I.intShipViaId = SV.[intEntityShipViaId]
 LEFT OUTER JOIN
-	dbo.tblEntity AS SE 
+	dbo.tblEMEntity AS SE 
 		ON I.[intEntitySalespersonId] = SE.intEntityId 
 LEFT OUTER JOIN
 	dbo.tblSMCurrency CUR
 		ON I.intCurrencyId = CUR.intCurrencyID
 LEFT OUTER JOIN
-	dbo.tblEntity AS EB 
+	dbo.tblEMEntity AS EB 
 		ON I.[intEntityId] = EB.intEntityId
 LEFT OUTER JOIN
 	(
@@ -94,7 +94,7 @@ LEFT OUTER JOIN
 	FROM
 		tblGLDetail G
 	LEFT OUTER JOIN
-		tblEntity E
+		tblEMEntity E
 			ON G.intEntityId = E.intEntityId
 	WHERE
 			G.strTransactionType IN ('Invoice')

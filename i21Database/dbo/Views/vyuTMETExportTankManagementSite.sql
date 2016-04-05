@@ -87,10 +87,10 @@ INNER JOIN (SELECT
 				,Loc.intTermsId
 				,Trm.strTermCode
 				,Trm.strTerm
-			FROM tblEntity Ent
+			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId
-			INNER JOIN tblEntityLocation Loc 
+			INNER JOIN [tblEMEntityLocation] Loc 
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1
 			LEFT JOIN tblSMTerm Trm
@@ -100,16 +100,16 @@ INNER JOIN (
 	SELECT 
 		 A.strEntityNo
 		 ,A.intEntityId
-	FROM tblEntity A
-	LEFT JOIN tblEntityLocation B
+	FROM tblEMEntity A
+	LEFT JOIN [tblEMEntityLocation] B
 		ON A.intEntityId = B.intEntityId
 			AND B.ysnDefaultLocation = 1
-	LEFT JOIN tblEntityToContact D
+	LEFT JOIN [tblEMEntityToContact] D
 		ON A.intEntityId = D.intEntityId
 			AND D.ysnDefaultContact = 1
-	LEFT JOIN tblEntity E
+	LEFT JOIN tblEMEntity E
 		ON D.intEntityContactId = E.intEntityId
-	INNER JOIN tblEntityType C
+	INNER JOIN [tblEMEntityType] C
 		ON A.intEntityId = C.intEntityId
 	WHERE strType = 'Salesperson'
 	) D

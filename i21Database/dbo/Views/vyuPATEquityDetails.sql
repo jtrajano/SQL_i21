@@ -14,7 +14,7 @@
 			CE.dblEquity,
 			CE.intConcurrencyId 
 	   FROM tblPATCustomerEquity CE
- INNER JOIN tblEntity ENT
+ INNER JOIN tblEMEntity ENT
 		 ON ENT.intEntityId = CE.intCustomerId
  INNER JOIN tblPATRefundRate RR
 		 ON RR.intRefundTypeId = CE.intRefundTypeId

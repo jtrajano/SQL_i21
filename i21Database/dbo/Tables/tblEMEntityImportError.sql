@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEntityImportError]
+﻿CREATE TABLE [dbo].[tblEMEntityImportError]
 (
 	[intId] [int] IDENTITY(1,1) NOT NULL,
 	[guidSessionId] [uniqueidentifier] NOT NULL,

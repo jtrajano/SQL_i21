@@ -35,14 +35,14 @@ BEGIN
 END
 PRINT '*** End Checking if exists tblAPVendorToContact ***'
 
-PRINT '*** Checking if exists tblEntityContact ***'
-IF EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' )
+PRINT '*** Checking if exists tblEMEntityContact ***'
+IF EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityContact' )
 BEGIN
-	PRINT '*** Dropping tblEntityContact ***'
-	EXEC('DROP TABLE tblEntityContact')
+	PRINT '*** Dropping tblEMEntityContact ***'
+	EXEC('DROP TABLE tblEMEntityContact')
 	
 END
-PRINT '*** End Checking if exists tblEntityContact ***'
+PRINT '*** End Checking if exists tblEMEntityContact ***'
 
 
 

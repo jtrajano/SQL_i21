@@ -28,7 +28,7 @@ SELECT TOP 100 PERCENT
 FROM tblGRCustomerStorage a  
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId  
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId  
-JOIN tblEntity E ON E.intEntityId = a.intEntityId  
+JOIN tblEMEntity E ON E.intEntityId = a.intEntityId  
 JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageScheduleId
 JOIN tblICItem Item ON Item.intItemId = a.intItemId

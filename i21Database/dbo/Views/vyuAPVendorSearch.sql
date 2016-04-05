@@ -31,14 +31,14 @@ SELECT
 	a.ysnPymtCtrlActive as ysnActive
 	
 	FROM tblAPVendor a
-	join tblEntity b
+	join tblEMEntity b
 		on b.intEntityId = a.intEntityVendorId
-	join tblEntityToContact c
+	join [tblEMEntityToContact] c
 		on c.intEntityId = b.intEntityId
 			and c.ysnDefaultContact = 1
-	join tblEntity d
+	join tblEMEntity d
 		on c.intEntityContactId = d.intEntityId
-	join tblEntityLocation e
+	join [tblEMEntityLocation] e
 		on e.intEntityId = a.intEntityVendorId
 			and e.ysnDefaultLocation = 1
 	left join tblSMApprovalList f

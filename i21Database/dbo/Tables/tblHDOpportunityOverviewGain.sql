@@ -8,5 +8,5 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDOpportunityOverviewGain] PRIMARY KEY CLUSTERED ([intOpportunityOverviewGainId] ASC),
     CONSTRAINT [FK_tblHDOpportunityOverviewGain_tblHDProject] FOREIGN KEY ([intProjectId]) REFERENCES [dbo].[tblHDProject] ([intProjectId]),
-    CONSTRAINT [FK_tblHDOpportunityOverviewGain_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+    CONSTRAINT [FK_tblHDOpportunityOverviewGain_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )

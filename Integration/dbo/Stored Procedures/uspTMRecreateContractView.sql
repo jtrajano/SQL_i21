@@ -167,7 +167,7 @@ BEGIN
 				ON A.intContractHeaderId = H.intContractHeaderId
 			INNER JOIN tblCTContractDetail B
 				ON A.intContractHeaderId = B.intContractHeaderId
-			INNER JOIN tblEntity C
+			INNER JOIN tblEMEntity C
 				ON A.intEntityId = C.intEntityId
 			LEFT JOIN tblICItem E
 				ON B.intItemId = E.intItemId	

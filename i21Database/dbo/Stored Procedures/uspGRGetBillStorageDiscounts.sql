@@ -118,7 +118,7 @@ BEGIN TRY
 	FROM tblGRCustomerStorage a  
 	JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId  
 	JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId  
-	JOIN tblEntity E ON E.intEntityId = a.intEntityId 
+	JOIN tblEMEntity E ON E.intEntityId = a.intEntityId 
 	JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageScheduleId
 	JOIN tblICItem Item ON Item.intItemId = a.intItemId
 	JOIN @BillStorageDiscounts bill ON bill.intCustomerStorageId=a.intCustomerStorageId

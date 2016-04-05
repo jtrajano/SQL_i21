@@ -12,9 +12,9 @@
 		ent.strEntityNo
 
 	from tblARSpecialTax special_tax
-		inner join tblEntity ent
+		inner join tblEMEntity ent
 			on special_tax.intEntityCustomerId = ent.intEntityId
-		left join tblEntityLocation cus_location
+		left join [tblEMEntityLocation] cus_location
 			on cus_location.intEntityId = special_tax.intEntityCustomerId
 				and special_tax.intEntityCustomerLocationId = cus_location.intEntityLocationId
 		left join tblAPVendor vend 

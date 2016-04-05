@@ -179,7 +179,7 @@ BEGIN
 				,vwivc_user_rev_dt		=	0
 				,A4GLIdentity			=	0
 			FROM tblARInvoice A
-			LEFT JOIN tblEntity B
+			LEFT JOIN tblEMEntity B
 				ON A.intEntityCustomerId = B.intEntityId
 			INNER JOIN tblARCustomer C
 				ON B.intEntityId = C.intEntityCustomerId

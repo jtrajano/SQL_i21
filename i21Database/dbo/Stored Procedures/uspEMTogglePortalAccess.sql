@@ -9,9 +9,9 @@ AS
 BEGIN
 	if @ysnEnablePortalAccess = 0 
 	begin
-		update tblEntityToContact set ysnPortalAccess = 0, intEntityRoleId = null where intEntityId = @intEntityId
+		update [tblEMEntityToContact] set ysnPortalAccess = 0, intEntityRoleId = null where intEntityId = @intEntityId
 
-		delete from tblEntityCredential where intEntityId in (select intEntityContactId from tblEntityToContact where intEntityId = @intEntityId)
+		delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId)
 
 		set @message =  ''
 	end
@@ -30,7 +30,7 @@ BEGIN
 				on a.intEntityRoleId = b.intUserRoleID		 
 			 where intEntityId = @intEntityId and b.ysnAdmin = 1
 		declare @userName nvarchar(200)
-		select @userName = strEmail from tblEntity where intEntityId = @intEntityContactId
+		select @userName = strEmail from tblEMEntity where intEntityId = @intEntityContactId
 				
 		if(@roleId is null or @roleId < 0)
 		begin
@@ -38,7 +38,7 @@ BEGIN
 			return 0
 		end
 
-		if exists( select top 1 1 from tblEntityToContact where intEntityRoleId = @roleId and intEntityContactId = @intEntityContactId and ysnPortalAccess = 1)
+		if exists( select top 1 1 from [tblEMEntityToContact] where intEntityRoleId = @roleId and intEntityContactId = @intEntityContactId and ysnPortalAccess = 1)
 		begin
 			return 0;
 		end
@@ -51,31 +51,31 @@ BEGIN
 			return 0
 		end
 
-		if exists(select top 1 1 from tblEntityCredential where strUserName = @userName and intEntityId <> @intEntityContactId)
+		if exists(select top 1 1 from [tblEMEntityCredential] where strUserName = @userName and intEntityId <> @intEntityContactId)
 		begin
 			set @message =  'Username already exists'
 			return 0
 		end
 
-		delete from tblEntityCredential where intEntityId in (select intEntityContactId from tblEntityToContact where intEntityId = @intEntityId and intEntityRoleId = @roleId)
+		delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId and intEntityRoleId = @roleId)
 
-		if not exists(select top 1 1 from tblEntityCredential where intEntityId = @intEntityContactId)
+		if not exists(select top 1 1 from [tblEMEntityCredential] where intEntityId = @intEntityContactId)
 		begin
 			if(@strPassword = '')
 				set @strPassword = '1234'
 
-			insert into tblEntityCredential(intEntityId,strUserName,strPassword)
+			insert into [tblEMEntityCredential](intEntityId,strUserName,strPassword)
 			select @intEntityContactId, @userName, @strPassword
 		end
 		
 
-		update tblEntityToContact set 
+		update [tblEMEntityToContact] set 
 			ysnPortalAccess = 0, 
 			intEntityRoleId = null 
 				where intEntityId = @intEntityId 
 					and intEntityRoleId = @roleId
 
-		update tblEntityToContact set 
+		update [tblEMEntityToContact] set 
 			ysnPortalAccess = 1, 
 			intEntityRoleId = @roleId 
 				where intEntityId = @intEntityId 

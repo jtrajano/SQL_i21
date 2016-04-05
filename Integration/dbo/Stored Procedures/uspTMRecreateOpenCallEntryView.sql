@@ -110,13 +110,13 @@ BEGIN
 				ON A.intSiteID = B.intSiteID
 			INNER JOIN tblTMCustomer C
 				ON B.intCustomerID = C.intCustomerID
-			INNER JOIN tblEntity D
+			INNER JOIN tblEMEntity D
 				ON C.intCustomerNumber = D.intEntityId
 			INNER JOIN tblICItem E
 				ON B.intProduct = E.intItemId
 			LEFT JOIN tblICItem F
 				ON A.intSubstituteProductID = F.intItemId
-			LEFT JOIN tblEntity G
+			LEFT JOIN tblEMEntity G
 				ON A.intDriverID = G.intEntityId
 			LEFT JOIN tblSMUserSecurity H
 				ON A.intUserID = H.intEntityUserSecurityId

@@ -5,7 +5,7 @@ BEGIN
 	EXEC('
 		UPDATE A
 			SET A.intShipViaId = ISNULL(B.intEntityShipViaId, A.intShipViaId)
-		FROM tblEntityLocation A
+		FROM tblEMEntityLocation A
 			INNER JOIN tblSMShipVia B ON A.intShipViaId = B.intShipViaID
 		')	
 END
@@ -18,7 +18,7 @@ BEGIN
 		EXEC('
 			UPDATE A
 				SET A.intShipViaId = NULL
-			FROM tblEntityLocation A
+			FROM tblEMEntityLocation A
 			WHERE A.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
 		')
 	END

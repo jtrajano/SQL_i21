@@ -9,7 +9,7 @@ BEGIN
 		(
 			[intId] INT NOT NULL,
 			CONSTRAINT [PK_cstEntity] PRIMARY KEY CLUSTERED ([intId] ASC),
-			CONSTRAINT [FK_cstEntity_tblEntity] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
+			CONSTRAINT [FK_cstEntity_tblEMEntity] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]) ON DELETE CASCADE
 		);
 	')
 	print('/*******************  END Creating Entity Custom Table *******************/')
@@ -63,7 +63,7 @@ BEGIN
 		(
 			[intId] INT NOT NULL,
 			CONSTRAINT [PK_cstEntityContact] PRIMARY KEY CLUSTERED ([intId] ASC),
-			CONSTRAINT [FK_cstEntityContact_tblEntity] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
+			CONSTRAINT [FK_cstEntityContact_tblEMEntity] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]) ON DELETE CASCADE
 		);
 	')
 	print('/*******************  END Creating Entity Contact Custom Table *******************/')

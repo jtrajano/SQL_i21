@@ -7,8 +7,8 @@ SELECT        Entity.intEntityId, Cus.intEntityCustomerId, Entity.strName, CASE 
                          BillToLoc.strCity AS strBillToCity, BillToLoc.strState AS strBillToState, BillToLoc.strZipCode AS strBillToZipCode, BillToLoc.strCountry AS strBillToCountry
 FROM            dbo.vyuEMSearch AS Entity INNER JOIN
                          dbo.tblARCustomer AS Cus ON Entity.intEntityId = Cus.intEntityCustomerId INNER JOIN
-                         dbo.tblEntityToContact AS CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId AND CusToCon.ysnDefaultContact = 1 LEFT OUTER JOIN
-                         dbo.tblEntity AS Con ON CusToCon.intEntityContactId = Con.intEntityId LEFT OUTER JOIN
-                         dbo.tblEntityLocation AS Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId LEFT OUTER JOIN
-                         dbo.tblEntityLocation AS ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId LEFT OUTER JOIN
-                         dbo.tblEntityLocation AS BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
+                         dbo.[tblEMEntityToContact] AS CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId AND CusToCon.ysnDefaultContact = 1 LEFT OUTER JOIN
+                         dbo.tblEMEntity AS Con ON CusToCon.intEntityContactId = Con.intEntityId LEFT OUTER JOIN
+                         dbo.[tblEMEntityLocation] AS Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId LEFT OUTER JOIN
+                         dbo.[tblEMEntityLocation] AS ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId LEFT OUTER JOIN
+                         dbo.[tblEMEntityLocation] AS BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId

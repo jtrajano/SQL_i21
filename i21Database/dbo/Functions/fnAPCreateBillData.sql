@@ -117,8 +117,8 @@ BEGIN
 		@shipFromState = B.strState,
 		@shipFromZipCode = B.strZipCode
 	FROM tblAPVendor A
-	LEFT JOIN tblEntityLocation B ON A.intEntityVendorId = B.intEntityId
-	LEFT JOIN tblEntityToContact C ON A.intEntityVendorId = C.intEntityId 
+	LEFT JOIN [tblEMEntityLocation] B ON A.intEntityVendorId = B.intEntityId
+	LEFT JOIN [tblEMEntityToContact] C ON A.intEntityVendorId = C.intEntityId 
 	WHERE A.intEntityVendorId= @vendorId 
 	AND 1 = (CASE WHEN @shipFrom IS NOT NULL THEN 
 					(CASE WHEN B.intEntityLocationId = @shipFrom THEN 1 ELSE 0 END)

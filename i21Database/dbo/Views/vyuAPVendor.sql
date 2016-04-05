@@ -60,16 +60,16 @@ SELECT
 	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0),
 	intSubCurrencyCent = (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId)
 FROM
-		dbo.tblEntity A
+		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
 		ON A.intEntityId = B.[intEntityVendorId]
-	INNER JOIN dbo.tblEntityLocation C
+	INNER JOIN dbo.[tblEMEntityLocation] C
 		ON B.intEntityVendorId = C.intEntityId and C.ysnDefaultLocation = 1
-	--INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
+	--INNER JOIN (dbo.tblEMEntityContact D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
 	--	ON B.intDefaultContactId = D.[intEntityContactId]
-	INNER JOIN dbo.tblEntityToContact G
+	INNER JOIN dbo.[tblEMEntityToContact] G
 		ON G.intEntityId = A.intEntityId
-	INNER JOIN dbo.tblEntity D
+	INNER JOIN dbo.tblEMEntity D
 		ON G.intEntityContactId = D.[intEntityId] AND G.ysnDefaultContact = 1
 	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID

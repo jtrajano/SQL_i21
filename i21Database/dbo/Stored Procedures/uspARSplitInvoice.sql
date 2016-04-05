@@ -26,7 +26,7 @@ BEGIN
 		BEGIN
 			SELECT @intSplitEntityId = intEntityId
 			      ,@dblSplitPercent = dblSplitPercent/100
-			FROM tblEntitySplitDetail 
+			FROM [tblEMEntitySplitDetail] 
 			WHERE intSplitDetailId = @SplitDetailId
 		END
 

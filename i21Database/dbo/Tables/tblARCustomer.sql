@@ -90,15 +90,15 @@
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
     CONSTRAINT [FK_tblARCustomer_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intSalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
     CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),    
-    CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+    CONSTRAINT [FK_tblARCustomer_tblEMEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblARCustomer_tblSMTaxCode] FOREIGN KEY([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
     CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intEntityCustomerId] ASC),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_ContractGroup] FOREIGN KEY([intContractGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_BuybackGroup] FOREIGN KEY([intBuybackGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_PriceGroup] FOREIGN KEY([intPriceGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
-	CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblARCustomer_tblEMEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARCustomer_tblSMCompanyLocationPricingLevel] FOREIGN KEY ([intCompanyLocationPricingLevelId]) REFERENCES [dbo].[tblSMCompanyLocationPricingLevel] ([intCompanyLocationPricingLevelId]),
-	CONSTRAINT [FK_tblARCustomer_tblEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEntityTariffType] ([intEntityTariffTypeId])
+	CONSTRAINT [FK_tblARCustomer_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 

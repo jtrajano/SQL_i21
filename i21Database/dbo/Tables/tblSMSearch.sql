@@ -5,7 +5,7 @@
     [intEntityId]      INT           NOT NULL,
     [intConcurrencyId] INT           NOT NULL,
     CONSTRAINT [PK_tblSMSearch] PRIMARY KEY CLUSTERED ([intSearchId] ASC),
-    CONSTRAINT [FK_tblSMSearch_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblSMSearch_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE
 );
 
 

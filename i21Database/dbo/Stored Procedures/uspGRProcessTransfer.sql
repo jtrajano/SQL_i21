@@ -108,7 +108,7 @@ BEGIN TRY
 		SET @strUpdateType='Bill'
     END
 												
-	SELECT @ItemCustomerName = strName	FROM tblEntity	WHERE intEntityId = @ItemEntityid
+	SELECT @ItemCustomerName = strName	FROM tblEMEntity	WHERE intEntityId = @ItemEntityid
 
 	SELECT @ItemLocationName = strLocationName	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @ItemCompanyLocationId
 
@@ -303,7 +303,7 @@ BEGIN TRY
 			WHERE intStorageScheduleTypeId = @ActionStorageTypeId
 
 			SELECT @ActionCustomerName = strName
-			FROM tblEntity
+			FROM tblEMEntity
 			WHERE intEntityId = @ActionCustomer
 			
 			---CASE #1:Customer Match,Location Match, Storatype Mismatch

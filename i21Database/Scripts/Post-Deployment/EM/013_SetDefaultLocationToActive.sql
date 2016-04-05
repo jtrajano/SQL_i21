@@ -1,15 +1,15 @@
 ﻿
-PRINT '*** Start set tblEntityLocation active location for default location***'
-IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation' and [COLUMN_NAME] = 'ysnActive')
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation' and [COLUMN_NAME] = 'ysnDefaultLocation')
-AND NOT EXISTS(SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Set active tblEntityLocation')
+PRINT '*** Start set tblEMEntityLocation active location for default location***'
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation' and [COLUMN_NAME] = 'ysnActive')
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation' and [COLUMN_NAME] = 'ysnDefaultLocation')
+AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Set active tblEMEntityLocation')
 
 BEGIN
-	PRINT '*** EXECUTING set tblEntityLocation active location for default location***'
-	Exec('UPDATE tblEntityLocation SET ysnActive = ysnDefaultLocation')
+	PRINT '*** EXECUTING set tblEMEntityLocation active location for default location***'
+	Exec('UPDATE tblEMEntityLocation SET ysnActive = ysnDefaultLocation')
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
-	VALUES('Set active tblEntityLocation', 1)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
+	VALUES('Set active tblEMEntityLocation', 1)
 
 END
-PRINT '*** End set tblEntityLocation active location for default location***'
+PRINT '*** End set tblEMEntityLocation active location for default location***'

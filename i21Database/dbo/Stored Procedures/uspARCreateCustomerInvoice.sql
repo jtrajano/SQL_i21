@@ -151,7 +151,7 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 		RETURN 0;
 	END	
 	
-IF NOT EXISTS(SELECT NULL FROM tblEntity WHERE intEntityId = @EntityId)
+IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN
 		SET @ErrorMessage = 'The entity Id provided does not exists!'
 		IF ISNULL(@RaiseError,0) = 1
@@ -298,24 +298,24 @@ BEGIN TRY
 							,[intTermsId]
 							,[intShipViaId]
 						FROM 
-							tblEntityLocation
+							[tblEMEntityLocation]
 						WHERE
 							ysnDefaultLocation = 1
 					) EL
 						ON C.[intEntityCustomerId] = EL.[intEntityId]
 	LEFT OUTER JOIN
-		tblEntityLocation SL
+		[tblEMEntityLocation] SL
 			ON ISNULL(@ShipToLocationId, 0) <> 0
 			AND @ShipToLocationId = SL.intEntityLocationId
 	LEFT OUTER JOIN
-		tblEntityLocation SL1
+		[tblEMEntityLocation] SL1
 			ON C.intShipToId = SL1.intEntityLocationId
 	LEFT OUTER JOIN
-		tblEntityLocation BL
+		[tblEMEntityLocation] BL
 			ON ISNULL(@BillToLocationId, 0) <> 0
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
-		tblEntityLocation BL1
+		[tblEMEntityLocation] BL1
 			ON C.intBillToId = BL1.intEntityLocationId
 	WHERE C.[intEntityCustomerId] = @EntityCustomerId
 	

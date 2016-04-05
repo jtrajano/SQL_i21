@@ -7,7 +7,7 @@ BEGIN
 	DECLARE @col NVARCHAR(MAX);	
 	select @col = COALESCE(@col + ', ', '') + RTRIM(LTRIM(strName)) from 
 			tblARCustomerGroupDetail b				
-			join tblEntity c
+			join tblEMEntity c
 				on c.intEntityId = b.intEntityId
 			where b.intCustomerGroupId = @intCustomerGroupId
 	RETURN @col

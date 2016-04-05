@@ -211,27 +211,27 @@ SELECT
 	dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
 FROM		tblLGShippingInstruction SI
-LEFT JOIN	tblEntity Vendor	ON Vendor.intEntityId = SI.intVendorEntityId
-LEFT JOIN	tblEntity Customer	ON Customer.intEntityId = SI.intCustomerEntityId
-LEFT JOIN	tblEntity SLEntity ON SLEntity.intEntityId = SI.intShippingLineEntityId
-LEFT JOIN	tblEntity THEntity ON THEntity.intEntityId = SI.intThroughShippingLineEntityId
+LEFT JOIN	tblEMEntity Vendor	ON Vendor.intEntityId = SI.intVendorEntityId
+LEFT JOIN	tblEMEntity Customer	ON Customer.intEntityId = SI.intCustomerEntityId
+LEFT JOIN	tblEMEntity SLEntity ON SLEntity.intEntityId = SI.intShippingLineEntityId
+LEFT JOIN	tblEMEntity THEntity ON THEntity.intEntityId = SI.intThroughShippingLineEntityId
 LEFT JOIN	tblLGContainerType ContType ON ContType.intContainerTypeId = SI.intContainerTypeId
-LEFT JOIN	tblEntity ForAgent ON ForAgent.intEntityId = SI.intForwardingAgentEntityId
-LEFT JOIN	tblEntity BLDraft ON BLDraft.intEntityId = SI.intBLDraftToBeSentId
-LEFT JOIN	tblEntity DocPres ON DocPres.intEntityId = SI.intDocPresentationId
+LEFT JOIN	tblEMEntity ForAgent ON ForAgent.intEntityId = SI.intForwardingAgentEntityId
+LEFT JOIN	tblEMEntity BLDraft ON BLDraft.intEntityId = SI.intBLDraftToBeSentId
+LEFT JOIN	tblEMEntity DocPres ON DocPres.intEntityId = SI.intDocPresentationId
 LEFT JOIN	tblCMBank Bank ON Bank.intBankId = SI.intDocPresentationId
-LEFT JOIN	tblEntity FirstNotify ON FirstNotify.intEntityId = SI.intFirstNotifyId
+LEFT JOIN	tblEMEntity FirstNotify ON FirstNotify.intEntityId = SI.intFirstNotifyId
 LEFT JOIN	tblCMBank FirstNotifyBank ON FirstNotifyBank.intBankId = SI.intFirstNotifyId
 LEFT JOIN	tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = SI.intFirstNotifyId
-LEFT JOIN	tblEntityLocation FNLocation ON FNLocation.intEntityLocationId = SI.intFirstNotifyLocationId
-LEFT JOIN	tblEntity SecondNotify ON SecondNotify.intEntityId = SI.intSecondNotifyId
+LEFT JOIN	[tblEMEntityLocation] FNLocation ON FNLocation.intEntityLocationId = SI.intFirstNotifyLocationId
+LEFT JOIN	tblEMEntity SecondNotify ON SecondNotify.intEntityId = SI.intSecondNotifyId
 LEFT JOIN	tblCMBank SecondNotifyBank ON SecondNotifyBank.intBankId = SI.intSecondNotifyId
 LEFT JOIN	tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SI.intSecondNotifyId
-LEFT JOIN	tblEntityLocation SNLocation ON SNLocation.intEntityLocationId = SI.intSecondNotifyLocationId
-LEFT JOIN	tblEntity Consignee ON Consignee.intEntityId = SI.intConsigneeId
+LEFT JOIN	[tblEMEntityLocation] SNLocation ON SNLocation.intEntityLocationId = SI.intSecondNotifyLocationId
+LEFT JOIN	tblEMEntity Consignee ON Consignee.intEntityId = SI.intConsigneeId
 LEFT JOIN	tblCMBank ConsigneeBank ON ConsigneeBank.intBankId = SI.intConsigneeId
 LEFT JOIN	tblSMCompanySetup ConsigneeCompany ON ConsigneeCompany.intCompanySetupID = SI.intConsigneeId
-LEFT JOIN	tblEntityLocation CSLocation ON CSLocation.intEntityLocationId = SI.intConsigneeLocationId
+LEFT JOIN	[tblEMEntityLocation] CSLocation ON CSLocation.intEntityLocationId = SI.intConsigneeLocationId
 LEFT JOIN	tblSMCurrency DemCurrency ON DemCurrency.intCurrencyID = SI.intDemurrageCurrencyId
 LEFT JOIN	tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = SI.intDespatchCurrencyId
 LEFT JOIN	tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = SI.intLoadingUnitMeasureId

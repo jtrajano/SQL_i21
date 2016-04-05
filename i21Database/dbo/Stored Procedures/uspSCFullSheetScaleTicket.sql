@@ -133,7 +133,7 @@ SET ANSI_WARNINGS OFF
 		tblSCTicket TIC
 		LEFT JOIN vyuCTEntity EY	
 		ON EY.intEntityId =	TIC.intEntityId
-		LEFT JOIN tblEntityLocation	EL	
+		LEFT JOIN [tblEMEntityLocation]	EL	
 		ON EL.intEntityId = EY.intEntityId
 		LEFT JOIN tblSCScaleSetup SS  
 		ON TIC.intScaleSetupId = SS.intScaleSetupId

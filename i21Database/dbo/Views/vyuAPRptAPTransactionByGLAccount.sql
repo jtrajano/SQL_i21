@@ -4,9 +4,9 @@ AS
 	 APV.intEntityVendorId
 	,strMainCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)  
 	,intTransactionType AS intTransactionId
-	,APV.strVendorId + ' - ' + (SELECT strName FROM tblEntity WHERE intEntityId = APV.intEntityVendorId) AS strVendorID
+	,APV.strVendorId + ' - ' + (SELECT strName FROM tblEMEntity WHERE intEntityId = APV.intEntityVendorId) AS strVendorID
     ,ISNULL(APV.strVendorId, '') + ' - ' + isnull(E.strName,'''') as strVendorIdName 
-	,strCompanyName = ( SELECT strName FROM tblEntity WHERE intEntityId = APV.intEntityVendorId)
+	,strCompanyName = ( SELECT strName FROM tblEMEntity WHERE intEntityId = APV.intEntityVendorId)
 	,APB.strVendorOrderNumber 
 	,APB.strVendorOrderNumber AS strInvoiceNumber
 	,APB.strBillId 
@@ -43,7 +43,7 @@ AS
 	FROM  tblAPBill APB
 	INNER JOIN tblAPVendor APV
 		ON APB.intEntityVendorId = APV.intEntityVendorId
-	LEFT JOIN dbo.tblEntity E
+	LEFT JOIN dbo.tblEMEntity E
 		ON E.intEntityId = APV.intEntityVendorId
 	WHERE 
 			APB.ysnForApproval != 1														   --Will not show For Approval Bills

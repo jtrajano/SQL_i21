@@ -31,7 +31,7 @@ SELECT
 	,D.strItemNo
 	,D.strDescription
 FROM dbo.tblPOPurchase A
-	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEntity C1 ON C.intEntityVendorId = C1.intEntityId)
+	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEMEntity C1 ON C.intEntityVendorId = C1.intEntityId)
 			ON A.[intEntityVendorId] = C.intEntityVendorId
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN dbo.tblICItem D ON B.intItemId = D.intItemId

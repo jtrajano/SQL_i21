@@ -155,18 +155,18 @@ SELECT
 		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
 FROM		tblLGShipment SH
-LEFT JOIN	tblEntity Vendor ON Vendor.intEntityId = SH.intVendorEntityId
-LEFT JOIN	tblEntityLocation VLocation ON VLocation.intEntityId = SH.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
-LEFT JOIN	tblEntity Customer ON Customer.intEntityId = SH.intCustomerEntityId
-LEFT JOIN	tblEntityLocation CLocation ON CLocation.intEntityId = SH.intCustomerEntityId and CLocation.intEntityLocationId = Customer.intDefaultLocationId
-LEFT JOIN	tblEntity SLEntity ON SLEntity.intEntityId = SH.intShippingLineEntityId
-LEFT JOIN	tblEntityLocation SLLocation ON SLLocation.intEntityId = SH.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
-LEFT JOIN	tblEntity TREntity ON TREntity.intEntityId = SH.intTruckerEntityId
-LEFT JOIN	tblEntityLocation TRLocation ON TRLocation.intEntityId = SH.intTruckerEntityId and TRLocation.intEntityLocationId = TREntity.intDefaultLocationId
-LEFT JOIN	tblEntity TerminalEntity ON TerminalEntity.intEntityId = SH.intTerminalEntityId
-LEFT JOIN	tblEntityLocation TerminalLocation ON TerminalLocation.intEntityId = SH.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
-LEFT JOIN	tblEntity InsurEntity ON InsurEntity.intEntityId = SH.intInsurerEntityId
-LEFT JOIN	tblEntityLocation InsurLocation ON InsurLocation.intEntityId = SH.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
+LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = SH.intVendorEntityId
+LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = SH.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
+LEFT JOIN	tblEMEntity Customer ON Customer.intEntityId = SH.intCustomerEntityId
+LEFT JOIN	[tblEMEntityLocation] CLocation ON CLocation.intEntityId = SH.intCustomerEntityId and CLocation.intEntityLocationId = Customer.intDefaultLocationId
+LEFT JOIN	tblEMEntity SLEntity ON SLEntity.intEntityId = SH.intShippingLineEntityId
+LEFT JOIN	[tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = SH.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
+LEFT JOIN	tblEMEntity TREntity ON TREntity.intEntityId = SH.intTruckerEntityId
+LEFT JOIN	[tblEMEntityLocation] TRLocation ON TRLocation.intEntityId = SH.intTruckerEntityId and TRLocation.intEntityLocationId = TREntity.intDefaultLocationId
+LEFT JOIN	tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = SH.intTerminalEntityId
+LEFT JOIN	[tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = SH.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
+LEFT JOIN	tblEMEntity InsurEntity ON InsurEntity.intEntityId = SH.intInsurerEntityId
+LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = SH.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
 LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = SH.intSubLocationId
 LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = SH.intInsuranceCurrencyId
 LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = SH.intShipmentId
