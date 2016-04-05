@@ -64,9 +64,9 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
 	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId) ON SO.intSalesOrderId = SD.intSalesOrderId
-INNER JOIN (tblARCustomer C 
+LEFT JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
-INNER JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
 	INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
