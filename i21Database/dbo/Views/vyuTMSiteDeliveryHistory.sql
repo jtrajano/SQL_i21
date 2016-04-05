@@ -119,7 +119,7 @@ AS
 	LEFT JOIN tblICItem H
 		ON D.intWillCallSubstituteProductId = H.intItemId
 	LEFT JOIN tblSMTerm I
-		ON D.intWillCallDeliveryTermId = I.strTerm
+		ON D.intWillCallDeliveryTermId = I.intTermID
 	LEFT JOIN tblSMUserSecurity J
 		ON D.intUserID = J.[intEntityUserSecurityId]
 	----Start Getting will call Driver	
