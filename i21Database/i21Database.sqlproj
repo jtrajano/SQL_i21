@@ -3594,6 +3594,7 @@
     <Build Include="dbo\Tables\tblHDOpportunitySource.sql" />
     <Build Include="dbo\Views\vyuTMEquipmentUsageAnalysisWithoutTotal.sql" />
     <Build Include="dbo\Views\vyuTMSalesAnalysisReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMCheckPendingTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
