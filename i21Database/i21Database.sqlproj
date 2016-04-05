@@ -3595,6 +3595,7 @@
     <Build Include="dbo\Views\vyuTMEquipmentUsageAnalysisWithoutTotal.sql" />
     <Build Include="dbo\Views\vyuTMSalesAnalysisReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCheckPendingTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidateContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
