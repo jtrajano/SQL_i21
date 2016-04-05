@@ -49,6 +49,7 @@ BEGIN
 		,TR.strFormulaParser
 		,T.intReplications
 		,PRT.intDataTypeId
+		,PRT.intDecimalPlaces
 		,PRT.intListId
 		,L.strListName
 		,TR.strIsMandatory

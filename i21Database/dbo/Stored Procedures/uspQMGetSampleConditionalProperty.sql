@@ -50,6 +50,7 @@ BEGIN
 		,0 AS intRepNo
 		,DT.strIsMandatory
 		,PRT.intDataTypeId
+		,PRT.intDecimalPlaces
 		,PRT.intListId
 		,L.strListName
 		,T.intReplications

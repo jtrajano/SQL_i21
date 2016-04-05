@@ -93,6 +93,7 @@ BEGIN
 		,0 AS intRepNo
 		,PP.strIsMandatory
 		,PRT.intDataTypeId
+		,PRT.intDecimalPlaces
 		,PRT.intListId
 		,L.strListName
 		,T.intReplications
