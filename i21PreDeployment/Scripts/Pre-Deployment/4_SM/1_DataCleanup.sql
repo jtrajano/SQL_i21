@@ -168,3 +168,13 @@ GO
 		EXEC('UPDATE tblSMCompanyLocation SET strLocationNumber = NULL WHERE strLocationNumber = ''''')
 	END
 GO
+	/* UPDATE EMPTY STRING TO NULL strLocationNumber */
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMMODULE')
+	BEGIN
+		EXEC
+		('
+			IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = ''i21'' AND strModule = ''Meter Billing'' AND intModuleId = 105)
+			DELETE FROM tblSMModule WHERE strApplicationName = ''i21'' AND strModule = ''Meter Billing'' AND intModuleId = 105	
+		')
+	END
+GO

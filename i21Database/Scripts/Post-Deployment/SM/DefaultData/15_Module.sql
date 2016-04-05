@@ -940,15 +940,23 @@
 		   [ysnSupported]					=		0,
 	       [intSort]						=		104
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Meter Billing')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integration')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
 	SELECT [intModuleId]					=		105,
-		   [strApplicationName]				=		N'i21',		  
-		   [strModule]						=		N'Meter Billing',
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Integration',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
 	       [intSort]						=		105
-	
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Meter Billing')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		106,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Meter Billing',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		106
 
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
