@@ -1062,7 +1062,7 @@ END CATCH
 				--Zero Contract Item Price	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The contract item - ' + I.strItemNo + ' price can not be of zero value.',
+					'The contract item - ' + I.strItemNo + ' price cannot be zero.',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
