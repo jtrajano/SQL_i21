@@ -260,6 +260,7 @@ END CATCH
 
 
 SET @NewInvoiceId = @CreatedInvoiceId
+SET @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId)
 
 
 BEGIN TRY
