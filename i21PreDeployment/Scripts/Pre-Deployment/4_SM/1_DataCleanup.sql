@@ -159,3 +159,6 @@ GO
 		EXEC('DELETE FROM tblSMShortcutKeys')
 	END
 GO
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLMIGRATIONLOG')
+		EXEC('UPDATE tblMigrationLog SET strEvent = ''Migrate All Entity Roles - tblEMEntityToContact'', strDescription = ''Migrate All Entity Roles - tblEMEntityToContact'' WHERE strEvent = ''Migrate All Entity Roles - tblEntityToContact'' AND strDescription = ''Migrate All Entity Roles - tblEntityToContact''')
+GO
