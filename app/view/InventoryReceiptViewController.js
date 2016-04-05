@@ -2680,7 +2680,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var costTypes = po.get('tblCTContractCosts');
                 if (costTypes) {
                     if (costTypes.length > 0) {
-                        costTypes.forEach(function (cost) {
+                        costTypes.forEach(function (otherCharge) {
                             var charges = receipt.tblICInventoryReceiptCharges().data.items;
                             var exists = Ext.Array.findBy(charges, function (row) {
                                 if ((row.get('intContractId') === po.get('intContractHeaderId')
@@ -2690,26 +2690,29 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             });
 
                             if (!exists) {
-                                var newCost = Ext.create('Inventory.model.ReceiptCharge', {
+                                var newOtherCharge = Ext.create('Inventory.model.ReceiptCharge', {
                                     intInventoryReceiptId: receipt.get('intInventoryReceiptId'),
                                     intContractId: po.get('intContractHeaderId'),
-                                    intChargeId: cost.intItemId,
+                                    intContractDetailId: otherCharge.intContractDetailId,
+                                    intChargeId: otherCharge.intItemId,
                                     ysnInventoryCost: false,
-                                    strCostMethod: cost.strCostMethod,
-                                    dblRate: cost.dblRate,
-                                    intCostUOMId: cost.intItemUOMId,
-                                    intEntityVendorId: cost.intVendorId,
+                                    strCostMethod: otherCharge.strCostMethod,
+                                    dblRate: otherCharge.dblRate,
+                                    intCostUOMId: otherCharge.intItemUOMId,
+                                    intEntityVendorId: otherCharge.intVendorId,
                                     dblAmount: 0,
                                     strAllocateCostBy: 'Unit',
-                                    ysnAccrue: cost.ysnAccrue,
-                                    ysnPrice: cost.ysnPrice,
-
-                                    strItemNo: cost.strItemNo,
-                                    strCostUOM: cost.strUOM,
-                                    strVendorId: cost.strVendorName,
+                                    ysnAccrue: otherCharge.ysnAccrue,
+                                    ysnPrice: otherCharge.ysnPrice,
+                                    strItemNo: otherCharge.strItemNo,
+                                    intCurrencyId: otherCharge.intCurrencyId,
+                                    strCurrency: otherCharge.strCurrency,
+                                    ysnSubCurrency: otherCharge.ysnSubCurrency,
+                                    strCostUOM: otherCharge.strUOM,
+                                    strVendorName: otherCharge.strVendorName,
                                     strContractNumber: po.get('strContractNumber')
                                 });
-                                receipt.tblICInventoryReceiptCharges().add(newCost);
+                                receipt.tblICInventoryReceiptCharges().add(newOtherCharge);
                             }
                         });
                     }
@@ -3760,11 +3763,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             if (record.get('ysnAccrue') === true) {
                 current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
-                current.set('strVendorId', cboVendor.getRawValue());
+                current.set('strVendorName', cboVendor.getRawValue());
             }
             else {
                 current.set('intEntityVendorId', null);
-                current.set('strVendorId', null);
+                current.set('strVendorName', null);
             }
 
             current.set('dblRate', record.get('dblAmount'));
@@ -3794,14 +3797,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var cboVendor = win.down('#cboVendor');
 
             if (checked === true) {
-                if (iRely.Functions.isEmpty(current.get('strVendorId'))) {
+                if (iRely.Functions.isEmpty(current.get('strVendorName'))) {
                     current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
-                    current.set('strVendorId', cboVendor.getRawValue());
+                    current.set('strVendorName', cboVendor.getRawValue());
                 }
             }
             else {
                 current.set('intEntityVendorId', null);
-                current.set('strVendorId', null);
+                current.set('strVendorName', null);
             }
         }
     },
@@ -4030,7 +4033,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                             strCurrency: otherCharge.strCurrency,
                                                             ysnSubCurrency: otherCharge.ysnSubCurrency,
                                                             strCostUOM: otherCharge.strUOM,
-                                                            strVendorId: otherCharge.strVendorName,
+                                                            strVendorName: otherCharge.strVendorName,
                                                             strContractNumber: order.get('strOrderNumber')
 
                                                         });
