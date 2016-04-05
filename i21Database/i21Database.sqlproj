@@ -3584,6 +3584,7 @@
     <Build Include="dbo\Views\vyuIPGetProcess.sql" />
     <Build Include="dbo\Views\vyuIPGetConnection.sql" />
     <None Include="Scripts\Post-Deployment\IP\1_MasterTables.sql" />
+    <Build Include="dbo\Tables\tblGLTempCOASegment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
