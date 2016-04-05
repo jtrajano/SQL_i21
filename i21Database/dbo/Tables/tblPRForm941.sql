@@ -26,7 +26,7 @@
     [ysnAllowContactDesignee] BIT NULL DEFAULT ((0)), 
     [strDesigneeName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [strDesigneePhone] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intDesigneePIN] INT NULL, 
+    [strDesigneePIN] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [strName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [strTitle] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [dtmSignDate] DATETIME NULL, 

@@ -36,7 +36,7 @@ BEGIN
 			,ysnAllowContactDesignee
 			,strDesigneeName
 			,strDesigneePhone
-			,intDesigneePIN
+			,strDesigneePIN
 			,strName
 			,strTitle
 			,dtmSignDate
@@ -81,7 +81,7 @@ BEGIN
 			,ysnAllowContactDesignee = 0
 			,strDesigneeName = ''
 			,strDesigneePhone = ''
-			,intDesigneePIN = NULL
+			,strDesigneePIN = ''
 			,strName = ''
 			,strTitle = ''
 			,dtmSignDate = NULL
