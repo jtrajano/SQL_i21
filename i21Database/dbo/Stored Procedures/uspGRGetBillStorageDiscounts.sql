@@ -2,6 +2,7 @@
  @StorageChargeDate DATETIME	
 ,@PostType NVARCHAR(30)
 ,@UserKey INT
+,@PortalEntityId INT
 AS
 BEGIN TRY
 
@@ -121,6 +122,7 @@ BEGIN TRY
 	JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageScheduleId
 	JOIN tblICItem Item ON Item.intItemId = a.intItemId
 	JOIN @BillStorageDiscounts bill ON bill.intCustomerStorageId=a.intCustomerStorageId
+	WHERE a.intEntityId= CASE WHEN @PortalEntityId>0 THEN @PortalEntityId ELSE a.intEntityId END
 	
 END TRY
 

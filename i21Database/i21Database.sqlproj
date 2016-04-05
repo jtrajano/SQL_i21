@@ -3590,8 +3590,8 @@
     <Build Include="dbo\Views\vyuQMCuppingReport.sql" />
     <Build Include="dbo\Tables\tblLGLoadDetailContainerCost.sql" />
     <Build Include="dbo\Tables\tblLGLoadContainerCost.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRUpdateInsertForm941.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTTransferSequence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
