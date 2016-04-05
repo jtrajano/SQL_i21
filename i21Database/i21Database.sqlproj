@@ -3217,6 +3217,8 @@
     <Build Include="dbo\Stored Procedures\uspMFLotItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentItemChange.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
