@@ -28,7 +28,8 @@ AS
 				CH.intContractPlanId,				CH.intEntityId,					CH.intCommodityId,
 				CH.intGradeId,						CH.intWeightId,					CH.intContractTextId,
 				CH.intAssociationId,				CH.intTermId,					CH.intPositionId,
-				CH.intCountryId,					CH.intContractBasisId,
+				CH.intCountryId,					CH.intContractBasisId,			CH.intContractTypeId,
+				CH.intCommodityUnitMeasureId,		
 
 				CASE	WHEN	CH.strStatuses LIKE '%Open%'
 						THEN	'Open'

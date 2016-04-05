@@ -54,6 +54,26 @@ BEGIN TRY
 	SELECT @SQL = 'DECLARE @ErrMsg NVARCHAR(MAX) '+ @SQL
 	exec sp_executesql @SQL
 
+	IF EXISTS	(	
+					SELECT * FROM tblICInventoryReceipt IR
+					JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptId = IR.intInventoryReceiptId
+					WHERE IR.strReceiptType = 'Purchase Contract' AND RI.intLineNo = @intContractDetailId
+				)
+	BEGIN
+		SET @ErrMsg = 'Selected sequence is used in Inventory Receipt. Cannot transfer sequence.'
+		RAISERROR(@ErrMsg,16,1) 
+	END
+
+	IF EXISTS	(	
+					SELECT * FROM tblICInventoryShipment SH
+					JOIN tblICInventoryShipmentItem SI ON SI.intInventoryShipmentId = SH.intInventoryShipmentId
+					WHERE SH.intOrderType = 4 AND SI.intLineNo = @intContractDetailId
+				)
+	BEGIN
+		SET @ErrMsg = 'Selected sequence is used in Inventory Shipment. Cannot transfer sequence.'
+		RAISERROR(@ErrMsg,16,1) 
+	END
+
 	UPDATE	CH
 	SET		CH.dblQuantity	=	CH.dblQuantity - dbo.fnCTConvertQuantityToTargetCommodityUOM(CU.intCommodityUnitMeasureId,CH.intCommodityUOMId,CD.dblQuantity)
 	FROM	tblCTContractHeader CH
