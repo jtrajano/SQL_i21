@@ -2255,7 +2255,6 @@
                             "cn": [
                                 {
                                     "id": "dca757e6-10ec-49f2-97ad-ce128fbb1777",
-                                    "expanded": false,
                                     "cn": [
                                         {
                                             "id": "2fd436e2-07a8-40e9-b8de-afa12f835239"
@@ -2318,7 +2317,6 @@
                                         },
                                         {
                                             "id": "df2215b4-b740-46d4-802a-aa7123035bb6",
-                                            "expanded": false,
                                             "cn": [
                                                 {
                                                     "id": "c6096dd4-b53f-4bdb-8df4-8ac71c08c334",
@@ -3047,6 +3045,9 @@
                                                                                                 },
                                                                                                 {
                                                                                                     "id": "2a93544d-ddff-4081-98cc-491dc9710b73"
+                                                                                                },
+                                                                                                {
+                                                                                                    "id": "8147d999-769e-4094-95d0-5575f8b860c3"
                                                                                                 }
                                                                                             ]
                                                                                         }
@@ -3795,6 +3796,9 @@
                                                 },
                                                 {
                                                     "id": "6dabf3cb-3444-4ae0-a940-786180ad95ca"
+                                                },
+                                                {
+                                                    "id": "21ae0dd9-7497-4494-8d22-a72758e8584d"
                                                 }
                                             ]
                                         },
@@ -4132,6 +4136,9 @@
                                                 },
                                                 {
                                                     "id": "30493662-2f11-49c2-90bd-5510e81a58db"
+                                                },
+                                                {
+                                                    "id": "1b6d7555-72e1-4208-88bb-5c0504724420"
                                                 }
                                             ]
                                         }
@@ -4370,9 +4377,6 @@
                                                             "id": "6c10e658-ecf5-47a1-8b1b-2094eab327e8"
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "id": "0a849a67-d3a3-43eb-a569-6b300290b9be"
                                                 },
                                                 {
                                                     "id": "48699e43-3805-4196-95dd-d7a264769bbf",
@@ -9335,14 +9339,16 @@
         }
     },
     "tabState": {
-        "openTabs": []
+        "openTabs": [
+            "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
+        ]
     },
     "canvasState": {
         "topInstance": null
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
+        "selectedInstance": "5355459c-6f8b-4711-9562-75e31610eb91"
     },
     "editMode": "code",
     "userSettings": {

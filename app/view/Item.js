@@ -510,11 +510,11 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailUnitQty',
                                                         modelValidation: true,
-                                                        width: 70,
+                                                        width: 90,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
-                                                        format: '0.000000',
+                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             validateOnChange: false,
@@ -526,7 +526,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailShortUPC',
-                                                        width: 70,
+                                                        width: 100,
                                                         dataIndex: 'string',
                                                         text: 'Short UPC',
                                                         editor: {
@@ -537,7 +537,8 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailUpcCode',
-                                                        minWidth: 110,
+                                                        minWidth: 90,
+                                                        width: 100,
                                                         dataIndex: 'string',
                                                         text: 'UPC Code',
                                                         flex: 2,
@@ -549,25 +550,25 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colStockUnit',
-                                                        width: 80,
+                                                        width: 90,
                                                         text: 'Stock Unit'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowPurchase',
-                                                        width: 130,
+                                                        width: 100,
                                                         text: 'Allow Purchase'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowSale',
-                                                        width: 100,
+                                                        width: 90,
                                                         text: 'Allow Sale'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailLength',
-                                                        width: 62,
+                                                        width: 90,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Length',
@@ -580,7 +581,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailWidth',
-                                                        width: 62,
+                                                        width: 90,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Width',
@@ -593,7 +594,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailHeight',
-                                                        width: 62,
+                                                        width: 90,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Height',
@@ -607,6 +608,7 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailDimensionUOM',
                                                         minWidth: 95,
+                                                        width: 100,
                                                         dataIndex: 'intUnitMeasureId',
                                                         text: 'Dimension UOM',
                                                         flex: 1.3,
@@ -640,7 +642,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailVolume',
-                                                        width: 62,
+                                                        width: 90,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Volume',
@@ -654,6 +656,7 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailVolumeUOM',
                                                         minWidth: 95,
+                                                        width: 100,
                                                         dataIndex: 'intUnitMeasureId',
                                                         text: 'Volume UOM',
                                                         flex: 1.3,
@@ -687,7 +690,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailWeight',
-                                                        width: 62,
+                                                        width: 90,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Weight',
@@ -702,6 +705,7 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailWeightUOM',
                                                         minWidth: 95,
+                                                        width: 100,
                                                         dataIndex: 'intUnitMeasureId',
                                                         text: 'Weight UOM',
                                                         flex: 1.3,
@@ -735,6 +739,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailMaxQty',
+                                                        width: 90,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Max Qty',
