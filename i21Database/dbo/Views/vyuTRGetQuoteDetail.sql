@@ -1,8 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuTRGetQuoteDetail]
 AS
 
-SELECT 
-	Header.intQuoteHeaderId
+SELECT Header.intQuoteHeaderId
 	, Header.strQuoteNumber
 	, Header.dtmQuoteDate
 	, Header.dtmQuoteEffectiveDate
@@ -19,17 +18,17 @@ SELECT
 	, strTerminalName = Terminal.strName
 	, Detail.intSupplyPointId
 	, SupplyPoint.strSupplyPoint
-	, Detail.dblRackPrice
-	, Detail.dblDeviationAmount
-	, Detail.dblTempAdjustment
-	, Detail.dblFreightRate
-	, Detail.dblQuotePrice
-	, Detail.dblMargin
-	, Detail.dblQtyOrdered
-	, Detail.dblExtProfit
-	, Detail.dblTax
+	, dblRackPrice = ISNULL(Detail.dblRackPrice, 0.000000)
+	, dblDeviationAmount = ISNULL(Detail.dblDeviationAmount, 0.000000)
+	, dblTempAdjustment = ISNULL(Detail.dblTempAdjustment, 0.000000)
+	, dblFreightRate = ISNULL(Detail.dblFreightRate, 0.000000)
+	, dblQuotePrice = ISNULL(Detail.dblQuotePrice, 0.000000)
+	, dblMargin = ISNULL(Detail.dblMargin, 0.000000)
+	, dblQtyOrdered = ISNULL(Detail.dblQtyOrdered, 0.000000)
+	, dblExtProfit = ISNULL(Detail.dblExtProfit, 0.000000)
+	, dblTax = ISNULL(Detail.dblTax, 0.000000)
 	, Detail.intShipToLocationId
-	, ShipToLocation.strLocationName
+	, strShipTo = ShipToLocation.strLocationName
 FROM tblTRQuoteDetail Detail
 LEFT JOIN tblTRQuoteHeader Header ON Header.intQuoteHeaderId = Detail.intQuoteHeaderId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Header.intEntityCustomerId
