@@ -43,7 +43,7 @@ LEFT JOIN ( SELECT
 				ON D.intSiteID = E.intSiteID
 			LEFT JOIN tblTMCustomer F
 				ON E.intCustomerID = F.intCustomerID
-			LEFT JOIN tblEntity G
+			LEFT JOIN tblEMEntity G
 				ON F.intCustomerNumber = G.intEntityId
 			LEFT JOIN tblICItem H
 				ON E.intProduct = H.intItemId) C
