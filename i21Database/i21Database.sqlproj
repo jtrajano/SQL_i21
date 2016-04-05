@@ -3592,6 +3592,7 @@
     <Build Include="dbo\Tables\tblLGLoadContainerCost.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTTransferSequence.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunitySource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
