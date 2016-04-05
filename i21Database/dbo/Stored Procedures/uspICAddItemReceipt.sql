@@ -444,6 +444,8 @@ BEGIN
 				,[ysnAccrue]
 				,[ysnPrice]
 				,[ysnSubCurrency]
+				,[intCurrencyId]
+				,[intCent]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -460,6 +462,8 @@ BEGIN
 				,[ysnAccrue]				= RawData.ysnAccrue
 				,[ysnPrice]					= RawData.ysnPrice
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
+				,[intCurrencyId]			= RawData.intCostCurrencyId
+				,[intCent]					= CostCurrency.intCent
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -471,6 +475,8 @@ BEGIN
 				LEFT JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intChargeId  
 					AND ItemUOM.intItemUOMId = RawData.intCostUOMId
+				LEFT JOIN dbo.tblSMCurrency CostCurrency
+					ON CostCurrency.intCurrencyID = RawData.intCostCurrencyId
 		WHERE RawHeaderData.intId = @intId
 
 		-- Add taxes into the receipt. 
