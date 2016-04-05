@@ -76,13 +76,13 @@ BEGIN
 		FROM ssvndmst 		
 		INNER JOIN tblAPVendor B
 			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
-		INNER JOIN tblEntity A
+		INNER JOIN tblEMEntity A
 			ON A.intEntityId = B.intEntityVendorId
-		INNER JOIN tblEntityLocation C
+		INNER JOIN tblEMEntityLocation C
 			ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
-		INNER JOIN tblEntityToContact G
+		INNER JOIN tblEMEntityToContact G
 			ON A.intEntityId = G.intEntityId and G.ysnDefaultContact = 1
-		INNER JOIN tblEntity D
+		INNER JOIN tblEMEntity D
 			ON  G.intEntityContactId = D.intEntityId
 		LEFT JOIN tblSMCurrency E
 			ON B.intCurrencyId = E.intCurrencyID
@@ -143,14 +143,14 @@ BEGIN
 			ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2)),
 			ssvnd_our_cus_no				=	CAST(B.strVendorAccountNum AS VARCHAR(20))
 		FROM
-			tblEntity A
+			tblEMEntity A
 		INNER JOIN tblAPVendor B
 			ON A.intEntityId = B.intEntityVendorId
-		INNER JOIN tblEntityLocation C		
+		INNER JOIN tblEMEntityLocation C		
 			ON  A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
-		INNER JOIN tblEntityToContact G
+		INNER JOIN tblEMEntityToContact G
 			ON A.intEntityId = G.intEntityId and G.ysnDefaultContact = 1
-		INNER JOIN tblEntity D
+		INNER JOIN tblEMEntity D
 			ON  G.intEntityContactId = D.intEntityId
 		LEFT JOIN tblSMCurrency E
 			ON B.intCurrencyId = E.intCurrencyID
@@ -452,7 +452,7 @@ BEGIN
 		BEGIN
 		PRINT ''INSERT Entity Record''
 		--INSERT Entity record for Vendor
-		INSERT [dbo].[tblEntity]	([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[strContactNumber], [strEntityNo])
+		INSERT [dbo].[tblEMEntity]	([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[strContactNumber], [strEntityNo])
 		VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed,'''',  @originVendor)
 
 		DECLARE @EntityId INT
@@ -462,14 +462,14 @@ BEGIN
 		--INSERT ENTITY record for Contact
 		IF(@strContactName IS NOT NULL)
 		BEGIN
-			INSERT [dbo].[tblEntity] ([strName], [strWebsite], [strInternalNotes],[strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			INSERT [dbo].[tblEMEntity] ([strName], [strWebsite], [strInternalNotes],[strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
 			VALUES					 (@strContactName, @strWebsite, @strInternalNotes,'''', @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 		END
 		ELSE
 		BEGIN
 		--Use the the vendor name as contact name if no contact is provided
 			SET @strContactName = @strName			
-			INSERT [dbo].[tblEntity] ([strName], [strWebsite], [strInternalNotes],[strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			INSERT [dbo].[tblEMEntity] ([strName], [strWebsite], [strInternalNotes],[strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
 			VALUES					 (@strContactName, @strWebsite, @strInternalNotes, '''', @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 		END
 
@@ -480,17 +480,17 @@ BEGIN
 		DECLARE @EntityContactId INT
 		SET @EntityContactId = @ContactEntityId
 
-		/*INSERT INTO tblEntityToContact( intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact)
+		/*INSERT INTO tblEMEntityToContact( intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact)
 		VALUES (@EntityId, @ContactEntityId, 0, 1)*/
 
 
-		--insert into tblEntityType
-		INSERT INTO tblEntityType ( intEntityId, strType, intConcurrencyId)
+		--insert into tblEMEntityType
+		INSERT INTO tblEMEntityType ( intEntityId, strType, intConcurrencyId)
 		VALUES (@EntityId, ''Vendor'', 0)
 
 		
 
-		INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
 		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, 1)
 
 		DECLARE @EntityLocationId INT
@@ -502,7 +502,7 @@ BEGIN
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
-		INSERT [dbo].[tblEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
+		INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
 		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, 1)/**/
 
 		INSERT INTO [dbo].[tblAPImportedVendors]

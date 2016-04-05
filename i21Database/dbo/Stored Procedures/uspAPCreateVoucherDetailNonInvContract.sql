@@ -53,7 +53,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM @voucherNonInvDetailContracts A
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
-	INNER JOIN tblEntity E ON D.intEntityVendorId = E.intEntityId
+	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	WHERE B.intBillId = @voucherId
 

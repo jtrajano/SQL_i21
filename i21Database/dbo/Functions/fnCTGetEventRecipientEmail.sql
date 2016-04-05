@@ -12,8 +12,8 @@ BEGIN
 										SELECT	DISTINCT												
 										'; ' + EY.strEmail											
 										FROM tblCTEventRecipient ER																								
-										JOIN tblEntityToContact EC ON EC.intEntityId = ER.intEntityId AND EC.ysnDefaultContact = 1  
-										JOIN tblEntity EY ON EY.intEntityId = EC.intEntityContactId
+										JOIN [tblEMEntityToContact] EC ON EC.intEntityId = ER.intEntityId AND EC.ysnDefaultContact = 1  
+										JOIN tblEMEntity EY ON EY.intEntityId = EC.intEntityContactId
 										WHERE ER.intEventId=EV.intEventId AND LTRIM(RTRIM(ISNULL(EY.strEmail,''))) <> ''
 										FOR XML PATH('')
 								   )											

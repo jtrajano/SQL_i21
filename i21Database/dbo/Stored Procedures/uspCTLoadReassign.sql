@@ -34,7 +34,7 @@ BEGIN
 			
 	FROM	tblCTContractDetail	CD
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
-	JOIn	tblEntity			EY	ON	EY.intEntityId			=	CH.intEntityId				LEFT
+	JOIn	tblEMEntity			EY	ON	EY.intEntityId			=	CH.intEntityId				LEFT
 	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId		LEFT
 	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId			LEFT
 	JOIN	tblICItemUOM		PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId		LEFT

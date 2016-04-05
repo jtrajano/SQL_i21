@@ -45,13 +45,13 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnCalculated]						BIT												NULL		
 	,[ysnSplitted]							BIT												NULL	
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Prepayment/Overpayment) 
-	,[intSplitId]							INT												NULL		-- Key Value from tblEntitySplit (Customer Split) 
+	,[intSplitId]							INT												NULL		-- Key Value from tblEMEntitySplit (Customer Split) 
 	,[intDistributionHeaderId]				INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load) 
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing
 	,[intShipmentId]						INT												NULL		-- Key Value from tblLGShipment (Inbound Shipment) 	
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
 	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional Invoice/ Duplicate/ Import/ Recurring) 	
-	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEntity			
+	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
 	,[ysnRecap]								BIT												NULL		-- If [ysnRecap] = 1 > Recap Invoices
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted

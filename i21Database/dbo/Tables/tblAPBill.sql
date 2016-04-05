@@ -69,14 +69,14 @@
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityVendorId]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMCompanyLocation_intShipToId] FOREIGN KEY (intShipToId) REFERENCES tblSMCompanyLocation(intCompanyLocationId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntityLocation_intShipFromId] FOREIGN KEY (intShipFromId) REFERENCES tblEntityLocation(intEntityLocationId),
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntityLocation_intShipFromId] FOREIGN KEY (intShipFromId) REFERENCES [tblEMEntityLocation](intEntityLocationId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipViaId) REFERENCES tblSMShipVia(intEntityShipViaId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMCurrency_intCurrencyID] FOREIGN KEY (intCurrencyId) REFERENCES tblSMCurrency(intCurrencyID),
-	--CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntityContact_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEntity(intEntityId),
+	--CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntityContact_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId)
 );
 GO

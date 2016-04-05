@@ -62,5 +62,5 @@ AS
 	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu.intUnitMeasureId
 	LEFT JOIN tblICItemOwner io ON io.intItemId = i.intItemId 
 	LEFT JOIN tblARCustomer ac ON ac.intEntityCustomerId = io.intOwnerId
-	LEFT JOIN tblEntity e ON e.intEntityId = ac.intEntityCustomerId
+	LEFT JOIN tblEMEntity e ON e.intEntityId = ac.intEntityCustomerId
 	WHERE iu.ysnStockUnit = 1 

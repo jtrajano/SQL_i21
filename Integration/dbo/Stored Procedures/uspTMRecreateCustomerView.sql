@@ -347,15 +347,15 @@ BEGIN
 				,ysnOriginIntegration = CAST(0 AS BIT)
 				,strFullCustomerName = Ent.strName
 				,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
-			FROM tblEntity Ent
+			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId
-			INNER JOIN tblEntityToContact CustToCon 
+			INNER JOIN tblEMEntityToContact CustToCon 
 				ON Cus.intEntityCustomerId = CustToCon.intEntityId 
 					and CustToCon.ysnDefaultContact = 1
-			INNER JOIN tblEntity Con 
+			INNER JOIN tblEMEntity Con 
 				ON CustToCon.intEntityContactId = Con.intEntityId
-			INNER JOIN tblEntityLocation Loc 
+			INNER JOIN tblEMEntityLocation Loc 
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1
 			LEFT JOIN [vyuARCustomerInquiryReport] CI

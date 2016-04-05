@@ -47,10 +47,10 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_ShipFromLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-		CONSTRAINT [FK_tblICInventoryShipment_tblEntityLocation] FOREIGN KEY ([intShipToLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]), 
+		CONSTRAINT [FK_tblICInventoryShipment_tblEMEntityLocation] FOREIGN KEY ([intShipToLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_ShipToCompanyLocation] FOREIGN KEY ([intShipToCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [AK_tblICInventoryShipment_strShipmentNumber] UNIQUE ([strShipmentNumber]), 
-		CONSTRAINT [FK_tblICInventoryShipment_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
+		CONSTRAINT [FK_tblICInventoryShipment_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
 	)
 
 	GO

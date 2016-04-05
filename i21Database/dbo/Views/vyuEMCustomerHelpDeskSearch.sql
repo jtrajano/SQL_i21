@@ -19,7 +19,7 @@
 		ent.strEntityNo
 
 		from tblARCustomerProductVersion cust_product
-			inner join tblEntity ent
+			inner join tblEMEntity ent
 				on cust_product.intCustomerId = ent.intEntityId
 			left join tblHDTicketProduct hd_product
 				on  cust_product.intProductId = hd_product.intTicketProductId

@@ -54,8 +54,8 @@ BEGIN
             From dbo.tblNRNote N
             JOIN dbo.tblARCustomer C On N.intCustomerId = C.intEntityCustomerId
             --INNER JOIN tblARCustomerToContact as CusToCon ON C.intDefaultContactId = CusToCon.intARCustomerToContactId
-            --LEFT JOIN tblEntityContact as Con ON CusToCon.intContactId = Con.intContactId
-            LEFT JOIN tblEntityLocation as Loc ON C.intDefaultLocationId = Loc.intEntityLocationId
+            --LEFT JOIN tblEMEntityContact as Con ON CusToCon.intContactId = Con.intContactId
+            LEFT JOIN [tblEMEntityLocation] as Loc ON C.intDefaultLocationId = Loc.intEntityLocationId
             WHERE N.intNoteId = @intNoteId
             
             -- Get Note related details

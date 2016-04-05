@@ -13,7 +13,7 @@
 	from
 		tblHDReminder r
 		,tblHDTicket t
-		,tblEntity e
+		,tblEMEntity e
 	where
 		t.intTicketId = r.intTicketId
 		and e.intEntityId = t.intCustomerId

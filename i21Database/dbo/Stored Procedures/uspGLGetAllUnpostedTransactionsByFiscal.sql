@@ -126,7 +126,7 @@ BEGIN
 		AS
 		(
 			SELECT intJournalId,  strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId,strDescription,  strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType,
-			strUserName = (select strName from tblEntity where intEntityId = j.intEntityId ),
+			strUserName = (select strName from tblEMEntity where intEntityId = j.intEntityId ),
 			intEntityId,
 			dtmDate,'GL' FROM tblGLJournal j
 				 WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL

@@ -38,7 +38,7 @@ AS
 	FROM	tblCTContractDetail		D
 	JOIN	tblCTContractHeader		H	ON	D.intContractHeaderId	=	H.intContractHeaderId
 	JOIN	tblCTContractType		T	ON	T.intContractTypeId		=	H.intContractTypeId
-	JOIN	tblEntity				E	ON	H.intEntityId			=	E.intEntityId
+	JOIN	tblEMEntity				E	ON	H.intEntityId			=	E.intEntityId
 	JOIN	tblICItem				I	ON	I.intItemId				=	D.intItemId
 	JOIN	tblCTPricingType		P	ON	P.intPricingTypeId		=	D.intPricingTypeId
 	JOIN	tblICUnitMeasure		UM1 ON	UM1.intUnitMeasureId	=	D.intUnitMeasureId		LEFT

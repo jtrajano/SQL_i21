@@ -106,7 +106,7 @@
        tblSCTicket.dblGross,
        tblSCTicket.dblShrink,
        tblSCTicket.dblConvertedUOMQty,
-       tblEntity.strName,
+       tblEMEntity.strName,
        tblSCListTicketTypes.strTicketType,
 	   tblSMCompanyLocation.strLocationName,
 	   tblSMCompanyLocationSubLocation.strSubLocationName,
@@ -119,16 +119,16 @@
 			WHEN tblSCTicket.strDistributionOption = 'HLD' THEN 'Hold'
 		END) AS strStorageTypeDescription,
 	   tblSCScaleSetup.strStationShortDescription,
-	   tblEntitySplit.strSplitNumber,
+	   [tblEMEntitySplit].strSplitNumber,
 	   tblSCTicketPool.strTicketPool,
 	   tblGRDiscountId.strDiscountId,
 	   tblICStorageLocation.strDescription,
 	   tblGRStorageScheduleRule.strScheduleId
   from ((dbo.tblSCTicket tblSCTicket
-	left join dbo.tblEntity tblEntity
-       on (tblEntity.intEntityId = tblSCTicket.intEntityId)
-	left join dbo.tblEntitySplit tblEntitySplit
-       on (tblEntitySplit.intSplitId = tblSCTicket.intSplitId)
+	left join dbo.tblEMEntity tblEMEntity
+       on (tblEMEntity.intEntityId = tblSCTicket.intEntityId)
+	left join dbo.[tblEMEntitySplit] tblEMEntitySplit
+       on ([tblEMEntitySplit].intSplitId = tblSCTicket.intSplitId)
 	left join dbo.tblSCScaleSetup tblSCScaleSetup
        on (tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId)
 	left join dbo.tblSMCompanyLocation tblSMCompanyLocation

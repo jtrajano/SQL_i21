@@ -24,7 +24,7 @@ INNER JOIN (SELECT
 				Ent.strEntityNo
 				,Ent.intEntityId
 				,Cus.ysnActive
-			FROM tblEntity Ent
+			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId) D
 	ON C.intCustomerNumber = D.intEntityId
@@ -54,7 +54,7 @@ INNER JOIN (SELECT
 				Ent.strEntityNo
 				,Ent.intEntityId
 				,Cus.ysnActive
-			FROM tblEntity Ent
+			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId) E
 	ON D.intCustomerNumber = E.intEntityId

@@ -28,7 +28,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			ft.[dtmFilledDate] AS [dtmFilledDate],
 			ft.intCommodityId					
 FROM [tblRKFutOptTransaction] AS ft
-LEFT OUTER JOIN [dbo].[tblEntity] AS e ON ft.[intEntityId] = e.[intEntityId]
+LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
 LEFT OUTER JOIN [dbo].[tblRKOptionsMonth] AS om ON ft.[intOptionMonthId] = om.[intOptionMonthId]
 LEFT OUTER JOIN [dbo].[tblCTBook] AS sb ON ft.[intBookId] = sb.[intBookId]

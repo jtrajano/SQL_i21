@@ -1,6 +1,6 @@
 ﻿PRINT '******   Check if Trucker is not yet run   ******'
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Move Trucker' AND strValue = '1')
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Move Trucker' AND strValue = '1')
 BEGIN
 
 	PRINT '******   Move Trucker data   ******'
@@ -11,9 +11,9 @@ BEGIN
 	END 
 
 
-	SELECT intEntityId INTO #tmpTruckerEntity FROM tblEntityType 
+	SELECT intEntityId INTO #tmpTruckerEntity FROM [tblEMEntityType] 
 								WHERE strType = 'Trucker'
-									AND intEntityId NOT IN ( SELECT intEntityId FROM tblEntityToContact)
+									AND intEntityId NOT IN ( SELECT intEntityId FROM [tblEMEntityToContact])
 
 
 	DECLARE @intTruckerLineEntityId INT
@@ -28,7 +28,7 @@ BEGIN
 		SET @intTruckerEntityLocationId = null
 
 				
-		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, strEmail2, ysnActive)	
+		INSERT INTO tblEMEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, strEmail2, ysnActive)	
 		SELECT ISNULL(strName,''), 
 				'',
 				ISNULL(strEmail,''), 
@@ -43,12 +43,12 @@ BEGIN
 		SELECT @intTruckerEntityContactId = @@IDENTITY
 
 		SELECT @intTruckerEntityLocationId = intEntityLocationId 
-			FROM tblEntityLocation 
+			FROM [tblEMEntityLocation] 
 				WHERE intEntityId = @intTruckerLineEntityId
 					and ysnDefaultLocation = 1
 
 	
-		INSERT INTO tblEntityToContact ( intEntityId, intEntityContactId, intEntityLocationId, ysnDefaultContact, ysnPortalAccess, intConcurrencyId)
+		INSERT INTO [tblEMEntityToContact] ( intEntityId, intEntityContactId, intEntityLocationId, ysnDefaultContact, ysnPortalAccess, intConcurrencyId)
 		VALUES ( @intTruckerLineEntityId, @intTruckerEntityContactId, @intTruckerEntityLocationId, 1, 0, 0)
 		
 
@@ -61,6 +61,6 @@ BEGIN
 		DROP TABLE #tmpTruckerEntity
 	END 
 	
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Move Trucker', '1' )
 END

@@ -134,16 +134,16 @@ End) as [SiteDeliveryDD]
 ,dblCallEntryPrice = F.dblPrice
 ,dblCallEntryMinimumQuantity = F.dblMinimumQuantity
 FROM tblTMCustomer A 
-INNER JOIN tblEntity Ent
+INNER JOIN tblEMEntity Ent
 	ON A.intCustomerNumber = Ent.intEntityId
 INNER JOIN tblARCustomer Cus 
 	ON Ent.intEntityId = Cus.intEntityCustomerId
-INNER JOIN tblEntityToContact CustToCon 
+INNER JOIN [tblEMEntityToContact] CustToCon 
 	ON Cus.intEntityCustomerId = CustToCon.intEntityId 
 		and CustToCon.ysnDefaultContact = 1
-INNER JOIN tblEntity Con 
+INNER JOIN tblEMEntity Con 
 	ON CustToCon.intEntityContactId = Con.intEntityId
-INNER JOIN tblEntityLocation Loc 
+INNER JOIN [tblEMEntityLocation] Loc 
 	ON Ent.intEntityId = Loc.intEntityId 
 		and Loc.ysnDefaultLocation = 1
 LEFT JOIN [vyuARCustomerInquiryReport] CI
@@ -177,11 +177,11 @@ LEFT JOIN (
 		 ,AA.strName
 		 ,AA.intEntityId
 		 ,intConcurrencyId = 0
-	FROM tblEntity AA
-	LEFT JOIN tblEntityLocation BB
+	FROM tblEMEntity AA
+	LEFT JOIN [tblEMEntityLocation] BB
 		ON AA.intEntityId = BB.intEntityId
 			AND BB.ysnDefaultLocation = 1
-	INNER JOIN tblEntityType CC
+	INNER JOIN [tblEMEntityType] CC
 		ON AA.intEntityId = CC.intEntityId
 	WHERE strType = 'Salesperson'
 ) J 

@@ -14,14 +14,14 @@ SELECT
 		a.strTitle,
 		c.strPayPeriod
 	FROM 		
-			tblEntity a
-		join tblEntityType b
+			tblEMEntity a
+		join [tblEMEntityType] b
 			on b.intEntityId = a.intEntityId and b.strType = 'Employee'
 		join tblPREmployee c
 			on c.intEntityEmployeeId = a.intEntityId
-		left join tblEntityLocation e  
+		left join [tblEMEntityLocation] e  
 			on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
-		left join tblEntityToContact f  
+		left join [tblEMEntityToContact] f  
 			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
-		left join tblEntity g  
+		left join tblEMEntity g  
 			on f.intEntityContactId = g.intEntityId  

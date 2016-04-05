@@ -41,7 +41,7 @@ BEGIN
 		,@state = A.strState
 		,@county = NULL
 		,@city = A.strCity
-	FROM tblEntityLocation A
+	FROM [tblEMEntityLocation] A
 	WHERE A.intEntityLocationId = @billShipFromLocation
 
 	IF(@purchaseTaxMasterId > 0)

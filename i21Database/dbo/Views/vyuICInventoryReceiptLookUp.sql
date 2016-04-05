@@ -27,7 +27,7 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 	--LEFT JOIN vyuEMEntity Entity 
 	--	ON Entity.intEntityId = Receipt.intEntityId 
 	--	AND Entity.strType = 'User'
-	--LEFT JOIN tblEntityLocation ShipFrom 
+	--LEFT JOIN tblEMEntityLocation ShipFrom 
 	--	ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	--LEFT JOIN tblSMTaxGroup TaxGroup 
 		--ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId

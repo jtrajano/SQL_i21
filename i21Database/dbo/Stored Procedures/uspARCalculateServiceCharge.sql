@@ -149,7 +149,7 @@ AS
 							FROM tblARCustomerBudget CB
 								INNER JOIN tblARCustomer C ON CB.intEntityCustomerId = C.intEntityCustomerId	
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
-								INNER JOIN tblEntityLocation EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
+								INNER JOIN [tblEMEntityLocation] EL ON CB.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1	
 							WHERE CB.intEntityCustomerId = @entityId
 								AND DATEADD(DAY, SC.intGracePeriod, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 AND ISNULL(CB.ysnCalculated, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, EL.intTermsId)) < @asOfDate
 								AND CB.dblBudgetAmount > @zeroDecimal

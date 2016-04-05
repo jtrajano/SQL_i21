@@ -36,7 +36,7 @@ SELECT
 	dblEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ItemUOM.dblUnitQty, 0),
 	ItemPricing.intSort
 FROM vyuICGetItemStock Item
-LEFT JOIN tblEntity Vendor ON Vendor.intEntityId = Item.intVendorId
+LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = Item.intVendorId
 LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId and ItemPricing.intItemLocationId = Item.intItemLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId
 LEFT JOIN tblICUnitMeasure UOM ON UOM .intUnitMeasureId= ItemUOM.intUnitMeasureId

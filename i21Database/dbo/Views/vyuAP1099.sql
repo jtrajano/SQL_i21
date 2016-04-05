@@ -62,9 +62,9 @@ INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
 LEFT JOIN vyuAPBillPayment B2
 	ON B.intBillId = B2.intBillId   
-LEFT JOIN (tblAPVendor C INNER JOIN tblEntity C2 ON C.intEntityVendorId = C2.intEntityId)
+LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityVendorId = C2.intEntityId)
     ON C.intEntityVendorId = B.intEntityVendorId
-LEFT JOIN tblEntityLocation D
+LEFT JOIN [tblEMEntityLocation] D
 	ON C.intEntityVendorId = D.intEntityId AND D.ysnDefaultLocation = 1     
 WHERE ((B.ysnPosted = 1 AND B2.dblPayment IS NOT NULL) OR B.intTransactionType = 9) AND A.int1099Form <> 0
 AND C2.ysnPrint1099 = 1

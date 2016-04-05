@@ -15,16 +15,16 @@ SELECT
 		h.intUserRoleID,
 		strDefaultUserRole = h.strName
     FROM         
-            tblEntity a
-        join tblEntityType b
+            tblEMEntity a
+        join [tblEMEntityType] b
             on b.intEntityId = a.intEntityId and b.strType = 'User'
         join tblSMUserSecurity c
             on c.intEntityUserSecurityId= a.intEntityId
-        left join tblEntityLocation e  
+        left join [tblEMEntityLocation] e  
             on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
-        left join tblEntityToContact f  
+        left join [tblEMEntityToContact] f  
             on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
-        left join tblEntity g  
+        left join tblEMEntity g  
             on f.intEntityContactId = g.intEntityId  
 		left join tblSMUserRole h
 			on h.intUserRoleID = c.intUserRoleID

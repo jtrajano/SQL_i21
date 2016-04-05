@@ -1,46 +1,46 @@
 ﻿PRINT '*** CHECKING ENTITY EMPLOYEE ***'
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity')
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strEntityNo')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strEntityNo')
 	BEGIN
-		EXEC('ALTER TABLE tblEntity ADD strEntityNo NVARCHAR(MAX)')
+		EXEC('ALTER TABLE tblEMEntity ADD strEntityNo NVARCHAR(MAX)')
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strContactNumber')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strContactNumber')
 	BEGIN
-		EXEC('ALTER TABLE tblEntity ADD strContactNumber NVARCHAR(MAX)')
+		EXEC('ALTER TABLE tblEMEntity ADD strContactNumber NVARCHAR(MAX)')
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strContactType')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strContactType')
 	BEGIN
-		EXEC('ALTER TABLE tblEntity ADD strContactType NVARCHAR(50)')
+		EXEC('ALTER TABLE tblEMEntity ADD strContactType NVARCHAR(50)')
 	END
 
 END
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation')
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityLocation ADD ysnDefaultContact BIT')
+		EXEC('ALTER TABLE tblEMEntityLocation ADD ysnDefaultContact BIT')
 	END
 
 END
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact')
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'intEntityContactId')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'intEntityContactId')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityToContact ADD intEntityContactId INT')
+		EXEC('ALTER TABLE tblEMEntityToContact ADD intEntityContactId INT')
 	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityToContact ADD ysnDefaultContact BIT')
+		EXEC('ALTER TABLE tblEMEntityToContact ADD ysnDefaultContact BIT')
 	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess')
 	BEGIN
-		EXEC('ALTER TABLE tblEntityToContact ADD ysnPortalAccess BIT')
+		EXEC('ALTER TABLE tblEMEntityToContact ADD ysnPortalAccess BIT')
 	END
 END
 
@@ -53,14 +53,14 @@ END
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPREmployee')  
 AND NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPREmployee' and [COLUMN_NAME] = 'intEntityEmployeeId')
 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strEntityNo') 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' and [COLUMN_NAME] = 'strContactNumber') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strEntityNo') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' and [COLUMN_NAME] = 'strContactNumber') 
 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact') 
 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'intEntityContactId') 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact') 
-AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'intEntityContactId') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnDefaultContact') 
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityToContact' and [COLUMN_NAME] = 'ysnPortalAccess') 
  
 BEGIN
 	PRINT '*** UPDATING ENTITY EMPLOYEE***'
@@ -90,20 +90,20 @@ BEGIN
 
 
 
-		UPDATE a set a.strEntityNo = b.strEmployeeId from tblEntity a
+		UPDATE a set a.strEntityNo = b.strEmployeeId from tblEMEntity a
 		join tblPREmployee b
 			on a.intEntityId = b.intEmployeeId
 		where a.strEntityNo = '''' or a.strEntityNo is null
 
 
 		update a  set a.ysnDefaultLocation = 1, strLocationName = b.strEmployeeId + '' Location''
-		from tblEntityLocation a
+		from tblEMEntityLocation a
 				join tblPREmployee b
 					on a.intEntityId = b.intEmployeeId
 				where b.intEmployeeId not in 
 					(select intEntityId 
 						from  (select intEntityId, count(*) c 
-								from tblEntityLocation 
+								from tblEMEntityLocation 
 									where ysnDefaultLocation = 1 
 										and intEntityId in (select 
 																intEmployeeId 
@@ -126,7 +126,7 @@ BEGIN
 		begin
 			select top 1 @curInt = intEmployeeId from #tmp
 
-			if not exists(select top 1 1 from tblEntityToContact where intEntityId = @curInt)
+			if not exists(select top 1 1 from tblEMEntityToContact where intEntityId = @curInt)
 			begin
 				set @mName = null
 				set @cName = null
@@ -145,20 +145,20 @@ BEGIN
 
 				from #tmp where intEmployeeId = @curInt
 
-				insert into tblEntity(strName, strContactNumber)
+				insert into tblEMEntity(strName, strContactNumber)
 				values (@mName, '''')
 				set @mContactId = @@IDENTITY
 
-				insert into tblEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
+				insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
 				values(@curInt, @mContactId, 1, 0)
 				
 				if(@cName is not null or @cName <> '''')
 				begin 
-					insert into tblEntity(strName, strContactNumber, strContactType, strPhone, strPhone2, strNotes)
+					insert into tblEMEntity(strName, strContactNumber, strContactType, strPhone, strPhone2, strNotes)
 					values(@cName, '''', ''Emergency'', @cPhone, @cPhone2, '''')
 					set @cContactId = @@IDENTITY
 
-					insert into tblEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
+					insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
 					values(@curInt, @cContactId, 0, 0)		
 				end 
 
@@ -181,10 +181,10 @@ BEGIN
 
 		EXEC(''update tblPREmployee set intEmployeeId = intUserSecurityId, intEntityId = intUserSecurityId where intUserSecurityId is not null'')
 
-		INSERT INTO tblEntityType(intEntityId,strType, intConcurrencyId)
+		INSERT INTO tblEMEntityType(intEntityId,strType, intConcurrencyId)
 	SELECT intEmployeeId,''Employee'', 0 FROM tblPREmployee 
 		where intEmployeeId not in (SELECT intEntityId FROM 
-										tblEntityType where strType = ''Employee'')
+										tblEMEntityType where strType = ''Employee'')
 
 
 

@@ -45,7 +45,7 @@ LEFT JOIN (SELECT
 				Ent.strEntityNo
 				,Ent.intEntityId
 				,Cus.ysnActive
-			FROM tblEntity Ent
+			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId) E
 	ON E.intEntityId =D.intCustomerNumber

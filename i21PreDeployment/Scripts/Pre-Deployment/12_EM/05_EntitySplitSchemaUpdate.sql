@@ -2,10 +2,10 @@
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerSplit')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerSplitDetail')
 BEGIN
-		IF NOT EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntitySplitDetail' )
+		IF NOT EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntitySplitDetail' )
 		BEGIN
 			EXEC( '
-				CREATE TABLE [dbo].[tblEntitySplit]
+				CREATE TABLE [dbo].[tblEMEntitySplit]
 				(
 					[intSplitId]          INT           NOT NULL,
 					[intEntityId]		  INT           NOT NULL,
@@ -18,10 +18,10 @@ BEGIN
 				)
 			')
 			PRINT '*** Check Entity Split Detail ***'
-			IF NOT EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntitySplitDetail' )
+			IF NOT EXISTS( SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntitySplitDetail' )
 			BEGIN
 				EXEC('
-						CREATE TABLE [dbo].[tblEntitySplitDetail]
+						CREATE TABLE [dbo].[tblEMEntitySplitDetail]
 						(
 							[intSplitDetailId] INT			   NOT NULL,
 							[intSplitId]       INT             NOT NULL,
@@ -36,10 +36,10 @@ BEGIN
 			IF EXISTS  (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerSplit'  and [COLUMN_NAME] = 'intEntityCustomerId' )
 			BEGIN
 				EXEC('
-					DELETE FROM tblEntitySplit
-					DELETE FROM tblEntitySplitDetail
+					DELETE FROM tblEMEntitySplit
+					DELETE FROM tblEMEntitySplitDetail
 
-					INSERT INTO tblEntitySplit (
+					INSERT INTO tblEMEntitySplit (
 						intSplitId,		intEntityId,			strSplitNumber,		strRecordType,		strAgExemptionClass,		strDescription,		dblAcres,		intConcurrencyId 
 					)
 					SELECT 
@@ -47,7 +47,7 @@ BEGIN
 					FROM tblARCustomerSplit
 
 
-					INSERT INTO tblEntitySplitDetail(
+					INSERT INTO tblEMEntitySplitDetail(
 						intSplitDetailId,		intSplitId,		intEntityId,		dblSplitPercent,	strOption,		intConcurrencyId
 					)
 					SELECT 
@@ -58,10 +58,10 @@ BEGIN
 			ELSE			
 			BEGIN
 				EXEC('
-					DELETE FROM tblEntitySplit
-					DELETE FROM tblEntitySplitDetail
+					DELETE FROM tblEMEntitySplit
+					DELETE FROM tblEMEntitySplitDetail
 
-					INSERT INTO tblEntitySplit (
+					INSERT INTO tblEMEntitySplit (
 						intSplitId,		intEntityId,			strSplitNumber,		strRecordType,		strAgExemptionClass,		strDescription,		dblAcres,		intConcurrencyId 
 					)
 					SELECT 
@@ -69,7 +69,7 @@ BEGIN
 					FROM tblARCustomerSplit
 
 
-					INSERT INTO tblEntitySplitDetail(
+					INSERT INTO tblEMEntitySplitDetail(
 						intSplitDetailId,		intSplitId,		intEntityId,		dblSplitPercent,	strOption,		intConcurrencyId
 					)
 					SELECT 

@@ -74,7 +74,7 @@ BEGIN
 		tblSMTaxCode TC
 			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	WHERE
 		[intEntityCustomerId] = @CustomerId
@@ -103,7 +103,7 @@ BEGIN
 		tblSMTaxCode TC
 			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	WHERE
 		[intEntityCustomerId] = @CustomerId
@@ -129,7 +129,7 @@ BEGIN
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblSMTaxClass SMTC
@@ -158,7 +158,7 @@ BEGIN
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	WHERE
 		[intEntityCustomerId] = @CustomerId
@@ -186,7 +186,7 @@ BEGIN
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblICItem  IC
@@ -218,7 +218,7 @@ BEGIN
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblICItem  IC
@@ -246,7 +246,7 @@ BEGIN
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	LEFT OUTER JOIN
 		tblICCategory ICC
@@ -274,7 +274,7 @@ BEGIN
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	WHERE
 		[intEntityCustomerId] = @CustomerId
@@ -477,7 +477,7 @@ BEGIN
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
 	WHERE
 		[intEntityCustomerId] = @CustomerId

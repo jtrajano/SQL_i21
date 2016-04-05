@@ -1,6 +1,6 @@
 ﻿PRINT '******   Check if Terminal is not yet run   ******'
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Move Terminal' AND strValue = '1')
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Move Terminal' AND strValue = '1')
 BEGIN
 
 	PRINT '******   Move Terminal data   ******'
@@ -11,9 +11,9 @@ BEGIN
 	END 
 
 
-	SELECT intEntityId INTO #tmpTerminalEntity FROM tblEntityType 
+	SELECT intEntityId INTO #tmpTerminalEntity FROM [tblEMEntityType] 
 								WHERE strType = 'Terminal'
-									AND intEntityId NOT IN ( SELECT intEntityId FROM tblEntityToContact)
+									AND intEntityId NOT IN ( SELECT intEntityId FROM [tblEMEntityToContact])
 
 
 	DECLARE @intTerminalEntityId INT
@@ -28,7 +28,7 @@ BEGIN
 		SET @intTerminalEntityLocationId = null
 
 				
-		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strMobile, strFax, strNotes)	
+		INSERT INTO tblEMEntity(strName, strContactNumber, strEmail, strPhone, strMobile, strFax, strNotes)	
 		SELECT ISNULL(strName,''), 
 				'', -- we do not need this because we only added this to map Origin Contact to i21 contact 
 				ISNULL(strEmail,''), 
@@ -41,12 +41,12 @@ BEGIN
 		SELECT @intTerminalEntityContactId = @@IDENTITY
 
 		SELECT @intTerminalEntityLocationId = intEntityLocationId 
-			FROM tblEntityLocation 
+			FROM [tblEMEntityLocation] 
 				WHERE intEntityId = @intTerminalEntityId
 					and ysnDefaultLocation = 1
 
 	
-		INSERT INTO tblEntityToContact ( intEntityId, intEntityContactId, intEntityLocationId, ysnDefaultContact, ysnPortalAccess, intConcurrencyId)
+		INSERT INTO [tblEMEntityToContact] ( intEntityId, intEntityContactId, intEntityLocationId, ysnDefaultContact, ysnPortalAccess, intConcurrencyId)
 		VALUES ( @intTerminalEntityId, @intTerminalEntityContactId, @intTerminalEntityLocationId, 1, 0, 0)
 		
 
@@ -59,6 +59,6 @@ BEGIN
 		DROP TABLE #tmpTerminalEntity
 	END 
 	
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Move Terminal', '1' )
 END

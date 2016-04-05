@@ -1,4 +1,4 @@
-﻿if not exists(select top 1 1 from tblEntityPreferences where strPreference = 'Fix Imported Vendor ysnOrigin Data' and strValue = '1')
+﻿if not exists(select top 1 1 from tblEMEntityPreferences where strPreference = 'Fix Imported Vendor ysnOrigin Data' and strValue = '1')
 begin
 	print 'Fix Imported Vendor ysnOrigin Data'
 	IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblAPVendor') AND name = 'strVendorId')
@@ -8,7 +8,7 @@ begin
 		EXEC('UPDATE tblAPImportedVendors set ysnOrigin = 1 where strVendorId in (select strVendorId from tblAPVendor where intPaymentMethodId = 0) and ysnOrigin = 0')
 
 		EXEC(
-		'INSERT INTO tblEntityPreferences ( strPreference, strValue)
+		'INSERT INTO tblEMEntityPreferences ( strPreference, strValue)
 			VALUES (''Fix Imported Vendor ysnOrigin Data'',''1'') ')
 	END
 	print 'End Fix Imported Vendor ysnOrigin Data'

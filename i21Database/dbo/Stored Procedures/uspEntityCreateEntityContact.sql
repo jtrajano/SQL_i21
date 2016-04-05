@@ -20,7 +20,7 @@ BEGIN
 			set @ContactId = NULL
 
 			BEGIN -- DML EntityContact
-				insert into tblEntityContact
+				insert into tblEMEntityContact
 				(
 					[intEntityContactId]
 					,strTitle

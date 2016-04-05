@@ -278,14 +278,14 @@ BEGIN TRY
 	--Get the ship from phone number                  
 	SELECT TOP 1 @strShipFromPhoneNo = e.strPhone
 	FROM tblWHOrderHeader h
-	INNER JOIN tblEntity e ON e.intEntityId = h.intShipFromAddressId
+	INNER JOIN tblEMEntity e ON e.intEntityId = h.intShipFromAddressId
 	WHERE h.intOrderHeaderId = @intOrderHeaderId;
 
 	--Get the carrier contact                  
 	SELECT TOP 1 @strCarrierContact = a.strTitle + ' ' + a.strName + ' ' + a.strPhone
 	FROM tblWHOrderHeader h
 	INNER JOIN tblWHTruck t ON t.intTruckId = h.intTruckId
-	INNER JOIN tblEntity a ON a.intEntityId = t.intCarrierAddressID
+	INNER JOIN tblEMEntity a ON a.intEntityId = t.intCarrierAddressID
 	WHERE h.intOrderHeaderId = @intOrderHeaderId;
 
 	--Contract status changes and send feed to Feed Table

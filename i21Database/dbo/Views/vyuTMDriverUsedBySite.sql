@@ -7,8 +7,8 @@ SELECT DISTINCT
 	A.strEntityNo
 	,A.intEntityId
 	,intConcurrencyId = 0
-FROM tblEntity A
-INNER JOIN tblEntityType B
+FROM tblEMEntity A
+INNER JOIN [tblEMEntityType] B
 	ON A.intEntityId = B.intEntityId
 INNER JOIN tblTMSite C
 	ON A.intEntityId = C.intDriverID

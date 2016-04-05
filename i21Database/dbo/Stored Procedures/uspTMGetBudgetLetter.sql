@@ -116,13 +116,13 @@ BEGIN
 			,blbLetterBody = E.blbMessage 
 			,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
 		FROM (SELECT TOP 1 * FROM tblSMCompanySetup) A, tblARCustomer B
-		INNER JOIN tblEntity C
+		INNER JOIN tblEMEntity C
 			ON B.intEntityCustomerId = C.intEntityId
 		INNER JOIN tblTMCustomer F
 			ON C.intEntityId = F.intCustomerNumber
 		INNER JOIN tblTMSite G
 			ON F.intCustomerID = G.intCustomerID
-		INNER JOIN tblEntityLocation D
+		INNER JOIN tblEMEntityLocation D
 			ON C.intEntityId = D.intEntityId AND D.ysnDefaultLocation = 1
 		,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') E
 		' + @strWhereClause

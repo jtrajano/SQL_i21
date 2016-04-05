@@ -12,7 +12,7 @@ SELECT dtmDate				= ISNULL(SO.dtmProcessDate, SO.dtmDate)
 	 , ysnPaid				= 0
 FROM tblSOSalesOrder SO
 INNER JOIN tblARCustomer C ON SO.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId
+INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 	
 UNION	
 
@@ -28,7 +28,7 @@ SELECT dtmDate				= ISNULL(I.dtmPostDate, I.dtmDate)
 	 , ysnPaid				= I.ysnPaid
 FROM tblARInvoice I
 INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId 
-INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId
+INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0))
 	
 UNION	
@@ -46,4 +46,4 @@ SELECT dtmDate				= P.dtmDatePaid
 FROM tblARPayment P
 LEFT OUTER JOIN (SELECT intPaymentId ,SUM(dblInvoiceTotal)	AS dblTotal FROM tblARPaymentDetail GROUP BY intPaymentId) AS PD ON P.intPaymentId = PD.intPaymentId
 INNER JOIN tblARCustomer C ON P.intEntityCustomerId = C.intEntityCustomerId 
-INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId
+INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId

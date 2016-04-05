@@ -17,6 +17,6 @@
 	[intEntityId]		INT			NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED ([intRecurringId] ASC),
-	CONSTRAINT [FK_dbo.tblAPRecurringTransaction_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId)
+	CONSTRAINT [FK_dbo.tblAPRecurringTransaction_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId)
 );
 

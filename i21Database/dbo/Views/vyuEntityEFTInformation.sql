@@ -15,5 +15,5 @@ intEntityEFTInfoId
 ,ysnPullTaxSeparately
 ,ysnRefundBudgetCredits
 ,ysnPrenoteSent
-FROM tblEntityEFTInformation as EFT
+FROM [tblEMEntityEFTInformation] as EFT
 INNER JOIN tblCMBank as Bank ON EFT.intBankId = Bank.intBankId

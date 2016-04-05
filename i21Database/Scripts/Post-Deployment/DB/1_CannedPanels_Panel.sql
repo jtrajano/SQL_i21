@@ -676,13 +676,13 @@ agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.
  
 INSERT INTO #TempCannedPanels VALUES (96, 0, 10, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 General Ledger - Chart of Accounts', N'Grid', N'', N'i21 General Ledger - Chart of Accounts', N'Line', N'', N'Chameleon', N'Fort Books - i21', N'None', N'None', N'', N'', N'select strAccountId, strDescription from tblGLAccount', N'', N'', N'', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.1', NULL, 1, 112, NULL)
  
-INSERT INTO #TempCannedPanels VALUES (97, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 AP - Unposted Payables', N'Grid', N'', N'i21 AP - Unposted Payables', N'Line', N'', N'Chameleon', N'Fort Books - i21', N'None', N'None', N'', N'', N'select tblEntityCredential.strUserName as Employee, strVendorId as Vendor, tblAPBill.dtmDate as GLDate, tblAPBill.dtmBillDate as BillDate, tblAPBill.dtmDueDate as DueDate, strVendorOrderNumber as InvoiceNumber, tblAPBillDetail.dblTotal as ItemTotal, 
+INSERT INTO #TempCannedPanels VALUES (97, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 AP - Unposted Payables', N'Grid', N'', N'i21 AP - Unposted Payables', N'Line', N'', N'Chameleon', N'Fort Books - i21', N'None', N'None', N'', N'', N'select tblEMEntityCredential.strUserName as Employee, strVendorId as Vendor, tblAPBill.dtmDate as GLDate, tblAPBill.dtmBillDate as BillDate, tblAPBill.dtmDueDate as DueDate, strVendorOrderNumber as InvoiceNumber, tblAPBillDetail.dblTotal as ItemTotal, 
 tblAPBillDetail.strMiscDescription as Item, tblGLAccount.strAccountId as Account, 
 tblGLAccount.strDescription as AccountDesc, dblAmountDue as Due from tblAPBillDetail
 inner join tblAPBill on tblAPBillDetail.intBillId = tblAPBill.intBillId
 inner join tblAPVendor on tblAPBill.intEntityVendorId = tblAPVendor.intEntityVendorId
 inner join tblGLAccount on tblAPBillDetail.intAccountId = tblGLAccount.intAccountId
-inner join tblEntityCredential on tblAPBill.intEntityId = tblEntityCredential.intEntityId
+inner join tblEMEntityCredential on tblAPBill.intEntityId = tblEMEntityCredential.intEntityId
 where ysnPosted = ''0''', N'', N'', N'', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4.2', NULL, 8, 111, NULL)
  
 INSERT INTO #TempCannedPanels VALUES (139, 0, 10, 100, 250, 0, NULL, NULL, NULL, 0, 1, 0, N'Master', N'i21 Tank Mgt - Deliveries for Review', N'Grid', N'', N'i21 Tank Mgt - Deliveries for Review', N'Line', NULL, N'Chameleon', N'i21 Demo', N'None', N'None', NULL, NULL, N'SELECT 

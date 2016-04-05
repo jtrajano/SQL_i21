@@ -325,7 +325,7 @@ GO
 	END
 	
 GO
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate All Entity Roles - tblEntityToContact')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate All Entity Roles - tblEMEntityToContact')
 	BEGIN
 		-- Loop through customers
 		DECLARE @currentRow INT
@@ -333,7 +333,7 @@ GO
 
 		PRINT N'GET TOTAL ROWS'
 		SET @currentRow = 1
-		SELECT @totalRows = Count(*) FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
+		SELECT @totalRows = Count(*) FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEMEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
 
 		--PRINT CONCAT(N'TOTAL ROWS ', @totalRows)
 
@@ -343,7 +343,7 @@ GO
 		DECLARE @customerId INT
 		SELECT @customerId = intEntityId FROM (  
 			SELECT ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS 'ROWID', *
-			FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
+			FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEMEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
 		) b
 		WHERE ROWID = @currentRow
 		--PRINT CONCAT(N'CUSTOMER ID ', @customerId)
@@ -354,7 +354,7 @@ GO
 			DECLARE @totalRows1 INT
 
 			SET @currentRow1 = 1
-			SELECT @totalRows1 = Count(*) FROM [dbo].[tblEntityToContact] EntityToContact
+			SELECT @totalRows1 = Count(*) FROM [dbo].[tblEMEntityToContact] EntityToContact
 			WHERE EntityToContact.intEntityRoleId IS NOT NULL AND EntityToContact.intEntityId = @customerId
 			--PRINT CONCAT(N'TOTAL NUMBER OF CONTACTS ', @totalRows1)
 
@@ -364,7 +364,7 @@ GO
 			DECLARE @contactId INT
 			SELECT @contactId = intEntityContactId FROM (  
 				SELECT EntityToContact.intEntityContactId as intEntityContactId, ROW_NUMBER() OVER(ORDER BY EntityToContact.intEntityId ASC) AS 'ROWID'
-				FROM [dbo].[tblEntityToContact] EntityToContact
+				FROM [dbo].[tblEMEntityToContact] EntityToContact
 				WHERE EntityToContact.intEntityRoleId IS NOT NULL AND EntityToContact.intEntityId = @customerId
 			) a
 			WHERE ROWID = @currentRow1
@@ -372,12 +372,12 @@ GO
 
 			-- Get role
 			DECLARE @roleId INT
-			SELECT @roleId = intEntityRoleId FROM tblEntityToContact WHERE intEntityContactId = @contactId
+			SELECT @roleId = intEntityRoleId FROM [tblEMEntityToContact] WHERE intEntityContactId = @contactId
 			--PRINT CONCAT(N'ROLE ID ', @roleId)
 
 			-- Get customer name
 			DECLARE @customerName VARCHAR(50)	
-			SELECT @customerName = RTRIM(strName) FROM tblEntity WHERE intEntityId = @customerId
+			SELECT @customerName = RTRIM(strName) FROM tblEMEntity WHERE intEntityId = @customerId
 			--PRINT CONCAT(N'CUSTOMER NAME ', @customerName)
 	
 			DECLARE @roleName VARCHAR(50)
@@ -416,7 +416,7 @@ GO
 
 			---- assign it back to respective contact
 			--PRINT CONCAT(N'ASSIGNING THE ROLE ID ', @newRoleId, ' TO CONTACT ID ', @contactId)
-			UPDATE tblEntityToContact SET intEntityRoleId = @newRoleId WHERE intEntityContactId = @contactId
+			UPDATE [tblEMEntityToContact] SET intEntityRoleId = @newRoleId WHERE intEntityContactId = @contactId
 
 			SET @currentRow1 = @currentRow1 + 1
 			END
@@ -444,20 +444,20 @@ GO
 
 				-- Get default contact and check if contact has portal permission
 				PRINT N'CHECKING IF CUSTOMER''S DEFAULT CONTACT HAVE PORTAL ACCESS'
-				IF EXISTS(SELECT TOP 1 1 FROM tblEntityToContact WHERE intEntityId = @customerId AND ysnDefaultContact = 1 AND ysnPortalAccess = 1)
+				IF EXISTS(SELECT TOP 1 1 FROM [tblEMEntityToContact] WHERE intEntityId = @customerId AND ysnDefaultContact = 1 AND ysnPortalAccess = 1)
 				BEGIN
 					-- if default contact has portal permission assign all the menus
 					--PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO DEFAULT CONTACT ', @contactAdminRoleId)
-					UPDATE tblEntityToContact SET intEntityRoleId = @contactAdminRoleId 
+					UPDATE [tblEMEntityToContact] SET intEntityRoleId = @contactAdminRoleId 
 					WHERE intEntityId = @customerId AND ysnDefaultContact = 1 AND ysnPortalAccess = 1
 				END
 				ELSE
 				BEGIN
 					-- else select top 1 and assign all the menus
 					--PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO THE TOP 1 CONTACT ', @customerId, ' ', @contactAdminRoleId)
-					UPDATE tblEntityToContact SET intEntityRoleId = @contactAdminRoleId 
+					UPDATE [tblEMEntityToContact] SET intEntityRoleId = @contactAdminRoleId 
 					WHERE intEntityContactId = (SELECT TOP 1 intEntityContactId 
-												FROM tblEntityToContact 
+												FROM [tblEMEntityToContact] 
 												WHERE intEntityId = @customerId AND ysnPortalAccess = 1)
 				END
 					-- INSERT RECORD TO tblEMEntityRole
@@ -471,14 +471,14 @@ GO
 		DECLARE @CRMParentMenuId INT
 		SELECT @CRMParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'Help Desk'
 
-		UPDATE tblSMUserRoleMenu SET ysnVisible = 0 FROM tblEntityType EntityType
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 0 FROM [tblEMEntityType] EntityType
 		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
 		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
 		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
 		WHERE (MasterMenu.intMenuID = @CRMParentMenuId OR MasterMenu.intParentMenuID = @CRMParentMenuId)
 		AND EntityType.strType <> 'Salesperson'
 
-		UPDATE tblSMUserRoleMenu SET ysnVisible = 1 FROM tblEntityType EntityType
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 1 FROM [tblEMEntityType] EntityType
 		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
 		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
 		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
@@ -486,7 +486,7 @@ GO
 		AND EntityType.strType = 'Salesperson'
 
 		UPDATE tblSMUserRoleMenu SET ysnVisible = 0
-		FROM tblEntityType EntityType
+		FROM [tblEMEntityType] EntityType
 		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
 		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
 		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
@@ -498,12 +498,12 @@ GO
 		--WHERE intUserRoleID IN (SELECT intUserRoleID FROM tblSMUserRole 
 		--					  WHERE strRoleType IN ('Contact Admin', 'Contact') 
 		--					  AND intUserRoleID NOT IN (SELECT intEntityRoleId
-		--												FROM tblEntityToContact 
+		--												FROM tblEMEntityToContact 
 		--												WHERE intEntityRoleId IS NOT NULL))
 				
 		PRINT N'ADD LOG TO tblMigrationLog'
 		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
-		VALUES('System Manager', 'Migrate All Entity Roles - tblEntityToContact', 'Migrate All Entity Roles - tblEntityToContact', GETDATE())
+		VALUES('System Manager', 'Migrate All Entity Roles - tblEMEntityToContact', 'Migrate All Entity Roles - tblEMEntityToContact', GETDATE())
 	END	
 GO
 	-- UPDATE ALL CONTACTS BASED ON THEIR CONTACT ADMINISTRATOR

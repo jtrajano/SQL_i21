@@ -67,7 +67,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	INNER JOIN tblICInventoryReceipt Receipt
 		ON ReceiptCharge.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	INNER JOIN (
-		tblAPVendor Vendor INNER JOIN tblEntity Entity
+		tblAPVendor Vendor INNER JOIN tblEMEntity Entity
 			ON Vendor.intEntityVendorId = Entity.intEntityId
 	) 
 		ON Vendor.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId,  Receipt.intEntityVendorId) 
@@ -159,7 +159,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	INNER JOIN tblICInventoryReceipt Receipt
 		ON ReceiptCharge.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	INNER JOIN (
-		tblAPVendor Vendor INNER JOIN tblEntity Entity
+		tblAPVendor Vendor INNER JOIN tblEMEntity Entity
 			ON Vendor.intEntityVendorId = Entity.intEntityId
 	) 
 		ON Vendor.intEntityVendorId = Receipt.intEntityVendorId

@@ -10,29 +10,29 @@ BEGIN
 	DECLARE @EntityContactId int
 	DECLARE @EntityLocationId int
 		
-	IF EXISTS(SELECT TOP 1 1 FROM tblEntity where strEntityNo = @Id)
+	IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where strEntityNo = @Id)
 	begin	
 		SET @Message = 'Entity No already exists.'		
 		RETURN 0
 	end
 	--Add validation for existing entity no
-	INSERT INTO tblEntity (strName, strContactNumber, strEntityNo)
+	INSERT INTO tblEMEntity (strName, strContactNumber, strEntityNo)
 	select @Id,'', @Id
 
 	SET @EntityId = @@IDENTITY
 
-	INSERT INTO tblEntity (strName, strContactNumber)
+	INSERT INTO tblEMEntity (strName, strContactNumber)
 	select @Id,''
 
 	SET @EntityContactId = @@IDENTITY
 
-	INSERT INTO tblEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
+	INSERT INTO [tblEMEntityToContact](intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
 	SELECT @EntityId, @EntityContactId,1, 0
 
-	INSERT INTO tblEntityLocation( intEntityId, strLocationName, ysnDefaultLocation)
+	INSERT INTO [tblEMEntityLocation]( intEntityId, strLocationName, ysnDefaultLocation)
 	SELECT @EntityId, @Id, 1
 
-	INSERT INTO tblEntityType(intEntityId, strType, intConcurrencyId)
+	INSERT INTO [tblEMEntityType](intEntityId, strType, intConcurrencyId)
 	SELECT @EntityId, @Type, 0
 
 	if @Type = 'Vendor'

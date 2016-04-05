@@ -12,7 +12,7 @@
 			dblVolume = sum(CV.dblVolume),
 			CV.intConcurrencyId 
 	   FROM tblPATCustomerVolume CV
- INNER JOIN tblEntity ENT
+ INNER JOIN tblEMEntity ENT
 		 ON ENT.intEntityId = intCustomerPatronId
  INNER JOIN tblPATPatronageCategory PC
 		 ON PC.intPatronageCategoryId = CV.intPatronageCategoryId

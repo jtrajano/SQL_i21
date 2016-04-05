@@ -12,5 +12,5 @@
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutCustomerPayments_intCustPaymentsId] PRIMARY KEY ([intCustPaymentsId]), 
 	CONSTRAINT [FK_tblSTCheckoutCustomerPayments_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE ,
-    CONSTRAINT [FK_tblSTCheckoutCustomerPayments_tblEntity] FOREIGN KEY ([intCustomerId]) REFERENCES [tblEntity]([intEntityId]) 
+    CONSTRAINT [FK_tblSTCheckoutCustomerPayments_tblEMEntity] FOREIGN KEY ([intCustomerId]) REFERENCES tblEMEntity([intEntityId]) 
 )

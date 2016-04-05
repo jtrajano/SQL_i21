@@ -41,10 +41,10 @@ CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEnt
 FROM         
 dbo.tblSOSalesOrder AS SO LEFT OUTER JOIN
 dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] LEFT OUTER JOIN
-dbo.tblEntity AS NTT ON Cus.[intEntityCustomerId] = NTT.intEntityId LEFT OUTER JOIN
+dbo.tblEMEntity AS NTT ON Cus.[intEntityCustomerId] = NTT.intEntityId LEFT OUTER JOIN
 dbo.tblSMTerm AS Term ON SO.intTermId = Term.intTermID LEFT OUTER JOIN
 dbo.tblSMCompanyLocation AS CompLoc ON SO.intCompanyLocationId  = CompLoc.intCompanyLocationId LEFT OUTER JOIN
 dbo.tblARQuoteTemplate AS QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId LEFT OUTER JOIN
-dbo.tblEntitySplit AS ES ON SO.intSplitId = ES.intSplitId LEFT OUTER JOIN
-dbo.tblEntity AS OE ON SO.intOrderedById = OE.intEntityId LEFT OUTER JOIN
-(dbo.tblARSalesperson AS SP INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
+dbo.[tblEMEntitySplit] AS ES ON SO.intSplitId = ES.intSplitId LEFT OUTER JOIN
+dbo.tblEMEntity AS OE ON SO.intOrderedById = OE.intEntityId LEFT OUTER JOIN
+(dbo.tblARSalesperson AS SP INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId

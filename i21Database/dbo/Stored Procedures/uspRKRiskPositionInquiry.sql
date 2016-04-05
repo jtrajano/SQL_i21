@@ -395,7 +395,7 @@ SELECT DISTINCT 'Terminal position (a. in lots )' as Selection,'Broker Account' 
   , null as intContractHeaderId,ft.intFutOptTransactionHeaderId  
 FROM tblRKFutOptTransaction ft  
 JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
-JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=1  
+JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=1  
 JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
 WHERE  intCommodityId=@intCommodityId 
 AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end 
@@ -419,7 +419,7 @@ SELECT DISTINCT 'Terminal position (b. in '+ @strUnitMeasure +' )' as Selection,
   , null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
 FROM tblRKFutOptTransaction ft  
 JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
-JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId = 1  
+JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId = 1  
 JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
 JOIN tblRKFutureMarket mar on mar.intFutureMarketId=ft.intFutureMarketId
 LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=ft.intCommodityId and um.intUnitMeasureId=mar.intUnitMeasureId
@@ -455,7 +455,7 @@ UNION
 				, null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
 	FROM tblRKFutOptTransaction ft  
 	JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
-	JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
+	JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
 	JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
 	WHERE  intCommodityId=@intCommodityId AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end AND ft.intFutureMarketId=@intFutureMarketId   
 	and dtmFutureMonthsDate >= @dtmFutureMonthsDate 
@@ -477,7 +477,7 @@ SELECT DISTINCT 'F&O' as Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' as 
 	 , null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
    FROM tblRKFutOptTransaction ft  
    JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
-   JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=1  
+   JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=1  
    JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
    WHERE  intCommodityId=@intCommodityId AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end AND ft.intFutureMarketId=@intFutureMarketId   
    and dtmFutureMonthsDate >= @dtmFutureMonthsDate  
@@ -510,7 +510,7 @@ SELECT DISTINCT 'F&O' as Selection,'F&O' as PriceStatus,strFutureMonth,'F&O' as 
 				, null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
 	FROM tblRKFutOptTransaction ft  
 	JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
-	JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
+	JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
 	JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
 	WHERE  intCommodityId=@intCommodityId AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end AND ft.intFutureMarketId=@intFutureMarketId   
 	and dtmFutureMonthsDate >= @dtmFutureMonthsDate 
@@ -530,7 +530,7 @@ FROM (
 		, null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
 		FROM tblRKFutOptTransaction ft
 		INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
-		INNER JOIN tblEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
+		INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
 		INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 		INNER JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
@@ -553,7 +553,7 @@ FROM (
 				, null as intContractHeaderId,ft.intFutOptTransactionHeaderId 
 		FROM tblRKFutOptTransaction ft
 		INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
-		INNER JOIN tblEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
+		INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 		INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 		INNER JOIN tblRKFutureMarket mar ON mar.intFutureMarketId = ft.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = ft.intCommodityId AND um.intUnitMeasureId = mar.intUnitMeasureId
@@ -615,7 +615,7 @@ update @List set strFutureMonth=@strFutureMonth where Selection='Net market risk
  IF NOT EXISTS ( SELECT *
 	FROM tblRKFutOptTransaction ft  
 	JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  
-	JOIN tblEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
+	JOIN tblEMEntity e on e.intEntityId=ft.intEntityId and ft.intInstrumentTypeId=2  
 	JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0  
 	WHERE  intCommodityId=@intCommodityId AND intLocationId= case when isnull(@intCompanyLocationId,0)=0 then intLocationId else @intCompanyLocationId end AND ft.intFutureMarketId=@intFutureMarketId   
 	and dtmFutureMonthsDate >= @dtmFutureMonthsDate 

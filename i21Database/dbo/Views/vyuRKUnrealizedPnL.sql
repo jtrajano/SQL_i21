@@ -41,7 +41,7 @@ SELECT  intFutOptTransactionId,
  JOIN tblICCommodity icc on icc.intCommodityId=ot.intCommodityId  
  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=ot.intLocationId  
  join tblARSalesperson sp on sp.intEntitySalespersonId= ot.intTraderId  
- JOIN tblEntity e on e.intEntityId=ot.intEntityId  
+ JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
   JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId   
@@ -90,7 +90,7 @@ SELECT  intFutOptTransactionId,
  JOIN tblICCommodity icc on icc.intCommodityId=ot.intCommodityId  
  JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=ot.intLocationId  
  join tblARSalesperson sp on sp.intEntitySalespersonId= ot.intTraderId  
- JOIN tblEntity e on e.intEntityId=ot.intEntityId  
+ JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
   JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId  AND bc.intFuturesRateType=2  

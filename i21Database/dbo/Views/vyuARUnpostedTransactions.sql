@@ -12,7 +12,7 @@ SELECT
 FROM
 	tblARInvoice I
 INNER JOIN
-	tblEntity E 
+	tblEMEntity E 
 		ON I.intEntityId = E.intEntityId 
 WHERE
 	I.ysnPosted = 0 
@@ -33,7 +33,7 @@ SELECT
 FROM
 	tblARPayment P
 INNER JOIN
-	tblEntity E 
+	tblEMEntity E 
 		ON P.intEntityId = E.intEntityId 	
 WHERE
 	ysnPosted = 0

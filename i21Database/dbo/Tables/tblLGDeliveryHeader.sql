@@ -18,11 +18,11 @@
 	
     CONSTRAINT [PK_tblLGDeliveryHeader_intDeliveryHeaderId] PRIMARY KEY ([intDeliveryHeaderId]), 
 	CONSTRAINT [UK_tblLGDeliveryHeader_intReferenceNumber] UNIQUE ([intReferenceNumber]),
-	CONSTRAINT [FK_tblLGDeliveryHeader_tblEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblLGDeliveryHeader_tblEMEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES tblEMEntity([intEntityId]),
     CONSTRAINT [FK_tblLGDeliveryHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
     CONSTRAINT [FK_tblLGDeliveryHeader_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 	CONSTRAINT [FK_tblLGDeliveryHeader_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
-	CONSTRAINT [FK_tblLGDeliveryHeader_tblEntity_intTruckerEntityId] FOREIGN KEY ([intTruckerEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblLGDeliveryHeader_tblEMEntity_intTruckerEntityId] FOREIGN KEY ([intTruckerEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblLGDeliveryHeader_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
     CONSTRAINT [FK_tblLGDeliveryHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
 )

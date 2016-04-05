@@ -78,7 +78,7 @@ BEGIN
 		[intCurrencyId] = A.intCurrencyId,
 		[dblExchangeRate] = 0,
 		[dtmDate] = A.dtmDatePaid,
-		[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityVendorId),
+		[strPayee] = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityVendorId),
 		[intPayeeId] = B.intEntityVendorId,
 		[strAddress] = PayTo.strAddress,
 		[strZipCode] = PayTo.strZipCode,
@@ -115,7 +115,7 @@ BEGIN
 				E.strCountry
 			FROM tblAPPaymentDetail C
 			INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
-			INNER JOIN tblEntityLocation E ON D.intPayToAddressId = E.intEntityLocationId AND D.intEntityVendorId = E.intEntityId
+			INNER JOIN tblEMEntityLocation E ON D.intPayToAddressId = E.intEntityLocationId AND D.intEntityVendorId = E.intEntityId
 			WHERE C.intPaymentId = A.intPaymentId
 		) PayTo
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)

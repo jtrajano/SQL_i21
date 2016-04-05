@@ -72,11 +72,11 @@ LEFT JOIN (tblARInvoiceDetail ID
 	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId) ON INV.intInvoiceId = ID.intInvoiceId
 INNER JOIN (tblARCustomer C 
-	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON INV.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
-	INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.intEntitySalespersonId
+	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.intEntitySalespersonId
 LEFT JOIN tblSMShipVia SV ON INV.intShipViaId = SV.intEntityShipViaId
 INNER JOIN tblSMTerm T ON INV.intTermId = T.intTermID
 LEFT JOIN tblSMFreightTerms FT ON INV.intFreightTermId = FT.intFreightTermId

@@ -63,14 +63,14 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
 	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId) ON SO.intSalesOrderId = SD.intSalesOrderId
 INNER JOIN (tblARCustomer C 
-	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
+	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
-	INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
+	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
 LEFT JOIN tblSMShipVia SV ON SO.intShipViaId = SV.intEntityShipViaId
 INNER JOIN tblSMTerm T ON SO.intTermId = T.intTermID
-LEFT JOIN tblEntity EOB ON SO.intOrderedById = EOB.intEntityId
+LEFT JOIN tblEMEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId
-LEFT JOIN tblEntitySplit ES ON SO.intSplitId = ES.intSplitId
+LEFT JOIN [tblEMEntitySplit] ES ON SO.intSplitId = ES.intSplitId
 LEFT JOIN tblARQuoteTemplate QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId

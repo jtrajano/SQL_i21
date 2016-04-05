@@ -80,12 +80,12 @@ BEGIN
 		@strCustomerReferenceNo = L.strCustomerReference,
 		
 		@strHauler = Hauler.strName,
-		@strHaulerAddress = (SELECT EL.strAddress from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerCity = (SELECT EL.strCity from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerCountry = (SELECT EL.strCountry from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerState = (SELECT EL.strState from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerZip = (SELECT EL.strZipCode from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
-		@strHaulerPhone = (SELECT EL.strPhone from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerAddress = (SELECT EL.strAddress from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerCity = (SELECT EL.strCity from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerCountry = (SELECT EL.strCountry from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerState = (SELECT EL.strState from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerZip = (SELECT EL.strZipCode from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
+		@strHaulerPhone = (SELECT EL.strPhone from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
 
 		@strDriver = Driver.strName,
 		@dtmDispatchedDate = L.dtmDispatchedDate,
@@ -96,8 +96,8 @@ BEGIN
 		@strTruckNo = L.strTruckNo
 
 	FROM		vyuLGLoadDetailView L
-	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
-	LEFT JOIN		tblEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
+	LEFT JOIN		tblEMEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
+	LEFT JOIN		tblEMEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
 	LEFT JOIN		tblSMUserSecurity	Dispatcher On				Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
 	WHERE L.[strLoadNumber] = @strLoadNumber
 

@@ -17,7 +17,7 @@
 
     CONSTRAINT [PK_tblLGStockSalesHeader_intStockSalesHeaderId] PRIMARY KEY ([intStockSalesHeaderId]), 
 	CONSTRAINT [UK_tblLGStockSalesHeader_intReferenceNumber] UNIQUE ([intReferenceNumber]),
-	CONSTRAINT [FK_tblLGStockSalesHeader_tblEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblLGStockSalesHeader_tblEMEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES tblEMEntity([intEntityId]),
     CONSTRAINT [FK_tblLGStockSalesHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
     CONSTRAINT [FK_tblLGStockSalesHeader_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 	CONSTRAINT [FK_tblLGStockSalesHeader_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),

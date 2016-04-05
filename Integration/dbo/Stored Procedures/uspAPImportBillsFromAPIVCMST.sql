@@ -103,7 +103,7 @@ BEGIN
 					[strVendorOrderNumber] 	=	(CASE WHEN DuplicateData.apivc_ivc_no IS NOT NULL
 														THEN dbo.fnTrim(A.apivc_ivc_no) + ''-DUP'' 
 														ELSE A.apivc_ivc_no END),
-					[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
+					[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
 													WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
 														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 					[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -144,7 +144,7 @@ BEGIN
 						ON A.apivc_cbk_no = B.apcbk_no
 					INNER JOIN tblAPVendor D
 						ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
-					LEFT JOIN tblEntityLocation loc
+					LEFT JOIN tblEMEntityLocation loc
 						ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 					OUTER APPLY (
 						SELECT E.* FROM apivcmst E
@@ -700,7 +700,7 @@ BEGIN
 				AND A.dtmDate = B.dtmDatePaid
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
-			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityVendorId = D.intEntityId)
+			INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId)
 				ON B.intEntityVendorId = C.intEntityVendorId 
 				--AND A.strPayee = D.strName
 			WHERE A.strSourceSystem IN (''AP'',''CW'')

@@ -6,7 +6,7 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblSMAnnouncementDisplay] PRIMARY KEY CLUSTERED ([intAnnouncementDisplayId] ASC),
     CONSTRAINT [FK_tblSMAnnouncementDisplay_tblSMAnnouncement] FOREIGN KEY ([intAnnouncementId]) REFERENCES [dbo].[tblSMAnnouncement] ([intAnnouncementId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblSMAnnouncementDisplay_tblSMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+    CONSTRAINT [FK_tblSMAnnouncementDisplay_tblSMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

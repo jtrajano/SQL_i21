@@ -28,7 +28,7 @@ FROM (
 		,C.strName
 		,intEntityApproverId = Approver.intApproverId
 	FROM dbo.tblAPBill A
-		INNER JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.intEntityVendorId = C.intEntityId)
+		INNER JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.intEntityVendorId = C.intEntityId)
 		ON A.intEntityVendorId = B.intEntityVendorId
 		OUTER APPLY (
 			SELECT intApproverId FROM [dbo].[fnAPGetNextVoucherApprover](A.intBillId)

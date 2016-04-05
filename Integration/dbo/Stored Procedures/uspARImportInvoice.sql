@@ -177,10 +177,10 @@ BEGIN
 			FROM
 				tblARCustomer C
 			LEFT OUTER JOIN
-				tblEntityLocation B
+				tblEMEntityLocation B
 					ON C.intBillToId = B.intEntityLocationId 
 			LEFT OUTER JOIN
-				tblEntityLocation S
+				tblEMEntityLocation S
 					ON C.intShipToId = S.intEntityLocationId 													
 			WHERE
 				intInvoiceId > @maxInvoiceId

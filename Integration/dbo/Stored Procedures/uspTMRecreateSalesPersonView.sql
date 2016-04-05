@@ -262,16 +262,16 @@ BEGIN
 				,vwsls_user_rev_dt  = 0   
 				,A4GLIdentity  = CAST(A.intEntityId   AS INT)
 				,intConcurrencyId = 0
-			FROM tblEntity A
-			LEFT JOIN tblEntityLocation B
+			FROM tblEMEntity A
+			LEFT JOIN tblEMEntityLocation B
 				ON A.intEntityId = B.intEntityId
 					AND B.ysnDefaultLocation = 1
-			LEFT JOIN tblEntityToContact D
+			LEFT JOIN tblEMEntityToContact D
 				ON A.intEntityId = D.intEntityId
 					AND D.ysnDefaultContact = 1
-			LEFT JOIN tblEntity E
+			LEFT JOIN tblEMEntity E
 				ON D.intEntityContactId = E.intEntityId
-			INNER JOIN tblEntityType C
+			INNER JOIN tblEMEntityType C
 				ON A.intEntityId = C.intEntityId
 			WHERE strType = ''Salesperson''
 		')

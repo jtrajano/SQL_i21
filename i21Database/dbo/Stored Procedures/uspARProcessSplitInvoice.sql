@@ -24,7 +24,7 @@ BEGIN
 	FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
 
 	INSERT INTO @splitDetails(intSplitDetailId, intEntityId, dblSplitPercent)
-	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM tblEntitySplitDetail WHERE intSplitId = @intSplitId
+	SELECT intSplitDetailId, intEntityId, dblSplitPercent FROM [tblEMEntitySplitDetail] WHERE intSplitId = @intSplitId
 
 	WHILE EXISTS(SELECT NULL FROM @splitDetails)
 		BEGIN
@@ -73,7 +73,7 @@ BEGIN
 	UPDATE_CURRENT_INVOICE:
 	SELECT @intSplitEntityId = intEntityId
 		 , @dblSplitPercent = dblSplitPercent/100 
-	FROM tblEntitySplitDetail 
+	FROM [tblEMEntitySplitDetail] 
 	WHERE intSplitDetailId = @intSplitDetailId
 
 	SELECT @newShipToId = intShipToId

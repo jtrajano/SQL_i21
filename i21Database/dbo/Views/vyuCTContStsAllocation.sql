@@ -12,7 +12,7 @@ AS
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-		JOIN	tblEntity				EY	ON	EY.intEntityId				=	CH.intEntityId		CROSS	
+		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId		CROSS	
 		APPLY	tblLGCompanyPreference	LP
 
 		UNION ALL 
@@ -27,5 +27,5 @@ AS
 		FROM	tblLGAllocationDetail	AD
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-		JOIN	tblEntity				EY	ON	EY.intEntityId				=	CH.intEntityId			CROSS	
+		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId			CROSS	
 		APPLY	tblLGCompanyPreference	LP

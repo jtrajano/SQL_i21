@@ -73,7 +73,7 @@ BEGIN
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = S.intLotId
 	LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WC.intWorkOrderId
-	LEFT OUTER JOIN dbo.tblEntity E ON E.intEntityId = S.intOwnerId
+	LEFT OUTER JOIN dbo.tblEMEntity E ON E.intEntityId = S.intOwnerId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
 	LEFT JOIN dbo.tblWHContainerInboundOrder CI ON CI.intContainerId = C.intContainerId
 	LEFT JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId
@@ -155,7 +155,7 @@ BEGIN
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = S.intLotId
 	LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WC.intWorkOrderId
-	LEFT OUTER JOIN dbo.tblEntity E ON E.intEntityId = S.intOwnerId
+	LEFT OUTER JOIN dbo.tblEMEntity E ON E.intEntityId = S.intOwnerId
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
 	JOIN dbo.tblWHContainerInboundOrder CI ON CI.intContainerId = C.intContainerId
 	JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = CI.intOrderHeaderId

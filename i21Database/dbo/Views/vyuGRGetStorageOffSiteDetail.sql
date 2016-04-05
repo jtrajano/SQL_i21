@@ -35,5 +35,5 @@ join tblGRStorageHistory sh on sh.intTicketId= sc.intTicketId
 join tblGRCustomerStorage a on a.intCustomerStorageId=sh.intCustomerStorageId
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId 
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
-JOIN tblEntity E ON E.intEntityId=a.intEntityId
+JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId   

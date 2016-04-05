@@ -102,7 +102,7 @@ SELECT
 	,0
 	,0
 	,0
-	,CASE WHEN EXISTS (SELECT TOP 1 1 FROM tblEntityEFTInformation WHERE ysnActive = 1 AND intEntityId = tblPREmployee.[intEntityEmployeeId]) THEN 1 ELSE 0 END
+	,CASE WHEN EXISTS (SELECT TOP 1 1 FROM [tblEMEntityEFTInformation] WHERE ysnActive = 1 AND intEntityId = tblPREmployee.[intEntityEmployeeId]) THEN 1 ELSE 0 END
 	,@intUserId
 	,GETDATE()
 	,@intUserId

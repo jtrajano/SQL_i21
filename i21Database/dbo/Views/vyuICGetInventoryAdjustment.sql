@@ -28,4 +28,4 @@ SELECT
 	, Adj.intSourceTransactionTypeId
 FROM tblICInventoryAdjustment Adj
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Adj.intLocationId
-LEFT JOIN tblEntity UserEntity ON UserEntity.intEntityId = Adj.intEntityId
+LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = Adj.intEntityId

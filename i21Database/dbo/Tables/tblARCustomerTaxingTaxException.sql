@@ -15,5 +15,5 @@
     [intConcurrencyId]					INT			CONSTRAINT [DF_tblARCustomerTaxingTaxException_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomerTaxingTaxException] PRIMARY KEY CLUSTERED ([intCustomerTaxingTaxExceptionId] ASC),
 	CONSTRAINT [FK_tblARCustomerTaxingTaxException_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
-	CONSTRAINT FK_tblARCustomerTaxingTaxException_tblEntityLocation FOREIGN KEY ([intEntityCustomerLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId])
+	CONSTRAINT FK_tblARCustomerTaxingTaxException_tblEMEntityLocation FOREIGN KEY ([intEntityCustomerLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId])
 )

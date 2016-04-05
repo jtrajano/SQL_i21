@@ -39,6 +39,6 @@
 		--	,intConcurrencyId = 1
 		--from
 		--	tblARCustomer cus
-		--	left outer join tblEntityContact ec on ec.intEntityId = cus.intEntityId
-		--	left outer join tblEntity en on en.intEntityId = cus.intEntityId
-		--	left outer join tblEntityLocation el on el.intEntityId = cus.intEntityId
+		--	left outer join tblEMEntityContact ec on ec.intEntityId = cus.intEntityId
+		--	left outer join tblEMEntity en on en.intEntityId = cus.intEntityId
+		--	left outer join tblEMEntityLocation el on el.intEntityId = cus.intEntityId

@@ -19,24 +19,24 @@
 		,ysnActiveContact = ec.ysnActive
 		,ec.imgPhoto
 		,ysnBillable = c.ysnHDBillableSupport
-		,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = c.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
+		,strEntityType = (select top 1 et.strType from tblEMEntityType et where et.intEntityId = c.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
 		,intModuleId = (select top 1 intModuleId from tblARCustomerProductVersion where intCustomerId = c.[intEntityCustomerId])
 		,strComapny = (select top 1 strCompany from tblARCustomerProductVersion where intCustomerId = c.[intEntityCustomerId])
 	  from
 	  	tblARCustomer c
-		inner join tblEntityToContact etc on etc.intEntityId = c.intEntityCustomerId
-		inner join tblEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
-		inner join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
-		left outer join tblEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
+		inner join tblEMEntityToContact etc on etc.intEntityId = c.intEntityCustomerId
+		inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
+		inner join tblEMEntity e on e.intEntityId = c.[intEntityCustomerId]
+		left outer join tblEMEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
 		/*
-		--tblEntityContact ec
+		--tblEMEntityContact ec
 		tblARCustomerToContact etc 		
-		inner join tblEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
+		inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 		--inner join tblARCustomerToContact etc on etc.[intEntityContactId] = ec.[intEntityContactId]
 		inner join tblARCustomer c on c.[intEntityCustomerId] = etc.[intEntityCustomerId]
-		inner join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
-		--inner join tblEntity eec on eec.intEntityId = ec.[intEntityContactId]
-		left outer join tblEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
+		inner join tblEMEntity e on e.intEntityId = c.[intEntityCustomerId]
+		--inner join tblEMEntity eec on eec.intEntityId = ec.[intEntityContactId]
+		left outer join tblEMEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
 		*/
 	--select
 	--	intContactId = ec.intEntityId
@@ -51,9 +51,9 @@
 	--	,ec.strTimezone
 	--	,intConcurrencyId = 1
 	--  from
-	--	tblEntityContact ec
-	--	inner join tblEntityToContact etc on etc.intContactId = ec.intEntityId
+	--	tblEMEntityContact ec
+	--	inner join tblEMEntityToContact etc on etc.intContactId = ec.intEntityId
 	--	inner join tblARCustomer c on c.intEntityId = etc.intEntityId
-	--	inner join tblEntity e on e.intEntityId = c.intEntityId
-	--	inner join tblEntity eec on eec.intEntityId = ec.intEntityId
-	--	left outer join tblEntityLocation el on el.intEntityLocationId = etc.intLocationId
+	--	inner join tblEMEntity e on e.intEntityId = c.intEntityId
+	--	inner join tblEMEntity eec on eec.intEntityId = ec.intEntityId
+	--	left outer join tblEMEntityLocation el on el.intEntityLocationId = etc.intLocationId

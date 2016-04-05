@@ -20,11 +20,11 @@ AS
 		B3.strEmail
 		,C3.strEmail AS strAlternateEmailApprover
 	FROM tblAPVoucherApprover A
-	INNER JOIN (tblEntity B INNER JOIN tblEntityToContact B2 ON B.intEntityId = B2.intEntityId AND B2.ysnDefaultContact = 1
-						INNER JOIN tblEntity B3 ON B2.intEntityContactId = B3.intEntityId)
+	INNER JOIN (tblEMEntity B INNER JOIN [tblEMEntityToContact] B2 ON B.intEntityId = B2.intEntityId AND B2.ysnDefaultContact = 1
+						INNER JOIN tblEMEntity B3 ON B2.intEntityContactId = B3.intEntityId)
 		ON A.intApproverId = B.intEntityId
-	LEFT JOIN (tblEntity C INNER JOIN tblEntityToContact C2 ON C.intEntityId = C2.intEntityId  AND C2.ysnDefaultContact = 1
-						INNER JOIN tblEntity C3 ON C2.intEntityContactId = C3.intEntityId)
+	LEFT JOIN (tblEMEntity C INNER JOIN [tblEMEntityToContact] C2 ON C.intEntityId = C2.intEntityId  AND C2.ysnDefaultContact = 1
+						INNER JOIN tblEMEntity C3 ON C2.intEntityContactId = C3.intEntityId)
 			ON A.intAlternateApproverId = C.intEntityId
 	WHERE A.intVoucherId = @voucherIdParam
 	AND A.ysnApproved = 0

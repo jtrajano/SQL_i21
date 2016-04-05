@@ -36,4 +36,4 @@ LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = Header.intEnt
 LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 LEFT JOIN vyuAPVendor Terminal ON Terminal.intEntityVendorId = Detail.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SupplyPoint ON SupplyPoint.intSupplyPointId = Detail.intSupplyPointId
-LEFT JOIN tblEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId
+LEFT JOIN [tblEMEntityLocation] ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId

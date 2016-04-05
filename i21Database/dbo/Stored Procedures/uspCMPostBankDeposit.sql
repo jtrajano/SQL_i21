@@ -308,7 +308,7 @@ BEGIN
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
 			INNER JOIN vyuGLAccountDetail GLAccnt
 				ON BankAccnt.intGLAccountId = GLAccnt.intAccountId
-			LEFT JOIN [dbo].tblEntity Entity
+			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 
@@ -342,7 +342,7 @@ BEGIN
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
 			INNER JOIN vyuGLAccountDetail GLAccnt
 				ON A.intShortGLAccountId = GLAccnt.intAccountId
-			LEFT JOIN [dbo].tblEntity Entity
+			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId AND A.intShortGLAccountId IS NOT NULL AND A.intShortGLAccountId <> 0
 	
@@ -376,7 +376,7 @@ BEGIN
 				ON A.intTransactionId = B.intTransactionId
 			INNER JOIN vyuGLAccountDetail GLAccnt
 				ON B.intGLAccountId = GLAccnt.intAccountId
-			LEFT JOIN [dbo].tblEntity Entity
+			LEFT JOIN [dbo].tblEMEntity Entity
 				ON B.intEntityId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 	

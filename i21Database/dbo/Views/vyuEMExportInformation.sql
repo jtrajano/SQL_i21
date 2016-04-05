@@ -48,12 +48,12 @@
 	,ven_expenseId		= j.strAccountId
 
 
-	from tblEntity a
-	join tblEntityToContact b
+	from tblEMEntity a
+	join [tblEMEntityToContact] b
 		on a.intEntityId = b.intEntityId and ysnDefaultContact = 1
-	join tblEntity c
+	join tblEMEntity c
 		on b.intEntityContactId = c.intEntityId
-	join tblEntityLocation d
+	join [tblEMEntityLocation] d
 		on d.intEntityId = a.intEntityId and ysnDefaultLocation = 1
 	left join tblAPVendor e
 		on e.intEntityVendorId = a.intEntityId

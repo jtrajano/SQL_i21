@@ -4,9 +4,9 @@
 		tblHDProjectContactInfo.intProjectContactInfoId
 		,tblHDProjectContactInfo.intProjectId
 		,tblHDProjectContactInfo.intEntityId
-		,tblEntity.strName
-		,tblEntity.strTitle
-		,tblEntityLocation.strLocationName
+		,tblEMEntity.strName
+		,tblEMEntity.strTitle
+		,[tblEMEntityLocation].strLocationName
 		,tblHDProjectContactInfo.strDecisionRole
 		,tblHDProjectContactInfo.strAttitude
 		,tblHDProjectContactInfo.strExtent
@@ -15,10 +15,10 @@
 		,tblHDProjectContactInfo.intSort
 		,tblHDProjectContactInfo.intConcurrencyId
 	from tblHDProjectContactInfo
-		,tblEntity
-		,tblEntityToContact
-		,tblEntityLocation
+		,tblEMEntity
+		,[tblEMEntityToContact]
+		,[tblEMEntityLocation]
 	where
-		tblEntity.intEntityId = tblHDProjectContactInfo.intEntityId
-		and tblEntityToContact.intEntityContactId = tblEntity.intEntityId
-		and tblEntityLocation.intEntityLocationId = tblEntityToContact.intEntityLocationId
+		tblEMEntity.intEntityId = tblHDProjectContactInfo.intEntityId
+		and [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId
+		and [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId

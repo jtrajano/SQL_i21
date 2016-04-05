@@ -47,7 +47,7 @@ SELECT intEntityCustomerId
 	, NULL
 FROM tblARCustomerGroup CG
 	JOIN tblARCustomerGroupDetail CD ON CG.intCustomerGroupId = CD.intCustomerGroupId
-	JOIN tblEntityLocation EL ON CD.intEntityId = EL.intEntityId
+	JOIN [tblEMEntityLocation] EL ON CD.intEntityId = EL.intEntityId
 	RIGHT JOIN vyuTRQuoteSelection QS ON QS.intEntityCustomerId = CD.intEntityId 
 		AND QS.intEntityCustomerLocationId = EL.intEntityLocationId
 WHERE CD.ysnQuote = 1
@@ -166,7 +166,7 @@ SELECT
 	, 1 --[intConcurrencyId]
 FROM @DataForQuote QS
 	JOIN tblTRQuoteHeader QH on QS.strQuoteNumber = QH.strQuoteNumber
-	JOIN tblEntityLocation EL on QS.intCustomerId = EL.intEntityId
+	JOIN [tblEMEntityLocation] EL on QS.intCustomerId = EL.intEntityId
 	JOIN vyuTRQuoteSelection QD on QD.intEntityCustomerId = QS.intCustomerId AND QD.intEntityCustomerLocationId = EL.intEntityLocationId
 WHERE QD.ysnQuote = 1
 

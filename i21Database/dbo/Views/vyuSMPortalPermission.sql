@@ -5,6 +5,6 @@ AS
 		B.strCommand AS strNamespace, 
 		C.intEntityContactId AS intUserRoleId,
 		'Full Access' AS strPermission
-	FROM tblEntityPortalPermission A
-		INNER JOIN tblEntityPortalMenu B ON A.intEntityPortalMenuId = B.intPortalParentMenuId
-		INNER JOIN tblEntityToContact C ON A.intEntityToContactId = C.intEntityToContactId
+	FROM [tblEMEntityPortalPermission] A
+		INNER JOIN [tblEMEntityPortalMenu] B ON A.intEntityPortalMenuId = B.intPortalParentMenuId
+		INNER JOIN [tblEMEntityToContact] C ON A.intEntityToContactId = C.intEntityToContactId

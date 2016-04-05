@@ -167,7 +167,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]), 
 		CONSTRAINT [FK_tblICItem_tblSMModule] FOREIGN KEY ([intModuleId]) REFERENCES [tblSMModule]([intModuleId]),		
 		CONSTRAINT [FK_tblICItem_tblMFBuyingGroup] FOREIGN KEY ([intBuyingGroupId]) REFERENCES [tblMFBuyingGroup]([intBuyingGroupId]), 
-		CONSTRAINT [FK_tblICItem_tblEntity] FOREIGN KEY ([intAccountManagerId]) REFERENCES [tblEntity]([intEntityId])
+		CONSTRAINT [FK_tblICItem_tblEMEntity] FOREIGN KEY ([intAccountManagerId]) REFERENCES tblEMEntity([intEntityId])
 	);
 	GO
 

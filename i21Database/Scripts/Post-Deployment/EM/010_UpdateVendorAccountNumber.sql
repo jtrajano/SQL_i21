@@ -1,6 +1,6 @@
 ﻿PRINT '*** Update Vendor Account Number***'
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'ssvndmst') 
-AND NOT EXISTS (SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Update Vendor Account Number' AND strValue = '1')
+AND NOT EXISTS (SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference = 'Update Vendor Account Number' AND strValue = '1')
 BEGIN
 	PRINT '***  Updating Vendor Account Number***'
 
@@ -13,7 +13,7 @@ BEGIN
 				and ssvnd_our_cus_no is not null
 
 
-	INSERT INTO tblEntityPreferences ( strPreference, strValue)
+	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Update Vendor Account Number' , '1' )
 END
 PRINT '*** End Update Vendor Account Number***'

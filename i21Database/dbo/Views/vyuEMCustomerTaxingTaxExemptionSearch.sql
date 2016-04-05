@@ -16,9 +16,9 @@
 		ent.strEntityNo
 
 	from tblARCustomerTaxingTaxException tax_exemption
-		inner join tblEntity ent
+		inner join tblEMEntity ent
 				on tax_exemption.intEntityCustomerId = ent.intEntityId
-		left join tblEntityLocation cus_location
+		left join [tblEMEntityLocation] cus_location
 			on cus_location.intEntityId = tax_exemption.intEntityCustomerId	
 				and cus_location.intEntityLocationId = tax_exemption.intEntityCustomerLocationId
 		left join tblICItem item

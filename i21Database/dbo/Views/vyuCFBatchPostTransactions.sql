@@ -4,7 +4,7 @@ SELECT        cfTrans.dtmTransactionDate, cfTrans.strTransactionId, 'Card Fuelin
                          'Network: ' + cfNetwork.strNetwork + ' ,Site: ' + cfSiteItem.strSiteName + ' ,Quantity: ' + CAST(cfTrans.dblQuantity AS nvarchar) AS strDescription, cfTransPrice.dblCalculatedAmount AS dblAmount, 
                          cfTrans.intTransactionId,
                              (SELECT        TOP (1) intEntityId
-                               FROM            dbo.tblEntity) AS intEntityId
+                               FROM            dbo.tblEMEntity) AS intEntityId
 FROM            dbo.tblCFTransaction AS cfTrans INNER JOIN
                          dbo.tblCFNetwork AS cfNetwork ON cfTrans.intNetworkId = cfNetwork.intNetworkId INNER JOIN
                              (SELECT        icfCards.intCardId, icfAccount.intAccountId, icfAccount.intSalesPersonId, icfAccount.intCustomerId, icfAccount.intTermsCode, icfCards.strCardNumber

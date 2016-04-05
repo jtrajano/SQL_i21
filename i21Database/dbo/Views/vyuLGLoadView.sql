@@ -154,8 +154,8 @@ SELECT -- Load Header
 		[intShipmentStatus]
 FROM tblLGLoad LOAD
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId
-LEFT JOIN tblEntity Hauler ON Hauler.intEntityId = LOAD.intHaulerEntityId
-LEFT JOIN tblEntity Driver ON Driver.intEntityId = LOAD.intDriverEntityId
+LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = LOAD.intHaulerEntityId
+LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = LOAD.intDriverEntityId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = LOAD.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = LOAD.intTransportLoadId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = LOAD.intLoadHeaderId

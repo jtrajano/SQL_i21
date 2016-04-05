@@ -40,7 +40,7 @@ AS
 
 	FROM tblCTPriceFixationDetail PD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
-	JOIN	tblEntity					EY	ON	EY.intEntityId					=	PD.intBrokerId				LEFT
+	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	PD.intBrokerId				LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId			LEFT
 	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT
 	JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	PD.intQtyItemUOMId			LEFT

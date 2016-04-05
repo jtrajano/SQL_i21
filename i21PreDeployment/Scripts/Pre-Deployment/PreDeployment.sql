@@ -9,6 +9,8 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
+--EM
+:r .\12_EM\17_DropDependencies_RenameTable.sql
 
 -- Validate Origin records
 -- --coctlmst
@@ -143,3 +145,8 @@
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
+
+
+--EM
+
+:r .\12_EM\16_Drop_tblEntity_related_constraints.sql -- THIS IS ON THE OUTSKIRT OF SCRIPT DUE TO ITS SENSITIVITY

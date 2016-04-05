@@ -22,11 +22,11 @@ BEGIN
 	,Loc.strState
 	,Loc.strZipCode 
 	,Loc.strCountry
-	FROM tblEntity as Entity
+	FROM tblEMEntity as Entity
 	INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 	INNER JOIN tblARCustomerToContact as CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
-	LEFT JOIN tblEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
-	LEFT JOIN tblEntityLocation as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
+	LEFT JOIN tblEMEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
+	LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 	
 	
 	SELECT cus.strCustomerNumber AS [Customer Number]

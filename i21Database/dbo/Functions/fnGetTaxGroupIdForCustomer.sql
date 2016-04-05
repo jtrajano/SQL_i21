@@ -332,7 +332,7 @@ BEGIN
 	FROM
 		tblARCustomer C
 	INNER JOIN
-		tblEntityLocation EL
+		[tblEMEntityLocation] EL
 			ON C.[intEntityCustomerId] = EL.[intEntityId] 
 	WHERE
 		C.[intEntityCustomerId] = @CustomerId

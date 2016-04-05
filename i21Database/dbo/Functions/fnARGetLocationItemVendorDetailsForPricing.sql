@@ -68,12 +68,12 @@ BEGIN
 		--			,strCountry
 		--			,strState
 		--			,strCity
-		--		FROM tblEntityLocation
+		--		FROM tblEMEntityLocation
 		--		WHERE ysnDefaultLocation = 1
 		--	) EntityLocation 
 		--	ON Customer.intEntityCustomerId = EntityLocation.intEntityId
 	LEFT OUTER JOIN 
-		tblEntityLocation ShipToLocation 
+		[tblEMEntityLocation] ShipToLocation 
 			ON Customer.intShipToId = ShipToLocation.intEntityLocationId
 	WHERE 
 		Customer.intEntityCustomerId = @CustomerId
@@ -89,12 +89,12 @@ BEGIN
 					,strCountry
 					,strState
 					,strCity
-				FROM tblEntityLocation
+				FROM [tblEMEntityLocation]
 				WHERE ysnDefaultLocation = 1
 			) EntityLocation 
 			ON Vendor.intEntityVendorId = EntityLocation.intEntityId
 	LEFT OUTER JOIN 
-		tblEntityLocation ShipFromLocation 
+		[tblEMEntityLocation] ShipFromLocation 
 			ON Vendor.intShipFromId = ShipFromLocation.intEntityLocationId
 	WHERE 
 		Vendor.intEntityVendorId = @ItemVendorId						

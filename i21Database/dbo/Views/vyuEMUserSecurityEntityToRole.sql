@@ -12,5 +12,5 @@
 from tblSMUserRole a
 	join tblEMEntityToRole b
 		on a.intUserRoleID = b.intEntityRoleId
-	join tblEntity c
+	join tblEMEntity c
 		on c.intEntityId = b.intEntityId

@@ -15,9 +15,9 @@
 			tblHDTicketGroup g
 			,tblHDGroupUserConfig gc
 			,tblSMUserSecurity u
-			--,tblEntity e
+			--,tblEMEntity e
 			,vyuEMEntityContact e
-			,tblEntityCredential c
+			,[tblEMEntityCredential] c
 		where
 			gc.intTicketGroupId = g.intTicketGroupId
 			and u.[intEntityUserSecurityId] = gc.intUserSecurityId
