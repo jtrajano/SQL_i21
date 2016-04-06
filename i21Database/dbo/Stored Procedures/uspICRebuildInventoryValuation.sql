@@ -511,8 +511,10 @@ BEGIN
 						,ICTrans.intLotId 
 						,ICTrans.intSubLocationId
 						,ICTrans.intStorageLocationId
-						,strActualCostId = NULL 
-				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICItemUOM ItemUOM
+						,Header.strActualCostId 
+				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN dbo.tblICInventoryTransfer Header
+							ON ICTrans.strTransactionId = Header.strTransferNo				
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	strBatchId = @strBatchId
@@ -564,7 +566,7 @@ BEGIN
 						,Detail.intNewLotId 
 						,Detail.intToSubLocationId
 						,Detail.intToStorageLocationId
-						,strActualCostId = NULL 
+						,Header.strActualCostId 
 				FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 							ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 						INNER JOIN dbo.tblICInventoryTransaction TransferSource
