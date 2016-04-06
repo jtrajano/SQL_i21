@@ -3599,6 +3599,7 @@
     <Build Include="dbo\Views\vyuTRGetLoadDistributionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCheckPendingTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
