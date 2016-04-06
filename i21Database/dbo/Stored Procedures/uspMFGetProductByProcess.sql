@@ -12,6 +12,7 @@ BEGIN
 		,IU.intItemUOMId
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
+		,I.strLotTracking
 	FROM dbo.tblMFRecipe R
 	JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
