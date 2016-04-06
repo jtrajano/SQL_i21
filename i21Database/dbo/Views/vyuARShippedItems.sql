@@ -499,7 +499,7 @@ SELECT
 	,[strShipmentUnitMeasure]			= ICUM1.[strUnitMeasure]
 	,[dblQtyShipped]					= ICISI.[dblQuantity] 	
 	,[dblQtyOrdered]					= CASE WHEN CTCD.[intContractDetailId] IS NOT NULL THEN CTCD.dblDetailQuantity ELSE 0 END 
-	,[dblShipmentQuantity]				= dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
+	,[dblShipmentQuantity]				= ICISI.[dblQuantity] --dbo.fnCalculateQtyBetweenUOM(ICISI.[intItemUOMId], ISNULL(ICISI.[intWeightUOMId],ICISI.[intItemUOMId]), ISNULL(ICISI.[dblQuantity],0))
 	,[dblShipmentQtyShippedTotal]		= ICISI.[dblQuantity]
 	,[dblQtyRemaining]					= ICISI.[dblQuantity]
 	,[dblDiscount]						= 0 
