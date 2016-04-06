@@ -13,7 +13,7 @@ SET NOCOUNT ON
 	DECLARE @RowRefNo AS INT
 	DECLARE @Filter AS NVARCHAR(MAX)
 	
-	DELETE tblFRAccountMonitor WHERE dtmEntered < DATEADD(day, -1, GETDATE());
+	DELETE tblFRAccountMonitor WHERE intRowId = @intRowId;
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRAccountMonitor WHERE intRowId = @intRowId AND intConcurrencyId = @ConcurrencyId)
 	BEGIN
@@ -41,6 +41,7 @@ SET NOCOUNT ON
 				 ,[strDescription]
 				 ,[strAccountGroup]
 				 ,[strAccountType]
+				 ,[ysnMissing]
 				 ,[intConcurrencyId]
 			)
 			SELECT 
@@ -52,6 +53,7 @@ SET NOCOUNT ON
 				 ,[strDescription]
 				 ,[strAccountGroup]
 				 ,[strAccountType]
+				 ,0
 				 , ' + @ConcurrencyId + ' as intConcurrencyId
 			FROM
 				vyuGLAccountView
