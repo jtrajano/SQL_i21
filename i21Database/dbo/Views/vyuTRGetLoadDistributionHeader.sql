@@ -1,0 +1,31 @@
+﻿CREATE VIEW [dbo].[vyuTRGetLoadDistributionHeader]
+	AS
+
+SELECT DistHeader.intLoadDistributionHeaderId
+	, DistHeader.intLoadHeaderId
+	, Header.strTransaction
+	, DistHeader.strDestination
+	, DistHeader.intEntityCustomerId
+	, Customer.strCustomerNumber
+	, strCustomerName = Customer.strName
+	, DistHeader.intShipToLocationId
+	, strShipTo = ShipTo.strLocationName
+	, strShipToAddress = ShipTo.strAddress
+	, DistHeader.intCompanyLocationId
+	, CompanyLocation.strLocationName
+	, strLocationAddress = CompanyLocation.strAddress
+	, DistHeader.intEntitySalespersonId
+	, Salesperson.strSalespersonName
+	, Salesperson.strSalespersonId
+	, DistHeader.strPurchaseOrder
+	, DistHeader.strComments
+	, DistHeader.dtmInvoiceDateTime
+	, DistHeader.intInvoiceId
+	, Invoice.strInvoiceNumber
+FROM tblTRLoadDistributionHeader DistHeader
+LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = DistHeader.intLoadHeaderId
+LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = DistHeader.intEntityCustomerId
+LEFT JOIN tblEMEntityLocation ShipTo ON ShipTo.intEntityLocationId = DistHeader.intShipToLocationId
+LEFT JOIN tblSMCompanyLocation CompanyLocation ON CompanyLocation.intCompanyLocationId = DistHeader.intCompanyLocationId
+LEFT JOIN vyuEMSalesperson Salesperson ON Salesperson.intEntitySalespersonId = DistHeader.intEntitySalespersonId
+LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DistHeader.intInvoiceId
