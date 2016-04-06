@@ -129,8 +129,8 @@ BEGIN TRY
 			'To be covered by ' + IB.strInsuranceBy AS strInsuranceBy,
 			CH.strPrintableRemarks,
 			AN.strComment	AS strArbitrationComment,
-			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-			
+			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+			PR.strName AS strProducer
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
@@ -146,6 +146,7 @@ BEGIN TRY
 	JOIN	tblSMCity			AB	ON	AB.intCityId			=	CH.intArbitrationId		LEFT
 	JOIN	tblSMCountry		RY	ON	RY.intCountryID			=	AB.intCountryId			LEFT
 	JOIN	tblCTInsuranceBy	IB	ON	IB.intInsuranceById		=	CH.intInsuranceById		LEFT	
+	JOIN	tblEMEntity			PR	ON	PR.intEntityId			=	CH.intProducerId		LEFT
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
 							CD.intContractHeaderId,
