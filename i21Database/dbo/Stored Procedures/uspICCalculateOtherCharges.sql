@@ -9,6 +9,7 @@ BEGIN
 			,ysnSubCurrency = Currency.ysnSubCurrency
 	FROM	dbo.tblICInventoryReceiptCharge ReceiptCharges INNER JOIN dbo.tblSMCurrency Currency
 				ON ReceiptCharges.intCurrencyId = Currency.intCurrencyID
+	WHERE	ReceiptCharges.intInventoryReceiptId = @intInventoryReceiptId
 
 	-- Calculate the other charges. 
 	BEGIN 
