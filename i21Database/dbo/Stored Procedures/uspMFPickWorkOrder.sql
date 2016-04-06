@@ -770,8 +770,8 @@ BEGIN TRY
 				IF @ysnExcessConsumptionAllowed = 0
 				BEGIN
 
-					SELECT @strQty=SUM(dblQty) FROM @tblLot
-					SELECT @strReqQty=@dblReqQty
+					SELECT @strQty=CONVERT(decimal(24,4),SUM(dblQty)) FROM @tblLot
+					SELECT @strReqQty=CONVERT(decimal(24,4),@dblReqQty)
 
 					SELECT @strItemNo = strItemNo
 					FROM dbo.tblICItem
