@@ -9,7 +9,7 @@ BEGIN
 			,@dblCostingQty AS NUMERIC(38, 20)
 			,@dblLotWeightPerQty AS NUMERIC(38,20)
 
-			,@expected AS NUMERIC(18,6) = 0  
+			,@expected AS NUMERIC(18,6) 
 			,@result AS NUMERIC(18,6) 
 	
 	-- Act
