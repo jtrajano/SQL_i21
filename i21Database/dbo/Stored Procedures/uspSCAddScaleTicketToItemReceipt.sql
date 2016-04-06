@@ -1187,10 +1187,12 @@ BEGIN
            ,[strRemarks] = NULL
            ,[strCondition] = NULL
            ,[dtmCertified] = NULL
-           ,[dtmExpiryDate] = NULL
+           ,[dtmExpiryDate] = DATEADD(YEAR, 2, ICIR.dtmReceiptDate)
            ,[intSort] = NULL
            ,[intConcurrencyId] = 1
-		   FROM	dbo.tblICInventoryReceiptItem RCT WHERE RCT.intInventoryReceiptItemId = @intLoopReceiptItemId
+		   FROM	dbo.tblICInventoryReceiptItem RCT
+				INNER JOIN dbo.tblICInventoryReceipt ICIR ON RCT.intInventoryReceiptId = ICIR.intInventoryReceiptId
+		   WHERE RCT.intInventoryReceiptItemId = @intLoopReceiptItemId
    END
 
    -- Attempt to fetch next row from cursor
