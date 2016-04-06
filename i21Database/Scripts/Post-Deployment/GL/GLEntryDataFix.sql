@@ -263,3 +263,17 @@ GO
 	PRINT N'End Updating NULL intCurrencyID in tblGLAccount'
 
 GO
+
+	PRINT N'Begin Updating NULL Foreign data columns  in tblGLDetail'
+	--GL-2625
+GO
+	update tblGLDetail set dblCreditForeign = 0 where dblCreditForeign is NULL and dblExchangeRate = 1.00000000000000000000
+	update tblGLDetail set dblDebitForeign = 0 where dblDebitForeign is NULL and dblExchangeRate = 1.00000000000000000000
+	update tblGLDetail set dblCreditReport = 0 where dblCreditReport is NULL 
+	update tblGLDetail set dblDebitReport = 0 where dblDebitReport is NULL 
+	update tblGLDetail set dblReportingRate = 0 where dblReportingRate is NULL 
+		
+	PRINT N'End Updating NULL Foreign data columns  in tblGLDetail'
+
+GO
+
