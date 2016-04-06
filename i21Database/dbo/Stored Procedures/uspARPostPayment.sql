@@ -209,7 +209,7 @@ SET @batchIdUsed = @batchId
 				INSERT INTO 
 					@ARReceivableInvalidData
 				SELECT 
-					'The Undeposited Funds account in Company Company Location - ' + CL.strLocationName  + ' was not set.'
+					'The Undeposited Funds account in Company Location - ' + CL.strLocationName  + ' was not set.'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
