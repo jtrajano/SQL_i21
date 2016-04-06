@@ -18,24 +18,33 @@ BEGIN TRY
 			@dblQuantityUsed		NUMERIC(18,6),
 			@idoc					INT,
 			@strNumber				NVARCHAR(100),
-			@intContractSeq			INT
+			@intContractSeq			INT,
+			@intContractHeaderId	INT,
+			@intNewStatusId			INT,
+			@intOldStatusId			INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
 	SELECT	@intContractDetailId	=	intContractDetailId,
 			@dblNewQuantity			=	dblQuantity,
-			@intNewItemUOMId		=	intItemUOMId
+			@intNewItemUOMId		=	intItemUOMId,
+			@intContractHeaderId	=	intContractHeaderId,
+			@intNewStatusId			=	intContractStatusId
+
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
 	(
 			intContractDetailId		INT,
 			dblQuantity				NUMERIC(18,6),
-			intItemUOMId			INT
+			intItemUOMId			INT,
+			intContractHeaderId		INT,
+			intContractStatusId		INT
 	)  
 
 	SELECT	@dblOldQuantity		=	dblQuantity,
 			@intOldItemUOMId	=	intItemUOMId,
-			@intContractSeq		=	intContractSeq
+			@intContractSeq		=	intContractSeq,
+			@intOldStatusId		=	intContractStatusId
 	FROM	tblCTContractDetail
 	WHERE	intContractDetailId	=	@intContractDetailId
 
@@ -54,6 +63,13 @@ BEGIN TRY
 		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
 		BEGIN
 			SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Inbound shipments.'
+			RAISERROR(@ErrMsg,16,1) 
+		END
+
+		IF @intNewStatusId IN (2,3,5) AND @intOldStatusId NOT IN (2,3,5) AND dbo.fnAPContractHasUnappliedPrepaid(@intContractHeaderId) = 1
+		BEGIN
+			SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
+			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+'. As prepaid balance is associated with the contract.'
 			RAISERROR(@ErrMsg,16,1) 
 		END
 	END
