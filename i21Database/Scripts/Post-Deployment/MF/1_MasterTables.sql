@@ -1996,3 +1996,7 @@ BEGIN
 	WHERE intForecastItemTypeId = 3
 END
 GO
+UPDATE tblMFCompanyPreference
+SET intForecastFirstEditableMonth = 0
+WHERE intForecastFirstEditableMonth IS NULL
+GO

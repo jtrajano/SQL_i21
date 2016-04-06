@@ -18,5 +18,6 @@
 	dtmWorkOrderCreateDate DATETIME,
 	strSchedulingCutOffTime NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strScheduleType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	intForecastFirstEditableMonth INT CONSTRAINT [DF_tblMFCompanyPreference_intForecastFirstEditableMonth] DEFAULT 0,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )
