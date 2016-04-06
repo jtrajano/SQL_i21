@@ -388,6 +388,7 @@ BEGIN TRY
 					WHERE SD.intWorkOrderId = S.intWorkOrderId
 						AND SD.intCalendarDetailId = @intCalendarDetailId
 					)
+				AND dtmExpectedDate >= @dtmCurrentDate
 
 			WHILE @intRecordId IS NOT NULL
 			BEGIN
@@ -992,6 +993,7 @@ BEGIN TRY
 						WHERE SD.intWorkOrderId = S.intWorkOrderId
 							AND SD.intCalendarDetailId = @intCalendarDetailId
 						)
+					AND S.dtmExpectedDate >= @dtmCurrentDate
 			END
 
 			IF NOT EXISTS (
@@ -999,6 +1001,7 @@ BEGIN TRY
 					FROM @tblMFScheduleWorkOrder S
 					WHERE S.intNoOfUnit > 0
 						AND S.intStatusId <> 1
+						AND S.dtmExpectedDate >= @dtmCurrentDate
 					)
 				BREAK
 
@@ -1014,6 +1017,7 @@ BEGIN TRY
 					WHERE intNoOfUnit > 0
 						AND S.intStatusId <> 1
 						AND intWorkOrderId <> @intWorkOrderId
+						AND S.dtmExpectedDate >= @dtmCurrentDate
 					)
 				OR @intGapDuetoEarliestStartDate > 0
 			BEGIN
@@ -1030,12 +1034,14 @@ BEGIN TRY
 				FROM @tblMFScheduleWorkOrder S
 				WHERE intNoOfUnit > 0
 					AND S.intStatusId <> 1
+					AND S.dtmExpectedDate >= @dtmCurrentDate
 				)
 		BEGIN
 			SELECT @intWorkOrderId = intWorkOrderId
 			FROM @tblMFScheduleWorkOrder S
 			WHERE intNoOfUnit > 0
-				AND S.intStatusId <> 1
+			AND S.intStatusId <> 1
+			AND S.dtmExpectedDate >= @dtmCurrentDate
 			ORDER BY intExecutionOrder ASC
 
 			SELECT @strWorkOrderNo = strWorkOrderNo
