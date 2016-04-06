@@ -2,6 +2,7 @@
 (
 	-- Add the parameters for the function here
 	 @dtmDateFrom NVARCHAR(50),
+	 @dtmDateTo NVARCHAR(50),
 	 @strCteName NVARCHAR(20),
 	 @Where NVARCHAR(MAX)
 	 
@@ -15,10 +16,22 @@ BEGIN
 	DECLARE @bottomDtmDateFrom NVARCHAR(10)
 	
 	SELECT TOP 1 @bottomDtmDateFrom= convert(varchar(10), dtmDateFrom,101) from tblGLFiscalYear order by dtmDateFrom 
+	SELECT @dte= convert(varchar(10),isnull(dtmDateFrom,''),101) from tblGLFiscalYear where @dtmDateFrom >= dtmDateFrom and @dtmDateFrom <= dtmDateTo
+
+
 
 	IF (@dtmDateFrom <=@bottomDtmDateFrom)
 	BEGIN
-		SELECT TOP 1 @dte =  convert(varchar(10), dtmDateFrom,101)  from tblGLFiscalYear order by dtmDateFrom desc
+	
+		SELECT TOP 1 @dte =  convert(varchar(10), dtmDateFrom,101)  from tblGLFiscalYear 
+			where ( @dtmDateTo > =dtmDateFrom and  @dtmDateTo<=dtmDateTo )
+			or @dtmDateTo > dtmDateTo
+			order by dtmDateFrom desc
+		if isnull(@dte,'') = ''
+		begin
+			SELECT @return ='Retained Earnings Activity Not Displayed'
+			RETURN @return
+		end
 	END
 	ELSE
 	BEGIN
@@ -43,9 +56,9 @@ BEGIN
 	Segment.[Primary Account] [Primary Account],
 	Account.strDescription as strAccountDescription,
 	DATENAME(YEAR,dtmDate) + ''-'' + CAST(MONTH(dtmDate) AS VARCHAR(4))  as strTransactionId,
-	DATENAME(MONTH,dtmDate) + '' '' +  DATENAME(YEAR,dtmDate) + '' '' + Grop.strAccountType as strReference,
-	Balance.beginBalance dblBeginBalance,
-	Balance.beginBalanceUnit dblBeginBalanceUnit,
+	DATENAME(MONTH,dtmDate) + '' '' +  DATENAME(YEAR,dtmDate) + '' '' + c.strAccountType as strReference,
+	0 as dblBeginBalance,
+	0 as dblBeginBalanceUnit,
 	sum(dblDebit) dblDebit,
 	sum(dblCredit) dblCredit, 
 	sum(dblDebitUnit) dblDebitUnit,
@@ -57,16 +70,16 @@ BEGIN
 	join tblGLAccount b on a.intAccountId = b.intAccountId
 	join tblGLAccountGroup c on b.intAccountGroupId = c.intAccountGroupId
 	OUTER APPLY (SELECT TOP 1 g.strAccountType FROM tblGLFiscalYear f  join tblGLAccount a on f.intRetainAccount = a.intAccountId join tblGLAccountGroup g on g.intAccountGroupId = a.intAccountGroupId)Grop
-	OUTER APPLY (SELECT beginBalance,beginBalanceUnit FROM dbo.fnGLGetBeginningBalanceAndUnitRE(b.strAccountId,''' + @dtmDateFrom + ''')) Balance
 	OUTER APPLY (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup) Company
 	OUTER APPLY (select top 1 s.[Primary Account] FROM tblGLFiscalYear F join tblGLTempCOASegment s on F.intRetainAccount = s.intAccountId) Segment
 	OUTER APPLY (select top 1 strAccountId,strDescription FROM tblGLFiscalYear F join tblGLAccount A on F.intRetainAccount = A.intAccountId) Account
 	where c.strAccountType in (''Revenue'', ''Expense'')  
 	group by  
+	c.strAccountType,
 	DATENAME(YEAR,dtmDate) + ''-'' + CAST(MONTH(dtmDate) AS VARCHAR(4)),
 	CAST(CONVERT(VARCHAR(4),YEAR(dtmDate)) + ''-'' +  CONVERT(VARCHAR(2), MONTH (dtmDate)) + ''-'' + ''1'' AS DATE),
 	DATENAME(MONTH,dtmDate) + '' '' +  DATENAME(YEAR,dtmDate),
-	Balance.beginBalance,Balance.beginBalanceUnit,strCompanyName,Account.strAccountId,Account.strDescription,Grop.strAccountType, [Primary Account]),' +
+	strCompanyName,Account.strAccountId,Account.strDescription,Grop.strAccountType, [Primary Account]),' +
 	@strCteName +
 	' as( select ' + @cols2 + ' FROM cteRetain1 ' +
 	CASE WHEN @Where = 'Where' THEN  + ')' ELSE + @Where + ')' END
