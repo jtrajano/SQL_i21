@@ -5,7 +5,9 @@
 	[strDescription] [nvarchar](150) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strJIRAType] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strIcon] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[strScreen] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[ysnTicket] [bit] NULL,
+	[ysnActivity] [bit] NULL,
+	[ysnOpportunity] [bit] NULL,
 	[ysnSupported] [bit] NOT NULL DEFAULT 1,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
@@ -76,3 +78,39 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicketType',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'True = show in Ticket screen',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicketType',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnTicket'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'True = show in Activity screen',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicketType',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnActivity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'True = show in Opportunity screen',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicketType',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnOpportunity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Supported',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicketType',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSupported'
