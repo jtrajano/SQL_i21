@@ -93,7 +93,7 @@ BEGIN
 		  intTicketDiscountId,
 		  intTicketFileId,
 		  strSourceType,	   
-		  DENSE_RANK() OVER ( PARTITION BY intTicketFileId, strSourceType ORDER BY intTicketDiscountId) AS [RANK]
+		  DENSE_RANK() OVER ( PARTITION BY intTicketFileId, strSourceType ORDER BY intTicketDiscountId) AS [Rank]
 		  FROM tblQMTicketDiscount
 	) as b 
 	  ON a.intTicketDiscountId = b.intTicketDiscountId 
