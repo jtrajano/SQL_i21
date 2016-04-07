@@ -57,3 +57,51 @@ BEGIN
 		UPDATE tblSCScaleSetup SET intUnitMeasureId = @intUnitMeasureId,strWeightDescription = @strSymbol  WHERE intUnitMeasureId IS NULL
 END
 GO
+DECLARE @intDTotalRows INT
+DECLARE @intDRowsWithSortOne INT
+SELECT @intDTotalRows=COUNT(1) FROM tblGRDiscountScheduleCode 
+SELECT @intDRowsWithSortOne=COUNT(1) FROM tblGRDiscountScheduleCode WHERE intSort=1
+
+IF  @intDTotalRows=@intDRowsWithSortOne
+BEGIN	
+	UPDATE a
+	SET a.intSort=b.[Rank]
+	FROM tblGRDiscountScheduleCode a
+	JOIN
+	(	  SELECT
+		  intDiscountScheduleCodeId,
+		  intDiscountScheduleId,
+		  DENSE_RANK() OVER ( PARTITION BY intDiscountScheduleId ORDER BY intDiscountScheduleCodeId) AS [Rank]
+		  FROM tblGRDiscountScheduleCode
+	) AS b ON a.intDiscountScheduleId = b.intDiscountScheduleId AND a.intDiscountScheduleCodeId = b.intDiscountScheduleCodeId
+END
+GO
+GO
+DECLARE @intQTotalRows INT
+DECLARE @intQRowsWithSortOne INT
+SELECT @intQTotalRows=COUNT(1) FROM tblQMTicketDiscount 
+SELECT @intQRowsWithSortOne=COUNT(1) FROM tblQMTicketDiscount WHERE intSort=1
+
+IF  @intQTotalRows=@intQRowsWithSortOne
+BEGIN	
+	UPDATE a
+	SET a.intSort=b.[Rank]
+	FROM tblQMTicketDiscount a
+	JOIN 
+	(
+		  SELECT
+		  intTicketDiscountId,
+		  intTicketFileId,
+		  strSourceType,	   
+		  DENSE_RANK() OVER ( PARTITION BY intTicketFileId, strSourceType ORDER BY intTicketDiscountId) AS [RANK]
+		  FROM tblQMTicketDiscount
+	) as b 
+	  ON a.intTicketDiscountId = b.intTicketDiscountId 
+	  AND a.intTicketFileId = b.intTicketFileId 
+	  AND a.strSourceType = b.strSourceType
+END
+GO
+IF EXISTS(SELECT * FROM tblGRDiscountScheduleCode WHERE strDiscountChargeType IS NULL)
+BEGIN
+	UPDATE tblGRDiscountScheduleCode SET strDiscountChargeType='Dollar' WHERE strDiscountChargeType IS NULL
+END

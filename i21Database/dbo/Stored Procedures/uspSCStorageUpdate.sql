@@ -656,7 +656,8 @@ BEGIN TRY
            ,[dtmDiscountPaidDate]
            ,[intTicketId]
            ,[intTicketFileId]
-           ,[strSourceType])
+           ,[strSourceType]
+		   ,[intSort])
 		SELECT	 [intConcurrencyId]= 1
            ,[strDiscountCode] = SD.[strDiscountCode]
            ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
@@ -678,6 +679,7 @@ BEGIN TRY
            ,[intTicketId]= NULL
            ,[intTicketFileId]= @intCustomerStorageId
            ,[strSourceType]= 'Storage'
+		   ,[intSort]=SD.[intSort]
 		FROM	dbo.[tblQMTicketDiscount] SD
 		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
 		
