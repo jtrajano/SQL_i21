@@ -3600,6 +3600,8 @@
     <Build Include="dbo\Stored Procedures\uspTMCheckPendingTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetContractPrice.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuotePriceAdjustmentHeader.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuotePriceAdjustmentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

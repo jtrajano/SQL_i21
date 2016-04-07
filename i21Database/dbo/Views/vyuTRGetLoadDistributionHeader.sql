@@ -11,6 +11,8 @@ SELECT DistHeader.intLoadDistributionHeaderId
 	, DistHeader.intShipToLocationId
 	, strShipTo = ShipTo.strLocationName
 	, strShipToAddress = ShipTo.strAddress
+	, ShipTo.intTaxGroupId
+	, TaxGroup.strTaxGroup
 	, DistHeader.intCompanyLocationId
 	, CompanyLocation.strLocationName
 	, strLocationAddress = CompanyLocation.strAddress
@@ -26,6 +28,7 @@ FROM tblTRLoadDistributionHeader DistHeader
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = DistHeader.intLoadHeaderId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = DistHeader.intEntityCustomerId
 LEFT JOIN tblEMEntityLocation ShipTo ON ShipTo.intEntityLocationId = DistHeader.intShipToLocationId
+LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = ShipTo.intTaxGroupId
 LEFT JOIN tblSMCompanyLocation CompanyLocation ON CompanyLocation.intCompanyLocationId = DistHeader.intCompanyLocationId
 LEFT JOIN vyuEMSalesperson Salesperson ON Salesperson.intEntitySalespersonId = DistHeader.intEntitySalespersonId
 LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DistHeader.intInvoiceId
