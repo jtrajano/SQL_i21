@@ -101,7 +101,7 @@ BEGIN
 	  AND a.strSourceType = b.strSourceType
 END
 GO
-IF EXISTS(SELECT * FROM tblGRDiscountScheduleCode WHERE strDiscountChargeType IS NULL)
+IF EXISTS(SELECT * FROM tblGRDiscountScheduleCode WHERE ISNULL(strDiscountChargeType,'')='')
 BEGIN
-	UPDATE tblGRDiscountScheduleCode SET strDiscountChargeType='Dollar' WHERE strDiscountChargeType IS NULL
+	UPDATE tblGRDiscountScheduleCode SET strDiscountChargeType='Dollar' WHERE ISNULL(strDiscountChargeType,'')=''
 END
