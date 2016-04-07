@@ -531,7 +531,7 @@ BEGIN
 				)
 		--CREDIT Tax
 		SELECT
-				dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
 			,strBatchID					= @BatchId
 			,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
 			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) END
@@ -577,7 +577,7 @@ BEGIN
 		UNION ALL
 		--Debit Tax
 		SELECT
-			 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+			 dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
 			,strBatchID					= @BatchId
 			,intAccountId				= @DeferredRevenueAccountId
 			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) ELSE 0 END
