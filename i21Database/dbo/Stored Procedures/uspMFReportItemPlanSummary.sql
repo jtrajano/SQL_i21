@@ -162,7 +162,7 @@ BEGIN
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
 	WHERE L.intLotStatusId = 1
-		AND L.dtmExpiryDate >= @dtmCurrentDateTime
+		AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 		AND CSL.strSubLocationName <> 'Intrasit'
 	GROUP BY L.intLocationId
 		,I.intItemId
