@@ -3845,6 +3845,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     showAddOrders: function(win) {
+        var me = this;
         var currentRecord = win.viewModel.data.current;
         var VendorId = null;
         var ReceiptType = currentRecord.get('strReceiptType');
@@ -3857,7 +3858,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else {
             VendorId = currentRecord.get('intEntityVendorId').toString();
         }
-        var me = this;
+
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
@@ -3925,8 +3926,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             search.on({
                 scope: me,
                 openselectedclick: function (button, e, result) {
-                    var win = this.getView();
-                    var currentVM = this.getViewModel().data.current;
+                    var win = me.getView();
+                    var currentVM = me.getViewModel().data.current;
 
                     Ext.each(result, function (order) {
                         var newRecord = {
