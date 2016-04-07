@@ -27,7 +27,7 @@ SELECT A.strCustomerName
      , dbl91Days            = SUM(B.dbl91Days)
      , dblTotalDue          = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
      , dblAmountPaid        = SUM(A.dblAmountPaid)
-     , dblCredits           = SUM(B.dblAvailableCredit)
+     , dblCredits           = SUM(B.dblAvailableCredit) * -1
      , dblPrepaids          = 0.000000
      , dtmAsOfDate          = @dtmDateTo
      , strSalespersonName   ='strSalespersonName' 

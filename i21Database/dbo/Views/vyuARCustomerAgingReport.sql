@@ -15,7 +15,7 @@ SELECT A.strCustomerName
 	 , dblTotalDue			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
 	 , dblAmountPaid		= SUM(A.dblAmountPaid)
 	 , dblInvoiceTotal		= SUM(A.dblInvoiceTotal)
-	 , dblCredits			= SUM(B.dblAvailableCredit)
+	 , dblCredits			= SUM(B.dblAvailableCredit) * -1
 	 , dblPrepaids			= 0.000000
 FROM
 

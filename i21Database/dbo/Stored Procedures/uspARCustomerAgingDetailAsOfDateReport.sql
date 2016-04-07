@@ -32,7 +32,7 @@ SELECT A.strInvoiceNumber
 	 , dblTotalDue			= B.dblTotalDue - B.dblAvailableCredit
 	 , dblAmountPaid		= A.dblAmountPaid
 	 , dblInvoiceTotal		= A.dblInvoiceTotal
-	 , dblCredits			= B.dblAvailableCredit
+	 , dblCredits			= B.dblAvailableCredit * -1
 	 , dblPrepaids			= 0.000000
 	 , dtmDate				= ISNULL(B.dtmDatePaid, A.dtmDate)
 	 , dtmDueDate	 
