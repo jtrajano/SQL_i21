@@ -442,7 +442,7 @@ BEGIN TRY
 		WHERE intStorageLocationId = @intConsumptionStorageLocationId
 			AND intItemId = @intInputItemId
 			AND intLotId <> @intInputLotId
-			AND dtmExpiryDate > @dtmCurrentDateTime
+			AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 			AND intLotStatusId = 1
 		ORDER BY dtmDateCreated DESC
 

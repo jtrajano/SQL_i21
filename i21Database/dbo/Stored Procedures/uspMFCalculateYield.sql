@@ -257,7 +257,7 @@ BEGIN TRY
 				WHERE intStorageLocationId = @intStorageLocationId
 					AND intItemId = @intItemId
 					AND intLotStatusId = 1
-					AND dtmExpiryDate > @dtmCurrentDateTime
+					AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 				)
 		BEGIN
 			PRINT 'CREATE STAGING LOT'
@@ -413,7 +413,7 @@ BEGIN TRY
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
 			AND intLotStatusId = 1
-			AND dtmExpiryDate > @dtmCurrentDateTime
+			AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 			AND dblQty > 0
 		ORDER BY dtmDateCreated DESC
 
@@ -431,7 +431,7 @@ BEGIN TRY
 			WHERE intStorageLocationId = @intStorageLocationId
 				AND intItemId = @intItemId
 				AND intLotStatusId = 1
-				AND dtmExpiryDate > @dtmCurrentDateTime
+				AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 			ORDER BY dtmDateCreated DESC
 		END
 

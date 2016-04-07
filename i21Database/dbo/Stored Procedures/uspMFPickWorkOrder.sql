@@ -414,7 +414,7 @@ BEGIN TRY
 			WHERE SI.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
-				AND dtmExpiryDate >= @dtmCurrentDateTime
+				AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.intStorageLocationId = (
 					CASE 
 						WHEN @intStorageLocationId IS NULL
@@ -489,7 +489,7 @@ BEGIN TRY
 		WHERE L.intItemId = @intItemId
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1
-			AND dtmExpiryDate >= @dtmCurrentDateTime
+			AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 			AND L.intStorageLocationId = (
 				CASE 
 					WHEN @intStorageLocationId IS NULL
@@ -723,7 +723,7 @@ BEGIN TRY
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
-				AND dtmExpiryDate >= @dtmCurrentDateTime
+				AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.intStorageLocationId = (
 					CASE 
 						WHEN @intStorageLocationId IS NULL

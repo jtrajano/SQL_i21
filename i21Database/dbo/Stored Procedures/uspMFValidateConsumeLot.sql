@@ -120,7 +120,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @dtmExpiryDate < GETDATE()
+	IF @dtmExpiryDate IS NOT NULL AND @dtmExpiryDate < GETDATE()
 	BEGIN
 		RAISERROR (
 				51088

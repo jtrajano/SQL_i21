@@ -206,7 +206,7 @@ BEGIN TRY
 			AND intItemId = @intItemId
 			AND dblQty > 0
 			AND intLotStatusId = 1
-			AND dtmExpiryDate > @dtmCurrentDate
+			AND ISNULL(dtmExpiryDate,@dtmCurrentDate) >= @dtmCurrentDate
 
 	END
 	ELSE IF EXISTS (

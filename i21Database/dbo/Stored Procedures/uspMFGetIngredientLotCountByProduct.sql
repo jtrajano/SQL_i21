@@ -33,7 +33,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		WHERE L.intLotStatusId = 1
-			AND L.dtmExpiryDate >= @dtmCurrentDate
+			AND ISNULL(dtmExpiryDate,@dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty>0
 			AND I.strStatus='Active'
 			and L.strLotNumber Like @strLotNumber +'%'
@@ -58,7 +58,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		WHERE L.intLotStatusId = 1
-			AND L.dtmExpiryDate >= @dtmCurrentDate
+			AND ISNULL(dtmExpiryDate,@dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty>0
 			AND I.strStatus='Active'
 			and L.strLotNumber Like @strLotNumber +'%'
