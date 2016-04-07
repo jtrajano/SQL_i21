@@ -80,6 +80,7 @@ BEGIN TRY
 		,strAdditionalComments
 		,intNoOfFlushes
 		,strWIPItemNo
+		,dtmEarliestStartDate 
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -111,6 +112,7 @@ BEGIN TRY
 		,x.strAdditionalComments
 		,x.intNoOfFlushes
 		,x.strWIPItemNo
+		,x.dtmEarliestStartDate 
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -136,6 +138,7 @@ BEGIN TRY
 			,strAdditionalComments NVARCHAR(MAX)
 			,intNoOfFlushes int
 			,strWIPItemNo nvarchar(50)
+			,dtmEarliestStartDate datetime
 			) x
 	JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
 	LEFT JOIN dbo.tblICItemFactory F1 ON F1.intFactoryId = @intLocationId

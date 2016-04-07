@@ -909,6 +909,13 @@ BEGIN TRY
 					BEGIN
 						UPDATE @tblMFScheduleWorkOrder
 						SET dtmPlannedStartDate = @dtmShiftStartTime
+							,strNote=CASE 
+									WHEN @dtmCurrentDate > dtmExpectedDate
+									THEN 'Past Expected Date'
+									WHEN dtmEarliestStartDate > @dtmShiftStartTime
+										THEN 'Earliest start date > Scheduled start Date'
+										Else NULL
+									END 
 						WHERE intWorkOrderId = @intWorkOrderId
 
 						SELECT @intSequenceNo = @intSequenceNo + 1
@@ -924,6 +931,13 @@ BEGIN TRY
 									THEN @intWODuration
 								ELSE intDuration
 								END
+							,strNote=CASE 
+								WHEN @dtmCurrentDate > dtmExpectedDate
+								THEN 'Past Expected Date'
+								WHEN dtmEarliestStartDate > @dtmShiftStartTime
+									THEN 'Earliest start date > Scheduled start Date'
+									Else NULL
+								END 
 						WHERE intWorkOrderId = @intWorkOrderId
 
 						SELECT @intSequenceNo = 1
