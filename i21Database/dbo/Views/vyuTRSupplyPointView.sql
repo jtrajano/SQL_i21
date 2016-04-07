@@ -1,20 +1,25 @@
 ﻿CREATE VIEW [dbo].[vyuTRSupplyPointView]
 	AS 
-SELECT 
-   
-   SP.intSupplyPointId,
-   (select top 1 EM.strName from dbo.vyuEMEntity EM where EM.intEntityId = SP.intEntityVendorId) as strFuelSupplier,
-   (select top 1 EL.strLocationName from dbo.[tblEMEntityLocation] EL where EL.intEntityLocationId = SP.intEntityLocationId) as strSupplyPoint,
-   (select top 1 TF.strTerminalControlNumber from dbo.tblTFTerminalControlNumber TF where TF.intTerminalControlNumberId = SP.intTerminalControlNumberId ) as strTerminalNumber,
-   SP.strGrossOrNet,
-   SP.intRackPriceSupplyPointId,
-   SP.intEntityLocationId,
-   SP.intEntityVendorId,
-   (select top 1 EZ.strZipCode from dbo.[tblEMEntityLocation] EZ where EZ.intEntityLocationId = SP.intEntityLocationId) as strZipCode,
-   SP.intTaxGroupId,
-   TX.strTaxGroup
-    	
-FROM
-    dbo.tblTRSupplyPoint SP	
-	LEFT JOIN tblSMTaxGroup TX on SP.intTaxGroupId = TX.intTaxGroupId
-	
+
+SELECT SupplyPoint.intSupplyPointId
+	, SupplyPoint.intEntityVendorId
+	, strFuelSupplier = Supplier.strName
+	, SupplyPoint.intEntityLocationId
+	, strSupplyPoint = EntityLocation.strLocationName
+	, strZipCode = EntityLocation.strZipCode
+	, SupplyPoint.intTerminalControlNumberId
+	, strTerminalNumber = Terminal.strTerminalControlNumber
+	, SupplyPoint.strGrossOrNet
+	, SupplyPoint.strFuelDealerId1
+	, SupplyPoint.strFuelDealerId2
+	, SupplyPoint.strDefaultOrigin
+	, SupplyPoint.intTaxGroupId
+	, TaxGroup.strTaxGroup
+	, SupplyPoint.ysnMultipleDueDates
+	, SupplyPoint.ysnMultipleBolInvoiced
+	, SupplyPoint.intRackPriceSupplyPointId
+FROM tblTRSupplyPoint SupplyPoint
+LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = SupplyPoint.intTaxGroupId
+LEFT JOIN vyuEMEntity Supplier ON Supplier.intEntityId = SupplyPoint.intEntityVendorId AND Supplier.strType = 'Vendor'
+LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = SupplyPoint.intEntityLocationId
+LEFT JOIN tblTFTerminalControlNumber Terminal ON Terminal.intTerminalControlNumberId = SupplyPoint.intTerminalControlNumberId
