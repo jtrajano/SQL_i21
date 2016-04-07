@@ -7,7 +7,7 @@ SELECT
 	,strCustomerNumber				= C.strCustomerNumber
 	,intEntityCustomerId			= C.intEntityCustomerId
 	,strTransactionType				= I.strTransactionType
-	,strType						= ISNULL(I.strType, 'Standard')
+	,strType						= CASE WHEN I.ysnTemplate = 1 THEN 'Recurring' ELSE ISNULL(I.strType, 'Standard') END
 	,strPONumber					= I.strPONumber
 	,strTerm						= T.strTerm
 	,strBOLNumber					= I.strBOLNumber
