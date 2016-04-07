@@ -5,7 +5,8 @@
 	,@NewInvoiceNumber	NVARCHAR(25)	= NULL	OUTPUT
 	,@NewInvoiceId		INT				= NULL	OUTPUT
 	,@RaiseError		BIT				= 0
-	,@ErrorMessage		NVARCHAR(250)	= NULL	OUTPUT	
+	,@ErrorMessage		NVARCHAR(250)	= NULL	OUTPUT
+	,@ForRecurring		BIT				= 0	
 AS
 
 BEGIN
@@ -88,7 +89,7 @@ SELECT
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
-	,@Comments						= [strComments] + ' DUP: ' + [strInvoiceNumber]
+	,@Comments						= [strComments] + (CASE WHEN ISNULL(@ForRecurring,0) = 0 THEN ' DUP: ' + [strInvoiceNumber] ELSE '' END)
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
 	,@Template						= 0		--[ysnTemplate]
