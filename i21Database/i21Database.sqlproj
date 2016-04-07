@@ -3602,6 +3602,7 @@
     <Build Include="dbo\Functions\fnCTGetContractPrice.sql" />
     <Build Include="dbo\Views\vyuTRGetQuotePriceAdjustmentHeader.sql" />
     <Build Include="dbo\Views\vyuTRGetQuotePriceAdjustmentDetail.sql" />
+    <Build Include="dbo\Views\vyuTRGetBulkPlantFreight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
