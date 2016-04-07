@@ -135,12 +135,12 @@ INSERT INTO [tblARInvoice]
 SELECT TE.InvoiceNumber														-- invoice number
 	 , IE.strSourceId														--[strInvoiceOriginId]
 	 , IE.[intEntityCustomerId]												--[intEntityCustomerId]
-	 , IE.dtmDate  															--[dtmDate]
-	 , dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
+	 , CAST(IE.dtmDate AS DATE)												--[dtmDate]
+	 , dbo.fnGetDueDateBasedOnTerm(CAST(IE.dtmDate AS DATE), ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
 	 , ISNULL(MIN(AC.intCurrencyId), IE.intCurrencyId)						--[intCurrencyId]
 	 , ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
 	 , ISNULL(IE.[intSalesPersonId], MIN(AC.[intSalespersonId]))			--[intEntitySalespersonId]
-	 , IE.dtmDate  															--[dtmShipDate]
+	 , CAST(IE.dtmDate AS DATE)												--[dtmShipDate]
 	 , ISNULL(IE.intShipViaId, ISNULL(MIN(EL.[intShipViaId]), 0))			--[intShipViaId]
 	 , IE.strPurchaseOrder    												--[strPONumber]
 	 , EL.[intTermsId]														--[intTermId]
@@ -156,7 +156,7 @@ SELECT TE.InvoiceNumber														-- invoice number
 	 , 0																	--[intPaymentMethodId]
 	 , IE.strComments        												--[strComments] 
 	 , @ARAccountId															--[intAccountId]
-	 , IE.dtmDate 															--[dtmPostDate] need to check
+	 , CAST(IE.dtmDate AS DATE)												--[dtmPostDate] need to check
 	 , 0																	--[ysnPosted]
 	 , 0																	--[ysnPaid]
 	 , ISNULL(min(IE.intShipToLocationId), MIN(EL.[intEntityLocationId]))	--[intShipToLocationId] 
@@ -215,12 +215,12 @@ UPDATE [tblARInvoice]
 SET	   
 	 [strInvoiceOriginId]			= IE.strSourceId
 	,[intEntityCustomerId]			= IE.[intEntityCustomerId]
-	,[dtmDate]						= IE.dtmDate
-	,[dtmDueDate]					= dbo.fnGetDueDateBasedOnTerm(IE.dtmDate, ISNULL(EL.[intTermsId],0))
+	,[dtmDate]						= CAST(IE.dtmDate AS DATE)
+	,[dtmDueDate]					= dbo.fnGetDueDateBasedOnTerm(CAST(IE.dtmDate AS DATE), ISNULL(EL.[intTermsId],0))
 	,[intCurrencyId]				= ISNULL(IE.intCurrencyId,AC.[intCurrencyId])
 	,[intCompanyLocationId]			= ISNULL(IE.intLocationId, (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
 	,[intEntitySalespersonId]		= ISNULL(IE.[intSalesPersonId],AC.[intSalespersonId])
-	,[dtmShipDate]					= IE.dtmDate
+	,[dtmShipDate]					= CAST(IE.dtmDate AS DATE)
 	,[intShipViaId]					= ISNULL(IE.intShipViaId,ISNULL(EL.[intShipViaId], 0))
 	,[strPONumber]					= IE.strPurchaseOrder
 	,[intTermId]					= EL.[intTermsId]

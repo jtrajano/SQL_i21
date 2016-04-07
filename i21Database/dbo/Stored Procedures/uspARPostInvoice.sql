@@ -1089,7 +1089,7 @@ END CATCH
 				--Contract Item Price not Equal to Contract Sequence Cash Price
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The contract item - ' + I.strItemNo + ' price (' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS NUMERIC(18,6)),2) + ') is not equal to the sequence cash price (' + CONVERT(NVARCHAR(100),CAST(ISNULL(CT.dblCashPrice,@ZeroDecimal) AS MONEY),2) + ').',
+					'The contract item - ' + I.strItemNo + ' price (' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the sequence cash price (' + CONVERT(NVARCHAR(100),CAST(([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * ISNULL(CT.dblCashPrice,@ZeroDecimal)) AS MONEY),2) + ').',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -1111,7 +1111,7 @@ END CATCH
 						AND D.intContractDetailId = CT.intContractDetailId 		 				
 				WHERE
 					D.dblPrice <> @ZeroDecimal				
-					AND ISNULL(CT.dblCashPrice,0.00) <> D.dblPrice 
+					AND CAST(([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * ISNULL(CT.dblCashPrice,0)) AS MONEY) <> CAST(ISNULL(D.dblPrice,0) AS MONEY)
 					AND CT.strPricingType <> 'Index'
 					
 					
@@ -1721,6 +1721,7 @@ IF @post = 1
 					ON DT.intTaxCodeId = TC.intTaxCodeId	
 			WHERE
 				DT.dblAdjustedTax <> @ZeroDecimal
+				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				
 			UNION ALL 
 			--DEBIT Discount

@@ -19,7 +19,9 @@ SELECT
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
-	,[intContractDetailId]				= SOD.[intContractDetailId] 
+	,[strContractNumber]				= CTCD.[strContractNumber]
+	,[intContractDetailId]				= SOD.[intContractDetailId]
+	,[intContractSeq]					= CTCD.[intContractSeq]
 	,[intCompanyLocationId]				= SO.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -83,6 +85,10 @@ INNER JOIN
 INNER JOIN
 	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId]
+LEFT OUTER JOIN 
+	vyuCTContractDetailView CTCD	
+		ON SOD.[intContractHeaderId] = CTCD.[intContractHeaderId]
+		AND SOD.[intContractDetailId] = CTCD.[intContractDetailId]
 LEFT JOIN
 	tblEMEntity ESP
 		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
@@ -142,7 +148,9 @@ SELECT
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
-	,[intContractDetailId]				= SOD.[intContractDetailId] 
+	,[strContractNumber]				= CTCD.[strContractNumber]
+	,[intContractDetailId]				= SOD.[intContractDetailId]
+	,[intContractSeq]					= CTCD.[intContractSeq]
 	,[intCompanyLocationId]				= SO.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -204,6 +212,10 @@ INNER JOIN
 INNER JOIN
 	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId] 
+LEFT OUTER JOIN 
+	vyuCTContractDetailView CTCD	
+		ON SOD.[intContractHeaderId] = CTCD.[intContractHeaderId]
+		AND SOD.[intContractDetailId] = CTCD.[intContractDetailId]
 LEFT JOIN
 	tblEMEntity ESP
 		ON SO.[intEntitySalespersonId] = ESP.[intEntityId]
@@ -260,7 +272,9 @@ SELECT
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
 	,[intContractHeaderId]				= SOD.[intContractHeaderId]
+	,[strContractNumber]				= CTCD.[strContractNumber]
 	,[intContractDetailId]				= SOD.[intContractDetailId]
+	,[intContractSeq]					= CTCD.[intContractSeq]
 	,[intCompanyLocationId]				= SHP.[intShipFromLocationId]
 	,[strLocationName]					= SHP.[strLocationName] 
 	,[intShipToLocationId]				= SO.[intShipToLocationId]
@@ -317,6 +331,10 @@ INNER JOIN
 INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
+LEFT OUTER JOIN 
+	vyuCTContractDetailView CTCD	
+		ON SOD.[intContractHeaderId] = CTCD.[intContractHeaderId]
+		AND SOD.[intContractDetailId] = CTCD.[intContractDetailId]
 INNER JOIN
 	tblEMEntity E
 		ON C.[intEntityCustomerId] = E.[intEntityId]
@@ -449,8 +467,10 @@ SELECT
 	,[strInventoryShipmentNumber]		= ICIS.[strShipmentNumber] 	
 	,[intShipmentId]					= LGICShipment.[intShipmentId]
 	,[strShipmentNumber]				= NULL
-	,[intContractHeaderId]				= CTCD.[intContractHeaderId]
-	,[intContractDetailId]				= CTCD.[intContractDetailId]
+	,[intContractHeaderId]				= ISNULL(CTCD.[intContractHeaderId], LGICShipment.[intContractHeaderId])
+	,[strContractNumber]				= ISNULL(CTCD.[strContractNumber], LGICShipment.[strContractNumber])
+	,[intContractDetailId]				= ISNULL(CTCD.[intContractDetailId], LGICShipment.[intContractDetailId])
+	,[intContractSeq]					= ISNULL(CTCD.[intContractSeq], LGICShipment.[intContractSeq])
 	,[intCompanyLocationId]				= ICIS.[intShipFromLocationId]
 	,[strLocationName]					= SMCL.[strLocationName] 
 	,[intShipToLocationId]				= ICIS.[intShipToLocationId]
@@ -525,6 +545,10 @@ LEFT OUTER JOIN
 			 LGSD.[intShipmentId]
 			,LGSD.[intTrackingNumber]
 			,ICISI1.[intInventoryShipmentItemId]
+			,LGSD.[intContractDetailId]
+			,LGSD.[strContractNumber] 
+			,LGSD.[intContractHeaderId]
+			,LGSD.[intContractSeq] 
 		FROM
 			tblICInventoryShipmentItem ICISI1
 		INNER JOIN
@@ -606,7 +630,9 @@ SELECT
 	,[intShipmentId]					= NULL
 	,[strShipmentNumber]				= NULL
 	,[intContractHeaderId]				= CTCD.[intContractHeaderId]
+	,[strContractNumber]				= CTCD.[strContractNumber]
 	,[intContractDetailId]				= CTCD.[intContractDetailId]
+	,[intContractSeq]					= CTCD.[intContractSeq]
 	,[intCompanyLocationId]				= ICIS.[intShipFromLocationId]
 	,[strLocationName]					= SMCL.[strLocationName] 
 	,[intShipToLocationId]				= ICIS.[intShipToLocationId]
@@ -711,7 +737,9 @@ SELECT
 	,[intShipmentId]					= LGS.[intShipmentId]
 	,[strShipmentNumber]				= CAST(LGS.intShipmentId AS NVARCHAR(250))
 	,[intContractHeaderId]				= NULL
+	,[strContractNumber]				= ''
 	,[intContractDetailId]				= NULL
+	,[intContractSeq]					= NULL
 	,[intCompanyLocationId]				= LGS.[intCompanyLocationId]
 	,[strLocationName]					= CL.[strLocationName]
 	,[intShipToLocationId]				= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
