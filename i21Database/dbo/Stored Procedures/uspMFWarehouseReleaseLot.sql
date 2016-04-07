@@ -1,8 +1,4 @@
-﻿CREATE PROCEDURE uspMFWarehouseReleaseLot (@strXML NVARCHAR(MAX)
-	,@strFGReleaseMailTOAddress NVARCHAR(MAX)=NULL OUTPUT
-	,@strFGReleaseMailCCAddress NVARCHAR(MAX)=NULL OUTPUT
-	,@strSubject VARCHAR(MAX)=NULL OUTPUT
-	,@strBody NVARCHAR(MAX)=NULL OUTPUT)
+﻿CREATE PROCEDURE uspMFWarehouseReleaseLot (@strXML NVARCHAR(MAX))
 AS
 BEGIN TRY
 	DECLARE @intLotId INT
@@ -360,25 +356,6 @@ BEGIN TRY
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
-
-	SELECT @strFGReleaseMailTOAddress = strFGReleaseMailTOAddress
-		,@strFGReleaseMailCCAddress = strFGReleaseMailCCAddress
-	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId = @intLocationId
-
-	SELECT @strSubject = 'FG Release List: ' + CONVERT(NVARCHAR, @dtmCurrentDate, 100)
-
-	SET @strBody = N'<H2>FG Release List</H2>' + N'<table border="1" bgcolor ="rgb(192, 255, 255)">' + N'<tr><th width="175">Lot No</th><th width="175">Item Name</th>' + N'<th width="850">Status</th></tr>' + CAST((
-	SELECT td = @strLotNumber
-		,''
-		,td = @strItemNo
-		,''
-		,td = 'Hold'
-	FOR XML PATH('tr')
-		,TYPE
-	) AS NVARCHAR(MAX)) + N'</table>';
-
-
 END TRY
 
 BEGIN CATCH
