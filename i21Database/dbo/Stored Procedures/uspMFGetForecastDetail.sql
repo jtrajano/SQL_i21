@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE dbo.uspMFGetForecastDetail (
-	@intAccountManagerId INT
-	,@intBuyingGroupId INT
+	@intAccountManagerId INT=0
+	,@intBuyingGroupId INT=0
 	,@intItemId INT
 	,@ysnIncludeForecast BIT = 1
 	,@ysnIncludeOrder BIT = 1
@@ -52,8 +52,8 @@ BEGIN
 	FROM dbo.tblMFForecastItemValue FV
 	JOIN dbo.tblMFForecastItemType FT ON FV.intForecastItemTypeId = FT.intForecastItemTypeId
 	JOIN dbo.tblICItem I ON I.intItemId = FV.intItemId
-	WHERE I.intAccountManagerId = @intAccountManagerId
-		AND I.intBuyingGroupId = @intBuyingGroupId
+	WHERE ISNULL(I.intAccountManagerId,@intAccountManagerId) = @intAccountManagerId
+		AND ISNULL(I.intBuyingGroupId,@intBuyingGroupId) = @intBuyingGroupId
 		AND I.intItemId = @intItemId
 		AND FV.intForecastItemTypeId IN (
 			@intForecast
