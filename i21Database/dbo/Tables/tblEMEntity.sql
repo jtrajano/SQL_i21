@@ -32,9 +32,12 @@
 	[ysnReceiveEmail]  BIT             CONSTRAINT [DF_tblEMEntity_ysnReceiveEmail] DEFAULT ((0)) NOT NULL,
 	[strEmailDistributionOption]	NVARCHAR(MAX)	 COLLATE Latin1_General_CI_AS NULL,
     [dtmOriginationDate]      DATETIME        NULL,
+	[intDefaultCountryId]		INT NULL,
 	    	
     [intConcurrencyId] INT             CONSTRAINT [DF__tmp_ms_xx__intCo__5132705A] DEFAULT ((0)) NOT NULL,
 	--CONSTRAINT [FK_tblEMEntity_tblEMEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
+	CONSTRAINT [FK_tblSMCountry_tblEMEntity] FOREIGN KEY ([intDefaultCountryId]) REFERENCES [tblSMCountry]([intCountryID]),
+
     CONSTRAINT [PK_dbo.tblEMEntity] PRIMARY KEY CLUSTERED ([intEntityId] ASC)
 );
 
