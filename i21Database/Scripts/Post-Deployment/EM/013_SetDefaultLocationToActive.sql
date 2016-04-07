@@ -6,7 +6,7 @@ AND NOT EXISTS(SELECT TOP 1 1 FROM [tblEMEntityPreferences] WHERE strPreference 
 
 BEGIN
 	PRINT '*** EXECUTING set tblEMEntityLocation active location for default location***'
-	Exec('UPDATE tblEMEntityLocation SET ysnActive = ysnDefaultLocation')
+	Exec('UPDATE tblEMEntityLocation SET ysnActive = isnull(ysnDefaultLocation, 0) where ysnActive is null')
 
 	INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Set active tblEMEntityLocation', 1)
