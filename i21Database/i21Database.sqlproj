@@ -3586,6 +3586,7 @@
     <None Include="Scripts\Post-Deployment\IP\1_MasterTables.sql" />
     <Build Include="dbo\Tables\tblGLTempCOASegment.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
