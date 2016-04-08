@@ -22,6 +22,7 @@ RETURNS @returntable TABLE
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
 	,[dblRate]						NUMERIC(18,6)
+	,[dblExemptionPercent]			NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[ysnSeparateOnInvoice]			BIT
@@ -49,6 +50,7 @@ BEGIN
 			,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 			,[strCalculationMethod]			NVARCHAR(30)
 			,[dblRate]						NUMERIC(18,6)
+			,[dblExemptionPercent]			NUMERIC(18,6)
 			,[dblTax]						NUMERIC(18,6)
 			,[dblAdjustedTax]				NUMERIC(18,6)
 			,[intTaxAccountId]				INT
@@ -80,6 +82,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
@@ -99,6 +102,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
@@ -122,6 +126,7 @@ BEGIN
 					,@AdjustedTax		NUMERIC(18,6)
 					,@Tax				NUMERIC(18,6)
 					,@Rate				NUMERIC(18,6)
+					,@ExemptionPercent	NUMERIC(18,6)
 					,@CalculationMethod	NVARCHAR(30)
 					,@CheckoffTax		BIT
 					,@TaxExempt			BIT
@@ -140,6 +145,7 @@ BEGIN
 				,@AdjustedTax		= [dblAdjustedTax]
 				,@Tax				= [dblTax]
 				,@Rate				= [dblRate]
+				,@ExemptionPercent	= [dblExemptionPercent]
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
@@ -240,8 +246,11 @@ BEGIN
 			ELSE
 				SET @ItemTaxAmount = (@QtyShipped * @Rate);
 				
-			IF(@TaxExempt = 1)
+			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
 				SET @ItemTaxAmount = 0.00;
+
+			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
+				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/100) );
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
@@ -265,6 +274,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]
@@ -285,6 +295,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]

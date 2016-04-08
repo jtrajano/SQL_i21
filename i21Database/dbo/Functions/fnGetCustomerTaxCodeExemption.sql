@@ -10,11 +10,23 @@
 	,@ShipToLocationId		INT
 	,@IsCustomerSiteTaxable	BIT
 )
-RETURNS NVARCHAR(500)
+--RETURNS NVARCHAR(500)
+RETURNS @returntable TABLE
+(
+	 [ysnTaxExempt]			BIT
+	,[strExemptionNotes]	NVARCHAR(500)
+	,[dblExemptionPercent]	NUMERIC(18,6)
+)
 AS
 BEGIN
-	DECLARE @TaxCodeExemption	NVARCHAR(500)
+	DECLARE	@TaxCodeExemption	NVARCHAR(500)
+			,@ExemptionPercent	NUMERIC(18,6)
+			,@TaxExempt			BIT
 	
+	SET @TaxCodeExemption = NULL
+	SET @ExemptionPercent = 0.00000
+	SET @TaxExempt = 0
+
 	IF @IsCustomerSiteTaxable IS NULL
 		BEGIN
 			--Customer
@@ -22,9 +34,17 @@ BEGIN
 				SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
 			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-				RETURN @TaxCodeExemption
+				BEGIN
+					INSERT INTO @returntable
+					SELECT 
+						 [ysnTaxExempt] = 1
+						,[strExemptionNotes] = @TaxCodeExemption
+						,[dblExemptionPercent] = @ExemptionPercent
+					RETURN 
+				END
+				
 		END
-
+	
 	IF @IsCustomerSiteTaxable IS NOT NULL
 		BEGIN
 			--Customer
@@ -32,7 +52,12 @@ BEGIN
 				SET @TaxCodeExemption = 'Customer Site is non taxable; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
 			--IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-			RETURN @TaxCodeExemption
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 			 
 		END
 		
 	--Item Category Tax Class		
@@ -58,8 +83,16 @@ BEGIN
 	END
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
-			
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
+
+	SET @ExemptionPercent = 0.00000		
 	--Customer Location
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
@@ -68,6 +101,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -87,9 +121,16 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 
-
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -97,6 +138,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -116,9 +158,16 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 	
-
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -126,6 +175,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Tax Class: ' + SMTC.[strTaxClass], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -145,9 +195,16 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END	
 	
-	
+	SET @ExemptionPercent = 0.00000			
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -155,6 +212,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Tax State: ' + TE.[strState], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -172,9 +230,16 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END	
 
-
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -183,6 +248,7 @@ BEGIN
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -205,9 +271,16 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 
-
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -215,6 +288,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -233,9 +307,16 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 
-
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -243,6 +324,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -262,15 +344,23 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 
-
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -285,9 +375,17 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 	
 	--Item
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -295,6 +393,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -314,9 +413,17 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 		
-		
+
+	SET @ExemptionPercent = 0.00000				
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -324,6 +431,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Tax Class: ' + TC.[strTaxClass], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -343,9 +451,16 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption		
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END		
 	
-		
+	SET @ExemptionPercent = 0.00000				
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
@@ -353,6 +468,7 @@ BEGIN
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Tax State: ' + TE.[strState], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -368,15 +484,23 @@ BEGIN
 		dtmStartDate			
 				
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END	
 
-	
+	SET @ExemptionPercent = 0.00000			
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -391,15 +515,24 @@ BEGIN
 		dtmStartDate			
 				
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 		
-		
+
+	SET @ExemptionPercent = 0.00000				
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -414,16 +547,25 @@ BEGIN
 		dtmStartDate			
 				
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption					
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END					
 				
 		
 	--Tax Code
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -440,15 +582,24 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 	
 	--Tax Class
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Tax Class: ' + SMTC.[strTaxClass], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -464,16 +615,24 @@ BEGIN
 		dtmStartDate	
 		
 		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END
 	
 	--Tax State
+	SET @ExemptionPercent = 0.00000		
 	SELECT TOP 1
 		@TaxCodeExemption = 'Tax Exemption '
 							 + ISNULL('Number: ' + TE.[strException], '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
 							 + ISNULL('; Tax State: ' + TE.[strState], '')
+		,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -491,7 +650,14 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END	
 		
 	--Sales Tax Account
 	SELECT TOP 1
@@ -504,8 +670,19 @@ BEGIN
 			
 				
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption					
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
+			RETURN 	
+		END					
 
-				
-	RETURN NULL		
+	INSERT INTO @returntable
+	SELECT 
+		[ysnTaxExempt] = @TaxExempt
+		,[strExemptionNotes] = @TaxCodeExemption
+		,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)				
+	RETURN		
 END

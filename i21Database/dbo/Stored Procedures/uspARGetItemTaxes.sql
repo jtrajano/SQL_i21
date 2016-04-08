@@ -31,6 +31,7 @@ AS
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
+				,[dblExemptionPercent]
 				,[dblTax]
 				,[dblAdjustedTax]
 				,[intTaxAccountId]				AS [intSalesTaxAccountId]

@@ -18,6 +18,7 @@ RETURNS @returntable TABLE
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
 	,[dblRate]						NUMERIC(18,6)
+	,[dblExemptionPercent]			NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[intTaxAccountId]				INT
@@ -47,6 +48,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]		= TC.[strTaxableByOtherTaxes]
 		,[strCalculationMethod]			= R.[strCalculationMethod]
 		,[dblRate]						= R.[dblRate]
+		,[dblExemptionPercent]			= E.[dblExemptionPercent]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
 		,[intTaxAccountId]				= TC.[intSalesTaxAccountId]
