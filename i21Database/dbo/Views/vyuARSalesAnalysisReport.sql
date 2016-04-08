@@ -18,7 +18,7 @@ SELECT strRecordNumber
 	 , ISNULL(A.dblQtyShipped, 0)     AS dblQtyShipped
 	 , ISNULL(A.dblStandardCost, 0)	  AS dblCost	 
 	 , dblMargin = (ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
-						CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
+						CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
 							THEN ISNULL(A.dblQtyShipped, 0) 
 							ELSE ISNULL(A.dblQtyOrdered, 0)
 						END
@@ -107,7 +107,7 @@ LEFT OUTER JOIN
 		AND ID.intItemId = ICIT1.intItemId 
 		AND ID.intItemUOMId = ICIT1.intItemUOMId
 WHERE I.ysnPosted = 1 
-  AND I.strTransactionType IN ('Invoice', 'Credit Memo')
+  AND I.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo')
 
 UNION ALL
 

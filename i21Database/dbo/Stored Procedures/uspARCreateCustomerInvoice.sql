@@ -112,6 +112,13 @@ IF @Comment IS NULL OR LTRIM(RTRIM(@Comment)) = ''
 	SET @Comment = ISNULL((SELECT TOP 1 ISNULL(strInvoiceComments,'') FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
 
 
+IF ISNULL(@TransactionType, '') = ''
+	SET @TransactionType = 'Invoice'
+
+IF ISNULL(@Type, '') = ''
+	SET @Type = 'Standard'
+
+
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)
 	BEGIN
 		SET @ErrorMessage = 'There is no setup for AR Account in the Company Configuration.';
@@ -155,6 +162,22 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN
 		SET @ErrorMessage = 'The entity Id provided does not exists!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END
+
+IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Prepayment'))
+	BEGIN
+		SET @ErrorMessage = @TransactionType + ' is not a valid transaction type!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END
+
+IF (@Type NOT IN ('Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store'))
+	BEGIN
+		SET @ErrorMessage = @TransactionType + ' is not a valid invoice type!'
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);		
 		RETURN 0;
@@ -229,7 +252,7 @@ BEGIN TRY
 		,[intConcurrencyId])
 	SELECT
 		 [strTransactionType]			= @TransactionType
-		,[strType]						= CASE WHEN ISNULL(@DistributionHeaderId, 0) > 0 THEN 'Transport Delivery' ELSE ISNULL(@Type, 'Standard') END
+		,[strType]						= @Type
 		,[intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId

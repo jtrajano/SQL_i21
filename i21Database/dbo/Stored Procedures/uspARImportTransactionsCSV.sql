@@ -171,7 +171,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@ShipDate						= D.dtmShipDate
 					,@PostDate						= D.dtmPostDate 
 					,@TransactionType				= D.strTransactionType
-					,@Type							= CASE WHEN D.strTransactionType = 'Credit Memo' THEN D.strTransactionType ELSE 'Standard' END
+					,@Type							= @Type
 					,@Comment						= D.strTransactionNumber
 					,@OriginId						= D.strTransactionNumber
 					,@PONumber						= D.strPONumber

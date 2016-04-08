@@ -50,7 +50,7 @@ BEGIN
 	WHERE intInvoiceId = @InvoiceId
 	
 	--VALIDATE INVOICE TYPES
-	IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @InvoiceType NOT IN ('Standard', 'Credit Memo')  AND ISNULL(@SplitDetailId, 0) = 0
+	IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @InvoiceType <> 'Standard'  AND ISNULL(@SplitDetailId, 0) = 0
 		BEGIN			
 			SET @errorMsg = 'Unable to duplicate ' + @InvoiceType + ' Invoice Type.'
 

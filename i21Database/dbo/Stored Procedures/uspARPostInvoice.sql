@@ -731,7 +731,7 @@ END CATCH
 					AND (D.intItemId IS NOT NULL OR D.intItemId <> 0)
 					AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 					AND (ISNULL(Acct.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND A.strType <> 'Debit Memo'
+					AND A.strTransactionType <> 'Debit Memo'
 					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 				--Sales Account				
@@ -756,7 +756,7 @@ END CATCH
 				WHERE
 					D.dblTotal <> @ZeroDecimal 
 					AND (ISNULL(D.intSalesAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND A.strType = 'Debit Memo'
+					AND A.strTransactionType = 'Debit Memo'
 					AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 
@@ -843,7 +843,7 @@ END CATCH
 					AND (ISNULL(IST.intCOGSAccountId,0) = 0 OR GLA.intAccountId IS NULL)
 					AND ISNULL(D.intItemId, 0) <> 0
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-					AND A.strType <> 'Debit Memo'
+					AND A.strTransactionType <> 'Debit Memo'
 
 
 				--Inventory In-Transit Account Account -- SHIPPED
@@ -896,7 +896,7 @@ END CATCH
 					AND (ISNULL(D.intInventoryShipmentItemId,0) <> 0 OR ISNULL(D.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(D.intItemId, 0) <> 0
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-					AND A.strType <> 'Debit Memo'	
+					AND A.strTransactionType <> 'Debit Memo'	
 					AND (ISNULL(IST.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					
 					
@@ -935,7 +935,7 @@ END CATCH
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-					AND Header.strType <> 'Debit Memo'
+					AND Header.strTransactionType <> 'Debit Memo'
 					
 					
 				--COGS Account
@@ -977,7 +977,7 @@ END CATCH
 					AND ISNULL(ARID.[intItemId],0) <> 0
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ARI.[strType] <> 'Debit Memo'		
+					AND ARI.[strTransactionType] <> 'Debit Memo'		
 					
 				--Inventory In-Transit Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1014,7 +1014,7 @@ END CATCH
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-					AND Header.strType <> 'Debit Memo'
+					AND Header.strTransactionType <> 'Debit Memo'
 					
 					
 				--Inventory In-Transit Account
@@ -1056,7 +1056,7 @@ END CATCH
 					AND ISNULL(ARID.[intItemId],0) <> 0
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ARI.[strType] <> 'Debit Memo'																		
+					AND ARI.[strTransactionType] <> 'Debit Memo'																		
 					
 				
 				--Zero Contract Item Price	
@@ -1374,9 +1374,9 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice'	THEN  
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  A.dblInvoiceTotal ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  0 ELSE A.dblInvoiceTotal END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  
 																								(
 																								SELECT
 																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
@@ -1403,7 +1403,7 @@ IF @post = 1
 																							ELSE 
 																								0
 																							END
-				,dblCreditUnit				=  CASE WHEN A.strTransactionType = 'Invoice'	THEN  
+				,dblCreditUnit				=  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  
 																								0
 																							ELSE 
 																								(
@@ -1521,7 +1521,7 @@ IF @post = 1
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
-				AND A.strType <> 'Debit Memo'
+				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT SALES
@@ -1578,7 +1578,7 @@ IF @post = 1
 				B.dblTotal <> @ZeroDecimal  
 				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
-				AND A.strType <> 'Debit Memo'
+				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT SALES - Debit Memo
@@ -1587,10 +1587,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1629,7 +1629,7 @@ IF @post = 1
 					AND A.intCompanyLocationId = ICIS.intLocationId 
 			WHERE
 				B.dblTotal <> @ZeroDecimal  
-				AND A.strType = 'Debit Memo'
+				AND A.strTransactionType = 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 
 			--CREDIT Shipping
@@ -1638,8 +1638,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE A.dblShipping END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN A.dblShipping ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE A.dblShipping END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN A.dblShipping ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1680,8 +1680,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN DT.dblAdjustedTax ELSE 0 END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE DT.dblAdjustedTax END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN DT.dblAdjustedTax ELSE 0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1729,8 +1729,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1835,7 +1835,7 @@ IF @post = 1
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-				AND A.strType <> 'Debit Memo'
+				AND A.strTransactionType <> 'Debit Memo'
 				
 			UNION ALL 
 			--CREDIT Inventory In-Transit - SHIPPED
@@ -1902,7 +1902,7 @@ IF @post = 1
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-				AND A.strType <> 'Debit Memo'	
+				AND A.strTransactionType <> 'Debit Memo'	
 				
 			UNION ALL 
 			--DEBIT COGS - Inbound Shipment
@@ -1970,7 +1970,7 @@ IF @post = 1
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-				AND A.strType <> 'Debit Memo'
+				AND A.strTransactionType <> 'Debit Memo'
 				
 			UNION ALL 
 			--CREDIT Inventory In-Transit - Inbound Shipment
@@ -2038,7 +2038,7 @@ IF @post = 1
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-				AND A.strType <> 'Debit Memo'
+				AND A.strTransactionType <> 'Debit Memo'
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
@@ -2125,7 +2125,7 @@ IF @post = 1
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-				AND Header.strType <> 'Debit Memo'
+				AND Header.strTransactionType <> 'Debit Memo'
 
 
 			UNION ALL
@@ -2184,7 +2184,7 @@ IF @post = 1
 				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
 				AND ISNULL(ARID.[intItemId],0) <> 0
 				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-				AND ARI.[strType] <> 'Debit Memo'	
+				AND ARI.[strTransactionType] <> 'Debit Memo'	
 
 			
 		END TRY

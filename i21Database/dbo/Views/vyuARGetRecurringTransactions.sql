@@ -6,7 +6,7 @@ SELECT intInvoiceId AS intTransactionId
 	 , strTransactionType
 	 , dtmDate
 FROM tblARInvoice
-WHERE strTransactionType = 'Invoice'
+WHERE strTransactionType IN ('Invoice', 'Debit Memo')
   AND ysnTemplate = 1
 
 UNION

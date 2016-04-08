@@ -29,27 +29,27 @@ SELECT TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
 									LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
 							WHERE intInvoiceId = I.intInvoiceId)
-	 , dblTaxDifference = CASE WHEN I.strTransactionType <> 'Invoice' 
+	 , dblTaxDifference = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 								THEN SUM(IDT.dblAdjustedTax - IDT.dblTax) * -1 
 								ELSE SUM(IDT.dblAdjustedTax - IDT.dblTax) 
 						  END
-	 , dblTaxAmount     = CASE WHEN I.strTransactionType <> 'Invoice' 
+	 , dblTaxAmount     = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 								THEN SUM(IDT.dblAdjustedTax) * -1 
 								ELSE SUM(IDT.dblAdjustedTax)
 						  END
-	 , dblNonTaxable    = CASE WHEN I.strTransactionType <> 'Invoice' 
+	 , dblNonTaxable    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 								THEN (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId) * -1 
 								ELSE (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId) 
 						  END
-	 , dblTaxable       = CASE WHEN I.strTransactionType <> 'Invoice' 
+	 , dblTaxable       = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') 
 								THEN (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId) * -1 
 								ELSE (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId) 
 						  END
-	 , dblTotalSales    = CASE WHEN I.strTransactionType <> 'Invoice' 
+	 , dblTotalSales    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 								THEN I.dblInvoiceTotal * -1 
 								ELSE I.dblInvoiceTotal
 						  END
-	 , dblTaxCollected  = CASE WHEN I.strTransactionType <> 'Invoice' 
+	 , dblTaxCollected  = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 								THEN ISNULL(I.dblTax, 0) * -1 
 								ELSE ISNULL(I.dblTax, 0)
 						  END

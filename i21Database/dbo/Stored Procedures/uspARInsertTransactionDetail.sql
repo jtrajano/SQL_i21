@@ -2,8 +2,9 @@
 	@InvoiceId	INT
 AS
 BEGIN
-
-	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = 'Invoice'
+	DECLARE @TransactionType AS NVARCHAR(25)
+	SELECT @TransactionType = [strTransactionType] FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId
+	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = @TransactionType
 
 	INSERT INTO [tblARTransactionDetail]
 	(
@@ -29,7 +30,7 @@ BEGIN
 	SELECT
 		 [intTransactionDetailId]				= [intInvoiceDetailId] 
 		,[intTransactionId]						= [intInvoiceId] 
-		,[strTransactionType]					= 'Invoice'
+		,[strTransactionType]					= @TransactionType
 		,[intItemId]							= [intItemId] 
 		,[intItemUOMId]							= [intItemUOMId] 
 		,[dblQtyOrdered]						= [dblQtyOrdered] 

@@ -91,7 +91,9 @@ DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
 BEGIN TRY
 	INSERT INTO @EntriesForInvoice(
-		 [strSourceTransaction]
+		 [strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
 		,[intSourceId]
 		,[strSourceId]
 		,[intInvoiceId]
@@ -174,7 +176,9 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 	)
 	SELECT
-		 [strSourceTransaction]				= 'Provisional Invoice'
+		 [strTransactionType]				= 'Invoice'
+		,[strType]							= 'Provisional Invoice'
+		,[strSourceTransaction]				= 'Provisional Invoice'
 		,[intSourceId]						= @InvoiceId   
 		,[strSourceId]						= @InvoiceNumber
 		,[intInvoiceId]						= NULL
@@ -276,7 +280,9 @@ BEGIN TRY
 UNION ALL
 
 SELECT
-		 [strSourceTransaction]				= 'Provisional Invoice'
+		 [strTransactionType]				= 'Invoice'
+		,[strType]							= 'Provisional Invoice'
+		,[strSourceTransaction]				= 'Provisional Invoice'
 		,[intSourceId]						= @InvoiceId   
 		,[strSourceId]						= @InvoiceNumber
 		,[intInvoiceId]						= NULL

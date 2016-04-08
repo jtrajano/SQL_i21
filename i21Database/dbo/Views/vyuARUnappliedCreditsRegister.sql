@@ -20,7 +20,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
 WHERE I.ysnPosted = 1
 AND I.ysnPaid = 0
-AND I.strTransactionType <> 'Invoice'
+AND I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 						WHERE AG.strAccountGroup = 'Receivables')

@@ -2,9 +2,25 @@
 	This is a user-defined table type used in creating/updating invoices for integration. 
 */
 CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
-(
+(	 
 	 [intId]								INT				IDENTITY PRIMARY KEY CLUSTERED                        
 	 --Header
+	,[strTransactionType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values 
+																											-- "Invoice" - Default
+																											-- "Credit Memo"
+																											-- "Debit Memo", 
+																											-- "Cash"
+																											-- "Cash Refund"
+																											-- "Overpayment"
+																											-- "Prepayment"
+	,[strType]								NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values 
+																											-- "Standard" - Default
+																											-- "Software"
+																											-- "Tank Delivery", 
+																											-- "Provisional Invoice"
+																											-- "Service Charge"
+																											-- "Transport Delivery"
+																											-- "Store"
 	,[strSourceTransaction]					NVARCHAR(250)									NOT NULL	-- Valid values 
 																											-- 0. "Direct"
 																											-- 1. "Sales Order"
@@ -17,6 +33,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 7. "Sell OffSite"
 																											-- 8. "Settle Storage"
 																											-- 9. "Process Grain Storage"
+																											-- 10. "Consumption Site"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 

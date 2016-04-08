@@ -74,7 +74,7 @@ FROM tblARInvoice I
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId    
 WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-  AND I.strTransactionType = 'Invoice'
+  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
   AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
@@ -222,7 +222,7 @@ FROM tblARInvoice I
 	LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
- AND I.strTransactionType = 'Invoice'
+ AND I.strTransactionType IN ('Invoice', 'Debit Memo')
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A

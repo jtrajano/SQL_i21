@@ -41,10 +41,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-DECLARE @CurrentErrorMessage NVARCHAR(250)
-		,@ZeroDecimal NUMERIC(18, 6)
+DECLARE @CurrentErrorMessage	NVARCHAR(250)
+		,@ZeroDecimal			NUMERIC(18, 6)
+		,@DateNow				DATETIME
 		
 SET @ZeroDecimal = 0.000000
+SET @DateNow = CAST(GETDATE() AS DATE)
 
 DECLARE @SourceColumn AS NVARCHAR (500)
 		,@SourceTable AS NVARCHAR (500)	
@@ -123,6 +125,8 @@ END CATCH
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
 DECLARE  @Id									INT
+		,@TransactionType						NVARCHAR(25)	
+		,@Type									NVARCHAR(100)	
 		,@SourceTransaction						NVARCHAR(250)	
 		,@SourceId								INT	
 		,@SourceNumber							NVARCHAR(250)
@@ -242,7 +246,9 @@ BEGIN
 		,[intId]
 								
 	SELECT TOP 1		 	
-		 @SourceTransaction				= [strSourceTransaction]
+		 @TransactionType				= [strTransactionType]
+		,@Type							= [strType]
+		,@SourceTransaction				= [strSourceTransaction]
 		,@SourceId						= [intSourceId]
 		,@SourceNumber					= [strSourceId]
 		,@InvoiceId						= [intInvoiceId]
@@ -251,9 +257,9 @@ BEGIN
 		,@CurrencyId					= [intCurrencyId]
 		,@SubCurrencyCents				= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = [intCurrencyId]),1) ELSE 1 END)
 		,@TermId						= [intTermId]
-		,@Date							= [dtmDate]
-		,@DueDate						= [dtmDueDate]
-		,@ShipDate						= [dtmShipDate]
+		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
+		,@DueDate						= CAST(ISNULL([dtmDueDate], @DateNow) AS DATE)
+		,@ShipDate						= CAST(ISNULL([dtmShipDate], @DateNow) AS DATE)
 		,@EntitySalespersonId			= [intEntitySalespersonId]
 		,@FreightTermId					= [intFreightTermId]
 		,@ShipViaId						= [intShipViaId]
@@ -387,8 +393,12 @@ BEGIN
 	END CATCH
 		
 	DECLARE @NewInvoiceId INT
-			,@Type NVARCHAR(200)
-	SET @Type = 'Standard'
+
+	IF ISNULL(@TransactionType, '') = ''
+		SET @TransactionType = 'Invoice'
+
+	IF ISNULL(@Type, '') = ''
+		SET @Type = 'Standard'
 	
 	IF ISNULL(@DistributionHeaderId, 0) > 0
 		BEGIN
@@ -407,7 +417,7 @@ BEGIN
 			,@DueDate						= @DueDate
 			,@ShipDate						= @ShipDate
 			,@PostDate						= NULL
-			,@TransactionType				= 'Invoice'
+			,@TransactionType				= @TransactionType
 			,@Type							= @Type
 			,@NewInvoiceId					= @NewInvoiceId			OUTPUT 
 			,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
@@ -870,8 +880,10 @@ BEGIN TRY
 		DECLARE @ExistingInvoiceId INT		
 		SELECT @ExistingInvoiceId = [intInvoiceId] FROM #EntriesForProcessing WHERE ISNULL([ysnForUpdate],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND ISNULL([intInvoiceId],0) <> 0 ORDER BY [intId]
 									
-		SELECT TOP 1		 	
-			 @SourceTransaction				= [strSourceTransaction]
+		SELECT TOP 1
+			 @TransactionType				= [strTransactionType]
+			,@Type							= [strType]		 	
+			,@SourceTransaction				= [strSourceTransaction]
 			,@SourceId						= [intSourceId]
 			,@SourceNumber					= [strSourceId]
 			,@InvoiceId						= [intInvoiceId]
@@ -956,7 +968,9 @@ BEGIN TRY
 		UPDATE
 			[tblARInvoice]
 		SET 
-			 [intEntityCustomerId]		= @EntityCustomerId
+			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Prepayment') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
+			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store') THEN [tblARInvoice].[strType] ELSE @Type END
+			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
 			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])
 			,[intSubCurrencyCents]		= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, C.[intCurrencyId])),1) ELSE 1 END) 	

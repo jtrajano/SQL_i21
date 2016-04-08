@@ -267,7 +267,7 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId					
 				WHERE
 					A.dblAmountPaid = 0
-					AND (NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE strTransactionType <> 'Invoice' AND intInvoiceId = B.intInvoiceId)
+					AND (NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE strTransactionType NOT IN ('Invoice','Debit Memo') AND intInvoiceId = B.intInvoiceId)
 						AND B.dblPayment <> 0)
 					
 				GROUP BY
@@ -1717,7 +1717,7 @@ IF @recap = 0
 			FROM
 				(
 					SELECT 
-						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
+						SUM(A.dblPayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblPayment
 						, SUM(A.dblDiscount) dblDiscount
 						, SUM(A.dblInterest) dblInterest
 						,A.intInvoiceId 
@@ -1767,7 +1767,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
+				dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1781,7 +1781,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) - A.dblPayment)
+				dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) - A.dblPayment)
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1970,7 +1970,7 @@ IF @recap = 0
 			FROM
 				(
 					SELECT 
-						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
+						SUM(A.dblPayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblPayment
 						,SUM(A.dblDiscount) dblDiscount
 						,SUM(A.dblDiscountAvailable) dblDiscountAvailable
 						,SUM(A.dblInterest) dblInterest
@@ -2022,7 +2022,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = ISNULL(C.dblAmountDue, 0.00) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)-- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+				dblAmountDue = ISNULL(C.dblAmountDue, 0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)-- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -2165,7 +2165,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
+			dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -2181,7 +2181,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END))) - A.dblPayment)
+			dblAmountDue = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - A.dblPayment)
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN

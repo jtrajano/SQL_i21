@@ -6,8 +6,19 @@ UPDATE tblSOSalesOrder SET ysnQuote = 1 WHERE strTransactionType = 'Quote'
 Update tblARInvoice SET strType = 'Standard'
 WHERE strType IS NULL OR LTRIM(RTRIM(strType)) = '' OR strType = 'General'
 
-Update tblARInvoice SET strType = 'Credit Memo'
-WHERE strTransactionType = 'Credit Memo'
+UPDATE tblARInvoice
+SET
+	 strTransactionType = 'Debit Memo'
+	,strType			= 'Standard'
+WHERE
+	strType = 'Debit Memo'
+	
+UPDATE tblARInvoice
+SET
+	 strTransactionType = 'Credit Memo'
+	,strType			= 'Standard'
+WHERE
+	strType = 'Credit Memo'	
 
 IF COL_LENGTH('tblARInvoice', 'intDistributionHeaderId') IS NOT NULL OR COL_LENGTH('tblARInvoice', 'intLoadDistributionHeaderId') IS NOT NULL
 	BEGIN

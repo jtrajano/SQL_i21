@@ -16,7 +16,7 @@ INNER JOIN
 		ON I.intEntityId = E.intEntityId 
 WHERE
 	I.ysnPosted = 0 
-	AND I.strTransactionType IN ('Invoice','Credit Memo')
+	AND I.strTransactionType IN ('Invoice','Credit Memo', 'Debit Memo')
 	AND ISNULL(I.intDistributionHeaderId, 0) = 0
 	AND I.ysnTemplate = 0
 	
