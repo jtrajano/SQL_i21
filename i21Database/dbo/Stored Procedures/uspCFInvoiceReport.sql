@@ -175,16 +175,41 @@ BEGIN
 		END
 		ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'TRUE' OR @From = 1))
 		BEGIN
+
+			DECLARE @tblCFTempTable TABLE
+			(
+				[intAccountId] INT
+			)
+
+			DECLARE @intTempCounter INT
+			DECLARE @intTempAccountId	INT
 			DECLARE @CFID NVARCHAR(50)
+			DECLARE @tblCFTempTableQuery nvarchar(MAX)
 
-			-- IF STARTING NUMBER IS EDITABLE --
-				 -- FIX STARTING NUMBER --
+			---------GET DISTINCT ACCOUNT ID---------
+			SET @tblCFTempTableQuery = 'SELECT DISTINCT intAccountId FROM vyuCFInvoiceReport ' + @whereClause
 
-			EXEC uspSMGetStartingNumber 53, @CFID OUT
-	
-			IF(@CFID IS NOT NULL)
+			INSERT INTO  @tblCFTempTable (intAccountId)
+			EXEC (@tblCFTempTableQuery)
+			---------GET DISTINCT ACCOUNT ID---------
+
+			WHILE (EXISTS(SELECT 1 FROM @tblCFTempTable))
 			BEGIN
-				EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @CFID + '''' + ' ' + @whereClause)
+
+				SELECT @intTempCounter = [intAccountId] FROM @tblCFTempTable
+				SELECT @intTempAccountId = [intAccountId] FROM @tblCFTempTable WHERE [intAccountId] = @intTempCounter
+
+				---------UPDATE INVOICE REPORT NUMBER ID---------
+				EXEC uspSMGetStartingNumber 53, @CFID OUT
+				IF(@CFID IS NOT NULL)
+				BEGIN
+				
+					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @CFID + '''' + ' WHERE intCardId = (SELECT TOP 1 intCardId FROM tblCFCard WHERE intAccountId =' + @intTempAccountId + ')')
+				END
+				---------UPDATE INVOICE REPORT NUMBER ID---------
+
+
+				DELETE FROM @tblCFTempTable WHERE [intAccountId] = @intTempCounter
 			END
 
 		END
