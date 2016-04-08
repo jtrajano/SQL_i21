@@ -713,7 +713,8 @@ BEGIN
 							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = RebuilInvTrans.intTransactionDetailId 
 						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
-							ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+							AND ReceiptItemLot.intLotId = RebuilInvTrans.intLotId 
 						LEFT JOIN dbo.tblARInvoice Invoice
 							ON Invoice.intInvoiceId = RebuilInvTrans.intTransactionId
 							AND Invoice.strInvoiceNumber = RebuilInvTrans.strTransactionId
