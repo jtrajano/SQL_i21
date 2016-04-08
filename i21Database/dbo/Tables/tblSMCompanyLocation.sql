@@ -200,9 +200,10 @@
 	CONSTRAINT [FK_tblSMCompanyLocation_tblEMEntity_ProductAlertOwner] FOREIGN KEY ([intProductAlertOwnerId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationDockDoorUnit] FOREIGN KEY ([intSanitizationDockDoorUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationStagingUnit] FOREIGN KEY ([intSanitizationStagingUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
-	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationStorageUnit] FOREIGN KEY ([intSanitizationStorageUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
+	CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_SanitizationStorageUnit] FOREIGN KEY ([intSanitizationStorageUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 
 )
-
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [AK_tblSMCompanyLocation_strLocationNumber] ON [tblSMCompanyLocation]([strLocationNumber]) WHERE [strLocationNumber] IS NOT NULL
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity field',
