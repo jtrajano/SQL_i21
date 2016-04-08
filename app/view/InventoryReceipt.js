@@ -782,13 +782,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         xtype: 'label',
                                                                                         itemId: 'lblGrossWgt',
                                                                                         width: 150,
-                                                                                        text: 'Gross Wgt'
+                                                                                        text: 'Gross'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'label',
                                                                                         itemId: 'lblNetWgt',
                                                                                         width: 150,
-                                                                                        text: 'Net Wgt'
+                                                                                        text: 'Net'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'label',
@@ -1296,42 +1296,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colItemSubCurrency',
-                                                                                text: 'Sub Currency',
-                                                                                editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intCurrencyID',
-                                                                                            dataType: 'numeric',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strCurrency',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Currency',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strDescription',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Description',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'ysnSubCurrency',
-                                                                                            dataType: 'boolean',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'intMainCurrencyId',
-                                                                                            dataType: 'numeric',
-                                                                                            hidden: true
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboItemSubCurrency',
-                                                                                    displayField: 'strCurrency',
-                                                                                    valueField: 'strCurrency'
-                                                                                }
+                                                                                text: 'Cost Currency'
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1903,6 +1868,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'string',
                                                                                             text: 'Unit Type',
                                                                                             flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'checkcolumn',
+                                                                                            dataIndex: 'ysnStockUnit',
+                                                                                            dataType: 'boolean',
+                                                                                            text: 'Stock Unit',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblUnitQty',
+                                                                                            dataType: 'float',
+                                                                                            text: 'Unit Unit',
+                                                                                            hidden: 1
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboLotUOM',
@@ -2417,7 +2395,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colChargeCurrency',
-                                                                text: 'Currency',
+                                                                text: 'Cost Currency',
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
@@ -2447,6 +2425,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             dataIndex: 'intMainCurrencyId',
                                                                             dataType: 'numeric',
                                                                             hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'intCent',
+                                                                            dataType: 'numeric',
+                                                                            hidden: true
                                                                         }
                                                                     ],
                                                                     itemId: 'cboChargeCurrency',
@@ -2468,7 +2451,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
-                                                                itemId: 'colCostUOM',
+                                                                itemId: 'colChargeUOM',
                                                                 text: 'UOM',
                                                                 flex: 1,
                                                                 editor: {
@@ -2500,19 +2483,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             flex: 1
                                                                         }
                                                                     ],
-                                                                    itemId: 'cboCostUOM',
+                                                                    itemId: 'cboChargeUOM',
                                                                     displayField: 'strUnitMeasure',
                                                                     valueField: 'strUnitMeasure'
-                                                                }
-                                                            },
-                                                            {
-                                                                xtype: 'numbercolumn',
-                                                                itemId: 'colExchangeRate',
-                                                                text: 'Exchange Rate',
-                                                                flex: 1,
-                                                                format: '0,000.000000',
-                                                                editor: {
-                                                                    xtype: 'numericfield'
                                                                 }
                                                             },
                                                             {

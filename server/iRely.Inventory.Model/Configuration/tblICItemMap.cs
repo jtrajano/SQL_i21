@@ -269,6 +269,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
             this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
             this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
+            this.Property(t => t.intOriginId).HasColumnName("intOriginId");
+            this.Property(t => t.strOriginName).HasColumnName("strOriginName");
         }
     }
 
@@ -440,7 +442,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
             this.Property(t => t.strLifeTimeType).HasColumnName("strLifeTimeType");
-            this.Property(t => t.ysnListBundleSeparately).HasColumnName("ysnListBundleSeparately");
+            this.Property(t => t.ysnListBundleSeparately).HasColumnName("ysnListBundleSeparately"); 
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)
@@ -477,6 +479,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLocationType).HasColumnName("strLocationType");
             this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");

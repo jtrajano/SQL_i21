@@ -29,11 +29,11 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
         },
         { name: 'intContractId', type: 'int', allowNull: true },
+        { name: 'intContractDetailId', type: 'int', allowNull: true },
         { name: 'intChargeId', type: 'int', allowNull: true },
         { name: 'ysnInventoryCost', type: 'boolean' },
         { name: 'strCostMethod', type: 'string' },
         { name: 'dblRate', type: 'float' },
-        { name: 'dblExchangeRate', type: 'float' },
         { name: 'intCostUOMId', type: 'int', allowNull: true },
         { name: 'dblAmount', type: 'float' },
         { name: 'strAllocateCostBy', type: 'string' },
@@ -47,7 +47,14 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strCostUOM', type: 'string' },
         { name: 'strUnitType', type: 'string' },
         { name: 'strVendorId', type: 'string' },
-        { name: 'strContractNumber', type: 'string' }
+        { name: 'strVendorName', type: 'string' },
+        { name: 'strContractNumber', type: 'string' },
+
+        { name: 'intCurrencyId', type: 'int', allowNull: true },
+        { name: 'strCurrency', type: 'string' },
+        { name: 'dblExchangeRate', type: 'float', allowNull: true  },
+        { name: 'intCent', type: 'int', allowNull: true },
+        { name: 'ysnSubCurrency', type: 'boolean', allowNull: true  }
     ],
 
     validators: [

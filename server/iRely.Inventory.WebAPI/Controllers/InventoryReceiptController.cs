@@ -113,9 +113,9 @@ namespace iRely.Inventory.WebApi
 
         [HttpGet]
         [ActionName("GetAddOrders")]
-        public async Task<HttpResponseMessage> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType)
+        public async Task<HttpResponseMessage> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType, int CurrencyId)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAddOrders(param, VendorId, ReceiptType, SourceType));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAddOrders(param, VendorId, ReceiptType, SourceType, CurrencyId));
         }
 
         [HttpGet]

@@ -1566,7 +1566,8 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter14",
+
+                                                                            "name": "filter1",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         },
@@ -2411,69 +2412,10 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "itemId": "colItemSubCurrency",
-                                                                        "text": "Sub Currency"
+                                                                        "text": "Cost Currency"
                                                                     },
                                                                     "name": "MyColumn48",
-                                                                    "designerId": "bf3d5c3c-68e4-4b9e-80d9-b6964192fab9",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.field.ComboBox",
-                                                                            "reference": {
-                                                                                "name": "editor",
-                                                                                "type": "object"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "columns": [
-                                                                                    "[",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'intCurrencyID',",
-                                                                                    "\t\tdataType: 'numeric',",
-                                                                                    "\t\thidden: true",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strCurrency',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Currency',",
-                                                                                    "\t\tflex: 1",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strDescription',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Description',",
-                                                                                    "\t\tflex: 1",
-                                                                                    "\t},",
-                                                                                    "    {",
-                                                                                    "\t\tdataIndex: 'ysnSubCurrency',",
-                                                                                    "\t\tdataType: 'boolean',",
-                                                                                    "\t\thidden: true",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'intMainCurrencyId',",
-                                                                                    "\t\tdataType: 'numeric',",
-                                                                                    "\t\thidden: true",
-                                                                                    "\t}",
-                                                                                    "]"
-                                                                                ],
-                                                                                "designer|createAlias": "gridcombobox",
-                                                                                "displayField": "strCurrency",
-                                                                                "itemId": "cboItemSubCurrency",
-                                                                                "valueField": "strCurrency"
-                                                                            },
-                                                                            "name": "MyComboBox77",
-                                                                            "configAlternates": {
-                                                                                "columns": "array"
-                                                                            },
-                                                                            "designerId": "49ecb544-5ff7-4e02-ba4a-8da94738db05",
-                                                                            "customConfigs": [
-                                                                                {
-                                                                                    "group": "(Custom Properties)",
-                                                                                    "name": "columns",
-                                                                                    "type": "string"
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    ]
+                                                                    "designerId": "bf3d5c3c-68e4-4b9e-80d9-b6964192fab9"
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Number",
@@ -3305,7 +3247,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "itemId": "lblGrossWgt",
-                                                                                "text": "Gross Wgt",
+                                                                                "text": "Gross",
                                                                                 "width": 150
                                                                             },
                                                                             "name": "MyLabel5",
@@ -3323,7 +3265,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "itemId": "lblNetWgt",
-                                                                                "text": "Net Wgt",
+                                                                                "text": "Net",
                                                                                 "width": 150
                                                                             },
                                                                             "name": "MyLabel6",
@@ -3457,7 +3399,7 @@
                                                                                 "tabIndex": -1,
                                                                                 "text": "Replicate Balance Lots"
                                                                             },
-                                                                            "name": "MyButton25",
+                                                                            "name": "MyButton24",
                                                                             "designerId": "5be25fe0-8328-4217-95ed-d159a227c18c"
                                                                         },
                                                                         {
@@ -3506,7 +3448,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter15",
+                                                                            "name": "filter11",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3767,6 +3709,19 @@
                                                                                     "\t\tdataType: 'string',",
                                                                                     "\t\ttext: 'Unit Type',",
                                                                                     "\t\tflex: 1",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\txtype: 'checkcolumn',",
+                                                                                    "\t\tdataIndex: 'ysnStockUnit',",
+                                                                                    "\t\tdataType: 'boolean',",
+                                                                                    "\t\ttext: 'Stock Unit',",
+                                                                                    "\t\tflex: 1",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'dblUnitQty',",
+                                                                                    "\t\tdataType: 'float',",
+                                                                                    "\t\ttext: 'Unit Unit',",
+                                                                                    "\t\thidden: 1",
                                                                                     "\t}",
                                                                                     "]"
                                                                                 ],
@@ -4824,7 +4779,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter16",
+                                                            "name": "filter12",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5044,9 +4999,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "itemId": "colChargeCurrency",
-                                                        "text": "Currency"
+                                                        "text": "Cost Currency"
                                                     },
-                                                    "name": "MyColumn53",
+                                                    "name": "MyColumn35",
                                                     "designerId": "11978d9a-f652-4779-8e35-91f0c65b23c0",
                                                     "cn": [
                                                         {
@@ -5059,33 +5014,38 @@
                                                             "userConfig": {
                                                                 "columns": [
                                                                     "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intCurrencyID',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strCurrency',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Currency',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Description',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "    {",
-                                                                    "\t\tdataIndex: 'ysnSubCurrency',",
-                                                                    "\t\tdataType: 'boolean',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intMainCurrencyId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\thidden: true",
-                                                                    "\t}",
+                                                                    "{",
+                                                                    "dataIndex: 'intCurrencyID',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'strCurrency',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Currency',",
+                                                                    "flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'strDescription',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Description',",
+                                                                    "flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'ysnSubCurrency',",
+                                                                    "dataType: 'boolean',",
+                                                                    "hidden: true",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'intMainCurrencyId',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "}, ",
+                                                                    "{",
+                                                                    "dataIndex: 'intCent',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "}\t",
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
@@ -5093,11 +5053,11 @@
                                                                 "itemId": "cboChargeCurrency",
                                                                 "valueField": "strCurrency"
                                                             },
-                                                            "name": "MyComboBox77",
+                                                            "name": "MyComboBox",
                                                             "configAlternates": {
                                                                 "columns": "array"
                                                             },
-                                                            "designerId": "f7b28852-a843-40cb-8256-6d7aa4b11959",
+                                                            "designerId": "37a053d5-ab58-4998-aefa-31985f86a6a4",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
@@ -5150,7 +5110,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
-                                                        "itemId": "colCostUOM",
+                                                        "itemId": "colChargeUOM",
                                                         "text": "UOM"
                                                     },
                                                     "name": "MyColumn45",
@@ -5195,7 +5155,7 @@
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strUnitMeasure",
-                                                                "itemId": "cboCostUOM",
+                                                                "itemId": "cboChargeUOM",
                                                                 "valueField": "strUnitMeasure"
                                                             },
                                                             "name": "MyComboBox82",
@@ -5210,37 +5170,6 @@
                                                                     "type": "string"
                                                                 }
                                                             ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "format": "0,000.000000",
-                                                        "itemId": "colExchangeRate",
-                                                        "text": "Exchange Rate"
-                                                    },
-                                                    "name": "MyNumberColumn24",
-                                                    "designerId": "4d890153-7a6f-44d3-a137-4b404cbf4f43",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Number",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "designer|createAlias": "numericfield"
-                                                            },
-                                                            "name": "MyNumberField60",
-                                                            "designerId": "45042bcf-17e9-4278-ab79-54378bb60de6"
                                                         }
                                                     ]
                                                 },
@@ -5841,7 +5770,8 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+
+                                                    "name": "filter13",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6310,7 +6240,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter14",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6840,7 +6770,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
