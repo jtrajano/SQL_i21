@@ -3603,6 +3603,7 @@
     <Build Include="dbo\Views\vyuTRGetQuotePriceAdjustmentHeader.sql" />
     <Build Include="dbo\Views\vyuTRGetQuotePriceAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuTRGetBulkPlantFreight.sql" />
+    <Build Include="dbo\Tables\tblHDActivityRecipient.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
