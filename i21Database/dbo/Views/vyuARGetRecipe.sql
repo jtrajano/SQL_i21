@@ -6,15 +6,16 @@ SELECT R.intRecipeId
 	 , I.strDescription
 	 , R.intItemUOMId
 	 , UOM.strUnitMeasure
-	 , R.intLocationId	AS intCompanyLocationId
+	 , intCompanyLocationId		= R.intLocationId
 	 , L.strLocationName
-	 , R.dblQuantity	AS dblOrigQuantity
+	 , dblOrigQuantity			= R.dblQuantity
 	 , R.dblQuantity
 	 , R.intVersionNo
 	 , R.intManufacturingProcessId
 	 , MP.strProcessName
-	 , R.intCustomerId	AS intEntityCustomerId
-	 , E.strEntityNo	AS strCustomerNumber	 
+	 , intEntityCustomerId		= R.intCustomerId
+	 , strCustomerNumber		= E.strEntityNo
+	 , strRecipeName			= R.strName
 FROM tblMFRecipe R
 	LEFT JOIN tblICItem I ON R.intItemId = I.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON R.[intItemUOMId] = UOM.intItemUOMId
