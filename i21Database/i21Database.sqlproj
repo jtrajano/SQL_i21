@@ -3455,7 +3455,6 @@
     <Build Include="dbo\Stored Procedures\uspAPCreate1099BFile.sql" />
     <Build Include="dbo\Views\vyuPRReportQuarterlyStateTax.sql" />
     <Build Include="dbo\Functions\fnAPGetNextVoucherApprover.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCReopenScaleTicket.sql" />
     <Build Include="dbo\Tables\tblCTReassign.sql" />
     <Build Include="dbo\Tables\tblCTReassignDetail.sql" />
     <Build Include="dbo\Tables\tblCTReassignAllocation.sql" />
@@ -3604,6 +3603,7 @@
     <Build Include="dbo\Views\vyuTRGetQuotePriceAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuTRGetBulkPlantFreight.sql" />
     <Build Include="dbo\Tables\tblHDActivityRecipient.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
