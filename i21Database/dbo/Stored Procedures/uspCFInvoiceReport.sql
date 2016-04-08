@@ -168,54 +168,144 @@ BEGIN
 			,@Fieldname = [fieldname]
 		FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
 
+		DECLARE @tblCFTableCardIds TABLE ([intCardId]	INT)
+		DECLARE @tblCFTableTransationIds TABLE ([intTransactionId]	INT)
+		DECLARE @tblCFFilterIds TABLE ([intTransactionId]	INT)
+		DECLARE @CFID NVARCHAR(50)
+		DECLARE @tblCFTempTableQuery nvarchar(MAX)
+
+
+		DECLARE @intTempCardCounter INT
+		DECLARE @intTempCardId	INT
+		DECLARE @tblCFInvoiceNunber TABLE (
+			[intCardId]	INT,
+			[strInvoiceNumber]	NVARCHAR(MAX)
+		)
+
+		---------GET DISTINCT CARD ID---------
+		SET @tblCFTempTableQuery = 'SELECT DISTINCT intCardId FROM vyuCFInvoiceReport ' + @whereClause
+
+		INSERT INTO  @tblCFTableCardIds (intCardId)
+		EXEC (@tblCFTempTableQuery)
+		---------GET DISTINCT CARD ID---------
+
+		---------CREATE ID WITH INVOICE NUMBER--------
+		WHILE (EXISTS(SELECT 1 FROM @tblCFTableCardIds))
+		BEGIN
+
+			SELECT @intTempCardCounter = [intCardId] FROM @tblCFTableCardIds
+			SELECT @intTempCardId = [intCardId] FROM @tblCFTableCardIds WHERE [intCardId] = @intTempCardCounter
+
+			EXEC uspSMGetStartingNumber 53, @CFID OUT
+
+			INSERT INTO @tblCFInvoiceNunber (
+					[intCardId]
+				,[strInvoiceNumber]
+			)
+			VALUES(
+					@intTempCardId
+				,@CFID
+			)
+
+			DELETE FROM @tblCFTableCardIds WHERE [intCardId] = @intTempCardCounter
+
+			-----------UPDATE INVOICE REPORT NUMBER ID---------
+			--EXEC uspSMGetStartingNumber 53, @CFID OUT
+			--IF(@CFID IS NOT NULL)
+			--BEGIN
+				
+			--	EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @CFID + '''' + ' WHERE intCardId = ' + @intTempAccountId)
+			--END
+			-----------UPDATE INVOICE REPORT NUMBER ID---------
+
+		END
+		---------CREATE ID WITH INVOICE NUMBER--------
+
+
+		DECLARE @intTempTransactionCounter INT
+		DECLARE @intTempTransactionId INT
+		DECLARE @strInvoiceNumber NVARCHAR(MAX)
 		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'FALSE' OR @From = 0))
 		BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' ( strInvoiceReportNumber  IS NULL )'
-		END
-		ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'TRUE' OR @From = 1))
-		BEGIN
 
-			DECLARE @tblCFTempTable TABLE
-			(
-				[intAccountId] INT
-			)
+			---------GET DISTINCT TRANSACTION ID---------
+			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM vyuCFInvoiceReport ' + @whereClause
 
-			DECLARE @intTempCounter INT
-			DECLARE @intTempAccountId	INT
-			DECLARE @CFID NVARCHAR(50)
-			DECLARE @tblCFTempTableQuery nvarchar(MAX)
-
-			---------GET DISTINCT ACCOUNT ID---------
-			SET @tblCFTempTableQuery = 'SELECT DISTINCT intAccountId FROM vyuCFInvoiceReport ' + @whereClause
-
-			INSERT INTO  @tblCFTempTable (intAccountId)
+			INSERT INTO  @tblCFTableTransationIds (intTransactionId)
 			EXEC (@tblCFTempTableQuery)
-			---------GET DISTINCT ACCOUNT ID---------
 
-			WHILE (EXISTS(SELECT 1 FROM @tblCFTempTable))
+			INSERT INTO  @tblCFFilterIds (intTransactionId)
+			EXEC (@tblCFTempTableQuery)
+			---------GET DISTINCT TRANSACTION ID---------
+
+
+			WHILE (EXISTS(SELECT 1 FROM @tblCFTableTransationIds))
 			BEGIN
 
-				SELECT @intTempCounter = [intAccountId] FROM @tblCFTempTable
-				SELECT @intTempAccountId = [intAccountId] FROM @tblCFTempTable WHERE [intAccountId] = @intTempCounter
+				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
+				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intCardId = (SELECT TOP 1 intCardId FROM tblCFTransaction WHERE intTransactionId = @intTempTransactionId)
 
 				---------UPDATE INVOICE REPORT NUMBER ID---------
-				EXEC uspSMGetStartingNumber 53, @CFID OUT
 				IF(@CFID IS NOT NULL)
 				BEGIN
 				
-					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @CFID + '''' + ' WHERE intCardId = (SELECT TOP 1 intCardId FROM tblCFCard WHERE intAccountId =' + @intTempAccountId + ')')
+					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
 				END
 				---------UPDATE INVOICE REPORT NUMBER ID---------
 
 
-				DELETE FROM @tblCFTempTable WHERE [intAccountId] = @intTempCounter
+				DELETE FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
 			END
 
 		END
+		ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'TRUE' OR @From = 1))
+		BEGIN
 
-		EXEC('SELECT * FROM vyuCFInvoiceReport ' + @whereClause)
+			---------GET DISTINCT TRANSACTION ID---------
+			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM vyuCFInvoiceReport ' + @whereClause
 
+			INSERT INTO  @tblCFTableTransationIds (intTransactionId)
+			EXEC (@tblCFTempTableQuery)
+
+			INSERT INTO  @tblCFFilterIds (intTransactionId)
+			EXEC (@tblCFTempTableQuery)
+			---------GET DISTINCT TRANSACTION ID---------
+
+			WHILE (EXISTS(SELECT 1 FROM @tblCFTableTransationIds))
+			BEGIN
+
+				SELECT @intTempTransactionCounter = [intTransactionId] FROM @tblCFTableTransationIds
+				SELECT @intTempTransactionId = [intTransactionId] FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
+				SELECT @strInvoiceNumber = strInvoiceNumber from @tblCFInvoiceNunber where intCardId = (SELECT TOP 1 intCardId FROM tblCFTransaction WHERE intTransactionId = @intTempTransactionId)
+
+				---------UPDATE INVOICE REPORT NUMBER ID---------
+				IF(@CFID IS NOT NULL)
+				BEGIN
+				
+					EXEC('UPDATE tblCFTransaction SET strInvoiceReportNumber = ' + '''' + @strInvoiceNumber + '''' + ' WHERE intTransactionId = ' + @intTempTransactionId)
+				END
+				---------UPDATE INVOICE REPORT NUMBER ID---------
+
+
+				DELETE FROM @tblCFTableTransationIds WHERE [intTransactionId] = @intTempTransactionCounter
+			END
+
+		END
+		ELSE
+		BEGIN
+			---------GET DISTINCT TRANSACTION ID---------
+			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM vyuCFInvoiceReport ' + @whereClause
+
+			INSERT INTO  @tblCFFilterIds (intTransactionId)
+			EXEC (@tblCFTempTableQuery)
+			---------GET DISTINCT TRANSACTION ID---------
+		END
+
+		--EXEC('SELECT * FROM vyuCFInvoiceReport ' + @whereClause)
+		SELECT * FROM vyuCFInvoiceReport where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 	END
     
 END
