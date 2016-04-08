@@ -401,6 +401,10 @@ Ext.define('Inventory.view.CommodityViewController', {
             }
         }
     },
+    
+     onFutureMarketDrilldown: function(combo) {
+        iRely.Functions.openScreen('RiskManagement.view.FuturesMarket', {action: 'new', viewConfig: { modal: true }});
+    },
 
     init: function(application) {
         this.control({
@@ -421,7 +425,10 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
             "#colUOMDefaultUOM": {
                 beforecheckchange: this.onUOMStockUnitCheckChange
-            }
+            },
+             "#cboFutureMarket": {
+                drilldown: this.onFutureMarketDrilldown
+            },
         });
     }
 });
