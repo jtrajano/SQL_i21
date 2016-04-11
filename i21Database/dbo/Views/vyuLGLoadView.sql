@@ -24,6 +24,26 @@ SELECT -- Load Header
 				ELSE 'Drop-Ship'
 				END
 		END COLLATE Latin1_General_CI_AS
+	,strSourceType = CASE 
+		WHEN LOAD.intSourceType = 1
+			THEN 'None'
+		WHEN LOAD.intSourceType = 2
+			THEN 'Contracts'
+		WHEN LOAD.intSourceType = 3
+			THEN 'Orders'
+		WHEN LOAD.intSourceType = 4
+			THEN 'Allocations'
+		WHEN LOAD.intSourceType = 5
+			THEN 'Picked Lots'
+		WHEN LOAD.intSourceType = 6
+			THEN 'Pick Lots'
+		END
+	,strTransportationMode = CASE 
+		WHEN intTransportationMode = 1 
+			THEN 'Truck'
+		WHEN intTransportationMode = 2
+			THEN 'Ocean Vessel'
+		END
 	,intGenerateReferenceNumber = GLoad.intReferenceNumber
 	,intGenerateSequence = LOAD.intGenerateSequence
 	,intNumberOfLoads = GLoad.intNumberOfLoads
@@ -102,6 +122,7 @@ SELECT -- Load Header
 		END COLLATE Latin1_General_CI_AS,
 		[intPositionId],
 		[intWeightUnitMeasureId],
+		strWeightUnitMeasure = [strUnitMeasure],
 		[strBLNumber],
 		[dtmBLDate],
 		[strOriginPort],
@@ -153,6 +174,7 @@ SELECT -- Load Header
 		[intTransportationMode],
 		[intShipmentStatus]
 FROM tblLGLoad LOAD
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = LOAD.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = LOAD.intDriverEntityId
