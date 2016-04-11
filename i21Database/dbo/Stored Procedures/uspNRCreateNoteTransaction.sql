@@ -260,14 +260,14 @@ BEGIN TRY
 					SET @ExtraAmount = (@Amount - @ExpectedPayAmount)
 					SET @strCMType = 'X'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExtraAmount, 0, ''
-					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+					SELECT @intGLReceivableAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference --WHERE strPreference = 'NRGLNotesReceivableAccount'
 					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExtraAmount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
 					SET @Comments = @Comments + @strCMType + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
 					SET @strCMTransactionId = ''
 					
 					SET @strCMType = 'E'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, 0, 0, ''
-					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+					SELECT @intGLReceivableAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference --WHERE strPreference = 'NRGLScheduledInvoiceAccount'
 					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExpectedPayAmount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
 					SET @Comments = @Comments + ',' + @strCMType + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
 					SET @strCMTransactionId = ''
@@ -277,7 +277,7 @@ BEGIN TRY
 				BEGIN
 					SET @strCMType = 'E'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
-					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+					SELECT @intGLReceivableAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference --WHERE strPreference = 'NRGLNotesReceivableAccount'
 					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
 					SET @Comments = @Comments + @strCMType + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
 					SET @strCMTransactionId = ''
@@ -287,7 +287,7 @@ BEGIN TRY
 				BEGIN
 					SET @strCMType = 'L'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, @LateFee, ''
-					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+					SELECT @intGLReceivableAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference --WHERE strPreference = 'NRGLScheduledInvoiceAccount'
 					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @LateFee, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
 					SET @Comments = @Comments + ',' + @strCMType + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
 					SET @strCMTransactionId = ''
@@ -300,7 +300,7 @@ BEGIN TRY
 			BEGIN
 				SET @strCMType = 'P'
 				--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
-				SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+				SELECT @intGLReceivableAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference --WHERE strPreference = 'NRGLNotesReceivableAccount'
 				EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
 				SET @Comments = @Comments + @strCMType + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
 				SET @strCMTransactionId = ''

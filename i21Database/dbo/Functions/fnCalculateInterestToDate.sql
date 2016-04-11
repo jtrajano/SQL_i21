@@ -26,7 +26,7 @@ Declare @prvdate datetime
 	SELECT @MaturityDate=dtmMaturityDate from dbo.tblNRNote where intNoteId=@NoteId
 	Select @WriteOff_Date = ISNULL(dtmWriteOffDate,0) from dbo.tblNRNote WHERE intNoteId=@NoteId
 	
-	SELECT @INTEREST_AFTER_MATURITY = strValue FROM dbo.tblSMPreferences WHERE RTRIM(strPreference) = 'CalculateInterestAfterMaturity'
+	SELECT @INTEREST_AFTER_MATURITY = ysnContinueInterestCalculationAfterNoteMaturityDate FROM dbo.tblNRCompanyPreference --WHERE RTRIM(strPreference) = 'CalculateInterestAfterMaturity'
 	
 	  Begin
 		-- Get last interest calculate date
