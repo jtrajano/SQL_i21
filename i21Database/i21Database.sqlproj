@@ -3600,6 +3600,8 @@
     <Build Include="dbo\Stored Procedures\uspTMCheckPendingTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetContractPrice.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\13_GlobalJulianCalendar.sql" />
+    <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
