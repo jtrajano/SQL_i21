@@ -3602,6 +3602,8 @@
     <Build Include="dbo\Tables\tblTFReportingComponentItem.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunPrecompile.sql" />
     <Build Include="dbo\Views\vyuSMEntityRole.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\13_GlobalJulianCalendar.sql" />
+    <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

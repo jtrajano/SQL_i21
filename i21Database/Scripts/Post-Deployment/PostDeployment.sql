@@ -127,6 +127,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
+:r .\TM\DefaultData\13_GlobalJulianCalendar
 
 
 -- Canned Panels
