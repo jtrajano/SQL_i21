@@ -53,11 +53,14 @@ BEGIN
 									FOR XML PATH ('''')) + ''#@$'','', #@$'','''')
 				,A.intLocationId
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
+				,strFillMethod = H.strFillMethod
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
 				INNER JOIN vwcusmst C
 					ON B.intCustomerNumber = C.A4GLIdentity
+				LEFT JOIN tblTMFillMethod H
+					ON A.intFillMethodId = H.intFillMethodId
 		')
 	END
 	ELSE
@@ -89,6 +92,7 @@ BEGIN
 									FOR XML PATH ('''')) + ''#@$'','', #@$'','''')
 				,A.intLocationId
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
+				,strFillMethod = H.strFillMethod
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -103,6 +107,8 @@ BEGIN
 						and F.ysnDefaultContact = 1
 				INNER JOIN tblEMEntity G 
 					ON F.intEntityContactId = G.intEntityId
+				LEFT JOIN tblTMFillMethod H
+					ON A.intFillMethodId = H.intFillMethodId
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END

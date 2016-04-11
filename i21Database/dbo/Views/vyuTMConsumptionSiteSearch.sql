@@ -24,6 +24,7 @@ AS
 						FOR XML PATH ('')) + '#@$',', #@$','')
 	,A.intLocationId
 	,ysnSiteActive = ISNULL(A.ysnActive,0)
+	,strFillMethod = H.strFillMethod
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -38,5 +39,7 @@ AS
 			and F.ysnDefaultContact = 1
 	INNER JOIN tblEMEntity G 
 		ON F.intEntityContactId = G.intEntityId
+	LEFT JOIN tblTMFillMethod H
+		ON A.intFillMethodId = H.intFillMethodId
 	WHERE ISNULL(D.ysnActive,0) = 1
 GO
