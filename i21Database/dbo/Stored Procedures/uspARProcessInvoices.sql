@@ -923,7 +923,7 @@ BEGIN TRY
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]			
 			,@DistributionHeaderId			= [intDistributionHeaderId]
-			,@LoadDistributionHeaderId		= [inLoadtDistributionHeaderId]
+			,@LoadDistributionHeaderId		= [intLoadDistributionHeaderId]
 			,@ActualCostId					= [strActualCostId]
 			,@ShipmentId					= [intShipmentId]
 			,@TransactionId 				= [intTransactionId]
