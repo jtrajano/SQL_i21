@@ -323,9 +323,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
-:r .\TF\DefaultData\_ScheduleFields.sql
-:r .\TF\DefaultData\_TaxReportTemplate.sql
-:r .\TF\DefaultData\_Transactions.sql
 :r .\TF\DefaultData\_ValidProductCode.sql
 
 
