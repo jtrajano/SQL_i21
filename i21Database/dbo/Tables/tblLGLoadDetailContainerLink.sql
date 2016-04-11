@@ -13,6 +13,12 @@
 [intCostUOMId] [int] NULL,
 [intCurrencyId] [int] NULL,
 [dblTotalCost] NUMERIC(18, 6) NULL,
+[strIntegrationNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+[dtmIntegrationRequested] DATETIME NULL,
+[strIntegrationOrderNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+[dblIntegrationOrderPrice] NUMERIC(18, 6) NULL,
+[ysnExported] [bit] NULL,
+[dtmExportedDate] DATETIME NULL,
 
 CONSTRAINT [PK_tblLGLoadDetailContainerLink_intLoadDetailContainerLinkId] PRIMARY KEY ([intLoadDetailContainerLinkId]), 
 CONSTRAINT [FK_tblLGLoadDetailContainerLink_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
