@@ -215,7 +215,6 @@ BEGIN TRY
 		,[dblDiscount]
 		,[dblAmountDue]
 		,[dblPayment]
-		,[intPeriodsToAccrue]
 		,[intEntitySalespersonId]
 		,[intFreightTermId]
 		,[intShipViaId]
@@ -265,7 +264,7 @@ BEGIN TRY
 		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))),1) ELSE @SubCurrencyCents END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[intSourceId]					= @SourceId
-		,[intPeriodsToAccrue]			= @PeriodsToAccrue
+		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
 		,[dtmDate]						= ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)
 		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
 		,[dtmShipDate]					= ISNULL(@ShipDate, DATEADD(month, 1, ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)))
@@ -277,7 +276,6 @@ BEGIN TRY
 		,[dblDiscount]					= @ZeroDecimal
 		,[dblAmountDue]					= @ZeroDecimal
 		,[dblPayment]					= @ZeroDecimal
-		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
 		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[intFreightTermId]				= @FreightTermId
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
