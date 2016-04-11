@@ -62,7 +62,7 @@ BEGIN
 	--DO NOT ALLOW TO VOID IF PAYMENT WAS CREATED FROM IMPORTING.
 	IF(EXISTS(SELECT 1 FROM tblAPPayment A WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND ysnOrigin = 1))
 	BEGIN
-		RAISERROR('Unable to post payment created from origin.', 16, 1);
+		RAISERROR('Unable to void payment created from origin.', 16, 1);
 	END
 
 	--Duplicate payment
