@@ -32,11 +32,13 @@
 	,@PaymentId						INT				= NULL
 	,@SplitId						INT				= NULL
 	,@DistributionHeaderId			INT				= NULL
+	,@LoadDistributionHeaderId		INT				= NULL
 	,@ActualCostId					NVARCHAR(50)	= NULL			
 	,@ShipmentId					INT				= NULL
 	,@TransactionId					INT				= NULL
 	,@OriginalInvoiceId				INT				= NULL
 	,@PeriodsToAccrue				INT				= 1
+	,@SourceId						INT				= 0
 		
 	,@ItemId						INT				= NULL
 	,@ItemIsInventory				BIT				= 0
@@ -200,6 +202,8 @@ BEGIN TRY
 		,[intCurrencyId]
 		,[intSubCurrencyCents]
 		,[intTermId]
+		,[intSourceId]
+		,[intPeriodsToAccrue] 
 		,[dtmDate]
 		,[dtmDueDate]
 		,[dtmShipDate]
@@ -244,6 +248,7 @@ BEGIN TRY
 		,[intPaymentId]
 		,[intSplitId]
 		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -259,6 +264,8 @@ BEGIN TRY
 		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))	
 		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))),1) ELSE @SubCurrencyCents END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
+		,[intSourceId]					= @SourceId
+		,[intPeriodsToAccrue]			= @PeriodsToAccrue
 		,[dtmDate]						= ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)
 		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
 		,[dtmShipDate]					= ISNULL(@ShipDate, DATEADD(month, 1, ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)))
@@ -303,6 +310,7 @@ BEGIN TRY
 		,[intPaymentId]					= @PaymentId 
 		,[intSplitId]					= @SplitId 
 		,[intDistributionHeaderId]		= @DistributionHeaderId 
+		,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId 
 		,[strActualCostId]				= @ActualCostId 
 		,[intShipmentId]				= @ShipmentId 
 		,[intTransactionId]				= @TransactionId 
@@ -462,8 +470,18 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
+
 	
 BEGIN TRY
+	SET @SourceId = dbo.[fnARGetValidInvoiceSourceId](@NewId)
+	IF ISNULL(@SourceId,0) <> 0
+	BEGIN
+		UPDATE tblARInvoice
+			SET [intSourceId] = @SourceId
+		WHERE
+			[intInvoiceId] = @NewId
+	END
+
 	EXEC [dbo].[uspARReComputeInvoiceAmounts] @NewId
 END TRY
 BEGIN CATCH

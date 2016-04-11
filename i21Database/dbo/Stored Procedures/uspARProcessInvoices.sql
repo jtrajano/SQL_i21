@@ -129,6 +129,7 @@ DECLARE  @Id									INT
 		,@Type									NVARCHAR(100)	
 		,@SourceTransaction						NVARCHAR(250)	
 		,@SourceId								INT	
+		,@PeriodsToAccrue						INT	
 		,@SourceNumber							NVARCHAR(250)
 		,@InvoiceId								INT
 		,@EntityCustomerId						INT
@@ -157,6 +158,7 @@ DECLARE  @Id									INT
 		,@PaymentId								INT
 		,@SplitId								INT
 		,@DistributionHeaderId					INT
+		,@LoadDistributionHeaderId				INT
 		,@ActualCostId							NVARCHAR(50)
 		,@ShipmentId							INT
 		,@TransactionId							INT
@@ -249,7 +251,8 @@ BEGIN
 		 @TransactionType				= [strTransactionType]
 		,@Type							= [strType]
 		,@SourceTransaction				= [strSourceTransaction]
-		,@SourceId						= [intSourceId]
+		,@SourceId						= [intSourceId] -- dbo.[fnARValidateInvoiceSourceId]([strSourceTransaction], [intSourceId])
+		,@PeriodsToAccrue				= [intPeriodsToAccrue] 
 		,@SourceNumber					= [strSourceId]
 		,@InvoiceId						= [intInvoiceId]
 		,@EntityCustomerId				= [intEntityCustomerId]
@@ -278,6 +281,7 @@ BEGIN
 		,@PaymentId						= [intPaymentId]
 		,@SplitId						= [intSplitId]
 		,@DistributionHeaderId			= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
+		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
 		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
@@ -400,10 +404,12 @@ BEGIN
 	IF ISNULL(@Type, '') = ''
 		SET @Type = 'Standard'
 	
-	IF ISNULL(@DistributionHeaderId, 0) > 0
+	IF ISNULL(ISNULL(@DistributionHeaderId, @LoadDistributionHeaderId), 0) > 0
 		BEGIN
 			SET @Type = 'Transport Delivery'
 		END
+
+	SET @SourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -440,10 +446,13 @@ BEGIN
 			,@PaymentId						= @PaymentId
 			,@SplitId						= @SplitId
 			,@DistributionHeaderId			= @DistributionHeaderId
+			,@LoadDistributionHeaderId		= @LoadDistributionHeaderId
 			,@ActualCostId					= @ActualCostId
 			,@ShipmentId					= @ShipmentId
 			,@TransactionId 				= @TransactionId
 			,@OriginalInvoiceId 			= @OriginalInvoiceId
+			,@PeriodsToAccrue				= @PeriodsToAccrue
+			,@SourceId						= @SourceId
 
 			,@ItemId						= @ItemId
 			,@ItemIsInventory				= @Inventory
@@ -885,6 +894,7 @@ BEGIN TRY
 			,@Type							= [strType]		 	
 			,@SourceTransaction				= [strSourceTransaction]
 			,@SourceId						= [intSourceId]
+			,@PeriodsToAccrue 				= [intPeriodsToAccrue]
 			,@SourceNumber					= [strSourceId]
 			,@InvoiceId						= [intInvoiceId]
 			,@EntityCustomerId				= [intEntityCustomerId]
@@ -913,6 +923,7 @@ BEGIN TRY
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]			
 			,@DistributionHeaderId			= [intDistributionHeaderId]
+			,@LoadDistributionHeaderId		= [inLoadtDistributionHeaderId]
 			,@ActualCostId					= [strActualCostId]
 			,@ShipmentId					= [intShipmentId]
 			,@TransactionId 				= [intTransactionId]
@@ -964,6 +975,8 @@ BEGIN TRY
 				RAISERROR(@ErrorMessage, 16, 1);
 			RETURN 0;
 		END CATCH
+
+		SET @SourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 			
 		UPDATE
 			[tblARInvoice]
@@ -975,6 +988,8 @@ BEGIN TRY
 			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])
 			,[intSubCurrencyCents]		= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, C.[intCurrencyId])),1) ELSE 1 END) 	
 			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
+			,[intSourceId] 				= @SourceId
+			,[intPeriodsToAccrue] 		= ISNULL(@PeriodsToAccrue,1)
 			,[dtmDate]					= @Date
 			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
 			,[dtmShipDate]				= @ShipDate
@@ -1015,6 +1030,7 @@ BEGIN TRY
 			,[intPaymentId]				= @PaymentId
 			,[intSplitId]				= @SplitId
 			,[intDistributionHeaderId]	= @DistributionHeaderId
+			,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId
 			,[strActualCostId]			= @ActualCostId
 			,[intShipmentId]			= @ShipmentId
 			,[intTransactionId]			= @TransactionId 

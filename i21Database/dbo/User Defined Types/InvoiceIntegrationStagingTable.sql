@@ -27,13 +27,13 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 2. "Invoice", "Provisional Invoice", 
 																											-- 3. "Transport Load"
 																											-- 4. "Inbound Shipment"
-																											-- 4. "Inventory Shipment"
-																											-- 5. "Card Fueling Transaction"
-																											-- 6. "Transfer Storage"
-																											-- 7. "Sell OffSite"
-																											-- 8. "Settle Storage"
-																											-- 9. "Process Grain Storage"
-																											-- 10. "Consumption Site"
+																											-- 5. "Inventory Shipment"
+																											-- 6. "Card Fueling Transaction"
+																											-- 7. "Transfer Storage"
+																											-- 8. "Sale OffSite"
+																											-- 9. "Settle Storage"
+																											-- 10. "Process Grain Storage"
+																											-- 11. "Consumption Site"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
@@ -64,6 +64,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Prepayment/Overpayment) 
 	,[intSplitId]							INT												NULL		-- Key Value from tblEMEntitySplit (Customer Split) 
 	,[intDistributionHeaderId]				INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load) 
+	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load-New Screen) 
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing
 	,[intShipmentId]						INT												NULL		-- Key Value from tblLGShipment (Inbound Shipment) 	
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	

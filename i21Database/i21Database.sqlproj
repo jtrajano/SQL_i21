@@ -3604,6 +3604,8 @@
     <Build Include="dbo\Views\vyuSMEntityRole.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\13_GlobalJulianCalendar.sql" />
     <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
+    <Build Include="dbo\Functions\fnARValidateInvoiceSourceId.sql" />
+    <Build Include="dbo\Functions\fnARGetValidInvoiceSourceId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
