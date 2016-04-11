@@ -112,8 +112,7 @@ BEGIN TRY
 		, MIN(DD.dblDistSurcharge)
 		, CAST(MIN(CAST(DD.ysnFreightInPrice AS INT)) AS BIT)
 		, MIN(DD.intTaxGroupId)
-		, strActualCostId = (CASE WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Customer' THEN MIN(TL.strTransaction)
-								ELSE NULL END)
+		, strActualCostId = MIN(TL.strTransaction)
 		, MIN(DH.intShipToLocationId)
 		, NULL
 		, MIN(DH.intInvoiceId)
