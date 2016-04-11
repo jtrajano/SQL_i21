@@ -3,8 +3,8 @@
  @dblNewLotQty numeric(38,20),
  @intUserId INT ,
  @strReasonCode NVARCHAR(1000),
- @strNotes NVARCHAR(MAX)=NULL
-
+ @strNotes NVARCHAR(MAX)=NULL,
+ @blnValidateLotReservation BIT = 0
 AS
 
 BEGIN TRY
@@ -56,18 +56,26 @@ BEGIN TRY
 		AND ysnStockUnit = 1
 
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
-	
-	IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
+
+	IF @blnValidateLotReservation = 1 
 	BEGIN
-		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
+		BEGIN
+			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+		END
 	END
-		
+
 	--IF @intItemStockUOMId = @intWeightUOMId
 	IF @dblWeightPerQty > 0 
 	BEGIN
 		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
 	END
-	
+
+	IF @dblNewLotQty=0
+	BEGIN
+		Select @dblAdjustByQuantity=-@dblLotQty
+	END
+
 	SELECT @dtmDate = GETDATE()
 	
 	SELECT @intSourceId = 1,@intSourceTransactionTypeId= 8
