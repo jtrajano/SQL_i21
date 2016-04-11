@@ -1,4 +1,7 @@
 ﻿CREATE PROCEDURE [uspTRFixRackPrices]
+	@ForceValue BIT = 0
+	, @SupplyPointId INT = NULL
+
 AS
 
 BEGIN
@@ -11,9 +14,10 @@ BEGIN
 	FROM tblTRRackPriceHeader Header
 	LEFT JOIN tblTRRackPriceDetail Detail ON Detail.intRackPriceHeaderId = Header.intRackPriceHeaderId
 	WHERE ISNULL(Detail.intRackPriceDetailId, '') <> ''
+		AND Header.intSupplyPointId = ISNULL(@SupplyPointId, Header.intSupplyPointId)
 
 	DECLARE @RackPriceDetailId INT
-		, @SupplyPointId INT
+		, @SupplyPoint INT
 		, @ItemId INT
 		, @Value NUMERIC(18, 6)
 
@@ -21,7 +25,7 @@ BEGIN
 	BEGIN
 		
 		SELECT TOP 1 @RackPriceDetailId = intRackPriceDetailId
-			, @SupplyPointId = intSupplyPointId
+			, @SupplyPoint = intSupplyPointId
 			, @ItemId = intItemId
 			, @Value = dblVendorRack
 		FROM #tmpRackPrices
@@ -32,7 +36,7 @@ BEGIN
 			, dblFactor
 		INTO #tmpEquations
 		FROM tblTRSupplyPointRackPriceEquation
-		WHERE intSupplyPointId = @SupplyPointId
+		WHERE intSupplyPointId = @SupplyPoint
 			AND intItemId = @ItemId
 		ORDER BY intSupplyPointRackPriceEquationId
 
@@ -70,11 +74,22 @@ BEGIN
 			DELETE FROM #tmpEquations WHERE intId = @counter
 		END
 
-		UPDATE tblTRRackPriceDetail
-		SET dblJobberRack = @Value
-		WHERE intRackPriceDetailId = @RackPriceDetailId
-			AND intItemId = @ItemId
-			AND ISNULL(dblJobberRack, 0) = 0
+		IF (@ForceValue = 1)
+		BEGIN
+			UPDATE tblTRRackPriceDetail
+			SET dblJobberRack = @Value
+			WHERE intRackPriceDetailId = @RackPriceDetailId
+				AND intItemId = @ItemId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblTRRackPriceDetail
+			SET dblJobberRack = @Value
+			WHERE intRackPriceDetailId = @RackPriceDetailId
+				AND intItemId = @ItemId
+				AND ISNULL(dblJobberRack, 0) = 0
+		END
+		
 
 		DROP TABLE #tmpEquations
 
