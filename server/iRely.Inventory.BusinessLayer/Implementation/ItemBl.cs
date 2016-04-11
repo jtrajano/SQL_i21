@@ -511,27 +511,30 @@ namespace iRely.Inventory.BusinessLayer
             string lastLocation = locationFromPreviousPage; 
             foreach (var row in paged_data)
             {
-                // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
-                currentLocation = row.strLocationName;
-                if (lastLocation != currentLocation)
+                if (row.intItemId != 0)
                 {
-                    // Reset the qty and balances back to zero. 
-                    dblBeginningBalance = 0;
-                    dblBeginningQty = 0; 
-                    lastLocation = currentLocation;
+                    // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
+                    currentLocation = row.strLocationName;
+                    if (lastLocation != currentLocation)
+                    {
+                        // Reset the qty and balances back to zero. 
+                        dblBeginningBalance = 0;
+                        dblBeginningQty = 0;
+                        lastLocation = currentLocation;
+                    }
+
+                    // Calculate beginning and running balance
+                    row.dblBeginningBalance = dblBeginningBalance;
+                    dblRunningBalance = dblBeginningBalance + row.dblValue;
+                    row.dblRunningBalance = Convert.ToDecimal(Math.Round(Convert.ToDouble(dblRunningBalance), 2));
+                    dblBeginningBalance = dblRunningBalance;
+
+                    // Calculate the beginning and running quantity
+                    row.dblBeginningQtyBalance = dblBeginningQty;
+                    dblRunningQty = dblBeginningQty + row.dblQuantity;
+                    row.dblRunningQtyBalance = dblRunningQty;
+                    dblBeginningQty = dblRunningQty;                
                 }
-
-                // Calculate beginning and running balance
-                row.dblBeginningBalance = dblBeginningBalance;
-                dblRunningBalance = dblBeginningBalance + row.dblValue;
-                row.dblRunningBalance = Convert.ToDecimal(Math.Round(Convert.ToDouble(dblRunningBalance), 2));
-                dblBeginningBalance = dblRunningBalance;
-
-                // Calculate the beginning and running quantity
-                row.dblBeginningQtyBalance = dblBeginningQty;
-                dblRunningQty = dblBeginningQty + row.dblQuantity;
-                row.dblRunningQtyBalance = dblRunningQty;
-                dblBeginningQty = dblRunningQty;                
             }
             
             return new SearchResult()
