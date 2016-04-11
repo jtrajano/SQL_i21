@@ -536,7 +536,7 @@ BEGIN TRY
 			,@intInputLotId =@intInputLotId
 			,@intInputStorageLocationId =@intInputLotStorageLocationId 
 	
-		IF @intLotStatusId IS NOT NULL
+		IF @intLotStatusId IS NOT NULL AND NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND intLotStatusId=@intLotStatusId)
 		BEGIN
 			--UPDATE dbo.tblICLot
 			--SET intLotStatusId = @intLotStatusId
