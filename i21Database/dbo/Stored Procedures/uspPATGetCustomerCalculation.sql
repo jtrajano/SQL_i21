@@ -100,7 +100,7 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 	 INNER JOIN tblPATPatronageCategory PC
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 	 
-	   WHERE CV.intFiscalYear = @intFiscalYearId
+	   WHERE CV.intFiscalYear = @intFiscalYearId AND CV.dblVolume <> 0.00
 	   GROUP BY CV.intCustomerPatronId, 
 				ENT.strName, 
 				AC.strStockStatus, 
