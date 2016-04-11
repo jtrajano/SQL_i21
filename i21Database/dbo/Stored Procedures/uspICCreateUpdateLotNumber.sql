@@ -87,6 +87,9 @@ DECLARE
 	,@intSplitFromLotId			AS INT 
 	,@intNoPallet				AS INT
 	,@intUnitPallet				AS INT
+	,@strTransactionId			AS NVARCHAR(50) 
+	,@strSourceTransactionId	AS NVARCHAR(50) 
+	,@intSourceTransactionTypeId AS INT 
 
 DECLARE @OwnerShipType_Own AS INT = 1
 
@@ -156,6 +159,9 @@ SELECT  intId
 		,intSplitFromLotId
 		,intNoPallet
 		,intUnitPallet
+		,strTransactionId
+		,strSourceTransactionId
+		,intSourceTransactionTypeId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -198,6 +204,9 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intSplitFromLotId
 		,@intNoPallet
 		,@intUnitPallet
+		,@strTransactionId
+		,@strSourceTransactionId
+		,@intSourceTransactionTypeId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -358,6 +367,7 @@ BEGIN
 				,strBOLNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strBOLNo ELSE LotMaster.strBOLNo END 
 				,strVessel				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVessel ELSE LotMaster.strVessel END 
 				,strReceiptNumber		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
+				,strTransactionId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strTransactionId ELSE LotMaster.strTransactionId END 
 				,strMarkings			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strMarkings ELSE LotMaster.strMarkings END 
 				,strNotes				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strNotes ELSE LotMaster.strNotes END 
 				,intEntityVendorId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
@@ -522,6 +532,9 @@ BEGIN
 				,intSplitFromLotId
 				,intNoPallet
 				,intUnitPallet
+				,strTransactionId
+				,strSourceTransactionId
+				,intSourceTransactionTypeId
 
 			) VALUES (
 				@intItemId
@@ -564,6 +577,9 @@ BEGIN
 				,@intSplitFromLotId
 				,@intNoPallet
 				,@intUnitPallet
+				,@strTransactionId
+				,@strSourceTransactionId
+				,@intSourceTransactionTypeId
 			)
 		;
 	
@@ -724,6 +740,9 @@ BEGIN
 		,@intSplitFromLotId
 		,@intNoPallet
 		,@intUnitPallet
+		,@strTransactionId
+		,@strSourceTransactionId
+		,@intSourceTransactionTypeId
 	;
 END
 

@@ -158,6 +158,9 @@ BEGIN
 			,strParentLotAlias
 			,intSplitFromLotId
 			,intOwnershipType
+			,strTransactionId
+			,strSourceTransactionId
+			,intSourceTransactionTypeId
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -176,7 +179,7 @@ BEGIN
 			,intGradeId				= SourceLot.intGradeId
 			,strBOLNo				= SourceLot.strBOLNo
 			,strVessel				= SourceLot.strVessel
-			,strReceiptNumber		= Transfer.strTransferNo
+			,strReceiptNumber		= [Transfer].strTransferNo
 			,strMarkings			= SourceLot.strMarkings
 			,strNotes				= SourceLot.strNotes
 			,intEntityVendorId		= SourceLot.intEntityVendorId
@@ -187,19 +190,23 @@ BEGIN
 			,strParentLotAlias		= ParentLotSourceLot.strParentLotAlias
 			,intSplitFromLotId		= SourceLot.intLotId
 			,intOwnershipType		= TransferItem.intOwnershipType
-	FROM	dbo.tblICInventoryTransfer Transfer INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
-				ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId
+			,strTransactionId			= [Transfer].strTransferNo
+			,strSourceTransactionId		= SourceLot.strTransactionId
+			,intSourceTransactionTypeId = SourceLot.intSourceTransactionTypeId
+
+	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
+				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item
 				ON TransferItem.intItemId = Item.intItemId		
 			INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON TransferItem.intItemId = ItemLocation.intItemId
-				AND Transfer.intToLocationId = ItemLocation.intLocationId	
+				AND [Transfer].intToLocationId = ItemLocation.intLocationId	
 			INNER JOIN tblICLot SourceLot 
 				ON SourceLot.intLotId = TransferItem.intLotId
 			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
 
-	WHERE	Transfer.strTransferNo = @strTransactionId
+	WHERE	[Transfer].strTransferNo = @strTransactionId
 
 END 
 
