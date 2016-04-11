@@ -146,7 +146,7 @@ delete from tblTFTaxReportSummary
 					print @SmryScheduleCodeParam
 					print @ScheduleCode
 					SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT sum(pxrpt_sls_trans_gals) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
+						SET @SmryQuery = 'SELECT sum(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
 					SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
@@ -154,7 +154,7 @@ delete from tblTFTaxReportSummary
 					ELSE IF @SmrySummaryItemId = 'MF-360-Summary-002'
 					BEGIN
 						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(pxrpt_sls_trans_gals) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
+						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
 						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
@@ -162,7 +162,7 @@ delete from tblTFTaxReportSummary
 					ELSE IF @SmrySummaryItemId = 'MF-360-Summary-003'
 					BEGIN
 						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(pxrpt_sls_trans_gals) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') and strType = ''Gasoline'' AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
+						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') and strType = ''Gasoline'' AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
 						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
@@ -208,7 +208,7 @@ delete from tblTFTaxReportSummary
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-010'
 					BEGIN
 						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(pxrpt_sls_trans_gals) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
+						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
 						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
@@ -216,7 +216,7 @@ delete from tblTFTaxReportSummary
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-011'
 					BEGIN
 						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(pxrpt_sls_trans_gals) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
+						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
 						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
@@ -224,7 +224,7 @@ delete from tblTFTaxReportSummary
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-012'
 					BEGIN
 						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(pxrpt_sls_trans_gals) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
+						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
 						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
@@ -285,7 +285,7 @@ delete from tblTFTaxReportSummary
 				
 				--ELSE
 				--	BEGIN
-				--		SET @SmryQuery = 'SELECT sum(pxrpt_sls_trans_gals) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''')'
+				--		SET @SmryQuery = 'SELECT sum(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''')'
 				--		INSERT INTO @tblTempSummaryTotal
 				--		EXEC(@SmryQuery)
 				--	END
@@ -361,11 +361,11 @@ delete from tblTFTaxReportSummary
 		
 
 			
-			SET @DetailColumnValue_gas = (SELECT ISNULL(sum(pxrpt_sls_trans_gals), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Gasoline')
-			SET @DetailColumnValue_kerosene = (SELECT ISNULL(sum(pxrpt_sls_trans_gals), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Kerosene')
-			SET @DetailColumnValue_others = (SELECT ISNULL(sum(pxrpt_sls_trans_gals), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Others')
-			--SET @ScheduleCodeCount = (SELECT sum(pxrpt_sls_trans_gals) FROM tblTFTransactions where strScheduleCode = @paramId and strFormCode = @FormCode)
-			SET @ItemTotal = (SELECT ISNULL(sum(pxrpt_sls_trans_gals), 0) FROM tblTFTransactions where strScheduleCode IN(@schedParamId))
+			SET @DetailColumnValue_gas = (SELECT ISNULL(sum(dblTax), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Gasoline')
+			SET @DetailColumnValue_kerosene = (SELECT ISNULL(sum(dblTax), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Kerosene')
+			SET @DetailColumnValue_others = (SELECT ISNULL(sum(dblTax), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Others')
+			--SET @ScheduleCodeCount = (SELECT sum(dblTax) FROM tblTFTransactions where strScheduleCode = @paramId and strFormCode = @FormCode)
+			SET @ItemTotal = (SELECT ISNULL(sum(dblTax), 0) FROM tblTFTransactions where strScheduleCode IN(@schedParamId))
 			
 			--IF (@ScheduleCodeCount > 0)
 			--BEGIN
@@ -377,7 +377,7 @@ delete from tblTFTaxReportSummary
 					SET @paramId = REPLACE(@paramId,',',''',''')
 					SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
 					print @ScheduleCode
-					SET @itemQuery = 'SELECT ISNULL(sum(pxrpt_sls_trans_gals), 0) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @paramId + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
+					SET @itemQuery = 'SELECT ISNULL(sum(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @paramId + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
 					SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 	
 					INSERT INTO @tblTempSummaryTotal
