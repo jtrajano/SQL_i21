@@ -3601,6 +3601,7 @@
     <Build Include="dbo\Stored Procedures\uspSCUpdateStatus.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentItem.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunPrecompile.sql" />
+    <Build Include="dbo\Views\vyuSMEntityRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
