@@ -496,7 +496,31 @@ END CATCH
 				WHERE
 					(ISNULL(SMCL.intFreightIncome, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ISNULL(ARI.dblShipping,0) <> 0.0
-				
+
+
+				--Undeposited Funds Account
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					CASE WHEN GLA.intAccountId IS NULL THEN 'The Undeposited Funds account of Company Location ' + SMCL.strLocationName + ' is not valid.' ELSE 'The Undeposited Funds account of Company Location ' + SMCL.strLocationName + ' was not set.' END
+					,ARI.strTransactionType
+					,ARI.strInvoiceNumber
+					,@batchId
+					,ARI.intInvoiceId
+				FROM
+					tblARInvoice ARI
+				INNER JOIN
+					@PostInvoiceData P
+						ON ARI.intInvoiceId = P.intInvoiceId						 
+				INNER JOIN
+					tblSMCompanyLocation SMCL
+						ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
+				LEFT OUTER JOIN
+					tblGLAccount GLA
+						ON SMCL.intUndepositedFundsId = GLA.intAccountId						
+				WHERE
+					(ISNULL(SMCL.intUndepositedFundsId, 0) = 0 OR GLA.intAccountId IS NULL)
+					AND ARI.strTransactionType IN ('Cash','Cash Refund')
+	
 				--Service Charge Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
@@ -1374,9 +1398,9 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  A.dblInvoiceTotal ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  0 ELSE A.dblInvoiceTotal END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblInvoiceTotal ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblInvoiceTotal END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								(
 																								SELECT
 																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, 0.00)))
@@ -1403,7 +1427,7 @@ IF @post = 1
 																							ELSE 
 																								0
 																							END
-				,dblCreditUnit				=  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN  
+				,dblCreditUnit				=  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								0
 																							ELSE 
 																								(
@@ -1476,10 +1500,10 @@ IF @post = 1
 													ELSE
 														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
 												END)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) ELSE 0 END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, 0.00)) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1530,10 +1554,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1587,10 +1611,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1638,8 +1662,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE A.dblShipping END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN A.dblShipping ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE A.dblShipping END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblShipping ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1680,8 +1704,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE DT.dblAdjustedTax END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN DT.dblAdjustedTax ELSE 0 END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN DT.dblAdjustedTax ELSE 0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1729,8 +1753,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo') THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1776,10 +1800,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblUOMQty) ELSE 0 END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblUOMQty) END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICT.dblQty) * ICT.dblUOMQty) ELSE 0 END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblUOMQty) END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1843,10 +1867,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblUOMQty) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblUOMQty) ELSE 0 END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblUOMQty) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICT.dblQty) * ICT.dblUOMQty) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1910,10 +1934,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -1978,10 +2002,10 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END				
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ICT.dblCashPrice * D.dblQtyShipped) END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ICT.dblCashPrice * D.dblQtyShipped) ELSE 0 END
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](D.intItemUOMId, ICIS.intStockUOMId, D.dblQtyShipped) ELSE 0 END				
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2080,7 +2104,7 @@ IF @post = 1
 				,intItemLocationId			= IST.intItemLocationId
 				,intItemUOMId				= Detail.intItemUOMId  
 				,dtmDate					= Header.dtmShipDate
-				,dblQty						= (Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,dblQty						= (Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
@@ -2107,7 +2131,7 @@ IF @post = 1
 			INNER JOIN
 				tblARInvoice Header
 					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
+					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
 					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
 			INNER JOIN
 				@PostInvoiceData P
@@ -2135,7 +2159,7 @@ IF @post = 1
 				,intItemLocationId			= IST.intItemLocationId
 				,intItemUOMId				= ARIC.[intItemUnitMeasureId] 
 				,dtmDate					= ARI.[dtmShipDate]
-				,dblQty						= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARI.[strTransactionType] = 'Invoice' THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
+				,dblQty						= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @post = 0 THEN -1 ELSE 1 END
 				,dblUOMQty					= ICIUOM.[dblUnitQty]
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
@@ -2345,7 +2369,7 @@ IF @post = 0
 			INNER JOIN
 				tblARInvoice Header
 					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND  Header.strTransactionType IN ('Invoice', 'Credit Memo')
+					AND  Header.strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
 			INNER JOIN
 				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
@@ -2627,11 +2651,11 @@ IF @recap = 0
 						tblARInvoice
 					SET
 						ysnPosted = 1
-						,ysnPaid = (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 THEN 1 ELSE 0 END)
+						,ysnPaid = (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 OR tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
 						,dblInvoiceTotal = dblInvoiceTotal
-						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
+						,dblAmountDue = (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 0.000000 ELSE ISNULL(dblInvoiceTotal, 0.000000) END)
 						,dblDiscount = ISNULL(dblDiscount, 0.000000)
-						,dblPayment = 0.000000
+						,dblPayment = (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, 0.000000) ELSE 0.000000 END)
 						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
 					WHERE
