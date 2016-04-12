@@ -46,7 +46,7 @@ BEGIN
 	SELECT	@intTicketItemUOMId = UM.intItemUOMId
 		FROM	dbo.tblICItemUOM UM	
 	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
+	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
 
 BEGIN 
