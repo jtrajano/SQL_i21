@@ -47,6 +47,7 @@ BEGIN TRY
 		,@intAttributeIdByBatch INT
 		,@strAttributeValueByBatch NVARCHAR(50)
 		,@intCategoryId int
+		,@intReleaseStatusId int
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -61,6 +62,7 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intUserId = intUserId
 		,@strComment = strComment
+		,@intReleaseStatusId=intReleaseStatusId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLotId INT
 			,strGTINCaseBarCode NVARCHAR(50)
@@ -68,6 +70,7 @@ BEGIN TRY
 			,intManufacturingProcessId INT
 			,intUserId INT
 			,strComment NVARCHAR(MAX)
+			,intReleaseStatusId int
 			)
 
 	IF @intLotId = 0
@@ -361,23 +364,25 @@ BEGIN TRY
 
 	EXEC sp_xml_removedocument @idoc
 
-	SELECT @strFGReleaseMailTOAddress = strFGReleaseMailTOAddress
-		,@strFGReleaseMailCCAddress = strFGReleaseMailCCAddress
-	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId = @intLocationId
+	IF @intReleaseStatusId=2
+	BEGIN
+		SELECT @strFGReleaseMailTOAddress = strFGReleaseMailTOAddress
+			,@strFGReleaseMailCCAddress = strFGReleaseMailCCAddress
+		FROM tblSMCompanyLocation
+		WHERE intCompanyLocationId = @intLocationId
 
-	SELECT @strSubject = 'FG Release List: ' + CONVERT(NVARCHAR, @dtmCurrentDate, 100)
+		SELECT @strSubject = 'FG Release List: ' + CONVERT(NVARCHAR, @dtmCurrentDate, 100)
 
-	SET @strBody = N'<H2>FG Release List</H2>' + N'<table border="1" bgcolor ="rgb(192, 255, 255)">' + N'<tr><th width="175">Lot No</th><th width="175">Item Name</th>' + N'<th width="850">Status</th></tr>' + CAST((
-	SELECT td = @strLotNumber
-		,''
-		,td = @strItemNo
-		,''
-		,td = 'Hold'
-	FOR XML PATH('tr')
-		,TYPE
-	) AS NVARCHAR(MAX)) + N'</table>';
-
+		SET @strBody = N'<H2>FG Release List</H2>' + N'<table border="1" bgcolor ="rgb(192, 255, 255)">' + N'<tr><th width="175">Lot No</th><th width="175">Item Name</th>' + N'<th width="850">Status</th></tr>' + CAST((
+		SELECT td = @strLotNumber
+			,''
+			,td = @strItemNo
+			,''
+			,td = 'Hold'
+		FOR XML PATH('tr')
+			,TYPE
+		) AS NVARCHAR(MAX)) + N'</table>';
+	END
 
 END TRY
 
