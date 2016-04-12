@@ -3607,6 +3607,26 @@
     <Build Include="dbo\Functions\fnARValidateInvoiceSourceId.sql" />
     <Build Include="dbo\Functions\fnARGetValidInvoiceSourceId.sql" />
     <Build Include="dbo\Tables\tblGLTempCOASegment.sql" />
+    <Build Include="dbo\Tables\tblMBConsignmentGroup.sql" />
+    <Build Include="dbo\Tables\tblMBConsignmentRate.sql" />
+    <Build Include="dbo\Tables\tblMBConsignmentRateDetail.sql" />
+    <Build Include="dbo\Tables\tblMBFuelPointPriceChange.sql" />
+    <Build Include="dbo\Tables\tblMBFuelPointPriceChangeDetail.sql" />
+    <Build Include="dbo\Tables\tblMBFuelPointReading.sql" />
+    <Build Include="dbo\Tables\tblMBFuelPointReadingDetail.sql" />
+    <Build Include="dbo\Tables\tblMBMeterAccount.sql" />
+    <Build Include="dbo\Tables\tblMBMeterAccountDetail.sql" />
+    <Build Include="dbo\Tables\tblMBMeterReading.sql" />
+    <Build Include="dbo\Tables\tblMBMeterReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuMBGetMeterReading.sql" />
+    <Build Include="dbo\Views\vyuMBGetMeterAccount.sql" />
+    <Build Include="dbo\Views\vyuMBGetMeterAccountDetail.sql" />
+    <Build Include="dbo\Views\vyuMBGetMeterReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuMBGetConsignmentRateDetail.sql" />
+    <Build Include="dbo\Views\vyuMBGetFuelPointPriceChange.sql" />
+    <Build Include="dbo\Views\vyuMBGetFuelPointPriceChangeDetail.sql" />
+    <Build Include="dbo\Views\vyuMBGetFuelPointReading.sql" />
+    <Build Include="dbo\Views\vyuMBGetFuelPointReadingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

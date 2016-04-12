@@ -4970,4 +4970,137 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblEMEntityType]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6709d677-2abf-4db9-a23f-5eddd40fef1d" ChangeDateTime="04/12/2016 05:31:41">
+    <Property Name="ElementName" Value="[dbo].[tblMBConsignmentGroup].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBConsignmentGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConsignmentGroupId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9c2dfcec-03bf-455f-9a6a-d42d0cc36269" ChangeDateTime="04/12/2016 05:34:02">
+    <Property Name="ElementName" Value="[dbo].[tblMBConsignmentRate].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBConsignmentRate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConsignmentRateId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b3e2a128-d8b1-4496-9fb1-89baa0fd5332" ChangeDateTime="04/12/2016 05:37:34">
+    <Property Name="ElementName" Value="[dbo].[tblMBConsignmentRateDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBConsignmentRateDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConsignmentRateDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a9e7da2b-f242-4746-9ae8-c6f70f537bd3" ChangeDateTime="04/12/2016 05:38:10">
+    <Property Name="ElementName" Value="[dbo].[tblMBConsignmentRateDetail].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBConsignmentRateDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConsignmentRateId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="81ea2a91-658d-4b23-9ba5-46a838f71289" ChangeDateTime="04/12/2016 05:57:39">
+    <Property Name="ElementName" Value="[dbo].[tblMBFuelPointPriceChange].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBFuelPointPriceChange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFuelPointPriceChangeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="00bbb434-8591-4ae1-9434-84debee6a300" ChangeDateTime="04/12/2016 05:58:35">
+    <Property Name="ElementName" Value="[dbo].[tblMBFuelPointPriceChange].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBFuelPointPriceChange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmDateFrom" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="beafd665-74f5-49b6-b2cc-21d5cc3e28e4" ChangeDateTime="04/12/2016 06:55:56">
+    <Property Name="ElementName" Value="[dbo].[tblMBFuelPointPriceChangeDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBFuelPointPriceChangeDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFuelPointPriceChangeDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6e2d26b4-592d-46bd-87e3-a58ae91008e2" ChangeDateTime="04/12/2016 07:05:47">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccount].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMeterAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b0edaca4-24f1-49e8-adfd-e184fec7d94a" ChangeDateTime="04/12/2016 07:08:32">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccount].[intTermId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTerms" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4ad48b5e-ca7f-449e-8c38-1e404a315c92" ChangeDateTime="04/12/2016 07:10:33">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccount].[intTerms]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTermId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1200a531-b358-4ef9-8642-996308d80f10" ChangeDateTime="04/12/2016 07:10:51">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccount].[intCompanyLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5484a0f0-9d62-4c6b-b661-ca974188ffc3" ChangeDateTime="04/12/2016 07:12:39">
+    <Property Name="ElementName" Value="[dbo].[tblMBFuelPointReading].[intCompanyLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBFuelPointReading]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="135af50f-ec64-436e-b938-1c4531039b72" ChangeDateTime="04/12/2016 07:12:43">
+    <Property Name="ElementName" Value="[dbo].[tblMBFuelPointPriceChange].[intCompanyLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBFuelPointPriceChange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b6b820f3-6048-48ce-92bd-7e45f3d85bbc" ChangeDateTime="04/12/2016 07:14:23">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccount].[intComm]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e0e198e5-6a40-4ddc-af86-2201d45c1cc0" ChangeDateTime="04/12/2016 07:16:21">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccountDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccountDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMeterAccountDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="52da1c6b-4e5b-4131-95d2-f26ac94be4c8" ChangeDateTime="04/12/2016 07:29:22">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccountDetail].[dblLasterMeterReading]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccountDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblLastMeterReading" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="55884d51-dc2c-45fc-81e2-0bce97a82801" ChangeDateTime="04/12/2016 07:48:11">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterReading].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterReading]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMeterReadingId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="70c97679-0636-4964-bb95-b27539b62c45" ChangeDateTime="04/12/2016 07:52:38">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterReadingDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterReadingDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMeterReadingDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1cfe0ea3-f4d4-4655-9276-0eb3e4201f88" ChangeDateTime="04/12/2016 08:30:00">
+    <Property Name="ElementName" Value="[dbo].[tblMBMeterAccountDetail].[intCocurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBMeterAccountDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
 </Operations>
