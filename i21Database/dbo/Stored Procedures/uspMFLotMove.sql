@@ -29,6 +29,9 @@ BEGIN TRY
 	DECLARE @dblLotAvailableQty NUMERIC(38,20)
 	DECLARE @intNewLotId INT
 	DECLARE @blnIsPartialMove BIT
+	DECLARE @strStorageLocationName NVARCHAR(50)
+	DECLARE @strItemNumber NVARCHAR(50)
+	DECLARE @strUnitMeasure NVARCHAR(50)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -42,6 +45,15 @@ BEGIN TRY
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
 	FROM tblICLot
+	WHERE intLotId = @intLotId
+	
+	SELECT @strStorageLocationName = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId
+	SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
+	
+	SELECT @strUnitMeasure =  UM.strUnitMeasure
+	FROM tblICLot l
+	JOIN tblICItemUOM U ON U.intItemUOMId = l.intWeightUOMId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
 	WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
@@ -57,7 +69,8 @@ BEGIN TRY
 
 	IF @dblMoveQty>@dblLotAvailableQty
 	BEGIN
-		RAISERROR (90015,11,1)
+		SET @ErrMsg = 'Move qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
+		RAISERROR (@ErrMsg,11,1)
 	END
 
 	SELECT @strNewLotNumber = @strLotNumber
@@ -150,15 +163,26 @@ BEGIN TRY
 				IF EXISTS(SELECT * FROM dbo.tblICStockReservation WHERE intLotId = @intLotId)
 				BEGIN
 					UPDATE dbo.tblICStockReservation 
-					SET intLotId = @intNewLotId
+					SET intLotId = @intNewLotId,
+						intStorageLocationId = @intNewStorageLocationId,
+						intSubLocationId = @intNewSubLocationId
 					WHERE intLotId = @intLotId
 				END
 	
-				IF EXISTS(SELECT * FROM dbo.tblMFPickListDetail WHERE intLotId = @intLotId)
+				IF EXISTS(SELECT * FROM dbo.tblMFPickListDetail WHERE intLotId = @intLotId AND intStageLotId = @intLotId)
 				BEGIN
 					UPDATE dbo.tblMFPickListDetail 
-					SET intLotId = @intNewLotId
-					WHERE intLotId = @intLotId
+					SET intLotId = @intNewLotId,
+						intStageLotId = @intNewLotId,
+						intStorageLocationId = @intNewStorageLocationId
+					WHERE intLotId = @intLotId AND intStageLotId = @intLotId
+				END
+
+				IF EXISTS(SELECT * FROM dbo.tblMFPickListDetail WHERE intStageLotId = @intLotId AND intLotId <> intStageLotId)
+				BEGIN
+					UPDATE dbo.tblMFPickListDetail 
+					SET intStageLotId = @intNewLotId
+					WHERE intStageLotId = @intLotId AND intLotId <> intStageLotId
 				END
 			END
 
