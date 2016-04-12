@@ -223,7 +223,8 @@ DECLARE  @Id									INT
 --INSERT
 BEGIN TRY
 WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND ISNULL([ysnProcessed],0) = 0)
-BEGIN					
+BEGIN
+	DECLARE @NewSourceId INT = 0					
 	SELECT TOP 1
 		 @Id						= [intId]				
 		,@EntityCustomerId			= [intEntityCustomerId]		
@@ -409,7 +410,7 @@ BEGIN
 			SET @Type = 'Transport Delivery'
 		END
 
-	SET @SourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
+	SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 
 	BEGIN TRY		
 		EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -452,7 +453,7 @@ BEGIN
 			,@TransactionId 				= @TransactionId
 			,@OriginalInvoiceId 			= @OriginalInvoiceId
 			,@PeriodsToAccrue				= @PeriodsToAccrue
-			,@SourceId						= @SourceId
+			,@SourceId						= @NewSourceId
 
 			,@ItemId						= @ItemId
 			,@ItemIsInventory				= @Inventory
@@ -976,7 +977,7 @@ BEGIN TRY
 			RETURN 0;
 		END CATCH
 
-		SET @SourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
+		SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 			
 		UPDATE
 			[tblARInvoice]
@@ -988,7 +989,7 @@ BEGIN TRY
 			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])
 			,[intSubCurrencyCents]		= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, C.[intCurrencyId])),1) ELSE 1 END) 	
 			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
-			,[intSourceId] 				= @SourceId
+			,[intSourceId] 				= @NewSourceId
 			,[intPeriodsToAccrue] 		= ISNULL(@PeriodsToAccrue,1)
 			,[dtmDate]					= @Date
 			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
