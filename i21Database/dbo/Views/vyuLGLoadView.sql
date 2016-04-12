@@ -44,6 +44,7 @@ SELECT -- Load Header
 		WHEN intTransportationMode = 2
 			THEN 'Ocean Vessel'
 		END
+	,strPosition = P.strPosition
 	,intGenerateReferenceNumber = GLoad.intReferenceNumber
 	,intGenerateSequence = LOAD.intGenerateSequence
 	,intNumberOfLoads = GLoad.intNumberOfLoads
@@ -120,7 +121,7 @@ SELECT -- Load Header
 			THEN 'Delivered'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS,
-		[intPositionId],
+		LOAD.intPositionId,
 		[intWeightUnitMeasureId],
 		strWeightUnitMeasure = [strUnitMeasure],
 		[strBLNumber],
@@ -183,3 +184,4 @@ LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = LOAD.intTransportLoad
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = LOAD.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId] = LOAD.intDispatcherId
+LEFT JOIN tblCTPosition P ON LOAD.intPositionId = P.intPositionId
