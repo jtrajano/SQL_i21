@@ -55,7 +55,12 @@ PRINT 'RENAME ALL THE TABLES'
 IF EXISTS(SELECT TOP 1 1 FROM sys.objects where name = 'tblEntity')
 BEGIN
 	EXEC('CREATE TABLE tblEntityTempForDelete (ID INT)')
-	EXEC('DROP VIEW vwcusmst')
+	if exists(SELECT TOP 1 1 FROM sys.objects where name = 'vwcusmst')
+	begin
+		EXEC('DROP VIEW vwcusmst')
+	end
+
+	
 
 	declare @EntityTable table(
 		name nvarchar(max)
