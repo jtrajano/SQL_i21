@@ -3566,11 +3566,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Index Pri
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.IndexPricingBySiteGroup', intSort = 1 WHERE strMenuName = 'Index Pricing By Site Groups' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Import Transaction', N'Card Fueling', @CardFuelingParentMenuId, N'Import Transaction', N'Activity', N'Screen', N'CardFueling.view.ImportFromCsv', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.ImportFromCsv', intSort = 2 WHERE strMenuName = 'Import Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Import Transaction', N'Card Fueling', @CardFuelingParentMenuId, N'Import Transaction', N'Activity', N'Screen', N'CardFueling.view.ImportFromCsv', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.ImportFromCsv', intSort = 2 WHERE strMenuName = 'Import Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -3674,6 +3674,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'File Fiel
 	VALUES (N'File Field Mapping', N'Credit Card Recon', @CreditCardReconParentMenuId, N'File Field Mapping', N'Maintenance', N'Screen', N'CreditCardRecon.view.FileFieldMapping', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCategory = 'Maintenance', strCommand = N'CreditCardRecon.view.FileFieldMapping' WHERE strMenuName = 'File Field Mapping' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId
+
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Import Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId
 
 /* ENTITY MANAGEMENT */
 UPDATE tblSMMasterMenu
