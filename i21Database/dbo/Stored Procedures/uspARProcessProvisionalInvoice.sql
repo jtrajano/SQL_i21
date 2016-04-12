@@ -177,7 +177,7 @@ BEGIN TRY
 	)
 	SELECT
 		 [strTransactionType]				= 'Invoice'
-		,[strType]							= 'Provisional Invoice'
+		,[strType]							= 'Standard'
 		,[strSourceTransaction]				= 'Provisional Invoice'
 		,[intSourceId]						= @InvoiceId   
 		,[strSourceId]						= @InvoiceNumber
@@ -281,7 +281,7 @@ UNION ALL
 
 SELECT
 		 [strTransactionType]				= 'Invoice'
-		,[strType]							= 'Provisional Invoice'
+		,[strType]							= 'Standard'
 		,[strSourceTransaction]				= 'Provisional Invoice'
 		,[intSourceId]						= @InvoiceId   
 		,[strSourceId]						= @InvoiceNumber
