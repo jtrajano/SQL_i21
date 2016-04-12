@@ -67,16 +67,20 @@ BEGIN
 						, [datatype] nvarchar(50))  
 		
 	DELETE FROM @filterTable WHERE [from] IS NULL OR RTRIM([from]) = ''
-	SELECT TOP 1 @strAccountIdFrom= ISNULL([from],'') , @strAccountIdTo = ISNULL([to],'') ,@strAccountIdCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'strAccountId' 
-	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'Primary Account' 
-	SELECT TOP 1 @dtmDateFrom= ISNULL([from],'') , @dtmDateTo = ISNULL([to],'') from  @filterTable WHERE [fieldname] = 'dtmDate' 
-
-	
 	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
 	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
-	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account' 
+	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'PrimaryAccount'
+	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account'
 	delete FROM @filterTable WHERE [condition]= 'All Date'
 	
+
+	SELECT TOP 1 @strAccountIdFrom= ISNULL([from],'') , @strAccountIdTo = ISNULL([to],'') ,@strAccountIdCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'strAccountId'
+	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = '[Primary Account]'
+	SELECT TOP 1 @dtmDateFrom= ISNULL([from],'') , @dtmDateTo = ISNULL([to],'') from  @filterTable WHERE [fieldname] = 'dtmDate'
+
+
+
+
 	IF EXISTS(
 	SELECT TOP 1 1 FROM @filterTable WHERE
 		(condition LIKE  '%Date'  or
@@ -231,7 +235,7 @@ WHERE ISNULL(A.ysnIsUnposted ,0) = 0
 DELETE FROM @filterTable WHERE fieldname = 'dtmDate'
 DECLARE @Where1 NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filterTable)
 
-DECLARE @sqlRetain NVARCHAR(MAX) = dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,'cteRetain2',@Where1)
+DECLARE @sqlRetain NVARCHAR(MAX) = dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,@dtmDateTo,'cteRetain2',@Where1)
 
 IF @sqlRetain <> 'Retained Earnings Activity Not Displayed'
 	SELECT @sqlCte += @sqlRetain
@@ -262,8 +266,7 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'strUOMCode,',''''' as strUOMCode,')
 	SELECT @cols1 = REPLACE (@cols1,'Location,',''''' as Location,')
 
-	IF @strAccountIdFrom <> ''  SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1)'
-	IF @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END  +  ' [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)'
+	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1)'
 	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + @Where1 + ' GROUP BY strAccountId),
 		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
 	SELECT @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '

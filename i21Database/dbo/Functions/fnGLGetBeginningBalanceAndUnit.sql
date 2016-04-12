@@ -16,9 +16,6 @@ BEGIN
 	--  NOTE : EXPENSE AND REVENUE BEGINNING BALANCE IS COMPUTED VIA *BOY WHILE OTHER ARE COMPUTE VIA *BOT
 	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccount A JOIN tblGLFiscalYear B ON A.intAccountId = B.intRetainAccount WHERE A.strAccountId = @strAccountId)
 	BEGIN
-		DECLARE @dte DATETIME
-		SELECT TOP 1 @dte= dtmDateFrom from tblGLFiscalYear WHERE @dtmDate >= dtmDateFrom  and @dtmDate <= dtmDateTo ORDER BY dtmDateFrom DESC
-
 		;WITH cte as(
 		SELECT  
 				 @strAccountId AS strAccountId,
@@ -29,7 +26,7 @@ BEGIN
 			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 			LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
 		WHERE
-		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < ISNULL(@dte,@dtmDate) )
+		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < @dtmDate)
 		OR (strAccountId =@strAccountId AND C.dtmDate < @dtmDate) and strCode <> '')
 		insert into @tbl
 		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId

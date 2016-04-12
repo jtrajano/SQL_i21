@@ -3606,6 +3606,7 @@
     <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
     <Build Include="dbo\Functions\fnARValidateInvoiceSourceId.sql" />
     <Build Include="dbo\Functions\fnARGetValidInvoiceSourceId.sql" />
+    <Build Include="dbo\Tables\tblGLTempCOASegment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

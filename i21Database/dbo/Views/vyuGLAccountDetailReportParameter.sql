@@ -12,11 +12,13 @@ SELECT  [strBatchId]
 	  ,g.strAccountType
 	  ,detail.strReference as strReferenceDetail
 	  ,detail.strDocument as strDocument
-	  ,strAccountId
+	  ,a.strAccountId
 	  ,strUOMCode
+	  ,[Primary Account] as PrimaryAccount
   FROM [dbo].[tblGLDetail] d join
   tblGLAccount a on d.intAccountId = a.intAccountId join
-  tblGLAccountGroup g on g.intAccountGroupId = a.intAccountGroupId 
+  tblGLAccountGroup g on g.intAccountGroupId = a.intAccountGroupId join
+  tblGLTempCOASegment s on a.intAccountId = s.intAccountId
   OUTER APPLY(
 	select strUOMCode from tblGLAccountUnit unit where unit.intAccountUnitId = a.intAccountUnitId
   ) u
