@@ -8,13 +8,8 @@ SELECT
 				ELSE [Transaction].intInventoryTransactionId
 			  END 
 			  AS intInventoryValuationKeyId,
-			  CASE 
-				WHEN [Transaction].intInventoryTransactionId IS NULL
-				THEN CAST(ROW_NUMBER() OVER (ORDER BY [Transaction].intInventoryTransactionId) AS INT)
-				ELSE [Transaction].intInventoryTransactionId
-			  END 
-			  AS intInventoryTransactionId,
-			  ISNULL([Transaction].intItemId, 0) AS intItemId,
+			  ISNULL([Transaction].intInventoryTransactionId, 0) AS intInventoryTransactionId,
+			  Item.intItemId AS intItemId,
 			  Item.strItemNo, 
 			  Item.strDescription AS strItemDescription, 
               Item.intCategoryId, 
