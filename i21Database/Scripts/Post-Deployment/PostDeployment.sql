@@ -188,8 +188,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\15_FixInvoiceDateForCredits.sql
 :r .\AR\DefaultData\16_FixInvoicePostDate.sql
 :r .\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql
-:r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
 :r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
+:r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
+:r .\AR\DefaultData\19_UpdateUsedCustomerBudget.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
