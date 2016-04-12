@@ -36,6 +36,7 @@
 	[strAcuVersion] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strDatabase] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strMultipleActivityId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
