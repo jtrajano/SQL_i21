@@ -40,6 +40,7 @@ AS
 			SK.intStockUnitMeasureId,											PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
 																				U4.strUnitMeasure				AS	strStockItemUOM,
 			CU.intMainCurrencyId,				CU.strCurrency,					CY.strCurrency					AS	strMainCurrency,
+																				U7.strUnitMeasure				AS	strNetWeightUOM,
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)															AS	ysnSubCurrency,
 			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
 			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
@@ -143,6 +144,7 @@ AS
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
 	JOIN	tblCTIndex						IX	ON	IX.intIndexId				=	CD.intIndexId				LEFT
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT
+	
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				LEFT
 	JOIN	tblICUnitMeasure				U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			LEFT
 	JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
@@ -152,6 +154,9 @@ AS
 	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId				AND	
 													SM.ysnStockUnit				=	1							LEFT
 	JOIN	tblICUnitMeasure				U4	ON	U4.intUnitMeasureId			=	SM.intUnitMeasureId			LEFT
+	JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
+	JOIN	tblICUnitMeasure				U7	ON	U7.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT	
+	
 	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId				LEFT
 	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
 	JOIN	tblSMCountry					CG	ON	CG.intCountryID				=	IC.intCountryId				LEFT
