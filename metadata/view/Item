@@ -900,7 +900,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter1",
                                                     "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -918,7 +918,8 @@
                                                 "flex": 1.3,
                                                 "itemId": "colDetailUnitMeasure",
                                                 "minWidth": 95,
-                                                "text": "Unit"
+                                                "text": "Unit",
+                                                "width": 100
                                             },
                                             "name": "MyColumn",
                                             "designerId": "9f60de7f-46f4-4ac5-9881-183c6ebb93bb",
@@ -983,10 +984,11 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
+                                                "format": "0,000.000000",
                                                 "itemId": "colDetailUnitQty",
                                                 "modelValidation": true,
                                                 "text": "Unit Qty",
-                                                "width": 70
+                                                "width": 90
                                             },
                                             "name": "MyNumberColumn",
                                             "designerId": "2fd011ba-d27d-487e-bb5d-7c5916119952",
@@ -1022,7 +1024,7 @@
                                                 "flex": null,
                                                 "itemId": "colDetailShortUPC",
                                                 "text": "Short UPC",
-                                                "width": 70
+                                                "width": 100
                                             },
                                             "name": "MyColumn24",
                                             "designerId": "23774939-b130-4af8-a189-2df006975a5a",
@@ -1055,8 +1057,9 @@
                                                 "dataIndex": "string",
                                                 "flex": 2,
                                                 "itemId": "colDetailUpcCode",
-                                                "minWidth": 110,
-                                                "text": "UPC Code"
+                                                "minWidth": 90,
+                                                "text": "UPC Code",
+                                                "width": 100
                                             },
                                             "name": "MyColumn23",
                                             "designerId": "57be5075-40ca-438c-99ec-cd53ee934ba8",
@@ -1083,7 +1086,7 @@
                                             "userConfig": {
                                                 "itemId": "colStockUnit",
                                                 "text": "Stock Unit",
-                                                "width": 80
+                                                "width": 90
                                             },
                                             "name": "MyCheck3",
                                             "designerId": "ef3bba55-a80d-44c3-9cce-d9c5613ed80d"
@@ -1098,7 +1101,7 @@
                                             "userConfig": {
                                                 "itemId": "colAllowPurchase",
                                                 "text": "Allow Purchase",
-                                                "width": 130
+                                                "width": 100
                                             },
                                             "name": "MyCheck9",
                                             "designerId": "490cc0bf-aaa0-44ea-8417-a0a034daf717"
@@ -1113,7 +1116,7 @@
                                             "userConfig": {
                                                 "itemId": "colAllowSale",
                                                 "text": "Allow Sale",
-                                                "width": 100
+                                                "width": 90
                                             },
                                             "name": "MyCheck4",
                                             "designerId": "d5f4523e-50e8-4ad7-86b9-7ff0978102b8"
@@ -1130,7 +1133,7 @@
                                                 "dataIndex": "number",
                                                 "itemId": "colDetailLength",
                                                 "text": "Length",
-                                                "width": 62
+                                                "width": 90
                                             },
                                             "name": "MyNumberColumn3",
                                             "designerId": "b8ab4588-024e-439e-ae23-aea81abe4d2b",
@@ -1164,7 +1167,7 @@
                                                 "dataIndex": "number",
                                                 "itemId": "colDetailWidth",
                                                 "text": "Width",
-                                                "width": 62
+                                                "width": 90
                                             },
                                             "name": "MyNumberColumn4",
                                             "designerId": "eab2ffa0-ff04-4688-9d9e-077cc86a7722",
@@ -1198,7 +1201,7 @@
                                                 "dataIndex": "number",
                                                 "itemId": "colDetailHeight",
                                                 "text": "Height",
-                                                "width": 62
+                                                "width": 90
                                             },
                                             "name": "MyNumberColumn5",
                                             "designerId": "ba2f1ad2-a632-4795-ac29-a4df1a220f8b",
@@ -1232,7 +1235,8 @@
                                                 "flex": 1.3,
                                                 "itemId": "colDetailDimensionUOM",
                                                 "minWidth": 95,
-                                                "text": "Dimension UOM"
+                                                "text": "Dimension UOM",
+                                                "width": 100
                                             },
                                             "name": "MyColumn48",
                                             "designerId": "e524c75d-940b-45a0-876c-320d959319c1",
@@ -1299,7 +1303,7 @@
                                                 "dataIndex": "number",
                                                 "itemId": "colDetailVolume",
                                                 "text": "Volume",
-                                                "width": 62
+                                                "width": 90
                                             },
                                             "name": "MyNumberColumn6",
                                             "designerId": "28db4a81-ba53-438a-b420-3fd55a9d4328",
@@ -1333,7 +1337,8 @@
                                                 "flex": 1.3,
                                                 "itemId": "colDetailVolumeUOM",
                                                 "minWidth": 95,
-                                                "text": "Volume UOM"
+                                                "text": "Volume UOM",
+                                                "width": 100
                                             },
                                             "name": "MyColumn50",
                                             "designerId": "66431ad3-8851-4a73-98af-6df9ec8e89f9",
@@ -1400,7 +1405,7 @@
                                                 "dataIndex": "number",
                                                 "itemId": "colDetailWeight",
                                                 "text": "Weight",
-                                                "width": 62
+                                                "width": 90
                                             },
                                             "name": "MyNumberColumn2",
                                             "designerId": "f105fdf5-a23d-48d4-9c34-809a5d9f57a6",
@@ -1435,7 +1440,8 @@
                                                 "flex": 1.3,
                                                 "itemId": "colDetailWeightUOM",
                                                 "minWidth": 95,
-                                                "text": "Weight UOM"
+                                                "text": "Weight UOM",
+                                                "width": 100
                                             },
                                             "name": "MyColumn35",
                                             "designerId": "c79dfa0e-e61a-4014-9358-8f7cc484cc3c",
@@ -1501,7 +1507,8 @@
                                                 "align": "right",
                                                 "dataIndex": "number",
                                                 "itemId": "colDetailMaxQty",
-                                                "text": "Max Qty"
+                                                "text": "Max Qty",
+                                                "width": 90
                                             },
                                             "name": "MyNumberColumn7",
                                             "designerId": "5355459c-6f8b-4711-9562-75e31610eb91",
@@ -1746,7 +1753,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter18",
+                                                                    "name": "filter11",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3633,7 +3640,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter19",
+                                                                            "name": "filter12",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3822,7 +3829,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter110",
+                                                                            "name": "filter13",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5556,7 +5563,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter111",
+                                                                    "name": "filter14",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5842,7 +5849,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter112",
+                                                                    "name": "filter15",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6330,7 +6337,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter113",
+                                                                            "name": "filter16",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6523,7 +6530,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter114",
+                                                                            "name": "filter17",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6744,7 +6751,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter115",
+                                                                    "name": "filter18",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7094,7 +7101,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter116",
+                                                                    "name": "filter19",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7894,7 +7901,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter117",
+                                                                    "name": "filter110",
                                                                     "designerId": "49c3fb54-0e26-4ccf-ade0-359ab372f04f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -8512,7 +8519,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter111",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -9029,7 +9036,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter119",
+                                                                    "name": "filter112",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -9655,7 +9662,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter120",
+                                                                    "name": "filter113",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10348,7 +10355,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter121",
+                                                    "name": "filter114",
                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -11187,7 +11194,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter122",
+                                                                    "name": "filter115",
                                                                     "designerId": "74ebd405-7763-4163-a329-69eecae2fbea",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -11535,7 +11542,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter123",
+                                                    "name": "filter116",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -11914,7 +11921,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter124",
+                                                    "name": "filter117",
                                                     "designerId": "336a12a5-7629-4f16-aedc-1c6511cd8165",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12299,7 +12306,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter125",
+                                                    "name": "filter118",
                                                     "designerId": "49a9508d-505d-4de5-977b-f8ebc7227c15",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12486,7 +12493,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter119",
                                                     "designerId": "6e3091f8-4c8b-4ab7-bb33-40607d9656f6",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -12947,7 +12954,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter127",
+                                                                    "name": "filter120",
                                                                     "designerId": "2bbc0808-5b40-4515-bf7e-466c3903a1c4",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13170,7 +13177,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter128",
+                                                                    "name": "filter121",
                                                                     "designerId": "f1bbb210-cf31-4fe7-8040-6808d9375e23",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13417,7 +13424,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter129",
+                                                                    "name": "filter122",
                                                                     "designerId": "49a6fdf8-831b-4540-9826-f339161f9600",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -13743,7 +13750,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging1",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
