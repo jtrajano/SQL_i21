@@ -511,7 +511,7 @@ namespace iRely.Inventory.BusinessLayer
             string lastLocation = locationFromPreviousPage; 
             foreach (var row in paged_data)
             {
-                if (row.intItemId != 0)
+                if (row.intInventoryTransactionId != 0)
                 {
                     // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
                     currentLocation = row.strLocationName;
