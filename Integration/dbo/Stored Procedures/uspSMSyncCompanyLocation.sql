@@ -34,6 +34,11 @@ BEGIN
 	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  
 	   SET @Unused = (SELECT TOP 1 l.agloc_loc_no + 1 AS start FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no + 1 = r.agloc_loc_no WHERE r.agloc_loc_no IS NULL)
 
+	   IF @MaxNumber2 IS NULL
+	   BEGIN
+		SET @MaxNumber2 = 0
+	   END
+
 	   SELECT @GreaterNumber = CASE WHEN @MaxNumber1 > @MaxNumber2 THEN @MaxNumber1 ELSE @MaxNumber2 END
 	   SELECT @GreaterNumber = CASE WHEN @GreaterNumber >= 999 THEN @Unused - 1 ELSE @GreaterNumber END
          
