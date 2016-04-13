@@ -8,7 +8,7 @@ BEGIN
 
 	DECLARE @tmpTable TABLE(intInvoiceId INT)
 	INSERT INTO @tmpTable
-	SELECT intInvoiceId FROM tblARPaymentDetail WHERE intPaymentId = @intPaymentId
+	SELECT intInvoiceId FROM tblARPaymentDetail WHERE intPaymentId = @intPaymentId and not dblPayment = 0
 	
 	IF EXISTS(SELECT NULL FROM @tmpTable)
 		BEGIN
