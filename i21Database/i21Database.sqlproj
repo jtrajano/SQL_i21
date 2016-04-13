@@ -3588,6 +3588,7 @@
     <Build Include="dbo\Stored Procedures\uspCTValidateContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
     <Build Include="dbo\Functions\fnCTCalculateAmountBetweenCurrency.sql" />
+    <Build Include="dbo\Functions\fnRKGetCurrencyConversionRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
