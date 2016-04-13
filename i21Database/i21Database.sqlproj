@@ -3219,6 +3219,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_FixInvoiceBillToInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -242,10 +242,15 @@ Begin
 	Update pl Set pl.intAssignedToId=tpl.intAssignedToId,pl.intLastModifiedUserId=tpl.intUserId,pl.dtmLastModified=@dtmCurrentDate,pl.intConcurrencyId=@intConCurrencyId 
 	From tblMFPickList pl Join @tblPickList tpl on pl.intPickListId=tpl.intPickListId
 
-	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,
+	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.dblQuantity=tpld.dblQuantity,pld.dblIssuedQuantity=tpld.dblIssuedQuantity,
+	pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,pld.intParentLotId=tpld.intParentLotId,pld.intStorageLocationId=tpld.intStorageLocationId,
+	pld.intItemUOMId=tpld.intItemUOMId,pld.intItemIssuedUOMId=tpld.intItemIssuedUOMId,
 	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId
 	From tblMFPickListDetail pld Join @tblPickListDetail tpld on pld.intPickListDetailId=tpld.intPickListDetailId 
 	Where pld.intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId
+
+	--Delete Records if not there in @tblPickListDetail table
+	Delete From tblMFPickListDetail Where intPickListDetailId NOT IN (Select intPickListDetailId From @tblPickListDetail) AND intLotId=intStageLotId
 
 	--insert new picked lots
 	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,

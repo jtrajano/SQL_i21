@@ -299,7 +299,7 @@ Begin
 
 	Insert Into @tblPickList
 	Select pld.intPickListDetailId,pld.intPickListId,pld.intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
-	l.intItemId,i.strItemNo,i.strDescription,pld.intStorageLocationId,sl.strName AS strStorageLocationName,
+	l.intItemId,i.strItemNo,i.strDescription,sl.intStorageLocationId,sl.strName AS strStorageLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
 	ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
@@ -439,7 +439,7 @@ Begin
 	tpl.intLotId,tpl.dblAvailableUnit,tpl.strAvailableUnitUOM,tpl.dblWeightPerUnit,'' AS strStatus
 	from @tblPickedLotsFinal tpl
 
-	Select * From @tblPickList ORDER BY strItemNo,strLotNumber DESC
+	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId ORDER BY a.strItemNo,a.strLotNumber DESC
 
 End
 
@@ -544,7 +544,7 @@ Begin
 
 	Insert Into @tblPickList
 	Select pld.intPickListDetailId,pld.intPickListId,pld.intStageLotId AS intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
-	l.intItemId,i.strItemNo,i.strDescription,pld.intStorageLocationId,sl.strName AS strStorageLocationName,
+	l.intItemId,i.strItemNo,i.strDescription,l.intStorageLocationId,sl.strName AS strStorageLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
 	((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
@@ -571,5 +571,5 @@ Begin
 	tpl.intLotId,tpl.dblAvailableUnit,tpl.strAvailableUnitUOM,tpl.dblWeightPerUnit,'' AS strStatus
 	from @tblPickedLotsFinal tpl
 
-	Select * From @tblPickList ORDER BY strItemNo,strLotNumber DESC
+	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId ORDER BY a.strItemNo,a.strLotNumber DESC
 End
