@@ -346,10 +346,17 @@ FROM
 		,[dblNetWeight]								=	0      
 		,[strCostUOM]								=	NULL
 		,[strgrossNetUOM]							=	NULL
-		,[dblWeightUnitQty]							=	0
-		,[dblCostUniNULL]							=	0
-		,[dblUnitQty]								=	0
+		,[dblWeightUnitQty]							=	ItemWeightUOM.dblUnitQty
+		,[dblCostUnitQty]							=	ItemCostUOM.dblUnitQty
+		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 	FROM [vyuAPChargesForBilling] A
+	INNER JOIN dbo.tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD
