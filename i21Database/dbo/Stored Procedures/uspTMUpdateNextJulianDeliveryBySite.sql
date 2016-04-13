@@ -181,6 +181,7 @@ BEGIN
 				UpdateSite:
 				UPDATE tblTMSite
 				SET dtmNextDeliveryDate = DATEADD(DAY,@intDaysBeforeDelivery,@dtmLastDeliveryDate)
+				,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 				WHERE intSiteID = @intSiteId
 				SET @ysnEndCalc = 1
 				PRINT @intDaysBeforeDelivery
