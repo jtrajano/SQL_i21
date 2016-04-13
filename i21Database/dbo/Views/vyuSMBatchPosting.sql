@@ -30,6 +30,12 @@ FROM
 	SELECT 'Payment', intPaymentId, strRecordNumber, dblAmountPaid, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDatePaid, strNotes FROM tblARPayment WHERE ysnPosted = 0
 	UNION ALL
 	SELECT 'Card Fueling', intTransactionId, strTransactionId, dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmTransactionDate, strDescription FROM vyuCFBatchPostTransactions
+	UNION ALL
+	SELECT BankTranType.strBankTransactionTypeName, intTransactionId, strTransactionId, dblAmount, '' AS strVendorInvoiceNumber, NULL AS intEntityVendorId, intEntityId, dtmDate, strMemo
+	FROM tblCMBankTransaction BankTran INNER JOIN tblCMBankTransactionType BankTranType ON BankTran.intBankTransactionTypeId = BankTranType.intBankTransactionTypeId
+	WHERE ysnPosted = 0 AND strBankTransactionTypeName IN ('Bank Deposit', 'Bank Transaction', 'Misc Checks')
+	UNION ALL
+	SELECT 'Bank Transfer', intTransactionId, strTransactionId, dblAmount, '' AS strVendorInvoiceNumber, NULL AS intEntityVendorId, intEntityId, dtmDate, strDescription FROM tblCMBankTransfer WHERE ysnPosted = 0
 ) BatchPosting
 LEFT JOIN tblEMEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
 LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId
