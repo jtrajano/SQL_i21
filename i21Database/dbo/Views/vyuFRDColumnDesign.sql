@@ -13,7 +13,7 @@ intColumnDetailId
 ,strSegmentUsed
 ,strColumnHeader
 ,strColumnCaption
-,strColumnType
+,A.strColumnType
 ,strColumnCode
 ,strFilterType
 ,strStartOffset
