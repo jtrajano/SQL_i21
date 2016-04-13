@@ -1,4 +1,4 @@
-﻿ALTER VIEW [dbo].[vyuSCTicketInventoryShipmentView]
+﻿CREATE VIEW [dbo].[vyuSCTicketInventoryShipmentView]
 	AS SELECT 
 	ICSI.intInventoryShipmentId,
 	ICSI.strShipmentNumber,

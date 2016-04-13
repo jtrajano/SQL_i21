@@ -3632,7 +3632,8 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateNextJulianDelivery.sql" />
     <Build Include="dbo\Functions\fnCTCalculateAmountBetweenCurrency.sql" />
     <Build Include="dbo\Functions\fnRKGetCurrencyConversionRate.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBatchPosting.sql" />
+    <Build Include="dbo\Views\vyuSCTicketInventoryReceiptView.sql" />
+    <Build Include="dbo\Views\vyuSCTicketInventoryShipmentView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
