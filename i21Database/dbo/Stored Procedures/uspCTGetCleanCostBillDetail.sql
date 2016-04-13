@@ -133,7 +133,7 @@ BEGIN TRY
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 								ELSE CAST(NULL AS NUMERIC(18,0)) 
 						END		AS dblValueInCCCurrency,
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,PM.intUnitMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) AS dblQuantity,
+						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,BD.intUnitOfMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) AS dblQuantity,
 						NUll AS intQuantityUOMId ,
 						@intCleanCostCurrencyId intCCCurrencyId,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
