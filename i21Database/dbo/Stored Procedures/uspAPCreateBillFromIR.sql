@@ -282,9 +282,9 @@ BEGIN
 		[intCostUOMId]				=	NULL,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1,
-		[dblWeightUnitQty]			=	ItemWeightUOM.dblUnitQty,
-		[dblCostUnitQty]			=	ItemCostUOM.dblUnitQty,
-		[dblUnitQty]				=	ItemUOM.dblUnitQty
+		[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,1),
+		[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1),
+		[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
