@@ -3630,6 +3630,7 @@
     <Build Include="dbo\Tables\tblHDOpportunityContract.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateNextJulianDeliveryBySite.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateNextJulianDelivery.sql" />
+    <Build Include="dbo\Functions\fnCTCalculateAmountBetweenCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
