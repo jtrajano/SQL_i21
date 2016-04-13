@@ -368,7 +368,8 @@ BEGIN
 
 	WHILE(@paymentCounter != (@totalRecords))
 	BEGIN
-		SELECT @PaymentId = (SELECT TOP(@paymentCounter) intPaymentId FROM #tmpPayablePostData)
+		SELECT @PaymentId = CAST((SELECT TOP(@paymentCounter + 1) intPaymentId FROM #tmpPayablePostData) AS NVARCHAR(50))
+		
 		EXEC dbo.uspSMAuditLog 
 		   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
 		  ,@keyValue = @PaymentId								-- Primary Key Value of the Voucher. 

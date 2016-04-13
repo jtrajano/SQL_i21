@@ -589,7 +589,7 @@ SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
 
 WHILE(@billCounter != (@totalRecords -1))
 BEGIN
-	SELECT @billId = (SELECT TOP 1(@billCounter) intBillId FROM #tmpPostBillData)
+	SELECT @billId = (SELECT TOP 1(@billCounter + 1) intBillId FROM #tmpPostBillData)
 
 	EXEC dbo.uspSMAuditLog 
 	   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
