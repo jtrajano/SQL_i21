@@ -3627,6 +3627,7 @@
     <Build Include="dbo\Views\vyuMBGetFuelPointPriceChangeDetail.sql" />
     <Build Include="dbo\Views\vyuMBGetFuelPointReading.sql" />
     <Build Include="dbo\Views\vyuMBGetFuelPointReadingDetail.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
