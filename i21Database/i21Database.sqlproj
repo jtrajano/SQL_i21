@@ -3628,6 +3628,8 @@
     <Build Include="dbo\Views\vyuMBGetFuelPointReading.sql" />
     <Build Include="dbo\Views\vyuMBGetFuelPointReadingDetail.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateNextJulianDeliveryBySite.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateNextJulianDelivery.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
