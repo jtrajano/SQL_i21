@@ -3589,6 +3589,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
     <Build Include="dbo\Functions\fnCTCalculateAmountBetweenCurrency.sql" />
     <Build Include="dbo\Functions\fnRKGetCurrencyConversionRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

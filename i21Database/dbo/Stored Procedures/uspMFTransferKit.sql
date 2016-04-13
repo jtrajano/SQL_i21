@@ -93,6 +93,116 @@ END
 SET @id=@strWorkOrderIds
 INSERT INTO @tblWorkOrder(intWorkOrderId) values (@id)
 
+
+--One WorkOrder one Pick List
+If (Select COUNT(1) From @tblWorkOrder)=1
+Begin
+Select @intWorkOrderId=intWorkOrderId From @tblWorkOrder
+Select @intPickListId=intPickListId,@intBlendItemId=intItemId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
+If (Select COUNT(1) From tblMFWorkOrder Where intPickListId=@intPickListId)=1
+Begin Try
+	Begin Tran
+
+	If @ysnBlendSheetRequired=0
+	Begin
+		--Add Parent Lots to Work Order Parent Lot Table
+		Delete From tblMFWorkOrderInputParentLot Where intWorkOrderId=@intWorkOrderId
+
+		Insert Into tblMFWorkOrderInputParentLot(intWorkOrderId,intParentLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+		dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,dblWeightPerUnit,intLocationId,intStorageLocationId)
+		Select @intWorkOrderId,intParentLotId,intItemId,SUM(dblQuantity),intItemUOMId,SUM(dblIssuedQuantity),intItemIssuedUOMId,null,
+		@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null AS intRecipeItemId,
+		(Select TOP 1 dblWeightPerQty From tblICLot Where intParentLotId=pl.intParentLotId) AS dblWeightPerUnit,@intBlendLocationId,null intStorageLocationId
+		From tblMFPickListDetail pl 
+		Where intPickListId=@intPickListId Group By intParentLotId,intItemId,intItemUOMId,intItemIssuedUOMId
+
+		--Copy Recipe
+		Exec uspMFCopyRecipe @intBlendItemId,@intBlendLocationId,@intUserId,@intWorkOrderId
+	End
+
+	--Get the child Lots attached to Pick List
+	Delete From @tblChildLot
+	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
+	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
+	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty
+	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
+	Where pld.intPickListId=@intPickListId
+
+	Select @intMinChildLot=Min(intRowNo) from @tblChildLot
+
+	While(@intMinChildLot is not null) --Loop Child Lots
+	Begin
+		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit
+		From @tblChildLot Where intRowNo=@intMinChildLot
+
+		Set @intNewLotId=NULL
+		Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
+		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intBlendStagingLocationId --And dblQty > 0
+
+		Set @dblMoveQty=@dblReqQty/@dblWeightPerUnit
+
+		If ISNULL(@intNewLotId,0) = 0 --Move
+			Begin
+				Exec [uspMFLotMove] @intLotId=@intLotId,
+									@intNewSubLocationId=@intNewSubLocationId,
+									@intNewStorageLocationId=@intBlendStagingLocationId,
+									@dblMoveQty=@dblReqQty,
+									@intUserId=@intUserId
+
+				Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
+				And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intBlendStagingLocationId --And dblQty > 0
+
+			End
+		Else --Merge
+			Exec [uspMFLotMerge] @intLotId=@intLotId,
+						@intNewLotId=@intNewLotId,
+						@dblMergeQty=@dblReqQty,
+						@intUserId=@intUserId
+			
+		Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
+			Select @intWorkOrderId,@intNewLotId,@intItemId,@dblReqQty,intItemUOMId,
+			CASE WHEN intItemUOMId=intItemIssuedUOMId THEN @dblReqQty ELSE @dblMoveQty End,intItemIssuedUOMId,null,
+			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
+			From @tblChildLot where intRowNo = @intMinChildLot
+
+		Select @intMinChildLot=Min(intRowNo) from @tblChildLot where intRowNo>@intMinChildLot
+	End --End Loop Child Lots
+
+	--Create Reservation
+	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=0
+
+	Update tblMFWorkOrder Set intKitStatusId=8,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime,
+	intStagingLocationId=@intBlendStagingLocationId,dtmStagedDate=@dtmCurrentDateTime Where intWorkOrderId=@intWorkOrderId
+
+	--All the WOs for the pick list are transfered No
+	If Exists (Select 1 From tblMFWorkOrder Where intPickListId=@intPickListId And intKitStatusId <> 8)
+	Begin
+		--Update Pick List Reservation
+		print 'Update Reservation'
+	End
+	Else --Yes
+	Begin
+		--Delete Pick List Reservation
+		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
+
+		Update tblMFPickList Set intKitStatusId=8,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime Where intPickListId=@intPickListId
+	End
+
+	Commit Tran
+
+	return
+End Try
+Begin Catch
+	 IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
+	 SET @ErrMsg = ERROR_MESSAGE()  
+	 RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
+End Catch
+End
+
+
+--Multiple Work One Pick List
 Select @intMinWorkOrder=Min(intRowNo) from @tblWorkOrder
 
 While(@intMinWorkOrder is not null) --Loop WorkOrders
