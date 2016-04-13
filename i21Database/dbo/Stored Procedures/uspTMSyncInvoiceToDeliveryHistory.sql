@@ -366,6 +366,7 @@ BEGIN
 					---- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
 					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
 				END
 				ELSE
 				BEGIN
@@ -837,6 +838,7 @@ BEGIN
 					---- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
 					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
 					
 					DELETE FROM tblTMDispatch
 					WHERE intSiteID = @intSiteId
@@ -1001,6 +1003,7 @@ BEGIN
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		WHERE intSiteID = @intSiteId
 
+		EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
 
 		
 		DELETE FROM #tmpVirtualMeterInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
