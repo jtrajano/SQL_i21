@@ -5103,4 +5103,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c8e3063d-782f-45c2-b161-e7c4af78dccb" ChangeDateTime="04/13/2016 01:55:14">
+    <Property Name="ElementName" Value="[dbo].[tblLGCompanyPreference].[ysnAutoGenerateReleaseNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[ysnContainersRequired]" />
+  </Operation>
 </Operations>

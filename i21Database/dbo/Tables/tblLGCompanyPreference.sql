@@ -5,7 +5,7 @@
 [intCommodityId] INT NULL,
 [intWeightUOMId] INT NULL,
 [ysnDropShip] [bit] NULL,
-[ysnAutoGenerateReleaseNo] [bit] NULL,
+[ysnContainersRequired] [bit] NULL,
 [intDefaultShipmentTransType] INT NULL,
 [intDefaultShipmentSourceType] INT NULL,
 [intDefaultTransportationMode] INT NULL,
