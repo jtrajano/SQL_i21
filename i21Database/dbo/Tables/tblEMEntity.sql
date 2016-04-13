@@ -32,6 +32,7 @@
 	[ysnReceiveEmail]  BIT             CONSTRAINT [DF_tblEMEntity_ysnReceiveEmail] DEFAULT ((0)) NOT NULL,
 	[strEmailDistributionOption]	NVARCHAR(MAX)	 COLLATE Latin1_General_CI_AS NULL,
     [dtmOriginationDate]      DATETIME        NULL,
+    [strPhoneBackUp]         NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
 	[intDefaultCountryId]		INT NULL,
 	    	
     [intConcurrencyId] INT             CONSTRAINT [DF__tmp_ms_xx__intCo__5132705A] DEFAULT ((0)) NOT NULL,
