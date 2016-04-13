@@ -3694,6 +3694,7 @@
     <Build Include="dbo\Tables\tblTMLeaseDevice.sql" />
     <Build Include="dbo\Views\vyuTMLeaseSearch.sql" />
     <None Include="Scripts\Post-Deployment\TM\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
