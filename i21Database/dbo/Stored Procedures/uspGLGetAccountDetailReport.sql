@@ -240,7 +240,7 @@ DECLARE @sqlRetain NVARCHAR(MAX) = dbo.fnGLGetRetainedEarningSQLString(@dtmDateF
 IF @sqlRetain <> 'Retained Earnings Activity Not Displayed'
 	SELECT @sqlCte += @sqlRetain
 
-SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  CASE WHEN @Where <> 'Where' THEN  @Where END +' )'-- UNION ALL SELECT ' + @cols + ' from cteRetain2 )'
+SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  CASE WHEN @Where <> 'Where' THEN  @Where ELSE '' END +' )'-- UNION ALL SELECT ' + @cols + ' from cteRetain2 )'
 
 
 SELECT @sqlCte+= ',cteBase as (SELECT '+ @cols +' from cteBase1 ' +  CASE WHEN  @sqlRetain <> 'Retained Earnings Activity Not Displayed' THEN ' UNION ALL SELECT ' + @cols + ' FROM  cteRetain2)' ELSE ')' END
@@ -267,7 +267,7 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'Location,',''''' as Location,')
 
 	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1)'
-	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + @Where1 + ' GROUP BY strAccountId),
+	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + CASE WHEN @Where1 <> 'Where' THEN  @Where1 ELSE '' END + ' GROUP BY strAccountId),
 		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
 	SELECT @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
 	END
