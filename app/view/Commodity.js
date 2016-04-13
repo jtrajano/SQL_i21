@@ -213,6 +213,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     }
                                                                 ],
                                                                 flex: 1,
+                                                                enableDrillDown: true,
                                                                 itemId: 'cboFutureMarket',
                                                                 fieldLabel: 'Default Future Market',
                                                                 labelWidth: 140,
