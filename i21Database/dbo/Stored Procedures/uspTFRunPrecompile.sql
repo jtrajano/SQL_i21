@@ -121,7 +121,7 @@ SET @query = 'SELECT     tblICItem.intItemId, tblICItemMotorFuelTax.intItemMotor
 						 tblSMShipVia.intEntityShipViaId, tblSMShipVia.strTransporterLicense, tblSMShipVia.strTransportationMode, 
 						 tblSMShipVia.strShipVia, tblSMShipVia.strFederalId,
 
-						 tblEntity.strName AS strVendorName, tblEntity_1.strName AS strCustomerName, tblEntity.strFederalTaxId AS strVendorFederalTaxId, tblEntity_1.strFederalTaxId AS strCustomerFederalTaxId
+						 tblEMEntity.strName AS strVendorName, tblEMEntity_1.strName AS strCustomerName, tblEMEntity.strFederalTaxId AS strVendorFederalTaxId, tblEMEntity_1.strFederalTaxId AS strCustomerFederalTaxId
 
 					FROM tblARInvoiceDetail INNER JOIN
                          tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId INNER JOIN
@@ -135,8 +135,8 @@ SET @query = 'SELECT     tblICItem.intItemId, tblICItemMotorFuelTax.intItemMotor
                          tblSMShipVia ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId INNER JOIN
                          tblAPVendor ON tblICInventoryReceipt.intEntityVendorId = tblAPVendor.intEntityVendorId INNER JOIN
                          tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityCustomerId INNER JOIN
-                         tblEntity ON tblAPVendor.intEntityVendorId = tblEntity.intEntityId INNER JOIN
-                         tblEntity AS tblEntity_1 ON tblARCustomer.intEntityCustomerId = tblEntity_1.intEntityId
+                         tblEMEntity ON tblAPVendor.intEntityVendorId = tblEMEntity.intEntityId INNER JOIN
+                         tblEMEntity AS tblEMEntity_1 ON tblARCustomer.intEntityCustomerId = tblEMEntity_1.intEntityId
 					WHERE tblICItemMotorFuelTax.intTaxAuthorityId = ''' + @TA + '''
 					AND tblICItemMotorFuelTax.intProductCodeId IN (''' + @ProductCodeId + ''')
 					AND tblICItem.ysnHasMFTImplication = 0'
