@@ -4,6 +4,7 @@
 	[strStatus] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strOrder] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strProjectStatus] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[dblProbability] NUMERIC(18, 6) NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblHDSalesPipeStatus] PRIMARY KEY CLUSTERED ([intSalesPipeStatusId] ASC),
