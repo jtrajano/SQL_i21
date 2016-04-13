@@ -338,7 +338,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 		/* Get the Created Paycheck Earning Id*/
 		SELECT @intPaycheckEarningId = @@IDENTITY
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId and ysnDefault = 1)
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId AND (ysnDefault = 1 OR dblHoursToProcess > 0))
 			BEGIN
 				/* Insert Paycheck Earning Taxes */
 				INSERT INTO tblPRPaycheckEarningTax
