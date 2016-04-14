@@ -2,6 +2,8 @@ Ext.define('Inventory.view.ItemViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icitem',
 
+    origStockUnitUOMId:'',
+    
     config: {
         helpURL: '/display/DOC/Items',
         searchConfig: {
@@ -1605,7 +1607,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 var pgeStock = tabPanel.down('#pgeStock');
                 var grdStock = pgeStock.down('#grdStock');
                 if (grdStock.store.complete === true)
+                {
+                    grdStock.store.reload();
                     grdStock.getView().refresh();
+                }
                 else
                     grdStock.store.load();
                 break;
@@ -1763,8 +1768,21 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
     },
+    beforeonUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
+        var win = obj.up('window');
+        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
+        var origStockUnitUOMId
 
-    onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+            if (grdUnitOfMeasure.store){
+                var record = grdUnitOfMeasure.store.findRecord('ysnStockUnit', true);
+                if (record){
+					origStockUnitUOMId = record.get('intItemUOMId');
+					Inventory.view.ItemViewController.origStockUnitUOMId = origStockUnitUOMId;
+                }
+            }
+    },
+    
+    onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
             var win = obj.up('window');
@@ -1810,6 +1828,82 @@ Ext.define('Inventory.view.ItemViewController', {
                     current.set('dblUnitQty', 1);
                 }
             }
+            
+            Ext.Ajax.request({
+            url: '../Inventory/api/Item/CheckStockUnit?ItemId=' + current.get('intItemId') + 
+            '&ItemStockUnit=' + current.get('ysnStockUnit') + '&ItemUOMId=' + current.get('intItemUOMId'),
+            method: 'post',
+            success: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    if (!jsonData.success) 
+                    {
+                       //iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        
+                         var result = function (button) {
+                            if (button === 'yes') {
+                                Ext.Ajax.request({
+                                 url: '../Inventory/api/Item/ConvertItemToNewStockUnit?ItemId=' + current.get('intItemId') + 
+                                '&ItemUOMId=' + current.get('intItemUOMId'),
+                                method: 'post',
+                                success: function (response) {
+                                    var jsonData = Ext.decode(response.responseText);
+                                        if (!jsonData.success) 
+                                            {
+                                                iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                                                
+                                            }
+                                        else
+                                            {
+                                                iRely.Functions.showCustomDialog('information', 'ok', 'Conversion to new stock unit has been completed.');
+                                            }
+                                },
+                                failure: function(response)
+                                    {
+                                        var jsonData = Ext.decode(response.responseText);
+                                        iRely.Functions.showErrorDialog('Connection Failed!');
+                                    }
+                                });
+                            } 
+                             
+                             else
+                                 {
+                                        current.set('ysnStockUnit', false);
+                                     
+                                        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
+                                        var uoms = grid.store.data.items;
+
+                                        Ext.Array.findBy(uoms, function (row) {
+                                            if (row.get('intItemUOMId') === Inventory.view.ItemViewController.origStockUnitUOMId) {
+                                                row.set('ysnStockUnit', true);
+                                            }
+                                        });
+                                }
+                        };
+
+                        if(current.get('ysnStockUnit') === false)
+                            {
+                                iRely.Functions.showErrorDialog("Item has already a transaction so Stock Unit is required.");
+                                current.set('ysnStockUnit', true);
+                            }
+                        else
+                            { 
+                                var msgBox = iRely.Functions;
+                                msgBox.showCustomDialog(
+                                msgBox.dialogType.WARNING,
+                                msgBox.dialogButtonType.YESNOCANCEL,
+                                "Item has transaction/s so changing stock unit will convert the following to new stock unit:<br> <br>Existing Stock <br>Cost & Prices <br> Existing Entries in Inventory Transaction Tables<br><br><br>Conversion to new stock unit will be automatically saved. <br><br>Do you want to continue?",
+                                result
+                               );
+                            }
+                    }
+                },
+            failure: function(response)
+            {
+                var jsonData = Ext.decode(response.responseText);
+                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+            }
+        
+          }); 
         }
     },
 
@@ -3300,7 +3394,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 tabchange: this.onItemTabChange
             },
             "#colStockUnit": {
-                beforecheckchange: this.onUOMStockUnitCheckChange
+                beforecheckchange: this.beforeonUOMStockUnitCheckChange,
+                checkchange: this.onUOMStockUnitCheckChange
             },
             "#colCellNameDefault": {
                 beforecheckchange: this.onManufacturingCellDefaultCheckChange
@@ -3387,5 +3482,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 drilldown: this.onPatronageDirectDrilldown
             }
         });
+        
     }
 });

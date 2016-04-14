@@ -599,5 +599,88 @@ namespace iRely.Inventory.BusinessLayer
 
             return newItemId;
         }
+
+        public SaveResult CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId)
+        {
+            SaveResult saveResult = new SaveResult();
+            var msg = "";
+
+            //Check if Stock Unit is changed
+            var query = _db.GetQuery<tblICItemUOM>()
+                .Where(t => t.intItemId == ItemId && t.ysnStockUnit == ItemStockUnit && t.intItemUOMId == ItemUOMId);
+
+            var totalItemChange = query.Count();
+
+            //No Change
+            if (totalItemChange > 0)
+            {
+                msg = "success";
+                saveResult.HasError = false;
+            }
+
+            //Changed
+            else
+            {
+                //Check if Transaction exists for the item
+                var query2 = _db.GetQuery<vyuICGetInventoryValuation>()
+                    .Where(t => t.intItemId == ItemId && t.intInventoryTransactionId != 0);
+
+                var totalItemWithTransaction = query2.Count();
+
+                //With Transaction
+                if (totalItemWithTransaction > 0)
+                {
+                    msg = "Item has already a transaction.";
+                    saveResult.HasError = true;
+                }
+
+                //Without Transaction
+                else
+                {
+                    msg = "success";
+                    saveResult.HasError = false;
+                }   
+            }
+
+            return saveResult;
+        }
+
+
+        public SaveResult ConvertItemToNewStockUnit(int ItemId, int ItemUOMId)
+        {
+            SaveResult saveResult = new SaveResult();
+            var msg = "";
+
+            using (SqlConnection conn = new SqlConnection(_db.ContextManager.Database.Connection.ConnectionString))
+            {
+                conn.Open();
+                try
+                {
+                    using (SqlCommand command = new SqlCommand("uspICChangeItemStockUOM", conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@intItemId", ItemId));
+                        command.Parameters.Add(new SqlParameter("@intItemUOMAsNewStockUnit", ItemUOMId));
+                        command.Parameters.Add(new SqlParameter("@entitySecurityUserId", iRely.Common.Security.GetEntityId()));
+                        
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.ExecuteNonQuery();
+
+                        saveResult = _db.Save(true);
+                        msg = "success";
+                        saveResult.HasError = false; 
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                }
+                conn.Close();
+            }
+
+            return saveResult;
+        }
     }
 }

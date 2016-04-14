@@ -124,5 +124,42 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        [HttpPost]
+        [ActionName("CheckStockUnit")]
+        public HttpResponseMessage CheckStockUnit(int ItemId, bool ItemStockUnit, int ItemUOMId)
+        {
+            var result = _bl.CheckStockUnit(ItemId, ItemStockUnit, ItemUOMId);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+
+        [HttpPost]
+        [ActionName("ConvertItemToNewStockUnit")]
+        public HttpResponseMessage ConvertItemToNewStockUnit(int ItemId, int ItemUOMId)
+        {
+            var result = _bl.ConvertItemToNewStockUnit(ItemId, ItemUOMId);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
     }
 }
