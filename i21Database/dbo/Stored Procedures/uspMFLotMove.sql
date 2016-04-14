@@ -34,6 +34,8 @@ BEGIN TRY
 	DECLARE @strItemNumber NVARCHAR(50)
 	DECLARE @strUnitMeasure NVARCHAR(50)
 	DECLARE @dblMoveWeight NUMERIC(38,20)
+			,@dblOldWeight NUMERIC(38,20)
+			,@dblOldSourceWeight NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -121,6 +123,22 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+			SELECT @dblOldWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
+			FROM dbo.tblICLot
+			WHERE strLotNumber = @strNewLotNumber
+				AND intStorageLocationId = @intNewStorageLocationId
+
+			IF @dblOldWeight IS NULL
+			SELECT @dblOldWeight=0
+
+			SELECT @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
+			FROM dbo.tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intStorageLocationId
+
+			IF @dblOldSourceWeight IS NULL
+			SELECT @dblOldSourceWeight=0
+
 			EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 				,@dtmDate
 				,@intLocationId
@@ -139,8 +157,14 @@ BEGIN TRY
 
 			UPDATE dbo.tblICLot
 			SET dblWeightPerQty = @dblWeightPerQty,
-				dblWeight = @dblMoveWeight,
-				dblQty = @dblMoveWeight/@dblWeightPerQty
+				dblWeight = @dblOldSourceWeight-@dblMoveWeight,
+				dblQty = (@dblOldSourceWeight-@dblMoveWeight)/@dblWeightPerQty
+			WHERE intSubLocationId =@intSubLocationId AND intStorageLocationId=@intStorageLocationId AND strLotNumber=@strLotNumber
+
+			UPDATE dbo.tblICLot
+			SET dblWeightPerQty = @dblWeightPerQty,
+				dblWeight = @dblOldWeight+@dblMoveWeight,
+				dblQty = (@dblOldWeight+@dblMoveWeight)/@dblWeightPerQty
 			WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 			SELECT @intNewLotId = intLotId
