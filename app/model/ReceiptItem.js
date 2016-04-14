@@ -67,8 +67,9 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblGrossMargin', type: 'float' },
         { name: 'intCommodityId', type: 'int', allowNull: true },
         { name: 'intTaxGroupId', type: 'int', allowNull: true },
-        { name: 'intLoadReceive', type: 'int' }
-
+        { name: 'intLoadReceive', type: 'int' },
+        { name: 'ysnSubCurrency', type: 'boolean', allowNull: true },
+        { name: 'strSubCurrency', type: 'string'}
     ],
 
     validators: [

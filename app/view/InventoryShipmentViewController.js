@@ -547,7 +547,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colRate: 'dblRate',
-                colExchangeRate: 'dblExchangeRate',
                 colCostUOM: {
                     dataIndex: 'strCostUOM',
                     editor: {
@@ -1741,9 +1740,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
-        else if (combo.itemId === 'cboChargeCurrency') {
-            current.set('dblExchangeRate', record.get('dblDailyRate'));
-        }
     },
 
     onQualityClick: function(button, e, eOpts) {
@@ -2133,7 +2129,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                             ysnInventoryCost: false,
                                                             strCostMethod: otherCharge.strCostMethod,
                                                             dblRate: otherCharge.dblRate,
-                                                            dblExchangeRate: otherCharge.dblFx,
                                                             intCostUOMId: otherCharge.intItemUOMId,
                                                             intEntityVendorId: otherCharge.intVendorId,
                                                             dblAmount: 0,

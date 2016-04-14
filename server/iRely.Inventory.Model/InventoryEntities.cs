@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            : base(iRely.Common.Security.GetCompanyName())
+             : base(iRely.Common.Security.GetCompanyName())
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
@@ -187,11 +187,14 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemLotMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptMap());
-            modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());            
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemTaxMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemLotMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptVoucherMap());
+
+            modelBuilder.Configurations.Add(new vyuICInventoryReceiptLookUpMap());
+            modelBuilder.Configurations.Add(new vyuICInventoryReceiptItemLookUpMap());            
             
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());

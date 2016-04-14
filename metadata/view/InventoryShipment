@@ -3414,6 +3414,9 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "hidden": true
+                                                    },
                                                     "name": "TabConfig6",
                                                     "designerId": "c19cc3de-b2c3-489d-9283-b91527f91fa4"
                                                 },
@@ -4041,37 +4044,6 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "flex": 1,
-                                                "format": "0,000.000000",
-                                                "itemId": "colExchangeRate",
-                                                "text": "Exchange Rate"
-                                            },
-                                            "name": "MyNumberColumn3",
-                                            "designerId": "40419e30-dd3e-44e2-8342-04be4b3b466e",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|createAlias": "numericfield"
-                                                    },
-                                                    "name": "MyNumberField60",
-                                                    "designerId": "b03e3838-f0a2-4af9-902a-23309f9052f0"
-                                                }
-                                            ]
-                                        },
-                                        {
                                             "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",
@@ -4189,40 +4161,14 @@
                                             "designerId": "ca98a097-437a-43d2-bfbe-a3e51ccf8e64",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "editor",
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "        dataIndex: 'strDescription',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Billed By',",
-                                                            "        flex: 1",
-                                                            "    }",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strDescription",
-                                                        "itemId": "cboCostBilledBy",
-                                                        "valueField": "strDescription"
-                                                    },
-                                                    "name": "MyComboBox85",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "a7dfee0f-fcb3-465f-a6c7-541e87ed0751",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox3",
+                                                    "designerId": "fbc62ff0-e651-4806-9308-92c0c214fd83"
                                                 }
                                             ]
                                         },
@@ -4515,7 +4461,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

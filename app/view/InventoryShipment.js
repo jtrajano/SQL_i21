@@ -33,6 +33,7 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.column.Check',
+        'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
@@ -1660,6 +1661,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'panel',
                                                         layout: 'fit',
                                                         title: 'Split Lots',
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            hidden: true
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
@@ -1938,16 +1943,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colExchangeRate',
-                                                        text: 'Exchange Rate',
-                                                        flex: 1,
-                                                        format: '0,000.000000',
-                                                        editor: {
-                                                            xtype: 'numericfield'
-                                                        }
-                                                    },
-                                                    {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCostUOM',
                                                         text: 'UOM',
@@ -2001,18 +1996,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         text: 'Accrue',
                                                         flex: 0.7,
                                                         editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Billed By',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboCostBilledBy',
-                                                            displayField: 'strDescription',
-                                                            valueField: 'strDescription'
+                                                            xtype: 'checkboxfield'
                                                         }
                                                     },
                                                     {
