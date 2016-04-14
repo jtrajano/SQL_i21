@@ -1661,6 +1661,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'panel',
                                                         layout: 'fit',
                                                         title: 'Split Lots',
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            hidden: true
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',

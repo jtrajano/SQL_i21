@@ -3414,6 +3414,9 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "hidden": true
+                                                    },
                                                     "name": "TabConfig6",
                                                     "designerId": "c19cc3de-b2c3-489d-9283-b91527f91fa4"
                                                 },
