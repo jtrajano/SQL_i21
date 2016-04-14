@@ -196,7 +196,7 @@ BEGIN
 	) PaymentRecords
 	IF(@totalRecords = 0)  
 	BEGIN
-		SET @success = 0
+		SET @success = 1
 		RETURN;
 	END
 
