@@ -136,4 +136,10 @@ BEGIN
     VALUES(3,'Export File')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 4)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(4,'File Operation')
+END
+GO
 
