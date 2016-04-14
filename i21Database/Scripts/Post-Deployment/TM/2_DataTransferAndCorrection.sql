@@ -33,9 +33,6 @@ BEGIN
 							WHERE strFillMethod = ''Julian Calendar'')
 	')
 
-	EXEC('
-		ALTER TABLE tblTMPreferenceCompany DROP COLUMN intLeaseItemId 
-	')
 END
 GO
 print N'END Populate global julian calendar for site'
