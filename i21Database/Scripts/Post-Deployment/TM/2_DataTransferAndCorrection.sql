@@ -27,7 +27,7 @@ BEGIN
 											FROM tblTMGlobalJulianCalendar
 											WHERE ysnDefault = 1)
 		WHERE intGlobalJulianCalendarId IS NULL 
-			AND intFillMethod = (SELECT TOP 1 
+			AND intFillMethodId = (SELECT TOP 1 
 								intFillMethodId 
 							FROM tblTMFillMethod 
 							WHERE strFillMethod = ''Julian Calendar'')
