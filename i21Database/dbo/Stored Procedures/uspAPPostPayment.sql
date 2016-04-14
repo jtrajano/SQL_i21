@@ -368,7 +368,7 @@ BEGIN
 
 	WHILE(@paymentCounter != (@totalRecords))
 	BEGIN
-		SELECT @PaymentId = CAST((SELECT TOP(@paymentCounter + 1) intPaymentId FROM #tmpPayablePostData) AS NVARCHAR(50))
+		SELECT @PaymentId = CAST((SELECT TOP(1) intPaymentId FROM #tmpPayablePostData) AS NVARCHAR(50))
 		
 		EXEC dbo.uspSMAuditLog 
 		   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
@@ -379,6 +379,7 @@ BEGIN
 		  ,@fromValue = ''									-- Previous Value
 		  ,@toValue = ''
 		SET @paymentCounter = @paymentCounter + 1
+		DELETE FROM #tmpPayablePostData WHERE intPaymentId = @PaymentId
 	END
 END
 ELSE

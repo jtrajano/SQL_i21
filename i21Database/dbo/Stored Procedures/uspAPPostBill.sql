@@ -589,7 +589,7 @@ SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
 
 WHILE(@billCounter != (@totalRecords))
 BEGIN
-	SELECT @billId = CAST((SELECT TOP (@billCounter + 1) intBillId FROM #tmpPostBillData) AS NVARCHAR(50))
+	SELECT @billId = CAST((SELECT TOP (1) intBillId FROM #tmpPostBillData) AS NVARCHAR(50))
 
 	EXEC dbo.uspSMAuditLog 
 	   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
@@ -601,6 +601,7 @@ BEGIN
 	  ,@toValue = ''									-- New Value
 
   SET @billCounter = @billCounter + 1
+  DELETE FROM #tmpPostBillData WHERE intBillId = @billId
 END
 
 Post_Commit:
