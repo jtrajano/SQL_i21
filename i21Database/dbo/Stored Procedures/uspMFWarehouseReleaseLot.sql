@@ -2,7 +2,8 @@
 	,@strFGReleaseMailTOAddress NVARCHAR(MAX)=NULL OUTPUT
 	,@strFGReleaseMailCCAddress NVARCHAR(MAX)=NULL OUTPUT
 	,@strSubject VARCHAR(MAX)=NULL OUTPUT
-	,@strBody NVARCHAR(MAX)=NULL OUTPUT)
+	,@strBody NVARCHAR(MAX)=NULL OUTPUT
+	,@ysnBuildEMailContent bit=1)
 AS
 BEGIN TRY
 	DECLARE @intLotId INT
@@ -364,7 +365,7 @@ BEGIN TRY
 
 	EXEC sp_xml_removedocument @idoc
 
-	IF @intReleaseStatusId=2
+	IF @intReleaseStatusId=2 and @ysnBuildEMailContent=1
 	BEGIN
 		SELECT @strFGReleaseMailTOAddress = strFGReleaseMailTOAddress
 			,@strFGReleaseMailCCAddress = strFGReleaseMailCCAddress
