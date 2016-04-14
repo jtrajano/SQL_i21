@@ -4179,16 +4179,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
     },
 
-    onVendorClick: function () {
-        iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor',{ action: 'view' });
-    },
-
     onVendorDrilldown: function(combo) {
-        if (iRely.Functions.isEmpty(combo.getValue())) {
-            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
-        }
-        else {
-            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', combo.getValue());
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current.get('intEntityVendorId') !== null) {
+            iRely.Functions.openScreen('EntityManagement.view.Entity', {
+                filters: [
+                    {
+                        column: 'intEntityId',
+                        value: current.get('intEntityVendorId')
+                    }
+                ]
+            });
         }
     },
 
