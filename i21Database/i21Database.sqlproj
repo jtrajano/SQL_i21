@@ -3634,6 +3634,7 @@
     <Build Include="dbo\Functions\fnRKGetCurrencyConversionRate.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryReceiptView.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryShipmentView.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSyncTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
