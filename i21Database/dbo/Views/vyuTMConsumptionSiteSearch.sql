@@ -25,6 +25,10 @@ AS
 	,A.intLocationId
 	,ysnSiteActive = ISNULL(A.ysnActive,0)
 	,strFillMethod = H.strFillMethod
+	,strItemNo = ISNULL(I.strItemNo,'')
+	,dtmLastDeliveryDate = A.dtmLastDeliveryDate
+	,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+	,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -39,6 +43,8 @@ AS
 			and F.ysnDefaultContact = 1
 	INNER JOIN tblEMEntity G 
 		ON F.intEntityContactId = G.intEntityId
+	LEFT JOIN tblICItem I
+		ON A.intProduct = I.intItemId
 	LEFT JOIN tblTMFillMethod H
 		ON A.intFillMethodId = H.intFillMethodId
 	WHERE ISNULL(D.ysnActive,0) = 1
