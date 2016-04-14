@@ -2,7 +2,7 @@
 (
 	[intTestResultId] INT NOT NULL IDENTITY, 
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMTestResult_intConcurrencyId] DEFAULT 0, 
-	[intSampleId] INT NOT NULL, 
+	[intSampleId] INT, 
 	[intProductId] INT, 
 	[intProductTypeId] INT NOT NULL, 
 	[intProductValueId] INT NULL CONSTRAINT [DF_tblQMTestResult_intProductValueId] DEFAULT 0, 
