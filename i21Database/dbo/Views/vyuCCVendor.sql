@@ -2,7 +2,7 @@
 CREATE VIEW [dbo].[vyuCCVendor]
 WITH SCHEMABINDING
 	AS 
-SELECT 
+SELECT DISTINCT
     A.intVendorDefaultId,
 	B.intEntityVendorId intEntityId,	
 	B.intEntityVendorId intVendorId,
@@ -25,6 +25,8 @@ SELECT
 
 FROM
      dbo.tblCCVendorDefault A
+	INNER JOIN dbo.tblCCDealerSite AS I
+	    ON I.intVendorDefaultId = A.intVendorDefaultId
 	INNER JOIN dbo.tblAPVendor B
 		ON A.intVendorId = B.intEntityVendorId
 	INNER JOIN dbo.tblEMEntity C
