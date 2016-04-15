@@ -321,7 +321,7 @@ FROM
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	A.dblTax
-		,[dblRate]									=	0
+		,[dblRate]									=	ISNULL(G1.dblRate,0)
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	A.intAccountId
@@ -340,23 +340,23 @@ FROM
 		,[intShipmentId]							=	0      
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	NULL
-		,[strCostUOM]								=	NULL
+		,[strUOM]									=	NULL
 		,[intWeightUOMId]							=	NULL
-		,[intCostUOMId]								=	NULL
+		,[intCostUOMId]								=	CostUOM.intUnitMeasureId
 		,[dblNetWeight]								=	0      
-		,[strCostUOM]								=	NULL
+		,[strCostUOM]								=	CostUOM.strUnitMeasure
 		,[strgrossNetUOM]							=	NULL
-		,[dblWeightUnitQty]							=	ItemWeightUOM.dblUnitQty
-		,[dblCostUnitQty]							=	ItemCostUOM.dblUnitQty
-		,[dblUnitQty]								=	ItemUOM.dblUnitQty
+		,[dblWeightUnitQty]							=	1
+		,[dblCostUnitQty]							=	ISNULL(ItemCostUOM.dblUnitQty,1)
+		,[dblUnitQty]								=	ISNULL(ItemCostUOM.dblUnitQty,1)
 	FROM [vyuAPChargesForBilling] A
-	INNER JOIN dbo.tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
-	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
-	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	INNER JOIN dbo.tblICInventoryReceiptCharge B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
-	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
+	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD
@@ -370,7 +370,7 @@ FROM
 		INNER JOIN dbo.tblAPBill B ON B.intBillId = H.intBillId
 		WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId --  AND B.str = A.inte
 		GROUP BY H.intInventoryReceiptChargeId
-
+			
 	) Qty
 	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (Qty.dblQty IS NULL)
 

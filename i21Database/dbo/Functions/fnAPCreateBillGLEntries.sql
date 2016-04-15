@@ -288,9 +288,9 @@ BEGIN
 														ELSE 
 															(CASE WHEN D.ysnInventoryCost = 0 
 																THEN 
-																	(CASE WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0
-																		THEN B.dblTotal / B.dblRate		
-																		ELSE B.dblTotal END) --Get the amount from voucher if NOT inventory cost
+																	(CASE WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0 THEN B.dblTotal / B.dblRate		
+																		  WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate	
+																		  ELSE B.dblTotal  END) --Get the amount from voucher if NOT inventory cost
 																ELSE D.dblAmount END)
 													END)
 											END, --Bill Detail
