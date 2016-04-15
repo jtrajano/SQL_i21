@@ -1769,7 +1769,7 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
     },
-    beforeonUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
+    beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
         var win = obj.up('window');
         var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
         var origStockUnitUOMId
@@ -1875,9 +1875,51 @@ Ext.define('Inventory.view.ItemViewController', {
 
                                         Ext.Array.findBy(uoms, function (row) {
                                             if (row.get('intItemUOMId') === Inventory.view.ItemViewController.origStockUnitUOMId) {
-                                                row.set('ysnStockUnit', true);
+                                               // row.set('ysnStockUnit', true);
+                                                current = row;
+                                                current.set('ysnStockUnit', true);
                                             }
                                         });
+                                     
+                                     if (checked === true){
+                                        var uoms = grid.store.data.items;
+                                        if (uoms) {
+                                            uoms.forEach(function(uom){
+                                                if (uom === current){
+                                                    current.set('dblUnitQty', 1);
+                                                }
+                                                if (uom !== current){
+                                                    uom.set('ysnStockUnit', false);
+                                                    if (uomConversion) {
+                                                        var index = uomConversion.data.findIndexBy(function (row) {
+                                                            if (row.get('intUnitMeasureId') === current.get('intUnitMeasureId')) {
+                                                                return true;
+                                                            }
+                                                        });
+                                                        if (index >= 0) {
+                                                            var stockUOM = uomConversion.getAt(index);
+                                                            var conversions = stockUOM.data.vyuICGetUOMConversions;
+                                                            if (conversions) {
+                                                                var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                                                                    if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
+                                                                        return true;
+                                                                    }
+                                                                });
+                                                                if (selectedUOM) {
+                                                                    uom.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                    else {
+                                        if (current){
+                                            current.set('dblUnitQty', 1);
+                                        }
+                                    }
                                 }
                         };
 
@@ -3395,7 +3437,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 tabchange: this.onItemTabChange
             },
             "#colStockUnit": {
-                beforecheckchange: this.beforeonUOMStockUnitCheckChange,
+                beforecheckchange: this.beforeUOMStockUnitCheckChange,
                 checkchange: this.onUOMStockUnitCheckChange
             },
             "#colCellNameDefault": {
