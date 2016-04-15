@@ -105,3 +105,8 @@ IF EXISTS(SELECT * FROM tblGRDiscountScheduleCode WHERE ISNULL(strDiscountCharge
 BEGIN
 	UPDATE tblGRDiscountScheduleCode SET strDiscountChargeType='Dollar' WHERE ISNULL(strDiscountChargeType,'')=''
 END
+GO
+IF EXISTS(SELECT * FROM tblQMTicketDiscount WHERE ISNULL(strDiscountChargeType,'')='')
+BEGIN
+	UPDATE tblQMTicketDiscount SET strDiscountChargeType='Dollar' WHERE ISNULL(strDiscountChargeType,'')=''
+END

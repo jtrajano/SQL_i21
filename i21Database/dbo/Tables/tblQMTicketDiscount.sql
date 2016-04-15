@@ -18,6 +18,7 @@
     [intTicketFileId] INT NULL, 
     [strSourceType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[intSort] INT NOT NULL DEFAULT 1,
+	[strDiscountChargeType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NOT NULL,
 	CONSTRAINT [PK_tblQMTicketDiscount_intTicketDiscountId] PRIMARY KEY ([intTicketDiscountId]),
 	CONSTRAINT [UK_tblQMTicketDiscount_intTicketId_intTicketFileId_strSourceType_strDiscountCode_strDiscountCodeDescription] UNIQUE ([intTicketId],[intTicketFileId],[strSourceType],[strDiscountCode],[strDiscountCodeDescription]), 
 	CONSTRAINT [FK_tblQMTicketDiscount_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
