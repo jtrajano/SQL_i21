@@ -3590,6 +3590,7 @@
     <Build Include="dbo\Functions\fnCTCalculateAmountBetweenCurrency.sql" />
     <Build Include="dbo\Functions\fnRKGetCurrencyConversionRate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
