@@ -40,6 +40,8 @@ BEGIN TRY
 	DECLARE @dblWeight NUMERIC(38,20)
 	DECLARE @dblLotQty NUMERIC(38,20)
 	DECLARE @dblLotAvailableQty NUMERIC(38,20)
+			,@dblOldDestinationQty NUMERIC(38,20)
+			,@dblOldSourceQty NUMERIC(38,20)
 
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
@@ -53,7 +55,8 @@ BEGIN TRY
 		   @intItemUOMId = intItemUOMId,	 
 		   @dblWeightPerQty = dblWeightPerQty,
 		   @intWeightUOMId = intWeightUOMId,
-		   @dblWeight = dblWeight
+		   @dblWeight = dblWeight,
+		   @dblOldSourceQty=dblQty
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
@@ -103,7 +106,15 @@ BEGIN TRY
 			RAISERROR('Lot tracking for the item is set as manual. Please supply the split lot number.',11,1)
 		END
 	END
-							 
+
+	SELECT @dblOldDestinationQty=dblQty
+	FROM dbo.tblICLot
+	WHERE strLotNumber = @strNewLotNumber
+		AND intStorageLocationId = @intSplitStorageLocationId
+
+	IF @dblOldDestinationQty IS NULL
+	SELECT @dblOldDestinationQty=0
+								 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
 													 @intLocationId	= @intLocationId,
@@ -124,13 +135,27 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	IF @dblOldDestinationQty IS NULL
+	SELECT @dblOldDestinationQty=0
+
+	IF @dblOldSourceQty IS NULL
+	SELECT @dblOldSourceQty=0
+
 	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblWeightPerQty
-	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
+	SET dblWeightPerQty = @dblWeightPerQty,
+		dblWeight = (@dblOldSourceQty-@dblSplitQty)*@dblWeightPerQty,
+		dblQty = @dblOldSourceQty-@dblSplitQty
+	WHERE intLotId=@intLotId
 	
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
 
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblWeightPerQty,
+		dblWeight = (@dblOldDestinationQty+@dblSplitQty)*@dblWeightPerQty,
+		dblQty = @dblOldDestinationQty+@dblSplitQty
+	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
+	
 	--UPDATE tblICLot
 	--SET dblWeight = dblQty
 	--WHERE dblQty <> dblWeight

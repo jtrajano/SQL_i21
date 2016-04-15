@@ -36,6 +36,11 @@ BEGIN TRY
 	DECLARE @intItemStockUOMId INT
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
+			,@dblOldDestinationWeight NUMERIC(38,20)
+			,@dblOldSourceWeight NUMERIC(38,20)
+			,@dblMergeWeight NUMERIC(38,20)
+
+	SELECT @dblMergeWeight = @dblMergeQty
 
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -46,7 +51,8 @@ BEGIN TRY
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intWeightUOMId = intWeightUOMId,
-		   @dblWeight = dblWeight
+		   @dblWeight = dblWeight,
+		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
@@ -78,7 +84,8 @@ BEGIN TRY
 		   @intNewItemUOMId = intItemUOMId,
 		   @strNewLotNumber = strLotNumber,
 		   @intNewLotStatusId = intLotStatusId,
-		   @dblNewLotWeightPerUnit = dblWeightPerQty
+		   @dblNewLotWeightPerUnit = dblWeightPerQty,
+		   @dblOldDestinationWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
 	FROM tblICLot WHERE intLotId = @intNewLotId
 		   
 	SELECT @dtmDate = GETDATE()
@@ -99,6 +106,12 @@ BEGIN TRY
 	--BEGIN
 	--	RAISERROR(51196,11,1)
 	--END
+
+	IF @dblOldDestinationWeight IS NULL
+	SELECT @dblOldDestinationWeight=0
+
+	IF @dblOldSourceWeight IS NULL
+	SELECT @dblOldSourceWeight=0
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
@@ -121,14 +134,16 @@ BEGIN TRY
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblNewLotWeightPerUnit
-	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
-	
-	--UPDATE tblICLot
-	--SET dblWeight = dblQty
-	--WHERE dblQty <> dblWeight
-	--	AND intItemUOMId = intWeightUOMId
-	--and intLotId=@intLotId
+	SET dblWeightPerQty = @dblLotWeightPerUnit,
+		dblWeight = CASE WHEN @dblLotWeightPerUnit = 0 THEN 0 ELSE @dblOldSourceWeight-@dblMergeWeight END,
+		dblQty = (@dblOldSourceWeight-@dblMergeWeight)/CASE WHEN @dblLotWeightPerUnit = 0 THEN 1 ELSE @dblLotWeightPerUnit END
+	WHERE intLotId=@intLotId
+
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblNewLotWeightPerUnit,
+		dblWeight = CASE WHEN @dblNewLotWeightPerUnit = 0 THEN 0 ELSE @dblOldDestinationWeight+@dblMergeWeight END,
+		dblQty = (@dblOldDestinationWeight+@dblMergeWeight)/CASE WHEN @dblNewLotWeightPerUnit = 0 THEN 1 ELSE @dblNewLotWeightPerUnit END
+	WHERE intLotId=@intNewLotId
 
 	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 	BEGIN
