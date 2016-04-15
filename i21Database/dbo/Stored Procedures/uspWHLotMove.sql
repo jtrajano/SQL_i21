@@ -4,7 +4,6 @@
 	,@dblMoveQty NUMERIC(38, 20)
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
-	,@blnInventoryMove BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -132,9 +131,7 @@ BEGIN TRY
 				,@intInventoryAdjustmentId
 	
 			UPDATE dbo.tblICLot
-			SET dblWeightPerQty = @dblWeightPerQty,
-				dblQty = @dblMoveQty,
-				dblWeight = @dblWeightPerQty * @dblMoveQty
+			SET dblWeightPerQty = @dblWeightPerQty
 			WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 	
 			SELECT @intNewLotId = intLotId
@@ -149,7 +146,7 @@ BEGIN TRY
 				WHERE intLotId = @intLotId
 			END
 
-			IF @blnIsPartialMove = 0 AND @blnInventoryMove = 1
+			IF @blnIsPartialMove = 0	
 			BEGIN
 				IF EXISTS(SELECT * FROM dbo.tblMFWorkOrderConsumedLot WHERE intLotId = @intLotId)
 				BEGIN

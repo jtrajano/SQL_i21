@@ -4,7 +4,6 @@
 	,@dblMoveQty NUMERIC(38, 20)
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
-	,@blnInventoryMove BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -33,7 +32,6 @@ BEGIN TRY
 	DECLARE @strStorageLocationName NVARCHAR(50)
 	DECLARE @strItemNumber NVARCHAR(50)
 	DECLARE @strUnitMeasure NVARCHAR(50)
-	DECLARE @dblMoveWeight NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -51,7 +49,7 @@ BEGIN TRY
 	
 	SELECT @strStorageLocationName = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId
 	SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
-	SELECT @dblMoveWeight = @dblMoveQty
+	
 	SELECT @strUnitMeasure =  UM.strUnitMeasure
 	FROM tblICLot l
 	JOIN tblICItemUOM U ON U.intItemUOMId = l.intWeightUOMId
@@ -146,9 +144,7 @@ BEGIN TRY
 				,@intInventoryAdjustmentId
 
 			UPDATE dbo.tblICLot
-			SET dblWeightPerQty = @dblWeightPerQty,
-				dblWeight = @dblMoveWeight,
-				dblQty = @dblMoveWeight/@dblWeightPerQty
+			SET dblWeightPerQty = @dblWeightPerQty
 			WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 			SELECT @intNewLotId = intLotId
@@ -163,7 +159,7 @@ BEGIN TRY
 				WHERE intLotId = @intLotId
 			END
 
-			IF @blnIsPartialMove = 0 AND @blnInventoryMove = 1
+			IF @blnIsPartialMove = 0	
 			BEGIN
 				IF EXISTS(SELECT * FROM dbo.tblMFWorkOrderConsumedLot WHERE intLotId = @intLotId)
 				BEGIN
