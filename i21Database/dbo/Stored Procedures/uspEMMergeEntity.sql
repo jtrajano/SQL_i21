@@ -1,8 +1,10 @@
 ﻿CREATE PROCEDURE uspEMMergeEntity
+
 	@PrimaryKey		int
 	,@PrimaryType	nvarchar(100)
 	,@Merge			nvarchar(max)
 as
+
 BEGIN
 	SET NOCOUNT ON
 	declare @PrimaryKeyString	nvarchar(100)
@@ -19,6 +21,8 @@ BEGIN
 	declare @RefUpdateCommandEntity  NVARCHAR(MAX)
 	declare @CurStatement	NVARCHAR(MAX)
 	
+	declare @hasUser	BIT
+	set @hasUser = 0
 	declare @RelationShips table 
 	(
 		stment nvarchar(max)
@@ -28,7 +32,19 @@ BEGIN
 	(
 		stment nvarchar(max)
 	)
-
+		
+	declare @curtype nvarchar(100)
+	declare @EntityTypes table
+	(
+		strType	nvarchar(100)
+	)
+	declare @getAll bit
+	declare @avoidtable table(
+		strTable nvarchar(100)
+	)
+	declare @parentAvoidTable table(
+		strTable nvarchar(100)
+	)
 	set @PrimaryKeyString =   Cast(@PrimaryKey  as nvarchar )
 	select * into #tmpMerge from dbo.[fnSplitString](@Merge,'|')
 	while exists(select top 1 1 from #tmpMerge)
@@ -49,45 +65,104 @@ BEGIN
 		select @CurMergeId = SUBSTRING(@CurMergeItem,0,CHARINDEX('.',@CurMergeItem))
 		,@CurMergeType = SUBSTRING(@CurMergeItem, CHARINDEX('.',@CurMergeItem)+ 1 , LEN(@CurMergeItem))
 
-		if exists(select top 1 1 from [tblEMEntityType] where intEntityId = @PrimaryKey and strType = @CurMergeType)
-			goto GoHere
+		--get all the type
+		insert into @EntityTypes(strType)
+		select strType from tblEMEntityType where intEntityId = @CurMergeId
 
-		if @CurMergeType = 'Customer' or @CurMergeType = 'Prospect'
+		while exists(select top 1 1 from @EntityTypes)
 		begin
-			set @CurTableName = 'tblARCustomer'
-			set @CurTableKey = 'intEntityCustomerId'
-		end
-		else if @CurMergeType = 'Vendor'
-		begin
-			set @CurTableName = 'tblAPVendor'
-			set @CurTableKey = 'intEntityVendorId'
-		end
-		else if @CurMergeType = 'Salesperson'
-		begin
-			set @CurTableName = 'tblARSalesperson'
-			set @CurTableKey = 'intEntitySalespersonId'
-		end
-		else if @CurMergeType = 'User'
-		begin
-			set @CurTableName = 'tblSMUserSecurity'
-			set @CurTableKey = 'intEntityUserSecurityId'
+			select top 1 @curtype = strType from @EntityTypes
+			
+			--delete from @avoidtable
+			--set @getAll = 1
+
+			if @curtype = 'Customer' or @curtype = 'Prospect'
+			begin
+				set @CurTableName = 'tblARCustomer'
+				set @CurTableKey = 'intEntityCustomerId'
+
+				insert into @avoidtable(strTable)
+				select 'tblARCustomerBudget'
+				union
+				select 'tblARCustomerApplicatorLicense'
+				union
+				select 'tblARCustomerAccountStatus'
+				union 
+				select 'tblARCustomerRackQuoteHeader'
+				set @getAll = 0
+
+			end
+			else if @curtype = 'Vendor'
+			begin
+				set @CurTableName = 'tblAPVendor'
+				set @CurTableKey = 'intEntityVendorId'
+			end
+			else if @curtype = 'Salesperson'
+			begin
+				set @CurTableName = 'tblARSalesperson'
+				set @CurTableKey = 'intEntitySalespersonId'
+			end
+			else if @curtype = 'User'
+			begin
+				set @CurTableName = 'tblSMUserSecurity'
+				set @CurTableKey = 'intEntityUserSecurityId'
+
+				insert into @avoidtable(strTable)
+				select 'tblSMUserSecurityCompanyLocationRolePermission'
+				set @getAll = 0
+				set @hasUser = 1
+			end
+
+			set @Columns = ''
+			SELECT @Columns = COALESCE(@Columns + ', ', '') + name from syscolumns where id = object_id(@CurTableName) and name <> @CurTableKey
+			
+			
+			insert into @RelationShips
+			SELECT
+				'UPDATE ' + R.TABLE_NAME + ' SET ' +  R.COLUMN_NAME + '='+ @PrimaryKeyString +' WHERE ' + R.COLUMN_NAME  + '=' + @CurMergeId + '; --relationship' as stment		
+			FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE U
+			INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
+				ON U.CONSTRAINT_CATALOG = FK.UNIQUE_CONSTRAINT_CATALOG
+				AND U.CONSTRAINT_SCHEMA = FK.UNIQUE_CONSTRAINT_SCHEMA
+				AND U.CONSTRAINT_NAME = FK.UNIQUE_CONSTRAINT_NAME
+			INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE R
+				ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
+				AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
+				AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
+			WHERE U.TABLE_NAME = @CurTableName AND (@getAll = 1 or R.TABLE_NAME not in (select strTable from @avoidtable))--OR U.TABLE_NAME = 'tblEMEntity'
+
+
+
+
+			delete from @EntityTypes where strType = @curtype
 		end
 
-		SELECT @Columns = COALESCE(@Columns + ', ', '') + name from syscolumns where id = object_id(@CurTableName) and name <> @CurTableKey
-		
-		insert into @RelationShips
-		SELECT
-			'UPDATE ' + R.TABLE_NAME + ' SET ' +  R.COLUMN_NAME + '='+ @PrimaryKeyString +' WHERE ' + R.COLUMN_NAME  + '=' + @CurMergeId + ';' as stment		
-		FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE U
-		INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
-			ON U.CONSTRAINT_CATALOG = FK.UNIQUE_CONSTRAINT_CATALOG
-			AND U.CONSTRAINT_SCHEMA = FK.UNIQUE_CONSTRAINT_SCHEMA
-			AND U.CONSTRAINT_NAME = FK.UNIQUE_CONSTRAINT_NAME
-		INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE R
-			ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
-			AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
-			AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
-		WHERE U.TABLE_NAME = @CurTableName --OR U.TABLE_NAME = 'tblEMEntity'
+		if exists(select top 1 1 from tblEMEntityType where intEntityId = @PrimaryKey and strType = 'Customer')
+		begin
+			insert into @parentAvoidTable
+			select 'tblARCustomer'
+		end
+		if exists(select top 1 1 from tblEMEntityType where intEntityId = @PrimaryKey and strType = 'Vendor')
+		begin
+			insert into @parentAvoidTable
+			select 'tblAPVendor'
+		end
+		if exists(select top 1 1 from tblEMEntityType where intEntityId = @PrimaryKey and strType = 'Salesperson')
+		begin
+			insert into @parentAvoidTable
+			select 'tblARSalesperson'
+		end
+		if exists(select top 1 1 from tblEMEntityType where intEntityId = @PrimaryKey and strType = 'User')
+		begin
+			insert into @parentAvoidTable
+			select 'tblSMUserSecurity'
+		end
+		if exists(select top 1 1 from tblEMEntityType where intEntityId = @PrimaryKey and strType = 'Employee')
+		begin
+			insert into @parentAvoidTable
+			select 'tblPREmployee'
+		end
+
 
 		insert into @EntityRelationShips
 		SELECT
@@ -101,23 +176,44 @@ BEGIN
 			ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
 			AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
 			AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME		
-		WHERE U.TABLE_NAME = 'tblEMEntity'  AND R.TABLE_NAME <> @CurTableName
+		WHERE U.TABLE_NAME = 'tblEMEntity'  AND R.TABLE_NAME <> @CurTableName and R.TABLE_NAME NOT IN(SELECT strTable from @parentAvoidTable)
 
 		BEGIN TRANSACTION
 		BEGIN TRY
-			if @CurMergeType = 'User'
+			if @hasUser = 1
 			BEGIN 
 				EXEC('alter table tblSMUserSecurity drop constraint AK_tblSMUserSecurity_strUserName')
-			END 
-			EXEC ( 'insert into tblEMEntityType ( intEntityId, strType, intConcurrencyId) values ('+ @PrimaryKeyString +','''+@CurMergeType+''',0 )
+
+				EXEC('insert into tblSMUserSecurityCompanyLocationRolePermission(intEntityUserSecurityId, intEntityId, intUserRoleId, intCompanyLocationId)
+						select ' + @PrimaryKeyString + ',' + @PrimaryKeyString + ' ,intUserRoleId, intCompanyLocationId 
+							from tblSMUserSecurityCompanyLocationRolePermission  a 
+							where a.intEntityUserSecurityId = ' + @CurMergeId + ' 
+								and  not exists(select * 
+													from tblSMUserSecurityCompanyLocationRolePermission b 
+														where intEntityUserSecurityId = ' + @PrimaryKeyString + ' 
+															and a.intUserRoleId = b.intUserRoleId 
+															and a.intCompanyLocationId = b.intCompanyLocationId)
+				
+				')
+				/*
+				
+				*/
+			END
+			if not exists(select top 1 1 from tblEMEntityType where intEntityId = @PrimaryKey and strType = @curtype)
+			begin
+				EXEC ( 'insert into tblEMEntityType ( intEntityId, strType, intConcurrencyId) values ('+ @PrimaryKeyString +','''+@curtype+''',0 )
 					insert into '+ @CurTableName +'(' + @CurTableKey +@Columns + ') 
 							select '+ @PrimaryKeyString + @Columns + ' 
 								from ' + @CurTableName + ' 
 									where ' + @CurTableKey + ' = ' +  @CurMergeId)
-			EXEC('delete from tblEMEntityType where intEntityId = ' + @CurMergeId + ' and strType = ''' + @CurMergeType + '''' )
+			end
+			
+			 
+			
+			EXEC('delete from tblEMEntityType where intEntityId = ' + @CurMergeId + ' and strType IN (SELECT strType from tblEMEntityType where intEntityId = ' + @PrimaryKeyString + ')' )
 			EXEC('update tblEMEntityLocation set ysnDefaultLocation = 0 where intEntityId = ' + @CurMergeId)
 			EXEC('update tblEMEntityToContact set ysnDefaultContact = 0 where intEntityId = ' + @CurMergeId)
-			--PRINT 'Execute relationships'
+			
 			SET @CurStatement = ''
 			WHILE EXISTS(SELECT TOP 1 1 FROM  @RelationShips)
 			BEGIN
@@ -127,7 +223,7 @@ BEGIN
 				
 				delete from @RelationShips where stment = @CurStatement
 			END 
-			PRINT 'Execute entity relationships'
+			
 			SET @CurStatement = ''
 			WHILE EXISTS(SELECT TOP 1 1 FROM  @EntityRelationShips)
 			BEGIN
@@ -140,7 +236,7 @@ BEGIN
 			
 			EXEC('delete from ' + @CurTableName + ' where ' + @CurTableKey + ' = ' + @CurMergeId )
 
-			if @CurMergeType = 'User'
+			if @hasUser = 1
 			BEGIN 
 				EXEC('ALTER TABLE tblSMUserSecurity ADD CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName])')
 			END 
