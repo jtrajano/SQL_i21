@@ -1,5 +1,5 @@
 ﻿CREATE VIEW dbo.vyuQMCuppingTestResult
-	WITH SCHEMABINDING
+	--WITH SCHEMABINDING
 AS
 SELECT intSampleId
 	,intPropertyId

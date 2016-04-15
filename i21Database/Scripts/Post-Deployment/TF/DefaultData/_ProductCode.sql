@@ -5,7 +5,7 @@ DECLARE @intTaxAuthorityId INT
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'
 IF (@intTaxAuthorityId IS NOT NULL)
-DELETE FROM tblTFProductCode
+
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
 	BEGIN

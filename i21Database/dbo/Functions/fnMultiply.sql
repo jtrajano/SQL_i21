@@ -52,7 +52,7 @@ BEGIN
 
 	-- Pad zeroes to the left 
 	BEGIN 
-		DECLARE @actualMultiply AS NUMERIC(38,20) = CAST(@factor1 AS NUMERIC(18, 6)) * CAST(@factor2 AS NUMERIC(18, 6)) 
+		DECLARE @actualMultiply AS NUMERIC(38,20) = CAST(@factor1 AS FLOAT) * CAST(@factor2 AS FLOAT) 
 		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@actualMultiply, '.', ''), '-', '')) - 1) + @rawResult +  REPLICATE('0', 5) 
 	END 
 	

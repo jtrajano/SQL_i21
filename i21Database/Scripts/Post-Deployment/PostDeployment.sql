@@ -59,6 +59,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\10_RegulatorType.sql
 :r .\TM\DefaultData\11_ApplianceType.sql
 :r .\TM\DefaultData\12_BudgetCalculation.sql
+:r .\TM\DefaultData\13_GlobalJulianCalendar.sql
 :r .\TM\Tables\tblTMCOBOLWRITE.sql
 
 ----TM Reports
@@ -127,7 +128,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
-:r .\TM\DefaultData\13_GlobalJulianCalendar.sql
+
 
 
 -- Canned Panels

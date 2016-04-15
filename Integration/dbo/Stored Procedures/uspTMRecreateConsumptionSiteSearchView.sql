@@ -54,11 +54,17 @@ BEGIN
 				,A.intLocationId
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
 				,strFillMethod = H.strFillMethod
+				,strItemNo = ISNULL(I.vwitm_no,'''')
+				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
+				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
 				INNER JOIN vwcusmst C
 					ON B.intCustomerNumber = C.A4GLIdentity
+				LEFT JOIN vwitmmst I
+					ON A.intProduct = I.A4GLIdentity
 				LEFT JOIN tblTMFillMethod H
 					ON A.intFillMethodId = H.intFillMethodId
 		')
@@ -93,6 +99,10 @@ BEGIN
 				,A.intLocationId
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
 				,strFillMethod = H.strFillMethod
+				,strItemNo = ISNULL(I.strItemNo,'''')
+				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
+				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -102,11 +112,13 @@ BEGIN
 					ON C.intEntityId = D.intEntityCustomerId
 				LEFT JOIN tblSMCompanyLocation E
 					ON A.intLocationId = E.intCompanyLocationId
-				INNER JOIN tblEMEntityToContact F
+				INNER JOIN [tblEMEntityToContact] F
 					ON D.intEntityCustomerId = F.intEntityId 
 						and F.ysnDefaultContact = 1
 				INNER JOIN tblEMEntity G 
 					ON F.intEntityContactId = G.intEntityId
+				LEFT JOIN tblICItem I
+					ON A.intProduct = I.intItemId
 				LEFT JOIN tblTMFillMethod H
 					ON A.intFillMethodId = H.intFillMethodId
 				WHERE ISNULL(D.ysnActive,0) = 1
