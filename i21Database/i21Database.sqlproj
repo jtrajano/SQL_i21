@@ -3635,6 +3635,8 @@
     <Build Include="dbo\Views\vyuSCTicketInventoryReceiptView.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryShipmentView.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSyncTables.sql" />
+    <Build Include="dbo\Tables\tblARCustomerLicenseInformation.sql" />
+    <Build Include="dbo\Tables\tblARCustomerLicenseModule.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateDiscountandShrink.sql" />
   </ItemGroup>
   <ItemGroup>
