@@ -89,7 +89,7 @@ BEGIN TRY
 		RAISERROR (51192,11,1)
 	END
 
-	IF(@dblMoveQty = @dblLotAvailableQty)
+	IF(@dblMoveQty = @dblWeight)
 	BEGIN
 		SET @blnIsPartialMove = 0
 	END
@@ -165,14 +165,14 @@ BEGIN TRY
 
 			UPDATE dbo.tblICLot
 			SET dblWeightPerQty = @dblWeightPerQty,
-				dblWeight = CASE WHEN @dblWeightPerQty = 0 THEN 0 ELSE @dblOldSourceWeight-@dblMoveWeight END,
-				dblQty = (@dblOldSourceWeight-@dblMoveWeight)/CASE WHEN @dblWeightPerQty = 0 THEN 1 ELSE @dblWeightPerQty END
+				dblWeight = @dblOldSourceWeight-@dblMoveWeight,
+				dblQty = (@dblOldSourceWeight-@dblMoveWeight)/@dblWeightPerQty
 			WHERE intSubLocationId =@intSubLocationId AND intStorageLocationId=@intStorageLocationId AND strLotNumber=@strLotNumber
 
 			UPDATE dbo.tblICLot
 			SET dblWeightPerQty = @dblWeightPerQty,
-				dblWeight = CASE WHEN @dblWeightPerQty = 0 THEN 0 ELSE @dblOldWeight+@dblMoveWeight END,
-				dblQty = (@dblOldWeight+@dblMoveWeight)/CASE WHEN @dblWeightPerQty = 0 THEN 1 ELSE @dblWeightPerQty END
+				dblWeight = @dblOldWeight+@dblMoveWeight,
+				dblQty = (@dblOldWeight+@dblMoveWeight)/@dblWeightPerQty
 			WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 			SELECT @intNewLotId = intLotId
