@@ -36,6 +36,8 @@ BEGIN TRY
 	DECLARE @intItemStockUOMId INT
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
+			,@dblOldDestinationQty NUMERIC(38,20)
+			,@dblOldSourceQty NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -46,7 +48,8 @@ BEGIN TRY
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intWeightUOMId = intWeightUOMId,
-		   @dblWeight = dblWeight
+		   @dblWeight = dblWeight,
+		   @dblOldSourceQty=dblQty
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
@@ -73,7 +76,8 @@ BEGIN TRY
 		   @intNewItemUOMId = intItemUOMId,
 		   @strNewLotNumber = strLotNumber,
 		   @intNewLotStatusId = intLotStatusId,
-		   @dblNewLotWeightPerUnit = dblWeightPerQty
+		   @dblNewLotWeightPerUnit = dblWeightPerQty,
+		   @dblOldDestinationQty=dblQty
 	FROM tblICLot WHERE intLotId = @intNewLotId
 		   
 	SELECT @dtmDate = GETDATE()
@@ -115,9 +119,23 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	IF @dblOldDestinationQty IS NULL
+	SELECT @dblOldDestinationQty=0
+
+	IF @dblOldSourceQty IS NULL
+	SELECT @dblOldSourceQty=0
+
 	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblNewLotWeightPerUnit
-	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
+	SET dblWeightPerQty = @dblLotWeightPerUnit,
+		dblWeight = (@dblOldSourceQty-@dblMergeQty)*@dblLotWeightPerUnit,
+		dblQty = (@dblOldSourceQty-@dblMergeQty)
+	WHERE intLotId=@intLotId
+
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblNewLotWeightPerUnit,
+		dblWeight = (@dblOldDestinationQty+@dblMergeQty)*@dblNewLotWeightPerUnit,
+		dblQty = (@dblOldDestinationQty+@dblMergeQty)
+	WHERE intLotId=@intNewLotId
 	
 	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 	BEGIN
