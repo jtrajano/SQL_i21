@@ -67,6 +67,8 @@
 	[strOriginCity] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strOriginState] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationTCN] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strFuelType] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+
 	[leaf] [bit] NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblDummyTransaction] PRIMARY KEY CLUSTERED 
