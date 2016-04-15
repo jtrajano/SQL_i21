@@ -21,7 +21,10 @@ BEGIN TRY
 			@intContractSeq			INT,
 			@intContractHeaderId	INT,
 			@intNewStatusId			INT,
-			@intOldStatusId			INT
+			@intOldStatusId			INT,
+			@intContractTypeId		INT,
+			@intOldItemId			INT,
+			@intOldQtyUnitMeasureId	INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -41,11 +44,16 @@ BEGIN TRY
 			intContractStatusId		INT
 	)  
 
-	SELECT	@dblOldQuantity		=	dblQuantity,
-			@intOldItemUOMId	=	intItemUOMId,
-			@intContractSeq		=	intContractSeq,
-			@intOldStatusId		=	intContractStatusId
-	FROM	tblCTContractDetail
+	SELECT	@dblOldQuantity		=	CD.dblQuantity,
+			@intOldItemUOMId	=	CD.intItemUOMId,
+			@intContractSeq		=	CD.intContractSeq,
+			@intOldStatusId		=	CD.intContractStatusId,
+			@intContractTypeId	=	CH.intContractTypeId,
+			@intOldItemId			=	CD.intItemId,
+			@intOldQtyUnitMeasureId=	IU.intUnitMeasureId
+	FROM	tblCTContractDetail	CD
+	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
+	JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CD.intItemUOMId
 	WHERE	intContractDetailId	=	@intContractDetailId
 
 	SELECT @dblNewQuantityInOldUOM = dbo.fnCTConvertQtyToTargetItemUOM(@intNewItemUOMId,@intOldItemUOMId,@dblNewQuantity)
@@ -63,6 +71,35 @@ BEGIN TRY
 		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
 		BEGIN
 			SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Inbound shipments.'
+			RAISERROR(@ErrMsg,16,1) 
+		END
+
+		IF @intContractTypeId = 1
+		BEGIN
+			SELECT	@dblQuantityUsed = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intOldItemId,intPUnitMeasureId,@intOldQtyUnitMeasureId,dblPAllocatedQty)) 
+			FROM	tblLGAllocationDetail WHERE intPContractDetailId = @intContractDetailId
+			IF @dblQuantityUsed > @dblNewQuantityInOldUOM
+			BEGIN
+				SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Allocation.'
+				RAISERROR(@ErrMsg,16,1) 
+			END
+		END
+
+		IF @intContractTypeId = 2
+		BEGIN
+			SELECT	@dblQuantityUsed = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intOldItemId,intSUnitMeasureId,@intOldQtyUnitMeasureId,dblPAllocatedQty)) 
+			FROM	tblLGAllocationDetail WHERE intSContractDetailId = @intContractDetailId
+			IF @dblQuantityUsed > @dblNewQuantityInOldUOM
+			BEGIN
+				SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Allocation.'
+				RAISERROR(@ErrMsg,16,1) 
+			END
+		END
+
+		SELECT @dblQuantityUsed = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intOldItemId,intUnitMeasureId,@intOldQtyUnitMeasureId,dblReservedQuantity)) FROM tblLGReservation WHERE intContractDetailId = @intContractDetailId
+		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
+		BEGIN
+			SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Reservation.'
 			RAISERROR(@ErrMsg,16,1) 
 		END
 
