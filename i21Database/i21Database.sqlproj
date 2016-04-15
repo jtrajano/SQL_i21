@@ -3639,6 +3639,8 @@
     <Build Include="dbo\Tables\tblARCustomerLicenseModule.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateDiscountandShrink.sql" />
     <Build Include="dbo\Views\vyuTMDeviceSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMInspectionGetResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMInspectionSaveResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
