@@ -2,12 +2,16 @@
 	AS 
 	
 SELECT MADetail.intMeterAccountDetailId
-	, MADetail.intMeterAccountId
+	, MA.intMeterAccountId
 	, MA.intEntityCustomerId
 	, MA.strCustomerName
 	, MA.strCustomerNumber
 	, MA.intEntityLocationId
 	, MA.strCustomerLocation
+	, MA.strAddress
+	, MA.strCity
+	, MA.strState
+	, MA.strZipCode
 	, MA.intConsignmentGroupId
 	, MA.strConsignmentGroup
 	, MA.intCompanyLocationId
@@ -23,6 +27,6 @@ SELECT MADetail.intMeterAccountDetailId
 	, MADetail.dblLastMeterReading
 	, MADetail.dblLastTotalSalesDollar
 	, MADetail.intSort
-FROM tblMBMeterAccountDetail MADetail
+FROM tblMBMeterAccountDetail MADetail 
 LEFT JOIN vyuMBGetMeterAccount MA ON MA.intMeterAccountId = MADetail.intMeterAccountId
 LEFT JOIN tblICItem Item ON Item.intItemId = MADetail.intItemId
