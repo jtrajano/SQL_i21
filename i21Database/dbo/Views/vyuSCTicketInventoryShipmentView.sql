@@ -1,10 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketInventoryShipmentView]
 	AS SELECT 
+	SC.intTicketId,
 	ICSI.intInventoryShipmentId,
 	ICSI.strShipmentNumber,
 	ICSI.dtmShipDate,
 	ICSI.strOrderType,
 	ICSI.strSourceType,
+	SC.intEntityId,
 	ICSI.strCustomerNumber,
 	ICSI.strCustomerName,
 	ICSI.ysnPosted,
