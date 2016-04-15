@@ -5,6 +5,7 @@ AS
 		,strCustomerNumber = D.strEntityNo
 		,strCustomerName = D.strName
 		,strSiteDescription = B.strDescription
+		,strSiteAddress = B.strSiteAddress
 		,strSiteNumber = RIGHT('000'+ CAST(B.intSiteNumber AS NVARCHAR(4)),4)
 		,strOrderNumber = A.strOrderNumber
 		,strProduct = COALESCE(F.strDescription,E.strDescription)
