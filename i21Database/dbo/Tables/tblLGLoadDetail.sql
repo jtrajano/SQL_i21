@@ -34,6 +34,7 @@
 
 	[strVendorReference] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerReference] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intAllocationDetailId] INT NULL,
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 
@@ -47,5 +48,6 @@
 	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocation_intPCompanyLocationId] FOREIGN KEY ([intPCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocation_intSCompanyLocationId] FOREIGN KEY ([intSCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblLGLoadDetail_tblICItemUOM_intWeightItemUOMId] FOREIGN KEY ([intWeightItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+	CONSTRAINT [FK_tblLGLoadDetail_tblICItemUOM_intWeightItemUOMId] FOREIGN KEY ([intWeightItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblLGLoadDetail_tblLGAllocationDetail_intAllocationDetailId] FOREIGN KEY ([intAllocationDetailId]) REFERENCES [tblLGAllocationDetail]([intAllocationDetailId])
 )

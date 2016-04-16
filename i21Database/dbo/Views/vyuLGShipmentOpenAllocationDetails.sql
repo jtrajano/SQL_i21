@@ -11,7 +11,7 @@ AS
 			CDP.intItemId AS intPItemId,
 			CAST (CHP.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
 			AD.dblPAllocatedQty,
-			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblPAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
 								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) AS dblPUnAllocatedQty,
 			AD.intPUnitMeasureId,
 			UP.strUnitMeasure as strPUnitMeasure,
@@ -34,7 +34,7 @@ AS
 			CDS.intItemId AS intSItemId,
 			CAST (CHS.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.dblSAllocatedQty,
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblSAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
 								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0)  AS dblSUnAllocatedQty,
 			AD.intSUnitMeasureId,
 			US.strUnitMeasure as strSUnitMeasure,
@@ -66,8 +66,8 @@ AS
 	LEFT JOIN	tblSMCountry			CP	ON	CP.intCountryID				= ITP.intOriginId
 	LEFT JOIN	tblSMCountry			CS	ON	CS.intCountryID				= ITS.intOriginId
 	WHERE	(
-			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblPAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
 								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0 AND
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblSAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblQuantity) from tblLGLoadDetail SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
 								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0
 			)			
