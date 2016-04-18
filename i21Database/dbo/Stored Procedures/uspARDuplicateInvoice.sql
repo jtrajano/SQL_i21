@@ -78,7 +78,7 @@ SELECT
 	,@TermId						= [intTermId]
 	,@Date							= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
 	,@DueDate						= NULL	--[dtmDueDate]
-	,@ShipDate						= NULL	--[dtmShipDate]
+	,@ShipDate						= CAST(GETDATE() AS DATE)
 	,@PostDate						= NULL	--[dtmPostDate]
 	,@PeriodsToAccrue				= [intPeriodsToAccrue]
 	,@EntitySalespersonId			= [intEntitySalespersonId]
@@ -97,7 +97,7 @@ SELECT
 	,@Calculated					= 0		--[ysnCalculated]
 	,@Splitted						= 0		--[ysnSplitted]
 	,@PaymentId						= NULL	--[intPaymentId]
-	,@SplitId						= NULL	--[intSplitId]
+	,@SplitId						= [intSplitId]
 	,@DistributionHeaderId			= NULL	--[intDistributionHeaderId]
 	,@LoadDistributionHeaderId		= NULL	--[intLoadDistributionHeaderId]
 	,@ActualCostId					= NULL	--[strActualCostId]
