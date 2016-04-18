@@ -315,7 +315,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInventoryReceiptChargeId).HasColumnName("intInventoryReceiptChargeId");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
             this.Property(t => t.intContractId).HasColumnName("intContractId");
-            this.Property(t => t.intContractDetailId).HasColumnName("intContractDetailId");
+          //  this.Property(t => t.intContractDetailId).HasColumnName("intContractDetailId");
             this.Property(t => t.intChargeId).HasColumnName("intChargeId");
             this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
             this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
@@ -329,9 +329,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
-            this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
-            this.Property(t => t.dblExchangeRate).HasColumnName("dblExchangeRate");
-            this.Property(t => t.intCent).HasColumnName("intCent");
+           // this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
+           // this.Property(t => t.dblExchangeRate).HasColumnName("dblExchangeRate");
+           // this.Property(t => t.intCent).HasColumnName("intCent");
             
             this.HasOptional(p => p.vyuICGetInventoryReceiptCharge)
                 .WithRequired(p => p.tblICInventoryReceiptCharge);
@@ -366,8 +366,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.ysnSubCurrency).HasColumnName("ysnSubCurrency");
-            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
-            this.Property(t => t.intCent).HasColumnName("intCent");
+          //  this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+         //   this.Property(t => t.intCent).HasColumnName("intCent");
 
         }
     }

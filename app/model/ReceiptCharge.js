@@ -29,7 +29,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
         },
         { name: 'intContractId', type: 'int', allowNull: true },
-        { name: 'intContractDetailId', type: 'int', allowNull: true },
+   //     { name: 'intContractDetailId', type: 'int', allowNull: true },
         { name: 'intChargeId', type: 'int', allowNull: true },
         { name: 'ysnInventoryCost', type: 'boolean' },
         { name: 'strCostMethod', type: 'string' },
@@ -50,10 +50,10 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strVendorName', type: 'string' },
         { name: 'strContractNumber', type: 'string' },
 
-        { name: 'intCurrencyId', type: 'int', allowNull: true },
+   /*     { name: 'intCurrencyId', type: 'int', allowNull: true },
         { name: 'strCurrency', type: 'string' },
         { name: 'dblExchangeRate', type: 'float', allowNull: true  },
-        { name: 'intCent', type: 'int', allowNull: true },
+        { name: 'intCent', type: 'int', allowNull: true },*/
         { name: 'ysnSubCurrency', type: 'boolean', allowNull: true  }
     ],
 
