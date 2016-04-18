@@ -345,7 +345,15 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strDescription: 'Freight'
                 },
                 {
-                    strDescription: 'Other Charges'
+                    strDescription: 'Other Charges',
+                }
+                ,
+                {
+                    strDescription: 'Discount',
+                }
+                ,
+                {
+                    strDescription: 'Storage Charge',
                 }
             ],
             fields: [
