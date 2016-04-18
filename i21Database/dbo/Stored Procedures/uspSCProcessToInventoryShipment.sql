@@ -33,7 +33,6 @@ DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @intDirectType AS INT = 3
-DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @intOrderId INT
 DECLARE @intLoadContractId AS INT
@@ -94,20 +93,14 @@ BEGIN TRY
  		BEGIN
  			SET @intOrderId = 4
  		END
+
  		BEGIN 
- 			SELECT	@intTicketUOM = UOM.intUnitMeasureId
- 			FROM	dbo.tblSCTicket SC	        
- 					--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-					JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
- 			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
- 		END
- 
- 		BEGIN 
- 			SELECT	@intTicketItemUOMId = UM.intItemUOMId
- 				FROM	dbo.tblICItemUOM UM	
+ 			SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intItemId = SC.intItemId
+ 				FROM dbo.tblICItemUOM UM	
  				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
- 			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+ 			WHERE SC.intTicketId = @intTicketId AND UM.ysnStockUnit = 1
  		END
+
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 			INSERT INTO @LineItems (
