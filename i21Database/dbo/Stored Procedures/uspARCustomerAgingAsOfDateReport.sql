@@ -149,9 +149,9 @@ FROM tblARPayment P
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
                                     WHERE AG.strAccountGroup = 'Receivables')
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-    INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
+    INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
   AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -185,7 +185,7 @@ FROM tblARInvoice I
         INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId    
         INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
         LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo) ON I.intInvoiceId = PD.intInvoiceId
-        LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+        LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted = 1
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo    
@@ -291,7 +291,7 @@ FROM tblARPayment P
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
                                     WHERE AG.strAccountGroup = 'Receivables')
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo   
   AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
@@ -311,7 +311,7 @@ FROM tblARInvoice I
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
     LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid ))) BETWEEN @dtmDateFrom AND @dtmDateTo) ON I.intInvoiceId = PD.intInvoiceId   
-    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+    LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE I.ysnPosted  = 1
     AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo    
