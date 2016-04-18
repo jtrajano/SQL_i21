@@ -70,7 +70,7 @@ BEGIN TRY
 	ELSE ISNULL(@dblWeight, 0)
 	END)
 	
-	IF @dblMoveQty>@dblLotAvailableQty
+	IF @dblMoveQty>@dblLotQty
 	BEGIN
 		SET @ErrMsg = 'Move qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 		RAISERROR (@ErrMsg,11,1)
