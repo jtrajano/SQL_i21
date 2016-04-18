@@ -20,8 +20,14 @@ SELECT INV.intInvoiceId
 	 , INV.dtmPostDate
 	 , CUR.strCurrency	 	 
 	 , INV.strInvoiceNumber
-	 , strBillTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, E.strName)
-	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, NULL)
+	 , strBillTo = CASE WHEN ysnIncludeEntityName = 1 THEN E.strName + CHAR(13) + char(10) + [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, E.strName)
+					ELSE
+					[dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, E.strName)
+					END
+	 , strShipTo = CASE WHEN ysnIncludeEntityName = 1 THEN E.strName + CHAR(13) + char(10) + [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, NULL)
+					ELSE
+					[dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, NULL)
+					END
 	 , strSalespersonName = ESP.strName
 	 , INV.strPONumber
 	 , (CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
@@ -80,3 +86,5 @@ LEFT JOIN (tblARSalesperson SP
 LEFT JOIN tblSMShipVia SV ON INV.intShipViaId = SV.intEntityShipViaId
 INNER JOIN tblSMTerm T ON INV.intTermId = T.intTermID
 LEFT JOIN tblSMFreightTerms FT ON INV.intFreightTermId = FT.intFreightTermId
+
+GO
