@@ -118,8 +118,7 @@ AS
 				[intShipFromId],
 				[intLocationId],
 				[ysnPrice],
-				[ysnSubCurrency],
-				[intCostCurrencyId]
+				[ysnSubCurrency]
 		) 
 		
 		SELECT	CC.intVendorId,
@@ -138,8 +137,7 @@ AS
 				EL.intEntityLocationId,
 				CD.intCompanyLocationId,
 				CC.ysnPrice,
-				CostCurrency.ysnSubCurrency,
-				CostCurrency.intCurrencyID				
+				SubCurrency.ysnSubCurrency				
 		FROM		vyuCTContractCostView	CC
 		JOIN		vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 		JOIN		tblEMEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
