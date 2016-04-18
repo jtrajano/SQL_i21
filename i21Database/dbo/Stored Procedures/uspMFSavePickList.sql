@@ -272,7 +272,8 @@ Begin
 	Where pld.intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId
 
 	--Delete Records if not there in @tblPickListDetail table
-	Delete From tblMFPickListDetail Where intPickListDetailId NOT IN (Select intPickListDetailId From @tblPickListDetail) AND intLotId=intStageLotId
+	Delete From tblMFPickListDetail Where intPickListId=@intPickListId AND 
+	intPickListDetailId NOT IN (Select intPickListDetailId From @tblPickListDetail) AND intLotId=intStageLotId
 
 	--insert new picked lots
 	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
