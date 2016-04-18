@@ -11,9 +11,9 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MR.strCustomerLocation
 	, MR.strCompanyLocation
 	, MR.dtmTransaction
-	, MRDetail.intItemId
-	, Item.strItemNo
-	, strItemDescription = Item.strDescription
+	, MADetail.intItemId
+	, MADetail.strItemNo
+	, MADetail.strItemDescription
 	, MRDetail.dblGrossPrice
 	, MRDetail.dblNetPrice
 	, MADetail.strMeterKey
@@ -26,5 +26,4 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MRDetail.intSort
 FROM tblMBMeterReadingDetail MRDetail
 LEFT JOIN vyuMBGetMeterReading MR ON MR.intMeterReadingId = MRDetail.intMeterReadingId
-LEFT JOIN tblICItem Item ON Item.intItemId = MRDetail.intItemId
-LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intEntityCustomerId = MR.intEntityCustomerId AND MADetail.intEntityLocationId = MR.intEntityLocationId
+LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId

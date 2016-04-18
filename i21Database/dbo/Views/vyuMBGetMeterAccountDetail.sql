@@ -4,18 +4,18 @@
 SELECT MADetail.intMeterAccountDetailId
 	, MA.intMeterAccountId
 	, MA.intEntityCustomerId
-	, MA.strCustomerName
-	, MA.strCustomerNumber
+	, strCustomerName = Customer.strName
+	, Customer.strCustomerNumber
 	, MA.intEntityLocationId
-	, MA.strCustomerLocation
-	, MA.strAddress
-	, MA.strCity
-	, MA.strState
-	, MA.strZipCode
+	, strCustomerLocation = EntityLocation.strLocationName
+	, EntityLocation.strAddress
+	, EntityLocation.strCity
+	, EntityLocation.strState
+	, EntityLocation.strZipCode
 	, MA.intConsignmentGroupId
-	, MA.strConsignmentGroup
+	, ConGroup.strConsignmentGroup
 	, MA.intCompanyLocationId
-	, MA.strCompanyLocation
+	, strCompanyLocation = Location.strLocationName
 	, MADetail.strMeterKey
 	, MADetail.intItemId
 	, Item.strItemNo
@@ -28,5 +28,9 @@ SELECT MADetail.intMeterAccountDetailId
 	, MADetail.dblLastTotalSalesDollar
 	, MADetail.intSort
 FROM tblMBMeterAccountDetail MADetail 
-LEFT JOIN vyuMBGetMeterAccount MA ON MA.intMeterAccountId = MADetail.intMeterAccountId
+LEFT JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MADetail.intMeterAccountId
 LEFT JOIN tblICItem Item ON Item.intItemId = MADetail.intItemId
+LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MA.intEntityCustomerId
+LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MA.intEntityLocationId
+LEFT JOIN tblMBConsignmentGroup ConGroup ON ConGroup.intConsignmentGroupId = MA.intConsignmentGroupId
+LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = MA.intCompanyLocationId
