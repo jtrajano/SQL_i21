@@ -724,7 +724,20 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
 
             }
-        }
+        },
+        disableAmount: function (get) {
+             switch (get('grdCharges.selection.strCostMethod')) {
+                  case 'Per Unit':
+                      return true;
+                      break;
+                  case 'Percentage':
+                      return true;
+                      break;
+                  default:
+                      return false;
+                      break;
+              }
+	       }
     }
 
 });
