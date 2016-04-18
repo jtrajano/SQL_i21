@@ -34,9 +34,17 @@ BEGIN TRY
 	DECLARE @intDestinationLotWeightUOM INT
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @intWeightUOMId INT
-	DECLARE @intItemStockUOMId INT
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
+			,@dblOldDestinationWeight NUMERIC(38,20)
+			,@dblOldSourceWeight NUMERIC(38,20)
+			,@dblMergeWeight NUMERIC(38,20)
+			,@strStorageLocationName NVARCHAR(50)
+			,@strItemNumber NVARCHAR(50)
+			,@strUnitMeasure NVARCHAR(50)
+			,@intItemUOMId int
+
+	SELECT @dblMergeWeight = @dblMergeQty
 
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -51,11 +59,19 @@ BEGIN TRY
 		   @dblWeight = dblWeight
 	FROM tblICLot WHERE intLotId = @intLotId
 
-	SELECT @intItemStockUOMId = intItemUOMId
-	FROM dbo.tblICItemUOM
-	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
+	IF @dblMergeQty>@dblOldSourceWeight
+	BEGIN
+		SELECT @strStorageLocationName = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId
+		SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
+		
+		SELECT @strUnitMeasure = UM.strUnitMeasure
+		FROM tblICItemUOM U 
+		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
+		WHERE U.intItemUOMId = IsNULL(@intWeightUOMId,@intItemUOMId)
 
+		SET @ErrMsg = 'Merge qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMergeQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
+		RAISERROR (@ErrMsg,11,1)
+	END
 	
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
 	
@@ -156,7 +172,7 @@ BEGIN TRY
 			@strNotes = 'Weight qty same'
 	END
 
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR (@intWeightUOMId is null and (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
 		--EXEC dbo.uspMFLotAdjustQty
 		-- @intLotId =@intLotId,       
