@@ -448,19 +448,19 @@ FROM
 		,[strItemNo]								=	CC.strItemNo
 		,[strDescription]							=	CC.strItemDescription
 		,[intPurchaseTaxGroupId]					=	NULL
-		,[dblOrderQty]								=	CD.dblAvailableQty
+		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
-		,[dblOpenReceive]							=	CD.dblAvailableQty
-		,[dblQuantityToBill]						=	CD.dblAvailableQty
+		,[dblOpenReceive]							=	1
+		,[dblQuantityToBill]						=	1
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
-		,[dblUnitCost]								=	ISNULL(CD.dblCashPrice,0)
+		,[dblUnitCost]								=	ISNULL(CC.dblRate,0)
 		,[dblTax]									=	0
-		,[dblRate]									=	CC.dblRate
+		,[dblRate]									=	ISNULL(G1.dblRate,0)
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
-		,[intSubCurrencyCents]						=	0
+		,[intSubCurrencyCents]						=	ISNULL(RC.intCent,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
@@ -483,9 +483,9 @@ FROM
 		,[dblNetWeight]								=	ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
-		,[dblWeightUnitQty]							=	0
-		,[dblCostUnitQty]							=	0
-		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
+		,[dblWeightUnitQty]							=	1
+		,[dblCostUnitQty]							=	1
+		,[dblUnitQty]								=	1--dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
 	FROM		vyuCTContractCostView		CC
 	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
@@ -494,6 +494,8 @@ FROM
 													RC.intChargeId			=	CC.intItemId
 	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intUnitMeasureId
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
+	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
+	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
 ) Items
