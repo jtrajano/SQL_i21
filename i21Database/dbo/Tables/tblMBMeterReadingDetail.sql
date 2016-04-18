@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblMBMeterReadingDetail]
 (
-	[intMeterReadingDetailId] INT NOT NULL , 
+	[intMeterReadingDetailId] INT NOT NULL IDENTITY, 
     [intMeterReadingId] INT NOT NULL, 
     [intMeterAccountDetailId] INT NOT NULL, 
     [dblGrossPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
