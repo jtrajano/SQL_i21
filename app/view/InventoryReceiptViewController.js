@@ -1828,6 +1828,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     calculateOtherCharges: function(win){
         var current = win.viewModel.data.current;
         var totalCharges = 0;
+        var lblCharges = win.down('#lblCharges');
+        
         if (current) {
             var charges = current.tblICInventoryReceiptCharges();
             if (charges) {
