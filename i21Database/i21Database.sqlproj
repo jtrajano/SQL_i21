@@ -3525,7 +3525,6 @@
     <Build Include="dbo\Tables\tblTFTaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponentConfiguration.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ValidProductCode.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
@@ -3565,7 +3564,6 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalancePrintEach.sql" />
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
