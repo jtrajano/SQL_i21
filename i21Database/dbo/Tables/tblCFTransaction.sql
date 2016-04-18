@@ -35,6 +35,7 @@
     [ysnInvalid]              BIT             NULL,
     [ysnPosted]               BIT             NULL,
     [strTransactionId]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strInvoiceReportNumber]  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intInvoiceId]            INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),

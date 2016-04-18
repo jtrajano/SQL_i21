@@ -173,7 +173,7 @@ END TRY
 
 BEGIN CATCH
 
-	SET @ErrMsg = 'uspCTReportContractPrintGrain - ' + ERROR_MESSAGE()  
+	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH

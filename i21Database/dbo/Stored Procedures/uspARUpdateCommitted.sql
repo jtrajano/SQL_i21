@@ -34,7 +34,7 @@ BEGIN
 		,[intSubLocationId]		
 		,[intStorageLocationId]		
 	)
-	--Quantity/UOM Changed
+	--Quantity/UOM Changed <
 	SELECT
 		[intItemId]					=	Detail.intItemId
 		,[intItemLocationId]		=	IST.intItemLocationId
@@ -77,7 +77,151 @@ BEGIN
 		AND Detail.intItemId = TD.intItemId		
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> TD.dblQtyShipped)
 		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0))
+
+	UNION ALL
+
+	--Quantity/UOM Changed >
+	SELECT
+		[intItemId]					=	Detail.intItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	Detail.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	(CASE WHEN 0 = 1 THEN (Detail.dblQtyShipped * -1) ELSE (Detail.dblQtyShipped - TD.dblQtyShipped) END)
+		,[dblUOMQty]				=	ItemUOM.dblUnitQty
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	Detail.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intInvoiceId
+		,[intTransactionDetailId]	=	Detail.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetail Detail
+	INNER JOIN
+		tblARInvoice Header
+			ON Detail.intInvoiceId = Header.intInvoiceId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND Detail.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Invoice'
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON Detail.intItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intInvoiceId = @InvoiceId
+		AND Header.strTransactionType = 'Invoice'
+		AND Detail.intItemId = TD.intItemId		
+		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> TD.dblQtyShipped)
+		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
+		AND Detail.dblQtyShipped > Detail.dblQtyOrdered 
+		AND ((@FromPosting = 1) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) <> 0))
+
+	UNION ALL
+
+	SELECT
+		[intItemId]					=	Detail.intItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	Detail.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	(TD.dblQtyShipped - Detail.dblQtyOrdered) * -1
+		,[dblUOMQty]				=	ItemUOM.dblUnitQty
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	Detail.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intInvoiceId
+		,[intTransactionDetailId]	=	Detail.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetail Detail
+	INNER JOIN
+		tblARInvoice Header
+			ON Detail.intInvoiceId = Header.intInvoiceId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND Detail.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Invoice'
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON Detail.intItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intInvoiceId = @InvoiceId
+		AND Header.strTransactionType = 'Invoice'
+		AND Detail.intItemId = TD.intItemId		
+		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> TD.dblQtyShipped)
+		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
+		AND TD.dblQtyShipped > Detail.dblQtyOrdered 
+		AND TD.dblQtyShipped > Detail.dblQtyShipped 
+		AND ((@FromPosting = 1) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) <> 0))
+
+	UNION ALL
+
+	--Delete Record from SO
+	SELECT
+		[intItemId]					=	Detail.intItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	Detail.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	Detail.dblQtyShipped - Detail.dblQtyOrdered
+		,[dblUOMQty]				=	ItemUOM.dblUnitQty
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	Detail.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intInvoiceId
+		,[intTransactionDetailId]	=	Detail.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetail Detail
+	INNER JOIN
+		tblARInvoice Header
+			ON Detail.intInvoiceId = Header.intInvoiceId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND Detail.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Invoice'
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON Detail.intItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intInvoiceId = @InvoiceId
+		AND Header.strTransactionType = 'Invoice'
+		AND Detail.intItemId = TD.intItemId		
+		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
+		AND Detail.dblQtyShipped > Detail.dblQtyOrdered 
+		AND ISNULL(@Negate, 0) = 1 
+		AND ISNULL(Detail.intSalesOrderDetailId, 0) <> 0
 
 	UNION ALL
 
@@ -123,11 +267,11 @@ BEGIN
 		AND Header.strTransactionType = 'Invoice'
 		AND Detail.intItemId <> TD.intItemId				
 		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0))
 
 	UNION ALL
 
-	--Deleted Item
+	--Deleted Item <
 	SELECT
 		[intItemId]					=	TD.intItemId
 		,[intItemLocationId]		=	IST.intItemLocationId
@@ -163,7 +307,50 @@ BEGIN
 		TD.intTransactionId = @InvoiceId
 		AND Header.strTransactionType = 'Invoice'
 		AND ISNULL(TD.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(TD.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(TD.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR (@FromPosting = 0 AND ISNULL(TD.intSalesOrderDetailId, 0) = 0))
+		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
+				
+	UNION ALL		
+
+	--Deleted Item >
+	SELECT
+		[intItemId]					=	TD.intItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	TD.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	(TD.dblQtyShipped - TD.dblQtyOrdered) * -1
+		,[dblUOMQty]				=	ItemUOM.dblUnitQty
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	TD.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intInvoiceId
+		,[intTransactionDetailId]	=	TD.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARTransactionDetail TD
+	INNER JOIN
+		tblARInvoice Header
+			ON TD.intTransactionId = Header.intInvoiceId							
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = TD.intItemUOMId
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON TD.intItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		TD.intTransactionId = @InvoiceId
+		AND Header.strTransactionType = 'Invoice'
+		AND ISNULL(TD.intInventoryShipmentItemId, 0) = 0
+		AND ISNULL(@FromPosting,0) = 0
+		AND TD.dblQtyShipped > TD.dblQtyOrdered 
+		AND ISNULL(TD.intSalesOrderDetailId, 0) <> 0
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 		
 	UNION ALL	
@@ -204,7 +391,7 @@ BEGIN
 		Detail.intInvoiceId = @InvoiceId
 		AND Header.strTransactionType = 'Invoice'
 		AND ISNULL(Detail.intInventoryShipmentItemId, 0) = 0
-		AND ((@FromPosting = 1) OR ((@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) > 0) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0)))
+		AND ((@FromPosting = 1) OR (@FromPosting = 0 AND ISNULL(Detail.intSalesOrderDetailId, 0) = 0))
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
 		
 	UPDATE

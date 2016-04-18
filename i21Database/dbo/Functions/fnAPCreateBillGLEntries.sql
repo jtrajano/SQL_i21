@@ -279,13 +279,19 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.intAccountId
+		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
 												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
 		[dblDebit]						=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
 												 WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
 												 WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
 												ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
-														ELSE D.dblAmount
+														ELSE 
+															(CASE WHEN D.ysnInventoryCost = 0 
+																THEN 
+																	(CASE WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0
+																		THEN B.dblTotal / B.dblRate		
+																		ELSE B.dblTotal END) --Get the amount from voucher if NOT inventory cost
+																ELSE D.dblAmount END)
 													END)
 											END, --Bill Detail
 		[dblCredit]						=	0, -- Bill
@@ -327,12 +333,12 @@ BEGIN
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-			LEFT JOIN tblICInventoryReceiptItemAllocatedCharge D
+			LEFT JOIN tblICInventoryReceiptCharge D
 				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
-			LEFT JOIN tblICInventoryReceiptItem E
-				ON D.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+			--LEFT JOIN tblICInventoryReceiptItem E
+			--	ON D.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN tblICItem F
-				ON E.intItemId = F.intItemId
+				ON B.intItemId = F.intItemId
 	WHERE B.intInventoryReceiptChargeId IS NOT NULL
 	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL

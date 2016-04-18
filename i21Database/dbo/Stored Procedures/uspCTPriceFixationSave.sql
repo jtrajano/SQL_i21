@@ -313,10 +313,13 @@ BEGIN TRY
 			SET		CD.intPricingTypeId		=	1,
 					CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
 					CD.dblCashPrice			=	CD.dblBasis + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),	
-					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * (CD.dblBasis + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0))),	
+					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
+												(CD.dblBasis + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)))/
+												CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
 					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END
 			FROM	tblCTContractDetail	CD
+			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 		END

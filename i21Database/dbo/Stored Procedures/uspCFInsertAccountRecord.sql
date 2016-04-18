@@ -164,25 +164,39 @@ BEGIN
 	---------------------------------------------------------
 
 	--Discount Schedule
-	SELECT @intDiscountScheduleId = intDiscountScheduleId 
-	FROM tblCFDiscountSchedule 
-	WHERE strDiscountSchedule = @strDiscountScheduleId
-	IF (@intDiscountScheduleId = 0)
+	IF(@strDiscountScheduleId != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strDiscountScheduleId +' on discount schedule list')
-		SET @ysnHasError = 1
+		SELECT @intDiscountScheduleId = intDiscountScheduleId 
+		FROM tblCFDiscountSchedule 
+		WHERE strDiscountSchedule = @strDiscountScheduleId
+		IF (@intDiscountScheduleId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strDiscountScheduleId +' on discount schedule list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intDiscountScheduleId = NULL;
 	END
 
 	--Invoice Cycle
-	SELECT @intInvoiceCycle = intInvoiceCycleId 
-	FROM tblCFInvoiceCycle 
-	WHERE strInvoiceCycle = @strInvoiceCycle
-	IF (@intInvoiceCycle = 0)
+	IF(@strInvoiceCycle != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strInvoiceCycle +' on invoice cycle list')
-		SET @ysnHasError = 1
+		SELECT @intInvoiceCycle = intInvoiceCycleId 
+		FROM tblCFInvoiceCycle 
+		WHERE strInvoiceCycle = @strInvoiceCycle
+		IF (@intInvoiceCycle = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strInvoiceCycle +' on invoice cycle list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intInvoiceCycle = NULL;
 	END
 
 	--Sales Person
@@ -193,86 +207,147 @@ BEGIN
 	WHERE E.strName = @strSalesPersonId
 	IF (@intSalesPersonId = 0)
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strSalesPersonId +' on salesperson list')
-		SET @ysnHasError = 1
+		SELECT @intSalesPersonId = intEntityId  
+		FROM tblEntity E
+		INNER JOIN tblARSalesperson S
+		ON E.intEntityId = S.intEntitySalespersonId
+		WHERE E.strName = @strSalesPersonId
+		IF (@intSalesPersonId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strSalesPersonId +' on salesperson list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intSalesPersonId = NULL;
 	END
 
 	--Terms
-	SELECT @intTermsCode = intTermID 
-	FROM tblSMTerm 
-	WHERE strTerm = @strTermsCode
-	IF (@intTermsCode = 0)
+	IF(@strTermsCode != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strTermsCode +' on terms list')
-		SET @ysnHasError = 1
+		SELECT @intTermsCode = intTermID 
+		FROM tblSMTerm 
+		WHERE strTerm = @strTermsCode
+		IF (@intTermsCode = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strTermsCode +' on terms list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intTermsCode = NULL;
 	END
 
 	--Account Status
-	SELECT @intAccountStatusCodeId = intAccountStatusId 
-	FROM tblARAccountStatus 
-	WHERE strAccountStatusCode = @strAccountStatusCodeId
-	IF (@intAccountStatusCodeId = 0)
+	IF(@strAccountStatusCodeId != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strAccountStatusCodeId +' on account status list')
-		SET @ysnHasError = 1
+		SELECT @intAccountStatusCodeId = intAccountStatusId 
+		FROM tblARAccountStatus 
+		WHERE strAccountStatusCode = @strAccountStatusCodeId
+		IF (@intAccountStatusCodeId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strAccountStatusCodeId +' on account status list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intAccountStatusCodeId = NULL;
 	END
 
 	--Price Rule Group
-	SELECT @intPriceRuleGroup = intPriceRuleGroupId 
-	FROM tblCFPriceRuleGroup 
-	WHERE strPriceGroup = @strPriceRuleGroup
-	IF (@intPriceRuleGroup = 0)
+	IF(@strPriceRuleGroup != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strPriceRuleGroup +' on price rule group list')
-		SET @ysnHasError = 1
+		SELECT @intPriceRuleGroup = intPriceRuleGroupId 
+		FROM tblCFPriceRuleGroup 
+		WHERE strPriceGroup = @strPriceRuleGroup
+		IF (@intPriceRuleGroup = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strPriceRuleGroup +' on price rule group list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intPriceRuleGroup = NULL;
 	END
 
 	--@Fee Profile
-	SELECT @intFeeProfileId = intFeeProfileId 
-	FROM tblCFFeeProfile 
-	WHERE strFeeProfileId = @strFeeProfileId
-	IF (@intFeeProfileId = 0)
+	IF(@strFeeProfileId != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strFeeProfileId +' on fee profile list')
-		SET @ysnHasError = 1
+		SELECT @intFeeProfileId = intFeeProfileId 
+		FROM tblCFFeeProfile 
+		WHERE strFeeProfileId = @strFeeProfileId
+		IF (@intFeeProfileId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strFeeProfileId +' on fee profile list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intFeeProfileId = NULL;
 	END
 
 	--@Remote Price Profile
-	SELECT @intRemotePriceProfileId = intPriceProfileHeaderId 
-	FROM tblCFPriceProfileHeader 
-	WHERE strPriceProfile = @strRemotePriceProfileId
-	IF (@intRemotePriceProfileId = 0)
+	IF(@strRemotePriceProfileId != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strRemotePriceProfileId +' on remote price profile list')
-		SET @ysnHasError = 1
+		SELECT @intRemotePriceProfileId = intPriceProfileHeaderId 
+		FROM tblCFPriceProfileHeader 
+		WHERE strPriceProfile = @strRemotePriceProfileId
+		IF (@intRemotePriceProfileId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strRemotePriceProfileId +' on remote price profile list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intRemotePriceProfileId = NULL;
 	END
 
 	--Ext Remote Price Profile
-	SELECT @intExtRemotePriceProfileId = intPriceProfileHeaderId 
-	FROM tblCFPriceProfileHeader 
-	WHERE strPriceProfile = @strExtRemotePriceProfileId
-	IF (@intExtRemotePriceProfileId = 0)
+	IF(@strExtRemotePriceProfileId != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strExtRemotePriceProfileId +' on ext remote price profile list')
-		SET @ysnHasError = 1
+		SELECT @intExtRemotePriceProfileId = intPriceProfileHeaderId 
+		FROM tblCFPriceProfileHeader 
+		WHERE strPriceProfile = @strExtRemotePriceProfileId
+		IF (@intExtRemotePriceProfileId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strExtRemotePriceProfileId +' on ext remote price profile list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intExtRemotePriceProfileId = NULL;
 	END
 
 	--Ext Remote Price Profile
-	SELECT @intLocalPriceProfileId = intPriceProfileHeaderId 
-	FROM tblCFPriceProfileHeader 
-	WHERE strPriceProfile = @strLocalPriceProfileId
-	IF (@intLocalPriceProfileId = 0)
+	IF(@strLocalPriceProfileId != '')
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCustomerId,'Unable to find match for '+ @strLocalPriceProfileId +' on local price profile list')
-		SET @ysnHasError = 1
+		SELECT @intLocalPriceProfileId = intPriceProfileHeaderId 
+		FROM tblCFPriceProfileHeader 
+		WHERE strPriceProfile = @strLocalPriceProfileId
+		IF (@intLocalPriceProfileId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Unable to find match for '+ @strLocalPriceProfileId +' on local price profile list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intLocalPriceProfileId = NULL;
 	END
 	---------------------------------------------------------
 	
@@ -451,6 +526,18 @@ BEGIN
 		VALUES (@strCustomerId,'Invalid print site address value '+ @strPrintSiteAddress +'. Value should be All, Remote, None only')
 		SET @ysnHasError = 1
 	END
+
+	--Bonus Commission Date
+	IF (@dtmBonusCommissionDate = '')
+		BEGIN 
+			SET @dtmBonusCommissionDate = NULL
+		END
+
+	--Last Billing Cycle Date
+	IF (@dtmLastBillingCycleDate = '')
+		BEGIN 
+			SET @dtmLastBillingCycleDate = NULL
+		END
 	---------------------------------------------------------
 
 
@@ -536,7 +623,9 @@ BEGIN
 			RETURN 1
 		END TRY
 		BEGIN CATCH
-
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Internal Error - ' + ERROR_MESSAGE())
+			SET @ysnHasError = 1
 			ROLLBACK TRANSACTION
 			RETURN 0
 		END CATCH

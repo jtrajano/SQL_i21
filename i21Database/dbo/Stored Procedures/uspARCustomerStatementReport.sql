@@ -210,19 +210,20 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
 	  ,STATEMENTREPORT.dblCreditLimit
-	  ,dblCreditAvailable = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-	  ,dbl0Days = ISNULL(AGINGREPORT.dbl0Days, 0)
-	  ,dbl10Days = ISNULL(AGINGREPORT.dbl10Days, 0)
-	  ,dbl30Days = ISNULL(AGINGREPORT.dbl30Days, 0)
-	  ,dbl60Days = ISNULL(AGINGREPORT.dbl60Days, 0)
-	  ,dbl90Days = ISNULL(AGINGREPORT.dbl90Days, 0)
-	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
-	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
+	  ,dblCreditAvailable	= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+	  ,dbl0Days				= ISNULL(AGINGREPORT.dbl0Days, 0)
+	  ,dbl10Days			= ISNULL(AGINGREPORT.dbl10Days, 0)
+	  ,dbl30Days			= ISNULL(AGINGREPORT.dbl30Days, 0)
+	  ,dbl60Days			= ISNULL(AGINGREPORT.dbl60Days, 0)
+	  ,dbl90Days			= ISNULL(AGINGREPORT.dbl90Days, 0)
+	  ,dbl91Days			= ISNULL(AGINGREPORT.dbl91Days, 0)
+	  ,dblCredits			= ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,STATEMENTREPORT.strFullAddress
 	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
 	  ,STATEMENTREPORT.strCompanyAddress	  
-	  ,dtmAsOfDate = @dtmDateTo
+	  ,dtmAsOfDate			= @dtmDateTo
+	  ,blbLogo				= dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId

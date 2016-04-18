@@ -72,15 +72,13 @@ BEGIN
 	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'PrimaryAccount'
 	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account'
 	delete FROM @filterTable WHERE [condition]= 'All Date'
+
+
+	SELECT TOP 1 @strAccountIdFrom= ISNULL([from],'') , @strAccountIdTo = ISNULL([to],'') ,@strAccountIdCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'strAccountId' 
+	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = '[Primary Account]' 
+	SELECT TOP 1 @dtmDateFrom= ISNULL([from],'') , @dtmDateTo = ISNULL([to],'') from  @filterTable WHERE [fieldname] = 'dtmDate' 
+
 	
-
-	SELECT TOP 1 @strAccountIdFrom= ISNULL([from],'') , @strAccountIdTo = ISNULL([to],'') ,@strAccountIdCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'strAccountId'
-	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = '[Primary Account]'
-	SELECT TOP 1 @dtmDateFrom= ISNULL([from],'') , @dtmDateTo = ISNULL([to],'') from  @filterTable WHERE [fieldname] = 'dtmDate'
-
-
-
-
 	IF EXISTS(
 	SELECT TOP 1 1 FROM @filterTable WHERE
 		(condition LIKE  '%Date'  or
@@ -267,7 +265,7 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'Location,',''''' as Location,')
 
 	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1)'
-	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + CASE WHEN @Where1 <> 'Where' THEN  @Where1 ELSE '' END + ' GROUP BY strAccountId),
+	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + @Where1 + ' GROUP BY strAccountId),
 		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
 	SELECT @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
 	END

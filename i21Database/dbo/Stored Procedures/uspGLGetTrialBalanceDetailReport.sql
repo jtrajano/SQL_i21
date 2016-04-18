@@ -58,15 +58,15 @@ BEGIN
 	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
 	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
 	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account' 
-	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'PrimaryAccount'
+	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'PrimaryAccount' 
 	delete FROM @filterTable WHERE [condition]= 'All Date'
 	
-	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] ,@strAccountIdCondition =[condition] from  @filterTable WHERE [fieldname] = 'strAccountId'
-	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = '[Primary Account]'
-	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate'
+	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] ,@strAccountIdCondition =[condition] from  @filterTable WHERE [fieldname] = 'strAccountId' 
+	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = '[Primary Account]' 
+	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate' 
 
-
-
+	
+	
 	IF EXISTS(
 	SELECT TOP 1 1 FROM @filterTable WHERE
 		(condition LIKE  '%Date'  or
@@ -232,7 +232,7 @@ SELECT @sqlCte += ',cteBase1 as(
 	 )'
 
 	 SELECT @sqlCte += ',cteBase as(
-	select * from cteBase1 ' + CASE WHEN @Where <> 'Where' THEN  @Where ELSE '' END + ')'
+	select * from cteBase1 ' + CASE WHEN @Where <> 'Where' THEN  @Where END + ')'
 IF @dtmDateFrom IS NOT NULL
 BEGIN
 	DECLARE @cols1 NVARCHAR(MAX) = ''
@@ -255,7 +255,7 @@ BEGIN
 	DECLARE @Where1 NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filterTable)
 	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase)'
 	--IF @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END  +  ' [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)'
-	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + CASE WHEN @Where1 <> 'Where' THEN  @Where1 ELSE '' END + ' GROUP BY strAccountId),
+	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + @Where1 + ' GROUP BY strAccountId),
 		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
 	SELECT @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
 

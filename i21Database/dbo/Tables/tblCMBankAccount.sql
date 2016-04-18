@@ -20,6 +20,7 @@
     [intCheckStartingNo]               INT            DEFAULT 0 NOT NULL,
     [intCheckEndingNo]                 INT            DEFAULT 0 NOT NULL,
     [intCheckNextNo]                   INT            DEFAULT 0 NOT NULL,
+	[intCheckNoLength]                 INT            DEFAULT 8 NOT NULL,
     [ysnCheckEnableMICRPrint]          BIT            DEFAULT 1 NOT NULL,
     [ysnCheckDefaultToBePrinted]       BIT            DEFAULT 1 NOT NULL,
     [intBackupCheckStartingNo]         INT            DEFAULT 0 NOT NULL,

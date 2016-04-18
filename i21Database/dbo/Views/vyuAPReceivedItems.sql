@@ -45,7 +45,7 @@ FROM
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
-		,[strScaleTicketNumber]		=	NULL
+		,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]			=	0            
 		,[intShipmentContractQtyId]	=	NULL
 		,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
@@ -55,7 +55,9 @@ FROM
 		,[dblNetWeight]				=	tblReceived.dblNetWeight
 		,[strCostUOM]				=	tblReceived.costUOM
 		,[strgrossNetUOM]			=	tblReceived.grossNetUOM
-		,[dblUnitQty]				=	tblReceived.dblUnitQty
+  		,[dblWeightUnitQty]			=	tblReceived.weightUnitQty
+		,[dblCostUnitQty]			=	tblReceived.costUnitQty      
+		,[dblUnitQty]				=	tblReceived.itemUnitQty
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -85,7 +87,9 @@ FROM
 				,dblNet AS dblNetWeight
 				,CostUOM.strUnitMeasure AS costUOM
 				,WeightUOM.strUnitMeasure AS grossNetUOM
-				,ItemWeightUOM.dblUnitQty
+				,ItemWeightUOM.dblUnitQty AS weightUnitQty
+				,ItemCostUOM.dblUnitQty AS costUnitQty
+				,ItemUOM.dblUnitQty AS itemUnitQty
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -123,6 +127,7 @@ FROM
 				,WeightUOM.strUnitMeasure
 				,ItemCostUOM.dblUnitQty
 				,ItemWeightUOM.dblUnitQty
+				,ItemUOM.dblUnitQty
 				,B1.ysnSubCurrency
 				,G.dblRate
 				,A1.intSubCurrencyCents
@@ -178,7 +183,7 @@ FROM
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
-	,[strScaleTicketNumber]		=	NULL
+	,[strScaleTicketNumber]		=	CAST(NULL AS NVARCHAR(50))
 	,[intShipmentId]			=	0    
 	,[intShipmentContractQtyId]	=	NULL
 	,[intUnitMeasureId]			=	B.intUnitOfMeasureId
@@ -188,7 +193,9 @@ FROM
 	,[dblNetWeight]				=	0
 	,[strCostUOM]				=	NULL
 	,[strgrossNetUOM]			=	NULL
-	,[dblUnitQty]				=	NULL
+	,[dblWeightUnitQty]			=	0
+	,[dblCostUniNULL]			=	0
+	,[dblUnitQty]				=	0
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -245,7 +252,7 @@ FROM
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
-	,[strScaleTicketNumber]		=	G.strTicketNumber
+	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(50))
 	,[intShipmentId]			=	0
 	,[intShipmentContractQtyId]	=	NULL
   	,[intUnitMeasureId]			=	B.intUnitMeasureId
@@ -255,7 +262,9 @@ FROM
 	,[dblNetWeight]				=	B.dblNet
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
-	,[dblUnitQty]				=	ItemWeightUOM.dblUnitQty
+	,[dblWeightUnitQty]			=	ItemWeightUOM.dblUnitQty
+	,[dblCostUnitQty]			=	ItemCostUOM.dblUnitQty
+	,[dblUnitQty]				=	ItemUOM.dblUnitQty
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -290,7 +299,7 @@ FROM
 	UNION ALL
 
 	--OTHER CHARGES
-	SELECT
+	SELECT DISTINCT
 		[intEntityVendorId]							=	A.intEntityVendorId
 		,[dtmDate]									=	A.dtmDate
 		,[strReference]								=	A.strReference
@@ -313,8 +322,8 @@ FROM
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	A.dblTax
 		,[dblRate]									=	0
-		,[ysnSubCurrency]							=	0
-		,[intSubCurrencyCents]						=	0
+		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
+		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
 		,[intAccountId]								=	A.intAccountId
 		,[strAccountId]								=	A.strAccountId
 		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = A.intAccountId)
@@ -325,10 +334,10 @@ FROM
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
+		,[intContractDetailId]						=	A.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	NULL
-		,[intContractDetailId]						=	NULL
-		,[intShipmentId]			=	0      
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
+		,[intShipmentId]							=	0      
 		,[intShipmentContractQtyId]					=	NULL
   		,[intUnitMeasureId]							=	NULL
 		,[strCostUOM]								=	NULL
@@ -337,14 +346,34 @@ FROM
 		,[dblNetWeight]								=	0      
 		,[strCostUOM]								=	NULL
 		,[strgrossNetUOM]							=	NULL
-		,[dblUnitQty]								=	0   
+		,[dblWeightUnitQty]							=	ItemWeightUOM.dblUnitQty
+		,[dblCostUnitQty]							=	ItemCostUOM.dblUnitQty
+		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 	FROM [vyuAPChargesForBilling] A
+	INNER JOIN dbo.tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	OUTER APPLY 
 	(
-		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-		GROUP BY H.intInventoryReceiptChargeId
+		SELECT intEntityVendorId FROM tblAPBillDetail BD
+		LEFT JOIN dbo.tblAPBill B ON BD.intBillId = B.intBillId
+		WHERE BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+
 	) Billed
-	WHERE ((Billed.dblQty < A.dblOpenReceive) OR Billed.dblQty IS NULL)
+	OUTER APPLY 
+	(
+		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
+		INNER JOIN dbo.tblAPBill B ON B.intBillId = H.intBillId
+		WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId --  AND B.str = A.inte
+		GROUP BY H.intInventoryReceiptChargeId
+
+	) Qty
+	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (Qty.dblQty IS NULL)
+
 	UNION ALL
 	SELECT
 		[intEntityVendorId]							=	A.intVendorEntityId
@@ -383,7 +412,7 @@ FROM
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	A.intShipmentId      
 		,[intShipmentContractQtyId]					=	A.intShipmentContractQtyId
 		,[intUnitMeasureId]							=	A.intItemUOMId
@@ -393,11 +422,18 @@ FROM
 		,[dblNetWeight]								=	ISNULL(A.dblNetWt,0)      
 		,[strCostUOM]								=	A.strPriceUOM
 		,[strgrossNetUOM]							=	A.strWeightUOM
-		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
+		--,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
+		,[dblWeightUnitQty]							=	ItemWeightUOM.dblUnitQty
+		,[dblCostUnitQty]							=	ItemCostUOM.dblUnitQty
+		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = A.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intCostUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
 	UNION ALL
 	SELECT
@@ -437,7 +473,7 @@ FROM
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
 		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
 		,[intShipmentContractQtyId]					=	NULL
 		,[intUnitMeasureId]							=	CC.intUnitMeasureId
@@ -447,6 +483,8 @@ FROM
 		,[dblNetWeight]								=	ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
+		,[dblWeightUnitQty]							=	0
+		,[dblCostUnitQty]							=	0
 		,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
 	FROM		vyuCTContractCostView		CC
 	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -459,4 +497,3 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
 ) Items
-GO

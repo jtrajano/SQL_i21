@@ -5,7 +5,8 @@
 	,@NewInvoiceNumber	NVARCHAR(25)	= NULL	OUTPUT
 	,@NewInvoiceId		INT				= NULL	OUTPUT
 	,@RaiseError		BIT				= 0
-	,@ErrorMessage		NVARCHAR(250)	= NULL	OUTPUT	
+	,@ErrorMessage		NVARCHAR(250)	= NULL	OUTPUT
+	,@ForRecurring		BIT				= 0	
 AS
 
 BEGIN
@@ -88,7 +89,7 @@ SELECT
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
-	,@Comments						= [strComments] + ' DUP: ' + [strInvoiceNumber]
+	,@Comments						= [strComments] + (CASE WHEN ISNULL(@ForRecurring,0) = 0 THEN ' DUP: ' + [strInvoiceNumber] ELSE '' END)
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
 	,@Template						= 0		--[ysnTemplate]
@@ -229,8 +230,8 @@ BEGIN TRY
 		,@ItemContractHeaderId					= NULL
 		,@ItemContractDetailId					= NULL			
 		,@ItemShipmentPurchaseSalesContractId	= NULL	
-		,@ItemShipmentUOMId						= NULL	
-		,@ItemShipmentQtyShipped				= 0.000000		
+		,@ItemWeightUOMId						= NULL	
+		,@ItemWeight							= 0.000000		
 		,@ItemShipmentGrossWt					= 0.000000		
 		,@ItemShipmentTareWt					= 0.000000		
 		,@ItemShipmentNetWt						= 0.000000			
@@ -260,6 +261,7 @@ END CATCH
 
 
 SET @NewInvoiceId = @CreatedInvoiceId
+SET @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId)
 
 
 BEGIN TRY
@@ -302,8 +304,8 @@ BEGIN TRY
 		,[intContractDetailId]
 		,[intShipmentId]
 		,[intShipmentPurchaseSalesContractId]
-		,[intShipmentItemUOMId]
-		,[dblShipmentQtyShipped]
+		,[intItemWeightUOMId]
+		,[dblItemWeight]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
@@ -360,8 +362,8 @@ BEGIN TRY
 		,[intContractDetailId]			= [intContractDetailId]
 		,[intShipmentId]				= NULL
 		,[intShipmentPurchaseSalesContractId] = NULL
-		,[intShipmentItemUOMId]			= [intShipmentItemUOMId]
-		,[dblShipmentQtyShipped]		= [dblShipmentQtyShipped]
+		,[intItemWeightUOMId]			= [intItemWeightUOMId]
+		,[dblItemWeight]		= [dblItemWeight]
 		,[dblShipmentGrossWt]			= [dblShipmentGrossWt]
 		,[dblShipmentTareWt]			= [dblShipmentTareWt]
 		,[dblShipmentNetWt]				= [dblShipmentNetWt]

@@ -1,41 +1,26 @@
 ﻿CREATE PROCEDURE [dbo].[uspARDuplicateQuotePage]
-	@intQuoteTemplateDetailId INT,
-	@NewQuoteTemplateDetailId INT = NULL OUTPUT
+	@intQuotePageId INT,
+	@NewQuotePageId INT = NULL OUTPUT
 AS
-	DECLARE @intQuoteTemplateId INT
-	      , @intNextSort		INT
-
-	SELECT TOP 1 @intQuoteTemplateId = intQuoteTemplateId FROM tblARQuoteTemplateDetail WHERE intQuoteTemplateDetailId = @intQuoteTemplateDetailId
-
-	IF ISNULL(@intQuoteTemplateId, 0) = 0
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblARQuotePage WHERE intQuotePageId = @intQuotePageId)
 		BEGIN
-			RAISERROR('Invalid Quote Template ID.', 16, 1)
+			RAISERROR('Invalid Quote Page ID.', 16, 1)
 			RETURN;
 		END
 
-	SELECT @intNextSort = MAX(intSort) + 1 FROM tblARQuoteTemplateDetail WHERE intQuoteTemplateId = @intQuoteTemplateId
-
-	INSERT INTO tblARQuoteTemplateDetail
-		([intQuoteTemplateId]
-		,[strSectionName]
-		,[strPageTitle]
+	INSERT INTO tblARQuotePage
+		([strPageTitle]
 		,[strPageDescription]
 		,[strPageBody]
-		,[ysnDisplayTitle]
-		,[intSort]
 		,[intConcurrencyId])
-	SELECT 
-		 [intQuoteTemplateId]
-		,'DUP: ' + [strSectionName]
-		,'DUP: ' + [strPageTitle]
+	SELECT 		 
+		 'DUP: ' + [strPageTitle]
 		,[strPageDescription]
 		,[strPageBody]
-		,[ysnDisplayTitle]
-		,@intNextSort
 		,1
-	FROM tblARQuoteTemplateDetail
-		WHERE intQuoteTemplateDetailId = @intQuoteTemplateDetailId
+	FROM tblARQuotePage
+		WHERE intQuotePageId = @intQuotePageId
 
-	SET @NewQuoteTemplateDetailId = SCOPE_IDENTITY()
+	SET @NewQuotePageId = SCOPE_IDENTITY()
 
 RETURN

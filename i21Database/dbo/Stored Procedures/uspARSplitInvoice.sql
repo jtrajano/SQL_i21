@@ -238,7 +238,7 @@ BEGIN
 					,@ItemShipmentNumber			NVARCHAR(50)
 					,@ItemSalesOrderDetailId		INT
 					,@ItemSalesOrderNumber			NVARCHAR(50)
-					,@ItemShipmentQtyShipped		NUMERIC(18,6)
+					,@ItemWeight					NUMERIC(18,6)
 					,@EntitySalespersonId			INT
 					,@SubCurrency					INT
 
@@ -397,7 +397,7 @@ BEGIN
 						,@ItemShipmentNumber			= [strShipmentNumber]
 						,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
-						,@ItemShipmentQtyShipped		= [dblShipmentQtyShipped]
+						,@ItemWeight					= [dblItemWeight]
 						,@EntitySalespersonId			= [intEntitySalespersonId]
 						,@SubCurrency					= [ysnSubCurrency]
 					FROM

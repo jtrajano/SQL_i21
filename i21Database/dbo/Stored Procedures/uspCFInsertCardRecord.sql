@@ -113,71 +113,114 @@ BEGIN
 	---------------------------------------------------------
 
 	--Network
-	SELECT @intNetworkId = intNetworkId 
-	FROM tblCFNetwork 
-	WHERE strNetwork = @strNetworkId
-	IF (@intNetworkId = 0)
+	IF (@strNetworkId != '')
+	BEGIN 
+		SELECT @intNetworkId = intNetworkId 
+		FROM tblCFNetwork 
+		WHERE strNetwork = @strNetworkId
+		IF (@intNetworkId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strNetworkId +' on network list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCardNumber,'Unable to find match for '+ @strNetworkId +' on network list')
-		SET @ysnHasError = 1
+		SET @intNetworkId = NULL
 	END
 
 	--Account
-	SELECT @intAccountId = CFAcc.intAccountId
-	FROM tblARCustomer as ARCus
-	INNER JOIN tblCFAccount as CFAcc
-	ON ARCus.intEntityCustomerId = CFAcc.intCustomerId
-	WHERE strCustomerNumber = @strAccountId
-	IF (@intAccountId = 0)
-	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCardNumber,'Unable to find match for '+ @strAccountId +' on account list')
-		SET @ysnHasError = 1
+	IF (@strAccountId != '')
+	BEGIN 
+		SELECT @intAccountId = CFAcc.intAccountId
+		FROM tblARCustomer as ARCus
+		INNER JOIN tblCFAccount as CFAcc
+		ON ARCus.intEntityCustomerId = CFAcc.intCustomerId
+		WHERE strCustomerNumber = @strAccountId
+		IF (@intAccountId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strAccountId +' on account list')
+			SET @ysnHasError = 1
+		END
 	END
+	ELSE
+	BEGIN
+		SET @intAccountId = NULL
+	END
+	
 
 	--Expense Item
-	SELECT @intExpenseItemId = intItemId  
-	FROM tblICItem
-	WHERE strItemNo = @strExpenseItemId
-	IF (@intExpenseItemId = 0)
+	IF (@strExpenseItemId != '')
+	BEGIN 
+		SELECT @intExpenseItemId = intItemId  
+		FROM tblICItem
+		WHERE strItemNo = @strExpenseItemId
+		IF (@intExpenseItemId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strExpenseItemId +' on item list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCardNumber,'Unable to find match for '+ @strExpenseItemId +' on item list')
-		SET @ysnHasError = 1
+		SET @intExpenseItemId = NULL
 	END
 
 	--Vehicle Number
-	SELECT @intDefaultFixVehicleNumber = intVehicleId 
-	FROM tblCFVehicle 
-	WHERE strVehicleNumber = @strDefaultFixVehicleNumber
-	IF (@intDefaultFixVehicleNumber = 0)
+	IF (@strDefaultFixVehicleNumber != '')
+	BEGIN 
+		SELECT @intDefaultFixVehicleNumber = intVehicleId 
+		FROM tblCFVehicle 
+		WHERE strVehicleNumber = @strDefaultFixVehicleNumber
+		IF (@intDefaultFixVehicleNumber = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strDefaultFixVehicleNumber +' on vehicle list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCardNumber,'Unable to find match for '+ @strDefaultFixVehicleNumber +' on vehicle list')
-		SET @ysnHasError = 1
+		SET @intDefaultFixVehicleNumber = NULL
 	END
 
 	--Department
-	SELECT @intDepartmentId = intDepartmentId 
-	FROM tblCFDepartment 
-	WHERE strDepartment = @strDepartmentId
-	IF (@intDepartmentId = 0)
+	IF (@strDepartmentId != '')
+	BEGIN 
+		SELECT @intDepartmentId = intDepartmentId 
+		FROM tblCFDepartment 
+		WHERE strDepartment = @strDepartmentId
+		IF (@intDepartmentId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strDepartmentId +' on department list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCardNumber,'Unable to find match for '+ @strDepartmentId +' on department list')
-		SET @ysnHasError = 1
+		SET @intDepartmentId = NULL
 	END
 
 	--Card Type
-	SELECT @intCardTypeId = intCardTypeId 
-	FROM tblCFCardType 
-	WHERE strCardType = @strCardTypeId
-	IF (@intCardTypeId = 0)
+	IF (@strCardTypeId != '')
+	BEGIN 
+		SELECT @intCardTypeId = intCardTypeId 
+		FROM tblCFCardType 
+		WHERE strCardType = @strCardTypeId
+		IF (@intCardTypeId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strCardTypeId +' on card type list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
 	BEGIN
-		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strCardNumber,'Unable to find match for '+ @strCardTypeId +' on card type list')
-		SET @ysnHasError = 1
+		SET @intCardTypeId = NULL
 	END
 	---------------------------------------------------------
 	
@@ -319,7 +362,9 @@ BEGIN
 			RETURN 1
 		END TRY
 		BEGIN CATCH
-
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Internal Error - ' + ERROR_MESSAGE())
+			SET @ysnHasError = 1
 			ROLLBACK TRANSACTION
 			RETURN 0
 		END CATCH

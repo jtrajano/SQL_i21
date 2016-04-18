@@ -22,7 +22,7 @@ SELECT Lot.intLotId
 	, strStorageLocation = StorageLocation.strName
 	, Lot.dblQty
 	, CASE WHEN Lot.dblQty > 0.0 THEN 
-				Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR Group By SR.intLotId Having Lot.intLotId = SR.intLotId), 0) 
+				Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR Group By SR.intLotId, SR.ysnPosted Having Lot.intLotId = SR.intLotId AND SR.ysnPosted != 1), 0) 
 			ELSE 
 				0.0 END AS dblUnPickedQty
 	, Lot.dblLastCost

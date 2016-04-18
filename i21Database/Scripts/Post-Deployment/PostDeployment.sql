@@ -337,6 +337,9 @@ print 'BEGIN POST DEPLOYMENT'
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql
 
+--Integration
+:R .\IP\1_MasterTables.sql
+
 -- Common
 :r .\Common\ErrorMessages.sql 
 

@@ -74,7 +74,7 @@ IF @IsOpen <> 0
 UPDATE
 	tblSOSalesOrderDetail
 SET
-	dblQtyShipped = CASE WHEN (dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00)) > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00) END
+	dblQtyShipped = dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00)
 FROM
 	(
 		SELECT
@@ -106,7 +106,7 @@ WHERE
 UPDATE
 	tblSOSalesOrderDetail
 SET
-	dblQtyShipped = CASE WHEN (dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00)) > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00) END
+	dblQtyShipped = dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00)
 FROM
 	(
 		SELECT

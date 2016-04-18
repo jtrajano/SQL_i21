@@ -136,6 +136,7 @@ BEGIN
 			,@intEntityId AS INT = 1
 			--,@intUserId AS INT = 1
 			,@intContractId AS INT
+			,@intContractDetailId AS INT
 
 			,@intEntityVendorId_ReceiptVendor AS INT = 1
 			,@intEntityVendorId_ThirdPartyVendor AS INT = 2
@@ -2175,6 +2176,7 @@ BEGIN
 		SET @strReceiptNumber = 'INVRCPT-XXXX15'
 		SET @dtmDate = '01/23/2014'
 		SET @intContractId = 6992
+		SET @intContractDetailId = 1130
 
 		-- Insert the Inventory Receipt header 
 		INSERT INTO dbo.tblICInventoryReceipt (
@@ -2211,7 +2213,6 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItem (
 			intInventoryReceiptId
-			,intLineNo
 			,intSourceId
 			,intItemId
 			,dblOrderQty
@@ -2224,10 +2225,10 @@ BEGIN
 			,intConcurrencyId
 			,intOwnershipType
 			,intOrderId
+			,intLineNo
 		)
 		-- intInventoryReceiptItemId: 35
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
-				,intLineNo				= 1
 				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 10
@@ -2240,10 +2241,10 @@ BEGIN
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 				,intOrderId				= @intContractId
+				,intLineNo				= @intContractDetailId
 		-- intInventoryReceiptItemId: 36
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
-				,intLineNo				= 2
 				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 20
@@ -2256,6 +2257,7 @@ BEGIN
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 				,intOrderId				= @intContractId
+				,intLineNo				= @intContractDetailId
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -2306,7 +2308,8 @@ BEGIN
 			,[dblAmount] 
 			,[strAllocateCostBy] 
 			,[ysnAccrue]
-			,[intContractId]	
+			,[intContractId]
+			,[intContractDetailId]	
 		)
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
@@ -2320,5 +2323,6 @@ BEGIN
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
 			,[ysnAccrue] 			= 0 -- @COST_BILLED_BY_None
 			,[intContractId]		= @intContractId
+			,[intContractDetailId]	= @intContractDetailId
 	END
 END

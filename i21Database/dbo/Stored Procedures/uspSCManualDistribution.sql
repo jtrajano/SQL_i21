@@ -47,11 +47,18 @@ BEGIN
 END
 
 BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId
-	FROM	dbo.tblICItemUOM UM	
-			JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
+	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
+		FROM	dbo.tblICItemUOM UM	
+	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
+
+--BEGIN 
+--	SELECT	@intTicketItemUOMId = UM.intItemUOMId
+--	FROM	dbo.tblICItemUOM UM	
+--			JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+--	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
+--END
 
 BEGIN TRY
 DECLARE @intId INT;

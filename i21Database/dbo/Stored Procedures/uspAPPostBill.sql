@@ -583,18 +583,25 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 Audit_Log_Invoke:
 DECLARE @strDescription AS NVARCHAR(100) 
   ,@actionType AS NVARCHAR(50)
-  ,@billId AS NVARCHAR(50)
-
+  ,@billId AS NVARCHAR(50);
+DECLARE @billCounter INT = 0;
 SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
-SELECT @billId = (SELECT intBillId FROM #tmpPostBillData)
-EXEC dbo.uspSMAuditLog 
-   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
-  ,@keyValue = @billId								-- Primary Key Value of the Voucher. 
-  ,@entityId = @userId									-- Entity Id.
-  ,@actionType = @actionType                        -- Action Type
-  ,@changeDescription = @strDescription				-- Description
-  ,@fromValue = ''									-- Previous Value
-  ,@toValue = ''									-- New Value
+
+WHILE(@billCounter != (@totalRecords -1))
+BEGIN
+	SELECT @billId = (SELECT TOP 1(@billCounter) intBillId FROM #tmpPostBillData)
+
+	EXEC dbo.uspSMAuditLog 
+	   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
+	  ,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+	  ,@entityId = @userId									-- Entity Id.
+	  ,@actionType = @actionType                        -- Action Type
+	  ,@changeDescription = @strDescription				-- Description
+	  ,@fromValue = ''									-- Previous Value
+	  ,@toValue = ''									-- New Value
+
+  SET @billCounter = @billCounter + 1
+END
 
 Post_Commit:
 	COMMIT TRANSACTION

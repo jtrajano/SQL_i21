@@ -21,3 +21,4 @@ LEFT JOIN vyuTRRackPriceEquation PriceEquation ON PriceEquation.intSupplyPointId
 INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intSupplyPointId = RH.intSupplyPointId
 INNER JOIN tblEMEntity Entity ON SupplyPoint.intEntityVendorId = Entity.intEntityId
 INNER JOIN [tblEMEntityLocation] EntityLocation ON SupplyPoint.intEntityLocationId = EntityLocation.intEntityLocationId
+LEFT JOIN tblICItem Item ON Item.intItemId = RD.intItemId

@@ -51,9 +51,39 @@ DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)
 DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
--- Sanitize the @xmlParam 
+
+	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
-	SET @xmlParam = NULL 
+BEGIN
+--SET @xmlParam = NULL 
+--Add this so that XtraReports have fields to get
+	SELECT 
+		NULL AS dtmDate,
+		NULL AS dtmDueDate,
+		NULL AS strVendorId,
+		0 AS intEntityVendorId,
+		0 AS intBillId,
+		NULL AS strBillId,
+		NULL AS strVendorOrderNumber,
+		NULL AS strTerm,
+		NULL AS strCompanyName,
+		NULL AS strAccountId,
+		NULL AS strVendorIdName,
+		NULL AS strAge,
+		0 AS intAccountId,
+		0 AS dblTotal,
+		0 AS dblAmountPaid,
+		0 AS dblDiscount,
+		0 AS dblInterest,
+		0 AS dblAmountDue,
+		0 AS dblUnappliedAmount,
+		0 AS dblCurrent,
+		0 AS dbl1,
+		0 AS dbl30,
+		0 AS dbl60,
+		0 AS dbl90,
+		0 AS intAging
+END
 
 DECLARE @xmlDocumentId AS INT;
 -- Create a table variable to hold the XML data. 		

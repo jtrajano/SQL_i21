@@ -315,7 +315,7 @@ BEGIN
 					,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
 													RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 													RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
-					,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
+					,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no,8)
 					,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 					,ysnCheckToBePrinted		=	1
 					,ysnCheckVoid				=	CASE
@@ -383,7 +383,7 @@ BEGIN
 					,dtmCheckPrinted
 			)
 			SELECT	intBankAccountId	= f.intBankAccountId
-					,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo)	
+					,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo,8)	
 					,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
 					,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
 					,intTransactionId	= f.intTransactionId
@@ -602,7 +602,7 @@ BEGIN
 						,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
-						,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
+						,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no,8)
 						,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) 
 						,ysnCheckToBePrinted		=	1
 						,ysnCheckVoid				=	CASE
@@ -679,7 +679,7 @@ BEGIN
 						,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
-						,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
+						,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no,8)
 						,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 						,ysnCheckToBePrinted		=	1
 						,ysnCheckVoid				=	CASE
@@ -757,7 +757,7 @@ BEGIN
 					,dtmCheckPrinted
 			)
 			SELECT	intBankAccountId	= f.intBankAccountId
-					,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo)
+					,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo,8)
 					,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
 					,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
 					,intTransactionId	= f.intTransactionId

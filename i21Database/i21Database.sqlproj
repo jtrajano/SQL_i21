@@ -175,6 +175,7 @@
     <Folder Include="Scripts\Post-Deployment\PR\Reports" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports\SubReports" />
     <Folder Include="Scripts\Post-Deployment\CF" />
+    <Folder Include="Scripts\Post-Deployment\IP" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3564,6 +3565,8 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalancePrintEach.sql" />
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
+    <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\CallEntryPrintOut.sql" />
@@ -3642,6 +3645,25 @@
     <Build Include="dbo\Stored Procedures\uspQMInspectionGetResult.sql" />
     <Build Include="dbo\Stored Procedures\uspQMInspectionSaveResult.sql" />
     <Build Include="dbo\Views\vyuLGLoadNotifyPartiesNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateInsertForm941.sql" />
+    <Build Include="dbo\Tables\tblIPProcess.sql" />
+    <Build Include="dbo\Tables\tblIPSchedule.sql" />
+    <Build Include="dbo\Tables\tblIPScheduleType.sql" />
+    <Build Include="dbo\Tables\tblIPStep.sql" />
+    <Build Include="dbo\Tables\tblIPLog.sql" />
+    <Build Include="dbo\Tables\tblIPDelimiter.sql" />
+    <Build Include="dbo\Tables\tblIPStepDetail.sql" />
+    <Build Include="dbo\Tables\tblIPDataType.sql" />
+    <Build Include="dbo\Tables\tblIPFileType.sql" />
+    <Build Include="dbo\Tables\tblIPConnection.sql" />
+    <Build Include="dbo\Tables\tblIPServerType.sql" />
+    <Build Include="dbo\Tables\tblIPStepType.sql" />
+    <Build Include="dbo\Views\vyuIPGetLog.sql" />
+    <Build Include="dbo\Views\vyuIPGetProcess.sql" />
+    <Build Include="dbo\Views\vyuIPGetConnection.sql" />
+    <None Include="Scripts\Post-Deployment\IP\1_MasterTables.sql" />
+    <Build Include="dbo\Tables\tblGLTempCOASegment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -86,6 +86,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intItemUOMId]							INT												NULL		-- The UOM Id
     ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
+	,[dblItemWeight]						NUMERIC(18, 6)									NULL
+	,[intItemWeightUOMId]					INT												NULL	
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
     ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
     ,[ysnRefreshPrice]						BIT												NULL		-- Indicate whether to recompute for Price based on the available pricing setup	
@@ -107,8 +109,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intContractHeaderId]					INT												NULL		-- Key Value from tblCTContractHeader(If NULL, it will be populated using [intContractDetailId])
 	,[intContractDetailId]					INT												NULL		-- Key Value from tblCTContractDetail (Sales Contract)
 	,[intShipmentPurchaseSalesContractId]	INT												NULL		-- Key Value from tblLGShipmentPurchaseSalesContract (Inbound Shipment)
-	,[intShipmentItemUOMId]					INT												NULL
-	,[dblShipmentQtyShipped]				NUMERIC(18, 6)									NULL
 	,[dblShipmentGrossWt]					NUMERIC(18, 6)									NULL
 	,[dblShipmentTareWt]					NUMERIC(18, 6)									NULL
 	,[dblShipmentNetWt]						NUMERIC(18, 6)									NULL

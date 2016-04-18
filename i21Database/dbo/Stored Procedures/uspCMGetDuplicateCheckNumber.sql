@@ -32,9 +32,11 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@intCheckNoLength AS INT
 		
 -- Clean the parameter
-SET @strCheckNo = LTRIM(RTRIM(ISNULL(@strCheckNo, ''))) 		
+SET @strCheckNo = LTRIM(RTRIM(ISNULL(@strCheckNo, '')))
+SELECT @intCheckNoLength = intCheckNoLength FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId
 		
 SELECT	TOP 1 
 		intBankAccountId 
@@ -46,6 +48,6 @@ WHERE	strTransactionId <> @strTransactionId
 		AND intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT, @PAYCHECK)
 		AND (
 			strReferenceNo = @strCheckNo 
-			OR strReferenceNo = dbo.fnAddZeroPrefixes(@strCheckNo)
+			OR strReferenceNo = dbo.fnAddZeroPrefixes(@strCheckNo,@intCheckNoLength)
 		)
 		AND @strCheckNo <> ''

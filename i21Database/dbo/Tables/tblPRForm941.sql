@@ -26,7 +26,7 @@
     [ysnAllowContactDesignee] BIT NULL DEFAULT ((0)), 
     [strDesigneeName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [strDesigneePhone] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intDesigneePIN] INT NULL, 
+    [strDesigneePIN] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [strName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [strTitle] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [dtmSignDate] DATETIME NULL, 
@@ -262,7 +262,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPRForm941',
     @level2type = N'COLUMN',
-    @level2name = N'intDesigneePIN'
+    @level2name = N'strDesigneePIN'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Print Name',

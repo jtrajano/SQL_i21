@@ -366,7 +366,7 @@ BEGIN
 	DECLARE @paymentCounter INT = 0;
 	SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
 
-	WHILE(@paymentCounter != (@totalRecords -1))
+	WHILE(@paymentCounter != (@totalRecords))
 	BEGIN
 		SELECT @PaymentId = (SELECT TOP(@paymentCounter) intPaymentId FROM #tmpPayablePostData)
 		EXEC dbo.uspSMAuditLog 

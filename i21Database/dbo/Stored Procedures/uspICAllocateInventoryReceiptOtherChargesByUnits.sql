@@ -57,7 +57,6 @@ BEGIN
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
-							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
 							,intInventoryReceiptId
@@ -66,7 +65,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (

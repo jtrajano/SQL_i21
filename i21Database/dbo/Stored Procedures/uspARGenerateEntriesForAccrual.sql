@@ -457,297 +457,297 @@ BEGIN
 
 	END
 
-	DECLARE @InvoiceDetailTax AS TABLE(intInvoiceDetailId INT, intInvoiceDetailTaxId INT, dblAdjustedTax DECIMAL(18,6))
-	DELETE FROM @InvoiceDetailTax
-	INSERT INTO @InvoiceDetailTax
-		(intInvoiceDetailId
-		,intInvoiceDetailTaxId
-		,dblAdjustedTax)
-	SELECT
-		 intInvoiceDetailId			= ARID.intInvoiceDetailId
-		,intInvoiceDetailTaxId		= ARIDT.intInvoiceDetailTaxId
-		,dblAdjustedTax				= ARIDT.dblAdjustedTax
-	FROM
-		tblARInvoiceDetailTax ARIDT
-	INNER JOIN
-		tblARInvoiceDetail ARID
-		ON ARIDT.intInvoiceDetailId = ARID.intInvoiceDetailId	
-	WHERE
-		ARID.intInvoiceDetailId = @InvoiceDetailId 
-		AND ARIDT.dblAdjustedTax <> @ZeroDecimal 	
-	ORDER BY
-		ARID.intInvoiceDetailId
-		,ARIDT.intInvoiceDetailTaxId
+	--DECLARE @InvoiceDetailTax AS TABLE(intInvoiceDetailId INT, intInvoiceDetailTaxId INT, dblAdjustedTax DECIMAL(18,6))
+	--DELETE FROM @InvoiceDetailTax
+	--INSERT INTO @InvoiceDetailTax
+	--	(intInvoiceDetailId
+	--	,intInvoiceDetailTaxId
+	--	,dblAdjustedTax)
+	--SELECT
+	--	 intInvoiceDetailId			= ARID.intInvoiceDetailId
+	--	,intInvoiceDetailTaxId		= ARIDT.intInvoiceDetailTaxId
+	--	,dblAdjustedTax				= ARIDT.dblAdjustedTax
+	--FROM
+	--	tblARInvoiceDetailTax ARIDT
+	--INNER JOIN
+	--	tblARInvoiceDetail ARID
+	--	ON ARIDT.intInvoiceDetailId = ARID.intInvoiceDetailId	
+	--WHERE
+	--	ARID.intInvoiceDetailId = @InvoiceDetailId 
+	--	AND ARIDT.dblAdjustedTax <> @ZeroDecimal 	
+	--ORDER BY
+	--	ARID.intInvoiceDetailId
+	--	,ARIDT.intInvoiceDetailTaxId
 	
 
 
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceDetailTax)
-	BEGIN
-	DECLARE @InvoiceDetailTaxId			INT
-			,@TaxTotal					DECIMAL(18,6)
-			,@TaxTotalPerPeriod			DECIMAL(18,6)
+	--WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceDetailTax)
+	--BEGIN
+	--DECLARE @InvoiceDetailTaxId			INT
+	--		,@TaxTotal					DECIMAL(18,6)
+	--		,@TaxTotalPerPeriod			DECIMAL(18,6)
 	
-	SELECT TOP 1 
-		@InvoiceDetailTaxId	= intInvoiceDetailTaxId
-		,@TaxTotal				= dblAdjustedTax
-		,@TaxTotalPerPeriod		= ROUND((dblAdjustedTax/@AccrualPeriod),2)
-	FROM 
-		@InvoiceDetailTax
+	--SELECT TOP 1 
+	--	@InvoiceDetailTaxId	= intInvoiceDetailTaxId
+	--	,@TaxTotal				= dblAdjustedTax
+	--	,@TaxTotalPerPeriod		= ROUND((dblAdjustedTax/@AccrualPeriod),2)
+	--FROM 
+	--	@InvoiceDetailTax
 		
-	SET @TaxRemainder = @ZeroDecimal
-	SET @TaxRemainder = ROUND(@TaxTotal,2) - ROUND((@TaxTotalPerPeriod * @AccrualPeriod),2)
-	SET @TaxLoopCounter = 0		
+	--SET @TaxRemainder = @ZeroDecimal
+	--SET @TaxRemainder = ROUND(@TaxTotal,2) - ROUND((@TaxTotalPerPeriod * @AccrualPeriod),2)
+	--SET @TaxLoopCounter = 0		
 
-	WHILE @TaxLoopCounter < @AccrualPeriod
-	BEGIN
+	--WHILE @TaxLoopCounter < @AccrualPeriod
+	--BEGIN
 
-		--DEBIT AR
-		INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm]
-					,[strModuleName]
-					,[intConcurrencyId]
-				)
-		--CREDIT Tax
-		SELECT
-				dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
-			,strBatchID					= @BatchId
-			,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) END
-			,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) ELSE 0 END
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
-			,strDescription				= A.strComments
-			,strCode					= @Code
-			,strReference				= C.strCustomerNumber
-			,intCurrencyId				= A.intCurrencyId 
-			,dblExchangeRate			= 1
-			,dtmDateEntered				= @PostDate 
-			,dtmTransactionDate			= A.dtmDate
-			,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-			,intJournalLineNo			= A.intInvoiceId
-			,ysnIsUnposted				= 0
-			,intUserId					= @UserId
-			,intEntityId				= @UserEntityId 				
-			,strTransactionId			= A.strInvoiceNumber
-			,intTransactionId			= A.intInvoiceId
-			,strTransactionType			= A.strTransactionType
-			,strTransactionForm			= @ScreenName 
-			,strModuleName				= @ModuleName 
-			,intConcurrencyId			= 1				 
-		FROM
-			tblARInvoiceDetailTax DT
-		INNER JOIN
-			tblARInvoiceDetail D
-				ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-		INNER JOIN			
-			tblARInvoice A 
-				ON D.intInvoiceId = A.intInvoiceId
-		INNER JOIN
-			tblARCustomer C
-				ON A.intEntityCustomerId = C.intEntityCustomerId			
-		LEFT OUTER JOIN
-			tblSMTaxCode TC
-				ON DT.intTaxCodeId = TC.intTaxCodeId	
-		WHERE
-			DT.intInvoiceDetailTaxId = @InvoiceDetailTaxId
-			AND DT.dblAdjustedTax <> @ZeroDecimal
+	--	--DEBIT AR
+	--	INSERT INTO @GLEntries (
+	--				[dtmDate] 
+	--				,[strBatchId]
+	--				,[intAccountId]
+	--				,[dblDebit]
+	--				,[dblCredit]
+	--				,[dblDebitUnit]
+	--				,[dblCreditUnit]
+	--				,[strDescription]
+	--				,[strCode]
+	--				,[strReference]
+	--				,[intCurrencyId]
+	--				,[dblExchangeRate]
+	--				,[dtmDateEntered]
+	--				,[dtmTransactionDate]
+	--				,[strJournalLineDescription]
+	--				,[intJournalLineNo]
+	--				,[ysnIsUnposted]
+	--				,[intUserId]
+	--				,[intEntityId]
+	--				,[strTransactionId]
+	--				,[intTransactionId]
+	--				,[strTransactionType]
+	--				,[strTransactionForm]
+	--				,[strModuleName]
+	--				,[intConcurrencyId]
+	--			)
+	--	--CREDIT Tax
+	--	SELECT
+	--			dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
+	--		,strBatchID					= @BatchId
+	--		,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
+	--		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) END
+	--		,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) ELSE 0 END
+	--		,dblDebitUnit				= 0
+	--		,dblCreditUnit				= 0				
+	--		,strDescription				= A.strComments
+	--		,strCode					= @Code
+	--		,strReference				= C.strCustomerNumber
+	--		,intCurrencyId				= A.intCurrencyId 
+	--		,dblExchangeRate			= 1
+	--		,dtmDateEntered				= @PostDate 
+	--		,dtmTransactionDate			= A.dtmDate
+	--		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+	--		,intJournalLineNo			= A.intInvoiceId
+	--		,ysnIsUnposted				= 0
+	--		,intUserId					= @UserId
+	--		,intEntityId				= @UserEntityId 				
+	--		,strTransactionId			= A.strInvoiceNumber
+	--		,intTransactionId			= A.intInvoiceId
+	--		,strTransactionType			= A.strTransactionType
+	--		,strTransactionForm			= @ScreenName 
+	--		,strModuleName				= @ModuleName 
+	--		,intConcurrencyId			= 1				 
+	--	FROM
+	--		tblARInvoiceDetailTax DT
+	--	INNER JOIN
+	--		tblARInvoiceDetail D
+	--			ON DT.intInvoiceDetailId = D.intInvoiceDetailId
+	--	INNER JOIN			
+	--		tblARInvoice A 
+	--			ON D.intInvoiceId = A.intInvoiceId
+	--	INNER JOIN
+	--		tblARCustomer C
+	--			ON A.intEntityCustomerId = C.intEntityCustomerId			
+	--	LEFT OUTER JOIN
+	--		tblSMTaxCode TC
+	--			ON DT.intTaxCodeId = TC.intTaxCodeId	
+	--	WHERE
+	--		DT.intInvoiceDetailTaxId = @InvoiceDetailTaxId
+	--		AND DT.dblAdjustedTax <> @ZeroDecimal
 			
-		UNION ALL
-		--Debit Tax
-		SELECT
-			 dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
-			,strBatchID					= @BatchId
-			,intAccountId				= @DeferredRevenueAccountId
-			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) ELSE 0 END
-			,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) END
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0				
-			,strDescription				= A.strComments
-			,strCode					= @Code
-			,strReference				= C.strCustomerNumber
-			,intCurrencyId				= A.intCurrencyId 
-			,dblExchangeRate			= 1
-			,dtmDateEntered				= @PostDate 
-			,dtmTransactionDate			= A.dtmDate
-			,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-			,intJournalLineNo			= A.intInvoiceId
-			,ysnIsUnposted				= 0
-			,intUserId					= @UserId
-			,intEntityId				= @UserEntityId 				
-			,strTransactionId			= A.strInvoiceNumber
-			,intTransactionId			= A.intInvoiceId
-			,strTransactionType			= A.strTransactionType
-			,strTransactionForm			= @ScreenName 
-			,strModuleName				= @ModuleName 
-			,intConcurrencyId			= 1				 
-		FROM
-			tblARInvoiceDetailTax DT
-		INNER JOIN
-			tblARInvoiceDetail D
-				ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-		INNER JOIN			
-			tblARInvoice A 
-				ON D.intInvoiceId = A.intInvoiceId
-		INNER JOIN
-			tblARCustomer C
-				ON A.intEntityCustomerId = C.intEntityCustomerId			
-		LEFT OUTER JOIN
-			tblSMTaxCode TC
-				ON DT.intTaxCodeId = TC.intTaxCodeId	
-		WHERE
-			DT.intInvoiceDetailTaxId = @InvoiceDetailTaxId
-			AND DT.dblAdjustedTax <> @ZeroDecimal	
+	--	UNION ALL
+	--	--Debit Tax
+	--	SELECT
+	--		 dtmDate					= DATEADD(mm, @TaxLoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
+	--		,strBatchID					= @BatchId
+	--		,intAccountId				= @DeferredRevenueAccountId
+	--		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) ELSE 0 END
+	--		,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TaxTotalPerPeriod + (CASE WHEN @TaxLoopCounter + 1 = @AccrualPeriod THEN @TaxRemainder ELSE 0 END) END
+	--		,dblDebitUnit				= 0
+	--		,dblCreditUnit				= 0				
+	--		,strDescription				= A.strComments
+	--		,strCode					= @Code
+	--		,strReference				= C.strCustomerNumber
+	--		,intCurrencyId				= A.intCurrencyId 
+	--		,dblExchangeRate			= 1
+	--		,dtmDateEntered				= @PostDate 
+	--		,dtmTransactionDate			= A.dtmDate
+	--		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+	--		,intJournalLineNo			= A.intInvoiceId
+	--		,ysnIsUnposted				= 0
+	--		,intUserId					= @UserId
+	--		,intEntityId				= @UserEntityId 				
+	--		,strTransactionId			= A.strInvoiceNumber
+	--		,intTransactionId			= A.intInvoiceId
+	--		,strTransactionType			= A.strTransactionType
+	--		,strTransactionForm			= @ScreenName 
+	--		,strModuleName				= @ModuleName 
+	--		,intConcurrencyId			= 1				 
+	--	FROM
+	--		tblARInvoiceDetailTax DT
+	--	INNER JOIN
+	--		tblARInvoiceDetail D
+	--			ON DT.intInvoiceDetailId = D.intInvoiceDetailId
+	--	INNER JOIN			
+	--		tblARInvoice A 
+	--			ON D.intInvoiceId = A.intInvoiceId
+	--	INNER JOIN
+	--		tblARCustomer C
+	--			ON A.intEntityCustomerId = C.intEntityCustomerId			
+	--	LEFT OUTER JOIN
+	--		tblSMTaxCode TC
+	--			ON DT.intTaxCodeId = TC.intTaxCodeId	
+	--	WHERE
+	--		DT.intInvoiceDetailTaxId = @InvoiceDetailTaxId
+	--		AND DT.dblAdjustedTax <> @ZeroDecimal	
 		
-		SET @TaxLoopCounter = @TaxLoopCounter + 1
+	--	SET @TaxLoopCounter = @TaxLoopCounter + 1
 
-	END
+	--END
 
-	DELETE FROM @InvoiceDetailTax WHERE intInvoiceDetailTaxId = @InvoiceDetailTaxId
-	END
+	--DELETE FROM @InvoiceDetailTax WHERE intInvoiceDetailTaxId = @InvoiceDetailTaxId
+	--END
 
 	DELETE FROM @InvoiceDetail WHERE intInvoiceDetailId = @InvoiceDetailId
 END
 
-	----DEBIT AR
-	--INSERT INTO @GLEntries (
-	--			[dtmDate] 
-	--			,[strBatchId]
-	--			,[intAccountId]
-	--			,[dblDebit]
-	--			,[dblCredit]
-	--			,[dblDebitUnit]
-	--			,[dblCreditUnit]
-	--			,[strDescription]
-	--			,[strCode]
-	--			,[strReference]
-	--			,[intCurrencyId]
-	--			,[dblExchangeRate]
-	--			,[dtmDateEntered]
-	--			,[dtmTransactionDate]
-	--			,[strJournalLineDescription]
-	--			,[intJournalLineNo]
-	--			,[ysnIsUnposted]
-	--			,[intUserId]
-	--			,[intEntityId]
-	--			,[strTransactionId]
-	--			,[intTransactionId]
-	--			,[strTransactionType]
-	--			,[strTransactionForm]
-	--			,[strModuleName]
-	--			,[intConcurrencyId]
-	--		)
-	----CREDIT Tax
-	--SELECT
-	--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-	--	,strBatchID					= @BatchId
-	--	,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-	--	,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
-	--	,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN DT.dblAdjustedTax ELSE 0 END
-	--	,dblDebitUnit				= 0
-	--	,dblCreditUnit				= 0				
-	--	,strDescription				= A.strComments
-	--	,strCode					= @Code
-	--	,strReference				= C.strCustomerNumber
-	--	,intCurrencyId				= A.intCurrencyId 
-	--	,dblExchangeRate			= 1
-	--	,dtmDateEntered				= @PostDate 
-	--	,dtmTransactionDate			= A.dtmDate
-	--	,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--	,intJournalLineNo			= A.intInvoiceId
-	--	,ysnIsUnposted				= 0
-	--	,intUserId					= @UserId
-	--	,intEntityId				= @UserEntityId 				
-	--	,strTransactionId			= A.strInvoiceNumber
-	--	,intTransactionId			= A.intInvoiceId
-	--	,strTransactionType			= A.strTransactionType
-	--	,strTransactionForm			= @ScreenName 
-	--	,strModuleName				= @ModuleName 
-	--	,intConcurrencyId			= 1				 
-	--FROM
-	--	tblARInvoiceDetailTax DT
-	--INNER JOIN
-	--	tblARInvoiceDetail D
-	--		ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-	--INNER JOIN			
-	--	tblARInvoice A 
-	--		ON D.intInvoiceId = A.intInvoiceId
-	--INNER JOIN
-	--	tblARCustomer C
-	--		ON A.intEntityCustomerId = C.intEntityCustomerId			
-	--LEFT OUTER JOIN
-	--	tblSMTaxCode TC
-	--		ON DT.intTaxCodeId = TC.intTaxCodeId	
-	--WHERE
-	--	A.intInvoiceId = @InvoiceId
-	--	AND DT.dblAdjustedTax <> @ZeroDecimal
+	--DEBIT AR
+	INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+			)
+	--CREDIT Tax
+	SELECT
+		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+		,strBatchID					= @BatchId
+		,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
+		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
+		,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN DT.dblAdjustedTax ELSE 0 END
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0				
+		,strDescription				= A.strComments
+		,strCode					= @Code
+		,strReference				= C.strCustomerNumber
+		,intCurrencyId				= A.intCurrencyId 
+		,dblExchangeRate			= 1
+		,dtmDateEntered				= @PostDate 
+		,dtmTransactionDate			= A.dtmDate
+		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+		,intJournalLineNo			= A.intInvoiceId
+		,ysnIsUnposted				= 0
+		,intUserId					= @UserId
+		,intEntityId				= @UserEntityId 				
+		,strTransactionId			= A.strInvoiceNumber
+		,intTransactionId			= A.intInvoiceId
+		,strTransactionType			= A.strTransactionType
+		,strTransactionForm			= @ScreenName 
+		,strModuleName				= @ModuleName 
+		,intConcurrencyId			= 1				 
+	FROM
+		tblARInvoiceDetailTax DT
+	INNER JOIN
+		tblARInvoiceDetail D
+			ON DT.intInvoiceDetailId = D.intInvoiceDetailId
+	INNER JOIN			
+		tblARInvoice A 
+			ON D.intInvoiceId = A.intInvoiceId
+	INNER JOIN
+		tblARCustomer C
+			ON A.intEntityCustomerId = C.intEntityCustomerId			
+	LEFT OUTER JOIN
+		tblSMTaxCode TC
+			ON DT.intTaxCodeId = TC.intTaxCodeId	
+	WHERE
+		A.intInvoiceId = @InvoiceId
+		AND DT.dblAdjustedTax <> @ZeroDecimal
 		
-	--UNION ALL
-	----Debit Tax
-	--SELECT
-	--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-	--	,strBatchID					= @BatchId
-	--	,intAccountId				= @DeferredRevenueAccountId
-	--	,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN DT.dblAdjustedTax ELSE 0 END
-	--	,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
-	--	,dblDebitUnit				= 0
-	--	,dblCreditUnit				= 0				
-	--	,strDescription				= A.strComments
-	--	,strCode					= @Code
-	--	,strReference				= C.strCustomerNumber
-	--	,intCurrencyId				= A.intCurrencyId 
-	--	,dblExchangeRate			= 1
-	--	,dtmDateEntered				= @PostDate 
-	--	,dtmTransactionDate			= A.dtmDate
-	--	,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-	--	,intJournalLineNo			= A.intInvoiceId
-	--	,ysnIsUnposted				= 0
-	--	,intUserId					= @UserId
-	--	,intEntityId				= @UserEntityId 				
-	--	,strTransactionId			= A.strInvoiceNumber
-	--	,intTransactionId			= A.intInvoiceId
-	--	,strTransactionType			= A.strTransactionType
-	--	,strTransactionForm			= @ScreenName 
-	--	,strModuleName				= @ModuleName 
-	--	,intConcurrencyId			= 1				 
-	--FROM
-	--	tblARInvoiceDetailTax DT
-	--INNER JOIN
-	--	tblARInvoiceDetail D
-	--		ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-	--INNER JOIN			
-	--	tblARInvoice A 
-	--		ON D.intInvoiceId = A.intInvoiceId
-	--INNER JOIN
-	--	tblARCustomer C
-	--		ON A.intEntityCustomerId = C.intEntityCustomerId			
-	--LEFT OUTER JOIN
-	--	tblSMTaxCode TC
-	--		ON DT.intTaxCodeId = TC.intTaxCodeId	
-	--WHERE
-	--	A.intInvoiceId = @InvoiceId
-	--	AND DT.dblAdjustedTax <> @ZeroDecimal	
+	UNION ALL
+	--Debit Tax
+	SELECT
+		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+		,strBatchID					= @BatchId
+		,intAccountId				= @DeferredRevenueAccountId
+		,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN DT.dblAdjustedTax ELSE 0 END
+		,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0				
+		,strDescription				= A.strComments
+		,strCode					= @Code
+		,strReference				= C.strCustomerNumber
+		,intCurrencyId				= A.intCurrencyId 
+		,dblExchangeRate			= 1
+		,dtmDateEntered				= @PostDate 
+		,dtmTransactionDate			= A.dtmDate
+		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+		,intJournalLineNo			= A.intInvoiceId
+		,ysnIsUnposted				= 0
+		,intUserId					= @UserId
+		,intEntityId				= @UserEntityId 				
+		,strTransactionId			= A.strInvoiceNumber
+		,intTransactionId			= A.intInvoiceId
+		,strTransactionType			= A.strTransactionType
+		,strTransactionForm			= @ScreenName 
+		,strModuleName				= @ModuleName 
+		,intConcurrencyId			= 1				 
+	FROM
+		tblARInvoiceDetailTax DT
+	INNER JOIN
+		tblARInvoiceDetail D
+			ON DT.intInvoiceDetailId = D.intInvoiceDetailId
+	INNER JOIN			
+		tblARInvoice A 
+			ON D.intInvoiceId = A.intInvoiceId
+	INNER JOIN
+		tblARCustomer C
+			ON A.intEntityCustomerId = C.intEntityCustomerId			
+	LEFT OUTER JOIN
+		tblSMTaxCode TC
+			ON DT.intTaxCodeId = TC.intTaxCodeId	
+	WHERE
+		A.intInvoiceId = @InvoiceId
+		AND DT.dblAdjustedTax <> @ZeroDecimal	
 END
 
 

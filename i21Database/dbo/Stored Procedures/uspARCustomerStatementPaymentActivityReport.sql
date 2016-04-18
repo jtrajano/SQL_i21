@@ -214,6 +214,7 @@ SELECT STATEMENTREPORT.*
 	  ,dbl91Days			= ISNULL(AGINGREPORT.dbl91Days, 0)
 	  ,dblCredits			= ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,dtmAsOfDate			= @dtmDateTo
+	  ,blbLogo				= dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId

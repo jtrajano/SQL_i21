@@ -47,8 +47,15 @@ BEGIN
 	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
 		FROM	dbo.tblICItemUOM UM	
 	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
+	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
+
+--BEGIN 
+--	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
+--		FROM	dbo.tblICItemUOM UM	
+--	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+--	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
+--END
 
 --BEGIN
 --    SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -1184,10 +1191,12 @@ BEGIN
            ,[strRemarks] = NULL
            ,[strCondition] = NULL
            ,[dtmCertified] = NULL
-           ,[dtmExpiryDate] = NULL
+           ,[dtmExpiryDate] = DATEADD(YEAR, 2, ICIR.dtmReceiptDate)
            ,[intSort] = NULL
            ,[intConcurrencyId] = 1
-		   FROM	dbo.tblICInventoryReceiptItem RCT WHERE RCT.intInventoryReceiptItemId = @intLoopReceiptItemId
+		   FROM	dbo.tblICInventoryReceiptItem RCT
+				INNER JOIN dbo.tblICInventoryReceipt ICIR ON RCT.intInventoryReceiptId = ICIR.intInventoryReceiptId
+		   WHERE RCT.intInventoryReceiptItemId = @intLoopReceiptItemId
    END
 
    -- Attempt to fetch next row from cursor

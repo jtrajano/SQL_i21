@@ -1113,7 +1113,7 @@ END CATCH
 				--Contract Item Price not Equal to Contract Sequence Cash Price
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The contract item - ' + I.strItemNo + ' price (' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the sequence cash price (' + CONVERT(NVARCHAR(100),CAST(([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * ISNULL(CT.dblCashPrice,@ZeroDecimal)) AS MONEY),2) + ').',
+					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * ISNULL(CT.dblCashPrice,@ZeroDecimal)) AS MONEY),2) + ').',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
