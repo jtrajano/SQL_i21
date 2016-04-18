@@ -21,7 +21,18 @@
 	ICRI.strLocationName,
 	ICRI.ysnPosted,
 	SC.strTicketNumber,
-	GRST.strStorageTypeDescription
+	SC.strLoadNumber,
+	(CASE 
+		WHEN ISNULL(ICRI.strOrderNumber, '') = '' THEN GRSC.strStorageTypeDescription
+	END) AS strStorageTypeDescription,
+	(CASE 
+		WHEN SC.strDistributionOption = 'CNT' THEN 'Contract'
+		WHEN SC.strDistributionOption = 'LOD' THEN 'Load'
+		WHEN SC.strDistributionOption = 'SPT' THEN 'Spot Sale'
+		WHEN SC.strDistributionOption = 'SPL' THEN 'Split'
+		WHEN SC.strDistributionOption = 'HLD' THEN 'Hold'
+	END) AS strDistributionOption
 	FROM tblSCTicket SC
 	INNER JOIN vyuICGetInventoryReceiptItem ICRI ON SC.intInventoryReceiptId = ICRI.intInventoryReceiptId
+	LEFT JOIN vyuGRGetStorageTransferTicket GRSC ON SC.intTicketId = GRSC.intTicketId
 	LEFT JOIN tblGRStorageType GRST ON GRST.strStorageTypeCode = SC.strDistributionOption
