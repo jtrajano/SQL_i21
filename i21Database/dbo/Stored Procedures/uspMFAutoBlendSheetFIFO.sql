@@ -623,6 +623,7 @@ BEGIN TRY
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityUserSecurityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+			JOIN tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
@@ -636,6 +637,7 @@ BEGIN TRY
 					,@intBlendStagingLocationId
 					--,@intPartialQuantityStorageLocationId
 					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
+				AND ISNULL(SL.ysnAllowConsume,0)=1
 				AND L.intLotId NOT IN (Select intLotId From @tblExcludedLot Where intItemId=@intRawItemId)
 
 			--Get Either Parent Lot OR Child Lot Based on Setting

@@ -216,7 +216,7 @@ Begin
 					XML PATH('')
 				  ), 1, 1, '')
 
-				Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory and save the pick list before staging.'
+				Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory. If inventory is available then save the pick list before staging.'
 				RaisError(@ErrMsg,16,1)
 			End
 
@@ -228,7 +228,7 @@ Begin
 	Begin
 		if @dblPickedQty < (@dblQtyToProduce - (Select ISNULL(SUM(dblRemainingQuantity),0) From @tblRemainingPickedItems Where intConsumptionMethodId in (2,3)))
 		Begin
-			Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory and save the pick list before staging.'
+			Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory. If inventory is available then save the pick list before staging.'
 			RaisError(@ErrMsg,16,1)
 		End
 	End
