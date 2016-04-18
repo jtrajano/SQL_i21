@@ -215,7 +215,6 @@ BEGIN TRY
 		,[dblDiscount]
 		,[dblAmountDue]
 		,[dblPayment]
-		,[intPeriodsToAccrue]
 		,[intEntitySalespersonId]
 		,[intFreightTermId]
 		,[intShipViaId]
@@ -277,7 +276,7 @@ BEGIN TRY
 		,[dblDiscount]					= @ZeroDecimal
 		,[dblAmountDue]					= @ZeroDecimal
 		,[dblPayment]					= @ZeroDecimal
-		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
+		
 		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[intFreightTermId]				= @FreightTermId
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
