@@ -3664,6 +3664,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
     <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateCollateralAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

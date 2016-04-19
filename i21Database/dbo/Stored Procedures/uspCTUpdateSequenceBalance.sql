@@ -88,6 +88,12 @@ BEGIN TRY
 			@dblNewValue			=	@dblNewBalance,	
 			@intUserId				=	@intUserId
 	
+	EXEC	uspCTCreateCollateralAdjustment
+			@intContractDetailId	=	@intContractDetailId,
+			@dblQuantityToUpdate	=	@dblQuantityToUpdate,
+			@intUserId				=	@intUserId,
+			@intExternalId			=	@intExternalId,
+			@strScreenName			=	@strScreenName
 END TRY
 
 BEGIN CATCH
