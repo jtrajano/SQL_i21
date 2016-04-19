@@ -99,7 +99,9 @@
     [intInventoryReceiptId] INT NULL, 
     [dblGross] DECIMAL(13, 3) NULL, 
     [dblShrink] DECIMAL(13, 3) NULL,
-	[dblConvertedUOMQty] DECIMAL(13, 3) NULL,  
+	[dblConvertedUOMQty] DECIMAL(13, 3) NULL,
+	[intItemUOMIdFrom] INT NULL, 
+	[intItemUOMIdTo] INT NULL
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -118,7 +120,9 @@
 	CONSTRAINT [FK_tblSCTicket_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation],
 	CONSTRAINT [FK_tblSCTicket_intMatchTicketId] FOREIGN KEY ([intMatchTicketId]) REFERENCES [tblSCTicket],
 	CONSTRAINT [FK_tblSCTicket_tblEMEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES tblEMEntity([intEntityId]),
-	CONSTRAINT [FK_tblSCTicket_tblGRStorageScheduleRule_intStorageScheduleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId])
+	CONSTRAINT [FK_tblSCTicket_tblGRStorageScheduleRule_intStorageScheduleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId]),
+	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdFrom] FOREIGN KEY (intItemUOMIdFrom) REFERENCES [tblICItemUOM](intItemUOMId),
+	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId)
 )
 
 GO
@@ -931,3 +935,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intStorageScheduleId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ticket Item UOM Id From',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemUOMIdFrom'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ticket Item UOM Id To',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemUOMIdTo'
