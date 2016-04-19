@@ -41,6 +41,7 @@ BEGIN TRY
 			,@strItemNumber NVARCHAR(50)
 			,@strUnitMeasure NVARCHAR(50)
 			,@intItemUOMId INT
+			,@dblLotAvailableQty NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -71,10 +72,16 @@ BEGIN TRY
 	END
 
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+
+	SELECT @dblLotAvailableQty = (CASE 
+	WHEN ISNULL(@dblWeight, 0) = 0
+		THEN ISNULL(@dblOldSourceQty, 0)
+	ELSE ISNULL(@dblWeight, 0)
+	END)
 	
 	IF @blnValidateLotReservation = 1
 	BEGIN
-		IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		IF (@dblLotAvailableQty + ((-@dblMergeQty)*(Case When @dblLotWeightPerUnit=0 Then 1 else @dblLotWeightPerUnit End))) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END

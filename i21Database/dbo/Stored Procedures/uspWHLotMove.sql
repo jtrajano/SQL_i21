@@ -62,7 +62,7 @@ BEGIN TRY
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
+		AND ysnStockUnit = 1	
 
 	SELECT @dblLotAvailableQty = (CASE 
 	WHEN ISNULL(@dblWeight, 0) = 0
@@ -108,7 +108,7 @@ BEGIN TRY
 	BEGIN
 		IF @blnValidateLotReservation = 1 
 		BEGIN
-			IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+			IF (@dblLotAvailableQty + ((-@dblMoveQty)*(Case When @dblWeightPerQty=0 Then 1 else @dblWeightPerQty End))) < @dblLotReservedQty
 			BEGIN
 				RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 			END
