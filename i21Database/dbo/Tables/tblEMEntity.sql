@@ -34,7 +34,8 @@
     [dtmOriginationDate]      DATETIME        NULL,
     [strPhoneBackUp]         NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
 	[intDefaultCountryId]		INT NULL,
-	    	
+	[strDocumentDelivery]	 NVARCHAR (400)  COLLATE Latin1_General_CI_AS NULL,
+
     [intConcurrencyId] INT             CONSTRAINT [DF__tmp_ms_xx__intCo__5132705A] DEFAULT ((0)) NOT NULL,
 	--CONSTRAINT [FK_tblEMEntity_tblEMEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblSMCountry_tblEMEntity] FOREIGN KEY ([intDefaultCountryId]) REFERENCES [tblSMCountry]([intCountryID]),
