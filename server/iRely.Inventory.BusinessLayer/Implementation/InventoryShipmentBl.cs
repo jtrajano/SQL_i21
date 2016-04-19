@@ -89,19 +89,26 @@ namespace iRely.Inventory.BusinessLayer
                     _db.ContextManager.Database.ExecuteSqlCommand("uspICLogTransactionDetail @TransactionType, @TransactionId", new SqlParameter("TransactionType", 2), new SqlParameter("TransactionId", ShipmentId));
 
                     result = await _db.SaveAsync(true).ConfigureAwait(false);
+
+                    // Update the stock reservation for the deleted shipments                    
+                    foreach (var shipment in deletedShipments)
+                    {
+                        var idParameter = new SqlParameter("intTransactionId", shipment.Entity.intInventoryShipmentId);
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
+                    }
                                         
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
+                        ShipmentId = shipment.intInventoryShipmentId;
                         // Update the sales order status using the latest shipment data
                         if (shipment.intOrderType == 2)
                         {
                             var intShipmentId = new SqlParameter("intShipmentId", shipment.intInventoryShipmentId);
                             _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", intShipmentId);
                         }
-                    }
 
-                    var userId = DefaultUserId;
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId", new SqlParameter("ShipmentId", ShipmentId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", userId));
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId", new SqlParameter("ShipmentId", ShipmentId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
+                    }                    
 
                     transaction.Commit();
 

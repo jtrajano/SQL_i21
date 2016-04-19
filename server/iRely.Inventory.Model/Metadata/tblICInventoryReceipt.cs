@@ -982,9 +982,7 @@ namespace iRely.Inventory.Model
         public decimal? dblAmountPaid { get; set; }
         public decimal? dblAmountPriced { get; set; }
         public int? intSort { get; set; }
-
-     //   public int? intCurrencyId { get; set; }
-
+   //     public int? intCurrencyId { get; set; }
    //     public decimal? dblExchangeRate { get; set; }
    //     public int? intCent { get; set; }
         public bool? ysnSubCurrency { get; set; }
