@@ -33,6 +33,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
+		   ,[strQuoteType]
 		   ,[strType]
            ,[strOrderStatus]
            ,[intAccountId]
@@ -85,6 +86,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
+		   ,[strQuoteType]
 		   ,[strType]
            ,@OrderStatus
            ,[intAccountId]
