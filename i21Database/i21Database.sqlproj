@@ -3771,6 +3771,7 @@
     <None Include="Scripts\Post-Deployment\EM\024_delete_old_entity_table.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\19_UpdateUsedCustomerBudget.sql" />
     <None Include="Scripts\Post-Deployment\EM\025_UpdatePhoneNumberAndCreateBackup.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\20_FixQuoteOrderTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
