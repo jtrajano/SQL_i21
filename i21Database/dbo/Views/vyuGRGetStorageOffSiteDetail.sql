@@ -9,8 +9,8 @@ SELECT DISTINCT
 	,a.intEntityId
 	,E.strName [Customer]
 	,a.strDPARecieptNumber [Receipt]
-	,(a.dblDiscountsDue-a.dblDiscountsPaid) [Disc Due]
-	,(a.dblStorageDue-a.dblStoragePaid)   [Storage Due]
+	,a.dblDiscountsDue [Disc Due]
+	,a.dblStorageDue   [Storage Due]
 	,a.dblOpenBalance  [Balance]
 	,a.intStorageTypeId
 	,b.strStorageTypeDescription [Storage Type]
@@ -36,4 +36,4 @@ join tblGRCustomerStorage a on a.intCustomerStorageId=sh.intCustomerStorageId
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId 
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
-LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId   
+LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId

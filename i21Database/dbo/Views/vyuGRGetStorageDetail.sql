@@ -9,8 +9,8 @@ SELECT
 	,a.intEntityId
 	,E.strName [Customer]
 	,a.strDPARecieptNumber [Receipt]
-	,(a.dblDiscountsDue-a.dblDiscountsPaid) [Disc Due]
-	,(a.dblStorageDue-a.dblStoragePaid)   [Storage Due]
+	,a.dblDiscountsDue [Disc Due]
+	,a.dblStorageDue   [Storage Due]
 	,a.dblOpenBalance  [Balance]
 	,a.intStorageTypeId
 	,b.strStorageTypeDescription [Storage Type]
@@ -28,7 +28,7 @@ SELECT
 	,i.strItemNo
 	,c.strLocationName
 	,intCommodityUnitMeasureId as intCommodityUnitMeasureId
-	,i.intItemId as intItemId 
+	,i.intItemId as intItemId
 FROM tblGRCustomerStorage a
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 JOIN tblICItem i on i.intItemId=a.intItemId

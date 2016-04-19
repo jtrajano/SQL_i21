@@ -1,4 +1,5 @@
 ﻿CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodity]
+	@intVendorId int = null
 AS
 DECLARE @tblFinalDetail TABLE (
 	intRowNum int,
@@ -28,7 +29,7 @@ FROM tblICCommodity
 if isnull(@strCommodity,'')=''  return	
 
 INSERT INTO @tblFinalDetail
-EXEC uspRKDPRDailyPositionByCommodityLocation @intCommodityId =  @strCommodity
+EXEC uspRKDPRDailyPositionByCommodityLocation @intCommodityId =  @strCommodity,@intVendorId=@intVendorId
 
 select intCommodityId,strCommodityCode,strUnitMeasure
 	,sum(isnull(OpenPurchasesQty,0))  OpenPurchasesQty
