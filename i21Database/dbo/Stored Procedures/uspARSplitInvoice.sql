@@ -293,7 +293,7 @@ BEGIN
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblDiscount]	  * @dblSplitPercent
-								,[dblPrice]      * @dblSplitPercent
+								,[dblPrice]      --* @dblSplitPercent -- AR-2505
 								,[dblTotalTax]   * @dblSplitPercent
 								,[dblTotal]      * @dblSplitPercent
 								,@SubCurrency

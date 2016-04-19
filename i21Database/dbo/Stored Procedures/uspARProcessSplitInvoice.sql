@@ -107,7 +107,7 @@ BEGIN
 
 			UPDATE tblARInvoiceDetail
 			SET dblDiscount		= dblDiscount * @dblSplitPercent
-			  , dblPrice		= dblPrice * @dblSplitPercent
+			 --, dblPrice		= dblPrice * @dblSplitPercent  -- AR-2505
 			  , dblTotalTax	    = dblTotalTax * @dblSplitPercent
 			  , dblTotal		= dblTotal * @dblSplitPercent
 			  , dblQtyOrdered	= dblQtyShipped * @dblSplitPercent
