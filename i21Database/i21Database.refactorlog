@@ -5110,4 +5110,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[ysnContainersRequired]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5596fd56-56b8-4fbb-b416-ef32002e954d" ChangeDateTime="04/19/2016 10:10:44">
+    <Property Name="ElementName" Value="[dbo].[tblTFValidOriginDestinationState].[intValidOriginDestinationStateId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFValidOriginDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intValidDestinationStateId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4d63970c-7689-4c4d-80af-8299414939c5" ChangeDateTime="04/19/2016 10:10:51">
+    <Property Name="ElementName" Value="[dbo].[tblTFValidOriginDestinationState].[intOriginDestinationStateId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFValidOriginDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDestinationStateId" />
+  </Operation>
 </Operations>
