@@ -478,9 +478,9 @@ FROM
 		,[intShipmentContractQtyId]					=	NULL
 		,[intUnitMeasureId]							=	CC.intUnitMeasureId
 		,[strUOM]									=	UOM.strUnitMeasure
-		,[intWeightUOMId]							=	CD.intNetWeightUOMId
+		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
 		,[intCostUOMId]								=	CC.intItemUOMId
-		,[dblNetWeight]								=	ISNULL(CD.dblNetWeight,0)      
+		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	1
