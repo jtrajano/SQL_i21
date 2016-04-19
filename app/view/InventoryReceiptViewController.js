@@ -2565,7 +2565,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var amount = i21.ModuleMgr.Inventory.roundDecimalFormat(context.value, 2);
             context.record.set('dblAmount', amount);           
             //me.showOtherCharges(win);
-            return false;
+            //return false;
         }
     },
 
