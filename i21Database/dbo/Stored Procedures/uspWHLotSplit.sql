@@ -75,7 +75,7 @@ BEGIN TRY
 	
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
 	
-	IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
+	IF (@dblLotAvailableQty + (@dblAdjustByQuantity*(Case When @dblWeightPerQty=0 Then 1 else @dblWeightPerQty End))) < @dblLotReservedQty
 	BEGIN
 		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 	END

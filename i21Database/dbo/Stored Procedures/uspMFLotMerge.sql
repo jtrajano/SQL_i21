@@ -77,7 +77,7 @@ BEGIN TRY
 	
 	IF @blnValidateLotReservation = 1
 	BEGIN
-		IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		IF (@dblOldSourceWeight + (-@dblMergeQty)) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END
