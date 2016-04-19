@@ -403,7 +403,18 @@ Ext.define('Inventory.view.CommodityViewController', {
     },
     
      onFutureMarketDrilldown: function(combo) {
-        iRely.Functions.openScreen('RiskManagement.view.FuturesMarket', {action: 'new', viewConfig: { modal: true }});
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+   
+         if(current.get('intFutureMarketId') !== null)
+             {
+                 iRely.Functions.openScreen('RiskManagement.view.FuturesMarket', current.get('intFutureMarketId'));
+             }
+         else
+             {
+                  iRely.Functions.openScreen('RiskManagement.view.FuturesMarket', {action: 'new'});
+             }
+        
     },
 
     init: function(application) {
