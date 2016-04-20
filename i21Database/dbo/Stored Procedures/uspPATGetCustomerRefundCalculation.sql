@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetCustomerRefundCalculation]
-			@intSearchPreviousData INT = NULL,
 			@intFiscalYearId INT = NULL,
-			@strStockStatus CHAR(1) = NULL
+			@strStockStatus CHAR(1) = NULL,
+			@intSearchPreviousData INT = 1
 AS
 BEGIN
 
