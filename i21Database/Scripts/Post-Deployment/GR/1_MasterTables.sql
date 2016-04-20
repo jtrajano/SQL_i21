@@ -60,7 +60,7 @@ GO
 DECLARE @intDTotalRows INT
 DECLARE @intDRowsWithSortOne INT
 SELECT @intDTotalRows=COUNT(1) FROM tblGRDiscountScheduleCode 
-SELECT @intDRowsWithSortOne=COUNT(1) FROM tblGRDiscountScheduleCode WHERE intSort=1
+SELECT @intDRowsWithSortOne=COUNT(1) FROM tblGRDiscountScheduleCode WHERE ISNULL(intSort,1)=1
 
 IF  @intDTotalRows=@intDRowsWithSortOne
 BEGIN	
@@ -80,7 +80,7 @@ GO
 DECLARE @intQTotalRows INT
 DECLARE @intQRowsWithSortOne INT
 SELECT @intQTotalRows=COUNT(1) FROM tblQMTicketDiscount 
-SELECT @intQRowsWithSortOne=COUNT(1) FROM tblQMTicketDiscount WHERE intSort=1
+SELECT @intQRowsWithSortOne=COUNT(1) FROM tblQMTicketDiscount ISNULL(intSort,1)=1
 
 IF  @intQTotalRows=@intQRowsWithSortOne
 BEGIN	
