@@ -688,6 +688,8 @@ namespace iRely.Inventory.Model
         public decimal? dblValue { get; set; }
         public decimal? dblRunningBalance { get; set; }
         public string strBatchId { get; set; }
+        public string strCostingMethod { get; set; }
+        public string strUOM { get; set; }
     }
 
     public class vyuICGetInventoryValuationSummary

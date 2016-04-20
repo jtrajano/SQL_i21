@@ -771,6 +771,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(38, 20);
             this.Property(t => t.dblRunningBalance).HasColumnName("dblRunningBalance").HasPrecision(38, 20);
             this.Property(t => t.strBatchId).HasColumnName("strBatchId");
+            this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
+            this.Property(t => t.strUOM).HasColumnName("strUOM");
         }
     }
 

@@ -13,6 +13,7 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
                 { dataIndex: 'strLocationName', text: 'Location', allowSort: false, flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocation' },
                 { dataIndex: 'strSubLocationName', text: 'Sub Location', allowSort: false, flex: 1, dataType: 'string' },
                 { dataIndex: 'strStorageLocationName', text: 'Storage Location', allowSort: false, flex: 1, dataType: 'string', drillDownText: 'View Storage Location', drillDownClick: 'onViewStorageLocation' },
+                { dataIndex: 'strUOM', text: 'UOM', allowSort: false, flex: 1, dataType: 'string' },
                 { xtype: 'datecolumn', dataIndex: 'dtmDate', text: 'Date', allowSort: false, flex: 1, dataType: 'date' },
                 { dataIndex: 'strTransactionType', text: 'Transaction Type', allowSort: false, flex: 1, dataType: 'string' },
                 { dataIndex: 'strTransactionId', text: 'Transaction Id', allowSort: false, flex: 1, dataType: 'string', drillDownText: 'View Transaction', drillDownClick: 'onViewTransaction' },
