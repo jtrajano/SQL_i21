@@ -44,7 +44,7 @@ RETURNS @tblTaxTable TABLE
 		,[ysnTaxExempt]					BIT
 		,[strTaxGroup]					NVARCHAR(100)
 		,[ysnInvalid]					BIT
-		,[strTaxExemptReason]			NVARCHAR(MAX)
+		,[strNotes]						NVARCHAR(MAX)
 		,[strReason]					NVARCHAR(MAX)
     )
 AS
@@ -68,7 +68,7 @@ BEGIN
 		,intSalesTaxAccountId			INT
 		,ysnCheckoffTax					BIT
 		,ysnTaxExempt					BIT
-		,strTaxExemptReason				NVARCHAR(MAX)
+		,strNotes						NVARCHAR(MAX)
 		,strReason						NVARCHAR(MAX)
 	)
 
@@ -108,7 +108,7 @@ BEGIN
 		,smTaxCode.intSalesTaxAccountId	
 		,smTaxCode.ysnCheckoffTax
 		,ysnTaxExempt = E.ysnTaxExempt
-		,strTaxExemptReason = E.strExemptionNotes
+		,strNotes = E.strExemptionNotes
 		,''
 	FROM tblCFNetwork cfNetwork
 	INNER JOIN tblCFNetworkTaxCode cfNetworkTax
@@ -148,7 +148,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -191,7 +191,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -234,7 +234,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -277,7 +277,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -320,7 +320,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -363,7 +363,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -406,7 +406,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -449,7 +449,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -492,7 +492,7 @@ BEGIN
 				,[ysnTaxExempt]				
 				,''				
 				,0				
-				,[strTaxExemptReason]		
+				,[strNotes]		
 				,''			
 			FROM
 				@tblNetworkTaxMapping
@@ -535,7 +535,7 @@ BEGIN
 	--			,[ysnTaxExempt]				
 	--			,''				
 	--			,0				
-	--			,[strTaxExemptReason]		
+	--			,[strNotes]		
 	--			,''			
 	--		FROM
 	--			@tblNetworkTaxMapping
@@ -578,7 +578,7 @@ BEGIN
 	--			,[ysnTaxExempt]				
 	--			,''				
 	--			,0				
-	--			,[strTaxExemptReason]		
+	--			,[strNotes]		
 	--			,''			
 	--		FROM
 	--			@tblNetworkTaxMapping
@@ -621,7 +621,7 @@ BEGIN
 	--			,[ysnTaxExempt]				
 	--			,''				
 	--			,0				
-	--			,[strTaxExemptReason]		
+	--			,[strNotes]		
 	--			,''			
 	--		FROM
 	--			@tblNetworkTaxMapping
@@ -664,7 +664,7 @@ BEGIN
 	--			,[ysnTaxExempt]				
 	--			,''				
 	--			,0				
-	--			,[strTaxExemptReason]		
+	--			,[strNotes]		
 	--			,''			
 	--		FROM
 	--			@tblNetworkTaxMapping
@@ -707,7 +707,7 @@ BEGIN
 	--			,[ysnTaxExempt]				
 	--			,''				
 	--			,0				
-	--			,[strTaxExemptReason]		
+	--			,[strNotes]		
 	--			,''			
 	--		FROM
 	--			@tblNetworkTaxMapping
@@ -750,7 +750,7 @@ BEGIN
 	--			,[ysnTaxExempt]				
 	--			,''				
 	--			,0				
-	--			,[strTaxExemptReason]		
+	--			,[strNotes]		
 	--			,''			
 	--		FROM
 	--			@tblNetworkTaxMapping
@@ -810,7 +810,7 @@ BEGIN
 						,[ysnTaxExempt]				
 						,''				
 						,0				
-						,[strTaxExemptReason]		
+						,[strNotes]		
 						,''			
 					FROM
 						@tblNetworkTaxMapping
