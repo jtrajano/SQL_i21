@@ -52,6 +52,9 @@ DROP CONSTRAINT FK_tblTFValidProductCode_tblTFReportingComponentDetail
 ALTER TABLE tblTFValidVendor
 DROP CONSTRAINT FK_tblTFValidVendor_tblTFReportingComponentDetail
 
+ALTER TABLE tblTFValidDestinationState
+DROP CONSTRAINT FK_tblTFValidDestinationState_tblTFReportingComponentDetail
+
 TRUNCATE TABLE tblTFReportingComponentDetail
 
 --ADD FOREIGN KEY BACK
@@ -85,7 +88,11 @@ FK_tblTFValidVendor_tblTFReportingComponentDetail FOREIGN KEY
 REFERENCES tblTFReportingComponentDetail
 ( intReportingComponentDetailId )
 
-
+ALTER TABLE tblTFValidDestinationState ADD CONSTRAINT
+FK_tblTFValidDestinationState_tblTFReportingComponentDetail FOREIGN KEY
+( intReportingComponentDetailId )
+REFERENCES tblTFReportingComponentDetail
+( intReportingComponentDetailId )
 
 
 BEGIN

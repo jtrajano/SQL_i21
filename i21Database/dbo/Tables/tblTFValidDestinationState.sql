@@ -12,10 +12,11 @@
 
 GO
 
-ALTER TABLE [dbo].[tblTFValidDestinationState]  WITH CHECK ADD  CONSTRAINT [FK_tblTFOriginDestinationState_tblTFReportingComponentDetail] FOREIGN KEY([intReportingComponentDetailId])
+ALTER TABLE [dbo].[tblTFValidDestinationState]  WITH CHECK ADD  CONSTRAINT [FK_tblTFValidDestinationState_tblTFReportingComponentDetail] FOREIGN KEY([intReportingComponentDetailId])
 REFERENCES [dbo].[tblTFReportingComponentDetail] ([intReportingComponentDetailId])
 GO
 
-ALTER TABLE [dbo].[tblTFValidDestinationState] CHECK CONSTRAINT [FK_tblTFOriginDestinationState_tblTFReportingComponentDetail]
+ALTER TABLE [dbo].[tblTFValidDestinationState] CHECK CONSTRAINT [FK_tblTFValidDestinationState_tblTFReportingComponentDetail]
 GO
+
 
