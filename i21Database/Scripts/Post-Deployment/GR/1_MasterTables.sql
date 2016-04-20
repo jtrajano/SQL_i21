@@ -80,7 +80,7 @@ GO
 DECLARE @intQTotalRows INT
 DECLARE @intQRowsWithSortOne INT
 SELECT @intQTotalRows=COUNT(1) FROM tblQMTicketDiscount 
-SELECT @intQRowsWithSortOne=COUNT(1) FROM tblQMTicketDiscount ISNULL(intSort,1)=1
+SELECT @intQRowsWithSortOne=COUNT(1) FROM tblQMTicketDiscount WHERE ISNULL(intSort,1)=1
 
 IF  @intQTotalRows=@intQRowsWithSortOne
 BEGIN	
