@@ -260,7 +260,7 @@ END
 			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
 														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
 																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
+																				WHERE TempDist.intLoadHeaderId = MIN(LTE.intLoadHeaderId)
 																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END)
 														END)
@@ -278,7 +278,7 @@ END
 			,[strAllocateCostBy]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Unit'
 														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
 																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
+																				WHERE TempDist.intLoadHeaderId = MIN(LTE.intLoadHeaderId)
 																					AND TempDist.strDestination = 'Location') THEN 'Unit'
 																ELSE NULL END)
 														END)
