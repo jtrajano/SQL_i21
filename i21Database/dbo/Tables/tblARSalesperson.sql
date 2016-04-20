@@ -27,8 +27,10 @@
     [dblPercent]              NUMERIC (18, 6) NULL,
     [strDispatchNotification] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTextMessage]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [intAttachmentSignatureId]          INT             NULL,	
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntitySalespersonId] ASC),
+    CONSTRAINT [FK_tblARSalesperson_tblSMAttachment_intTerritoryId] FOREIGN KEY ([intAttachmentSignatureId]) REFERENCES [dbo].[tblSMAttachment] ([intAttachmentId]),
     CONSTRAINT [FK_tblARSalesperson_tblARTerritory_intTerritoryId] FOREIGN KEY ([intTerritoryId]) REFERENCES [dbo].[tblARTerritory] ([intTerritoryId]),
     CONSTRAINT [FK_tblARSalesperson_tblEMEntity_intEntityId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].tblEMEntity ([intEntityId])  ON DELETE CASCADE
     --CONSTRAINT [UQ_tblARSalesperson_intSalespersonId] UNIQUE NONCLUSTERED ([intSalespersonId] ASC),
