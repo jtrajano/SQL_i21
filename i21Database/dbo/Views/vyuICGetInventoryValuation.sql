@@ -31,7 +31,9 @@ SELECT
 			  CAST(0 AS NUMERIC(38, 20)) AS dblBeginningBalance, 
 			  ISNULL([Transaction].dblQty, 0) * ISNULL([Transaction].dblCost, 0) + ISNULL([Transaction].dblValue, 0) AS dblValue, 
 			  CAST(0 AS NUMERIC(38, 20)) AS dblRunningBalance, 
-			  ISNULL([Transaction].strBatchId, ' ') AS strBatchId
+			  ISNULL([Transaction].strBatchId, ' ') AS strBatchId,
+			  ViewItemLocation.strCostingMethod,
+			  Stock.strStockUOM AS strUOM
 
 FROM					 
 			   dbo.tblICItem AS Item  LEFT OUTER JOIN
@@ -41,4 +43,6 @@ FROM
                dbo.tblSMCompanyLocation AS Location ON Location.intCompanyLocationId = ItemLocation.intLocationId LEFT OUTER JOIN
                dbo.tblSMCompanyLocationSubLocation AS SubLocation ON SubLocation.intCompanyLocationSubLocationId = [Transaction].intSubLocationId LEFT OUTER JOIN
                dbo.tblICStorageLocation AS StorageLocation ON StorageLocation.intStorageLocationId = [Transaction].intStorageLocationId LEFT OUTER JOIN
-               dbo.tblICInventoryTransactionType AS TransactionType ON TransactionType.intTransactionTypeId = [Transaction].intTransactionTypeId
+               dbo.tblICInventoryTransactionType AS TransactionType ON TransactionType.intTransactionTypeId = [Transaction].intTransactionTypeId LEFT OUTER JOIN
+			   vyuICGetItemLocation ViewItemLocation ON ViewItemLocation.intItemLocationId = ItemLocation.intItemLocationId LEFT OUTER JOIN
+			   vyuICGetItemStock Stock ON Stock.intItemId = Item.intItemId AND Stock.intItemLocationId = ItemLocation.intItemLocationId
