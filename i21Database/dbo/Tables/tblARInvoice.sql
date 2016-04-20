@@ -56,6 +56,7 @@
 	[ysnForgiven]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnForgiven] DEFAULT ((0)),
 	[ysnCalculated]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCalculated] DEFAULT ((0)),
 	[ysnSplitted]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnSplitted] DEFAULT ((0)),		
+	[ysnImpactInventory]			BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnImpactInventory] DEFAULT ((1)),		
 	[intPaymentId]					INT												NULL,
 	[intSplitId]					INT												NULL,
 	[intDistributionHeaderId]		INT												NULL,
