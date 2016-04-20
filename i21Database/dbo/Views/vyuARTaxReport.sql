@@ -13,6 +13,8 @@ SELECT TC.intTaxCodeId
 	 , SalesTaxAccount = SA.strAccountId
 	 , TC.intPurchaseTaxAccountId
 	 , PurchaseTaxAccount = ISNULL(PA.strAccountId, '')
+	 , IDT.strCalculationMethod
+	 , IDT.dblRate
 	 , I.intInvoiceId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
@@ -85,3 +87,5 @@ GROUP BY
 	,I.ysnPaid
 	,I.dblTax
 	,I.strTransactionType
+	,IDT.strCalculationMethod
+	,IDT.dblRate
