@@ -25,9 +25,11 @@
     [dblDebitForeign]	 NUMERIC(18, 9) NULL, 
     [dblDebitReport]	 NUMERIC(18, 9) NULL, 
 	[dblCreditForeign]	 NUMERIC(18, 9) NULL, 
-    [dblCreditReport]	 NUMERIC(18, 9) NULL
+    [dblCreditReport]	 NUMERIC(18, 9) NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
     CONSTRAINT [PK_tblGLJournalDetail] PRIMARY KEY CLUSTERED ([intJournalDetailId] ASC),
     CONSTRAINT [FK_tblGLJournalDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblGLJournalDetail_tblGLJournal] FOREIGN KEY ([intJournalId]) REFERENCES [dbo].[tblGLJournal] ([intJournalId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblGLJournalDetail_tblGLJournal] FOREIGN KEY ([intJournalId]) REFERENCES [dbo].[tblGLJournal] ([intJournalId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblGLJournalDetail_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
 
