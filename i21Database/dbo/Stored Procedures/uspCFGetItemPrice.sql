@@ -1172,6 +1172,17 @@ BEGIN
 					
 				SET @CFPricingOut = 'Price Profile' 
 			END
+		ELSE IF(@CFPriceBasis = 'Full Retail')
+			BEGIN
+				IF(@CFTransferCost IS NOT NULL)
+					BEGIN
+						SET @CFPriceOut = @CFTransferCost + @Rate
+						SET @CFPricingOut = 'Price Profile' 
+						RETURN 1;    
+					END
+					
+				SET @CFPricingOut = 'Price Profile' 
+			END
 		ELSE IF(@CFPriceBasis IS NOT NULL)
 			BEGIN
 				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 

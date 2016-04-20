@@ -131,7 +131,7 @@ BEGIN
 		,[strTaxGroup]					NVARCHAR(100)
 		,[ysnInvalid]					BIT
 		,[strReason]					NVARCHAR(MAX)
-		,[strTaxExemptReason]			NVARCHAR(MAX)
+		,[strNotes]						NVARCHAR(MAX)
 	)
 	DECLARE @tblTaxRateTable		TABLE
 	(
@@ -782,7 +782,7 @@ BEGIN
 			,[strTaxGroup]				
 			,[ysnInvalid]				
 			,[strReason]
-			,[strTaxExemptReason]
+			,[strNotes]
 			)		
 		SELECT
 			 [intTransactionDetailTaxId]
@@ -804,7 +804,7 @@ BEGIN
 			,[strTaxGroup]
 			,[ysnInvalid]
 			,[strReason]
-			,[strTaxExemptReason]
+			,[strNotes]
 		 FROM
 		 [dbo].[fnCFRemoteTaxes](
 			 @TaxState		
@@ -855,7 +855,7 @@ BEGIN
 		)
 		SELECT
 			@Pk 					 	
-			,strTaxExemptReason
+			,strNotes
 		FROM @tblTaxTable
 		WHERE ysnTaxExempt = 1
 		
