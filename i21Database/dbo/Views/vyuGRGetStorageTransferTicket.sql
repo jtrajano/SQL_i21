@@ -35,7 +35,7 @@ JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageSche
 JOIN tblICItem Item ON Item.intItemId = a.intItemId
 LEFT JOIN tblSMCompanyLocationSubLocation Sub ON Sub.intCompanyLocationSubLocationId=a.intCompanyLocationSubLocationId
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=a.intCustomerStorageId
-LEFT JOIN tblGRStorageHistory SH1 ON SH1.intCustomerStorageId=a.intCustomerStorageId AND SH.strType='From Scale'
+LEFT JOIN tblGRStorageHistory SH1 ON SH1.intCustomerStorageId=a.intCustomerStorageId AND SH1.strType='From Scale'
 LEFT JOIN vyuCTContractDetailView CD ON CD.intContractHeaderId=SH.intContractHeaderId  
 Where a.dblOpenBalance >0 AND ISNULL(a.strStorageType,'') <> 'ITR'AND SH.strType IN('From Scale','From Transfer')  
 ORDER BY a.dtmDeliveryDate
