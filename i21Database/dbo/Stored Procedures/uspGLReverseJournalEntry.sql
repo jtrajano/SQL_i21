@@ -37,7 +37,7 @@ INSERT INTO [tblGLJournal]
            ,[dtmDate]
            ,[strReverseLink]
            ,[intCurrencyId]
-		   ,[intExchangeRateDetailId]
+		   ,[intCurrencyExchangeRateId]
            ,[dblExchangeRate]
            ,[strDescription]
            ,[ysnPosted]
@@ -57,7 +57,7 @@ INSERT INTO [tblGLJournal]
            ,GETDATE()
            ,[strReverseLink]
            ,[intCurrencyId]
-		   ,[intExchangeRateDetailId]
+		   ,[intCurrencyExchangeRateId]
            ,[dblExchangeRate]
            ,'Reversing transaction for ' + strJournalId
            ,0
@@ -102,7 +102,9 @@ INSERT INTO [dbo].[tblGLJournalDetail]
            ,[dblDebitForeign]
            ,[dblDebitReport]
            ,[dblCreditForeign]
-           ,[dblCreditReport])
+           ,[dblCreditReport]
+		   ,[intCurrencyExchangeRateTypeId]
+		   )
     select
            [intLineNo]
            ,@newIntJournalId
@@ -130,6 +132,7 @@ INSERT INTO [dbo].[tblGLJournalDetail]
            ,[dblCreditReport]
            ,[dblDebitForeign]
            ,[dblDebitReport]
+		   ,[intCurrencyExchangeRateTypeId]
            FROM tblGLJournalDetail WHERE intJournalId = @intJournalId
       SELECT @newIntJournalId
 END

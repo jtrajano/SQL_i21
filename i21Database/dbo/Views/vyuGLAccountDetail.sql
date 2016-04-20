@@ -4,7 +4,8 @@ AS
                          dbo.tblGLAccount.strComments, dbo.tblGLAccount.strCashFlow, dbo.tblGLAccount.ysnActive, dbo.tblGLAccount.ysnSystem, dbo.tblGLAccount.ysnRevalue, dbo.tblGLAccountUnit.intAccountUnitId, 
                          dbo.tblGLAccountUnit.strUOMCode, dbo.tblGLAccount.intAccountId, dbo.tblGLAccount.intCurrencyID, dbo.tblGLAccount.intCurrencyExchangeRateTypeId, dbo.tblGLAccount.strNote, dbo.tblSMCurrency.strCurrency, 
                          dbo.tblSMCurrencyExchangeRateType.strCurrencyExchangeRateType, dbo.tblGLAccount.intAccountGroupId, dbo.tblGLAccountSegment.intAccountCategoryId,
-						 dbo.tblGLCOACrossReference.strExternalId,dbo.tblGLCOACrossReference.strCurrentExternalId, tblGLAccountSegment.strCode
+						 dbo.tblGLCOACrossReference.strExternalId,dbo.tblGLCOACrossReference.strCurrentExternalId, tblGLAccountSegment.strCode,
+						 cast(0.00 as numeric(18,2)) as dblBalance
 FROM            dbo.tblGLAccount INNER JOIN
                          dbo.tblGLAccountSegmentMapping ON dbo.tblGLAccount.intAccountId = dbo.tblGLAccountSegmentMapping.intAccountId INNER JOIN
                          dbo.tblGLAccountSegment ON dbo.tblGLAccountSegmentMapping.intAccountSegmentId = dbo.tblGLAccountSegment.intAccountSegmentId INNER JOIN
