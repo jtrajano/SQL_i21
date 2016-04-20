@@ -2133,6 +2133,12 @@ IF @post = 1
 					ON Detail.intInvoiceId = Header.intInvoiceId
 					AND Header.strTransactionType  IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')
 					AND ISNULL(Header.intPeriodsToAccrue,0) <= 1
+					and 1 = CASE	
+								WHEN Header.strTransactionType = 'Credit Memo'
+									THEN Header.ysnImpactInventory
+									ELSE 1
+								END
+
 			INNER JOIN
 				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
@@ -2150,7 +2156,7 @@ IF @post = 1
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
 				AND Header.strTransactionType <> 'Debit Memo'
-
+				
 
 			UNION ALL
 
