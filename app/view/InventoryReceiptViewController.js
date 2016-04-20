@@ -1396,6 +1396,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var grid = combo.up('grid');
         var cboCurrency = win.down('#cboCurrency');
         var grdLotTracking = win.down('#grdLotTracking');
+        grdLotTracking.store.reload();
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
 
