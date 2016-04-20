@@ -19,6 +19,7 @@
 [dblIntegrationOrderPrice] NUMERIC(18, 6) NULL,
 [ysnExported] [bit] NULL,
 [dtmExportedDate] DATETIME NULL,
+[dtmIntegrationOrderDate] DATETIME NULL,
 
 CONSTRAINT [PK_tblLGLoadDetailContainerLink_intLoadDetailContainerLinkId] PRIMARY KEY ([intLoadDetailContainerLinkId]), 
 CONSTRAINT [FK_tblLGLoadDetailContainerLink_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
