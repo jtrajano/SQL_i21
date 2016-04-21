@@ -377,24 +377,24 @@ SET @batchIdUsed = @batchId
 						ON A.intLocationId = L.intCompanyLocationId
 				WHERE L.intCompanyLocationId IS NULL
 				
-				--Bank Account
-				INSERT INTO 
-					@ARReceivableInvalidData
-				SELECT 
-					'Bank Account of ' + A.strRecordNumber + ' was not set.'
-					,'Receivable'
-					,A.strRecordNumber
-					,@batchId
-					,A.intPaymentId
-				FROM
-					tblARPayment A
-				INNER JOIN
-					@ARReceivablePostData P
-						ON A.intPaymentId = P.intPaymentId						 
-				LEFT OUTER JOIN
-					tblCMBankAccount B
-						ON A.intBankAccountId = B.intBankAccountId 
-				WHERE B.intBankAccountId  IS NULL
+				----Bank Account
+				--INSERT INTO 
+				--	@ARReceivableInvalidData
+				--SELECT 
+				--	'Bank Account of ' + A.strRecordNumber + ' was not set.'
+				--	,'Receivable'
+				--	,A.strRecordNumber
+				--	,@batchId
+				--	,A.intPaymentId
+				--FROM
+				--	tblARPayment A
+				--INNER JOIN
+				--	@ARReceivablePostData P
+				--		ON A.intPaymentId = P.intPaymentId						 
+				--LEFT OUTER JOIN
+				--	tblCMBankAccount B
+				--		ON A.intBankAccountId = B.intBankAccountId 
+				--WHERE B.intBankAccountId  IS NULL
 				
 				
 				--In-active Bank Account
