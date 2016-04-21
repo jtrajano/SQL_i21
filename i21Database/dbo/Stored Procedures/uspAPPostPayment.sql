@@ -196,7 +196,7 @@ BEGIN
 	) PaymentRecords
 	IF(@totalRecords = 0)  
 	BEGIN
-		SET @success = 0
+		SET @success = 1
 		RETURN;
 	END
 
@@ -368,7 +368,8 @@ BEGIN
 
 	WHILE(@paymentCounter != (@totalRecords))
 	BEGIN
-		SELECT @PaymentId = (SELECT TOP(@paymentCounter) intPaymentId FROM #tmpPayablePostData)
+		SELECT @PaymentId = CAST((SELECT TOP(1) intPaymentId FROM #tmpPayablePostData) AS NVARCHAR(50))
+		
 		EXEC dbo.uspSMAuditLog 
 		   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
 		  ,@keyValue = @PaymentId								-- Primary Key Value of the Voucher. 
@@ -378,6 +379,7 @@ BEGIN
 		  ,@fromValue = ''									-- Previous Value
 		  ,@toValue = ''
 		SET @paymentCounter = @paymentCounter + 1
+		DELETE FROM #tmpPayablePostData WHERE intPaymentId = @PaymentId
 	END
 END
 ELSE

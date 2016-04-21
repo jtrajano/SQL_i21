@@ -2,7 +2,7 @@
 	@intPickListId int
 AS
 DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
-DECLARE @intInventoryTransactionType AS INT=22
+DECLARE @intInventoryTransactionType AS INT=34
 DECLARE @strInvalidItemNo AS NVARCHAR(50) 
 DECLARE @intInvalidItemId AS INT 
 

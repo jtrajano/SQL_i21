@@ -41,6 +41,11 @@ BEGIN TRY
 	DECLARE @dblWeight NUMERIC(38,20)
 	DECLARE @dblLotQty NUMERIC(38,20)
 	DECLARE @dblLotAvailableQty NUMERIC(38,20)
+			,@dblOldDestinationWeight NUMERIC(38,20)
+			,@dblOldSourceWeight NUMERIC(38,20)
+			,@dblSplitWeight NUMERIC(38,20)
+
+	SELECT @dblSplitWeight = @dblSplitQty
 
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
@@ -54,7 +59,8 @@ BEGIN TRY
 		   @intItemUOMId = intItemUOMId,	 
 		   @dblWeightPerQty = dblWeightPerQty,
 		   @intWeightUOMId = intWeightUOMId,
-		   @dblWeight = dblWeight
+		   @dblWeight = dblWeight,
+		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @intItemStockUOMId = intItemUOMId
@@ -120,12 +126,20 @@ BEGIN TRY
 			RAISERROR('Lot tracking for the item is set as manual. Please supply the split lot number.',11,1)
 		END
 	END
-
+	
 	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
 	BEGIN
 		RAISERROR(90008,11,1)
 	END
 							 
+	SELECT @dblOldDestinationWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
+	FROM dbo.tblICLot
+	WHERE strLotNumber = @strNewLotNumber
+		AND intStorageLocationId = @intSplitStorageLocationId
+
+	IF @dblOldDestinationWeight IS NULL
+	SELECT @dblOldDestinationWeight=0
+									 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
 													 @intLocationId	= @intLocationId,
@@ -146,18 +160,26 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+	IF @dblOldDestinationWeight IS NULL
+	SELECT @dblOldDestinationWeight=0
+
+	IF @dblOldSourceWeight IS NULL
+	SELECT @dblOldSourceWeight=0
+
 	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblWeightPerQty
-	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
-	
+	SET dblWeightPerQty = @dblWeightPerQty,
+		dblWeight = CASE WHEN @dblWeightPerQty = 0 THEN 0 ELSE @dblOldSourceWeight-@dblSplitWeight END,
+		dblQty = (@dblOldSourceWeight-@dblSplitWeight)/CASE WHEN @dblWeightPerQty = 0 THEN 1 ELSE @dblWeightPerQty END
+	WHERE intLotId=@intLotId
+		
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
 
-	--UPDATE tblICLot
-	--SET dblWeight = dblQty
-	--WHERE dblQty <> dblWeight
-	--	AND intItemUOMId = intWeightUOMId
-	--and intLotId=@intLotId
+	UPDATE dbo.tblICLot
+	SET dblWeightPerQty = @dblWeightPerQty,
+		dblWeight = CASE WHEN @dblWeightPerQty = 0 THEN 0 ELSE @dblOldDestinationWeight+@dblSplitWeight END,
+		dblQty = (@dblOldDestinationWeight+@dblSplitWeight)/CASE WHEN @dblWeightPerQty = 0 THEN 1 ELSE @dblWeightPerQty END
+	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strSplitLotNumber
 
 	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 	BEGIN
@@ -171,16 +193,16 @@ BEGIN TRY
 
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		EXEC dbo.uspMFLotAdjustQty
-		 @intLotId =@intLotId,       
-		 @dblNewLotQty =0,
-		 @intUserId=@intUserId ,
-		 @strReasonCode ='Residue qty clean up',
-		 @strNotes ='Residue qty clean up'
-		--UPDATE tblICLot
-		--SET dblWeight = 0
-		--	,dblQty = 0
-		--WHERE intLotId = @intLotId
+		--EXEC dbo.uspMFLotAdjustQty
+		-- @intLotId =@intLotId,       
+		-- @dblNewLotQty =0,
+		-- @intUserId=@intUserId ,
+		-- @strReasonCode ='Residue qty clean up',
+		-- @strNotes ='Residue qty clean up'
+		UPDATE tblICLot
+		SET dblWeight = 0
+			,dblQty = 0
+		WHERE intLotId = @intLotId
 	END
 													 
 END TRY  

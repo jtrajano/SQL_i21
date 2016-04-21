@@ -5,5 +5,5 @@
     [intEntityRoleId] INT NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblEMEntityToRole_tblEntity] FOREIGN KEY (intEntityId) REFERENCES [tblEntity]([intEntityId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblEMEntityToRole_tblSMUserRole] FOREIGN KEY (intEntityRoleId) REFERENCES [tblSMUserRole]([intUserRoleID])
+    CONSTRAINT [FK_tblEMEntityToRole_tblSMUserRole] FOREIGN KEY (intEntityRoleId) REFERENCES [tblSMUserRole]([intUserRoleID]) ON DELETE CASCADE
 )

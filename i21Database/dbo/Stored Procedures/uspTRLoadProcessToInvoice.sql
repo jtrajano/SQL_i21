@@ -82,41 +82,48 @@ BEGIN TRY
 		, intInvoiceId
 		, strSourceScreenName
 		)
-	SELECT
-		MIN(DH.intEntityCustomerId)
-		, MIN(DH.intCompanyLocationId)
-		, MIN(DD.intItemId)
-		, intItemUOMId = (CASE WHEN MIN(DD.intContractDetailId) IS NULL THEN MIN(IC.intIssueUOMId)
-							WHEN MIN(DD.intContractDetailId) IS NOT NULL THEN (SELECT TOP 1 intItemUOMId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId = MIN(DD.intContractDetailId))
-						END)
-		, MIN(DH.dtmInvoiceDateTime)
-		, MIN(DD.intContractDetailId)
-		, MIN(TL.intShipViaId)
-		, MIN(DH.intEntitySalespersonId)
-		, MIN(DD.dblUnits)
-		, MIN(DD.dblPrice)
-		, intCurrencyId = (SELECT TOP 1 CP.intDefaultCurrencyId
-							FROM dbo.tblSMCompanyPreference CP
-							WHERE CP.intCompanyPreferenceId = 1) -- USD default from company Preference
-		, 1 -- Need to check this
-		, MIN(DD.dblFreightRate)
-		, strComments = (CASE WHEN MIN(TR.intSupplyPointId) IS NULL AND MIN(TL.intLoadId) IS NULL THEN RTRIM(MIN(DH.strComments))
-							WHEN MIN(TR.intSupplyPointId) IS NOT NULL AND MIN(TL.intLoadId) IS NULL THEN 'Origin:' + RTRIM(MIN(ee.strSupplyPoint)) + ' ' + RTRIM(MIN(DH.strComments))
-							WHEN (MIN(TR.intSupplyPointId)) IS NULL AND MIN(TL.intLoadId) IS NOT NULL THEN 'Load #:' + RTRIM(MIN(LG.strExternalLoadNumber)) + ' ' + RTRIM(MIN(DH.strComments))
-							WHEN (MIN(TR.intSupplyPointId)) IS NOT NULL AND MIN(TL.intLoadId) IS NOT NULL THEN 'Origin:' + RTRIM(MIN(ee.strSupplyPoint))  + ' Load #:' + RTRIM(MIN(LG.strExternalLoadNumber)) + ' ' + RTRIM(MIN(DH.strComments))
-						END)
-		, MIN(TL.strTransaction)
-		, MIN(DH.intLoadDistributionHeaderId)
-		, MIN(DH.strPurchaseOrder)
-		, 'Deliver'
-		, MIN(DD.dblDistSurcharge)
-		, CAST(MIN(CAST(DD.ysnFreightInPrice AS INT)) AS BIT)
-		, MIN(DD.intTaxGroupId)
-		, strActualCostId = MIN(TL.strTransaction)
-		, MIN(DH.intShipToLocationId)
-		, NULL
-		, MIN(DH.intInvoiceId)
-		, 'Transport Loads'
+	SELECT intEntityCustomerId	= MIN(DH.intEntityCustomerId)
+		, intLocationId			= MIN(DH.intCompanyLocationId)
+		, intItemId				= MIN(DD.intItemId)
+		, intItemUOMId			= (CASE WHEN MIN(DD.intContractDetailId) IS NULL THEN MIN(IC.intIssueUOMId)
+										WHEN MIN(DD.intContractDetailId) IS NOT NULL THEN (SELECT TOP 1 intItemUOMId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId = MIN(DD.intContractDetailId))
+									END)
+		, dtmDate				= MIN(DH.dtmInvoiceDateTime)
+		, intContractDetailId	= MIN(DD.intContractDetailId)
+		, intShipViaId			= MIN(TL.intShipViaId)
+		, intSalesPersonId		= MIN(DH.intEntitySalespersonId)
+		, dblQty				= MIN(DD.dblUnits)
+		, dblPrice				= MIN(DD.dblPrice)
+		, intCurrencyId			= (SELECT TOP 1 CP.intDefaultCurrencyId
+									FROM dbo.tblSMCompanyPreference CP
+									WHERE CP.intCompanyPreferenceId = 1) -- USD default from company Preference
+		, dblExchangeRate		= 1 -- Need to check this
+		, dblFreightRate		= MIN(DD.dblFreightRate)
+		, strComments			= (CASE WHEN MIN(TR.intSupplyPointId) IS NULL AND MIN(TL.intLoadId) IS NULL THEN RTRIM(MIN(DH.strComments))
+										WHEN MIN(TR.intSupplyPointId) IS NOT NULL AND MIN(TL.intLoadId) IS NULL THEN 'Origin:' + RTRIM(MIN(ee.strSupplyPoint)) + ' ' + RTRIM(MIN(DH.strComments))
+										WHEN (MIN(TR.intSupplyPointId)) IS NULL AND MIN(TL.intLoadId) IS NOT NULL THEN 'Load #:' + RTRIM(MIN(LG.strExternalLoadNumber)) + ' ' + RTRIM(MIN(DH.strComments))
+										WHEN (MIN(TR.intSupplyPointId)) IS NOT NULL AND MIN(TL.intLoadId) IS NOT NULL THEN 'Origin:' + RTRIM(MIN(ee.strSupplyPoint))  + ' Load #:' + RTRIM(MIN(LG.strExternalLoadNumber)) + ' ' + RTRIM(MIN(DH.strComments))
+									END)
+		, strSourceId			= MIN(TL.strTransaction)
+		, intSourceId			= MIN(DH.intLoadDistributionHeaderId)
+		, strPurchaseOrder		= MIN(DH.strPurchaseOrder)
+		, strDeliverPickup		= 'Deliver'
+		, dblSurcharge			= MIN(DD.dblDistSurcharge)
+		, ysnFreightInPrice		= CAST(MIN(CAST(DD.ysnFreightInPrice AS INT)) AS BIT)
+		, intTaxGroupId			= MIN(DD.intTaxGroupId)
+		, strActualCostId		= (CASE WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Customer'
+											THEN MIN(TL.strTransaction)
+										WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
+											THEN NULL
+										WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
+											THEN MIN(TL.strTransaction)
+										WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
+											THEN NULL
+										END)
+		, intShipToLocationId	= MIN(DH.intShipToLocationId)
+		, strBOLNumber			= NULL
+		, intInvoiceId			= MIN(DH.intInvoiceId)
+		, strSourceScreenName	= 'Transport Loads'
 	FROM dbo.tblTRLoadHeader TL
 		JOIN dbo.tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 		JOIN dbo.tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId

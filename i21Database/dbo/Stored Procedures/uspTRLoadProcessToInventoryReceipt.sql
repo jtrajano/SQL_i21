@@ -203,9 +203,11 @@ END
 			,[intCurrencyId]  					= min(RE.intCurrencyId)
 			,[intChargeId]						= @intFreightItemId
 			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
-														ELSE (CASE WHEN (TLR.strTransaction) = NULL THEN CAST(1 AS BIT)
-																WHEN (TLR.strTransaction) != NULL THEN CAST(0 AS BIT)
-																END)
+														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
+																				FROM tblTRLoadDistributionHeader TempDist
+																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
+																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
+																ELSE CAST(0 AS BIT) END)
 														END)
 			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= min(RE.dblFreightRate)
@@ -219,9 +221,11 @@ END
 												END
 			,[dblAmount]						= 0
 			,[strAllocateCostBy]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Unit'
-														ELSE (CASE WHEN (TLR.strTransaction) = NULL THEN 'Unit'
-																WHEN (TLR.strTransaction) != NULL THEN NULL
-																END)
+														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
+																				FROM tblTRLoadDistributionHeader TempDist
+																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
+																					AND TempDist.strDestination = 'Location') THEN 'Unit'
+																ELSE NULL END)
 														END)
 			,[intContractHeaderId]				= min(RE.intContractHeaderId)
 			,[intContractDetailId]				= min(RE.intContractDetailId)
@@ -234,7 +238,7 @@ END
 												END
     FROM	@ReceiptStagingTable RE 
 	        LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
-			LEFT JOIN (select strTransaction,intLoadReceiptId from tblTRLoadHeader TT
+			LEFT JOIN (select TT.intLoadHeaderId, TT.strTransaction, RR.intLoadReceiptId from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
 					                                                 JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
 													                 JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
@@ -254,9 +258,11 @@ END
 			,[intCurrencyId]  					= min(RE.intCurrencyId)
 			,[intChargeId]						= @intSurchargeItemId
 			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
-														ELSE (CASE WHEN (LTE.strTransaction) = NULL THEN CAST(1 AS BIT)
-																WHEN (LTE.strTransaction) != NULL THEN CAST(0 AS BIT)
-																END)
+														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
+																				FROM tblTRLoadDistributionHeader TempDist
+																				WHERE TempDist.intLoadHeaderId = MIN(LTE.intLoadHeaderId)
+																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
+																ELSE CAST(0 AS BIT) END)
 														END)
 			,[strCostMethod]					= 'Percentage'
 			,[dblRate]							= min(RE.dblSurcharge)
@@ -270,9 +276,11 @@ END
 												END
 			,[dblAmount]						= 0
 			,[strAllocateCostBy]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN 'Unit'
-														ELSE (CASE WHEN (LTE.strTransaction) = NULL THEN 'Unit'
-																WHEN (LTE.strTransaction) != NULL THEN NULL
-																END)
+														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
+																				FROM tblTRLoadDistributionHeader TempDist
+																				WHERE TempDist.intLoadHeaderId = MIN(LTE.intLoadHeaderId)
+																					AND TempDist.strDestination = 'Location') THEN 'Unit'
+																ELSE NULL END)
 														END)
 			,[intContractHeaderId]				= min(RE.intContractHeaderId)
 			,[intContractDetailId]				= min(RE.intContractDetailId)
@@ -285,7 +293,7 @@ END
 												END
     FROM	@ReceiptStagingTable RE 
 	LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
-	LEFT JOIN (select intLoadReceiptId,strTransaction from tblTRLoadHeader TT
+	LEFT JOIN (select TT.intLoadHeaderId, RR.intLoadReceiptId, TT.strTransaction from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
 					                                                 JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
 													                 JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId and RR.intItemId = HD.intItemId

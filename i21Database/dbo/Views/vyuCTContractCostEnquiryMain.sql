@@ -41,11 +41,11 @@ AS
 						CC.dblAmountPer,
 						CC.dblActual,
 						CC.dblActualPer,
-						HE.dblNetImpact * dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) dblNetImpact,
+						HE.dblNetImpactInDefCurrency dblNetImpact,
 						CASE	WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intPriceUnitMeasureId,CD.intUnitMeasureId,CD.dblDetailQuantity),0) = 0 
 								THEN NULL
-								ELSE HE.dblNetImpact / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity)
-						END	 * dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	dblNetImpactPer
+								ELSE HE.dblNetImpactInDefCurrency / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity)
+						END	 	dblNetImpactPer
 				FROM	vyuCTContractDetailView		CD
 				JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId		LEFT
 				JOIN	tblSMCountry				RY	ON	RY.intCountryID					=	IM.intOriginId		LEFT
@@ -70,7 +70,7 @@ AS
 						)CC ON CC.intContractDetailId = CD.intContractDetailId		LEFT
 				JOIN	(
 							SELECT		intContractDetailId,
-										SUM(dblNetImpact) dblNetImpact
+										SUM(dblNetImpactInDefCurrency) dblNetImpactInDefCurrency
 							FROM		vyuCTContractCostEnquiryHedge
 							GROUP BY	intContractDetailId
 						)HE ON HE.intContractDetailId = CD.intContractDetailId		

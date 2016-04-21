@@ -203,7 +203,7 @@ BEGIN
 			BEGIN
 				SELECT	@intContractDetailId		=	intContractDetailId,
 						@intFromItemUOMId			=	intItemUOMId,
-						@dblQty						=	dblQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END) * -1,
+						@dblQty						=	dblQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END), -- * -1,
 						@intInventoryShipmentItemId	=	intInventoryShipmentItemId
 				FROM	@tblContractsToProcess 
 				WHERE	intKeyId				=	 @Id

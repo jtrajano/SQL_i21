@@ -3,12 +3,28 @@
      @intCompanyLocationId INT
 AS  
 BEGIN  
+
+	--IF (SELECT COUNT(*)FROM dbo.tblICLot WHERE strLotNumber =@strLotNo AND dblQty>0 AND intLocationId =@intCompanyLocationId)>1
+	--BEGIN
+	--	RAISERROR('Lot is available in more than one location, Please do this operation in the regular client.',16,1)
+	--	RETURN
+	--END
+
 	DECLARE @intLotId AS INT
 	
 	SELECT @intLotId = intLotId
 	FROM tblICLot
 	WHERE strLotNumber = @strLotNo
+		AND dblQty>0
 		AND intLocationId = @intCompanyLocationId
+
+	IF @intLotId IS NULL
+	BEGIN
+		SELECT @intLotId = intLotId
+		FROM tblICLot
+		WHERE strLotNumber = @strLotNo
+			AND intLocationId = @intCompanyLocationId
+	END
 
 	SELECT DISTINCT l.intLotId,   
 		 l.strLotNumber,   

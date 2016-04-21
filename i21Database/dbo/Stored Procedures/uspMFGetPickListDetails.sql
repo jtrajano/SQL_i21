@@ -11,8 +11,10 @@ Declare @intBlendRequirementId int
 Declare @strXml nvarchar(max)
 Declare @strWorkOrderIds nvarchar(max)
 Declare @intKitStagingLocationId int
+DECLARE @intBlendStagingLocationId INT
 Declare @intManufacturingProcessId int
 Declare @intWorkOrderId int
+DECLARE @intInventoryTransactionType AS INT=34
 Declare @intMinItemCount int,
 		@intRecipeItemId int,
 		@intRawItemId int,
@@ -36,6 +38,8 @@ Select @intKitStagingLocationId=pa.strAttributeValue
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 and at.strAttributeName='Kit Staging Location'
+
+Select @intBlendStagingLocationId=ISNULL(intBlendProductionStagingUnitId,0) From tblSMCompanyLocation Where intCompanyLocationId=@intLocationId
 
 Declare @tblReservedQty table
 (
@@ -293,13 +297,13 @@ If @intKitStatusId = 7
 Begin
 	Insert @tblReservedQty(intLotId,dblReservedQty)
 	Select sr.intLotId,sum(distinct sr.dblQty) 
-	from tblMFPickListDetail pld join tblICStockReservation sr on pld.intLotId=sr.intLotId 
+	from tblMFPickListDetail pld join tblICStockReservation sr on pld.intStageLotId=sr.intLotId 
 	Where pld.intPickListId=@intPickListId
 	Group by sr.intLotId
 
 	Insert Into @tblPickList
 	Select pld.intPickListDetailId,pld.intPickListId,pld.intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
-	l.intItemId,i.strItemNo,i.strDescription,pld.intStorageLocationId,sl.strName AS strStorageLocationName,
+	l.intItemId,i.strItemNo,i.strDescription,sl.intStorageLocationId,sl.strName AS strStorageLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
 	ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
@@ -315,6 +319,47 @@ Begin
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join @tblReservedQty rq on pld.intLotId=rq.intLotId
 	Where pld.intPickListId=@intPickListId
+	UNION --Bulk Items from Reservation table
+	Select 0 AS intPickListDetailId,@intPickListId AS intPickListId,
+	(Select TOP 1 intLotId From tblICLot Where intItemId=ti.intItemId AND intLocationId=@intLocationId) AS intLotId,
+	'' AS strLotNumber,'' AS strLotAlias,0 intParentLotId,'' AS strParentLotNumber,
+	i.intItemId,i.strItemNo,i.strDescription,0 AS intStorageLocationId,'' strName,
+	sr.dblQty,sr.intItemUOMId AS intWeightUOMId,um.strUnitMeasure,sr.dblQty,sr.intItemUOMId AS intWeightUOMId,um.strUnitMeasure,
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+			Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+			WHERE L.intItemId = ti.intItemId
+			AND L.intLocationId = @intLocationId
+			AND L.intLotStatusId = 1 
+			AND L.dtmExpiryDate >= GETDATE()
+			AND L.dblWeight >= .01
+			AND L.intStorageLocationId NOT IN (
+				@intKitStagingLocationId
+				,@intBlendStagingLocationId
+				) --Exclude Kit Staging,Blend Staging
+			AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblAvailableQty,
+	(Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblReservedQty,
+	sr.dblQty,sr.intItemUOMId AS intWeightUOMId,um.strUnitMeasure,
+	(Select TOP 1 intLotId From tblICLot Where intItemId=ti.intItemId) AS intLotId,
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+			Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+			WHERE L.intItemId = ti.intItemId
+			AND L.intLocationId = @intLocationId
+			AND L.intLotStatusId = 1 
+			AND L.dtmExpiryDate >= GETDATE()
+			AND L.dblWeight >= .01
+			AND L.intStorageLocationId NOT IN (
+				@intKitStagingLocationId
+				,@intBlendStagingLocationId
+				) --Exclude Kit Staging,Blend Staging
+			AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblAvailableUnit,
+	um.strUnitMeasure,1 dblWeightPerQty,'Picking'
+	From @tblInputItem ti Join tblICStockReservation sr on ti.intItemId=sr.intItemId
+	Join tblICItem i on sr.intItemId=i.intItemId
+	Join tblICItemUOM iu on sr.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Where ti.intConsumptionMethodId in (2,3) AND sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=@intInventoryTransactionType
 
 	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute,intParentItemId)
 	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute,ti.intParentItemId 
@@ -437,9 +482,46 @@ Begin
 	tpl.dblIssuedQuantity,tpl.intItemIssuedUOMId,tpl.strIssuedUOM,
 	tpl.dblAvailableQty,tpl.dblReservedQty,tpl.dblPickQuantity,tpl.intPickUOMId,tpl.strPickUOM,
 	tpl.intLotId,tpl.dblAvailableUnit,tpl.strAvailableUnitUOM,tpl.dblWeightPerUnit,'' AS strStatus
-	from @tblPickedLotsFinal tpl
+	from @tblPickedLotsFinal tpl Join @tblInputItem ti on tpl.intItemId=ti.intItemId 
+	Where ti.intConsumptionMethodId=1
+	UNION --Bulk Items
+	Select 0,0,tpl.intLotId,'' AS strLotNumber,'' AS strLotAlias,tpl.intParentLotId,'' AS strParentLotNumber,
+	tpl.intItemId,tpl.strItemNo,tpl.strDescription,tpl.intStorageLocationId,'' AS strStorageLocationName,
+	tpl.dblQuantity,tpl.intItemUOMId,tpl.strUOM,
+	tpl.dblIssuedQuantity,tpl.intItemIssuedUOMId,tpl.strIssuedUOM,
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+			Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+			WHERE L.intItemId = ti.intItemId
+			AND L.intLocationId = @intLocationId
+			AND L.intLotStatusId = 1 
+			AND L.dtmExpiryDate >= GETDATE()
+			AND L.dblWeight >= .01
+			AND L.intStorageLocationId NOT IN (
+				@intKitStagingLocationId
+				,@intBlendStagingLocationId
+				) --Exclude Kit Staging,Blend Staging
+			AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblAvailableQty,
+	(Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblReservedQty,
+	tpl.dblPickQuantity,tpl.intPickUOMId,tpl.strPickUOM,tpl.intLotId,
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+			Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+			WHERE L.intItemId = ti.intItemId
+			AND L.intLocationId = @intLocationId
+			AND L.intLotStatusId = 1 
+			AND L.dtmExpiryDate >= GETDATE()
+			AND L.dblWeight >= .01
+			AND L.intStorageLocationId NOT IN (
+				@intKitStagingLocationId
+				,@intBlendStagingLocationId
+				) --Exclude Kit Staging,Blend Staging
+			AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblAvailableUnit,
+	tpl.strAvailableUnitUOM,1 AS dblWeightPerUnit,'' AS strStatus
+	from @tblPickedLotsFinal tpl Join @tblInputItem ti on tpl.intItemId=ti.intItemId 
+	Where ti.intConsumptionMethodId IN (2,3)
 
-	Select * From @tblPickList ORDER BY strItemNo,strLotNumber DESC
+	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId ORDER BY a.strItemNo,a.strLotNumber DESC
 
 End
 
@@ -453,9 +535,11 @@ Begin
 
 	--Bulk Items
 	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute,intParentItemId)
-	Select ti.intItemId,ti.dblRequiredQty AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute,intParentItemId 
-	From @tblInputItem ti 
-	WHERE ti.intConsumptionMethodId in (2,3)
+	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute,intParentItemId 
+	From @tblInputItem ti Left Join 
+	(Select intItemId,SUM(dblQty) AS dblQuantity 
+	From tblICStockReservation Where intTransactionId=@intPickListId AND intInventoryTransactionType=@intInventoryTransactionType Group by intItemId) tpl on  ti.intItemId=tpl.intItemId
+	WHERE (ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) > 0 AND ti.intConsumptionMethodId in (2,3)
 
 	--Find the Remaining Lots
 	If (Select COUNT(1) From @tblRemainingPickedItems) > 0
@@ -542,9 +626,19 @@ Begin
 		ORDER BY tpl.strItemNo,tpl.strStorageLocationName
 	End
 
+	If (Select COUNT(1) From @tblPickedLotsFinal) > 0
+	Insert Into @tblPickList
+	Select 0,0,tpl.intLotId,tpl.strLotNumber,tpl.strLotAlias,tpl.intParentLotId,tpl.strParentLotNumber,
+	tpl.intItemId,tpl.strItemNo,tpl.strDescription,tpl.intStorageLocationId,tpl.strStorageLocationName,
+	tpl.dblQuantity,tpl.intItemUOMId,tpl.strUOM,
+	tpl.dblIssuedQuantity,tpl.intItemIssuedUOMId,tpl.strIssuedUOM,
+	tpl.dblAvailableQty,tpl.dblReservedQty,tpl.dblPickQuantity,tpl.intPickUOMId,tpl.strPickUOM,
+	tpl.intLotId,tpl.dblAvailableUnit,tpl.strAvailableUnitUOM,tpl.dblWeightPerUnit,'' AS strStatus
+	from @tblPickedLotsFinal tpl
+
 	Insert Into @tblPickList
 	Select pld.intPickListDetailId,pld.intPickListId,pld.intStageLotId AS intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
-	l.intItemId,i.strItemNo,i.strDescription,pld.intStorageLocationId,sl.strName AS strStorageLocationName,
+	l.intItemId,i.strItemNo,i.strDescription,l.intStorageLocationId,sl.strName AS strStorageLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
 	((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
@@ -560,16 +654,47 @@ Begin
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join @tblReservedQty rq on pld.intStageLotId=rq.intLotId
 	Where pld.intPickListId=@intPickListId
+	UNION --Bulk Items from Reservation table
+	Select 0 AS intPickListDetailId,@intPickListId AS intPickListId,
+	(Select TOP 1 intLotId From tblICLot Where intItemId=ti.intItemId) AS intLotId,
+	'' AS strLotNumber,'' AS strLotAlias,0 intParentLotId,'' AS strParentLotNumber,
+	i.intItemId,i.strItemNo,i.strDescription,0 AS intStorageLocationId,'' AS strName,
+	sr.dblQty,sr.intItemUOMId AS intWeightUOMId,um.strUnitMeasure,sr.dblQty,sr.intItemUOMId AS intWeightUOMId,um.strUnitMeasure,
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+			Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+			WHERE L.intItemId = ti.intItemId
+			AND L.intLocationId = @intLocationId
+			AND L.intLotStatusId = 1 
+			AND L.dtmExpiryDate >= GETDATE()
+			AND L.dblWeight >= .01
+			AND L.intStorageLocationId NOT IN (
+				@intKitStagingLocationId
+				,@intBlendStagingLocationId
+				) --Exclude Kit Staging,Blend Staging
+			AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblAvailableQty,
+	(Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblReservedQty,
+	sr.dblQty,sr.intItemUOMId AS intWeightUOMId,um.strUnitMeasure,
+	(Select TOP 1 intLotId From tblICLot Where intItemId=ti.intItemId) AS intLotId,
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+			Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+			WHERE L.intItemId = ti.intItemId
+			AND L.intLocationId = @intLocationId
+			AND L.intLotStatusId = 1 
+			AND L.dtmExpiryDate >= GETDATE()
+			AND L.dblWeight >= .01
+			AND L.intStorageLocationId NOT IN (
+				@intKitStagingLocationId
+				,@intBlendStagingLocationId
+				) --Exclude Kit Staging,Blend Staging
+			AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=ti.intItemId AND intLocationId = @intLocationId) AS dblAvailableUnit,
+	um.strUnitMeasure,1 dblWeightPerQty,'Picking'
+	From @tblInputItem ti Join tblICStockReservation sr on ti.intItemId=sr.intItemId
+	Join tblICItem i on sr.intItemId=i.intItemId
+	Join tblICItemUOM iu on sr.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Where ti.intConsumptionMethodId in (2,3) AND sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=@intInventoryTransactionType
 
-	If (Select COUNT(1) From @tblPickedLotsFinal) > 0
-	Insert Into @tblPickList
-	Select 0,0,tpl.intLotId,tpl.strLotNumber,tpl.strLotAlias,tpl.intParentLotId,tpl.strParentLotNumber,
-	tpl.intItemId,tpl.strItemNo,tpl.strDescription,tpl.intStorageLocationId,tpl.strStorageLocationName,
-	tpl.dblQuantity,tpl.intItemUOMId,tpl.strUOM,
-	tpl.dblIssuedQuantity,tpl.intItemIssuedUOMId,tpl.strIssuedUOM,
-	tpl.dblAvailableQty,tpl.dblReservedQty,tpl.dblPickQuantity,tpl.intPickUOMId,tpl.strPickUOM,
-	tpl.intLotId,tpl.dblAvailableUnit,tpl.strAvailableUnitUOM,tpl.dblWeightPerUnit,'' AS strStatus
-	from @tblPickedLotsFinal tpl
-
-	Select * From @tblPickList ORDER BY strItemNo,strLotNumber DESC
+	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId ORDER BY a.strItemNo,a.strLotNumber DESC
 End
