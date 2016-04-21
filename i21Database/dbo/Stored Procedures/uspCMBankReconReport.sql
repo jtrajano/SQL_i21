@@ -41,8 +41,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL 
 
 -- Declare the variables.
-DECLARE @intBankAccountIdFrom AS INT
-		,@intBankAccountIdTo AS INT
+DECLARE @intBankAccountId AS INT
 		,@dtmStatementDate AS DATETIME
 
 		-- Declare the variables for the XML parameter
@@ -79,8 +78,7 @@ WITH (
 )
 
 -- Gather the variables values from the xml table. 
-SELECT	@intBankAccountIdFrom = [from]
-		,@intBankAccountIdTo = [to]
+SELECT	@intBankAccountId = [from]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'intBankAccountId'
 
@@ -93,10 +91,10 @@ IF @dtmStatementDate IS NOT NULL
 	SET @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)
 	
 -- SANITIZE THE BANK ACCOUNT ID
-SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
-SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
-IF @intBankAccountIdFrom > @intBankAccountIdTo
-	SET @intBankAccountIdTo = @intBankAccountIdFrom
+--SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
+--SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
+--IF @intBankAccountIdFrom > @intBankAccountIdTo
+--	SET @intBankAccountIdTo = @intBankAccountIdFrom
 
 SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dtmStatementDate				= @dtmStatementDate
@@ -111,9 +109,12 @@ SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dblBankStatementEndingBalance	= [dbo].[fnGetBankCurrentEndingBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
 		,dblUnclearedPayments			= [dbo].[fnGetUnclearedPayments](BankAccnt.intBankAccountId, @dtmStatementDate)
 		,dblUnclearedDeposits			= [dbo].[fnGetUnclearedDeposits](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,strCompanyName
 FROM	dbo.tblCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
 			ON BankAccnt.intBankId = Bank.intBankId
 		INNER JOIN dbo.tblGLAccount GL
 			ON BankAccnt.intGLAccountId = GL.intAccountId
-WHERE	BankAccnt.intBankAccountId BETWEEN @intBankAccountIdFrom AND @intBankAccountIdTo
+		LEFT JOIN tblSMCompanySetup COMPANY 
+			ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+WHERE	BankAccnt.intBankAccountId = @intBankAccountId
 		AND @dtmStatementDate IS NOT NULL

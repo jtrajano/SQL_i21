@@ -55,8 +55,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL 
 
 -- Declare the variables.
-DECLARE @intBankAccountIdFrom AS INT
-		,@intBankAccountIdTo AS INT
+DECLARE @intBankAccountId AS INT
 
 		-- Declare the variables for the XML parameter
 		,@xmlDocumentId AS INT
@@ -92,16 +91,15 @@ WITH (
 )
 
 -- Gather the variables values from the xml table. 
-SELECT	@intBankAccountIdFrom = [from]
-		,@intBankAccountIdTo = [to]
+SELECT	@intBankAccountId = [from]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'intBankAccountId'
 			
 -- SANITIZE THE BANK ACCOUNT ID
-SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
-SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
-IF @intBankAccountIdFrom > @intBankAccountIdTo
-	SET @intBankAccountIdTo = @intBankAccountIdFrom
+--SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
+--SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
+--IF @intBankAccountIdFrom > @intBankAccountIdTo
+--	SET @intBankAccountIdTo = @intBankAccountIdFrom
 
 -- THE REPORT QUERY:
 SELECT	intBankAccountId		= BankAccnt.intBankAccountId
@@ -117,7 +115,9 @@ SELECT	intBankAccountId		= BankAccnt.intBankAccountId
 								END
 		,strRemarks				= CheckNumberAudit.strRemarks
 		,strTransactionId		= CheckNumberAudit.strTransactionId
+		,strCompanyName
 FROM	dbo.tblCMBankAccount BankAccnt RIGHT JOIN dbo.tblCMCheckNumberAudit CheckNumberAudit
 			ON BankAccnt.intBankAccountId = CheckNumberAudit.intBankAccountId
-WHERE	BankAccnt.intBankAccountId BETWEEN @intBankAccountIdFrom AND @intBankAccountIdTo
-
+		LEFT JOIN tblSMCompanySetup COMPANY 
+			ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+WHERE	BankAccnt.intBankAccountId = @intBankAccountId

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspCMBankReconClearedPaymentsSubReport
-	@xmlParam NVARCHAR(MAX) = NULL
+	@intBankAccountId AS INT
+	,@dtmStatementDate AS DATETIME
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -58,66 +59,66 @@ DECLARE @BANK_DEPOSIT INT = 1
 --</xmlparam>'
 
 -- Sanitize the @xmlParam 
-IF LTRIM(RTRIM(@xmlParam)) = '' 
-	SET @xmlParam = NULL 
+--IF LTRIM(RTRIM(@xmlParam)) = '' 
+--	SET @xmlParam = NULL 
 
--- Declare the variables.
-DECLARE @intBankAccountIdFrom AS INT
-		,@intBankAccountIdTo AS INT
-		,@dtmStatementDate AS DATETIME
+---- Declare the variables.
+--DECLARE @intBankAccountIdFrom AS INT
+--		,@intBankAccountIdTo AS INT
+--		,@dtmStatementDate AS DATETIME
 
-		-- Declare the variables for the XML parameter
-		,@xmlDocumentId AS INT
+--		-- Declare the variables for the XML parameter
+--		,@xmlDocumentId AS INT
 		
--- Create a table variable to hold the XML data. 		
-DECLARE @temp_xml_table TABLE (
-	[fieldname] NVARCHAR(50)
-	,condition NVARCHAR(20)      
-	,[from] NVARCHAR(50)
-	,[to] NVARCHAR(50)
-	,[join] NVARCHAR(10)
-	,[begingroup] NVARCHAR(50)
-	,[endgroup] NVARCHAR(50)
-	,[datatype] NVARCHAR(50)
-)
+---- Create a table variable to hold the XML data. 		
+--DECLARE @temp_xml_table TABLE (
+--	[fieldname] NVARCHAR(50)
+--	,condition NVARCHAR(20)      
+--	,[from] NVARCHAR(50)
+--	,[to] NVARCHAR(50)
+--	,[join] NVARCHAR(10)
+--	,[begingroup] NVARCHAR(50)
+--	,[endgroup] NVARCHAR(50)
+--	,[datatype] NVARCHAR(50)
+--)
 
--- Prepare the XML 
-EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam
+---- Prepare the XML 
+--EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam
 
--- Insert the XML to the xml table. 		
-INSERT INTO @temp_xml_table
-SELECT *
-FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
-WITH (
-	[fieldname] nvarchar(50)
-	, condition nvarchar(20)
-	, [from] nvarchar(50)
-	, [to] nvarchar(50)
-	, [join] nvarchar(10)
-	, [begingroup] nvarchar(50)
-	, [endgroup] nvarchar(50)
-	, [datatype] nvarchar(50)
-)
+---- Insert the XML to the xml table. 		
+--INSERT INTO @temp_xml_table
+--SELECT *
+--FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
+--WITH (
+--	[fieldname] nvarchar(50)
+--	, condition nvarchar(20)
+--	, [from] nvarchar(50)
+--	, [to] nvarchar(50)
+--	, [join] nvarchar(10)
+--	, [begingroup] nvarchar(50)
+--	, [endgroup] nvarchar(50)
+--	, [datatype] nvarchar(50)
+--)
 
--- Gather the variables values from the xml table. 
-SELECT	@intBankAccountIdFrom = [from]
-		,@intBankAccountIdTo = [to]
-FROM	@temp_xml_table 
-WHERE	[fieldname] = 'intBankAccountId'
+---- Gather the variables values from the xml table. 
+--SELECT	@intBankAccountIdFrom = [from]
+--		,@intBankAccountIdTo = [to]
+--FROM	@temp_xml_table 
+--WHERE	[fieldname] = 'intBankAccountId'
 
-SELECT	@dtmStatementDate = CAST([from] AS DATETIME)
-FROM	@temp_xml_table 
-WHERE	[fieldname] = 'dtmStatementDate'
+--SELECT	@dtmStatementDate = CAST([from] AS DATETIME)
+--FROM	@temp_xml_table 
+--WHERE	[fieldname] = 'dtmStatementDate'
 		
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmStatementDate IS NOT NULL
 	SET @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
 	
 -- SANITIZE THE BANK ACCOUNT ID
-SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
-SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
-IF @intBankAccountIdFrom > @intBankAccountIdTo
-	SET @intBankAccountIdTo = @intBankAccountIdFrom
+--SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
+--SET @intBankAccountIdTo = ISNULL(@intBankAccountIdTo, @intBankAccountIdFrom)
+--IF @intBankAccountIdFrom > @intBankAccountIdTo
+--	SET @intBankAccountIdTo = @intBankAccountIdFrom
 		
 SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmStatementDate = @dtmStatementDate
@@ -142,7 +143,7 @@ FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] 
 			
 WHERE	BankTrans.ysnPosted = 1
 		AND BankTrans.ysnClr = 1
-		AND BankTrans.intBankAccountId BETWEEN @intBankAccountIdFrom AND @intBankAccountIdTo
+		AND BankTrans.intBankAccountId = @intBankAccountId
 		AND BankTrans.dblAmount <> 0		
 		AND CAST(FLOOR(CAST(BankTrans.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, BankTrans.dtmDate) AS FLOAT)) AS DATETIME)
 		AND (
