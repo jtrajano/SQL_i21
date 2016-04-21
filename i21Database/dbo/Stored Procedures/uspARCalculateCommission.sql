@@ -20,7 +20,7 @@ DECLARE  @intCommissionAccountId	INT
 	   , @strDrivers				NVARCHAR(MAX)
 	   , @strItemCategories			NVARCHAR(MAX)
 	   , @strItems					NVARCHAR(MAX)
-	   , @strCondition				NVARCHAR(MAX)
+	   , @intApprovalListId			NVARCHAR(MAX)
 	   , @ysnMarginalSales			BIT
 	   , @ysnPaymentRequired		BIT
 
@@ -38,7 +38,7 @@ SELECT TOP 1
   , @strDrivers				= CASE WHEN strBasis = 'Revenue' THEN strDrivers ELSE NULL END
   , @strItemCategories		= CASE WHEN strBasis = 'Revenue' THEN strItemCategories ELSE NULL END
   , @strItems				= CASE WHEN strBasis = 'Revenue' THEN strItems ELSE NULL END
-  , @strCondition			= CASE WHEN strBasis = 'Conditional' THEN strCondition ELSE NULL END
+  , @intApprovalListId		= CASE WHEN strBasis = 'Conditional' THEN intApprovalListId ELSE NULL END
   , @dblHurdle				= ISNULL(dblHurdle, 0.000000)
   , @dblCalculationAmount	= ISNULL(dblCalculationAmount, 0.000000)
   , @ysnPaymentRequired		= ysnPaymentRequired
@@ -102,7 +102,7 @@ ELSE IF @strBasis = 'Units'
 	END
 ELSE IF @strBasis = 'Conditional'
 	BEGIN
-		SELECT @strCondition
+		SELECT @intApprovalListId
 	END
 
 --CREATE AUTO PAYABLES

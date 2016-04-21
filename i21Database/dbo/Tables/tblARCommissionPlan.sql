@@ -13,7 +13,7 @@
 	[strDrivers]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strItemCategories]     NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strItems]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strCondition]          NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[intApprovalListId]     INT NULL,
 	[strCalculationType]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strHurdleFrequency]    NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 	[strHurdleType]		    NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
