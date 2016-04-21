@@ -13,5 +13,6 @@
     CONSTRAINT [FK_tblMBMeterAccount_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]), 
     CONSTRAINT [FK_tblMBMeterAccount_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]), 
     CONSTRAINT [FK_tblMBMeterAccount_tblMBConsignmentGroup] FOREIGN KEY ([intConsignmentGroupId]) REFERENCES [tblMBConsignmentGroup]([intConsignmentGroupId]), 
-    CONSTRAINT [FK_tblMBMeterAccount_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 
+    CONSTRAINT [FK_tblMBMeterAccount_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+    CONSTRAINT [AK_tblMBMeterAccount] UNIQUE ([intEntityCustomerId], [intEntityLocationId]) 
 )
