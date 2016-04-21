@@ -33,6 +33,7 @@ Declare @ysnBlendSheetRequired bit
 Declare @intLocationId int
 Declare @intBlendItemId int
 Declare @intWorkOrderId int
+Declare @strBulkItemXml nvarchar(max)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -209,6 +210,37 @@ If ISNULL(@strPickListNo,'') = ''
 
 Select @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where strWorkOrderNo = (Select TOP 1 strWorkOrderNo From @tblWorkOrder)
 
+--Xml for Bulk Items for Reservation
+Set @strBulkItemXml='<root>'
+
+--Input Item
+Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+'<intItemId>' + convert(varchar,tpl.intItemId) + '</intItemId>' +
+'<intItemUOMId>' + convert(varchar,tpl.intItemUOMId) + '</intItemUOMId>' + 
+'<dblQuantity>' + convert(varchar,tpl.dblQuantity) + '</dblQuantity>' + '</lot>'
+From @tblPickListDetail tpl 
+Join tblMFWorkOrderRecipeItem ri on tpl.intItemId=ri.intItemId 
+Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+AND r.intWorkOrderId = @intWorkOrderId
+
+--Sub Item
+Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' +  
+'<intItemId>' + convert(varchar,tpl.intItemId) + '</intItemId>' + 
+'<intItemUOMId>' + convert(varchar,tpl.intItemUOMId) + '</intItemUOMId>' + 
+'<dblQuantity>' + convert(varchar,tpl.dblQuantity) + '</dblQuantity>' + '</lot>'
+From @tblPickListDetail tpl 
+Join tblMFWorkOrderRecipeSubstituteItem rs on tpl.intItemId=rs.intSubstituteItemId
+Join tblMFWorkOrderRecipeItem ri on rs.intItemId=ri.intItemId 
+Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+AND r.intWorkOrderId = @intWorkOrderId
+
+Set @strBulkItemXml=@strBulkItemXml+'</root>'
+
+If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+	Set @strBulkItemXml=''
+
 --Do not save items if consumption method is not By Lot
 Delete tpl From @tblPickListDetail tpl 
 Join tblMFWorkOrderRecipeItem ri on tpl.intItemId=ri.intItemId 
@@ -288,7 +320,7 @@ End
 SET @intPickListIdOut=@intPickListId
 
 --Reserve Lots
-Exec [uspMFCreateLotReservationByPickList] @intPickListId
+Exec [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml
 
 Commit Tran
 

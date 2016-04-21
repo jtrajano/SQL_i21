@@ -29,8 +29,10 @@ Declare @intBlendStagingLocationId int
 Declare @dblPickedQty numeric(38,20)
 Declare @dblQuantity numeric(38,20)
 Declare @strRemItems nvarchar(max)=''
+Declare @strBulkItemXml nvarchar(max)
+Declare @intWorkOrderId INT
 
-Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
+Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
 Select @intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
 
@@ -287,7 +289,23 @@ Begin
 End
 
 --Reserve Lots
-Exec [uspMFCreateLotReservationByPickList] @intPickListId
+--Get Bulk Items From Reserved Lots
+Set @strBulkItemXml='<root>'
+
+--Bulk Item
+Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
+'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
+'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
+From tblICStockReservation sr 
+Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+
+Set @strBulkItemXml=@strBulkItemXml+'</root>'
+
+If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+	Set @strBulkItemXml=''
+
+Exec [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml
 
 Update tblMFWorkOrder Set intKitStatusId=12,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime Where intPickListId=@intPickListId
 

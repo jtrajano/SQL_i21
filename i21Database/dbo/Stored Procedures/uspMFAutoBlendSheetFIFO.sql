@@ -56,6 +56,7 @@ BEGIN TRY
 	DECLARE @intConsumptionStoragelocationId INT
 	DECLARE @ysnIsSubstitute bit
 	DECLARE @intWorkOrderId INT
+	DECLARE @dblBulkItemAvailableQty NUMERIC(38,20)
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
 		,@strRuleName NVARCHAR(100)
@@ -496,7 +497,7 @@ BEGIN TRY
 
 			SET @dblOriginalRequiredQty = @dblRequiredQty
 
-			if @intConsumptionMethodId in (2,4)
+			if @intConsumptionMethodId in (2,3)
 				Set @intIssuedUOMTypeId=1
 
 			IF OBJECT_ID('tempdb..#tblLot') IS NOT NULL
@@ -926,6 +927,36 @@ BEGIN TRY
 
 			EXEC (@strSQL)
 
+			--For Bulk Items Do not consider lot
+			If @intConsumptionMethodId IN (2, 3) --By Location/FIFO
+			Begin
+				SET @dblBulkItemAvailableQty = (Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+				Join tblICLotStatus LS ON L.intLotStatusId=LS.intLotStatusId
+				Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+				WHERE L.intItemId = @intRawItemId
+				AND L.intLocationId = @intLocationId
+				AND LS.strPrimaryStatus IN (
+					Select strStatusName From @tblLotStatus
+					)
+				AND L.dtmExpiryDate >= GETDATE()
+				AND L.dblWeight >= .01
+				AND L.intStorageLocationId NOT IN (
+					@intKitStagingLocationId
+					,@intBlendStagingLocationId
+					) --Exclude Kit Staging,Blend Staging
+				AND ISNULL(SL.ysnAllowConsume,0)=1
+				AND L.intLotId NOT IN (Select intLotId From @tblExcludedLot Where intItemId=@intRawItemId))
+				- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=@intRawItemId AND intLocationId = @intLocationId)
+				- (SELECT ISNULL(SUM(BS.dblQuantity), 0) FROM #tblBlendSheetLot BS WHERE BS.intItemId = @intRawItemId)
+				
+				Delete From #tblInputLot
+
+				If @dblBulkItemAvailableQty > 0
+					INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId)
+					Select TOP 1 intLotId,intItemId,@dblBulkItemAvailableQty,intStorageLocationId,1,intWeightUOMId,intWeightUOMId 
+					From tblICLot Where intItemId=@intRawItemId AND dblWeight >= .01 AND ISNULL(intStorageLocationId,0) > 0 AND intLocationId=@intLocationId
+			End
+
 			--Full Bag Pick
 			If ISNULL(@intPartialQuantityStorageLocationId,0)>0 AND @intOriginalIssuedUOMTypeId=@intIssuedUOMTypeId
 				DELETE FROM #tblInputLot WHERE intStorageLocationId=@intPartialQuantityStorageLocationId
@@ -1274,7 +1305,7 @@ BEGIN TRY
 
 				--IF @intIssuedUOMTypeId = 2
 				  --AND 
-				  if @intConsumptionMethodId in (2,4) --By FIFO and By Locationn
+				  if @intConsumptionMethodId in (2,3) --By FIFO and By Locationn
 				  AND Exists (Select 1 From @tblInputItem Where intItemId=@intRawItemId)
 			BEGIN
 				SELECT @dblRemainingRequiredQty=@dblOriginalRequiredQty - ISNULL(SUM(ISNULL(dblQuantity,0)),0) From #tblBlendSheetLot Where intItemId=@intRawItemId
