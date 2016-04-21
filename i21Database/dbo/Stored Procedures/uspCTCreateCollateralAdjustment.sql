@@ -37,6 +37,9 @@ BEGIN TRY
 	JOIN	tblICUnitMeasure	UM	ON UM.intUnitMeasureId = CL.intUnitMeasureId
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 
+	IF	@intCollateralId IS NULL 
+		RETURN
+
 	IF NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId	= @intCollateralUOMId)
 	BEGIN
 		RAISERROR(110002,16,1,@strUnitMeasure,@strTransNo,@strItemNo)

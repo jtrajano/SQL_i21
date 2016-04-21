@@ -3670,6 +3670,7 @@
     <Build Include="dbo\Tables\tblSMEmailUpload.sql" />
     <Build Include="dbo\Tables\tblSMEmailRecipient.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateEmail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateCollateralAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
