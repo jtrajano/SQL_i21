@@ -3671,6 +3671,8 @@
     <Build Include="dbo\Tables\tblSMEmailRecipient.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateEmail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateCollateralAdjustment.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContracts.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerReceiptContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
