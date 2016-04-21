@@ -1,21 +1,21 @@
 ﻿CREATE VIEW vyuMFGetWorkOrderTransactionView
 AS
-SELECT W.intWorkOrderId,
-	W.strWorkOrderNo
+SELECT W.intWorkOrderId
+	,W.strWorkOrderNo
 	,W.dtmOrderDate
-	,I.intItemId as intTargetItemId
+	,I.intItemId AS intTargetItemId
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
 	,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity AS dblPlannedQty
-	,UM.intUnitMeasureId as intTargetUnitMeasureId
+	,UM.intUnitMeasureId AS intTargetUnitMeasureId
 	,UM.strUnitMeasure AS strTargetUnitMeasure
 	,WS.strName AS strStatusName
 	,MC.intManufacturingCellId
 	,MC.strCellName
 	,W.dtmPlannedDate
-	,PS.intShiftId as intPlannedShiftId
+	,PS.intShiftId AS intPlannedShiftId
 	,PS.strShiftName AS strPlannedShiftName
 	,MP.intManufacturingProcessId
 	,MP.strProcessName
@@ -28,14 +28,14 @@ SELECT W.intWorkOrderId,
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
 	,WI.dtmBusinessDate
-	,BS.intShiftId as intBusinessShiftId
+	,BS.intShiftId AS intBusinessShiftId
 	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [strFromTo]
 	,M.intMachineId
 	,M.strName AS strMachineName
 	,WI.strReferenceNo
-	,WI.dtmActualInputDateTime as dtmActualTransactionDateTime
+	,WI.dtmActualInputDateTime AS dtmActualTransactionDateTime
 	,C.intContainerId
 	,C.strContainerId
 	,CT.intContainerTypeId
@@ -44,32 +44,32 @@ SELECT W.intWorkOrderId,
 	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'CONSUME' AS strTransactionName
-	,NULL as dblReadingQty
-	,NULL as dblTotalizerStartReading
-	,NULL as dblTotalizerEndReading
-	,NULL as dblTotalizerQty
-	,NULL as dblPulseStartReading
-	,NULL as dblPulseEndReading
-	,NULL as dblPulseQty
+	,NULL AS dblReadingQty
+	,NULL AS dblTotalizerStartReading
+	,NULL AS dblTotalizerEndReading
+	,NULL AS dblTotalizerQty
+	,NULL AS dblPulseStartReading
+	,NULL AS dblPulseEndReading
+	,NULL AS dblPulseQty
 	,W.strComment
-	,NULL as strFormulaUsedForTotalizerReading
-	,NULL as strFormulaUsedForPulseReading
-	,NULL as dblMinMoisture
-	,NULL as dblMoisture
-	,NULL as dblMaxMoisture
-	,NULL as dblMinDensity
-	,NULL as dblDensity
-	,NULL as dblMaxDensity
-	,NULL as dblMinColor
-	,NULL as dblColor
-	,NULL as dblMaxColor
-	,L.intLotId 
-	,L.strLotNumber 
-	,L.strLotAlias 
-	,S.intShiftId 
-	,S.strShiftName 
+	,NULL AS strFormulaUsedForTotalizerReading
+	,NULL AS strFormulaUsedForPulseReading
+	,NULL AS dblMinMoisture
+	,NULL AS dblMoisture
+	,NULL AS dblMaxMoisture
+	,NULL AS dblMinDensity
+	,NULL AS dblDensity
+	,NULL AS dblMaxDensity
+	,NULL AS dblMinColor
+	,NULL AS dblColor
+	,NULL AS dblMaxColor
+	,L.intLotId
+	,L.strLotNumber
+	,L.strLotAlias
+	,S.intShiftId
+	,S.strShiftName
 	,WI.dtmProductionDate
-	,1 as intSequenceNo 
+	,1 AS intSequenceNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -91,26 +91,25 @@ LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
 WHERE WI.ysnConsumptionReversed = 0
---THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
---JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WI.intLastModifiedUserId
 
 UNION
-SELECT W.intWorkOrderId,
-	W.strWorkOrderNo
+
+SELECT W.intWorkOrderId
+	,W.strWorkOrderNo
 	,W.dtmOrderDate
-	,I.intItemId as intTargetItemId
+	,I.intItemId AS intTargetItemId
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
 	,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity AS dblPlannedQty
-	,UM.intUnitMeasureId as intTargetUnitMeasureId
+	,UM.intUnitMeasureId AS intTargetUnitMeasureId
 	,UM.strUnitMeasure AS strTargetUnitMeasure
 	,WS.strName AS strStatusName
 	,MC.intManufacturingCellId
 	,MC.strCellName
 	,W.dtmPlannedDate
-	,PS.intShiftId As intPlannedShiftId
+	,PS.intShiftId AS intPlannedShiftId
 	,PS.strShiftName AS strPlannedShiftName
 	,MP.intManufacturingProcessId
 	,MP.strProcessName
@@ -119,18 +118,120 @@ SELECT W.intWorkOrderId,
 	,II.strItemNo
 	,II.strDescription
 	,II.strShortName AS strShortDesc
-	,-WI.dblQuantity
+	,WI.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
-	,WI.dtmBusinessDate
-	,BS.intShiftId as intBusinessShiftId
+	,WP.dtmBusinessDate
+	,BS.intShiftId AS intBusinessShiftId
 	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [strFromTo]
 	,M.intMachineId
 	,M.strName AS strMachineName
 	,WI.strReferenceNo
-	,WI.dtmActualInputDateTime as dtmActualTransactionDateTime
+	,WI.dtmActualInputDateTime AS dtmActualTransactionDateTime
+	,C.intContainerId
+	,C.strContainerId
+	,CT.intContainerTypeId
+	,CT.strDisplayMember AS strContainerType
+	,WI.dtmLastModified
+	,US.[intEntityUserSecurityId]
+	,US.strUserName
+	,'CONSUME' AS strTransactionName
+	,NULL AS dblReadingQty
+	,NULL AS dblTotalizerStartReading
+	,NULL AS dblTotalizerEndReading
+	,NULL AS dblTotalizerQty
+	,NULL AS dblPulseStartReading
+	,NULL AS dblPulseEndReading
+	,NULL AS dblPulseQty
+	,W.strComment
+	,NULL AS strFormulaUsedForTotalizerReading
+	,NULL AS strFormulaUsedForPulseReading
+	,NULL AS dblMinMoisture
+	,NULL AS dblMoisture
+	,NULL AS dblMaxMoisture
+	,NULL AS dblMinDensity
+	,NULL AS dblDensity
+	,NULL AS dblMaxDensity
+	,NULL AS dblMinColor
+	,NULL AS dblColor
+	,NULL AS dblMaxColor
+	,L.intLotId
+	,L.strLotNumber
+	,L.strLotAlias
+	,S.intShiftId
+	,S.strShiftName
+	,WP.dtmProductionDate
+	,1 AS intSequenceNo
+FROM dbo.tblMFWorkOrder W
+JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
+JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intBatchId = WI.intBatchId
+JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
+JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
+JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
+LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
+JOIN dbo.tblICItem II ON II.intItemId = WI.intItemId
+JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
+JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WI.intItemUOMId
+JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WI.intShiftId
+LEFT JOIN dbo.tblMFShift PS ON PS.intShiftId = W.intPlannedShiftId
+JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocationId
+LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
+LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
+LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
+WHERE NOT EXISTS (
+		SELECT *
+		FROM tblMFWorkOrder W1
+		JOIN tblMFWorkOrderInputLot WI1 ON W1.intWorkOrderId = WI1.intWorkOrderId
+			AND W1.intManufacturingProcessId = W.intManufacturingProcessId
+		)
+--THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
+--JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WI.intLastModifiedUserId
+
+UNION
+
+SELECT W.intWorkOrderId
+	,W.strWorkOrderNo
+	,W.dtmOrderDate
+	,I.intItemId AS intTargetItemId
+	,I.strType AS strTargetItemType
+	,I.strItemNo AS strTargetItemNo
+	,I.strDescription AS strTargetItemDesc
+	,I.strShortName AS strTargetItemShortDesc
+	,W.dblQuantity AS dblPlannedQty
+	,UM.intUnitMeasureId AS intTargetUnitMeasureId
+	,UM.strUnitMeasure AS strTargetUnitMeasure
+	,WS.strName AS strStatusName
+	,MC.intManufacturingCellId
+	,MC.strCellName
+	,W.dtmPlannedDate
+	,PS.intShiftId AS intPlannedShiftId
+	,PS.strShiftName AS strPlannedShiftName
+	,MP.intManufacturingProcessId
+	,MP.strProcessName
+	,II.intItemId
+	,II.strType
+	,II.strItemNo
+	,II.strDescription
+	,II.strShortName AS strShortDesc
+	,- WI.dblQuantity
+	,IUM.intUnitMeasureId
+	,IUM.strUnitMeasure
+	,WI.dtmBusinessDate
+	,BS.intShiftId AS intBusinessShiftId
+	,BS.strShiftName AS strBusinessShiftName
+	,SL.intStorageLocationId
+	,SL.strName AS [strFromTo]
+	,M.intMachineId
+	,M.strName AS strMachineName
+	,WI.strReferenceNo
+	,WI.dtmActualInputDateTime AS dtmActualTransactionDateTime
 	,C.intContainerId
 	,C.strContainerId
 	,CT.intContainerTypeId
@@ -139,32 +240,32 @@ SELECT W.intWorkOrderId,
 	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'CONSUME REVERSAL' AS strTransactionName
-	,NULL as dblReadingQty
-	,NULL as dblTotalizerStartReading
-	,NULL as dblTotalizerEndReading
-	,NULL as dblTotalizerQty
-	,NULL as dblPulseStartReading
-	,NULL as dblPulseEndReading
-	,NULL as dblPulseQty
+	,NULL AS dblReadingQty
+	,NULL AS dblTotalizerStartReading
+	,NULL AS dblTotalizerEndReading
+	,NULL AS dblTotalizerQty
+	,NULL AS dblPulseStartReading
+	,NULL AS dblPulseEndReading
+	,NULL AS dblPulseQty
 	,W.strComment
-	,NULL as strFormulaUsedForTotalizerReading
-	,NULL as strFormulaUsedForPulseReading
-	,NULL as dblMinMoisture
-	,NULL as dblMoisture
-	,NULL as dblMaxMoisture
-	,NULL as dblMinDensity
-	,NULL as dblDensity
-	,NULL as dblMaxDensity
-	,NULL as dblMinColor
-	,NULL as dblColor
-	,NULL as dblMaxColor
-	,L.intLotId 
-	,L.strLotNumber 
+	,NULL AS strFormulaUsedForTotalizerReading
+	,NULL AS strFormulaUsedForPulseReading
+	,NULL AS dblMinMoisture
+	,NULL AS dblMoisture
+	,NULL AS dblMaxMoisture
+	,NULL AS dblMinDensity
+	,NULL AS dblDensity
+	,NULL AS dblMaxDensity
+	,NULL AS dblMinColor
+	,NULL AS dblColor
+	,NULL AS dblMaxColor
+	,L.intLotId
+	,L.strLotNumber
 	,L.strLotAlias
-	,S.intShiftId 
-	,S.strShiftName 
-	,WI.dtmProductionDate 
-	,2 as intSequenceNo
+	,S.intShiftId
+	,S.strShiftName
+	,WI.dtmProductionDate
+	,2 AS intSequenceNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -188,14 +289,15 @@ JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifi
 WHERE WI.ysnConsumptionReversed = 1
 
 UNION
-SELECT W.intWorkOrderId,
-	W.strWorkOrderNo
-	,ISNULL(W.dtmOrderDate,W.dtmCreated) AS dtmOrderDate
-	,I.intItemId as intTargetItemId
+
+SELECT W.intWorkOrderId
+	,W.strWorkOrderNo
+	,ISNULL(W.dtmOrderDate, W.dtmCreated) AS dtmOrderDate
+	,I.intItemId AS intTargetItemId
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
-		,I.strShortName AS strTargetItemShortDesc
+	,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity
 	,UM.intUnitMeasureId
 	,UM.strUnitMeasure
@@ -220,8 +322,8 @@ SELECT W.intWorkOrderId,
 	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [strFromTo]
-	,ISNULL(M.intMachineId,0) AS intMachineId
-	,ISNULL(M.strName,'') AS strMachineName
+	,ISNULL(M.intMachineId, 0) AS intMachineId
+	,ISNULL(M.strName, '') AS strMachineName
 	,WP.strReferenceNo
 	,WP.dtmLastModified
 	,C.intContainerId
@@ -232,32 +334,32 @@ SELECT W.intWorkOrderId,
 	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'PRODUCE' AS strTransactionName
-	,NULL as dblReadingQty
-	,NULL as dblTotalizerStartReading
-	,NULL as dblTotalizerEndReading
-	,NULL as dblTotalizerQty
-	,NULL as dblPulseStartReading
-	,NULL as dblPulseEndReading
-	,NULL as dblPulseQty
+	,NULL AS dblReadingQty
+	,NULL AS dblTotalizerStartReading
+	,NULL AS dblTotalizerEndReading
+	,NULL AS dblTotalizerQty
+	,NULL AS dblPulseStartReading
+	,NULL AS dblPulseEndReading
+	,NULL AS dblPulseQty
 	,W.strComment
-	,NULL as strFormulaUsedForTotalizerReading
-	,NULL as strFormulaUsedForPulseReading
-	,NULL as dblMinMoisture
-	,NULL as dblMoisture
-	,NULL as dblMaxMoisture
-	,NULL as dblMinDensity
-	,NULL as dblDensity
-	,NULL as dblMaxDensity
-	,NULL as dblMinColor
-	,NULL as dblColor
-	,NULL as dblMaxColor
-		,L.intLotId 
-	,L.strLotNumber 
+	,NULL AS strFormulaUsedForTotalizerReading
+	,NULL AS strFormulaUsedForPulseReading
+	,NULL AS dblMinMoisture
+	,NULL AS dblMoisture
+	,NULL AS dblMaxMoisture
+	,NULL AS dblMinDensity
+	,NULL AS dblDensity
+	,NULL AS dblMaxDensity
+	,NULL AS dblMinColor
+	,NULL AS dblColor
+	,NULL AS dblMaxColor
+	,L.intLotId
+	,L.strLotNumber
 	,L.strLotAlias
-	,ISNULL(S.intShiftId,0) AS  intShiftId
-	,ISNULL(S.strShiftName,'') AS strShiftName
-	,WP.dtmProductionDate 
-	,3 as intSequenceNo
+	,ISNULL(S.intShiftId, 0) AS intShiftId
+	,ISNULL(S.strShiftName, '') AS strShiftName
+	,WP.dtmProductionDate
+	,3 AS intSequenceNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -281,15 +383,17 @@ JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifi
 WHERE WP.ysnProductionReversed = 0
 ---THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
 --JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WP.intLastModifiedUserId
+
 UNION
-SELECT W.intWorkOrderId,
-	W.strWorkOrderNo
-	,ISNULL(W.dtmOrderDate,W.dtmCreated) AS dtmOrderDate
-	,I.intItemId as intTargetItemId
+
+SELECT W.intWorkOrderId
+	,W.strWorkOrderNo
+	,ISNULL(W.dtmOrderDate, W.dtmCreated) AS dtmOrderDate
+	,I.intItemId AS intTargetItemId
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
-		,I.strShortName AS strTargetItemShortDesc
+	,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity
 	,UM.intUnitMeasureId
 	,UM.strUnitMeasure
@@ -305,8 +409,8 @@ SELECT W.intWorkOrderId,
 	,II.strType
 	,II.strItemNo
 	,II.strDescription
-		,II.strShortName AS strShortDesc
-	,-WP.dblQuantity
+	,II.strShortName AS strShortDesc
+	,- WP.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
 	,WP.dtmBusinessDate
@@ -314,8 +418,8 @@ SELECT W.intWorkOrderId,
 	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [FROM/To]
-	,ISNULL(M.intMachineId,0) AS intMachineId
-	,ISNULL(M.strName,'') AS strMachineName
+	,ISNULL(M.intMachineId, 0) AS intMachineId
+	,ISNULL(M.strName, '') AS strMachineName
 	,WP.strReferenceNo
 	,WP.dtmLastModified
 	,C.intContainerId
@@ -326,32 +430,32 @@ SELECT W.intWorkOrderId,
 	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'PRODUCE REVERSAL' AS TransactionName
-	,NULL as dblReadingQty
-	,NULL as dblTotalizerStartReading
-	,NULL as dblTotalizerEndReading
-	,NULL as dblTotalizerQty
-	,NULL as dblPulseStartReading
-	,NULL as dblPulseEndReading
-	,NULL as dblPulseQty
+	,NULL AS dblReadingQty
+	,NULL AS dblTotalizerStartReading
+	,NULL AS dblTotalizerEndReading
+	,NULL AS dblTotalizerQty
+	,NULL AS dblPulseStartReading
+	,NULL AS dblPulseEndReading
+	,NULL AS dblPulseQty
 	,W.strComment
-	,NULL as strFormulaUsedForTotalizerReading
-	,NULL as strFormulaUsedForPulseReading
-	,NULL as dblMinMoisture
-	,NULL as dblMoisture
-	,NULL as dblMaxMoisture
-	,NULL as dblMinDensity
-	,NULL as dblDensity
-	,NULL as dblMaxDensity
-	,NULL as dblMinColor
-	,NULL as dblColor
-	,NULL as dblMaxColor
-	,L.intLotId 
-	,L.strLotNumber 
+	,NULL AS strFormulaUsedForTotalizerReading
+	,NULL AS strFormulaUsedForPulseReading
+	,NULL AS dblMinMoisture
+	,NULL AS dblMoisture
+	,NULL AS dblMaxMoisture
+	,NULL AS dblMinDensity
+	,NULL AS dblDensity
+	,NULL AS dblMaxDensity
+	,NULL AS dblMinColor
+	,NULL AS dblColor
+	,NULL AS dblMaxColor
+	,L.intLotId
+	,L.strLotNumber
 	,L.strLotAlias
-	,ISNULL(S.intShiftId,0) AS  intShiftId
-	,ISNULL(S.strShiftName,'') AS strShiftName 
-	,WP.dtmProductionDate 
-	,4 as intSequenceNo
+	,ISNULL(S.intShiftId, 0) AS intShiftId
+	,ISNULL(S.strShiftName, '') AS strShiftName
+	,WP.dtmProductionDate
+	,4 AS intSequenceNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -373,4 +477,3 @@ LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
 WHERE WP.ysnProductionReversed = 1
-
