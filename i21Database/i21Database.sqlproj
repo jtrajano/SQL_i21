@@ -3666,6 +3666,10 @@
     <Build Include="dbo\Tables\tblTFValidDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
     <Build Include="dbo\Stored Procedures\uspMBDuplicateConsignmentRate.sql" />
+    <Build Include="dbo\Tables\tblSMEmail.sql" />
+    <Build Include="dbo\Tables\tblSMEmailUpload.sql" />
+    <Build Include="dbo\Tables\tblSMEmailRecipient.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateEmail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
