@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblSMEvents] (
 	[intEventId] [int] IDENTITY(1,1) NOT NULL,
 	[intEntityId] [int] NULL,
-	[intCalendarid] [int] NULL,
+	[intCalendarId] [int] NULL,
 	[strEventTitle] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strEventDetail] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strJsonData] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
