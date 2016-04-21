@@ -125,6 +125,13 @@ namespace iRely.Inventory.BusinessLayer
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
                     }
 
+                    foreach (var receipt in changedReceipts)
+                    {
+                        ReceiptId = receipt.Entity.intInventoryReceiptId;
+                        ysnDeleted = true;
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
+                    }
+
                     if (result.HasError)
                     {
                         throw result.BaseException;
