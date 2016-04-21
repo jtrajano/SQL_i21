@@ -2,12 +2,12 @@
 	AS 
 SELECT TOP 100 PERCENT
    strCompanyName = CompanySetup.strCompanyName
-   , strCompanyAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CompanySetup.strAddress, CompanySetup.strCity, CompanySetup.strState, CompanySetup.strZip, CompanySetup.strCountry, NULL)
+   , strCompanyAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CompanySetup.strAddress, CompanySetup.strCity, CompanySetup.strState, CompanySetup.strZip, CompanySetup.strCountry, NULL, 0)
    , QH.strQuoteNumber
    , GETDATE() AS dtmGeneratedDate
    , QH.dtmQuoteDate
-   , strCustomer = [dbo].fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName)
-   , strSalesperson = [dbo].fnARFormatCustomerAddress(SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, SP.strName)
+   , strCustomer = [dbo].fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName, 0)
+   , strSalesperson = [dbo].fnARFormatCustomerAddress(SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, SP.strName, 0)
    , EL.strLocationName
    , IC.strItemNo
    , TR.strSupplyPoint

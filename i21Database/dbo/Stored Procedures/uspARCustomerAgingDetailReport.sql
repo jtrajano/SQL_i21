@@ -175,7 +175,7 @@ INSERT INTO @temp_aging_table
 EXEC [uspARCustomerAgingDetailAsOfDateReport] @dtmDateFrom, @dtmDateTo, @strSalesperson
 
 SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-     , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
+     , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
      , * 
 FROM @temp_aging_table'
 

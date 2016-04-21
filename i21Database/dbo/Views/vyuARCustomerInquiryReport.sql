@@ -45,10 +45,10 @@ SELECT
 , intRemainingBudgetPeriods	= (SELECT ISNULL(COUNT(*), 0) FROM tblARCustomerBudget WHERE intEntityCustomerId = CAR.intEntityCustomerId AND dtmBudgetDate >= GETDATE())
 , strBudgetStatus			= CASE WHEN 1 = 1 THEN 'Past Due' ELSE 'Current' END
 , strTerm					= (SELECT TOP 1 strTerm FROM vyuARCustomer C INNER JOIN tblSMTerm T ON C.intTermsId = T.intTermID WHERE intEntityCustomerId = CAR.intEntityCustomerId)
-, strContact				= (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
+, strContact				= (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
 									FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1 WHERE C.intEntityCustomerId = CAR.intEntityCustomerId)
 , strCompanyName			= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-, strCompanyAddress			= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
+, strCompanyAddress			= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL,) FROM tblSMCompanySetup)
 FROM vyuARCustomerAgingReport CAR
 LEFT JOIN tblARCustomerBudget CB 
 	ON CAR.intEntityCustomerId = CB.intEntityCustomerId 
