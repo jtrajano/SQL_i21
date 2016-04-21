@@ -72,7 +72,7 @@ BEGIN TRY
 		,@dblReadingQuantity = dblReadingQuantity
 		,@intInputWeightUOMId = intInputWeightUOMId
 		,@intDestinationSubLocationId = intDestinationSubLocationId
-		,@intDestinationStorageLocationId = intDestinationStorageLocationId
+		,@intDestinationStorageLocationId = intDestStorageLocationId
 		,@intUserId = intUserId
 		,@ysnEmptyOut = ysnEmptyOut
 		,@ysnNegativeQuantityAllowed = ysnNegativeQuantityAllowed
@@ -94,7 +94,7 @@ BEGIN TRY
 			,dblReadingQuantity NUMERIC(18, 6)
 			,intInputWeightUOMId INT
 			,intDestinationSubLocationId INT
-			,intDestinationStorageLocationId INT
+			,intDestStorageLocationId INT
 			,intUserId INT
 			,ysnEmptyOut BIT
 			,ysnNegativeQuantityAllowed BIT
@@ -359,7 +359,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
+		SELECT @dblAdjustByQuantity =  @dblNewWeight / (
 				CASE 
 					WHEN @intWeightUOMId IS NULL
 						THEN 1
