@@ -3670,6 +3670,8 @@
     <Build Include="dbo\Stored Procedures\uspCMUnreconcileBankRecords.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Views\vyuLGLoadContainerReceiptContracts.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -16,6 +16,7 @@ SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.dblDeliveredNet
 		,strWeightItemUOM = WeightUOM.strUnitMeasure
 		,LoadDetail.intVendorEntityId
+		,dblItemUOMCF = ItemUOM.dblUnitQty
 
 -- Vendor Info
         ,strVendor = VEN.strName
@@ -32,13 +33,29 @@ SELECT LoadDetail.intLoadDetailId
 		,strVendorMobile = VEN.strMobile
 		,strVendorPhone = VEN.strPhone
 		,LoadDetail.intPContractDetailId
+		,intPContractHeaderId = PDetail.intContractHeaderId
+		,intPCommodityId = PDetail.intCommodityId
         ,strPContractNumber = PDetail.strContractNumber
         ,intPContractSeq = PDetail.intContractSeq
+		,intPLifeTime = PDetail.intLifeTime
+		,strPLifeTimeType = PDetail.strLifeTimeType
 		,strVendorContract = PDetail.strCustomerContract
 		,dblPCashPrice = PDetail.dblCashPrice
+		,strPCostUOM = PDetail.strPriceUOM
+  	    ,intPCostUOMId = PDetail.intPriceItemUOMId
+		,dblPCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = PDetail.intPriceItemUOMId),0)
 		,ysnPLoad = PDetail.ysnLoad
 		,dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
 		,intPNoOfLoads = PDetail.intNoOfLoad
+		,intPStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId),0)
+        ,strPStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId)
+		,strPStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId)
+        ,dblPStockUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId),0)
+		,strPCurrency = PDetail.strCurrency
+	    ,strPMainCurrency = PDetail.strMainCurrency
+	    ,ysnPSubCurrency = PDetail.ysnSubCurrency
+	    ,dblPMainCashPrice = PDetail.dblMainCashPrice
+	    ,dblPFranchise = CASE WHEN PWG.dblFranchise > 0 THEN PWG.dblFranchise / 100 ELSE 0 END
 
 -- Inbound Company Location
 		,LoadDetail.intPCompanyLocationId
@@ -69,13 +86,29 @@ SELECT LoadDetail.intLoadDetailId
 		,strCustomerPhone = CEN.strPhone
 
 		,LoadDetail.intSContractDetailId
+		,intSContractHeaderId = SDetail.intContractHeaderId
         ,strSContractNumber = SDetail.strContractNumber
         ,intSContractSeq = SDetail.intContractSeq
+		,intSCommodityId = SDetail.intCommodityId
+		,intSLifeTime = SDetail.intLifeTime
+		,strSLifeTimeType = SDetail.strLifeTimeType
 		,strCustomerContract = SDetail.strCustomerContract
 		,dblSCashPrice = SDetail.dblCashPrice
+		,strSCostUOM = SDetail.strPriceUOM
+  	    ,intSCostUOMId = SDetail.intPriceItemUOMId
+		,dblSCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = SDetail.intPriceItemUOMId),0)
 		,ysnSLoad = SDetail.ysnLoad
 		,dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
 		,intSNoOfLoads = SDetail.intNoOfLoad
+		,intSStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId),0)
+        ,strSStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId)
+		,strSStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId)
+        ,dblSStockUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId),0)
+		,strSCurrency = SDetail.strCurrency
+	    ,strSMainCurrency = SDetail.strMainCurrency
+	    ,ysnSSubCurrency = SDetail.ysnSubCurrency
+	    ,dblSMainCashPrice = SDetail.dblMainCashPrice
+	    ,dblSFranchise = CASE WHEN SWG.dblFranchise > 0 THEN SWG.dblFranchise / 100 ELSE 0 END
 
 -- Outbound Company Location
 		,LoadDetail.intSCompanyLocationId
@@ -96,6 +129,7 @@ SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.strLoadDirectionMsg
 		,LoadDetail.ysnUpdateLoadDirections
 		,LoadDetail.ysnPrintLoadDirections
+		,Item.strLotTracking
 
 -- Load Header
 		,Load.intLoadId
@@ -158,7 +192,7 @@ SELECT LoadDetail.intLoadDetailId
 		,Load.ysnDispatchMailSent
 		,Load.dtmDispatchMailSent
 		,Load.dtmCancelDispatchMailSent
-
+		,Load.intCompanyLocationId
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
@@ -182,3 +216,5 @@ LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoad
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
+LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PDetail.intWeightId
+LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SDetail.intWeightId
