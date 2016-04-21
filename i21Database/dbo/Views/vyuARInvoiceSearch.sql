@@ -7,7 +7,7 @@ SELECT
 	,strCustomerNumber				= C.strCustomerNumber
 	,intEntityCustomerId			= C.intEntityCustomerId
 	,strTransactionType				= I.strTransactionType
-	,strType						= CASE WHEN I.ysnTemplate = 1 THEN 'Recurring' ELSE ISNULL(I.strType, 'Standard') END
+	,strType						= ISNULL(I.strType, 'Standard')
 	,strPONumber					= I.strPONumber
 	,strTerm						= T.strTerm
 	,strBOLNumber					= I.strBOLNumber
@@ -22,6 +22,7 @@ SELECT
 	,ysnProcessed					= I.ysnProcessed
 	,ysnForgiven					= I.ysnForgiven
 	,ysnCalculated					= I.ysnCalculated
+	,ysnRecurring					= I.ysnTemplate
 	,dblInvoiceTotal				= ISNULL(I.dblInvoiceTotal, 0)
 	,dblDiscount					= ISNULL(I.dblDiscount,0)
 	,dblDiscountAvailable			= ISNULL(I.dblDiscountAvailable,0)
@@ -45,7 +46,7 @@ SELECT
 	,strEnteredBy					= EB.strName
 	,dtmBatchDate					= GL.dtmDate
 	,strBatchId						= GL.strBatchId
-	,strUserEntered					= GL.strName
+	,strUserEntered					= GL.strName	
 	,ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM         
 	dbo.tblARInvoice AS I 
