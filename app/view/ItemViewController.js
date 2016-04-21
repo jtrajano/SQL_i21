@@ -1153,6 +1153,13 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    deleteMessage: function() {
+        var win = Ext.WindowMgr.getActive();
+        var itemNo = win.down("#txtItemNo").value;
+        var msg = "Are you sure you want to delete Item <b>" + Ext.util.Format.htmlEncode(itemNo) + "</b>?";
+        return msg;
+    },
+
     setupContext : function(options){
         var me = this,
             win = options.window,
@@ -1189,6 +1196,7 @@ Ext.define('Inventory.view.ItemViewController', {
             store  : store,
             createRecord : me.createRecord,
             validateRecord : me.validateRecord,
+            deleteMsg: me.deleteMessage,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             enableAudit: true,
@@ -1439,7 +1447,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (config) {
             win.show();
-
             var context = me.setupContext( {window : win} );
 
             if (config.action === 'new') {
