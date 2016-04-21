@@ -99,10 +99,10 @@ UNION SELECT DISTINCT
 	dtmCreated = GETDATE(),
 	intLastModifiedUserId = @intUserId,
 	dtmLastModified = GETDATE()
-FROM vyuARUndepositedPayment v INNER JOIN tblCMBankAccount b
+FROM vyuARUndepositedPayment v LEFT JOIN tblCMBankAccount b
 			ON b.intBankAccountId = v.intBankAccountId --OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
 WHERE	v.intBankAccountId = @intBankAccountId
-		--OR ISNULL(v.intBankAccountId,0) = 0
+		OR ISNULL(v.intBankAccountId,0) = 0 -- AR-2203
 		AND	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
