@@ -7,6 +7,7 @@
     [ysnClr] INT NULL, 
     [dblAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [intUserId] INT NULL, 
+	[ysnReconciled] BIT  NOT NULL DEFAULT 1,
     [dtmDateReconciled] DATETIME NOT NULL, 
     [dtmLog] DATETIME NOT NULL, 
     [intConcurrencyId] INT NULL

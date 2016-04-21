@@ -3667,6 +3667,9 @@
     <Build Include="dbo\Tables\tblETDeliveryMetrics.sql" />
     <Build Include="dbo\Tables\tblSMCalendars.sql" />
     <Build Include="dbo\Tables\tblSMCalendarEntity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUnreconcileBankRecords.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
