@@ -3,6 +3,7 @@ AS
 SELECT
 	 LD.intLoadDetailId
 	,LDCL.intLoadId
+	,LDCL.intLoadDetailContainerLinkId
 	,LC.intLoadContainerId
 	,L.intPurchaseSale
 	,L.strLoadNumber
