@@ -48,7 +48,7 @@ SELECT
 , strContact				= (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
 									FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1 WHERE C.intEntityCustomerId = CAR.intEntityCustomerId)
 , strCompanyName			= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-, strCompanyAddress			= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL,) FROM tblSMCompanySetup)
+, strCompanyAddress			= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
 FROM vyuARCustomerAgingReport CAR
 LEFT JOIN tblARCustomerBudget CB 
 	ON CAR.intEntityCustomerId = CB.intEntityCustomerId 
