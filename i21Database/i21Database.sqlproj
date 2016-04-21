@@ -3665,6 +3665,7 @@
     <Build Include="dbo\Tables\tblTFOriginDestinationState.sql" />
     <Build Include="dbo\Tables\tblTFValidDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBDuplicateConsignmentRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
