@@ -7,8 +7,7 @@ SELECT FPReading.intFuelPointReadingId
 	, Customer.strCustomerNumber
 	, FPReading.intEntityLocationId
 	, EntityLocation.strLocationName
-	, FPReading.dtmDateFrom
-	, FPReading.dtmDateTo
+	, FPReading.dtmDate
 	, FPReading.intSort
 FROM tblMBFuelPointReading FPReading
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = FPReading.intEntityCustomerId
