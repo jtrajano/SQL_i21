@@ -44,7 +44,7 @@ BEGIN TRY
 	DECLARE @dblOriginalRequiredQty NUMERIC(38,20)
 	DECLARE @dblPartialQuantity NUMERIC(38,20)
 	DECLARE @dblRemainingRequiredQty NUMERIC(38,20)
-	DECLARE @intPartialQuantityStorageLocationId INT
+	DECLARE @intPartialQuantitySubLocationId INT
 	DECLARE @intOriginalIssuedUOMTypeId INT
 	DECLARE @intKitStagingLocationId INT
 	DECLARE @intBlendStagingLocationId INT
@@ -121,12 +121,12 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Show Available Lots By Storage Location'
 
-	SELECT @intPartialQuantityStorageLocationId = ISNULL(pa.strAttributeValue, 0)
+	SELECT @intPartialQuantitySubLocationId = ISNULL(pa.strAttributeValue, 0)
 	FROM tblMFManufacturingProcessAttribute pa
 	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Partial Quantity Storage Location'
+		AND at.strAttributeName = 'Partial Quantity Sub Location'
 
 	SELECT @intKitStagingLocationId = pa.strAttributeValue
 	FROM tblMFManufacturingProcessAttribute pa
@@ -647,7 +647,7 @@ BEGIN TRY
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId
-					--,@intPartialQuantityStorageLocationId
+					--,@intPartialQuantitySubLocationId
 					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
 				AND ISNULL(SL.ysnAllowConsume,0)=1
 				AND L.intLotId NOT IN (Select intLotId From @tblExcludedLot Where intItemId=@intRawItemId)
@@ -958,13 +958,14 @@ BEGIN TRY
 			End
 
 			--Full Bag Pick
-			If ISNULL(@intPartialQuantityStorageLocationId,0)>0 AND @intOriginalIssuedUOMTypeId=@intIssuedUOMTypeId
-				DELETE FROM #tblInputLot WHERE intStorageLocationId=@intPartialQuantityStorageLocationId
+			If ISNULL(@intPartialQuantitySubLocationId,0)>0 AND @intOriginalIssuedUOMTypeId=@intIssuedUOMTypeId
+				DELETE FROM #tblInputLot WHERE intStorageLocationId IN 
+				(Select intStorageLocationId From tblICStorageLocation Where intSubLocationId = ISNULL(@intPartialQuantitySubLocationId,0))
 
 			--Hand Add Pick
 			--Pick From Hand Add, remaining pick from Full Bag 
 			--#tblInputLotHandAdd table used for ordering of hand add and full bag add location lots
-			If ISNULL(@intPartialQuantityStorageLocationId,0)>0 AND @intOriginalIssuedUOMTypeId<>@intIssuedUOMTypeId
+			If ISNULL(@intPartialQuantitySubLocationId,0)>0 AND @intOriginalIssuedUOMTypeId<>@intIssuedUOMTypeId
 			Begin
 				DELETE FROM #tblInputLotHandAdd
 
@@ -974,10 +975,12 @@ BEGIN TRY
 				DELETE FROM #tblInputLot
 
 				INSERT INTO #tblInputLot
-				Select * From #tblInputLotHandAdd Where intStorageLocationId=ISNULL(@intPartialQuantityStorageLocationId,0)
+				Select * From #tblInputLotHandAdd Where intStorageLocationId IN 
+					(Select intStorageLocationId From tblICStorageLocation Where intSubLocationId = ISNULL(@intPartialQuantitySubLocationId,0))
 				
 				INSERT INTO #tblInputLot
-				Select * From #tblInputLotHandAdd Where intStorageLocationId<>ISNULL(@intPartialQuantityStorageLocationId,0)
+				Select * From #tblInputLotHandAdd Where intStorageLocationId NOT IN 
+					(Select intStorageLocationId From tblICStorageLocation Where intSubLocationId = ISNULL(@intPartialQuantitySubLocationId,0))
 			End
 
 			If @intOriginalIssuedUOMTypeId<>@intIssuedUOMTypeId AND (Select COUNT(1) From #tblInputLot)=0
@@ -1004,7 +1007,7 @@ BEGIN TRY
 
 			WHILE (@@FETCH_STATUS <> - 1)
 			BEGIN
-				IF @dblRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantityStorageLocationId, 0) > 0 AND @intIssuedUOMTypeId = 2
+				IF @dblRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantitySubLocationId, 0) > 0 AND @intIssuedUOMTypeId = 2
 					--SELECT @intIssuedUOMTypeId = 1
 					GOTO LOOP_END
 
@@ -1119,7 +1122,7 @@ BEGIN TRY
 							FROM #tblParentLot L
 							WHERE L.intParentLotId = @intParentLotId --AND L.dblWeight > 0
 
-						If ISNULL(@intPartialQuantityStorageLocationId, 0) > 0 AND @intIssuedUOMTypeId=2
+						If ISNULL(@intPartialQuantitySubLocationId, 0) > 0 AND @intIssuedUOMTypeId=2
 						Begin
 							SET @dblRequiredQty=@dblRequiredQty - Floor(@dblRequiredQty / @dblWeightPerQty) * @dblWeightPerQty
 							If @dblRequiredQty = 0 
@@ -1282,7 +1285,7 @@ BEGIN TRY
 							Delete From @tblInputItem Where intItemId=@intRawItemId And ysnIsSubstitute=0 --Remove the main Item
 						End
 					Else --substitute does not exists then show 0 for main item
-						If ISNULL(@intPartialQuantityStorageLocationId, 0) > 0
+						If ISNULL(@intPartialQuantitySubLocationId, 0) > 0
 							INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
 							intItemUOMId,	strUOM,	dblIssuedQuantity,	intItemIssuedUOMId,	strIssuedUOM,	intItemId,	intRecipeItemId,	
 							dblUnitCost,	dblDensity,	dblRequiredQtyPerSheet,	dblWeightPerUnit,	dblRiskScore,	intStorageLocationId,	
