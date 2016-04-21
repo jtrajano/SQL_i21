@@ -7,8 +7,7 @@ SELECT FPPriceChange.intFuelPointPriceChangeId
 	, Customer.strCustomerNumber
 	, FPPriceChange.intEntityLocationId
 	, EntityLocation.strLocationName
-	, FPPriceChange.dtmDateFrom
-	, FPPriceChange.dtmDateTo
+	, FPPriceChange.dtmDate
 	, FPPriceChange.intSort
 FROM tblMBFuelPointPriceChange FPPriceChange
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = FPPriceChange.intEntityCustomerId

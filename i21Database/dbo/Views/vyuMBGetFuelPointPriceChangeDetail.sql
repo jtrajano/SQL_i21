@@ -3,10 +3,14 @@
 	
 SELECT FPPriceChangeDetail.intFuelPointPriceChangeDetailId
 	, FPPriceChangeDetail.intFuelPointPriceChangeId
-	, FPPriceChangeDetail.dtmDate
+	, FPPriceChange.strCustomerName
+	, FPPriceChange.strCustomerNumber
+	, FPPriceChange.strLocationName
+	, FPPriceChange.dtmDate
 	, FPPriceChangeDetail.strFuelingPoint
 	, FPPriceChangeDetail.strProductNo
 	, FPPriceChangeDetail.dblPrice
 	, FPPriceChangeDetail.ysnBilled
 	, FPPriceChangeDetail.intSort
 FROM tblMBFuelPointPriceChangeDetail FPPriceChangeDetail
+LEFT JOIN vyuMBGetFuelPointPriceChange FPPriceChange ON FPPriceChange.intFuelPointPriceChangeId = FPPriceChangeDetail.intFuelPointPriceChangeId
