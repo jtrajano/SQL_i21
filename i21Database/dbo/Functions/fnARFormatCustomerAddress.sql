@@ -8,7 +8,8 @@
 	@strState		 NVARCHAR(50)  = NULL,
 	@strZipCode		 NVARCHAR(12)  = NULL,
 	@strCountry		 NVARCHAR(25)  = NULL,
-	@strBillToName   NVARCHAR(100) = NULL
+	@strBillToName   NVARCHAR(100) = NULL,
+	@ysnIncludeEntityName BIT = NULL
 )
 RETURNS NVARCHAR(MAX) AS
 BEGIN
@@ -23,11 +24,14 @@ BEGIN
 	SET @strState = CASE WHEN @strState = '' THEN NULL ELSE @strState END
 	SET @strZipCode = CASE WHEN @strZipCode = '' THEN NULL ELSE @strZipCode END
 	SET @strCountry = CASE WHEN @strCountry = '' THEN NULL ELSE @strCountry END
+	
+
+	if @ysnIncludeEntityName = 0
+		SET @strBillToName = null
 
 	IF @strBillToName IS NULL
 		BEGIN
-			SET @fullAddress = ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
-					 + ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
+			SET @fullAddress = ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
 					 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
 					 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
 					 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')
@@ -41,6 +45,7 @@ BEGIN
 			SET @fullAddress = ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strCity), '')
 				 + ISNULL(', ' + RTRIM(@strState), '')
