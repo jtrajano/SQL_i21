@@ -3592,6 +3592,7 @@
     <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
     <Build Include="dbo\Views\vyuPRForm941Report.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleGroup.sql" />
+    <Build Include="dbo\Functions\fnARComputeDiscountForEarlyPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
