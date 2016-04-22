@@ -320,7 +320,7 @@ BEGIN
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
 		,[intItemUOMId]				=	ARID.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	ARID.dblQtyShipped - ARTD.dblQtyShipped
+		,[dblQty]					=	ARID.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered)
 		,[dblUOMQty]				=	ICIUOM.dblUnitQty
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
@@ -360,7 +360,7 @@ BEGIN
 		AND ARI.strTransactionType = 'Invoice'
 		AND ARID.intItemId = ARTD.intItemId		
 		AND ARID.intItemUOMId = ARTD.intItemUOMId 
-		AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
+		AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
 		AND ARID.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
 		
@@ -464,7 +464,7 @@ BEGIN
 		AND ARI.strTransactionType = 'Invoice'
 		AND ARID.intItemId = ARTD.intItemId		
 		AND ARID.intItemUOMId = ARTD.intItemUOMId 
-		AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
+		AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
 		AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered) 
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
 		
