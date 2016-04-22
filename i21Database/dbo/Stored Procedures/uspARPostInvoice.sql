@@ -1207,6 +1207,7 @@ END CATCH
 				INNER JOIN 
 					tblARPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
+						AND ISNULL(A.ysnPosted,0) = 1
 				INNER JOIN 
 					tblARInvoice C
 						ON B.intInvoiceId = C.intInvoiceId
@@ -2636,6 +2637,19 @@ IF @recap = 0
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+					UPDATE
+						tblARPaymentDetail
+					SET
+						tblARPaymentDetail.dblInvoiceTotal = ARI.dblInvoiceTotal 
+						,tblARPaymentDetail.dblAmountDue = (ARI.dblInvoiceTotal + ISNULL(tblARPaymentDetail.dblInterest, @ZeroDecimal))  - (ISNULL(tblARPaymentDetail.dblPayment, @ZeroDecimal) + ISNULL(tblARPaymentDetail.dblDiscount, @ZeroDecimal))
+					FROM
+						tblARInvoice ARI
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					WHERE
+						tblARPaymentDetail.intInvoiceId = ARI.intInvoiceId 
 
 					--Insert Successfully posted transactions.
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
