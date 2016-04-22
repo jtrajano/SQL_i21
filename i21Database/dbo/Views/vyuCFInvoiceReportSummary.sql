@@ -2,9 +2,10 @@
 AS
 SELECT        cfCardAccount.strDepartment, cfCardAccount.intAccountId, cfTrans.intCardId, cfCardAccount.strCardNumber, cfTrans.intProductId, cfTrans.intARItemId, cfSiteItem.strProductNumber, cfSiteItem.strProductDescription,
                           cfCardAccount.strCardDescription, cfTrans.strMiscellaneous, ISNULL(SUM(cfTrans.dblQuantity), 0) AS dblTotalQuantity, ISNULL(SUM(cfTransGrossPrice.dblCalculatedAmount), 0) AS dblTotalGrossAmount, 
-                         ISNULL(SUM(cfTransPrice.dblCalculatedAmount), 0) - ISNULL(SUM(TotalTaxes.dblTaxCalculatedAmount), 0) AS dblTotalNetAmount, ISNULL(SUM(cfTransPrice.dblCalculatedAmount), 0) AS dblTotalAmount, 
-                         ISNULL(SUM(FETTaxes.dblTaxCalculatedAmount), 0) AS TotalFET, ISNULL(SUM(SETTaxes.dblTaxCalculatedAmount), 0) AS TotalSET, ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) AS TotalSST, 
-                         ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0) AS TotalLC, ISNULL(SUM(TotalTaxes.dblTaxCalculatedAmount), 0) AS t
+                         ISNULL(SUM(cfTransPrice.dblCalculatedAmount), 0) AS dblTotalAmount, ISNULL(SUM(FETTaxes.dblTaxCalculatedAmount), 0) AS TotalFET, ISNULL(SUM(SETTaxes.dblTaxCalculatedAmount), 0) AS TotalSET, 
+                         ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) AS TotalSST, ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0) AS TotalLC, ISNULL(SUM(cfTransPrice.dblCalculatedAmount), 0) 
+                         - (ISNULL(SUM(FETTaxes.dblTaxCalculatedAmount), 0) + ISNULL(SUM(SETTaxes.dblTaxCalculatedAmount), 0) + ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) 
+                         + ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0)) AS dblTotalNetAmount
 FROM            dbo.vyuCFInvoice AS arInv INNER JOIN
                          dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId INNER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON cfTrans.intCardId = cfCardAccount.intCardId INNER JOIN
