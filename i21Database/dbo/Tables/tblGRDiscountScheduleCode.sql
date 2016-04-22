@@ -17,7 +17,7 @@
 	[dtmEffectiveDate] DATETIME NULL,
 	[dtmTerminationDate] DATETIME NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
-	[intSort] INT NULL DEFAULT 1, 
+	[intSort] INT NULL , 
     [strDiscountChargeType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] PRIMARY KEY ([intDiscountScheduleCodeId]), 
     CONSTRAINT [UK_tblGRDiscountScheduleCode_strDiscountCode_intDiscountScheduleId_dtmEffectiveDate_dtmTerminationDate] UNIQUE ([strDiscountCode], [intDiscountScheduleId], [dtmEffectiveDate], [dtmTerminationDate]), 
