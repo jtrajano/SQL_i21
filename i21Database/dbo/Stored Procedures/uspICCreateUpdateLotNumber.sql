@@ -85,6 +85,7 @@ DECLARE
 	,@strParentLotAlias			AS NVARCHAR(50) 
 	,@intLotStatusId_ItemLotTable AS INT 
 	,@intSplitFromLotId			AS INT 
+	,@dblWeightPerQty			AS NUMERIC(38,20)
 
 DECLARE @OwnerShipType_Own AS INT = 1
 
@@ -152,6 +153,7 @@ SELECT  intId
 		,strParentLotAlias
 		,intLotStatusId
 		,intSplitFromLotId
+		,dblWeightPerQty
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -192,6 +194,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strParentLotAlias
 		,@intLotStatusId_ItemLotTable
 		,@intSplitFromLotId
+		,@dblWeightPerQty
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -333,6 +336,7 @@ BEGIN
 						,intStorageLocationId = @intStorageLocationId
 						,dblQty = @dblQty
 						,dblWeight = @dblWeight
+						,dblWeightPerQty = @dblWeightPerQty
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -379,15 +383,17 @@ BEGIN
 														END 
 													ELSE 
 														-- Increase the weight per Qty if there is an incoming stock for the lot. 
-														CASE	WHEN LotToUpdate.dblQty > 0  THEN 
+														CASE	WHEN LotToUpdate.dblQty > 0 AND LotToUpdate.dblWeightPerQty <> LotMaster.dblWeightPerQty THEN 
 																	dbo.fnCalculateWeightUnitQty(
 																		(
 																			LotMaster.dblQty 
-																			+ LotToUpdate.dblQty
+																			+ dbo.fnCalculateQtyBetweenUOM(LotToUpdate.intItemUOMId, LotMaster.intWeightUOMId, LotToUpdate.dblQty) 
 																		)
 																		,(
-																			(CAST(LotMaster.dblQty AS FLOAT) * CAST(LotMaster.dblWeightPerQty AS FLOAT))
-																			+ CAST(LotToUpdate.dblWeight AS FLOAT) 
+																			--(CAST(LotMaster.dblQty AS FLOAT) * CAST(LotMaster.dblWeightPerQty AS FLOAT))
+																			--+ CAST(LotToUpdate.dblWeight AS FLOAT) 
+																			dbo.fnMultiply(LotMaster.dblQty, LotMaster.dblWeightPerQty)	
+																			+ LotToUpdate.dblWeight
 																		)
 																	) 
 																ELSE 
@@ -711,6 +717,7 @@ BEGIN
 		,@strParentLotAlias
 		,@intLotStatusId_ItemLotTable
 		,@intSplitFromLotId
+		,@dblWeightPerQty
 	;
 END
 

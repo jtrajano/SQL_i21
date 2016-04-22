@@ -59,7 +59,7 @@ BEGIN
 
 	-- Pad zeroes to the left 
 	BEGIN 
-		DECLARE @actualDivide AS NUMERIC(38,20) = CAST(@dividend AS NUMERIC(18, 6)) / CAST(@divisor AS NUMERIC(18, 6)) 
+		DECLARE @actualDivide AS NUMERIC(38,20) = CAST(@dividend AS FLOAT) / CAST(@divisor AS FLOAT) 
 		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@actualDivide, '.', ''), '-', '')) - 1) + @rawResult
 	END 
 

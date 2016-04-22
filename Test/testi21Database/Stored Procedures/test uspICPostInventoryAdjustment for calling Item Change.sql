@@ -26,6 +26,12 @@ BEGIN
 		SET intAdjustmentType = @ADJUSTMENT_TYPE_ITEM_CHANGE					
 	END 
 
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectException 
+			@ExpectedMessage = 'G/L entries are expected. Cannot continue because it is missing.' 
+	END	
+
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryAdjustment 
@@ -35,10 +41,10 @@ BEGIN
 			,@intEntityId
 	END 
 
-	-- Assert
-	BEGIN 
-		--Assert uspICPostInventoryAdjustmentItemChange is called 
-		IF @ysnPost = 1 AND NOT EXISTS (SELECT 1 FROM dbo.uspICPostInventoryAdjustmentItemChange_SpyProcedureLog)
-			EXEC tSQLt.Fail 'A helper stored procedure uspICPostInventoryAdjustmentItemChange is expected to be called.'
-	END
+	---- Assert
+	--BEGIN 
+	--	--Assert uspICPostInventoryAdjustmentItemChange is called 
+	--	IF @ysnPost = 1 AND NOT EXISTS (SELECT 1 FROM dbo.uspICPostInventoryAdjustmentItemChange_SpyProcedureLog)
+	--		EXEC tSQLt.Fail 'A helper stored procedure uspICPostInventoryAdjustmentItemChange is expected to be called.'
+	--END
 END 
