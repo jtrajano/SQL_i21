@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE uspCFInvoiceReport(
+CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -12,6 +12,7 @@ BEGIN
 		,intInvoiceId			   = 0
 		,intProductId			   = 0
 		,intCardId				   = 0
+		,intOdometer			   = 0
 		,EXPR18					   = 0
 		,intAccountId			   = 0
 		,intInvoiceCycle		   = 0
@@ -42,6 +43,8 @@ BEGIN
 		,strProductNumber		   = ''
 		,strItemNo				   = ''
 		,strDescription			   = ''
+		,strVehicleNumber		   = ''
+		,strVehicleDescription	   = ''
 		,dblQuantity			   = 0.0
 		,dblCalculatedTotalAmount  = 0.0
 		,dblOriginalTotalAmount	   = 0.0
