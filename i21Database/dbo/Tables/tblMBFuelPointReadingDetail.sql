@@ -2,7 +2,6 @@
 (
 	[intFuelPointReadingDetailId] INT NOT NULL IDENTITY, 
     [intFuelPointReadingId] INT NOT NULL, 
-    [dtmDate] DATETIME NOT NULL DEFAULT (GETDATE()), 
     [strFuelingPoint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strProductNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dblVolume] NUMERIC(18, 6) NULL DEFAULT ((0)), 

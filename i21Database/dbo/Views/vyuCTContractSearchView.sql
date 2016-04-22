@@ -23,7 +23,8 @@ AS
 				CH.strPricingLevelName,				CH.strLoadUnitMeasure,			CH.strCategoryUnitMeasure,
 				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				BL.dblAppliedQty,
 				CH.dtmCreated,						CH.strContractPlan,				CH.dtmSigned,
-				CH.strCreatedBy,					CH.strLastModifiedBy,
+				CH.strCreatedBy,					CH.strLastModifiedBy,			CH.ysnExported,
+				CH.dtmExported,
 
 				CH.intContractPlanId,				CH.intEntityId,					CH.intCommodityId,
 				CH.intGradeId,						CH.intWeightId,					CH.intContractTextId,

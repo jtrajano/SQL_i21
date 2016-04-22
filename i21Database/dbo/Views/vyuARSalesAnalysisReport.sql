@@ -3,7 +3,7 @@ AS
 SELECT strRecordNumber
 	 , intTransactionId
 	 , A.intAccountId	 
-	 , DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) AS dtmDate
+	 , dtmDate				= DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0)
 	 , A.intCompanyLocationId
 	 , A.intEntityCustomerId	 
 	 , IC.intItemId
@@ -14,14 +14,19 @@ SELECT strRecordNumber
 	 , A.intEntitySalespersonId	 
 	 , A.strTransactionType
 	 , A.strType
-	 , ISNULL(A.dblQtyOrdered, 0)	  AS dblQtyOrdered
-	 , ISNULL(A.dblQtyShipped, 0)     AS dblQtyShipped
-	 , ISNULL(A.dblStandardCost, 0)	  AS dblCost	 
-	 , dblMargin = (ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
-						CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
-							THEN ISNULL(A.dblQtyShipped, 0) 
-							ELSE ISNULL(A.dblQtyOrdered, 0)
-						END
+	 , dblQtyOrdered		= ISNULL(A.dblQtyOrdered, 0)
+	 , dblQtyShipped		= ISNULL(A.dblQtyShipped, 0)
+	 , dblUnitCost			= ISNULL(A.dblStandardCost, 0)
+	 , dblTotalCost			= ISNULL(A.dblStandardCost, 0) *
+								CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
+									THEN ISNULL(A.dblQtyShipped, 0) 
+									ELSE ISNULL(A.dblQtyOrdered, 0)
+								END
+	 , dblMargin			= (ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
+								CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
+									THEN ISNULL(A.dblQtyShipped, 0) 
+									ELSE ISNULL(A.dblQtyOrdered, 0)
+								END
 	 , dblMarginPercentage = CASE WHEN (ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
 											CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
 												THEN ISNULL(A.dblQtyShipped, 0) 
@@ -29,28 +34,28 @@ SELECT strRecordNumber
 											END > 0 
 								 THEN ((ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) / ISNULL(A.dblPrice, 0)) * 100 ELSE 0 
 							 END
-	 , ISNULL(A.dblPrice, 0)		  AS dblPrice 
-	 , ISNULL(A.dblTax, 0)			  AS dblTax
-	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
-	 , ISNULL(A.dblTotal, 0)		  AS dblTotal
+	 , dblPrice				= ISNULL(A.dblPrice, 0)
+	 , dblTax				= ISNULL(A.dblTax, 0)
+	 , dblLineTotal			= ISNULL(A.dblLineTotal, 0)
+	 , dblTotal				= ISNULL(A.dblTotal, 0)
 	 , C.strCustomerNumber
-	 , GA.strAccountId				  AS strAccountId
-	 , GA.strDescription			  AS strAccountName
+	 , strAccountId			= GA.strAccountId
+	 , strAccountName		= GA.strDescription
 	 , L.strLocationName
-	 , IC.strItemNo					  AS strItemName
-	 , IC.strDescription              AS strItemDesc
-	 , A.strItemDescription			  AS strLineDesc
-	 , UOM.strUnitMeasure			  AS strUOM
+	 , strItemName			= IC.strItemNo
+	 , strItemDesc			= IC.strDescription
+	 , strLineDesc			= A.strItemDescription
+	 , strUOM				= UOM.strUnitMeasure
 	 , ICM.strManufacturer
 	 , ICB.strBrandName
-	 , ICC.strCommodityCode			  AS strCommodityName
-	 , CAT.strCategoryCode			  AS strCategoryName
-     , E.strName					  AS strCustomerName
-	 , ESP.strName					  AS strSalespersonName	 
-	 , RTRIM(A.strBillToLocationName) AS strBillTo
-	 , RTRIM(A.strShipToLocationName) AS strShipTo
-	 , REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0') AS strSiteNumber
-	 , TMS.strDescription			  AS strSiteDescription
+	 , strCommodityName		= ICC.strCommodityCode
+	 , strCategoryName		= CAT.strCategoryCode
+     , strCustomerName		= E.strName
+	 , strSalespersonName	= ESP.strName
+	 , strBillTo			= RTRIM(A.strBillToLocationName)
+	 , strShipTo			= RTRIM(A.strShipToLocationName)
+	 , strSiteNumber		= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0')
+	 , strSiteDescription	= TMS.strDescription
 FROM
 (SELECT I.strInvoiceNumber			  AS strRecordNumber
 	  , I.intInvoiceId				  AS intTransactionId

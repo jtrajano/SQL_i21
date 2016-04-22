@@ -13,5 +13,6 @@
 			,strGroup = (select top 1 strGroup from tblHDTicketGroup where intTicketGroupId = tblHDModule.intTicketGroupId)
 			,strModule = strModule
 			,ysnSupported = ysnSupported
+			,strProduct = (select top 1 strProduct from tblHDTicketProduct where intTicketProductId = tblHDModule.intTicketProductId)
 		from
 			tblHDModule

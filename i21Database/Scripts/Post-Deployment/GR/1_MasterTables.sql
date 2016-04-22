@@ -126,3 +126,8 @@ BEGIN
 	INNER JOIN tblICItemUOM ItemUOM ON SCT.intItemId = ItemUOM.intItemId
 	WHERE ItemUOM.ysnStockUnit = 1
 END
+GO
+IF EXISTS(SELECT 1 FROM tblGRStorageScheduleRule WHERE strAllowancePeriod IS NULL)
+BEGIN
+	UPDATE tblGRStorageScheduleRule SET strAllowancePeriod='Day(s)',dtmAllowancePeriodFrom=NULL,dtmAllowancePeriodTo=NULL WHERE strAllowancePeriod IS NULL
+END

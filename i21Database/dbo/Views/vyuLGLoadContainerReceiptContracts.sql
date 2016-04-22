@@ -54,6 +54,8 @@ SELECT
 	,dblContainerWeightPerQty = NULL
 	,intSubLocationId = NULL
 	,strSubLocationName = NULL
+	,intLoadContainerId = -1
+	,intLoadDetailContainerLinkId = -1
 FROM vyuLGLoadDetailView WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
 
 UNION ALL
@@ -113,4 +115,6 @@ SELECT
 	,dblContainerWeightPerQty
 	,intSubLocationId
 	,strSubLocationName
+	,intLoadContainerId
+	,intLoadDetailContainerLinkId
 FROM vyuLGLoadContainerPurchaseContracts

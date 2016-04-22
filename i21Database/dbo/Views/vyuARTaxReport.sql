@@ -26,6 +26,9 @@ SELECT TC.intTaxCodeId
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
 							WHERE intInvoiceId = I.intInvoiceId)
+	 , dblQtyShipped	= (SELECT TOP 1 dblQtyShipped FROM tblARInvoiceDetail IID 
+									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
+							WHERE intInvoiceId = I.intInvoiceId)
 	 , strItemCategory  = (SELECT TOP 1 ICC.strDescription FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId

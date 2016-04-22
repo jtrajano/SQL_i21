@@ -15,6 +15,7 @@ SELECT
 	A.dtmBillDate,
 	A.dtmDueDate,
 	A.strVendorOrderNumber,
+	A.strReference,
 	A.dtmDateCreated,
 	A.intTransactionType,
 	A.intEntityVendorId,

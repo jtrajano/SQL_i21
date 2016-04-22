@@ -137,7 +137,7 @@ BEGIN
 		[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
 		[intAccountId] 			=	@APAccount,
 		[strBillId]				=	@generatedBillRecordId,
-		[strReference] 			=	NULL,
+		[strReference] 			=	A.strBillOfLading,
 		[dblTotal] 				=	A.dblInvoiceAmount,
 		[dblAmountDue]			=	A.dblInvoiceAmount,
 		[intEntityId]			=	@userId,

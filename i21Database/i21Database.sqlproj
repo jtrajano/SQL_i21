@@ -3666,6 +3666,17 @@
     <Build Include="dbo\Tables\tblTFValidDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
     <Build Include="dbo\Stored Procedures\uspMBDuplicateConsignmentRate.sql" />
+    <Build Include="dbo\Tables\tblSMEmail.sql" />
+    <Build Include="dbo\Tables\tblSMEmailUpload.sql" />
+    <Build Include="dbo\Tables\tblSMEmailRecipient.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateEmail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateCollateralAdjustment.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContracts.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerReceiptContracts.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerLineOfBusiness.sql" />
+    <Build Include="dbo\Views\vyuAPOpenPayableDetailsFields.sql" />
+    <Build Include="dbo\Tables\tblSMCalendars.sql" />
+    <Build Include="dbo\Tables\tblSMCalendarEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
