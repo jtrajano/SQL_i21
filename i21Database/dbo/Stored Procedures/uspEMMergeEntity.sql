@@ -186,7 +186,7 @@ BEGIN
 						'is null'
 					end + 
 				 ' )
-					and a.intEntityCustomerId = ' + @PrimaryKeyString + ' 
+					and a.' + @CurTableKey + ' = ' + @PrimaryKeyString + ' 
 					and exists(select top 1 1 from ' + @CurTableName + ' b where b.' + @CurTableKey + '  = ' + @CurMergeId + ' and (' + c.name + ' is not null and ' + c.name + 		
 					case when y.name = 'numeric' or y.name = 'int' then
 						' > 0'
