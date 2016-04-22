@@ -106,8 +106,8 @@ SET strQuery = '
 		I.vwtrm_desc,
 		I.vwtrm_key_n
 		From tblTMCustomer A Inner Join vwcusmst B On A.intCustomerNumber = B.A4GLIdentity
-		Left Join tblTMSite C On A.intCustomerID = C.intCustomerID
-		INNER JOIN vwlocmst L
+		INNER Join tblTMSite C On A.intCustomerID = C.intCustomerID
+		LEFT JOIN vwlocmst L
 			ON C.intLocationId = L.A4GLIdentity
 		Left Join tblTMDispatch F On C.intSiteID = F.intSiteID 
 		Left Join vwitmmst G On C.intProduct = G.A4GLIdentity 
