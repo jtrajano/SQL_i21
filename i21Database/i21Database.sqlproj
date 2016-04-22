@@ -3675,6 +3675,8 @@
     <Build Include="dbo\Views\vyuLGLoadContainerReceiptContracts.sql" />
     <Build Include="dbo\Views\vyuHDCustomerLineOfBusiness.sql" />
     <Build Include="dbo\Views\vyuAPOpenPayableDetailsFields.sql" />
+    <Build Include="dbo\Tables\tblSMCalendars.sql" />
+    <Build Include="dbo\Tables\tblSMCalendarEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
