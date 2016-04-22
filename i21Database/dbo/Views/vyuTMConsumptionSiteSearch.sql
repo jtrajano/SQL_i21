@@ -13,17 +13,19 @@ AS
 	,intConcurrencyId = A.intConcurrencyId
 	,strCity = A.strCity
 	,strBillingBy = A.strBillingBy
-	,strSerialNumbers = REPLACE((SELECT Y.strSerialNumber + ', '
-						FROM tblTMSiteDevice Z
-						INNER JOIN tblTMDevice Y
-							ON Z.intDeviceId = Y.intDeviceId
-						WHERE Z.intSiteID = A.intSiteID
-							AND RTRIM(ISNULL(strSerialNumber,''))<> ''
-							AND Y.intDeviceTypeId = (SELECT TOP 1 intDeviceTypeId FROM tblTMDeviceType WHERE strDeviceType = 'Tank')
-						ORDER BY Z.intSiteDeviceID
-						FOR XML PATH ('')) + '#@$',', #@$','')
+	--,strSerialNumbers = REPLACE((SELECT Y.strSerialNumber + ', '
+	--					FROM tblTMSiteDevice Z
+	--					INNER JOIN tblTMDevice Y
+	--						ON Z.intDeviceId = Y.intDeviceId
+	--					WHERE Z.intSiteID = A.intSiteID
+	--						AND RTRIM(ISNULL(strSerialNumber,''))<> ''
+	--						AND Y.intDeviceTypeId = (SELECT TOP 1 intDeviceTypeId FROM tblTMDeviceType WHERE strDeviceType = 'Tank')
+	--					ORDER BY Z.intSiteDeviceID
+	--					FOR XML PATH ('')) + '#@$',', #@$','')
+	,strSerialNumber = J.strSerialNumber
 	,A.intLocationId
 	,ysnSiteActive = ISNULL(A.ysnActive,0)
+	,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -38,5 +40,16 @@ AS
 			and F.ysnDefaultContact = 1
 	INNER JOIN tblEntity G 
 		ON F.intEntityContactId = G.intEntityId
+	LEFT JOIN (
+					SELECT Y.strSerialNumber 
+						,Z.intSiteID
+					FROM tblTMSiteDevice Z
+					INNER JOIN tblTMDevice Y
+						ON Z.intDeviceId = Y.intDeviceId
+					INNER JOIN tblTMDeviceType X
+						ON Y.intDeviceTypeId = X.intDeviceTypeId
+					WHERE X.strDeviceType = 'Tank'
+				) J
+					ON A.intSiteID = J.intSiteID
 	WHERE ISNULL(D.ysnActive,0) = 1
 GO
