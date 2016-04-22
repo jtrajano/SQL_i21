@@ -86,6 +86,8 @@ Ext.define('Inventory.search.InventoryReceipt', {
                 { dataIndex: 'strVendorRefNo', text: 'Vendor Reference No.', flex: 1, dataType: 'string', hidden: false },
                 { dataIndex: 'strShipFrom', text: 'Ship From', flex: 1, dataType: 'string', hidden: false },
                 { dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string', hidden: false },
+                { dataIndex: 'ysnExported', text: 'Exported', flex: 1, dataType: 'boolean', xtype: 'checkcolumn', hidden: true },
+                { dataIndex: 'dtmExportedDate', text: 'Exported Date', flex: 1, dataType: 'date', xtype: 'datecolumn', hidden: true }
             ]
         },
         {
