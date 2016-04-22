@@ -173,7 +173,7 @@ BEGIN
 	)
 	SELECT 	intItemId				= Lot.intItemId
 			,intItemLocationId		= Lot.intItemLocationId
-			,intItemUOMId			= Lot.intItemUOMId
+			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty

@@ -118,7 +118,7 @@ BEGIN
 												Detail.dblNewSplitLotQuantity
 											ELSE  
 												1 
-										END 
+										  END 
 			,[dtmExpiryDate]			= SourceLot.dtmExpiryDate
 			,[strLotAlias]				= SourceLot.strLotAlias
 			,[intLotStatusId]			= SourceLot.intLotStatusId
