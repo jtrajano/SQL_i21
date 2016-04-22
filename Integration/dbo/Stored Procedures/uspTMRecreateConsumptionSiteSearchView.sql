@@ -42,15 +42,7 @@ BEGIN
 				,intConcurrencyId = A.intConcurrencyId
 				,strCity = A.strCity
 				,strBillingBy = A.strBillingBy
-				,strSerialNumbers = REPLACE((SELECT Y.strSerialNumber + '', ''
-									FROM tblTMSiteDevice Z
-									INNER JOIN tblTMDevice Y
-										ON Z.intDeviceId = Y.intDeviceId
-									WHERE Z.intSiteID = A.intSiteID
-										AND RTRIM(ISNULL(strSerialNumber,''''))<> ''''
-										AND Y.intDeviceTypeId = (SELECT TOP 1 intDeviceTypeId FROM tblTMDeviceType WHERE strDeviceType = ''Tank'')
-									ORDER BY Z.intSiteDeviceID
-									FOR XML PATH ('''')) + ''#@$'','', #@$'','''')
+				,strSerialNumber = J.strSerialNumber
 				,A.intLocationId
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
 				,strFillMethod = H.strFillMethod
@@ -58,6 +50,7 @@ BEGIN
 				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
 				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
+				,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -87,17 +80,10 @@ BEGIN
 				,intConcurrencyId = A.intConcurrencyId
 				,strCity = A.strCity
 				,strBillingBy = A.strBillingBy
-				,strSerialNumbers = REPLACE((SELECT Y.strSerialNumber + '', ''
-									FROM tblTMSiteDevice Z
-									INNER JOIN tblTMDevice Y
-										ON Z.intDeviceId = Y.intDeviceId
-									WHERE Z.intSiteID = A.intSiteID
-										AND RTRIM(ISNULL(strSerialNumber,''''))<> ''''
-										AND Y.intDeviceTypeId = (SELECT TOP 1 intDeviceTypeId FROM tblTMDeviceType WHERE strDeviceType = ''Tank'')
-									ORDER BY Z.intSiteDeviceID
-									FOR XML PATH ('''')) + ''#@$'','', #@$'','''')
+				,strSerialNumber = J.strSerialNumber
 				,A.intLocationId
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
+				,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
 				,strFillMethod = H.strFillMethod
 				,strItemNo = ISNULL(I.strItemNo,'''')
 				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
