@@ -11,7 +11,7 @@ BEGIN TRY
 			@dblQuantity			DECIMAL(12,4),
 			@dblBalance				DECIMAL(12,4),
 			@dblAdjAmount			DECIMAL(12,4)
-			          
+	/*		          
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML ,'<row xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>'
 	
 	SELECT	@intContractDetailId	=	intContractDetailId,
@@ -83,7 +83,7 @@ BEGIN TRY
 	SET		dblQuantity			=	dblQuantity + @dblAdjAmount,
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractHeaderId	=	@intContractHeaderId
-	
+	*/
 END TRY      
 BEGIN CATCH       
  SET @ErrMsg = ERROR_MESSAGE()      
