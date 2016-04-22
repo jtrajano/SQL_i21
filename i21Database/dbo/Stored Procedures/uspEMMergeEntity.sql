@@ -164,6 +164,44 @@ BEGIN
 		end
 
 
+		--
+		insert into @EntityRelationShips
+		select 
+			'update a set  ' +c.name  + '  = (select top 1 ' + c.name + '  from ' + @CurTableName + ' b where b.' + @CurTableKey + '  = ' + @CurMergeId + ' and (' + c.name + ' is not null and ' + c.name + 		
+					case when y.name = 'numeric' or y.name = 'int' then
+						' > 0'
+					when y.name = 'nvarchar' or y.name = 'varchar' then
+						' <> '''''
+					else
+						'is not null'
+					end + 
+				 ' ) ) from 
+			' + @CurTableName + ' a 
+				where (a.' +c.name + ' is null or ' + c.name + 		
+					case when y.name = 'numeric' or y.name = 'int' then
+						' <= 0'
+					when y.name = 'nvarchar' or y.name = 'varchar' then
+						' = '''''
+					else
+						'is null'
+					end + 
+				 ' )
+					and a.intEntityCustomerId = ' + @PrimaryKeyString + ' 
+					and exists(select top 1 1 from ' + @CurTableName + ' b where b.' + @CurTableKey + '  = ' + @CurMergeId + ' and (' + c.name + ' is not null and ' + c.name + 		
+					case when y.name = 'numeric' or y.name = 'int' then
+						' > 0'
+					when y.name = 'nvarchar' or y.name = 'varchar' then
+						' <> '''''
+					else
+						'is not null'
+					end + 
+				 ' )) ' + ';' as stment
+			from sys.columns c 
+				JOIN sys.types y ON y.user_type_id = c.user_type_id 		
+				where c.object_id = object_id(@CurTableName) and c.name <> @CurTableKey
+				AND y.name in ('numeric', 'nvarchar', 'varchar', 'int')
+
+		--
 		insert into @EntityRelationShips
 		SELECT
 			'UPDATE ' + R.TABLE_NAME + ' SET ' +  R.COLUMN_NAME + '='+ @PrimaryKeyString +' WHERE ' + R.COLUMN_NAME  + '=' + @CurMergeId + ';' as stment		
