@@ -3673,6 +3673,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateCollateralAdjustment.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerPurchaseContracts.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerReceiptContracts.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerLineOfBusiness.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
