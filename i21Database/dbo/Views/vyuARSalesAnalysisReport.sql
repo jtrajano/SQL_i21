@@ -83,6 +83,27 @@ FROM
 												AND strTransactionId = I.strInvoiceNumber
 												AND intItemId		 = ID.intItemId
 												AND intItemUOMId	 = ID.intItemUOMId) 
+											WHEN ISNULL(ICIT1.dblCost,0) = 0
+											THEN (
+												SELECT TOP 1
+													 dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, ICIT.dblCost) dblCost
+												FROM 
+													tblICInventoryShipmentItem ICISI
+												INNER JOIN
+													tblICInventoryShipment ICIS
+														ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+												INNER JOIN
+													tblICInventoryTransaction ICIT
+														ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+														AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+														AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+														AND ICISI.intItemId = ICIT.intItemId
+														AND ICISI.intInventoryShipmentItemId = ICIT.intTransactionDetailId 
+														AND ICISI.intItemUOMId <> ICIT.intItemUOMId
+												WHERE ID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId 
+														AND ID.intItemId = ICISI.intItemId 
+													
+											)
 											ELSE ICIT1.dblCost 
 										END)
 	  , dblPrice
