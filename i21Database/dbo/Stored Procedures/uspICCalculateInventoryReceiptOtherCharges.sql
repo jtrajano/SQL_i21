@@ -69,7 +69,13 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND (			
 												Charge.dblRate 
-												* dbo.fnCalculateQtyBetweenUOM(ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId), dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ISNULL(ReceiptItem.dblNet, ReceiptItem.dblOpenReceive)) 
+												* dbo.fnCalculateQtyBetweenUOM(ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId), dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), 
+												CASE
+													WHEN ReceiptItem.dblNet = '0.00000000000000000000'
+													THEN ReceiptItem.dblOpenReceive
+													ELSE ReceiptItem.dblNet
+												END
+												)
 												, 2
 											 )
 			,[intContractId]				= Charge.intContractId
