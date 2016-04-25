@@ -13,7 +13,9 @@
 		dtmDate = dtmDate,
 		strPaymentInfo = null,
 		intPaymentId = null	,
-		intTransactionId = null
+		intTransactionId = null,
+		dtmDatePaid = null
+
 	from vyuARCustomerHistory
 	union
 	select 
@@ -29,7 +31,8 @@
 		dtmDate = dtmDate,
 		strPaymentInfo = strPaymentInfo,
 		intPaymentId = intPaymentId,
-		intTransactionId = intTransactionId
+		intTransactionId = intTransactionId,
+		dtmDatePaid = dtmDatePaid
 		--,* 
 	from vyuAPVendorHistory
 	union
@@ -46,6 +49,7 @@
 		dtmDate = dtmQuoteDate,
 		strPaymentInfo = '',
 		intPaymentId = 0,
-		intTransactionId = intQuoteHeaderId
+		intTransactionId = intQuoteHeaderId,
+		dtmDatePaid = null
 		--,* 
 	from vyuTRQuoteView
