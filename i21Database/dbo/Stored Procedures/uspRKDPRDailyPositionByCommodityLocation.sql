@@ -1,5 +1,5 @@
 ﻿CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodityLocation]  
-    @intCommodityId nvarchar(max),
+    @intCommodityId nvarchar(max)='',
 	@intVendorId int = null
 AS      
  
@@ -15,7 +15,7 @@ SELECT strLocationName,OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodity
 isnull(CashExposure,0) as dblCaseExposure, isnull(DeltaOption,0) DeltaOption,              
 (isnull(CompanyTitledNonDP,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) as dblBasisExposure ,             
 (isnull(CompanyTitledNonDP,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,    
-isnull(InHouse,0) as dblInHouse,intLocationId  into #temp            
+isnull(InHouse,0) as dblInHouse,intLocationId  into #temp         
 FROM(              
 SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId, intLocationId, 
    isnull(invQty,0)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
@@ -38,8 +38,7 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    isnull(invQty,0) + isnull(dblGrainBalance ,0) +
    CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end + isnull(OnHold,0)
    else
-   isnull(dblGrainBalance ,0) +
-   isnull(CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DP,0) else 0 end,0) + isnull(OnHold,0) end
+    isnull(CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then isnull(DPCustomer,0) else 0 end,0) + isnull(OnHold,0) end
    AS InHouse             
                  
 FROM(  
@@ -167,6 +166,14 @@ SELECT distinct c.intCommodityId, strLocationName, intLocationId,
 	 WHERE CH.intCommodityId = c.intCommodityId AND ysnDPOwnedType=1 and CH.intCompanyLocationId=cl.intCompanyLocationId
 	  and  intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then intEntityId else @intVendorId end 	
 	 )t) as DP 
+
+	,(SELECT Sum(dblTotal) from (
+    SELECT
+     dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(Balance,0)) dblTotal
+	 FROM vyuGRGetStorageDetail CH  
+	 WHERE CH.intCommodityId = c.intCommodityId and CH.intCompanyLocationId=cl.intCompanyLocationId and strOwnedPhysicalStock='Customer'
+	  and  intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then intEntityId else @intVendorId end 	
+	 )t) as DPCustomer
 
 	,(SELECT Sum(dblTotal) from (
      SELECT

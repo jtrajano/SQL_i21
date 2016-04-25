@@ -3682,6 +3682,9 @@
     <Build Include="dbo\Views\vyuCTContractAdjustmentSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspCMClearRangeByCheckNo.sql" />
     <Build Include="dbo\Stored Procedures\uspCMClearRangeByDate.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionImport_ErrLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImportValidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
