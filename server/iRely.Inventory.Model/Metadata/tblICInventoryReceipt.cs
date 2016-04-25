@@ -854,6 +854,20 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }
     }
 
+    public class vyuICGetInventoryReceiptItemView
+    {
+        public int intInventoryReceiptId { get; set; }
+        public int intInventoryReceiptItemId { get; set; }
+        public int intItemId { get; set; }
+        public int intSourceId { get; set; }
+        public decimal? dblReceived { get; set; }
+        public decimal? dblBillQty { get; set; }
+        public string strSourceType { get; set; }
+        public string strOrderNumber { get; set; }
+        public string strSourceNumber { get; set; }
+        public int intRecordNo { get; set; }
+    }
+
     public class vyuICGetInventoryReceiptItem
     {
         public int intInventoryReceiptId { get; set; }

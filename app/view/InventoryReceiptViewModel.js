@@ -30,7 +30,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
-        'Logistics.store.BufferedShipmentReceiptContracts'
+        'Logistics.store.BufferedShipmentReceiptContracts',
+        'Inventory.store.BufferedReceiptItemView'
         //'AccountsPayable.common.extensions.GridExtension' -- Removed as per Erick and Lex.
     ],
 
@@ -40,6 +41,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     },
 
     stores: {
+        receiptItemView: {
+            type: 'icbufferedreceiptitemview'
+        },
         receiptTypes: {
             autoLoad: true,
             data: [

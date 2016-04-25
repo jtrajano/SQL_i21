@@ -105,6 +105,13 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("SearchReceiptItemView")]
+        public async Task<HttpResponseMessage> SearchReceiptItemView(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.SearchReceiptItemView(param));
+        }
+
+        [HttpGet]
         [ActionName("SearchReceiptItemLots")]
         public async Task<HttpResponseMessage> SearchReceiptItemLots(GetParameter param)
         {

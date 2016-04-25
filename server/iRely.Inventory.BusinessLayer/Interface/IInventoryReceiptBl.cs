@@ -16,6 +16,7 @@ namespace iRely.Inventory.BusinessLayer
         SaveResult PostTransaction(Common.Posting_RequestModel receipt, bool isRecap);
         void SetUser(int UserId);
         Task<SearchResult> SearchReceiptItems(GetParameter param);
+        Task<SearchResult> SearchReceiptItemView(GetParameter param);
         Task<SearchResult> SearchReceiptItemLots(GetParameter param);
         Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType, int CurrencyId);
         Task<SearchResult> GetReceiptVouchers(GetParameter param);
