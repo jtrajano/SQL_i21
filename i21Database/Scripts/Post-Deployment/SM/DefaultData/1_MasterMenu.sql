@@ -2498,14 +2498,18 @@ BEGIN
 END
 /* End of Remodule */
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0)
+/* Rename Scale to Ticket Entry */
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0)
+UPDATE tblSMMasterMenu SET strMenuName = N'Ticket Entry', strDescription = N'Ticket Entry' WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Entry' AND strModuleName = 'Scale' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Scale', N'Scale', 0, N'Scale', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 16, 0)
+	VALUES (N'Ticket Entry', N'Scale', 0, N'Ticket Entry', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 16, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 16 WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0
+	UPDATE tblSMMasterMenu SET intSort = 16 WHERE strMenuName = 'Ticket Entry' AND strModuleName = 'Scale' AND intParentMenuID = 0
 
 DECLARE @ScaleInterfaceParentMenuId INT
-SELECT @ScaleInterfaceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intParentMenuID = 0
+SELECT @ScaleInterfaceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Entry' AND strModuleName = 'Scale' AND intParentMenuID = 0
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
     INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2530,6 +2534,9 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Grading Equipment', strDescription = '
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = 'Ticket Pools', strDescription = 'Ticket Pools' WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Enter Tickets', strDescription = 'Enter Tickets' WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 /* End of Re-name */
 
 /* Start of moving report */
@@ -2537,11 +2544,11 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @ScaleInterfaceReportParentMenuId W
 UPDATE tblSMMasterMenu SET intParentMenuID = @ScaleInterfaceReportParentMenuId WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Scale' AND strType = 'Report' AND intParentMenuID = @ScaleInterfaceParentMenuId
 /* End of moving report */
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Enter Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Scale Tickets', N'Scale', @ScaleInterfaceParentMenuId, N'Scale Tickets', N'Activity', N'Screen', N'Grain.view.ScaleStationSelection', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Enter Tickets', N'Scale', @ScaleInterfaceParentMenuId, N'Enter Tickets', N'Activity', N'Screen', N'Grain.view.ScaleStationSelection', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSelection', intSort = 0 WHERE strMenuName = 'Scale Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSelection', intSort = 0 WHERE strMenuName = 'Enter Tickets' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Pools' AND strModuleName = 'Scale' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
