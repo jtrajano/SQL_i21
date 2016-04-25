@@ -2752,6 +2752,15 @@ IF @recap = 0
 					SELECT TOP 1 @intInvoiceIntegractionId = intInvoiceId FROM @InvoiceToUpdate ORDER BY intInvoiceId
 
 						EXEC dbo.uspARPostInvoiceIntegrations @post, @intInvoiceIntegractionId, @userId
+
+						--update invoice contract balance after updating the actual contract
+						update I
+						set I.dblContractBalance = C.dblBalance
+						from tblARInvoiceDetail I
+						inner join tblCTContractDetail  C
+						on I.intContractHeaderId = C.intContractHeaderId and I.intContractDetailId = C.intContractDetailId
+						where I.dblContractBalance <> C.dblBalance
+						and I.intInvoiceId = @intInvoiceIntegractionId
 									
 					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 
 												
