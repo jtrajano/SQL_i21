@@ -273,6 +273,8 @@ namespace iRely.Inventory.Model
         public string strCostUOM { get; set; }
         public int? intOriginId { get; set; }
         public string strOriginName { get; set; }
+        public string strCostType { get; set; }
+        public string strShortName { get; set; }
 
     }
 

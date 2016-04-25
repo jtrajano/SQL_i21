@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsba360f5492744e136029ae5e188af09e2896d5272d5a71d66b56103d03120514))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd6d4de0dee76bc06c55a727d7e1ccf5e11f34ac97937c0b2d49e9bfb88a051b5))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsba360f5492744e136029ae5e188af09e2896d5272d5a71d66b56103d03120514 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsd6d4de0dee76bc06c55a727d7e1ccf5e11f34ac97937c0b2d49e9bfb88a051b5 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "ba360f5492744e136029ae5e188af09e2896d5272d5a71d66b56103d03120514"; }
+            get { return "d6d4de0dee76bc06c55a727d7e1ccf5e11f34ac97937c0b2d49e9bfb88a051b5"; }
         }
 
         /// <summary>
@@ -11221,7 +11221,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCompactItem
-        [CodeFirstDatabaseSchema.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName)
+        [CodeFirstDatabaseSchema.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName, T1.vyuICGetCompactItem_strCostType, T1.vyuICGetCompactItem_strShortName)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetCompactItem_intItemId, 
@@ -11251,6 +11251,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCostUOM AS vyuICGetCompactItem_strCostUOM, 
             T.intOriginId AS vyuICGetCompactItem_intOriginId, 
             T.strOriginName AS vyuICGetCompactItem_strOriginName, 
+            T.strCostType AS vyuICGetCompactItem_strCostType, 
+            T.strShortName AS vyuICGetCompactItem_strShortName, 
             True AS _from0
         FROM InventoryEntities.vyuICGetCompactItems AS T
     ) AS T1");
@@ -11264,7 +11266,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCompactItems
-        [iRely.Inventory.Model.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName)
+        [iRely.Inventory.Model.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName, T1.vyuICGetCompactItem_strCostType, T1.vyuICGetCompactItem_strShortName)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetCompactItem_intItemId, 
@@ -11294,6 +11296,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCostUOM AS vyuICGetCompactItem_strCostUOM, 
             T.intOriginId AS vyuICGetCompactItem_intOriginId, 
             T.strOriginName AS vyuICGetCompactItem_strOriginName, 
+            T.strCostType AS vyuICGetCompactItem_strCostType, 
+            T.strShortName AS vyuICGetCompactItem_strShortName, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetCompactItem AS T
     ) AS T1");
