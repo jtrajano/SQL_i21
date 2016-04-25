@@ -28,6 +28,8 @@ SELECT Item.intItemId
 , strCostUOM = CostUOM.strUnitMeasure
 , Item.intOriginId
 , strOriginName = CommodityAttrib.strDescription
+, Item.strCostType
+, Item.strShortName
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
