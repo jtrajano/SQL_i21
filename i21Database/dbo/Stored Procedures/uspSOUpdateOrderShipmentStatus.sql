@@ -161,7 +161,7 @@ SET_ORDER_STATUS:
 	SET [strOrderStatus] = @OrderStatus
 	  , [dtmProcessDate] = GETDATE()
 	  , [ysnProcessed]   = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END	  
-	  , [ysnShipped]	 = CASE WHEN (SELECT COUNT(*) FROM tblICInventoryShipmentItem ISHI WHERE intOrderId = @SalesOrderId GROUP BY intInventoryShipmentId) > 1 THEN 1 ELSE 0 END
+	  , [ysnShipped]	 = CASE WHEN (SELECT TOP 1 COUNT(*) FROM tblICInventoryShipmentItem ISHI WHERE intOrderId = @SalesOrderId GROUP BY intInventoryShipmentId ORDER BY COUNT(*) DESC) > 1 THEN 1 ELSE 0 END
 	WHERE [intSalesOrderId] = @SalesOrderId
 		
 	RETURN;
