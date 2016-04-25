@@ -91,7 +91,7 @@ SELECT
 	,C.[intSalespersonId]						--[intEntitySalespersonId]
 	,S.[dtmShipDate]							--[dtmShipDate]
 	,S.[intShipViaId]							--[intShipViaId]
-	,''											--[strPONumber]
+	,SO.[strPONumber]							--[strPONumber]
 	,EL.[intTermsId]							--[intTermId]
 	,@ZeroDecimal								--[dblInvoiceSubtotal]
 	,@ZeroDecimal								--[dblShipping]
