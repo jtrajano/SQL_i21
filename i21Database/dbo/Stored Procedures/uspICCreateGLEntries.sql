@@ -17,6 +17,9 @@ DECLARE @AccountCategory_WriteOffSold AS NVARCHAR(30) = 'Write-Off Sold';
 DECLARE @AccountCategory_RevalueSold AS NVARCHAR(30) = 'Revalue Sold';
 DECLARE @AccountCategory_AutoNegative AS NVARCHAR(30) = 'Auto-Variance';
 
+-- Get the default currency ID
+DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
@@ -241,7 +244,7 @@ AS
 			,TRANS.dblCost
 			,TRANS.dblValue
 			,TRANS.intTransactionTypeId
-			,TRANS.intCurrencyId
+			,ISNULL(TRANS.intCurrencyId, @DefaultCurrencyId) intCurrencyId
 			,TRANS.dblExchangeRate
 			,TRANS.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName

@@ -26,6 +26,9 @@ DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-
 		,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
 		,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
 
+-- Get the default currency ID
+DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 -- Get the Inventory Shipment batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
 		,@strItemNo AS NVARCHAR(50)
@@ -257,7 +260,7 @@ BEGIN
 												END
 
 				,dblSalesPrice              = 0.00
-				,intCurrencyId              = NULL 
+				,intCurrencyId              = @DefaultCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
 				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
@@ -378,7 +381,7 @@ BEGIN
 														Lot.dblLastCost 
 												END, 0)
 				,dblSalesPrice              = 0.00
-				,intCurrencyId              = NULL 
+				,intCurrencyId              = @DefaultCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
 				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
