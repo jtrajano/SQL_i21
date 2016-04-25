@@ -3680,6 +3680,8 @@
     <Build Include="dbo\Tables\tblSMAttachmentDetailLink.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractAdjustmentSave.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustmentSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMClearRangeByCheckNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMClearRangeByDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
