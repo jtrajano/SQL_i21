@@ -3678,6 +3678,8 @@
     <Build Include="dbo\Tables\tblSMCalendars.sql" />
     <Build Include="dbo\Tables\tblSMCalendarEntity.sql" />
     <Build Include="dbo\Tables\tblSMAttachmentDetailLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractAdjustmentSave.sql" />
+    <Build Include="dbo\Views\vyuCTContractAdjustmentSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

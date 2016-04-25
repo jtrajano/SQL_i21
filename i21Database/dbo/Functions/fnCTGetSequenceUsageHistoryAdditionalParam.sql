@@ -121,7 +121,15 @@ BEGIN
 		JOIN	tblICInventoryShipment			HR	ON	HR.intInventoryShipmentId	=	DL.intInventoryShipmentId
 		WHERE	DL.intInventoryShipmentItemId	=	@intExternalId
 	END
-	
+	ELSE IF @strScreenName = 'Contract AdjustMent'
+	BEGIN
+		SELECT	@intExternalHeaderId			=	CA.intAdjustmentId,
+				@strNumber						=	CA.strAdjustmentNo,
+				@strHeaderIdColumn				=	'intAdjustmentId'
+		FROM	tblCTContractAdjustment CA
+		WHERE	CA.intAdjustmentId	=	@intExternalId
+	END
+
 	INSERT @returntable
 	(
 			intExternalHeaderId, 

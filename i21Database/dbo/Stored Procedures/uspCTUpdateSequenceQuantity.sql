@@ -9,6 +9,7 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg						NVARCHAR(MAX),
+			@XML						NVARCHAR(MAX),
 			@dblQuantity				NUMERIC(18,6),
 			@dblScheduleQty				NUMERIC(18,6),
 			@dblBalance					NUMERIC(18,6),
@@ -83,6 +84,15 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('UOM configured in the header not available in the sequence.',16,1)
 	END
+
+	SET @XML = '<tblCTContractDetails>'
+	SET @XML +=		'<tblCTContractDetail>'
+	SET @XML +=			'<intContractDetailId>'+LTRIM(@intContractDetailId)+'</intContractDetailId>'
+	SET @XML +=			'<dblQuantity>'+LTRIM(@dblQuantityToUpdate)+'</dblQuantity>'
+	SET @XML +=		'</tblCTContractDetail>'
+	SET @XML +=	'</tblCTContractDetails>'
+
+	EXEC uspCTValidateContractDetail @XML,'Modified'
 
 	UPDATE	tblCTContractHeader
 	SET		dblQuantity			=	dblQuantity + @dblQuantityToUpdate,
