@@ -457,27 +457,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intRecordNo',
-                                                                                dataType: 'int',
-                                                                                hidden: false
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strSourceType',
-                                                                                dataType: 'string',
-                                                                                text: 'Source Type',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboReceiptItemView',
-                                                                        fieldLabel: 'Receipt Item View',
-                                                                        labelWidth: 65,
-                                                                        displayField: 'strSourceType',
-                                                                        valueField: 'intRecordNo'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
                                                                                 dataIndex: 'intEntityUserSecurityId',
                                                                                 dataType: 'numeric',
                                                                                 hidden: true

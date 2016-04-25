@@ -92,16 +92,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             ],
             searchConfig: [
                 {
-                    title: 'Receipts',
-                    api: {
-                        read: '../Inventory/api/InventoryReceipt/SearchReceiptItemView'
-                    },
-                    columns: [
-                        {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                        {dataIndex: 'strSourceType', text: 'Source Type', flex: 1, dataType: 'string'}
-                    ]
-                },
-                {
                     title: 'Details',
                     api: {
                         read: '../Inventory/api/InventoryReceipt/SearchReceiptItems'
@@ -221,10 +211,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store: '{sourceTypes}',
                 readOnly: '{disableSourceType}',
                 defaultFilters: '{filterSourceByType}'
-            },
-            cboReceiptItemView: {
-                value: '{current.intSourceType}',
-                store: '{receiptItemView}'
             },
             cboVendor: {
                 value: '{current.intEntityVendorId}',
