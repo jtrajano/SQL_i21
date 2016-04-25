@@ -2,7 +2,7 @@
 	AS 
 	
 SELECT MRDetail.intMeterReadingDetailId
-	, MRDetail.intMeterReadingId
+	, MR.intMeterReadingId
 	, MR.strTransactionId
 	, MR.intEntityCustomerId
 	, MR.strCustomerName
@@ -24,6 +24,6 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MRDetail.dblCurrentDollars
 	, dblDollarsSold = MRDetail.dblCurrentDollars - MRDetail.dblCurrentDollars
 	, MRDetail.intSort
-FROM tblMBMeterReadingDetail MRDetail
-LEFT JOIN vyuMBGetMeterReading MR ON MR.intMeterReadingId = MRDetail.intMeterReadingId
+FROM vyuMBGetMeterReading MR
+LEFT JOIN tblMBMeterReadingDetail MRDetail ON MR.intMeterReadingId = MRDetail.intMeterReadingId
 LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
