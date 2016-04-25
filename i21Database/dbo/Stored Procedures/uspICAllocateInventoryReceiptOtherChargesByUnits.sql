@@ -41,7 +41,12 @@ BEGIN
 	USING (
 		SELECT	CalculatedCharges.*
 				,ReceiptItem.intInventoryReceiptItemId
-				,ReceiptItem.dblOpenReceive
+				,CASE
+					WHEN ReceiptItem.dblNet = '0.00000000000000000000'
+					THEN ReceiptItem.dblOpenReceive
+					ELSE ReceiptItem.dblNet
+				 END
+				 AS dblNetOrOpenReceive
 				,ItemUOM.dblUnitQty
 				,TotalUnitsOfItemsPerContract.dblTotalUnits 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -53,7 +58,7 @@ BEGIN
 							END 					
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own			
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
-					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+					ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
@@ -69,12 +74,16 @@ BEGIN
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
-					SELECT	dblTotalUnits = SUM(ReceiptItem.dblOpenReceive)
+					SELECT	dblTotalUnits = SUM(CASE
+													WHEN ReceiptItem.dblNet = '0.00000000000000000000'
+													THEN ReceiptItem.dblOpenReceive
+													ELSE ReceiptItem.dblNet
+												END)
 							,ReceiptItem.intInventoryReceiptId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 							INNER JOIN dbo.tblICItemUOM ItemUOM
-								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+								ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 					GROUP BY ReceiptItem.intInventoryReceiptId 
 				) TotalUnitsOfItemsPerContract 
@@ -92,7 +101,7 @@ BEGIN
 								ISNULL(dblAmount, 0) 
 								+ (
 									Source_Query.dblTotalOtherCharge
-									* Source_Query.dblOpenReceive
+									* Source_Query.dblNetOrOpenReceive
 									/ Source_Query.dblTotalUnits 
 								)
 								, 2
@@ -116,7 +125,7 @@ BEGIN
 			,Source_Query.intEntityVendorId
 			,ROUND (
 				Source_Query.dblTotalOtherCharge
-				* Source_Query.dblOpenReceive
+				* Source_Query.dblNetOrOpenReceive
 				/ Source_Query.dblTotalUnits 
 				, 2
 			)
