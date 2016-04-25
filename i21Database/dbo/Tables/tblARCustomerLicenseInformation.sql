@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerLicenseInformation]
 (
 	[intCustomerLicenseInformationId]	INT NOT NULL IDENTITY(1,1),
+	[strUniqueId]						NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL ,
 	[intEntityCustomerId]				INT NOT NULL,
 	[strCompanyId]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL ,
 	[intNumberOfUser]					INT NOT NULL,
