@@ -50,6 +50,8 @@ A.intJournalId
 ,B.dblCreditReport
 ,C.strAccountId
 ,C.intAccountId
+,C.strDescription as strAccountDescription
+
 from tblGLJournal A
 inner join tblGLJournalDetail B
 on A.intJournalId = B.intJournalId
