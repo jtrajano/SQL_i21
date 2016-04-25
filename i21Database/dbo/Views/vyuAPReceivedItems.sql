@@ -342,19 +342,15 @@ FROM
   		,[intUnitMeasureId]							=	NULL
 		,[strUOM]									=	NULL
 		,[intWeightUOMId]							=	NULL
-		,[intCostUOMId]								=	CostUOM.intUnitMeasureId
+		,[intCostUOMId]								=	A.intCostUnitMeasureId
 		,[dblNetWeight]								=	0      
-		,[strCostUOM]								=	CostUOM.strUnitMeasure
+		,[strCostUOM]								=	A.strCostUnitMeasure
 		,[strgrossNetUOM]							=	NULL
 		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	ISNULL(ItemCostUOM.dblUnitQty,1)
-		,[dblUnitQty]								=	ISNULL(ItemCostUOM.dblUnitQty,1)
+		,[dblCostUnitQty]							=	1
+		,[dblUnitQty]								=	1
 	FROM [vyuAPChargesForBilling] A
-	INNER JOIN dbo.tblICInventoryReceiptCharge B ON A.intInventoryReceiptId = B.intInventoryReceiptId
-	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
-	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
-											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	OUTER APPLY 
@@ -368,7 +364,7 @@ FROM
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
 		INNER JOIN dbo.tblAPBill B ON B.intBillId = H.intBillId
-		WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId --  AND B.str = A.inte
+		WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 		GROUP BY H.intInventoryReceiptChargeId
 			
 	) Qty
