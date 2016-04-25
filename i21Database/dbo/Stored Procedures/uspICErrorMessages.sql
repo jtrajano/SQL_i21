@@ -70,7 +70,7 @@ EXEC sp_addmessage 80010,11,@strmessage,'us_english','False'
 
 -- was 51044
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80011) EXEC sp_dropmessage 80011, 'us_english'	
-SET @strmessage = 'The Quantity UOM for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.'
+SET @strmessage = '%s has stock and is assigned with UOM = %s. You cannot use the same Lot Number if Lot UOM is not %s.'
 EXEC sp_addmessage 80011,11,@strmessage,'us_english','False'
 
 -- was 51045

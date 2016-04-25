@@ -627,8 +627,8 @@ BEGIN
 		WHERE	ItemUOM.intItemId = @intItemId
 				AND ItemUOM.intItemUOMId = @intItemUOMId
 
-		--'The Quantity UOM for {Item} cannot be changed from {Item UOM} to {Item UOM} because a stock from it has been used from a different transaction.'
-		RAISERROR(80011, 11, 1, @strItemNo, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo);
+		-- {Lot number} has stock and is assigned with UOM = {Quantity UOM used}. You cannot use the same Lot Number if Lot UOM is not {Quantity UOM used}.
+		RAISERROR(80011, 11, 1, @strLotNumber, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMFrom);
 		RETURN -6;
 	END 
 
