@@ -459,7 +459,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 						ELSE
 							dblAmount
 						END
-	WHERE intEntityEmployeeId = @intEmployee
+	WHERE intEntityEmployeeId = @intEmployee AND (intPayGroupId IS NULL OR intPayGroupId IN (SELECT intPayGroupId FROM #tmpPayGroups))
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDepartments')) DROP TABLE #tmpDepartments
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayGroups')) DROP TABLE #tmpPayGroups
