@@ -472,17 +472,6 @@ BEGIN
 
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strCustomer,intCommodityId,intFromCommodityUnitMeasureId,strTruckName,strDriverName,[Storage Due])
 	
-				SELECT distinct 1 AS intSeqId,'In-House',@strDescription,[Storage Type] AS [strType],
-				dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(Balance,0))
-				,strLocationName,strItemNo,strName,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName,[Storage Due]
-				FROM vyuGRGetStorageDetail sd
-				JOIN tblEMEntity e on sd.intEntityId=e.intEntityId
-				WHERE ysnCustomerStorage <> 1 AND
-				intCommodityId = @intCommodityId AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
-				AND sd.intEntityId= @intVendorId 	
-								
-				UNION
-
 				(select distinct 1 AS intSeqId,'In-House',@strDescription,StorageType AS [strType],				
 				 CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then dblTotal  else 0 end dblTotal 
 				 ,strLocationName,strItemNo,strName,@intCommodityId,@intCommodityUnitMeasureId,'' strTruckName,'' strDriverName,[Storage Due]
@@ -493,7 +482,7 @@ BEGIN
 				[Storage Type] StorageType,strName,[Storage Due]
 				FROM vyuGRGetStorageDetail ch
 				JOIN tblEMEntity e on ch.intEntityId=e.intEntityId
-				WHERE ch.intCommodityId  = @intCommodityId	AND ysnDPOwnedType = 1
+				WHERE ch.intCommodityId  = @intCommodityId	and strOwnedPhysicalStock='Customer'
 					AND ch.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then ch.intCompanyLocationId else @intLocationId end
 					AND ch.intEntityId= @intVendorId 	
 				)t)

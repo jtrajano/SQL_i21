@@ -25,6 +25,9 @@ DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adj
 DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @strItemNo AS NVARCHAR(50)
 
+-- Get the default currency ID
+DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
 		,@intReturnValue AS INT
@@ -160,7 +163,7 @@ BEGIN
 			,dblCost				= dbo.fnMultiply(ItemPricing.dblLastCost, ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
+			,intCurrencyId			= @DefaultCurrencyId 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryCountId
 			,intTransactionDetailId = Detail.intInventoryCountDetailId

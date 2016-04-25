@@ -1,9 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCalculateCommission]
 	@intCommissionPlanId	INT,
 	@intEntityId			INT,
-	@ysnEmployee			BIT = 0,
-	@ysnAutoCreatePayables	BIT = 0,
-	@ysnAutoCreatePayroll	BIT = 0
+	@dblLineTotal			NUMERIC(18,6) = NULL OUTPUT
 AS
 DECLARE  @intCommissionAccountId	INT
 	   , @strBasis					NVARCHAR(50)
@@ -23,6 +21,8 @@ DECLARE  @intCommissionAccountId	INT
 	   , @intApprovalListId			NVARCHAR(MAX)
 	   , @ysnMarginalSales			BIT
 	   , @ysnPaymentRequired		BIT
+	   , @dtmStartDate				DATETIME
+	   , @dtmEndDate				DATETIME
 
 SELECT TOP 1 
 	@intCommissionAccountId	= intCommissionAccountId
@@ -43,8 +43,10 @@ SELECT TOP 1
   , @dblCalculationAmount	= ISNULL(dblCalculationAmount, 0.000000)
   , @ysnPaymentRequired		= ysnPaymentRequired
   , @ysnMarginalSales		= CASE WHEN strBasis = 'Revenue' THEN ysnMarginalSales ELSE 0 END
+  , @dtmStartDate			= dtmStartDate
+  , @dtmEndDate				= dtmEndDate
 FROM tblARCommissionPlan 
-WHERE intCommissionId = @intCommissionPlanId
+WHERE intCommissionPlanId = @intCommissionPlanId
 AND GETDATE() BETWEEN dtmStartDate AND dtmEndDate
 
 IF @strBasis = 'Hours'
@@ -104,15 +106,3 @@ ELSE IF @strBasis = 'Conditional'
 	BEGIN
 		SELECT @intApprovalListId
 	END
-
---CREATE AUTO PAYABLES
-IF @ysnAutoCreatePayables = 1
-BEGIN
-	SELECT * FROM tblAPBill											
-END
-
---CREATE AUTO PAYROLL
-IF @ysnAutoCreatePayroll = 1 AND @ysnEmployee = 1
-BEGIN
-	SELECT * FROM tblPRPaycheck
-END

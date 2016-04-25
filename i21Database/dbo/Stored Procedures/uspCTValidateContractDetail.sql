@@ -44,13 +44,19 @@ BEGIN TRY
 			intContractStatusId		INT
 	)  
 
-	SELECT	@dblOldQuantity		=	CD.dblQuantity,
-			@intOldItemUOMId	=	CD.intItemUOMId,
-			@intContractSeq		=	CD.intContractSeq,
-			@intOldStatusId		=	CD.intContractStatusId,
-			@intContractTypeId	=	CH.intContractTypeId,
+	SELECT	@dblOldQuantity			=	CD.dblQuantity,
+			@intOldItemUOMId		=	CD.intItemUOMId,
+			@intContractSeq			=	CD.intContractSeq,
+			@intOldStatusId			=	CD.intContractStatusId,
+			@intContractTypeId		=	CH.intContractTypeId,
 			@intOldItemId			=	CD.intItemId,
-			@intOldQtyUnitMeasureId=	IU.intUnitMeasureId
+			@intOldQtyUnitMeasureId	=	IU.intUnitMeasureId,
+
+			@dblNewQuantity			=	ISNULL(@dblNewQuantity,CD.dblQuantity),
+			@intNewItemUOMId		=	ISNULL(@intNewItemUOMId,CD.intItemUOMId),
+			@intContractHeaderId	=	ISNULL(@intContractHeaderId,CD.intContractHeaderId),
+			@intNewStatusId			=	ISNULL(@intNewStatusId,CD.intContractStatusId)
+
 	FROM	tblCTContractDetail	CD
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
 	JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CD.intItemUOMId

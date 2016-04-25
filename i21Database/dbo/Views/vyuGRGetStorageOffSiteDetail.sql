@@ -26,11 +26,12 @@ SELECT DISTINCT
  	,a.dtmLastStorageAccrueDate  
  	,c1.strScheduleId,
  	isnull(ysnExternal,0) as ysnExternal,
-	ri.intItemId  	  
+	i.intItemId  	  
 FROM tblICInventoryReceipt r
 JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 JOIN tblSCTicket sc on sc.intTicketId = ri.intSourceId
 LEFT JOIN tblSMCompanyLocationSubLocation sl on sl.intCompanyLocationSubLocationId =sc.intSubLocationId and sl.intCompanyLocationId=sc.intProcessingLocationId 
+join tblICItem i on i.intItemId=sc.intItemId
 join tblGRStorageHistory sh on sh.intTicketId= sc.intTicketId 
 join tblGRCustomerStorage a on a.intCustomerStorageId=sh.intCustomerStorageId
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId 

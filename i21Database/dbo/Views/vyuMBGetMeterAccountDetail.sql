@@ -4,22 +4,29 @@
 SELECT MADetail.intMeterAccountDetailId
 	, MA.intMeterAccountId
 	, MA.intEntityCustomerId
-	, strCustomerName = Customer.strName
-	, Customer.strCustomerNumber
+	, MA.strCustomerName
+	, MA.strCustomerNumber
 	, MA.intEntityLocationId
-	, strCustomerLocation = EntityLocation.strLocationName
-	, EntityLocation.strAddress
-	, EntityLocation.strCity
-	, EntityLocation.strState
-	, EntityLocation.strZipCode
+	, MA.strCustomerLocation
+	, MA.strAddress
+	, MA.strCity
+	, MA.strState
+	, MA.strZipCode
+	, MA.intTermId
+	, MA.strTerm
+	, MA.strTermCode
+	, MA.intPriceType
+	, MA.strPriceType
 	, MA.intConsignmentGroupId
-	, ConGroup.strConsignmentGroup
+	, MA.strConsignmentGroup
 	, MA.intCompanyLocationId
-	, strCompanyLocation = Location.strLocationName
+	, MA.strCompanyLocation
 	, MADetail.strMeterKey
+	, dblGrossPrice = ItemPrice.dblSalePrice + 0 -- ADD taxes
+	, dblNetPrice = ItemPrice.dblSalePrice
 	, MADetail.intItemId
 	, Item.strItemNo
-	, strItemDescription = strDescription
+	, strItemDescription = Item.strDescription
 	, MADetail.strWorksheetSequence
 	, MADetail.strMeterCustomerId
 	, MADetail.strMeterFuelingPoint
@@ -27,10 +34,8 @@ SELECT MADetail.intMeterAccountDetailId
 	, MADetail.dblLastMeterReading
 	, MADetail.dblLastTotalSalesDollar
 	, MADetail.intSort
-FROM tblMBMeterAccountDetail MADetail 
-LEFT JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MADetail.intMeterAccountId
+FROM vyuMBGetMeterAccount MA
+LEFT JOIN tblMBMeterAccountDetail MADetail ON MA.intMeterAccountId = MADetail.intMeterAccountId
 LEFT JOIN tblICItem Item ON Item.intItemId = MADetail.intItemId
-LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MA.intEntityCustomerId
-LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MA.intEntityLocationId
-LEFT JOIN tblMBConsignmentGroup ConGroup ON ConGroup.intConsignmentGroupId = MA.intConsignmentGroupId
-LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = MA.intCompanyLocationId
+LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = MADetail.intItemId AND ItemLocation.intLocationId = MA.intCompanyLocationId
+LEFT JOIN tblICItemPricing ItemPrice ON ItemPrice.intItemId = MADetail.intItemId AND ItemPrice.intItemLocationId = ItemLocation.intItemLocationId

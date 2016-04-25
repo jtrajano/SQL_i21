@@ -24,6 +24,9 @@ DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3 
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
 
+-- Get the default currency ID
+DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 -- Get the Inventory Receipt batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
 		,@strItemNo AS NVARCHAR(50)
@@ -225,7 +228,7 @@ BEGIN
 				,dblUOMQty = ItemUOM.dblUnitQty
 				,ISNULL(Detail.dblCost, 0)
 				,0
-				,NULL
+				,@DefaultCurrencyId
 				,1
 				,@intTransactionId 
 				,Detail.intInventoryTransferDetailId
@@ -292,7 +295,7 @@ BEGIN
 				,FromStock.dblUOMQty
 				,ISNULL(FromStock.dblCost, 0)
 				,0
-				,NULL
+				,@DefaultCurrencyId
 				,1
 				,@intTransactionId 
 				,Detail.intInventoryTransferDetailId

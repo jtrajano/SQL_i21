@@ -24,6 +24,9 @@ DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
 DECLARE @MergeLotSource AS ItemCostingTableType
 		,@MergeToTargetLot AS ItemCostingTableType
 
+-- Get the default currency ID
+DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 --------------------------------------------------------------------------------
 -- VALIDATIONS
 --------------------------------------------------------------------------------
@@ -142,7 +145,7 @@ BEGIN
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= Detail.dblCost -- ItemUOM.dblUnitQty-- Cost saved in Adj is expected come from the cost bucket. 
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
+			,intCurrencyId			= @DefaultCurrencyId 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
@@ -498,7 +501,7 @@ BEGIN
 									END
 			,dblValue				= 0
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
+			,intCurrencyId			= @DefaultCurrencyId 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCommissionPlan]
 (
-	[intCommissionId]		INT NOT NULL IDENTITY,
+	[intCommissionPlanId]	INT NOT NULL IDENTITY,
 	[strCommissionPlanName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strEntities]           NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -26,6 +26,6 @@
 	[ysnMarginalSales]		BIT NULL,
 	[intCommissionAccountId] INT NULL,
 	[intConcurrencyId]		INT NOT NULL DEFAULT ((0)),
-    CONSTRAINT [PK_tblARCommissionPlan_intCommissionId] PRIMARY KEY CLUSTERED ([intCommissionId] ASC),
+    CONSTRAINT [PK_tblARCommissionPlan_intCommissionPlanId] PRIMARY KEY CLUSTERED ([intCommissionPlanId] ASC),
 	CONSTRAINT [UK_tblARCommissionPlan_strCommissionPlanName] UNIQUE (strCommissionPlanName)
 )

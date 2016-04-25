@@ -3677,6 +3677,15 @@
     <Build Include="dbo\Views\vyuAPOpenPayableDetailsFields.sql" />
     <Build Include="dbo\Tables\tblSMCalendars.sql" />
     <Build Include="dbo\Tables\tblSMCalendarEntity.sql" />
+    <Build Include="dbo\Tables\tblSMAttachmentDetailLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractAdjustmentSave.sql" />
+    <Build Include="dbo\Views\vyuCTContractAdjustmentSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMClearRangeByCheckNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMClearRangeByDate.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionImport_ErrLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImportValidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImport.sql" />
+    <Build Include="dbo\Views\vyuCTContractAdjustmentNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

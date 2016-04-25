@@ -25,6 +25,9 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @strItemNo AS NVARCHAR(50)
 
+-- Get the default currency ID
+DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
 		,@intReturnValue AS INT
@@ -146,7 +149,7 @@ BEGIN
 			, ItemUOM.dblUnitQty
 			, Detail.dblCost
 			, 0
-			, NULL
+			, @DefaultCurrencyId
 			, 1
 			, @intTransactionId
 			, Detail.intBuildAssemblyDetailId
@@ -202,7 +205,7 @@ BEGIN
 			, ItemUOM.dblUnitQty
 			, -1 * dbo.fnGetTotalStockValueFromTransactionBatch(@intTransactionId, @strBatchId) / ISNULL(Item.dblBuildQuantity, 0)
 			, 0
-			, NULL
+			, @DefaultCurrencyId
 			, 1
 			, @intTransactionId
 			, @intTransactionId
