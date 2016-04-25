@@ -3593,6 +3593,7 @@
     <Build Include="dbo\Views\vyuPRForm941Report.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleGroup.sql" />
     <Build Include="dbo\Functions\fnARComputeDiscountForEarlyPayment.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
