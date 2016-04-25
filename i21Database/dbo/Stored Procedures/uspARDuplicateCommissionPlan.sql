@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARDuplicateCommissionPlan]
-	@intCommissionId		INT		
-   ,@NewCommissionId		INT = NULL OUTPUT
+	@intCommissionPlanId		INT		
+   ,@NewCommissionPlanId		INT = NULL OUTPUT
 AS
 	INSERT INTO tblARCommissionPlan
 		([strCommissionPlanName]
@@ -33,8 +33,8 @@ AS
 	    ,[ysnActive]
 		,1
 	FROM tblARCommissionPlan
-		WHERE intCommissionId = @intCommissionId
+		WHERE intCommissionPlanId = @intCommissionPlanId
 
-	SET @NewCommissionId = SCOPE_IDENTITY()
+	SET @NewCommissionPlanId = SCOPE_IDENTITY()
 
 RETURN

@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCommissionPlanSearch]
 AS
-SELECT CP.intCommissionId
+SELECT CP.intCommissionPlanId
 	 , CP.intCommissionAccountId
 	 , CP.strCommissionPlanName
 	 , CP.strDescription

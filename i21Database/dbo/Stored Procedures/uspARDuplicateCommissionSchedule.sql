@@ -6,21 +6,25 @@ AS
 		([strCommissionScheduleName]
 		,[strCommissionScheduleDesc]
 		,[strReviewPeriod]
-		,[dtmReviewStartDate]
+		,[strScheduleType]
+		,[dtmStartDate]
+		,[dtmEndDate]
 		,[ysnActive]
-		,[ysnAutoPayables]
-		,[ysnAutoPayroll]
-		,[ysnAutoProcess]
+		,[ysnPayables]
+		,[ysnPayroll]
+		,[ysnAdjustPrevious]
 		,[intConcurrencyId])
 	SELECT 
 		 'DUP:' + [strCommissionScheduleName]
 		,[strCommissionScheduleDesc]
 		,[strReviewPeriod]
-		,[dtmReviewStartDate]
+		,[strScheduleType]
+		,[dtmStartDate]
+		,[dtmEndDate]
 		,[ysnActive]
-		,[ysnAutoPayables]
-		,[ysnAutoPayroll]
-		,[ysnAutoProcess]
+		,[ysnPayables]
+		,[ysnPayroll]
+		,[ysnAdjustPrevious]
 		,1
 	FROM tblARCommissionSchedule
 		WHERE intCommissionScheduleId = @intCommissionScheduleId
@@ -49,13 +53,13 @@ AS
 		INSERT INTO [tblARCommissionScheduleDetail]
 			([intCommissionScheduleId]
 			,[intEntityId]
-			,[intCommissionId]
+			,[intCommissionPlanId]
 			,[ysnAdjustPrevious]
 			,[intConcurrencyId])
 		SELECT 
 			@NewCommissionScheduleId
 			,[intEntityId]
-			,[intCommissionId]
+			,[intCommissionPlanId]
 			,[ysnAdjustPrevious]
 			,1
 		FROM

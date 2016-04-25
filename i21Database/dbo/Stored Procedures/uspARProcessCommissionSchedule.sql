@@ -12,12 +12,14 @@ AS
 	SELECT intID FROM fnGetRowsFromDelimitedValues(@commissionIds)
 			
 	DECLARE @tblARCommissionSchedules TABLE (
-		intCommissionScheduleId INT
+		  intCommissionScheduleId	INT
 		, strReviewPeriod			NVARCHAR(20)
-		, dtmReviewStartDate		DATETIME
-		, ysnAutoPayables			BIT
-		, ysnAutoPayroll			BIT
-		, ysnAutoProcess			BIT
+		, strScheduleType			NVARCHAR(20)
+		, dtmStartDate				DATETIME
+		, dtmEndDate				DATETIME
+		, ysnPayables				BIT
+		, ysnPayroll				BIT
+		, ysnAdjustPrevious			BIT
 	)
 
 	--FILTER BY COMMISSION SCHEDULE ID AND ACTIVE = 1
@@ -26,10 +28,12 @@ AS
 			INSERT INTO @tblARCommissionSchedules
 			SELECT intCommissionScheduleId
 					, strReviewPeriod
-					, dtmReviewStartDate
-					, ysnAutoPayables
-					, ysnAutoPayroll
-					, ysnAutoProcess
+					, strScheduleType
+					, dtmStartDate
+					, dtmEndDate
+					, ysnPayables
+					, ysnPayroll
+					, ysnAdjustPrevious
 			FROM tblARCommissionSchedule
 			WHERE intCommissionScheduleId IN (SELECT intCommissionScheduleId FROM @tmpCommissionSchedule)
 				AND ysnActive = 1
@@ -39,10 +43,12 @@ AS
 			INSERT INTO @tblARCommissionSchedules
 			SELECT intCommissionScheduleId
 					, strReviewPeriod
-					, dtmReviewStartDate
-					, ysnAutoPayables
-					, ysnAutoPayroll
-					, ysnAutoProcess
+					, strScheduleType
+					, dtmStartDate
+					, dtmEndDate
+					, ysnPayables
+					, ysnPayroll
+					, ysnAdjustPrevious
 			FROM tblARCommissionSchedule
 			WHERE ysnActive = 1
 		END
@@ -51,38 +57,36 @@ AS
 	IF @dtmStartDate IS NOT NULL AND @dtmEndDate IS NOT NULL
 		BEGIN
 			DELETE FROM @tblARCommissionSchedules
-			WHERE CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmReviewStartDate))) NOT BETWEEN CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmStartDate))) 
+			WHERE CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmStartDate))) NOT BETWEEN CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmStartDate))) 
 																								AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmEndDate))) 
 		END
 			
 	--GET COMM. SCHED. DETAILS WHERE intCommissionScheduleId
 	IF EXISTS(SELECT NULL FROM @tblARCommissionSchedules)
 		BEGIN
-			DECLARE @tblARCommissionScheduleDetails TABLE (intEntityId INT, intCommissionPlanId INT, ysnAdjustForPrevious BIT, ysnEmployee BIT)
+			DECLARE @tblARCommissionScheduleDetails TABLE (intEntityId INT, intCommissionPlanId INT, ysnAdjustForPrevious BIT)
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionSchedules)
 				BEGIN
 					DECLARE @intActiveCommSchedId	INT,
-							@ysnAutoPayables		BIT,
-							@ysnAutoPayroll			BIT
+							@ysnPayables		BIT,
+							@ysnPayroll			BIT
 
 					SELECT TOP 1 
-							@intActiveCommSchedId	= intCommissionScheduleId
-							, @ysnAutoPayables			= ysnAutoPayables
-							, @ysnAutoPayroll			= ysnAutoPayroll
+							  @intActiveCommSchedId		= intCommissionScheduleId
+							, @ysnPayables				= ysnPayables
+							, @ysnPayroll				= ysnPayroll
 					FROM @tblARCommissionSchedules ORDER BY intCommissionScheduleId
 
 					INSERT INTO @tblARCommissionScheduleDetails
 							(intEntityId
 							, intCommissionPlanId
-							, ysnAdjustForPrevious
-							, ysnEmployee)
+							, ysnAdjustForPrevious)
 					SELECT CSD.intEntityId
-							, CSD.intCommissionId
+							, CSD.intCommissionPlanId
 							, CSD.ysnAdjustPrevious
-							, Employee
 					FROM tblARCommissionScheduleDetail CSD 
-						INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionId = CP.intCommissionId
+						INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionPlanId = CP.intCommissionPlanId
 						LEFT JOIN vyuEMSearch E ON CSD.intEntityId = E.intEntityId
 					WHERE CSD.intCommissionScheduleId = @intActiveCommSchedId
 						AND CP.ysnActive = 1
@@ -93,15 +97,13 @@ AS
 							WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
 								BEGIN
 									DECLARE @intCommissionPlanId	INT
-									        , @intEntityId			INT
-											, @ysnEmployee			BIT
+									      , @intEntityId			INT
 									SELECT TOP 1
 											@intCommissionPlanId = intCommissionPlanId
-											, @intEntityId			= intEntityId
-											, @ysnEmployee			= ysnEmployee
+										  , @intEntityId		 = intEntityId											
 									FROM @tblARCommissionScheduleDetails
 											
-									EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId, @ysnEmployee, @ysnAutoPayables, @ysnAutoPayroll
+									EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId
 
 									DELETE FROM @tblARCommissionScheduleDetails WHERE intCommissionPlanId = @intCommissionPlanId
 								END									
