@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetEquityRefundDetails]
-	@intRefundTypeId INT = NULL
+	@intCustomerId INT = NULL
 AS
 BEGIN
 
@@ -15,9 +15,7 @@ SELECT DISTINCT RR.intRefundTypeId,
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 	 INNER JOIN tblPATCustomerEquity CE
 			 ON CE.intRefundTypeId = RR.intRefundTypeId
-		  WHERE RR.intRefundTypeId = @intRefundTypeId
+		  WHERE CE.intCustomerId = @intCustomerId
 	   GROUP BY RR.intRefundTypeId, CE.strEquityType, RR.strRefundType, RR.intConcurrencyId, CE.dblEquity
-
-
 END
 GO

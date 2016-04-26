@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspPATGetEquityPatronageDetails 
-	@intRefundTypeId INT = NULL
+	@intCustomerId INT = NULL
 AS
 BEGIN
 	SELECT RR.intRefundTypeId, 
@@ -15,8 +15,6 @@ INNER JOIN tblPATPatronageCategory PC
 		ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 INNER JOIN tblPATCustomerEquity CE
 		ON CE.intRefundTypeId = RR.intRefundTypeId
-	 WHERE RR.intRefundTypeId = @intRefundTypeId
-
-
+	 WHERE CE.intCustomerId = @intCustomerId
 END
 GO
