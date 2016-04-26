@@ -28,6 +28,7 @@ BEGIN TRY
 	DECLARE @intItemUOMId INT
 	DECLARE @intItemIssuedUOMId INT
 	DECLARE @dblPickedLotWeightPerUnit NUMERIC(38,20)
+			,@intPickUOMId int
 
 	SELECT @intPickListId = pl.intPickListId, @strPickListNo = pl.strPickListNo, @intPickListLotId = pld.intStageLotId, @dblPickListQty = pld.dblPickQuantity, @intPickListDetailId = pld.intPickListDetailId
 	FROM tblMFPickList pl
@@ -38,6 +39,7 @@ BEGIN TRY
 
 	SELECT @intItemUOMId = intItemUOMId
 		  ,@intItemIssuedUOMId = intItemIssuedUOMId
+		  ,@intPickUOMId=intPickUOMId
 	FROM tblMFPickListDetail
 	WHERE intPickListDetailId = @intPickListDetailId
 
@@ -49,10 +51,10 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intPickedLotId
 
-	IF @intItemUOMId = @intItemIssuedUOMId
-	BEGIN
-		SET @dblPickedQty = dbo.fnDivide(@dblPickedQty,@dblPickedLotWeightPerUnit)
-	END
+	--IF @intItemUOMId = @intItemIssuedUOMId
+	--BEGIN
+	--	SET @dblPickedQty = dbo.fnDivide(@dblPickedQty,@dblPickedLotWeightPerUnit)
+	--END
 
 	INSERT INTO tblWHPickForKitting (intPickListId, strPickListNo, intPickListDetailId, intPickListLotId, intPickedLotId, dblPickListQty, dblPickedQty, intUserId)
 	VALUES (@intPickListId, @strPickListNo, @intPickListDetailId, @intPickListLotId, @intPickedLotId, @dblPickListQty, @dblPickedQty, @intUserId)
@@ -88,6 +90,7 @@ BEGIN TRY
 						  @intNewStorageLocationId = @intStorageLocationId, 
 						  @dblMoveQty = @dblPickedQty, 
 						  @intUserId = @intUserId
+						  ,@intItemUOMId=@intPickUOMId
 	END
 					  
 	SELECT TOP 1 @intNewLotId = intLotId

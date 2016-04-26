@@ -39,7 +39,7 @@ BEGIN TRY
 		   @dblLotQty = dblQty,
 		   @dblWeight=dblWeight,
 		   @dblWeightPerQty = dblWeightPerQty,
-		   @intWeightUOMId = intWeightUOMId
+		   @intWeightUOMId = IsNULL(intWeightUOMId,intItemUOMId)
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dblLotAvailableQty = (CASE 
@@ -66,10 +66,10 @@ BEGIN TRY
 	END
 
 	--IF @intItemStockUOMId = @intWeightUOMId
-	IF @dblWeightPerQty > 0 
-	BEGIN
-		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
-	END
+	--IF @dblWeightPerQty > 0 
+	--BEGIN
+	--	SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	--END
 
 	IF @dblNewLotQty=0
 	BEGIN
@@ -103,6 +103,7 @@ BEGIN TRY
 													  @strLotNumber,
 													  @dblAdjustByQuantity,
 													  @dblNewUnitCost,
+  												      @intWeightUOMId,
 													  @intSourceId,
 													  @intSourceTransactionTypeId,
 													  @intUserId,
@@ -119,16 +120,27 @@ BEGIN TRY
 
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		--EXEC dbo.uspMFLotAdjustQty
-		-- @intLotId =@intLotId,       
-		-- @dblNewLotQty =0,
-		-- @intUserId=@intUserId ,
-		-- @strReasonCode ='Residue qty clean up',
-		-- @strNotes ='Residue qty clean up'
-		UPDATE tblICLot
-		SET dblWeight = 0
-			,dblQty = 0
-		WHERE intLotId = @intLotId
+			DECLARE @dblResidueWeight NUMERIC(38,20)
+			SELECT @dblResidueWeight = CASE WHEN intWeightUOMId IS NULL THEN dblWeight ELSE dblQty END FROM tblICLot WHERE intLotId = @intLotId
+			select @dblAdjustByQuantity=-@dblResidueWeight
+
+			EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId,
+								@dtmDate,
+								@intLocationId,
+								@intSubLocationId,
+								@intStorageLocationId,
+								@strLotNumber,
+								@dblAdjustByQuantity,
+								@dblNewUnitCost,
+  								@intWeightUOMId,
+								@intSourceId,
+								@intSourceTransactionTypeId,
+								@intUserId,
+								@intInventoryAdjustmentId OUTPUT
+		--UPDATE tblICLot
+		--SET dblWeight = 0
+		--	,dblQty = 0
+		--WHERE intLotId = @intLotId
 	END
 END TRY  
   

@@ -107,13 +107,13 @@ BEGIN TRY
 		END
 	END
 
-	SELECT @dblOldDestinationQty=dblQty
-	FROM dbo.tblICLot
-	WHERE strLotNumber = @strNewLotNumber
-		AND intStorageLocationId = @intSplitStorageLocationId
+	--SELECT @dblOldDestinationQty=dblQty
+	--FROM dbo.tblICLot
+	--WHERE strLotNumber = @strNewLotNumber
+	--	AND intStorageLocationId = @intSplitStorageLocationId
 
-	IF @dblOldDestinationQty IS NULL
-	SELECT @dblOldDestinationQty=0
+	--IF @dblOldDestinationQty IS NULL
+	--SELECT @dblOldDestinationQty=0
 								 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
@@ -126,6 +126,7 @@ BEGIN TRY
 													 @intNewStorageLocationId = @intSplitStorageLocationId,
 													 @strNewLotNumber = @strNewLotNumber,
 													 @dblAdjustByQuantity = @dblAdjustByQuantity,
+													 @intItemUOMId=@intItemUOMId,
 													 @dblNewSplitLotQuantity = NULL,
 													 @dblNewWeight = NULL,
 													 @intNewItemUOMId = @intNewItemUOMId,
@@ -135,26 +136,26 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-	IF @dblOldDestinationQty IS NULL
-	SELECT @dblOldDestinationQty=0
+	--IF @dblOldDestinationQty IS NULL
+	--SELECT @dblOldDestinationQty=0
 
-	IF @dblOldSourceQty IS NULL
-	SELECT @dblOldSourceQty=0
+	--IF @dblOldSourceQty IS NULL
+	--SELECT @dblOldSourceQty=0
 
-	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblWeightPerQty,
-		dblWeight = (@dblOldSourceQty-@dblSplitQty)*@dblWeightPerQty,
-		dblQty = @dblOldSourceQty-@dblSplitQty
-	WHERE intLotId=@intLotId
+	--UPDATE dbo.tblICLot
+	--SET dblWeightPerQty = @dblWeightPerQty,
+	--	dblWeight = (@dblOldSourceQty-@dblSplitQty)*@dblWeightPerQty,
+	--	dblQty = @dblOldSourceQty-@dblSplitQty
+	--WHERE intLotId=@intLotId
 	
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
 
-	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblWeightPerQty,
-		dblWeight = (@dblOldDestinationQty+@dblSplitQty)*@dblWeightPerQty,
-		dblQty = @dblOldDestinationQty+@dblSplitQty
-	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
+	--UPDATE dbo.tblICLot
+	--SET dblWeightPerQty = @dblWeightPerQty,
+	--	dblWeight = (@dblOldDestinationQty+@dblSplitQty)*@dblWeightPerQty,
+	--	dblQty = @dblOldDestinationQty+@dblSplitQty
+	--WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
 	
 	--UPDATE tblICLot
 	--SET dblWeight = dblQty
@@ -174,16 +175,16 @@ BEGIN TRY
 
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
 	BEGIN
-		--EXEC dbo.uspMFLotAdjustQty
-		-- @intLotId =@intLotId,       
-		-- @dblNewLotQty =0,
-		-- @intUserId=@intUserId ,
-		-- @strReasonCode ='Residue qty clean up',
-		-- @strNotes ='Residue qty clean up'
-		UPDATE tblICLot
-		SET dblWeight = 0
-			,dblQty = 0
-		WHERE intLotId = @intLotId
+		EXEC dbo.uspMFLotAdjustQty
+		 @intLotId =@intLotId,       
+		 @dblNewLotQty =0,
+		 @intUserId=@intUserId ,
+		 @strReasonCode ='Residue qty clean up',
+		 @strNotes ='Residue qty clean up'
+		--UPDATE tblICLot
+		--SET dblWeight = 0
+		--	,dblQty = 0
+		--WHERE intLotId = @intLotId
 	END
 													 
 END TRY  
