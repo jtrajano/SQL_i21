@@ -102,7 +102,6 @@
        tblSCTicket.ysnUseDestinationGrades,
        tblSCTicket.ysnHasGeneratedTicketNumber,
        tblSCTicket.intInventoryTransferId,
-       tblSCTicket.intInventoryReceiptId,
        tblSCTicket.dblGross,
        tblSCTicket.dblShrink,
        tblSCTicket.dblConvertedUOMQty,
@@ -123,27 +122,35 @@
 	   tblSCTicketPool.strTicketPool,
 	   tblGRDiscountId.strDiscountId,
 	   tblICStorageLocation.strDescription,
-	   tblGRStorageScheduleRule.strScheduleId
-  from ((dbo.tblSCTicket tblSCTicket
-	left join dbo.tblEMEntity tblEMEntity
+	   tblGRStorageScheduleRule.strScheduleId,
+	   tblICInventoryReceipt.intInventoryReceiptId,
+	   tblICInventoryReceipt.strReceiptNumber,
+	   vyuICGetInventoryShipmentItem.intInventoryShipmentId,
+	   vyuICGetInventoryShipmentItem.strShipmentNumber
+  from ((tblSCTicket tblSCTicket
+	left join tblEMEntity tblEMEntity
        on (tblEMEntity.intEntityId = tblSCTicket.intEntityId)
-	left join dbo.[tblEMEntitySplit] tblEMEntitySplit
+	left join tblEMEntitySplit tblEMEntitySplit
        on ([tblEMEntitySplit].intSplitId = tblSCTicket.intSplitId)
-	left join dbo.tblSCScaleSetup tblSCScaleSetup
+	left join tblSCScaleSetup tblSCScaleSetup
        on (tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId)
-	left join dbo.tblSMCompanyLocation tblSMCompanyLocation
+	left join tblSMCompanyLocation tblSMCompanyLocation
        on (tblSMCompanyLocation.intCompanyLocationId = tblSCTicket.intProcessingLocationId))
-	left join dbo.tblSCListTicketTypes tblSCListTicketTypes
+	left join tblSCListTicketTypes tblSCListTicketTypes
        on (tblSCListTicketTypes.intTicketType = tblSCTicket.intTicketType AND tblSCListTicketTypes.strInOutIndicator = tblSCTicket.strInOutFlag)
-	left join dbo.tblGRStorageType tblGRStorageType
+	left join tblGRStorageType tblGRStorageType
        on (tblGRStorageType.strStorageTypeCode = tblSCTicket.strDistributionOption)
-	left join dbo.tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation
+	left join tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation
        on (tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = tblSCTicket.intSubLocationId))
-	left join dbo.tblSCTicketPool tblSCTicketPool
-       on (tblSCTicketPool.intTicketPoolId = tblSCTicket.intTicketPoolId)
-	left join dbo.tblGRDiscountId tblGRDiscountId
-       on (tblGRDiscountId.intDiscountId = tblSCTicket.intDiscountId)
-	left join dbo.tblICStorageLocation tblICStorageLocation
-       on (tblICStorageLocation.intStorageLocationId = tblSCTicket.intStorageLocationId)
-	left join dbo.tblGRStorageScheduleRule tblGRStorageScheduleRule
-       on (tblGRStorageScheduleRule.intStorageScheduleRuleId = tblSCTicket.intStorageScheduleId)
+	left join tblSCTicketPool tblSCTicketPool
+       on tblSCTicketPool.intTicketPoolId = tblSCTicket.intTicketPoolId
+	left join tblGRDiscountId tblGRDiscountId
+       on tblGRDiscountId.intDiscountId = tblSCTicket.intDiscountId
+	left join tblICStorageLocation tblICStorageLocation
+       on tblICStorageLocation.intStorageLocationId = tblSCTicket.intStorageLocationId
+	left join tblGRStorageScheduleRule tblGRStorageScheduleRule
+       on tblGRStorageScheduleRule.intStorageScheduleRuleId = tblSCTicket.intStorageScheduleId
+	left join tblICInventoryReceipt tblICInventoryReceipt
+	   on  tblICInventoryReceipt.intInventoryReceiptId = tblSCTicket.intInventoryReceiptId
+	left join vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem
+	   on  vyuICGetInventoryShipmentItem.intSourceId = tblSCTicket.intTicketId

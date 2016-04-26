@@ -3690,6 +3690,7 @@
     <Build Include="dbo\Functions\fnGLGetBalancesDateCriteria.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinDetails.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBins.sql" />
+    <Build Include="dbo\Views\vyuSCTicketInventoryTransferView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
