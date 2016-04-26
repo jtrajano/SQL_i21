@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetCustomerRefundCalculation]
 			@intFiscalYearId INT = NULL,
-			@strStockStatus CHAR(1) = NULL,
-			@intSearchPreviousData INT = 1
+			@strStockStatus CHAR(1) = NULL
 AS
 BEGIN
 
@@ -16,6 +15,8 @@ BEGIN
 -- =======================================================================================================
 
 CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
+
+
 
 IF(@strStockStatus = 'A')
 BEGIN
@@ -35,26 +36,6 @@ ELSE IF(@strStockStatus = 'V')
 BEGIN
 	DELETE FROM #statusTable
 	INSERT INTO #statusTable VALUES ('Voting');
-END
-
-IF(@intSearchPreviousData = 1)
-BEGIN
-	EXEC (N'SELECT intCategoryVolumeId, intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume = TotalRefund.dblRefundAmount, intConcurrencyId
-	INTO ##tempCustomerVolume
-	FROM tblPATCustomerVolume CVol
-	INNER JOIN
-	(
-		SELECT intCustomerId, dblRefundAmount = SUM(dblRefundAmount)
-		FROM tblPATRefundCustomer
-		GROUP BY intCustomerId
-	) TotalRefund
-	ON TotalRefund.intCustomerId = CVol.intCustomerPatronId')
-END
-ELSE
-BEGIN
-	EXEC(N'SELECT * 
-	INTO ##tempCustomerVolume 
-	FROM tblPATCustomerVolume')
 END
 
 DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM tblPATCompanyPreference)
@@ -77,9 +58,10 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 				dblEquityRefund = Total.dblRefundAmount - Total.dblCashRefund
 		   FROM (
 				SELECT DISTINCT intCustomerId = B.intCustomerPatronId,
-							(CASE WHEN SUM(RRD.dblRate * dblVolume) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
-							SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund
-					   FROM ##tempCustomerVolume B
+							(CASE WHEN SUM(RRD.dblRate * dblVolume) <= 10 THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
+							SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund,
+							RRD.intPatronageCategoryId
+					   FROM tblPATCustomerVolume B
 				 INNER JOIN tblPATRefundRateDetail RRD
 						 ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
 				 INNER JOIN tblPATRefundRate RR
@@ -92,10 +74,10 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 						 ON ENT.intEntityId = B.intCustomerPatronId
 				 INNER JOIN tblPATPatronageCategory PC
 						 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-				   GROUP BY B.intCustomerPatronId, RR.dblCashPayout
+				   GROUP BY B.intCustomerPatronId, RR.dblCashPayout,RRD.intPatronageCategoryId
 			  ) Total
-     INNER JOIN ##tempCustomerVolume CV
-		    ON CV.intCustomerPatronId = Total.intCustomerId
+     INNER JOIN tblPATCustomerVolume CV
+		    ON CV.intCustomerPatronId = Total.intCustomerId AND CV.intPatronageCategoryId = Total.intPatronageCategoryId
 	 INNER JOIN tblPATRefundRateDetail RRD
 			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
      INNER JOIN tblPATRefundRate RR
@@ -127,7 +109,6 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 				RR.intRefundTypeId
 
 	DROP TABLE #statusTable
-	DROP TABLE ##tempCustomerVolume
 	-- ==================================================================
 	-- End Transaction
 	-- ==================================================================
