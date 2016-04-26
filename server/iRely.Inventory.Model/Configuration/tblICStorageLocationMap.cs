@@ -160,6 +160,52 @@ namespace iRely.Inventory.Model
         }
     }
 
+    class vyuICGetStorageBinsMap : EntityTypeConfiguration<vyuICGetStorageBins>
+    {
+        public vyuICGetStorageBinsMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intStorageLocationId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetStorageBins");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
+            this.Property(t => t.strLocation).HasColumnName("strLocation");
+            this.Property(t => t.dblCapacity).HasColumnName("dblCapacity").HasPrecision(18, 6);
+            this.Property(t => t.dblAvailable).HasColumnName("dblAvailable").HasPrecision(18, 6);
+            this.Property(t => t.dblStock).HasColumnName("dblStock").HasPrecision(18, 6);
+        }
+    }
+
+    class vyuICGetStorageBinDetailsMap : EntityTypeConfiguration<vyuICGetStorageBinDetails>
+    {
+        public vyuICGetStorageBinDetailsMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intItemLocationId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetStorageBinDetails");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.intCompanyLocationSubLocationId).HasColumnName("intCompanyLocationSubLocationId");
+            this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
+            this.Property(t => t.strSubLocation).HasColumnName("strSubLocation");
+            this.Property(t => t.strUOM).HasColumnName("strUOM");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strLocation).HasColumnName("strLocation");
+            this.Property(t => t.dblCapacity).HasColumnName("dblCapacity").HasPrecision(18, 6);
+            this.Property(t => t.dblAvailable).HasColumnName("dblAvailable").HasPrecision(18, 6);
+            this.Property(t => t.dblStock).HasColumnName("dblStock").HasPrecision(18, 6);
+        }
+    }
+
     class vyuICGetStorageLocationMap : EntityTypeConfiguration<vyuICGetStorageLocation>
     {
         public vyuICGetStorageLocationMap()

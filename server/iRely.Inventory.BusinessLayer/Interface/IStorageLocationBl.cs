@@ -11,6 +11,7 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IStorageLocationBl : IBusinessLayer<tblICStorageLocation>
     {
-
+        Task<SearchResult> GetStorageBins(GetParameter param);
+        Task<SearchResult> GetStorageBinDetails(GetParameter param);
     }
 }
