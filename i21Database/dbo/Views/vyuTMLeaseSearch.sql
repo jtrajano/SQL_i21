@@ -1,0 +1,65 @@
+﻿CREATE VIEW [dbo].[vyuTMLeaseSearch]
+AS  
+	SELECT
+			A.intLeaseId
+			,A.strLeaseNumber
+			,A.dtmStartDate
+			,strLeaseCode = B.strLeaseCode
+			,strBillToCustomerNumber = C.strEntityNo
+			,strBillToCustomerName = C.strName
+			,A.strRentalStatus
+			,A.strLeaseStatus
+			,A.strBillingFrequency
+			,A.intBillingMonth
+			,A.strBillingType
+			,ysnLeaseToOwn = CAST(ISNULL(A.ysnLeaseToOwn,0) AS BIT)
+			,A.dtmDontBillAfter
+			,A.intConcurrencyId 
+			,strSiteCustomerNumber = L.strEntityNo
+			,strSiteCustomerName = L.strName
+			,intSiteNumber = F.intSiteNumber
+			,strSiteDescription = F.strDescription
+			,F.strSiteAddress 
+			,H.strDeviceType
+			,G.strSerialNumber
+			,dblLeaseAmount = J.dblAmount
+			,ysnLeaseTaxable = J.ysnTaxable
+			,dblTotalUsage = F.dblYTDGalsThisSeason
+			,dblLeaseBillingMinimum = (SELECT TOP 1 dblMinimumUsage 
+												FROM tblTMLeaseMinimumUse 
+												WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
+												ORDER BY tblTMLeaseMinimumUse.dblSiteCapacity ASC)
+			,dtmLastLeaseBillingDate = A.dtmLastLeaseBillingDate
+		FROM tblTMLease A
+		LEFT JOIN tblTMLeaseCode B
+			ON A.intLeaseCodeId = B.intLeaseCodeId
+		LEFT JOIN tblEMEntity C
+			ON A.intBillToCustomerId = C.intEntityId 
+		LEFT JOIN tblTMLeaseDevice D
+			ON A.intLeaseId = D.intLeaseId 
+		LEFT JOIN (
+			SELECT DISTINCT 
+				S.intSiteID
+				,LD.intLeaseId
+			FROM tblTMLeaseDevice LD
+			INNER JOIN tblTMDevice Dev
+				ON LD.intDeviceId = Dev.intDeviceId
+			INNER JOIN tblTMSiteDevice SD
+				ON SD.intDeviceId = Dev.intDeviceId
+			INNER JOIN tblTMSite S 
+				ON SD.intSiteID = S.intSiteID
+		) E
+			ON D.intLeaseId = E.intLeaseId
+		LEFT JOIN tblTMSite F
+			ON E.intSiteID = F.intSiteID
+		LEFT JOIN tblTMDevice G
+			ON G.intDeviceId = D.intDeviceId
+		LEFT JOIN tblTMDeviceType H
+			ON G.intDeviceTypeId = H.intDeviceTypeId
+		LEFT JOIN tblTMLeaseCode J
+			ON A.intLeaseCodeId = J.intLeaseCodeId
+		LEFT JOIN tblTMCustomer K
+			ON F.intCustomerID = K.intCustomerID 
+		LEFT JOIN tblEMEntity L
+			ON K.intCustomerNumber = L.intEntityId
+GO
