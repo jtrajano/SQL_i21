@@ -367,7 +367,8 @@ BEGIN
 								
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
-													CASE	WHEN ISNULL(LotMaster.intItemUOMId, 0) <> LotToUpdate.intItemUOMId THEN 1 
+													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0
+															WHEN ISNULL(LotMaster.intItemUOMId, 0) <> LotToUpdate.intItemUOMId THEN 1 
 															WHEN ISNULL(LotMaster.intWeightUOMId, 0) <> LotToUpdate.intWeightUOMId THEN 2
 															WHEN ISNULL(LotMaster.intSubLocationId, 0) <> ISNULL(LotToUpdate.intSubLocationId, 0) THEN 3
 															WHEN ISNULL(LotMaster.intStorageLocationId, 0) <> ISNULL(LotToUpdate.intStorageLocationId, 0) THEN 4
@@ -382,8 +383,12 @@ BEGIN
 																ELSE 0 
 														END 
 													ELSE 
-														-- Increase the weight per Qty if there is an incoming stock for the lot. 
-														CASE	WHEN LotToUpdate.dblQty > 0 AND LotToUpdate.dblWeightPerQty <> LotMaster.dblWeightPerQty THEN 
+														
+														CASE	-- Retain the same Wgt Per Qty if the incoming stock is in wgt. 
+																WHEN LotToUpdate.dblQty > 0 AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 
+																	LotMaster.dblWeightPerQty
+																-- Increase the weight per Qty if there is an incoming stock for the lot. 
+																WHEN LotToUpdate.dblQty > 0 AND LotToUpdate.dblWeightPerQty <> LotMaster.dblWeightPerQty THEN 
 																	dbo.fnCalculateWeightUnitQty(
 																		(
 																			LotMaster.dblQty 
@@ -461,27 +466,40 @@ BEGIN
 				-- 1. It is editing from the source transaction id
 				-- 2. The item UOM, Weight UOM, Sub Location, and Storage Location matches exactly. 
 				-- Otherwise, it returns zero. 
-				,@intInsertedLotId		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotMaster.intLotId
+				,@intInsertedLotId		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
+														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
 														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
-													) THEN LotMaster.intLotId 
+													) THEN 
+														LotMaster.intLotId 
+													WHEN (
+														LotMaster.intWeightUOMId = LotToUpdate.intItemUOMId
+														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+													) THEN 
+														LotMaster.intLotId 
 													ELSE 0 
 											END
-				,@intLotId				=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotMaster.intLotId
+				,@intLotId				=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
+														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
 														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
-													) THEN LotMaster.intLotId 
+													) THEN 
+														LotMaster.intLotId 
+													WHEN (
+														LotMaster.intWeightUOMId = LotToUpdate.intItemUOMId
+														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+													) THEN 
+														LotMaster.intLotId 
 													ELSE 0 
-											END
-
-
-				
+											END			
 
 
 		-- If none found, insert a new lot record. 
