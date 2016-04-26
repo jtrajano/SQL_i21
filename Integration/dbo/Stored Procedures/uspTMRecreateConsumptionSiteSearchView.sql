@@ -51,6 +51,18 @@ BEGIN
 					ON A.intCustomerID = B.intCustomerID
 				INNER JOIN vwcusmst C
 					ON B.intCustomerNumber = C.A4GLIdentity
+				LEFT JOIN (
+					SELECT Y.strSerialNumber 
+						,Z.intSiteID
+					FROM tblTMSiteDevice Z
+					INNER JOIN tblTMDevice Y
+						ON Z.intDeviceId = Y.intDeviceId
+					INNER JOIN tblTMDeviceType X
+						ON Y.intDeviceTypeId = X.intDeviceTypeId
+					WHERE X.strDeviceType = ''Tank''
+				) J
+					ON A.intSiteID = J.intSiteID
+				
 		')
 	END
 	ELSE
@@ -89,6 +101,17 @@ BEGIN
 						and F.ysnDefaultContact = 1
 				INNER JOIN tblEntity G 
 					ON F.intEntityContactId = G.intEntityId
+				LEFT JOIN (
+					SELECT Y.strSerialNumber 
+						,Z.intSiteID
+					FROM tblTMSiteDevice Z
+					INNER JOIN tblTMDevice Y
+						ON Z.intDeviceId = Y.intDeviceId
+					INNER JOIN tblTMDeviceType X
+						ON Y.intDeviceTypeId = X.intDeviceTypeId
+					WHERE X.strDeviceType = ''Tank''
+				) J
+					ON A.intSiteID = J.intSiteID
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END
