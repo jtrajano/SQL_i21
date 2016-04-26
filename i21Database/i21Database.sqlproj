@@ -3688,6 +3688,8 @@
     <Build Include="dbo\Views\vyuCTContractAdjustmentNotMapped.sql" />
     <Build Include="dbo\Functions\fnGLGetActivityBalance.sql" />
     <Build Include="dbo\Functions\fnGLGetBalancesDateCriteria.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageBinDetails.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageBins.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
