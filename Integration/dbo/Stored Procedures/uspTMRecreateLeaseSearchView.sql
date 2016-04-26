@@ -166,7 +166,7 @@ BEGIN
 					FROM tblTMLease A
 					LEFT JOIN tblTMLeaseCode B
 						ON A.intLeaseCodeId = B.intLeaseCodeId
-					LEFT JOIN tblEntity C
+					LEFT JOIN tblEMEntity C
 						ON A.intBillToCustomerId = C.intEntityId 
 					LEFT JOIN tblTMLeaseDevice D
 						ON A.intLeaseId = D.intLeaseId 
@@ -193,7 +193,7 @@ BEGIN
 						ON A.intLeaseCodeId = J.intLeaseCodeId
 					LEFT JOIN tblTMCustomer K
 						ON F.intCustomerID = K.intCustomerID 
-					LEFT JOIN tblEntity L
+					LEFT JOIN tblEMEntity L
 						ON K.intCustomerNumber = L.intEntityId
 		')
 	END
