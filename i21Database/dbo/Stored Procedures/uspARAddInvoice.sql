@@ -438,7 +438,7 @@ IF ISNULL(@intFreightItemId, 0) > 0
 
 		IF ISNULL(@intFreightItemUOMId, 0) = 0
 			BEGIN
-				SELECT TOP 1 @intFreightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+				SELECT TOP 1 @intFreightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId ORDER BY ysnStockUnit DESC
 			END
 
 		IF ISNULL(@intFreightItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
@@ -454,7 +454,7 @@ IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
 
 		IF ISNULL(@intSurchargeItemUOMId, 0) = 0
 			BEGIN
-				SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
+				SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId ORDER BY ysnStockUnit DESC
 			END
 
 		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblSurcharge, @ZeroDecimal) > @ZeroDecimal)
@@ -537,9 +537,10 @@ IF @ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0
 			([intInvoiceId]
 			,[intItemId]
 			,[strItemDescription]
-			,[strDocumentNumber]
-			,[intItemUOMId]
+			,[strDocumentNumber]			
+			,[intOrderUOMId]
 			,[dblQtyOrdered]
+			,[intItemUOMId]
 			,[dblQtyShipped]
 			,[dblPrice]
 			,[dblTotal]
@@ -557,7 +558,8 @@ IF @ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0
 			,IC.[strDescription]										--strItemDescription] 
 			,IE.strSourceId
 			,@intSurchargeItemUOMId										--[intItemUOMId]
-			,1   														--[dblQtyOrdered]
+			,1   	
+			,@intSurchargeItemUOMId														--[dblQtyOrdered]
 			,1  														--[dblQtyShipped]
 			,dblPrice = ISNULL(IE.dblQty, @ZeroDecimal) * (ISNULL(IE.[dblFreightRate], @ZeroDecimal) * (ISNULL(IE.dblSurcharge, @ZeroDecimal) / 100))
 			,0          												--[dblTotal]
