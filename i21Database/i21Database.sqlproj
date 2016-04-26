@@ -3686,6 +3686,8 @@
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImport.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustmentNotMapped.sql" />
+    <Build Include="dbo\Functions\fnGLGetActivityBalance.sql" />
+    <Build Include="dbo\Functions\fnGLGetBalancesDateCriteria.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
