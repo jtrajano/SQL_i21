@@ -337,6 +337,7 @@ BEGIN
 						,dblQty = @dblQty
 						,dblWeight = @dblWeight
 						,dblWeightPerQty = @dblWeightPerQty
+						,intSplitFromLotId = @intSplitFromLotId
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -453,14 +454,12 @@ BEGIN
 														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+														AND LotToUpdate.intSplitFromLotId IS NULL 
 													) THEN 
 														ISNULL(LotMaster.dblGrossWeight, 0) + @dblGrossWeight 
 													ELSE 
 														LotMaster.dblGrossWeight 
 											END 
-															
-				
-				-- CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dblGrossWeight ELSE LotMaster.dblGrossWeight END
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
