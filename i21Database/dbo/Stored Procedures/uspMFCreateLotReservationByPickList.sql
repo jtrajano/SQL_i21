@@ -88,7 +88,7 @@ Select @intLocationId=intLocationId,@strPickListNo=strPickListNo From tblMFPickL
 			,intTransactionTypeId = @intInventoryTransactionType
 	FROM	tblMFPickListDetail pld 
 			Join tblMFPickList pl on pld.intPickListId=pl.intPickListId
-			JOIN tblICLot l ON l.intLotId = pld.intLotId
+			JOIN tblICLot l ON l.intLotId = pld.intStageLotId
 	WHERE	pld.intPickListId = @intPickListId
 
 	--Insert Bulk Items if any

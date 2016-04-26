@@ -57,6 +57,8 @@ BEGIN TRY
 	DECLARE @ysnIsSubstitute bit
 	DECLARE @intWorkOrderId INT
 	DECLARE @dblBulkItemAvailableQty NUMERIC(38,20)
+	DECLARE @dblRecipeQty NUMERIC(38,20)
+
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
 		,@strRuleName NVARCHAR(100)
@@ -250,6 +252,7 @@ BEGIN TRY
 	If ISNULL(@strXml,'')=''
 	Begin
 		If Exists (Select 1 From tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId)
+		Begin
 				INSERT INTO @tblInputItem (
 				intRecipeId
 				,intRecipeItemId
@@ -292,6 +295,9 @@ BEGIN TRY
 			WHERE r.intWorkOrderId = @intWorkOrderId
 				AND rs.intRecipeItemTypeId = 1
 			ORDER BY ysnIsSubstitute, ysnMinorIngredient
+
+				Select @dblRecipeQty=dblQuantity From tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId
+		End
 		Else
 		Begin
 			INSERT INTO @tblInputItem (
@@ -348,6 +354,8 @@ BEGIN TRY
 			WHERE r.intRecipeId = @intRecipeId
 				AND rs.intRecipeItemTypeId = 1
 			ORDER BY ysnIsSubstitute,ysnMinorIngredient
+
+			Select @dblRecipeQty=dblQuantity From tblMFRecipe Where intRecipeId=@intRecipeId
 		End
 
 		IF (
@@ -1281,7 +1289,8 @@ BEGIN TRY
 					--if main item qty not there then remaining qty pick from substitute if exists
 					If Exists(Select 1 From @tblInputItem Where intParentItemId=@intRawItemId And ysnIsSubstitute=1)
 						Begin
-							Update @tblInputItem Set dblRequiredQty=@dblRemainingRequiredQty Where intParentItemId=@intRawItemId And ysnIsSubstitute=1
+							If ISNULL(@dblRecipeQty,0)=0 SET @dblRecipeQty=1
+							Update @tblInputItem Set dblRequiredQty=(@dblRemainingRequiredQty * (@dblQtyToProduce / @dblRecipeQty)) Where intParentItemId=@intRawItemId And ysnIsSubstitute=1
 							Delete From @tblInputItem Where intItemId=@intRawItemId And ysnIsSubstitute=0 --Remove the main Item
 						End
 					Else --substitute does not exists then show 0 for main item

@@ -298,8 +298,9 @@ Begin
 
 	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.dblQuantity=tpld.dblQuantity,pld.dblIssuedQuantity=tpld.dblIssuedQuantity,
 	pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,pld.intParentLotId=tpld.intParentLotId,pld.intStorageLocationId=tpld.intStorageLocationId,
-	pld.intItemUOMId=tpld.intItemUOMId,pld.intItemIssuedUOMId=tpld.intItemIssuedUOMId,
-	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId
+	pld.intItemUOMId=tpld.intItemUOMId,pld.intItemIssuedUOMId=tpld.intItemIssuedUOMId,pld.intPickUOMId=tpld.intPickUOMId,
+	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId,
+	pld.intItemId=tpld.intItemId
 	From tblMFPickListDetail pld Join @tblPickListDetail tpld on pld.intPickListDetailId=tpld.intPickListDetailId 
 	Where pld.intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId
 
