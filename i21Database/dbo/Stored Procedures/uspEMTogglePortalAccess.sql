@@ -57,7 +57,7 @@ BEGIN
 			return 0
 		end
 
-		delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId and intEntityRoleId = @roleId)
+		--delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId and intEntityRoleId = @roleId)
 
 		if not exists(select top 1 1 from [tblEMEntityCredential] where intEntityId = @intEntityContactId)
 		begin
@@ -70,7 +70,7 @@ BEGIN
 		
 
 		update [tblEMEntityToContact] set 
-			ysnPortalAccess = 0, 
+			--ysnPortalAccess = 0, 
 			intEntityRoleId = null 
 				where intEntityId = @intEntityId 
 					and intEntityRoleId = @roleId
