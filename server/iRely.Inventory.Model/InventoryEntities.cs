@@ -203,6 +203,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageBinsMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageBinDetailsMap());
+            modelBuilder.Configurations.Add(new vyuICGetStorageBinMeasurementReadingMap());
 
             modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
             modelBuilder.Configurations.Add(new vyuICGetItemFactoryManufacturingCellMap());
