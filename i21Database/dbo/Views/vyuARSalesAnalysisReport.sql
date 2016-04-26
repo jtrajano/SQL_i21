@@ -1,192 +1,401 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesAnalysisReport]
 AS
-SELECT strRecordNumber
-	 , intTransactionId
-	 , A.intAccountId	 
-	 , DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) AS dtmDate
-	 , A.intCompanyLocationId
-	 , A.intEntityCustomerId	 
-	 , IC.intItemId
-	 , IC.intManufacturerId
-	 , IC.intBrandId
-	 , IC.intCommodityId
-	 , IC.intCategoryId
-	 , A.intEntitySalespersonId	 
-	 , A.strTransactionType
-	 , A.strType
-	 , ISNULL(A.dblQtyOrdered, 0)	  AS dblQtyOrdered
-	 , ISNULL(A.dblQtyShipped, 0)     AS dblQtyShipped
-	 , ISNULL(A.dblStandardCost, 0)	  AS dblCost	 
-	 , dblMargin = (ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
-						CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
-							THEN ISNULL(A.dblQtyShipped, 0) 
-							ELSE ISNULL(A.dblQtyOrdered, 0)
-						END
-	 , dblMarginPercentage = CASE WHEN (ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
-											CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
-												THEN ISNULL(A.dblQtyShipped, 0) 
-												ELSE ISNULL(A.dblQtyOrdered, 0)
+
+SELECT 
+	 strRecordNumber			= SAR.strRecordNumber
+	,intTransactionId			= SAR.intTransactionId
+	,intAccountId				= SAR.intAccountId
+	,dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0)
+	,intCompanyLocationId		= SAR.intCompanyLocationId
+	,intEntityCustomerId		= SAR.intEntityCustomerId
+	,intItemId					= IC.intItemId
+	,intManufacturerId			= IC.intManufacturerId
+	,intBrandId					= IC.intBrandId
+	,intCommodityId				= IC.intCommodityId
+	,intCategoryId				= IC.intCategoryId
+	,intEntitySalespersonId		= SAR.intEntitySalespersonId
+	,strTransactionType			= SAR.strTransactionType
+	,strType					= SAR.strType
+	,dblQtyOrdered				= ISNULL(SAR.dblQtyOrdered, 0)
+	,dblQtyShipped				= ISNULL(SAR.dblQtyShipped, 0)
+	,dblCost					= ISNULL(SAR.dblStandardCost, 0)
+	,dblMargin					= (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo') 
+										THEN ISNULL(SAR.dblQtyShipped, 0) 
+										ELSE ISNULL(SAR.dblQtyOrdered, 0)
+									END
+	,dblMarginPercentage		= CASE WHEN (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo') 
+												THEN ISNULL(SAR.dblQtyShipped, 0) 
+												ELSE ISNULL(SAR.dblQtyOrdered, 0)
 											END > 0 
-								 THEN ((ISNULL(A.dblPrice, 0) - ISNULL(A.dblStandardCost, 0)) * 
-											CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
-												THEN ISNULL(A.dblQtyShipped, 0) 
-												ELSE ISNULL(A.dblQtyOrdered, 0)
-											END / ISNULL(A.dblLineTotal, 0)) * 100 
-								 ELSE 0 
-							 END
-	 , ISNULL(A.dblPrice, 0)		  AS dblPrice 
-	 , ISNULL(A.dblTax, 0)			  AS dblTax
-	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
-	 , ISNULL(A.dblTotal, 0)		  AS dblTotal
-	 , C.strCustomerNumber
-	 , GA.strAccountId				  AS strAccountId
-	 , GA.strDescription			  AS strAccountName
-	 , L.strLocationName
-	 , IC.strItemNo					  AS strItemName
-	 , IC.strDescription              AS strItemDesc
-	 , A.strItemDescription			  AS strLineDesc
-	 , UOM.strUnitMeasure			  AS strUOM
-	 , ICM.strManufacturer
-	 , ICB.strBrandName
-	 , ICC.strCommodityCode			  AS strCommodityName
-	 , CAT.strCategoryCode			  AS strCategoryName
-     , E.strName					  AS strCustomerName
-	 , ESP.strName					  AS strSalespersonName	 
-	 , RTRIM(A.strBillToLocationName) AS strBillTo
-	 , RTRIM(A.strShipToLocationName) AS strShipTo
-	 , REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0') AS strSiteNumber
-	 , TMS.strDescription			  AS strSiteDescription
+									THEN ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo') 
+												THEN ISNULL(SAR.dblQtyShipped, 0) 
+												ELSE ISNULL(SAR.dblQtyOrdered, 0)
+											END / ISNULL(SAR.dblLineTotal, 0)) * 100 
+									ELSE 0 
+								  END
+	,dblPrice					= ISNULL(SAR.dblPrice, 0)
+	,dblTax						= ISNULL(SAR.dblTax, 0)
+	,dblLineTotal				= ISNULL(SAR.dblLineTotal, 0)
+	,dblTotal					= ISNULL(SAR.dblTotal, 0)
+	,strCustomerNumber			= C.strCustomerNumber
+	,strAccountId				= GA.strAccountId
+	,strAccountName				= GA.strDescription
+	,strLocationName			= L.strLocationName
+	,strItemName				= IC.strItemNo
+	,strItemDesc				= IC.strDescription
+	,strLineDesc				= SAR.strItemDescription
+	,strUOM						= UOM.strUnitMeasure
+	,strManufacturer			= ICM.strManufacturer
+	,strBrandName				= ICB.strBrandName
+	,strCommodityName			= ICC.strCommodityCode
+	,strCategoryName			= CAT.strCategoryCode
+	,strCustomerName			= E.strName
+	,strSalespersonName			= ESP.strName
+	,strBillTo					= RTRIM(SAR.strBillToLocationName)
+	,strShipTo					= RTRIM(SAR.strShipToLocationName)
+	,strSiteNumber				= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0')
+	,strSiteDescription			= TMS.strDescription
 FROM
-(SELECT I.strInvoiceNumber			  AS strRecordNumber
-	  , I.intInvoiceId				  AS intTransactionId
-	  , I.intEntityCustomerId
-	  , I.intAccountId
-	  , ID.intItemId
-	  , ID.intItemUOMId
-	  , I.dtmDate
-	  , I.intCompanyLocationId	 
-	  , I.intEntitySalespersonId	 
-	  , I.strTransactionType
-	  , I.strType
-	  , ID.strItemDescription
-	  , intItemAccountId			  = (CASE WHEN dbo.fnIsStockTrackingItem(ID.intItemId) = 1 OR IA.strType = 'Bundle'
-												THEN IA.intSalesAccountId 
-											  WHEN IA.strType = 'Other Charge'
-												THEN IA.intOtherChargeIncomeAccountId
-											ELSE IA.intGeneralAccountId 
-										 END)
-	  , ID.dblQtyOrdered
-	  , ID.dblQtyShipped
-	  , dblStandardCost				  = (CASE WHEN ISNULL(ID.intInventoryShipmentItemId,0) = 0 
-											THEN (SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
-												AND intTransactionId = I.intInvoiceId
-												AND strTransactionId = I.strInvoiceNumber
-												AND intItemId		 = ID.intItemId
-												AND intItemUOMId	 = ID.intItemUOMId) 
-											WHEN ISNULL(ICIT1.dblCost,0) = 0
-											THEN (
-												SELECT TOP 1
-													 dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, ICIT.dblCost) dblCost
-												FROM 
-													tblICInventoryShipmentItem ICISI
-												INNER JOIN
-													tblICInventoryShipment ICIS
-														ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-												INNER JOIN
-													tblICInventoryTransaction ICIT
-														ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-														AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-														AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-														AND ICISI.intItemId = ICIT.intItemId
-														AND ICISI.intInventoryShipmentItemId = ICIT.intTransactionDetailId 
-														AND ICISI.intItemUOMId <> ICIT.intItemUOMId
-												WHERE ID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId 
-														AND ID.intItemId = ICISI.intItemId 
-													
-											)
-											ELSE ICIT1.dblCost 
-										END)
-	  , dblPrice
-	  , ID.dblTotalTax				  AS dblTax
-	  , ID.dblTotal					  AS dblLineTotal
-	  , I.dblInvoiceTotal			  AS dblTotal
-	  , I.strBillToLocationName
-	  , I.strShipToLocationName
-	  , intSiteId
-FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-LEFT JOIN vyuARGetItemAccount IA ON ID.intItemId = IA.intItemId AND I.intCompanyLocationId = IA.intLocationId
-LEFT OUTER JOIN
 	(
-		SELECT
-			 ICIT.dblCost
-			,ICISI.intInventoryShipmentItemId
-			,ICISI.intItemId
-			,ICISI.intItemUOMId
-		FROM 
-			tblICInventoryShipmentItem ICISI
+		SELECT 
+			 strRecordNumber				= ARI.strInvoiceNumber
+			,intTransactionId				= ARI.intInvoiceId
+			,intEntityCustomerId			= ARI.intEntityCustomerId
+			,intAccountId					= ARI.intAccountId
+			,intItemId						= ARID.intItemId
+			,intItemUOMId					= ARID.intItemUOMId
+			,dtmDate						= ARI.dtmDate
+			,intCompanyLocationId			= ARI.intCompanyLocationId
+			,intEntitySalespersonId			= ARI.intEntitySalespersonId
+			,strTransactionType				= ARI.strTransactionType
+			,strType						= ARI.strType
+			,strItemDescription				= ARID.strItemDescription
+			,intItemAccountId				= (CASE WHEN dbo.fnIsStockTrackingItem(ARID.intItemId) = 1 OR ARGIA.strType = 'Bundle'
+														THEN ARGIA.intSalesAccountId 
+													  WHEN ARGIA.strType = 'Other Charge'
+														THEN ARGIA.intOtherChargeIncomeAccountId
+													ELSE ARGIA.intGeneralAccountId 
+												 END)
+			,dblQtyOrdered					= ARID.dblQtyOrdered
+			,dblQtyShipped					= ARID.dblQtyShipped
+			,dblStandardCost				= (CASE WHEN ISNULL(ICIC.intTransactionDetailId,0) <> 0 THEN ICIC.dblCost
+													--WHEN ISNULL(SOIC.intTransactionDetailId,0) <> 0 THEN SOIC.dblCost
+													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) = 0 AND ISNULL(ARID.intSalesOrderDetailId,0) = 0 )
+														AND EXISTS
+														(
+															SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
+															AND intTransactionId = ARI.intInvoiceId
+															AND strTransactionId = ARI.strInvoiceNumber
+															AND intItemId		 = ARID.intItemId
+															AND intItemUOMId	 = ARID.intItemUOMId
+														)
+														THEN
+														(
+															SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
+															AND intTransactionId = ARI.intInvoiceId
+															AND strTransactionId = ARI.strInvoiceNumber
+															AND intItemId		 = ARID.intItemId
+															AND intItemUOMId	 = ARID.intItemUOMId
+														)
+													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId,0) <> 0 AND ISNULL(ICIC.dblCost,0) = 0)
+														AND NOT EXISTS
+														(
+															SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
+															AND intTransactionId = ARI.intInvoiceId
+															AND strTransactionId = ARI.strInvoiceNumber
+															AND intItemId		 = ARID.intItemId
+															AND intItemUOMId	 = ARID.intItemUOMId
+														)
+														THEN
+														(
+															SELECT TOP 1
+																 dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, ICIT.dblCost) dblCost
+															FROM 
+																tblICInventoryShipmentItem ICISI
+															INNER JOIN
+																tblICInventoryShipment ICIS
+																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+															INNER JOIN
+																tblICInventoryTransaction ICIT
+																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+																	AND ICISI.intItemId = ICIT.intItemId
+																	AND ICISI.intInventoryShipmentItemId = ICIT.intTransactionDetailId 
+																	AND ICISI.intItemUOMId <> ICIT.intItemUOMId
+															WHERE ARID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId 
+																	AND ARID.intItemId = ICISI.intItemId 
+														)
+													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) = 0 AND ISNULL(ARID.intSalesOrderDetailId,0) <> 0 AND ISNULL(ICIC.dblCost,0) = 0)
+														AND EXISTS
+														(
+															SELECT
+																 NULL 
+															FROM
+																tblSOSalesOrderDetail SOSOD
+															INNER JOIN 
+																tblICInventoryShipmentItem ICISI
+																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
+															INNER JOIN
+																tblICInventoryShipment ICIS
+																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+																	AND ICIS.intOrderType = 2
+															INNER JOIN
+																tblICInventoryTransaction ICIT
+																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+																	AND ICISI.intItemId = ICIT.intItemId 
+																	AND ICISI.intItemUOMId = ICIT.intItemUOMId
+																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
+															WHERE
+																ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId 
+																AND ARID.intItemId = ICISI.intItemId
+																AND ARID.intItemUOMId = ICISI.intItemUOMId
+														)
+														THEN
+														(
+															SELECT TOP 1
+																 ICIT.dblCost 
+															FROM
+																tblSOSalesOrderDetail SOSOD
+															INNER JOIN 
+																tblICInventoryShipmentItem ICISI
+																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
+															INNER JOIN
+																tblICInventoryShipment ICIS
+																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+																	AND ICIS.intOrderType = 2
+															INNER JOIN
+																tblICInventoryTransaction ICIT
+																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+																	AND ICISI.intItemId = ICIT.intItemId 
+																	AND ICISI.intItemUOMId = ICIT.intItemUOMId
+																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
+															WHERE
+																ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId 
+																AND ARID.intItemId = SOSOD.intItemId
+																AND ARID.intItemUOMId = SOSOD.intItemUOMId														
+														)
+													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) = 0 AND ISNULL(ARID.intSalesOrderDetailId,0) <> 0 AND ISNULL(ICIC.dblCost,0) = 0)
+														AND NOT EXISTS
+														(
+															SELECT
+																 NULL 
+															FROM
+																tblSOSalesOrderDetail SOSOD
+															INNER JOIN 
+																tblICInventoryShipmentItem ICISI
+																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
+															INNER JOIN
+																tblICInventoryShipment ICIS
+																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+																	AND ICIS.intOrderType = 2
+															INNER JOIN
+																tblICInventoryTransaction ICIT
+																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+																	AND ICISI.intItemId = ICIT.intItemId 
+																	AND ICISI.intItemUOMId = ICIT.intItemUOMId
+																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
+															WHERE
+																ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId 
+																AND ARID.intItemId = ICISI.intItemId
+																AND ARID.intItemUOMId = ICISI.intItemUOMId
+														)
+														THEN
+														(
+															SELECT TOP 1
+																 dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, ICIT.dblCost) dblCost
+															FROM 
+																tblSOSalesOrderDetail SOSOD
+															INNER JOIN 
+																tblICInventoryShipmentItem ICISI
+																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
+															INNER JOIN
+																tblICInventoryShipment ICIS
+																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+																	AND ICIS.intOrderType = 2
+															INNER JOIN
+																tblICInventoryTransaction ICIT
+																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+																	AND ICISI.intItemId = ICIT.intItemId 
+																	AND ICISI.intItemUOMId <> ICIT.intItemUOMId
+																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
+															WHERE
+																SOSOD.intSalesOrderDetailId = ARID.intSalesOrderDetailId  
+																AND ARID.intItemId = ICISI.intItemId																
+														)
+												END)
+			,dblPrice						= ARID.dblPrice
+			,dblTax							= ARID.dblTotalTax
+			,dblLineTotal					= ARID.dblTotal
+			,dblTotal						= ARI.dblInvoiceTotal
+			,strBillToLocationName			= ARI.strBillToLocationName
+			,strShipToLocationName			= ARI.strShipToLocationName
+			,intSiteId						= ARID.intSiteId	
+		FROM
+			tblARInvoiceDetail ARID 
 		INNER JOIN
-			tblICInventoryShipment ICIS
-				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-		INNER JOIN
-			tblICInventoryTransaction ICIT
-				ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-				AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-				AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-				AND ICISI.intItemId = ICIT.intItemId 
-				AND ICISI.intItemUOMId = ICIT.intItemUOMId
-	) ICIT1
-		ON  ID.intInventoryShipmentItemId = ICIT1.intInventoryShipmentItemId 
-		AND ID.intItemId = ICIT1.intItemId 
-		AND ID.intItemUOMId = ICIT1.intItemUOMId
-WHERE I.ysnPosted = 1 
-  AND I.strTransactionType IN ('Invoice', 'Credit Memo')
+			tblARInvoice ARI 
+				ON ARID.intInvoiceId = ARI.intInvoiceId
+		LEFT JOIN 
+			vyuARGetItemAccount ARGIA 
+				ON ARID.intItemId = ARGIA.intItemId AND ARI.intCompanyLocationId = ARGIA.intLocationId
+		LEFT OUTER JOIN
+			(
+				SELECT
+					 ICIT.dblCost
+					,ICIT.intTransactionDetailId
+					,ICISI.intItemId
+					,ICISI.intItemUOMId
+				FROM 
+					tblICInventoryShipmentItem ICISI
+				INNER JOIN
+					tblICInventoryShipment ICIS
+						ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+				INNER JOIN
+					tblICInventoryTransaction ICIT
+						ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+						AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+						AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+						AND ICISI.intItemId = ICIT.intItemId 
+						AND ICISI.intItemUOMId = ICIT.intItemUOMId
+						AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
+			) ICIC
+				ON  ARID.intInventoryShipmentItemId = ICIC.intTransactionDetailId 
+				AND ARID.intItemId = ICIC.intItemId 
+				AND ARID.intItemUOMId = ICIC.intItemUOMId
+		--LEFT OUTER JOIN
+		--	(
+		--		SELECT
+		--			 ICIT.dblCost
+		--			,ICIT.intTransactionDetailId
+		--			,ICISI.intItemId
+		--			,ICISI.intItemUOMId
+		--			,SOSOD.intSalesOrderDetailId 
+		--		FROM
+		--			tblSOSalesOrderDetail SOSOD
+		--		INNER JOIN 
+		--			tblICInventoryShipmentItem ICISI
+		--				ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
+		--		INNER JOIN
+		--			tblICInventoryShipment ICIS
+		--				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+		--				AND ICIS.intOrderType = 2
+		--		INNER JOIN
+		--			tblICInventoryTransaction ICIT
+		--				ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
+		--				AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
+		--				AND ICIS.strShipmentNumber = ICIT.strTransactionId 
+		--				AND ICISI.intItemId = ICIT.intItemId 
+		--				AND ICISI.intItemUOMId = ICIT.intItemUOMId
+		--				AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
+		--	) SOIC
+		--		ON  ARID.intSalesOrderDetailId = SOIC.intSalesOrderDetailId 
+		--		AND ARID.intItemId = SOIC.intItemId 
+		--		AND ARID.intItemUOMId = SOIC.intItemUOMId		
+		WHERE ARI.ysnPosted = 1 
+		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo')							
 
-UNION ALL
+	UNION ALL
 
-SELECT SO.strSalesOrderNumber		  AS strRecordNumber
-	 , SO.intSalesOrderId			  AS intTransactionId
-	 , SO.intEntityCustomerId
-	 , SO.intAccountId
-	 , SOD.intItemId
-	 , SOD.intItemUOMId
-	 , SO.dtmDate
-	 , SO.intCompanyLocationId
-	 , SO.intEntitySalespersonId	 
-	 , SO.strTransactionType
-	 , SO.strType
-	 , SOD.strItemDescription
-	 , intItemAccountId				= (CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1  OR IA.strType = 'Bundle'
-												THEN IA.intSalesAccountId 
-											WHEN IA.strType = 'Other Charge'
-												THEN IA.intOtherChargeIncomeAccountId
-											ELSE IA.intGeneralAccountId 
-									   END)
-	 , SOD.dblQtyOrdered
-	 , SOD.dblQtyShipped
-	 , ICP.dblStandardCost			  AS dblStandardCost				  
-	 , dblPrice
-	 , SOD.dblTotalTax				  AS dblTax
-	 , SOD.dblTotal					  AS dblLineTotal
-	 , SO.dblSalesOrderTotal		  AS dblTotal 
-	 , SO.strBillToLocationName
-	 , SO.strShipToLocationName
-	 , NULL							  AS intSiteId
-FROM tblSOSalesOrder SO INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
-LEFT JOIN tblICItemUOM SU ON SOD.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
-LEFT JOIN (tblICItemLocation ICL 
-		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
-LEFT JOIN vyuARGetItemAccount IA ON SOD.intItemId = IA.intItemId AND SO.intCompanyLocationId = IA.intLocationId
-WHERE SO.ysnProcessed = 1) AS A
-	LEFT JOIN tblGLAccount GA ON A.intItemAccountId = GA.intAccountId
-	INNER JOIN tblSMCompanyLocation L ON A.intCompanyLocationId = L.intCompanyLocationId
-	INNER JOIN (tblARCustomer C 
-		INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON A.intEntityCustomerId = C.intEntityCustomerId
-	LEFT JOIN (tblARSalesperson SP 
-		INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON A.intEntitySalespersonId = SP.intEntitySalespersonId	
-	LEFT JOIN (tblICItem IC 
-		LEFT JOIN tblICManufacturer ICM ON IC.intManufacturerId = ICM.intManufacturerId
-		LEFT JOIN tblICCommodity ICC ON IC.intCommodityId = ICC.intCommodityId
-		LEFT JOIN tblICCategory CAT ON IC.intCategoryId = CAT.intCategoryId		
-		LEFT JOIN tblICBrand ICB ON IC.intBrandId = ICB.intBrandId) ON A.intItemId = IC.intItemId
-	LEFT JOIN vyuARItemUOM UOM ON A.intItemUOMId = UOM.intItemUOMId		
-	LEFT JOIN tblTMSite TMS ON A.intSiteId = TMS.intSiteID	
+	SELECT 
+		strRecordNumber				= SO.strSalesOrderNumber
+		,intTransactionId			= SO.intSalesOrderId
+		,intEntityCustomerId		= SO.intEntityCustomerId
+		,intAccountId				= SO.intAccountId
+		,intItemId					= SOD.intItemId
+		,intItemUOMId				= SOD.intItemUOMId
+		,dtmDate					= SO.dtmDate
+		,intCompanyLocationId		= SO.intCompanyLocationId
+		,intEntitySalespersonId		= SO.intEntitySalespersonId
+		,strTransactionType			= SO.strTransactionType
+		,strType					= SO.strType
+		,strItemDescription			= SOD.strItemDescription
+		,intItemAccountId			= (CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 1  OR IA.strType = 'Bundle'
+											THEN IA.intSalesAccountId 
+										WHEN IA.strType = 'Other Charge'
+											THEN IA.intOtherChargeIncomeAccountId
+										ELSE IA.intGeneralAccountId 
+									 END)
+		,dblQtyOrdered				= SOD.dblQtyOrdered
+		,dblQtyShipped				= SOD.dblQtyShipped
+		,dblStandardCost			= ICP.dblStandardCost
+		,dblPrice					= dblPrice
+		,dblTax						= SOD.dblTotalTax
+		,dblLineTotal				= SOD.dblTotal
+		,dblTotal					= SO.dblSalesOrderTotal
+		,strBillToLocationName		= SO.strBillToLocationName
+		,strShipToLocationName		= SO.strShipToLocationName
+		,intSiteId					= NULL
+	FROM
+		tblSOSalesOrder SO 
+	INNER JOIN 
+		tblSOSalesOrderDetail SOD 
+			ON SO.intSalesOrderId = SOD.intSalesOrderId
+	LEFT JOIN 
+		tblICItemUOM SU 
+			ON SOD.intItemId = SU.intItemId AND SU.ysnStockUnit = 1
+	LEFT JOIN 
+		(
+			tblICItemLocation ICL 
+			INNER JOIN 
+				tblICItemPricing ICP 
+			ON ICL.intItemLocationId = ICP.intItemLocationId
+		) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
+	LEFT JOIN 
+		vyuARGetItemAccount IA 
+			ON SOD.intItemId = IA.intItemId AND SO.intCompanyLocationId = IA.intLocationId
+	WHERE 
+		SO.ysnProcessed = 1
+	) AS SAR
+LEFT JOIN 
+	tblGLAccount GA 
+		ON SAR.intItemAccountId = GA.intAccountId
+INNER JOIN
+	tblSMCompanyLocation L 
+		ON SAR.intCompanyLocationId = L.intCompanyLocationId
+INNER JOIN 
+	(
+	tblARCustomer C 
+	INNER JOIN 
+		tblEntity E 
+			ON C.intEntityCustomerId = E.intEntityId
+	) ON SAR.intEntityCustomerId = C.intEntityCustomerId
+LEFT JOIN 
+	(
+	tblARSalesperson SP 
+	INNER JOIN
+		tblEntity ESP 
+			ON SP.intEntitySalespersonId = ESP.intEntityId
+	) ON SAR.intEntitySalespersonId = SP.intEntitySalespersonId	
+LEFT JOIN 
+	(
+	tblICItem IC 
+	LEFT JOIN 
+		tblICManufacturer ICM 
+			ON IC.intManufacturerId = ICM.intManufacturerId
+	LEFT JOIN 
+		tblICCommodity ICC 
+			ON IC.intCommodityId = ICC.intCommodityId
+	LEFT JOIN 
+		tblICCategory CAT 
+			ON IC.intCategoryId = CAT.intCategoryId		
+	LEFT JOIN 
+		tblICBrand ICB 
+			ON IC.intBrandId = ICB.intBrandId
+	) ON SAR.intItemId = IC.intItemId
+LEFT JOIN
+	vyuARItemUOM UOM 
+		ON SAR.intItemUOMId = UOM.intItemUOMId		
+LEFT JOIN 
+	tblTMSite TMS ON SAR.intSiteId = TMS.intSiteID
