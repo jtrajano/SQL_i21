@@ -53,7 +53,7 @@ BEGIN
 		SET @rawResult = REPLACE(LTRIM(REPLACE(REPLACE(REPLACE(@rawResult, '-', ''), '.', ''), '0', ' ')), ' ', 0)		
 	END 
 
-	-- Pad zeroes to the left 
+	-- Pad zeroes to the raw value. 
 	BEGIN 
 		DECLARE @stringFactor1 AS NVARCHAR(40) = CAST(@factor1 AS NVARCHAR(40)) 
 				,@stringFactor2 AS NVARCHAR(40) = CAST(@factor2 AS NVARCHAR(40)) 
