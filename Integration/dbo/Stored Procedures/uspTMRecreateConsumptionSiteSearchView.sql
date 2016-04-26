@@ -20,7 +20,7 @@ BEGIN
 	)
 	BEGIN
 		EXEC('
-			CREATE VIEW [dbo].[vyuTMConsumptionSiteSearch]
+			CREATE VIEW [dbo].[vyuTMConsumptionSiteSearch] 
 			AS
 			SELECT 
 				strKey = C.vwcus_key COLLATE Latin1_General_CI_AS 
