@@ -100,10 +100,14 @@ BEGIN TRY
 		,intItemContractId
 		,intContractHeaderId
 		,intContractDetailId
-		,intShipmentBLContainerContractId
-		,intShipmentId
-		,intShipmentContractQtyId
-		,intShipmentBLContainerId
+		--,intShipmentBLContainerContractId
+		--,intShipmentId
+		--,intShipmentContractQtyId
+		--,intShipmentBLContainerId
+		,intLoadContainerId
+		,intLoadDetailContainerLinkId
+		,intLoadId
+		,intLoadDetailId
 		,intCountryID
 		,ysnIsContractCompleted
 		,intLotStatusId
@@ -143,10 +147,14 @@ BEGIN TRY
 		,intItemContractId
 		,intContractHeaderId
 		,intContractDetailId
-		,intShipmentBLContainerContractId
-		,intShipmentId
-		,intShipmentContractQtyId
-		,intShipmentBLContainerId
+		--,intShipmentBLContainerContractId
+		--,intShipmentId
+		--,intShipmentContractQtyId
+		--,intShipmentBLContainerId
+		,intLoadContainerId
+		,intLoadDetailContainerLinkId
+		,intLoadId
+		,intLoadDetailId
 		,intCountryID
 		,ysnIsContractCompleted
 		,intLotStatusId
@@ -184,10 +192,14 @@ BEGIN TRY
 			,intItemContractId INT
 			,intContractHeaderId INT
 			,intContractDetailId INT
-			,intShipmentBLContainerId INT
-			,intShipmentBLContainerContractId INT
-			,intShipmentId INT
-			,intShipmentContractQtyId INT
+			--,intShipmentBLContainerId INT
+			--,intShipmentBLContainerContractId INT
+			--,intShipmentId INT
+			--,intShipmentContractQtyId INT
+			,intLoadContainerId INT
+			,intLoadDetailContainerLinkId INT
+			,intLoadId INT
+			,intLoadDetailId INT
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
 			,intLotStatusId INT

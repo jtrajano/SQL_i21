@@ -33,7 +33,7 @@ BEGIN TRY
      JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
      JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
      JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId  
-     LEFT JOIN dbo.tblLGShipmentBLContainer AS C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId  
+     LEFT JOIN dbo.tblLGLoadContainer AS C ON C.intLoadContainerId = S.intLoadContainerId  
      ) t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
@@ -83,7 +83,7 @@ BEGIN TRY
   JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
   JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
   JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId  
-  LEFT JOIN dbo.tblLGShipmentBLContainer AS C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId  
+  LEFT JOIN dbo.tblLGLoadContainer AS C ON C.intLoadContainerId = S.intLoadContainerId  
   ) t  
  PIVOT(max(strPropertyValue) FOR strPropertyName IN (' 
 		+ @str + ')) pvt WHERE intRankNo > ' + @strStart
