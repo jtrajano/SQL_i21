@@ -3597,6 +3597,7 @@
     <Build Include="dbo\Functions\fnARComputeDiscountForEarlyPayment.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteHeader.sql" />
     <Build Include="dbo\Views\vyuPRDailyTaxTotal.sql" />
+    <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
