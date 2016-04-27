@@ -70,9 +70,9 @@ BEGIN TRY
 	--BEGIN
 	--	SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
 	--END
-	BEGIN
-		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
-	END
+	--BEGIN
+	--	SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	--END
 
 	IF @dblNewLotQty=0
 	BEGIN
