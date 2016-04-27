@@ -156,11 +156,11 @@ BEGIN TRY
 	--	dblWeight = (@dblOldDestinationQty+@dblMergeQty)*@dblNewLotWeightPerUnit,
 	--	dblQty = (@dblOldDestinationQty+@dblMergeQty)
 	--WHERE intLotId=@intNewLotId
-	
+	DECLARE @dblLotQty NUMERIC(38,20)
 	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 	BEGIN
-		DECLARE @dblLotQty NUMERIC(38,20)
-		SELECT @dblLotQty = dblQty FROM tblICLot WHERE intLotId = @intLotId
+		
+		SELECT @dblLotQty = Case When intWeightUOMId is null Then dblQty Else dblWeight End FROM tblICLot WHERE intLotId = @intLotId
 
 		EXEC dbo.uspMFLotAdjustQty
 			@intLotId = @intLotId,       
@@ -172,16 +172,18 @@ BEGIN TRY
 
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR (@intWeightUOMId is null and (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		--EXEC dbo.uspMFLotAdjustQty
-		-- @intLotId =@intLotId,       
-		-- @dblNewLotQty =0,
-		-- @intUserId=@intUserId ,
-		-- @strReasonCode ='Residue qty clean up',
-		-- @strNotes ='Residue qty clean up'
-		UPDATE tblICLot
-		SET dblWeight = 0
-			,dblQty = 0
-		WHERE intLotId = @intLotId
+		SELECT @dblLotQty = Case When intWeightUOMId is null Then dblQty Else dblWeight End FROM tblICLot WHERE intLotId = @intLotId
+
+		EXEC dbo.uspMFLotAdjustQty
+		 @intLotId =@intLotId,       
+		 @dblNewLotQty =@dblLotQty,
+		 @intUserId=@intUserId ,
+		 @strReasonCode ='Residue qty clean up',
+		 @strNotes ='Residue qty clean up'
+		--UPDATE tblICLot
+		--SET dblWeight = 0
+		--	,dblQty = 0
+		--WHERE intLotId = @intLotId
 	END
 
 
