@@ -36,7 +36,8 @@
 	[strStorageTicketNumber] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] INT NULL,  
     [intCompanyLocationSubLocationId] INT NULL, 
-    [intStorageLocationId] INT NULL, 
+    [intStorageLocationId] INT NULL,
+	[intUnitMeasureId] [int] NULL, 
     CONSTRAINT [PK_tblGRCustomerStorage_intCustomerStorageId] PRIMARY KEY ([intCustomerStorageId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),
@@ -45,7 +46,8 @@
 	CONSTRAINT [FK_tblGRCustomerStorage_tblGRStorageType_intStorageTypeId] FOREIGN KEY ([intStorageTypeId]) REFERENCES [dbo].[tblGRStorageType] ([intStorageScheduleTypeId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
-	CONSTRAINT [FK_tblGRCustomerStorage_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
+	CONSTRAINT [FK_tblGRCustomerStorage_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
+	CONSTRAINT [FK_tblGRCustomerStorage_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
 
 GO
