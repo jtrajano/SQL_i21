@@ -459,7 +459,11 @@ LEFT JOIN
 		ON SHP.[intWeightUOMId] = IU2.[intItemUOMId]
 LEFT JOIN
 	tblICUnitMeasure U2
-		ON IU2.[intUnitMeasureId] = U2.[intUnitMeasureId]	
+		ON IU2.[intUnitMeasureId] = U2.[intUnitMeasureId]
+LEFT OUTER JOIN
+	tblARInvoiceDetail ARID
+		ON SHP.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+WHERE ISNULL(ARID.[intInventoryShipmentItemId],0) = 0			
 	
 UNION ALL
 
