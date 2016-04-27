@@ -115,13 +115,13 @@ BEGIN TRY
 	--IF @dblOldDestinationQty IS NULL
 	--SELECT @dblOldDestinationQty=0
 								 
-	SELECT @dblOldDestinationQty=dblQty
-	FROM dbo.tblICLot
-	WHERE strLotNumber = @strNewLotNumber
-		AND intStorageLocationId = @intSplitStorageLocationId
+	--SELECT @dblOldDestinationQty=dblQty
+	--FROM dbo.tblICLot
+	--WHERE strLotNumber = @strNewLotNumber
+	--	AND intStorageLocationId = @intSplitStorageLocationId
 
-	IF @dblOldDestinationQty IS NULL
-	SELECT @dblOldDestinationQty=0
+	--IF @dblOldDestinationQty IS NULL
+	--SELECT @dblOldDestinationQty=0
 								 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
@@ -173,6 +173,10 @@ BEGIN TRY
 
 	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 	BEGIN
+
+		SELECT @dblLotQty=NULL
+		SELECT @dblLotQty = Case When intWeightUOMId is null Then dblQty Else dblWeight End FROM tblICLot WHERE intLotId = @intLotId
+
 		EXEC dbo.uspMFLotAdjustQty
 			@intLotId = @intLotId,       
 			@dblNewLotQty = @dblLotQty,
