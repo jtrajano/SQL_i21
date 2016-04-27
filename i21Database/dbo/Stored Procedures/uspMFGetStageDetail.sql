@@ -5,8 +5,9 @@ BEGIN
 			,@strAttributeValue nvarchar(50)
 			,@intManufacturingProcessId int
 			,@intLocationId int
+			,@intStatusId int
 
-	Select @intManufacturingProcessId=intManufacturingProcessId, @intLocationId=intLocationId From dbo.tblMFWorkOrder Where intWorkOrderId =@intWorkOrderId 
+	Select @intManufacturingProcessId=intManufacturingProcessId, @intLocationId=intLocationId,@intStatusId=intStatusId  From dbo.tblMFWorkOrder Where intWorkOrderId =@intWorkOrderId 
 
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Display actual consumption in WM'
 
@@ -14,7 +15,7 @@ BEGIN
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 
-	IF @strAttributeValue='True'
+	IF @strAttributeValue='True' OR @intStatusId=13
 	BEGIN
 		SELECT W.intWorkOrderConsumedLotId As intWorkOrderInputLotId,
 			L.intLotId 
