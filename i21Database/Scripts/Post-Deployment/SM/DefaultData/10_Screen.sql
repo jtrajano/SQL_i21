@@ -33,7 +33,7 @@ GO
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
-			SET strTableName = N'tblEMEntity'
+			SET strTableName = N'tblEntity'
 			WHERE strNamespace = 'EntityManagement.view.Entity'
 		END
 		
@@ -58,7 +58,7 @@ GO
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
-			SET strTableName = N'tblEMEntity', strScreenId = N'Entity Contact', strScreenName = 'Entity Contact'
+			SET strTableName = N'tblEntityContact', strScreenId = N'Entity Contact', strScreenName = 'Entity Contact'
 			WHERE strNamespace = 'EntityManagement.view.EntityContact'
 		END
 

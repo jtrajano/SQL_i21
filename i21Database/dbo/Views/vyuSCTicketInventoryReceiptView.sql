@@ -7,7 +7,7 @@
 	ICRI.strReceiptType,
 	ICRI.strItemNo,
 	ICRI.strItemDescription,
-	ICRI.strOrderNumber,
+	
 	ICRI.strSourceNumber,
 	ICRI.strUnitMeasure,
 	ICRI.dblQtyToReceive,
@@ -22,6 +22,7 @@
 	ICRI.ysnPosted,
 	SC.strTicketNumber,
 	SC.strLoadNumber,
+	ICRI.strOrderNumber + '-' + CONVERT(varchar(20), SC.intContractSequence) AS strOrderNumber,
 	(CASE 
 		WHEN ISNULL(ICRI.strOrderNumber, '') = '' THEN GRSC.strStorageTypeDescription
 	END) AS strStorageTypeDescription,
@@ -32,7 +33,8 @@
 		WHEN SC.strDistributionOption = 'SPL' THEN 'Split'
 		WHEN SC.strDistributionOption = 'HLD' THEN 'Hold'
 	END) AS strDistributionOption
-	FROM tblSCTicket SC
-	INNER JOIN vyuICGetInventoryReceiptItem ICRI ON SC.intInventoryReceiptId = ICRI.intInventoryReceiptId
+	FROM tblSCTicket SC 
+	INNER JOIN tblICInventoryReceipt ICR ON SC.intInventoryReceiptId = ICR.intInventoryReceiptId
+	INNER JOIN vyuICGetInventoryReceiptItem ICRI ON SC.strTicketNumber = ICRI.strSourceNumber
 	LEFT JOIN vyuGRGetStorageTransferTicket GRSC ON SC.intTicketId = GRSC.intTicketId
 	LEFT JOIN tblGRStorageType GRST ON GRST.strStorageTypeCode = SC.strDistributionOption

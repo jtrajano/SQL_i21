@@ -3686,6 +3686,15 @@
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImport.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustmentNotMapped.sql" />
+    <Build Include="dbo\Functions\fnGLGetActivityBalance.sql" />
+    <Build Include="dbo\Functions\fnGLGetBalancesDateCriteria.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageBinDetails.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageBins.sql" />
+    <Build Include="dbo\Views\vyuSCTicketInventoryTransferView.sql" />
+    <Build Include="dbo\Tables\tblTMLeaseDevice.sql" />
+    <Build Include="dbo\Views\vyuTMLeaseSearch.sql" />
+    <None Include="Scripts\Post-Deployment\TM\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -5124,4 +5124,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intDestinationStateId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c7c4a9f3-5c82-4c9a-a734-c4b61f65857c" ChangeDateTime="04/26/2016 14:26:27">
+    <Property Name="ElementName" Value="[dbo].[tblLGWarehouseRateMatrixDetail].[intCommodityUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGWarehouseRateMatrixDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intItemUOMId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="55b55de8-c176-4eaf-a752-4917824abb95" ChangeDateTime="04/26/2016 14:27:56">
+    <Property Name="ElementName" Value="[dbo].[FK_tblLGWarehouseRateMatrixDetail_tblICCommodityUnitMeasure_intCommodityUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGWarehouseRateMatrixDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblLGWarehouseRateMatrixDetail_tblICItemUOM_intItemUOMId]" />
+  </Operation>
 </Operations>

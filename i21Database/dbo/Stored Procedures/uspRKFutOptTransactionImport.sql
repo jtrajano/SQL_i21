@@ -4,6 +4,17 @@ Begin Try
 DECLARE @tblRKFutOptTransactionHeaderId int 
 Declare @ErrMsg nvarchar(Max)
 
+DECLARE @strDateTimeFormat nvarchar(50)
+DECLARE @ConvertYear int
+
+SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
+
+IF (@strDateTimeFormat = 'MM DD YYYY' OR @strDateTimeFormat ='YYYY MM DD')
+SELECT @ConvertYear=101
+ELSE IF (@strDateTimeFormat = 'DD MM YYYY' OR @strDateTimeFormat ='YYYY DD MM')
+SELECT @ConvertYear=103
+
+
 DECLARE @strInternalTradeNo int= null
 DECLARE @intFutOptTransactionHeaderId int = null
 SELECT @strInternalTradeNo=max(convert(int,replace(strInternalTradeNo,'O-',''))) from tblRKFutOptTransaction
@@ -21,7 +32,7 @@ INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyI
 SELECT DISTINCT @intFutOptTransactionHeaderId,1,getdate(),em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
 	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 0 END,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId,
 	   cur.intCurrencyID,@strInternalTradeNo+1,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
-	   m.intFutureMonthId, intOptionMonthId intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),b.intBookId,sb.intSubBookId
+	   m.intFutureMonthId, intOptionMonthId intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),b.intBookId,sb.intSubBookId
 FROM tblRKFutOptTransactionImport ti
 JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
 JOIN tblRKBrokerageAccount ba on ba.strAccountNumber=ti.strAccountNumber

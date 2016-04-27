@@ -4,8 +4,7 @@
 	@dblMinimumRefund NUMERIC(18,6) = NULL,
 	@dblCashCutoffAmount NUMERIC(18,6) = NULL,
 	@FWT NUMERIC(18,6) = NULL,
-	@LessService NUMERIC(18,6) = NULL,
-	@intSearchPreviousData INT = 1
+	@LessService NUMERIC(18,6) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -42,35 +41,6 @@ BEGIN
 	INSERT INTO #statusTable VALUES ('Voting');
 END
 
-CREATE TABLE #tempCustomerVolume (
-	[intCategoryVolumeId] [int] IDENTITY(1,1) NOT NULL,
-	[intCustomerPatronId] [int] NULL,
-	[intPatronageCategoryId] [int] NULL,
-	[intFiscalYear] [int] NULL,
-	[dtmLastActivityDate] [datetime] NULL,
-	[dblVolume] [numeric](18, 6) NULL,
-	[intConcurrencyId] [int] NULL
-);
-
-IF(@intSearchPreviousData = 1)
-BEGIN
-	EXEC (N'SELECT intCategoryVolumeId, intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume = TotalRefund.dblRefundAmount, intConcurrencyId
-	INTO ##tempCustomerVolume
-	FROM tblPATCustomerVolume CVol
-	INNER JOIN
-	(
-		SELECT intCustomerId, dblRefundAmount = SUM(dblRefundAmount)
-		FROM tblPATRefundCustomer
-		GROUP BY intCustomerId
-	) TotalRefund
-	ON TotalRefund.intCustomerId = CVol.intCustomerPatronId')
-END
-ELSE
-BEGIN
-	EXEC(N'SELECT * 
-	INTO ##tempCustomerVolume 
-	FROM tblPATCustomerVolume')
-END
 
 
 SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
@@ -99,7 +69,7 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 					@LessService AS dblLessServiceFee,
 					dblVolume = SUM(dblVolume),
 					dblTotalRefund = SUM(RRD.dblRate)
-			   FROM ##tempCustomerVolume B
+			   FROM tblPATCustomerVolume B
 		 INNER JOIN tblPATRefundRateDetail RRD
 				 ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
 		 INNER JOIN tblPATRefundRate RR
@@ -115,7 +85,7 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   WHERE B.intCustomerPatronId = B.intCustomerPatronId
 		   GROUP BY B.intCustomerPatronId
 			) Total
-	 INNER JOIN ##tempCustomerVolume CV
+	 INNER JOIN tblPATCustomerVolume CV
 		    ON CV.intCustomerPatronId = Total.intCustomerId
      INNER JOIN tblPATRefundRateDetail RRD
 			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
@@ -146,12 +116,8 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 	   
 
 	   DROP TABLE #statusTable
-	   DROP TABLE ##tempCustomerVolume
 	-- ==================================================================
 	-- End Transaction
 	-- ==================================================================
 END
-
-
-
 GO

@@ -1,6 +1,6 @@
 ﻿CREATE PROC uspRKFutOptTransactionImportValidate
 AS
-Begin Try
+BEGIN TRY
 DECLARE @tblRKFutOptTransactionHeaderId int 
 Declare @ErrMsg nvarchar(Max)
 
@@ -23,7 +23,16 @@ DECLARE @strBook NVARCHAR(100)
 DECLARE @strSubBook NVARCHAR(100)
 DECLARE @PreviousErrMsg nvarchar(max)
 
+DECLARE @strDateTimeFormat nvarchar(50)
+DECLARE @ConvertYear int
+
+SELECT @strDateTimeFormat = strDateTimeFormat FROM tblRKCompanyPreference
 SELECT @mRowNumber = MIN(intFutOptTransactionId) FROM tblRKFutOptTransactionImport
+
+IF (@strDateTimeFormat = 'MM DD YYYY' OR @strDateTimeFormat ='YYYY MM DD')
+SELECT @ConvertYear=101
+ELSE IF (@strDateTimeFormat = 'DD MM YYYY' OR @strDateTimeFormat ='YYYY DD MM')
+SELECT @ConvertYear=103
 
 WHILE @mRowNumber > 0
 	BEGIN
@@ -59,7 +68,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Broker.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Broker.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -78,7 +87,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Account Number.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Account Number.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -97,7 +106,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -117,7 +126,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Instrument Type.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Instrument Type.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -136,7 +145,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Commodity Code.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Commodity Code.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -156,7 +165,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Location.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Location.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -176,7 +185,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Sales Person.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Sales Person.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -195,7 +204,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Currency.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Currency.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -215,7 +224,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Buy/Sell.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Buy/Sell.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -235,7 +244,7 @@ WHILE @mRowNumber > 0
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Future Month.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Future Month.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -257,7 +266,7 @@ BEGIN
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Option Month.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Option Month.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -277,7 +286,7 @@ BEGIN
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid OptionType.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid OptionType.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -297,7 +306,7 @@ END
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Status.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Status.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -319,7 +328,7 @@ BEGIN
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid Book.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid Book.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -341,7 +350,7 @@ BEGIN
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Invalid SubBook.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Invalid SubBook.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -366,7 +375,7 @@ END
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Broker is not configured for the market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Broker is not configured for the market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -394,7 +403,7 @@ END
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Instrument Type is not configured for the market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Instrument Type is not configured for the market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -419,7 +428,7 @@ END
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Commodity is not configured for the market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Commodity is not configured for the market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -444,7 +453,7 @@ END
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Sales Person is not configured for the market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Sales Person is not configured for the market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -467,7 +476,7 @@ IF NOT EXISTS(SELECT 1
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Currency is not configured for the market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Currency is not configured for the market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -490,7 +499,7 @@ IF NOT EXISTS(SELECT 1
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Currency is not configured for the market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Currency is not configured for the market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -514,7 +523,7 @@ IF NOT EXISTS(SELECT 1
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,103),strBook,strSubBook,intConcurrencyId,'Option Month is not configured for the market.'
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Option Month is not configured for the market.'
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
@@ -529,7 +538,7 @@ END
 
 SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg  FROM tblRKFutOptTransactionImport_ErrLog
+		convert(datetime,dtmFilledDate,@ConvertYear) dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg  FROM tblRKFutOptTransactionImport_ErrLog
 
 DELETE FROM tblRKFutOptTransactionImport_ErrLog
 END TRY

@@ -45,10 +45,14 @@ BEGIN TRY
 		,intItemContractId = x.intItemContractId
 		,intContractHeaderId = x.intContractHeaderId
 		,intContractDetailId = x.intContractDetailId
-		,intShipmentBLContainerContractId = x.intShipmentBLContainerContractId
-		,intShipmentId = x.intShipmentId
-		,intShipmentContractQtyId = x.intShipmentContractQtyId
-		,intShipmentBLContainerId = x.intShipmentBLContainerId
+		--,intShipmentBLContainerContractId = x.intShipmentBLContainerContractId
+		--,intShipmentId = x.intShipmentId
+		--,intShipmentContractQtyId = x.intShipmentContractQtyId
+		--,intShipmentBLContainerId = x.intShipmentBLContainerId
+		,intLoadContainerId = x.intLoadContainerId
+		,intLoadDetailContainerLinkId = x.intLoadDetailContainerLinkId
+		,intLoadId = x.intLoadId
+		,intLoadDetailId = x.intLoadDetailId
 		,intCountryID = x.intCountryID
 		,ysnIsContractCompleted = x.ysnIsContractCompleted
 		,intLotStatusId = x.intLotStatusId
@@ -84,10 +88,14 @@ BEGIN TRY
 			,intItemContractId INT
 			,intContractHeaderId INT
 			,intContractDetailId INT
-			,intShipmentBLContainerId INT
-			,intShipmentBLContainerContractId INT
-			,intShipmentId INT
-			,intShipmentContractQtyId INT
+			--,intShipmentBLContainerId INT
+			--,intShipmentBLContainerContractId INT
+			--,intShipmentId INT
+			--,intShipmentContractQtyId INT
+			,intLoadContainerId INT
+			,intLoadDetailContainerLinkId INT
+			,intLoadId INT
+			,intLoadDetailId INT
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
 			,intLotStatusId INT

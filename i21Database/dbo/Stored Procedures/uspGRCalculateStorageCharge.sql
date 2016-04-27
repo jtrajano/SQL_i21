@@ -49,6 +49,12 @@ BEGIN TRY
 	DECLARE @CalculatedNumberOfDays INT=0
 	DECLARE @FirstMonthFullChargeApplicable BIT
 	DECLARE @LastMonthChargeApplicable BIT=1
+	DECLARE @strAllowancePeriod NVARCHAR(50)
+	DECLARE @dtmAllowancePeriodFrom DATETIME
+	DECLARE @dtmAllowancePeriodTo DATETIME
+	DECLARE @ActualStorageChargeDate DATETIME
+	
+	SET @ActualStorageChargeDate=@StorageChargeDate	
 	
 	DECLARE @tblGRStorageSchedulePeriod AS TABLE 
 	(
@@ -131,7 +137,9 @@ BEGIN TRY
 			,@strLastMonth = SR.strLastMonth
 			,@dtmHEffectiveDate = SR.dtmEffectiveDate
 			,@dtmTerminationDate = SR.dtmTerminationDate
-			--,@dtmDeliveryDate = CASE WHEN @dtmOverrideDeliveryDate IS NULL THEN CS.dtmDeliveryDate ELSE @dtmOverrideDeliveryDate END
+			,@strAllowancePeriod=SR.strAllowancePeriod
+			,@dtmAllowancePeriodFrom=SR.dtmAllowancePeriodFrom
+			,@dtmAllowancePeriodTo=SR.dtmAllowancePeriodTo			
 			,@dtmDeliveryDate = CS.dtmDeliveryDate
 			,@dtmLastStorageAccrueDate = CASE 
 											 WHEN @strProcessType < > 'recalculate' THEN CS.dtmLastStorageAccrueDate
@@ -147,13 +155,15 @@ BEGIN TRY
 		SET @intStorageScheduleId = @intOverrideStorageScheduleId
 		SET @dtmDeliveryDate = @dtmOverrideDeliveryDate
 		SET @dtmLastStorageAccrueDate = NULL
-
 		SELECT @intAllowanceDays = intAllowanceDays
 			,@strStorageRate = strStorageRate
 			,@strFirstMonth = strFirstMonth
 			,@strLastMonth = strLastMonth
 			,@dtmHEffectiveDate = dtmEffectiveDate
 			,@dtmTerminationDate = dtmTerminationDate
+			,@strAllowancePeriod=strAllowancePeriod
+			,@dtmAllowancePeriodFrom=dtmAllowancePeriodFrom
+			,@dtmAllowancePeriodTo=dtmAllowancePeriodTo
 		FROM tblGRStorageScheduleRule
 		WHERE intStorageScheduleRuleId = @intStorageScheduleId
 	END
@@ -208,19 +218,19 @@ BEGIN TRY
 				  (@intAllowanceDays > 0)
 			  AND (@dtmLastStorageAccrueDate IS NULL)
 			  AND ((DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1) <= @intAllowanceDays)
-		    ) --3.Charge is not at all Accrued( Means at least once) and the No of Days between Dev.date to Calc. date less than or equal to Allowance Days.
+		    ) --3.Charge is not at all Accrued( Means at least once) and the No of Days between Dev.date to Calc. date less than or equal to Allowance Days.		
 	BEGIN
 		SET @dblStorageDuePerUnit = 0
 		SET @dblStorageDueAmount = 0
 		SET @StorageChargeCalculationRequired = 0
 	END
-
-
+	
 	IF @StorageChargeDate < @dtmDeliveryDate --1. When Storage Calculation Date less than Delivery date.
 						OR (
 									 @dtmLastStorageAccrueDate IS NOT NULL
 								AND (@dtmLastStorageAccrueDate >= @StorageChargeDate)
 						   ) --2. When Last Storage Accrue date greather than or equal to Storage Calculation Date.
+						OR (@strAllowancePeriod='Date(s)' AND dbo.fnRemoveTimeOnDate(@dtmDeliveryDate) >= dbo.fnRemoveTimeOnDate(@dtmAllowancePeriodFrom) AND dbo.fnRemoveTimeOnDate(@StorageChargeDate) <=dbo.fnRemoveTimeOnDate(@dtmAllowancePeriodTo))   
 	BEGIN
 		SET @dblStorageDuePerUnit = 0
 		SET @dblStorageDueAmount = 0
@@ -230,6 +240,11 @@ BEGIN TRY
 	IF @strProcessType = 'Unpaid' AND @strUpdateType = 'estimate'
 	BEGIN
 		SET @StorageChargeCalculationRequired = 0
+	END
+	
+	IF @strAllowancePeriod='Date(s)' AND dbo.fnRemoveTimeOnDate(@dtmDeliveryDate) < dbo.fnRemoveTimeOnDate(@dtmAllowancePeriodFrom) AND (dbo.fnRemoveTimeOnDate(@StorageChargeDate) >= dbo.fnRemoveTimeOnDate(@dtmAllowancePeriodFrom) AND dbo.fnRemoveTimeOnDate(@StorageChargeDate) <=dbo.fnRemoveTimeOnDate(@dtmAllowancePeriodTo))
+	BEGIN
+		SET @StorageChargeDate = @dtmAllowancePeriodFrom - 1
 	END
 
 	SELECT @TotalDaysApplicableForStorageCharge = DATEDIFF(DAY, @dtmDeliveryDate, @StorageChargeDate) + 1
@@ -244,6 +259,8 @@ BEGIN TRY
 											ELSE
 											0
 										END	
+
+	
 
 	---------------Start Of Daily----------------------
 	--Due from Deliverydate to StorageCalculation Date. 
@@ -4088,7 +4105,7 @@ BEGIN TRY
 		IF @strUpdateType = 'accrue' OR @strUpdateType = 'Bill'
 		BEGIN
 			UPDATE tblGRCustomerStorage
-			SET dtmLastStorageAccrueDate = @StorageChargeDate
+			SET dtmLastStorageAccrueDate = @ActualStorageChargeDate
 			WHERE intCustomerStorageId = @intCustomerStorageId
 
 			UPDATE tblGRCustomerStorage
@@ -4125,7 +4142,7 @@ BEGIN TRY
 				,NULL
 				,NULL
 				,@dblOpenBalance
-				,@StorageChargeDate
+				,@ActualStorageChargeDate
 				,@dblStorageDuePerUnit
 				,NULL
 				,NULL
@@ -4174,7 +4191,7 @@ BEGIN TRY
 			,NULL
 			,NULL
 			,@dblOpenBalance
-			,@StorageChargeDate
+			,@ActualStorageChargeDate
 			,(@dblNewStoragePaid - @dblOldStoragePaid)
 			,NULL
 			,NULL

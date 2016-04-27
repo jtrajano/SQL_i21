@@ -96,6 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\WorkOrder.sql
 :r .\TM\Reports\DataSource\CallEntryPrintOut.sql
 :r .\TM\Reports\Layout\CallEntryPrintOut.sql
+:r .\TM\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
@@ -123,7 +124,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
-:r "..\..\..\Integration\dbo\Views\vyuTMLeaseSearch.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"

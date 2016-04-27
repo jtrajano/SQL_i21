@@ -11,10 +11,10 @@
 	[intItemContractId] INT, -- Contract Item
 	[intContractHeaderId] INT, 
 	[intContractDetailId] INT, 
-	[intShipmentBLContainerId] INT, 
-	[intShipmentBLContainerContractId] INT, 
-	[intShipmentId] INT, 
-	[intShipmentContractQtyId] INT, 
+	[intShipmentBLContainerId] INT, -- Need to remove later
+	[intShipmentBLContainerContractId] INT,  -- Need to remove later
+	[intShipmentId] INT,  -- Need to remove later
+	[intShipmentContractQtyId] INT,  -- Need to remove later
 	[intCountryID] INT, -- Origin Id
 	[ysnIsContractCompleted] BIT NOT NULL CONSTRAINT [DF_tblQMSample_ysnIsContractCompleted] DEFAULT 0, 
 	[intLotStatusId] INT, 
@@ -39,6 +39,10 @@
 	[intCompanyLocationSubLocationId] INT, 
 	[strCountry] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	[intItemBundleId] INT, -- Bundle Item
+	[intLoadContainerId] INT, 
+	[intLoadDetailContainerLinkId] INT, 
+	[intLoadId] INT, 
+	[intLoadDetailId] INT, 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
@@ -63,8 +67,10 @@
 	CONSTRAINT [FK_tblQMSample_tblICLotStatus] FOREIGN KEY ([intLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]), 
 	CONSTRAINT [FK_tblQMSample_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 
 	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
-    CONSTRAINT [FK_tblQMSample_tblICItem_intItemBundleId] FOREIGN KEY ([intItemBundleId]) REFERENCES [tblICItem]([intItemId])
-
-    
-
+    CONSTRAINT [FK_tblQMSample_tblICItem_intItemBundleId] FOREIGN KEY ([intItemBundleId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblQMSample_tblLGLoadContainer] FOREIGN KEY ([intLoadContainerId]) REFERENCES [tblLGLoadContainer]([intLoadContainerId]), 
+	CONSTRAINT [FK_tblQMSample_tblLGLoadDetailContainerLink] FOREIGN KEY ([intLoadDetailContainerLinkId]) REFERENCES [tblLGLoadDetailContainerLink]([intLoadDetailContainerLinkId]), 
+	CONSTRAINT [FK_tblQMSample_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]), 
+	CONSTRAINT [FK_tblQMSample_tblLGLoadDetail] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId])
+	
 )

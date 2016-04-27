@@ -119,7 +119,7 @@ SET strQuery = '
 		LEFT JOIN vwslsmst J ON J.A4GLIdentity = F.intDriverID 
 		LEFT JOIN vwlclmst K
 			ON C.intTaxStateID = K.A4GLIdentity
-		Where C.intSiteID = F.intSiteID And (H.strCurrentSeason Is Not Null) AND vwcus_active_yn = ''Y'' 
+		And (H.strCurrentSeason Is Not Null) AND vwcus_active_yn = ''Y'' 
 		AND  (ysnOnHold = 0 OR dtmOnHoldEndDate < GetDate()) AND C.ysnActive = 1
 
 ' 

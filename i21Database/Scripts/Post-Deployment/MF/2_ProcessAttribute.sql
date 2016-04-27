@@ -901,12 +901,17 @@ BEGIN
         ,strSQL
         )
     SELECT 43
-        ,'Partial Quantity Storage Location'
+        ,'Partial Quantity Sub Location'
         ,5
         ,2
         ,0
-        ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName AS DisplayMember from tblICStorageLocation'
+        ,'select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'')'
 END
+ELSE
+UPDATE tblMFAttribute 
+	Set strAttributeName='Partial Quantity Sub Location',
+	strSQL='select CONVERT(VARCHAR,intCompanyLocationSubLocationId) AS ValueMember,strSubLocationName AS DisplayMember from tblSMCompanyLocationSubLocation Where UPPER(strClassification)=UPPER(''Inventory'')'
+	WHERE intAttributeId = 43
 GO
 IF NOT EXISTS (
         SELECT *

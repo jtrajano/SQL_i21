@@ -101,6 +101,7 @@ End
 	Begin
 		Set @strConsumeXml='<root>'
 		Set @strConsumeXml=@strConsumeXml + '<intWorkOrderId>' + convert(varchar,@intWorkOrderId) + '</intWorkOrderId>'
+		Set @strConsumeXml=@strConsumeXml + '<intItemId>' + convert(varchar,@intItemId) + '</intItemId>'
 		Set @strConsumeXml=@strConsumeXml + '<intManufacturingProcessId>' + convert(varchar,@intManufacturingProcessId) + '</intManufacturingProcessId>'
 		Set @strConsumeXml=@strConsumeXml + '<intStatusId>' + convert(varchar,10) + '</intStatusId>'
 		Set @strConsumeXml=@strConsumeXml + '<intUserId>' + convert(varchar,@intUserId) + '</intUserId>'
