@@ -28,11 +28,12 @@ INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyI
 									intInstrumentTypeId,intCommodityId,intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,strBrokerTradeNo,
 									strBuySell,intNoOfContract,intFutureMonthId,intOptionMonthId,strOptionType,dblStrike,dblPrice,strReference,strStatus,
 									dtmFilledDate,intBookId,intSubBookId)
-
-SELECT DISTINCT @intFutOptTransactionHeaderId,1,getdate(),em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
-	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 0 END,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId,
-	   cur.intCurrencyID,@strInternalTradeNo+1,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
-	   m.intFutureMonthId, intOptionMonthId intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),b.intBookId,sb.intSubBookId
+SELECT * FROM(
+SELECT DISTINCT @intFutOptTransactionHeaderId intFutOptTransactionHeaderId ,1 intConcurrencyId,
+		getdate() dtmTransactionDate,em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
+	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 0 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
+	   cur.intCurrencyID,isnull(@strInternalTradeNo,0) + ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
+	   m.intFutureMonthId, intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId
 FROM tblRKFutOptTransactionImport ti
 JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
 JOIN tblRKBrokerageAccount ba on ba.strAccountNumber=ti.strAccountNumber
@@ -44,7 +45,7 @@ JOIN tblSMCurrency cur on fm.intCurrencyId=cur.intCurrencyID and cur.strCurrency
 JOIN tblRKFuturesMonth m on m.strFutureMonth=replace(ti.strFutureMonth,'-',' ') and m.intFutureMarketId=fm.intFutureMarketId
 Left JOIN tblRKOptionsMonth om on om.strOptionMonth=replace(ti.strOptionMonth,'-',' ') and om.intFutureMarketId=fm.intFutureMarketId 
 LEFT JOIN tblCTBook b on b.strBook=ti.strBook
-LEFT JOIN tblCTSubBook sb on sb.strSubBook=ti.strSubBook 
+LEFT JOIN tblCTSubBook sb on sb.strSubBook=ti.strSubBook)t order by strInternalTradeNo
 
 END
 
