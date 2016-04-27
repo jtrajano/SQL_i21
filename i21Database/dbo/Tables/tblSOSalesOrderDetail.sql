@@ -29,6 +29,7 @@
     [intContractHeaderId] INT NULL, 
     [intContractDetailId] INT NULL,
 	[dblContractBalance]					NUMERIC(18, 6)									NOT NULL DEFAULT 0, 
+	[dblContractAvailable]					NUMERIC(18, 6)									NOT NULL DEFAULT 0, 
 	[intTaxGroupId] INT NULL, 
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE,
