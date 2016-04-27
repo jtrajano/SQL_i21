@@ -14,7 +14,7 @@ SELECT        arInv.intTransactionId, arInv.strCustomerNumber, arInv.strShipTo, 
                                FROM            dbo.tblCFTransactionTax
                                WHERE        (intTransactionId = cfTrans.intTransactionId)) AS dblTotalTax, cfTrans.intOdometer
 FROM            dbo.vyuCFInvoice AS arInv INNER JOIN
-                         dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId INNER JOIN
+                         dbo.tblCFTransaction AS cfTrans ON arInv.intTransactionId = cfTrans.intTransactionId LEFT JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTrans.intVehicleId = cfVehicle.intVehicleId INNER JOIN
                          dbo.vyuCFCardAccount AS cfCardAccount ON arInv.intEntityCustomerId = cfCardAccount.intCustomerId AND cfTrans.intCardId = cfCardAccount.intCardId INNER JOIN
                          dbo.vyuCFSiteItem AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId AND cfSiteItem.intARItemId = cfTrans.intARItemId AND cfSiteItem.intItemId = cfTrans.intProductId INNER JOIN
