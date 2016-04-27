@@ -55,8 +55,8 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   dblEquityRefund = Total.dblRefundAmount - Total.dblCashRefund,
 			   dblCashRefund = Total.dblCashRefund,
 			   dbLessFWT = Total.dbLessFWT ,
-			   dblLessServiceFee = Total.dblLessServiceFee,
-			   dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee END,
+			   dblLessServiceFee = Total.dblCashRefund * (Total.dblLessServiceFee/100),
+			   dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) END,
 			   dblTotalVolume = Total.dblVolume,
 			   dblTotalRefund = Total.dblTotalRefund
 		  FROM (
