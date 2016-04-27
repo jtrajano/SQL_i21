@@ -892,6 +892,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Meter Readings')
+	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 96
+			,[strTransactionType]	= N'Least Cost Routing'
+			,[strPrefix]			= N'LCR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Least Cost Routing')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
