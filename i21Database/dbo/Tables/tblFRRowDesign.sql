@@ -6,6 +6,7 @@
     [strRowType]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strBalanceSide]			NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
 	[strSource]					NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
+	[strCalculationOverride]	NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,	
     [strRelatedRows]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountsUsed]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strAccountsType]			NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
