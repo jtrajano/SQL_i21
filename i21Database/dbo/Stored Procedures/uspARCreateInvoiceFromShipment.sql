@@ -291,7 +291,7 @@ SELECT
 	,[intSplitId]							= @SplitId
 	,[intDistributionHeaderId]				= @DistributionHeaderId
 	,[strActualCostId]						= @ActualCostId
-	,[intShipmentId]						= @ShipmentId
+	,[intShipmentId]						= NULL
 	,[intTransactionId]						= @TransactionId
 	,[intOriginalInvoiceId]					= @OriginalInvoiceId
 	,[intEntityId]							= @UserId
@@ -301,7 +301,7 @@ SELECT
 																																																		
 	,[intInvoiceDetailId]					= NULL
 	,[intItemId]							= ARSI.[intItemId]
-	,[ysnInventory]							= NULL
+	,[ysnInventory]							= 1
 	,[strDocumentNumber]					= @ShipmentNumber 
 	,[strItemDescription]					= ARSI.[strItemDescription]
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
@@ -354,8 +354,36 @@ FROM
 	vyuARShippedItems ARSI
 WHERE
 	ARSI.[strTransactionType] = 'Inventory Shipment'
-	AND ARSI.[strTransactionNumber] = @ShipmentNumber
-	AND ARSI.[intInventoryShipmentId] = @ShipmentId 
+	--AND ARSI.[strTransactionNumber] = @ShipmentNumber
+	AND ARSI.[intInventoryShipmentId] = @ShipmentId
+
+
+IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
+BEGIN
+	SELECT TOP 1
+		@InvoiceNumber		= ARI.[strInvoiceNumber]
+		,@ShipmentNumber	= ICIS.[strShipmentNumber] 
+	FROM
+		tblARInvoice ARI
+	INNER JOIN
+		tblARInvoiceDetail ARID
+			ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+	INNER JOIN
+		tblICInventoryShipmentItem ICISI
+			ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
+	INNER JOIN
+		tblICInventoryShipment ICIS
+			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId] 
+	WHERE
+		ICISI.[intInventoryShipmentId] = @ShipmentId 
+
+	DECLARE @ErrorMessage NVARCHAR(250)
+
+	SET @ErrorMessage = 'Invoice(' + @InvoiceNumber + ') was already created for ' + @ShipmentNumber;
+
+	RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END
 	
 	
 DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
