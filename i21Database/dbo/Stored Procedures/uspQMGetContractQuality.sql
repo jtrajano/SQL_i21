@@ -65,7 +65,7 @@ BEGIN TRY
    ,I1.strItemNo AS strBundleItemNo
    ,I.strItemNo  
    ,I.strDescription  
-   ,C.strContainerNumber  
+   ,ISNULL(C.strContainerNumber, S.strContainerNumber) AS strContainerNumber 
    ,S.strSampleNumber  
    ,ST.strSampleTypeName  
    ,SS.strStatus  
