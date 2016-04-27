@@ -172,11 +172,10 @@ BEGIN TRY
 
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR (@intWeightUOMId is null and (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		SELECT @dblLotQty = Case When intWeightUOMId is null Then dblQty Else dblWeight End FROM tblICLot WHERE intLotId = @intLotId
-
+		
 		EXEC dbo.uspMFLotAdjustQty
 		 @intLotId =@intLotId,       
-		 @dblNewLotQty =@dblLotQty,
+		 @dblNewLotQty =0,
 		 @intUserId=@intUserId ,
 		 @strReasonCode ='Residue qty clean up',
 		 @strNotes ='Residue qty clean up'
