@@ -655,7 +655,7 @@ BEGIN TRY
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
 					,@intBlendStagingLocationId
-					--,@intPartialQuantityStorageLocationId
+					--,@intPartialQuantitySubLocationId
 					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
 				AND ISNULL(SL.ysnAllowConsume,0)=1
 				AND L.intLotId NOT IN (Select intLotId From @tblExcludedLot Where intItemId=@intRawItemId)
@@ -935,32 +935,6 @@ BEGIN TRY
 
 			EXEC (@strSQL)
 
-			--Full Bag Pick
-			If ISNULL(@intPartialQuantityStorageLocationId,0)>0 AND @intOriginalIssuedUOMTypeId=@intIssuedUOMTypeId
-				DELETE FROM #tblInputLot WHERE intStorageLocationId=@intPartialQuantityStorageLocationId
-
-			--Hand Add Pick
-			--Pick From Hand Add, remaining pick from Full Bag 
-			--#tblInputLotHandAdd table used for ordering of hand add and full bag add location lots
-			If ISNULL(@intPartialQuantityStorageLocationId,0)>0 AND @intOriginalIssuedUOMTypeId<>@intIssuedUOMTypeId
-			Begin
-				DELETE FROM #tblInputLotHandAdd
-
-				INSERT INTO #tblInputLotHandAdd
-				Select * From #tblInputLot
-
-				DELETE FROM #tblInputLot
-
-				INSERT INTO #tblInputLot
-				Select * From #tblInputLotHandAdd Where intStorageLocationId=ISNULL(@intPartialQuantityStorageLocationId,0)
-				
-				INSERT INTO #tblInputLot
-				Select * From #tblInputLotHandAdd Where intStorageLocationId<>ISNULL(@intPartialQuantityStorageLocationId,0)
-			End
-
-			If @intOriginalIssuedUOMTypeId<>@intIssuedUOMTypeId AND (Select COUNT(1) From #tblInputLot)=0
-				GOTO NOLOT
-
 			--For Bulk Items Do not consider lot
 			If @intConsumptionMethodId IN (2, 3) --By Location/FIFO
 			Begin
@@ -1041,7 +1015,7 @@ BEGIN TRY
 
 			WHILE (@@FETCH_STATUS <> - 1)
 			BEGIN
-				IF @dblRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantityStorageLocationId, 0) > 0 AND @intIssuedUOMTypeId = 2
+				IF @dblRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantitySubLocationId, 0) > 0 AND @intIssuedUOMTypeId = 2
 					--SELECT @intIssuedUOMTypeId = 1
 					GOTO LOOP_END
 
@@ -1156,7 +1130,7 @@ BEGIN TRY
 							FROM #tblParentLot L
 							WHERE L.intParentLotId = @intParentLotId --AND L.dblWeight > 0
 
-						If ISNULL(@intPartialQuantityStorageLocationId, 0) > 0 AND @intIssuedUOMTypeId=2
+						If ISNULL(@intPartialQuantitySubLocationId, 0) > 0 AND @intIssuedUOMTypeId=2
 						Begin
 							SET @dblRequiredQty=@dblRequiredQty - Floor(@dblRequiredQty / @dblWeightPerQty) * @dblWeightPerQty
 							If @dblRequiredQty = 0 
