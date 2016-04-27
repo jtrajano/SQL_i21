@@ -102,7 +102,6 @@ Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
 Where l.dblQty>0 and ls.strPrimaryStatus='Active' 
 And l.intLocationId=@intLocationId  And ISNULL(sl.ysnAllowConsume,0)=1 
 AND l.intStorageLocationId NOT IN (@intKitStagingLocationId,@intBlendStagingLocationId) 
-AND l.intItemId=@intItemId
 
 Insert into @tblReservedQty
 Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 
