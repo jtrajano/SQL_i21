@@ -220,9 +220,14 @@ GO
 	PRINT N'Start updating tblHDTicket Customer Id.'
 GO
 
+	/*
 	update tblHDTicket set intCustomerId = (
 		select top 1 tblARCustomer.intEntityCustomerId from tblARCustomer where strCustomerNumber = tblHDTicket.strCustomerNumber
 	)
+	*/
+
+	Update tblHDTicket set tblHDTicket.strType = 'HD' where tblHDTicket.strType is null and SUBSTRING(tblHDTicket.strTicketNumber,1,4) = 'HDTN';
+	Update tblHDTicket set tblHDTicket.strType = 'CRM' where tblHDTicket.strType is null and SUBSTRING(tblHDTicket.strTicketNumber,1,4) = 'CRMN';
 
 GO
 	PRINT N'End updating tblHDTicket Customer Id.'
@@ -306,4 +311,48 @@ GO
 
 GO
 	PRINT N'End updating HD modules with SM modules.'
+	PRINT N'Start updating HD ticket closed date.'
+GO
+
+	Update tblHDTicket set tblHDTicket.dtmCompleted = tblHDTicket.dtmLastModified
+	where tblHDTicket.dtmCompleted is null and tblHDTicket.intTicketStatusId = 2
+
+GO
+	PRINT N'End updating HD ticket closed date.'
+	PRINT N'Start updating HD ticket last commented date.'
+GO
+
+	update
+		tblHDTicket 
+	set
+		tblHDTicket.dtmLastCommented = (select max(tblHDTicketComment.dtmLastModified) from tblHDTicketComment where tblHDTicketComment.intTicketId = tblHDTicket.intTicketId)
+		,tblHDTicket.intLastCommentedByEntityId = (
+													select
+														top 1 tblHDTicketComment.intLastModifiedUserEntityId 
+													from
+														tblHDTicketComment 
+													where
+														tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
+														and tblHDTicketComment.dtmLastModified = (
+																									select max(tblHDTicketComment.dtmLastModified) 
+																									from tblHDTicketComment 
+																									where tblHDTicketComment.intTicketId = tblHDTicket.intTicketId
+																								  )
+												  )
+	where tblHDTicket.dtmLastCommented is null
+
+GO
+	PRINT N'End updating HD ticket last commented date.'
+	PRINT N'Start updating HD Project Type.'
+GO
+
+	update
+		tblHDProject 
+	set
+		tblHDProject.strType = 'HD'
+	where
+		tblHDProject.strType is null or tblHDProject.strType = ''
+
+GO
+	PRINT N'End updating HD Project Type.'
 GO

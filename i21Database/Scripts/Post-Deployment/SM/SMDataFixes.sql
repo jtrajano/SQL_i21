@@ -116,3 +116,12 @@ GO
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Scale' AND strModuleName = 'Scale' AND intMenuID <> @ScaleInterfaceParentMenuId
 	DELETE FROM tblSMMasterMenu WHERE strMenuName IN ('Scale Activity', 'Unsent Tickets') AND strModuleName = 'Grain'
 GO
+	/* DELETE AP Transaction By GLAccount Reports MENU'S DUPLICATE */
+	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'AP Transaction By GLAccount' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'AP Transaction By GLAccount') > 1)
+	BEGIN
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'AP Transaction By GLAccount' AND strModuleName = 'Accounts Payable' AND intMenuID NOT IN
+		(
+			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'AP Transaction By GLAccount' AND strModuleName = 'Accounts Payable'
+		)
+	END
+GO

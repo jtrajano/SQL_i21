@@ -23,3 +23,4 @@ AS
 	JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CD.intItemId				
 													AND	IU.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT
 	JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId	
+	WHERE	PF.intPriceFixationId IS NOT NULL

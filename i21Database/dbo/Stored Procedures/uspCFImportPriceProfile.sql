@@ -8,10 +8,8 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 		SET NOCOUNT ON
 	
 		--====================================================--
-		--     ONE TIME DISCOUNT SCHEDULE SYNCHRONIZATION	  --
+		--     ONE TIME PRICE PROFILE SYNCHRONIZATION	  --
 		--====================================================--
-		TRUNCATE TABLE tblCFPriceProfileFailedImport
-		TRUNCATE TABLE tblCFPriceProfileSuccessImport
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
@@ -50,6 +48,34 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 			FROM cfpphmst
 				WHERE cfpph_prc_prf_id COLLATE Latin1_General_CI_AS NOT IN (select strPriceProfile from tblCFPriceProfileHeader) 
 
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+				dtmImportDate
+				,strSetupName
+				,ysnSuccessful
+				,strFailedReason
+				,strOriginTable
+				,strOriginIdentityId
+				,strI21Table
+				,intI21IdentityId
+				,strUserId
+			)
+		SELECT 
+		dtmImportDate = GETDATE()
+		,strSetupName = 'Price Profile'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate price profile on i21 Card Fueling price profiles list'
+		,strOriginTable = 'cfpphmst'
+		,strOriginIdentityId = cfpph_prc_prf_id
+		,strI21Table = 'tblCFPriceProfileHeader'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfpphmst
+		WHERE cfpph_prc_prf_id COLLATE Latin1_General_CI_AS  IN (select strPriceProfile from tblCFPriceProfileHeader) 
+		
+		--DUPLICATE SITE ON i21--
+
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfpphmst))
 		BEGIN
 				
@@ -73,6 +99,7 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 					
 				--================================--
 				--		INSERT MASTER RECORD	  --
+				--*******COMMIT TRANSACTION*******--
 				--================================--
 				INSERT [dbo].[tblCFPriceProfileHeader](
 				 [strPriceProfile]
@@ -101,7 +128,10 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 					SELECT @originPriceProfileDetail = cfppd_prc_prf_id FROM #tmpcfppdmst
 
 					SELECT TOP 1
-					@intItemId						= LTRIM(RTRIM(cfppd_ar_itm_no))
+					@intItemId						= (SELECT TOP 1 intItemId 
+															  FROM tblICItem 
+															  WHERE strItemNo = LTRIM(RTRIM(cfppd_ar_itm_no))
+																				 COLLATE Latin1_General_CI_AS)
 					,@intNetworkId					= ISNULL((SELECT intNetworkId 
 															  FROM tblCFNetwork 
 															  WHERE strNetwork = LTRIM(RTRIM(cfppd_netwrok_id))
@@ -138,7 +168,7 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 
 					FROM cfppdmst
 					WHERE cfppd_prc_prf_id = @originPriceProfileDetail
-					
+
 					INSERT [dbo].[tblCFPriceProfileDetail](
 					 [intPriceProfileHeaderId]
 					,[intItemId]				
@@ -159,26 +189,90 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 					,@dblRate				
 					,@strBasis				
 					)
-					CONTINUEDETAILLOOP:
-					PRINT @originPriceProfileDetail
+					
+					INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Price Profile Detail'
+						,1
+						,''
+						,'cffprmst'
+						,@originPriceProfileDetail
+						,'tblCFPriceProfileDetail'
+						,null
+						,''
+					)
+
 					DELETE FROM #tmpcfppdmst WHERE cfppd_prc_prf_id = @originPriceProfileDetail
 				END
 
 				DROP TABLE #tmpcfppdmst
 
-				COMMIT TRANSACTION
+									   COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
 				SET @TotalSuccess += 1;
-				INSERT INTO tblCFPriceProfileSuccessImport(strPriceProfileId)					
-				VALUES(@originPriceProfile)			
+				INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Price Profile'
+						,1
+						,''
+						,'cfppdmst'
+						,@originPriceProfile
+						,'tblCFPriceProfile'
+						,@MasterPk
+						,''
+					)
 			END TRY
 			BEGIN CATCH
-				PRINT 'IMPORTING PRICE PROFILE' + ERROR_MESSAGE()
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				INSERT INTO tblCFPriceProfileFailedImport(strPriceProfileId,strReason)					
-				VALUES(@originPriceProfile,ERROR_MESSAGE())					
-				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Price Profile'
+					,0
+					,ERROR_MESSAGE()
+					,'cfppdmst'
+					,@originPriceProfile
+					,'tblCFPriceProfile'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -187,13 +281,14 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 			END
 								
 			CONTINUELOOP:
-			PRINT @originPriceProfile
 			DELETE FROM #tmpcfpphmst WHERE cfpph_prc_prf_id = @originPriceProfile
 		
 			SET @Counter += 1;
 
 		END
 	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfpphmst
+		PRINT @TotalFailed
 
 	END

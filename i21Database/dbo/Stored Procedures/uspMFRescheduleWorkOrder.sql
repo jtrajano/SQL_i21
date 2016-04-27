@@ -2,6 +2,35 @@
 AS
 BEGIN TRY
 	SET NOCOUNT ON
+	DECLARE @strScheduleType nvarchar(50)
+			,@intAttributeId int
+			,@strAttributeValue nvarchar(50)
+			,@intBlendAttributeId int
+			,@strBlendAttributeValue nvarchar(50)
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Schedule Type'
+	
+	Select @strScheduleType=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intAttributeId
+
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	
+	Select @strBlendAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intBlendAttributeId
+
+	If @strScheduleType is NULL or @strScheduleType=''
+	Begin
+		SELECT @strScheduleType = strScheduleType
+		FROM dbo.tblMFCompanyPreference
+	End
+
+	IF @strScheduleType='Backward Schedule'
+	BEGIN
+		EXEC dbo.uspMFRescheduleWorkOrderByLocation @strXML=@strXML,@ysnScheduleByManufacturingCell=1
+		RETURN
+	END
 
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
@@ -101,9 +130,24 @@ BEGIN TRY
 		,dtmChangeoverEndDate DATETIME
 		,intDuration INT
 		)
+	DECLARE @tblMFScheduleConstraint TABLE (
+		intScheduleConstraintId INT identity(1, 1)
+		,intScheduleRuleId INT
+		,intPriorityNo int
+		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
+
+	INSERT INTO @tblMFScheduleConstraint(intScheduleRuleId,intPriorityNo)
+	SELECT intScheduleRuleId,intPriorityNo
+	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+			intScheduleRuleId INT
+			,intPriorityNo int
+			,ysnSelect bit
+			)
+	WHERE ysnSelect=1
+	ORDER BY intPriorityNo
 
 	SELECT @intManufacturingCellId = intManufacturingCellId
 		,@intCalendarId = intCalendarId
@@ -176,7 +220,9 @@ BEGIN TRY
 		,intUnitMeasureId
 		,dblQuantity
 		,dblBalance
+		,dtmEarliestDate
 		,dtmExpectedDate
+		,dtmLatestDate
 		,intStatusId
 		,intExecutionOrder
 		,strComments
@@ -194,6 +240,8 @@ BEGIN TRY
 		,strWIPItemNo
 		,intSetupDuration
 		,ysnPicked
+		,intDemandRatio
+		,intNoOfFlushes
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -202,7 +250,9 @@ BEGIN TRY
 		,x.intUnitMeasureId
 		,x.dblQuantity
 		,x.dblBalance
+		,x.dtmEarliestDate
 		,x.dtmExpectedDate
+		,x.dtmLatestDate
 		,x.intStatusId
 		,x.intExecutionOrder
 		,x.strComments
@@ -223,6 +273,8 @@ BEGIN TRY
 		,x.strWIPItemNo
 		,x.intSetupDuration
 		,0 AS ysnPicked
+		,x.intDemandRatio
+		,x.intNoOfFlushes
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -231,7 +283,9 @@ BEGIN TRY
 			,intItemUOMId INT
 			,dblQuantity NUMERIC(18, 6)
 			,dblBalance NUMERIC(18, 6)
+			,dtmEarliestDate DATETIME
 			,dtmExpectedDate DATETIME
+			,dtmLatestDate DATETIME
 			,intStatusId INT
 			,intExecutionOrder INT
 			,strComments NVARCHAR(MAX)
@@ -244,6 +298,8 @@ BEGIN TRY
 			,ysnFrozen BIT
 			,strWIPItemNo NVARCHAR(50)
 			,intSetupDuration INT
+			,intDemandRatio int
+			,intNoOfFlushes int
 			) x
 	LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
 		AND MC.intPackTypeId = x.intPackTypeId
@@ -327,9 +383,7 @@ BEGIN TRY
 
 		RETURN
 	END
-
-
-
+	
 	INSERT INTO @tblMFScheduleWorkOrderCalendarDetail (
 		intCalendarDetailId
 		,intCalendarId
@@ -572,19 +626,22 @@ BEGIN TRY
 					SELECT @intRemainingDuration = DATEDIFF(MINUTE, @dtmPlannedStartDate, @dtmShiftEndTime)
 				END
 
-				DECLARE @intScheduleRuleId INT
+				DECLARE @intScheduleConstraintId int
+					,@intScheduleRuleId INT
 					,@strColumnName NVARCHAR(50)
 					,@strColumnValue NVARCHAR(50)
 					,@strPreviousColumnValue NVARCHAR(50)
 					,@intChangeoverTime INT
 
-				SELECT @intScheduleRuleId = MIN(R.intScheduleRuleId)
-				FROM dbo.tblMFScheduleRule R
-				WHERE R.ysnActive = 1
-					AND R.intScheduleRuleTypeId = 1
+				SELECT @intScheduleConstraintId = MIN(intScheduleConstraintId)
+				FROM @tblMFScheduleConstraint
 
-				WHILE @intScheduleRuleId IS NOT NULL
+				WHILE @intScheduleConstraintId IS NOT NULL
 				BEGIN
+					SELECT @intScheduleRuleId = intScheduleRuleId
+					FROM @tblMFScheduleConstraint
+					Where intScheduleConstraintId=@intScheduleConstraintId
+
 					SELECT @strColumnName = NULL
 
 					SELECT @strColumnName = A.strColumnName
@@ -679,11 +736,9 @@ BEGIN TRY
 						END
 					END
 
-					SELECT @intScheduleRuleId = MIN(R.intScheduleRuleId)
-					FROM dbo.tblMFScheduleRule R
-					WHERE R.ysnActive = 1
-						AND R.intScheduleRuleTypeId = 1
-						AND R.intScheduleRuleId > @intScheduleRuleId
+					SELECT @intScheduleConstraintId = MIN(intScheduleConstraintId)
+					FROM @tblMFScheduleConstraint
+					WHERE intScheduleConstraintId > @intScheduleConstraintId
 				END
 
 				IF @ysnConsiderSumOfChangeoverTime = 0
@@ -1067,7 +1122,9 @@ BEGIN TRY
 		,@intScheduleId AS intScheduleId
 		,W.strWorkOrderNo
 		,IsNULL(SL.dblQuantity, W.dblQuantity) AS dblQuantity
+		,SL.dtmEarliestDate 
 		,Isnull(SL.dtmExpectedDate, W.dtmExpectedDate) AS dtmExpectedDate
+		,SL.dtmLatestDate 
 		,IsNULL(SL.dblQuantity, W.dblQuantity) - W.dblProducedQuantity AS dblBalanceQuantity
 		,W.dblProducedQuantity
 		,W.strComment AS strWorkOrderComments
@@ -1077,8 +1134,9 @@ BEGIN TRY
 			SELECT TOP 1 strItemNo
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+			JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = 'Assembly/Blend'
+				AND C.strCategoryCode = @strBlendAttributeValue
 			) AS strWIPItemNo
 		,I.intItemId
 		,I.strItemNo
@@ -1096,7 +1154,10 @@ BEGIN TRY
 		,SL.dtmChangeoverEndDate
 		,SL.dtmPlannedStartDate
 		,SL.dtmPlannedEndDate
-		,SL.intExecutionOrder
+		,Convert(INT, CASE 
+			WHEN SL.intStatusId = 1 
+				THEN NULL
+			ELSE SL.intExecutionOrder End) AS intExecutionOrder
 		,SL.intChangeoverDuration
 		,SL.intSetupDuration
 		,SL.strComments
@@ -1118,6 +1179,8 @@ BEGIN TRY
 		,W.ysnIngredientAvailable
 		,W.dtmLastProducedDate
 		,CONVERT(bit,0) AS ysnEOModified
+		,SL.intDemandRatio
+		,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes 
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		AND W.intManufacturingCellId = @intManufacturingCellId
@@ -1221,6 +1284,7 @@ BEGIN TRY
 		,0 AS intLeadTime
 		,'' AS strCustomer
 		,Ltrim(W.intWorkOrderId) AS strRowId
+		,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 	FROM dbo.tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -1232,9 +1296,10 @@ BEGIN TRY
 	JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 	WHERE W.intLocationId = @intLocationId
 		AND MC.intManufacturingCellId = @intManufacturingCellId
-		AND SL.dtmPlannedStartDate >= @dtmFromDate
-		AND SL.dtmPlannedEndDate <= @dtmToDate
-	
+	AND (@dtmFromDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate 
+		OR @dtmToDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate
+		    OR (SL.dtmPlannedStartDate >= @dtmFromDate
+			AND SL.dtmPlannedEndDate <= @dtmToDate))
 	UNION
 	
 	SELECT W.intManufacturingCellId
@@ -1274,6 +1339,7 @@ BEGIN TRY
 		,SC.intDuration AS intLeadTime
 		,NULL AS strCustomer
 		,Ltrim(W.intWorkOrderId)+Ltrim(SR.intScheduleRuleId)
+		,ISNULL(SL.intNoOfFlushes,0) AS intNoOfFlushes
 	FROM dbo.tblMFWorkOrder W
 	JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	JOIN @tblMFScheduleConstraintDetail SC ON SC.intWorkOrderId = W.intWorkOrderId
@@ -1287,9 +1353,30 @@ BEGIN TRY
 				ELSE @intManufacturingCellId
 				END
 			)
-		AND SC.dtmChangeoverStartDate >= @dtmFromDate
-		AND SC.dtmChangeoverEndDate <= @dtmToDate
+		AND (@dtmFromDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate 
+		OR @dtmToDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate
+		    OR (SC.dtmChangeoverStartDate >= @dtmFromDate
+			AND SC.dtmChangeoverEndDate <= @dtmToDate))
 	ORDER BY SL.intExecutionOrder
+
+	SELECT R.intScheduleRuleId
+		,R.strName AS strScheduleRuleName
+		,R.intScheduleRuleTypeId
+		,RT.strName AS strScheduleRuleTypeName
+		,R.ysnActive
+		,R.intPriorityNo
+		,R.strComments
+		,Convert(BIT, CASE 
+				WHEN SC.intScheduleConstraintId IS NULL
+					THEN 0
+				ELSE 1
+				END) AS ysnSelect
+		,@intScheduleId AS intScheduleId
+		,R.intConcurrencyId
+	FROM dbo.tblMFScheduleRule R
+	JOIN dbo.tblMFScheduleRuleType RT ON RT.intScheduleRuleTypeId = R.intScheduleRuleTypeId
+	LEFT JOIN @tblMFScheduleConstraint SC ON SC.intScheduleRuleId = R.intScheduleRuleId
+	WHERE R.intLocationId = @intLocationId AND R.ysnActive = 1
 
 	EXEC sp_xml_removedocument @idoc
 END TRY

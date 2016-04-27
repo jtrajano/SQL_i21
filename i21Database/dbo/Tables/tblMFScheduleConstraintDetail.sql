@@ -12,5 +12,5 @@
 	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFScheduleLine_intScheduleLineId] FOREIGN KEY (intScheduleWorkOrderId) REFERENCES tblMFScheduleWorkOrder(intScheduleWorkOrderId)ON DELETE CASCADE
 	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFScheduleRule_intScheduleRuleId] FOREIGN KEY (intScheduleRuleId) REFERENCES tblMFScheduleRule(intScheduleRuleId)
 	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES [dbo].[tblMFWorkOrder](intWorkOrderId)
-	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES [dbo].[tblMFSchedule](intScheduleId) 
+	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES [dbo].[tblMFSchedule](intScheduleId)
 	)

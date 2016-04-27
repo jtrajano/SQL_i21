@@ -116,7 +116,7 @@ AS
 --	DECLARE @AccountCategoryName_RevalueSold AS NVARCHAR(100) = 'Revalue Sold'
 --	DECLARE @AccountCategoryId_RevalueSold AS INT = 43
 
---	DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+--	DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Variance'
 --	DECLARE @AccountCategoryId_AutoNegative AS INT = 44
 
 --	DECLARE @AccountCategoryName_InventoryInTransit AS NVARCHAR(100) = 'Inventory In Transit'

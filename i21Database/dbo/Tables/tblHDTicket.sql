@@ -3,13 +3,16 @@
 	[intTicketId] [int] IDENTITY(1,1) NOT NULL,
 	[strTicketNumber] [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strSubject] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strSubjectOverride] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[ysnSendLink] [bit] null,
 	[strCustomerNumber] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerContactId] [int] NULL,
 	[intCustomerId] [int] NULL,
 	[intMilestoneId] [int] NULL,
-	[intTicketTypeId] [int] NOT NULL,
+	[intTicketTypeId] [int] NULL,
 	[intTicketStatusId] [int] NOT NULL,
-	[intTicketPriorityId] [int] NOT NULL,
+	[intLineOfBusinessId] [int] NULL,
+	[intTicketPriorityId] [int] NULL,
 	[intTicketProductId] [int] NULL,
 	[intModuleId] [int] NULL,
 	[intVersionId] [int] NULL,
@@ -19,9 +22,12 @@
 	[intCreatedUserEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
 	[dtmDueDate] [datetime] Null,
+	[dtmCompleted] [datetime] NULL,
 	[intLastModifiedUserId] [int] NULL,
 	[intLastModifiedUserEntityId] [int] NULL,
+	[intLastCommentedByEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
+	[dtmLastCommented] [datetime] NULL,
 	[dblQuotedHours] [numeric](18, 6) NULL,
 	[dblActualHours] [numeric](18, 6) NULL,
 	[strJiraKey] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -29,6 +35,7 @@
 	[strOperatingSystem] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strAcuVersion] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strDatabase] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
@@ -40,7 +47,8 @@
     CONSTRAINT [FK_Ticket_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]),
     CONSTRAINT [FK_Ticket_Module] FOREIGN KEY ([intModuleId]) REFERENCES [dbo].[tblHDModule] ([intModuleId]),
     CONSTRAINT [FK_Ticket_Version] FOREIGN KEY ([intVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId]),
-    CONSTRAINT [FK_Ticket_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId])
+    CONSTRAINT [FK_Ticket_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblHDTicket_tblHDLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [dbo].[tblHDLineOfBusiness] ([intLineOfBusinessId])
 )
 
 GO
@@ -521,3 +529,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicket',
     @level2type = N'COLUMN',
     @level2name = N'dtmDueDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Line Of Business Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intLineOfBusinessId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Date Completed',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmCompleted'

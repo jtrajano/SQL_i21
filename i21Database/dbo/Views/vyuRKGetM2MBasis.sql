@@ -27,7 +27,8 @@ AS
 			,intPricingTypeId
 			,intContractTypeId
 			,CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END AS intUnitMeasureId
-			,0 as intConcurrencyId
+			,0 as intConcurrencyId,
+			i.strMarketValuation
 		FROM vyuCTContractDetailView cd
 		LEFT JOIN tblICItem i on i.intItemId=cd.intItemId	
 		LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId
@@ -66,9 +67,10 @@ AS
 				,intPricingTypeId
 				,intContractTypeId
 				,CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END AS intUnitMeasureId
-				,0 as intConcurrencyId
+				,0 as intConcurrencyId,
+				i.strMarketValuation
 			FROM tblICItemStock iis		
-			JOIN tblICItem i on i.intItemId=iis.intItemId	
+			JOIN tblICItem i on i.intItemId=iis.intItemId and strLotTracking = 'No'
 			LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId
 			LEFT JOIN vyuCTContractDetailView cd on iis.intItemId=cd.intItemId 
 			LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
@@ -77,4 +79,4 @@ AS
 			LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 			LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 			WHERE LEFT(strPricingType,2) <> 'DP' and (iis.dblUnitOnHand > 0 or iis.dblUnitStorage>0) and strContractType <> 'Sale'
-	
+

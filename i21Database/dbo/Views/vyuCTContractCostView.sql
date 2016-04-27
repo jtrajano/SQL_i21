@@ -16,15 +16,18 @@ AS
 			CC.ysnMTM,
 			CC.ysnPrice ,
 			IM.strItemNo,
+			IM.strDescription strItemDescription,
 			UM.strUnitMeasure AS strUOM,
 			EY.strEntityName AS strVendorName,
 			CD.intContractHeaderId,
 			IU.intUnitMeasureId,
 			CD.intContractSeq,
-			CY.strCurrency
+			CY.strCurrency,
+			CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractSeq
 
 	FROM	tblCTContractCost	CC
 	JOIN	tblCTContractDetail CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 	JOIN	tblICItem			IM	ON	IM.intItemId			=	CC.intItemId			LEFT
 	JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CC.intItemUOMId			LEFT	
 	JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	IU.intUnitMeasureId		LEFT	

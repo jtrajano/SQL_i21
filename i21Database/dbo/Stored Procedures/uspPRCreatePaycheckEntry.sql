@@ -226,8 +226,8 @@ LEFT JOIN
  FROM tblPRTimecard
  WHERE ysnApproved = 1 AND intPaycheckId IS NULL
 	AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
-	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
-	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDateIn) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDateOut) AS FLOAT)) AS DATETIME)
 	AND @ysnUseStandard = 0
 ) T ON E.intEmployeeEarningId = T.intEmployeeEarningId
 	
@@ -289,8 +289,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 						WHERE intEmployeeEarningId = @intEmployeeEarningId
 						AND ysnApproved = 1 AND intPaycheckId IS NULL
 						AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
-						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
-						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+						AND CAST(FLOOR(CAST(dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDateIn) AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDateOut) AS FLOAT)) AS DATETIME)	
 					), 0)
 				END
 			,@dblEarningAmount
@@ -315,8 +315,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 							WHERE intEmployeeEarningId = @intEmployeeEarningId
 							AND ysnApproved = 1 AND intPaycheckId IS NULL
 							AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
-							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
-							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+							AND CAST(FLOOR(CAST(dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDateIn) AS FLOAT)) AS DATETIME)
+							AND CAST(FLOOR(CAST(dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDateOut) AS FLOAT)) AS DATETIME)	
 						), 0)
 					END 
 				  * @dblEarningAmount
@@ -338,7 +338,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 		/* Get the Created Paycheck Earning Id*/
 		SELECT @intPaycheckEarningId = @@IDENTITY
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId and ysnDefault = 1)
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId AND (ysnDefault = 1 OR dblHoursToProcess > 0))
 			BEGIN
 				/* Insert Paycheck Earning Taxes */
 				INSERT INTO tblPRPaycheckEarningTax
@@ -441,8 +441,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			SET intPaycheckId = @intPaycheckId
 			WHERE ysnApproved = 1 AND intPaycheckId IS NULL
 			AND [intEntityEmployeeId] = @intEmployee AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
-			AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
-			AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+			AND CAST(FLOOR(CAST(dtmDateIn AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDateIn) AS FLOAT)) AS DATETIME)
+			AND CAST(FLOOR(CAST(dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDateOut) AS FLOAT)) AS DATETIME)	
 		END
 	ELSE
 		BEGIN
@@ -459,7 +459,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 						ELSE
 							dblAmount
 						END
-	WHERE intEntityEmployeeId = @intEmployee
+	WHERE intEntityEmployeeId = @intEmployee AND (intPayGroupId IS NULL OR intPayGroupId IN (SELECT intPayGroupId FROM #tmpPayGroups))
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDepartments')) DROP TABLE #tmpDepartments
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayGroups')) DROP TABLE #tmpPayGroups

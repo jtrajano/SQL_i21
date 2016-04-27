@@ -250,3 +250,282 @@ GO
 	SET strRoleType = CASE UserRole.ysnAdmin WHEN 1 THEN 'Administrator' ELSE 'User' END 
 	FROM tblSMUserRole UserRole WHERE UserRole.strRoleType IS NULL
 GO
+
+	/* MIGRATE HD ANNOUNCEMENT TO SM ANNOUNCEMENT */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate HD Announcement to SM Announcement')
+	BEGIN
+		INSERT INTO tblSMAnnouncementType(strAnnouncementType, strDescription, strDisplayTo, strFontColor, strBackColor, intSort)
+		SELECT strAnnouncementType, strDescription, strDisplayTo, strFontColor, strBackColor, intSort FROM tblHDAnnouncementType
+
+		INSERT INTO tblSMAnnouncementUpload(strImageId, strFileIdentifier, strFilename, strFileLocation, blbFile)
+		SELECT strTicketCommentImageId, strFileIdentifier, strFileName,  REPLACE(REPLACE(strFileLocation, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload\Announcement'), blbFile FROM tblHDUpload
+
+		INSERT INTO tblSMAnnouncement(intAnnouncementTypeId, dtmStartDate, dtmEndDate, strAnnouncement, intSort, strImageId)
+		SELECT AnnouncementType1.intAnnouncementTypeId, Announcement.dtmStartDate, Announcement.dtmEndDate, Announcement.strAnnouncement, Announcement.intSort, Announcement.strImageId 
+		FROM tblSMAnnouncementType AnnouncementType1
+		INNER JOIN tblHDAnnouncementType AnnouncementType2 ON AnnouncementType1.strAnnouncementType = AnnouncementType2.strAnnouncementType
+		INNER JOIN tblHDAnnouncement Announcement ON AnnouncementType2.intAnnouncementTypeId = Announcement.intAnnouncementTypeId
+
+		INSERT INTO tblSMAnnouncementDisplay(intAnnouncementId, intEntityId)
+		SELECT Announcement1.intAnnouncementId, AnnouncementDisplay.intEntityId FROM tblSMAnnouncement Announcement1
+		INNER JOIN tblHDAnnouncement Announcement2 ON Announcement1.strImageId = Announcement2.strImageId
+		INNER JOIN tblHDAnnouncementDisplay AnnouncementDisplay ON AnnouncementDisplay.intAnnouncementId = Announcement2.intAnnouncementId
+
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Migrate HD Announcement to SM Announcement', 'Migrate HD Announcement to SM Announcement', GETDATE())
+	END
+
+GO	
+
+	DECLARE @currentRow INT
+	DECLARE @totalRows INT
+
+	SET @currentRow = 1
+	SELECT @totalRows = COUNT(*) FROM (SELECT Count(*) as 'Count' FROM [dbo].[tblSMUserSecurityMenuFavorite] GROUP BY intEntityUserSecurityId) a
+
+	WHILE (@currentRow <= @totalRows)
+	BEGIN
+
+		Declare @entityId INT
+		SELECT @entityId = [intEntityUserSecurityId] FROM (  
+			SELECT intEntityUserSecurityId, COUNT(*) as 'Total', ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID'
+			FROM [dbo].[tblSMUserSecurityMenuFavorite] GROUP BY intEntityUserSecurityId
+		) a
+		WHERE ROWID = @currentRow
+
+		DECLARE @currentRow1 INT
+		DECLARE @totalRows1 INT
+
+		SET @currentRow1 = 1
+		SELECT @totalRows1 = COUNT(*) FROM (SELECT Count(*) as 'Count' FROM [dbo].[tblSMUserSecurityMenuFavorite] WHERE intEntityUserSecurityId = @entityId GROUP BY intCompanyLocationId) a 
+
+		WHILE (@currentRow1 <= @totalRows1)
+		BEGIN
+
+			Declare @companyLocationId INT
+			SELECT @companyLocationId = [intCompanyLocationId] FROM (  
+				SELECT [intCompanyLocationId], Count(*) as 'Count', ROW_NUMBER() OVER(ORDER BY [intCompanyLocationId] ASC) AS 'ROWID'
+				FROM [dbo].[tblSMUserSecurityMenuFavorite] WHERE intEntityUserSecurityId = @entityId GROUP BY intCompanyLocationId
+			) a
+			WHERE ROWID = @currentRow1
+
+			INSERT INTO tblSMEntityMenuFavorite(intMenuId, intEntityId, intCompanyLocationId, intSort)
+			SELECT intMenuId, intEntityUserSecurityId, intCompanyLocationId, ROW_NUMBER() OVER (ORDER BY intUserSecurityMenuFavoriteId) AS 'intSort' 
+			FROM tblSMUserSecurityMenuFavorite SecurityFavorite
+			WHERE NOT EXISTS 
+			(
+				SELECT 1 FROM tblSMEntityMenuFavorite EntityFavorite WHERE SecurityFavorite.intMenuId = EntityFavorite.intMenuId AND SecurityFavorite.intEntityUserSecurityId = EntityFavorite.intEntityId AND ISNULL(SecurityFavorite.intCompanyLocationId,0) = ISNULL(EntityFavorite.intCompanyLocationId, 0)
+			)
+			AND intEntityUserSecurityId = @entityId AND ISNULL(intCompanyLocationId, 0) = ISNULL(@companyLocationId, 0)
+		
+		SET @currentRow1 = @currentRow1 + 1
+		END
+	SET @currentRow = @currentRow + 1
+	END
+	
+GO
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Migrate All Entity Roles - tblEntityToContact')
+	BEGIN
+		-- Loop through customers
+		DECLARE @currentRow INT
+		DECLARE @totalRows INT
+
+		PRINT N'GET TOTAL ROWS'
+		SET @currentRow = 1
+		SELECT @totalRows = Count(*) FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
+
+		--PRINT CONCAT(N'TOTAL ROWS ', @totalRows)
+
+		WHILE (@currentRow <= @totalRows)
+		BEGIN
+
+		DECLARE @customerId INT
+		SELECT @customerId = intEntityId FROM (  
+			SELECT ROW_NUMBER() OVER(ORDER BY intEntityId ASC) AS 'ROWID', *
+			FROM (SELECT DISTINCT intEntityId FROM [dbo].[tblEntityType]) a-- where strType IN ('Customer', 'Vendor')) a
+		) b
+		WHERE ROWID = @currentRow
+		--PRINT CONCAT(N'CUSTOMER ID ', @customerId)
+
+		-- Loop through all contacts of the current customer with user role
+
+			DECLARE @currentRow1 INT
+			DECLARE @totalRows1 INT
+
+			SET @currentRow1 = 1
+			SELECT @totalRows1 = Count(*) FROM [dbo].[tblEntityToContact] EntityToContact
+			WHERE EntityToContact.intEntityRoleId IS NOT NULL AND EntityToContact.intEntityId = @customerId
+			--PRINT CONCAT(N'TOTAL NUMBER OF CONTACTS ', @totalRows1)
+
+			WHILE (@currentRow1 <= @totalRows1)
+			BEGIN
+
+			DECLARE @contactId INT
+			SELECT @contactId = intEntityContactId FROM (  
+				SELECT EntityToContact.intEntityContactId as intEntityContactId, ROW_NUMBER() OVER(ORDER BY EntityToContact.intEntityId ASC) AS 'ROWID'
+				FROM [dbo].[tblEntityToContact] EntityToContact
+				WHERE EntityToContact.intEntityRoleId IS NOT NULL AND EntityToContact.intEntityId = @customerId
+			) a
+			WHERE ROWID = @currentRow1
+			--PRINT CONCAT(N'CONTACT ID ', @contactId)
+
+			-- Get role
+			DECLARE @roleId INT
+			SELECT @roleId = intEntityRoleId FROM tblEntityToContact WHERE intEntityContactId = @contactId
+			--PRINT CONCAT(N'ROLE ID ', @roleId)
+
+			-- Get customer name
+			DECLARE @customerName VARCHAR(50)	
+			SELECT @customerName = RTRIM(strName) FROM tblEntity WHERE intEntityId = @customerId
+			--PRINT CONCAT(N'CUSTOMER NAME ', @customerName)
+	
+			DECLARE @roleName VARCHAR(50)
+			SELECT @roleName = CAST(@customerName AS VARCHAR) + '''s ' + strName
+			FROM tblSMUserRole 
+			WHERE intUserRoleID = @roleId
+			--PRINT CONCAT(N'ROLE NAME ', @roleName)
+
+			DECLARE @newRoleId INT
+			-- Duplicate role
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRole WHERE strName = @roleName)
+			BEGIN
+				PRINT N'INSERTING NEW ROLE'
+				INSERT INTO tblSMUserRole(strName, strDescription, strMenu, strMenuPermission, strForm, strRoleType, ysnAdmin)
+				SELECT @roleName as strName, @roleName as strDescription, strMenu, strMenuPermission, strForm, 'Contact', 0 
+				FROM tblSMUserRole 
+				WHERE intUserRoleID = @roleId
+
+				SELECT @newRoleId = SCOPE_IDENTITY()
+				--PRINT CONCAT(N'NEW ROLE ID ', @newRoleId)
+
+				--PRINT CONCAT(N'UPDATE USER ROLE MENUS FOR ROLE ID ', @newRoleId)
+				EXEC uspSMUpdateUserRoleMenus @newRoleId, 1, 0
+
+				-- ENABLING EXISTING MENUS
+				UPDATE tblSMUserRoleMenu SET ysnVisible = 1 WHERE intUserRoleId = @newRoleId AND intMenuId IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE ysnVisible = 1 AND intUserRoleId = @roleId)
+
+				-- INSERT RECORD TO tblEMEntityRole
+				INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId)
+				VALUES(@customerId, @newRoleId)
+			END
+			ELSE
+			BEGIN
+				SELECT @newRoleId = intUserRoleID FROM tblSMUserRole WHERE strName = @roleName
+			END
+
+			---- assign it back to respective contact
+			--PRINT CONCAT(N'ASSIGNING THE ROLE ID ', @newRoleId, ' TO CONTACT ID ', @contactId)
+			UPDATE tblEntityToContact SET intEntityRoleId = @newRoleId WHERE intEntityContactId = @contactId
+
+			SET @currentRow1 = @currentRow1 + 1
+			END
+
+			IF @totalRows1 > 0
+			BEGIN
+
+				--DECLARE @timeStamp VARCHAR(50)
+				--select @timeStamp = SUBSTRING(REPLACE(REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, GETDATE(), 121), ' ', ''), '-', ''), ':', ''), '.', ''), 3, 15)
+				--PRINT CONCAT(N'TIMESTAMP ', @timeStamp)
+
+				DECLARE @contactAdminName VARCHAR(50)
+				SELECT @contactAdminName = CAST(@customerName AS VARCHAR) +  '-' + CAST(@customerId AS VARCHAR)
+				--PRINT CONCAT(N'CONTACT ADMIN NAME ', @contactAdminName)
+
+				-- Create a role as contact admin (and Get all menus) ?
+				--PRINT CONCAT(N'INSERTING NEW CONTACT ADMIN NAMED ', @contactAdminName)
+				INSERT INTO tblSMUserRole(strName, strDescription, strRoleType, ysnAdmin)
+				VALUES(@contactAdminName, 'Contact Administrator', 'Contact Admin', 1)
+
+				DECLARE @contactAdminRoleId INT
+				SELECT @contactAdminRoleId = SCOPE_IDENTITY()
+				--PRINT CONCAT(N'UPDATING NEW CONTACT ADMIN''S USER ROLE MENUS WITH ROLE ID ', @contactAdminRoleId)
+				EXEC uspSMUpdateUserRoleMenus @contactAdminRoleId, 1, 1
+
+				-- Get default contact and check if contact has portal permission
+				PRINT N'CHECKING IF CUSTOMER''S DEFAULT CONTACT HAVE PORTAL ACCESS'
+				IF EXISTS(SELECT TOP 1 1 FROM tblEntityToContact WHERE intEntityId = @customerId AND ysnDefaultContact = 1 AND ysnPortalAccess = 1)
+				BEGIN
+					-- if default contact has portal permission assign all the menus
+					--PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO DEFAULT CONTACT ', @contactAdminRoleId)
+					UPDATE tblEntityToContact SET intEntityRoleId = @contactAdminRoleId 
+					WHERE intEntityId = @customerId AND ysnDefaultContact = 1 AND ysnPortalAccess = 1
+				END
+				ELSE
+				BEGIN
+					-- else select top 1 and assign all the menus
+					--PRINT CONCAT(N'ASSIGNING NEW CONTACT ADMIN ROLE ID TO THE TOP 1 CONTACT ', @customerId, ' ', @contactAdminRoleId)
+					UPDATE tblEntityToContact SET intEntityRoleId = @contactAdminRoleId 
+					WHERE intEntityContactId = (SELECT TOP 1 intEntityContactId 
+												FROM tblEntityToContact 
+												WHERE intEntityId = @customerId AND ysnPortalAccess = 1)
+				END
+					-- INSERT RECORD TO tblEMEntityRole
+					INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId)
+					VALUES(@customerId, @contactAdminRoleId)
+			END
+	
+		SET @currentRow = @currentRow + 1
+		END
+
+		DECLARE @CRMParentMenuId INT
+		SELECT @CRMParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'CRM' AND strModuleName = 'Help Desk'
+
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 0 FROM tblEntityType EntityType
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
+		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
+		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE (MasterMenu.intMenuID = @CRMParentMenuId OR MasterMenu.intParentMenuID = @CRMParentMenuId)
+		AND EntityType.strType <> 'Salesperson'
+
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 1 FROM tblEntityType EntityType
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
+		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
+		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE (MasterMenu.intMenuID = @CRMParentMenuId OR MasterMenu.intParentMenuID = @CRMParentMenuId)
+		AND EntityType.strType = 'Salesperson'
+
+		UPDATE tblSMUserRoleMenu SET ysnVisible = 0
+		FROM tblEntityType EntityType
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityType.intEntityId = EntityToRole.intEntityId
+		INNER JOIN tblSMUserRoleMenu UserRoleMenu ON EntityToRole.intEntityRoleId = UserRoleMenu.intUserRoleId
+		INNER JOIN tblSMMasterMenu MasterMenu ON UserRoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE MasterMenu.strModuleName IN ('Scale', 'Grain', 'Logistics')
+
+		-- delete all un-assigned contact role (except for Help Desk) ?
+		PRINT N'DELETING UN-ASSIGNED CONTACTS USER ROLES'
+		--DELETE FROM tblSMUserRole 
+		--WHERE intUserRoleID IN (SELECT intUserRoleID FROM tblSMUserRole 
+		--					  WHERE strRoleType IN ('Contact Admin', 'Contact') 
+		--					  AND intUserRoleID NOT IN (SELECT intEntityRoleId
+		--												FROM tblEntityToContact 
+		--												WHERE intEntityRoleId IS NOT NULL))
+				
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Migrate All Entity Roles - tblEntityToContact', 'Migrate All Entity Roles - tblEntityToContact', GETDATE())
+	END	
+GO
+	-- UPDATE ALL CONTACTS BASED ON THEIR CONTACT ADMINISTRATOR
+	DECLARE @currentRow INT
+	DECLARE @totalRows INT
+
+	SET @currentRow = 1
+	SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserRole] WHERE [strRoleType] = 'Contact Admin'
+
+	WHILE (@currentRow <= @totalRows)
+	BEGIN
+
+	Declare @roleId INT
+	SELECT @roleId = intUserRoleID FROM (  
+		SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
+		FROM [dbo].[tblSMUserRole] WHERE [strRoleType] = 'Contact Admin'
+	) a
+	WHERE ROWID = @currentRow
+
+	PRINT N'Executing uspSMResolveContactRoleMenus'
+	Exec uspSMResolveContactRoleMenus @roleId
+
+	SET @currentRow = @currentRow + 1
+	END
+GO

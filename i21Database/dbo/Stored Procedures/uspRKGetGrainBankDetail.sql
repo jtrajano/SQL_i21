@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE uspRKGetGrainBankDetail 
-@intCommodityId INT  
-,@intLocationId INT = NULL  
-,@intSeqId INT  
-,@strGrainType NVARCHAR(20)  
+			@intCommodityId INT  
+			,@intLocationId INT = NULL  
+			,@intSeqId INT  
+			,@strGrainType NVARCHAR(20)  
 AS  
 BEGIN  
 
@@ -51,7 +51,7 @@ IF ISNULL(@intLocationId, 0) <> 0
 	BEGIN  
 	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+		SELECT intCustomerStorageId,'DP' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 		FROM vyuGRGetStorageDetail  
@@ -61,7 +61,7 @@ ELSE
 	BEGIN  
 	INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-		SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+		SELECT intCustomerStorageId,'DP' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 		,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 		,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 		FROM vyuGRGetStorageDetail  WHERE ysnDPOwnedType = 1  AND intCommodityId = @intCommodityId  
@@ -73,7 +73,7 @@ BEGIN
 		BEGIN  
 		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+			SELECT intCustomerStorageId,'Warehouse' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 			FROM vyuGRGetStorageOffSiteDetail  WHERE ysnReceiptedStorage = 1 AND ysnExternal <> 1 AND strOwnedPhysicalStock = 'Customer'  AND intCommodityId = @intCommodityId  AND intCompanyLocationId = @intLocationId  
@@ -82,7 +82,7 @@ BEGIN
 		BEGIN  
 		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+			SELECT intCustomerStorageId,'Warehouse' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 			 FROM vyuGRGetStorageOffSiteDetail  WHERE ysnReceiptedStorage = 1 AND ysnExternal <> 1 	AND intCommodityId = @intCommodityId  
@@ -93,7 +93,7 @@ BEGIN
 		BEGIN  
 		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+			SELECT intCustomerStorageId,@strGrainType strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal,intCommodityId   
 			FROM vyuGRGetStorageDetail  
@@ -103,7 +103,7 @@ BEGIN
 		BEGIN  
 		INSERT INTO @tblTemp (intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,	dblDiscDue ,
 			dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal,intCommodityId )
-			SELECT intCustomerStorageId,'Off-Site' strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
+			SELECT intCustomerStorageId,@strGrainType strType ,Loc AS strLocation ,[Delivery Date] AS dtmDeliveryDate ,Ticket strTicket  
 			,Customer as strCustomerReference ,Receipt AS strDPAReceiptNo ,[Disc Due] AS dblDiscDue ,[Storage Due] AS dblStorageDue  
 			,dtmLastStorageAccrueDate ,strScheduleId ,ISNULL(Balance, 0) dblTotal ,intCommodityId    
 			FROM vyuGRGetStorageDetail  
@@ -125,5 +125,6 @@ JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and 
 END
 ELSE
 BEGIN
-SELECT intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal FROM @tblTemp
+SELECT intCustomerStorageId,strType ,strLocation ,dtmDeliveryDate ,strTicket ,strCustomerReference,strDPAReceiptNo ,dblDiscDue ,dblStorageDue ,	dtmLastStorageAccrueDate ,strScheduleId, dblTotal 
+FROM @tblTemp
 END

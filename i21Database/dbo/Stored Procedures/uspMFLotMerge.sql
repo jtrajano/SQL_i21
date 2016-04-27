@@ -23,7 +23,6 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	
 	DECLARE @intNewLocationId INT
 	DECLARE @intNewSubLocationId INT
 	DECLARE @intNewStorageLocationId INT	
@@ -31,14 +30,19 @@ BEGIN TRY
 	DECLARE @intNewLotStatusId INT
 	DECLARE @dblNewLotWeightPerUnit NUMERIC(38,20)
 	DECLARE @strNewLotNumber NVARCHAR(100)
+	DECLARE @intSourceLotWeightUOM INT
+	DECLARE @intDestinationLotWeightUOM INT
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @intWeightUOMId INT
-	DECLARE @intItemStockUOMId INT
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
 			,@dblOldDestinationWeight NUMERIC(38,20)
 			,@dblOldSourceWeight NUMERIC(38,20)
 			,@dblMergeWeight NUMERIC(38,20)
+			,@strStorageLocationName NVARCHAR(50)
+			,@strItemNumber NVARCHAR(50)
+			,@strUnitMeasure NVARCHAR(50)
+			,@intItemUOMId int
 
 	SELECT @dblMergeWeight = @dblMergeQty
 
@@ -51,21 +55,36 @@ BEGIN TRY
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intWeightUOMId = IsNull(intWeightUOMId,intItemUOMId),
+		   @intSourceLotWeightUOM = intWeightUOMId,
 		   @dblWeight = dblWeight,
-		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
-	FROM tblICLot WHERE intLotId = @intLotId
+		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End,
+		   @intItemUOMId=intItemUOMId
+		FROM tblICLot WHERE intLotId = @intLotId
 
-	SELECT @intItemStockUOMId = intItemUOMId
-	FROM dbo.tblICItemUOM
-	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
+	--SELECT @intItemStockUOMId = intItemUOMId
+	--FROM dbo.tblICItemUOM
+	--WHERE intItemId = @intItemId
+	--	AND ysnStockUnit = 1
 
+	IF @dblMergeQty>@dblOldSourceWeight
+	BEGIN
+		SELECT @strStorageLocationName = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId
+		SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
+		
+		SELECT @strUnitMeasure = UM.strUnitMeasure
+		FROM tblICItemUOM U 
+		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
+		WHERE U.intItemUOMId = IsNULL(@intWeightUOMId,@intItemUOMId)
+
+		SET @ErrMsg = 'Merge qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMergeQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
+		RAISERROR (@ErrMsg,11,1)
+	END
 	
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
 	
 	IF @blnValidateLotReservation = 1
 	BEGIN
-		IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		IF (@dblOldSourceWeight + (-@dblMergeQty)) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END
@@ -85,6 +104,7 @@ BEGIN TRY
 		   @strNewLotNumber = strLotNumber,
 		   @intNewLotStatusId = intLotStatusId,
 		   @dblNewLotWeightPerUnit = dblWeightPerQty,
+		   @intDestinationLotWeightUOM = intWeightUOMId,
 		   @dblOldDestinationWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
 	FROM tblICLot WHERE intLotId = @intNewLotId
 		   
@@ -101,6 +121,16 @@ BEGIN TRY
 	BEGIN
 		RAISERROR(51195,11,1)
 	END
+
+	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
+	BEGIN
+		RAISERROR(90008,11,1)
+	END
+	
+	IF @intDestinationLotWeightUOM <> @intSourceLotWeightUOM
+	BEGIN
+		RAISERROR(90009,11,1)
+	END												 
 
 	--IF ROUND(@dblNewLotWeightPerUnit,3) <> ROUND(@dblLotWeightPerUnit,3)
 	--BEGIN

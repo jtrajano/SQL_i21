@@ -18,6 +18,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 DECLARE @generatedBillRecordId NVARCHAR(50);
 DECLARE @tranRecordId INT;
 DECLARE @tranType INT;
+DECLARE @isVendorContact INT = 0;
 
 --DUPLICATING tblAPBill
 IF OBJECT_ID('tempdb..#tmpDuplicateBill') IS NOT NULL DROP TABLE #tmpDuplicateBill
@@ -28,6 +29,11 @@ ALTER TABLE #tmpDuplicateBill DROP COLUMN intBillId
 SELECT TOP 1 @tranType = intTransactionType FROM #tmpDuplicateBill
 
 SET @tranRecordId = CASE @tranType WHEN 1 THEN 9 WHEN 2 THEN 20 WHEN 3 THEN 18 WHEN 8 THEN 66 WHEN 9 THEN 77 END
+
+IF (EXISTS(SELECT 1 FROM tblEntityToContact A INNER JOIN tblEntityType B ON A.intEntityId = B.intEntityId WHERE intEntityContactId = @userId AND strType = 'Vendor'))
+BEGIN
+	SET @isVendorContact = 1;
+END
 
 EXEC uspSMGetStartingNumber @tranRecordId, @generatedBillRecordId OUT
 
@@ -44,6 +50,7 @@ UPDATE A
 	,ysnApproved = 0
 	,ysnForApprovalSubmitted = 0
 	,dtmApprovalDate = NULL
+	,ysnForApproval = @isVendorContact
 FROM #tmpDuplicateBill A
 
 --INSERT INTO tblAPBill(

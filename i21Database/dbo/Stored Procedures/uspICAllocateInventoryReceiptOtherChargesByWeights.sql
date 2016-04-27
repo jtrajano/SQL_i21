@@ -49,16 +49,17 @@ BEGIN
 			INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
-							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
+							,intInventoryReceiptId
+							,intInventoryReceiptChargeId
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
-							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost
+							AND CalculatedCharge.intContractId IS NULL 
+					GROUP BY ysnAccrue, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
-					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 			LEFT JOIN dbo.tblICItemUOM StockUOM
 				ON StockUOM.intItemId = ReceiptItem.intItemId
 				AND StockUOM.ysnStockUnit = 1
@@ -81,7 +82,7 @@ BEGIN
 	END 
 END
 
--- Allocate by cost by 'Weight' on cost methods using 'Per Unit' and 'Percentage' 
+-- Allocate cost by 'Weight' regardless if there are contracts and cost methods used are 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
 	MERGE	
@@ -107,7 +108,6 @@ BEGIN
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
-							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
 							,intInventoryReceiptId
@@ -116,7 +116,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (

@@ -168,11 +168,11 @@ BEGIN
 	BEGIN 
 		-- Declare the variables for the transaction types
 		DECLARE @PurchaseType AS INT = 4
-				,@SalesType AS INT = 5
-				,@CostAdjustmentType AS INT = 24
-				,@BillType AS INT = 23
+				,@SalesType AS INT = 5				
+				,@BillType AS INT = 27
 
-				,@RevalueTransfer AS INT = 28
+				,@CostAdjustmentType AS INT = 26
+				,@RevalueTransfer AS INT = 30
 
 		-- Declare the cost types
 		DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1

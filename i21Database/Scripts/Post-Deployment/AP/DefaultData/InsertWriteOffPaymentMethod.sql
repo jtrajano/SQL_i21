@@ -10,6 +10,5 @@ AS Source (strPaymentMethod, ysnActive)
 ON Target.strPaymentMethod = Source.strPaymentMethod 
 -- insert new rows
 WHEN NOT MATCHED BY TARGET 
-	THEN INSERT (strPaymentMethod, ysnActive) VALUES (strPaymentMethod, ysnActive)
-WHEN MATCHED AND Target.strPaymentMethod = 'Write Off' THEN DELETE;
+	THEN INSERT (strPaymentMethod, ysnActive) VALUES (strPaymentMethod, ysnActive);
 GO

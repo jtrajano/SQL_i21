@@ -3,6 +3,7 @@ CREATE PROCEDURE uspCMGenerateCheckNumbers
 	@intBankAccountId INT = NULL,
 	@intStartNumber INT = NULL,
 	@intEndNumber INT = NULL,
+	@intCheckNoLength INT = NULL,
 	@intUserId INT = NULL,
 	@isDuplicateFound BIT = 0 OUTPUT
 AS
@@ -23,6 +24,8 @@ DECLARE @CHECK_NUMBER_STATUS_UNUSED AS INT = 1
 		,@CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION AS INT = 6
 		
 		,@returnValue AS INT = 0
+		,@usedCount AS INT = 0
+
 
 -- Validate the start and end numbers
 IF (@intStartNumber IS NULL OR @intEndNumber IS NULL)
@@ -50,7 +53,7 @@ CREATE TABLE #tmpChecks (
 WHILE (@intCheckNumber <= @intEndNumber)
 BEGIN
 	INSERT INTO #tmpChecks (strCheckNo) 
-	SELECT dbo.fnAddZeroPrefixes(@intCheckNumber)
+	SELECT dbo.fnAddZeroPrefixes(@intCheckNumber,@intCheckNoLength)
 	SET @intCheckNumber = @intCheckNumber + 1
 END
 IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
@@ -60,6 +63,13 @@ SELECT @isDuplicateFound = (SELECT TOP 1 1 FROM dbo.tblCMCheckNumberAudit
 									WHERE intBankAccountId = @intBankAccountId 
 									AND strCheckNo IN (SELECT strCheckNo FROM #tmpChecks))
 IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
+
+-- Check the statistic of Check Number Audit. If there are used check number (used,printed,voided,wasted,for print verification) delete the existing to be replaced by the new one.
+-- Possible reason to recreate the check number is the changes on check number's length
+SELECT @usedCount = (intCheckNumberAuditId) FROM tblCMCheckNumberAudit WHERE intCheckNoStatus <> @CHECK_NUMBER_STATUS_UNUSED AND intBankAccountId = @intBankAccountId
+IF @usedCount = 0
+	DELETE FROM tblCMCheckNumberAudit WHERE intBankAccountId = @intBankAccountId
+
 
 -- INSERT THE CHECK NUMBER TO THE AUDIT TABLE ONLY IF IT DOES NOT EXISTS. 
 INSERT INTO dbo.tblCMCheckNumberAudit(

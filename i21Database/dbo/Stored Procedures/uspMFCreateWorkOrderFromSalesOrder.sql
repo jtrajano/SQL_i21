@@ -44,6 +44,8 @@ Declare @strWorkOrderNoOrig nVarchar(50)
 Declare @ysnRequireCustomerApproval bit
 Declare @strLotTracking nvarchar(50)
 Declare @intMinWO int
+Declare @intCategoryId int
+Declare @strItemNo nvarchar(50)
 
 Declare @tblWO As table
 (
@@ -80,6 +82,13 @@ Select @intManufacturingProcessId=r.intManufacturingProcessId,@intAttributeTypeI
 From tblMFRecipe r Join  tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 
 Where r.intItemId=@intItemId And r.intLocationId=@intLocationId And r.ysnActive=1
 
+If ISNULL(@intManufacturingProcessId,0)=0
+Begin
+	Select @strItemNo=strItemNo From tblICItem Where intItemId=@intItemId
+	Set @ErrMsg='No active recipe found for item ' + @strItemNo + '.'
+	RaisError(@ErrMsg,16,1)
+End
+
 Begin Tran
 
 If @intAttributeTypeId=2 --Blending
@@ -113,7 +122,7 @@ Begin
 	End
 
 	Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
-	Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
+	Select @strLotTracking=strLotTracking,@intCategoryId=intCategoryId From tblICItem Where intItemId=@intItemId
 
 	Select @ysnRequireCustomerApproval=ysnRequireCustomerApproval 
 	From tblICItem Where intItemId=@intItemId
@@ -154,8 +163,19 @@ Begin
 	End
 
 	--Get Demand No
-	EXEC dbo.uspSMGetStartingNumber 46
-		,@strDemandNo OUTPUT
+	--EXEC dbo.uspSMGetStartingNumber 46
+	--	,@strDemandNo OUTPUT
+
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+				,@intItemId = @intItemId
+				,@intManufacturingId = NULL
+				,@intSubLocationId = @intSubLocationId
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 46
+				,@ysnProposed = 0
+				,@strPatternString = @strDemandNo OUTPUT
 
 	Select @dtmDueDate=Min(dtmDueDate) From @tblWO
 
@@ -184,11 +204,16 @@ Begin
 		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
 		And mc.intManufacturingCellId=@intCellId
 
-		Select @strWorkOrderNo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  
-		from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
-
-		if ISNULL(@strWorkOrderNo,'')=''
-			Set @strWorkOrderNo=convert(varchar,@strDemandNo) + '01'
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		,@intItemId = @intItemId
+		,@intManufacturingId = @intCellId
+		,@intSubLocationId = 0
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = @intBlendRequirementId
+		,@intPatternCode = 93
+		,@ysnProposed = 0
+		,@strPatternString = @strWorkOrderNo OUTPUT
 
 		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
 		And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
@@ -224,8 +249,20 @@ Begin
 
 		--Get Work Order No
 		If ISNULL(@strWorkOrderNo,'') = ''
-			EXEC dbo.uspSMGetStartingNumber 34
-				,@strWorkOrderNo OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 34
+			--	,@strWorkOrderNo OUTPUT
+		Begin
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+			,@intItemId = @intItemId
+			,@intManufacturingId = @intCellId
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 34
+			,@ysnProposed = 0
+			,@strPatternString = @strWorkOrderNo OUTPUT
+		End
 
 		Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
 		And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate)

@@ -1,8 +1,8 @@
 ﻿
 -- Returns the equivalent item uom id for an item using item UOM Id of another item. 
 CREATE FUNCTION [dbo].[fnGetMatchingItemUOMId] (
-	@intItemId AS INT,
-	@intItemUOMIdFromAnotherItem AS INT
+	@intTargetItemId AS INT,
+	@intItemUOMIdFromSourceItem AS INT
 )
 RETURNS INT 
 AS
@@ -10,11 +10,11 @@ BEGIN
 	DECLARE @result AS INT
 
 	SELECT	TOP 1 
-			@result = SourceItem.intItemUOMId
-	FROM	dbo.tblICItemUOM SourceItem INNER JOIN dbo.tblICItemUOM AnotherItem
-				ON SourceItem.intUnitMeasureId = AnotherItem.intUnitMeasureId
-	WHERE	SourceItem.intItemId = @intItemId
-			AND AnotherItem.intItemUOMId = @intItemUOMIdFromAnotherItem
+			@result = TargetItem.intItemUOMId
+	FROM	dbo.tblICItemUOM TargetItem INNER JOIN dbo.tblICItemUOM SourceItem
+				ON TargetItem.intUnitMeasureId = SourceItem.intUnitMeasureId
+	WHERE	TargetItem.intItemId = @intTargetItemId
+			AND SourceItem.intItemUOMId = @intItemUOMIdFromSourceItem
 
 	RETURN @result;
 END

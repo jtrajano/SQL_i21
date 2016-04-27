@@ -55,7 +55,7 @@ IF NOT EXISTS (
 			AND GLAccount.ysnActive = 1
 )
 BEGIN
-	RAISERROR(50010, 11, 1, @strTransactionId)
+	RAISERROR(70010, 11, 1, @strTransactionId)
 	GOTO uspCMAddDeposit_Rollback
 END
 
@@ -74,7 +74,7 @@ IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 -- Check for duplicate transaction id. 
 IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankTransaction] WHERE strTransactionId = @strTransactionId)
 BEGIN
-	RAISERROR(50015, 11, 1, @strTransactionId)
+	RAISERROR(70015, 11, 1, @strTransactionId)
 	GOTO uspCMAddDeposit_Rollback
 END
 

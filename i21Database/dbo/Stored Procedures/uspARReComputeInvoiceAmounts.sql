@@ -11,13 +11,22 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal	DECIMAL(18,6)
+DECLARE  @ZeroDecimal		DECIMAL(18,6)
+		,@SubCurrencyCents	INT
+
 SET @ZeroDecimal = 0.000000	
+						
+SELECT
+	@SubCurrencyCents		= ISNULL([intSubCurrencyCents], 1)
+FROM
+	tblARInvoice
+WHERE
+	[intInvoiceId] = @InvoiceId
 
 UPDATE
 	tblARInvoiceDetailTax
 SET
-	 [numRate]			= ISNULL([numRate], @ZeroDecimal)
+	 [dblRate]			= ISNULL([dblRate], @ZeroDecimal)
 	,[dblTax]			= ISNULL([dblTax], @ZeroDecimal)
 	,[dblAdjustedTax]	= ROUND(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,[ysnTaxAdjusted]	= ROUND(ISNULL([ysnTaxAdjusted], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
@@ -28,12 +37,14 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	 [dblQtyOrdered]	= ISNULL([dblQtyOrdered], @ZeroDecimal)
-	,[dblQtyShipped]	= ISNULL([dblQtyShipped], @ZeroDecimal)
-	,[dblDiscount]		= ISNULL([dblDiscount], @ZeroDecimal)
-	,[dblPrice]			= ISNULL([dblPrice], @ZeroDecimal)
-	,[dblTotalTax]		= ISNULL([dblTotalTax], @ZeroDecimal)
-	,[dblTotal]			= ISNULL([dblTotal], @ZeroDecimal)
+	 [dblQtyOrdered]	 = ISNULL([dblQtyOrdered], @ZeroDecimal)
+	,[dblQtyShipped]	 = ISNULL([dblQtyShipped], @ZeroDecimal)
+	,[dblDiscount]		 = ISNULL([dblDiscount], @ZeroDecimal)
+	,[dblItemWeight]	 = ISNULL([dblItemWeight], 1.00)
+	,[dblShipmentNetWt]	 = ISNULL([dblShipmentNetWt], [dblQtyShipped])
+	,[dblPrice]			 = ISNULL([dblPrice], @ZeroDecimal)
+	,[dblTotalTax]		 = ISNULL([dblTotalTax], @ZeroDecimal)
+	,[dblTotal]			 = ISNULL([dblTotal], @ZeroDecimal)
 WHERE
 	[intInvoiceId] = @InvoiceId
 	
@@ -74,30 +85,27 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
+	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
+							THEN
+								ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()) 								
+							ELSE
+								ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
+						END							
+					  )
 WHERE
 	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId
-	
---UPDATE
---	tblARInvoiceDetail
---SET
---	[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
---WHERE
---	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId	
-	
+		
 	
 UPDATE
 	tblARInvoice
 SET
 	 [dblTax]				= T.[dblTotalTax]
 	,[dblInvoiceSubtotal]	= T.[dblTotal]
-	--,[dblDiscount]			= T.[dblDiscount]
 FROM
 	(
 		SELECT 
 			 SUM([dblTotalTax])		AS [dblTotalTax]
 			,SUM([dblTotal])		AS [dblTotal]
-			--,SUM((([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))) AS [dblDiscount]
 			,[intInvoiceId]
 		FROM
 			tblARInvoiceDetail

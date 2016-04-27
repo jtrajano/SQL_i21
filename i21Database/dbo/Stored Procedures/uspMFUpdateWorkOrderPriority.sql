@@ -8,7 +8,17 @@ BEGIN TRY
 		,@intUserId int
 		,@intConcurrencyId int
 		,@intManufacturingCellId int
-		
+		,@intLocationId int
+		,@intBlendAttributeId int
+		,@strBlendAttributeValue nvarchar(50)
+
+
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	
+	Select @strBlendAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intBlendAttributeId
+
 	SELECT @dtmCurrentDate = GetDate()	
 	
 	DECLARE @tblMFScheduleWorkOrder TABLE (
@@ -41,20 +51,42 @@ BEGIN TRY
 		,ysnFrozen BIT
 		,intConcurrencyId INT
 		,intSequenceId int
+		,intDemandRatio int
+		,dtmEarliestDate DateTime
+		,dtmLatestDate DateTime
+		,intNoOfFlushes int
+		)
+
+	DECLARE @tblMFScheduleConstraint TABLE (
+		intScheduleConstraintId INT identity(1, 1)
+		,intScheduleRuleId INT
+		,intPriorityNo int
 		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
+	INSERT INTO @tblMFScheduleConstraint(intScheduleRuleId,intPriorityNo)
+	SELECT intScheduleRuleId,intPriorityNo
+	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+			intScheduleRuleId INT
+			,intPriorityNo int
+			,ysnSelect bit
+			)
+	WHERE ysnSelect=1
+	ORDER BY intPriorityNo
+
 	SELECT @intManufacturingCellId = intManufacturingCellId
 		,@intScheduleId = intScheduleId
 		,@intConcurrencyId = intConcurrencyId
 		,@intUserId = intUserId
+		,@intLocationId=intLocationId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingCellId INT
 			,intScheduleId INT
 			,intConcurrencyId INT
 			,intUserId INT
+			,intLocationId int
 			)
 					
 	INSERT INTO @tblMFScheduleWorkOrder (
@@ -86,6 +118,10 @@ BEGIN TRY
 		,ysnFrozen
 		,intConcurrencyId
 		,intSequenceId
+		,intDemandRatio
+		,dtmEarliestDate
+		,dtmLatestDate
+		,intNoOfFlushes
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -116,6 +152,10 @@ BEGIN TRY
 		,x.ysnFrozen
 		,@intConcurrencyId
 		,x.intSequenceNo
+		,x.intDemandRatio
+		,x.dtmEarliestDate
+		,x.dtmLatestDate
+		,x.intNoOfFlushes
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -145,6 +185,10 @@ BEGIN TRY
 			,ysnFrozen BIT
 			,intSequenceNo int
 			,ysnEOModified bit
+			,intDemandRatio int
+			,dtmEarliestDate DATETIME
+			,dtmLatestDate DATETIME
+			,intNoOfFlushes int
 			) x Where x.intStatusId<>1
 	ORDER BY x.intExecutionOrder
 	
@@ -177,6 +221,10 @@ BEGIN TRY
 		,ysnFrozen
 		,intConcurrencyId
 		,intSequenceId
+		,intDemandRatio
+		,dtmEarliestDate
+		,dtmLatestDate
+		,intNoOfFlushes
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -206,6 +254,10 @@ BEGIN TRY
 		,x.ysnFrozen
 		,@intConcurrencyId
 		,x.intSequenceNo
+		,x.intDemandRatio
+		,x.dtmEarliestDate
+		,x.dtmLatestDate
+		,x.intNoOfFlushes
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -234,6 +286,10 @@ BEGIN TRY
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,intSequenceNo int
+			,intDemandRatio int
+			,dtmEarliestDate DATETIME
+			,dtmLatestDate DATETIME
+			,intNoOfFlushes int
 			) x Where x.intStatusId=1
 	ORDER BY x.intExecutionOrder
 	
@@ -244,7 +300,9 @@ BEGIN TRY
 		,@intScheduleId AS intScheduleId
 		,W.strWorkOrderNo
 		,SL.dblQuantity
+		,SL.dtmEarliestDate
 		,SL.dtmExpectedDate
+		,SL.dtmLatestDate
 		,SL.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
 		,W.dblProducedQuantity
 		,W.strComment AS strWorkOrderComments
@@ -254,8 +312,9 @@ BEGIN TRY
 			SELECT TOP 1 strItemNo
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+			JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = 'Assembly/Blend'
+				AND C.strCategoryCode = @strBlendAttributeValue
 			) AS strWIPItemNo
 		,I.intItemId
 		,I.strItemNo
@@ -295,6 +354,8 @@ BEGIN TRY
 		,W.ysnIngredientAvailable 
 		,W.dtmLastProducedDate
 		,CONVERT(bit,0) AS ysnEOModified
+		,SL.intDemandRatio
+		,IsNULL(SL.intNoOfFlushes,0) As intNoOfFlushes
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
@@ -310,6 +371,25 @@ BEGIN TRY
 		AND R.ysnActive = 1
 	ORDER BY WS.intSequenceNo DESC
 		,SL.intExecutionOrder
+
+	SELECT R.intScheduleRuleId
+		,R.strName AS strScheduleRuleName
+		,R.intScheduleRuleTypeId
+		,RT.strName AS strScheduleRuleTypeName
+		,R.ysnActive
+		,R.intPriorityNo
+		,R.strComments
+		,Convert(BIT, CASE 
+				WHEN SC.intScheduleConstraintId IS NULL
+					THEN 0
+				ELSE 1
+				END) AS ysnSelect
+		,@intScheduleId AS intScheduleId
+		,R.intConcurrencyId
+	FROM dbo.tblMFScheduleRule R
+	JOIN dbo.tblMFScheduleRuleType RT ON RT.intScheduleRuleTypeId = R.intScheduleRuleTypeId
+	LEFT JOIN @tblMFScheduleConstraint SC ON SC.intScheduleRuleId = R.intScheduleRuleId
+	WHERE R.intLocationId = @intLocationId AND R.ysnActive = 1
 
 	EXEC sp_xml_removedocument @idoc
 END TRY

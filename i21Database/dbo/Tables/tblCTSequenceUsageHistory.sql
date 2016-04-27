@@ -13,6 +13,12 @@
 	intUserId INT NOT NULL,
 	dtmTransactionDate DATETIME NOT NULL,
 
+	intExternalHeaderId INT NULL, 
+    intContractHeaderId INT NULL, 
+	intContractSeq INT NULL,
+	strNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strUserName NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+
     CONSTRAINT [PK_tblCTSequenceUsageHistory_intSequenceUsageHistoryId] PRIMARY KEY CLUSTERED ([intSequenceUsageHistoryId] ASC), 
 	CONSTRAINT [FK_tblCTSequenceUsageHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE
 )

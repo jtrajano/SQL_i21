@@ -8,6 +8,18 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @dblConfirmedQty numeric(18,6)
+DECLARE @intDefaultStorageBin INT
+DECLARE @intManufacturingProcessId INT
+DECLARE @intLocationId INT
+
+Select @intManufacturingProcessId=intManufacturingProcessId,@intLocationId=intLocationId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
+	SELECT TOP 1 @intDefaultStorageBin=ISNULL(pa.strAttributeValue,0)
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND at.strAttributeName = 'Default Storage Bin'
 
 Select @dblConfirmedQty=ISNULL(sum(dblQuantity),0.0) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId AND ISNULL(ysnStaged,0)=1
 
@@ -15,7 +27,7 @@ Select w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescriptio
 w.dblPlannedQuantity,w.intItemUOMId,um.strUnitMeasure AS strUOM,w.intStatusId,w.intManufacturingCellId,w.intMachineId,
 w.dtmCreated,w.intCreatedUserId,w.dtmLastModified,w.intLastModifiedUserId,w.dtmExpectedDate,
 w.dblBinSize,w.intBlendRequirementId,
-w.ysnKittingEnabled,w.strComment,w.intLocationId,w.intStorageLocationId,
+w.ysnKittingEnabled,w.strComment,w.intLocationId,CASE WHEN ISNULL(w.intStorageLocationId,0)=0 THEN @intDefaultStorageBin ELSE w.intStorageLocationId END AS intStorageLocationId,
 br.strDemandNo,ISNULL(ws.strBackColorName,'') AS strBackColorName,us.strUserName,w.intExecutionOrder,
 ws.strName AS strStatus,sl.strName AS strStorageLocation,
 @dblConfirmedQty AS dblConfirmedQty,w.intPickListId,pl.strPickListNo,i.strLotTracking

@@ -4,6 +4,8 @@
 	,@low DECIMAL(24, 10)
 	,@last DECIMAL(24, 10)
 	,@url Nvarchar(Max)
+	,@msg Nvarchar(Max)
+	,@FutureMarketId INT
 AS
 BEGIN
 	INSERT INTO tblRKElectronicPricingValue 
@@ -13,6 +15,8 @@ BEGIN
 		,dblOpen
 		,dblLast
 		,strURL
+		,strMessage
+		,intFutureMarketId
 	  )
 	SELECT 
 		 @high
@@ -20,4 +24,6 @@ BEGIN
 		,@open
 		,@last
 		,@url
+		,@msg
+		,@FutureMarketId
 END

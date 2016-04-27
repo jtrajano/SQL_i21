@@ -31,7 +31,7 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_InboundShipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
--- Allocate cost by 'Unit' on cost methods using 'Per Unit' and 'Percentage'
+-- Allocate cost by 'Unit' regardless if there are contracts and cost methods used are 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
 	MERGE	
@@ -41,7 +41,12 @@ BEGIN
 	USING (
 		SELECT	CalculatedCharges.*
 				,ReceiptItem.intInventoryReceiptItemId
-				,ReceiptItem.dblOpenReceive
+				,CASE
+					WHEN ReceiptItem.dblNet = '0.00000000000000000000'
+					THEN ReceiptItem.dblOpenReceive
+					ELSE ReceiptItem.dblNet
+				 END
+				 AS dblNetOrOpenReceive
 				,ItemUOM.dblUnitQty
 				,TotalUnitsOfItemsPerContract.dblTotalUnits 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -53,11 +58,10 @@ BEGIN
 							END 					
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own			
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
-					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+					ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
-							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
 							,intInventoryReceiptId
@@ -66,16 +70,20 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
-					SELECT	dblTotalUnits = SUM(ReceiptItem.dblOpenReceive)
+					SELECT	dblTotalUnits = SUM(CASE
+													WHEN ReceiptItem.dblNet = '0.00000000000000000000'
+													THEN ReceiptItem.dblOpenReceive
+													ELSE ReceiptItem.dblNet
+												END)
 							,ReceiptItem.intInventoryReceiptId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 							INNER JOIN dbo.tblICItemUOM ItemUOM
-								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+								ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 					GROUP BY ReceiptItem.intInventoryReceiptId 
 				) TotalUnitsOfItemsPerContract 
@@ -93,7 +101,7 @@ BEGIN
 								ISNULL(dblAmount, 0) 
 								+ (
 									Source_Query.dblTotalOtherCharge
-									* Source_Query.dblOpenReceive
+									* Source_Query.dblNetOrOpenReceive
 									/ Source_Query.dblTotalUnits 
 								)
 								, 2
@@ -117,7 +125,7 @@ BEGIN
 			,Source_Query.intEntityVendorId
 			,ROUND (
 				Source_Query.dblTotalOtherCharge
-				* Source_Query.dblOpenReceive
+				* Source_Query.dblNetOrOpenReceive
 				/ Source_Query.dblTotalUnits 
 				, 2
 			)

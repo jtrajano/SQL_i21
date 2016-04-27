@@ -50,6 +50,7 @@ BEGIN
 			,NULL
 			,NULL
 			,@InvoiceType
+			,NULL
 		)
 
 	RETURN @ItemPrice

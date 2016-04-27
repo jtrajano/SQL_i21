@@ -68,12 +68,12 @@ BEGIN
 	DECLARE @PurchaseType AS INT = 4
 	DECLARE @SalesType AS INT = 5
 	
-	DECLARE @AUTO_NEGATIVE_NAME AS NVARCHAR(255) = 'Inventory Auto Negative'
+	DECLARE @AUTO_NEGATIVE_NAME AS NVARCHAR(255) = 'Inventory Auto Variance'
 	DECLARE @WRITE_OFF_SOLD_NAME AS NVARCHAR(255) = 'Inventory Write-Off Sold'
 	DECLARE @REVALUE_SOLD_NAME AS NVARCHAR(255) = 'Inventory Revalue Sold'	
 	DECLARE @PURCHASE_TYPE_NAME AS NVARCHAR(255) = 'Inventory Receipt'
 	DECLARE @SALES_TYPE_NAME AS NVARCHAR(255) = 'Inventory Shipment'
-	--1	Inventory Auto Negative
+	--1	Inventory Auto Variance
 	--2	Inventory Write-Off Sold
 	--3	Inventory Revalue Sold
 	--4	Inventory Receipt
@@ -447,7 +447,7 @@ BEGIN
 		FROM	dbo.tblGLAccount GLAccount
 		WHERE	GLAccount.intAccountId = @RevalueSold_Default
 
-		-- AUTO NEGATIVE
+		-- Auto Variance
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,strBatchId = 'BATCH-200000'

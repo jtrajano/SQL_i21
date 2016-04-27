@@ -1,236 +1,24 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetMarketSymbolSuffix]
-
-	@FutureMarketId INT	
-
+	@FutureMarketId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @FutureMonthId INT	
+	DECLARE @StrTradedMonthSymbol NVARCHAR(2)
 	
-	DECLARE @StrTradedMonthSymbol NVARCHAR(2)	
+	SELECT TOP 1 @FutureMonthId =ISNULL(intFutureMonthId,0)	
+	FROM tblRKFuturesMonth
+	WHERE intFutureMarketId = @FutureMarketId AND ysnExpired=0
+	AND ISNULL(dtmLastTradingDate, CONVERT(DATETIME, SUBSTRING(LTRIM(year(GETDATE())), 1, 2) + LTRIM(intYear) + '-' + SUBSTRING(strFutureMonth, 1, 3) + '-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+	ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME, SUBSTRING(LTRIM(year(GETDATE())), 1, 2) + LTRIM(intYear) + '-' + SUBSTRING(strFutureMonth, 1, 3) + '-01')) ASC
 	
-	DECLARE @FutureTradedMonths AS TABLE 
-	(
-		 IntMonthNumber INT
-		,StrMonthName NVARCHAR(20)
-		,IsTraded BIT
-		,StrTradedMonthSymbol NVARCHAR(2)
-	 )
-
-	--Jan    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 1
-		,'JAN'
-		,ysnFutJan
-		,'F'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--Feb    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 2
-		,'FEB'
-		,ysnFutFeb
-		,'G'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--March    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 3
-		,'MAR'
-		,ysnFutMar
-		,'H'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--APR    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 4
-		,'APR'
-		,ysnFutApr
-		,'J'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--May    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 5
-		,'MAY'
-		,ysnFutMay
-		,'K'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--JUN    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 6
-		,'JUN'
-		,ysnFutJun
-		,'M'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--JUly    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 7
-		,'JUL'
-		,ysnFutJul
-		,'N'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--AUGUST    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 8
-		,'AUG'
-		,ysnFutAug
-		,'Q'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--SEP    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 9
-		,'SEP'
-		,ysnFutSep
-		,'U'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--OCT    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 10
-		,'OCT'
-		,ysnFutOct
-		,'V'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--Nov    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 11
-		,'NOV'
-		,ysnFutNov
-		,'X'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	--DEC    
-	INSERT INTO @FutureTradedMonths 
-	(
-		 IntMonthNumber
-		,StrMonthName
-		,IsTraded
-		,StrTradedMonthSymbol
-	)
-	SELECT 12
-		,'DEC'
-		,ysnFutDec
-		,'Z'
-	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId
-		
-
-	SELECT TOP 1 @StrTradedMonthSymbol = StrTradedMonthSymbol
-	FROM @FutureTradedMonths
-	WHERE IntMonthNumber >= MONTH(Getdate()) AND IsTraded = 1
-	ORDER BY IntMonthNumber ASC
-		
-	IF ISNULL(@StrTradedMonthSymbol,'')=''
+	IF @FutureMonthId >0
 	BEGIN
-	
-		SET @StrTradedMonthSymbol=
-		(
-			SELECT TOP 1 StrTradedMonthSymbol
-			FROM @FutureTradedMonths
-			WHERE IsTraded = 1
-			ORDER BY IntMonthNumber ASC
-	   )	   
-	   SELECT @StrTradedMonthSymbol+RIGHT(YEAR(GetDate())+1,1),@StrTradedMonthSymbol+SUBSTRING(CONVERT(Nvarchar,YEAR(GetDate())+1),3,2)  
+		SELECT @StrTradedMonthSymbol=strSymbol+RIGHT(intYear,1) from tblRKFuturesMonth Where  intFutureMonthId=@FutureMonthId
+		SELECT @StrTradedMonthSymbol
 	END
-	ELSE
-	BEGIN
-		SELECT @StrTradedMonthSymbol+RIGHT(YEAR(GetDate()), 1),@StrTradedMonthSymbol+SUBSTRING(CONVERT(nvarchar,YEAR(GetDate())),3,2)    
-	END	
 	
 END TRY
 

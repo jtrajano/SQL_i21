@@ -32,10 +32,49 @@ BEGIN
 				,@ColdGrains_BushelUOMId AS INT = 4
 				,@HotGrains_BushelUOMId AS INT = 5
 				
-		-- Declare the variables for location  
-		DECLARE @Default_Location AS INT = 1  
-		,@NewHaven AS INT = 2  
-		,@BetterHaven AS INT = 3  
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
+
+				,@CornCommodity_DefaultLocation AS INT = 18
+				,@CornCommodity_NewHaven AS INT = 19
+				,@CornCommodity_BetterHaven AS INT = 20
+
+				,@ManualLotGrains_NewHaven AS INT = 21
+				,@SerializedLotGrains_NewHaven AS INT = 22
+
+				,@OtherCharges_DefaultLocation AS INT = 23
+				,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+				,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+				,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
+
+				,@OtherCharges_NewHaven AS INT = 27
+				,@SurchargeOtherCharges_NewHaven AS INT = 28
+				,@SurchargeOnSurcharge_NewHaven AS INT = 29
+				,@SurchargeOnSurchargeOnSurcharge_NewHaven AS INT = 30
+
+				,@OtherCharges_BetterHaven AS INT = 31
+				,@SurchargeOtherCharges_BetterHaven AS INT = 32
+				,@SurchargeOnSurcharge_BetterHaven AS INT = 33
+				,@SurchargeOnSurchargeOnSurcharge_BetterHaven AS INT = 34
 
 		-- Declare the variables for the currencies  
 		DECLARE @USD AS INT = 1;  
@@ -63,7 +102,7 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002  
 
 		DECLARE @MODULENAME AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @INVENTORY_AUTONEGATIVE_NAME AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @INVENTORY_AUTONEGATIVE_NAME AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @INVENTORY_REVALUESOLD_NAME AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @INVENTORY_WRITEOFFSOLD_NAME AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 
@@ -111,7 +150,7 @@ BEGIN
 		) 
 		-- in (Stock goes up to 200)  
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location 
+				,intItemLocationId = @WetGrains_DefaultLocation 
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = 100  
@@ -128,10 +167,10 @@ BEGIN
 				,intLotId = NULL  
 				,intSubLocationId = NULL
 				,intStorageLocationId  = NULL
-				-- out (Stock goes down to 170)  
+		-- out (Stock goes down to 170)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location 
+				,intItemLocationId = @WetGrains_DefaultLocation 
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = -30  
@@ -151,7 +190,7 @@ BEGIN
 		-- out (Stock goes down to 135)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location  
+				,intItemLocationId = @WetGrains_DefaultLocation  
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = -35  
@@ -171,7 +210,7 @@ BEGIN
 		-- out (Stock goes down to 90)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location  
+				,intItemLocationId = @WetGrains_DefaultLocation  
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = -45  
@@ -191,7 +230,7 @@ BEGIN
 		-- out (Stock goes down to -42)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location  
+				,intItemLocationId = @WetGrains_DefaultLocation  
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = -132  
@@ -211,7 +250,7 @@ BEGIN
 		-- in (Stock goes up to -22)  
 		UNION ALL    
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location 
+				,intItemLocationId = @WetGrains_DefaultLocation 
 				,intItemUOMId = @WetGrains_BushelUOMId 
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = 20  
@@ -231,7 +270,7 @@ BEGIN
 		-- in (Stock goes up to 0)  
 		UNION ALL      
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location 
+				,intItemLocationId = @WetGrains_DefaultLocation 
 				,intItemUOMId = @WetGrains_BushelUOMId 
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = 22  
@@ -251,7 +290,7 @@ BEGIN
 		-- in (Stock goes up to 100)  
 		UNION ALL      
 		SELECT  intItemId = @WetGrains  
-				,intItemLocationId = @Default_Location  
+				,intItemLocationId = @WetGrains_DefaultLocation  
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'  
 				,dblQty = 100  
@@ -864,13 +903,13 @@ BEGIN
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @CostOfGoods_Default     
 		 
-		-- 22 stock in for $16.50 (Write-off sold)  
+		-- 22 stock in for $18.00 (Write-off sold)  
 		UNION ALL   
 		SELECT   
 				dtmDate  = 'November 17, 2014'  
 				,strBatchId = 'BATCH-000001'  
 				,intAccountId = @Inventory_Default  
-				,dblDebit = 22 * 18.00 -- 396.00 -- (22 x $18.00)  
+				,dblDebit = 18.00 * 22 -- 341.00 -- (15.50 x 22)  
 				,dblCredit = 0  
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
@@ -899,7 +938,7 @@ BEGIN
 				,strBatchId = 'BATCH-000001'  
 				,intAccountId = @WriteOffSold_Default  
 				,dblDebit = 0  
-				,dblCredit = 22 * 18.00 -- 396.00 -- (22 x $18.00)  
+				,dblCredit = 18.00 * 22 -- 341.00 -- (15.50 x 22)  
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
 				,strDescription = tblGLAccount.strDescription  
@@ -978,6 +1017,8 @@ BEGIN
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @RevalueSold_Default  
 		 
+		-- Nothing to auto-negative since stock is zero.   
+		 
 		-- 100 stock in for $18.00  
 		UNION ALL   
 		SELECT   
@@ -1035,45 +1076,17 @@ BEGIN
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @CostOfGoods_Default  
 
-		-- Auto Negative
-		UNION ALL   
-		SELECT   
-				dtmDate  = 'November 17, 2014'  
-				,strBatchId = 'BATCH-000001'  
-				,intAccountId = @AutoNegative_Default  
-				,dblDebit = 55.00  
-				,dblCredit = 0  
-				,dblDebitUnit = 0  
-				,dblCreditUnit = 0  
-				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IAN' 
-				,strReference = '' 
-				,intCurrencyId = @USD  
-				,dblExchangeRate  = 1  
-				,dtmTransactionDate  = 'November 17, 2014'  
-				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 19
-				,ysnIsUnposted = 0  
-				,intEntityId = 1 
-				,strTransactionId  = 'PURCHASE-000001'  
-				,intTransactionId  = 1  
-				,strTransactionType  = 'Inventory Auto Negative'  
-				,strTransactionForm  = 'Inventory Receipt'  
-				,strModuleName = @MODULENAME  
-				,intConcurrencyId  = 1  
-		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @AutoNegative_Default  
-
+		-- Auto Variance. 
 		UNION ALL   
 		SELECT   
 				dtmDate  = 'November 17, 2014'  
 				,strBatchId = 'BATCH-000001'  
 				,intAccountId = @Inventory_Default  
-				,dblDebit = 0  
+				,dblDebit = 0.00  
 				,dblCredit = 55.00  
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
-				,strDescription = tblGLAccount.strDescription  
+				,strDescription = 'Inventory variance is created. The current item valuation is 1855.0000. The new valuation is (Qty x New Average Cost) 100.00 x 18.0000 = 1800.0000.'
 				,strCode = 'IAN' 
 				,strReference = '' 
 				,intCurrencyId = @USD  
@@ -1085,12 +1098,40 @@ BEGIN
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000001'  
 				,intTransactionId  = 1  
-				,strTransactionType  = 'Inventory Auto Negative'  
+				,strTransactionType  = 'Inventory Auto Variance'
 				,strTransactionForm  = 'Inventory Receipt'  
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @Inventory_Default  
+
+		UNION ALL   
+		SELECT   
+				dtmDate  = 'November 17, 2014'  
+				,strBatchId = 'BATCH-000001'  
+				,intAccountId = @AutoNegative_Default  
+				,dblDebit = 55.00
+				,dblCredit = 0.00  
+				,dblDebitUnit = 0  
+				,dblCreditUnit = 0  
+				,strDescription = 'Inventory variance is created. The current item valuation is 1855.0000. The new valuation is (Qty x New Average Cost) 100.00 x 18.0000 = 1800.0000.'
+				,strCode = 'IAN' 
+				,strReference = '' 
+				,intCurrencyId = @USD  
+				,dblExchangeRate  = 1  
+				,dtmTransactionDate  = 'November 17, 2014'  
+				,strJournalLineDescription = '' 
+				,intJournalLineNo  = 19
+				,ysnIsUnposted = 0  
+				,intEntityId = 1 
+				,strTransactionId  = 'PURCHASE-000001'  
+				,intTransactionId  = 1  
+				,strTransactionType  = 'Inventory Auto Variance'  
+				,strTransactionForm  = 'Inventory Receipt'  
+				,strModuleName = @MODULENAME  
+				,intConcurrencyId  = 1  
+		FROM dbo.tblGLAccount   
+		WHERE tblGLAccount.intAccountId = @AutoNegative_Default  
 	END   
 
 	-- Act  
@@ -1098,17 +1139,15 @@ BEGIN
 		-- Call uspICPostCosting to post the costing and generate the g/l entries   
 		INSERT INTO actual   
 		EXEC dbo.uspICPostCosting  
-			@ItemsToPost  
-			,@strBatchId   
-			,@strAccountToCounterInventory  
-			,@intEntityUserSecurityId  
+		@ItemsToPost  
+		,@strBatchId   
+		,@strAccountToCounterInventory  
+		,@intEntityUserSecurityId  
 
 		-- Remove the column dtmDateEntered. We don't need to assert it.   
 		ALTER TABLE actual   
 		DROP COLUMN dtmDateEntered  
 	END   
-
-	SELECT 'debug tblICInventoryTransaction 2', * FROM tblICInventoryTransaction
 
 	-- Assert  
 	BEGIN   

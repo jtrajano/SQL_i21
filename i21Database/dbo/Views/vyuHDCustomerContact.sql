@@ -19,6 +19,9 @@
 		,ysnActiveContact = ec.ysnActive
 		,ec.imgPhoto
 		,ysnBillable = c.ysnHDBillableSupport
+		,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = c.[intEntityCustomerId] and et.strType in ('Customer','Prospect'))
+		,intModuleId = (select top 1 intModuleId from tblARCustomerProductVersion where intCustomerId = c.[intEntityCustomerId])
+		,strComapny = (select top 1 strCompany from tblARCustomerProductVersion where intCustomerId = c.[intEntityCustomerId])
 	  from
 	  	tblARCustomer c
 		inner join tblEntityToContact etc on etc.intEntityId = c.intEntityCustomerId

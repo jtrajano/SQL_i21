@@ -14,6 +14,15 @@ BEGIN
 		,@strCompanyLocationName NVARCHAR(50)
 		,@strItemGroupName NVARCHAR(50)
 		,@strShowStorage NVARCHAR(50)
+		,@intBlendAttributeId int
+		,@strBlendAttributeValue nvarchar(50)
+
+
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	
+	Select @strBlendAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intAttributeId=@intBlendAttributeId
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -262,7 +271,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE strType = 'Assembly/Blend'
+		WHERE strType = @strBlendAttributeValue
 			AND strItemNo LIKE @strItemNo + '%'
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
@@ -278,7 +287,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE strType = 'Assembly/Blend'
+		WHERE strType = @strBlendAttributeValue
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
 	ELSE IF @strItemNo <> ''
@@ -293,7 +302,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE strType = 'Assembly/Blend'
+		WHERE strType = @strBlendAttributeValue
 			AND strItemNo LIKE @strItemNo + '%'
 	END
 	ELSE
@@ -307,7 +316,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 		FROM tblICItem
-		WHERE strType = 'Assembly/Blend'
+		WHERE strType = @strBlendAttributeValue
 	END
 
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
@@ -379,7 +388,7 @@ BEGIN
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-			AND II.strType = 'Assembly/Blend'
+			AND II.strType = @strBlendAttributeValue
 		JOIN @tblICItem I ON I.intItemId = II.intItemId
 		--JOIN dbo.tblEntity E ON E.intEntityId = I.intOwnerId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId

@@ -331,7 +331,7 @@ BEGIN
 				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
 			AND strRelatedTransactionId = @strTransactionId
-			AND ICType.strName <> 'Inventory Auto Negative'			
+			AND ICType.strName <> 'Inventory Auto Variance'			
 	---------------------------------------------------------------------------------
 	-- Expect new transactions that reverses the revalue and write-off transactions 		
 	UNION ALL 
@@ -360,7 +360,7 @@ BEGIN
 				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
 			AND strRelatedTransactionId = @strTransactionId
-			AND ICType.strName <> 'Inventory Auto Negative'
+			AND ICType.strName <> 'Inventory Auto Variance'
 			
 	-- Setup the expected Item Stock
 	-- Expect the stock to be back at 100. The average cost should remain the same. 
@@ -706,7 +706,7 @@ BEGIN
 				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	Trans.intTransactionId = @intTransactionId
 			AND Trans.strTransactionId = @strTransactionId
-			AND ICType.strName <> 'Inventory Auto Negative'
+			AND ICType.strName <> 'Inventory Auto Variance'
 			AND intInventoryTransactionId IN (6, 9, 12, 15, 18)	
 
 	-- BEGIN Setup the expected Item Stock

@@ -183,6 +183,12 @@ BEGIN
     VALUES(13,'Completed')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 14)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(14,'Cancel')
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFReleaseStatus
@@ -493,7 +499,23 @@ GO
 IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 4)
 BEGIN
     INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
-    VALUES(4,'Others')
+    VALUES(4,'Bag Off')
+END
+ELSE
+BEGIN
+	UPDATE tblMFAttributeType SET strAttributeTypeName='Bag Off' WHERE intAttributeTypeId = 4
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 5)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(5,'Process Production')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 6)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(6,'Others')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendDemandStatus WHERE intStatusId = 1)
@@ -1132,7 +1154,7 @@ IF EXISTS (
 BEGIN
 	UPDATE tblMFCompanyPreference
 	SET intDefaultGanttChartViewDuration = 7
-	Where intDefaultGanttChartViewDuration=NULL
+	Where intDefaultGanttChartViewDuration IS NULL
 END
 ELSE
 BEGIN
@@ -1196,7 +1218,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'BagOff Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 1
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1222,7 +1243,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'BagOff Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 2
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1249,7 +1269,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 1
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1275,7 +1294,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 2
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1302,7 +1320,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 3
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1328,7 +1345,6 @@ IF @intPropertyId IS NOT NULL
 		FROM tblQMReportProperty
 		WHERE strReportName = 'Tote Label'
 			AND intPropertyId = @intPropertyId
-			AND intSequenceNo = 4
 		)
 BEGIN
 	INSERT INTO tblQMReportProperty (
@@ -1413,7 +1429,7 @@ GO
 	BEGIN
 	
 		UPDATE tblWHCompanyPreference
-		SET intCompanyLocationId = @intCompanyLocationId, intAllowablePickDayRange = 30, ysnAllowMoveAssignedTask = 1, ysnScanForkliftOnLogin = 0, strHandheldType = 'Small', strWarehouseType = 'Lite', intContainerMinimumLength = 3, intLocationMinLength = 3, ysnNegativeQtyAllowed = 0, ysnPartialMoveAllowed = 0, ysnGTINCaseCodeMandatory = 1, ysnEnableMoveAndMergeSplit = 1, ysnTicketLabelToPrinter = 1, intNoOfCopiesToPrintforPalletSlip = 3, strWebServiceServerURL = '', strWMSStatus = 'Release,Hold', dblPalletWeight = 50.000000, intNumberOfDecimalPlaces = 4, ysnCreateLoadTasks = 0, intMaximumPalletsOnForklift = 3
+		SET intAllowablePickDayRange = 30, ysnAllowMoveAssignedTask = 1, ysnScanForkliftOnLogin = 0, strHandheldType = 'Small', strWarehouseType = 'Lite', intContainerMinimumLength = 3, intLocationMinLength = 3, ysnNegativeQtyAllowed = 0, ysnPartialMoveAllowed = 0, ysnGTINCaseCodeMandatory = 1, ysnEnableMoveAndMergeSplit = 1, ysnTicketLabelToPrinter = 1, intNoOfCopiesToPrintforPalletSlip = 3, strWebServiceServerURL = '', strWMSStatus = 'Release,Hold', dblPalletWeight = 50.000000, intNumberOfDecimalPlaces = 4, ysnCreateLoadTasks = 0, intMaximumPalletsOnForklift = 3
 	END
 	ELSE
 	BEGIN
@@ -1421,4 +1437,562 @@ GO
 		SELECT intCompanyLocationId, 30, 1, 0, 'Small', 'Lite', 3, 3, 0, 0, 1, 1, 1, 3, '', 'Release,Hold', 50.000000, 4, 0, 3
 		FROM tblSMCompanyLocation
 	END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFShiftActivityStatus WHERE intShiftActivityStatusId = 1)
+BEGIN
+    INSERT INTO tblMFShiftActivityStatus(intShiftActivityStatusId,strStatus)
+    VALUES(1,'Not Started')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFShiftActivityStatus WHERE intShiftActivityStatusId = 2)
+BEGIN
+    INSERT INTO tblMFShiftActivityStatus(intShiftActivityStatusId,strStatus)
+    VALUES(2,'Started')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFShiftActivityStatus WHERE intShiftActivityStatusId = 3)
+BEGIN
+    INSERT INTO tblMFShiftActivityStatus(intShiftActivityStatusId,strStatus)
+    VALUES(3,'Completed')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFWastageType WHERE intWastageTypeId = 1)
+BEGIN
+    INSERT INTO tblMFWastageType(intWastageTypeId,strWastageTypeName)
+    VALUES(1,'ReClaim')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFWastageType WHERE intWastageTypeId = 2)
+BEGIN
+    INSERT INTO tblMFWastageType(intWastageTypeId,strWastageTypeName)
+    VALUES(2,'Waste')
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 1)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(1,'Common')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 2)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(2,'Forecasting')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 3)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(3,'Inventory')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReasonType WHERE intReasonTypeId = 4)
+BEGIN
+    INSERT INTO tblMFReasonType(intReasonTypeId,strReasonName)
+    VALUES(4,'Efficiency')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFItemSubstitutionType WHERE intItemSubstitutionTypeId = 1)
+BEGIN
+    INSERT INTO tblMFItemSubstitutionType(intItemSubstitutionTypeId,strName)
+    VALUES(1,'Replacement')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFItemSubstitutionType WHERE intItemSubstitutionTypeId = 2)
+BEGIN
+    INSERT INTO tblMFItemSubstitutionType(intItemSubstitutionTypeId,strName)
+    VALUES(2,'Substitute')
+END
+GO
+UPDATE tblMFCompanyPreference
+SET ysnAutoPriorityOrderByDemandRatio = 0
+WHERE ysnAutoPriorityOrderByDemandRatio IS NULL
+Go
+
+UPDATE tblMFCompanyPreference
+SET dtmWorkOrderCreateDate = '2013-11-30 00:00:00.000'
+WHERE dtmWorkOrderCreateDate IS NULL
+Go
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Input'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 1
+		,'Input'
+		,1
+		,1
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Output'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 2
+		,'Output'
+		,1
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Empty Out Adj'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 3
+		,'Empty Out Adj'
+		,0
+		,1
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Cycle Count Adj'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 4
+		,'Cycle Count Adj'
+		,0
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Queued Qty Adj'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 5
+		,'Queued Qty Adj'
+		,0
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Output Opening Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 6
+		,'Output Opening Quantity'
+		,1
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Output Count Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 7
+		,'Output Count Quantity'
+		,1
+		,0
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Opening Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 8
+		,'Opening Quantity'
+		,1
+		,1
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFYieldTransaction
+		WHERE strYieldTransactionName = 'Count Quantity'
+		)
+BEGIN
+	INSERT INTO dbo.tblMFYieldTransaction (
+		intYieldTransactionId
+		,strYieldTransactionName
+		,ysnProcessRelated
+		,ysnInputTransaction
+		)
+	SELECT 9
+		,'Count Quantity'
+		,1
+		,1
+END
+GO
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 1
+		,'STRING'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 2
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 2
+		,'NUMBER'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 3
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 3
+		,'DATETIME'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 4
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 4
+		,'TABLECOLUMN'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 5
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 5
+		,'SPLCHAR'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 6
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 6
+		,'SEQUENCE'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFSubPatternType
+		WHERE intSubPatternTypeId = 7
+		)
+BEGIN
+	INSERT INTO tblMFSubPatternType (
+		intSubPatternTypeId
+		,strSubPatternTypeName
+		)
+	SELECT 7
+		,'UDA'
+END
+GO
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 33
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 33
+		,'Batch Production'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 34
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 34
+		,'Work Order'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 46
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 46
+		,'Demand Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 55
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 55
+		,'Stage Lot Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 59
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 59
+		,'Bag Off Order'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 63
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 63
+		,'Schedule Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 68
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 68
+		,'Pick List Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 70
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 70
+		,'Sanitization Order Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFPatternCode
+		WHERE intPatternCode = 78
+		)
+BEGIN
+	INSERT INTO tblMFPatternCode (
+		intPatternCode
+		,strName
+		)
+	SELECT 78
+		,'Parent Lot Number'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFForecastItemType
+		WHERE intForecastItemTypeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFForecastItemType (
+		intForecastItemTypeId
+		,strType
+		,strBackColorName
+		)
+	SELECT 1
+		,'F'
+		,'bc-palegreen'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFForecastItemType
+		WHERE intForecastItemTypeId = 2
+		)
+BEGIN
+	INSERT INTO tblMFForecastItemType (
+		intForecastItemTypeId
+		,strType
+		,strBackColorName
+		)
+	SELECT 2
+		,'O'
+		,'bc-skyblue'
+END
+ELSE
+BEGIN
+	UPDATE tblMFForecastItemType
+	SET strBackColorName = 'bc-skyblue'
+	WHERE intForecastItemTypeId = 2
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFForecastItemType
+		WHERE intForecastItemTypeId = 3
+		)
+BEGIN
+	INSERT INTO tblMFForecastItemType (
+		intForecastItemTypeId
+		,strType
+		,strBackColorName
+		)
+	SELECT 3
+		,'S'
+		,'bc-yellow'
+END
+ELSE
+BEGIN
+	UPDATE tblMFForecastItemType
+	SET strBackColorName = 'bc-yellow'
+	WHERE intForecastItemTypeId = 3
+END
 GO

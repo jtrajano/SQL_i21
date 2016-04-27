@@ -9,15 +9,30 @@
 	@intUserId				INT
 AS
 BEGIN TRY
-	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg					NVARCHAR(MAX),
+			@intExternalHeaderId	INT,
+			@intContractHeaderId	INT,
+			@intContractSeq			INT,
+			@strNumber				NVARCHAR(MAX),
+			@strUserName			NVARCHAR(MAX)
 	
+
+	SELECT	@intExternalHeaderId	=	intExternalHeaderId, 
+			@intContractHeaderId	=	intContractHeaderId, 
+			@intContractSeq			=	intContractSeq,
+			@strNumber				=	strNumber,
+			@strUserName			=	strUserName
+	FROM	dbo.fnCTGetSequenceUsageHistoryAdditionalParam(@intContractDetailId,@strScreenName,@intExternalId,@intUserId)
+
 	INSERT INTO tblCTSequenceUsageHistory
 	(
-			intContractDetailId,	strScreenName,			intExternalId,	strFieldName,
-			dblOldValue,			dblTransactionQuantity,	dblNewValue,	intUserId,		dtmTransactionDate
+			intContractDetailId,	strScreenName,				intExternalId,		strFieldName,
+			dblOldValue,			dblTransactionQuantity,		dblNewValue,		intUserId,		dtmTransactionDate,
+			intExternalHeaderId,	intContractHeaderId,		intContractSeq,		strNumber,		strUserName
 	)
-	SELECT	@intContractDetailId,	@strScreenName,			@intExternalId,	@strFieldName,
-			@dblOldValue,			@dblTransactionQuantity,@dblNewValue,	@intUserId,		GETDATE()
+	SELECT	@intContractDetailId,	@strScreenName,				@intExternalId,		@strFieldName,
+			@dblOldValue,			@dblTransactionQuantity,	@dblNewValue,		@intUserId,		GETDATE(),
+			@intExternalHeaderId,	@intContractHeaderId,		@intContractSeq,	@strNumber,		@strUserName
 	
 END TRY      
 BEGIN CATCH       

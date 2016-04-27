@@ -23,7 +23,7 @@ When adding or reducing the stock qty of an item under the company's custody, th
 		[intItemUOMId] INT NULL,
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[intTransactionId] INT NOT NULL, 
-		[intTransactionDetailId] INT NOT NULL, 
+		[intTransactionDetailId] INT NULL, 
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionTypeId] INT NOT NULL, 
 		[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 

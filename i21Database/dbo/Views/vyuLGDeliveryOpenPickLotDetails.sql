@@ -34,11 +34,13 @@ SELECT PL.intPickLotDetailId,
   Lot.intStorageLocationId,
   Lot.strStorageLocation,
   PCD.intContractHeaderId as intPContractHeaderId,
+  PCD.intContractDetailId as intPContractDetailId,
   PCD.strContractNumber as strPContractNumber,
   PCD.intContractSeq as intPContractSeq,
   SCD.dblCashPrice,
   SCD.dblDetailQuantity,
   SCD.intContractHeaderId as intSContractHeaderId,
+  SCD.intContractDetailId as intSContractDetailId,
   SCD.strContractNumber as strSContractNumber,
   SCD.intContractSeq as intSContractSeq,
   UM.strUnitMeasure as strLotUnitMeasure,
@@ -47,14 +49,18 @@ SELECT PL.intPickLotDetailId,
   SaleUOM.strUnitType as strSaleUnitType,
   Lot.intOwnershipType,
   Lot.strOwnershipType,
-  Lot.dblAvailableQty
+  Lot.dblAvailableQty,
+  dblItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemUOMId = Lot.intItemUOMId),
+  dblWeightItemUOMConv = (SELECT IU.dblUnitQty from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId),
+  PLH.strCustomerNo
+
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLots PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
-LEFT JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
-LEFT JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
+JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
+JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId
-LEFT JOIN vyuCTContractDetailView PCD ON PCD.intContractDetailId  = AD.intPContractDetailId
-LEFT JOIN vyuCTContractDetailView SCD ON SCD.intContractDetailId  = AD.intSContractDetailId
+JOIN vyuCTContractDetailView PCD ON PCD.intContractDetailId  = AD.intPContractDetailId
+JOIN vyuCTContractDetailView SCD ON SCD.intContractDetailId  = AD.intSContractDetailId
 JOIN tblICUnitMeasure  UM ON UM.intUnitMeasureId   = PL.intLotUnitMeasureId
 JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasureId
 JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId

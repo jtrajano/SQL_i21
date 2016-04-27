@@ -63,17 +63,30 @@ BEGIN
 
 			
 			--CHECK FOR MISSING VENDOR IN i21
-			DECLARE @missingVendor NVARCHAR(100), @missingVendorError NVARCHAR(200);
-			SELECT TOP 1 @missingVendor = dbo.fnTrim(apivc_vnd_no) FROM (
+			DECLARE @missingVendor TABLE(strVendorId NVARCHAR(100));
+			DECLARE @missingVendorId NVARCHAR(100);
+			DECLARE @missingVendorError NVARCHAR(500);
+			INSERT INTO @missingVendor
+			SELECT dbo.fnTrim(apivc_vnd_no) FROM (
 					SELECT apivc_vnd_no FROM apivcmst A
 						LEFT JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 						WHERE B.strVendorId IS NULL
 			) MissingVendors
 
-			IF @missingVendor IS NOT NULL
+			IF EXISTS(SELECT 1 FROM @missingVendor)
 			BEGIN
-				SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
-				RAISERROR(@missingVendorError, 16, 1);
+				--SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
+				--RAISERROR(@missingVendorError, 16, 1);
+				WHILE EXISTS(SELECT 1 FROM @missingVendor)
+				BEGIN
+					SELECT TOP 1 @missingVendorId = strVendorId FROM @missingVendor;
+					EXEC uspEMCreateEntityById @Id = @missingVendorId, @Type = ''Vendor'', @UserId = @UserId, @Message = @missingVendorError OUTPUT
+					IF (@missingVendorError IS NOT NULL)
+					BEGIN
+						RAISERROR(@missingVendorError, 16, 1);
+					END
+					DELETE FROM @missingVendor WHERE strVendorId = @missingVendorId;
+				END
 			END
 
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
@@ -237,18 +250,24 @@ BEGIN
 					[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') AND C.aphgl_gl_amt > 0 THEN
 													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1) --make it negative if detail of debit memo is positive
 												ELSE 
-													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 
+														ELSE 
+															(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_un * -1 ELSE C.aphgl_gl_un END)
+													END) 
 												END),
 					[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') AND C.aphgl_gl_amt > 0 THEN
 													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1)
 												ELSE 
-													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 
+													ELSE 
+														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_un * -1 ELSE C.aphgl_gl_un END)
+													END) 
 												END),
 					[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
 					[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN C.aphgl_gl_amt * -1
 														--(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
 													ELSE C.aphgl_gl_amt END,
-					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN
+					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'',''I'') THEN
 														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
 													ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
 					[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)

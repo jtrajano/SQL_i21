@@ -1,31 +1,44 @@
 ﻿CREATE VIEW [dbo].[vyuTRQuoteReport]
 	AS 
-SELECT 
-   (select top 1 CM.strCompanyName from tblSMCompanySetup CM ) as strCompanyName,
-   (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CCM.strAddress, CCM.strCity, CCM.strState, CCM.strZip, CCM.strCountry, NULL) FROM tblSMCompanySetup CCM) as strCompanyAddress,
-   QH.strQuoteNumber,
-   getdate() as dtmGeneratedDate,   
-   QH.dtmQuoteDate,
-   strCustomer = [dbo].fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName),
-   strSalesperson = [dbo].fnARFormatCustomerAddress(SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, SP.strName),
-   EL.strLocationName,
-   IC.strItemNo,
-   TR.strSupplyPoint,
-   QH.dtmQuoteEffectiveDate,
-   (QD.dblQuotePrice - (select top 1 PQD.dblQuotePrice from tblTRQuoteHeader PQH
-                                join tblTRQuoteDetail PQD on PQH.intQuoteHeaderId = PQD.intQuoteHeaderId
-           where PQH.strQuoteNumber < QH.strQuoteNumber and PQH.intEntityCustomerId = QH.intEntityCustomerId and PQH.strQuoteStatus = 'Confirmed' and PQD.intItemId = QD.intItemId and PQD.intShipToLocationId = QD.intShipToLocationId
-           order by PQH.strQuoteNumber DESC)) as dblPriceChange,
-   QD.dblQuotePrice,
-   ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = QH.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + 'Quotes' + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END, 
-   QH.intQuoteHeaderId,
-   QH.strQuoteComments	
-FROM
-    dbo.tblTRQuoteHeader QH
-	left join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
-	join dbo.vyuARCustomer AR on QH.intEntityCustomerId = AR.intEntityCustomerId
-	left join dbo.vyuEMSalesperson SP on SP.intEntitySalespersonId = AR.intSalespersonId
-	left join dbo.tblEntityLocation EL on EL.intEntityLocationId = QD.intShipToLocationId and EL.intEntityId = QH.intEntityCustomerId
-	left join dbo.tblICItem IC on IC.intItemId = QD.intItemId
-	left join dbo.vyuTRSupplyPointView TR on TR.intSupplyPointId = QD.intSupplyPointId
-where QH.strQuoteStatus = 'Confirmed' or QH.strQuoteStatus = 'Sent'
+SELECT TOP 100 PERCENT
+   strCompanyName = CompanySetup.strCompanyName
+   , strCompanyAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CompanySetup.strAddress, CompanySetup.strCity, CompanySetup.strState, CompanySetup.strZip, CompanySetup.strCountry, NULL)
+   , QH.strQuoteNumber
+   , GETDATE() AS dtmGeneratedDate
+   , QH.dtmQuoteDate
+   , strCustomer = [dbo].fnARFormatCustomerAddress(NULL, NULL, AR.strBillToLocationName, AR.strBillToAddress, AR.strBillToCity, AR.strBillToState, AR.strBillToZipCode, AR.strBillToCountry, AR.strName)
+   , strSalesperson = [dbo].fnARFormatCustomerAddress(SP.strPhone, SP.strEmail, NULL, NULL, NULL, NULL, NULL, NULL, SP.strName)
+   , EL.strLocationName
+   , IC.strItemNo
+   , TR.strSupplyPoint
+   , QH.dtmQuoteEffectiveDate
+   , dblPriceChange = (QD.dblQuotePrice - (SELECT TOP 1 PQD.dblQuotePrice
+							FROM tblTRQuoteHeader PQH
+							JOIN tblTRQuoteDetail PQD on PQH.intQuoteHeaderId = PQD.intQuoteHeaderId
+							WHERE PQH.strQuoteNumber < QH.strQuoteNumber 
+								AND PQH.intEntityCustomerId = QH.intEntityCustomerId 
+								AND PQH.strQuoteStatus = 'Confirmed' 
+								AND PQD.intItemId = QD.intItemId 
+								AND PQD.intShipToLocationId = QD.intShipToLocationId
+							ORDER BY PQH.strQuoteNumber DESC))
+	, QD.dblQuotePrice
+	, ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) 
+									FROM vyuARCustomerContacts CC 
+									WHERE CC.intCustomerEntityId = QH.intEntityCustomerId 
+										AND ISNULL(CC.strEmail, '') <> '' 
+										AND CC.strEmailDistributionOption LIKE '%' + 'Transport Quote' + '%') > 0 THEN CONVERT(BIT, 1) 
+							ELSE CONVERT(BIT, 0) END
+	, QH.intQuoteHeaderId
+	, QH.strQuoteComments
+FROM dbo.tblTRQuoteHeader QH
+JOIN tblSMCompanySetup CompanySetup ON ISNULL(CompanySetup.intCompanySetupID, '') <> ''
+LEFT JOIN dbo.tblTRQuoteDetail QD ON QD.intQuoteHeaderId = QH.intQuoteHeaderId
+JOIN dbo.vyuARCustomer AR ON QH.intEntityCustomerId = AR.intEntityCustomerId
+LEFT JOIN dbo.vyuEMSalesperson SP ON SP.intEntitySalespersonId = AR.intSalespersonId
+LEFT JOIN dbo.tblEntityLocation EL ON EL.intEntityLocationId = QD.intShipToLocationId
+	AND EL.intEntityId = QH.intEntityCustomerId
+LEFT JOIN dbo.tblICItem IC ON IC.intItemId = QD.intItemId
+LEFT JOIN dbo.vyuTRSupplyPointView TR ON TR.intSupplyPointId = QD.intSupplyPointId
+WHERE QH.strQuoteStatus = 'Confirmed'
+	OR QH.strQuoteStatus = 'Sent'
+ORDER BY EL.strLocationName, IC.strItemNo, dblQuotePrice ASC

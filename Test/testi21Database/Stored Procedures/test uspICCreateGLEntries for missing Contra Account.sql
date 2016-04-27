@@ -31,7 +31,7 @@ BEGIN
 		DECLARE @AccountCategoryName_RevalueSold AS NVARCHAR(100) = 'Revalue Sold'
 		DECLARE @AccountCategoryId_RevalueSold AS INT = 43
 
-		DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+		DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Variance'
 		DECLARE @AccountCategoryId_AutoNegative AS INT = 44
 
 		DECLARE @AccountCategoryName_InventoryInTransit AS NVARCHAR(100) = 'Inventory In Transit'
@@ -62,7 +62,7 @@ BEGIN
 		DECLARE @USD AS INT = 1;
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @Inventory_RevalueSold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @Inventory_WriteOffSold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 		

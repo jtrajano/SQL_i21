@@ -166,3 +166,25 @@ GO
 	END
 
 GO
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityCredential' AND [COLUMN_NAME] = 'intEntityRoleId') 
+	BEGIN
+		PRINT N'Check if tblEntityCredential is existing and intEntityRoleId'
+
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact')
+		BEGIN
+			IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact' AND [COLUMN_NAME] = 'intEntityRoleId') 
+			BEGIN
+				EXEC('ALTER TABLE tblEntityToContact ADD intEntityRoleId INT NULL')
+				EXEC
+				('
+					UPDATE tblEntityToContact SET intEntityRoleId = EntityCredential.intEntityRoleId
+					FROM [dbo].[tblEntityToContact] EntityToContact
+					INNER JOIN [dbo].[tblEntityCredential] EntityCredential ON EntityToContact.intEntityContactId = EntityCredential.intEntityId
+					WHERE EntityCredential.intEntityRoleId IS NOT NULL
+				')
+			END
+		END
+	END
+
+GO

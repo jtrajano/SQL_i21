@@ -6,6 +6,7 @@
     [intTotalSalesCount] INT NULL, 
     [dblTotalSalesAmount] DECIMAL(18, 6) NULL, 
     [dblRegisterSalesAmount] DECIMAL(18, 6) NULL, 
+	[strDepartmentTotalsComment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [intPromotionalDiscountsCount] INT NULL, 
     [dblPromotionalDiscountAmount] DECIMAL(18, 6) NULL, 
     [intManagerDiscountCount] INT NULL, 
@@ -19,6 +20,6 @@
     [dblTaxAmount4] DECIMAL(18, 6) NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutDepartmetTotals_intDepartmentTotalId] PRIMARY KEY ([intDepartmentTotalId]) ,
-	CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]), 
+	CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) 
 )

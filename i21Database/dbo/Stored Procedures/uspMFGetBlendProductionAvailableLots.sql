@@ -22,12 +22,11 @@ Declare @tblReservedQty table
 	dblReservedQty numeric(38,20)
 )
 
-If @ysnEnableParentLot=0
-	Insert into @tblReservedQty
-	Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 
-	From tblICStockReservation sr 
-	where sr.intItemId=@intItemId
-	group by sr.intLotId
+Insert into @tblReservedQty
+Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 
+From tblICStockReservation sr 
+where sr.intItemId=@intItemId
+group by sr.intLotId
 
 Select l.intLotId,l.strLotNumber,l.intItemId,i.strItemNo,i.strDescription,ISNULL(l.strLotAlias,'') AS strLotAlias,l.dblWeight AS dblPhysicalQty,
 ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(l.dblWeight,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty,

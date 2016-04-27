@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKLFuturePSTransaction
+﻿CREATE  VIEW vyuRKLFuturePSTransaction
 AS
 SELECT TOP 100 PERCENT * FROM (
 SELECT strTotalLot-dblSelectedLot1 AS dblBalanceLot, 0.0 as dblSelectedLot ,* from  (
@@ -22,12 +22,15 @@ SELECT
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId
       ,fm.dblContractSize
-      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission,dtmFilledDate 
+      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission,dtmFilledDate
+	  ,ot.intFutOptTransactionHeaderId,
+	   c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency  
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
-LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId and ot.intBrokerageAccountId=bc.intBrokerageAccountId
+JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
+JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId and ot.intBrokerageAccountId=bc.intBrokerageAccountId
 JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId 
-	AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId IN(1,3) AND ba.intBrokerageAccountId=ot.intBrokerageAccountId 
+	AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId IN(1,3) 
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId )t)t1  where dblBalanceLot > 0
 ORDER BY dtmFilledDate 

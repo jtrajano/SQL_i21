@@ -85,7 +85,7 @@ Type the overview for the table here.
 		[dblOverReceiveTolerance] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[strMaintenanceCalculationMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[dblMaintenanceRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[ysnListBundleSeparately] BIT NULL DEFAULT ((0)),
+		[ysnListBundleSeparately] BIT NULL DEFAULT ((1)),
 		[intModuleId] INT NULL,
 		[strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -146,6 +146,8 @@ Type the overview for the table here.
 		[dblMinStockWeeks] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblFullContainerSize] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnHasMFTImplication] BIT NULL DEFAULT ((0)),
+		[intBuyingGroupId] INT NULL,
+		[intAccountManagerId] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
@@ -163,7 +165,9 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblICItem_Owner] FOREIGN KEY ([intOwnerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
 		CONSTRAINT [FK_tblICItem_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]), 
-		CONSTRAINT [FK_tblICItem_tblSMModule] FOREIGN KEY ([intModuleId]) REFERENCES [tblSMModule]([intModuleId])
+		CONSTRAINT [FK_tblICItem_tblSMModule] FOREIGN KEY ([intModuleId]) REFERENCES [tblSMModule]([intModuleId]),		
+		CONSTRAINT [FK_tblICItem_tblMFBuyingGroup] FOREIGN KEY ([intBuyingGroupId]) REFERENCES [tblMFBuyingGroup]([intBuyingGroupId]), 
+		CONSTRAINT [FK_tblICItem_tblEntity] FOREIGN KEY ([intAccountManagerId]) REFERENCES [tblEntity]([intEntityId])
 	);
 	GO
 

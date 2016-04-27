@@ -105,7 +105,7 @@ BEGIN
 		IF @intLotId IS NOT NULL 
 		BEGIN
 			-- 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
-			RAISERROR(80074, 11, 1, @strLotNumber)  
+			RAISERROR(80076, 11, 1, @strLotNumber)  
 			RETURN -1
 		END
 	END 
@@ -141,7 +141,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Detail.dblCost -- ItemUOM.dblUnitQty-- Cost saved in Adj is expected come from the cost bucket. 
+			,dblCost				= Detail.dblCost -- Cost saved in Adj is expected to come from the cost bucket. 
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1

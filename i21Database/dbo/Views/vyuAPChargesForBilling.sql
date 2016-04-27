@@ -18,7 +18,7 @@ SELECT
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	NULL 
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	ReceiptCharge.dblAmount
+	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ReceiptCharge.dblAmount * 100) ELSE ReceiptCharge.dblAmount END
 	,[dblTax]									=	0
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
@@ -57,10 +57,17 @@ SELECT
 
 													END 
 
-	,[strName]									=	Entity.strName
-	,[strVendorId]								=	Vendor.strVendorId
-	,[strContractNumber]						=	vReceiptCharge.strContractNumber
-	,[intContractHeaderId]						=	ReceiptCharge.intContractId
+	,[strName]									= Entity.strName
+	,[strVendorId]								= Vendor.strVendorId
+	,[strContractNumber]						= vReceiptCharge.strContractNumber
+	,[intContractHeaderId]						= ReceiptCharge.intContractId
+	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
+	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
+	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
+	,[intSubCurrencyCents]						= TransCurrency.intCent
+	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
+	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -74,13 +81,24 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId
-
+	
 	INNER JOIN vyuICGetInventoryReceiptCharge vReceiptCharge
 		ON ReceiptCharge.intInventoryReceiptChargeId = vReceiptCharge.intInventoryReceiptChargeId
-
+	
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
 
+	LEFT JOIN dbo.tblSMCurrency TransCurrency 
+		ON TransCurrency.intCurrencyID = ReceiptCharge.intCurrencyId
+
+	LEFT JOIN dbo.tblSMCurrency MainCurrency
+		ON MainCurrency.intCurrencyID = TransCurrency.intMainCurrencyId
+	
+	LEFT JOIN tblICItemUOM ItemCostUOM 
+		ON ItemCostUOM.intItemUOMId = ReceiptCharge.intCostUOMId
+
+	LEFT JOIN tblICUnitMeasure CostUOM 
+		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
@@ -109,7 +127,7 @@ SELECT
 	,[intLineNo]								=	1
 	,[intInventoryReceiptItemId]				=	NULL 
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
-	,[dblUnitCost]								=	-1 * ReceiptCharge.dblAmount -- Negate the amount if other charge is set as price. 
+	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount /* Negate the amount if other charge is set as price*/  END 
 	,[dblTax]									=	0
 	,[intAccountId]								=	
 													CASE	WHEN ISNULL(ReceiptCharge.ysnInventoryCost, 0) = 0 THEN 
@@ -148,11 +166,17 @@ SELECT
 
 													END 
 
-	,[strName]									=	Entity.strName
-	,[strVendorId]								=	Vendor.strVendorId
-	,[strContractNumber]						=	vReceiptCharge.strContractNumber
-	,[intContractHeaderId]						=	ReceiptCharge.intContractId
-
+	,[strName]									= Entity.strName
+	,[strVendorId]								= Vendor.strVendorId
+	,[strContractNumber]						= vReceiptCharge.strContractNumber
+	,[intContractHeaderId]						= ReceiptCharge.intContractId
+	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
+	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
+	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
+	,[intSubCurrencyCents]						= TransCurrency.intCent
+	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
+	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -173,6 +197,17 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
 
+	LEFT JOIN dbo.tblSMCurrency TransCurrency 
+		ON TransCurrency.intCurrencyID = ReceiptCharge.intCurrencyId
+
+	LEFT JOIN dbo.tblSMCurrency MainCurrency
+		ON MainCurrency.intCurrencyID = TransCurrency.intMainCurrencyId
+	
+	LEFT JOIN tblICItemUOM ItemCostUOM 
+		ON ItemCostUOM.intItemUOMId = ReceiptCharge.intCostUOMId
+
+	LEFT JOIN tblICUnitMeasure CostUOM 
+		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
@@ -180,4 +215,4 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 WHERE	ReceiptCharge.ysnAccrue = 1 
 		AND ReceiptCharge.ysnPrice = 1
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
-		AND ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0 
+		AND ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0

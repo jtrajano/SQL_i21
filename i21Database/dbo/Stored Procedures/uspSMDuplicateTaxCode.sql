@@ -11,20 +11,20 @@ BEGIN
 
 	INSERT dbo.tblSMTaxCode([strTaxCode], [intTaxClassId], [strDescription], /*[strCalculationMethod], [numRate], */
 							[strTaxAgency], [strAddress], [strZipCode], [strState], [strCity], [strCountry], [strCounty], 
-							[intSalesTaxAccountId], [intPurchaseTaxAccountId], [strTaxableByOtherTaxes], [ysnCheckoffTax])
+							[intSalesTaxAccountId], [intPurchaseTaxAccountId], [strTaxableByOtherTaxes], [ysnCheckoffTax], [strStoreTaxNumber])
 	SELECT CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strTaxCode] 
 		   ELSE 'DUP: ' + [strTaxCode] + ' (' + @intCount + ')' END,
 	[intTaxClassId], [strDescription], /*[strCalculationMethod], [numRate], */
 	[strTaxAgency], [strAddress], [strZipCode], [strState], [strCity],[strCountry], [strCounty], 
-	[intSalesTaxAccountId], [intPurchaseTaxAccountId], [strTaxableByOtherTaxes], [ysnCheckoffTax]
+	[intSalesTaxAccountId], [intPurchaseTaxAccountId], [strTaxableByOtherTaxes], [ysnCheckoffTax], [strStoreTaxNumber]
 	FROM dbo.tblSMTaxCode 
 	WHERE [intTaxCodeId] = @intTaxCodeId;
 	
 	SELECT @newTaxCodeId = SCOPE_IDENTITY();
 
-	INSERT INTO tblSMTaxCodeRate([intTaxCodeId], [strCalculationMethod], [numRate], [dtmEffectiveDate])
-	SELECT @newTaxCodeId, [strCalculationMethod], [numRate], [dtmEffectiveDate]
+	INSERT INTO tblSMTaxCodeRate([intTaxCodeId], [strCalculationMethod], [dblRate], [dtmEffectiveDate])
+	SELECT @newTaxCodeId, [strCalculationMethod], [dblRate], [dtmEffectiveDate]
 	FROM dbo.tblSMTaxCodeRate
 	WHERE [intTaxCodeId] = @intTaxCodeId
 

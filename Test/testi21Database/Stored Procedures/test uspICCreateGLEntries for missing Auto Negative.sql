@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for missing Auto Negative]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for missing Auto Variance]
 AS
 BEGIN
 	-- Arrange 
@@ -32,7 +32,7 @@ BEGIN
 		DECLARE @AccountCategoryName_RevalueSold AS NVARCHAR(100) = 'Revalue Sold'
 		DECLARE @AccountCategoryId_RevalueSold AS INT = 43
 
-		DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+		DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Variance'
 		DECLARE @AccountCategoryId_AutoNegative AS INT = 44
 
 		DECLARE @AccountCategoryName_InventoryInTransit AS NVARCHAR(100) = 'Inventory In Transit'
@@ -63,7 +63,7 @@ BEGIN
 		DECLARE @USD AS INT = 1;
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @Inventory_RevalueSold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @Inventory_WriteOffSold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 		
@@ -136,7 +136,7 @@ BEGIN
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 
-		-- Delete Auto Negative from the G/L account setup to simulate a missing account id
+		-- Delete Auto Variance from the G/L account setup to simulate a missing account id
 		DELETE FROM dbo.tblICItemAccount
 		WHERE intAccountCategoryId = @AccountCategoryId_AutoNegative
 	END 
@@ -145,7 +145,7 @@ BEGIN
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
 		EXEC tSQLt.ExpectException 
-			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Auto-Negative account category.'
+			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Auto-Variance account category.'
 			,@ExpectedErrorNumber = 80008 
 	END
 

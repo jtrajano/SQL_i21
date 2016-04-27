@@ -60,9 +60,38 @@ DECLARE @begingroup NVARCHAR(50)
 DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
 
--- Sanitize the @xmlParam 
+	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
-	SET @xmlParam = NULL 
+BEGIN
+--SET @xmlParam = NULL 
+--Add this so that XtraReports have fields to get
+	SELECT 
+		NULL AS dtmDate,
+		NULL AS dtmDueDate,
+		NULL AS strVendorId,
+		0 AS intEntityVendorId,
+		0 AS intBillId,
+		NULL AS strBillId,
+		NULL AS strVendorOrderNumber,
+		NULL AS strTerm,
+		NULL AS strCompanyName,
+		NULL AS strAccountId,
+		NULL AS strVendorIdName,
+		NULL AS strAge,
+		0 AS intAccountId,
+		0 AS dblTotal,
+		0 AS dblAmountPaid,
+		0 AS dblDiscount,
+		0 AS dblInterest,
+		0 AS dblAmountDue,
+		0 AS dblUnappliedAmount,
+		0 AS dblCurrent,
+		0 AS dbl1,
+		0 AS dbl30,
+		0 AS dbl60,
+		0 AS dbl90,
+		0 AS intAging
+END
 
 DECLARE @xmlDocumentId AS INT;
 
@@ -134,6 +163,8 @@ BEGIN
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 	END  
+	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
+	SET @dateTo = @dtmDateTo;
 END
 ELSE
 BEGIN
@@ -295,7 +326,7 @@ SET @query = '
 ) MainQuery'
 
 
-SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), GETDATE(), 110) + '''');
+SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF ISNULL(@filter,'') != ''
 BEGIN

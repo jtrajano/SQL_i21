@@ -96,12 +96,8 @@ BEGIN TRY
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 								ELSE CAST(NULL AS NUMERIC(18,0)) 
 						END		AS dblValueInCCCurrency,
-						CASE	WHEN BD.intInventoryReceiptChargeId IS NULL 
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, RI.dblGross) 
-								ELSE NULL 
-						END
-						dblQuantity,
-						RI.intWeightUOMId AS intQuantityUOMId ,
+						NULL AS dblQuantity,
+						BD.intWeightUOMId AS intQuantityUOMId ,
 						@intCleanCostCurrencyId intCCCurrencyId,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
 								ELSE	BD.dblTotal 
@@ -126,11 +122,9 @@ BEGIN TRY
 				FROM	tblAPBillDetail				BD
 				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
 				JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId					
-				JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	BD.intInventoryReceiptItemId	LEFT
-				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intChargeId					=	BD.intInventoryReceiptChargeId	LEFT
-				JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	RI.intWeightUOMId				LEFT
+				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intInventoryReceiptChargeId	=	BD.intInventoryReceiptChargeId	LEFT
 				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
-				WHERE	RI.intInventoryReceiptId =@intInventoryReceiptId AND BL.intTransactionType = 1 AND BD.intInventoryReceiptChargeId IS NOT NULL
+				WHERE	RC.intInventoryReceiptId =@intInventoryReceiptId AND BL.intTransactionType = 1 AND BD.intInventoryReceiptChargeId IS NOT NULL
 				
 				UNION ALL
 				
@@ -139,7 +133,7 @@ BEGIN TRY
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 								ELSE CAST(NULL AS NUMERIC(18,0)) 
 						END		AS dblValueInCCCurrency,
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,PM.intUnitMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) AS dblQuantity,
+						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,BD.intUnitOfMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) AS dblQuantity,
 						NUll AS intQuantityUOMId ,
 						@intCleanCostCurrencyId intCCCurrencyId,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))

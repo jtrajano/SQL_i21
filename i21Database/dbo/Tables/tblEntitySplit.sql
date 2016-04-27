@@ -9,7 +9,7 @@
     [intConcurrencyId]    INT           NOT NULL,
     CONSTRAINT [PK_tblEntitySplit] PRIMARY KEY CLUSTERED ([intSplitId] ASC),
 	CONSTRAINT [FK_tblEntitySplit_tblARCustomer] FOREIGN KEY([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [UK_tblEntitySplit_strSplitNumber] UNIQUE NONCLUSTERED ([strSplitNumber] ASC),
+	CONSTRAINT [UK_tblEntitySplit_strSplitNumber] UNIQUE NONCLUSTERED ([strSplitNumber] ASC, [intEntityId] ASC),
 	CONSTRAINT [FK_dbo_tblEntitySplit_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId])
 
 )

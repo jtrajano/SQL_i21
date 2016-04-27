@@ -637,12 +637,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage for the basics.sql" />
     <Build Include="testi21Database\Fake Data\Fake transactions for item Storage.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on Lot Costing for one incoming stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage by not allowing negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage by allowing negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage is successful with positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on Lot Costing for two incoming stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on Lot Costing for outgoing stock and it does not allow negative stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotStorage by not allowing negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on Lot Costing for outgoing stock and it allows negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotStorage is successful with negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotStorage is successful with positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on Lot Costing for an outgoing stock.sql" />
@@ -650,7 +650,6 @@
     <Build Include="testi21Database\Fake Data\Fake data for item uom table, bushel scenario.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostStorage on Lot Costing for a successful unpost.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostStorage for an unsuccessful unpost.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post with positive qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostSplitLot for a successful post with new weight.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage for non-supported costing method.sql" />
@@ -832,11 +831,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOStorage is successful up to zero stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOStorage is successful with positive stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOStorage to failed for negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOStorage is successful with negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOStorage is successful up to zero stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOStorage is successful with positive stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOStorage to failed for negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOStorage is successful with negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for add-sell-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for the basics.sql" />
@@ -862,11 +861,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage for calling uspICPostLotStorage.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on FIFO or Ave Costing for an outgoing stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on FIFO or Ave Costing for one incoming stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on FIFO or Ave Costing for outgoing stock and it does not allow negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on FIFO or Ave Costing for outgoing stock and it allows negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on FIFO or Ave Costing for two incoming stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for an outgoing stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for one incoming stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for outgoing stock and it does not allow negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for outgoing stock and it allows negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for two incoming stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 2.sql" />
@@ -965,14 +964,15 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Receive Stocks.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnMultiply.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnDivide.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for a successful post.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid company location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid lot id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid source transaction type id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid storage location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid sub location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add multiple line items.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\i21Database\i21Database.sqlproj">
-      <Name>i21Database</Name>
-      <Project>{2e49b212-114b-4cfd-a343-2a2061e987bc}</Project>
-      <Private>True</Private>
-      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-    </ProjectReference>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">
       <Name>tSQLt</Name>
       <Project>{ec6666e5-b9e5-4a93-a016-5d8d65d2ee28}</Project>

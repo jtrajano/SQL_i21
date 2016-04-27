@@ -28,6 +28,7 @@ BEGIN TRY
 		-- Detail 
 		,[intInvoiceDetailId]
 		,[intItemId]
+		,[strItemNo]
 		,[strItemDescription]
 		,[intSCInvoiceId]
 		,[strSCInvoiceNumber]
@@ -50,6 +51,7 @@ BEGIN TRY
 		,[dblConversionFactor]
 		,[intPerformerId]
 		,[intContractHeaderId]
+		,[strContractNumber]
 		,[strMaintenanceType]
 		,[strFrequency]
 		,[dtmMaintenanceDate]

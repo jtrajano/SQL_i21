@@ -4,7 +4,7 @@ This tables holds all the transaction types supported in Inventory.
 The list of transaction types is maintained in the 1_InventoryTransactionTypes.sql file. 
 
 The transaction types are: 
-*	Type id 1 is Inventory Auto Negative
+*	Type id 1 is Inventory Auto Variance
 *	Type id 2 is Inventory Write-Off Sold
 *	Type id 3 is Inventory Revalue Sold
 *	Type id 4 is Inventory Receipt

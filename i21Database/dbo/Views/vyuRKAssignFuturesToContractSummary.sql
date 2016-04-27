@@ -26,7 +26,8 @@ SELECT
 		,b1.strBook
 		,sb1.strSubBook,cd.intContractDetailId,ch.intContractHeaderId,
 		fot.intFutOptTransactionId,
-		cs.ysnIsHedged		
+		cs.ysnIsHedged
+		,fot.intFutOptTransactionHeaderId    		
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN vyuCTContractHeaderView ch on ch.intContractHeaderId= cs.intContractHeaderId
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId  = cd.intContractHeaderId and cs.intContractDetailId=cd.intContractDetailId       

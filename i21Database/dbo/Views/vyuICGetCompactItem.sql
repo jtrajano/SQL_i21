@@ -26,6 +26,8 @@ SELECT Item.intItemId
 , Item.dblAmount
 , Item.intCostUOMId
 , strCostUOM = CostUOM.strUnitMeasure
+, Item.intOriginId
+, strOriginName = CommodityAttrib.strDescription
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -34,3 +36,4 @@ LEFT JOIN tblICBrand Brand ON Brand.intBrandId = Item.intBrandId
 LEFT JOIN tblICItem OnCostType ON OnCostType.intItemId = Item.intOnCostTypeId
 LEFT JOIN tblICItemUOM CostItemUOM ON CostItemUOM.intItemUOMId = Item.intCostUOMId
 LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = CostItemUOM.intUnitMeasureId
+LEFT JOIN tblICCommodityAttribute CommodityAttrib ON CommodityAttrib.intCommodityAttributeId = Item.intOriginId

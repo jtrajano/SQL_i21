@@ -134,7 +134,7 @@ BEGIN
 	FROM dbo.tblGLAccountCategory
 	WHERE strAccountCategory = @AccountCategoryName_RevalueSold
 
-	DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+	DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Variance'
 	DECLARE @AccountCategoryId_AutoNegative AS INT -- = 44
 
 	SELECT @AccountCategoryId_AutoNegative = intAccountCategoryId
@@ -249,18 +249,18 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		CREATE TABLE expectedTransactionToReverse (
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20) 
 		)
 
 		-- Create the temp table 
@@ -268,9 +268,9 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		-- Call the fake data stored procedure
@@ -327,7 +327,19 @@ BEGIN
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,strBatchId = 'BATCH-0002'
 				,intInventoryCostBucketStorageId = 1
-
+	END 
+	
+	-- Act
+	BEGIN 
+		-- Call the uspICUnpostFIFOOut
+		SET @strTransactionId = 'InvRcpt-0000001'
+		SET @intTransactionId = 1
+		
+		EXEC dbo.uspICUnpostFIFOInFromStorage @strTransactionId, @intTransactionId	
+	END 
+	
+	-- Assert
+	BEGIN 
 		-- Setup the expected data for FIFO
 		INSERT INTO expectedFIFO (
 				strTransactionId
@@ -349,25 +361,17 @@ BEGIN
 			intInventoryTransactionStorageId
 			,intTransactionId
 			,strTransactionId
+			,strRelatedTransactionId
+			,intRelatedTransactionId
 			,intTransactionTypeId
-			,intInventoryCostBucketStorageId
-			,dblQty
 		)
-		SELECT	intInventoryTransactionStorageId	= 1
-				,intTransactionId					= 1
-				,strTransactionId					= 'InvRcpt-0000001'
-				,intTransactionTypeId				= @InventoryReceipt
-				,intInventoryCostBucketStorageId	= 1
-				,dblQty								= NULL 
-	END 
-	
-	-- Act
-	BEGIN 
-		-- Call the uspICUnpostFIFOOut
-		SET @strTransactionId = 'InvRcpt-0000001'
-		SET @intTransactionId = 1
-		
-		EXEC dbo.uspICUnpostFIFOInFromStorage @strTransactionId, @intTransactionId
+		SELECT 
+			intInventoryTransactionStorageId	= 1
+			,intTransactionId					= 1
+			,strTransactionId					= 'InvRcpt-0000001'
+			,strRelatedTransactionId			= NULL  
+			,intRelatedTransactionId			= NULL 
+			,intTransactionTypeId				= @InventoryReceipt
 
 		INSERT INTO actualTransactionToReverse
 		SELECT * FROM #tmpInventoryTransactionStockToReverse
@@ -387,11 +391,8 @@ BEGIN
 				,dblStockOut		
 				,dblCost
 				,ysnIsUnposted
-		FROM	dbo.tblICInventoryFIFOStorage		
-	END 
-	
-	-- Assert
-	BEGIN 
+		FROM	dbo.tblICInventoryFIFOStorage	
+
 		EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
 		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
 	END

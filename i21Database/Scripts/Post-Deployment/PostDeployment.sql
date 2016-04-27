@@ -13,6 +13,9 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
+-- Card Fueling
+:r .\CF\1_ImportMapping.sql
+
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
@@ -182,6 +185,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\14_RemoveWriteOffFromCMUndepositedFund.sql
 :r .\AR\DefaultData\15_FixInvoiceDateForCredits.sql
 :r .\AR\DefaultData\16_FixInvoicePostDate.sql
+:r .\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql
+:r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
 :r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
 
 --Accounts Payable
@@ -196,11 +201,13 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
-:r .\AP\UpdatePOAddressInfo.sql
+--:r .\AP\UpdatePOAddressInfo.sql
 :r .\AP\UpdateApprovalRecords.sql
-:r .\AP\UpdateBillStatus.sql
+--:r .\AP\UpdateBillStatus.sql
 :r .\AP\RemoveBillTemplate.sql
 :r .\AP\UpdateVoucherForApproval.sql
+:r .\AP\UpdateBillPayToAddress.sql
+:r .\AP\UpdateBillGLEntriesRecords.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
@@ -222,6 +229,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\InventoryCategoryFix.sql
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
 :r .\IC\PopulateTransDetailIdOnCostBuckets.sql
+:r .\IC\16_Fix_Allow_Negative_Stock_Option.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
@@ -243,6 +251,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
+:R .\MF\3_Pattern.sql
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
@@ -255,6 +264,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\Reports\SubReports\PaycheckEarningSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckTaxSubReport.sql
 :r .\PR\Reports\SubReports\PaycheckDeductionSubReport.sql
+:r .\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql
 :r .\PR\Reports\PaycheckTop.sql
 :r .\PR\Reports\PaycheckMiddle.sql
 :r .\PR\Reports\PaycheckBottom.sql
@@ -282,8 +292,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\017_MoveSplitCategoryToNewTable.sql
 :r .\EM\018_UpdateRoleId_ForEntityCredential.sql
 :r .\EM\019_RemoveEmailToParentEntity.sql
+:r .\EM\020_DefaultDataForEntityImportSchemaCSV.sql
+:r .\EM\021_MoveCustomerMessageToEntity.sql
 :r .\DB\5_FixUserIdDataEntry.sql ---used entry = 'Update DB UserId From Parent Entity' on tblEntityPreferences
 
+:r .\EM\022_DefaultDataForContactTypeAndImport.sql
+:r .\EM\023_RenameEntityContactEmailDistribution.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
@@ -293,6 +307,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\3_FileFieldMapping_PromotionCombo.sql
 :r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
 :r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
+:r .\ST\6_Checkout_Radiant_ISM.sql
+:r .\ST\7_Checkout_Radiant_MCM.sql
+:r .\ST\8_Checkout_Radiant_FGM.sql
+:r .\ST\9_Checkout_Radiant_MSM.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\_TaxAuthority.sql
@@ -302,12 +320,24 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
+:r .\TF\DefaultData\_ScheduleFields.sql
+:r .\TF\DefaultData\_TaxReportTemplate.sql
+:r .\TF\DefaultData\_Transactions.sql
+:r .\TF\DefaultData\_ValidProductCode.sql
+
 
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql
 
+--Transports
+:R .\TR\01_OldTransportLoadConversion.sql
+
+--Integration
+:R .\IP\1_MasterTables.sql
+
 -- Common
 :r .\Common\ErrorMessages.sql 
+
 
 print 'END POST DEPLOYMENT'

@@ -25,7 +25,7 @@ BEGIN TRY
 
 	-- Get whether User Role has administrative rights
 	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-	
+		
 	-- Check whether or not to build the specified user role according to the Master Menus
 	IF (@BuildUserRole = 1)
 	BEGIN
@@ -43,17 +43,9 @@ BEGIN TRY
 										ELSE 0 END),
 		intSort = intMenuID FROM tblSMMasterMenu Menu
 		WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
-		
-		IF (@IsAdmin = 0)
-		BEGIN
-			DELETE FROM tblSMUserRoleMenu
-			WHERE intUserRoleId = @UserRoleID
-			AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
-								WHERE ((strMenuName = 'System Manager' 
-										AND strCommand = 'i21' 
-										AND intParentMenuID = 0)
-										OR intParentMenuID IN (1, 10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
-		END
+
+		-- DELETE UNNECESSARY MENUS FOR DIFFERENT KIND OF ROLES -> Original statement move on the other stored procedure
+		EXEC uspSMFixUserRoleMenus @UserRoleID
 		
 		UPDATE tblSMUserRoleMenu
 		SET intParentMenuId = tblPatch.intRoleParentID
@@ -115,6 +107,9 @@ BEGIN TRY
 		END
 
 	END
+
+	-- Update group if role is for contact admin.
+	EXEC uspSMResolveContactRoleMenus @UserRoleID
 	
 	---- Iterate through all affected user securities and apply Master Menus
 	--WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)

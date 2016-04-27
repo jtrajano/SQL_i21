@@ -3,8 +3,8 @@
  @intNewLotId INT,  
  @dblMergeQty NUMERIC(38,20),
  @intUserId INT,
- @blnValidateLotReservation BIT = 0
- ,@intItemUOMId int =NULL
+ @blnValidateLotReservation BIT = 0,
+ @intItemUOMId INT = NULL
 
 AS
 
@@ -34,11 +34,14 @@ BEGIN TRY
 	DECLARE @strNewLotNumber NVARCHAR(100)
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @intWeightUOMId INT
-	DECLARE @intItemStockUOMId INT
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
 			,@dblOldDestinationQty NUMERIC(38,20)
 			,@dblOldSourceQty NUMERIC(38,20)
+			,@strStorageLocationName NVARCHAR(50)
+			,@strItemNumber NVARCHAR(50)
+			,@strUnitMeasure NVARCHAR(50)			
+			,@dblLotAvailableQty NUMERIC(38,20)
 
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -54,17 +57,31 @@ BEGIN TRY
 		   @intItemUOMId=CASE WHEN @intItemUOMId IS NULL THEN intItemUOMId ELSE @intItemUOMId END
 	FROM tblICLot WHERE intLotId = @intLotId
 
-	SELECT @intItemStockUOMId = intItemUOMId
-	FROM dbo.tblICItemUOM
-	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
+	IF @dblMergeQty>@dblOldSourceQty
+	BEGIN
+		SELECT @strStorageLocationName = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId
+		SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
+		
+		SELECT @strUnitMeasure = UM.strUnitMeasure
+		FROM tblICItemUOM U 
+		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
+		WHERE U.intItemUOMId = IsNULL(@intWeightUOMId,@intItemUOMId)
 
-	
+		SET @ErrMsg = 'Merge qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMergeQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
+		RAISERROR (@ErrMsg,11,1)
+	END
+
 	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+
+	SELECT @dblLotAvailableQty = (CASE 
+	WHEN ISNULL(@dblWeight, 0) = 0
+		THEN ISNULL(@dblOldSourceQty, 0)
+	ELSE ISNULL(@dblWeight, 0)
+	END)
 	
 	IF @blnValidateLotReservation = 1
 	BEGIN
-		IF (@dblWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		IF (@dblLotAvailableQty + ((-@dblMergeQty)*(Case When @dblLotWeightPerUnit=0 Then 1 else @dblLotWeightPerUnit End))) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END
@@ -153,18 +170,18 @@ BEGIN TRY
 			@strNotes = 'Weight qty same'
 	END
 
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR (@intWeightUOMId is null and (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		EXEC dbo.uspMFLotAdjustQty
-		 @intLotId =@intLotId,       
-		 @dblNewLotQty =0,
-		 @intUserId=@intUserId ,
-		 @strReasonCode ='Residue qty clean up',
-		 @strNotes ='Residue qty clean up'
-		--UPDATE tblICLot
-		--SET dblWeight = 0
-		--	,dblQty = 0
-		--WHERE intLotId = @intLotId
+		--EXEC dbo.uspMFLotAdjustQty
+		-- @intLotId =@intLotId,       
+		-- @dblNewLotQty =0,
+		-- @intUserId=@intUserId ,
+		-- @strReasonCode ='Residue qty clean up',
+		-- @strNotes ='Residue qty clean up'
+		UPDATE tblICLot
+		SET dblWeight = 0
+			,dblQty = 0
+		WHERE intLotId = @intLotId
 	END
 
 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFAddLotsToPickList]
+CREATE PROCEDURE [dbo].[uspMFAddLotsToPickList]
 	@strXml nvarchar(max)
 AS
 
@@ -382,7 +382,7 @@ Begin
 	Set @strXmlLot = @strXmlLot + '</root>'
 
 	Insert Into @tblPickedLots
-	Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXmlItem,@strXmlLot
+	Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXmlItem,1,@strXmlLot
 
 	--Remaining Lots to Pick
 	Insert Into @tblRemainingPickedLots

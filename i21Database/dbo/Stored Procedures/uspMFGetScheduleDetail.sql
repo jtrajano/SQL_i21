@@ -56,9 +56,17 @@ SELECT SC.intWorkOrderId
 FROM tblMFScheduleConstraintDetail SC
 JOIN tblMFWorkOrder W ON W.intWorkOrderId = SC.intWorkOrderId
 JOIN dbo.tblMFScheduleRule SR ON SR.intScheduleRuleId = SC.intScheduleRuleId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
-WHERE SC.dtmChangeoverStartDate >= @dtmPlannedStartDate
-	AND SC.dtmChangeoverEndDate <= @dtmPlannedEndDate
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId and MC.ysnIncludeSchedule =1
+JOIN dbo.tblMFSchedule S ON S.intScheduleId = SC.intScheduleId AND S.ysnStandard=(
+		CASE 
+			WHEN @intScheduleId = 0
+				THEN 1
+			ELSE S.ysnStandard
+			END
+		)
+WHERE ((SC.dtmChangeoverStartDate >= @dtmPlannedStartDate
+    AND SC.dtmChangeoverEndDate <= @dtmPlannedEndDate)
+	OR @dtmPlannedStartDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate OR @dtmPlannedEndDate BETWEEN SC.dtmChangeoverStartDate AND SC.dtmChangeoverEndDate)
 	AND SC.intScheduleId = (
 		CASE 
 			WHEN @intScheduleId = 0
@@ -97,8 +105,8 @@ SELECT MC.intManufacturingCellId
 	,W.dblQuantity - ISNULL(W.dblProducedQuantity, 0) AS dblBalanceQuantity
 	,W.strComment AS strWorkOrderComment
 	,W.dtmExpectedDate
-	,W.dtmEarliestDate
-	,W.dtmLatestDate
+	,ISNULL(W.dtmEarliestDate,W.dtmExpectedDate) As dtmEarliestDate
+	,ISNULL(W.dtmLatestDate,W.dtmExpectedDate) As dtmLatestDate
 	,I.intItemId
 	,I.strItemNo
 	,I.strDescription
@@ -126,18 +134,26 @@ SELECT MC.intManufacturingCellId
 	,0 AS intLeadTime
 	,'' AS strCustomer
 	,Ltrim(W.intWorkOrderId) AS strRowId
+	,IsNULL(SL.intNoOfFlushes,0) intNoOfFlushes
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 	AND IU.ysnStockUnit = 1
 JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId and MC.ysnIncludeSchedule =1
 JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	AND intScheduleId = (
 		CASE 
 			WHEN @intScheduleId = 0
 				THEN SL.intScheduleId
 			ELSE @intScheduleId
+			END
+		)
+JOIN dbo.tblMFSchedule S ON S.intScheduleId = SL.intScheduleId AND S.ysnStandard=(
+		CASE 
+			WHEN @intScheduleId = 0
+				THEN 1
+			ELSE S.ysnStandard
 			END
 		)
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
@@ -150,8 +166,10 @@ WHERE W.intLocationId = @intLocationId
 			ELSE @intManufacturingCellId
 			END
 		)
-	AND SL.dtmPlannedStartDate >= @dtmPlannedStartDate
-	AND SL.dtmPlannedEndDate <= @dtmPlannedEndDate
+	AND (@dtmPlannedStartDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate 
+		OR @dtmPlannedEndDate BETWEEN SL.dtmPlannedStartDate AND SL.dtmPlannedEndDate
+		    OR (SL.dtmPlannedStartDate >= @dtmPlannedStartDate
+			AND SL.dtmPlannedEndDate <= @dtmPlannedEndDate))
 
 UNION
 
@@ -192,5 +210,6 @@ SELECT SC.intManufacturingCellId
 	,SC.intDuration AS intLeadTime
 	,NULL AS strCustomer
 	,strRowId
+	,0 AS intNoOfFlushes
 FROM @tblMFScheduleConstraintDetail SC
-ORDER BY intExecutionOrder
+ORDER BY intManufacturingCellId,intExecutionOrder

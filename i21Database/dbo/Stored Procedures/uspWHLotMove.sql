@@ -5,7 +5,7 @@
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
-	,@intItemUOMId int=NULL
+	,@intItemUOMId INT = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -64,7 +64,7 @@ BEGIN TRY
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
+		AND ysnStockUnit = 1	
 
 	SELECT @dblLotAvailableQty = (CASE 
 	WHEN ISNULL(@dblWeight, 0) = 0
@@ -72,7 +72,7 @@ BEGIN TRY
 	ELSE ISNULL(@dblWeight, 0)
 	END)
 	
-	IF @dblMoveQty>@dblLotAvailableQty
+	IF @dblMoveQty>@dblLotQty
 	BEGIN
 		SET @ErrMsg = 'Move qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 		RAISERROR (@ErrMsg,11,1)
@@ -119,10 +119,6 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-			--SELECT @dblOldQty=dblQty
-			--FROM dbo.tblICLot
-			--WHERE strLotNumber = @strNewLotNumber
-			--	AND intStorageLocationId = @intNewStorageLocationId
 
 			--IF @dblOldQty IS NULL
 			--SELECT @dblOldQty=0
@@ -163,11 +159,6 @@ BEGIN TRY
 			--	dblQty =@dblOldQty+ @dblMoveQty,
 			--	dblWeight = @dblWeightPerQty * (@dblMoveQty+@dblOldQty)
 			--WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
-	
-			SELECT @intNewLotId = intLotId
-			FROM dbo.tblICLot
-			WHERE strLotNumber = @strNewLotNumber
-				AND intStorageLocationId = @intNewStorageLocationId
 
 			IF EXISTS (SELECT * FROM dbo.tblMFWorkOrderProducedLot WHERE intLotId = @intLotId AND dblPhysicalCount = @dblMoveQty)
 			BEGIN

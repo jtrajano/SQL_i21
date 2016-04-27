@@ -3,6 +3,9 @@
     [strCurrency]         NVARCHAR (40)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strFormat]		      NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
+	[ysnSubCurrency]	  BIT			  NOT NULL DEFAULT 0, 
+	[intMainCurrencyId]   INT			  NULL,
+	[intCent]			  INT			  NULL,
     [strCheckDescription] NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [dblDailyRate]        NUMERIC (18, 6) NULL,
     [dblMinRate]          NUMERIC (18, 6) NULL,
@@ -12,7 +15,11 @@
     CONSTRAINT [PK_SMCurrency_CurrencyID] PRIMARY KEY CLUSTERED ([intCurrencyID] ASC),
     CONSTRAINT [AK_tblSMCurrency_strCurrencyID] UNIQUE NONCLUSTERED ([strCurrency] ASC)
 );
+GO 
 
+CREATE NONCLUSTERED INDEX [IX_tblSMCurrency_intMainCurrencyId]
+    ON [dbo].[tblSMCurrency]([intMainCurrencyId] ASC);
+GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

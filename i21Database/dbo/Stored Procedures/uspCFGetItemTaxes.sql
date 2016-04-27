@@ -1,13 +1,62 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFGetItemTaxes]    
-@CFTaxGroupMasterId    INT    
+	 @intNetworkId					INT
+	,@intARItemId					INT
+	,@intARItemLocationId			INT
+	,@intCustomerId					INT
+	,@intCustomerLocationId			INT
+	,@dtmTransactionDate			DATETIME
+	,@TaxState						NVARCHAR(MAX)
+	,@strTaxCodeId					NVARCHAR(MAX)	= ''
+	,@FederalExciseTaxRate        	NUMERIC(18,6)	= 0.000000
+	,@StateExciseTaxRate1         	NUMERIC(18,6)	= 0.000000
+	,@StateExciseTaxRate2         	NUMERIC(18,6)	= 0.000000
+	,@CountyExciseTaxRate         	NUMERIC(18,6)	= 0.000000
+	,@CityExciseTaxRate           	NUMERIC(18,6)	= 0.000000
+	,@StateSalesTaxPercentageRate 	NUMERIC(18,6)	= 0.000000
+	,@CountySalesTaxPercentageRate	NUMERIC(18,6)	= 0.000000
+	,@CitySalesTaxPercentageRate  	NUMERIC(18,6)	= 0.000000
+	,@OtherSalesTaxPercentageRate 	NUMERIC(18,6)	= 0.000000
 AS    
-  
-SELECT TC.*,TCR.*  ,TGM.[intTaxGroupMasterId],TGTM.[intTaxGroupId]  ,TGC.[intTaxCodeId]  
-   FROM tblSMTaxCode TC   
-    INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId]   
-    INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]  
-    INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]  
-    INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]  
-    INNER JOIN tblSMTaxCodeRate TCR ON TC.[intTaxCodeId] = TCR.[intTaxCodeId]
-   WHERE   
-    TGM.[intTaxGroupMasterId] = @CFTaxGroupMasterId
+		
+SELECT
+	 [intTransactionDetailTaxId]
+	,[intTransactionDetailId]  AS [intInvoiceDetailId]
+	,NULL
+	,[intTaxGroupId]
+	,[intTaxCodeId]
+	,[intTaxClassId]
+	,[strTaxableByOtherTaxes]
+	,[strCalculationMethod]
+	,[dblRate]
+	,[dblTax]
+	,[dblAdjustedTax]
+	,[intTaxAccountId]    AS [intSalesTaxAccountId]
+	,[ysnSeparateOnInvoice]
+	,[ysnCheckoffTax]
+	,[strTaxCode]
+	,[ysnTaxExempt]
+	,[strTaxGroup]
+	,[ysnInvalid]
+	,[strReason]
+	,[strNotes]
+FROM
+	[dbo].[fnCFRemoteTaxes](
+	@TaxState		
+	,@strTaxCodeId
+	,@FederalExciseTaxRate        	
+	,@StateExciseTaxRate1         	
+	,@StateExciseTaxRate2         	
+	,@CountyExciseTaxRate         	
+	,@CityExciseTaxRate           	
+	,@StateSalesTaxPercentageRate 	
+	,@CountySalesTaxPercentageRate		
+	,@CitySalesTaxPercentageRate  		
+	,@OtherSalesTaxPercentageRate 	
+	,@intNetworkId
+	,@intARItemId				
+	,@intARItemLocationId			
+	,@intCustomerId				
+	,@intCustomerLocationId		
+	,@dtmTransactionDate)
+
+	RETURN

@@ -100,7 +100,13 @@ BEGIN
 				,intTransactionId					= Receipt.intInventoryReceiptId				
 				,strTransactionId					= Receipt.strReceiptNumber
 				,intReceiptItemTaxId				= ReceiptTaxes.intInventoryReceiptItemTaxId
-				,dblTax								= ReceiptTaxes.dblTax
+				,dblTax								=	ReceiptTaxes.dblTax
+														--/ 
+														--CASE	WHEN ReceiptItem.ysnSubCurrency = 1 THEN 
+														--			CASE WHEN ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Receipt.intSubCurrencyCents, 1) ELSE 1 END 
+														--		ELSE 
+														--			1
+														--END 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= Receipt.intCurrencyId
 				,dblExchangeRate					= 1

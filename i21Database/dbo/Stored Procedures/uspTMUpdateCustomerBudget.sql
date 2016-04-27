@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspTMUpdateCustomerBudget]
+	@EntityId INT
 AS
 BEGIN	
 	DECLARE @strBudgetAmountForBudgetBilling NVARCHAR(50)
@@ -22,7 +23,7 @@ BEGIN
 			,@intEntityCustomerId = intEntityCustomerId
 		FROM #tmpCustomerBudget
 
-		EXEC uspEMUpdateCustomerTable 'dblMonthlyBudget', @strBudgetAmountForBudgetBilling, @intEntityCustomerId
+		EXEC uspEMUpdateCustomerTable 'dblMonthlyBudget', @strBudgetAmountForBudgetBilling, @intEntityCustomerId, @EntityId
 
 		DELETE FROM #tmpCustomerBudget WHERE intEntityCustomerId = @intEntityCustomerId
 	END

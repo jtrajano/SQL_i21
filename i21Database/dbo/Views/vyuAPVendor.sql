@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPVendor]
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 	AS 
 SELECT 
 	A.intEntityId,
@@ -55,7 +55,10 @@ SELECT
 	C.intFreightTermId,
 	H.strPaymentMethod,
 	B.ysnOneBillPerPayment,
-	B.strFLOId
+	B.strFLOId,
+	intCent = CASE WHEN (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId) IS NOT NULL THEN 0 ELSE E.intCent END,
+	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0),
+	intSubCurrencyCent = (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId)
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B

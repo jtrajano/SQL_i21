@@ -28,7 +28,7 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
 		,@REVALUE_SOLD AS INT = 3
 
-		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 24;
+		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26;
 
 -- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
 DECLARE @strItemNo AS NVARCHAR(50)

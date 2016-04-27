@@ -116,7 +116,7 @@ BEGIN
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_RevalueSoldWheat, '50110', 'REVALUE SOLD WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 
 		DECLARE @SEGMENT_ID_AutoNegativeWheat AS INT = 6
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_AutoNegativeWheat, '60110', 'AUTO NEGATIVE WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_AutoNegativeWheat, '60110', 'Auto Variance WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 
 		DECLARE @SEGMENT_ID_InventoryInTransit AS INT = 7
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_InventoryInTransit, '12050', 'INVENTORY IN TRANSIT', @ACCOUNT_STRUCTURE_ID_Primary)
@@ -157,7 +157,7 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_Default, 'AP CLEARING WHEAT-DEFAULT', '30110-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@WriteOffSold_Default, 'WRITE-OFF SOLD WHEAT-DEFAULT', '40110-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueSold_Default, 'REVALUE SOLD WHEAT-DEFAULT', '50110-1000');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_Default, 'AUTO NEGATIVE WHEAT-DEFAULT', '60110-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_Default, 'Auto Variance WHEAT-DEFAULT', '60110-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_Default, 'INVENTORY IN TRANSIT-DEFAULT', '12050-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_Default, 'ACCOUNT RECEIVABLE-DEFAULT', '10650-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_Default, 'INVENTORY ADJUSTMENT-DEFAULT', '20500-1000');
@@ -172,7 +172,7 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_NewHaven, 'AP CLEARING WHEAT-NEW HAVEN', '30110-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@WriteOffSold_NewHaven, 'WRITE-OFF SOLD WHEAT-NEW HAVEN', '40110-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueSold_NewHaven, 'REVALUE SOLD WHEAT-NEW HAVEN', '50110-1001');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_NewHaven, 'AUTO NEGATIVE WHEAT-NEW HAVEN', '60110-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_NewHaven, 'Auto Variance WHEAT-NEW HAVEN', '60110-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_NewHaven, 'INVENTORY IN TRANSIT-NEW HAVEN', '12050-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_NewHaven, 'ACCOUNT RECEIVABLE-NEW HAVEN', '10650-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_NewHaven, 'INVENTORY ADJUSTMENT-NEW HAVEN', '20500-1001');
@@ -187,7 +187,7 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_BetterHaven, 'AP CLEARING WHEAT-BETTER HAVEN', '30110-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@WriteOffSold_BetterHaven, 'WRITE-OFF SOLD WHEAT-BETTER HAVEN', '40110-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueSold_BetterHaven, 'REVALUE SOLD WHEAT-BETTER HAVEN', '50110-1002');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_BetterHaven, 'AUTO NEGATIVE WHEAT-BETTER HAVEN', '60110-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_BetterHaven, 'Auto Variance WHEAT-BETTER HAVEN', '60110-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_BetterHaven, 'INVENTORY IN TRANSIT-BETTER HAVEN', '12050-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_BetterHaven, 'ACCOUNT RECEIVABLE-BETTER HAVEN', '10650-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_BetterHaven, 'INVENTORY ADJUSTMENT-BETTER HAVEN', '20500-1002');
@@ -220,7 +220,7 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_Default, @SEGMENT_ID_RevalueSoldWheat);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_Default, @SEGMENT_ID_DefaultLocation);
 			
-			-- AUTO NEGATIVE WHEAT
+			-- Auto Variance WHEAT
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_Default, @SEGMENT_ID_AutoNegativeWheat);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_Default, @SEGMENT_ID_DefaultLocation);
 
@@ -276,7 +276,7 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_NewHaven, @SEGMENT_ID_RevalueSoldWheat);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_NewHaven, @SEGMENT_ID_NewHavenLocation);
 			
-			-- AUTO NEGATIVE WHEAT
+			-- Auto Variance WHEAT
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_NewHaven, @SEGMENT_ID_AutoNegativeWheat);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
@@ -332,7 +332,7 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_BetterHaven, @SEGMENT_ID_RevalueSoldWheat);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 			
-			-- AUTO NEGATIVE WHEAT
+			-- Auto Variance WHEAT
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_BetterHaven, @SEGMENT_ID_AutoNegativeWheat);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 

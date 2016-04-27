@@ -33,6 +33,7 @@ Declare @dblWeightPerUnit numeric(38,20)
 Declare @dblMoveQty numeric(38,20)
 Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
+Declare @strBulkItemXml nvarchar(max)
  
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess Where intAttributeTypeId=2
 
@@ -171,7 +172,23 @@ Begin Try
 	End --End Loop Child Lots
 
 	--Create Reservation
-	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=0
+	--Get Bulk Items From Reserved Lots
+	Set @strBulkItemXml='<root>'
+
+	--Bulk Item
+	Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+	'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
+	'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
+	'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
+	From tblICStockReservation sr 
+	Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+
+	Set @strBulkItemXml=@strBulkItemXml+'</root>'
+
+	If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+		Set @strBulkItemXml=''
+
+	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=0,@strBulkItemXml=@strBulkItemXml
 
 	Update tblMFWorkOrder Set intKitStatusId=8,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime,
 	intStagingLocationId=@intBlendStagingLocationId,dtmStagedDate=@dtmCurrentDateTime Where intWorkOrderId=@intWorkOrderId

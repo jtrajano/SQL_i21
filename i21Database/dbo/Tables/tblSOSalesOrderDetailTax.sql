@@ -7,7 +7,7 @@
     [intTaxClassId] INT NOT NULL, 
 	[strTaxableByOtherTaxes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strCalculationMethod] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
-    [numRate] NUMERIC(18, 6) NULL, 
+    [dblRate] NUMERIC(18, 6) NULL, 
     [intSalesTaxAccountId] INT NULL, 
     [dblTax] NUMERIC(18, 6) NULL, 
     [dblAdjustedTax] NUMERIC(18, 6) NULL, 

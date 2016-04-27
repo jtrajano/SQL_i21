@@ -49,6 +49,7 @@ BEGIN TRY
 		,@strProcessName nvarchar(50)
 		,@dtmBusinessDate datetime
 		,@intBusinessShiftId int
+		,@intManufacturingCellId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -205,8 +206,8 @@ BEGIN TRY
 				)
 	END
 
-	IF @intConsumptionStorageLocationId IS NULL
-		OR @intConsumptionStorageLocationId = 0
+	IF @intConsumptionMethodId=2 AND (@intConsumptionStorageLocationId IS NULL
+		OR @intConsumptionStorageLocationId = 0)
 	BEGIN
 		RAISERROR (
 				51115
@@ -223,6 +224,7 @@ BEGIN TRY
 		BEGIN
 
 		SELECT @strWorkOrderNo = strWorkOrderNo
+				,@intManufacturingCellId=intManufacturingCellId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -402,6 +404,36 @@ BEGIN TRY
 					,@intEntityUserSecurityId = @intUserId
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
+					 INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction  
+					 (  
+						intWorkOrderId  
+					   ,intLotId  
+					   ,dblQuantity  
+					   ,intItemUOMId  
+					   ,intItemId  
+					   ,intTransactionId  
+					   ,intTransactionTypeId  
+					   ,strTransactionType  
+					   ,dtmTransactionDate  
+					   ,intProcessId  
+					   ,intShiftId  
+					 )  
+					 SELECT TOP 1  
+					   WI.intWorkOrderId,  
+					   WI.intLotId,  
+					   @dblNewWeight-@dblWeight,  
+					   WI.intItemUOMId,  
+					   WI.intItemId,  
+					   @intInventoryAdjustmentId,  
+					   24,  
+					   'Empty Out Adj',  
+					   @dtmBusinessDate,  
+					   intManufacturingProcessId,  
+					   @intBusinessShiftId
+					 FROM dbo.tblMFWorkOrderInputLot WI
+					 JOIN dbo.tblMFWorkOrder W on W.intWorkOrderId =WI.intWorkOrderId 
+					 WHERE intLotId = @intInputLotId
+
 			PRINT 'Call Lot Adjust routine.'
 		END
 
@@ -448,8 +480,21 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				EXEC dbo.uspSMGetStartingNumber 55
-					,@strDestinationLotNumber OUTPUT
+				--EXEC dbo.uspSMGetStartingNumber 55
+				--	,@strDestinationLotNumber OUTPUT
+
+				Declare @intCategoryId int
+				Select @intCategoryId=intCategoryId from tblICItem Where intItemId=@intItemId
+				EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+					,@intItemId = @intItemId
+					,@intManufacturingId = @intManufacturingCellId
+					,@intSubLocationId = @intSubLocationId
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 55
+					,@ysnProposed = 0
+					,@strPatternString = @strDestinationLotNumber OUTPUT
 					
 				PRINT '1.Call Lot Merge routine.'
 

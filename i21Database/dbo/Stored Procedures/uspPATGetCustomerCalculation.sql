@@ -46,7 +46,7 @@ END
 SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   strCustomerName = ENT.strName,
 			   strStockStatus = AC.strStockStatus,
-			   dtmLastActivityDate = CV.dtmLastActivityDate,
+			   dtmLastActivityDate = max(CV.dtmLastActivityDate),
 			   TC.strTaxCode,
 			   ysnEligibleRefund = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND Total.dblRefundAmount < @dblMinimumRefund  THEN 1 ELSE 0 END),
 			   dblTotalPurchases = Total.dblTotalPurchases,
@@ -59,7 +59,34 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			   dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - Total.dblLessServiceFee END,
 			   dblTotalVolume = Total.dblVolume,
 			   dblTotalRefund = Total.dblTotalRefund
-		   FROM tblPATCustomerVolume CV
+		  FROM (
+		  SELECT DISTINCT B.intCustomerPatronId AS intCustomerId,
+				    dblTotalPurchases = SUM(CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END),
+					dblTotalSales = SUM(CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END),
+					(CASE WHEN SUM(RRD.dblRate * dblVolume) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
+					SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund,
+					SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (@FWT/100)) AS dbLessFWT,
+					@LessService AS dblLessServiceFee,
+					dblVolume = SUM(dblVolume),
+					dblTotalRefund = SUM(RRD.dblRate)
+			   FROM tblPATCustomerVolume B
+		 INNER JOIN tblPATRefundRateDetail RRD
+				 ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
+		 INNER JOIN tblPATRefundRate RR
+				 ON RR.intRefundTypeId = RRD.intRefundTypeId
+		 INNER JOIN tblARCustomer AC
+				 ON AC.intEntityCustomerId = B.intCustomerPatronId
+		  LEFT JOIN tblSMTaxCode TC
+				 ON TC.intTaxCodeId = AC.intTaxCodeId
+		 INNER JOIN tblEntity ENT
+				 ON ENT.intEntityId = B.intCustomerPatronId
+		 INNER JOIN tblPATPatronageCategory PC
+				 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
+			   WHERE B.intCustomerPatronId = B.intCustomerPatronId
+		   GROUP BY B.intCustomerPatronId
+			) Total
+	 INNER JOIN tblPATCustomerVolume CV
+		    ON CV.intCustomerPatronId = Total.intCustomerId
      INNER JOIN tblPATRefundRateDetail RRD
 			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
      INNER JOIN tblPATRefundRate RR
@@ -72,59 +99,20 @@ SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 			 ON ENT.intEntityId = CV.intCustomerPatronId
 	 INNER JOIN tblPATPatronageCategory PC
 			 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-	 CROSS APPLY (
-	 SELECT DISTINCT CV.intCustomerPatronId AS intCustomerId,
-				    (CASE WHEN PC.strPurchaseSale = 'Purchase' THEN SUM(dblVolume) ELSE 0 END) AS dblTotalPurchases,
-					(CASE WHEN PC.strPurchaseSale = 'Sale' THEN SUM(dblVolume) ELSE 0 END) AS dblTotalSales,
-					(CASE WHEN SUM(RRD.dblRate) * SUM(dblVolume) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate) * SUM(dblVolume) END) AS dblRefundAmount,
-					(SUM(RRD.dblRate) * SUM(dblVolume) * (SUM(RR.dblCashPayout)/100)) AS dblCashRefund,
-					(((SUM(RRD.dblRate) * SUM(dblVolume)) * (RR.dblCashPayout/100)) * (@FWT/100)) AS dbLessFWT,
-					@LessService AS dblLessServiceFee,
-					SUM(dblVolume) AS dblVolume,
-					SUM(RRD.dblRate) AS dblTotalRefund
-			   FROM tblPATCustomerVolume B
-		 INNER JOIN tblPATRefundRateDetail RRD
-				 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
-		 INNER JOIN tblPATRefundRate RR
-				 ON RR.intRefundTypeId = RRD.intRefundTypeId
-		 INNER JOIN tblARCustomer AC
-				 ON AC.intEntityCustomerId = CV.intCustomerPatronId
-		  LEFT JOIN tblSMTaxCode TC
-				 ON TC.intTaxCodeId = AC.intTaxCodeId
-		 INNER JOIN tblEntity ENT
-				 ON ENT.intEntityId = CV.intCustomerPatronId
-		 INNER JOIN tblPATPatronageCategory PC
-				 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-			   WHERE B.intCustomerPatronId = CV.intCustomerPatronId
-		   GROUP BY PC.strPurchaseSale,
-					B.intCustomerPatronId,
-					RR.dblCashPayout,
-					AC.ysnSubjectToFWT
-	 ) Total
-		  WHERE CV.intFiscalYear = @intFiscalYearId
+	 
+	   WHERE CV.intFiscalYear = @intFiscalYearId AND CV.dblVolume <> 0.00
 	   GROUP BY CV.intCustomerPatronId, 
 				ENT.strName, 
 				AC.strStockStatus, 
-				RR.strRefundType, 
-				RR.strRefundDescription, 
-				RR.dblCashPayout, 
-				RR.ysnQualified, 
-				PC.strCategoryCode, 
-				RRD.intPatronageCategoryId, 
-				CV.intPatronageCategoryId, 
-				PC.intPatronageCategoryId, 
 				TC.strTaxCode, 
-				CV.dtmLastActivityDate,
-				PC.strPurchaseSale,
-				Total.dblTotalPurchases,
-				Total.dblTotalSales,
-				Total.dblRefundAmount,
-				Total.dblCashRefund,
-				Total.dbLessFWT,
-				Total.dblLessServiceFee,
+				dblTotalPurchases,
+				dblTotalSales,
+				dblRefundAmount,
+				dblCashRefund,
+				dbLessFWT,
+				dblLessServiceFee,
 				Total.dblVolume,
-				Total.dblTotalRefund,
-				AC.ysnSubjectToFWT
+				Total.dblTotalRefund
 	   
 
 	   DROP TABLE #statusTable

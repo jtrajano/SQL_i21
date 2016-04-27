@@ -46,7 +46,7 @@ BEGIN
 	SELECT	@intTicketItemUOMId = UM.intItemUOMId
 		FROM	dbo.tblICItemUOM UM	
 	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
 
 BEGIN 
@@ -134,12 +134,15 @@ BEGIN
 			,intSubLocationId
 			,dblQuantity
 			,intItemUOMId
+			,intWeightUOMId
 			,dblUnitPrice
 			,intDockDoorId
 			,strNotes
 			,intSort
 			,intConcurrencyId
 			,intOwnershipType
+			,intStorageLocationId
+			,intDiscountSchedule
 	)
 	SELECT			
 			intInventoryShipmentId	= @InventoryShipmentId
@@ -149,7 +152,8 @@ BEGIN
 			,intItemId				= SC.intItemId
 			,intSubLocationId		= SC.intSubLocationId
 			,dblQuantity			= LI.dblQty
-			,intItemUOMId			= ItemUOM.intItemUOMId
+			,intItemUOMId			= LI.intItemUOMId
+			,intWeightUOMId			= (SELECT intUnitMeasureId from tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
 			--,dblUnitPrice			= LI.dblCost
 			,dblUnitPrice			= SC.dblUnitPrice + SC.dblUnitBasis
 			,intDockDoorId			= NULL
@@ -162,6 +166,8 @@ BEGIN
 									  WHEN LI.ysnIsStorage = 1
 									  THEN 2
 									  END
+			,intStorageLocationId	= SC.intStorageLocationId
+			,intDiscountSchedule	= SC.intDiscountId
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
@@ -217,5 +223,3 @@ BEGIN
 	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryShipmentId = @InventoryShipmentId
 END
 GO
-
-

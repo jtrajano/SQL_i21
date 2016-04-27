@@ -77,7 +77,7 @@ BEGIN
 			,intErrorCode
 			,strModuleName
 		)
-		VALUES ('DUMMY-00001', 'Invalid G/L account id found.', 50001, 'Inventory')
+		VALUES ('DUMMY-00001', 'Invalid G/L account id found.', 60001, 'Inventory')
 
 		-- Call the fake data for GL Account 
 		EXEC testi21Database.[Fake COA used for fake inventory items];

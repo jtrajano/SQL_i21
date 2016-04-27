@@ -14,9 +14,9 @@ SET ANSI_WARNINGS OFF
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
-		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Negative'
+		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Variance'
 
-		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Auto-Negative' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
+		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
 		--,@AccountCategory_Revalue_Produced AS NVARCHAR(30) = 'Revalue Produced'
 		--,@AccountCategory_Revalue_Transfer AS NVARCHAR(30) = 'Revalue Inventory Transfer'
@@ -27,11 +27,11 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
 		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
-		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 24
-		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 26
-		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 27
-		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 28
-		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 29
+		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
+		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
+		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
+		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
+		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
@@ -160,7 +160,7 @@ BEGIN
 END 
 ;
 
--- Check for missing Auto Negative Account Id
+-- Check for missing Auto Variance Account Id
 IF EXISTS (
 	SELECT	TOP 1 1 
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType

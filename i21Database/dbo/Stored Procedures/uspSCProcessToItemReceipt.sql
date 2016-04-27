@@ -43,12 +43,21 @@ DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @intLoadContractId AS INT
 DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
+DECLARE @total AS INT
+DECLARE @ysnDPStorage AS BIT
+DECLARE @strLotTracking AS NVARCHAR(100)
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
+END
+
+BEGIN
+	SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
+	FROM dbo.tblGRStorageType ST WHERE 
+	ST.strStorageTypeCode = @strDistributionOption
 END
 
 DECLARE @ErrMsg                    NVARCHAR(MAX),
@@ -69,7 +78,10 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT @intLoadContractId = LGL.intContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM tblLGLoad LGL WHERE LGL.intLoadId = @intLoadId
+				SELECT @intLoadContractId = LGLD.intPContractDetailId, @dblLoadScheduledUnits = LGLD.dblQuantity FROM tblLGLoad LGL
+				INNER JOIN tblLGLoadDetail LGLD
+				ON LGL.intLoadId = LGLD.intLoadId 
+				WHERE LGL.intLoadId = @intLoadId
 			END
 			IF @intLoadContractId IS NULL
 			BEGIN 
@@ -78,7 +90,7 @@ BEGIN TRY
 			END
 			BEGIN
 			SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
-			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
+				EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
 			END
 			BEGIN
 				INSERT INTO [dbo].[tblSCTicketCost]
@@ -139,20 +151,21 @@ BEGIN TRY
 			SET @strReceiptType = 'Direct'
 		END
 		BEGIN 
-			SELECT	@intTicketUOM = UOM.intUnitMeasureId
+			SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
 			FROM	dbo.tblSCTicket SC	        
-					JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+					--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+					JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 		END
 
 		BEGIN 
-			SELECT	@intTicketItemUOMId = UM.intItemUOMId
+			SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
 				FROM	dbo.tblICItemUOM UM	
 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+			WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 		END
 
-		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 			INSERT INTO @LineItems (
 			intContractDetailId,
@@ -187,8 +200,9 @@ BEGIN TRY
 				   -- uses a PRINT statement as that action (not a very good
 				   -- example).
 				   IF	ISNULL(@intLoopContractId,0) != 0
-				   EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
-
+				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+				   
 				   -- Attempt to fetch next row from cursor
 				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
 				END;
@@ -203,48 +217,204 @@ BEGIN TRY
 		END
 		IF(@dblRemainingUnits > 0)
 		BEGIN
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDummyDistributionOption, NULL
-			IF (@dblRemainingUnits = @dblNetUnits)
-			RETURN
+			INSERT INTO @ItemsForItemReceipt (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+				,ysnIsStorage 
+			)
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
+			--IF (@dblRemainingUnits = @dblNetUnits)
+			--RETURN
 		END
-		UPDATE @LineItems set intTicketId = @intTicketId
-		DELETE FROM @ItemsForItemReceipt
+			UPDATE @LineItems set intTicketId = @intTicketId
+			--DELETE FROM @ItemsForItemReceipt
+			-- Get the items to process
+			INSERT INTO @ItemsForItemReceipt (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+				,ysnIsStorage 
+			)
+			EXEC dbo.uspSCGetScaleItemForItemReceipt 
+				 @intTicketId
+				,@strSourceType
+				,@intUserId
+				,@dblNetUnits
+				,@dblCost
+				,@intEntityId
+				,@intContractId
+				,@strDistributionOption
+				,@LineItems
+
+		-- Validate the items to receive 
+		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+
+		SELECT @total = COUNT(*) FROM @ItemsForItemReceipt;
+		IF (@total = 0)
+			RETURN;
 		END
+	ELSE
+	BEGIN
+		IF @strDistributionOption = 'SPT'
+		BEGIN
+			UPDATE @LineItems set intTicketId = @intTicketId
+				--DELETE FROM @ItemsForItemReceipt
+				-- Get the items to process
+				INSERT INTO @ItemsForItemReceipt (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+					,ysnIsStorage 
+				)
+				EXEC dbo.uspSCGetScaleItemForItemReceipt 
+					 @intTicketId
+					,@strSourceType
+					,@intUserId
+					,@dblNetUnits
+					,@dblCost
+					,@intEntityId
+					,@intContractId
+					,@strDistributionOption
+					,@LineItems
 
-	-- Get the items to process
-	INSERT INTO @ItemsForItemReceipt (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-		,ysnIsStorage 
-	)
-	EXEC dbo.uspSCGetScaleItemForItemReceipt 
-		 @intTicketId
-		,@strSourceType
-		,@intUserId
-		,@dblNetUnits
-		,@dblCost
-		,@intEntityId
-		,@intContractId
-		,@strDistributionOption
-		,@LineItems
+			-- Validate the items to receive 
+			EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt;
+		END
+		ELSE
+		BEGIN
+			IF @ysnDPStorage = 1
+				BEGIN
+					INSERT INTO @LineItems (
+					intContractDetailId,
+					dblUnitsDistributed,
+					dblUnitsRemaining,
+					dblCost)
+					EXEC dbo.uspCTUpdationFromTicketDistribution 
+					@intTicketId
+					,@intEntityId
+					,@dblNetUnits
+					,@intContractId
+					,@intUserId
+					,@ysnDPStorage
 
-	-- Validate the items to receive 
-	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+					DECLARE @intDPContractId INT;
+					DECLARE @dblDPContractUnits NUMERIC(12,4);
+					DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+					FOR
+					SELECT intContractDetailId, dblUnitsDistributed
+					FROM @LineItems;
+
+					OPEN intListCursor;
+
+					-- Initial fetch attempt
+					FETCH NEXT FROM intListCursor INTO @intDPContractId, @dblDPContractUnits;
+
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						-- Here we do some kind of action that requires us to 
+						-- process the table variable row-by-row. This example simply
+						-- uses a PRINT statement as that action (not a very good
+						-- example).
+						IF	ISNULL(@intDPContractId,0) != 0
+							INSERT INTO @ItemsForItemReceipt (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage 
+							)
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
+						--EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
+
+						-- Attempt to fetch next row from cursor
+						FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+					END;
+
+					CLOSE intListCursor;
+					DEALLOCATE intListCursor;
+				END
+			ELSE
+				BEGIN
+					INSERT INTO @ItemsForItemReceipt (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage 
+					)
+					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
+				END
+		END
+	END
 
 	-- Add the items to the item receipt 
 	--IF @strSourceType = @SourceType_Direct
@@ -257,7 +427,13 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 	END
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+
+	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+	if @strLotTracking = 'No'
+		BEGIN
+			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+		END
+
 	--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 	--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 

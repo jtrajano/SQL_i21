@@ -86,6 +86,11 @@ DECLARE
 	,@intLotStatusId_ItemLotTable AS INT 
 	,@intSplitFromLotId			AS INT 
 	,@dblWeightPerQty			AS NUMERIC(38,20)
+	,@intNoPallet				AS INT
+	,@intUnitPallet				AS INT
+	,@strTransactionId			AS NVARCHAR(50) 
+	,@strSourceTransactionId	AS NVARCHAR(50) 
+	,@intSourceTransactionTypeId AS INT 
 
 DECLARE @OwnerShipType_Own AS INT = 1
 
@@ -154,6 +159,11 @@ SELECT  intId
 		,intLotStatusId
 		,intSplitFromLotId
 		,dblWeightPerQty
+		,intNoPallet
+		,intUnitPallet
+		,strTransactionId
+		,strSourceTransactionId
+		,intSourceTransactionTypeId
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -195,6 +205,11 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intLotStatusId_ItemLotTable
 		,@intSplitFromLotId
 		,@dblWeightPerQty
+		,@intNoPallet
+		,@intUnitPallet
+		,@strTransactionId
+		,@strSourceTransactionId
+		,@intSourceTransactionTypeId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -357,6 +372,7 @@ BEGIN
 				,strBOLNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strBOLNo ELSE LotMaster.strBOLNo END 
 				,strVessel				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVessel ELSE LotMaster.strVessel END 
 				,strReceiptNumber		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
+				,strTransactionId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strTransactionId ELSE LotMaster.strTransactionId END 
 				,strMarkings			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strMarkings ELSE LotMaster.strMarkings END 
 				,strNotes				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strNotes ELSE LotMaster.strNotes END 
 				,intEntityVendorId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
@@ -365,6 +381,8 @@ BEGIN
 				,strContractNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContractNo ELSE LotMaster.strContractNo END 
 				,dtmManufacturedDate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
 				,intSplitFromLotId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSplitFromLotId ELSE LotMaster.intSplitFromLotId END 
+				,intNoPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intNoPallet ELSE LotMaster.intNoPallet END 
+				,intUnitPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intUnitPallet ELSE LotMaster.intUnitPallet END 
 								
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
@@ -538,6 +556,11 @@ BEGIN
 				,intOwnershipType
 				,dblGrossWeight
 				,intSplitFromLotId
+				,intNoPallet
+				,intUnitPallet
+				,strTransactionId
+				,strSourceTransactionId
+				,intSourceTransactionTypeId
 
 			) VALUES (
 				@intItemId
@@ -578,6 +601,11 @@ BEGIN
 				,@intOwnershipType
 				,@dblGrossWeight
 				,@intSplitFromLotId
+				,@intNoPallet
+				,@intUnitPallet
+				,@strTransactionId
+				,@strSourceTransactionId
+				,@intSourceTransactionTypeId
 			)
 		;
 	
@@ -602,6 +630,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intLotId
 			,@intParentLotId OUTPUT 
+			,@intSubLocationId
+			,@intLocationId
 
 		IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
 			RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;
@@ -735,6 +765,11 @@ BEGIN
 		,@intLotStatusId_ItemLotTable
 		,@intSplitFromLotId
 		,@dblWeightPerQty
+		,@intNoPallet
+		,@intUnitPallet
+		,@strTransactionId
+		,@strSourceTransactionId
+		,@intSourceTransactionTypeId
 	;
 END
 

@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspTRLoadProcessTransportLoad]
 	 @intLoadHeaderId AS INT	 
-	 ,@ysnPostOrUnPost AS BIT
+	 , @ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,54 +14,57 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 BEGIN TRY
-declare @intTicketId int,@intInboundLoadId int,@intOutboundLoadId int,
-    	        @dtmDeliveredDate DATETIME,@dblDeliveredQuantity DECIMAL(18, 6);
 
-if @ysnPostOrUnPost = 1
-    BEGIN
-    --Update the Transport Load as Posted
-    	UPDATE	TransportLoad
-    	      SET	TransportLoad.ysnPosted = 1
-    		  FROM	dbo.tblTRLoadHeader TransportLoad 
-    		  WHERE	TransportLoad.intLoadHeaderId = @intLoadHeaderId
-    
-    --Update the Logistics Load 
-    	
-    
-    	select @intTicketId = TL.intLoadHeaderId ,@intInboundLoadId = LG.intLoadId,@intOutboundLoadId = LG.intOutboundLoadId,@dtmDeliveredDate = TL.dtmLoadDateTime,
-    	       @dblDeliveredQuantity = (select top 1 dblGross from tblTRLoadReceipt TR where TR.intLoadHeaderId = TL.intLoadHeaderId) from tblTRLoadHeader TL
-    	            join vyuTRDispatchedLoad LG on isNull(TL.intLoadId,0) = isNull(LG.intLoadId,0)
-    			    where TL.intLoadHeaderId = @intLoadHeaderId
-        IF (isNull(@intInboundLoadId,0) != 0)
+	DECLARE @intLoadDetailId INT
+		, @Id INT
+		, @dtmDeliveredDate DATETIME
+		, @dblDeliveredQuantity DECIMAL(18, 6)
+
+	DECLARE @LoadTable TABLE
+	(
+		intId INT IDENTITY PRIMARY KEY CLUSTERED
+		, [intLoadDetailId] INT NULL
+		, [dtmDeliveredDate] DATETIME NULL
+		, [dblDeliveredQuantity] DECIMAL(18,6) NULL
+	)
+
+	--Update the Transport Load as Posted/Unposted
+	UPDATE	TransportLoad
+		SET	TransportLoad.ysnPosted = @ysnPostOrUnPost
+	FROM	dbo.tblTRLoadHeader TransportLoad
+	WHERE	TransportLoad.intLoadHeaderId = @intLoadHeaderId
+
+	INSERT INTO @LoadTable
+	SELECT  DD.intLoadDetailId
+		, DH.dtmInvoiceDateTime
+		, (CASE WHEN LH.ysnPosted = 1 THEN ISNULL(dblUnits, 0)
+			ELSE 0 END)
+	FROM tblTRLoadDistributionHeader DH
+		JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+		JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId
+	WHERE DH.intLoadHeaderId = @intLoadHeaderId AND ISNULL(intLoadDetailId, 0) != 0
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM @LoadTable)
+	BEGIN
+		SELECT TOP 1 @Id = intId
+			, @intLoadDetailId =intLoadDetailId
+			, @dtmDeliveredDate = dtmDeliveredDate
+			, @dblDeliveredQuantity = dblDeliveredQuantity
+		FROM @LoadTable
+
+		IF (ISNULL(@intLoadDetailId,0) != 0)
     	BEGIN
-            Exec dbo.uspLGUpdateLoadDetails @intInboundLoadId,0,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
+			IF (@ysnPostOrUnPost = 1)
+			BEGIN
+				EXEC dbo.uspLGUpdateLoadDetails @intLoadDetailId,0,@intLoadHeaderId,@dtmDeliveredDate,@dblDeliveredQuantity
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspLGUpdateLoadDetails @intLoadDetailId,1,@intLoadHeaderId,@dtmDeliveredDate,@dblDeliveredQuantity
+			END
     	END
-    	IF (isNull(@intOutboundLoadId,0) != 0 and isNull(@intInboundLoadId,0) != isNull(@intOutboundLoadId,0))
-    	BEGIN
-    	    Exec dbo.uspLGUpdateLoadDetails @intOutboundLoadId,0,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
-        END
-    END
-ELSE
-    BEGIN
-	   --Update the Transport Load as UnPosted
-    	UPDATE	TransportLoad
-    	      SET	TransportLoad.ysnPosted = 0
-    		  FROM	dbo.tblTRLoadHeader TransportLoad 
-    		  WHERE	TransportLoad.intLoadHeaderId = @intLoadHeaderId
-    
-    --Update the Logistics Load 
-    	select @intTicketId = TL.intLoadHeaderId ,@intInboundLoadId = LG.intLoadId,@intOutboundLoadId = LG.intOutboundLoadId,@dtmDeliveredDate = TL.dtmLoadDateTime,
-    	       @dblDeliveredQuantity = (select top 1 dblGross from tblTRLoadReceipt TR where TR.intLoadHeaderId = TL.intLoadHeaderId) from tblTRLoadHeader TL
-    	            join vyuTRDispatchedLoad LG on isNull(TL.intLoadId,0) = isNull(LG.intLoadId,0)
-    			    where TL.intLoadHeaderId = @intLoadHeaderId
-        IF (isNull(@intInboundLoadId,0) != 0)
-    	BEGIN
-            Exec dbo.uspLGUpdateLoadDetails @intInboundLoadId,1,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
-    	END
-    	IF (isNull(@intOutboundLoadId,0) != 0 and isNull(@intInboundLoadId,0) != isNull(@intOutboundLoadId,0))
-    	BEGIN
-    	    Exec dbo.uspLGUpdateLoadDetails @intOutboundLoadId,1,@intTicketId,@dtmDeliveredDate,@dblDeliveredQuantity
-        END
+		
+		DELETE FROM @LoadTable WHERE intId = @Id
 	END
 END TRY
 BEGIN CATCH

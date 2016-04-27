@@ -18,6 +18,7 @@ SELECT DISTINCT
 	 , P.intPaymentId	 
 	 , I.intEntityCustomerId
 	 , PM.strPaymentMethod
+	 , P.strPaymentInfo as strReferenceNumber
 	 , I.intInvoiceId	 
 	 , I.intCompanyLocationId
 	 , Item.intCommodityId

@@ -7,7 +7,7 @@ AS
 			SELECT	CQ.intContractDetailId,
 					BL.strBLNumber,
 					BC.strContainerNumber,
-					(BC.dblNetWt / BC.dblQuantity) * CC.dblQuantity dblShippedWeight,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,BC.intWeightUnitMeasureId,LP.intWeightUOMId,BC.dblNetWt) dblShippedWeight,
 					IU.intItemUOMId,
 					IM.strUnitMeasure,
 					SH.ysnDirectShipment
@@ -18,15 +18,16 @@ AS
 			JOIN	tblLGShipmentBL						BL	ON	BL.intShipmentBLId				=	CC.intShipmentBLId  
 			JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CQ.intItemId	 
 															AND	IU.intUnitMeasureId				=	SH.intWeightUnitMeasureId 
-			JOIN	tblICUnitMeasure					IM	ON	IM.intUnitMeasureId				=	IU.intUnitMeasureId			LEFT
-			JOIN	tblLGShipmentBLContainer			BC	ON	BC.intShipmentBLContainerId		=	CC.intShipmentBLContainerId  
+			JOIN	tblICUnitMeasure					IM	ON	IM.intUnitMeasureId				=	IU.intUnitMeasureId				LEFT
+			JOIN	tblLGShipmentBLContainer			BC	ON	BC.intShipmentBLContainerId		=	CC.intShipmentBLContainerId		CROSS	
+			APPLY	tblLGCompanyPreference	LP 	
 
 			UNION ALL
 
 			SELECT	AD.intSContractDetailId,
 					BL.strBLNumber,
 					BC.strContainerNumber,
-					(BC.dblNetWt / BC.dblQuantity) * CC.dblQuantity dblShippedWeight,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,BC.intWeightUnitMeasureId,LP.intWeightUOMId,BC.dblNetWt) dblShippedWeight,
 					IU.intItemUOMId,
 					IM.strUnitMeasure,
 					SH.ysnDirectShipment
@@ -38,6 +39,7 @@ AS
 			JOIN	tblLGShipmentBL						BL	ON	BL.intShipmentBLId				=	CC.intShipmentBLId  
 			JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CQ.intItemId	 
 															AND	IU.intUnitMeasureId				=	SH.intWeightUnitMeasureId 
-			JOIN	tblICUnitMeasure					IM	ON	IM.intUnitMeasureId				=	IU.intUnitMeasureId			LEFT
-			JOIN	tblLGShipmentBLContainer			BC	ON	BC.intShipmentBLContainerId		=	CC.intShipmentBLContainerId  
+			JOIN	tblICUnitMeasure					IM	ON	IM.intUnitMeasureId				=	IU.intUnitMeasureId				LEFT
+			JOIN	tblLGShipmentBLContainer			BC	ON	BC.intShipmentBLContainerId		=	CC.intShipmentBLContainerId		CROSS	
+			APPLY	tblLGCompanyPreference	LP 	  
 	)t

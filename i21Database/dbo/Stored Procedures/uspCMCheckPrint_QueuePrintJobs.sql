@@ -58,6 +58,7 @@ DECLARE -- Constant variables for bank account types:
 		-- Local variables
 		,@strRecordNo AS NVARCHAR(40)
 		,@strNextCheckNumber AS NVARCHAR(20)
+		,@intCheckNoLength AS INT = 8
 
 -- Clean the parameters
 SELECT	@strTransactionId = CASE WHEN LTRIM(RTRIM(@strTransactionId)) = '' THEN NULL ELSE @strTransactionId END
@@ -76,6 +77,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
@@ -93,6 +95,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 SELECT	intBankAccountId	= F.intBankAccountId
 		,intTransactionId	= F.intTransactionId
 		,strTransactionId	= F.strTransactionId
+		,intBankTransactionTypeId = F.intBankTransactionTypeId
 		,strBatchId			= F.strLink
 		,strCheckNo			= ISNULL(F.strReferenceNo,'')
 		,dtmPrintJobCreated	= GETDATE()
@@ -122,7 +125,8 @@ END
 
 -- Get the next check number from the bank account table
 SELECT TOP 1 
-		@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo)		
+		@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo,intCheckNoLength),	
+		@intCheckNoLength = intCheckNoLength	
 FROM	dbo.tblCMBankAccount
 WHERE	intBankAccountId = @intBankAccountId
 
@@ -170,7 +174,7 @@ BEGIN
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
 	IF (LTRIM(RTRIM(ISNULL(@loop_CheckNumber, ''))) = '')
 	BEGIN 
-		RAISERROR(50014, 11, 1)
+		RAISERROR(70014, 11, 1)
 		
 		GOTO _ROLLBACK
 	END 
@@ -199,6 +203,7 @@ INSERT INTO tblCMCheckPrintJobSpool(
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
@@ -211,6 +216,7 @@ SELECT
 		intBankAccountId
 		,intTransactionId
 		,strTransactionId
+		,intBankTransactionTypeId
 		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
@@ -231,7 +237,7 @@ FROM	tblCMBankTransaction f INNER JOIN #tmpPrintJobSpoolTable TMP
 -- Retrieve the highest check number entered for the print queue. 
 SET @strNextCheckNumber = NULL 
 SELECT	TOP 1 
-		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo))
+		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo, @intCheckNoLength))
 FROM	#tmpPrintJobSpoolTable
 WHERE	ISNUMERIC(strCheckNo) = 1
 
@@ -240,10 +246,10 @@ IF (@strNextCheckNumber IS NOT NULL)
 BEGIN 
 	-- Update the next check number 
 	UPDATE	dbo.tblCMBankAccount
-	SET		intCheckNextNo = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
+	SET		intCheckNextNo = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber,intCheckNoLength) AS INT) + 1
 	WHERE	intBankAccountId = @intBankAccountId
 			AND ISNULL(@strNextCheckNumber, '') <> ''
-			AND intCheckNextNo <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)
+			AND intCheckNextNo <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber,intCheckNoLength) AS INT)
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- Update the next check number to the checkbook in origin.

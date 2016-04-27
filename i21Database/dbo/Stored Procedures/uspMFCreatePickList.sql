@@ -206,6 +206,13 @@ Where intWorkOrderId in (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
 Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
 
+Select @intKitStagingLocationId=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Kit Staging Location'
+
+Select @intBlendStagingLocationId=ISNULL(intBlendProductionStagingUnitId,0) From tblSMCompanyLocation Where intCompanyLocationId=@intLocationId
+
 If @ysnBlendSheetRequired=0
 Begin
 	Select @dblQuantity=SUM(dblQuantity) From tblMFWorkOrder 
@@ -213,6 +220,47 @@ Begin
 
 	Select @intBlendRequirementId=intBlendRequirementId,@intBlendItemId=intItemId From tblMFWorkOrder 
 	Where intWorkOrderId in (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+
+	--Get Recipe Items
+	Select @dblQuantity=SUM(dblPlannedQuantity) From tblMFWorkOrder 
+	Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder)
+
+	SELECT @intRecipeId = intRecipeId
+	FROM tblMFWorkOrderRecipe
+	WHERE intItemId = @intBlendItemId
+		AND intLocationId = @intLocationId
+		AND ysnActive = 1 
+		AND intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+
+		INSERT INTO @tblInputItem (
+		intItemId
+		,dblRequiredQty
+		,ysnIsSubstitute
+		,intConsumptionMethodId
+		)
+	SELECT 
+		ri.intItemId
+		,(ri.dblCalculatedQuantity * (@dblQuantity / r.dblQuantity)) AS dblRequiredQty
+		,0
+		,ri.intConsumptionMethodId
+	FROM tblMFWorkOrderRecipeItem ri
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
+	WHERE r.intRecipeId = @intRecipeId
+		AND ri.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
+
+	UNION
+	SELECT 
+		rs.intSubstituteItemId
+		,(rs.dblQuantity * (@dblQuantity / r.dblQuantity)) AS dblRequiredQty
+		,1
+		,ri.intConsumptionMethodId
+	FROM tblMFWorkOrderRecipeSubstituteItem rs 
+	JOIN tblMFWorkOrderRecipeItem ri ON rs.intRecipeItemId=ri.intRecipeItemId
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
+	WHERE r.intRecipeId = @intRecipeId
+		AND ri.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
 
 	--WO created from Blend Management Screen if Lots are there input lot table when kitting enabled
 	If Exists (Select 1 From tblMFWorkOrderInputLot Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder))
@@ -233,47 +281,6 @@ Begin
 			wi.intItemIssuedUOMId,um1.strUnitMeasure,i.intItemId,
 			l.intStorageLocationId,sl.strName,l.strLotAlias
 
-			Select @dblQuantity=SUM(dblPlannedQuantity) From tblMFWorkOrder 
-			Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder)
-
-			SELECT @intRecipeId = intRecipeId
-			FROM tblMFWorkOrderRecipe
-			WHERE intItemId = @intBlendItemId
-				AND intLocationId = @intLocationId
-				AND ysnActive = 1 
-				AND intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
-
-				INSERT INTO @tblInputItem (
-				intItemId
-				,dblRequiredQty
-				,ysnIsSubstitute
-				,intConsumptionMethodId
-				)
-			SELECT 
-				ri.intItemId
-				,(ri.dblCalculatedQuantity * (@dblQuantity / r.dblQuantity)) AS dblRequiredQty
-				,0
-				,ri.intConsumptionMethodId
-			FROM tblMFWorkOrderRecipeItem ri
-			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
-			WHERE r.intRecipeId = @intRecipeId
-				AND ri.intRecipeItemTypeId = 1
-				AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
-
-			UNION
-			SELECT 
-				rs.intSubstituteItemId
-				,(rs.dblQuantity * (@dblQuantity / r.dblQuantity)) AS dblRequiredQty
-				,1
-				,ri.intConsumptionMethodId
-			FROM tblMFWorkOrderRecipeSubstituteItem rs 
-			JOIN tblMFWorkOrderRecipeItem ri ON rs.intRecipeItemId=ri.intRecipeItemId
-			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
-			WHERE r.intRecipeId = @intRecipeId
-				AND ri.intRecipeItemTypeId = 1
-				AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From @tblWorkOrder)
-
-			--Bulk Items
 			Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute)
 			Select ti.intItemId,ti.dblRequiredQty AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute 
 			From @tblInputItem ti 
@@ -322,12 +329,12 @@ Begin
 				Set @strXml = @strXml + '</root>'
 
 				Insert Into @tblPickedLots
-				Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml
+				Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
 			End
 		End
 	Else
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,@dblQuantity
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,@dblQuantity,'',1
 
 	--Remaining Lots to Pick
 	Insert Into @tblRemainingPickedLots
@@ -346,31 +353,66 @@ Begin
 	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
 	Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
 
-	Select DISTINCT tpl.*,cl.dblQuantity AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,(cl.dblQuantity / tpl.dblWeightPerUnit) AS dblAvailableUnit,um.strUnitMeasure AS strAvailableUnitUOM,
+	Select DISTINCT tpl.intWorkOrderInputLotId,tpl.intLotId,CASE When ri.intConsumptionMethodId=1 Then tpl.strLotNumber Else '' End AS strLotNumber,
+	tpl.strItemNo,tpl.strDescription,tpl.dblQuantity,tpl.intItemUOMId,tpl.strUOM,tpl.dblIssuedQuantity,
+	tpl.intItemIssuedUOMId,tpl.strIssuedUOM,tpl.intItemId,tpl.intRecipeItemId,tpl.dblUnitCost,tpl.dblDensity,tpl.dblRequiredQtyPerSheet,tpl.dblWeightPerUnit,tpl.dblRiskScore,
+	tpl.intStorageLocationId,
+	CASE When ri.intConsumptionMethodId=1 Then tpl.strStorageLocationName Else '' End AS strStorageLocationName,tpl.strLocationName,tpl.intLocationId,tpl.strSubLocationName,
+	CASE When ri.intConsumptionMethodId=1 Then tpl.strLotAlias Else '' End AS strLotAlias,tpl.ysnParentLot,tpl.strRowState,
+	CASE When ri.intConsumptionMethodId=1 Then cl.dblQuantity 
+	Else 
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+				Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+				WHERE L.intItemId = tpl.intItemId
+				AND L.intLocationId = @intLocationId
+				AND L.intLotStatusId = 1 
+				AND L.dtmExpiryDate >= GETDATE()
+				AND L.dblWeight >= .01
+				AND L.intStorageLocationId NOT IN (
+					@intKitStagingLocationId
+					,@intBlendStagingLocationId
+					) --Exclude Kit Staging,Blend Staging
+				AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId)
+	End AS dblAvailableQty,
+	CASE When ri.intConsumptionMethodId=1 Then  ISNULL(rq.dblReservedQty,0) 
+	Else
+	(Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId)
+	End AS dblReservedQty,
+	CASE When ri.intConsumptionMethodId=1 Then  (cl.dblQuantity / tpl.dblWeightPerUnit) 
+	Else
+	(Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot L 
+				Join tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+				WHERE L.intItemId = tpl.intItemId
+				AND L.intLocationId = @intLocationId
+				AND L.intLotStatusId = 1 
+				AND L.dtmExpiryDate >= GETDATE()
+				AND L.dblWeight >= .01
+				AND L.intStorageLocationId NOT IN (
+					@intKitStagingLocationId
+					,@intBlendStagingLocationId
+					) --Exclude Kit Staging,Blend Staging
+				AND ISNULL(SL.ysnAllowConsume,0)=1)
+	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=tpl.intItemId AND intLocationId = @intLocationId)
+	End AS dblAvailableUnit,
+	um.strUnitMeasure AS strAvailableUnitUOM,
 	tpl.dblIssuedQuantity AS dblPickQuantity,tpl.intItemIssuedUOMId AS intPickUOMId,tpl.strIssuedUOM AS strPickUOM,
-	l.intParentLotId,pl.strParentLotNumber
+	l.intParentLotId,CASE When ri.intConsumptionMethodId=1 Then pl.strParentLotNumber Else '' End AS strParentLotNumber
 	From @tblPickedLots tpl Join @tblChildLot cl on tpl.intLotId=cl.intLotId 
 	Join tblICLot l on tpl.intLotId=l.intLotId
 	Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
 	Left Join @tblReservedQty rq on tpl.intLotId = rq.intLotId
+	Left Join @tblInputItem ri on tpl.intItemId=ri.intItemId
 	UNION 
 	Select rpl.*,0.0 AS dblAvailableQty,0.0 AS dblReservedQty,0.0 AS dblAvailableUnit,'' AS strAvailableUnitUOM, 
 	0.0 AS dblPickQuantity,0 AS intPickUOMId,'' AS strPickUOM,0 AS intParentLotId,'' AS strParentLotNumber
 	From @tblRemainingPickedLots rpl
-	ORDER BY tpl.strItemNo,tpl.strStorageLocationName
+	ORDER BY tpl.strItemNo,tpl.intStorageLocationId
 
 	return
 End
-
-
-Select @intKitStagingLocationId=pa.strAttributeValue 
-From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
-Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
-and at.strAttributeName='Kit Staging Location'
-
-Select @intBlendStagingLocationId=ISNULL(intBlendProductionStagingUnitId,0) From tblSMCompanyLocation Where intCompanyLocationId=@intLocationId
 
 Select @intPickListPreferenceId=pa.strAttributeValue
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId

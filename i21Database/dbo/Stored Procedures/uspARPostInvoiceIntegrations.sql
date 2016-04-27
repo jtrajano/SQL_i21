@@ -35,6 +35,7 @@ BEGIN
 		-- Detail 
 		,[intInvoiceDetailId]
 		,[intItemId]
+		,[strItemNo]
 		,[strItemDescription]
 		,[intSCInvoiceId]
 		,[strSCInvoiceNumber]
@@ -57,6 +58,7 @@ BEGIN
 		,[dblConversionFactor]
 		,[intPerformerId]
 		,[intContractHeaderId]
+		,[strContractNumber]
 		,[strMaintenanceType]
 		,[strFrequency]
 		,[dtmMaintenanceDate]
@@ -80,6 +82,9 @@ EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 
 --Committed QUatities
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
+
+--In Transit Outbound Quantities 
+EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0
 
 --Sales Order Status
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete

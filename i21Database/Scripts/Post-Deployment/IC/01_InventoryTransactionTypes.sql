@@ -12,16 +12,16 @@ WITH	(HOLDLOCK)
 AS		InventoryTransactionTypes
 USING	(
 		SELECT	id = 1
-				,name = 'Inventory Auto Negative'
-				,form = null
+				,name = 'Inventory Auto Variance'
+				,form = NULL
 		UNION ALL 
 		SELECT	id = 2
 				,name = 'Inventory Write-Off Sold'
-				,form = null
+				,form = NULL
 		UNION ALL 
 		SELECT	id = 3
 				,name = 'Inventory Revalue Sold'
-				,form = null
+				,form = NULL
 		UNION ALL 
 		SELECT	id = 4
 				,name = 'Inventory Receipt'
@@ -95,41 +95,57 @@ USING	(
 				,name = 'Pick Lots'
 				,form = 'Pick Lots'
         UNION ALL 
-        SELECT    id = 22
+        SELECT	id = 22
                 ,name = 'Inbound Shipments'
                 ,form = 'Inbound Shipments'
 		UNION ALL 
-        SELECT    id = 23
+        SELECT	id = 23
                 ,name = 'Inventory Count'
                 ,form = 'Inventory Count'
 		UNION ALL 
-		SELECT	id = 24
-				,name = 'Cost Adjustment'
-				,form = null
+        SELECT	id = 24
+                ,name = 'Empty Out'
+                ,form = 'Empty Out'
 		UNION ALL 
-		SELECT	id = 25
+        SELECT	id = 25
+                ,name = 'Process Inventory Count'
+                ,form = 'Process Inventory Count'
+		UNION ALL 
+		SELECT	id = 26
+				,name = 'Cost Adjustment'
+				,form = NULL
+		UNION ALL 
+		SELECT	id = 27
 				,name = 'Bill'
 				,form = 'Bill'
 		UNION ALL 
-		SELECT	id = 26
-				,name = 'Revalue WIP'
-				,form = null
-		UNION ALL 
-		SELECT	id = 27
-				,name = 'Revalue Produced'
-				,form = null
-		UNION ALL 
 		SELECT	id = 28
-				,name = 'Revalue Transfer'
-				,form = null
+				,name = 'Revalue WIP'
+				,form = NULL
 		UNION ALL 
 		SELECT	id = 29
+				,name = 'Revalue Produced'
+				,form = NULL
+		UNION ALL 
+		SELECT	id = 30
+				,name = 'Revalue Transfer'
+				,form = NULL
+		UNION ALL 
+		SELECT	id = 31
 				,name = 'Revalue Build Assembly'
-				,form = null
+				,form = NULL 
+		UNION ALL 
+		SELECT	id = 32
+				,name = 'iProcess'
+				,form = 'iProcess' 
         UNION ALL 
-        SELECT    id = 30
+        SELECT    id = 33
                 ,name = 'Invoice'
                 ,form = 'Invoice'
+		UNION ALL 
+		SELECT	id = 34
+				,name = 'Pick List'
+				,form = 'Pick List'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

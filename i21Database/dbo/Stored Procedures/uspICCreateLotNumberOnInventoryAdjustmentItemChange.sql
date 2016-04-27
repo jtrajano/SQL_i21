@@ -105,6 +105,9 @@ BEGIN
 			,[intOwnershipType]
 			,[intGradeId]
 			,[intDetailId]
+			,[strTransactionId]
+			,[strSourceTransactionId]
+			,[intSourceTransactionTypeId]
 	)
 	SELECT	[intLotId]					= Detail.intNewLotId 
 			,[intItemId]				= Detail.intNewItemId
@@ -149,6 +152,10 @@ BEGIN
 			,[intOwnershipType]			= SourceLot.intOwnershipType
 			,[intGradeId]				= SourceLot.intGradeId
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
+			,[strTransactionId]			= Header.strAdjustmentNo
+			,[strSourceTransactionId]	= SourceLot.strTransactionId
+			,[intSourceTransactionTypeId] = SourceLot.intSourceTransactionTypeId
+
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 

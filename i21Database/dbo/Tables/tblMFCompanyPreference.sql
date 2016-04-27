@@ -12,5 +12,11 @@
     [ysnBlendSheetRequired] BIT NULL DEFAULT 1, 
 	ysnSanitizationProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSanitizationProcessEnabled] DEFAULT 0,
 	ysnWIPStagingProcessEnabled BIT NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnWIPStagingProcessEnabled] DEFAULT 0,
+	ysnAutoPriorityOrderByDemandRatio bit,
+    ysnDisplayNewOrderByExpectedDate BIT NULL,
+	ysnCheckCrossContamination bit NULL, 
+	dtmWorkOrderCreateDate DATETIME,
+	strSchedulingCutOffTime NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strScheduleType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )

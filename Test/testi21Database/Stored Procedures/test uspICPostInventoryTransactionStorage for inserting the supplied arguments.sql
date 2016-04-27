@@ -3,36 +3,38 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		EXEC testi21Database.[Fake inventory items];
-				
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionStorage', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionType', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;			
 
-		DECLARE	@intItemId INT								= 1
+		DECLARE 
+				@intItemId INT								= 1
 				,@intItemLocationId INT						= 2
 				,@intItemUOMId INT							= 3
 				,@intSubLocationId INT						= 4
 				,@intStorageLocationId INT					= 5
 				,@dtmDate DATETIME							= '01/06/2015'
-				,@dblQty NUMERIC(18, 6)						= 7
-				,@dblUOMQty NUMERIC(18, 6)					= 8
-				,@dblCost NUMERIC(38, 20)					= 9
-				,@dblValue NUMERIC(18, 6)					= 10
+				,@dblQty NUMERIC(38,20)						= 7
+				,@dblUOMQty NUMERIC(38,20)					= 8
+				,@dblCost NUMERIC(38,20)					= 9
+				,@dblValue NUMERIC(38,20)					= 10
 				,@dblSalesPrice NUMERIC(18, 6)				= 11
 				,@intCurrencyId INT							= 12
-				,@dblExchangeRate NUMERIC (38, 20)			= 13
+				,@dblExchangeRate NUMERIC (38,20)			= 13
 				,@intTransactionId INT						= 14
 				,@intTransactionDetailId INT				= 15
 				,@strTransactionId NVARCHAR(40)				= '16'
 				,@strBatchId NVARCHAR(20)					= '17'
 				,@intTransactionTypeId INT					= 18
 				,@intLotId INT								= 19
-				,@strTransactionForm NVARCHAR (255)			= '20'
-				,@intEntityUserSecurityId INT				= 21
-				,@SourceCostBucketStorageId INT				= 22
-				,@InventoryTransactionIdStorageId INT		= 23
+				,@intRelatedInventoryTransactionId INT		= 20
+				,@intRelatedTransactionId INT				= 21
+				,@strRelatedTransactionId NVARCHAR(40)		= '22'
+				,@strTransactionForm NVARCHAR (255)			= '23'
+				,@intEntityUserSecurityId INT				= 24
+				,@intCostingMethod INT						= 25
+				,@InventoryTransactionIdentityId INT		= 26
 
 		CREATE TABLE expected (
 			[intInventoryTransactionStorageId] INT, 
@@ -43,10 +45,10 @@ BEGIN
 			[intStorageLocationId] INT,
 			[intLotId] INT, 
 			[dtmDate] DATETIME,	
-			[dblQty] NUMERIC(18, 6), 
-			[dblUOMQty] NUMERIC(18, 6), 		
+			[dblQty] NUMERIC(38, 20), 
+			[dblUOMQty] NUMERIC(38, 20), 		
 			[dblCost] NUMERIC(38, 20), 
-			[dblValue] NUMERIC(18, 6), 
+			[dblValue] NUMERIC(38, 20), 
 			[dblSalesPrice] NUMERIC(18, 6), 
 			[intCurrencyId] INT,
 			[dblExchangeRate] DECIMAL (38, 20),
@@ -58,8 +60,13 @@ BEGIN
 			[intTransactionTypeId] INT, 		
 			[ysnIsUnposted] BIT,
 			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS,
+			[intRelatedInventoryTransactionId] INT, 
+			[intRelatedTransactionId] INT, 
+			[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
+			[intCostingMethod] INT, 
 			[dtmCreated] DATETIME, 
-			[intCreatedEntityId] INT, 
+			[intCreatedUserId] INT,
+			[intCreatedEntityId] INT,		
 			[intConcurrencyId] INT, 
 		)
 
@@ -72,10 +79,10 @@ BEGIN
 			[intStorageLocationId] INT,
 			[intLotId] INT, 
 			[dtmDate] DATETIME,	
-			[dblQty] NUMERIC(18, 6), 
-			[dblUOMQty] NUMERIC(18, 6), 		
+			[dblQty] NUMERIC(38, 20), 
+			[dblUOMQty] NUMERIC(38, 20), 		
 			[dblCost] NUMERIC(38, 20), 
-			[dblValue] NUMERIC(18, 6), 
+			[dblValue] NUMERIC(38, 20), 
 			[dblSalesPrice] NUMERIC(18, 6), 
 			[intCurrencyId] INT,
 			[dblExchangeRate] DECIMAL (38, 20),
@@ -87,42 +94,48 @@ BEGIN
 			[intTransactionTypeId] INT, 		
 			[ysnIsUnposted] BIT,
 			[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS,
+			[intRelatedInventoryTransactionId] INT, 
+			[intRelatedTransactionId] INT, 
+			[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
+			[intCostingMethod] INT, 
 			[dtmCreated] DATETIME, 
-			[intCreatedEntityId] INT, 
+			[intCreatedUserId] INT,
+			[intCreatedEntityId] INT,		
 			[intConcurrencyId] INT, 
 		)
 
 		INSERT INTO expected (
-			[intInventoryTransactionStorageId]
-			,[intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[intSubLocationId]
+			[intItemId]
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[intSubLocationId] 
 			,[intStorageLocationId]
-			,[intLotId]
-			,[dtmDate]
-			,[dblQty]
-			,[dblUOMQty]
-			,[dblCost]
-			,[dblValue]
-			,[dblSalesPrice]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intTransactionId]
-			,[intTransactionDetailId]
+			,[intLotId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblCost] 
+			,[dblValue] 
+			,[dblSalesPrice] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
 			,[strTransactionId] 
 			,[intInventoryCostBucketStorageId] 
 			,[strBatchId] 
 			,[intTransactionTypeId] 
 			,[ysnIsUnposted] 
 			,[strTransactionForm] 
-			,[dtmCreated] 
+			,[intRelatedInventoryTransactionId] 
+			,[intRelatedTransactionId] 
+			,[strRelatedTransactionId] 
+			,[intCostingMethod] 
 			,[intCreatedEntityId] 
 			,[intConcurrencyId] 
 		)
 		SELECT 
-			[intInventoryTransactionStorageId]	= 1
-			,[intItemId]							= @intItemId
+			[intItemId]								= @intItemId
 			,[intItemLocationId]					= @intItemLocationId
 			,[intItemUOMId]							= @intItemUOMId
 			,[intSubLocationId]						= @intSubLocationId
@@ -139,22 +152,25 @@ BEGIN
 			,[intTransactionId]						= @intTransactionId
 			,[intTransactionDetailId]				= @intTransactionDetailId
 			,[strTransactionId]						= @strTransactionId
-			,[intInventoryCostBucketStorageId]		= @SourceCostBucketStorageId
+			,[intInventoryCostBucketStorageId]		= NULL 
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= @intTransactionTypeId
-			,[ysnIsUnposted]						= 0
+			,[ysnIsUnposted]						= NULL 
 			,[strTransactionForm]					= @strTransactionForm
-			,[dtmCreated]							= dbo.fnRemoveTimeOnDate(GETDATE())
+			,[intRelatedInventoryTransactionId]		= @intRelatedInventoryTransactionId
+			,[intRelatedTransactionId]				= @intRelatedTransactionId
+			,[strRelatedTransactionId]				= @strRelatedTransactionId
+			,[intCostingMethod]						= @intCostingMethod
 			,[intCreatedEntityId]					= @intEntityUserSecurityId
-			,[intConcurrencyId] 					= 1
+			,[intConcurrencyId]						= 1
 	END 
 	
 	-- Act 
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
 		EXEC dbo.uspICPostInventoryTransactionStorage
-				@intItemId
-				,@intItemLocationId
+				@intItemId 
+				,@intItemLocationId 
 				,@intItemUOMId 
 				,@intSubLocationId 
 				,@intStorageLocationId 
@@ -172,67 +188,72 @@ BEGIN
 				,@strBatchId 
 				,@intTransactionTypeId 
 				,@intLotId 
+				,@intRelatedInventoryTransactionId 
+				,@intRelatedTransactionId 
+				,@strRelatedTransactionId 
 				,@strTransactionForm 
 				,@intEntityUserSecurityId 
-				,@SourceCostBucketStorageId 
-				,@InventoryTransactionIdStorageId OUTPUT 
+				,@intCostingMethod 
+				,@InventoryTransactionIdentityId OUTPUT 
 	END 
 
 	-- Assert
 	BEGIN
 		INSERT INTO actual (
-			[intInventoryTransactionStorageId]
-			,[intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[intSubLocationId]
+			[intItemId]
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[intSubLocationId] 
 			,[intStorageLocationId]
-			,[intLotId]
-			,[dtmDate]
-			,[dblQty]
-			,[dblUOMQty]
-			,[dblCost]
-			,[dblValue]
-			,[dblSalesPrice]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intTransactionId]
-			,[intTransactionDetailId]
+			,[intLotId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblCost] 
+			,[dblValue] 
+			,[dblSalesPrice] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
 			,[strTransactionId] 
 			,[intInventoryCostBucketStorageId] 
 			,[strBatchId] 
 			,[intTransactionTypeId] 
-			,[ysnIsUnposted] 
 			,[strTransactionForm] 
-			,[dtmCreated] 
+			,[intRelatedInventoryTransactionId] 
+			,[intRelatedTransactionId] 
+			,[strRelatedTransactionId] 
+			,[intCostingMethod] 
 			,[intCreatedEntityId] 
-			,[intConcurrencyId] 		
+			,[intConcurrencyId] 	
 		)
 		SELECT
-			[intInventoryTransactionStorageId]
-			,[intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[intSubLocationId]
+			[intItemId]
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[intSubLocationId] 
 			,[intStorageLocationId]
-			,[intLotId]
-			,[dtmDate]
-			,[dblQty]
-			,[dblUOMQty]
-			,[dblCost]
-			,[dblValue]
-			,[dblSalesPrice]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intTransactionId]
-			,[intTransactionDetailId]
+			,[intLotId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblCost] 
+			,[dblValue] 
+			,[dblSalesPrice] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
 			,[strTransactionId] 
 			,[intInventoryCostBucketStorageId] 
 			,[strBatchId] 
 			,[intTransactionTypeId] 
-			,[ysnIsUnposted] 
 			,[strTransactionForm] 
-			,dbo.fnRemoveTimeOnDate(dtmCreated)
+			,[intRelatedInventoryTransactionId] 
+			,[intRelatedTransactionId] 
+			,[strRelatedTransactionId] 
+			,[intCostingMethod] 
 			,[intCreatedEntityId] 
 			,[intConcurrencyId] 
 		FROM dbo.tblICInventoryTransactionStorage
@@ -240,7 +261,6 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END 
 
-	select * from tblICInventoryTransactionStorage
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

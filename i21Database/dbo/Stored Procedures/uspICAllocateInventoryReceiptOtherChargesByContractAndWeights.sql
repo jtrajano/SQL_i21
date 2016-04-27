@@ -55,15 +55,17 @@ BEGIN
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
 							,intContractId
+							,intContractDetailId
 							,intEntityVendorId
 							,ysnInventoryCost
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY ysnAccrue, intContractId, intContractDetailId, intEntityVendorId, ysnInventoryCost
 				) CalculatedCharges 
 					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					AND ReceiptItem.intLineNo = CalculatedCharges.intContractDetailId
 			LEFT JOIN dbo.tblICItemUOM StockUOM
 				ON StockUOM.intItemId = ReceiptItem.intItemId
 				AND StockUOM.ysnStockUnit = 1
@@ -84,7 +86,7 @@ BEGIN
 	END 
 END
 
--- Allocate by cost by 'Weight' on cost methods using 'Per Unit' and 'Percentage' 
+-- Allocate cost by 'Weight' and by Contract and cost methods used are 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
 	MERGE	
@@ -109,6 +111,7 @@ BEGIN
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue
 							,intContractId
+							,intContractDetailId
 							,intEntityVendorId
 							,ysnInventoryCost
 							,intInventoryReceiptId
@@ -117,12 +120,14 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intContractId, intContractDetailId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					AND ReceiptItem.intLineNo = CalculatedCharges.intContractDetailId
 				LEFT JOIN (
 					SELECT  dblTotalWeight = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
 							,ReceiptItem.intOrderId 
+							,ReceiptItem.intLineNo
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
 								AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
@@ -137,7 +142,7 @@ BEGIN
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 							AND ReceiptItem.intOrderId IS NOT NULL 
 							AND StockUOM.intItemUOMId IS NOT NULL 
-					GROUP BY ReceiptItem.intOrderId
+					GROUP BY ReceiptItem.intOrderId, ReceiptItem.intLineNo
 				) TotalWeightOfItemsPerContract 
 					ON TotalWeightOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
 	) AS Source_Query  
@@ -151,11 +156,10 @@ BEGIN
 		UPDATE 
 		SET		dblAmount = ROUND (
 								ISNULL(dblAmount, 0) 
-								+ (
-									Source_Query.dblTotalOtherCharge
-									* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
-									/ Source_Query.dblTotalWeight 
-								)
+								+  dbo.fnDivide(
+									dbo.fnMultiply(Source_Query.dblTotalOtherCharge , dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty))
+									,Source_Query.dblTotalWeight 
+								)								
 								, 2
 							)
 	-- Create a new allocation record for the item. 
@@ -175,9 +179,10 @@ BEGIN
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
 			,ROUND (
-				Source_Query.dblTotalOtherCharge
-				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
-				/ Source_Query.dblTotalWeight 
+				dbo.fnDivide(
+					dbo.fnMultiply(Source_Query.dblTotalOtherCharge, dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty))
+					,Source_Query.dblTotalWeight 
+				)
 				, 2
 			)
 			,Source_Query.ysnAccrue

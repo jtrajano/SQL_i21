@@ -372,9 +372,21 @@ SET @strmessage = 'Split Lot for %s is not allowed because it will be a split to
 EXEC sp_addmessage 80073,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80074) EXEC sp_dropmessage 80074, 'us_english'	
-SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
+SET @strmessage = 'The lot %s is assigned to the same item. Item change requires a different item.'
 EXEC sp_addmessage 80074,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80075) EXEC sp_dropmessage 80075, 'us_english'	
-SET @strmessage = 'Unable to update %s. It is posted. Please unpost it first.'
+SET @strmessage = 'Item %s is invalid. It must be lot tracked.'
 EXEC sp_addmessage 80075,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80076) EXEC sp_dropmessage 80076, 'us_english'	
+SET @strmessage = 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
+EXEC sp_addmessage 80076,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80077) EXEC sp_dropmessage 80077, 'us_english'	
+SET @strmessage = 'Unable to update %s. It is posted. Please unpost it first.'
+EXEC sp_addmessage 80077,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80078) EXEC sp_dropmessage 80078, 'us_english'	
+SET @strmessage = 'Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.'
+EXEC sp_addmessage 80078,11,@strmessage,'us_english','False'

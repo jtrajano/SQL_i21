@@ -24,6 +24,7 @@
 :r .\1_TM\4_1420_to_1430.sql
 :r .\1_TM\5_1430_to_1440.sql
 :r .\1_TM\6_1510_to_1520.sql
+:r .\1_TM\7_DropView.sql
 
 -- CM
 :r .\2_CM\1_CM.sql
@@ -79,7 +80,7 @@
 -- FRD
 :r .\9_FRD\1_1420_to_1430.sql
 :r .\9_FRD\2_1440_to_1510.sql
-:r .\9_FRD\3_1510_to_1540.sql
+:r .\9_FRD\3_1540_to_1610.sql
 
 -- RPT
 :r .\10_RPT\1_1430_to_1430.sql
@@ -139,3 +140,6 @@
 
 --MF
 :r .\19_MF\01_Recipe_UOM_Update.sql
+
+--CF
+:r .\20_CF\FixeDataWithContraints.sql

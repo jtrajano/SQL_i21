@@ -2,19 +2,25 @@
 	AS
 
 SELECT 
+	ReceiptItem.intInventoryReceiptId,
 	ReceiptItem.intInventoryReceiptItemId,
 	ReceiptItem.intOrderId,
 	Receipt.strReceiptType,
+	Receipt.intSourceType,
+	strSourceType = (
+		CASE WHEN Receipt.intSourceType = 1 THEN 'Scale'
+			WHEN Receipt.intSourceType = 2 THEN 'Inbound Shipment'
+			WHEN Receipt.intSourceType = 3 THEN 'Transport'
+			WHEN Receipt.intSourceType = 0 THEN 'None'
+		END),
 	strOrderNumber = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
-				THEN ISNULL(ContractView.strContractNumber, 'Contract No not found!')
+				THEN ContractView.strContractNumber
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN ISNULL(POView.strPurchaseOrderNumber, 'PO Number not found!')
-			WHEN Receipt.strReceiptType = 'Transfer Receipt'
-				THEN NULL
-			WHEN Receipt.strReceiptType = 'Direct Transfer'
-				THEN NULL
+				THEN POView.strPurchaseOrderNumber
+			WHEN Receipt.strReceiptType = 'Transfer Order'
+				THEN TransferView.strTransferNo
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
 			ELSE NULL
@@ -25,10 +31,8 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 				THEN ContractView.dtmContractDate
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN (SELECT ISNULL(dtmDate, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
-			WHEN Receipt.strReceiptType = 'Transfer Receipt'
-				THEN NULL
-			WHEN Receipt.strReceiptType = 'Direct Transfer'
+				THEN (SELECT dtmDate FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
+			WHEN Receipt.strReceiptType = 'Transfer Order'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
@@ -40,9 +44,9 @@ SELECT
 			CASE WHEN Receipt.intSourceType = 1 -- Scale
 				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = ReceiptItem.intSourceId)
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
-				THEN CAST(ISNULL(LogisticsView.intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50))
+				THEN CAST(ISNULL(LogisticsView.intTrackingNumber, '')AS NVARCHAR(50))
 			WHEN Receipt.intSourceType = 3 -- Transport
-				THEN ISNULL(TransportView.strTransaction, 'Transport not found!')
+				THEN ISNULL(TransportView_New.strTransaction, TransportView_Old.strTransaction) 
 			ELSE NULL
 			END
 		),
@@ -51,20 +55,20 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 				THEN (
 					CASE WHEN Receipt.intSourceType = 0 -- None
-						THEN ISNULL(ContractView.strItemUOM, 'Contract No not found!') 
+						THEN ContractView.strItemUOM
 					WHEN Receipt.intSourceType = 1 -- Scale
 						THEN NULL
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
-						THEN ISNULL(LogisticsView.strUnitMeasure, 'Inbound Shipment not found!')
+						THEN LogisticsView.strUnitMeasure
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN (SELECT ISNULL(strUnitMeasure, 'Transport not found!')  FROM tblICItemUOM LEFT JOIN tblICUnitMeasure ON tblICUnitMeasure.intUnitMeasureId = tblICItemUOM.intUnitMeasureId WHERE intItemUOMId = ReceiptItem.intUnitMeasureId)
+						THEN ItemUOM.strUnitMeasure
 					ELSE NULL
 					END
 				)
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN POView.strUOM
 			WHEN Receipt.strReceiptType = 'Transfer Order'
-				THEN NULL
+				THEN TransferView.strUnitMeasure
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
 			ELSE NULL
@@ -81,16 +85,14 @@ SELECT
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblItemUOMCF, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN (SELECT ISNULL(dblUnitQty, 'Transport not found!')  FROM tblICItemUOM WHERE intItemUOMId = ReceiptItem.intUnitMeasureId)
+						THEN ItemUOM.dblUnitQty
 					ELSE NULL
 					END
 				)
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN POView.dblItemUOMCF
-			WHEN Receipt.strReceiptType = 'Transfer Receipt'
-				THEN 0
-			WHEN Receipt.strReceiptType = 'Direct Transfer'
-				THEN 0
+			WHEN Receipt.strReceiptType = 'Transfer Order'
+				THEN TransferView.dblItemUOMCF
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
 			ELSE NULL
@@ -111,14 +113,14 @@ SELECT
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblQuantity, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN ISNULL(TransportView.dblOrderedQuantity, 0)
+						THEN ISNULL(ISNULL(TransportView_New.dblOrderedQuantity, TransportView_Old.dblOrderedQuantity), 0) 
 					ELSE NULL
 					END
 				)
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN ISNULL(POView.dblQtyOrdered, 0.00)
 			WHEN Receipt.strReceiptType = 'Transfer Order'
-				THEN 0.00
+				THEN ISNULL(TransferView.dblQuantity, 0.00)
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN 0.00
 			ELSE 0.00
@@ -138,7 +140,7 @@ SELECT
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN ISNULL(LogisticsView.dblReceivedQty, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
-						THEN ISNULL(TransportView.dblReceivedQuantity, 0)
+						THEN ISNULL(ISNULL(TransportView_New.dblReceivedQuantity, TransportView_Old.dblReceivedQuantity), 0) 
 					ELSE NULL
 					END
 				)
@@ -168,8 +170,33 @@ SELECT
 		)
 	, ContractView.ysnLoad
 	, ContractView.dblAvailableQty
+	, dblFranchise =
+		(
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+				THEN (
+					CASE WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+						THEN LogisticsView.dblFranchise
+					ELSE 0.00
+					END
+				)
+			ELSE 0.00
+			END
+		)
+	, dblContainerWeightPerQty =
+		(
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+				THEN (
+					CASE WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+						THEN LogisticsView.dblContainerWeightPerQty
+					ELSE 0.00
+					END
+				)
+			ELSE 0.00
+			END
+		)
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 LEFT JOIN vyuCTContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Contract'
@@ -178,9 +205,18 @@ LEFT JOIN vyuLGShipmentContainerReceiptContracts LogisticsView
 		AND intShipmentBLContainerId = ReceiptItem.intContainerId
 		AND strReceiptType = 'Purchase Contract'
 		AND intSourceType = 2
-LEFT JOIN vyuTRTransportReceipt TransportView
-	ON TransportView.intTransportReceiptId = ReceiptItem.intSourceId
+
+LEFT JOIN vyuTRTransportReceipt_New TransportView_New
+	ON TransportView_New.intTransportReceiptId = ReceiptItem.intSourceId
 		AND intSourceType = 3
+
+LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
+	ON TransportView_Old.intTransportReceiptId = ReceiptItem.intSourceId
+	AND intSourceType = 3
+
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Order'
+LEFT JOIN vyuICGetInventoryTransferDetail TransferView
+	ON TransferView.intInventoryTransferDetailId = ReceiptItem.intLineNo
+		AND strReceiptType = 'Transfer Order'

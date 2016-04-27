@@ -12,6 +12,8 @@ BEGIN TRY
 	---Header Variables	
 	DECLARE @Entityid INT
 	DECLARE @ItemId INT
+	DECLARE @intUnitMeasureId INT
+	DECLARE @intSourceItemUOMId INT
 	DECLARE @TicketNo NVARCHAR(20)
 	DECLARE @UserKey INT
 	DECLARE @UserName NVARCHAR(100)	
@@ -21,17 +23,23 @@ BEGIN TRY
 	DECLARE @CurrentItemOpenBalance DECIMAL(24, 10)
 	DECLARE @intCustomerStorageId INT
 	DECLARE @dblStorageUnits DECIMAL(24, 10)
+	DECLARE @dblNegativeStorageUnits DECIMAL(24, 10)
 	DECLARE @dblOpenBalance DECIMAL(24, 10)
 	DECLARE @strStorageTicketNumber NVARCHAR(50)
 	DECLARE @intCompanyLocationId INT
 	DECLARE @intStorageTypeId INT
 	DECLARE @intStorageScheduleId INT
+	DECLARE @DPContractHeaderId INT
+	DECLARE @ContractHeaderId INT
+	DECLARE @ContractDetailId INT
+	DECLARE @dblDPStorageUnits DECIMAL(24, 10)
 	
 	--Contract Varibales
 	DECLARE @SettleContractKey INT
 	DECLARE @intContractDetailId INT
 	DECLARE @intContractHeaderId INT
 	DECLARE @dblContractUnits DECIMAL(24, 10)
+	DECLARE @dblNegativeContractUnits DECIMAL(24, 10)
 	DECLARE @strContractNumber NVARCHAR(50)
 	DECLARE @ContractEntityId INT
 	DECLARE @dblAvailableQty DECIMAL(24, 10)
@@ -69,6 +77,7 @@ BEGIN TRY
 		,intCompanyLocationId INT
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
+		,intContractHeaderId INT	
 	)
 
 	CREATE TABLE #SettleStorageCopy 
@@ -81,6 +90,7 @@ BEGIN TRY
 		,intCompanyLocationId INT
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
+		,intContractHeaderId INT		
 	)
 
 	DECLARE @SettleContract AS TABLE 
@@ -129,6 +139,7 @@ BEGIN TRY
 			,intCompanyLocationId
 			,intStorageTypeId
 			,intStorageScheduleId
+			,intContractHeaderId
 		)
 	SELECT intCustomerStorageId
 		,dblUnits
@@ -137,6 +148,7 @@ BEGIN TRY
 		,intCompanyLocationId
 		,intStorageTypeId
 		,intStorageScheduleId
+		,intContractHeaderId INT
 	FROM OPENXML(@idoc, 'root/SettleStorage', 2) WITH 
 	(
 			intCustomerStorageId INT
@@ -146,6 +158,7 @@ BEGIN TRY
 			,intCompanyLocationId INT
 			,intStorageTypeId INT
 			,intStorageScheduleId INT
+			,intContractHeaderId INT
 	)
 	
 	INSERT INTO @SettleContract 
@@ -186,10 +199,25 @@ BEGIN TRY
 			,dblSpotPrice DECIMAL(24, 10)
 			,dblSpotBasis DECIMAL(24, 10)
 			,dblSpotCashPrice DECIMAL(24, 10)
-	)	
-
+	)
 	
+	SELECT @intUnitMeasureId=a.intUnitMeasureId 
+	FROM tblICCommodityUnitMeasure a 
+	JOIN tblICItem b ON b.intCommodityId=a.intCommodityId
+	WHERE b.intItemId=@ItemId AND a.ysnStockUnit=1
 	
+	IF @intUnitMeasureId IS NULL 
+	BEGIN
+		RAISERROR('The stock UOM of the commodity must be set for item', 16, 1);
+		RETURN;
+	END	
+	
+	IF NOT EXISTS(SELECT 1 FROM tblICItemUOM WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId)
+	BEGIN
+		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
+	END
+				
+	SELECT @intSourceItemUOMId=intItemUOMId FROM tblICItemUOM UOM  WHERE intItemId = @ItemId AND intUnitMeasureId = @intUnitMeasureId
 		
 	SELECT @SettleStorageKey = MIN(intSettleStorageKey)	FROM #SettleStorage	WHERE dblStorageUnits > 0
 	
@@ -201,26 +229,10 @@ BEGIN TRY
 	SET @intStorageTypeId = NULL
 	SET @intStorageScheduleId = NULL
 	SET @CurrentItemOpenBalance = NULL
-	
-		--SELECT @CurrentItemOpenBalance = dblOpenBalance
-		--FROM tblGRCustomerStorage
-		--WHERE intCustomerStorageId = @intCustomerStorageId
-		
-		--SELECT @intCustomerStorageId
-	
-		--IF @CurrentItemOpenBalance IS NULL
-		--BEGIN
-		--	SET @ErrMsg = 'The ticket ' + LTRIM(@strStorageTicketNumber) + ' has been deleted by another user.  Settle Process cannot proceed.'
-		--	RAISERROR (@ErrMsg,16,1)
-		--END
-		
-		--IF @CurrentItemOpenBalance <> @dblOpenBalance
-		--BEGIN
-		--	SET @ErrMsg = 'The Open balance of ticket ' + LTRIM(@strStorageTicketNumber) + ' has been modified by another user.  Settle Process cannot proceed.'
-		--	RAISERROR (@ErrMsg,16,1)
-		--END
-		
-		
+	SET @dblDPStorageUnits=NULL
+	SET @DPContractHeaderId = NULL
+	SET @ContractDetailId = NULL
+
 	WHILE @SettleStorageKey > 0
 	BEGIN
 		SELECT @intCustomerStorageId = intCustomerStorageId
@@ -229,9 +241,25 @@ BEGIN TRY
 			,@strStorageTicketNumber = strStorageTicketNumber
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intStorageTypeId = intStorageTypeId
-			,@intStorageScheduleId = intStorageScheduleId		
+			,@intStorageScheduleId = intStorageScheduleId
+			,@DPContractHeaderId=intContractHeaderId		
 		FROM #SettleStorage
-		WHERE intSettleStorageKey = @SettleStorageKey	
+		WHERE intSettleStorageKey = @SettleStorageKey
+		
+		IF ISNULL(@DPContractHeaderId,0)>0
+		BEGIN
+			SELECT @ContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@DPContractHeaderId
+			SET @dblDPStorageUnits= - @dblStorageUnits
+
+			 EXEC uspCTUpdateSequenceQuantityUsingUOM 
+			 @intContractDetailId=@ContractDetailId
+			,@dblQuantityToUpdate=@dblDPStorageUnits
+			,@intUserId=@UserKey
+			,@intExternalId=@intCustomerStorageId
+			,@strScreenName='Settle Storage'
+			,@intSourceItemUOMId=@intSourceItemUOMId
+
+		END	
 		
 		IF EXISTS (SELECT 1 FROM @SettleContract WHERE dblContractUnits > 0 )
 		BEGIN
@@ -245,6 +273,7 @@ BEGIN TRY
 			SET @strContractType = NULL
 			SET @dblCashPrice = NULL
 			SET @intContractHeaderId = NULL
+			SET @dblNegativeContractUnits=NULL
 			
 			
 
@@ -264,18 +293,19 @@ BEGIN TRY
 
 				IF @dblStorageUnits <= @dblContractUnits
 				BEGIN
-					
+					SET @dblNegativeStorageUnits= - @dblStorageUnits					
 
 					UPDATE @SettleContract SET dblContractUnits = dblContractUnits - @dblStorageUnits WHERE intSettleContractKey = @SettleContractKey
 															
 					UPDATE #SettleStorage SET dblStorageUnits = 0 WHERE intSettleStorageKey = @SettleStorageKey
 					
-					EXEC uspCTUpdateScheduleQuantity 
+					EXEC uspCTUpdateSequenceQuantityUsingUOM 
 						 @intContractDetailId=@intContractDetailId
-						,@dblQuantityToUpdate=@dblStorageUnits
+						,@dblQuantityToUpdate=@dblNegativeStorageUnits
 						,@intUserId=@UserKey
 						,@intExternalId=@intCustomerStorageId
 						,@strScreenName='Settle Storage'
+						,@intSourceItemUOMId=@intSourceItemUOMId
 										
 					Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblStorageUnits Where intCustomerStorageId=@intCustomerStorageId
 
@@ -313,18 +343,19 @@ BEGIN TRY
 				ELSE
 				BEGIN
 
-					
+					SET @dblNegativeStorageUnits= - @dblContractUnits
 						
 					UPDATE @SettleContract SET dblContractUnits = dblContractUnits - @dblContractUnits WHERE intSettleContractKey = @SettleContractKey
 
 					UPDATE #SettleStorage SET dblStorageUnits = 0 WHERE intSettleStorageKey = @SettleStorageKey
 
-					EXEC uspCTUpdateScheduleQuantity 
+					EXEC uspCTUpdateSequenceQuantityUsingUOM 
 						 @intContractDetailId=@intContractDetailId
-						,@dblQuantityToUpdate=@dblContractUnits
+						,@dblQuantityToUpdate=@dblNegativeStorageUnits
 						,@intUserId=@UserKey
 						,@intExternalId=@intCustomerStorageId
 						,@strScreenName='Settle Storage'
+						,@intSourceItemUOMId=@intSourceItemUOMId
 						
 					Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblContractUnits Where intCustomerStorageId=@intCustomerStorageId
 						
@@ -368,6 +399,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					)
 					SELECT 
 						 intSettleStorageKey
@@ -378,6 +410,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					FROM #SettleStorage WHERE intSettleStorageKey > @SettleStorageKey
 
 					DELETE FROM #SettleStorage WHERE intSettleStorageKey > @SettleStorageKey
@@ -393,6 +426,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 						)
 					SELECT @SettleStorageKey + 1
 						,@intCustomerStorageId
@@ -402,6 +436,7 @@ BEGIN TRY
 						,@intCompanyLocationId
 						,@intStorageTypeId
 						,@intStorageScheduleId
+						,ISNULL(@DPContractHeaderId,0)
 
 					SET IDENTITY_INSERT [dbo].[#SettleStorage] OFF
 
@@ -414,6 +449,7 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					)
 					SELECT intCustomerStorageId
 						,dblStorageUnits
@@ -422,9 +458,10 @@ BEGIN TRY
 						,intCompanyLocationId
 						,intStorageTypeId
 						,intStorageScheduleId
+						,intContractHeaderId
 					FROM #SettleStorageCopy
 
-					DELETE FROM #SettleStorageCopy
+					DELETE FROM #SettleStorageCopy				
 					
 					BREAK;
 				END
@@ -435,8 +472,78 @@ BEGIN TRY
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey) FROM [#SettleStorage] WHERE intSettleStorageKey > @SettleStorageKey AND dblStorageUnits > 0
 			
 		END
-		ELSE
-		
+		ELSE IF @dblSpotUnits >0
+		BEGIN
+			 
+			 IF @dblStorageUnits<=@dblSpotUnits
+			 BEGIN
+			 Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblStorageUnits Where intCustomerStorageId=@intCustomerStorageId
+
+					--CREATE History For Storage Ticket
+					INSERT INTO [dbo].[tblGRStorageHistory] 
+					(
+					 [intConcurrencyId]
+					,[intCustomerStorageId]	
+					,[intInvoiceId]
+					,[intContractHeaderId]
+					,[dblUnits]
+					,[dtmHistoryDate]					
+					,[strType]
+					,[strUserName]					
+					,[intEntityId]
+					,[strSettleTicket]					
+					)
+				VALUES 
+				   (
+					1
+					,@intCustomerStorageId
+					,NULL
+					,NULL
+					,@dblStorageUnits				
+					,GETDATE()					
+					,'Settlement'
+					,@UserName				
+					,NULL
+					,@TicketNo
+					)
+				SET @dblSpotUnits=@dblSpotUnits-@dblStorageUnits
+			 END
+			 ELSE
+			 BEGIN
+			   Update tblGRCustomerStorage SET dblOpenBalance=dblOpenBalance-@dblSpotUnits Where intCustomerStorageId=@intCustomerStorageId
+
+					--CREATE History For Storage Ticket
+					INSERT INTO [dbo].[tblGRStorageHistory] 
+					(
+					 [intConcurrencyId]
+					,[intCustomerStorageId]	
+					,[intInvoiceId]
+					,[intContractHeaderId]
+					,[dblUnits]
+					,[dtmHistoryDate]					
+					,[strType]
+					,[strUserName]					
+					,[intEntityId]
+					,[strSettleTicket]					
+					)
+				VALUES 
+				   (
+					1
+					,@intCustomerStorageId
+					,NULL
+					,NULL
+					,@dblSpotUnits				
+					,GETDATE()					
+					,'Settlement'
+					,@UserName				
+					,NULL
+					,@TicketNo
+					)
+				SET @dblSpotUnits=0
+			 END
+
+		END
+		ELSE				
 			BREAK;
 	END
 		

@@ -2,7 +2,7 @@
 	DROP PROCEDURE uspSMSyncCompanyLocation
 GO
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix IN ('AG', 'GR') and strDBName = db_name() ORDER BY ysnUsed DESC) = 1
 BEGIN
 
 	EXEC('CREATE PROCEDURE uspSMSyncCompanyLocation  
@@ -45,7 +45,7 @@ BEGIN
        -- BEGIN  
   
          UPDATE tblSMCompanyLocation -- Uncomment Once strLocationNumberhas been adde to strLocationNumber  
-         SET strLocationNumber = @GreaterNumber + 1  
+         SET strLocationNumber = RIGHT(''000'' + CAST(@GreaterNumber + 1 AS VARCHAR(3)),3)--@GreaterNumber + 1  
          WHERE intCompanyLocationId = @TopLocId  
         --END  
           

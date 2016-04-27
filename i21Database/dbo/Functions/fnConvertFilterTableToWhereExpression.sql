@@ -49,20 +49,20 @@ BEGIN
 			WHEN @Condition ='Greater Than' THEN '>'
 			WHEN @Condition ='Greater Than Or Equal' THEN '>='
 			WHEN @Condition ='Less Than' THEN '<'
-			WHEN @Condition IN ('Less Than Or Equal','As Of') THEN '<='
+			WHEN @Condition IN ('Less Than Or Equal') THEN '<='
 			WHEN (@Condition = 'Custom' AND @From <> '' AND @To <>'') or
 				 @Condition like '%Date'  or
 				 @Condition like '%Month' or
 				 @Condition like '%Period' or
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
-				 @Condition = 'Between' or
-				 @Condition = 'As Of' THEN 'Between'
+				 @Condition  = 'As Of' or
+				 @Condition = 'Between' THEN 'Between'
 			END + ' '
 			
 		Select @Result +=
  			CASE WHEN @Condition IN('Equal To','Not Equal To','Greater Than',
-			'Greater Than Or Equal','Less Than','Less Than Or Equal','As Of') or
+			'Greater Than Or Equal','Less Than','Less Than Or Equal') or
 			(@Condition = 'Custom' AND @From <> '' AND @To ='') 
 			THEN '''' + @From + ''''
 			WHEN @Condition like '%Date'  or
@@ -70,11 +70,11 @@ BEGIN
 				 @Condition like '%Period' or
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
-				 @Condition = 'As Of' or
 				 @Condition = 'Between' or
+				 @Condition  = 'As Of' or
 				 (@Condition = 'Custom' AND @From <> '' AND @To <> '') 
 			THEN '''' + @From + '''' + ' AND ' + '''' + @To + ''''
-			WHEN @Condition = 'Starts With' THEN '''' + @From + '%' + ''''
+			WHEN @Condition = 'Starts With' THEN ' ' + @From + '%' + ''''
 			WHEN @Condition = 'Ends With' THEN '''' + '%' + @From + ''''
 			END + ' '
 		SET @Counter +=1

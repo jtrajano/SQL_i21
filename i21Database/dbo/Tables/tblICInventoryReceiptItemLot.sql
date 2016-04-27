@@ -24,6 +24,7 @@ Type the overview for the table here.
 		[dblGrossWeight] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblTareWeight] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+		[intNoPallet] INT NULL DEFAULT ((0)),
 		[intUnitPallet] INT NULL DEFAULT ((0)), 
 		[dblStatedGrossPerUnit] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblStatedTarePerUnit] NUMERIC(38, 20) NULL DEFAULT ((0)), 

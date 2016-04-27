@@ -11,6 +11,8 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, ShipmentCharge.dblRate
 	, strCostUOM = UOM.strUnitMeasure
 	, Charge.strUnitType
+	, ShipmentCharge.intCurrencyId
+	, Currency.strCurrency
 	, Charge.intOnCostTypeId
 	, Charge.ysnPrice
 	, strOnCostType = Charge.strOnCostType
@@ -24,3 +26,4 @@ FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 	LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = ShipmentCharge.intEntityVendorId
 	LEFT JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ShipmentCharge.intContractId
+	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentCharge.intCurrencyId

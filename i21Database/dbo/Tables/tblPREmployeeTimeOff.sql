@@ -4,7 +4,7 @@
     [intTypeTimeOffId]     INT             NOT NULL,
     [dblRate]              NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblRa__73341951] DEFAULT ((0)) NULL,
     [dblPerPeriod]         NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblPe__74283D8A] DEFAULT ((0)) NULL,
-    [strPeriod]            NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPREmpl__strPe__751C61C3] DEFAULT ((0)) NULL,
+    [strPeriod]            NVARCHAR (30)   COLLATE Latin1_General_CI_AS  NULL,
 	[dblRateFactor]        NUMERIC (18, 6) DEFAULT ((1)) NULL,
     [strAwardPeriod]       NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPREmpl__strAw__761085FC] DEFAULT ((0)) NULL,
     [dblMaxCarryover]      NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblMa__7704AA35] DEFAULT ((0)) NULL,

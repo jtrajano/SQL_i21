@@ -17,11 +17,11 @@ BEGIN
 				,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
 				,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
-				,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 24
-				,@INV_TRANS_TYPE_Revalue_WIP AS INT = 26
-				,@INV_TRANS_TYPE_Revalue_Produced AS INT = 27
-				,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 28
-				,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 29
+				,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
+				,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
+				,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
+				,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
+				,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -255,7 +255,7 @@ BEGIN
 			,dblCredit					= 12.00
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= 'AUTO NEGATIVE WHEAT-DEFAULT'
+			,strDescription				= 'Auto Variance WHEAT-DEFAULT'
 			,strCode					= 'ICA'
 			,strReference				= ''
 			,intCurrencyId				= @USD

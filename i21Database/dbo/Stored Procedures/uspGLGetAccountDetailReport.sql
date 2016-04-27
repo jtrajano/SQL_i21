@@ -1,5 +1,4 @@
-﻿/****** Object:  StoredProcedure [dbo].[uspGLGetAccountDetailReport]    Script Date: 10/30/2015 7:17:16 PM ******/
-CREATE PROCEDURE [dbo].[uspGLGetAccountDetailReport]
+﻿CREATE PROCEDURE [dbo].[uspGLGetAccountDetailReport]
 (@xmlParam NVARCHAR(MAX)= '')
 as
 BEGIN
@@ -68,15 +67,19 @@ BEGIN
 						, [datatype] nvarchar(50))  
 		
 	DELETE FROM @filterTable WHERE [from] IS NULL OR RTRIM([from]) = ''
+	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
+	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
+	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'PrimaryAccount' 
+	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account' 
+	delete FROM @filterTable WHERE [condition]= 'All Date'
+
+
 	SELECT TOP 1 @strAccountIdFrom= ISNULL([from],'') , @strAccountIdTo = ISNULL([to],'') ,@strAccountIdCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'strAccountId' 
-	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = 'Primary Account' 
+	SELECT TOP 1 @strPrimaryCodeFrom= ISNULL([from],'') , @strPrimaryCodeTo = ISNULL([to],'') ,@strPrimaryCodeCondition =ISNULL([condition],'') from  @filterTable WHERE [fieldname] = '[Primary Account]' 
 	SELECT TOP 1 @dtmDateFrom= ISNULL([from],'') , @dtmDateTo = ISNULL([to],'') from  @filterTable WHERE [fieldname] = 'dtmDate' 
 
 	
-	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
-	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
-	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account' 
-	delete FROM @filterTable WHERE [condition]= 'All Date'
+	
 	
 	IF EXISTS(
 	SELECT TOP 1 1 FROM @filterTable WHERE
@@ -227,21 +230,24 @@ OUTER APPLY(SELECT * from GLAccountBalance  bal WHERE bal.intAccountId = A.intAc
 OUTER APPLY(SELECT dblLbsPerUnit from Units u WHERE u.intAccountId = A.intAccountId) U
 OUTER APPLY(SELECT TOP 1 strCompanyName from tblSMCompanySetup) C
 WHERE ISNULL(A.ysnIsUnposted ,0) = 0 
-AND A.intAccountId NOT IN (SELECT DISTINCT(intRetainAccount) FROM tblGLFiscalYear)
 ) '
 
 DELETE FROM @filterTable WHERE fieldname = 'dtmDate'
 DECLARE @Where1 NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filterTable)
 
-SELECT @sqlCte += dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,'cteRetain2',@Where1)
-SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  CASE WHEN @Where <> 'Where' THEN  @Where END +' )'-- UNION ALL SELECT ' + @cols + ' from cteRetain2 )'
-SELECT @sqlCte+= ',cteBase as (SELECT '+ @cols +' from cteBase1 UNION ALL SELECT ' + @cols + ' FROM  cteRetain2)'
+DECLARE @sqlRetain NVARCHAR(MAX) = dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,@dtmDateTo,'cteRetain2',@Where1)
+
+IF @sqlRetain <> 'Retained Earnings Activity Not Displayed'
+	SELECT @sqlCte += @sqlRetain
+
+SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  CASE WHEN @Where <> 'Where' THEN  @Where ELSE '' END +' )'-- UNION ALL SELECT ' + @cols + ' from cteRetain2 )'
 
 
+SELECT @sqlCte+= ',cteBase as (SELECT '+ @cols +' from cteBase1 ' +  CASE WHEN  @sqlRetain <> 'Retained Earnings Activity Not Displayed' THEN ' UNION ALL SELECT ' + @cols + ' FROM  cteRetain2)' ELSE ')' END
 
-
-
-IF @dtmDateFrom <> ''
+IF @dtmDateFrom = '' OR (@strAccountIdFrom = '' AND @strPrimaryCodeFrom = '')
+	SELECT @sqlCte +=	' select * from cteBase '
+ELSE
 BEGIN
 	DECLARE @cols1 NVARCHAR(MAX) = ''
 	SELECT @cols1 = REPLACE (@cols,'dtmDate','''' + @dtmDateFrom  + '''' + ' as dtmDate')
@@ -260,70 +266,11 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'strUOMCode,',''''' as strUOMCode,')
 	SELECT @cols1 = REPLACE (@cols1,'Location,',''''' as Location,')
 
-	IF @strAccountIdFrom = '' AND @strPrimaryCodeFrom = ''
-	BEGIN
-	SET @sqlCte +=
-		',cteInactive (accountId,id)AS
-		(
-			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId NOT IN(SELECT strAccountId FROM cteBase)
-			GROUP BY strAccountId
-		),
-		cte1 
-		AS(
-			SELECT * FROM RAWREPORT	A join cteInactive B
-			ON B.accountId = A.strAccountId 
-			AND B.id = A.intGLDetailId
-		)'
-		
+	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1)'
+	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + CASE WHEN @Where1 <> 'Where' THEN  @Where1 ELSE '' END + ' GROUP BY strAccountId),
+		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
+	SELECT @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
 	END
 
-	IF @strAccountIdFrom <> ''  AND @strPrimaryCodeFrom = ''
-	BEGIN
-
-
-	SET @sqlCte +=
-		',cteInactive (accountId,id)AS
-		(
-			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE strAccountId BETWEEN ''' + @strAccountIdFrom + '''  AND CASE WHEN ''' + @strAccountIdTo + ''' = '''' THEN ''' + @strAccountIdFrom + ''' ELSE ''' + @strAccountIdTo + ''' END 
-			AND strAccountId NOT IN(SELECT strAccountId FROM cteBase)
-			GROUP BY strAccountId
-		),
-		cte1 
-		AS(
-			SELECT * FROM RAWREPORT	A join cteInactive B
-			ON B.accountId = A.strAccountId 
-			AND B.id = A.intGLDetailId
-		
-		)'
-		
-	END
-	IF @strAccountIdFrom IS NULL  AND @strPrimaryCodeFrom IS NOT NULL
-	BEGIN
-	SET @sqlCte +=
-		',cteInactive (accountId,id)AS
-		(
-			SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT
-			WHERE [Primary Account] BETWEEN ''' + @strPrimaryCodeFrom + '''  AND CASE WHEN ''' + @strPrimaryCodeTo + ''' = '''' THEN ''' + @strPrimaryCodeFrom + ''' ELSE ''' + @strPrimaryCodeTo + ''' END 
-			AND [Primary Account] NOT IN(SELECT [Primary Account] FROM cteBase)
-			GROUP BY strAccountId
-		),
-		cte1 
-		AS(
-			SELECT * FROM RAWREPORT	A join cteInactive B
-			ON B.accountId = A.strAccountId 
-			AND B.id = A.intGLDetailId
-		
-		)'
-		
-	END
-	select @sqlCte +=	' select ' + @cols1  + ' FROM cte1 union all select ' + @cols + ' from cteBase '
-
-END
-ELSE
-BEGIN
-	SET @sqlCte += 'SELECT * FROM cteBase'
-END
 	EXEC (@sqlCte)
 END

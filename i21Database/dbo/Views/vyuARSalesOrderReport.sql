@@ -13,47 +13,50 @@ SELECT SO.intSalesOrderId
 								WHEN L.strUseLocationAddress = 'Letterhead'
 									THEN ''
 						   END 
-	 , strOrderType = ISNULL(SO.strType, 'Standard')
-     , strCustomerName = E.strName
+	 , strOrderType				= ISNULL(SO.strType, 'Standard')
+     , strCustomerName			= E.strName
 	 , L.strLocationName
 	 , SO.dtmDate
 	 , CUR.strCurrency
 	 , SO.strBOLNumber
 	 , SO.strOrderStatus
 	 , SO.strSalesOrderNumber
-	 , strBillTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName)
-	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, NULL)
-	 , strSalespersonName = ESP.strName
 	 , SO.strPONumber
 	 , SV.strShipVia
 	 , T.strTerm
-	 , strOrderedByName = EOB.strName
 	 , SO.dtmDueDate
 	 , FT.strFreightTerm
-	 , strSplitName = CASE WHEN ISNULL(ES.strDescription, '') <> '' THEN ES.strDescription ELSE ES.strSplitNumber END
-	 , strSOHeaderComment = SO.strComments
-	 , strSOFooterComment = [dbo].fnARGetFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer')
-	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
-	 , dblShipping = ISNULL(SO.dblShipping, 0)
-	 , dblTax = ISNULL(SD.dblTotalTax, 0)
-	 , dblSalesOrderTotal = ISNULL(SO.dblSalesOrderTotal, 0)
 	 , I.strItemNo
 	 , SD.intSalesOrderDetailId
 	 , CH.strContractNumber
 	 , SD.strItemDescription
 	 , UOM.strUnitMeasure
-	 , dblQtyShipped = ISNULL(SD.dblQtyShipped, 0)
-	 , dblQtyOrdered = ISNULL(SD.dblQtyOrdered, 0)
-	 , dblDiscount = ISNULL(SD.dblDiscount, 0) / 100
-	 , dblTotalTax = ISNULL(SO.dblTax, 0)
-	 , dblPrice = ISNULL(SD.dblPrice, 0)
-	 , dblItemPrice = ISNULL(SD.dblTotal, 0)
 	 , SDT.intTaxCodeId
-	 , strTaxCode = SMT.strTaxCode
-	 , dblTaxDetail = SDT.dblAdjustedTax
 	 , SO.strTransactionType
-	 , intDetailCount = (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
-	 , ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + SO.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , QT.strTemplateName
+	 , QT.intQuoteTemplateId
+	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName)
+	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, NULL)
+	 , strSalespersonName		= ESP.strName
+	 , strOrderedByName			= EOB.strName
+	 , strSplitName				= CASE WHEN ISNULL(ES.strDescription, '') <> '' THEN ES.strDescription ELSE ES.strSplitNumber END
+	 , strSOHeaderComment		= SO.strComments
+	 , strSOFooterComment		= SO.strFooterComments
+	 , dblSalesOrderSubtotal	= ISNULL(SO.dblSalesOrderSubtotal, 0)
+	 , dblShipping				= ISNULL(SO.dblShipping, 0)
+	 , dblTax					= ISNULL(SD.dblTotalTax, 0)
+	 , dblSalesOrderTotal		= ISNULL(SO.dblSalesOrderTotal, 0)
+	 , dblQtyShipped			= ISNULL(SD.dblQtyShipped, 0)
+	 , dblQtyOrdered			= ISNULL(SD.dblQtyOrdered, 0)
+	 , dblDiscount				= ISNULL(SD.dblDiscount, 0) / 100
+	 , dblTotalTax				= ISNULL(SO.dblTax, 0)
+	 , dblPrice					= ISNULL(SD.dblPrice, 0)
+	 , dblItemPrice				= ISNULL(SD.dblTotal, 0)
+	 , strTaxCode				= SMT.strTaxCode
+	 , dblTaxDetail				= SDT.dblAdjustedTax
+	 , intDetailCount			= (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
+	 , ysnHasEmailSetup			= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + CASE WHEN SO.ysnQuote = 1 THEN 'Quote Order' ELSE 'Sales Order' END + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')	 
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId 
@@ -61,9 +64,9 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
 	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId) ON SO.intSalesOrderId = SD.intSalesOrderId
-INNER JOIN (tblARCustomer C 
+LEFT JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
-INNER JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN tblSMCurrency CUR ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
 	INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
@@ -72,3 +75,4 @@ INNER JOIN tblSMTerm T ON SO.intTermId = T.intTermID
 LEFT JOIN tblEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId
 LEFT JOIN tblEntitySplit ES ON SO.intSplitId = ES.intSplitId
+LEFT JOIN tblARQuoteTemplate QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId AND SO.ysnQuote = 1

@@ -7,7 +7,10 @@
 	[strTimeZone] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intTicketStatusId] [int] NULL,
 	[intTicketTypeId] [int] NULL,
+	[intTemplateStatusId] [int] NULL,
 	[intBillingIncrement] [int] NOT NULL DEFAULT 0,
+	[strFromName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strSubjectPrefix] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblHDSettings] PRIMARY KEY CLUSTERED 
 (
@@ -87,3 +90,31 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDSetting',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Billing Increment',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDSetting',
+    @level2type = N'COLUMN',
+    @level2name = N'intBillingIncrement'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'HD Email - From Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDSetting',
+    @level2type = N'COLUMN',
+    @level2name = N'strFromName'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'HD Email - Subject Prefix',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDSetting',
+    @level2type = N'COLUMN',
+    @level2name = N'strSubjectPrefix'

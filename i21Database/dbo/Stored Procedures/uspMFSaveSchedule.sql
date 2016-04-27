@@ -51,8 +51,21 @@ BEGIN TRY
 	IF @intScheduleId IS NULL
 	BEGIN
 		IF @strScheduleNo IS NULL
-			EXEC dbo.uspSMGetStartingNumber 63
-				,@strScheduleNo OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 63
+			--	,@strScheduleNo OUTPUT
+			Declare @intSubLocationId int
+			Select @intSubLocationId=intSubLocationId from dbo.tblMFManufacturingCell  Where intManufacturingCellId = @intManufacturingCellId
+
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+							,@intItemId = NULL
+							,@intManufacturingId = @intManufacturingCellId
+							,@intSubLocationId = @intSubLocationId
+							,@intLocationId = @intLocationId
+							,@intOrderTypeId = NULL
+							,@intBlendRequirementId = NULL
+							,@intPatternCode = 63
+							,@ysnProposed = 0
+							,@strPatternString = @strScheduleNo OUTPUT
 
 		INSERT INTO dbo.tblMFSchedule (
 			strScheduleNo
@@ -123,6 +136,7 @@ BEGIN TRY
 		,strAdditionalComments
 		,dtmEarliestStartDate
 		,ysnFrozen
+		,intNoOfFlushes
 		,intConcurrencyId
 		,dtmCreated
 		,intCreatedUserId
@@ -147,6 +161,7 @@ BEGIN TRY
 		,x.strAdditionalComments
 		,x.dtmEarliestStartDate
 		,x.ysnFrozen
+		,x.intNoOfFlushes
 		,1
 		,@dtmCurrentDate
 		,@intUserId
@@ -171,6 +186,7 @@ BEGIN TRY
 			,strAdditionalComments NVARCHAR(MAX)
 			,dtmEarliestStartDate DATETIME
 			,ysnFrozen BIT
+			,intNoOfFlushes INT
 			,intConcurrencyId INT
 			,dtmCreated DATETIME
 			,intCreatedUserId INT
@@ -188,6 +204,9 @@ BEGIN TRY
 			,intPlannedShiftId =x.intPlannedShiftId
 			,dtmPlannedDate =x.dtmPlannedStartDate
 			,intExecutionOrder =x.intExecutionOrder 
+			,dtmEarliestDate=x.dtmEarliestDate
+			,dtmLatestDate=x.dtmLatestDate
+			,dtmExpectedDate =x.dtmExpectedDate
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 				intWorkOrderId INT
 				,intStatusId int
@@ -195,7 +214,11 @@ BEGIN TRY
 				,intManufacturingCellId int
 				,intPlannedShiftId int
 				,dtmPlannedStartDate datetime
-				,intExecutionOrder int) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
+				,intExecutionOrder int
+				,dtmEarliestDate datetime
+				,dtmLatestDate datetime
+				,dtmExpectedDate datetime
+				) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
 	END
 	
 	INSERT INTO dbo.tblMFScheduleWorkOrderDetail (
@@ -301,6 +324,14 @@ BEGIN TRY
 			) x 
 	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
 	WHERE W.intScheduleId = @intScheduleId
+
+	INSERT INTO dbo.tblMFScheduleConstraint(intScheduleId,intScheduleRuleId)
+	SELECT @intScheduleId,intScheduleRuleId
+	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
+			intScheduleRuleId INT
+			,ysnSelect bit
+			)
+	WHERE ysnSelect=1
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

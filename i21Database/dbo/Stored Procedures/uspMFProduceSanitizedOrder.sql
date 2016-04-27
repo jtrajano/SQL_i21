@@ -46,12 +46,13 @@ BEGIN TRY
 		,@intInventoryAdjustmentId INT
 		,@strLotTracking NVARCHAR(50)
 		,@dblOutputWeightPerQty numeric(18,6)
+		,@intCategoryId int
 
 	SELECT @strDefaultStatusForSanitizedLot = strDefaultStatusForSanitizedLot
 	FROM dbo.tblMFCompanyPreference
 
-	EXEC dbo.uspSMGetStartingNumber 33
-		,@intBatchId OUTPUT
+	--EXEC dbo.uspSMGetStartingNumber 33
+	--	,@intBatchId OUTPUT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -95,6 +96,17 @@ BEGIN TRY
 			,intLocationId INT
 			)
 
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+		,@intItemId = NULL
+		,@intManufacturingId = NULL
+		,@intSubLocationId = NULL
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 33
+		,@ysnProposed = 0
+		,@strPatternString = @intBatchId OUTPUT
+
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
@@ -105,6 +117,7 @@ BEGIN TRY
 	WHERE intLotId = @intInputLotId
 
 	SELECT @strLotTracking = strLotTracking
+			,@intCategoryId = intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -144,8 +157,20 @@ BEGIN TRY
 				)
 			--AND @strLotTracking <> 'Yes - Serial Number'
 		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 24
-				,@strOutputLotNumber OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 24
+			--	,@strOutputLotNumber OUTPUT
+			Declare @intManufacturingCellId int
+			Select @intManufacturingCellId=intManufacturingCellId from tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+						,@intItemId = @intItemId
+						,@intManufacturingId = @intManufacturingCellId
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 24
+						,@ysnProposed = 0
+						,@strPatternString = @strOutputLotNumber OUTPUT
 		END
 
 		EXEC dbo.uspMFLotSplit @intLotId = @intInputLotId
@@ -569,8 +594,18 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
 
-			EXEC dbo.uspSMGetStartingNumber 75
-				,@strBOLNo OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 75
+			--	,@strBOLNo OUTPUT
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+							,@intItemId = @intItemId
+							,@intManufacturingId = @intManufacturingCellId
+							,@intSubLocationId = @intSubLocationId
+							,@intLocationId = @intLocationId
+							,@intOrderTypeId = 9
+							,@intBlendRequirementId = NULL
+							,@intPatternCode = 75
+							,@ysnProposed = 0
+							,@strPatternString = @strBOLNo OUTPUT
 
 			DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
 

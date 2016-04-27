@@ -50,6 +50,13 @@ SELECT
 	   ,intCostUOMId = CT.intPriceItemUOMId
 	   ,strCostUOM = CT.strPriceUOM
 	   ,dblCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId),0)
+	   ,intWeightItemUOMId = (SELECT WeightItem.intItemUOMId FROM tblICItemUOM WeightItem WHERE WeightItem.intItemId=SCQ.intItemId AND WeightItem.intUnitMeasureId=S.intWeightUnitMeasureId)
+	   ,CT.strCurrency
+	   ,CT.strMainCurrency
+	   ,CT.ysnSubCurrency
+	   ,CT.dblMainCashPrice
+	   ,dblFranchise = CASE WHEN WG.dblFranchise > 0 THEN WG.dblFranchise / 100 ELSE 0 END
+	   ,dblContainerWeightPerQty = (Container.dblNetWt / Container.dblQuantity)
 
 FROM tblLGShipmentBLContainerContract SC
 LEFT JOIN tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
@@ -63,3 +70,4 @@ JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = SC.intUnitMeasureId
 JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = S.intWeightUnitMeasureId
 LEFT JOIN tblICItem Item ON Item.intItemId = SCQ.intItemId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = S.intSubLocationId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CT.intWeightId

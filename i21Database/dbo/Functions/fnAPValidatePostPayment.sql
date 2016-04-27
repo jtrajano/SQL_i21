@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnAPValidatePostPayment]
 (
-	@paymentIds NVARCHAR(MAX),
+	@paymentIds Id READONLY,
 	@post BIT,
 	@userId INT
 )
@@ -16,10 +16,11 @@ BEGIN
 
 	DECLARE @WithholdAccount INT, @DiscountAccount INT, @InterestAccount INT, @CashAccount INT, @APAccount INT;
 	DECLARE @userLocation INT;
-	DECLARE @tmpPayments TABLE(
-		[intPaymentId] [int]
-	);
-	INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
+	
+	--DECLARE @tmpPayments TABLE(
+	--	[intPaymentId] [int]
+	--);
+	--INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
 	SELECT TOP 1 @userLocation = intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId;
 	IF (@userLocation IS NOT NULL AND @userLocation > 0)
@@ -42,7 +43,20 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
-		
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 'Posting different Currency are not yet implemented.',
+				'Payable',
+			   A.strPaymentRecordNum,
+			   A.intPaymentId
+		FROM dbo.tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+		INNER JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+		CROSS APPLY
+		(
+			SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference
+		) BaseCurrency
+		WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId
+
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
 			'Please setup user default location.',
@@ -50,7 +64,7 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND @userLocation IS NULL
 		AND A.intPaymentId IN (SELECT A.intPaymentId FROM tblAPPayment A
 								INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -59,11 +73,11 @@ BEGIN
 								OR C.ysnWithholding = 1 --Withhold
 								OR B.dblDiscount <> 0 --Discount
 								OR B.dblInterest <> 0) --Interest
-								AND A.intPaymentId IN (SELECT [intPaymentId] FROM @tmpPayments)
+								AND A.intPaymentId IN (SELECT intId FROM @paymentIds)
 							)
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT TOP 1
+		SELECT
 			'Bank account is inactive.',
 			'Payable',
 			A.strPaymentRecordNum,
@@ -71,17 +85,17 @@ BEGIN
 		FROM tblAPPayment A 
 		INNER JOIN tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND B.ysnActive = 0
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT TOP 1
+		SELECT
 			'Overpayment requires to have default AP account setup.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND (@APAccount IS NULL OR @APAccount <= 0) AND A.dblUnapplied > 0
 
 		--Make sure it has setup for default withhold account if vendor is set for withholding
@@ -94,7 +108,7 @@ BEGIN
 		FROM tblAPPayment A 
 		INNER JOIN tblAPVendor B
 			ON A.intEntityVendorId = B.intEntityVendorId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND @WithholdAccount IS NULL
 		 AND B.ysnWithholding = 1
 
@@ -108,7 +122,7 @@ BEGIN
 		--FROM tblAPPayment A 
 		--INNER JOIN tblAPVendor B
 		--	ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
-		--WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		--WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		--AND @CashAccount IS NULL
 
 		--Make sure it ha setup for default discount account
@@ -123,7 +137,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)--fully paid
 		AND B.dblDiscount <> 0
 		AND B.dblPayment <> 0
@@ -145,7 +159,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) --fully paid
 		AND B.dblInterest <> 0
 		AND B.dblPayment <> 0
@@ -165,7 +179,7 @@ BEGIN
 		--FROM tblAPPayment A 
 		--LEFT JOIN tblAPPaymentDetail B
 		--	ON A.intPaymentId = B.intPaymentId
-		--WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		--WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		--GROUP BY A.intPaymentId, A.strPaymentRecordNum
 		--HAVING SUM(B.dblPayment) = 0
 
@@ -179,7 +193,7 @@ BEGIN
 		FROM tblAPPayment A 
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND B.intPaymentId IS NULL
 
 		--Fiscal Year
@@ -190,7 +204,7 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
 		--This is currently doing by the uspGLBookEntries
@@ -203,7 +217,7 @@ BEGIN
 		A.strPaymentRecordNum,
 		A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 		((A.dblAmountPaid + A.dblWithheld - A.dblUnapplied) --deduct the overpayment
 		+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
 		<> ((SELECT SUM(CASE WHEN B2.intTransactionType != 1 AND B1.dblPayment > 0 THEN B1.dblPayment * -1 ELSE B1.dblPayment END) FROM tblAPPaymentDetail B1 INNER JOIN tblAPBill B2 ON B1.intBillId = B2.intBillId
@@ -219,7 +233,7 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			A.ysnPosted = 1
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -229,7 +243,7 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			A.dblAmountPaid < 0
 
 		--BILL(S) ALREADY PAID IN FULL
@@ -244,7 +258,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 			AND C.ysnPaid = 1 AND B.dblPayment <> 0
 				
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -258,8 +272,24 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount - B.dblInterest)
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			A.strPaymentRecordNum + ' payment have vouchers with different pay to address.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND B.dblPayment != 0
+		GROUP BY A.strPaymentRecordNum, A.intPaymentId
+		HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
@@ -270,9 +300,9 @@ BEGIN
 		FROM tblAPPayment A
 		WHERE A.dblAmountPaid < 0 
 		AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
-		AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE C.intTransactionType = 2 AND B.intPaymentId IN (SELECT [intPaymentId] FROM @tmpPayments))
-				AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT [intPaymentId] FROM @tmpPayments)) = 1)
-		AND A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE C.intTransactionType = 2 AND B.intPaymentId IN (SELECT intId FROM @paymentIds))
+				AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)) = 1)
+		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		
 			
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -287,7 +317,7 @@ BEGIN
 		INNER JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
 		WHERE C.intEntityVendorId <> A.intEntityVendorId
-		AND A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 
 		--DO NOT ALLOW TO POST DEBIT MEMOS AND PAYMENTS IF AMOUNT PAID IS NOT EQUAL TO ZERO
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -298,7 +328,7 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
-		WHERE A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.dblAmountPaid = 0
 		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
 
@@ -313,7 +343,7 @@ BEGIN
 				A.intPaymentId
 		FROM    tblAPPayment A INNER JOIN tblCMBankTransaction B
 					ON A.strPaymentRecordNum = B.strTransactionId
-					AND intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
+					AND intPaymentId IN (SELECT intId FROM @paymentIds)
 				CROSS APPLY dbo.fnGetBankTransactionReversalErrors(B.intTransactionId) C
 
 		--Fiscal Year
@@ -324,7 +354,7 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
 		--Do not allow to unpost if there is latest payment made
@@ -347,14 +377,14 @@ BEGIN
 					INNER JOIN tblAPPaymentDetail A2 ON A1.intPaymentId = A2.intPaymentId
 					INNER JOIN 
 					(
-						SELECT intBillId, A3.intPaymentId, tmpPayments.intPaymentId AS intPostPaymentId
-						FROM tblAPPaymentDetail A3 INNER JOIN @tmpPayments AS tmpPayments ON A3.intPaymentId = tmpPayments.intPaymentId
+						SELECT intBillId, A3.intPaymentId, tmpPayments.intId AS intPostPaymentId
+						FROM tblAPPaymentDetail A3 INNER JOIN @paymentIds AS tmpPayments ON A3.intPaymentId = tmpPayments.intId
 					) OtherPayments ON A2.intBillId = OtherPayments.intBillId
-				WHERE A1.intPaymentId NOT IN (SELECT [intPaymentId] FROM @tmpPayments) --exclude the for posted on results
+				WHERE A1.intPaymentId NOT IN (SELECT intId FROM @paymentIds) --exclude the for posted on results
 				AND A1.ysnPosted = 1 --get only the posted
 				) OtherPaymentsFiltered WHERE rowNum = 1
 			) LatestPayment ON A.intPaymentId = LatestPayment.intPostPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) 
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) 
 		AND A.intPaymentId < LatestPayment.intPaymentId
 	END
 

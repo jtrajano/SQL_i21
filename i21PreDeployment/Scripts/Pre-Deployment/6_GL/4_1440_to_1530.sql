@@ -51,3 +51,10 @@ BEGIN
 END
 PRINT 'Finished updating tblGLDetail null strTransactionType'
 GO
+
+--GL-2482
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.VIEWS WHERE [TABLE_NAME] = 'vyuGLAccountView')
+	BEGIN
+		EXEC ('DROP VIEW vyuGLAccountView');
+	END
+Go

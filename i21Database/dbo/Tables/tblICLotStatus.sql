@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[strSecondaryStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[strPrimaryStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strBackColor] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICLotStatus] PRIMARY KEY ([intLotStatusId])

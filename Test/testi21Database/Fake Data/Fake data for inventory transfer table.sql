@@ -12,6 +12,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblSMUserPreference', @Identity = 1;	
 	
 	-- Item Ids
 	DECLARE @WetGrains AS INT = 1

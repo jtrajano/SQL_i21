@@ -25,8 +25,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@fieldname					AS NVARCHAR(50)
 		,@condition					AS NVARCHAR(20)
 		,@id						AS INT 
-		,@from						AS NVARCHAR(50)
-		,@to						AS NVARCHAR(50)
+		,@from						AS NVARCHAR(100)
+		,@to						AS NVARCHAR(100)
 		,@join						AS NVARCHAR(10)
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)
@@ -37,8 +37,8 @@ DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
 	,[fieldname]	NVARCHAR(50)
 	,[condition]	NVARCHAR(20)
-	,[from]			NVARCHAR(50)
-	,[to]			NVARCHAR(50)
+	,[from]			NVARCHAR(100)
+	,[to]			NVARCHAR(100)
 	,[join]			NVARCHAR(10)
 	,[begingroup]	NVARCHAR(50)
 	,[endgroup]		NVARCHAR(50)
@@ -62,7 +62,8 @@ DECLARE @temp_aging_table TABLE(
 	,[dblAmountPaid]			NUMERIC(18,6)
 	,[dblCredits]				NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME	
+	,[dtmAsOfDate]				DATETIME
+	,[strSalespersonName]		NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -97,8 +98,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (
 	  [fieldname]  NVARCHAR(50)
 	, [condition]  NVARCHAR(20)
-	, [from]	   NVARCHAR(50)
-	, [to]		   NVARCHAR(50)
+	, [from]	   NVARCHAR(100)
+	, [to]		   NVARCHAR(100)
 	, [join]	   NVARCHAR(10)
 	, [begingroup] NVARCHAR(50)
 	, [endgroup]   NVARCHAR(50)
@@ -136,7 +137,7 @@ ELSE
 	END
 
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateWithCurrentReport] @dtmDateFrom, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 
@@ -158,7 +159,7 @@ END
 SET @query = 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
-	 , I.intEntityCustomerId
+	 , C.intEntityCustomerId
 	 , dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'') THEN NULL ELSE I.dtmDueDate END
 	 , I.dtmPostDate
 	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
@@ -169,7 +170,7 @@ SET @query = 'SELECT * FROM
 						THEN CASE WHEN I.strTransactionType <> ''Invoice'' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
 						ELSE 0
 					END
-	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
+	 , dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](C.intEntityCustomerId, I.dtmDate), 0)
 	 , C.strCustomerNumber
 	 , C.strName
 	 , I.strBOLNumber
@@ -178,13 +179,13 @@ SET @query = 'SELECT * FROM
 	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Footer'')	 
 	 , strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''') FROM tblSMCompanySetup)
-FROM tblARInvoice I
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
+FROM vyuARCustomer C
+	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
+	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId 
+		AND I.ysnPosted = 1 
+		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
+		'+ @innerQuery +'
 	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
-WHERE I.ysnPosted = 1
-  AND I.ysnPaid = 0  
-  AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
-  '+ @innerQuery +'
 ) MainQuery'
 
 IF ISNULL(@filter,'') != ''
@@ -209,19 +210,20 @@ SELECT STATEMENTREPORT.strReferenceNumber
 	  ,STATEMENTREPORT.strName
 	  ,STATEMENTREPORT.strBOLNumber
 	  ,STATEMENTREPORT.dblCreditLimit
-	  ,dblCreditAvailable = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-	  ,dbl0Days = ISNULL(AGINGREPORT.dbl0Days, 0)
-	  ,dbl10Days = ISNULL(AGINGREPORT.dbl10Days, 0)
-	  ,dbl30Days = ISNULL(AGINGREPORT.dbl30Days, 0)
-	  ,dbl60Days = ISNULL(AGINGREPORT.dbl60Days, 0)
-	  ,dbl90Days = ISNULL(AGINGREPORT.dbl90Days, 0)
-	  ,dbl91Days = ISNULL(AGINGREPORT.dbl91Days, 0)
-	  ,dblCredits = ISNULL(AGINGREPORT.dblCredits, 0)
+	  ,dblCreditAvailable	= STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+	  ,dbl0Days				= ISNULL(AGINGREPORT.dbl0Days, 0)
+	  ,dbl10Days			= ISNULL(AGINGREPORT.dbl10Days, 0)
+	  ,dbl30Days			= ISNULL(AGINGREPORT.dbl30Days, 0)
+	  ,dbl60Days			= ISNULL(AGINGREPORT.dbl60Days, 0)
+	  ,dbl90Days			= ISNULL(AGINGREPORT.dbl90Days, 0)
+	  ,dbl91Days			= ISNULL(AGINGREPORT.dbl91Days, 0)
+	  ,dblCredits			= ISNULL(AGINGREPORT.dblCredits, 0)
 	  ,STATEMENTREPORT.strFullAddress
 	  ,STATEMENTREPORT.strStatementFooterComment	  
 	  ,STATEMENTREPORT.strCompanyName
 	  ,STATEMENTREPORT.strCompanyAddress	  
-	  ,dtmAsOfDate = @dtmDateTo
+	  ,dtmAsOfDate			= @dtmDateTo
+	  ,blbLogo				= dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId

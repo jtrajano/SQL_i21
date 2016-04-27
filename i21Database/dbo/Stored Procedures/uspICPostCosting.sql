@@ -632,6 +632,7 @@ BEGIN
 					,[intCreatedEntityId]
 					,[intConcurrencyId]
 					,[intCostingMethod]
+					,[strDescription]
 			)			
 		SELECT	
 				[intItemId]								= @intItemId
@@ -661,6 +662,14 @@ BEGIN
 				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
 				,[intCostingMethod]						= @AVERAGECOST
+				,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
+														 FORMATMESSAGE(
+															80078
+															,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)															
+															,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
+															,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
+															,CONVERT(NVARCHAR, CAST((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) AS MONEY), 2)
+														)
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId

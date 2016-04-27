@@ -106,6 +106,9 @@ BEGIN
 			,[intGradeId]
 			,[intDetailId]
 			--,[dblWeightPerQty]
+			,[strTransactionId]
+			,[strSourceTransactionId]
+			,[intSourceTransactionTypeId]
 	)
 	SELECT	[intLotId]					= NewLot.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -200,6 +203,9 @@ BEGIN
 			--										-- lot will still use the same qty. the use the same wgt-per-qty. 
 			--										SourceLot.dblWeightPerQty
 			--								END
+			,[strTransactionId]			= Header.strAdjustmentNo
+			,[strSourceTransactionId]	= SourceLot.strTransactionId
+			,[intSourceTransactionTypeId] = SourceLot.intSourceTransactionTypeId
 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId

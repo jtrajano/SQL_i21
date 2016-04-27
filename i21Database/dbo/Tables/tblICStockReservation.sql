@@ -9,6 +9,7 @@
 	,[intSubLocationId] INT NULL
 	,[intStorageLocationId] INT NULL
     ,[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT ((0))
+	,[intParentLotId] INT NULL
     ,[intTransactionId] INT NULL
     ,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     ,[intSort] INT NULL

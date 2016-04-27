@@ -1,19 +1,20 @@
 ﻿CREATE VIEW vyuRKLOptionPSTransaction  
 AS  
-SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strOptionMonth,strName,strAccountNumber,isnull(intTotalLot,0) intTotalLot,isnull(dblOpenLots,0) dblOpenLots,  
-  strOptionType,dblStrike,dblPremium,dblPremiumValue,dblCommission,intFutOptTransactionId  
- ,dblPremiumValue+dblCommission as dblNetPremium,  
- dblMarketPremium,  
- dblMarketValue,  
- case when strBuySell='B' then  dblMarketValue-dblPremiumValue else  dblPremiumValue-dblMarketValue end as dblMTM,  
+SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strOptionMonth,strName,strAccountNumber,
+isnull(intTotalLot,0) intTotalLot,isnull(dblOpenLots,0) dblOpenLots,  
+strOptionType,dblStrike,-dblPremium as dblPremium,-dblPremiumValue as dblPremiumValue,dblCommission,intFutOptTransactionId  
+,((-dblPremiumValue)+(dblCommission)) as dblNetPremium,  
+dblMarketPremium,  
+dblMarketValue,  
+ case when strBuySell='B' then  dblMarketValue-dblPremiumValue else  dblPremiumValue-dblMarketValue end as  dblMTM,  
  dtmExpirationDate,strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,  
  -(dblOpenLots*dblDelta*dblContractSize) AS dblDeltaHedge,  
- strHedgeUOM,strBuySell,dblContractSize  
+ strHedgeUOM,strBuySell,dblContractSize,intFutOptTransactionHeaderId,intCurrencyId,intCent,ysnSubCurrency   
   FROM (  
-SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots,'' as dblSelectedLot,  
-  (intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,  
-  (intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium  as dblMarketValue,  
-  -dblOptCommission*(intTotalLot-dblSelectedLot1) AS dblCommission,* from  (  
+	SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots,'' as dblSelectedLot,  
+	  ((intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium )/ case when ysnSubCurrency = 'true' then intCent else 1 end  as dblPremiumValue,  
+	  ((intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium)/ case when ysnSubCurrency = 'true' then intCent else 1 end  as dblMarketValue,  
+	  (-dblOptCommission*(intTotalLot-dblSelectedLot1))/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblCommission,* from  (  
 SELECT DISTINCT  
       strInternalTradeNo AS strInternalTradeNo  
       ,dtmTransactionDate as dtmTransactionDate  
@@ -53,8 +54,10 @@ SELECT DISTINCT
    ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell,intFutOptTransactionId,  
     isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope where  ope.intFutOptTransactionId= ot.intFutOptTransactionId),0) intExpiredLots,      
     isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa where  opa.intFutOptTransactionId= ot.intFutOptTransactionId),0) intAssignedLots  
+	,c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,intFutOptTransactionHeaderId
 FROM tblRKFutOptTransaction ot  
-JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=2 --and ot.strStatus='Filled'   
+JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=2 --and ot.strStatus='Filled' 
+JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId  
 join tblICUnitMeasure um on fm.intUnitMeasureId=um.intUnitMeasureId  
 JOIN tblICCommodity ic on ic.intCommodityId=ot.intCommodityId  
 JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=ot.intLocationId  
@@ -66,3 +69,5 @@ JOIN tblEntity e on e.intEntityId=ba.intEntityId
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId  
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId  
  )t)t1  where dblOpenLots > 0 and strBuySell='B'
+
+ 

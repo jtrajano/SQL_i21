@@ -38,13 +38,15 @@ BEGIN
 				ON TL.intLoadHeaderId = DH.intLoadHeaderId		
 			JOIN tblTRLoadDistributionDetail DD 
 				ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId		
-                  			
-    WHERE	TL.intLoadHeaderId = @intLoadHeaderId 
+            LEFT JOIN vyuICGetItemStock IC
+			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId         			
+    WHERE	TL.intLoadHeaderId = @intLoadHeaderId
+	        AND IC.strType != 'Non-Inventory' 
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
 			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
 			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)))
-			AND (ISNULL(TR.intInventoryTransferId, '') <> '')
+			AND ISNULL(intInventoryTransferId, '') <> ''
 	
 	SELECT @total = COUNT(*) FROM #tmpAddInventoryTransferResult;
     IF (@total = 0)
@@ -59,89 +61,81 @@ END
 
 -- Insert the data needed to create the inventory transfer.
     INSERT INTO @TransferEntries (
-                -- Header
-                [dtmTransferDate]
-                ,[strTransferType]
-                ,[intSourceType]
-                ,[strDescription]
-                ,[intFromLocationId]
-                ,[intToLocationId]
-                ,[ysnShipmentRequired]
-                ,[intStatusId]
-                ,[intShipViaId]
-                ,[intFreightUOMId]
-				,[strActualCostId]
-                -- Detail
-                ,[intItemId]
-                ,[intLotId]
-                ,[intItemUOMId]
-                ,[dblQuantityToTransfer]
-                ,[strNewLotId]
-                ,[intFromSubLocationId]
-                ,[intToSubLocationId]
-                ,[intFromStorageLocationId]
-                ,[intToStorageLocationId]
-                -- Integration Field
-                ,[intInventoryTransferId]
-                ,[intSourceId]   
-				,[strSourceId]  
-				,[strSourceScreenName]
+        [dtmTransferDate]
+        ,[strTransferType]
+        ,[intSourceType]
+        ,[strDescription]
+        ,[intFromLocationId]
+        ,[intToLocationId]
+        ,[ysnShipmentRequired]
+        ,[intStatusId]
+        ,[intShipViaId]
+        ,[intFreightUOMId]
+		,[strActualCostId]
+        ,[intItemId]
+        ,[intLotId]
+        ,[intItemUOMId]
+        ,[dblQuantityToTransfer]
+        ,[strNewLotId]
+        ,[intFromSubLocationId]
+        ,[intToSubLocationId]
+        ,[intFromStorageLocationId]
+        ,[intToStorageLocationId]
+        ,[intInventoryTransferId]
+        ,[intSourceId]   
+		,[strSourceId]  
+		,[strSourceScreenName]
     )
-    SELECT      -- Header
-                [dtmTransferDate]           = MIN(TL.dtmLoadDateTime)
-                ,[strTransferType]          = 'Location to Location'
-                ,[intSourceType]            = 3
-                ,[strDescription]           = min(IC.strDescription) 
-                ,[intFromLocationId]        = min(TR.intCompanyLocationId)
-                ,[intToLocationId]          = min(DH.intCompanyLocationId)
-                ,[ysnShipmentRequired]      = 0
-                ,[intStatusId]              = 1
-                ,[intShipViaId]             = min(TL.intShipViaId)
-                ,[intFreightUOMId]          = (SELECT	TOP 1 
-											            IU.intUnitMeasureId											
-											            FROM dbo.tblICItemUOM IU 
-											            WHERE	IU.intItemId = min(TR.intItemId) and IU.ysnStockUnit = 1)
-				,[strActualCostId]			= min(TL.strTransaction) 
-                -- Detail
-                ,[intItemId]                = min(TR.intItemId)
-                ,[intLotId]                 = NULL
-                ,[intItemUOMId]             = (SELECT	TOP 1 
-											            IU.intItemUOMId											
-											            FROM dbo.tblICItemUOM IU 
-											            WHERE	IU.intItemId = min(TR.intItemId) and IU.ysnStockUnit = 1)
-				,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
-             --   ,[dblQuantityToTransfer]    = CASE	WHEN min(SP.strGrossOrNet) = 'Gross' THEN min(TR.dblGross)
-													--WHEN min(SP.strGrossOrNet) = 'Net' THEN min(TR.dblNet)
-											  --END
-                ,[strNewLotId]              = NULL
-                ,[intFromSubLocationId]     = NULL
-                ,[intToSubLocationId]       = NULL
-                ,[intFromStorageLocationId] = NULL
-                ,[intToStorageLocationId]   = NULL
-                -- Integration Field
-                ,[intInventoryTransferId]   = min(TR.intInventoryTransferId)
-                ,[intSourceId]              = TR.intLoadReceiptId
-				,[strSourceId]				= min(TL.strTransaction)
-				,[strSourceScreenName]		= 'Transport Loads'
-
+    SELECT [dtmTransferDate]		= MIN(TL.dtmLoadDateTime)
+		,[strTransferType]          = 'Location to Location'
+		,[intSourceType]            = 3
+		,[strDescription]           = MIN(IC.strDescription)
+		,[intFromLocationId]        = MIN(TR.intCompanyLocationId)
+		,[intToLocationId]          = MIN(DH.intCompanyLocationId)
+		,[ysnShipmentRequired]      = 0
+		,[intStatusId]              = 1
+		,[intShipViaId]             = MIN(TL.intShipViaId)
+		,[intFreightUOMId]          = MIN(ItemUOM.intUnitMeasureId)
+		,[strActualCostId]			= (CASE WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Customer'
+												THEN MIN(TL.strTransaction)
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
+												THEN NULL
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
+												THEN MIN(TL.strTransaction)
+											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
+												THEN NULL
+											END)
+		,[intItemId]                = MIN(TR.intItemId)
+		,[intLotId]                 = NULL
+		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
+		,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
+		,[strNewLotId]              = NULL
+		,[intFromSubLocationId]     = NULL
+		,[intToSubLocationId]       = NULL
+		,[intFromStorageLocationId] = NULL
+		,[intToStorageLocationId]   = NULL
+		,[intInventoryTransferId]   = MIN(TR.intInventoryTransferId)
+		,[intSourceId]              = TR.intLoadReceiptId
+		,[strSourceId]				= MIN(TL.strTransaction)
+		,[strSourceScreenName]		= 'Transport Loads'
     FROM	tblTRLoadHeader TL 	        
 			JOIN tblTRLoadDistributionHeader DH 
 				ON TL.intLoadHeaderId = DH.intLoadHeaderId		
 			JOIN tblTRLoadDistributionDetail DD 
 				ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 			JOIN tblTRLoadReceipt TR 
-				ON TR.intLoadHeaderId = TL.intLoadHeaderId	and TR.strReceiptLine in (select Item from fnTRSplit(DD.strReceiptLink,','))
+				ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (SELECT Item FROM fnTRSplit(DD.strReceiptLink,','))
             LEFT JOIN vyuICGetItemStock IC
-			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId   	
+			    ON IC.intItemId = TR.intItemId AND IC.intLocationId = TR.intCompanyLocationId   	
 			LEFT JOIN tblTRSupplyPoint SP 
-				ON SP.intSupplyPointId = TR.intSupplyPointId	
-    	
+				ON SP.intSupplyPointId = TR.intSupplyPointId
+			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = TR.intItemId AND ItemUOM.ysnStockUnit = 1
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 	        AND IC.strType != 'Non-Inventory'
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)))
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
+			OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 OR TR.dblFreightRate != 0 OR TR.dblPurSurcharge != 0)))
 	GROUP BY TR.intLoadReceiptId
 
 	--if No Records to Process exit

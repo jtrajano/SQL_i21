@@ -1,25 +1,43 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTXMLToIntermediateTable]
-	@intImportFileHeaderId Int
-, @XML XML
+  @intImportFileHeaderId Int
+, @intCheckoutId Int
+, @strSPName nvarchar(100) 
+, @strXML nvarchar(max)
 AS
 BEGIN
 
-	DECLARE @strXML nvarchar(max)
 
-	SET @strXML = CAST(@XML as nvarchar(max))
+
+	DECLARE @XML XML --,  @strXML nvarchar(max)
+
+	--SET @XML = CAST(@XML1 as xml)
+
+	If(ISNULL(@intCheckoutId, 0) = 0)
+	BEGIN
+		RAISERROR('Checkout transaction needs to be carried out first.',16,1)
+	END
+
+	--DECLARE @intStoreId Int
+	--Select @intStoreId = intStoreId FROM dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
+
+	--Select @strSPName = RFC.strStoredProcedure 
+	--FROM dbo.tblSTRegisterFileConfiguration RFC
+	--JOIN dbo.tblSTRegister R ON R.intRegisterId = RFC.intRegisterId
+	----JOIN dbo.tblSTStore S ON S.intStoreId = R.intStoreId
+	----JOIN dbo.tblSTCheckoutHeader CH ON CH.intStoreId = S.intStoreId
+	--Where R.intStoreId = @intStoreId AND RFC.intImportFileHeaderId = @intImportFileHeaderId
+
+	--If(ISNULL(@strSPName, '') = '')
+	--BEGIN
+	--	RAISERROR('Please set Stored Procedure in Register configuration.',16,1)
+	--END
+
+	--SET @strXML = @XML1 -- CAST(@XML as nvarchar(max))
 
 	--SELECT LEN(@strXML) 'Len of strXML'
  
 	IF (CHARINDEX(':' ,@strXML) > 0	)		
-		SET @strXML = REPLACE(@strXML, ':', '') --REPLACE(SUBSTRING(@strXML, CHARINDEX(':', @strXML), LEN(@strXML)), ':', '')
-
-	--DECLARE @strFirstTag nvarchar(200)
-	--Select @strFirstTag = strXMLTag from dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = 16 AND intLevel = 1
-
-	--IF ((LEN(@strXML)-LEN(REPLACE(@strXML, @strFirstTag, ''))) / LEN(@strFirstTag) ) <> 2
-	--	SET @strXML = '<' + @strFirstTag + ' ' + @strXML
-
-	
+		SET @strXML = REPLACE(@strXML, ':', '')
 	--SELECT @strXML
 
 	SET @XML = CAST(@strXML as XML)
@@ -33,6 +51,12 @@ BEGIN
 	INSERT INTO @tblXML
 	SELECT intImportFileColumnDetailId, intLevel, intLength, intPosition, strXMLTag, strDataType, strTable
 	FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel > 1 Order By intLevel
+	
+	INSERT INTO @tblXML
+	SELECT CD.intImportFileColumnDetailId, intLevel, intLength, intPosition, TA.strTagAttribute [strXMLTag], 'TagAttribute' [strDataType], TA.strTable
+	FROM dbo.tblSMImportFileColumnDetail CD
+	JOIN dbo.tblSMXMLTagAttribute TA ON CD.intImportFileColumnDetailId = TA.intImportFileColumnDetailId 
+	Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel > 1 Order By intLevel
 
 	--Select * from @tblXML
 
@@ -68,10 +92,12 @@ BEGIN
 
 
 	SELECT *
-	INTO #tempRadiantEMC FROM '
+	INTO #tempCheckoutInsert FROM '
 
 	WHILE(@intLevelMin <= @intLevelMax)
 	BEGIN
+
+		DECLARE @tagName nvarchar(50)
 
 		IF EXISTS (SELECT 1 FROM @tblXML WHERE intLevel = @intLevelMin)
 		BEGIN
@@ -84,7 +110,7 @@ BEGIN
 			, @strXMLTag = strXMLTag
 			, @strDataType = ISNULL(strDataType, '') 
 			, @strTable = ISNULL(strTable, '')
-			FROM @tblXML WHERE intLevel = @intLevelMin 
+			FROM @tblXML WHERE intLevel = @intLevelMin and ISNULL(strDataType, '') <> 'TagAttribute'
 		
 			DECLARE @strCompareTagName nvarchar(200)
 			SET @strCompareTagName = @strXMLTag + '>'
@@ -173,13 +199,20 @@ BEGIN
 	--SELECT @strColumnPath
 									
 					SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + ' nvarchar(200) ''.' + ISNULL(@strColumnPath, '') + '/' + @strXMLTag + '/text()'' ,'
+
+					IF EXISTS(Select 1 FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute')
+					BEGIN
+						SELECT @tagName = strXMLTag FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute'
+						SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + @tagName + ' nvarchar(200) ''.' + ISNULL(@strColumnPath, '') + '/' + @strXMLTag + '/@' + @tagName + '/text()'' ,'
+					END
+
 				END
 			
 				IF ( (@intRec = @intRecCnt) OR (@intLevelMin = @intLevelMax) )
 				BEGIN
 					IF (CHARINDEX('OPENXML' ,@SQL) > 0	) 
 					BEGIN
-						SET @SQL = @SQL + ' CROSS JOIN '
+						SET @SQL = @SQL + ' OUTER APPLY '
 					END
 				
 					SET @strColumnsList = SUBSTRING(@strColumnsList, 0, LEN(@strColumnsList))
@@ -215,7 +248,17 @@ BEGIN
 				END
 				ELSE
 				BEGIN
+				
 					SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + ' nvarchar(200) ''./' + ISNULL(@strColumnPath, '') + @strXMLTag + '/text()'' ,'
+
+					
+					IF EXISTS(Select 1 FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute')
+					BEGIN
+						SELECT @tagName = strXMLTag FROM @tblXML Where intLevel = @intLevelMin and strDataType = 'TagAttribute'
+						SET @strColumnsList = @strColumnsList + ' ' + @strXMLTag + @tagName + ' nvarchar(200) ''.' + ISNULL(@strColumnPath, '') + '/' + @strXMLTag + '/@' + @tagName + '/text()'' ,'
+					END
+
+
 				END
 			
 				DECLARE @strNextHeader nvarchar(200)
@@ -225,7 +268,7 @@ BEGIN
 				BEGIN
 					IF (CHARINDEX('OPENXML' ,@SQL) > 0	) 
 					BEGIN
-						SET @SQL = @SQL + ' CROSS JOIN '
+						SET @SQL = @SQL + ' OUTER APPLY '
 					END
 				
 					SET @strColumnsList = SUBSTRING(@strColumnsList, 0, LEN(@strColumnsList))
@@ -249,13 +292,14 @@ BEGIN
 
 	SET @SQL = @SQL + '
 	 EXEC sp_xml_removedocument @DocumentID  
-			SELECT * FROM #tempRadiantEMC
-		DROP TABLE #tempRadiantEMC
+			SELECT * FROM #tempCheckoutInsert
+		EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20))  + '
+		DROP TABLE #tempCheckoutInsert
 	'
 
 	SELECT @SQL
 
 	EXEC sp_executesql @SQL
 
-END	
 
+END

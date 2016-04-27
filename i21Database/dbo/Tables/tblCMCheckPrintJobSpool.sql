@@ -2,6 +2,7 @@
     [intBankAccountId]   INT            NOT NULL,
     [intTransactionId]   INT            NOT NULL,
     [strTransactionId]   NVARCHAR (40)  COLLATE Latin1_General_CI_AS NOT NULL,
+	[intBankTransactionTypeId]   INT    NULL,
     [strBatchId]         NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
     [strCheckNo]         NVARCHAR (20)  COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmPrintJobCreated] DATETIME       NULL,

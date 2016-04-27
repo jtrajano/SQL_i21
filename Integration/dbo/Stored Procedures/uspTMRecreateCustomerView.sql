@@ -326,7 +326,7 @@ BEGIN
 				,vwcus_last_pay_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastPaymentDate) AS NVARCHAR(4)) + RIGHT(''00'' + CAST(MONTH(CI.dtmLastPaymentDate) AS NVARCHAR(2)),2)  + RIGHT(''00'' + CAST(DAY(CI.dtmLastPaymentDate) AS NVARCHAR(2)),2))  AS INT),0)  
 				,vwcus_last_ivc_rev_dt = 0
 				,vwcus_high_cred = 0.0  
-				,vwcus_high_past_due = 0.0
+				,vwcus_high_past_due = ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0)
 				,vwcus_avg_days_pay = 0
 				,vwcus_avg_days_no_ivcs = 0
 				,vwcus_last_stmt_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastStatementDate) AS NVARCHAR(4)) + RIGHT(''00'' + CAST(MONTH(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)  + RIGHT(''00'' + CAST(DAY(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)) AS INT),0) 

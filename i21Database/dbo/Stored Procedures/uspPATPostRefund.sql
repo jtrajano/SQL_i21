@@ -41,18 +41,69 @@ DECLARE @error NVARCHAR(200)
 --=====================================================================================================================================
 --  GET REFUND DETAILS
 ---------------------------------------------------------------------------------------------------------------------------------------
-	SELECT PR.intRefundId, PR.intFiscalYearId, PR.dtmRefundDate, PR.strRefund, PR.dblMinimumRefund, PR.dblServiceFee,
-		   PR.dblCashCutoffAmount, PR.dblFedWithholdingPercentage, PR.dblPurchaseVolume, PR.dblSaleVolume,
-		   PR.dblLessFWT, PR.dblLessService, PR.dblCheckAmount, PR.dblNoRefund, PR.ysnPosted, PRC.intRefundCustomerId,
-		   PRC.intCustomerId, PRC.intPatronageCategoryId, PRC.strStockStatus, PRC.ysnEligibleRefund, PRC.intRefundTypeId, PRC.dblCashPayout,
-		   PRC.ysnQualified, PRC.dblRefundAmount, PRC.dblCashRefund, PRC.dblEquityRefund, PRCA.intRefundCategoryId,
-		   PRCA.dblRefundRate, PRCA.dblVolume
-	  INTO #tmpRefundData
-	  FROM tblPATRefund PR
-INNER JOIN tblPATRefundCustomer PRC
-		ON PRC.intRefundId = PR.intRefundId
-INNER JOIN tblPATRefundCategory PRCA
-		ON PRCA.intRefundCustomerId = PRC.intRefundCustomerId
+	SELECT	Ref.intRefundId, 
+		Ref.intFiscalYearId, 
+		Ref.dtmRefundDate, 
+		Ref.strRefund,
+		Ref.dblMinimumRefund, 
+		Ref.dblServiceFee,		   
+		Ref.dblCashCutoffAmount, 
+		Ref.dblFedWithholdingPercentage, 
+		Total.dblPurchaseVolume, 
+		Total.dblSaleVolume, 
+		Total.dblLessFWT, 
+		Total.dblLessService,
+		dblCheckAmount = Total.dblCashRefund - Total.dblLessFWT - Total.dblLessService,
+		Total.dblNoRefund,
+		Ref.ysnPosted,
+		RCus.intRefundCustomerId,
+		RCus.intCustomerId,
+		RCus.strStockStatus,
+		RCus.ysnEligibleRefund,
+		RCus.intRefundTypeId,
+		RCus.dblCashPayout,
+		RCus.ysnQualified, 
+		RCus.dblRefundAmount, 
+		RCus.dblCashRefund, 
+		RCus.dblEquityRefund,
+		RCat.intRefundCategoryId,
+		RCat.dblRefundRate, 
+		RCat.dblVolume
+INTO #tmpRefundData
+FROM tblPATRefund Ref
+INNER JOIN tblPATRefundCustomer RCus
+ON Ref.intRefundId = RCus.intRefundId
+INNER JOIN tblPATRefundCategory RCat
+ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
+INNER JOIN tblPATCustomerVolume CVol
+ON CVol.intCustomerPatronId = RCus.intCustomerId
+INNER JOIN
+(
+	SELECT DISTINCT B.intCustomerPatronId AS intCustomerId,
+					dblPurchaseVolume = SUM(CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END),
+					dblSaleVolume = SUM(CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END),
+					(CASE WHEN SUM(RRD.dblRate * dblVolume) <= Ref.dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
+					(CASE WHEN SUM(RRD.dblRate * dblVolume) > Ref.dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblNoRefund,
+					SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund,
+					SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) * (Ref.dblServiceFee/100) AS dblLessService,
+					SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) AS dblLessFWT,
+					dblVolume = SUM(dblVolume),
+					dblTotalRefund = SUM(RRD.dblRate)
+	FROM tblPATCustomerVolume B
+		INNER JOIN tblPATRefundRateDetail RRD
+			ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
+		INNER JOIN tblPATRefundRate RR
+			ON RR.intRefundTypeId = RRD.intRefundTypeId
+		INNER JOIN tblPATPatronageCategory PC
+			ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
+		INNER JOIN tblPATRefundCustomer RCus
+			ON B.intCustomerPatronId = RCus.intCustomerId
+		INNER JOIN tblPATRefund Ref
+			ON Ref.intRefundId = RCus.intRefundId  
+	WHERE B.intCustomerPatronId = B.intCustomerPatronId
+	GROUP BY B.intCustomerPatronId, Ref.dblMinimumRefund,Ref.dblServiceFee
+) Total
+ON CVol.intCustomerPatronId = Total.intCustomerId;
 
 SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	
 
@@ -109,7 +160,7 @@ BEGIN CATCH
 END CATCH
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
-BEGIN TRANSACTION
+--BEGIN TRANSACTION
 
 --=====================================================================================================================================
 -- 	UPDATE CUSTOMER EQUITY TABLE
@@ -119,7 +170,7 @@ BEGIN TRY
 DECLARE @strCutoffTo NVARCHAR(50) = (SELECT TOP 1 strCutoffTo from tblPATCompanyPreference)
 
 MERGE tblPATCustomerEquity AS EQ
-USING #tmpRefundData AS B
+USING (SELECT * FROM #tmpRefundData WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)) AS B
 	ON (EQ.intCustomerId = B.intCustomerId AND EQ.intFiscalYearId = B.intFiscalYearId)
 	WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
 		THEN DELETE
@@ -136,6 +187,70 @@ USING #tmpRefundData AS B
 			VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
 																	(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
 																B.dblRefundAmount - (B.dblRefundAmount * .25) END, GETDATE(), 1);
+
+
+
+----=====================================================================================================================================
+---- 	UPDATE REFUND TABLE
+-----------------------------------------------------------------------------------------------------------------------------------------
+SELECT	TRD.intRefundId as intRefundId, 
+		TRD.intFiscalYearId as intFiscalYearId, 
+		dblPurchaseVolume = SUM(TRD.dblPurchaseVolume), 
+		dblSaleVolume = SUM(TRD.dblSaleVolume), 
+		dblEquityRefund = SUM(TRD.dblEquityRefund), 
+		dblCashRefund = SUM(TRD.dblCashRefund),
+		dblLessFWT = SUM(TRD.dblLessFWT),
+		dblLessService = SUM(TRD.dblLessService),
+		dblCheckAmount = SUM(TRD.dblCheckAmount),
+		dblNoRefund = SUM(TRD.dblNoRefund)
+INTO #tmpCurrentData
+FROM #tmpRefundData TRD
+WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)
+GROUP BY TRD.intRefundId, TRD.intFiscalYearId;
+
+UPDATE Ref
+SET Ref.dblPurchaseVolume = CDat.dblPurchaseVolume, 
+Ref.dblSaleVolume = CDat.dblSaleVolume,
+Ref.dblEquityRefund = CDat.dblEquityRefund,
+Ref.dblCashRefund = CDat.dblCashRefund,
+Ref.dblLessFWT = CDat.dblLessFWT,
+Ref.dblLessService = CDat.dblLessService,
+Ref.dblCheckAmount = CDat.dblCheckAmount,
+Ref.dblNoRefund = CDat.dblNoRefund
+FROM tblPATRefund Ref
+INNER JOIN #tmpCurrentData CDat
+ON Ref.intRefundId = CDat.intRefundId
+
+----=====================================================================================================================================
+---- 	UPDATE REFUND CATEGORY TABLE
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE RCat
+SET RCat.intPatronageCategoryId = RRat.intPatronageCategoryId,
+RCat.dblVolume = CVol.dblVolume,
+RCat.dblRefundRate = RRat.dblRate
+FROM tblPATRefundCategory RCat
+INNER JOIN tblPATRefundCustomer RCus
+ON RCat.intRefundCustomerId = RCus.intRefundCustomerId
+INNER JOIN tblPATRefundRateDetail RRat
+ON RCus.intRefundTypeId = RRat.intRefundTypeId
+INNER JOIN tblPATCustomerVolume CVol
+ON RCus.intCustomerId = CVol.intCustomerPatronId
+INNER JOIN #tmpCurrentData
+ON CVol.intFiscalYear = #tmpCurrentData.intFiscalYearId
+WHERE CVol.dblVolume <> 0.00
+
+----=====================================================================================================================================
+---- 	UPDATE CUSTOMER VOLUME TABLE
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE CVol
+SET CVol.dblVolume = 0.00
+FROM tblPATCustomerVolume CVol
+INNER JOIN #tmpCurrentData
+ON CVol.intFiscalYear = #tmpCurrentData.intFiscalYearId
+WHERE CVol.dblVolume <> 0.00
+
 
 END TRY
 BEGIN CATCH
@@ -175,6 +290,7 @@ Post_Cleanup:
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundPostData')) DROP TABLE #tmpRefundPostData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCurrentData')) DROP TABLE #tmpCurrentData
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------

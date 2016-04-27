@@ -12,6 +12,7 @@
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -30,8 +31,8 @@
 	,@ItemContractDetailId			INT				= NULL			
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
-	,@ItemShipmentUOMId				INT				= NULL	
-	,@ItemShipmentQtyShipped		NUMERIC(18,6)	= 0.000000		
+	,@ItemWeightUOMId				INT				= NULL	
+	,@ItemWeight					NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentGrossWt			NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000		
@@ -48,6 +49,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
+	,@SubCurrency					BIT				= 0
 AS
 
 BEGIN
@@ -59,10 +61,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@EntityCustomerId INT
-		,@CompanyLocationId INT
-		,@InvoiceDate DATETIME
+DECLARE @ZeroDecimal		NUMERIC(18, 6)
+		,@EntityCustomerId	INT
+		,@CompanyLocationId	INT
+		,@InvoiceDate		DATETIME
+		,@TermDiscount		NUMERIC(18, 6)
+		,@SubCurrencyCents	INT
 
 SET @ZeroDecimal = 0.000000
 
@@ -78,6 +82,7 @@ SELECT
 	 @EntityCustomerId	= [intEntityCustomerId]
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
+	,@SubCurrencyCents	= ISNULL([intSubCurrencyCents], 1)
 FROM
 	tblARInvoice
 WHERE
@@ -116,12 +121,13 @@ IF ISNULL(@RaiseError,0) = 0
 	
 IF (ISNULL(@RefreshPrice,0) = 1)
 	BEGIN
-		DECLARE @Pricing			NVARCHAR(250)				
-				,@ContractNumber	INT
+		DECLARE  @ContractNumber	INT
 				,@ContractSeq		INT
 				,@InvoiceType		NVARCHAR(200)
+				,@TermId			INT
+
 		BEGIN TRY
-		SELECT TOP 1 @InvoiceType = strType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
+		SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 		EXEC dbo.[uspARGetItemPrice]  
 			 @ItemId					= @ItemId
 			,@CustomerId				= @EntityCustomerId
@@ -129,12 +135,13 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			,@ItemUOMId					= @ItemUOMId
 			,@TransactionDate			= @InvoiceDate
 			,@Quantity					= @ItemQtyShipped
-			,@Price						= @ItemPrice OUTPUT
-			,@Pricing					= @Pricing OUTPUT
-			,@ContractHeaderId			= @ItemContractHeaderId OUTPUT
-			,@ContractDetailId			= @ItemContractDetailId OUTPUT
-			,@ContractNumber			= @ContractNumber OUTPUT
-			,@ContractSeq				= @ContractSeq OUTPUT
+			,@Price						= @ItemPrice			OUTPUT
+			,@Pricing					= @ItemPricing			OUTPUT
+			,@ContractHeaderId			= @ItemContractHeaderId	OUTPUT
+			,@ContractDetailId			= @ItemContractDetailId	OUTPUT
+			,@ContractNumber			= @ContractNumber		OUTPUT
+			,@ContractSeq				= @ContractSeq			OUTPUT
+			,@TermDiscount				= @TermDiscount			OUTPUT
 			--,@AvailableQuantity			= NULL OUTPUT
 			--,@UnlimitedQuantity			= 0    OUTPUT
 			--,@OriginalQuantity			= NULL
@@ -147,6 +154,7 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			--,@PricingLevelId			= NULL
 			--,@AllowQtyToExceedContract	= 0
 			,@InvoiceType				= @InvoiceType
+			,@TermId					= @TermId
 		END TRY
 		BEGIN CATCH
 			SET @ErrorMessage = ERROR_MESSAGE();
@@ -159,11 +167,12 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 BEGIN TRY
 	DECLARE @existingInvoiceDetail INT
 
-	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId AND strSalesOrderNumber = @ItemSalesOrderNumber
+	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId AND strSalesOrderNumber = @ItemSalesOrderNumber AND intInvoiceId = @InvoiceId
 	IF ISNULL(@existingInvoiceDetail, 0) > 0
 		BEGIN
 			UPDATE tblARInvoiceDetail 
-				SET dblQtyShipped = dblQtyShipped + ISNULL(@ItemQtyShipped ,0.000000)
+				SET dblQtyOrdered = dblQtyOrdered,
+					dblQtyShipped = dblQtyShipped + ISNULL(@ItemQtyShipped ,0.000000)
 			WHERE intInvoiceDetailId = @existingInvoiceDetail
 		END
 	ELSE
@@ -178,9 +187,12 @@ BEGIN TRY
 				,[intItemUOMId]
 				,[dblQtyShipped]
 				,[dblDiscount]
+				,[dblItemTermDiscount]
 				,[dblPrice]
+				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
+				,[ysnSubCurrency]
 				,[intAccountId]
 				,[intCOGSAccountId]
 				,[intSalesAccountId]
@@ -202,8 +214,8 @@ BEGIN TRY
 				,[intContractDetailId]
 				,[intShipmentId]
 				,[intShipmentPurchaseSalesContractId]
-				,[intShipmentItemUOMId]
-				,[dblShipmentQtyShipped]
+				,[intItemWeightUOMId]
+				,[dblItemWeight]
 				,[dblShipmentGrossWt]
 				,[dblShipmentTareWt]
 				,[dblShipmentNetWt]
@@ -231,9 +243,12 @@ BEGIN TRY
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
-				,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
+				,[dblItemTermDiscount]				= ISNULL(@TermDiscount, @ZeroDecimal)
+				,[dblPrice]							= (CASE WHEN (ISNULL(@SubCurrency,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @SubCurrency ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
+				,[ysnSubCurrency]					= @SubCurrency
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
 				,[intSalesAccountId]				= Acct.[intSalesAccountId]
@@ -255,8 +270,8 @@ BEGIN TRY
 				,[intContractDetailId]				= @ItemContractDetailId
 				,[intShipmentId]					= @ItemShipmentId
 				,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
-				,[intShipmentItemUOMId]				= @ItemShipmentUOMId
-				,[dblShipmentQtyShipped]			= @ItemShipmentQtyShipped
+				,[intItemWeightUOMId]				= @ItemWeightUOMId
+				,[dblItemWeight]					= @ItemWeight
 				,[dblShipmentGrossWt]				= @ItemShipmentGrossWt
 				,[dblShipmentTareWt]				= @ItemShipmentTareWt
 				,[dblShipmentNetWt]					= @ItemShipmentNetWt

@@ -17,7 +17,9 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 GO
 
 -- PT VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1
+IF  ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1
+	AND (select top 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst') = 1)
+BEGIN
 	EXEC ('
 		CREATE VIEW [dbo].[vwticmst]
 		AS
@@ -29,4 +31,5 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		FROM
 		ptticmst
 			')
+END
 GO

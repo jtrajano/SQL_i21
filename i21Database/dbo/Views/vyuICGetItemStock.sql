@@ -24,11 +24,11 @@ SELECT
 	Location.strLocationName,
 	Location.strLocationType,
 	ItemLocation.intVendorId,
-	strVendorId = (SELECT TOP 1 strVendorId FROM tblAPVendor WHERE intVendorId = ItemLocation.intVendorId),
-	intStockUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
-	strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
-	strStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
-	dblStockUnitQty = (SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
+	strVendorId = Vendor.strVendorId,
+	intStockUOMId = StockUOM.intItemUOMId,
+	strStockUOM = StockUOM.strUnitMeasure,
+	strStockUOMType = StockUOM.strUnitType,
+	dblStockUnitQty = StockUOM.dblUnitQty,
 	ItemLocation.intReceiveUOMId,
 	dblReceiveUOMConvFactor = ISNULL(ReceiveUOM.dblUnitQty, 0),
 	ItemLocation.intIssueUOMId,
@@ -111,7 +111,8 @@ SELECT
 	Item.intGradeId,
 	strGrade = Grade.strDescription,
 	Item.intLifeTime,
-	Item.strLifeTimeType
+	Item.strLifeTimeType,
+	Item.ysnListBundleSeparately 
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
@@ -126,3 +127,5 @@ LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON ItemLocation.intSubLoca
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
+LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ItemLocation.intVendorId
+LEFT JOIN vyuICGetItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId AND StockUOM.ysnStockUnit = 1

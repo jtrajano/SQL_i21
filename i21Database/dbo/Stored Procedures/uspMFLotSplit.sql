@@ -33,6 +33,7 @@ BEGIN TRY
 	DECLARE @intNewItemUOMId INT
 	DECLARE @dblAdjustByQuantity NUMERIC(38,20)
 	DECLARE @strLotTracking NVARCHAR(50)
+			,@intCategoryId int
 	DECLARE @dblWeightPerQty NUMERIC(38, 20)
 	DECLARE @intWeightUOMId INT
 	DECLARE @intItemStockUOMId INT
@@ -92,6 +93,7 @@ BEGIN TRY
 	--END
 	
 	SELECT @strLotTracking = strLotTracking
+			,@intCategoryId=intCategoryId
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -107,12 +109,27 @@ BEGIN TRY
 	BEGIN 
 		IF (@strLotTracking = 'Yes - Serial Number')
 		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 24, @strNewLotNumber OUTPUT
+			--EXEC dbo.uspSMGetStartingNumber 24, @strNewLotNumber OUTPUT
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+						,@intItemId = @intItemId
+						,@intManufacturingId = NULL
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 24
+						,@ysnProposed = 0
+						,@strPatternString = @strNewLotNumber OUTPUT
 		END
 		ELSE 
 		BEGIN
 			RAISERROR('Lot tracking for the item is set as manual. Please supply the split lot number.',11,1)
 		END
+	END
+	
+	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
+	BEGIN
+		RAISERROR(90008,11,1)
 	END
 
 	--SELECT @dblOldDestinationWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End

@@ -24,6 +24,7 @@
 	[intFWTLiabilityAccountId] [int] NULL,
 	[intDividendsGLAccount] [int] NULL,
 	[intTreasuryGLAccount] [int] NULL,
+	[intAPClearingGLAccount] [int] NULL,
 	[intConcurrencyId] [int] NULL, 
     CONSTRAINT [PK_tblPATCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblPATCompanyPreference_GrainDisc] FOREIGN KEY ([intGrainDiscountId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]),

@@ -134,7 +134,7 @@ BEGIN
 	FROM dbo.tblGLAccountCategory
 	WHERE strAccountCategory = @AccountCategoryName_RevalueSold
 
-	DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+	DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Variance'
 	DECLARE @AccountCategoryId_AutoNegative AS INT -- = 44
 
 	SELECT @AccountCategoryId_AutoNegative = intAccountCategoryId
@@ -243,18 +243,18 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		CREATE TABLE expectedTransactionToReverse (
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20) 
 		)
 
 		-- Create the temp table 
@@ -262,15 +262,16 @@ BEGIN
 			intInventoryTransactionStorageId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryCostBucketStorageId INT 
-			,dblQty NUMERIC(38,20)
 		)
 
 		-- Call the fake data stored procedure
 		EXEC testi21Database.[Fake inventory items]
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOStorage', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOStorageOut', @Identity = 1;
 	END 
 	
 	-- Act
@@ -280,15 +281,32 @@ BEGIN
 		DECLARE @intTransactionId AS INT 
 				
 		EXEC dbo.uspICUnpostLIFOOutFromStorage @strTransactionId, @intTransactionId
-
-		INSERT INTO actualTransactionToReverse 
-		SELECT * FROM #tmpInventoryTransactionStockToReverse
 	END 
 
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedLIFO', 'actualLIFO';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
+		INSERT INTO actualTransactionToReverse 
+		SELECT * FROM #tmpInventoryTransactionStockToReverse
+						
+		-- Get the actual LIFO data
+		INSERT INTO actualLIFO (
+				strTransactionId
+				,intTransactionId
+				,dblStockIn
+				,dblStockOut
+				,dblCost
+				,ysnIsUnposted
+		)
+		SELECT strTransactionId
+				,intTransactionId
+				,dblStockIn
+				,dblStockOut		
+				,dblCost
+				,ysnIsUnposted
+		FROM	dbo.tblICInventoryLIFOStorage	
+
+		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse', 'Failed data for #tmpInventoryTransactionStockToReverse.';
+		EXEC tSQLt.AssertEqualsTable 'expectedLIFO', 'actualLIFO', 'Failed data for lifo cost bucket.';
 	END
 
 	-- Clean-up: remove the tables used in the unit test

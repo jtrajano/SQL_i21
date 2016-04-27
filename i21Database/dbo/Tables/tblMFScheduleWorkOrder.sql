@@ -17,7 +17,9 @@
 	,strNote NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strAdditionalComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,dtmEarliestStartDate DATETIME
+	,dtmTargetDate DATETIME
 	,ysnFrozen bit
+	,intNoOfFlushes int
 	,intConcurrencyId INT
 	,dtmCreated DATETIME NOT NULL
 	,intCreatedUserId INT NOT NULL

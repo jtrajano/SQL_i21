@@ -22,7 +22,8 @@ DECLARE @intScaleStationId AS INT
 DECLARE @strGRStorage AS nvarchar(3)
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @intDirectType AS INT = 3
-DECLARE @intTicketUOM INT
+DECLARE @intCommodityUOMId INT
+DECLARE @intCommodityUnitMeasureId INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @InventoryReceiptId AS INT
@@ -40,7 +41,9 @@ DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 DECLARE @intDefaultStorageSchedule AS INT
 DECLARE @intCommodityId AS INT
 DECLARE @matchStorageType AS INT
-
+DECLARE @ysnIsStorage AS INT
+DECLARE @intContractHeaderId INT
+DECLARE @strLotTracking NVARCHAR(4000)
 
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
@@ -68,7 +71,9 @@ BEGIN TRY
 
 	SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
 	WHERE US.[intEntityUserSecurityId] = @intUserId
-
+	
+	SELECT @intContractHeaderId=intContractHeaderId FROM vyuCTContractDetailView Where intContractDetailId=@intDPContractId
+	
 	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId FROM tblSCTicket TIC
 	WHERE TIC.intTicketId = @intTicketId
 
@@ -85,21 +90,37 @@ BEGIN TRY
 	END
 
     BEGIN
+	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+		SET @ysnIsStorage = 0
+	ELSE
+		SET @ysnIsStorage = 1
 	IF @dblNetUnits < 0
 	BEGIN
 		SET @PostShipment = 2
 		BEGIN 
-			SELECT	@intTicketUOM = UOM.intUnitMeasureId
+			SELECT	@intCommodityUnitMeasureId = CommodityUOM.intUnitMeasureId
 			FROM	dbo.tblSCTicket SC	        
-					JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+					INNER JOIN dbo.tblICCommodityUnitMeasure CommodityUOM On SC.intCommodityId  = CommodityUOM.intCommodityId
+			WHERE	SC.intTicketId = @intTicketId AND CommodityUOM.ysnStockUnit = 1		
 		END
 		BEGIN 
-			SELECT	@intTicketItemUOMId = UM.intItemUOMId
-				FROM	dbo.tblICItemUOM UM	
+			SELECT	@intCommodityUOMId = UM.intItemUOMId
+				FROM dbo.tblICItemUOM UM	
 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+			WHERE UM.intUnitMeasureId = @intCommodityUnitMeasureId AND SC.intTicketId = @intTicketId
 		END
+		IF @intCommodityUOMId IS NULL 
+		BEGIN 
+			-- Raise the error:
+			RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
+			RETURN;
+		END
+		BEGIN 
+			SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId
+			FROM    dbo.tblICItemUOM ItemUOM
+			WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
+		END
+
 		SET @dblUnits = @dblNetUnits * -1
 		SELECT @intStorageEntityId = SC.intEntityId, @intStorageCommodityId = SC.intCommodityId,
 		@intStorageLocationId =  SC.intProcessingLocationId
@@ -230,7 +251,7 @@ BEGIN TRY
 									,intLotId = NULL 
 									,intSubLocationId = ScaleTicket.intSubLocationId
 									,intStorageLocationId = ScaleTicket.intStorageLocationId
-									,ysnIsStorage = 0
+									,ysnIsStorage = @ysnIsStorage
 							FROM	dbo.tblSCTicket ScaleTicket
 									INNER JOIN dbo.tblICItemUOM ItemUOM
 										ON ScaleTicket.intItemId = ItemUOM.intItemId
@@ -239,9 +260,7 @@ BEGIN TRY
 										ON ScaleTicket.intItemId = ItemLocation.intItemId
 										-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 										AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-										INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-									AND TicketCommodityUOM.ysnStockUnit = 1
-							WHERE	ScaleTicket.intTicketId = @intTicketId
+							WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 					END
 				SET @dblUnits = 0
 				GOTO CONTINUEISH
@@ -249,7 +268,10 @@ BEGIN TRY
 			IF @dblRunningBalance > @dblUnits
 				BEGIN
 				UPDATE tblGRCustomerStorage 
-				SET dblOpenBalance = @dblRunningBalance - @dblUnits
+				SET dblOpenBalance = CASE 
+				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance - @dblUnits)
+				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance - @dblUnits
+				END 
 				WHERE intCustomerStorageId = @intStorageTicketId
 				INSERT INTO [dbo].[tblGRStorageHistory]
 				   ([intConcurrencyId]
@@ -272,7 +294,11 @@ BEGIN TRY
 				   ,NULL
 				   ,NULL
 				   ,NULL
-				   ,@dblUnits
+				   --,@dblUnits
+				   ,CASE 
+						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits)
+						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits
+					END 
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
 				   ,'TakeOut From Scale'
@@ -323,9 +349,7 @@ BEGIN TRY
 							ON ScaleTicket.intItemId = ItemLocation.intItemId
 							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	ScaleTicket.intTicketId = @intTicketId
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 				SET @dblUnits = 0
 				GOTO CONTINUEISH
 				END
@@ -335,7 +359,10 @@ BEGIN TRY
 				SET dblOpenBalance = 0
 				WHERE intCustomerStorageId = @intStorageTicketId
 				SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
-				SET @dblUnits = @dblUnits - @dblRunningBalance
+				SET @dblUnits = CASE 
+									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits - @dblRunningBalance)
+									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits - @dblRunningBalance
+								END 
 				INSERT INTO [dbo].[tblGRStorageHistory]
 				   ([intConcurrencyId]
 				   ,[intCustomerStorageId]
@@ -357,7 +384,11 @@ BEGIN TRY
 				   ,NULL
 				   ,NULL
 				   ,NULL
-				   ,@dblRunningBalance
+				   --,@dblRunningBalance
+				   ,CASE 
+						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance)
+						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance
+					END 
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
 				   ,'TakeOut From Scale'
@@ -408,16 +439,14 @@ BEGIN TRY
 							ON ScaleTicket.intItemId = ItemLocation.intItemId
 							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	ScaleTicket.intTicketId = @intTicketId
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 				END
 				SET @intStorageTicketId = 0
 		END
 		GOTO CONTINUEISH
 	END
 	BEGIN 
-		SELECT @intScaleStationId = SC.intScaleSetupId
+		SELECT @intScaleStationId = SC.intScaleSetupId, @intItemId = SC.intItemId
 		FROM	dbo.tblSCTicket SC	        
 		WHERE	SC.intTicketId = @intTicketId		
 	END
@@ -445,7 +474,7 @@ BEGIN TRY
 	IF @intDefaultStorageSchedule IS NULL 
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Invalid Storage Schedule - uspSCStorageUpdate', 16, 1);
+		RAISERROR('Invalid Default Schedule Storage in Commodity - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
 
@@ -454,28 +483,37 @@ BEGIN TRY
 		FROM	dbo.tblGRStorageScheduleRule SSR	        
 		WHERE	SSR.intStorageScheduleRuleId = @intDefaultStorageSchedule		
 	END
-
 	IF @matchStorageType !=  @intGRStorageId
 	BEGIN 
 		-- Raise the error:
 		RAISERROR('Storage type / Storage Schedule Mismatch - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
-	
 	BEGIN 
-		SELECT	@intTicketUOM = UOM.intUnitMeasureId
+		SELECT	@intCommodityUnitMeasureId = CommodityUOM.intUnitMeasureId
 		FROM	dbo.tblSCTicket SC	        
-				JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-		WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+				INNER JOIN dbo.tblICCommodityUnitMeasure CommodityUOM On SC.intCommodityId  = CommodityUOM.intCommodityId
+		WHERE	SC.intTicketId = @intTicketId AND CommodityUOM.ysnStockUnit = 1		
 	END
-	
 	BEGIN 
-		SELECT	@intTicketItemUOMId = UM.intItemUOMId
-			FROM	dbo.tblICItemUOM UM	
-			  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-		WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+		SELECT	@intCommodityUOMId = UM.intItemUOMId
+			FROM dbo.tblICItemUOM UM	
+				JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+		WHERE UM.intUnitMeasureId = @intCommodityUnitMeasureId AND SC.intTicketId = @intTicketId
 	END
-	
+	IF @intCommodityUOMId IS NULL 
+	BEGIN 
+		-- Raise the error:
+		RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
+		RETURN;
+	END
+
+	BEGIN 
+		SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId
+		FROM    dbo.tblICItemUOM ItemUOM
+		WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
+	END
+
 	-- Insert the Customer Storage Record 
 	INSERT INTO [dbo].[tblGRCustomerStorage]
 	           ([intConcurrencyId]
@@ -506,7 +544,9 @@ BEGIN TRY
 	           ,[dblCurrencyRate]
 			   ,[intCurrencyId]
 			   ,[strStorageTicketNumber]
-			   ,[intItemId])
+			   ,[intItemId]
+			   ,[intCompanyLocationSubLocationId]
+			   ,[intStorageLocationId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -517,8 +557,14 @@ BEGIN TRY
 			,[intDiscountScheduleId]= SC.intDiscountId
 			,[dblTotalPriceShrink]= 0
 			,[dblTotalWeightShrink]= 0 
-			,[dblOriginalBalance]= @dblNetUnits 
-			,[dblOpenBalance]= @dblNetUnits
+			,[dblOriginalBalance]= CASE 
+									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
+									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
+								END  
+			,[dblOpenBalance]= CASE 
+									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
+									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
+								END 
 			,[dtmDeliveryDate]= GETDATE()
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
@@ -536,6 +582,8 @@ BEGIN TRY
 			,[intCurrencyId] = SC.intCurrencyId
 			,[intStorageTicketNumber] = SC.strTicketNumber
 			,SC.[intItemId]
+			,SC.[intSubLocationId]
+			,SC.[intStorageLocationId]
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
@@ -570,8 +618,12 @@ BEGIN TRY
 		   ,@intTicketId
 		   ,NULL
 		   ,NULL
-		   ,NULL
-		   ,@dblNetUnits
+		   ,@intContractHeaderId
+		   --,@dblNetUnits
+		   ,CASE 
+				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
+				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
+			END 
 		   ,dbo.fnRemoveTimeOnDate(GETDATE())
 		   ,0
 		   ,'Generated From Scale'
@@ -628,117 +680,74 @@ BEGIN TRY
            ,[strSourceType]= 'Storage'
 		FROM	dbo.[tblQMTicketDiscount] SD
 		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
+		
+		Update tblGRCustomerStorage 
+		SET  dblDiscountsDue=(SELECT SUM(dblDiscountDue)FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage')
+		WHERE intCustomerStorageId=@intCustomerStorageId
+
 	END
 	
-	INSERT INTO @ItemsForItemReceipt (
-				 intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,intTransactionDetailId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage 
-			)
+	BEGIN
 			SELECT intItemId = ScaleTicket.intItemId
-							,intLocationId = ItemLocation.intItemLocationId 
-							,intItemUOMId = ItemUOM.intItemUOMId
-							,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-							,dblQty = @dblNetUnits 
-							,dblUOMQty = ItemUOM.dblUnitQty
-							,dblCost = 0
-							,dblSalesPrice = 0
-							,intCurrencyId = ScaleTicket.intCurrencyId
-							,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-							,intTransactionId = ScaleTicket.intTicketId
-							,intTransactionDetailId = NULL
-							,strTransactionId = ScaleTicket.strTicketNumber
-							,intTransactionTypeId = @intDirectType 
-							,intLotId = NULL 
-							,intSubLocationId = ScaleTicket.intSubLocationId
-							,intStorageLocationId = ScaleTicket.intStorageLocationId
-							,ysnIsStorage = 1
-					FROM	dbo.tblSCTicket ScaleTicket
-							INNER JOIN dbo.tblICItemUOM ItemUOM
-								ON ScaleTicket.intItemId = ItemUOM.intItemId
-								AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-							INNER JOIN dbo.tblICItemLocation ItemLocation
-								ON ScaleTicket.intItemId = ItemLocation.intItemId
-								-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-								AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-								INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-							AND TicketCommodityUOM.ysnStockUnit = 1
-					WHERE	ScaleTicket.intTicketId = @intTicketId
-	
-		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
-	
-		-- Add the items to the item receipt 
-		BEGIN 
-			EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, 'Direct' ,@InventoryReceiptId OUTPUT; 
-		END
-	
-		BEGIN 
-		SELECT	@strTransactionId = IR.strReceiptNumber
-		FROM	dbo.tblICInventoryReceipt IR	        
-		WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
-		END
-	
-		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
-		--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
-		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
-
-		BEGIN
-	   	SELECT	@ysnDPStorage = ST.ysnDPOwnedType
-		FROM	dbo.tblGRStorageType ST	        
-		WHERE	ST.intStorageScheduleTypeId = @intGRStorageId
-		IF @ysnDPStorage = 1
-		BEGIN
-			 EXEC dbo.uspCTUpdationFromTicketDistribution 
-			 @intTicketId
-			,@intEntityId
-			,@dblNetUnits
-			,@intDPContractId
-			,@intUserId
-			,1
-		END
+					,intLocationId = ItemLocation.intItemLocationId 
+					,intItemUOMId = ItemUOM.intItemUOMId
+					,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+					,dblQty = @dblNetUnits 
+					,dblUOMQty = ItemUOM.dblUnitQty
+					,dblCost = 0
+					,dblSalesPrice = 0
+					,intCurrencyId = ScaleTicket.intCurrencyId
+					,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+					,intTransactionId = ScaleTicket.intTicketId
+					,intTransactionDetailId = NULL
+					,strTransactionId = ScaleTicket.strTicketNumber
+					,intTransactionTypeId = @intDirectType 
+					,intLotId = NULL 
+					,intSubLocationId = ScaleTicket.intSubLocationId
+					,intStorageLocationId = ScaleTicket.intStorageLocationId
+					,ysnIsStorage = 1
+			FROM	dbo.tblSCTicket ScaleTicket
+					INNER JOIN dbo.tblICItemUOM ItemUOM
+						ON ScaleTicket.intItemId = ItemUOM.intItemId
+						--AND @intTicketItemUOMId = ItemUOM.intItemUOMId
+						AND @intTicketItemUOMId = ItemUOM.intItemUOMId
+					INNER JOIN dbo.tblICItemLocation ItemLocation
+						ON ScaleTicket.intItemId = ItemLocation.intItemId
+						-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+						AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+			WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 	END
 	
 	CONTINUEISH:
 
 	IF @PostShipment = 2
-	BEGIN
-			-- Validate the items to shipment 
-		EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
+		BEGIN
+				-- Validate the items to shipment 
+			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
-		---- Add the items into inventory shipment > sales order type. 
-		IF @strSourceType = @SALES_ORDER
-		BEGIN 
-			EXEC dbo.uspSCAddScaleTicketToItemShipment 
-				  @intTicketId
-				 ,@intUserId
-				 ,@ItemsForItemShipment
-				 ,@intEntityId
-				 ,4
-				 ,@InventoryShipmentId OUTPUT;
+			---- Add the items into inventory shipment > sales order type. 
+			IF @strSourceType = @SALES_ORDER
+			BEGIN 
+				EXEC dbo.uspSCAddScaleTicketToItemShipment 
+					  @intTicketId
+					 ,@intUserId
+					 ,@ItemsForItemShipment
+					 ,@intEntityId
+					 ,4
+					 ,@InventoryShipmentId OUTPUT;
+			END
+			BEGIN 
+			SELECT	@strTransactionId = ship.strShipmentNumber
+			FROM	dbo.tblICInventoryShipment ship	        
+			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+			END
+			SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+			IF @strLotTracking = 'No'
+			BEGIN
+				EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			END
+		
 		END
-		BEGIN 
-		SELECT	@strTransactionId = ship.strShipmentNumber
-		FROM	dbo.tblICInventoryShipment ship	        
-		WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
-		END
-		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
-	END
-
 	END
 
 END TRY

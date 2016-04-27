@@ -4,9 +4,10 @@
 	@NewSalesOrderId INT = NULL OUTPUT
 AS
 BEGIN
-	DECLARE @NewTransactionId INT,
-			@DateOnly DATETIME,
-			@Type NVARCHAR(25) = 'Standard'
+	DECLARE @NewTransactionId	INT,
+			@DateOnly			DATETIME,
+			@Type				NVARCHAR(25) = 'Standard',
+			@ZeroDecimal		NUMERIC(18, 6) = 0.000000
 
 	SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
@@ -110,12 +111,24 @@ BEGIN
 	SET @NewTransactionId = SCOPE_IDENTITY()
 
 	--DETAILS
-	DECLARE @OrderDetails TABLE(intSalesOrderDetailId INT)
+	DECLARE @OrderDetails TABLE(intSalesOrderDetailId	INT, 
+							    dblDiscount				NUMERIC(18,6), 
+								dblDiscountAmount		NUMERIC(18,6),
+								dblPrice				NUMERIC(18,6),
+								dblQtyOrdered			NUMERIC(18,6))
 		
 	INSERT INTO @OrderDetails
-		([intSalesOrderDetailId])
+		([intSalesOrderDetailId]
+		,[dblDiscount]
+		,[dblDiscountAmount]
+		,[dblPrice]
+		,[dblQtyOrdered])
 	SELECT 	
 		 [intSalesOrderDetailId]
+		,ISNULL([dblDiscount], @ZeroDecimal)
+		,ISNULL([dblItemTermDiscount], @ZeroDecimal)
+		,ISNULL([dblPrice], @ZeroDecimal)
+		,ISNULL([dblQtyOrdered], @ZeroDecimal)
 	FROM
 		tblSOSalesOrderDetail
 	WHERE
@@ -125,10 +138,13 @@ BEGIN
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderDetails)
 	BEGIN
-		DECLARE @SalesOrderDetailId INT,
-				@NewSalesOrderDetailId INT
+		DECLARE @SalesOrderDetailId		INT,
+				@NewSalesOrderDetailId	INT,				
+				@QtyOrdered				NUMERIC(18,6),
+				@Price					NUMERIC(18,6)
 
-		SELECT TOP 1 @SalesOrderDetailId = [intSalesOrderDetailId] FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
+		SELECT TOP 1 @SalesOrderDetailId = [intSalesOrderDetailId]
+		FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
 		
 		INSERT INTO tblSOSalesOrderDetail
 			([intSalesOrderId]
@@ -139,6 +155,7 @@ BEGIN
 			,[dblQtyAllocated]
 			,[dblQtyShipped]
 			,[dblDiscount]
+			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
 			,[dblTotalTax]
@@ -167,6 +184,7 @@ BEGIN
 			,[dblQtyAllocated]
 			,[dblQtyShipped]
 			,[dblDiscount]
+			,[dblItemTermDiscount]
 			,[intTaxId]
 			,[dblPrice]
 			,[dblTotalTax]
@@ -199,7 +217,7 @@ BEGIN
 			,[intTaxClassId]
 			,[strTaxableByOtherTaxes]
 			,[strCalculationMethod]
-			,[numRate]
+			,[dblRate]
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
@@ -215,7 +233,7 @@ BEGIN
 			,[intTaxClassId]
 			,[strTaxableByOtherTaxes]
 			,[strCalculationMethod]
-			,[numRate]
+			,[dblRate]
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]

@@ -193,7 +193,7 @@ BEGIN
 	FROM dbo.tblGLAccountCategory
 	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_RevalueSold
 
-	DECLARE @ACCOUNT_CATEGORY_NAME_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+	DECLARE @ACCOUNT_CATEGORY_NAME_AutoNegative AS NVARCHAR(100) = 'Auto Variance'
 	DECLARE @ACCOUNT_CATEGORY_ID_AutoNegative AS INT -- = 44
 
 	SELECT @ACCOUNT_CATEGORY_ID_AutoNegative = intAccountCategoryId
@@ -614,6 +614,9 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @ACCOUNT_CATEGORY_ID_WorkInProgress, @WorkInProgress_Default);
 
 
+
+		-- Add the G/L account for serial lot item 
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SerializedLotGrains, @ACCOUNT_CATEGORY_ID_InventoryAdjustment, @InventoryAdjustment_Default);
 
 		-- Add the G/L Account for Commodity items. 
 		-- Corn

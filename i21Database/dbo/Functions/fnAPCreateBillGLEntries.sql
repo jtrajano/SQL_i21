@@ -57,8 +57,9 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 
-													THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
+		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 THEN A.dblAmountDue / Rate.dblRate 
+											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -94,6 +95,10 @@ BEGIN
 	FROM	[dbo].tblAPBill A
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
+			CROSS APPLY
+			(
+				SELECT TOP 1 dblRate,ysnSubCurrency FROM dbo.tblAPBillDetail A WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+			) Rate
 			--CROSS APPLY
 			--(
 			--	SELECT * FROM #tmpGLUnits WHERE intAccountId = A.intAccountId
@@ -106,7 +111,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	C.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CAST(B.dblAmountApplied AS DECIMAL(18,2)),
+		[dblCredit]						=	B.dblAmountApplied,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	C.strReference,
@@ -149,14 +154,28 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) 
-												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
-														ELSE 
-															(CASE WHEN B.dblOldCost != 0 THEN CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) --COST ADJUSTMENT
-																ELSE B.dblTotal END)
-															+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
-														END) --IC Tax
-												END), --Bill Detail
+		[dblDebit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
+												  --WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate 
+												  --WHEN A.intTransactionType IN (1) AND B.ysnSubCurrency > 0 THEN B.dblTotal + CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
+												ELSE 
+													CASE WHEN B.dblRate > 0 THEN 
+															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															ELSE 
+																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
+																	  ELSE B.dblTotal END)
+																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
+															END) / B.dblRate 
+													ELSE 
+															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															ELSE 
+																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
+																	  ELSE B.dblTotal END)
+																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
+															END)
+													END
+												END) AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -207,8 +226,11 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Negative'),
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) ELSE 0 END), 
+		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Auto-Variance'),
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (1) THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2))
+												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / B.dblRate
+												  WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency > 0  THEN B.dblTotal - CAST(B.dblOldCost  * B.dblQtyReceived AS DECIMAL(18,2)) / B.dblRate
+											 ELSE 0 END), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -257,13 +279,21 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.intAccountId
+		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
 												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
-		[dblDebit]						=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
+		[dblDebit]						=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
+												 WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
+												 WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
 												ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
-														ELSE D.dblAmount
+														ELSE 
+															(CASE WHEN D.ysnInventoryCost = 0 
+																THEN 
+																	(CASE WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0 THEN B.dblTotal / B.dblRate		
+																		  WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate	
+																		ELSE B.dblTotal  END) --Get the amount from voucher if NOT inventory cost
+																ELSE D.dblAmount END)
 													END)
-											END, --Bill Detail
+											END AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -303,12 +333,12 @@ BEGIN
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-			LEFT JOIN tblICInventoryReceiptItemAllocatedCharge D
+			LEFT JOIN tblICInventoryReceiptCharge D
 				ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
-			LEFT JOIN tblICInventoryReceiptItem E
-				ON D.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+			--LEFT JOIN tblICInventoryReceiptItem E
+			--	ON D.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 			LEFT JOIN tblICItem F
-				ON E.intItemId = F.intItemId
+				ON B.intItemId = F.intItemId
 	WHERE B.intInventoryReceiptChargeId IS NOT NULL
 	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
@@ -318,7 +348,9 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
 		--[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
-		[dblDebit]						=	(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END)
+		[dblDebit]						=	(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) 
+												  WHEN B.dblRate > 0 THEN  CAST(SUM(D.dblTax) / B.dblRate AS DECIMAL(18,2))
+											 ELSE SUM(D.dblTax) END)
 											* (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -371,6 +403,7 @@ BEGIN
 	,A.intTransactionType
 	,A.strBillId
 	,A.intBillId
+	,B.dblRate
 	
 	RETURN
 END

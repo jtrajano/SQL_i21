@@ -34,7 +34,7 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_InboundShipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
--- Allocate by cost by 'Stock Unit' on cost methods using 'Per Unit' and 'Percentage' 
+-- Allocate cost by 'Stock Unit' regardless if there are contracts and cost methods used are 'Per Unit' and 'Percentage' 
 BEGIN 
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
 	MERGE	
@@ -60,7 +60,6 @@ BEGIN
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,ysnAccrue 
-							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
 							,intInventoryReceiptId
@@ -69,7 +68,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Stock_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (

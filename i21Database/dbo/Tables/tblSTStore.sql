@@ -107,6 +107,7 @@
     [ysnRecieptErrors] BIT NULL, 
     [dtmEndOfDayDate] DATETIME NULL, 
     [intEndOfDayShiftNo] INT NULL, 
+	[intTaxGroupId] int NULL,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 
@@ -121,5 +122,6 @@
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intCashTransctionMopId] FOREIGN KEY ([intCashTransctionMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intLoyaltyDiscountMopId] FOREIGN KEY ([intLoyaltyDiscountMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intRemovePropCardMopId] FOREIGN KEY ([intRemovePropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
-	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intAddPropCardMopId] FOREIGN KEY ([intAddPropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId])
+	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intAddPropCardMopId] FOREIGN KEY ([intAddPropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
+	CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId])
    );

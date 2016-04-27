@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCFFeeProfileDetail] (
     [intFeeProfileDetailId] INT            IDENTITY (1, 1) NOT NULL,
-    [intFeeProfileId]       INT            NULL,
+    [intFeeProfileId]       INT            NOT NULL,
     [intFeeId]              INT            NULL,
     [strDescription]        NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [dtmEndDate]            DATETIME       NULL,
@@ -10,6 +10,8 @@
     CONSTRAINT [FK_tblCFFeeProfileDetail_tblCFFee] FOREIGN KEY ([intFeeId]) REFERENCES [dbo].[tblCFFee] ([intFeeId]),
     CONSTRAINT [FK_tblCFFeeProfileDetail_tblCFFeeProfile] FOREIGN KEY ([intFeeProfileId]) REFERENCES [dbo].[tblCFFeeProfile] ([intFeeProfileId]) ON DELETE CASCADE
 );
+
+
 
 
 

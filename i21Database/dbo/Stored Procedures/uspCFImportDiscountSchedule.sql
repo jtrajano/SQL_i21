@@ -10,8 +10,6 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 		--====================================================--
 		--     ONE TIME DISCOUNT SCHEDULE SYNCHRONIZATION	  --
 		--====================================================--
-		TRUNCATE TABLE tblCFDiscountScheduleFailedImport
-		TRUNCATE TABLE tblCFDiscountScheduleSuccessImport
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
@@ -112,10 +110,37 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 			FROM cfdscmst
 				WHERE cfdsc_schd COLLATE Latin1_General_CI_AS NOT IN (select strDiscountSchedule from tblCFDiscountSchedule) 
 
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+				dtmImportDate
+				,strSetupName
+				,ysnSuccessful
+				,strFailedReason
+				,strOriginTable
+				,strOriginIdentityId
+				,strI21Table
+				,intI21IdentityId
+				,strUserId
+			)
+		SELECT 
+		dtmImportDate = GETDATE()
+		,strSetupName = 'Discount Schedule'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate discount schedule on i21 Card Fueling discount schedules list'
+		,strOriginTable = 'cfdscmst'
+		,strOriginIdentityId = cfdsc_schd
+		,strI21Table = 'tblCFDiscountSchedule'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfdscmst
+				WHERE cfdsc_schd COLLATE Latin1_General_CI_AS IN (select strDiscountSchedule from tblCFDiscountSchedule) 
+		
+		--DUPLICATE SITE ON i21--
+
+
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfdscmst))
 		BEGIN
-				
-
 			SELECT @originDiscountSchedule = cfdsc_schd FROM #tmpcfdscmst
 
 			DECLARE @DetailRecord TABLE (
@@ -204,6 +229,7 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 					
 				--================================--
 				--		INSERT MASTER RECORD	  --
+				--*******COMMIT TRANSACTION*******--
 				--================================--
 				INSERT [dbo].[tblCFDiscountSchedule](
 				 [strDiscountSchedule]	
@@ -503,19 +529,61 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 					,@Per_Unit_20)
 				END
 
-				COMMIT TRANSACTION
+									   COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
 				SET @TotalSuccess += 1;
-				INSERT INTO tblCFDiscountScheduleSuccessImport(strDiscountScheduleId)					
-				VALUES(@originDiscountSchedule)			
+				INSERT INTO tblCFImportResult(
+					dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Discount Schedule'
+					,1
+					,''
+					,'cfdscmst'
+					,@originDiscountSchedule
+					,'tblCFDiscountSchedule'
+					,@MasterPk
+					,''
+				)
 			END TRY
 			BEGIN CATCH
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				INSERT INTO tblCFDiscountScheduleFailedImport(strDiscountScheduleId,strReason)					
-				VALUES(@originDiscountSchedule,ERROR_MESSAGE())					
-				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
-				PRINT 'IMPORTING DISCOUNT SCHEDULE' + ERROR_MESSAGE()
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Discount Schedule'
+					,0
+					,ERROR_MESSAGE()
+					,'cfdscmst'
+					,@originDiscountSchedule
+					,'tblCFDiscountSchedule'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -524,13 +592,14 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 			END
 								
 			CONTINUELOOP:
-			PRINT @originDiscountSchedule
 			DELETE FROM #tmpcfdscmst WHERE cfdsc_schd = @originDiscountSchedule
 		
 			SET @Counter += 1;
 
 		END
 	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfdscmst
+		PRINT @TotalFailed
 
 	END

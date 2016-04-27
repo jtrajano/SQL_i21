@@ -228,8 +228,13 @@ BEGIN
 END
 ELSE
 BEGIN
+
+	DECLARE @Ids AS Id
+	INSERT INTO @Ids
+	SELECT intBillId FROM #tmpPostBillData
+
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.fnAPReverseGLEntries(@validBillIds, 'Bill', DEFAULT, @userId, @batchId)
+	SELECT * FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 END
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
@@ -361,6 +366,7 @@ BEGIN
 		FROM tblAPBill A
 		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
+		GOTO Audit_Log_Invoke
 	END
 	ELSE
 	BEGIN
@@ -439,8 +445,6 @@ BEGIN
 		FROM tblAPBill A
 		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
-		IF @@ERROR <> 0	GOTO Post_Rollback;
-
 	END
 
 	BEGIN TRY
@@ -486,6 +490,9 @@ BEGIN
 		RAISERROR(@integrationError, 16, 1);
 		GOTO Post_Rollback
 	END CATCH
+
+	GOTO Audit_Log_Invoke
+	IF @@ERROR <> 0	GOTO Post_Rollback;
 
 END
 ELSE
@@ -573,6 +580,30 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
+Audit_Log_Invoke:
+DECLARE @strDescription AS NVARCHAR(100) 
+  ,@actionType AS NVARCHAR(50)
+  ,@billId AS NVARCHAR(50);
+DECLARE @billCounter INT = 0;
+SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
+
+WHILE(@billCounter != (@totalRecords))
+BEGIN
+	SELECT @billId = CAST((SELECT TOP (1) intBillId FROM #tmpPostBillData) AS NVARCHAR(50))
+
+	EXEC dbo.uspSMAuditLog 
+	   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
+	  ,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+	  ,@entityId = @userId									-- Entity Id.
+	  ,@actionType = @actionType                        -- Action Type
+	  ,@changeDescription = @strDescription				-- Description
+	  ,@fromValue = ''									-- Previous Value
+	  ,@toValue = ''									-- New Value
+
+  SET @billCounter = @billCounter + 1
+  DELETE FROM #tmpPostBillData WHERE intBillId = @billId
+END
+
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1

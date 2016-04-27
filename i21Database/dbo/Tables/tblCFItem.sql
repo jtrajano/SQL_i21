@@ -1,6 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblCFItem] (
     [intItemId]                     INT             IDENTITY (1, 1) NOT NULL,
-    [intTaxGroupMaster]             INT             NULL,
     [intNetworkId]                  INT             NULL,
     [intSiteId]                     INT             NULL,
     [strProductNumber]              NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -28,8 +27,15 @@
     [dtmLastModified]               DATETIME        NULL,
     [intConcurrencyId]              INT             CONSTRAINT [DF_tblCFItem_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFItem] PRIMARY KEY CLUSTERED ([intItemId] ASC),
-    CONSTRAINT [FK_tblCFItem_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblCFItem_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblCFItem_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
+
+
+
+
 
 
 

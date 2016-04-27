@@ -18,6 +18,9 @@
     [intRestrictedByProduct]  INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFFee_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFFee] PRIMARY KEY CLUSTERED ([intFeeId] ASC),
-    CONSTRAINT [FK_tblCFFee_tblCFCardType] FOREIGN KEY ([intCardTypeId]) REFERENCES [dbo].[tblCFCardType] ([intCardTypeId])
+    CONSTRAINT [FK_tblCFFee_tblCFCardType] FOREIGN KEY ([intCardTypeId]) REFERENCES [dbo].[tblCFCardType] ([intCardTypeId]),
+    CONSTRAINT [FK_tblCFFee_tblGLAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
+
+
 

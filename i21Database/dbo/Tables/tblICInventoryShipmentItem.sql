@@ -23,11 +23,13 @@ Type the overview for the table here.
 		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblQuantity] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
 		[intItemUOMId] INT NOT NULL, 
+		[intCurrencyId] INT NULL,
 		[intWeightUOMId] INT NULL,
 		[dblUnitPrice] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intDockDoorId] INT NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intGradeId] INT NULL,
+		[intDiscountSchedule] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
@@ -37,7 +39,9 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 	)
 
 	GO

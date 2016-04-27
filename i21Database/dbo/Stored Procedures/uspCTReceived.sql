@@ -16,18 +16,24 @@ BEGIN TRY
 				@intFromItemUOMId				INT,
 				@intToItemUOMId					INT,
 				@intUniqueId					INT,
-				@dblQty							NUMERIC(12,4),
-				@dblConvertedQty				NUMERIC(12,4),
+				@dblQty							NUMERIC(18,6),
+				@dblConvertedQty				NUMERIC(18,6),
 				@ErrMsg							NVARCHAR(MAX),
 				@strReceiptType					NVARCHAR(50),
-				@dblSchQuantityToUpdate			NUMERIC(12,4),
+				@dblSchQuantityToUpdate			NUMERIC(18,6),
 				@intSourceType					INT,
-				@ysnPO							BIT
+				@ysnPO							BIT,
+				@ysnLoad						BIT
 
 	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 
 	IF(@strReceiptType <> 'Purchase Contract' AND @strReceiptType <> 'Purchase Order')
 		RETURN
+
+	SELECT	@ysnLoad = ysnLoad 
+	FROM	tblCTContractHeader CH
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+	WHERE	intContractDetailId	=	@intContractDetailId
 
 	DECLARE @tblToProcess TABLE
 	(
@@ -35,20 +41,21 @@ BEGIN TRY
 		intInventoryReceiptDetailId INT,
 		intContractDetailId			INT,
 		intItemUOMId				INT,
-		dblQty						NUMERIC(12,4)	
+		dblQty						NUMERIC(18,6)	
 	)
 
 	IF(@strReceiptType = 'Purchase Contract')
 	BEGIN
 		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
-		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,	dblQty
-		FROM	@ItemsFromInventoryReceipt
+		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,CASE WHEN @ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END
+		FROM	@ItemsFromInventoryReceipt IR
+		WHERE	ISNULL(intLineNo,0) > 0
 	END
 	ELSE IF(@strReceiptType = 'Purchase Order')
 	BEGIN
 		SELECT	@ysnPO = 1
 		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
-		SELECT 	IR.intInventoryReceiptDetailId,PO.intContractDetailId,IR.intItemUOMId,IR.dblQty
+		SELECT 	IR.intInventoryReceiptDetailId,PO.intContractDetailId,IR.intItemUOMId,CASE WHEN @ysnLoad=1 THEN IR.intLoadReceive ELSE IR.dblQty END
 		FROM	@ItemsFromInventoryReceipt	IR
 		JOIN	tblPOPurchaseDetail			PO	ON	PO.intPurchaseDetailId	=	IR.intLineNo
 		WHERE	PO.intContractDetailId		IS	NOT NULL
@@ -77,7 +84,7 @@ BEGIN TRY
 
 		SELECT @intToItemUOMId	=	intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
-		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+		SELECT @dblConvertedQty =	CASE WHEN @ysnLoad=1 THEN @dblQty ELSE dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty) END
 
 		IF ISNULL(@dblConvertedQty,0) = 0
 		BEGIN
@@ -110,7 +117,7 @@ END TRY
 
 BEGIN CATCH
 
-	SET @ErrMsg = 'uspCTReceived - ' + ERROR_MESSAGE()  
+	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH

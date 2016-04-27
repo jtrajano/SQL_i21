@@ -9,7 +9,7 @@ AS
 				IR.strReceiptNumber, 
 				RL.strLotNumber, 
 				RL.dblQuantity,
-				RL.dblGrossWeight - RL.dblTareWeight AS dblNetWeight,
+				dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,RL.dblGrossWeight - RL.dblTareWeight) AS dblNetWeight,
 				RI.intWeightUOMId intItemUOMId,
 				IM.strUnitMeasure,
 				SL.strSubLocationName
@@ -20,7 +20,8 @@ AS
 													AND IR.strReceiptType					=	'Purchase Contract'
 		JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId
 		JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	RI.intWeightUOMId
-		JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId
+		JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId		CROSS	
+		APPLY	tblLGCompanyPreference			LP 	
 
 		UNION ALL
 
@@ -28,7 +29,7 @@ AS
 				IR.strReceiptNumber, 
 				RL.strLotNumber, 
 				RL.dblQuantity,
-				RL.dblGrossWeight - RL.dblTareWeight AS dblNetWeight,
+				dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,RL.dblGrossWeight - RL.dblTareWeight) AS dblNetWeight,
 				RI.intWeightUOMId intItemUOMId,
 				IM.strUnitMeasure,
 				SL.strSubLocationName
@@ -40,5 +41,6 @@ AS
 		JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId
 		JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	RI.intWeightUOMId
 		JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId
-		JOIN	tblLGAllocationDetail			AD	ON	AD.intPContractDetailId				=	RI.intLineNo
+		JOIN	tblLGAllocationDetail			AD	ON	AD.intPContractDetailId				=	RI.intLineNo		CROSS	
+		APPLY	tblLGCompanyPreference			LP 	
 	)t

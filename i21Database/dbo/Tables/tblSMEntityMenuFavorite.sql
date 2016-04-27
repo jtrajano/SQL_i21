@@ -1,8 +1,14 @@
 ﻿CREATE TABLE [dbo].[tblSMEntityMenuFavorite]
 (
-    [intUserSecurityMenuFavoriteId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserSecurityMenuId] INT NOT NULL, 
-	[intEntityUserSecurityId] INT NOT NULL, 
+    [intEntityMenuFavoriteId] INT NOT NULL PRIMARY KEY IDENTITY, 
+	[strMenuName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
+    [intMenuId] INT NULL, 
+	[intEntityId] INT NOT NULL, 
+	[intCompanyLocationId] INT NULL, 
+	[intParentEntityMenuFavoriteId] INT NULL,
     [intSort] INT NULL DEFAULT (1), 
-    [intConcurrencyId] INT NOT NULL DEFAULT (1)
+	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
+    CONSTRAINT [FK_tblSMEntityMenuFavorite_tblSMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [tblSMMasterMenu]([intMenuID]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMEntityMenuFavorite_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMEntityMenuFavorite_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) ON DELETE CASCADE
 )

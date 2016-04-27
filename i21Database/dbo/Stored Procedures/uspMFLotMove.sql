@@ -116,17 +116,17 @@ BEGIN TRY
 		END
 	END
 
-	--IF @dblWeightPerQty > 0 
+	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
+	BEGIN
+		RAISERROR(90008,11,1)
+	END
+
+	
+	--IF @intItemStockUOMId = @intWeightUOMId
 	--BEGIN
 	--	SELECT @dblMoveQty = dbo.fnDivide(@dblMoveQty, @dblWeightPerQty)
 	--END
 
-	BEGIN TRANSACTION
-
-			--SELECT @dblOldWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
-			--FROM dbo.tblICLot
-			--WHERE strLotNumber = @strNewLotNumber
-			--	AND intStorageLocationId = @intNewStorageLocationId
 
 			--IF @dblOldWeight IS NULL
 			--SELECT @dblOldWeight=0
@@ -167,6 +167,44 @@ BEGIN TRY
 			--	dblWeight = CASE WHEN @dblWeightPerQty = 0 THEN 0 ELSE @dblOldWeight+@dblMoveWeight END,
 			--	dblQty = (@dblOldWeight+@dblMoveWeight)/CASE WHEN @dblWeightPerQty = 0 THEN 1 ELSE @dblWeightPerQty END
 			--WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
+			IF @dblOldWeight IS NULL
+			SELECT @dblOldWeight=0
+
+			SELECT @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
+			FROM dbo.tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intStorageLocationId
+
+			IF @dblOldSourceWeight IS NULL
+			SELECT @dblOldSourceWeight=0
+
+			EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
+				,@dtmDate
+				,@intLocationId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@strLotNumber
+				,@intNewLocationId
+				,@intNewSubLocationId
+				,@intNewStorageLocationId
+				,@strNewLotNumber
+				,@dblMoveQty
+				,@intSourceId
+				,@intSourceTransactionTypeId
+				,@intUserId
+				,@intInventoryAdjustmentId
+
+			UPDATE dbo.tblICLot
+			SET dblWeightPerQty = @dblWeightPerQty,
+				dblWeight = CASE WHEN @dblWeightPerQty = 0 THEN 0 ELSE @dblOldSourceWeight-@dblMoveWeight END,
+				dblQty = (@dblOldSourceWeight-@dblMoveWeight)/CASE WHEN @dblWeightPerQty = 0 THEN 1 ELSE @dblWeightPerQty END
+			WHERE intSubLocationId =@intSubLocationId AND intStorageLocationId=@intStorageLocationId AND strLotNumber=@strLotNumber
+
+			UPDATE dbo.tblICLot
+			SET dblWeightPerQty = @dblWeightPerQty,
+				dblWeight = CASE WHEN @dblWeightPerQty = 0 THEN 0 ELSE @dblOldWeight+@dblMoveWeight END,
+				dblQty = (@dblOldWeight+@dblMoveWeight)/CASE WHEN @dblWeightPerQty = 0 THEN 1 ELSE @dblWeightPerQty END
+			WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 			SELECT @intNewLotId = intLotId
 			FROM dbo.tblICLot

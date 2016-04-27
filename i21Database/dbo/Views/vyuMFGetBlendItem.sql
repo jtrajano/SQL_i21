@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuMFGetBlendItem
 AS
-SELECT strItemNo as strWIPItemNo
-	,strDescription
-FROM dbo.tblICItem
-WHERE strType = 'Assembly/Blend'
+SELECT I.strItemNo AS strWIPItemNo
+	,I.strDescription
+FROM dbo.tblICItem I
+JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+WHERE C.strCategoryCode = 'Blend'

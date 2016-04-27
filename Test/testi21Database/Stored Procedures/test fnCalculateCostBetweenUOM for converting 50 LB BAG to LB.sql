@@ -15,10 +15,10 @@ BEGIN
 		,@20KGBag_UnitQty AS NUMERIC(38, 20) = 44.0925
 
 	-- Arrange
-	DECLARE @dblCost AS NUMERIC(18,6) = 25.00
+	DECLARE @dblCost AS NUMERIC(38, 20) = 25.00
 
-	DECLARE @result AS NUMERIC(18,6) 
-	DECLARE @Expected AS NUMERIC(18,6) = (@dblCost / @50LBBag_UnitQty * @LBS_UnitQty) -- Equals 0.5
+	DECLARE @result AS NUMERIC(38, 20) 
+	DECLARE @Expected AS NUMERIC(38, 20) = @dblCost * @LBS_UnitQty / @50LBBag_UnitQty
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostBetweenUOM(@50LB_BAG, @LBS, @dblCost)

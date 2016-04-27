@@ -842,6 +842,36 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bag Mark')
+	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 91
+			,[strTransactionType]	= N'CRM Number'
+			,[strPrefix]			= N'CRMN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Help Desk'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'CRM Number')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 92
+			,[strTransactionType]	= N'OffSiteTicketNumber'
+			,[strPrefix]			= N'OFF-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Grain'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'OffSiteTicketNumber')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 93
+			,[strTransactionType]	= N'Blend Sheet Number'
+			,[strPrefix]			= N'BS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Blend Sheet Number')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
@@ -850,7 +880,8 @@ GO
 	-- Update the intNumber to update what really should be the current value
 	UPDATE tblSMStartingNumber
 	SET intNumber = x.intNumber,
-	strPrefix = x.strPrefix
+	strPrefix = x.strPrefix,
+	ysnUseLocation = x.ysnUseLocation
 	FROM tmpSMStartingNumber x
 	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
 GO

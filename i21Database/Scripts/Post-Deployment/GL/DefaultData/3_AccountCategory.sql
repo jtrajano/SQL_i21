@@ -3,7 +3,9 @@
 GO
 
 --DO NOT CHANGE THE ID NAME COMBINATION AS OTHER MODULES ARE USING ID AS REFERENCE
---TOTAL COUNT IS 58 AS OF 01/27/2016
+--TOTAL COUNT IS 56 AS OF 10-22-2015
+--TOTAL COUNT IS 59 AS OF 01-26-2015
+--TOTAL COUNT IS 60 AS OF 01-27-2015
 BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 	BEGIN TRANSACTION
 	DECLARE @tblSegment TABLE(intAccountSegmentId INT, strAccountCategory VARCHAR(100))
@@ -89,7 +91,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 41,name = 'Write Off'UNION ALL 
 			SELECT id = 42,name = 'Write-Off Sold'UNION ALL 
 			SELECT id = 43,name = 'Revalue Sold'UNION ALL 
-			SELECT id = 44,name = 'Auto-Negative'UNION ALL 
+			SELECT id = 44,name = 'Auto-Variance'UNION ALL 
 			SELECT id = 45,name = 'AP Clearing'UNION ALL 
 			SELECT id = 46,name = 'Inventory In-Transit'UNION ALL 
 			SELECT id = 47,name = 'General'UNION ALL 
@@ -101,9 +103,11 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 53,name = 'Vendor Prepayments'UNION ALL 
 			SELECT id = 54,name = 'Customer Prepayments'UNION ALL 
 			SELECT id = 55,name = 'Other Charge Expense'UNION ALL 
-			SELECT id = 56,name = 'Other Charge Income'UNION ALL 
+			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
 			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
-			SELECT id = 58,name = 'Deferred Revenue' 
+			SELECT id = 58,name = 'Deferred Revenue' UNION ALL
+			SELECT id = 59,name = 'Realized Gain or Loss Foreign Currency' UNION ALL
+			SELECT id = 60,name = 'Unrealized Gain or Loss Foreign Currency'
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
 
@@ -165,7 +169,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
 		--REMOVE EXCESS
-		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 58
+		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 60
 	END
 	COMMIT TRANSACTION
 END TRY
@@ -255,10 +259,10 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Write-Off Sold'
 	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Auto-Negative')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Auto-Variance')
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Negative'
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Variance'
 	END
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Inventory Adjustment')

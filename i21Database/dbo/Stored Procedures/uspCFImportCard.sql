@@ -10,8 +10,6 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 		--====================================================--
 		--     ONE TIME CARD SYNCHRONIZATION	  --
 		--====================================================--
-		--TRUNCATE TABLE tblCFDiscountScheduleFailedImport
-		--TRUNCATE TABLE tblCFDiscountScheduleSuccessImport
 		SET @TotalSuccess = 0
 		SET @TotalFailed = 0
 
@@ -64,6 +62,36 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			FROM cfcusmst
 				WHERE cfcus_card_no COLLATE Latin1_General_CI_AS NOT IN (select strCardNumber from tblCFCard) 
 
+
+		--DUPLICATE CARD ON i21--
+
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Card'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate card on i21 Card Fueling cards list'
+		,strOriginTable = 'cfcusmst'
+		,strOriginIdentityId = cfcus_card_no
+		,strI21Table = 'tblCFCard'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfcusmst
+		WHERE cfcus_card_no COLLATE Latin1_General_CI_AS IN (select strCardNumber from tblCFCard) 
+		
+		--DUPLICATE CARD ON i21--
+
+
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfcusmst))
 		BEGIN
 				
@@ -71,12 +99,14 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			SELECT @originCard = cfcus_card_no FROM #tmpcfcusmst
 
 			BEGIN TRY
-				BEGIN TRANSACTION
+			--*********************BEGIN TRANSACTION*****************--
+								   BEGIN TRANSACTION 
+			--*********************BEGIN TRANSACTION*****************--
 				SELECT TOP 1
-				 @intNetworkId							   = ISNULL((SELECT intNetworkId 
+				 @intNetworkId							   = (SELECT intNetworkId 
 																	FROM tblCFNetwork 
 																	WHERE strNetwork = LTRIM(RTRIM(cfcus_network_id))
-																	COLLATE Latin1_General_CI_AS),0)
+																	COLLATE Latin1_General_CI_AS)
 				,@strCardNumber							   = LTRIM(RTRIM(cfcus_card_no))
 				,@strCardDescription					   = LTRIM(RTRIM(cfcus_card_desc))
 				,@intAccountId							   = ISNULL((SELECT cfAcct.intAccountId 
@@ -86,18 +116,18 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 																    WHERE arAcct.strCustomerNumber = LTRIM(RTRIM(cfcus_ar_cus_no))
 																    COLLATE Latin1_General_CI_AS),0)
 				--,@strCardForOwnUse						   = LTRIM(RTRIM())
-				,@intExpenseItemId						   = ISNULL((SELECT intAccountId 
+				,@intExpenseItemId						   = (SELECT intAccountId 
 																	FROM tblGLAccount 
 																	WHERE strAccountId = LTRIM(RTRIM(cfcus_exp_itm_no))
-																	COLLATE Latin1_General_CI_AS),0)
+																	COLLATE Latin1_General_CI_AS)
 				,@intDefaultFixVehicleNumber			   = ISNULL((SELECT intVehicleId 
 																	FROM tblCFVehicle 
 																	WHERE strVehicleNumber = LTRIM(RTRIM(cfcus_def_fix_veh_no))
 																	COLLATE Latin1_General_CI_AS),0)
-				,@intDepartmentId						   = ISNULL((SELECT intDepartmentId 
+				,@intDepartmentId						   = (SELECT intDepartmentId 
 																	FROM tblCFDepartment 
 																	WHERE strDepartment = LTRIM(RTRIM(cfcus_dept))
-																	COLLATE Latin1_General_CI_AS),0)
+																	COLLATE Latin1_General_CI_AS)
 				,@dtmLastUsedDated						   = (case
 																when LEN(RTRIM(LTRIM(ISNULL(cfcus_date_last_used,0)))) = 8 
 																then CONVERT(datetime, SUBSTRING (RTRIM(LTRIM(cfcus_date_last_used)),1,4) 
@@ -165,96 +195,169 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 
 				FROM cfcusmst
 				WHERE cfcus_card_no = @originCard
-					
-				--================================--
-				--		INSERT MASTER RECORD	  --
-				--================================--
-				INSERT [dbo].[tblCFCard](
-					 [intNetworkId]			
-					,[strCardNumber]			
-					,[strCardDescription]		
-					,[intAccountId]			
-					,[strCardForOwnUse]		
-					,[intExpenseItemId]		
-					,[intDefaultFixVehicleNumber]
-					,[intDepartmentId]		
-					,[dtmLastUsedDated]		
-					,[intCardTypeId]			
-					,[dtmIssueDate]			
-					,[ysnActive]				
-					,[ysnCardLocked]			
-					,[strCardPinNumber]		
-					,[dtmCardExpiratioYearMonth]
-					,[strCardValidationCode]	
-					,[intNumberOfCardsIssued]	
-					,[intCardLimitedCode]		
-					,[intCardFuelCode]		
-					,[strCardTierCode]		
-					,[strCardOdometerCode]	
-					,[strCardWCCode]			
-					,[strSplitNumber]		
-					,[intCardManCode]			
-					,[intCardShipCat]			
-					,[intCardProfileNumber]	
-					,[intCardPositionSite]	
-					,[intCardvehicleControl]	
-					,[intCardCustomPin]		
-					,[intCreatedUserId]		
-					,[dtmCreated]				
-					,[intLastModifiedUserId]	
-					,[dtmLastModified]		
-					,[ysnCardForOwnUse]		
-					,[ysnIgnoreCardTransaction])
-				VALUES(
-					 @intNetworkId			
-					,@strCardNumber			
-					,@strCardDescription		
-					,@intAccountId			
-					,@strCardForOwnUse		
-					,@intExpenseItemId		
-					,@intDefaultFixVehicleNumber
-					,@intDepartmentId		
-					,@dtmLastUsedDated		
-					,@intCardTypeId			
-					,@dtmIssueDate			
-					,@ysnActive				
-					,@ysnCardLocked			
-					,@strCardPinNumber		
-					,@dtmCardExpiratioYearMonth
-					,@strCardValidationCode	
-					,@intNumberOfCardsIssued	
-					,@intCardLimitedCode		
-					,@intCardFuelCode		
-					,@strCardTierCode		
-					,@strCardOdometerCode	
-					,@strCardWCCode			
-					,@strSplitNumber			
-					,@intCardManCode			
-					,@intCardShipCat			
-					,@intCardProfileNumber	
-					,@intCardPositionSite	
-					,@intCardvehicleControl	
-					,@intCardCustomPin		
-					,@intCreatedUserId		
-					,@dtmCreated				
-					,@intLastModifiedUserId	
-					,@dtmLastModified		
-					,@ysnCardForOwnUse		
-					,@ysnIgnoreCardTransaction)
+				
+			
+				IF(@intAccountId != 0)
+				BEGIN
+					--*********************COMMIT TRANSACTION*****************--
+					INSERT [dbo].[tblCFCard](
+						 [intNetworkId]			
+						,[strCardNumber]			
+						,[strCardDescription]		
+						,[intAccountId]			
+						,[strCardForOwnUse]		
+						,[intExpenseItemId]		
+						,[intDefaultFixVehicleNumber]
+						,[intDepartmentId]		
+						,[dtmLastUsedDated]		
+						,[intCardTypeId]			
+						,[dtmIssueDate]			
+						,[ysnActive]				
+						,[ysnCardLocked]			
+						,[strCardPinNumber]		
+						,[dtmCardExpiratioYearMonth]
+						,[strCardValidationCode]	
+						,[intNumberOfCardsIssued]	
+						,[intCardLimitedCode]		
+						,[intCardFuelCode]		
+						,[strCardTierCode]		
+						,[strCardOdometerCode]	
+						,[strCardWCCode]			
+						,[strSplitNumber]		
+						,[intCardManCode]			
+						,[intCardShipCat]			
+						,[intCardProfileNumber]	
+						,[intCardPositionSite]	
+						,[intCardvehicleControl]	
+						,[intCardCustomPin]		
+						,[intCreatedUserId]		
+						,[dtmCreated]				
+						,[intLastModifiedUserId]	
+						,[dtmLastModified]		
+						,[ysnCardForOwnUse]		
+						,[ysnIgnoreCardTransaction])
+					VALUES(
+						 @intNetworkId			
+						,@strCardNumber			
+						,@strCardDescription		
+						,@intAccountId			
+						,@strCardForOwnUse		
+						,@intExpenseItemId		
+						,@intDefaultFixVehicleNumber
+						,@intDepartmentId		
+						,@dtmLastUsedDated		
+						,@intCardTypeId			
+						,@dtmIssueDate			
+						,@ysnActive				
+						,@ysnCardLocked			
+						,@strCardPinNumber		
+						,@dtmCardExpiratioYearMonth
+						,@strCardValidationCode	
+						,@intNumberOfCardsIssued	
+						,@intCardLimitedCode		
+						,@intCardFuelCode		
+						,@strCardTierCode		
+						,@strCardOdometerCode	
+						,@strCardWCCode			
+						,@strSplitNumber			
+						,@intCardManCode			
+						,@intCardShipCat			
+						,@intCardProfileNumber	
+						,@intCardPositionSite	
+						,@intCardvehicleControl	
+						,@intCardCustomPin		
+						,@intCreatedUserId		
+						,@dtmCreated				
+						,@intLastModifiedUserId	
+						,@dtmLastModified		
+						,@ysnCardForOwnUse		
+						,@ysnIgnoreCardTransaction)
 
-				COMMIT TRANSACTION
-				SET @TotalSuccess += 1;
-				--INSERT INTO tblCFDiscountScheduleSuccessImport(strDiscountScheduleId)					
-				--VALUES(@originCard)			
+
+										   COMMIT TRANSACTION
+					--*********************COMMIT TRANSACTION*****************--
+					SET @TotalSuccess += 1;
+					INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Card'
+						,1
+						,''
+						,'cfcusmst'
+						,@originCard
+						,'tblCFCard'
+						,null
+						,''
+					)
+				END
+				ELSE
+				BEGIN
+				--*********************ROLLBACK TRANSACTION*****************--
+									   ROLLBACK TRANSACTION
+					INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Card'
+						,0
+						,'Uable to find Account for Card'
+						,'cfcusmst'
+						,@originCard
+						,'tblCFCard'
+						,null
+						,''
+					)
+				--*********************ROLLBACK TRANSACTION*****************--
+				END
 			END TRY
 			BEGIN CATCH
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				PRINT 'IMPORTING CARDS' + ERROR_MESSAGE()
-				--INSERT INTO tblCFDiscountScheduleFailedImport(strDiscountScheduleId,strReason)					
-				--VALUES(@originCard,ERROR_MESSAGE())					
-				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Card'
+					,0
+					,ERROR_MESSAGE()
+					,'cfcusmst'
+					,@originCard
+					,'tblCFCard'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -269,7 +372,9 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			SET @Counter += 1;
 
 		END
-	
-		--SET @Total = @Counter
+
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfcusmst
+		PRINT @TotalFailed
 
 	END

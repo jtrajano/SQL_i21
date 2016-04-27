@@ -18,7 +18,7 @@ BEGIN
 	DECLARE @GLEntries AS RecapTableType 
 	DECLARE @batchId NVARCHAR(20)
 	DECLARE @createdPayments NVARCHAR(MAX)
-	DECLARE @transCount INT;
+	DECLARE @transCount INT = @@TRANCOUNT;
 
 	IF @transCount = 0 BEGIN TRANSACTION
 
@@ -57,6 +57,12 @@ BEGIN
 					AND A.ysnPrepay = 1))
 	BEGIN
 		RAISERROR('Void failed. There are bills that applied this prepayment. Please unpost that first.', 16, 1);
+	END
+
+	--DO NOT ALLOW TO VOID IF PAYMENT WAS CREATED FROM IMPORTING.
+	IF(EXISTS(SELECT 1 FROM tblAPPayment A WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND ysnOrigin = 1))
+	BEGIN
+		RAISERROR('Unable to void payment created from origin.', 16, 1);
 	END
 
 	--Duplicate payment
@@ -190,9 +196,14 @@ BEGIN
 	SELECT @createdPayments = COALESCE(@createdPayments + ',', '') +  CONVERT(VARCHAR(12),intNewPaymentId)
 	FROM #tmpPayables WHERE intNewPaymentId IS NOT NULL
 	ORDER BY intNewPaymentId
+	
+	DECLARE @Ids AS Id
+	INSERT INTO @Ids
+	SELECT DISTINCT intPaymentId FROM #tmpPayables
+
 	INSERT INTO @GLEntries
 	--SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
-	SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
+	SELECT * FROM dbo.[fnAPReverseGLEntries](@Ids, 'Payable', @voidDate, @intUserId, @batchId)
 
 	--Reversed gl entries of void check should be posted
 	UPDATE A

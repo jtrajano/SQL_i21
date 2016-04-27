@@ -120,8 +120,8 @@ BEGIN
 			,strTransactionForm = 'Inventory Receipt'
 
 		-- Insert the expected data 
-		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Debit and credit amounts are not balanced.', 50003, 'Inventory')
-		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Debit and credit amounts are not balanced.', 50003, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00001', 'Debit and credit amounts are not balanced.', 60003, 'Inventory')
+		INSERT INTO expected (strTransactionId, strText, intErrorCode, strModuleName) VALUES ('DUMMY-00003', 'Debit and credit amounts are not balanced.', 60003, 'Inventory')
 
 		-- Call the fake data for GL Account 
 		EXEC testi21Database.[Fake COA used for fake inventory items];

@@ -21,6 +21,7 @@ SELECT C.intEntityCustomerId
 	 , dblPendingPayment			= ISNULL(CI.dblPendingPayment, CONVERT(NUMERIC(18,6), 0))
 	 , dblCreditLimit				= ISNULL(CI.dblCreditLimit, CONVERT(NUMERIC(18,6), 0))
 	 , dblFuture					= ISNULL(CI.dblFuture, CONVERT(NUMERIC(18,6), 0))
+	 , dbl0Days						= ISNULL(CI.dbl0Days, CONVERT(NUMERIC(18,6), 0))
 	 , dbl10Days					= ISNULL(CI.dbl10Days, CONVERT(NUMERIC(18,6), 0))
 	 , dbl30Days					= ISNULL(CI.dbl30Days, CONVERT(NUMERIC(18,6), 0))
 	 , dbl60Days					= ISNULL(CI.dbl60Days, CONVERT(NUMERIC(18,6), 0))

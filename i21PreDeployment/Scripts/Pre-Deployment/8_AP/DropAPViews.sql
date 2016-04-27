@@ -13,12 +13,12 @@ GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBill')
 	DROP VIEW vyuAPBill
 GO
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPVendor')
-	DROP VIEW vyuAPVendor
-GO
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPVendorHistory')
-	DROP VIEW vyuAPVendorHistory
-GO
+--IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPVendor')
+--	DROP VIEW vyuAPVendor
+--GO
+--IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPVendorHistory')
+--	DROP VIEW vyuAPVendorHistory
+--GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPayablesAgingSummary')
 	DROP VIEW vyuAPPayablesAgingSummary
 GO

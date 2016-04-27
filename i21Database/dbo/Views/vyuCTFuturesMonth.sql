@@ -4,5 +4,13 @@ AS
 
 	SELECT	intFutureMonthId,
 			REPLACE(strFutureMonth,' ','('+strSymbol+') ') strFutureMonthYear,
-			intFutureMarketId 
+			intFutureMarketId,
+			dtmFutureMonthsDate,
+			strSymbol,
+			intYear,
+			dtmFirstNoticeDate,
+			dtmLastNoticeDate,
+			dtmLastTradingDate,
+			dtmSpotDate,
+			ysnExpired 
 	FROM	tblRKFuturesMonth

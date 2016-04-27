@@ -106,3 +106,17 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 't
 		exec('ALTER TABLE tblSCTicketType DROP CONSTRAINT [' + @constraint +']' )
 	END
 GO 
+
+
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAINT_NAME = 'FK_tblSCScaleSetup_tblICUnitMeasure_intUnitMeasureId')
+	BEGIN
+		PRINT 'BEGIN Drop FK_tblSCScaleSetup_tblICUnitMeasure_intUnitMeasureId'
+		EXEC('
+			ALTER TABLE tblSCScaleSetup
+			DROP CONSTRAINT FK_tblSCScaleSetup_tblICUnitMeasure_intUnitMeasureId		
+		');
+		PRINT 'END Drop FK_tblSCScaleSetup_tblICUnitMeasure_intUnitMeasureId'
+	END	
+GO
+
+GO

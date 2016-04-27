@@ -12,5 +12,5 @@
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutDeposits_intDepositId] PRIMARY KEY ([intDepositId]), 
     CONSTRAINT [FK_tblSTCheckoutDeposits_tblICCategory] FOREIGN KEY ([intDepNo]) REFERENCES [tblICCategory]([intCategoryId]), 
-    CONSTRAINT [FK_tblSTCheckoutDeposits_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) 
+    CONSTRAINT [FK_tblSTCheckoutDeposits_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE 
 )

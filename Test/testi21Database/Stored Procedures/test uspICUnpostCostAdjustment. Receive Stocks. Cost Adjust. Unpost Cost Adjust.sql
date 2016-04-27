@@ -194,7 +194,7 @@ BEGIN
 		-- Declare the variables for the transaction types
 		DECLARE @PurchaseType AS INT = 4
 				,@SalesType AS INT = 5
-				,@CostAdjustmentType AS INT = 24
+				,@CostAdjustmentType AS INT = 26
 				,@BillType AS INT = 23
 
 		-- Declare the cost types
@@ -787,7 +787,7 @@ BEGIN
 				,[dblCredit]					= 610.44 
 				,[dblDebitUnit]					= 0 
 				,[dblCreditUnit]				= 0 
-				,[strDescription]				= 'AUTO NEGATIVE WHEAT-DEFAULT'
+				,[strDescription]				= 'Auto Variance WHEAT-DEFAULT'
 				,[strCode]						= 'ICA'
 				,[strReference]					= ''
 				,[intCurrencyId]				= @CurrencyId_USD
@@ -841,7 +841,7 @@ BEGIN
 				,[dblCredit]					= 0
 				,[dblDebitUnit]					= 0 
 				,[dblCreditUnit]				= 0 
-				,[strDescription]				= 'AUTO NEGATIVE WHEAT-DEFAULT'
+				,[strDescription]				= 'Auto Variance WHEAT-DEFAULT'
 				,[strCode]						= 'ICA'
 				,[strReference]					= ''
 				,[intCurrencyId]				= @CurrencyId_USD

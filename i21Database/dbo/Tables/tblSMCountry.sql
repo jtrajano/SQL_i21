@@ -1,10 +1,14 @@
 ﻿CREATE TABLE [dbo].[tblSMCountry] (
-    [intCountryID]     INT            IDENTITY (1, 1) NOT NULL,
-    [strCountry]       NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strPhoneNumber]   NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
-    [strCountryCode]   NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
-    [intSort]          INT            NULL,
-    [intConcurrencyId] INT            DEFAULT 1 NOT NULL,
+    [intCountryID]				INT				IDENTITY (1, 1) NOT NULL,
+    [strCountry]				NVARCHAR (100)	COLLATE Latin1_General_CI_AS NOT NULL,
+    [strCountryCode]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+	[intCityAreaDigit]			INT				NULL,
+	[strCityAreaMask]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+	[intLocalDigit]				INT				NULL,
+	[strLocalMask]				NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+	[ysnDisplayCountryCode]		NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+    [intSort]					INT				NULL,
+    [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC), 
     CONSTRAINT [AK_tblSMCountry_Country] UNIQUE (strCountry)
 );
@@ -30,16 +34,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strCountry'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Phone Number default format',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSMCountry',
-    @level2type = N'COLUMN',
-    @level2name = N'strPhoneNumber'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Country Code',
+    @value = N'Country',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -48,7 +43,52 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strCountryCode'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Sort Field',
+    @value = N'Country',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'intCityAreaDigit'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'strCityAreaMask'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'intLocalDigit'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'strLocalMask'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDisplayCountryCode'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -57,7 +97,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intSort'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Concurrency Check',
+    @value = N'Country',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',

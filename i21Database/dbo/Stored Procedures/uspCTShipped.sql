@@ -16,11 +16,11 @@ BEGIN TRY
 				@intFromItemUOMId				INT,
 				@intToItemUOMId					INT,
 				@intUniqueId					INT,
-				@dblQty							NUMERIC(12,4),
-				@dblConvertedQty				NUMERIC(12,4),
+				@dblQty							NUMERIC(18,6),
+				@dblConvertedQty				NUMERIC(18,6),
 				@ErrMsg							NVARCHAR(MAX),
 				@intOrderType					INT,
-				@dblSchQuantityToUpdate			NUMERIC(12,4),
+				@dblSchQuantityToUpdate			NUMERIC(18,6),
 				@intSourceType					INT,
 				@ysnPO							BIT
 
@@ -35,7 +35,7 @@ BEGIN TRY
 		intInventoryShipmentItemId	INT,
 		intContractDetailId			INT,
 		intItemUOMId				INT,
-		dblQty						NUMERIC(12,4)	
+		dblQty						NUMERIC(18,6)	
 	)
 
 	IF(@intOrderType = 1)
@@ -84,15 +84,15 @@ BEGIN TRY
 
 		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-		--IF @intSourceType IN (0,1,2,3)
-		--BEGIN					
-		--	EXEC	uspCTUpdateScheduleQuantity
-		--			@intContractDetailId	=	@intContractDetailId,
-		--			@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-		--			@intUserId				=	@intUserId,
-		--			@intExternalId			=	@intInventoryShipmentItemId,
-		--			@strScreenName			=	'Inventory Shipment' 
-		--END
+		IF @intSourceType IN (0,1,2,3)
+		BEGIN					
+			EXEC	uspCTUpdateScheduleQuantity
+					@intContractDetailId	=	@intContractDetailId,
+					@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+					@intUserId				=	@intUserId,
+					@intExternalId			=	@intInventoryShipmentItemId,
+					@strScreenName			=	'Inventory Shipment' 
+		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END

@@ -19,6 +19,7 @@ SELECT TL.intLoadHeaderId
 	, NULL AS dblPrice
 	, TR.dblUnitCost AS dblCost
 	, NULL AS dblMargin
+	, dblTotalFreight = (dblFreightRate * dblPurSurcharge * dblNet)
 	, (select  top 1 AR.strName from dbo.vyuEMEntity AR where AR.intEntityId = TL.intDriverId) AS strDriver
 	, TL.dtmLoadDateTime AS dtmDateTime
 	, TL.ysnPosted
@@ -46,6 +47,7 @@ SELECT TL.intLoadHeaderId
 	, DD.dblPrice AS dblPrice
 	, ee.dblUnitCost AS dblCost
 	, DD.dblPrice - ee.dblUnitCost AS dblMargin
+	, dblTotalFreight = (dblFreightRate * dblDistSurcharge * dblUnits)
 	, (select  top 1 AR.strName from dbo.vyuEMEntity AR where AR.intEntityId = TL.intDriverId) AS strDriver
 	, DH.dtmInvoiceDateTime AS dtmDateTime
 	, TL.ysnPosted

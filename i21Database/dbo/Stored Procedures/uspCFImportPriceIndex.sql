@@ -15,7 +15,7 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceIndex]
 		SET @TotalFailed = 0
 
 		--1 Time synchronization here
-		PRINT '1 Time DISCOUNT SCHEDULE Synchronization'
+		PRINT '1 Time Price Index Synchronization'
 
 		DECLARE @originPriceIndex				NVARCHAR(50)
 
@@ -28,6 +28,34 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceIndex]
 		SELECT cfpix_idx_id INTO #tmpcfpixmst
 			FROM cfpixmst
 				WHERE cfpix_idx_id COLLATE Latin1_General_CI_AS NOT IN (select strPriceIndex from tblCFPriceIndex) 
+
+		--DUPLICATE SITE ON i21--
+
+		INSERT INTO tblCFImportResult(
+							 dtmImportDate
+							,strSetupName
+							,ysnSuccessful
+							,strFailedReason
+							,strOriginTable
+							,strOriginIdentityId
+							,strI21Table
+							,intI21IdentityId
+							,strUserId
+						)
+		SELECT 
+		 dtmImportDate = GETDATE()
+		,strSetupName = 'Price Index'
+		,ysnSuccessful = 0
+		,strFailedReason = 'Duplicate price index on i21 Card Fueling price indexes list'
+		,strOriginTable = 'cfpixmst'
+		,strOriginIdentityId = cfpix_idx_id
+		,strI21Table = 'tblCFPriceIndex'
+		,intI21IdentityId = null
+		,strUserId = ''
+		FROM cfpixmst
+		WHERE cfpix_idx_id COLLATE Latin1_General_CI_AS IN (select strPriceIndex from tblCFPriceIndex) 
+		
+		--DUPLICATE SITE ON i21--
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfpixmst))
 		BEGIN
@@ -42,7 +70,7 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceIndex]
 				FROM cfpixmst
 				WHERE cfpix_idx_id = @originPriceIndex
 					
-				
+				--*********************COMMIT TRANSACTION*****************--
 				INSERT [dbo].[tblCFPriceIndex](
 				 [strPriceIndex]	
 				,[strDescription])
@@ -50,15 +78,62 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceIndex]
 				@strPriceIndex	
 				,@strDescription)
 
-				COMMIT TRANSACTION
+									   COMMIT TRANSACTION
+				--*********************COMMIT TRANSACTION*****************--
 				SET @TotalSuccess += 1;
+				INSERT INTO tblCFImportResult(
+						 dtmImportDate
+						,strSetupName
+						,ysnSuccessful
+						,strFailedReason
+						,strOriginTable
+						,strOriginIdentityId
+						,strI21Table
+						,intI21IdentityId
+						,strUserId
+					)
+					VALUES(
+						GETDATE()
+						,'Price Index'
+						,1
+						,''
+						,'cfpixmst'
+						,@originPriceIndex
+						,'tblCFPriceIndex'
+						,SCOPE_IDENTITY()
+						,''
+					)
 				
 			END TRY
 			BEGIN CATCH
-				PRINT 'IMPORTING PRICE INDEX' + ERROR_MESSAGE()
+				--*********************ROLLBACK TRANSACTION*****************--
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
+				
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+					,'Price Index'
+					,0
+					,ERROR_MESSAGE()
+					,'cfpixmst'
+					,@originPriceIndex
+					,'tblCFPriceIndex'
+					,null
+					,''
+				)
 				GOTO CONTINUELOOP;
+				--*********************ROLLBACK TRANSACTION*****************--
 			END CATCH
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -67,13 +142,14 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceIndex]
 			END
 								
 			CONTINUELOOP:
-			PRINT @originPriceIndex
 			DELETE FROM #tmpcfpixmst WHERE cfpix_idx_id = @originPriceIndex
 		
 			SET @Counter += 1;
 
 		END
 	
-		--SET @Total = @Counter
+		PRINT @TotalSuccess
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfpixmst
+		PRINT @TotalFailed
 
 	END

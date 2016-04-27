@@ -8,6 +8,7 @@
 		,con.strName
 		,con.strEmail
 		,con.imgPhoto
+		,strEntityType = (select top 1 et.strType from tblEntityType et where et.intEntityId = cu.intEntityCustomerId and et.strType in ('Customer','Prospect'))
 	from
 		tblARCustomer cu
 		--left outer join tblARCustomerToContact cc on cc.intEntityCustomerId = cu.intEntityCustomerId
@@ -23,6 +24,7 @@
 		,con.strName
 		,con.strEmail
 		,con.imgPhoto
+		,strEntityType = 'Agent'
 	from
 		tblSMUserSecurity us
 		left outer join vyuEMEntityContact con on con.intEntityId = us.[intEntityUserSecurityId] and con.ysnDefaultContact = 1

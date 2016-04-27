@@ -18,10 +18,13 @@
 	,@strBatchId NVARCHAR(20)
 	,@intTransactionTypeId INT
 	,@intLotId INT
+	,@intRelatedInventoryTransactionId INT
+	,@intRelatedTransactionId INT
+	,@strRelatedTransactionId NVARCHAR(40)
 	,@strTransactionForm NVARCHAR (255)
 	,@intEntityUserSecurityId INT
-	,@SourceCostBucketStorageId INT 
-	,@InventoryTransactionIdStorageId INT OUTPUT 
+	,@intCostingMethod INT
+	,@InventoryTransactionIdentityId INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -30,38 +33,42 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-SET @InventoryTransactionIdStorageId = NULL
+SET @InventoryTransactionIdentityId = NULL
 
 INSERT INTO dbo.tblICInventoryTransactionStorage (
-		[intItemId] 
+		[intItemId]
 		,[intItemLocationId]
 		,[intItemUOMId]
-		,[intLotId]
-		,[dtmDate] 
-		,[dblQty] 
-		,[dblUOMQty]
-		,[dblCost] 
-		,[dblValue]
-		,[dblSalesPrice] 		
-		,[intCurrencyId] 
-		,[dblExchangeRate] 
-		,[intTransactionId] 
-		,[intTransactionDetailId]
-		,[strTransactionId] 
-		,[strBatchId] 
-		,[intTransactionTypeId] 
-		,[strTransactionForm]
 		,[intSubLocationId]
 		,[intStorageLocationId]
-		,[ysnIsUnposted]
-		,[dtmCreated] 
-		,[intCreatedEntityId] 
-		,[intConcurrencyId] 
+		,[intLotId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
 		,[intInventoryCostBucketStorageId]
+		,[strBatchId]
+		,[intTransactionTypeId]
+		,[strTransactionForm]
+		,[intRelatedInventoryTransactionId]
+		,[intRelatedTransactionId]
+		,[strRelatedTransactionId]
+		,[intCostingMethod]
+		,[intCreatedEntityId]
+		,[intConcurrencyId]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intItemLocationId]					= @intItemLocationId
 		,[intItemUOMId]							= @intItemUOMId
+		,[intSubLocationId]						= @intSubLocationId
+		,[intStorageLocationId]					= @intStorageLocationId
 		,[intLotId]								= @intLotId
 		,[dtmDate]								= @dtmDate
 		,[dblQty]								= ISNULL(@dblQty, 0)
@@ -70,25 +77,25 @@ SELECT	[intItemId]								= @intItemId
 		,[dblValue]								= ISNULL(@dblValue, 0)
 		,[dblSalesPrice]						= ISNULL(@dblSalesPrice, 0)
 		,[intCurrencyId]						= @intCurrencyId
-		,[dblExchangeRate]						= ISNULL(@dblExchangeRate, 1)
+		,[dblExchangeRate]						= ISNULL(@dblExchangeRate, 1) 
 		,[intTransactionId]						= @intTransactionId
 		,[intTransactionDetailId]				= @intTransactionDetailId
 		,[strTransactionId]						= @strTransactionId
+		,[intInventoryCostBucketStorageId]		= NULL 
 		,[strBatchId]							= @strBatchId
 		,[intTransactionTypeId]					= @intTransactionTypeId
 		,[strTransactionForm]					= @strTransactionForm
-		,[intSubLocationId]						= @intSubLocationId
-		,[intStorageLocationId]					= @intStorageLocationId
-		,[ysnIsUnposted]						= 0 
-		,[dtmCreated]							= GETDATE()
+		,[intRelatedInventoryTransactionId]		= @intRelatedInventoryTransactionId
+		,[intRelatedTransactionId]				= @intRelatedTransactionId
+		,[strRelatedTransactionId]				= @strRelatedTransactionId
+		,[intCostingMethod]						= @intCostingMethod
 		,[intCreatedEntityId]					= @intEntityUserSecurityId
 		,[intConcurrencyId]						= 1
-		,[intInventoryCostBucketStorageId]	= @SourceCostBucketStorageId
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
 
-SET @InventoryTransactionIdStorageId = SCOPE_IDENTITY();
+SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 
 IF @intLotId IS NOT NULL 
 BEGIN 
@@ -112,6 +119,6 @@ BEGIN
 		,@intTransactionTypeId 		
 		,@strTransactionForm
 		,@intEntityUserSecurityId 
-		,@SourceCostBucketStorageId 
+		,NULL -- @SourceCostBucketStorageId 
 		,NULL 
 END

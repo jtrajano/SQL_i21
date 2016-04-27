@@ -13,22 +13,37 @@ SELECT	CD.intContractDetailId,
 		PF.intTotalLots,
 		PF.intLotsFixed,
 		IC.strContractItemName,
-		WU.strUnitMeasure strNetWeightUOM,
+		WM.strUnitMeasure strNetWeightUOM,
+		PM.strUnitMeasure strPriceUOM,
 		RY.strCountry AS strOrigin,
 		CASE	WHEN	CH.ysnCategory = 1
 				THEN	dbo.fnCTConvertQtyToTargetCategoryUOM(CD.intCategoryUOMId,GU.intCategoryUOMId,1)
 				ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CM.intItemUOMId,1) 
 		END		AS		dblConversionFactor,
-		ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM
+		ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM,
+		CY.strCurrency	strMainCurrency,
+		CU.ysnSubCurrency,
+		CASE	WHEN	CH.ysnLoad = 1
+					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
+					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
+		END		AS	dblAppliedQty
 
 FROM	tblCTContractDetail			CD	
 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId		LEFT
 JOIN	tblICItemContract			IC	ON	IC.intItemContractId			=	CD.intItemContractId		LEFT
 JOIN	tblSMCountry				RY	ON	RY.intCountryID					=	IC.intCountryId				LEFT
+JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	CD.intCurrencyId			LEFT
+JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CU.intMainCurrencyId		LEFT
+
 JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId					=	CD.intItemUOMId				LEFT
 JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId				=	QU.intUnitMeasureId			LEFT
-JOIN	tblICItemUOM				WM	ON	WM.intItemUOMId					=	CD.intNetWeightUOMId		LEFT
-JOIN	tblICUnitMeasure			WU	ON	WU.intUnitMeasureId				=	WM.intUnitMeasureId			LEFT
+
+JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId					=	CD.intNetWeightUOMId		LEFT
+JOIN	tblICUnitMeasure			WM	ON	WM.intUnitMeasureId				=	WU.intUnitMeasureId			LEFT
+
+JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId					=	CD.intPriceItemUOMId		LEFT
+JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=	PU.intUnitMeasureId			LEFT
+
 JOIN	tblICCommodityUnitMeasure	CO	ON	CO.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		LEFT
 JOIN	tblICItemUOM				CM	ON	CM.intItemId					=	CD.intItemId				AND
 											CM.intUnitMeasureId				=	CO.intUnitMeasureId			LEFT

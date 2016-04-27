@@ -47,3 +47,13 @@ BEGIN
 	SELECT 3,'Price Shrink',1	
 END
 GO
+
+IF EXISTS(SELECT intUnitMeasureId FROM tblSCScaleSetup)
+BEGIN
+	declare @intUnitMeasureId int
+	declare @strSymbol varchar(20)
+	SELECT @intUnitMeasureId = intUnitMeasureId, @strSymbol = strSymbol FROM tblICUnitMeasure WHERE (strSymbol LIKE '%LB%' OR strUnitMeasure LIKE '%Pound%') AND strUnitType = 'Weight'
+	IF @intUnitMeasureId IS NOT NULL
+		UPDATE tblSCScaleSetup SET intUnitMeasureId = @intUnitMeasureId,strWeightDescription = @strSymbol  WHERE intUnitMeasureId IS NULL
+END
+GO

@@ -29,6 +29,8 @@ SELECT
 	,D.dblLicenseAmount
 	,D.intSCInvoiceId
 	,D.strSCInvoiceNumber
+	,D.intContractDetailId
+	,D.intContractHeaderId
 FROM         
 	[tblARInvoiceDetail] D
 INNER JOIN	

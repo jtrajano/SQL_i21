@@ -25,6 +25,7 @@ SELECT	i21.intBankAccountId
 		,i21.intCheckStartingNo
 		,i21.intCheckEndingNo
 		,i21.intCheckNextNo
+		,i21.intCheckNoLength
 		,i21.ysnCheckEnableMICRPrint
 		,i21.ysnCheckDefaultToBePrinted
 		,i21.intBackupCheckStartingNo
@@ -101,6 +102,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intCheckStartingNo
 						,intCheckEndingNo
 						,intCheckNextNo
+						,intCheckNoLength
 						,ysnCheckEnableMICRPrint
 						,ysnCheckDefaultToBePrinted
 						,intBackupCheckStartingNo
@@ -148,6 +150,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intCheckStartingNo					= i.intCheckStartingNo
 						,intCheckEndingNo					= i.intCheckEndingNo
 						,intCheckNextNo						= i.intCheckNextNo
+						,intCheckNoLength					= i.intCheckNoLength
 						,ysnCheckEnableMICRPrint			= i.ysnCheckEnableMICRPrint
 						,ysnCheckDefaultToBePrinted			= i.ysnCheckDefaultToBePrinted
 						,intBackupCheckStartingNo			= i.intBackupCheckStartingNo
@@ -211,6 +214,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
+					,intCheckNoLength					= i.intCheckNoLength
 					,ysnCheckEnableMICRPrint			= i.ysnCheckEnableMICRPrint
 					,ysnCheckDefaultToBePrinted			= i.ysnCheckDefaultToBePrinted
 					,intBackupCheckStartingNo			= i.intBackupCheckStartingNo

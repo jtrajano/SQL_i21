@@ -52,5 +52,8 @@ BEGIN
 			END
 			
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId
-	END 
+	END
+
+	EXEC dbo.uspARUpdateInTransit @intTransactionId, @ysnPost, 1
+
 END

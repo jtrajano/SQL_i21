@@ -579,7 +579,7 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
--- Check if the transaction is already posted
+-- Check if the transaction is already unposted
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN 
 	-- The transaction is already unposted.
@@ -636,7 +636,7 @@ BEGIN
 END 
 
 -- Check if amount is zero. 
-IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
+IF @dblAmount <= 0 AND @ysnPost = 1 AND @ysnRecap = 0
 BEGIN 
 	-- Cannot post a zero-value transaction.
 	RAISERROR(50020, 11, 1)
@@ -657,6 +657,35 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+-- Check if transaction has invalid date range
+IF @ysnPost = 1 AND @ysnRecap = 0
+BEGIN 
+	IF EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblPRPaycheck
+		WHERE	intPaycheckId = @intPaycheckId 
+		    AND dtmDateFrom > dtmDateTo
+	)
+	BEGIN
+		RAISERROR('Period To cannot be earlier than Period From.', 11, 1)
+		GOTO Post_Rollback
+	END
+END 
+
+-- Check if transaction has associated Payables
+IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
+BEGIN 
+	IF EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblAPBillDetail
+		WHERE	intPaycheckHeaderId = @intPaycheckId 
+	)
+	BEGIN
+		-- Cannot Unpost Paycheck with associated Payables.
+		RAISERROR('Cannot Unpost Paycheck with associated Payables.', 11, 1)
+		GOTO Post_Rollback
+	END
+END 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -913,7 +942,6 @@ IF (@isSuccessful <> 0)
 						/* Update Paycheck Direct Deposit Distribution */
 						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
 							EXEC uspPRPaycheckEFTDistribution @intPaycheckId
-
 					END
 			END
 		ELSE
@@ -967,6 +995,7 @@ IF (@isSuccessful <> 0)
 			DELETE FROM #tmpAccrueTimeOff WHERE intEmployeeAccrueTimeOffId = @intAccrueTimeOffId
 		END
 
+		EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 	END
 ELSE
 	BEGIN

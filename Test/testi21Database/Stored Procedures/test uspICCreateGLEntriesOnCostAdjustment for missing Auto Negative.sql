@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntriesOnCostAdjustment for missing Auto Negative]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntriesOnCostAdjustment for missing Auto Variance]
 AS
 BEGIN
 	-- Arrange 
@@ -12,7 +12,7 @@ BEGIN
 	DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 			,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
 			,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
-			,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Negative'
+			,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Variance'
 
 			,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Cost Adjustment'
 			,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Revalue WIP'
@@ -25,11 +25,11 @@ BEGIN
 			,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
 			,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
-			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 24
-			,@INV_TRANS_TYPE_Revalue_WIP AS INT = 26
-			,@INV_TRANS_TYPE_Revalue_Produced AS INT = 27
-			,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 28
-			,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 29
+			,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
+			,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
+			,@INV_TRANS_TYPE_Revalue_Produced AS INT = 29
+			,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
+			,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -56,7 +56,7 @@ BEGIN
 		DECLARE @USD AS INT = 1;
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @Inventory_RevalueSold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @Inventory_WriteOffSold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 		
@@ -129,7 +129,7 @@ BEGIN
 				,intCreatedUserId = 1
 				,intConcurrencyId = 1
 
-		-- Delete Auto Negative from the G/L account setup to simulate a missing account id
+		-- Delete Auto Variance from the G/L account setup to simulate a missing account id
 		DELETE	ItemAccount
 		FROM	dbo.tblICItemAccount ItemAccount INNER JOIN dbo.tblGLAccountCategory GLAccountCategory
 					ON ItemAccount.intAccountCategoryId = GLAccountCategory.intAccountCategoryId
@@ -140,7 +140,7 @@ BEGIN
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
 		EXEC tSQLt.ExpectException 
-			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Auto-Negative account category.'
+			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Auto-Variance account category.'
 			,@ExpectedErrorNumber = 80008 
 	END
 

@@ -311,3 +311,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheck',
     @level2type = N'COLUMN',
     @level2name = N'dtmLastModified'
+GO

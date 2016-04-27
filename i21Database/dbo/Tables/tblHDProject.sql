@@ -4,8 +4,11 @@
 	[strProjectName] [nvarchar](255) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerId] [int] NOT NULL,
+	[intSalesPipeStatusId] [int] NULL,
 	[intCustomerContactId] [int] NOT NULL,
-	[intTicketTypeId] [int] NOT NULL,
+	[intTicketTypeId] [int] NULL,
+	[dtmCreated] [datetime] NULL,
+	[dtmClose] [datetime] NULL,
 	[dtmGoLive] [datetime] NULL,
 	[intPercentComplete] [int] NULL,
 	[ysnCompleted] [bit] NULL,
@@ -28,6 +31,7 @@
 	[dtmInitialUserGroupDuesInvoice] [datetime] null,
 	[ysnReceivedDownPayment] [bit] null,
 	[ysnGenerateTicket] [bit] null,
+	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
@@ -41,7 +45,8 @@
 	--CONSTRAINT [FK_Project_CusProjMgr] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
 	CONSTRAINT [FK_Project_CusProjMgr] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
 	--CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId])
-	CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+	CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+	CONSTRAINT [FK_tblHDProject_tblHDSalesPipeStatus] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblHDSalesPipeStatus] ([intSalesPipeStatusId])
 )
 
 GO
@@ -305,3 +310,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDProject',
     @level2type = N'COLUMN',
     @level2name = N'ysnGenerateTicket'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sales Pipe Status Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intSalesPipeStatusId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Project Type CRM or HD',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Close Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmClose'

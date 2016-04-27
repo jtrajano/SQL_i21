@@ -16,7 +16,7 @@ RETURNS @returntable TABLE
 	,[intTaxClassId]				INT
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
-	,[numRate]						NUMERIC(18,6)
+	,[dblRate]						NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[intTaxAccountId]				INT
@@ -45,7 +45,7 @@ BEGIN
 		,[intTaxClassId]				= TC.[intTaxClassId]				
 		,[strTaxableByOtherTaxes]		= TC.[strTaxableByOtherTaxes]
 		,[strCalculationMethod]			= R.[strCalculationMethod]
-		,[numRate]						= R.[numRate]
+		,[dblRate]						= R.[dblRate]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
 		,[intTaxAccountId]				= TC.[intPurchaseTaxAccountId]

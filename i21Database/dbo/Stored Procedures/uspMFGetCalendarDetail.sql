@@ -7,6 +7,7 @@
 	,@intCalendarId INT
 	,@intLocationId INT
 	,@dtmMachineConfiguredAsOn DATETIME = NULL
+	,@ysnIncludeHoliday bit=1
 	)
 AS
 BEGIN
@@ -95,10 +96,10 @@ BEGIN
 		DROP TABLE #tblMFCalendarDetail
 
 	IF OBJECT_ID('tempdb..#tblMFScheduleCalendarMachineDetail') IS NOT NULL
-		DROP TABLE #tblMFCalendarDetail
+		DROP TABLE #tblMFScheduleCalendarMachineDetail
 
 	IF OBJECT_ID('tempdb..#tblMFScheduleCalendarMachineCountDetail') IS NOT NULL
-		DROP TABLE #tblMFCalendarDetail
+		DROP TABLE #tblMFScheduleCalendarMachineCountDetail
 
 	CREATE TABLE #tblMFCalendarDetail (
 		intCalendarDetailId INT
@@ -340,7 +341,7 @@ BEGIN
 				,M.strName
 				,CD.intConcurrencyId
 			FROM #tblMFCalendarDetail CD
-			JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
+			JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId AND (CD.ysnHoliday=0 OR CD.ysnHoliday='+LTRIM(@ysnIncludeHoliday)+')
 			LEFT JOIN #tblMFScheduleCalendarMachineDetail MD on MD.dtmCalendarDate=CD.dtmCalendarDate and MD.intShiftId=CD.intShiftId
 			LEFT JOIN dbo.tblMFMachine M on M.intMachineId=MD.intMachineId
 			) AS DT

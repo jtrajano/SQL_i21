@@ -3,7 +3,7 @@
     [intNetworkId]               INT            NULL,
     [strCardNumber]              NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strCardDescription]         NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
-    [intAccountId]               INT            NULL,
+    [intAccountId]               INT            NOT NULL,
     [strCardForOwnUse]           NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [intExpenseItemId]           INT            NULL,
     [intDefaultFixVehicleNumber] INT            NULL,
@@ -41,7 +41,8 @@
     CONSTRAINT [FK_tblCFCard_tblCFCardType] FOREIGN KEY ([intCardTypeId]) REFERENCES [dbo].[tblCFCardType] ([intCardTypeId]),
     CONSTRAINT [FK_tblCFCard_tblCFDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblCFDepartment] ([intDepartmentId]),
     CONSTRAINT [FK_tblCFCard_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
-    CONSTRAINT [FK_tblCFCard_tblCFVehicle] FOREIGN KEY ([intDefaultFixVehicleNumber]) REFERENCES [dbo].[tblCFVehicle] ([intVehicleId])
+    CONSTRAINT [FK_tblCFCard_tblCFVehicle] FOREIGN KEY ([intDefaultFixVehicleNumber]) REFERENCES [dbo].[tblCFVehicle] ([intVehicleId]),
+    CONSTRAINT [FK_tblCFCard_tblICItem] FOREIGN KEY ([intExpenseItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
 
 
@@ -50,7 +51,27 @@ ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFCardType];
 
 
 GO
-ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFDepartment];
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
+
+
+
+
+GO
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFCardType];
+
+
+GO
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
+
+
+
+
+GO
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFCardType];
+
+
+GO
+
 
 
 GO

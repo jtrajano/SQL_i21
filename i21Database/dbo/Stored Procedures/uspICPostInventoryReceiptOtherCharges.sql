@@ -116,17 +116,10 @@ BEGIN
 END 
 
 -- Calculate the other charges. 
-BEGIN 
-	-- Calculate the other charges. 
-	EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+BEGIN
+	EXEC dbo.uspICCalculateOtherCharges
 		@intInventoryReceiptId
 END 
-
--- Calculate the surcharges
-BEGIN 
-	EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
-		@intInventoryReceiptId
-END
 
 -- Allocate the other charges and surcharges. 
 BEGIN 

@@ -2,7 +2,7 @@
 	@strBatchId AS NVARCHAR(20)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
-	,@strGLDescription AS NVARCHAR(255) = NULL 
+	,@strGLDescription AS NVARCHAR(255) = NULL 	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,7 +15,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory';
 DECLARE @AccountCategory_WriteOffSold AS NVARCHAR(30) = 'Write-Off Sold';
 DECLARE @AccountCategory_RevalueSold AS NVARCHAR(30) = 'Revalue Sold';
-DECLARE @AccountCategory_AutoNegative AS NVARCHAR(30) = 'Auto-Negative';
+DECLARE @AccountCategory_AutoNegative AS NVARCHAR(30) = 'Auto-Variance';
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
@@ -157,7 +157,7 @@ BEGIN
 END 
 ;
 
--- Check for missing Auto Negative Account Id
+-- Check for missing Auto Variance Account Id
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -227,6 +227,7 @@ WITH ForGLEntries_CTE (
 	,intInventoryTransactionId
 	,strInventoryTransactionTypeName
 	,strTransactionForm
+	,strDescription
 )
 AS 
 (
@@ -245,6 +246,7 @@ AS
 			,TRANS.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,TRANS.strTransactionForm 
+			,TRANS.strDescription
 
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
@@ -532,7 +534,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= ISNULL(ForGLEntries_CTE.strDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -576,7 +578,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strDescription				= ISNULL(ForGLEntries_CTE.strDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId

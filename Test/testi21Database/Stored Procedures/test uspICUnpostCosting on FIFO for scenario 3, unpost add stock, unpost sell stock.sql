@@ -203,7 +203,7 @@ BEGIN
 		-------------------------------------------------------------
 
 		---------------------------------------------------------------
-		---- Begin: Expect AUTO NEGATIVE G/L entries
+		---- Begin: Expect Auto Variance G/L entries
 		---------------------------------------------------------------			
 		--UNION ALL 
 		--SELECT	dtmDate = '01/01/2014'
@@ -231,7 +231,7 @@ BEGIN
 		--			FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemLocation ItemLocation
 		--						ON Stock.intItemId = ItemLocation.intItemId
 		--						AND Stock.intItemLocationId = ItemLocation.intItemLocationId							
-		--					OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, 'Auto-Negative') AutoNegative
+		--					OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, 'Auto-Variance') AutoNegative
 		--			WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
 		--					AND ItemLocation.intLocationId = @Default_Location						
 		--		) InventoryAccountSetup
@@ -271,7 +271,7 @@ BEGIN
 		--		INNER JOIN dbo.tblGLAccount GLAccount
 		--			ON InventoryAccountSetup.intAccountId = GLAccount.intAccountId			
 		---------------------------------------------------------------
-		---- Begin: Expect AUTO NEGATIVE G/L entries
+		---- Begin: Expect Auto Variance G/L entries
 		---------------------------------------------------------------
 		
 
@@ -344,7 +344,7 @@ BEGIN
 				AND strTransactionId = @strTransactionId
 
 		-------------------------------------------------------------------------------------
-		---- Expect the auto negative transactions
+		---- Expect the Auto Variance transactions
 		--UNION ALL 
 		--SELECT	intItemId 
 		--		,intItemLocationId 
@@ -367,7 +367,7 @@ BEGIN
 		--			FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemLocation ItemLocation
 		--						ON Stock.intItemId = ItemLocation.intItemId
 		--						AND Stock.intItemLocationId = ItemLocation.intItemLocationId							
-		--					OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, 'Auto-Negative') Inventory
+		--					OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, 'Auto-Variance') Inventory
 		--			WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
 		--					AND ItemLocation.intLocationId = @Default_Location								
 		--		) InventoryAccountSetup

@@ -28,6 +28,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.dblUnitCost
 	, ReceiptItem.dblTax
 	, ReceiptItem.dblLineTotal
+	, dblGrossWgt = ReceiptItem.dblGross
+	, dblNetWgt = ReceiptItem.dblNet
 	, Item.strLotTracking
 	, Item.intCommodityId
 	, ReceiptItem.intContainerId
@@ -45,16 +47,25 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
 	, strCostUOM = CostUOM.strUnitMeasure
 	, dblCostUOMConvFactor = ISNULL(ItemCostUOM.dblUnitQty, 0)
+	, ReceiptItem.ysnSubCurrency
+	, strSubCurrency = SubCurrency.strCurrency
 	, dblGrossMargin = (
-		CASE WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
-			ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
+		CASE	WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
+				ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
 	)
 	, ReceiptItem.intGradeId
+	, ReceiptItem.dblBillQty
 	, strGrade = Grade.strDescription
 	, Item.intLifeTime
 	, Item.strLifeTimeType
 	, ReceiptItemSource.ysnLoad
 	, ReceiptItemSource.dblAvailableQty
+	, ReceiptItem.intDiscountSchedule
+	, strDiscountSchedule = DiscountSchedule.strDiscountId
+	, ReceiptItem.ysnExported
+	, ReceiptItem.dtmExportedDate
+	, ReceiptItemSource.dblFranchise
+	, ReceiptItemSource.dblContainerWeightPerQty
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -68,3 +79,5 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = ReceiptItem.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItem.intGradeId
+	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ReceiptItem.intDiscountSchedule
+	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = Receipt.intCurrencyId

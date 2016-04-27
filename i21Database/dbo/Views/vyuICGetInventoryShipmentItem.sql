@@ -30,8 +30,11 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strUnitMeasure = UOM.strUnitMeasure
 	, dblItemUOMConv = ItemUOM.dblUnitQty
 	, strUnitType = UOM.strUnitType
+	, ShipmentItem.intCurrencyId
+	, Currency.strCurrency
 	, strWeightUOM = WeightUOM.strUnitMeasure
 	, dblWeightItemUOMConv = ItemWeightUOM.dblUnitQty
+	, dblUnitCost = ShipmentItemSource.dblCost
 	, dblQtyOrdered = ISNULL(ShipmentItemSource.dblQtyOrdered, 0)
     , dblQtyAllocated = ISNULL(ShipmentItemSource.dblQtyAllocated, 0)
     , dblUnitPrice = ISNULL(ShipmentItemSource.dblUnitPrice, 0)
@@ -42,6 +45,8 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, dblLineTotal = ISNULL(ShipmentItem.dblQuantity, 0) * ISNULL(ShipmentItem.dblUnitPrice, 0)
 	, ShipmentItem.intGradeId
 	, strGrade = Grade.strDescription
+	, ShipmentItem.intDiscountSchedule
+	, strDiscountSchedule = DiscountSchedule.strDiscountId
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -53,3 +58,5 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ShipmentItem.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId    
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId
+	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ShipmentItem.intDiscountSchedule
+	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentItem.intCurrencyId

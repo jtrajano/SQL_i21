@@ -49,6 +49,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intDiscountId] [int] NULL,
 	[intDiscountScheduleId] [int] NULL,
 	[intDiscountScheduleCodeId] [int] NULL,
+	[intStorageScheduleRuleId] [int] NULL,
 	[intContractOptHeaderId] [int] NULL,
 	[strBuyerSeller] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intBillTo] [int] NULL,
@@ -69,7 +70,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [intShipperId] INT NULL, 
 	[strRemark] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 
-	[strGarden] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
+	[intFarmFieldId] INT NULL,
 	[strGrade] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
@@ -89,6 +90,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dtmFXValidFrom]  [datetime] NULL,
 	[dtmFXValidTo]  [datetime] NULL,
 	[dblRate] [numeric](18, 6) NULL,
+	[intFXPriceUOMId] [int] NULL,
 	[strFXRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dblAssumedFX] [numeric](18, 6) NULL,
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -122,7 +124,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountTypeId] FOREIGN KEY ([intDiscountTypeId]) REFERENCES [tblCTDiscountType]([intDiscountTypeId]),
-	
+	CONSTRAINT [FK_tblCTContractDetail_tblGRStorageScheduleRule_intStorageScheduleRuleId] FOREIGN KEY ([intStorageScheduleRuleId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]),
+
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
@@ -144,4 +147,5 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategory_intCategoryId] FOREIGN KEY([intCategoryId])REFERENCES [tblICCategory] ([intCategoryId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEntityFarm]([intFarmFieldId])
 ) 

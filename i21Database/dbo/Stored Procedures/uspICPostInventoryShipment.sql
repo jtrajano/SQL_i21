@@ -397,8 +397,6 @@ BEGIN
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
-				INNER JOIN vyuICGetShipmentItemSource ItemSource 
-					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
 
@@ -422,7 +420,7 @@ IF @ysnPost = 0
 BEGIN   
 	-- Call the unpost routine 
 	BEGIN 
-		-- Call the post routine 
+		-- Unpost the company owned stocks. 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -463,6 +461,16 @@ BEGIN
 				,@intEntityUserSecurityId	
 				,@ysnRecap
 
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+		-- Unpost storage stocks. 
+		EXEC	@intReturnValue = dbo.uspICUnpostStorage
+				@intTransactionId
+				,@strTransactionId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@ysnRecap
+		
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   

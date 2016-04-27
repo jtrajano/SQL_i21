@@ -31,6 +31,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intCheckStartingNo
 				,i21.intCheckEndingNo
 				,i21.intCheckNextNo
+				,i21.intCheckNoLength
 				,i21.ysnCheckEnableMICRPrint
 				,i21.ysnCheckDefaultToBePrinted
 				,i21.intBackupCheckStartingNo
@@ -191,6 +192,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCheckStartingNo
 					,intCheckEndingNo
 					,intCheckNextNo
+					,intCheckNoLength
 					,ysnCheckEnableMICRPrint
 					,ysnCheckDefaultToBePrinted
 					,intBackupCheckStartingNo
@@ -238,6 +240,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
+					,intCheckNoLength					= i.intCheckNoLength
 					,ysnCheckEnableMICRPrint			= i.ysnCheckEnableMICRPrint
 					,ysnCheckDefaultToBePrinted			= i.ysnCheckDefaultToBePrinted
 					,intBackupCheckStartingNo			= i.intBackupCheckStartingNo
@@ -395,6 +398,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
+					,intCheckNoLength					= i.intCheckNoLength
 					,ysnCheckEnableMICRPrint			= i.ysnCheckEnableMICRPrint
 					,ysnCheckDefaultToBePrinted			= i.ysnCheckDefaultToBePrinted
 					,intBackupCheckStartingNo			= i.intBackupCheckStartingNo

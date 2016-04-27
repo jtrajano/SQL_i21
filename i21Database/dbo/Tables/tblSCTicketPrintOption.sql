@@ -11,10 +11,12 @@
 	[intTicketTypeOption] INT NOT NULL,
 	[strInOutIndicator] NVARCHAR(1) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intPrintingOption] INT NOT NULL,
-    [intConcurrencyId] INT NULL, 
+	[intListTicketTypeId] INT NULL,
+    [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSCTicketPrintOption_intTicketPrintOptionId] PRIMARY KEY ([intTicketPrintOptionId]), 
     CONSTRAINT [FK_tblSCTicketPrintOption_tblSCScaleSetup_intScaleSetupId] FOREIGN KEY ([intScaleSetupId]) REFERENCES [tblSCScaleSetup]([intScaleSetupId]), 
-    CONSTRAINT [FK_tblSCTicketPrintOption_tblSCTicketFormat_intTicketFormatId] FOREIGN KEY ([intTicketFormatId]) REFERENCES [tblSCTicketFormat]([intTicketFormatId])
+    CONSTRAINT [FK_tblSCTicketPrintOption_tblSCTicketFormat_intTicketFormatId] FOREIGN KEY ([intTicketFormatId]) REFERENCES [tblSCTicketFormat]([intTicketFormatId]),
+	CONSTRAINT [FK_tblSCTicketPrintOption_tblSCListTicketTypes] FOREIGN KEY([intListTicketTypeId])REFERENCES [tblSCListTicketTypes] ([intTicketTypeId])
 )
 
 GO
@@ -125,3 +127,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketPrintOption',
     @level2type = N'COLUMN',
     @level2name = N'intPrintingOption'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Printing Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketPrintOption',
+    @level2type = N'COLUMN',
+    @level2name = N'intListTicketTypeId'

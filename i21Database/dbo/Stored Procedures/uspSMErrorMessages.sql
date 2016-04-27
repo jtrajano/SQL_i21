@@ -384,7 +384,7 @@ SET @strmessage =  'The input lots for the item %s are expired / inactive / unav
 EXEC sp_addmessage 51095,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51096) EXEC sp_dropmessage 51096, 'us_english'	
-SET @strmessage =  'There is no sufficient quantity for the item %s.'
+SET @strmessage =  'Item %s is having %s%s quantity which is less than the required quantity %s%s.'
 EXEC sp_addmessage 51096,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51097) EXEC sp_dropmessage 51097, 'us_english'	

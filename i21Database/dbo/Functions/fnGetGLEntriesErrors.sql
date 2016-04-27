@@ -18,8 +18,8 @@ RETURN (
 	SELECT * FROM (
 		-- Failed. Invalid G/L account id found.
 		SELECT	strTransactionId
-				,strText = FORMATMESSAGE(50001)
-				,intErrorCode = 50001
+				,strText = FORMATMESSAGE(60001)
+				,intErrorCode = 60001
 				,strModuleName
 		FROM	@GLEntriesToValidate GLEntries 
 		WHERE	NOT EXISTS (SELECT intAccountId FROM tblGLAccount WHERE tblGLAccount.intAccountId = GLEntries.intAccountId)
@@ -27,8 +27,8 @@ RETURN (
 		-- Debit and credit amounts are not balanced.
 		UNION ALL 
 		SELECT	SubQuery.strTransactionId
-				,strText = FORMATMESSAGE(50003)
-				,intErrorCode = 50003
+				,strText = FORMATMESSAGE(60003)
+				,intErrorCode = 60003
 				,strModuleName
 		FROM	(
 					SELECT	ToValidate.strTransactionId
@@ -46,8 +46,8 @@ RETURN (
 		-- Allow audit adjustment transactions to be posted to a closed fiscal year period
 		UNION ALL 
 		SELECT	strTransactionId
-				,strText = FORMATMESSAGE(50005)
-				,intErrorCode = 50005
+				,strText = FORMATMESSAGE(60004)
+				,intErrorCode = 60004
 				,strModuleName
 		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') !='AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 		WHERE	dbo.isOpenAccountingDate(dtmDate) = 0
@@ -56,16 +56,16 @@ RETURN (
 
 		-- G/L entries are expected. Cannot continue because it is missing.
 		SELECT	strTransactionId = NULL 
-				,strText = FORMATMESSAGE(50032)
-				,intErrorCode = 50032
+				,strText = FORMATMESSAGE(60005)
+				,intErrorCode = 60005
 				,strModuleName = NULL
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM @GLEntriesToValidate)
 
 		--Cannot continue if Module status in fiscal year period is closed (CM,AR,INV,AP)
 		UNION ALL 
 		SELECT	strTransactionId
-				,strText = FORMATMESSAGE(51189,strModuleName)
-				,intErrorCode = 51189
+				,strText = FORMATMESSAGE(60009,strModuleName)
+				,intErrorCode = 60009
 				,strModuleName
 		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') !='AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 		WHERE	dbo.isOpenAccountingDateByModule(dtmDate,strModuleName) = 0

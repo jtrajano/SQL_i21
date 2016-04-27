@@ -37,7 +37,7 @@ DECLARE @NewLogisticsTable TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,      
 	intLoadHeaderId int,		
-	 intLoadNumber int
+	 strLoadNumber NVARCHAR(MAX)
     );
 DECLARE @total int,
         @intLoadHeaderId int,
@@ -54,7 +54,7 @@ DECLARE @total int,
 		@intInvoiceId int,
 		@incIvcval int,
 		@Logtotal int,
-		@intLoadNumber int,
+		@strLoadNumber NVARCHAR(MAX),
 		@incLogval int,
 		@incDistval int,
         @intTransportLoadId int,
@@ -283,7 +283,7 @@ END
 
 
 --Logistics link 
-insert into @NewLogisticsTable select TH.intLoadHeaderId, LG.intLoadNumber from tblTRLoadHeader TH
+insert into @NewLogisticsTable select TH.intLoadHeaderId, LG.[strLoadNumber] from tblTRLoadHeader TH
                                                                           join tblLGLoad LG on TH.intLoadId = LG.intLoadId
 																		   
 
@@ -291,11 +291,11 @@ select @Logtotal = count(*) from @NewLogisticsTable;
      
 WHILE @incLogval <=@Logtotal 
 BEGIN
-     select @intLoadNumber = intLoadNumber , @intLoadHeaderId = intLoadHeaderId from @NewLogisticsTable where intId = @incLogval  
+     select @strLoadNumber = strLoadNumber , @intLoadHeaderId = intLoadHeaderId from @NewLogisticsTable where intId = @incLogval  
 	 
 	 update tblLGLoad
 	       set intLoadHeaderId = @intLoadHeaderId
-	       where intLoadNumber = @intLoadNumber
+	       where [strLoadNumber] = @strLoadNumber
 
 	 SET @incLogval = @incLogval + 1;
 END
@@ -304,4 +304,9 @@ END
 delete from tblTRTransportLoad
 
 
+GO
 
+	-- Run Fixes for Jobber Price calculations on 16.1
+	EXEC uspTRFixRackPrices
+
+GO

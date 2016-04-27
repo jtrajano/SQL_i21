@@ -21,14 +21,31 @@ AS
 				CH.strApprovalBasisDescription,		CH.strCommodityCode,			CH.strINCOLocationType,
 				CH.strApprovalBasis,				CH.strContractBasis,			CH.strPricingType,
 				CH.strPricingLevelName,				CH.strLoadUnitMeasure,			CH.strCategoryUnitMeasure,
-				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				CH.strStatuses,
-				CH.dtmCreated,						CH.intContractPlanId,			CH.strContractPlan,
+				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				BL.dblAppliedQty,
+				CH.dtmCreated,						CH.strContractPlan,				CH.ysnExported,
+				CH.strCreatedBy,					CH.strLastModifiedBy,			CH.dtmExported,
+
+				CH.intContractPlanId,				CH.intEntityId,					CH.intCommodityId,
+				CH.intGradeId,						CH.intWeightId,					CH.intContractTextId,
+				CH.intAssociationId,				CH.intTermId,					CH.intPositionId,
+				CH.intCountryId,					CH.intContractBasisId,
+
+				CASE	WHEN	CH.strStatuses LIKE '%Open%'
+						THEN	'Open'
+						WHEN	CH.strStatuses LIKE '%Complete%'
+						THEN	'Complete'
+						ELSE	CH.strStatuses
+				END		strStatuses,
 				CASE WHEN CH.ysnLoad = 1 THEN CH.strHeaderUnitMeasure + '/Load' ELSE CH.strHeaderUnitMeasure END strHeaderUnitMeasure
+
+				
 
 	FROM		vyuCTContractHeaderView		CH	LEFT
 	JOIN
 	(
-		SELECT	HV.intContractHeaderId,SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId,CD.dblBalance)) AS dblBalance
+		SELECT	HV.intContractHeaderId,
+				SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId,CD.dblBalance))		AS dblBalance,
+				SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId,CD.dblAppliedQty))	AS dblAppliedQty
 		FROM	vyuCTContractHeaderView		HV	LEFT
 		JOIN	tblICCommodityUnitMeasure	UM	ON	UM.intCommodityUnitMeasureId	=	HV.intCommodityUnitMeasureId LEFT
 		JOIN	vyuCTContractDetailView		CD	ON CD.intContractHeaderId			=	HV.intContractHeaderId

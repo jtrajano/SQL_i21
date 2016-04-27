@@ -25,8 +25,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@fieldname					AS NVARCHAR(50)
 		,@condition					AS NVARCHAR(20)
 		,@id						AS INT 
-		,@from						AS NVARCHAR(50)
-		,@to						AS NVARCHAR(50)
+		,@from						AS NVARCHAR(100)
+		,@to						AS NVARCHAR(100)
 		,@join						AS NVARCHAR(10)
 		,@begingroup				AS NVARCHAR(50)
 		,@endgroup					AS NVARCHAR(50)
@@ -37,8 +37,8 @@ DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
 	,[fieldname]	NVARCHAR(50)
 	,[condition]	NVARCHAR(20)
-	,[from]			NVARCHAR(50)
-	,[to]			NVARCHAR(50)
+	,[from]			NVARCHAR(100)
+	,[to]			NVARCHAR(100)
 	,[join]			NVARCHAR(10)
 	,[begingroup]	NVARCHAR(50)
 	,[endgroup]		NVARCHAR(50)
@@ -62,7 +62,8 @@ DECLARE @temp_aging_table TABLE(
 	,[dblAmountPaid]			NUMERIC(18,6)
 	,[dblCredits]				NUMERIC(18,6)
 	,[dblPrepaids]				NUMERIC(18,6)
-	,[dtmAsOfDate]				DATETIME	
+	,[dtmAsOfDate]				DATETIME
+	,[strSalespersonName]		NVARCHAR(100)
 )
 
 DECLARE @temp_statement_table TABLE(
@@ -104,8 +105,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (
 	  [fieldname]  NVARCHAR(50)
 	, [condition]  NVARCHAR(20)
-	, [from]	   NVARCHAR(50)
-	, [to]		   NVARCHAR(50)
+	, [from]	   NVARCHAR(100)
+	, [to]		   NVARCHAR(100)
 	, [join]	   NVARCHAR(10)
 	, [begingroup] NVARCHAR(50)
 	, [endgroup]   NVARCHAR(50)
@@ -143,7 +144,7 @@ ELSE
 	END
 
 INSERT INTO @temp_aging_table
-EXEC [uspARCustomerAgingAsOfDateWithCurrentReport] @dtmDateFrom, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 
@@ -198,7 +199,7 @@ FROM tblARInvoice I
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
 	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
 WHERE I.ysnPosted = 1
-  AND I.ysnPaid = 0  
+  AND I.ysnPaid = 0
   AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
   '+ @innerQuery +'
 ) MainQuery'

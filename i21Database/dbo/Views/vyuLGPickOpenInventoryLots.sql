@@ -22,7 +22,7 @@ SELECT Lot.intLotId
 	, strStorageLocation = StorageLocation.strName
 	, Lot.dblQty
 	, CASE WHEN Lot.dblQty > 0.0 THEN 
-				Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR Group By SR.intLotId Having Lot.intLotId = SR.intLotId), 0) 
+				Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR Group By SR.intLotId, SR.ysnPosted Having Lot.intLotId = SR.intLotId AND SR.ysnPosted != 1), 0) 
 			ELSE 
 				0.0 END AS dblUnPickedQty
 	, Lot.dblLastCost
@@ -39,8 +39,8 @@ SELECT Lot.intLotId
 				ELSE
 					0.0 END as dblTareWeight
 	, Lot.dblWeight as dblNetWeight
-	, Lot.intWeightUOMId as intItemWeightUOMId
-	, strWeightUOM = WeightUOM.strUnitMeasure
+	, CASE WHEN isnull(Lot.intWeightUOMId,0) = 0 THEN Lot.intItemUOMId ELSE Lot.intWeightUOMId end intItemWeightUOMId
+	, strWeightUOM = CASE WHEN isnull(Lot.intWeightUOMId,0) = 0 THEN UOM.strUnitMeasure ELSE WeightUOM.strUnitMeasure END
 	, dblWeightUOMConv = ItemWeightUOM.dblUnitQty
 	, Lot.dblWeightPerQty
 	, Lot.intOriginId
@@ -76,7 +76,7 @@ SELECT Lot.intLotId
 	, Shipment.dtmInventorizedDate
 
 FROM tblICLot Lot
-INNER JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
+JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblLGShipmentContractQty ShipmentContract ON ShipmentContract.intShipmentContractQtyId = ReceiptItem.intSourceId

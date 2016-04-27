@@ -56,6 +56,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount]
 			,[intContractId]
+			,[intContractDetailId]
 			,[strAllocateCostBy]
 			,[ysnAccrue]
 			,[ysnPrice]
@@ -68,10 +69,17 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND (			
 												Charge.dblRate 
-												* dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ReceiptItem.dblOpenReceive) 
+												* dbo.fnCalculateQtyBetweenUOM(ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId), dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), 
+												CASE
+													WHEN ReceiptItem.dblNet = '0.00000000000000000000'
+													THEN ReceiptItem.dblOpenReceive
+													ELSE ReceiptItem.dblNet
+												END
+												)
 												, 2
 											 )
 			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
@@ -87,6 +95,7 @@ BEGIN
 				OR (
 					Charge.intContractId IS NOT NULL 
 					AND ReceiptItem.intOrderId = Charge.intContractId
+					AND ReceiptItem.intLineNo = Charge.intContractDetailId
 				)	
 			)
 			AND Item.intOnCostTypeId IS NULL 
@@ -132,6 +141,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
 			,[intContractId]
+			,[intContractDetailId]
 			,[strAllocateCostBy]
 			,[ysnAccrue]
 			,[ysnPrice]
@@ -144,11 +154,11 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND (
 												(ISNULL(Charge.dblRate, 0) / 100)
-												* ReceiptItem.dblOpenReceive
-												* ReceiptItem.dblUnitCost
+												* ISNULL(ReceiptItem.dblLineTotal, ReceiptItem.dblOpenReceive * ReceiptItem.dblUnitCost) 
 												, 2
 											)
 			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
@@ -164,6 +174,7 @@ BEGIN
 				OR (
 					Charge.intContractId IS NOT NULL 
 					AND ReceiptItem.intOrderId = Charge.intContractId
+					AND ReceiptItem.intLineNo = Charge.intContractDetailId
 				)
 			)
 			AND Item.intOnCostTypeId IS NULL 
@@ -180,6 +191,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
 			,[intContractId]
+			,[intContractDetailId]
 			,[strAllocateCostBy]
 			,[ysnAccrue]
 			,[ysnPrice]
@@ -192,6 +204,7 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND(Charge.dblAmount, 2)
 			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
 			,[ysnAccrue]					= Charge.ysnAccrue
 			,[ysnPrice]						= Charge.ysnPrice
@@ -206,10 +219,22 @@ BEGIN
 END 
 
 -- Update the Other Charge amounts
+-- Also, the sub-currency amounts must be converted back the currency amounts.
 BEGIN 
 	UPDATE	Charge
-	SET		dblAmount = ROUND(ISNULL(CalculatedCharges.dblAmount, 0), 2)
-	FROM	dbo.tblICInventoryReceiptCharge Charge 	INNER JOIN dbo.tblICItem Item 
+	SET		dblAmount = ROUND(	
+							ISNULL(CalculatedCharges.dblAmount, 0)
+							/ 
+							CASE	WHEN Charge.ysnSubCurrency = 1 THEN 
+										CASE WHEN ISNULL(Charge.intCent, 1) <> 0 THEN ISNULL(Charge.intCent, 1) ELSE 1 END 
+									ELSE 
+										1
+							END 
+						, 2)						
+
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge 	
+				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = Charge.intChargeId		
 			LEFT JOIN (
 					SELECT	dblAmount = SUM(dblCalculatedAmount)
@@ -219,7 +244,7 @@ BEGIN
 					GROUP BY intInventoryReceiptChargeId
 			) CalculatedCharges
 				ON CalculatedCharges.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
-	WHERE	Charge.intInventoryReceiptId = @intInventoryReceiptId
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			AND Item.intOnCostTypeId IS NULL
 			AND Charge.strCostMethod <> @COST_METHOD_AMOUNT
 END 

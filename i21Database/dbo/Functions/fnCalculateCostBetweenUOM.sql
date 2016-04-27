@@ -55,7 +55,7 @@ BEGIN
 					@dblCost
 				ELSE 
 					CASE	WHEN @dblUnitQtyFrom <> 0 THEN 
-								dbo.fnMultiply(dbo.fnDivide(@dblCost, @dblUnitQtyFrom), @dblUnitQtyTo) 
+								dbo.fnDivide(dbo.fnMultiply(@dblCost, @dblUnitQtyTo), @dblUnitQtyFrom)
 							ELSE 
 								NULL 
 					END

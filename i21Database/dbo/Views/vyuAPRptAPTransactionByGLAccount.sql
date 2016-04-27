@@ -2,6 +2,7 @@
 AS
 	SELECT
 	 APV.intEntityVendorId
+	,strMainCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)  
 	,intTransactionType AS intTransactionId
 	,APV.strVendorId + ' - ' + (SELECT strName FROM tblEntity WHERE intEntityId = APV.intEntityVendorId) AS strVendorID
     ,ISNULL(APV.strVendorId, '') + ' - ' + isnull(E.strName,'''') as strVendorIdName 
@@ -11,6 +12,7 @@ AS
 	,APB.strBillId 
 	,strAccountID = (SELECT strAccountId  FROM tblGLAccount WHERE intAccountId = APB.intAccountId)
 	,strDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = APB.intAccountId)
+	,strAccount = (SELECT strAccountId  FROM tblGLAccount WHERE intAccountId = APB.intAccountId) + ' - ' + (SELECT strDescription FROM tblGLAccount WHERE intAccountId = APB.intAccountId)
 	,strTerms = (SELECT strTerm FROM tblSMTerm WHERE intTermID = APB.intTermsId)
 	,APB.strReference
 	,APB.strBillId AS strBillBatchNumber

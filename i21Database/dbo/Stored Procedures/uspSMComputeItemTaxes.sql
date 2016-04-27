@@ -32,7 +32,7 @@ BEGIN
 		,intTaxClassId			INT
 		,strTaxableByOtherTaxes NVARCHAR(MAX) 
 		,strCalculationMethod	NVARCHAR(50)
-		,numRate				NUMERIC(18,6)
+		,dblRate				NUMERIC(18,6)
 		,dblTax					NUMERIC(18,6)
 		,dblAdjustedTax			NUMERIC(18,6)
 		,ysnCheckoffTax			BIT
@@ -54,9 +54,9 @@ BEGIN
 				CASE	WHEN ISNULL(dblAdjustedTax, 0) <> 0 THEN 
 							dblAdjustedTax
 						WHEN strCalculationMethod = @CALC_METHOD_Percentage THEN 						
-							ISNULL(dblAmount, 0) * ISNULL(dblQty, 0) * (numRate / 100)
+							ISNULL(dblAmount, 0) * ISNULL(dblQty, 0) * (dblRate / 100)
 						ELSE 						
-							ISNULL(dblQty, 0) * ISNULL(numRate, 0) 
+							ISNULL(dblQty, 0) * ISNULL(dblRate, 0) 
 				END 
 			,ysnCalculated = 1
 	FROM	#tmpComputeItemTaxes ItemTaxes
@@ -74,13 +74,13 @@ BEGIN
 				+ (
 					TaxableOtherTaxes.dblCalculatedTaxAmount 
 					* (
-						SELECT	ISNULL( SUM (OtherTaxRate.numRate / 100), 0)
+						SELECT	ISNULL( SUM (OtherTaxRate.[dblRate] / 100), 0)
 						FROM	dbo.tblSMTaxCode OtherTax INNER JOIN dbo.tblSMTaxCodeRate OtherTaxRate
 									ON OtherTax.intTaxCodeId = OtherTaxRate.intTaxCodeId
 								INNER JOIN dbo.fnGetRowsFromDelimitedValues(TaxableOtherTaxes.strTaxableByOtherTaxes) AddOnTaxClass
 									ON AddOnTaxClass.intID = OtherTax.intTaxClassId
 						WHERE	OtherTax.intTaxCodeId <> TaxableOtherTaxes.intTaxCodeId
-								AND ISNULL(OtherTaxRate.numRate, 0) <> 0 
+								AND ISNULL(OtherTaxRate.[dblRate], 0) <> 0 
 								AND dbo.fnDateLessThanEquals(OtherTaxRate.dtmEffectiveDate, TaxableOtherTaxes.dtmDate) = 1
 								AND ISNULL(OtherTax.strZipCode, '') = ISNULL(TaxCode.strZipCode, '')
 								AND ISNULL(OtherTax.strCity, '') = ISNULL(TaxCode.strCity, '')
@@ -95,13 +95,13 @@ BEGIN
 				+ (
 					TaxableOtherTaxes.dblCalculatedTaxAmount 
 					* (
-						SELECT	ISNULL( SUM (OtherTaxRate.numRate), 0)
+						SELECT	ISNULL( SUM (OtherTaxRate.[dblRate]), 0)
 						FROM	dbo.tblSMTaxCode OtherTax INNER JOIN dbo.tblSMTaxCodeRate OtherTaxRate
 									ON OtherTax.intTaxCodeId = OtherTaxRate.intTaxCodeId
 								INNER JOIN dbo.fnGetRowsFromDelimitedValues(TaxableOtherTaxes.strTaxableByOtherTaxes) AddOnTaxClass
 									ON AddOnTaxClass.intID = OtherTax.intTaxClassId
 						WHERE	OtherTax.intTaxCodeId <> TaxableOtherTaxes.intTaxCodeId
-								AND ISNULL(OtherTaxRate.numRate, 0) <> 0 
+								AND ISNULL(OtherTaxRate.[dblRate], 0) <> 0 
 								AND dbo.fnDateLessThanEquals(OtherTaxRate.dtmEffectiveDate, TaxableOtherTaxes.dtmDate) = 1
 								AND ISNULL(OtherTax.strZipCode, '') = ISNULL(TaxCode.strZipCode, '')
 								AND ISNULL(OtherTax.strCity, '') = ISNULL(TaxCode.strCity, '')
@@ -128,7 +128,7 @@ END
 --		UPDATE	AddOnTaxes
 --		SET		dblCalculatedTaxAmount = ISNULL(dblCalculatedTaxAmount, 0) + 
 --					CASE	WHEN strCalculationMethod = @CALC_METHOD_Percentage THEN 						
---								(AddOnTaxes.numRate / 100) * 
+--								(AddOnTaxes.dblRate / 100) * 
 --								(
 --									SELECT	ISNULL(SUM(dblCalculatedTaxAmount), 0)
 --									FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
@@ -138,7 +138,7 @@ END
 --											AND SourceTaxes.intDetailId = AddOnTaxes.intDetailId
 --								)
 --							ELSE 						
---								AddOnTaxes.numRate * 
+--								AddOnTaxes.dblRate * 
 --								(
 --									SELECT	ISNULL(SUM(dblQty), 0)
 --									FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
