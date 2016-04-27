@@ -370,8 +370,13 @@ BEGIN
 						SET @SourceColumn = 'intInvoiceId'
 						SET @SourceTable = 'tblARInvoice'
 					END
+				IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
+					BEGIN
+						SET @SourceColumn = 'intInventoryShipmentId'
+						SET @SourceTable = 'tblICInventoryShipment'
+					END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Provisional Invoice')
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Provisional Invoice', 'Inventory Shipment')
 					BEGIN
 						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 					END
@@ -613,7 +618,7 @@ BEGIN
 						,@ItemDocumentNumber			= @ItemDocumentNumber
 						,@ItemDescription				= @ItemDescription
 						,@OrderUOMId					= @OrderUOMId
-						,@ItemQtyOrdered				= @ItemQtyShipped
+						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemUOMId						= @ItemUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
