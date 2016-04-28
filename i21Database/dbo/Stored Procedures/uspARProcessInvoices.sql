@@ -287,7 +287,7 @@ BEGIN
 		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
 		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
-		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Reading' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
+		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional Invoice' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@ResetDetails					= [ysnResetDetails]
@@ -378,7 +378,7 @@ BEGIN
 						SET @SourceColumn = 'intTransactionId'
 						SET @SourceTable = 'tblCFTransaction'
 					END
-				IF ISNULL(@SourceTransaction, '') = 'Meter Reading'
+				IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
 					BEGIN
 						SET @SourceColumn = 'intMeterReadingId'
 						SET @SourceTable = 'tblMBMeterReading' 
@@ -389,7 +389,7 @@ BEGIN
 						SET @SourceTable = 'tblARInvoice'
 					END				
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Reading', 'Provisional Invoice')
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice')
 					BEGIN
 						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 					END

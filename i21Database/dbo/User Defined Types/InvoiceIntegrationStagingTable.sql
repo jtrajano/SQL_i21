@@ -20,7 +20,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Provisional Invoice"
 																											-- "Service Charge"
 																											-- "Transport Delivery"
-																											-- "Meter Reading"
+																											-- "Meter Billing"
 																											-- "Store"
 	,[strSourceTransaction]					NVARCHAR(250)									NOT NULL	-- Valid values 
 																											-- 0. "Direct"
