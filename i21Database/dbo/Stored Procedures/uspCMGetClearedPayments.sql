@@ -32,6 +32,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
+		,@LastReconDate AS DATETIME
+
+		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ABS(ISNULL(dblAmount, 0))), 0)
@@ -53,3 +56,7 @@ WHERE	ysnPosted = 1
 			intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH)
 			OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
+		AND 1 = CASE 
+			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
+			ELSE 1 
+			END --CM-1143
