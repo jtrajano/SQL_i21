@@ -83,48 +83,46 @@ BEGIN
 	WHERE	intInventoryShipmentId = @intTransactionId 
 END 
 
--- Update the shipped quantities back to the Sales Order
-IF	@OrderType = @INT_ORDER_TYPE_SALES_ORDER 
-	AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_NONE
+-- Call the integration scripts based on Order type
 BEGIN 
-	EXEC dbo.uspSOShipped @ItemsFromInventoryShipment, @ysnPost
-	GOTO _Exit;
-END
+	-- Update the shipped quantities back to the Contract Management
+	IF @OrderType = @INT_ORDER_TYPE_SALES_CONTRACT  
+	BEGIN   
+		 EXEC dbo.uspCTShipped @ItemsFromInventoryShipment ,@intEntityUserSecurityId  
+	END  
 
--- Update the shipped quantities back to Inbound Shipment 
-IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_INBOUND_SHIPMENT
+	-- Update the shipped quantities back to Account Receivable
+	IF	@OrderType = @INT_ORDER_TYPE_SALES_ORDER AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_NONE
+	BEGIN 
+		EXEC dbo.uspSOShipped @ItemsFromInventoryShipment, @ysnPost
+	END
+END 
+
+-- Call the integration scripts based on Source Type
 BEGIN 
-	EXEC dbo.uspLGShipped 
-		@ItemsFromInventoryShipment
-		,@intEntityUserSecurityId
-	GOTO _Exit;
-END
+	-- Update the shipped quantities back to Inbound Shipment 
+	IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_INBOUND_SHIPMENT
+	BEGIN 
+		EXEC dbo.uspLGShipped 
+			@ItemsFromInventoryShipment
+			,@intEntityUserSecurityId
+	END
 
--- Update the shipped quantities back to a Scale Ticket
-IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_SCALE
-BEGIN 
-	EXEC dbo.uspSCShipped 
-		@ItemsFromInventoryShipment
-		,@intEntityUserSecurityId
-	GOTO _Exit;
-END
+	-- Update the shipped quantities back to a Scale Ticket
+	IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_SCALE
+	BEGIN 
+		EXEC dbo.uspSCShipped 
+			@ItemsFromInventoryShipment
+			,@intEntityUserSecurityId
+	END
 
--- Update the shipped quantities back to Transport
-IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_TRANSPORT
-BEGIN 
-	EXEC dbo.uspTRShipped 
-		@ItemsFromInventoryShipment
-		,@intEntityUserSecurityId
-	GOTO _Exit;
-END
-
--- Update the shipped quantities back to Contracts
-IF @OrderType = @INT_ORDER_TYPE_SALES_CONTRACT  
-BEGIN   
-	 EXEC dbo.uspCTShipped 
-		@ItemsFromInventoryShipment
-		, @intEntityUserSecurityId  
-	 GOTO _Exit;  
-END  
+	-- Update the shipped quantities back to Transport
+	IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_TRANSPORT
+	BEGIN 
+		EXEC dbo.uspTRShipped 
+			@ItemsFromInventoryShipment
+			,@intEntityUserSecurityId
+	END
+END 
 
 _Exit: 
