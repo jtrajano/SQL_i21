@@ -36,6 +36,7 @@
 	,@ActualCostId					NVARCHAR(50)	= NULL			
 	,@ShipmentId					INT				= NULL
 	,@TransactionId					INT				= NULL
+	,@MeterReadingId				INT				= NULL
 	,@OriginalInvoiceId				INT				= NULL
 	,@PeriodsToAccrue				INT				= 1
 	,@SourceId						INT				= 0
@@ -251,6 +252,7 @@ BEGIN TRY
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
+		,[intMeterReadingId]
 		,[intOriginalInvoiceId] 
 		,[intEntityId]
 		,[intConcurrencyId])
@@ -312,7 +314,8 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId 
 		,[strActualCostId]				= @ActualCostId 
 		,[intShipmentId]				= @ShipmentId 
-		,[intTransactionId]				= @TransactionId 
+		,[intTransactionId]				= @TransactionId
+		,[intMeterReadingId]			= @MeterReadingId
 		,[intOriginalInvoiceId]			= @OriginalInvoiceId
 		,[intEntityId]					= @EntityId 
 		,[intConcurrencyId]				= 0

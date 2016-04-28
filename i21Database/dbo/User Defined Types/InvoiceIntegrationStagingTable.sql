@@ -20,6 +20,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Provisional Invoice"
 																											-- "Service Charge"
 																											-- "Transport Delivery"
+																											-- "Meter Reading"
 																											-- "Store"
 	,[strSourceTransaction]					NVARCHAR(250)									NOT NULL	-- Valid values 
 																											-- 0. "Direct"
@@ -68,6 +69,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing
 	,[intShipmentId]						INT												NULL		-- Key Value from tblLGShipment (Inbound Shipment) 	
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
+	,[intMeterReadingId]						INT												NULL		-- Key Value from tblMBMeterReading (Meter Reading)
 	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional Invoice/ Duplicate/ Import/ Recurring) 	
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
