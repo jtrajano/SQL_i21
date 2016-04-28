@@ -20,6 +20,41 @@ UNIQUE (strTransactionId))
 INSERT INTO #tmpCMBankTransaction (strTransactionId)
 SELECT @strTransactionId
 
+-- Insert Void Paycheck to Check Audit
+INSERT INTO tblCMCheckNumberAudit (
+		intBankAccountId
+		,strCheckNo
+		,intCheckNoStatus
+		,strRemarks
+		,strTransactionId
+		,intTransactionId
+		,intUserId
+		,dtmCreated
+		,dtmCheckPrinted
+)
+SELECT	intBankAccountId = F.intBankAccountId
+		,strCheckNo = F.strReferenceNo
+		,intCheckNoStatus = 4
+		,strRemarks = ''
+		,strTransactionId = F.strTransactionId
+		,intTransactionId = F.intTransactionId
+		,intUserId = @intUserId
+		,dtmCreated = GETDATE()
+		,dtmCheckPrinted = NULL 
+FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+			ON F.strTransactionId = TMP.strTransactionId
+WHERE	NOT EXISTS (
+			SELECT	TOP 1 1
+			FROM	tblCMCheckNumberAudit AUDIT
+			WHERE	AUDIT.intBankAccountId = F.intBankAccountId
+					AND AUDIT.strCheckNo = F.strReferenceNo
+					AND AUDIT.intTransactionId = F.intTransactionId
+					AND AUDIT.intCheckNoStatus = 4
+		)
+		AND F.strReferenceNo NOT IN ('Cash')		
+		AND ISNULL(F.strReferenceNo, '') <> ''
+		AND F.dtmCheckPrinted IS NOT NULL
+
 -- Calling the reversal stored procedure
 EXEC dbo.uspCMBankTransactionReversal @intUserId, @dtmReverseDate, @isReversingSuccessful OUTPUT
 
