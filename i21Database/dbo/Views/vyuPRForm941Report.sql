@@ -52,14 +52,18 @@ SELECT DISTINCT
 							CONVERT(NUMERIC(18,2), ISNULL(dblTotalDeposit,0))
  ,dblBalanceDue =			/* box12 = if box10 > box 11 then box10 - box11 */
 							CASE WHEN ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0)) > ISNULL(dblTotalDeposit,0)   
 								 THEN ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0)) - ISNULL(dblTotalDeposit,0)
 								 ELSE 0 END
  ,dblOverPayment =			/* box13 = if box10 < box 11 then box10 - box11 */
 							CASE WHEN ISNULL(dblTotalDeposit,0) > ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0))
 								 THEN ISNULL(dblTotalDeposit,0) - ((CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSS, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableSSTips, 0) * 0.124)) + (CONVERT(NUMERIC(18,2), ISNULL(dblTaxableMed, 0) * 0.029)) + ISNULL(dblFIT, 0) 
+										+ CONVERT(NUMERIC(18,2), ISNULL(dblTaxDueUnreported, 0))
 										+ ISNULL(dblAdjustSickPay, 0) + ISNULL(dblAdjustFractionCents, 0) + ISNULL(dblAdjustTips, 0))
 								 ELSE 0 END
  ,ysnRefundOverpayment =	/* box13 */ 
