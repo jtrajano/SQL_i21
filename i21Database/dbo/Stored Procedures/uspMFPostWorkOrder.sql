@@ -40,7 +40,7 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
-		AND WP.intItemId IN (SELECT intItemId FROM dbo.tblMFWorkOrderRecipeItem WHERE intRecipeId=2 AND ysnConsumptionRequired=1 AND intWorkOrderId=@intWorkOrderId)
+		AND WP.intItemId IN (SELECT intItemId FROM dbo.tblMFWorkOrderRecipeItem WHERE intRecipeItemTypeId=2 AND ysnConsumptionRequired=1 AND intWorkOrderId=@intWorkOrderId)
 
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
