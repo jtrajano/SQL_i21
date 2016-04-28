@@ -29,7 +29,7 @@ SELECT
 	,intEntityVendorId = intVendorEntityId
 	,strVendor
 	,strItemNo
-	,strItemDescription = strItemNo COLLATE Latin1_General_CI_AS
+	,strItemDescription
 	,strLotTracking
 	,strType
 	,strUnitMeasure = strItemUOM COLLATE Latin1_General_CI_AS

@@ -3,6 +3,7 @@
 AS
 BEGIN
 	DECLARE @intTrackingNumber			INT,
+			@strTrackingNumber			NVARCHAR(50),
 			@xmlDocumentId				INT 
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
@@ -40,35 +41,38 @@ BEGIN
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intTrackingNumber' 
 
+	SELECT	@strTrackingNumber = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strTrackingNumber' 
 SELECT 
-		SH.intTrackingNumber,
-		SH.intDeliveryNoticeNumber,
-		SH.dtmDeliveryNoticeDate,
-		SH.dtmDeliveryDate,
-		SH.intSubLocationId,
-		SH.intShippingLineEntityId,
-		SH.intTruckerEntityId,
-		SH.dtmPickupDate,
-		SH.dtmLastFreeDate,
-		SH.dtmStrippingReportReceivedDate,
-		SH.dtmSampleAuthorizedDate,
-		SH.strStrippingReportComments,
-		SH.strFreightComments,
-		SH.strSampleComments,
-		SH.strOtherComments,
-		SH.strOriginPort,
-		SH.strDestinationPort,
-		SH.strDestinationCity,
-		SH.dtmShipmentDate,
-		SH.dtmETAPOL,
-		SH.dtmETAPOD,
-		SH.dtmETSPOL,
-		SH.strMVessel,
-		SH.strFVessel,
-		SH.strMVoyageNumber,
-		SH.strFVoyageNumber,
-		SH.dblInsuranceValue,
-		SH.intInsuranceCurrencyId,
+		L.strLoadNumber AS strTrackingNumber,
+		--LD.intDeliveryNoticeNumber,
+		--L.dtmDeliveryNoticeDate,
+		--L.dtmDeliveryDate,
+		LW.intSubLocationId,
+		L.intShippingLineEntityId,
+		--SH.intTruckerEntityId,
+		--L.dtmPickupDate,
+		--SH.dtmLastFreeDate,
+		--LD.dtmStrippingReportReceivedDate,
+		--LD.dtmSampleAuthorizedDate,
+		--L.strStrippingReportComments,
+		--L.strFreightComments,
+		--L.strSampleComments,
+		--L.strOtherComments,
+		L.strOriginPort,
+		L.strDestinationPort,
+		L.strDestinationCity,
+		L.dtmBLDate,
+		L.dtmETAPOL,
+		L.dtmETAPOD,
+		L.dtmETSPOL,
+		L.strMVessel,
+		L.strFVessel,
+		L.strMVoyageNumber,
+		L.strFVoyageNumber,
+		L.dblInsuranceValue,
+		L.intInsuranceCurrencyId,
 		InsuranceCur.strCurrency,
 
   		Vendor.strName as strVendor,
@@ -107,18 +111,6 @@ SELECT
 		SLLocation.strState as strShippingLineState,
 		SLLocation.strZipCode as strShippingLineZipCode,
 
-		TREntity.strName as strTrucker,
-		TREntity.strEmail as strTruckerEmail,
-		TREntity.strFax as strTruckerFax,
-		TREntity.strPhone as strTruckerPhone,
-		TREntity.strMobile as strTruckerMobile,
-		TREntity.strWebsite as strTruckerWebsite,
-		TRLocation.strAddress as strTruckerAddress,
-		TRLocation.strCity as strTruckerCity,
-		TRLocation.strCountry as strTruckerCountry,
-		TRLocation.strState as strTruckerState,
-		TRLocation.strZipCode as strTruckerZipCode,
-
 		TerminalEntity.strName as strTerminal,
 		TerminalEntity.strEmail as strTerminalEmail,
 		TerminalEntity.strFax as strTerminalFax,
@@ -154,21 +146,24 @@ SELECT
 		WI.intWarehouseInstructionHeaderId,
 		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
-FROM		tblLGShipment SH
-LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = SH.intVendorEntityId
-LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = SH.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
-LEFT JOIN	tblEMEntity Customer ON Customer.intEntityId = SH.intCustomerEntityId
-LEFT JOIN	[tblEMEntityLocation] CLocation ON CLocation.intEntityId = SH.intCustomerEntityId and CLocation.intEntityLocationId = Customer.intDefaultLocationId
-LEFT JOIN	tblEMEntity SLEntity ON SLEntity.intEntityId = SH.intShippingLineEntityId
-LEFT JOIN	[tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = SH.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
-LEFT JOIN	tblEMEntity TREntity ON TREntity.intEntityId = SH.intTruckerEntityId
-LEFT JOIN	[tblEMEntityLocation] TRLocation ON TRLocation.intEntityId = SH.intTruckerEntityId and TRLocation.intEntityLocationId = TREntity.intDefaultLocationId
-LEFT JOIN	tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = SH.intTerminalEntityId
-LEFT JOIN	[tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = SH.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
-LEFT JOIN	tblEMEntity InsurEntity ON InsurEntity.intEntityId = SH.intInsurerEntityId
-LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = SH.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
-LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = SH.intSubLocationId
-LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = SH.intInsuranceCurrencyId
-LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = SH.intShipmentId
-WHERE SH.intTrackingNumber = @intTrackingNumber
+FROM		tblLGLoad L
+JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
+LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
+LEFT JOIN	tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+LEFT JOIN	[tblEMEntityLocation] CLocation ON CLocation.intEntityId = LD.intCustomerEntityId and CLocation.intEntityLocationId = Customer.intDefaultLocationId
+LEFT JOIN	tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
+LEFT JOIN	[tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
+LEFT JOIN	tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = L.intTerminalEntityId
+LEFT JOIN	[tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
+LEFT JOIN	tblEMEntity InsurEntity ON InsurEntity.intEntityId = L.intInsurerEntityId
+LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
+LEFT JOIN	tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+LEFT JOIN	tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+LEFT JOIN	tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+LEFT JOIN	tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
+LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
+LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
+WHERE L.strLoadNumber = @strTrackingNumber
 END
