@@ -7,6 +7,7 @@ SELECT strRecordNumber
 	 , A.intCompanyLocationId
 	 , A.intEntityCustomerId	 
 	 , IC.intItemId
+	 , UOM.intUnitMeasureId
 	 , IC.intManufacturerId
 	 , IC.intBrandId
 	 , IC.intCommodityId
