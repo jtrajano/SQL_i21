@@ -3700,6 +3700,7 @@
     <Build Include="dbo\Tables\tblEMEntityPhoneNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspMBPostMeterReading.sql" />
     <Build Include="dbo\Stored Procedures\uspMBBatchPostMeterReading.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityCampaign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
