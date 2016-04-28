@@ -124,10 +124,7 @@ BEGIN TRY
 		RAISERROR(90009,11,1)
 	END												 
 
-	--IF ROUND(@dblNewLotWeightPerUnit,3) <> ROUND(@dblLotWeightPerUnit,3)
-	--BEGIN
-	--	RAISERROR(51196,11,1)
-	--END
+	BEGIN TRANSACTION
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
@@ -185,12 +182,12 @@ BEGIN TRY
 			,dblQty = 0
 		WHERE intLotId = @intLotId
 	END
-
+	COMMIT TRANSACTION
 END TRY  
   
 BEGIN CATCH  
   
- IF XACT_STATE() != 0 AND @TransactionCount = 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
+ IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
  SET @ErrMsg = ERROR_MESSAGE()      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')     
   

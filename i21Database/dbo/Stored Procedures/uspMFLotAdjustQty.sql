@@ -122,19 +122,21 @@ BEGIN TRY
 				)
 	END
 
-	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId
-		,@dtmDate
-		,@intLocationId
-		,@intSubLocationId
-		,@intStorageLocationId
-		,@strLotNumber
-		,@dblAdjustByQuantity
-		,@dblNewUnitCost
-		,@intSourceId
-		,@intSourceTransactionTypeId
-		,@intUserId
-		,@intInventoryAdjustmentId OUTPUT
+	BEGIN TRANSACTION
 
+	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId,
+													  @dtmDate,
+													  @intLocationId,
+													  @intSubLocationId,
+													  @intStorageLocationId,
+													  @strLotNumber,
+													  @dblAdjustByQuantity,
+													  @dblNewUnitCost,
+  												      @intWeightUOMId,
+													  @intSourceId,
+													  @intSourceTransactionTypeId,
+													  @intUserId,
+													  @intInventoryAdjustmentId OUTPUT
 	IF EXISTS (
 			SELECT TOP 1 *
 			FROM tblMFWorkOrderProducedLot
@@ -196,11 +198,11 @@ BEGIN TRY
 			,dblQty = 0
 		WHERE intLotId = @intLotId
 	END
+	COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @TransactionCount = 0
 		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 
