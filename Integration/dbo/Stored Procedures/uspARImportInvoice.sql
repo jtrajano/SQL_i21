@@ -186,7 +186,6 @@ BEGIN
 				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
 				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmPostDate]
 				0,--[intCurrencyId]
-				1,
 				(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = ptivc_loc_no COLLATE Latin1_General_CI_AS),--[intCompanyLocationId]
 				Salesperson.intEntitySalespersonId,--[intEntitySalespersonId]
 				NULL, -- [dtmShipDate]
