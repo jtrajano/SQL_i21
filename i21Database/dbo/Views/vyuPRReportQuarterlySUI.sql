@@ -8,7 +8,7 @@ SELECT
 	,tblPREmployee.strLastName
 	,tblPRPaycheck.intYear
 	,tblPRPaycheck.intQuarter
-	,SUM(tblPRPaycheck.dblAdjustedGross) AS dblGross
+	,SUM(tblPRPaycheck.dblGross) AS dblGross
 	,MAX(tblPRPaycheck.dblAdjustedGrossYTD) AS dblGrossYTD
 	,dblTaxable = CASE WHEN (dblLimit - (dblLimit - ISNULL((SELECT MAX (dblAdjustedGrossYTD) FROM vyuPRPaycheckYTD 
 												   WHERE YEAR(vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intYear
