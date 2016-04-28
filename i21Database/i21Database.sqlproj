@@ -3698,7 +3698,8 @@
     <Build Include="dbo\Tables\tblLGLoadDetailLot.sql" />
     <Build Include="dbo\Tables\tblETDeliveryMetrics.sql" />
     <Build Include="dbo\Tables\tblEMEntityPhoneNumber.sql" />
-
+    <Build Include="dbo\Stored Procedures\uspMBPostMeterReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBBatchPostMeterReading.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
