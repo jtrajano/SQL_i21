@@ -71,8 +71,10 @@ BEGIN
 		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
-		,C.intItemId
-		,C.strItemDescription AS strDescription
+		--,C.intItemId
+		--,C.strItemDescription AS strDescription
+		,S.intItemId
+		,S.strItemDescription AS strDescription
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
@@ -96,8 +98,10 @@ BEGIN
 		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
-		,C.intItemId
-		,C.strItemDescription AS strDescription
+		--,C.intItemId
+		--,C.strItemDescription AS strDescription
+		,S.intItemId
+		,S.strItemDescription AS strDescription
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
