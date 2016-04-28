@@ -6,8 +6,8 @@ BEGIN
 IF OBJECT_ID('tempdb..#tempLotHistory') IS NOT NULL
 DROP TABLE  #tempLotHistory
 
- DECLARE @dblPrimaryQty NUMERIC(38,20)
- SET @dblPrimaryQty=0     
+ DECLARE @dblPrimaryQty NUMERIC(38,20),@dblPrimaryWeight NUMERIC(38,20)
+ SELECT @dblPrimaryQty=0, @dblPrimaryWeight=0     
 
 		SELECT ilt.dtmCreated AS dtmDateTime, 
 			   l.strLotNumber AS strLotNo, 
@@ -17,9 +17,12 @@ DROP TABLE  #tempLotHistory
 			   clsl.strSubLocationName AS strSubLocation, 
 			   sl.strName AS strStorageLocation, 
 			   itt.strName AS strTransaction, 
-			   CONVERT(NUMERIC(38,20),CASE WHEN iu.intItemUOMId = ilt.intItemUOMId THEN ilt.dblQty ELSE ilt.dblQty*ilt.dblUOMQty END) AS dblTransactionQty,
+			   CONVERT(NUMERIC(38,20),0.0) AS dblWeight,
+			   CONVERT(NUMERIC(38,20),ilt.dblQty) AS dblTransactionWeight,
+			   uwm.strUnitMeasure AS strTransactionWeightUOM, 
 			   CONVERT(NUMERIC(38,20),0.0) AS dblQuantity,
-			   um.strUnitMeasure AS strUOM, 
+			   CONVERT(NUMERIC(38,20),ilt.dblQty/CASE WHEN l.dblWeightPerQty=0 THEN 1 ELSE l.dblWeightPerQty END ) AS dblTransactionQty,
+			   um.strUnitMeasure AS strTransactionQtyUOM, 
 			   iad.strNewLotNumber AS strRelatedLotId, 
 			   '' AS strPreviousItem, 
 			   '' AS strSourceSubLocation, 
@@ -42,9 +45,13 @@ DROP TABLE  #tempLotHistory
 		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
 		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
-		LEFT JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit=1
+		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId 
+		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
+
+		LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId,l.intItemUOMId)
+		LEFT JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
+
 		LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
-		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
@@ -66,9 +73,12 @@ DROP TABLE  #tempLotHistory
 					THEN 'Inventory Adjustment - Expiry Date Change'
 				ELSE ''
 				END AS strTransaction, 
-			   CONVERT(NUMERIC(38,20),ISNULL(CASE WHEN ium.intItemUOMId = iad.intItemUOMId THEN iad.dblWeight  ELSE iad.dblWeight*iad.dblWeightPerQty END,0)) AS dblTransactionQty,
+			   CONVERT(NUMERIC(38,20),0.0) AS dblWeight,
+			   CONVERT(NUMERIC(38,20),ISNULL(iad.dblWeight,0)) AS dblTransactionWeight,
+			   um.strUnitMeasure AS strTransactionWeightUOM, 
 			   CONVERT(NUMERIC(38,20),0.0) AS dblQuantity,    
-			   um.strUnitMeasure AS strUOM, 
+			   CONVERT(NUMERIC(38,20),ISNULL(iad.dblWeight/(CASE WHEN l.dblWeightPerQty=0 THEN 1 ELSE l.dblWeightPerQty END),0)) AS dblTransactionQty,
+			   um1.strUnitMeasure AS strTransactionQtyUOM, 
 			   iad.strNewLotNumber AS strRelatedLotId, 
 			   i1.strItemNo AS strPreviousItem, 
 			   clsl1.strSubLocationName AS strSourceSubLocation, 
@@ -89,8 +99,12 @@ DROP TABLE  #tempLotHistory
 		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 		LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
 		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
-		LEFT JOIN tblICItemUOM ium ON ium.intItemId = i.intItemId AND ium.ysnStockUnit=1
+		LEFT JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
 		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+
+		LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = IsNULL(l.intWeightUOMId,l.intItemUOMId)
+		LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
+
 		LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
 		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
@@ -115,6 +129,7 @@ DROP TABLE  #tempLotHistory
 
 	UPDATE #tempLotHistory
 	SET @dblPrimaryQty=dblQuantity = CASE WHEN (((@dblPrimaryQty + dblTransactionQty) < 0.01) AND ((@dblPrimaryQty + dblTransactionQty) > 0)) THEN 0 ELSE @dblPrimaryQty + dblTransactionQty END
+		,@dblPrimaryWeight=dblWeight = CASE WHEN (((@dblPrimaryWeight + dblTransactionWeight) < 0.01) AND ((@dblPrimaryWeight + dblTransactionWeight) > 0)) THEN 0 ELSE @dblPrimaryWeight + dblTransactionWeight END
 
 	SELECT * FROM #tempLotHistory
 END
