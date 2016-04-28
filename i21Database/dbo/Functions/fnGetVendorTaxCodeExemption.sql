@@ -9,10 +9,24 @@
 	,@ItemCategoryId	INT
 	,@ShipFromLocationId	INT
 )
-RETURNS NVARCHAR(500)
+RETURNS @returntable TABLE
+(
+	 [ysnTaxExempt]			BIT
+	,[ysnInvalidSetup]		BIT
+	,[strExemptionNotes]	NVARCHAR(500)
+	,[dblExemptionPercent]	NUMERIC(18,6)
+)
 AS
 BEGIN
 	DECLARE @TaxCodeExemption	NVARCHAR(500)
+			,@ExemptionPercent	NUMERIC(18,6)
+			,@TaxExempt			BIT
+			,@InvalidSetup		BIT
+
+	SET @TaxCodeExemption = NULL
+	SET @ExemptionPercent = 0.00000
+	SET @TaxExempt = 0
+	SET @InvalidSetup = 0
 	
 	--Item Category Tax Class
 	IF NOT EXISTS	(
@@ -34,10 +48,20 @@ BEGIN
 	BEGIN
 		SET @TaxCodeExemption	= ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
 								+ ISNULL(' is not included in Item Category - ' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ' tax class setup.', '') 	
+
+		SET @InvalidSetup = 1
 	END
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 			
 	--Vendor Location
 
@@ -67,7 +91,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 
 	SELECT TOP 1
@@ -96,7 +128,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 	
 
 	SELECT TOP 1
@@ -125,7 +165,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END	
 	
 	
 	SELECT TOP 1
@@ -152,7 +200,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END	
 
 
 	SELECT TOP 1
@@ -184,7 +240,15 @@ BEGIN
 		dtmStartDate
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 
 	SELECT TOP 1
@@ -211,7 +275,15 @@ BEGIN
 		dtmStartDate
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 
 	SELECT TOP 1
@@ -239,7 +311,15 @@ BEGIN
 		dtmStartDate
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 					
 
 	SELECT TOP 1
@@ -263,7 +343,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 	
 	--Item
@@ -293,7 +381,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 		
 		
 	SELECT TOP 1
@@ -322,7 +418,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption		
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END		
 	
 		
 	SELECT TOP 1
@@ -347,7 +451,15 @@ BEGIN
 		dtmStartDate
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 
 	SELECT TOP 1
@@ -370,7 +482,15 @@ BEGIN
 		dtmStartDate
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 
 	SELECT TOP 1
@@ -397,7 +517,15 @@ BEGIN
 		dtmStartDate
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 
 	--Tax Code
@@ -423,7 +551,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 	
 	--Tax Class
 	SELECT TOP 1
@@ -448,7 +584,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END	
 	
 	--Tax State
 	SELECT TOP 1
@@ -474,7 +618,15 @@ BEGIN
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption	
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 		
 				
 	SELECT TOP 1
@@ -487,8 +639,21 @@ BEGIN
 			
 				
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		RETURN @TaxCodeExemption					
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = 1
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END					
 
-				
-	RETURN NULL		
+	INSERT INTO @returntable
+	SELECT 
+		[ysnTaxExempt] = @TaxExempt
+		,[ysnInvalidSetup] = @InvalidSetup
+		,[strExemptionNotes] = @TaxCodeExemption
+		,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)				
+	RETURN					
 END
