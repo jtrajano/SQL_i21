@@ -54,13 +54,13 @@ AS
 			([intCommissionScheduleId]
 			,[intEntityId]
 			,[intCommissionPlanId]
-			,[ysnAdjustPrevious]
+			,[dblPercentage]
 			,[intConcurrencyId])
 		SELECT 
 			@NewCommissionScheduleId
 			,[intEntityId]
 			,[intCommissionPlanId]
-			,[ysnAdjustPrevious]
+			,[dblPercentage]
 			,1
 		FROM
 			[tblARCommissionScheduleDetail]

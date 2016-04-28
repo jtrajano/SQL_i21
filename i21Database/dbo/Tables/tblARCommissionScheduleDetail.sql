@@ -4,7 +4,7 @@
 	[intCommissionScheduleId]       INT NOT NULL,
     [intEntityId]					INT NULL, 
 	[intCommissionPlanId]			INT NULL, 
-    [ysnAdjustPrevious]				BIT NULL, 
+    [dblPercentage]					NUMERIC(18, 6) NULL, 
     [intConcurrencyId]				INT NOT NULL DEFAULT ((0)),
 	CONSTRAINT [PK_tblARCommissionScheduleDetail_intCommissionScheduleDetailId] PRIMARY KEY CLUSTERED ([intCommissionScheduleDetailId] ASC),
 	CONSTRAINT [FK_tblARCommissionScheduleDetail_tblARCommissionSchedule] FOREIGN KEY ([intCommissionScheduleId]) REFERENCES [tblARCommissionSchedule] ([intCommissionScheduleId]) ON DELETE CASCADE,

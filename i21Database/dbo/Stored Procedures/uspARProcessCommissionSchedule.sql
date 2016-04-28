@@ -64,7 +64,7 @@ AS
 	--GET COMM. SCHED. DETAILS WHERE intCommissionScheduleId
 	IF EXISTS(SELECT NULL FROM @tblARCommissionSchedules)
 		BEGIN
-			DECLARE @tblARCommissionScheduleDetails TABLE (intEntityId INT, intCommissionPlanId INT, ysnAdjustForPrevious BIT)
+			DECLARE @tblARCommissionScheduleDetails TABLE (intEntityId INT, intCommissionPlanId INT, dblPercentage NUMERIC(18,6))
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionSchedules)
 				BEGIN
@@ -81,10 +81,10 @@ AS
 					INSERT INTO @tblARCommissionScheduleDetails
 							(intEntityId
 							, intCommissionPlanId
-							, ysnAdjustForPrevious)
+							, dblPercentage)
 					SELECT CSD.intEntityId
 							, CSD.intCommissionPlanId
-							, CSD.ysnAdjustPrevious
+							, CSD.dblPercentage
 					FROM tblARCommissionScheduleDetail CSD 
 						INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionPlanId = CP.intCommissionPlanId
 						LEFT JOIN vyuEMSearch E ON CSD.intEntityId = E.intEntityId
