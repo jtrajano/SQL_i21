@@ -16,14 +16,12 @@ SELECT
 			END
 		),
 	strSourceNumber =
-		CAST (
-			CASE WHEN Shipment.intSourceType = 1 -- Scale
+		CASE WHEN Shipment.intSourceType = 1 -- Scale
 				THEN ScaleView.strTicketNumber
 			WHEN Shipment.intSourceType = 2 -- Inbound Shipment
-				THEN LogisticView.intTrackingNumber
+				THEN CONVERT(NVARCHAR(100), LogisticView.intTrackingNumber)
 			ELSE NULL
-			END
-		AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS,
+			END,
 	strOrderUOM = 
 		(
 			CASE WHEN Shipment.intOrderType = 1
