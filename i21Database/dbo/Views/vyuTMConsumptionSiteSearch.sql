@@ -31,6 +31,7 @@ AS
 	,dtmNextDeliveryDate = A.dtmNextDeliveryDate
 	,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 	,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
+	,strContactEmailAddress = G.strEmail
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
