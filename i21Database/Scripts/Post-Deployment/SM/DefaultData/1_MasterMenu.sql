@@ -1622,29 +1622,35 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportuni
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Project:searchConfigAllOpportunity' WHERE strMenuName = 'Opportunities' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Campaigns', N'Help Desk', @CRMParentMenuId, N'CRM Campaigns', N'Activity', N'Screen', N'HelpDesk.view.Campaign', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.Campaign' WHERE strMenuName = 'Campaigns' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Sales Pipe Statuses', N'Help Desk', @CRMParentMenuId, N'CRM Sales Pipe Statuses', N'Activity', N'Screen', N'HelpDesk.view.SalesPipeStatus', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Sales Pipe Statuses', N'Help Desk', @CRMParentMenuId, N'CRM Sales Pipe Statuses', N'Activity', N'Screen', N'HelpDesk.view.SalesPipeStatus', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.SalesPipeStatus' WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'HelpDesk.view.SalesPipeStatus' WHERE strMenuName = 'Sales Pipe Statuses' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lines of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Lines of Business', N'Help Desk', @CRMParentMenuId, N'Lines of Business', N'Activity', N'Screen', N'HelpDesk.view.LineOfBusiness', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Lines of Business', N'Help Desk', @CRMParentMenuId, N'Lines of Business', N'Activity', N'Screen', N'HelpDesk.view.LineOfBusiness', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.LineOfBusiness' WHERE strMenuName = 'Lines of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'HelpDesk.view.LineOfBusiness' WHERE strMenuName = 'Lines of Business' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sources' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Sources', N'Help Desk', @CRMParentMenuId, N'Opportunity Sources', N'Activity', N'Screen', N'HelpDesk.view.OpportunitySource', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Sources', N'Help Desk', @CRMParentMenuId, N'Opportunity Sources', N'Activity', N'Screen', N'HelpDesk.view.OpportunitySource', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.OpportunitySource' WHERE strMenuName = 'Sources' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'HelpDesk.view.OpportunitySource' WHERE strMenuName = 'Sources' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Prospects and Customers' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Prospects and Customers', N'Help Desk', @CRMParentMenuId, N'Prospects and Customers', N'Activity', N'Screen', N'EntityManagement.view.Entity:searchEntityProspect', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
+	VALUES (N'Prospects and Customers', N'Help Desk', @CRMParentMenuId, N'Prospects and Customers', N'Activity', N'Screen', N'EntityManagement.view.Entity:searchEntityProspect', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'EntityManagement.view.Entity:searchEntityProspect' WHERE strMenuName = 'Prospects and Customers' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'EntityManagement.view.Entity:searchEntityProspect' WHERE strMenuName = 'Prospects and Customers' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
 /* Start of delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
@@ -4426,6 +4432,14 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Opportunities
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @OpportunitiesMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@OpportunitiesMenuId)
+END
+
+DECLARE @CampaignsMenuId INT
+SELECT  @CampaignsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Campaigns' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CampaignsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CampaignsMenuId)
 END
 
 DECLARE @SalesPipeStatusesMenuId INT
