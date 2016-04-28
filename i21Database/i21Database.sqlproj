@@ -3697,6 +3697,8 @@
     <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
     <Build Include="dbo\Tables\tblLGLoadDetailLot.sql" />
     <Build Include="dbo\Tables\tblETDeliveryMetrics.sql" />
+    <Build Include="dbo\Tables\tblEMEntityPhoneNumber.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3804,6 +3806,7 @@
     <None Include="Scripts\Post-Deployment\EM\024_delete_old_entity_table.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\19_UpdateUsedCustomerBudget.sql" />
     <None Include="Scripts\Post-Deployment\EM\025_UpdatePhoneNumberAndCreateBackup.sql" />
+    <None Include="Scripts\Post-Deployment\EM\026_ImportPhoneNumbersToNewTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
