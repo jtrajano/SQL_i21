@@ -138,6 +138,7 @@ BEGIN TRY
 
 			--IF @dblOldSourceWeight IS NULL
 			--SELECT @dblOldSourceWeight=0
+	BEGIN TRANSACTION
 
 			EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 				,@dtmDate
@@ -289,7 +290,6 @@ END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @TransactionCount = 0
 		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 

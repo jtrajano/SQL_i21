@@ -142,6 +142,8 @@ BEGIN TRY
 
 	--IF @dblOldSourceWeight IS NULL
 	--SELECT @dblOldSourceWeight=0
+
+	BEGIN TRANSACTION
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
@@ -202,12 +204,12 @@ BEGIN TRY
 		--	,dblQty = 0
 		--WHERE intLotId = @intLotId
 	END
-
+	COMMIT TRANSACTION
 END TRY  
   
 BEGIN CATCH  
   
- IF XACT_STATE() != 0 AND @TransactionCount = 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
+ IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
  SET @ErrMsg = ERROR_MESSAGE()      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')     
   
