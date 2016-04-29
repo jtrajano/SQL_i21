@@ -152,4 +152,4 @@ EXEC sp_executesql @query
 SELECT * FROM @temp_SOA_table STATEMENTREPORT
 LEFT JOIN @temp_aging_table AGINGREPORT
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-WHERE ISNULL(AGINGREPORT.dblTotalAR, 0) > 0
+WHERE ISNULL(AGINGREPORT.dblTotalAR, 0) <> 0
