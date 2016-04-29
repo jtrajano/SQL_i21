@@ -3701,6 +3701,7 @@
     <Build Include="dbo\Stored Procedures\uspMBPostMeterReading.sql" />
     <Build Include="dbo\Stored Procedures\uspMBBatchPostMeterReading.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityCampaign.sql" />
+    <Build Include="dbo\Views\vyuHDOpportunityCampaignSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
