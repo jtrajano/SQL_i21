@@ -52,6 +52,7 @@ BEGIN TRY
 													   ,@intNewItemId = @intNewItemId
 													   ,@intNewSubLocationId = @intSubLocationId
 													   ,@intNewStorageLocationId = @intStorageLocationId
+													   ,@intItemUOMId=@intItemUOMId
 													   ,@intSourceId = @intSourceId
 													   ,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 													   ,@intEntityUserSecurityId  = @intUserId
