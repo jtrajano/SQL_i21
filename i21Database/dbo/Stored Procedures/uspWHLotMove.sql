@@ -5,6 +5,7 @@
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
+	,@intItemUOMId int =NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -47,10 +48,7 @@ BEGIN TRY
 		,@dblWeightPerQty = dblWeightPerQty
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
-<<<<<<< HEAD
-=======
 		,@intItemUOMId=CASE WHEN @intItemUOMId Is NULL THEN intItemUOMId ELSE @intItemUOMId END
->>>>>>> dee1a66... WH-193
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
