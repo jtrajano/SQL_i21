@@ -29,6 +29,15 @@ BEGIN
 	RETURN -1; 
 END 
 
+DECLARE	@AdjustmentTypeQtyChange AS INT = 1
+		,@AdjustmentTypeUOMChange AS INT = 2
+		,@AdjustmentTypeItemChange AS INT = 3
+		,@AdjustmentTypeLotStatusChange AS INT = 4
+		,@AdjustmentTypeSplitLot AS INT = 5
+		,@AdjustmentTypeExpiryDateChange AS INT = 6
+		,@AdjustmentTypeLotMerge AS INT = 7
+		,@AdjustmentTypeLotMove AS INT = 8 
+
 BEGIN TRANSACTION 
 
 -- Return all the "Out" stock qty back to the cost buckets. 
@@ -588,22 +597,235 @@ BEGIN
 					,@intUserId
 					,@strGLDescription
 					,@ItemsToPost
-			END			
-			ELSE 
+			END	
+
+			-- Special repost routine for the following Inventory adjustments: 
+			ELSE IF EXISTS (
+				SELECT	1 
+				FROM	dbo.tblICInventoryTransactionType 
+				WHERE	intTransactionTypeId = @intTransactionTypeId 
+						AND strName IN (
+							'Inventory Adjustment - Item Change'
+							, 'Inventory Adjustment - Split Lot'
+							, 'Inventory Adjustment - Lot Merge'
+							, 'Inventory Adjustment - Lot Move'
+						)
+			)
 			BEGIN 
-								
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
 				SET		dblCost =	dbo.fnMultiply(
-										CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
-													(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
+										CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
+													-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
+													CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+																(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
+															ELSE 
+																ISNULL(Lot.dblLastCost, 0) 
+													END 
+												WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
+													-- It item is using Average Costing, then get the Average Cost. 
+													dbo.fnGetItemAverageCost(
+														AdjDetail.intItemId
+														, ItemLocation.intItemLocationId
+														, AdjDetail.intItemUOMId
+													) 
 												ELSE
-													ISNULL(Lot.dblLastCost, 0) 
+													-- Otherwise, get the item's last cost. 
+													(	
+														SELECT	TOP 1 
+																dblLastCost 
+														FROM	tblICItemPricing 
+														WHERE	intItemId = AdjDetail.intItemId 
+																AND intItemLocationId = ItemLocation.intItemLocationId
+													)
 										END								
 										,ItemUOM.dblUnitQty 
 									)
 				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+						LEFT JOIN dbo.tblICItemLocation ItemLocation
+							ON ItemLocation.intLocationId = Adj.intLocationId 
+							AND ItemLocation.intItemId = AdjDetail.intItemId
+						LEFT JOIN dbo.tblICLot Lot
+							ON AdjDetail.intLotId = Lot.intLotId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
+				WHERE	Adj.strAdjustmentNo = @strTransactionId
+
+				-- Reduce the stock from the source lot. 
+				BEGIN 
+					INSERT INTO @ItemsToPost (
+							intItemId
+							,intItemLocationId 
+							,intItemUOMId  
+							,dtmDate  
+							,dblQty  
+							,dblUOMQty  
+							,dblCost  
+							,dblSalesPrice  
+							,intCurrencyId  
+							,dblExchangeRate  
+							,intTransactionId  
+							,intTransactionDetailId  
+							,strTransactionId  
+							,intTransactionTypeId  
+							,intLotId 
+							,intSubLocationId
+							,intStorageLocationId	
+							,strActualCostId 	
+					)
+					SELECT 	RebuilInvTrans.intItemId  
+							,RebuilInvTrans.intItemLocationId 
+							,RebuilInvTrans.intItemUOMId  
+							,RebuilInvTrans.dtmDate  
+							,RebuilInvTrans.dblQty  
+							,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
+							,dblCost = AdjDetail.dblCost
+							,RebuilInvTrans.dblSalesPrice  
+							,RebuilInvTrans.intCurrencyId  
+							,RebuilInvTrans.dblExchangeRate  
+							,RebuilInvTrans.intTransactionId  
+							,RebuilInvTrans.intTransactionDetailId  
+							,RebuilInvTrans.strTransactionId  
+							,RebuilInvTrans.intTransactionTypeId  
+							,RebuilInvTrans.intLotId 
+							,RebuilInvTrans.intSubLocationId
+							,RebuilInvTrans.intStorageLocationId
+							,strActualCostId = NULL 
+					FROM	#tmpICInventoryTransaction RebuilInvTrans LEFT JOIN dbo.tblICInventoryAdjustment Adj
+								ON Adj.strAdjustmentNo = RebuilInvTrans.strTransactionId						
+								AND Adj.intInventoryAdjustmentId = RebuilInvTrans.intTransactionId
+							LEFT JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
+								AND AdjDetail.intInventoryAdjustmentDetailId = RebuilInvTrans.intTransactionDetailId 
+							LEFT JOIN dbo.tblICItemUOM AdjItemUOM
+								ON AdjDetail.intItemId = AdjItemUOM.intItemId
+								AND AdjDetail.intItemUOMId = AdjItemUOM.intItemUOMId
+							LEFT JOIN dbo.tblICItemUOM ItemUOM
+								ON RebuilInvTrans.intItemId = ItemUOM.intItemId
+								AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+					WHERE	RebuilInvTrans.strBatchId = @strBatchId
+							AND RebuilInvTrans.dblQty < 0
+
+					EXEC dbo.uspICRepostCosting
+						@strBatchId
+						,@strAccountToCounterInventory
+						,@intUserId
+						,@strGLDescription
+						,@ItemsToPost
+				END 
+
+				-- Add stock to the target lot. 
+				BEGIN 
+					DELETE FROM @ItemsToPost
+
+					INSERT INTO @ItemsToPost (
+							intItemId
+							,intItemLocationId 
+							,intItemUOMId  
+							,dtmDate  
+							,dblQty  
+							,dblUOMQty  
+							,dblCost  
+							,dblSalesPrice  
+							,intCurrencyId  
+							,dblExchangeRate  
+							,intTransactionId  
+							,intTransactionDetailId  
+							,strTransactionId  
+							,intTransactionTypeId  
+							,intLotId 
+							,intSubLocationId
+							,intStorageLocationId	
+							,strActualCostId 	
+					)
+					SELECT 	RebuilInvTrans.intItemId  
+							,RebuilInvTrans.intItemLocationId 
+							,RebuilInvTrans.intItemUOMId  
+							,RebuilInvTrans.dtmDate  
+							,RebuilInvTrans.dblQty  
+							,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
+							,dblCost = 
+								CASE	WHEN ABS(SourceLot.dblQty) = ABS(RebuilInvTrans.dblQty) AND SourceLot.intItemUOMId = RebuilInvTrans.intItemUOMId THEN	 
+											-- Use the same cost from the source lot. 
+											SourceLot.dblCost
+										ELSE 
+											-- Calculate the new cost. 
+											dbo.fnDivide(
+												dbo.fnMultiply(ABS(SourceLot.dblQty), SourceLot.dblCost) 
+												, RebuilInvTrans.dblQty
+											) 
+								END 
+							,RebuilInvTrans.dblSalesPrice  
+							,RebuilInvTrans.intCurrencyId  
+							,RebuilInvTrans.dblExchangeRate  
+							,RebuilInvTrans.intTransactionId  
+							,RebuilInvTrans.intTransactionDetailId  
+							,RebuilInvTrans.strTransactionId  
+							,RebuilInvTrans.intTransactionTypeId  
+							,RebuilInvTrans.intLotId 
+							,RebuilInvTrans.intSubLocationId
+							,RebuilInvTrans.intStorageLocationId
+							,strActualCostId = NULL 
+					FROM	#tmpICInventoryTransaction RebuilInvTrans INNER JOIN dbo.tblICInventoryAdjustment Adj
+								ON Adj.strAdjustmentNo = RebuilInvTrans.strTransactionId						
+								AND Adj.intInventoryAdjustmentId = RebuilInvTrans.intTransactionId
+							INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
+								AND AdjDetail.intInventoryAdjustmentDetailId = RebuilInvTrans.intTransactionDetailId 
+							INNER JOIN dbo.tblICInventoryTransaction SourceLot 
+								ON SourceLot.intLotId = AdjDetail.intLotId 
+								AND SourceLot.intTransactionId = Adj.intInventoryAdjustmentId 
+								AND SourceLot.strTransactionId = Adj.strAdjustmentNo
+								AND SourceLot.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
+								AND SourceLot.dblQty < 0
+
+							LEFT JOIN dbo.tblICItemUOM AdjItemUOM
+								ON AdjDetail.intItemId = AdjItemUOM.intItemId
+								AND AdjDetail.intItemUOMId = AdjItemUOM.intItemUOMId
+							LEFT JOIN dbo.tblICItemUOM ItemUOM
+								ON RebuilInvTrans.intItemId = ItemUOM.intItemId
+								AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+					WHERE	RebuilInvTrans.strBatchId = @strBatchId
+							AND RebuilInvTrans.dblQty > 0
+				END
+			END 					
+			ELSE 
+			BEGIN 								
+				-- Update the cost used in the adjustment 
+				UPDATE	AdjDetail
+				SET		dblCost =	dbo.fnMultiply(
+										CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
+													-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
+													CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+																(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
+															ELSE 
+																ISNULL(Lot.dblLastCost, 0) 
+													END 
+												WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
+													-- It item is using Average Costing, then get the Average Cost. 
+													dbo.fnGetItemAverageCost(
+														AdjDetail.intItemId
+														, ItemLocation.intItemLocationId
+														, AdjDetail.intItemUOMId
+													) 
+												ELSE
+													-- Otherwise, get the item's last cost. 
+													(	
+														SELECT	TOP 1 
+																dblLastCost 
+														FROM	tblICItemPricing 
+														WHERE	intItemId = AdjDetail.intItemId 
+																AND intItemLocationId = ItemLocation.intItemLocationId
+													)
+										END								
+										,ItemUOM.dblUnitQty 
+									)
+				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+						LEFT JOIN dbo.tblICItemLocation ItemLocation
+							ON ItemLocation.intLocationId = Adj.intLocationId 
+							AND ItemLocation.intItemId = AdjDetail.intItemId
 						LEFT JOIN dbo.tblICLot Lot
 							ON AdjDetail.intLotId = Lot.intLotId
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
@@ -671,7 +893,7 @@ BEGIN
 														END
 
 													WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-														dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) 
+														dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId, RebuilInvTrans.intItemUOMId) 
 													ELSE 
 														dbo.fnMultiply(
 															(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId) 
@@ -680,17 +902,20 @@ BEGIN
 											END 
 											
 										 WHEN (dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
-											dbo.fnMultiply (
-												dbo.fnDivide(
-													ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
-													,AdjItemUOM.dblUnitQty
-												)
-												,ItemUOM.dblUnitQty
-											)
-											
+											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 1 
+
+													ELSE 
+														dbo.fnMultiply (
+															dbo.fnDivide(
+																ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
+																,AdjItemUOM.dblUnitQty
+															)
+															,ItemUOM.dblUnitQty
+														)
+											END 											
 											
 										 WHEN (dblQty > 0 AND strTransactionId LIKE 'SI%' AND dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST) THEN 
-											dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) 
+											dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId, RebuilInvTrans.intItemUOMId) 
 
 										 ELSE 
 											RebuilInvTrans.dblCost
