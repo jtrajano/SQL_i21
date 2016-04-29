@@ -118,6 +118,24 @@ BEGIN
     VALUES(3,'Monthly')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPSQLType WHERE intSQLTypeId = 1)
+BEGIN
+    INSERT INTO tblIPSQLType(intSQLTypeId,strName)
+    VALUES(1,'Table')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblIPSQLType WHERE intSQLTypeId = 2)
+BEGIN
+    INSERT INTO tblIPSQLType(intSQLTypeId,strName)
+    VALUES(2,'Stored Procedure')
+END
+--GO
+--IF NOT EXISTS(SELECT * FROM tblIPSQLType WHERE intSQLTypeId = 3)
+--BEGIN
+--    INSERT INTO tblIPSQLType(intSQLTypeId,strName)
+--    VALUES(3,'SQL Statement')
+--END
+GO
 IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 1)
 BEGIN
     INSERT INTO tblIPStepType(intStepTypeId,strName)
@@ -142,4 +160,9 @@ BEGIN
     VALUES(4,'File Operation')
 END
 GO
-
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 5)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(5,'Database Operation')
+END
+GO
