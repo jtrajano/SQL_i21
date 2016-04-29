@@ -146,7 +146,7 @@ BEGIN
 END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] '01/01/1900', @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
 
 SET @query = 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -174,10 +174,10 @@ FROM vyuARCustomer C
 	LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
 	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
 		AND I.ysnPosted  = 1		
-		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
-		--AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +'
-		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +' OR
-			 CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +' AND (I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +')))
+		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
+		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +' 
+			AND (I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'))
+			 OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) > '+ @strDateTo +')))			 
 		AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 											INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 											WHERE AG.strAccountGroup = ''Receivables'')			
@@ -196,23 +196,24 @@ FROM vyuARCustomer C
 
 IF ISNULL(@filter,'') != ''
 BEGIN
-	SET @query = @query + ' WHERE ' + @filter
+	SET @query = @query + ' WHERE dblBalance IS NOT NULL AND ' + @filter
 END
 
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
 SELECT STATEMENTREPORT.*
-      ,dblCreditAvailable    = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
-      ,dbl0Days                = ISNULL(AGINGREPORT.dbl0Days, 0)
+      ,dblCreditAvailable   = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
+      ,dbl0Days             = ISNULL(AGINGREPORT.dbl0Days, 0)
       ,dbl10Days            = ISNULL(AGINGREPORT.dbl10Days, 0)
       ,dbl30Days            = ISNULL(AGINGREPORT.dbl30Days, 0)
       ,dbl60Days            = ISNULL(AGINGREPORT.dbl60Days, 0)
       ,dbl90Days            = ISNULL(AGINGREPORT.dbl90Days, 0)
       ,dbl91Days            = ISNULL(AGINGREPORT.dbl91Days, 0)
-      ,dblCredits            = ISNULL(AGINGREPORT.dblCredits, 0)
-      ,dtmAsOfDate            = @dtmDateTo
-      ,blbLogo                = dbo.fnSMGetCompanyLogo('Header')
+      ,dblCredits           = ISNULL(AGINGREPORT.dblCredits, 0)
+      ,dtmAsOfDate          = @dtmDateTo
+      ,blbLogo              = dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+WHERE ISNULL(dblTotalAR, 0) > 0
