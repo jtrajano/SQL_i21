@@ -245,7 +245,7 @@ SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  CASE WHEN @Where <>
 
 SELECT @sqlCte+= ',cteBase as (SELECT '+ @cols +' from cteBase1 ' +  CASE WHEN  @sqlRetain <> 'Retained Earnings Activity Not Displayed' THEN ' UNION ALL SELECT ' + @cols + ' FROM  cteRetain2)' ELSE ')' END
 
-IF @dtmDateFrom = '' OR (@strAccountIdFrom = '' AND @strPrimaryCodeFrom = '')
+IF @dtmDateFrom = ''
 	SELECT @sqlCte +=	' select * from cteBase '
 ELSE
 BEGIN
