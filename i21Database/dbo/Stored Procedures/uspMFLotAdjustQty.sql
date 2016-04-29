@@ -3,8 +3,8 @@
  @dblNewLotQty numeric(38,20),
  @intUserId INT ,
  @strReasonCode NVARCHAR(1000), 
- @strNotes NVARCHAR(MAX)=NULL,
- @blnValidateLotReservation BIT = 0
+ @blnValidateLotReservation BIT = 0,
+ @strNotes NVARCHAR(MAX)=NULL
 
 AS
 BEGIN TRY
