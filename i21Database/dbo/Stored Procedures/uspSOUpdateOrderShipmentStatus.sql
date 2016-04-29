@@ -74,61 +74,26 @@ IF @IsOpen <> 0
 UPDATE
 	tblSOSalesOrderDetail
 SET
-	dblQtyShipped = dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00)
+	dblQtyShipped = ISNULL(SHP.[dblQuantity], 0.00)
 FROM
 	(
-		SELECT
-			 ISD.[intOrderId]
-			,ISD.[intLineNo]
-			,SUM(ISNULL((CASE WHEN @ForDelete = 0 THEN
-								CASE WHEN ISH.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ISD.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ISD.[dblQuantity],0)) ELSE SOD.[dblQtyShipped] END
-							ELSE 
-								CASE WHEN ISH.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ISD.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ISD.[dblQuantity],0)) ELSE SOD.[dblQtyShipped] END * -1 
-						  END
-			 ), 0.00)) [dblQuantity]
-		FROM
-			tblICInventoryShipmentItem ISD
-		INNER JOIN
-			tblICInventoryShipment ISH
-				ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-		LEFT JOIN
-			tblSOSalesOrderDetail SOD ON ISD.[intLineNo] = SOD.intSalesOrderDetailId
-		WHERE
-			ISD.[intOrderId] = @SalesOrderId
-		GROUP BY
-			ISD.[intOrderId]			
-			,ISD.[intLineNo]
-	) SHP
-WHERE
-	[intSalesOrderId] = SHP.[intOrderId]
-	AND [intSalesOrderDetailId] = SHP.[intLineNo] 
-
-UPDATE
-	tblSOSalesOrderDetail
-SET
-	dblQtyShipped = dblQtyShipped + ISNULL(SHP.[dblQuantity], 0.00)
-FROM
-	(
-		SELECT
-			 ID.[intSalesOrderDetailId]
-			,SUM(ISNULL((CASE WHEN @ForDelete = 0 THEN 
-								CASE WHEN I.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ID.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ID.[dblQtyShipped],0)) ELSE SOD.[dblQtyShipped] END
-							  ELSE 
-								CASE WHEN I.ysnPosted = 1 THEN dbo.fnCalculateQtyBetweenUOM(ID.[intItemUOMId], SOD.[intItemUOMId], ISNULL(ID.[dblQtyShipped],0)) ELSE SOD.[dblQtyShipped] END * -1 
-						  END
-			), 0.00)) [dblQuantity]
-		FROM
-			tblARInvoiceDetail ID
-		INNER JOIN
-			tblARInvoice I
-				ON ID.[intInvoiceId] = I.[intInvoiceId]
-		LEFT JOIN
-			tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-		WHERE
-			ISNULL(ID.[intSalesOrderDetailId], 0) <> 0
-			AND ID.intSalesOrderDetailId NOT IN (SELECT intLineNo FROM tblICInventoryShipmentItem WHERE ISNULL(intLineNo, 0) > 0)
-		GROUP BY
-			ID.[intSalesOrderDetailId]
+		SELECT SOD.intSalesOrderDetailId
+			 , dblQuantity			= SUM(ISNULL(ID.dblQtyShipped, 0)) + SUM(ISNULL(ISHI.dblQuantity, 0))
+		FROM tblSOSalesOrderDetail SOD
+			LEFT JOIN (SELECT ID.intSalesOrderDetailId
+							, dblQtyShipped	= CASE WHEN ISNULL(ISHI.dblQuantity, 0) = 0 THEN ID.dblQtyShipped ELSE ID.dblQtyShipped - ISNULL(ISHI.dblQuantity, 0) END
+						FROM tblARInvoiceDetail ID 
+								INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1
+								LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
+											ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId AND ISH.ysnPosted = 1)
+												ON ISHI.intLineNo = ID.intSalesOrderDetailId
+							) ID
+				ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
+			LEFT JOIN (tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH 
+							ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId AND ISH.ysnPosted = 1)							
+				ON SOD.intSalesOrderDetailId = ISHI.intLineNo
+		WHERE SOD.dblQtyOrdered > 0
+		GROUP BY SOD.intSalesOrderDetailId
 	) SHP
 WHERE
 	[intSalesOrderId] = @SalesOrderId
@@ -161,7 +126,6 @@ SET_ORDER_STATUS:
 	SET [strOrderStatus] = @OrderStatus
 	  , [dtmProcessDate] = GETDATE()
 	  , [ysnProcessed]   = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END	  
-	  , [ysnShipped]	 = CASE WHEN (SELECT TOP 1 COUNT(*) FROM tblICInventoryShipmentItem ISHI WHERE intOrderId = @SalesOrderId GROUP BY intInventoryShipmentId ORDER BY COUNT(*) DESC) > 1 THEN 1 ELSE 0 END
 	WHERE [intSalesOrderId] = @SalesOrderId
 		
 	RETURN;
