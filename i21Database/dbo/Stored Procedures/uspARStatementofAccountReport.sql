@@ -52,6 +52,27 @@ DECLARE @temp_SOA_table TABLE(
 	,[dtmDateTo]			 DATETIME
 )
 
+DECLARE @temp_aging_table TABLE(
+     [strCustomerName]            NVARCHAR(100)
+    ,[strEntityNo]                NVARCHAR(100)
+    ,[intEntityCustomerId]        INT
+    ,[dblCreditLimit]            NUMERIC(18,6)
+    ,[dblTotalAR]                NUMERIC(18,6)
+    ,[dblFuture]                NUMERIC(18,6)
+    ,[dbl0Days]                    NUMERIC(18,6)
+    ,[dbl10Days]                NUMERIC(18,6)
+    ,[dbl30Days]                NUMERIC(18,6)
+    ,[dbl60Days]                NUMERIC(18,6)
+    ,[dbl90Days]                NUMERIC(18,6)
+    ,[dbl91Days]                NUMERIC(18,6)
+    ,[dblTotalDue]                NUMERIC(18,6)
+    ,[dblAmountPaid]            NUMERIC(18,6)
+    ,[dblCredits]                NUMERIC(18,6)
+    ,[dblPrepaids]                NUMERIC(18,6)
+    ,[dtmAsOfDate]                DATETIME
+    ,[strSalespersonName]        NVARCHAR(100)
+)
+
 -- Prepare the XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
 
@@ -106,6 +127,9 @@ BEGIN
 	END
 END
 
+INSERT INTO @temp_aging_table
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
+
 SET @query = 'SELECT * FROM
 (SELECT C.intEntityCustomerId
       , C.strCustomerNumber
@@ -125,4 +149,7 @@ END
 INSERT INTO @temp_SOA_table
 EXEC sp_executesql @query
 
-SELECT * FROM @temp_SOA_table
+SELECT * FROM @temp_SOA_table STATEMENTREPORT
+LEFT JOIN @temp_aging_table AGINGREPORT
+ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+WHERE ISNULL(AGINGREPORT.dblTotalAR, 0) > 0
