@@ -206,7 +206,10 @@ WHILE @incval <= @total
 				UPDATE tblTRQuoteDetail
 				SET dblRackPrice = (SELECT rackID = (CASE WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice]    --[dblRackPrice]
 		                                                    ( @dtmEffectiveDate
-		                                                    , (SELECT TOP 1 intSupplyPointId FROM tblARCustomerRackQuoteVendor WHERE intEntityCustomerLocationId = SP.intCustomerLocationId)
+		                                                    , (SELECT intSupplyPointId
+																FROM vyuTRSupplyPointView
+																WHERE intEntityVendorId = SP.intRackVendorId
+																	AND intEntityLocationId = SP.intRackLocationId)
 		                                                    , SP.intRackItemId ) 
 														WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice]    --[dblRackPrice]
 															( @dtmEffectiveDate
