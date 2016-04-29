@@ -3725,6 +3725,8 @@
     <Build Include="dbo\Tables\tblTFTaxCategory.sql" />
     <Build Include="dbo\Tables\tblTFTaxCriteria.sql" />
     <Build Include="dbo\Tables\tblFRAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspEncrypt.sql" />
+    <Build Include="dbo\Stored Procedures\uspDecrypt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
