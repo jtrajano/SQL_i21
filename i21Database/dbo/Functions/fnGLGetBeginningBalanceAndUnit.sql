@@ -27,7 +27,7 @@ BEGIN
 			LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
 		WHERE
 		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < @dtmDate)
-		OR (strAccountId =@strAccountId AND C.dtmDate < @dtmDate) and strCode <> '')
+		OR (strAccountId =@strAccountId AND C.dtmDate >= D.dtmDateFrom AND C.dtmDate <@dtmDate) and strCode <> '')
 		insert into @tbl
 		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
 		
