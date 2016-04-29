@@ -638,6 +638,11 @@ BEGIN
 
 		-- Insert into a temp table 
 		BEGIN 
+			-- Get the generated parent lot id. 
+			SELECT @strParentLotNumber = strParentLotNumber
+			FROM	dbo.tblICParentLot
+			WHERE	intParentLotId = @intParentLotId
+
 			INSERT INTO #GeneratedLotItems (
 				intLotId
 				,strLotNumber
