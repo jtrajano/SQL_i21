@@ -343,6 +343,17 @@ GO
 
 GO
 	PRINT N'End updating HD ticket last commented date.'
+	PRINT N'Start updating HD ticket lines of business.'
+GO
+
+	update
+		tblHDTicket 
+	set
+		tblHDTicket.strLineOfBusinessId = convert(nvarchar(255), (case when tblHDTicket.intLineOfBusinessId is null then 0 else tblHDTicket.intLineOfBusinessId end))
+	where tblHDTicket.strLineOfBusinessId is null
+
+GO
+	PRINT N'End updating HD ticket lines of business.'
 	PRINT N'Start updating HD Project Type.'
 GO
 
