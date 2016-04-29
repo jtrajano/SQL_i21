@@ -47,6 +47,10 @@ BEGIN TRY
 		,@dblWeightPerQty = dblWeightPerQty
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
+<<<<<<< HEAD
+=======
+		,@intItemUOMId=CASE WHEN @intItemUOMId Is NULL THEN intItemUOMId ELSE @intItemUOMId END
+>>>>>>> dee1a66... WH-193
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -224,7 +228,7 @@ BEGIN TRY
 					@strNotes = 'Weight qty same'
 			END
 
-			IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
+			IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 			BEGIN
 				--EXEC dbo.uspMFLotAdjustQty
 				-- @intLotId =@intLotId,       
