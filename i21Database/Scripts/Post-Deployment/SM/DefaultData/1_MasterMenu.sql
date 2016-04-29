@@ -2874,12 +2874,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Productio
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ProcessProductionRunsView' WHERE strMenuName = 'Production Runs View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Plant Schedule' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Plant Schedule', N'Manufacturing', @ManufacturingParentMenuId, N'Plant Schedule', N'Activity', N'Screen', N'Manufacturing.view.PlantSchedule', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.PlantSchedule' WHERE strMenuName = 'Plant Schedule' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Plant Schedule' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Plant Schedule', N'Manufacturing', @ManufacturingParentMenuId, N'Plant Schedule', N'Activity', N'Screen', N'Manufacturing.view.PlantSchedule', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.PlantSchedule' WHERE strMenuName = 'Plant Schedule' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Plant Schedule' AND strModuleName = 'Manufacturing'
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Yield View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2965,11 +2966,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Productio
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ProductionCalendar' WHERE strMenuName = 'Production Calendar' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Holiday Calendar' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Holiday Calendar', N'Manufacturing', @ManufacturingParentMenuId, N'Holiday Calendar', N'Maintenance', N'Screen', N'Manufacturing.view.HolidayCalendar', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.HolidayCalendar' WHERE strMenuName = 'Holiday Calendar' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Holiday Calendar' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Holiday Calendar', N'Manufacturing', @ManufacturingParentMenuId, N'Holiday Calendar', N'Maintenance', N'Screen', N'Manufacturing.view.HolidayCalendar', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.HolidayCalendar' WHERE strMenuName = 'Holiday Calendar' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Change Over Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 --	DELETE tblSMMasterMenu WHERE strMenuName = 'Change Over Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
@@ -2988,6 +2989,8 @@ ELSE
 --	VALUES (N'Multiple Changeover Factors', N'Manufacturing', @ManufacturingParentMenuId, N'Multiple Changeover Factors', N'Maintenance', N'Screen', N'Manufacturing.view.MultipleChangeOverFactors', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
 --ELSE 
 --	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.MultipleChangeOverFactors' WHERE strMenuName = 'Multiple Changeover Factors' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Holiday Calendar' AND strModuleName = 'Manufacturing'
 
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Change Over Group' AND strModuleName = 'Manufacturing'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Multiple Change Over Factors' AND strModuleName = 'Manufacturing'
@@ -3093,17 +3096,20 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Production Summary View' AND st
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Production Summary By Line View' AND strModuleName = 'Manufacturing'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Production Summary By Date View' AND strModuleName = 'Manufacturing'
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contamination Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Contamination Group', N'Manufacturing', @ManufacturingParentMenuId, N'Contamination Group', N'Maintenance', N'Screen', N'Manufacturing.view.ContaminationGroup', N'small-menu-maintenance', 0, 0, 0, 1, 19, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ContaminationGroup' WHERE strMenuName = 'Contamination Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contamination Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Contamination Group', N'Manufacturing', @ManufacturingParentMenuId, N'Contamination Group', N'Maintenance', N'Screen', N'Manufacturing.view.ContaminationGroup', N'small-menu-maintenance', 0, 0, 0, 1, 19, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ContaminationGroup' WHERE strMenuName = 'Contamination Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Item Contamination' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Item Contamination', N'Manufacturing', @ManufacturingParentMenuId, N'Item Contamination', N'Maintenance', N'Screen', N'Manufacturing.view.ItemContamination', N'small-menu-maintenance', 0, 0, 0, 1, 20, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ItemContamination' WHERE strMenuName = 'Item Contamination' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Item Contamination' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Item Contamination', N'Manufacturing', @ManufacturingParentMenuId, N'Item Contamination', N'Maintenance', N'Screen', N'Manufacturing.view.ItemContamination', N'small-menu-maintenance', 0, 0, 0, 1, 20, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ItemContamination' WHERE strMenuName = 'Item Contamination' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Contamination Group' AND strModuleName = 'Manufacturing'
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Item Contamination' AND strModuleName = 'Manufacturing'
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Finished Goods Forecast' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -3120,11 +3126,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Demand An
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.DemandAnalysisView' WHERE strMenuName = 'Demand Analysis View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Blend Demand', N'Manufacturing', @ManufacturingParentMenuId, N'Blend Demand', N'Maintenance', N'Screen', N'ContractManagement.view.BlendDemand', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.BlendDemand' WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Blend Demand', N'Manufacturing', @ManufacturingParentMenuId, N'Blend Demand', N'Maintenance', N'Screen', N'ContractManagement.view.BlendDemand', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'ContractManagement.view.BlendDemand' WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing'
 
 
 /* INTEGRATION */
