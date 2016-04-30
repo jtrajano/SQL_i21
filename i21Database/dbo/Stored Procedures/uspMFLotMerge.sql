@@ -2,6 +2,7 @@
  @intLotId INT,     
  @intNewLotId INT,  
  @dblMergeQty NUMERIC(38,20),
+ @intMergeItemUOMId int,
  @intUserId INT,
  @blnValidateLotReservation BIT = 0
 
@@ -54,7 +55,7 @@ BEGIN TRY
 		   @intLotStatusId = intLotStatusId,
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
-		   @intWeightUOMId = IsNull(intWeightUOMId,intItemUOMId),
+		   @intWeightUOMId = intWeightUOMId,
 		   @intSourceLotWeightUOM = intWeightUOMId,
 		   @dblWeight = dblWeight,
 		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End,
@@ -66,7 +67,7 @@ BEGIN TRY
 	--WHERE intItemId = @intItemId
 	--	AND ysnStockUnit = 1
 
-	IF @dblMergeQty>@dblOldSourceWeight
+	IF (CASE WHEN @intItemUOMId=@intMergeItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMergeQty*@dblLotWeightPerUnit ELSE -@dblMergeQty END)>@dblOldSourceWeight
 	BEGIN
 		SELECT @strStorageLocationName = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId
 		SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
@@ -84,7 +85,7 @@ BEGIN TRY
 	
 	IF @blnValidateLotReservation = 1
 	BEGIN
-		IF (@dblOldSourceWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		IF (@dblOldSourceWeight + (CASE WHEN @intItemUOMId=@intMergeItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMergeQty*@dblLotWeightPerUnit ELSE -@dblMergeQty END)) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END
@@ -156,7 +157,7 @@ BEGIN TRY
 													 @intNewStorageLocationId = @intNewStorageLocationId,
 													 @strNewLotNumber = @strNewLotNumber,
 													 @dblAdjustByQuantity = @dblAdjustByQuantity,
-													 @intItemUOMId=@intWeightUOMId,
+													 @intItemUOMId=@intMergeItemUOMId,
 													 @dblNewSplitLotQuantity = NULL,
 													 @dblNewWeight = NULL,
 													 @intNewItemUOMId = NULL,

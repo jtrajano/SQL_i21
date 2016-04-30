@@ -2,6 +2,7 @@
 	,@intNewSubLocationId INT
 	,@intNewStorageLocationId INT
 	,@dblMoveQty NUMERIC(38, 20)
+	,@intMoveItemUOMId int
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
@@ -36,6 +37,7 @@ BEGIN TRY
 	DECLARE @dblMoveWeight NUMERIC(38,20)
 			,@dblOldWeight NUMERIC(38,20)
 			,@dblOldSourceWeight NUMERIC(38,20)
+			,@intItemUOMId int
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -46,8 +48,9 @@ BEGIN TRY
 		,@intLotStatusId = intLotStatusId
 		,@intNewLocationId = intLocationId
 		,@dblWeightPerQty = dblWeightPerQty
-		,@intWeightUOMId = IsNULL(intWeightUOMId,intItemUOMId)
+		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
+		,@intItemUOMId=intItemUOMId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 	
@@ -71,7 +74,7 @@ BEGIN TRY
 	ELSE ISNULL(@dblWeight, 0)
 	END)
 
-	IF @dblMoveQty>@dblLotAvailableQty
+	IF (CASE WHEN @intItemUOMId=@intMoveItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblMoveQty*@dblWeightPerQty ELSE @dblMoveQty END)>@dblLotAvailableQty
 	BEGIN
 		SET @ErrMsg = 'Move qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 		RAISERROR (@ErrMsg,11,1)
@@ -109,7 +112,7 @@ BEGIN TRY
 	BEGIN
 		IF @blnValidateLotReservation = 1 
 		BEGIN
-			IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+			IF (@dblWeight + (CASE WHEN @intItemUOMId=@intMoveItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMoveQty*@dblWeightPerQty ELSE -@dblMoveQty END)) < @dblLotReservedQty
 			BEGIN
 				RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 			END
@@ -151,7 +154,7 @@ BEGIN TRY
 				,@intNewStorageLocationId
 				,@strNewLotNumber
 				,@dblMoveQty
-				,@intWeightUOMId
+				,@intMoveItemUOMId
 				,@intSourceId
 				,@intSourceTransactionTypeId
 				,@intUserId

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [uspMFLotAdjustQty]
  @intLotId INT,       
  @dblNewLotQty numeric(38,20),
+ @intAdjustItemUOMId int,
  @intUserId INT ,
  @strReasonCode NVARCHAR(1000), 
  @blnValidateLotReservation BIT = 0,
@@ -39,7 +40,8 @@ BEGIN TRY
 		   @dblLotQty = dblQty,
 		   @dblWeight=dblWeight,
 		   @dblWeightPerQty = dblWeightPerQty,
-		   @intWeightUOMId = IsNULL(intWeightUOMId,intItemUOMId)
+		   @intWeightUOMId =intWeightUOMId,
+		   @intItemUOMId=intItemUOMId
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dblLotAvailableQty = (CASE 
@@ -47,8 +49,14 @@ BEGIN TRY
 			THEN ISNULL(@dblLotQty, 0)
 		ELSE ISNULL(@dblWeight, 0)
 		END)
-
-	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotAvailableQty
+	IF @intItemUOMId=@intAdjustItemUOMId AND @intWeightUOMId IS NOT NULL
+	BEGIN
+		SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotQty
+	END
+	ELSE
+	BEGIN
+		SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotAvailableQty
+	END
 
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
@@ -59,7 +67,7 @@ BEGIN TRY
 
 	IF @blnValidateLotReservation = 1 
 	BEGIN
-		IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
+		IF (@dblLotAvailableQty + (CASE WHEN @intItemUOMId=@intAdjustItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblAdjustByQuantity*@dblWeightPerQty ELSE @dblAdjustByQuantity END)) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END
@@ -77,6 +85,7 @@ BEGIN TRY
 	IF @dblNewLotQty=0
 	BEGIN
 		Select @dblAdjustByQuantity=-@dblLotQty
+		Select @intAdjustItemUOMId =@intItemUOMId 
 	END
 
 	SELECT @dtmDate = GETDATE()
@@ -135,7 +144,7 @@ BEGIN TRY
 													  @strLotNumber,
 													  @dblAdjustByQuantity,
 													  @dblNewUnitCost,
-  												      @intWeightUOMId,
+  												      @intAdjustItemUOMId,
 													  @intSourceId,
 													  @intSourceTransactionTypeId,
 													  @intUserId,
