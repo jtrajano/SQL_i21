@@ -42,11 +42,13 @@ BEGIN
 	END
 	PRINT 'End updating of Account Structure to Location'		
 
+
+
 			DECLARE @Segments NVARCHAR(MAX)
 			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']','[Primary Account]')
 			DECLARE @Query NVARCHAR(MAX)
 			SET @Query = 
-			'insert into tblGLTempCOASegment SELECT A.intAccountId, DAS.* FROM tblGLAccount A
+			'SELECT A.intAccountId, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
 			INNER JOIN (
 			 SELECT *  FROM (
 			   SELECT DISTINCT
