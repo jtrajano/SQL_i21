@@ -3715,6 +3715,7 @@
     <Build Include="dbo\Views\vyuTMGeneratedCallEntry.sql" />
     <Build Include="dbo\Views\vyuARPaymentReport.sql" />
     <Build Include="dbo\Views\vyuHDCustomerProspectType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBillOfLadingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
