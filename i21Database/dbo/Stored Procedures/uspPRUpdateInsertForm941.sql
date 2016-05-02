@@ -61,7 +61,7 @@ BEGIN
 			,intEmployees = ISNULL(PCHK.intEmployees, 0)
 			,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
-			,ysnNoTaxable = 0
+			,ysnNoTaxable = CASE WHEN ((ISNULL(SS.dblTotal, 0) + ISNULL(MED.dblTotal, 0)) <= 0) THEN 0 ELSE 1 END
 			,dblTaxableSS = ISNULL(SS.dblTotal, 0)
 			,dblTaxableSSTips = 0
 			,dblTaxableMed = ISNULL(MED.dblTotal, 0)
@@ -122,6 +122,7 @@ BEGIN
 		/* If it exists, update the values */
 		UPDATE tblPRForm941 
 		SET intEmployees = ISNULL(PCHK.intEmployees, 0)
+			,ysnNoTaxable = CASE WHEN ((ISNULL(SS.dblTotal, 0) + ISNULL(MED.dblTotal, 0) + ISNULL(dblTaxableSSTips, 0)) <= 0) THEN 0 ELSE 1 END
 			,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
 			,dblTaxableSS = CONVERT(NUMERIC(18,2), ISNULL(SS.dblTotal, 0))
