@@ -3600,6 +3600,7 @@
     <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
     <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
     <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBillOfLadingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
