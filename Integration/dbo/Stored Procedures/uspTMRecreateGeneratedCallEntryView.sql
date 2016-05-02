@@ -57,7 +57,14 @@ BEGIN
 				,intDispatchId = A.intDispatchID
 				,intCompanyLocationId  = B.intLocationId
 				,strCompanyLocationName  = I.vwloc_loc_no
-			,strLocation = B.strLocation
+				,dblLocationLongitude = 0.0
+				,dblLocationLatitude = 0.0
+				,strSiteCity = B.strCity
+				,strSiteZipCode = B.strZipCode
+				,strSiteState = B.strState
+				,strSiteCountry = B.strCountry
+				,dblLongitude = B.dblLongitude
+				,dblLatitude = B.dblLatitude
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -110,6 +117,14 @@ BEGIN
 				,intCustomerID = B.intCustomerID
 				,intCompanyLocationId  = B.intLocationId
 				,strCompanyLocationName  = I.strLocationName
+				,dblLocationLongitude = ISNULL(I.dblLongitude,0.0)
+				,dblLocationLatitude = ISNULL(I.dblLatitude,0.0)
+				,strSiteCity = B.strCity
+				,strSiteZipCode = B.strZipCode
+				,strSiteState = B.strState
+				,strSiteCountry = B.strCountry
+				,dblLongitude = B.dblLongitude
+				,dblLatitude = B.dblLatitude
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID

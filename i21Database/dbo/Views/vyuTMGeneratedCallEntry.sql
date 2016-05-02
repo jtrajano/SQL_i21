@@ -27,6 +27,14 @@ AS
 		,intCustomerID = B.intCustomerID
 		,intCompanyLocationId  = B.intLocationId
 		,strCompanyLocationName  = I.strLocationName
+		,dblLocationLongitude = ISNULL(I.dblLongitude,0.0)
+		,dblLocationLatitude = ISNULL(I.dblLatitude,0.0)
+		,strSiteCity = B.strCity
+		,strSiteZipCode = B.strZipCode
+		,strSiteState = B.strState
+		,strSiteCountry = B.strCountry
+		,dblLongitude = B.dblLongitude
+		,dblLatitude = B.dblLatitude
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
