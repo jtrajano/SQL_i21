@@ -364,17 +364,42 @@ BEGIN
 									
 											CASE	
 													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+														--dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+
+														dbo.fnCalculateCostFromNetWgt(
+															-- Calculate the line total 
+															dbo.fnCalculateReceiptLineTotal(
+																DetailItem.dblOpenReceive
+																,DetailItem.dblNet
+																,DetailItem.dblUnitCost
+																,CASE WHEN DetailItem.ysnSubCurrency = 1 THEN Header.intSubCurrencyCents ELSE 1 END 
+																,ItemUOM.dblUnitQty
+																,WeightUOM.dblUnitQty
+																,CostUOM.dblUnitQty
+															)
+															, DetailItem.dblOpenReceive
+														) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 													
 													ELSE 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+														--dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+														dbo.fnCalculateCostFromNetWgt(
+															dbo.fnCalculateReceiptLineTotal(
+																DetailItem.dblOpenReceive
+																,DetailItem.dblNet
+																,DetailItem.dblUnitCost
+																,CASE WHEN DetailItem.ysnSubCurrency = 1 THEN Header.intSubCurrencyCents ELSE 1 END 
+																,ItemUOM.dblUnitQty
+																,WeightUOM.dblUnitQty
+																,CostUOM.dblUnitQty
+															)
+															, DetailItem.dblOpenReceive
+														) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 											END
 
 									-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
 									ELSE 
-
 											CASE	
 													-- It is an non-Lot item. 
 													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
@@ -422,6 +447,9 @@ BEGIN
 					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM WeightUOM
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
+				LEFT JOIN dbo.tblICItemUOM CostUOM
+					ON CostUOM.intItemUOMId = DetailItem.intCostUOMId
+
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   
@@ -1065,4 +1093,3 @@ BEGIN
 END
 
 Post_Exit:
-

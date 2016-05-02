@@ -1547,7 +1547,7 @@ BEGIN
 					,[dblQty] = 0
 					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
-					,[dblValue] = 15 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
+					,[dblValue] = 15 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
