@@ -34,6 +34,8 @@ Declare @dblMoveQty numeric(38,20)
 Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
 Declare @strBulkItemXml nvarchar(max)
+		,@dblPickQuantity numeric(38,20)
+		,@intPickUOMId int
  
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess Where intAttributeTypeId=2
 
@@ -78,7 +80,9 @@ Declare @tblChildLot table
 	dblAvailableQty numeric(38,20),
 	intItemUOMId int,
 	intItemIssuedUOMId int,
-	dblWeightPerUnit numeric(38,20)
+	dblWeightPerUnit numeric(38,20),
+	dblPickQuantity numeric(38,20),
+	intPickUOMId int
 )
 
 --Get the Comma Separated Work Order Ids into a table
@@ -124,17 +128,17 @@ Begin Try
 
 	--Get the child Lots attached to Pick List
 	Delete From @tblChildLot
-	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
+	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId)
 	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
-	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty
+	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId
 
 	Select @intMinChildLot=Min(intRowNo) from @tblChildLot
 
-	While(@intMinChildLot is not null) --Loop Child Lots
+	While(@intMinChildLot is not null) --Loop Child Lot.
 	Begin
-		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit
+		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId
 		From @tblChildLot Where intRowNo=@intMinChildLot
 
 		Set @intNewLotId=NULL
@@ -148,7 +152,8 @@ Begin Try
 				Exec [uspMFLotMove] @intLotId=@intLotId,
 									@intNewSubLocationId=@intNewSubLocationId,
 									@intNewStorageLocationId=@intBlendStagingLocationId,
-									@dblMoveQty=@dblReqQty,
+									@dblMoveQty=@dblPickQuantity,
+									@intMoveItemUOMId=@intPickUOMId,
 									@intUserId=@intUserId
 
 				Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
@@ -158,7 +163,8 @@ Begin Try
 		Else --Merge
 			Exec [uspMFLotMerge] @intLotId=@intLotId,
 						@intNewLotId=@intNewLotId,
-						@dblMergeQty=@dblReqQty,
+						@dblMergeQty=@dblPickQuantity,
+						@intMergeItemUOMId=@intPickUOMId,
 						@intUserId=@intUserId
 			
 		Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
@@ -280,7 +286,7 @@ Begin
 
 	While(@intMinChildLot is not null) --Loop Child Lots
 	Begin
-		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblAvailableQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit
+		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblAvailableQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit,@intItemUOMId =intItemUOMId
 		From @tblChildLot Where intRowNo=@intMinChildLot
 
 		If @dblReqQty <= 0 GOTO NextParentLot
@@ -299,6 +305,7 @@ Begin
 										@intNewSubLocationId=@intNewSubLocationId,
 										@intNewStorageLocationId=@intBlendStagingLocationId,
 										@dblMoveQty=@dblReqQty,
+										@intMoveItemUOMId=@intItemUOMId,
 										@intUserId=@intUserId
 
 					Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
@@ -309,6 +316,7 @@ Begin
 				Exec [uspMFLotMerge] @intLotId=@intLotId,
 							@intNewLotId=@intNewLotId,
 							@dblMergeQty=@dblReqQty,
+							@intMergeItemUOMId=@intItemUOMId,
 							@intUserId=@intUserId
 
 			
@@ -331,6 +339,7 @@ Begin
 										@intNewSubLocationId=@intNewSubLocationId,
 										@intNewStorageLocationId=@intBlendStagingLocationId,
 										@dblMoveQty=@dblAvailableQty,
+										@intMoveItemUOMId=@intItemUOMId,
 										@intUserId=@intUserId
 
 					Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
@@ -341,6 +350,7 @@ Begin
 				Exec [uspMFLotMerge] @intLotId=@intLotId,
 							@intNewLotId=@intNewLotId,
 							@dblMergeQty=@dblAvailableQty,
+							@intMergeItemUOMId=@intItemUOMId,
 							@intUserId=@intUserId
 
 			Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
