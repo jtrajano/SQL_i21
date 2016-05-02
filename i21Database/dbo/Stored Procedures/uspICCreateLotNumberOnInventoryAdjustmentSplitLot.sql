@@ -105,7 +105,7 @@ BEGIN
 			,[intOwnershipType]
 			,[intGradeId]
 			,[intDetailId]
-			--,[dblWeightPerQty]
+			,[dblWeightPerQty]
 			,[strTransactionId]
 			,[strSourceTransactionId]
 			,[intSourceTransactionTypeId]
@@ -180,29 +180,29 @@ BEGIN
 			,[intOwnershipType]			= SourceLot.intOwnershipType
 			,[intGradeId]				= SourceLot.intGradeId
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
-			--,[dblWeightPerQty]			=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
-			--										-- Calculate a new weight per qty if the new wgt is supplied. 
-			--										dbo.fnCalculateWeightUnitQty(ISNULL(Detail.dblNewSplitLotQuantity, 0), Detail.dblNewWeight) 
-			--									WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
-			--										-- Calculate a new weight per qty if there is a new wgt-per-uom. 
-			--										dbo.fnCalculateWeightUnitQty(
-			--											ISNULL(
-			--												Detail.dblNewSplitLotQuantity
-			--												, ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
-			--											)
-			--											,dbo.fnCalculateQtyBetweenUOM(
-			--												Detail.intWeightUOMId
-			--												, Detail.intNewWeightUOMId
-			--												, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
-			--											)
-			--										)
-			--									WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
-			--										-- When cutting a bag into wgt, then qty comes wgt. 
-			--										1 
-			--									ELSE 
-			--										-- lot will still use the same qty. the use the same wgt-per-qty. 
-			--										SourceLot.dblWeightPerQty
-			--								END
+			,[dblWeightPerQty]			=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+													-- Calculate a new weight per qty if the new wgt is supplied. 
+													dbo.fnCalculateWeightUnitQty(ISNULL(Detail.dblNewSplitLotQuantity, 0), Detail.dblNewWeight) 
+												WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
+													-- Calculate a new weight per qty if there is a new wgt-per-uom. 
+													dbo.fnCalculateWeightUnitQty(
+														ISNULL(
+															Detail.dblNewSplitLotQuantity
+															, ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
+														)
+														,dbo.fnCalculateQtyBetweenUOM(
+															Detail.intWeightUOMId
+															, Detail.intNewWeightUOMId
+															, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+														)
+													)
+												WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
+													-- When cutting a bag into wgt, then qty becomes wgt. 
+													1 
+												ELSE 
+													-- lot will still use the same qty. the use the same wgt-per-qty. 
+													SourceLot.dblWeightPerQty
+											END
 			,[strTransactionId]			= Header.strAdjustmentNo
 			,[strSourceTransactionId]	= SourceLot.strTransactionId
 			,[intSourceTransactionTypeId] = SourceLot.intSourceTransactionTypeId
