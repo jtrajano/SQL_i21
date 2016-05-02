@@ -3710,6 +3710,7 @@
     <Build Include="dbo\Tables\tblLGRouteMileage.sql" />
     <Build Include="dbo\Tables\tblLGRouteOrder.sql" />
     <Build Include="dbo\Views\vyuLGRouteOpenOrders.sql" />
+    <Build Include="dbo\Tables\tblHDCampainStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
