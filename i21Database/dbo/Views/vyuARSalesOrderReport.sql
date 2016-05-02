@@ -36,7 +36,7 @@ SELECT SO.intSalesOrderId
 	 , QT.strTemplateName
 	 , QT.intQuoteTemplateId
 	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName, ysnIncludeEntityName)
-	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, NULL, ysnIncludeEntityName)
+	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, E.strName, ysnIncludeEntityName)
 	 , strSalespersonName		= ESP.strName
 	 , strOrderedByName			= EOB.strName
 	 , strSplitName				= CASE WHEN ISNULL(ES.strDescription, '') <> '' THEN ES.strDescription ELSE ES.strSplitNumber END

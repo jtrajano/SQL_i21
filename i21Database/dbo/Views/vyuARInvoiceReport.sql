@@ -22,7 +22,7 @@ SELECT INV.intInvoiceId
 	 , INV.strInvoiceNumber
 	 , INV.strBillToLocationName
 	 , strBillTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, E.strName, ysnIncludeEntityName)
-	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, NULL, ysnIncludeEntityName)
+	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, E.strName, ysnIncludeEntityName)
 	 , strSalespersonName = ESP.strName
 	 , INV.strPONumber
 	 , (CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
