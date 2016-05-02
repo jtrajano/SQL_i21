@@ -25,7 +25,9 @@ UNION ALL
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
 	 C.strBillId ,
-	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0 THEN B.dblPayment * -1 ELSE B.dblPayment END AS dblAmountPaid,     
+	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0
+				THEN (CASE WHEN E.intBankTransactionTypeId <> 19 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+				ELSE B.dblPayment END AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -41,6 +43,8 @@ FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityVendorId] = D2.intEntityId)
-	ON A.[intEntityVendorId] = D.[intEntityVendorId]
+ 	ON A.[intEntityVendorId] = D.[intEntityVendorId]
+LEFT JOIN dbo.tblCMBankTransaction E
+	ON A.strPaymentRecordNum = E.strTransactionId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
