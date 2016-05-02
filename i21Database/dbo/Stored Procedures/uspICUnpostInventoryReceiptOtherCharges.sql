@@ -268,7 +268,7 @@ BEGIN
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
-				,AllocatedOtherCharges.ysnPrice
+				,ReceiptCharges.ysnPrice -- AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -431,6 +431,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None
 			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
+			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
 
 	UNION ALL 
 	SELECT	
@@ -474,6 +475,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
 	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None
 			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
+			AND ISNULL(ForGLEntries_CTE.ysnPrice, 0) = 0
 END
 
 -- Exit point

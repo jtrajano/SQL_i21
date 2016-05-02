@@ -64,11 +64,12 @@ BEGIN
 							,ysnInventoryCost
 							,intInventoryReceiptId
 							,intInventoryReceiptChargeId
+							,ysnPrice
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Stock_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY ysnAccrue, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId, ysnPrice
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
@@ -91,7 +92,7 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
 		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
-		
+		AND ReceiptItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalStockUnit, 0) <> 0 THEN 
@@ -116,6 +117,7 @@ BEGIN
 			,[dblAmount]
 			,[ysnAccrue]
 			,[ysnInventoryCost]
+			,[ysnPrice]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
@@ -130,6 +132,7 @@ BEGIN
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
+			,Source_Query.ysnPrice
 		)
 	;
 END 
