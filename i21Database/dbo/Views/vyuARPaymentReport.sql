@@ -4,12 +4,16 @@ AS
 SELECT
 	 [intPaymentId]			= ARP.[intPaymentId]
 	,[strRecordNumber]		= ARP.[strRecordNumber]
-	,[dtmDatePaid]			= ARP.[dtmDatePaid] 
+	,[dtmDatePaid]			= ARP.[dtmDatePaid]
+	,[strLocationName]		= SMCL.[strLocationName]
+	,[strCurrency]			= SMC.[strCurrency]
 	,[strPaymentInfo]		= ARP.[strPaymentInfo]
 	,[strNotes]				= ARP.[strNotes]
-	,[strBatchNumber]		= GLB.[strBatchId]  
+	,[dblAmountPaid]		= ARP.[dblAmountPaid]
+	,[dblUnappliedAmount]	= ARP.[dblUnappliedAmount]
+	,[strBatchNumber]		= GLB.[strBatchId]
 	,[intEntityCustomerId]	= ARP.[intEntityCustomerId]
-	,[strCustomerNumber]	= ARC.[strCustomerNumber] 
+	,[strCustomerNumber]	= ARC.[strCustomerNumber]
 	,[strCustomerName]		= EME.[strName]
 	,[strCustomerAddress]	= CASE WHEN ISNULL(EMEL.[intEntityLocationId],0) <> 0
 									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL.[strLocationName], EMEL.[strAddress], EMEL.[strCity], EMEL.[strState], EMEL.[strZipCode], EMEL.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
@@ -18,9 +22,9 @@ SELECT
 							  ELSE 
 								''
 							  END
-	,[dblCustomerARBalance]	= ARC.[dblARBalance] 
+	,[dblCustomerARBalance]	= ARC.[dblARBalance]
 	,[intInvoiceId]			= ARI.[intInvoiceId]
-	,[strInvoiceNumber]		= ARI.[strInvoiceNumber] 
+	,[strInvoiceNumber]		= ARI.[strInvoiceNumber]
 	,[strInvoiceType]		= ARI.[strTransactionType]
 	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN 1 ELSE 0 END
 	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
@@ -39,7 +43,7 @@ SELECT
 									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, SMCL.[strAddress], SMCL.[strCity], SMCL.[strStateProvince], SMCL.[strZipPostalCode], SMCL.[strCountry], NULL, ARC.[ysnIncludeEntityName])
 								WHEN SMCL.[strUseLocationAddress] = 'Letterhead'
 									THEN ''
-							  END 
+							  END
 FROM
 	tblARPayment ARP
 INNER JOIN
@@ -50,18 +54,18 @@ INNER JOIN
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
 LEFT OUTER JOIN
 	(
-	SELECT 
+	SELECT
 		 [intEntityLocationId]
 		,[strLocationName]
 		,[strAddress]
-		,[intEntityId] 
+		,[intEntityId]
 		,[strCountry]
 		,[strState]
 		,[strCity]
 		,[strZipCode]
 		,[intTermsId]
 		,[intShipViaId]
-	FROM 
+	FROM
 		[tblEMEntityLocation]
 	WHERE
 		ysnDefaultLocation = 1
@@ -69,10 +73,13 @@ LEFT OUTER JOIN
 	ON ARC.[intEntityCustomerId] = EMEL.[intEntityId]
 LEFT OUTER JOIN
 	[tblEMEntityLocation] EMEL1
-		ON ARC.[intBillToId] = EME.[intEntityId] 
-INNER JOIN 
-	tblSMCompanyLocation SMCL 
+		ON ARC.[intBillToId] = EME.[intEntityId]
+INNER JOIN
+	tblSMCompanyLocation SMCL
 		ON ARP.[intLocationId] = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN
+	tblSMCurrency SMC
+		ON ARP.[intCurrencyId] = SMC.[intCurrencyID]
 LEFT OUTER JOIN
 	(
 	SELECT --TOP 1
@@ -89,41 +96,40 @@ LEFT OUTER JOIN
 	) GLB
 		ON ARP.intPaymentId = GLB.intTransactionId
 		AND ARP.intAccountId = GLB.intAccountId
-		AND ARP.strRecordNumber = GLB.strTransactionId		
+		AND ARP.strRecordNumber = GLB.strTransactionId
 LEFT OUTER JOIN
 	tblARPaymentDetail ARPD
 		ON ARP.[intPaymentId] = ARPD.[intPaymentId]
 INNER JOIN
 	tblARInvoice ARI
-		ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
-WHERE
-	ARP.[ysnPosted] = 1
-	
-	
+		ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]	
 	
 UNION ALL
-
 
 SELECT
 	 [intPaymentId]			= ARP.[intPaymentId]
 	,[strRecordNumber]		= ARP.[strRecordNumber]
-	,[dtmDatePaid]			= ARP.[dtmDatePaid] 
+	,[dtmDatePaid]			= ARP.[dtmDatePaid]
+	,[strLocationName]		= SMCL.[strLocationName]
+	,[strCurrency]			= SMC.[strCurrency]
 	,[strPaymentInfo]		= ARP.[strPaymentInfo]
 	,[strNotes]				= ARP.[strNotes]
-	,[strBatchNumber]		= GLB.[strBatchId]  
+	,[dblAmountPaid]		= ARP.[dblAmountPaid]
+	,[dblUnappliedAmount]	= ARP.[dblUnappliedAmount]
+	,[strBatchNumber]		= GLB.[strBatchId]
 	,[intEntityCustomerId]	= ARP.[intEntityCustomerId]
-	,[strCustomerNumber]	= ARC.[strCustomerNumber] 
+	,[strCustomerNumber]	= ARC.[strCustomerNumber]
 	,[strCustomerName]		= EME.[strName]
 	,[strCustomerAddress]	= CASE WHEN ISNULL(EMEL.[intEntityLocationId],0) <> 0
 									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL.[strLocationName], EMEL.[strAddress], EMEL.[strCity], EMEL.[strState], EMEL.[strZipCode], EMEL.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
 								WHEN ISNULL(EMEL1.[intEntityLocationId],0) <> 0
 									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL1.[strLocationName], EMEL1.[strAddress], EMEL1.[strCity], EMEL1.[strState], EMEL1.[strZipCode], EMEL1.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
-							  ELSE 
+							  ELSE
 								''
 							  END
-	,[dblCustomerARBalance]	= ARC.[dblARBalance] 
+	,[dblCustomerARBalance]	= ARC.[dblARBalance]
 	,[intInvoiceId]			= ARI.[intInvoiceId]
-	,[strInvoiceNumber]		= ARI.[strInvoiceNumber] 
+	,[strInvoiceNumber]		= ARI.[strInvoiceNumber]
 	,[strInvoiceType]		= ARI.[strTransactionType]
 	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN 1 ELSE 0 END
 	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
@@ -142,7 +148,7 @@ SELECT
 									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, SMCL.[strAddress], SMCL.[strCity], SMCL.[strStateProvince], SMCL.[strZipPostalCode], SMCL.[strCountry], NULL, ARC.[ysnIncludeEntityName])
 								WHEN SMCL.[strUseLocationAddress] = 'Letterhead'
 									THEN ''
-							  END 
+							  END
 FROM
 	tblARPayment ARP
 INNER JOIN
@@ -153,18 +159,18 @@ INNER JOIN
 		ON ARC.[intEntityCustomerId] = EME.[intEntityId]
 LEFT OUTER JOIN
 	(
-	SELECT 
+	SELECT
 		 [intEntityLocationId]
 		,[strLocationName]
 		,[strAddress]
-		,[intEntityId] 
+		,[intEntityId]
 		,[strCountry]
 		,[strState]
 		,[strCity]
 		,[strZipCode]
 		,[intTermsId]
 		,[intShipViaId]
-	FROM 
+	FROM
 		[tblEMEntityLocation]
 	WHERE
 		ysnDefaultLocation = 1
@@ -172,10 +178,13 @@ LEFT OUTER JOIN
 	ON ARC.[intEntityCustomerId] = EMEL.[intEntityId]
 LEFT OUTER JOIN
 	[tblEMEntityLocation] EMEL1
-		ON ARC.[intBillToId] = EME.[intEntityId] 
-INNER JOIN 
-	tblSMCompanyLocation SMCL 
+		ON ARC.[intBillToId] = EME.[intEntityId]
+INNER JOIN
+	tblSMCompanyLocation SMCL
 		ON ARP.[intLocationId] = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN
+	tblSMCurrency SMC
+		ON ARP.[intCurrencyId] = SMC.[intCurrencyID]
 LEFT OUTER JOIN
 	(
 	SELECT --TOP 1
@@ -192,15 +201,12 @@ LEFT OUTER JOIN
 	) GLB
 		ON ARP.intPaymentId = GLB.intTransactionId
 		AND ARP.intAccountId = GLB.intAccountId
-		AND ARP.strRecordNumber = GLB.strTransactionId		
+		AND ARP.strRecordNumber = GLB.strTransactionId
 INNER JOIN
 	tblARInvoice ARI
 		ON ARP.[intPaymentId] = ARI.[intPaymentId]
 		AND ARI.[ysnPosted] = 1
 		AND ARI.[ysnPaid] = 1
-		AND ARI.[dblPayment] <> 0
-WHERE
-	ARP.[ysnPosted] = 1	
-		
+		AND ARI.[dblPayment] <> 0		
 
 GO
