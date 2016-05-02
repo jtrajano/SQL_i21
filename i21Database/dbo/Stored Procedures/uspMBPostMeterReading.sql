@@ -3,8 +3,8 @@
 	,@UserId			INT	
 	,@Post				BIT	= NULL
 	,@Recap				BIT	= NULL
-	,@InvoiceId			BIT	= NULL
-	,@ErrorMessage		NVARCHAR(250) OUTPUT
+	,@InvoiceId			INT	= NULL
+	,@ErrorMessage		NVARCHAR(MAX) OUTPUT
 	,@CreatedInvoices	NVARCHAR(MAX)  = NULL OUTPUT
 	,@UpdatedInvoices	NVARCHAR(MAX)  = NULL OUTPUT
 AS
@@ -100,6 +100,7 @@ BEGIN
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
+		,[intMeterReadingId]
 	)
 	SELECT
 		[strType]								= 'Meter Billing'
@@ -178,6 +179,7 @@ BEGIN
 		,[ysnVirtualMeterReading]				= NULL
 		,[ysnClearDetailTaxes]					= 1
 		,[intTempDetailIdForTaxes]				= @TransactionId
+		,[intMeterReadingId]					= @TransactionId
 	FROM vyuMBGetMeterReadingDetail MRDetail
 	LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
 	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MRDetail.intEntityCustomerId
@@ -203,7 +205,6 @@ BEGIN
 		,@CreatedIvoices	= @CreatedInvoices OUTPUT
 		,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
 
-
 	IF (@ErrorMessage IS NULL)
 		BEGIN
 			COMMIT TRANSACTION
@@ -213,23 +214,16 @@ BEGIN
 			ROLLBACK TRANSACTION
 		END
 
-	IF (@CreatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
-	BEGIN
-		UPDATE tblMBMeterReading 
-		SET intInvoiceId = @CreatedInvoices,
-			ysnPosted = @Post 
-		WHERE intMeterReadingId = @TransactionId
-	END
-
-	IF (@UpdatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
-	BEGIN
-		UPDATE tblMBMeterReading 
-		SET ysnPosted = @Post 
-		WHERE intMeterReadingId = @TransactionId 
-	END
-
 	IF (@ErrorMessage IS NULL)
 	BEGIN
+
+		IF (@CreatedInvoices IS NOT NULL)
+		BEGIN
+			UPDATE tblMBMeterReading 
+			SET intInvoiceId = @CreatedInvoices
+			WHERE intMeterReadingId = @TransactionId
+		END	
+
 		UPDATE tblMBMeterReading
 		SET ysnPosted = @Post
 			, dtmPostedDate = GETDATE()
@@ -257,10 +251,11 @@ BEGIN
 			SET tblMBMeterAccountDetail.dblLastMeterReading = MRDetail.dblCurrentReading
 				, tblMBMeterAccountDetail.dblLastTotalSalesDollar = MRDetail.dblCurrentDollars
 			FROM (
-				SELECT * FROM vyuMBGetMeterReadingDetail
+				SELECT TOP 1 * FROM vyuMBGetMeterReadingDetail
 				WHERE intMeterAccountId = @meterAccountId
 					AND dtmTransaction < @transactionDate
 					AND ysnPosted = 1
+				ORDER BY dtmTransaction DESC
 				) MRDetail
 			WHERE MRDetail.intMeterAccountDetailId = tblMBMeterAccountDetail.intMeterAccountDetailId
 		END
