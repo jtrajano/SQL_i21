@@ -22,6 +22,7 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @intTransactionCount INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
+			,@intAdjustItemUOMId int
 
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
 		
@@ -30,18 +31,15 @@ BEGIN TRY
 		   @intSubLocationId = intSubLocationId,
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
-		   @intLotStatusId = intLotStatusId,
-		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intItemUOMId = intItemUOMId,
-		   @dblLotQty = dblQty	   
+		   @dblAdjustByQuantity=CASE WHEN intWeightUOMId IS NULL THEN -dblQty ELSE -dblWeight END,
+		   @intAdjustItemUOMId= CASE WHEN intWeightUOMId IS NULL THEN intItemUOMId ELSE intWeightUOMId End    
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	SELECT @dblAdjustByQuantity = - @dblLotQty
-
 	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
 													   ,@dtmDate = @dtmDate
 													   ,@intLocationId = @intLocationId
@@ -52,7 +50,7 @@ BEGIN TRY
 													   ,@intNewItemId = @intNewItemId
 													   ,@intNewSubLocationId = @intSubLocationId
 													   ,@intNewStorageLocationId = @intStorageLocationId
-													   ,@intItemUOMId=@intItemUOMId
+													   ,@intItemUOMId=@intAdjustItemUOMId
 													   ,@intSourceId = @intSourceId
 													   ,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 													   ,@intEntityUserSecurityId  = @intUserId
