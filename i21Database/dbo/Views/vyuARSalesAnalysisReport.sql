@@ -40,6 +40,7 @@ SELECT strRecordNumber
 	 , dblLineTotal			= ISNULL(A.dblLineTotal, 0)
 	 , dblTotal				= ISNULL(A.dblTotal, 0)
 	 , C.strCustomerNumber
+	 , A.intItemAccountId
 	 , strAccountId			= GA.strAccountId
 	 , strAccountName		= GA.strDescription
 	 , L.strLocationName
