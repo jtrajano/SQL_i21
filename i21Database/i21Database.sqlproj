@@ -3714,6 +3714,7 @@
     <Build Include="dbo\Tables\tblHDCampaignEntity.sql" />
     <Build Include="dbo\Views\vyuTMGeneratedCallEntry.sql" />
     <Build Include="dbo\Views\vyuARPaymentReport.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerProspectType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
