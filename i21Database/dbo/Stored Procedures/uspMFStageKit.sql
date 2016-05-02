@@ -39,6 +39,8 @@ Declare @intInputItemId INT
 Declare @ysnHasSubstitute bit
 Declare @strInputItemNo nvarchar(50)
 Declare @dblRecipeQty NUMERIC(38,20)
+		,@dblPickQuantity numeric(38,20)
+		,@intPickUOMId int
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -241,7 +243,7 @@ Begin
 	Select @intLotId=intLotId,@strLotNumber=strLotNumber,
 	@dblMoveQty=CASE WHEN intItemUOMId = intItemIssuedUOMId THEN dblPickQuantity / dblWeightPerQty ELSE dblPickQuantity END,
 	@intItemId=intItemId,
-	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity 
+	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId 
 	From @tblPickListDetail Where intRowNo=@intMinLot
 
 	If ROUND(@dblPhysicalQty,3) < ROUND(@dblQuantity,3)
@@ -262,7 +264,8 @@ Begin
 			Exec [uspMFLotMove] @intLotId=@intLotId,
 								@intNewSubLocationId=@intNewSubLocationId,
 								@intNewStorageLocationId=@intKitStagingLocationId,
-								@dblMoveQty=@dblQuantity,
+								@dblMoveQty=@dblPickQuantity,
+								@intMoveItemUOMId=@intPickUOMId,
 								@intUserId=@intUserId
 
 			Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
@@ -272,7 +275,8 @@ Begin
 	Else
 		Exec [uspMFLotMerge] @intLotId=@intLotId,
 					@intNewLotId=@intNewLotId,
-					@dblMergeQty=@dblQuantity,
+					@dblMergeQty=@dblPickQuantity,
+					@intMergeItemUOMId=@intPickUOMId,
 					@intUserId=@intUserId
 
 	Update tblMFPickListDetail Set intStageLotId=@intNewLotId,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime
