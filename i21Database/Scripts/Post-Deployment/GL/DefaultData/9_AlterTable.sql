@@ -9,5 +9,15 @@ Post-Deployment Script Template
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
-ALTER TABLE dbo.[tblGLTempCOASegment] ADD CONSTRAINT [PK_tblGLTempCOASegment] PRIMARY KEY ([intAccountId])
+
+IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') 
+	IF EXISTS(SELECT * 
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    WHERE CONSTRAINT_NAME='PK_tblGLTempCOASegment' )
+	BEGIN
+		ALTER TABLE dbo.[tblGLTempCOASegment]
+		DROP CONSTRAINT PK_tblGLTempCOASegment
+
+	END
+	ALTER TABLE dbo.[tblGLTempCOASegment] ADD CONSTRAINT [PK_tblGLTempCOASegment] PRIMARY KEY ([intAccountId])
 GO
