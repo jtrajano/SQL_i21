@@ -52,15 +52,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strDescription'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Campaign Type',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
-    @level2type = N'COLUMN',
-    @level2name = N'strType'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Reference Id for Line Of Business',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
