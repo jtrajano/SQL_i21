@@ -36,6 +36,7 @@ BEGIN TRY
 	DECLARE @strUnitMeasure NVARCHAR(50)
 			,@dblOldQty NUMERIC(38,20)
 			,@dblSourceOldQty NUMERIC(38,20)
+			,@intLotItemUOMId int
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -49,6 +50,7 @@ BEGIN TRY
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
 		,@intItemUOMId=CASE WHEN @intItemUOMId Is NULL THEN intItemUOMId ELSE @intItemUOMId END
+		,@intLotItemUOMId=intItemUOMId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -72,7 +74,7 @@ BEGIN TRY
 	ELSE ISNULL(@dblWeight, 0)
 	END)
 	
-	IF @dblMoveQty>@dblLotQty
+	IF (CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblMoveQty*@dblWeightPerQty ELSE @dblMoveQty END)>@dblLotAvailableQty
 	BEGIN
 		SET @ErrMsg = 'Move qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 		RAISERROR (@ErrMsg,11,1)
@@ -110,7 +112,7 @@ BEGIN TRY
 	BEGIN
 		IF @blnValidateLotReservation = 1 
 		BEGIN
-			IF (@dblWeight + (-@dblMoveQty)) < @dblLotReservedQty
+			IF (@dblWeight + (-(CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMoveQty*@dblWeightPerQty ELSE -@dblMoveQty END))) < @dblLotReservedQty
 			BEGIN
 				RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 			END
