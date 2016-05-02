@@ -16,6 +16,7 @@ SELECT MR.intMeterReadingId
 	, MR.dtmTransaction
 	, MR.ysnPosted
 	, MR.dtmPostedDate
+	, MR.intEntityId
 	, MR.intSort
 FROM tblMBMeterReading MR
 LEFT JOIN vyuMBGetMeterAccount MA ON MA.intMeterAccountId = MR.intMeterAccountId

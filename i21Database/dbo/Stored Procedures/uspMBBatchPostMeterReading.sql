@@ -112,6 +112,7 @@ BEGIN
 			,[ysnVirtualMeterReading]
 			,[ysnClearDetailTaxes]					
 			,[intTempDetailIdForTaxes]
+			,[intMeterReadingId]
 		)
 		SELECT
 			[strType]								= 'Meter Billing'
@@ -125,7 +126,7 @@ BEGIN
 			,[intTermId]							= MADetail.intTermId
 			,[dtmDate]								= MRDetail.dtmTransaction
 			,[dtmDueDate]							= NULL
-			,[dtmShipDate]							= NULL
+			,[dtmShipDate]							= MRDetail.dtmTransaction
 			,[intEntitySalespersonId]				= Customer.intSalespersonId
 			,[intFreightTermId]						= NULL 
 			,[intShipViaId]							= NULL 
@@ -146,7 +147,7 @@ BEGIN
 			,[intDistributionHeaderId]				= NULL
 			,[strActualCostId]						= ''
 			,[intShipmentId]						= NULL
-			,[intTransactionId]						= MRDetail.intMeterReadingId
+			,[intTransactionId]						= NULL
 			,[intEntityId]							= @UserEntityId
 			,[ysnResetDetails]						= 0
 			,[ysnPost]								= @Post
@@ -190,6 +191,7 @@ BEGIN
 			,[ysnVirtualMeterReading]				= NULL
 			,[ysnClearDetailTaxes]					= 1
 			,[intTempDetailIdForTaxes]				= @intRecordKey
+			,[intMeterReadingId]					= @intRecordKey
 		FROM vyuMBGetMeterReadingDetail MRDetail
 		LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
 		LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MRDetail.intEntityCustomerId
@@ -244,7 +246,7 @@ BEGIN
 					SET ysnPosted = 1
 						, intInvoiceId = @InvoiceId
 						, dtmPostedDate = GETDATE()
-				WHERE intMeterReadingId = (SELECT intTransactionId --REPLACE with Meter Billing Reference field
+				WHERE intMeterReadingId = (SELECT intMeterReadingId
 											FROM tblARInvoice 
 											WHERE intInvoiceId = @InvoiceId)
 
@@ -253,7 +255,7 @@ BEGIN
 					, tblMBMeterAccountDetail.dblLastTotalSalesDollar = MRDetail.dblCurrentDollars
 				FROM tblMBMeterAccountDetail MADetail
 				LEFT JOIN tblMBMeterReadingDetail MRDetail ON MRDetail.intMeterAccountDetailId = MADetail.intMeterAccountDetailId
-				WHERE MRDetail.intMeterReadingId = (SELECT intTransactionId --REPLACE with Meter Billing Reference field
+				WHERE MRDetail.intMeterReadingId = (SELECT intMeterReadingId
 														FROM tblARInvoice 
 														WHERE intInvoiceId = @InvoiceId)
 
@@ -278,7 +280,7 @@ BEGIN
 					SET ysnPosted = 1
 						, intInvoiceId = @InvoiceId
 						, dtmPostedDate = GETDATE()
-				WHERE intMeterReadingId = (SELECT intTransactionId --REPLACE with Meter Billing Reference field
+				WHERE intMeterReadingId = (SELECT intMeterReadingId
 											FROM tblARInvoice 
 											WHERE intInvoiceId = @InvoiceId)
 
@@ -287,7 +289,7 @@ BEGIN
 					, tblMBMeterAccountDetail.dblLastTotalSalesDollar = MRDetail.dblCurrentDollars
 				FROM tblMBMeterAccountDetail MADetail
 				LEFT JOIN tblMBMeterReadingDetail MRDetail ON MRDetail.intMeterAccountDetailId = MADetail.intMeterAccountDetailId
-				WHERE MRDetail.intMeterReadingId = (SELECT intTransactionId --REPLACE with Meter Billing Reference field
+				WHERE MRDetail.intMeterReadingId = (SELECT intMeterReadingId
 														FROM tblARInvoice 
 														WHERE intInvoiceId = @InvoiceId)
 				
