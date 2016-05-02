@@ -91,6 +91,8 @@ BEGIN
 	FROM dbo.tblICItem 
 	WHERE intItemId = @intNewItemId
 
+	SET @strNewItemNo = ISNULL(@strNewItemNo, '(Unknown new item)')
+
 	-- 'Item %s is invalid. It must be lot tracked.'
 	RAISERROR(80075, 11, 1, @strNewItemNo); 
 	GOTO _Exit;
@@ -160,9 +162,11 @@ END
 -- Validate the original item and lot
 BEGIN 
 	-- Get the original item name. 
-	SELECT	@strOriginalItemNo = ISNULL(strItemNo, '(Original item)')			
+	SELECT	@strOriginalItemNo = strItemNo
 	FROM	dbo.tblICItem Item 
 	WHERE	Item.intItemId = @intItemId
+
+	SET @strOriginalItemNo = ISNULL(@strOriginalItemNo, '(Unknown original item)')
 
 	-- Get the original UOM name. 
 	SELECT	@strOriginalUOMName = UOM.strUnitMeasure
@@ -202,9 +206,11 @@ END
 -- Validate the new item. 
 BEGIN 
 	-- Get the new item name. 
-	SELECT	@strNewItemNo = ISNULL(strItemNo, '(New item)')
+	SELECT	@strNewItemNo = strItemNo
 	FROM	dbo.tblICItem Item 
 	WHERE	Item.intItemId = @intNewItemId
+
+	SET @strNewItemNo = ISNULL(@strNewItemNo, '(Unknown new item)')
 
 	-- Check if the item uom id is valid for the new item. 
 	IF NOT EXISTS (
@@ -214,8 +220,8 @@ BEGIN
 				AND intItemUOMId =  dbo.fnGetMatchingItemUOMId(@intNewItemId, @intItemUOMId)
 	)
 	BEGIN 
-		-- 'Item UOM {UOM name} for {Item} is invalid or missing.'
-		RAISERROR(80079, 11, 1, @strOriginalUOMName, @strOriginalItemNo)  
+		-- 'Item UOM {UOM name} for {New Item} is invalid or missing.'
+		RAISERROR(80080, 11, 1, @strOriginalUOMName, @strNewItemNo)  
 		GOTO _Exit
 	END 
 END
