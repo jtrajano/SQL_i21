@@ -138,6 +138,7 @@ Begin Try
 
 	While(@intMinChildLot is not null) --Loop Child Lot.
 	Begin
+		Select @dblPickQuantity=NULL,@intPickUOMId=NULL
 		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId
 		From @tblChildLot Where intRowNo=@intMinChildLot
 
