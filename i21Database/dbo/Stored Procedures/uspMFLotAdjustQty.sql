@@ -201,7 +201,7 @@ BEGIN TRY
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
 			DECLARE @dblResidueWeight NUMERIC(38,20)
-			SELECT @dblResidueWeight = CASE WHEN intWeightUOMId IS NULL THEN dblWeight ELSE dblQty END FROM tblICLot WHERE intLotId = @intLotId
+			SELECT @dblResidueWeight = CASE WHEN intWeightUOMId IS NULL THEN dblQty ELSE dblWeight END,@intAdjustItemUOMId= CASE WHEN intWeightUOMId IS NULL THEN intItemUOMId ELSE intWeightUOMId End FROM tblICLot WHERE intLotId = @intLotId
 			select @dblAdjustByQuantity=-@dblResidueWeight
 
 			EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId,
@@ -212,7 +212,7 @@ BEGIN TRY
 								@strLotNumber,
 								@dblAdjustByQuantity,
 								@dblNewUnitCost,
-  								@intWeightUOMId,
+  								@intAdjustItemUOMId,
 								@intSourceId,
 								@intSourceTransactionTypeId,
 								@intUserId,
