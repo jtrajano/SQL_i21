@@ -360,43 +360,29 @@ BEGIN
 								-- 2.2. If it is a Lot, use the lot qty. 
 
 							CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
-									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
-									
-											CASE	
-													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
-														--dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-
-														dbo.fnCalculateCostFromNetWgt(
-															-- Calculate the line total 
-															dbo.fnCalculateReceiptLineTotal(
-																DetailItem.dblOpenReceive
-																,DetailItem.dblNet
-																,DetailItem.dblUnitCost
-																,CASE WHEN DetailItem.ysnSubCurrency = 1 THEN Header.intSubCurrencyCents ELSE 1 END 
-																,ItemUOM.dblUnitQty
-																,WeightUOM.dblUnitQty
-																,CostUOM.dblUnitQty
-															)
-															, DetailItem.dblOpenReceive
-														) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-													
-													ELSE 
-														--dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-														dbo.fnCalculateCostFromNetWgt(
-															dbo.fnCalculateReceiptLineTotal(
-																DetailItem.dblOpenReceive
-																,DetailItem.dblNet
-																,DetailItem.dblUnitCost
-																,CASE WHEN DetailItem.ysnSubCurrency = 1 THEN Header.intSubCurrencyCents ELSE 1 END 
-																,ItemUOM.dblUnitQty
-																,WeightUOM.dblUnitQty
-																,CostUOM.dblUnitQty
-															)
-															, DetailItem.dblOpenReceive
-														) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-											END
+									WHEN DetailItem.intWeightUOMId IS NOT NULL AND DetailItem.dblNet = 0 THEN
+										0
+									WHEN DetailItem.intWeightUOMId IS NOT NULL AND DetailItem.dblNet <> 0 THEN 
+										-- Line total / Net Qty. 
+										-- Ex: 
+										-- 1. Receive 100 60-kg bags. 
+										-- 2. Cost per 60-kg bag is $1.00
+										-- 3. Net Qty is 3,000 kgs. 
+										-- 4. Line total is $50 
+										-- 5. Cost per kg is $50 / 3,000 kgs. 
+										dbo.fnCalculateCostFromNetWgt(
+											dbo.fnCalculateReceiptLineTotal(
+												DetailItem.dblOpenReceive
+												,DetailItem.dblNet
+												,DetailItem.dblUnitCost
+												--,CASE WHEN DetailItem.ysnSubCurrency = 1 THEN Header.intSubCurrencyCents ELSE 1 END 
+												,ItemUOM.dblUnitQty
+												,WeightUOM.dblUnitQty
+												,CostUOM.dblUnitQty
+											)
+											, DetailItem.dblNet
+										)
+										+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 
 									-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
 									ELSE 
@@ -409,13 +395,12 @@ BEGIN
 													
 													-- It is a Lot item. 
 													ELSE 
-														-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
+														-- Convert the Cost UOM to Item UOM and then to Lot UOM. 
 														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 											END 
 
 							END
-
 							/ 
 							CASE	WHEN DetailItem.ysnSubCurrency = 1 THEN 
 										CASE WHEN ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Header.intSubCurrencyCents, 1) ELSE 1 END 
