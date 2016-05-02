@@ -3220,6 +3220,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAddLotsToPickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBillOfLadingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
