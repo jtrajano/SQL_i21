@@ -43,7 +43,7 @@ SELECT W.intWorkOrderId
 	,WI.dtmLastModified
 	,US.[intEntityUserSecurityId]
 	,US.strUserName
-	,'CONSUME' AS strTransactionName
+	,'STAGE' AS strTransactionName
 	,NULL AS dblReadingQty
 	,NULL AS dblTotalizerStartReading
 	,NULL AS dblTotalizerEndReading
@@ -185,12 +185,12 @@ LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
-WHERE NOT EXISTS (
-		SELECT *
-		FROM tblMFWorkOrder W1
-		JOIN tblMFWorkOrderInputLot WI1 ON W1.intWorkOrderId = WI1.intWorkOrderId
-			AND W1.intManufacturingProcessId = W.intManufacturingProcessId
-		)
+--WHERE NOT EXISTS (
+--		SELECT *
+--		FROM tblMFWorkOrder W1
+--		JOIN tblMFWorkOrderInputLot WI1 ON W1.intWorkOrderId = WI1.intWorkOrderId
+--			AND W1.intManufacturingProcessId = W.intManufacturingProcessId
+--		)
 --THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
 --JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WI.intLastModifiedUserId
 
@@ -239,7 +239,7 @@ SELECT W.intWorkOrderId
 	,WI.dtmLastModified
 	,US.[intEntityUserSecurityId]
 	,US.strUserName
-	,'CONSUME REVERSAL' AS strTransactionName
+	,'STAGE REVERSAL' AS strTransactionName
 	,NULL AS dblReadingQty
 	,NULL AS dblTotalizerStartReading
 	,NULL AS dblTotalizerEndReading
