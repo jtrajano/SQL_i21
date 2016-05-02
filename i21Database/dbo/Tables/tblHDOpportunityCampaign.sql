@@ -3,19 +3,24 @@
 	[intOpportunityCampaignId] [int] IDENTITY(1,1) NOT NULL,
 	[strCampaignName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
-	[strType] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[intTicketTypeId] [int] NULL,
 	[intLineOfBusinessId] [int] NULL,
 	[dtmStartDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
 	[dblOpenRate] [numeric](18, 6) NULL,
+	[dblBaseCost] [numeric](18, 6) NULL,
+	[dblTotalCost] [numeric](18, 6) NULL,
+	[dblExpectedRevenue] [numeric](18, 6) NULL,
 	[dtmCreateDate] [datetime] NULL,
-	[strStatus] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	intCampaignStatusId [int] NULL,
 	[ysnHold] [bit] null,
 	[ysnActive] [bit] null,
 	[intEntityId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDOpportunityCampaign] PRIMARY KEY CLUSTERED ([intOpportunityCampaignId] ASC),
 	CONSTRAINT [UQ_tblHDOpportunityCampaign] UNIQUE ([strCampaignName]),
+	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDTicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
+	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDCampaignStatus] FOREIGN KEY (intCampaignStatusId) REFERENCES [dbo].[tblHDCampainStatus] (intCampaignStatusId),
 	CONSTRAINT [FK_tblHDOpportunityCampaign_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
@@ -46,15 +51,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDOpportunityCampaign',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Campaign Type',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
-    @level2type = N'COLUMN',
-    @level2name = N'strType'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Reference Id for Line Of Business',
@@ -100,15 +96,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDOpportunityCampaign',
     @level2type = N'COLUMN',
     @level2name = N'dtmCreateDate'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Campaign Status',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
-    @level2type = N'COLUMN',
-    @level2name = N'strStatus'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Hold (true or false)',

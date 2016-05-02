@@ -75,7 +75,7 @@ BEGIN
 					,intCustomerId = A.intCustomerID
 					,strItemNumber = RTRIM(E.vwitm_no) COLLATE Latin1_General_CI_AS 
 					,strItemClass = RTRIM(E.vwitm_class) COLLATE Latin1_General_CI_AS 
-					,dblDailyUse = (CASE WHEN E.strCurrentSeason = ''Winter'' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
+					,dblDailyUse = (CASE WHEN G.strCurrentSeason = ''Winter'' THEN ISNULL(A.dblWinterDailyUse,0.0) ELSE ISNULL(A.dblSummerDailyUse,0) END)
 				INTO #tmpStage1
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
@@ -88,8 +88,8 @@ BEGIN
 					ON A.intProduct = E.A4GLIdentity
 				LEFT JOIN vwlocmst D
 					ON A.intLocationId = D.A4GLIdentity
-				LEFT JOIN tblTMClock E
-					ON A.intClockID = E.intClockID
+				LEFT JOIN tblTMClock G
+					ON A.intClockID = G.intClockID
 	
 
 				IF OBJECT_ID(''tempdb..#tmpStage2'') IS NOT NULL 
@@ -112,7 +112,7 @@ BEGIN
 									END),0.0)
 				INTO #tmpStage2
 				FROM #tmpStage1 A
-				LEFT JOIN tblTMBudgetCalculationItemPricing B
+				INNER JOIN tblTMBudgetCalculationItemPricing B
 					ON A.intSiteItemId = B.intItemId
 
 
@@ -266,7 +266,7 @@ BEGIN
 									END),0.0)
 				INTO #tmpStage2
 				FROM #tmpStage1 A
-				LEFT JOIN tblTMBudgetCalculationItemPricing B
+				INNER JOIN tblTMBudgetCalculationItemPricing B
 					ON A.intSiteItemId = B.intItemId
 
 

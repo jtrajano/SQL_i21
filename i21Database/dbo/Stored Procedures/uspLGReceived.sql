@@ -46,14 +46,14 @@ SET ANSI_WARNINGS OFF
 		FROM	@ItemsFromInventoryReceipt 
 		WHERE	intLotId						=	 @intLotId
 		
-		IF NOT EXISTS(SELECT * FROM tblLGShipmentContractQty WHERE intShipmentContractQtyId = @intSourceId)
+		IF NOT EXISTS(SELECT * FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId)
 		BEGIN
 		SELECT 1, @intSourceId, Cast(@intSourceId as varchar(100))
 			SET @ErrMsg = 'Contract for this shipment does not exist'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF NOT EXISTS(SELECT * FROM tblLGShipmentBLContainerContract WHERE intShipmentContractQtyId = @intSourceId AND intShipmentBLContainerId = @intContainerId)
+		IF NOT EXISTS(SELECT * FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId)
 		BEGIN		
 			SET @ErrMsg = 'Container for this shipment does not exist'
 			RAISERROR(@ErrMsg,16,1)

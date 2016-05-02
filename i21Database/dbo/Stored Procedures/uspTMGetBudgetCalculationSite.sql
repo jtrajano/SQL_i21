@@ -119,7 +119,7 @@ BEGIN
 						END),0.0)
 	INTO #tmpStage2
 	FROM #tmpStage1 A
-	LEFT JOIN tblTMBudgetCalculationItemPricing B
+	INNER JOIN tblTMBudgetCalculationItemPricing B
 		ON A.intSiteItemId = B.intItemId
 
 

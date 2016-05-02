@@ -32,7 +32,7 @@ BEGIN
        SELECT @TopLocId = intCompanyLocationId FROM #Temp ORDER BY intCompanyLocationId  
        SELECT @MaxNumber1 = MAX([agloc_loc_no]) FROM aglocmst  
 	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  
-	   SET @Unused = (SELECT TOP 1 l.agloc_loc_no + 1 AS start FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no + 1 = r.agloc_loc_no WHERE r.agloc_loc_no IS NULL)
+	   SET @Unused = (SELECT TOP 1 l.agloc_loc_no + 1 AS start FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no + 1 = r.agloc_loc_no WHERE r.agloc_loc_no IS NULL AND l.agloc_loc_no + 1 NOT IN (SELECT CAST(ISNULL(strLocationNumber, ''0'') AS INT) FROM tblSMCompanyLocation))
 
 	   IF @MaxNumber2 IS NULL
 	   BEGIN

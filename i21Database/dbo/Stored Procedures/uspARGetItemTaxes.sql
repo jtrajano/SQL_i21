@@ -39,6 +39,7 @@ AS
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnInvalidSetup] 
 				,[strTaxGroup]
 				,[strNotes]
 			FROM

@@ -37,9 +37,10 @@ BEGIN TRY
 
 	SELECT @dblProduceQty = SUM(dblQuantity)
 		,@intItemUOMId = MIN(intItemUOMId)
-	FROM dbo.tblMFWorkOrderProducedLot
-	WHERE intWorkOrderId = @intWorkOrderId
-		AND ysnProductionReversed = 0
+	FROM dbo.tblMFWorkOrderProducedLot WP
+	WHERE WP.intWorkOrderId = @intWorkOrderId
+		AND WP.ysnProductionReversed = 0
+		AND WP.intItemId IN (SELECT intItemId FROM dbo.tblMFWorkOrderRecipeItem WHERE intRecipeItemTypeId=2 AND ysnConsumptionRequired=1 AND intWorkOrderId=@intWorkOrderId)
 
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION

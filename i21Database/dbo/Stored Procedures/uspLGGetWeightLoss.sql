@@ -38,8 +38,8 @@ BEGIN TRY
 		sum(ReceiptItem.dblNet) as dblNetReceivedWt
 	FROM tblICInventoryReceiptItem ReceiptItem
 	JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-	JOIN vyuLGInboundShipmentView Shipment ON Shipment.intShipmentContractQtyId = ReceiptItem.intSourceId and Shipment.intShipmentBLContainerId = ReceiptItem.intContainerId
-	GROUP BY Shipment.intShipmentId, Shipment.intTrackingNumber, Shipment.dblFranchise, ReceiptItem.intItemId) t1
+	JOIN vyuLGInboundShipmentView Shipment ON Shipment.intLoadDetailId = ReceiptItem.intSourceId and Shipment.intLoadContainerId = ReceiptItem.intContainerId
+	GROUP BY Shipment.intLoadId, Shipment.strTrackingNumber, Shipment.dblFranchise, ReceiptItem.intItemId) t1
 	
 END TRY
 BEGIN CATCH

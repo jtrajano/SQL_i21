@@ -5,6 +5,7 @@
     [intEntityCustomerId]         INT             NULL,
     [dtmDate]               DATETIME        NOT NULL,
     [dtmDueDate]            DATETIME        NOT NULL,
+	[dtmExpirationDate]            DATETIME        NULL,
     [intCurrencyId]         INT             NOT NULL,
     [intCompanyLocationId]  INT             NULL,
     [intEntitySalespersonId]      INT       NULL,

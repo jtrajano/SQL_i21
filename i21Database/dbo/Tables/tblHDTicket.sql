@@ -12,6 +12,7 @@
 	[intTicketTypeId] [int] NULL,
 	[intTicketStatusId] [int] NOT NULL,
 	[intLineOfBusinessId] [int] NULL,
+	[strLineOfBusinessId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intTicketPriorityId] [int] NULL,
 	[intTicketProductId] [int] NULL,
 	[intModuleId] [int] NULL,

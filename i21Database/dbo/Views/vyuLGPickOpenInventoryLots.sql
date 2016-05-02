@@ -47,7 +47,7 @@ SELECT Lot.intLotId
 	, Lot.strBOLNo
 	, Lot.strVessel
 	, Lot.strReceiptNumber
-	, ShipmentContainer.strMarks as strMarkings
+	, LC.strMarks as strMarkings
 	, Lot.strNotes
 	, Lot.intEntityVendorId
 	, Lot.strVendorLotNo
@@ -69,22 +69,21 @@ SELECT Lot.intLotId
 	, CTDetail.dblDetailQuantity as dblOriginalQty
 	, dblAllocatedQty = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0)
 	, dblReservedQty = IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
-	, ShipmentContainer.strContainerNumber
-	, ShipmentBL.strBLNumber
+	, LC.strContainerNumber
+	, L.strBLNumber
 	, CTDetail.strEntityName as strVendor
-	, Shipment.intTrackingNumber
-	, Shipment.dtmInventorizedDate
+	, L.strLoadNumber
+	, L.dtmInventorizedDate
 
 FROM tblICLot Lot
 JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-LEFT JOIN tblLGShipmentContractQty ShipmentContract ON ShipmentContract.intShipmentContractQtyId = ReceiptItem.intSourceId
-LEFT JOIN tblLGShipment Shipment ON Shipment.intShipmentId = ShipmentContract.intShipmentId
-LEFT JOIN tblLGShipmentBLContainer ShipmentContainer ON ShipmentContainer.intShipmentBLContainerId = ReceiptItem.intContainerId
-LEFT JOIN tblLGShipmentBLContainerContract ShipmentContainerContract ON ShipmentContainerContract.intShipmentContractQtyId = ShipmentContract.intShipmentContractQtyId AND ShipmentContainerContract.intShipmentBLContainerId = ShipmentContainer.intShipmentBLContainerId
-LEFT JOIN tblLGShipmentBL ShipmentBL ON ShipmentBL.intShipmentBLId = ShipmentContainer.intShipmentBLId
-LEFT JOIN vyuCTContractDetailView CTDetail ON CTDetail.intContractDetailId = ShipmentContract.intContractDetailId
+LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
+LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId
+LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId AND LDCL.intLoadContainerId = LC.intLoadContainerId
+LEFT JOIN vyuCTContractDetailView CTDetail ON CTDetail.intContractDetailId = L.intContractDetailId
 LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Lot.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lot.intItemUOMId

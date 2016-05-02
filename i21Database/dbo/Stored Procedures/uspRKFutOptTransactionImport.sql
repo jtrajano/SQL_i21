@@ -31,7 +31,7 @@ INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyI
 SELECT * FROM(
 SELECT DISTINCT @intFutOptTransactionHeaderId intFutOptTransactionHeaderId ,1 intConcurrencyId,
 		getdate() dtmTransactionDate,em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
-	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 0 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
+	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 2 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
 	   cur.intCurrencyID,isnull(@strInternalTradeNo,0) + ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
 	   m.intFutureMonthId, intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId
 FROM tblRKFutOptTransactionImport ti

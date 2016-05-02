@@ -5,6 +5,7 @@
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
+	,@intItemUOMId int =NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -47,6 +48,7 @@ BEGIN TRY
 		,@dblWeightPerQty = dblWeightPerQty
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
+		,@intItemUOMId=CASE WHEN @intItemUOMId Is NULL THEN intItemUOMId ELSE @intItemUOMId END
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -224,7 +226,7 @@ BEGIN TRY
 					@strNotes = 'Weight qty same'
 			END
 
-			IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01) AND ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01)
+			IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 			BEGIN
 				--EXEC dbo.uspMFLotAdjustQty
 				-- @intLotId =@intLotId,       
@@ -244,7 +246,6 @@ END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @TransactionCount = 0
 		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
 

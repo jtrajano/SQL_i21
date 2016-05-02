@@ -26,6 +26,7 @@ RETURNS @returntable TABLE
 	,[ysnCheckoffTax]				BIT
 	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT
+	,[ysnInvalidSetup]				BIT
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
 )
@@ -39,6 +40,26 @@ BEGIN
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
 	
 	INSERT INTO @returntable
+		([intTransactionDetailTaxId]
+		,[intTransactionDetailId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[dblRate]
+		,[dblExemptionPercent]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[intTaxAccountId]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[strTaxCode]
+		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
+		,[strTaxGroup]
+		,[strNotes]
+		)
 	SELECT
 		 [intTransactionDetailTaxId]	= 0
 		,[intTransactionDetailId]		= 0
@@ -56,6 +77,7 @@ BEGIN
 		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
 		,[strTaxCode]					= TC.[strTaxCode]
 		,[ysnTaxExempt]					= E.[ysnTaxExempt]
+		,[ysnInvalidSetup]				= E.[ysnInvalidSetup]
 		,[strTaxGroup]					= TG.[strTaxGroup]
 		,[strNotes]						= E.[strExemptionNotes]
 	FROM

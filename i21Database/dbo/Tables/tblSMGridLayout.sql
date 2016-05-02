@@ -10,6 +10,7 @@
     [ysnActive] BIT NULL, 
 	[ysnIsQuickFilter] BIT NULL,
 	[intTabIndex] INT NULL,
+	[ysnIsSorted] BIT NULL,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSMGridLayout] PRIMARY KEY CLUSTERED ([intGridLayoutId] ASC) 
 )

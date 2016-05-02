@@ -2,7 +2,8 @@ CREATE VIEW vyuLGLoadDetailView
 AS
 SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.intItemId
-		,strItemNo = Item.strDescription
+		,Item.strItemNo
+		,Item.strDescription AS strItemDescription
 		,LoadDetail.dblQuantity
 		,LoadDetail.intItemUOMId
 		,strItemUOM = UOM.strUnitMeasure

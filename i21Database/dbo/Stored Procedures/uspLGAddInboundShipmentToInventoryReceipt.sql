@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGAddInboundShipmentToInventoryReceipt]
-	@ShipmentId AS INT
+	 @intLoadId AS INT
 	,@intEntityUserSecurityId AS INT
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
@@ -15,7 +15,7 @@ DECLARE @ReceiptNumber AS NVARCHAR(20)
 
 DECLARE @ReceiptType_PurchaseContract AS NVARCHAR(100) = 'Purchase Contract'
 
-IF @ShipmentId IS NULL 
+IF @intLoadId IS NULL 
 BEGIN 
     -- Raise the error:
     -- Unable to generate the Inventory Receipt. An error stopped the process from Inbound Shipment to Inventory Receipt.
@@ -61,11 +61,11 @@ INSERT INTO dbo.tblICInventoryReceipt (
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
-		,intEntityVendorId		= Shipment.intVendorEntityId
+		,intEntityVendorId		= LD.intVendorEntityId
 		,strReceiptType			= @ReceiptType_PurchaseContract
 		,intSourceType			= 2
 		,intBlanketRelease		= NULL
-		,intLocationId			= Shipment.intCompanyLocationId
+		,intLocationId			= L.intCompanyLocationId
 		,strVendorRefNo			= NULL
 		,strBillOfLading		= NULL
 		,intShipViaId			= NULL
@@ -89,8 +89,9 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intConcurrencyId		= 1
 		,intEntityId			= @intEntityUserSecurityId
 		,ysnPosted				= 0
-FROM	dbo.tblLGShipment Shipment
-WHERE	Shipment.intShipmentId = @ShipmentId
+FROM	dbo.tblLGLoad L
+JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+WHERE	L.intLoadId = @intLoadId
 
 -- Get the identity value from tblICInventoryReceipt
 SELECT @InventoryReceiptId = SCOPE_IDENTITY()
@@ -114,15 +115,15 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intConcurrencyId
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
-		,intLineNo				= ShipmentDetail.intShipmentContractQtyId
-		,intOrderId				= ShipmentDetail.intContractHeaderId
-		,intSourceId			= ShipmentDetail.intShipmentContractQtyId
+		,intLineNo				= ShipmentDetail.intLoadDetailId
+		,intOrderId				= ShipmentDetail.intPContractHeaderId
+		,intSourceId			= ShipmentDetail.intLoadId
 		,intItemId				= ShipmentDetail.intItemId
-		,intContainerId			= ShipmentDetail.intShipmentBLContainerId
+		,intContainerId			= ShipmentDetail.intLoadContainerId
 		,intSubLocationId		= ShipmentDetail.intSubLocationId
 		,dblOrderQty			= ShipmentDetail.dblQuantity
-		,dblOpenReceive			= (ISNULL(ShipmentDetail.dblQuantity, 0) - ISNULL(ShipmentDetail.dblReceivedQty, 0))
-		,dblReceived			= ShipmentDetail.dblReceivedQty
+		,dblOpenReceive			= (ISNULL(ShipmentDetail.dblQuantity, 0) - ISNULL(ShipmentDetail.dblDeliveredQuantity, 0))
+		,dblReceived			= ShipmentDetail.dblDeliveredQuantity
 		,intUnitMeasureId		= ShipmentDetail.intItemUOMId
 		,intWeightUOMId			=	(
 										SELECT	TOP 1 
@@ -138,8 +139,8 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,dblLineTotal			= ISNULL(ShipmentDetail.dblQuantity, 0) * ShipmentDetail.dblCost
 		,intSort				= NULL
 		,intConcurrencyId		= 1
-FROM	vyuLGShipmentContainerReceiptContracts ShipmentDetail
-WHERE	ShipmentDetail.intShipmentContractQtyId = @ShipmentId
+FROM	vyuLGLoadContainerReceiptContracts ShipmentDetail
+WHERE	ShipmentDetail.intLoadId = @intLoadId
 		AND dbo.fnIsStockTrackingItem(ShipmentDetail.intItemId) = 1
 
 -- Re-update the total cost 

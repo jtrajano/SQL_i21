@@ -30,6 +30,7 @@ AS
 												WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 
 												ORDER BY tblTMLeaseMinimumUse.dblSiteCapacity ASC)
 			,dtmLastLeaseBillingDate = A.dtmLastLeaseBillingDate
+			,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intLeaseId)) AS INT)
 		FROM tblTMLease A
 		LEFT JOIN tblTMLeaseCode B
 			ON A.intLeaseCodeId = B.intLeaseCodeId

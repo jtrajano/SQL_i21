@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGLotConditionSummaryView
 	AS
-SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intShipmentId)) as intKeyColumn, *, 
+SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intLoadId)) as intKeyColumn, *, 
 	(dblNetShippedWt - dblNetReceivedWt) as dblWeightLoss,
 	CASE WHEN strCondition = 'Sound/Full' THEN
 			(dblNetShippedWt * dblFranchise)
@@ -22,8 +22,8 @@ SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intShipmentId)) 
 		END as dblClaimableWt
 FROM (
 	SELECT
-	Shipment.intShipmentId,
-	Shipment.intTrackingNumber,
+	Shipment.intLoadId,
+	Shipment.strTrackingNumber,
 	dblFranchise = Shipment.dblFranchise / 100,
 	ReceiptItem.intItemId,
 	CASE WHEN ReceiptLot.strCondition = 'Sound/Full' THEN
@@ -39,5 +39,5 @@ FROM (
 	sum(ReceiptLot.dblGrossWeight-ReceiptLot.dblTareWeight) as dblNetReceivedWt
 FROM tblICInventoryReceiptItemLot ReceiptLot
 LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-LEFT JOIN vyuLGInboundShipmentView Shipment ON Shipment.intShipmentContractQtyId = ReceiptItem.intSourceId and Shipment.intShipmentBLContainerId = ReceiptItem.intContainerId
-GROUP BY Shipment.intShipmentId, Shipment.intTrackingNumber, Shipment.dblFranchise, ReceiptLot.strCondition, ReceiptItem.intItemId) t1
+LEFT JOIN vyuLGInboundShipmentView Shipment ON Shipment.intLoadId = ReceiptItem.intSourceId and Shipment.intLoadContainerId = ReceiptItem.intContainerId
+GROUP BY Shipment.intLoadId, Shipment.strTrackingNumber, Shipment.dblFranchise, ReceiptLot.strCondition, ReceiptItem.intItemId) t1

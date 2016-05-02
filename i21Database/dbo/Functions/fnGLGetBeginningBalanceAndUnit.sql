@@ -25,9 +25,10 @@ BEGIN
 		FROM tblGLAccount A
 			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 			LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
+			CROSS APPLY (SELECT dtmDateFrom,dtmDateTo from tblGLFiscalYear where @dtmDate >= dtmDateFrom AND @dtmDate <= dtmDateTo) D
 		WHERE
 		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < @dtmDate)
-		OR (strAccountId =@strAccountId AND C.dtmDate < @dtmDate) and strCode <> '')
+		OR (strAccountId =@strAccountId AND C.dtmDate >= D.dtmDateFrom AND C.dtmDate <@dtmDate) and strCode <> '')
 		insert into @tbl
 		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
 		

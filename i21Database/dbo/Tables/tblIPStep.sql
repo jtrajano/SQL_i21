@@ -10,6 +10,7 @@
     [intFailureStepId] INT NULL ,
     [intConnectionId] INT NULL, 
     [strSQL] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
+	[intSQLTypeId] INT,
 	[intFileTypeId] INT NULL,
 	[intDelimiterId] INT NULL,
 	[strRecordMarker] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -23,6 +24,9 @@
 	[ysnDeleteFile] BIT DEFAULT 0,
 	[ysnCopyFile] BIT DEFAULT 0,
 	[ysnPrefixTimeStamp] BIT DEFAULT 0,
+    [intSourceConnectionId] INT NULL, 
+    [strSourceSQL] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
+	[intSourceSQLTypeId] INT,
 	[intConcurrencyId] INT NULL DEFAULT 0,
 	CONSTRAINT [PK_tblIPStep_intStepId] PRIMARY KEY ([intStepId]),
 	CONSTRAINT [UQ_tblIPStep_strStepName] UNIQUE ([intProcessId],[strStepName]),
@@ -30,5 +34,8 @@
 	CONSTRAINT [FK_tblIPStep_tblIPStepType_intStepTypeId] FOREIGN KEY ([intStepTypeId]) REFERENCES [tblIPStepType]([intStepTypeId]), 
 	CONSTRAINT [FK_tblIPStep_tblIPFileType_intFileTypeId] FOREIGN KEY ([intFileTypeId]) REFERENCES [tblIPFileType]([intFileTypeId]), 
 	CONSTRAINT [FK_tblIPStep_tblIPDelimiter_intDelimiterId] FOREIGN KEY ([intDelimiterId]) REFERENCES [tblIPDelimiter]([intDelimiterId]), 
-	CONSTRAINT [FK_tblIPStep_tblIPConnection_intConnectionId] FOREIGN KEY ([intConnectionId]) REFERENCES [tblIPConnection]([intConnectionId])
+	CONSTRAINT [FK_tblIPStep_tblIPConnection_intConnectionId] FOREIGN KEY ([intConnectionId]) REFERENCES [tblIPConnection]([intConnectionId]),
+	CONSTRAINT [FK_tblIPStep_tblIPSQLType_intSQLTypeId] FOREIGN KEY ([intSQLTypeId]) REFERENCES [tblIPSQLType]([intSQLTypeId]), 
+	CONSTRAINT [FK_tblIPStep_tblIPConnection_intSourceConnectionId] FOREIGN KEY ([intSourceConnectionId]) REFERENCES [tblIPConnection]([intConnectionId]),
+	CONSTRAINT [FK_tblIPStep_tblIPSQLType_intSourceSQLTypeId] FOREIGN KEY ([intSourceSQLTypeId]) REFERENCES [tblIPSQLType]([intSQLTypeId]), 
 )
