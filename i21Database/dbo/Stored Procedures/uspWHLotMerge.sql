@@ -167,6 +167,7 @@ BEGIN TRY
 		EXEC dbo.uspMFLotAdjustQty
 			@intLotId = @intLotId,       
 			@dblNewLotQty = @dblLotQty,
+			@intAdjustItemUOMId=@intItemUOMId,
 			@intUserId = @intUserId ,
 			@strReasonCode = 'Weight qty same',
 			@strNotes = 'Weight qty same'
@@ -178,6 +179,7 @@ BEGIN TRY
 		EXEC dbo.uspMFLotAdjustQty
 		 @intLotId =@intLotId,       
 		 @dblNewLotQty =0,
+		 @intAdjustItemUOMId=@intItemUOMId,
 		 @intUserId=@intUserId ,
 		 @strReasonCode ='Residue qty clean up',
 		 @strNotes ='Residue qty clean up'
