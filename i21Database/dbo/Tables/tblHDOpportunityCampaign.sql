@@ -3,7 +3,7 @@
 	[intOpportunityCampaignId] [int] IDENTITY(1,1) NOT NULL,
 	[strCampaignName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
-	[strType] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[intTicketTypeId] [int] NULL,
 	[intLineOfBusinessId] [int] NULL,
 	[dtmStartDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
@@ -19,6 +19,7 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDOpportunityCampaign] PRIMARY KEY CLUSTERED ([intOpportunityCampaignId] ASC),
 	CONSTRAINT [UQ_tblHDOpportunityCampaign] UNIQUE ([strCampaignName]),
+	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDTicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
 	CONSTRAINT [FK_tblHDOpportunityCampaign_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
