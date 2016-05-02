@@ -3598,6 +3598,8 @@
     <Build Include="dbo\Views\vyuTRGetQuoteHeader.sql" />
     <Build Include="dbo\Views\vyuPRDailyTaxTotal.sql" />
     <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
+    <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
