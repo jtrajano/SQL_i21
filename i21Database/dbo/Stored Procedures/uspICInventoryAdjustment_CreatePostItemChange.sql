@@ -163,7 +163,6 @@ BEGIN
 	SELECT	@strOriginalItemNo = ISNULL(strItemNo, '(Original item)')			
 	FROM	dbo.tblICItem Item 
 	WHERE	Item.intItemId = @intItemId
-			AND ItemUOM.intItemUOMId = @intItemUOMId
 
 	-- Get the original UOM name. 
 	SELECT	@strOriginalUOMName = UOM.strUnitMeasure

@@ -268,7 +268,7 @@ BEGIN
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
-				,ReceiptCharges.ysnPrice -- AllocatedOtherCharges.ysnPrice
+				,AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
