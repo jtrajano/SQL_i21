@@ -2223,7 +2223,7 @@
                                                                         "format": "0,000.##",
                                                                         "itemId": "colReceived",
                                                                         "text": "Received so far",
-                                                                        "width": 75
+                                                                        "width": 100
                                                                     },
                                                                     "name": "MyNumberColumn2",
                                                                     "designerId": "ce5ef165-d833-49c0-af04-47388380389e",

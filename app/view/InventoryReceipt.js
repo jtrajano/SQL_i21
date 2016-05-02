@@ -1206,7 +1206,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
                                                                                 itemId: 'colReceived',
-                                                                                width: 75,
+                                                                                width: 100,
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblQtyOrdered',
                                                                                 text: 'Received so far',
