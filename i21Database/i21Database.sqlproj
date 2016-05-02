@@ -3712,6 +3712,7 @@
     <Build Include="dbo\Views\vyuLGRouteOpenOrders.sql" />
     <Build Include="dbo\Tables\tblHDCampainStatus.sql" />
     <Build Include="dbo\Tables\tblHDCampaignEntity.sql" />
+    <Build Include="dbo\Views\vyuTMGeneratedCallEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
