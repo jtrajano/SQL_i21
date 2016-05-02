@@ -19,6 +19,7 @@
 	[intEarlyDaysSales] INT NULL,
 	[strDemandItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[ysnBagMarkMandatory] BIT NULL,
+	[strESA] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
