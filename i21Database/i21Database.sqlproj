@@ -3713,6 +3713,7 @@
     <Build Include="dbo\Tables\tblHDCampainStatus.sql" />
     <Build Include="dbo\Tables\tblHDCampaignEntity.sql" />
     <Build Include="dbo\Views\vyuTMGeneratedCallEntry.sql" />
+    <Build Include="dbo\Views\vyuARPaymentReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
