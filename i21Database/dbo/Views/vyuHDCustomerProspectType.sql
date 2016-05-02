@@ -2,7 +2,8 @@
 	AS
 	select
 		distinct
-		tblARCustomer.intEntityCustomerId
+		intId = ROW_NUMBER() over (order by intEntityCustomerId)
+		,tblARCustomer.intEntityCustomerId
 		,tblARCustomer.strCustomerNumber
 		,strEntityName = tblEMEntity.strName
 		,tblEMEntityType.strType
