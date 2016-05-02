@@ -3716,6 +3716,7 @@
     <Build Include="dbo\Views\vyuARPaymentReport.sql" />
     <Build Include="dbo\Views\vyuHDCustomerProspectType.sql" />
     <Build Include="dbo\Stored Procedures\uspICBillOfLadingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGReserveStockForInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
