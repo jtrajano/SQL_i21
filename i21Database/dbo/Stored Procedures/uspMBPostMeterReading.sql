@@ -114,7 +114,7 @@ BEGIN
 		,[intTermId]							= MADetail.intTermId
 		,[dtmDate]								= MRDetail.dtmTransaction
 		,[dtmDueDate]							= NULL
-		,[dtmShipDate]							= NULL
+		,[dtmShipDate]							= MRDetail.dtmTransaction
 		,[intEntitySalespersonId]				= Customer.intSalespersonId
 		,[intFreightTermId]						= NULL 
 		,[intShipViaId]							= NULL 
@@ -135,7 +135,7 @@ BEGIN
 		,[intDistributionHeaderId]				= NULL
 		,[strActualCostId]						= ''
 		,[intShipmentId]						= NULL
-		,[intTransactionId]						= MRDetail.intMeterReadingId
+		,[intTransactionId]						= NULL
 		,[intEntityId]							= @UserEntityId
 		,[ysnResetDetails]						= 0
 		,[ysnPost]								= @Post
@@ -248,10 +248,14 @@ BEGIN
 			WHERE intMeterReadingId = @TransactionId
 
 			UPDATE tblMBMeterAccountDetail
-			SET tblMBMeterAccountDetail.dblLastMeterReading = MRDetail.dblCurrentReading
-				, tblMBMeterAccountDetail.dblLastTotalSalesDollar = MRDetail.dblCurrentDollars
+			SET dblLastMeterReading = 0
+				, dblLastTotalSalesDollar = 0
+
+			UPDATE tblMBMeterAccountDetail
+			SET tblMBMeterAccountDetail.dblLastMeterReading = ISNULL(MRDetail.dblCurrentReading, 0)
+				, tblMBMeterAccountDetail.dblLastTotalSalesDollar = ISNULL(MRDetail.dblCurrentDollars, 0)
 			FROM (
-				SELECT TOP 1 * FROM vyuMBGetMeterReadingDetail
+				SELECT TOP 100 PERCENT * FROM vyuMBGetMeterReadingDetail
 				WHERE intMeterAccountId = @meterAccountId
 					AND dtmTransaction < @transactionDate
 					AND ysnPosted = 1
