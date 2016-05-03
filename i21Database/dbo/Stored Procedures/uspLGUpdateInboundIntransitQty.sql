@@ -73,12 +73,12 @@ BEGIN TRY
 
 	IF (@ysnInventorize = 1)
 	BEGIN
-			UPDATE tblLGLoad SET ysnPosted = 1, dtmInventorizedDate=GETDATE() WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad SET ysnPosted = 1, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
 	END
 
 	IF (@ysnInventorize = 0)
 	BEGIN
-			UPDATE tblLGLoad SET ysnPosted = 0, dtmInventorizedDate=NULL WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad SET ysnPosted = 0, dtmPostedDate=NULL WHERE intLoadId = @intLoadId
 	END
 
 END TRY

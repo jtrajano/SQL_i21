@@ -73,7 +73,7 @@ SELECT Lot.intLotId
 	, L.strBLNumber
 	, CTDetail.strEntityName as strVendor
 	, L.strLoadNumber
-	, L.dtmInventorizedDate
+	, L.dtmPostedDate
 
 FROM tblICLot Lot
 JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
