@@ -195,7 +195,7 @@ FROM
 	,[strgrossNetUOM]			=	NULL
 	,[dblWeightUnitQty]			=	0
 	,[dblCostUniNULL]			=	0
-	,[dblUnitQty]				=	0
+	,[dblUnitQty]				=	1
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
