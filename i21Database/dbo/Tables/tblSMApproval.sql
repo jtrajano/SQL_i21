@@ -7,7 +7,7 @@
 	[intSubmittedById] [int] NOT NULL,
 	[dblAmount] [numeric](18, 6) NOT NULL,
 	[dtmDueDate] [datetime] NULL,
-	[strStatus] [nvarchar](15) NOT NULL,
+	[strStatus] [nvarchar](100) NOT NULL,
 	[strComment] [nvarchar](max) NULL,
 	[dtmDate] [datetime] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 
