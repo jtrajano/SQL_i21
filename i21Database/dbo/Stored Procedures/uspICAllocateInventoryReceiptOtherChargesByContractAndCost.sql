@@ -46,7 +46,7 @@ BEGIN
 	USING (
 		SELECT	CalculatedCharges.*
 				,ReceiptItem.intInventoryReceiptItemId
-				,ReceiptItem.dblOpenReceive
+				,Qty = CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 				,ReceiptItem.dblUnitCost
 				,TotalCostOfItemsPerContract.dblTotalCost 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -74,7 +74,16 @@ BEGIN
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId
 					AND CalculatedCharges.intContractDetailId = ReceiptItem.intLineNo 
 				LEFT JOIN (
-					SELECT	dblTotalCost = SUM(dbo.fnMultiply(ISNULL(ReceiptItem.dblOpenReceive, 0), ISNULL(ReceiptItem.dblUnitCost, 0)))
+					SELECT	dblTotalCost = SUM(
+									dbo.fnMultiply(
+										CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+													ISNULL(ReceiptItem.dblNet, 0) 
+												ELSE 
+													ISNULL(ReceiptItem.dblOpenReceive, 0) 
+										END
+										, ISNULL(ReceiptItem.dblUnitCost, 0)
+									)
+								)
 							,ReceiptItem.intOrderId 
 							,ReceiptItem.intLineNo
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -101,7 +110,10 @@ BEGIN
 								+ (
 									dbo.fnDivide(
 										dbo.fnMultiply(
-											dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.dblOpenReceive)
+											dbo.fnMultiply(
+												Source_Query.dblTotalOtherCharge
+												,Source_Query.Qty
+											)
 											,Source_Query.dblUnitCost
 										)									
 										,Source_Query.dblTotalCost 
@@ -132,7 +144,7 @@ BEGIN
 					dbo.fnMultiply(
 						dbo.fnMultiply(
 							Source_Query.dblTotalOtherCharge
-							,Source_Query.dblOpenReceive 
+							,Source_Query.Qty 
 						)
 						,Source_Query.dblUnitCost
 					)

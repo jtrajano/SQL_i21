@@ -46,8 +46,7 @@ BEGIN
 	USING (
 		SELECT	CalculatedCharges.*
 				,ReceiptItem.intInventoryReceiptItemId
-				,ReceiptItem.dblOpenReceive
-				,ItemUOM.dblUnitQty
+				,Qty = CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END
 				,TotalUnitsOfItemsPerContract.dblTotalUnits 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -55,8 +54,8 @@ BEGIN
 					AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					AND ReceiptItem.intOrderId IS NOT NULL 
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-				INNER JOIN dbo.tblICItemUOM ItemUOM	
-					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+				--INNER JOIN dbo.tblICItemUOM ItemUOM	
+				--	ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (					
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount) 								
 							,ysnAccrue
@@ -83,7 +82,13 @@ BEGIN
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId 
 					AND CalculatedCharges.intContractDetailId = ReceiptItem.intLineNo
 				LEFT JOIN (
-					SELECT	dblTotalUnits = SUM(ReceiptItem.dblOpenReceive)
+					SELECT	dblTotalUnits = SUM(
+								CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+											ISNULL(ReceiptItem.dblNet, 0) 
+										ELSE 
+											ISNULL(ReceiptItem.dblOpenReceive, 0) 
+								END
+							)
 							,ReceiptItem.intOrderId 
 							,ReceiptItem.intLineNo
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -111,7 +116,7 @@ BEGIN
 		SET		dblAmount = ROUND(
 								ISNULL(dblAmount, 0) 
 								+ dbo.fnDivide(
-										dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.dblOpenReceive)
+										dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.Qty)
 										,Source_Query.dblTotalUnits
 								)  								
 								, 2
@@ -136,7 +141,7 @@ BEGIN
 			,Source_Query.intEntityVendorId
 			,ROUND (
 				dbo.fnDivide(
-					dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.dblOpenReceive) 
+					dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.Qty) 
 					,Source_Query.dblTotalUnits 
 				)
 				,2 
