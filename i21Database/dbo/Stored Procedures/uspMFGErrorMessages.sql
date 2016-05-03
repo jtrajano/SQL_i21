@@ -76,3 +76,7 @@ EXEC sp_addmessage 90014,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90015) EXEC sp_dropmessage 90015, 'us_english'	
 SET @strmessage = 'Move qty cannot be greater than available qty.'
 EXEC sp_addmessage 90015,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90016) EXEC sp_dropmessage 90016, 'us_english'	
+SET @strmessage = 'Source Lot''s UOM %s is not configured as one of the UOM in destination item %s.'
+EXEC sp_addmessage 90016,11,@strmessage,'us_english','False'
