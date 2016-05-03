@@ -477,7 +477,7 @@ BEGIN CATCH
     SET @ErrorState    = ERROR_STATE()
     SET @ErrorLine     = ERROR_LINE()
     SET @ErrorProc     = ERROR_PROCEDURE()
-    SET @ErrorMessage  = 'Problem posting payment.' + CHAR(13) + @ErrorMessage
+    --SET @ErrorMessage  = 'Problem posting payment.' + CHAR(13) + @ErrorMessage
     -- Not all errors generate an error state, to set to 1 if it's zero
     IF @ErrorState  = 0
     SET @ErrorState = 1
