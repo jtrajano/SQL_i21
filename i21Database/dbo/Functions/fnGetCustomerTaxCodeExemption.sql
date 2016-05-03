@@ -635,7 +635,7 @@ BEGIN
 	ORDER BY
 		dtmStartDate	
 		
-		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
