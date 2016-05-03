@@ -34,6 +34,7 @@ SELECT
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
+WHERE TMO.strOrderStatus = 'Generated'
 
 UNION ALL
 
