@@ -100,6 +100,10 @@ END
 DROP TABLE #TempGLAccount
 
 UPDATE tblFRRow SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1 WHERE intRowId = @intRowId
+UPDATE tblFRRowDesign SET strDateOverride = 'None' 
+	WHERE intRowId = @intRowId 
+		AND (strRowType = 'Filter Accounts' or strRowType = 'Hidden' or strRowType = 'Cash Flow Activity' or strRowType = 'Percentage' or strRowType = 'Current Year Earnings' or strRowType = 'Retained Earnings')
+		AND (strDateOverride IS NULL or strDateOverride = '')
 
 
 END
