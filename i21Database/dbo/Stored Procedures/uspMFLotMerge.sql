@@ -160,7 +160,7 @@ BEGIN TRY
 													 @intItemUOMId=@intMergeItemUOMId,
 													 @dblNewSplitLotQuantity = NULL,
 													 @dblNewWeight = NULL,
-													 @intNewItemUOMId = NULL,
+													 @intNewItemUOMId = @intNewItemUOMId,
 													 @intNewWeightUOMId = NULL,
 													 @dblNewUnitCost = NULL,
 													 @intSourceId = @intSourceId,
