@@ -43,7 +43,10 @@ BEGIN
 		RETURN 10		
 		
 	IF @SourceTransaction = 'Consumption Site'
-		RETURN 11			
+		RETURN 11		
+		
+	IF @SourceTransaction = 'Meter Billing'
+		RETURN 12			
 
 
 	RETURN @SourceIdOut
