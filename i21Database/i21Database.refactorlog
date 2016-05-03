@@ -5145,4 +5145,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnRecurring" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e32547d8-5ad5-4136-a1bb-8bace000b3e8" ChangeDateTime="05/03/2016 06:59:33">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxCategory].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxCategoryid" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5518e844-e38c-4c91-9307-33fa526f9761" ChangeDateTime="05/03/2016 07:01:11">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxCategory].[intTaxCategoryid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5749ba98-9921-4121-9bbb-0e0874c5cb5e" ChangeDateTime="05/03/2016 07:03:39">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxCriteria].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxCriteria]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxCriteriaId" />
+  </Operation>
 </Operations>
