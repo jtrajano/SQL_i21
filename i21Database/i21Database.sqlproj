@@ -3720,6 +3720,7 @@
     <Build Include="dbo\Tables\tblARCommission.sql" />
     <Build Include="dbo\Tables\tblARCommissionDetail.sql" />
     <Build Include="dbo\Views\vyuARCommission.sql" />
+    <Build Include="dbo\Tables\tblTMGenerateOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
