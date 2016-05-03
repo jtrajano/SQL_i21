@@ -23,6 +23,9 @@ BEGIN TRY
 	DECLARE @intTransactionCount INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 			,@intAdjustItemUOMId int
+			,@intUnitMeasureId int
+			,@strUnitMeasure nvarchar(50)
+			,@strItemNo nvarchar(50)
 
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
 		
@@ -32,9 +35,28 @@ BEGIN TRY
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
 		   @intItemUOMId = intItemUOMId,
-		   @dblAdjustByQuantity=CASE WHEN intWeightUOMId IS NULL THEN -dblQty ELSE -dblWeight END,
-		   @intAdjustItemUOMId= CASE WHEN intWeightUOMId IS NULL THEN intItemUOMId ELSE intWeightUOMId End    
+		   @dblAdjustByQuantity=-dblQty,
+		   @intAdjustItemUOMId= intItemUOMId  
 	FROM tblICLot WHERE intLotId = @intLotId
+
+	SELECT @intUnitMeasureId=intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId=@intItemUOMId
+
+	IF NOT EXISTS(SELECT *FROM dbo.tblICItemUOM WHERE intItemId=@intNewItemId AND intUnitMeasureId=@intUnitMeasureId)
+	BEGIN
+		SELECT @strUnitMeasure =strUnitMeasure 
+		FROM dbo.tblICUnitMeasure 
+		WHERE intUnitMeasureId =@intUnitMeasureId 
+
+		SELECT @strItemNo=strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId=@intNewItemId
+
+		RAISERROR(90016
+				,11
+				,1
+				,@strUnitMeasure
+				,@strItemNo)
+	END
 	
 	SELECT @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
