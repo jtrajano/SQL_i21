@@ -3721,6 +3721,7 @@
     <Build Include="dbo\Tables\tblARCommissionDetail.sql" />
     <Build Include="dbo\Views\vyuARCommission.sql" />
     <Build Include="dbo\Tables\tblTMGenerateOrder.sql" />
+    <Build Include="dbo\Views\vyuLGRouteOrders.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
