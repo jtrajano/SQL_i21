@@ -177,11 +177,12 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		LEFT JOIN tblAPPaymentDetail B
-			ON A.intPaymentId = B.intPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		GROUP BY A.intPaymentId, A.strPaymentRecordNum
-		HAVING SUM(B.dblPayment) = 0
+		OUTER APPLY (
+			SELECT intPaymentDetailId FROM tblAPPaymentDetail B
+			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
+		) PaymentDetails
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND PaymentDetails.intPaymentDetailId IS NULL
 
 		--Payment without detail
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
