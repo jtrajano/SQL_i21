@@ -241,7 +241,7 @@ BEGIN TRY
 		,[strBillToCountry]
 		,[ysnPosted]
 		,[ysnPaid]
-		,[ysnTemplate]
+		,[ysnRecurring]
 		,[ysnForgiven]
 		,[ysnCalculated]
 		,[ysnSplitted]

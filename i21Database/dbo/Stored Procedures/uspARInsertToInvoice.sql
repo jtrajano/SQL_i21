@@ -188,7 +188,7 @@ IF ISNULL(@RaiseError,0) = 0
 --CHECK IF THERE IS SOFTWARE ITEMS (NON-STOCK / STOCK ITEMS)
 IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 	BEGIN
-		SELECT TOP 1 @SoftwareInvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @EntityCustomerId AND ysnTemplate = 1 AND strType = 'Software'
+		SELECT TOP 1 @SoftwareInvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @EntityCustomerId AND ysnRecurring = 1 AND strType = 'Software'
 		
 		IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			BEGIN
@@ -199,7 +199,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				  , dblInvoiceTotal		= dblInvoiceTotal + @dblSalesOrderTotal
 				  , dblDiscount			= dblDiscount + @dblDiscount
 				  , dtmDate				= @DateOnly
-				  , ysnTemplate			= 1
+				  , ysnRecurring		= 1
 				  , strType				= 'Software'
 				  , ysnPosted			= 1
 				WHERE intInvoiceId = @SoftwareInvoiceId
@@ -247,7 +247,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strBillToState]
 					,[strBillToZipCode]
 					,[strBillToCountry]
-					,[ysnTemplate]
+					,[ysnRecurring]
 					,[ysnPosted]
 				)
 				SELECT

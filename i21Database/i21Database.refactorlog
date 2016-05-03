@@ -5138,4 +5138,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblLGWarehouseRateMatrixDetail_tblICItemUOM_intItemUOMId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b85413bb-5bd4-49a7-a3c3-1b485803c75d" ChangeDateTime="05/03/2016 06:16:41">
+    <Property Name="ElementName" Value="[dbo].[tblARInvoice].[ysnTemplate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARInvoice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnRecurring" />
+  </Operation>
 </Operations>
