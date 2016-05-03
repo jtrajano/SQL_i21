@@ -82,7 +82,6 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN vwlocmst I
 				ON B.intLocationId = I.A4GLIdentity
-			WHERE A.strWillCallStatus = ''Generated''
 		')
 	END
 	ELSE
@@ -142,7 +141,6 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
-			WHERE A.strWillCallStatus = ''Generated''
 		')
 	END
 END

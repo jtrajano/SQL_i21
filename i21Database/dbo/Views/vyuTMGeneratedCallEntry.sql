@@ -52,5 +52,4 @@ AS
 		ON A.intUserID = H.[intEntityUserSecurityId]
 	LEFT JOIN tblSMCompanyLocation I
 		ON B.intLocationId = I.intCompanyLocationId
-	WHERE A.strWillCallStatus = 'Generated'
 GO
