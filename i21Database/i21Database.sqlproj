@@ -3724,6 +3724,7 @@
     <Build Include="dbo\Views\vyuLGRouteOrders.sql" />
     <Build Include="dbo\Tables\tblTFTaxCategory.sql" />
     <Build Include="dbo\Tables\tblTFTaxCriteria.sql" />
+    <Build Include="dbo\Tables\tblFRAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
