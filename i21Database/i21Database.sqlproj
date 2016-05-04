@@ -3732,13 +3732,14 @@
     <Build Include="dbo\Stored Procedures\uspAESDecrypt.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryHistoryCallEntry.sql" />
     <Build Include="dbo\Views\vyuPRForm941Report.sql" />
-        <Build Include="dbo\Views\vyuSMUserRoleGroup.sql" />
-        <Build Include="dbo\Functions\fnARComputeDiscountForEarlyPayment.sql" />
-        <Build Include="dbo\Views\vyuTRGetQuoteHeader.sql" />
-        <Build Include="dbo\Views\vyuPRDailyTaxTotal.sql" />
-        <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
-        <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
-        <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleGroup.sql" />
+    <Build Include="dbo\Functions\fnARComputeDiscountForEarlyPayment.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteHeader.sql" />
+    <Build Include="dbo\Views\vyuPRDailyTaxTotal.sql" />
+    <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
+    <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateRouteSequence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
