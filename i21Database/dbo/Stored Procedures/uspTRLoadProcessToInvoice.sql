@@ -104,7 +104,7 @@ BEGIN TRY
 	)
 	SELECT
 		 [strSourceTransaction]					= 'Transport Load'
-		,[intSourceId]							= TL.intLoadHeaderId
+		,[intSourceId]							= DH.intLoadDistributionHeaderId
 		,[strSourceId]							= TL.strTransaction
 		,[intInvoiceId]							= DH.intInvoiceId --NULL Value will create new invoice
 		,[intEntityCustomerId]					= DH.intEntityCustomerId
@@ -188,7 +188,7 @@ BEGIN TRY
 		,[ysnLeaseBilling]						= NULL
 		,[ysnVirtualMeterReading]				= NULL
 		,[ysnClearDetailTaxes]					= 1
-		,[intTempDetailIdForTaxes]				= @intLoadHeaderId
+		,[intTempDetailIdForTaxes]				= NULL
 	FROM tblTRLoadHeader TL
 			LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 			LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = DH.intEntityCustomerId
@@ -257,12 +257,12 @@ BEGIN TRY
 		SET ysnPosted = @ysnPostOrUnPost
 		WHERE intLoadHeaderId = @intLoadHeaderId
 
-		SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @CreatedInvoices, ',', 'strReceiptLink'))
+		SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @UpdatedInvoices, ',', 'strReceiptLink'))
 		SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
 		
 		UPDATE tblARInvoice
 		SET strBOLNumber = @strBOL
-		WHERE intInvoiceId = @CreatedInvoices
+		WHERE intInvoiceId = @UpdatedInvoices
 	END
 
 END TRY
