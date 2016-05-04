@@ -155,7 +155,7 @@ BEGIN
 																	,dbo.fnMultiply(-1, (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
 																) 
 													END 
-												WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
+												WHEN ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) = SourceLot.intWeightUOMId THEN 
 													-- When cutting a bag into weights, then qty becomes wgt. 
 													1 
 												ELSE 
@@ -196,7 +196,7 @@ BEGIN
 															, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
 														)
 													)
-												WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
+												WHEN ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) = SourceLot.intWeightUOMId THEN 
 													-- When cutting a bag into wgt, then qty becomes wgt. 
 													1 
 												ELSE 

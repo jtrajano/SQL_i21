@@ -386,7 +386,8 @@ BEGIN
 								
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
-													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0
+													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Incoming lot is already in wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
+															WHEN ISNULL(LotMaster.intItemUOMId, 0) = ISNULL(LotMaster.intWeightUOMId, 0) AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Lot is purely in wgt. Any bag wgt passed on it is converted to wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
 															WHEN ISNULL(LotMaster.intItemUOMId, 0) <> LotToUpdate.intItemUOMId THEN 1 
 															WHEN ISNULL(LotMaster.intWeightUOMId, 0) <> LotToUpdate.intWeightUOMId THEN 2
 															WHEN ISNULL(LotMaster.intSubLocationId, 0) <> ISNULL(LotToUpdate.intSubLocationId, 0) THEN 3
@@ -414,8 +415,6 @@ BEGIN
 																			+ dbo.fnCalculateQtyBetweenUOM(LotToUpdate.intItemUOMId, LotMaster.intWeightUOMId, LotToUpdate.dblQty) 
 																		)
 																		,(
-																			--(CAST(LotMaster.dblQty AS FLOAT) * CAST(LotMaster.dblWeightPerQty AS FLOAT))
-																			--+ CAST(LotToUpdate.dblWeight AS FLOAT) 
 																			dbo.fnMultiply(LotMaster.dblQty, LotMaster.dblWeightPerQty)	
 																			+ LotToUpdate.dblWeight
 																		)
@@ -493,7 +492,7 @@ BEGIN
 													) THEN 
 														LotMaster.intLotId 
 													WHEN (
-														LotMaster.intWeightUOMId = LotToUpdate.intItemUOMId
+														(LotMaster.intWeightUOMId = LotToUpdate.intItemUOMId OR LotMaster.intWeightUOMId = LotToUpdate.intWeightUOMId)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 													) THEN 
@@ -510,7 +509,7 @@ BEGIN
 													) THEN 
 														LotMaster.intLotId 
 													WHEN (
-														LotMaster.intWeightUOMId = LotToUpdate.intItemUOMId
+														(LotMaster.intWeightUOMId = LotToUpdate.intItemUOMId OR LotMaster.intWeightUOMId = LotToUpdate.intWeightUOMId)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 													) THEN 
