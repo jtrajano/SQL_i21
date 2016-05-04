@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnDateEquals](
-	@expected AS DATETIME
-	,@actual AS DATETIME
+	@actual AS DATETIME
+	,@expected AS DATETIME
 )
 RETURNS BIT
 AS

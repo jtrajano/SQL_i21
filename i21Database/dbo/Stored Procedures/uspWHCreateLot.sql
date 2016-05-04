@@ -59,6 +59,7 @@ BEGIN
 	--Declare @intItemId int
 	Declare @intLocationId int
 	Declare @intSubLocationId int
+	DECLARE @strBOLNo nvarchar(50)
 
 	SELECT TOP 1   
 			@intTransactionId = intOrderHeaderId
@@ -67,6 +68,7 @@ BEGIN
 			,@intCreatedEntityId = @intUserId
 			,@strTransactionId = strBOLNo
 			,@intLocationId=intShipToAddressId  
+			,@strBOLNo = strBOLNo
 	FROM	dbo.tblWHOrderHeader   
 	WHERE	intOrderHeaderId=@intOrderHeaderId
 
@@ -142,31 +144,37 @@ BEGIN
 			,strGarden
 			,intDetailId
 			,ysnProduced		
+			,strTransactionId
+			,strSourceTransactionId
+			,intSourceTransactionTypeId
 	)
-	SELECT	intLotId				= null
-			,strLotNumber			= @strLotNumber
-			,strLotAlias			= @strLotAlias
-			,intItemId				= @intItemId
-			,intItemLocationId		= @intItemLocationId
-			,intSubLocationId		= @intSubLocationId
-			,intStorageLocationId	= @intStorageLocationId
-			,dblQty					= @dblProduceQty
-			,intItemUOMId			= @intProduceUOMKey
-			,dblWeight				= (CASE	WHEN @intWeightUOMId=@intProduceUOMKey THEN NULL ELSE @dblWeight END)
-			,intWeightUOMId			= (CASE	WHEN @intWeightUOMId=@intProduceUOMKey THEN NULL ELSE @intWeightUOMId END)
-			,dtmExpiryDate			= @dtmExpiryDate
-			,dtmManufacturedDate	= GetDate()
-			,intOriginId			= null
-			,strBOLNo				= null
-			,strVessel				= null
-			,strReceiptNumber		= null
-			,strMarkings			= null
-			,strNotes				= null
-			,intEntityVendorId		= null
-			,strVendorLotNo			= @strVendorLotNo
-			,strGarden	= null
-			,intDetailId			= @intOrderHeaderId
-			,ysnProduced			= 1
+	SELECT	intLotId					= null
+			,strLotNumber				= @strLotNumber
+			,strLotAlias				= @strLotAlias
+			,intItemId					= @intItemId
+			,intItemLocationId			= @intItemLocationId
+			,intSubLocationId			= @intSubLocationId
+			,intStorageLocationId		= @intStorageLocationId
+			,dblQty						= @dblProduceQty
+			,intItemUOMId				= @intProduceUOMKey
+			,dblWeight					= (CASE	WHEN @intWeightUOMId=@intProduceUOMKey THEN NULL ELSE @dblWeight END)
+			,intWeightUOMId				= (CASE	WHEN @intWeightUOMId=@intProduceUOMKey THEN NULL ELSE @intWeightUOMId END)
+			,dtmExpiryDate				= @dtmExpiryDate
+			,dtmManufacturedDate		= GetDate()
+			,intOriginId				= null
+			,strBOLNo					= null
+			,strVessel					= null
+			,strReceiptNumber			= null
+			,strMarkings				= null
+			,strNotes					= null
+			,intEntityVendorId			= null
+			,strVendorLotNo				= @strVendorLotNo
+			,strGarden					= null
+			,intDetailId				= @intOrderHeaderId
+			,ysnProduced				= 1
+			,strTransactionId			= @strBOLNo
+			,strSourceTransactionId		= @strBOLNo
+			,intSourceTransactionTypeId	= 4
 
 	EXEC dbo.uspICCreateUpdateLotNumber 
 		@ItemsThatNeedLotId

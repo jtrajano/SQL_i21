@@ -150,6 +150,7 @@ BEGIN
 			-- Parameters for the new values: 
 			,@dblAdjustByQuantity			= NULL
 			,@dblNewUnitCost				= NULL
+			,@intItemUOMId					= NULL 
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId					= 1 
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE

@@ -1231,6 +1231,7 @@ END CATCH
 				INNER JOIN 
 					tblARPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
+						AND ISNULL(A.ysnPosted,0) = 1
 				INNER JOIN 
 					tblARInvoice C
 						ON B.intInvoiceId = C.intInvoiceId
@@ -2109,7 +2110,7 @@ IF @post = 1
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
 				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
+																					dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
 																				ELSE 
 																					IST.dblLastCost  
 																		END 
@@ -2170,7 +2171,7 @@ IF @post = 1
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
 				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId) 
+																					dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId, ARIC.[intItemUnitMeasureId]) 
 																				ELSE 
 																					IST.dblLastCost  
 																		END 
@@ -2666,6 +2667,19 @@ IF @recap = 0
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+					UPDATE
+						tblARPaymentDetail
+					SET
+						tblARPaymentDetail.dblInvoiceTotal = ARI.dblInvoiceTotal 
+						,tblARPaymentDetail.dblAmountDue = (ARI.dblInvoiceTotal + ISNULL(tblARPaymentDetail.dblInterest, @ZeroDecimal))  - (ISNULL(tblARPaymentDetail.dblPayment, @ZeroDecimal) + ISNULL(tblARPaymentDetail.dblDiscount, @ZeroDecimal))
+					FROM
+						tblARInvoice ARI
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					WHERE
+						tblARPaymentDetail.intInvoiceId = ARI.intInvoiceId 
 
 					--Insert Successfully posted transactions.
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

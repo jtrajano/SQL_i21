@@ -81,6 +81,8 @@ BEGIN
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
 		)
 	SELECT intItemId = l.intItemId
 		,intItemLocationId = l.intItemLocationId
@@ -106,6 +108,8 @@ BEGIN
 		,intLotId = l.intLotId
 		,intSubLocationId = l.intSubLocationId
 		,intStorageLocationId = l.intStorageLocationId
+		,intSourceTransactionId=@INVENTORY_CONSUME 
+		,strSourceTransactionId=@strWorkOrderNo
 	FROM tblMFWorkOrderConsumedLot cl
 	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
@@ -196,6 +200,9 @@ BEGIN
 		,strGarden
 		,intDetailId
 		,ysnProduced
+		,strTransactionId			
+		,strSourceTransactionId	
+		,intSourceTransactionTypeId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -222,6 +229,9 @@ BEGIN
 		,strGarden = NULL
 		,intDetailId = @intWorkOrderId
 		,ysnProduced = 1
+		,strTransactionId			=@strWorkOrderNo
+		,strSourceTransactionId		=@strWorkOrderNo 
+		,intSourceTransactionTypeId	=@INVENTORY_PRODUCE
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
@@ -262,6 +272,8 @@ BEGIN
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
 		)
 	SELECT intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
@@ -298,6 +310,8 @@ BEGIN
 		,intLotId = @intLotId
 		,intSubLocationId = @intSubLocationId
 		,intStorageLocationId = @intStorageLocationId
+		,intSourceTransactionId=@INVENTORY_PRODUCE 
+		,strSourceTransactionId=@strWorkOrderNo
 
 	EXEC dbo.uspICPostCosting @ItemsForPost
 		,@strBatchId
