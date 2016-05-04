@@ -3726,6 +3726,7 @@
     <Build Include="dbo\Tables\tblTFTaxCriteria.sql" />
     <Build Include="dbo\Tables\tblFRAuditLog.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryHistoryCallEntry.sql" />
+    <Build Include="dbo\Tables\tblAPImportVoucherLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
