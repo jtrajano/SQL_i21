@@ -1,25 +1,15 @@
-﻿--If there is no master key, create one now. 
-IF NOT EXISTS 
-  (SELECT * FROM sys.symmetric_keys WHERE symmetric_key_id = 101)
-  CREATE MASTER KEY ENCRYPTION BY 
-    PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=';
-GO
-
-OPEN MASTER KEY
-  DECRYPTION BY PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=';
+﻿IF NOT EXISTS
+  (SELECT * FROM sys.certificates WHERE name = 'i21EncryptionCert')
+  CREATE CERTIFICATE i21EncryptionCert
+    ENCRYPTION BY PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+    WITH SUBJECT = 'i21 Encryption Certificate'
 GO
 
 IF NOT EXISTS
-  (SELECT * FROM sys.certificates WHERE name = 'i21Certificate')
-  CREATE CERTIFICATE i21Certificate
-    WITH SUBJECT = 'i21 Certificate';
-GO
-
-IF NOT EXISTS
-  (SELECT * FROM sys.symmetric_keys WHERE name = 'i21SymKey')
-  CREATE SYMMETRIC KEY i21SymKey
+  (SELECT * FROM sys.symmetric_keys WHERE name = 'i21EncryptionSymKey')
+  CREATE SYMMETRIC KEY i21EncryptionSymKey
     WITH ALGORITHM = AES_256
-    ENCRYPTION BY CERTIFICATE i21Certificate;
+    ENCRYPTION BY CERTIFICATE i21EncryptionCert
 GO
 
 IF COL_LENGTH('tblEMEntityCredential', 'ysnNotEncrypted') IS NULL
@@ -27,9 +17,9 @@ IF COL_LENGTH('tblEMEntityCredential', 'ysnNotEncrypted') IS NULL
     ADD ysnNotEncrypted bit NOT NULL DEFAULT((1));
 GO
 
-OPEN SYMMETRIC KEY i21SymKey
-  DECRYPTION BY CERTIFICATE i21Certificate;
-GO
+OPEN SYMMETRIC KEY i21EncryptionSymKey
+  DECRYPTION BY CERTIFICATE i21EncryptionCert
+  WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 DECLARE @EncryptionTable TABLE (
   intEntityCredentialId INT,
@@ -37,7 +27,7 @@ DECLARE @EncryptionTable TABLE (
 )
 
 INSERT INTO @EncryptionTable
-  SELECT intEntityCredentialId, EncryptByKey(Key_GUID('i21SymKey'), strPassword)
+  SELECT intEntityCredentialId, EncryptByKey(Key_GUID('i21EncryptionSymKey'), strPassword)
   FROM tblEMEntityCredential
   WHERE ysnNotEncrypted = 1
 
@@ -47,4 +37,7 @@ ysnNotEncrypted = 0
 FROM tblEMEntityCredential EntityCredential
 join @EncryptionTable Encrypt on Encrypt.intEntityCredentialId = EntityCredential.intEntityCredentialId
 WHERE ysnNotEncrypted = 1;
+GO
+
+CLOSE SYMMETRIC KEY i21EncryptionSymKey 
 GO

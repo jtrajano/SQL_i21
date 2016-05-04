@@ -3727,6 +3727,8 @@
     <Build Include="dbo\Tables\tblFRAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspEncrypt.sql" />
     <Build Include="dbo\Stored Procedures\uspDecrypt.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESEncrypt.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESDecrypt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
