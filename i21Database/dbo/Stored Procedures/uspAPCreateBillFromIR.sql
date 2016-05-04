@@ -279,20 +279,17 @@ BEGIN
 		[intContractDetailId]		=	A.intContractDetailId,
 		[intContractHeaderId]		=	A.intContractHeaderId,
 		[intUnitOfMeasureId]		=	NULL,
-		[intCostUOMId]				=	ItemCostUOM.intUnitMeasureId,
+		[intCostUOMId]              =   A.intCostUnitMeasureId,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1,
 		[dblWeightUnitQty]			=	1,
-		[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1),
-		[dblUnitQty]				=	ISNULL(ItemCostUOM.dblUnitQty,1)
+		[dblCostUnitQty]			=	1,
+		[dblUnitQty]				=	1
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
-	INNER JOIN dbo.tblICInventoryReceiptCharge C ON A.intInventoryReceiptId = C.intInventoryReceiptId
-	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = C.intCostUOMId
-	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
-	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = C.intCurrencyId) 
-											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 	WHERE A.intInventoryReceiptId = @receiptId
 

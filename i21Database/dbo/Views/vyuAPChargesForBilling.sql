@@ -67,7 +67,7 @@ SELECT
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
 	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
-	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
+	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -176,7 +176,7 @@ SELECT
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
 	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
-	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
+	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
