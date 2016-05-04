@@ -261,7 +261,7 @@ GO
 		SELECT strTicketCommentImageId, strFileIdentifier, strFileName,  REPLACE(REPLACE(strFileLocation, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload\Announcement'), blbFile FROM tblHDUpload
 
 		INSERT INTO tblSMAnnouncement(intAnnouncementTypeId, dtmStartDate, dtmEndDate, strAnnouncement, intSort, strImageId)
-		SELECT AnnouncementType1.intAnnouncementTypeId, Announcement.dtmStartDate, Announcement.dtmEndDate, Announcement.strAnnouncement, Announcement.intSort, Announcement.strImageId 
+		SELECT AnnouncementType1.intAnnouncementTypeId, Announcement.dtmStartDate, Announcement.dtmEndDate, REPLACE(REPLACE(Announcement.strAnnouncement, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload/Announcement'), Announcement.intSort, Announcement.strImageId 
 		FROM tblSMAnnouncementType AnnouncementType1
 		INNER JOIN tblHDAnnouncementType AnnouncementType2 ON AnnouncementType1.strAnnouncementType = AnnouncementType2.strAnnouncementType
 		INNER JOIN tblHDAnnouncement Announcement ON AnnouncementType2.intAnnouncementTypeId = Announcement.intAnnouncementTypeId
