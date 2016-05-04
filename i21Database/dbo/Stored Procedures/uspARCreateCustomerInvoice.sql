@@ -220,7 +220,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -279,7 +279,7 @@ BEGIN TRY
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
 		,[intPaymentId]					= @PaymentId 
 		,[intSplitId]					= @SplitId 
-		,[intDistributionHeaderId]		= @DistributionHeaderId 
+		,[intLoadDistributionHeaderId]	= @DistributionHeaderId 
 		,[strActualCostId]				= @ActualCostId 
 		,[intShipmentId]				= @ShipmentId 
 		,[intTransactionId]				= @TransactionId 

@@ -152,7 +152,7 @@ DECLARE  @Id									INT
 		,@Splitted								BIT
 		,@PaymentId								INT
 		,@SplitId								INT
-		,@DistributionHeaderId					INT
+		,@LoadDistributionHeaderId				INT
 		,@ActualCostId							NVARCHAR(50)
 		,@ShipmentId							INT
 		,@TransactionId							INT
@@ -271,7 +271,7 @@ BEGIN
 		,@Splitted						= [ysnSplitted]
 		,@PaymentId						= [intPaymentId]
 		,@SplitId						= [intSplitId]
-		,@DistributionHeaderId			= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
+		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
 		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
@@ -352,8 +352,8 @@ BEGIN
 			BEGIN
 				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
 					BEGIN
-						SET @SourceColumn = 'intDistributionHeaderId'
-						SET @SourceTable = 'tblTRDistributionHeader'
+						SET @SourceColumn = 'intLoadDistributionHeaderId'
+						SET @SourceTable = 'tblTRLoadDistributionHeader'
 					END
 				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
 					BEGIN
@@ -395,7 +395,7 @@ BEGIN
 			,@Type NVARCHAR(200)
 	SET @Type = 'Standard'
 	
-	IF ISNULL(@DistributionHeaderId, 0) > 0
+	IF ISNULL(@LoadDistributionHeaderId, 0) > 0
 		BEGIN
 			SET @Type = 'Transport Delivery'
 		END
@@ -434,7 +434,7 @@ BEGIN
 			,@Splitted						= @Splitted
 			,@PaymentId						= @PaymentId
 			,@SplitId						= @SplitId
-			,@DistributionHeaderId			= @DistributionHeaderId
+			,@DistributionHeaderId			= @LoadDistributionHeaderId
 			,@ActualCostId					= @ActualCostId
 			,@ShipmentId					= @ShipmentId
 			,@TransactionId 				= @TransactionId
@@ -905,7 +905,7 @@ BEGIN TRY
 			,@Splitted						= [ysnSplitted]
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]			
-			,@DistributionHeaderId			= [intDistributionHeaderId]
+			,@LoadDistributionHeaderId		= [intDistributionHeaderId]
 			,@ActualCostId					= [strActualCostId]
 			,@ShipmentId					= [intShipmentId]
 			,@TransactionId 				= [intTransactionId]
@@ -924,8 +924,8 @@ BEGIN TRY
 		BEGIN TRY
 			IF ISNULL(@SourceTransaction,'') = 'Transport Load'
 				BEGIN
-					SET @SourceColumn = 'intDistributionHeaderId'
-					SET @SourceTable = 'tblTRDistributionHeader'
+					SET @SourceColumn = 'intLoadDistributionHeaderId'
+					SET @SourceTable = 'tblTRLoadDistributionHeader'
 				END
 			IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
 				BEGIN
@@ -1005,7 +1005,7 @@ BEGIN TRY
 			,[ysnSplitted]				= ISNULL(@Splitted,0)
 			,[intPaymentId]				= @PaymentId
 			,[intSplitId]				= @SplitId
-			,[intDistributionHeaderId]	= @DistributionHeaderId
+			,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId
 			,[strActualCostId]			= @ActualCostId
 			,[intShipmentId]			= @ShipmentId
 			,[intTransactionId]			= @TransactionId 

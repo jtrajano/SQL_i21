@@ -46,7 +46,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnSplitted]							BIT												NULL	
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Prepayment/Overpayment) 
 	,[intSplitId]							INT												NULL		-- Key Value from tblEntitySplit (Customer Split) 
-	,[intDistributionHeaderId]				INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load) 
+	,[intDistributionHeaderId]				INT												NULL		-- Key Value from tblTRLoadDistributionHeader (Transport Load) 
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing
 	,[intShipmentId]						INT												NULL		-- Key Value from tblLGShipment (Inbound Shipment) 	
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
