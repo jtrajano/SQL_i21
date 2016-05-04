@@ -14,6 +14,7 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MR.dtmTransaction
 	, MADetail.intMeterAccountId
 	, MADetail.intMeterAccountDetailId
+	, MR.strInvoiceComment
 	, MR.intInvoiceId
 	, MR.strInvoiceNumber
 	, MADetail.intItemId
@@ -24,12 +25,12 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MRDetail.dblGrossPrice
 	, MRDetail.dblNetPrice
 	, MADetail.strMeterKey
-	, MADetail.dblLastMeterReading
+	, MRDetail.dblLastReading
 	, MRDetail.dblCurrentReading
-	, dblQuantitySold = MRDetail.dblCurrentReading - MADetail.dblLastMeterReading
-	, MADetail.dblLastTotalSalesDollar
+	, dblQuantitySold = MRDetail.dblCurrentReading - MRDetail.dblLastReading
+	, MRDetail.dblLastDollars
 	, MRDetail.dblCurrentDollars
-	, dblDollarsSold = MRDetail.dblCurrentDollars - MRDetail.dblCurrentDollars
+	, dblDollarsSold = MRDetail.dblCurrentDollars - MRDetail.dblLastDollars
 	, MR.ysnPosted
 	, MR.dtmPostedDate
 	, MRDetail.intSort

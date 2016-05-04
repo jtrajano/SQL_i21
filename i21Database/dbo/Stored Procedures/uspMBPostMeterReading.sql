@@ -123,7 +123,7 @@ BEGIN
 		,[strPONumber]							= NULL
 		,[strBOLNumber]							= ''
 		,[strDeliverPickup]						= 'Pickup'
-		,[strComments]							= ''
+		,[strComments]							= MRDetail.strInvoiceComment
 		,[intShipToLocationId]					= MRDetail.intEntityLocationId
 		,[intBillToLocationId]					= NULL
 		,[ysnTemplate]							= 0
@@ -155,7 +155,7 @@ BEGIN
 		,[dtmMaintenanceDate]					= NULL
 		,[dblMaintenanceAmount]					= NULL
 		,[dblLicenseAmount]						= NULL
-		,[intTaxGroupId]						= NULL
+		,[intTaxGroupId]						= EntityLocation.intTaxGroupId
 		,[ysnRecomputeTax]						= 1
 		,[intSCInvoiceId]						= NULL
 		,[strSCInvoiceNumber]					= ''
@@ -183,6 +183,7 @@ BEGIN
 	FROM vyuMBGetMeterReadingDetail MRDetail
 	LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
 	LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MRDetail.intEntityCustomerId
+	LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MRDetail.intEntityLocationId AND MRDetail.intEntityCustomerId = EntityLocation.intEntityId
 	WHERE MRDetail.intMeterReadingId = @TransactionId
 	GROUP BY MRDetail.intMeterReadingId
 		, MRDetail.strTransactionId
@@ -195,6 +196,8 @@ BEGIN
 		, MADetail.intTermId
 		, MRDetail.dtmTransaction
 		, Customer.intSalespersonId
+		, MRDetail.strInvoiceComment
+		, EntityLocation.intTaxGroupId
 
 	EXEC [dbo].[uspARProcessInvoices]
 		@InvoiceEntries	= @EntriesForInvoice

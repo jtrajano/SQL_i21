@@ -5,6 +5,7 @@ SELECT MR.intMeterReadingId
 	, MR.strTransactionId
 	, MR.intMeterAccountId
 	, MR.intInvoiceId
+	, MR.strInvoiceComment
 	, Invoice.strInvoiceNumber
 	, MA.intEntityCustomerId
 	, MA.strCustomerName
