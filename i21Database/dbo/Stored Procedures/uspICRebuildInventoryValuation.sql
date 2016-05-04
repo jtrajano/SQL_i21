@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	@dtmStartDate AS DATETIME 
+	,@isPeriodic AS BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -272,19 +273,35 @@ BEGIN
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
-		SELECT	TOP 1 
-				@strBatchId = strBatchId
-				,@intUserId = intCreatedUserId
-				,@strTransactionForm = strTransactionForm
-				,@strTransactionId = strTransactionId
-				,@intTransactionId = intTransactionId
-				,@intItemId = intItemId
-				,@dblQty = dblQty 
-				,@intTransactionTypeId = intTransactionTypeId
-		FROM	#tmpICInventoryTransaction
-		-- ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
-		ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
-		-- ORDER BY intInventoryTransactionId ASC 
+		IF ISNULL(@isPeriodic, 1) = 1
+		BEGIN 
+			SELECT	TOP 1 
+					@strBatchId = strBatchId
+					,@intUserId = intCreatedUserId
+					,@strTransactionForm = strTransactionForm
+					,@strTransactionId = strTransactionId
+					,@intTransactionId = intTransactionId
+					,@intItemId = intItemId
+					,@dblQty = dblQty 
+					,@intTransactionTypeId = intTransactionTypeId
+			FROM	#tmpICInventoryTransaction			
+			ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
+		END 
+		ELSE 
+		BEGIN 
+			SELECT	TOP 1 
+					@strBatchId = strBatchId
+					,@intUserId = intCreatedUserId
+					,@strTransactionForm = strTransactionForm
+					,@strTransactionId = strTransactionId
+					,@intTransactionId = intTransactionId
+					,@intItemId = intItemId
+					,@dblQty = dblQty 
+					,@intTransactionTypeId = intTransactionTypeId
+			FROM	#tmpICInventoryTransaction
+			ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
+		END 
+
 
 		-- Run the post routine. 
 		BEGIN 
@@ -680,7 +697,7 @@ BEGIN
 							,RebuilInvTrans.dtmDate  
 							,RebuilInvTrans.dblQty  
 							,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
-							,dblCost = AdjDetail.dblCost
+							,dblCost = dbo.fnCalculateCostBetweenUOM(AdjDetail.intItemUOMId, RebuilInvTrans.intItemUOMId, AdjDetail.dblCost) 
 							,RebuilInvTrans.dblSalesPrice  
 							,RebuilInvTrans.intCurrencyId  
 							,RebuilInvTrans.dblExchangeRate  
@@ -788,6 +805,13 @@ BEGIN
 								AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	RebuilInvTrans.strBatchId = @strBatchId
 							AND RebuilInvTrans.dblQty > 0
+
+					EXEC dbo.uspICRepostCosting
+						@strBatchId
+						,@strAccountToCounterInventory
+						,@intUserId
+						,@strGLDescription
+						,@ItemsToPost
 				END
 			END 					
 			ELSE 

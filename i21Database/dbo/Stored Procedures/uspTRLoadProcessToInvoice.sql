@@ -11,243 +11,262 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000);
-DECLARE @ErrorSeverity INT;
-DECLARE @ErrorState INT;
-DECLARE @InventoryReceiptId INT; 
-DECLARE @ErrMsg NVARCHAR(MAX);
-
-DECLARE @InvoiceStagingTable InvoiceStagingTable,
-        @strReceiptLink NVARCHAR(100),
-		@strBOL NVARCHAR(50),
-        @total INT;
-
-DECLARE @InvoiceOutputTable TABLE (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED
-	, intSourceId INT
-	, intInvoiceId INT )
-DECLARE @InvoicePostOutputTable TABLE (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED
-	, intInvoiceId INT )
+DECLARE @ErrorMessage NVARCHAR(4000)
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
+DECLARE @CreatedInvoices INT
+DECLARE @UpdatedInvoices INT
 
 BEGIN TRY
 
-	IF @ysnPostOrUnPost = 0 AND @ysnRecap = 0
-	BEGIN
-		INSERT INTO @InvoiceOutputTable
-		SELECT DH.intLoadDistributionHeaderId
-			, DH.intInvoiceId
-		FROM tblTRLoadDistributionHeader DH
-		WHERE DH.intLoadHeaderId = @intLoadHeaderId
+	DECLARE @UserEntityId INT
+	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId), @intUserId)
+
+	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+
+	BEGIN TRANSACTION
+
+	INSERT INTO @EntriesForInvoice(
+		 [strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[intInvoiceId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intCurrencyId]
+		,[intTermId]
+		,[dtmDate]
+		,[dtmDueDate]
+		,[dtmShipDate]
+		,[intEntitySalespersonId]
+		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[strPONumber]
+		,[strBOLNumber]
+		,[strDeliverPickup]
+		,[strComments]
+		,[intShipToLocationId]
+		,[intBillToLocationId]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[intPaymentId]
+		,[intSplitId]
+		,[intDistributionHeaderId]
+		,[strActualCostId]
+		,[intShipmentId]
+		,[intTransactionId]
+		,[intEntityId]
+		,[ysnResetDetails]
+		,[ysnPost]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[ysnInventory]
+		,[strItemDescription]
+		,[intItemUOMId]
+		,[dblQtyOrdered]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblPrice]
+		,[ysnRefreshPrice]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[intTaxGroupId]
+		,[ysnRecomputeTax]
+		,[intSCInvoiceId]
+		,[strSCInvoiceNumber]
+		,[intInventoryShipmentItemId]
+		,[strShipmentNumber]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[ysnClearDetailTaxes]					
+		,[intTempDetailIdForTaxes]
+	)
+	SELECT
+		 [strSourceTransaction]					= 'Transport Load'
+		,[intSourceId]							= TL.intLoadHeaderId
+		,[strSourceId]							= TL.strTransaction
+		,[intInvoiceId]							= DH.intInvoiceId --NULL Value will create new invoice
+		,[intEntityCustomerId]					= DH.intEntityCustomerId
+		,[intCompanyLocationId]					= DH.intCompanyLocationId
+		,[intCurrencyId]						= 1
+		,[intTermId]							= EL.intTermsId
+		,[dtmDate]								= TL.dtmLoadDateTime
+		,[dtmDueDate]							= NULL
+		,[dtmShipDate]							= TL.dtmLoadDateTime
+		,[intEntitySalespersonId]				= DH.intEntitySalespersonId
+		,[intFreightTermId]						= NULL 
+		,[intShipViaId]							= ISNULL(TL.intShipViaId, EL.intShipViaId) 
+		,[intPaymentMethodId]					= 0
+		,[strInvoiceOriginId]					= ''
+		,[strPONumber]							= DH.strPurchaseOrder
+		,[strBOLNumber]							= NULL
+		,[strDeliverPickup]						= 'Deliver'
+		,[strComments]							= (CASE WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(DH.strComments)
+														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ee.strSupplyPoint) + ' ' + RTRIM(DH.strComments)
+														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
+														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ee.strSupplyPoint)  + ' Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
+													END)
+		,[intShipToLocationId]					= DH.intShipToLocationId
+		,[intBillToLocationId]					= ISNULL(Customer.intBillToId, EL.intEntityLocationId)
+		,[ysnTemplate]							= 0
+		,[ysnForgiven]							= 0
+		,[ysnCalculated]						= 0  --0 OS
+		,[ysnSplitted]							= 0
+		,[intPaymentId]							= NULL
+		,[intSplitId]							= NULL
+		,[intDistributionHeaderId]				= DH.intLoadDistributionHeaderId
+		,[strActualCostId]						= (CASE WHEN (TR.strOrigin) = 'Terminal' AND (DH.strDestination) = 'Customer'
+														THEN (TL.strTransaction)
+													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Customer' AND (TR.intCompanyLocationId) = (DH.intCompanyLocationId)
+														THEN NULL
+													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Customer' AND (TR.intCompanyLocationId) != (DH.intCompanyLocationId)
+														THEN (TL.strTransaction)
+													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Location'
+														THEN NULL
+													END)
+		,[intShipmentId]						= NULL
+		,[intTransactionId]						= NULL
+		,[intEntityId]							= @UserEntityId
+		,[ysnResetDetails]						= 0
+		,[ysnPost]								= @ysnPostOrUnPost	
+		,[intInvoiceDetailId]					= NULL
+		,[intItemId]							= DD.intItemId
+		,[ysnInventory]							= 1
+		,[strItemDescription]					= Item.strDescription
+		,[intItemUOMId]							= Item.intIssueUOMId
+		,[dblQtyOrdered]						= DD.dblUnits
+		,[dblQtyShipped]						= DD.dblUnits
+		,[dblDiscount]							= 0
+		,[dblPrice]								= DD.dblPrice
+		,[ysnRefreshPrice]						= 0
+		,[strMaintenanceType]					= ''
+		,[strFrequency]							= ''
+		,[dtmMaintenanceDate]					= NULL
+		,[dblMaintenanceAmount]					= NULL
+		,[dblLicenseAmount]						= NULL
+		,[intTaxGroupId]						= DD.intTaxGroupId
+		,[ysnRecomputeTax]						= 1
+		,[intSCInvoiceId]						= NULL
+		,[strSCInvoiceNumber]					= ''
+		,[intInventoryShipmentItemId]			= NULL
+		,[strShipmentNumber]					= ''
+		,[intSalesOrderDetailId]				= NULL
+		,[strSalesOrderNumber]					= ''
+		,[intContractHeaderId]					= (SELECT TOP 1 intContractHeaderId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId = DD.intContractDetailId) 
+		,[intContractDetailId]					= DD.intContractDetailId
+		,[intShipmentPurchaseSalesContractId]	= NULL
+		,[intTicketId]							= NULL
+		,[intTicketHoursWorkedId]				= NULL
+		,[intSiteId]							= NULL
+		,[strBillingBy]							= ''
+		,[dblPercentFull]						= NULL
+		,[dblNewMeterReading]					= NULL
+		,[dblPreviousMeterReading]				= NULL
+		,[dblConversionFactor]					= NULL
+		,[intPerformerId]						= NULL
+		,[ysnLeaseBilling]						= NULL
+		,[ysnVirtualMeterReading]				= NULL
+		,[ysnClearDetailTaxes]					= 1
+		,[intTempDetailIdForTaxes]				= @intLoadHeaderId
+	FROM tblTRLoadHeader TL
+			LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
+			LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = DH.intEntityCustomerId
+			LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
+			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+			LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
+			LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
+			LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
+			LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
+					SELECT Item 
+					FROM dbo.fnTRSplit(DD.strReceiptLink,','))
+					LEFT JOIN ( 
+							SELECT DISTINCT intLoadDistributionDetailId
+								, STUFF(( SELECT DISTINCT ', ' + CD.strSupplyPoint
+											FROM dbo.vyuTRLinkedReceipts CD
+											WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
+												AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
+											FOR XML PATH('')), 1, 2, '') strSupplyPoint
+							FROM vyuTRLinkedReceipts CH) ee 
+						ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+		WHERE TL.intLoadHeaderId = @intLoadHeaderId
 			AND DH.strDestination = 'Customer'
-			AND ISNULL(DH.intInvoiceId,0) != 0
-		
-		SELECT @total = COUNT(*) FROM @InvoiceOutputTable;
-		IF (@total = 0)
-			BEGIN
-				RETURN
-			END
-		ELSE
-			BEGIN
-				GOTO _PostOrUnPost
-			END
-	END
-	
-	-- Insert Entries to Stagging table that needs to processed to Transport Load
-	INSERT into @InvoiceStagingTable(
-		intEntityCustomerId
-		, intLocationId
-		, intItemId
-		, intItemUOMId
-		, dtmDate
-		, intContractDetailId
-		, intShipViaId
-		, intSalesPersonId
-		, dblQty
-		, dblPrice
-		, intCurrencyId
-		, dblExchangeRate
-		, dblFreightRate
-		, strComments
-		, strSourceId
-		, intSourceId
-		, strPurchaseOrder
-		, strDeliverPickup
-		, dblSurcharge
-		, ysnFreightInPrice
-		, intTaxGroupId
-		, strActualCostId
-		, intShipToLocationId
-		, strBOLNumber
-		, intInvoiceId
-		, strSourceScreenName
-		)
-	SELECT intEntityCustomerId	= MIN(DH.intEntityCustomerId)
-		, intLocationId			= MIN(DH.intCompanyLocationId)
-		, intItemId				= MIN(DD.intItemId)
-		, intItemUOMId			= (CASE WHEN MIN(DD.intContractDetailId) IS NULL THEN MIN(IC.intIssueUOMId)
-										WHEN MIN(DD.intContractDetailId) IS NOT NULL THEN (SELECT TOP 1 intItemUOMId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId = MIN(DD.intContractDetailId))
-									END)
-		, dtmDate				= MIN(DH.dtmInvoiceDateTime)
-		, intContractDetailId	= MIN(DD.intContractDetailId)
-		, intShipViaId			= MIN(TL.intShipViaId)
-		, intSalesPersonId		= MIN(DH.intEntitySalespersonId)
-		, dblQty				= MIN(DD.dblUnits)
-		, dblPrice				= MIN(DD.dblPrice)
-		, intCurrencyId			= (SELECT TOP 1 CP.intDefaultCurrencyId
-									FROM dbo.tblSMCompanyPreference CP
-									WHERE CP.intCompanyPreferenceId = 1) -- USD default from company Preference
-		, dblExchangeRate		= 1 -- Need to check this
-		, dblFreightRate		= MIN(DD.dblFreightRate)
-		, strComments			= (CASE WHEN MIN(TR.intSupplyPointId) IS NULL AND MIN(TL.intLoadId) IS NULL THEN RTRIM(MIN(DH.strComments))
-										WHEN MIN(TR.intSupplyPointId) IS NOT NULL AND MIN(TL.intLoadId) IS NULL THEN 'Origin:' + RTRIM(MIN(ee.strSupplyPoint)) + ' ' + RTRIM(MIN(DH.strComments))
-										WHEN (MIN(TR.intSupplyPointId)) IS NULL AND MIN(TL.intLoadId) IS NOT NULL THEN 'Load #:' + RTRIM(MIN(LG.strExternalLoadNumber)) + ' ' + RTRIM(MIN(DH.strComments))
-										WHEN (MIN(TR.intSupplyPointId)) IS NOT NULL AND MIN(TL.intLoadId) IS NOT NULL THEN 'Origin:' + RTRIM(MIN(ee.strSupplyPoint))  + ' Load #:' + RTRIM(MIN(LG.strExternalLoadNumber)) + ' ' + RTRIM(MIN(DH.strComments))
-									END)
-		, strSourceId			= MIN(TL.strTransaction)
-		, intSourceId			= MIN(DH.intLoadDistributionHeaderId)
-		, strPurchaseOrder		= MIN(DH.strPurchaseOrder)
-		, strDeliverPickup		= 'Deliver'
-		, dblSurcharge			= MIN(DD.dblDistSurcharge)
-		, ysnFreightInPrice		= CAST(MIN(CAST(DD.ysnFreightInPrice AS INT)) AS BIT)
-		, intTaxGroupId			= MIN(DD.intTaxGroupId)
-		, strActualCostId		= (CASE WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Customer'
-											THEN MIN(TL.strTransaction)
-										WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
-											THEN NULL
-										WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
-											THEN MIN(TL.strTransaction)
-										WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
-											THEN NULL
-										END)
-		, intShipToLocationId	= MIN(DH.intShipToLocationId)
-		, strBOLNumber			= NULL
-		, intInvoiceId			= MIN(DH.intInvoiceId)
-		, strSourceScreenName	= 'Transport Loads'
-	FROM dbo.tblTRLoadHeader TL
-		JOIN dbo.tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
-		JOIN dbo.tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-		LEFT JOIN dbo.vyuLGLoadView LG ON LG.intLoadId = TL.intLoadId
-		LEFT JOIN dbo.vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
-		LEFT JOIN dbo.tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (SELECT Item FROM dbo.fnTRSplit(DD.strReceiptLink,','))
-		LEFT JOIN ( SELECT DISTINCT intLoadDistributionDetailId
-						, STUFF(( SELECT DISTINCT ', ' + CD.strSupplyPoint
-									FROM dbo.vyuTRLinkedReceipts CD
-									WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
-										AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
-									FOR XML PATH('')), 1, 2, '') strSupplyPoint
-					FROM dbo.vyuTRLinkedReceipts CH) ee ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
-	WHERE TL.intLoadHeaderId = @intLoadHeaderId
-		AND DH.strDestination = 'Customer'
-	GROUP BY DH.intLoadDistributionHeaderId
-		, DD.intLoadDistributionDetailId
-	
-	--No Records to process so exit
-	SELECT @total = COUNT(*) FROM @InvoiceStagingTable
-	IF (@total = 0)
-		RETURN;
 
-	EXEC dbo.uspARAddInvoice @InvoiceStagingTable, @intUserId;
+	EXEC [dbo].[uspARProcessInvoices]
+			 @InvoiceEntries	= @EntriesForInvoice
+			,@UserId			= @intUserId
+			,@GroupingOption	= 11
+			,@RaiseError		= 1
+			,@ErrorMessage		= @ErrorMessage OUTPUT
+			,@CreatedIvoices	= @CreatedInvoices OUTPUT
+			,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
 
-	INSERT INTO @InvoiceOutputTable
-	SELECT IE.intSourceId
-		, IV.intInvoiceId
-	FROM @InvoiceStagingTable IE
-		JOIN tblARInvoice IV ON IE.intSourceId = IV.intLoadDistributionHeaderId
-
-_PostOrUnPost:
-	
-	DECLARE @incval INT
-		, @SouceId INT
-		, @InvoiceId INT;
-		
-	DECLARE @minId INT = 0
-		, @maxId INT
-		, @SuccessCount INT
-		, @InvCount INT
-		, @IsSuccess BIT
-		, @batchId NVARCHAR(20);
-	
-	SET @incval = 1
-	WHILE @incval <= @total
+	IF (@ErrorMessage IS NULL)
 	BEGIN
-		SELECT @SouceId = intSourceId
-			, @InvoiceId = intInvoiceId
-		FROM @InvoiceOutputTable
-		WHERE @incval = intId
-		
-		UPDATE tblTRLoadDistributionHeader
-		SET intInvoiceId = @InvoiceId
-		WHERE @SouceId = intLoadDistributionHeaderId 
-		
-		SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @InvoiceId, ',', 'strReceiptLink'))
+		COMMIT TRANSACTION
+	END
+	ELSE
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
+
+	DECLARE @strReceiptLink NVARCHAR(100),
+		@strBOL NVARCHAR(50)
+
+	IF (@CreatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
+	BEGIN
+		UPDATE tblTRLoadDistributionHeader 
+		SET intInvoiceId = @CreatedInvoices
+		WHERE intLoadHeaderId = @intLoadHeaderId
+
+		UPDATE tblTRLoadHeader 
+		SET ysnPosted = @ysnPostOrUnPost
+		WHERE intLoadHeaderId = @intLoadHeaderId
+
+		SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @CreatedInvoices, ',', 'strReceiptLink'))
 		SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
 		
 		UPDATE tblARInvoice
 		SET strBOLNumber = @strBOL
-		WHERE intInvoiceId = @InvoiceId
-		
-		SET @incval += 1;
-	END;
-	
-	IF @ysnRecap = 0
+		WHERE intInvoiceId = @CreatedInvoices
+	END
+
+	IF (@UpdatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
 	BEGIN
-		IF (@ysnPostOrUnPost = 0 AND @ysnRecap = 0)
-		BEGIN
-			INSERT INTO @InvoicePostOutputTable
-			SELECT DISTINCT DH.intInvoiceId
-			FROM tblTRLoadDistributionHeader DH
-			WHERE DH.intLoadHeaderId = @intLoadHeaderId
-				AND DH.strDestination = 'Customer'
-				AND ISNULL(DH.intInvoiceId,0) != 0
-		END
-		ELSE
-		BEGIN
-			INSERT INTO @InvoicePostOutputTable
-			SELECT DISTINCT IV.intInvoiceId
-			FROM @InvoiceStagingTable IE
-				JOIN tblARInvoice IV ON IE.intSourceId = IV.intLoadDistributionHeaderId
-		END
+		UPDATE tblTRLoadHeader 
+		SET ysnPosted = @ysnPostOrUnPost
+		WHERE intLoadHeaderId = @intLoadHeaderId
+
+		SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @CreatedInvoices, ',', 'strReceiptLink'))
+		SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
 		
-		SELECT @total = COUNT(*) FROM @InvoicePostOutputTable;
-		SET @incval = 1
-		WHILE (@incval <= @total)
-		BEGIN
-			SELECT @InvoiceId = intInvoiceId
-			FROM @InvoicePostOutputTable
-			WHERE @incval = intId
-			
-			EXEC [dbo].[uspARPostInvoice]
-					@batchId = NULL
-					, @post = @ysnPostOrUnPost
-					, @recap = 0
-					, @param = NULL
-					, @userId = @intUserId
-					, @beginDate = NULL
-					, @endDate = NULL
-					, @beginTransaction = @InvoiceId
-					, @endTransaction = @InvoiceId
-					, @exclude = NULL
-					, @successfulCount = @SuccessCount OUTPUT
-					, @invalidCount = @InvCount OUTPUT
-					, @success = @IsSuccess OUTPUT
-					, @batchIdUsed = @batchId OUTPUT
-					, @recapId = NULL
-					, @transType = N'Invoice'
-					, @raiseError = 1
-			
-			IF @IsSuccess = 0
-			BEGIN
-				RAISERROR('Invoice did not Post/UnPost', 16, 1);
-			END
-			
-			SET @incval += 1;
-		END;
-		
-		--Post the invoice that was created
+		UPDATE tblARInvoice
+		SET strBOLNumber = @strBOL
+		WHERE intInvoiceId = @CreatedInvoices
 	END
 
 END TRY
+
 BEGIN CATCH
 	SELECT 
 		@ErrorMessage = ERROR_MESSAGE(),
