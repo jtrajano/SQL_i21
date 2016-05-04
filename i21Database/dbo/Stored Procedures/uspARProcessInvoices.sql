@@ -171,6 +171,8 @@ DECLARE  @Id									INT
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
+		,@ItemPrepayTypeId						INT
+		,@ItemPrepayRate						NUMERIC(18, 6)
 		,@Inventory								BIT
 		,@ItemDocumentNumber					NVARCHAR(100)
 		,@ItemDescription						NVARCHAR(250)
@@ -189,6 +191,8 @@ DECLARE  @Id									INT
 		,@ItemMaintenanceAmount					NUMERIC(18, 6)
 		,@ItemLicenseAmount						NUMERIC(18, 6)
 		,@ItemTaxGroupId						INT
+		,@ItemStorageLocationId					INT
+		,@ItemCompanyLocationSubLocationId		INT
 		,@RecomputeTax							BIT
 		,@ItemSCInvoiceId						INT
 		,@ItemSCInvoiceNumber					NVARCHAR(25)
@@ -296,6 +300,8 @@ BEGIN
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
+		,@ItemPrepayTypeId 				= (CASE WHEN @GroupingOption = 0 THEN [intPrepayTypeId] ELSE NULL END) 
+		,@ItemPrepayRate 				= (CASE WHEN @GroupingOption = 0 THEN [dblPrepayRate] ELSE NULL END) 
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
 		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL([strDocumentNumber],[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
@@ -313,6 +319,8 @@ BEGIN
 		,@ItemMaintenanceAmount			= (CASE WHEN @GroupingOption = 0 THEN [dblMaintenanceAmount] ELSE NULL END)
 		,@ItemLicenseAmount				= (CASE WHEN @GroupingOption = 0 THEN [dblLicenseAmount] ELSE NULL END)
 		,@ItemTaxGroupId				= (CASE WHEN @GroupingOption = 0 THEN [intTaxGroupId] ELSE NULL END)
+		,@ItemStorageLocationId			= (CASE WHEN @GroupingOption = 0 THEN [intStorageLocationId] ELSE NULL END)
+		,@ItemCompanyLocationSubLocationId	= (CASE WHEN @GroupingOption = 0 THEN [intCompanyLocationSubLocationId] ELSE NULL END)
 		,@RecomputeTax					= (CASE WHEN @GroupingOption = 0 THEN [ysnRecomputeTax] ELSE 0 END)
 		,@ItemSCInvoiceId				= (CASE WHEN @GroupingOption = 0 THEN [intSCInvoiceId] ELSE NULL END)
 		,@ItemSCInvoiceNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSCInvoiceNumber] ELSE NULL END)
@@ -363,10 +371,15 @@ BEGIN
 	BEGIN TRY
 		IF ISNULL(@SourceTransaction, '') <> 'Import'
 			BEGIN
-				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
+				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@LoadDistributionHeaderId,0) = 0
 					BEGIN
 						SET @SourceColumn = 'intDistributionHeaderId'
 						SET @SourceTable = 'tblTRDistributionHeader'
+					END
+				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
+					BEGIN
+						SET @SourceColumn = 'intLoadDistributionHeaderId'
+						SET @SourceTable = 'tblTRLoadDistributionHeader'
 					END
 				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
 					BEGIN
@@ -469,6 +482,8 @@ BEGIN
 			,@SourceId						= @NewSourceId
 
 			,@ItemId						= @ItemId
+			,@ItemPrepayTypeId				= @ItemPrepayTypeId
+			,@ItemPrepayRate				= @ItemPrepayRate
 			,@ItemIsInventory				= @Inventory
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
@@ -485,6 +500,8 @@ BEGIN
 			,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 			,@ItemLicenseAmount				= @ItemLicenseAmount
 			,@ItemTaxGroupId				= @ItemTaxGroupId
+			,@ItemStorageLocationId			= @ItemStorageLocationId 
+			,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId 
 			,@RecomputeTax					= @RecomputeTax
 			,@ItemSCInvoiceId				= @ItemSCInvoiceId
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
@@ -583,6 +600,8 @@ BEGIN
 				SELECT TOP 1
 					 @ShipmentId					= [intShipmentId]		 	
 					,@ItemId						= [intItemId]
+					,@ItemPrepayTypeId				= [intPrepayTypeId]
+					,@ItemPrepayRate 				= [dblPrepayRate]
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
@@ -639,6 +658,8 @@ BEGIN
 					EXEC [dbo].[uspARAddItemToInvoice]
 						 @InvoiceId						= @NewInvoiceId	
 						,@ItemId						= @ItemId
+						,@ItemPrepayTypeId				= @ItemPrepayTypeId
+						,@ItemPrepayRate 				= @ItemPrepayRate
 						,@ItemIsInventory				= @Inventory
 						,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
 						,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
@@ -955,10 +976,15 @@ BEGIN TRY
 			[intId]
 
 		BEGIN TRY
-			IF ISNULL(@SourceTransaction,'') = 'Transport Load'
+			IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@LoadDistributionHeaderId,0) = 0
 				BEGIN
 					SET @SourceColumn = 'intDistributionHeaderId'
 					SET @SourceTable = 'tblTRDistributionHeader'
+				END
+			IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
+				BEGIN
+					SET @SourceColumn = 'intLoadDistributionHeaderId'
+					SET @SourceTable = 'tblTRLoadDistributionHeader'
 				END
 			IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
 				BEGIN
@@ -1120,6 +1146,8 @@ BEGIN TRY
 					SELECT TOP 1
 						 @ShipmentId					= [intShipmentId]		 	
 						,@ItemId						= [intItemId]
+						,@ItemPrepayTypeId				= [intPrepayTypeId]
+						,@ItemPrepayRate				= [dblPrepayRate]
 						,@Inventory						= [ysnInventory]
 						,@ItemDocumentNumber			= [strDocumentNumber]
 						,@ItemDescription				= [strItemDescription]
@@ -1175,6 +1203,8 @@ BEGIN TRY
 						EXEC [dbo].[uspARAddItemToInvoice]
 							 @InvoiceId						= @ExistingInvoiceId	
 							,@ItemId						= @ItemId
+							,@ItemPrepayTypeId				= @ItemPrepayTypeId
+							,@ItemPrepayRate				= @ItemPrepayRate
 							,@ItemIsInventory				= @Inventory
 							,@NewInvoiceDetailId			= @NewExistingDetailId	OUTPUT 
 							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
@@ -1335,6 +1365,8 @@ BEGIN TRY
 					 @ShipmentId					= [intShipmentId]		 	
 					,@InvoiceDetailId				= [intInvoiceDetailId] 
 					,@ItemId						= [intItemId]
+					,@ItemPrepayTypeId				= [intPrepayTypeId]
+					,@ItemPrepayRate				= [dblPrepayrate]
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
@@ -1436,6 +1468,8 @@ BEGIN TRY
 						[tblARInvoiceDetail]
 					SET	
 						 [intItemId]							= @ItemId
+						,[intPrepayTypeId]						= @ItemPrepayTypeId
+						,[dblPrepayRate]						= @ItemPrepayRate
 						,[strDocumentNumber]					= @ItemDocumentNumber
 						,[strItemDescription]					= @ItemDescription
 						,[intOrderUOMId]						= @OrderUOMId

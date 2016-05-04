@@ -227,6 +227,8 @@ INSERT INTO @EntriesForInvoice
 	,[dblMaintenanceAmount]
 	,[dblLicenseAmount]
 	,[intTaxGroupId]
+	,[intStorageLocationId]
+	--,[intCompanyLocationSubLocationId]
 	,[ysnRecomputeTax]
 	,[intSCInvoiceId]
 	,[strSCInvoiceNumber]
@@ -320,6 +322,8 @@ SELECT
 	,[dblMaintenanceAmount]					= @ZeroDecimal 
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
+	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
+	--,[intCompanyLocationSubLocationId]		= ARSI.[intStorageLocationId] 
 	,[ysnRecomputeTax]						= 1
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
