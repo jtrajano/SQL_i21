@@ -27,7 +27,9 @@
     [dtmMaintenanceDate]					DATETIME										NULL, 
     [dblMaintenanceAmount]					NUMERIC(18, 6)									NULL, 
     [dblLicenseAmount]						NUMERIC(18, 6)									NULL,      	
-	[intTaxGroupId]							INT												NULL,	
+	[intTaxGroupId]							INT												NULL,
+	[intStorageLocationId]					INT												NULL,
+	[intCompanyLocationSubLocationId]		INT												NULL,
 	[intSCInvoiceId]						INT												NULL,
 	[intSCBudgetId]							INT												NULL,
 	[strSCInvoiceNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
@@ -77,7 +79,9 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblHDTicketHoursWorked_intTicketHoursWorkedId] FOREIGN KEY ([intTicketHoursWorkedId]) REFERENCES [dbo].[tblHDTicketHoursWorked] ([intTicketHoursWorkedId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblTMSite_intSiteId] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId])
+	CONSTRAINT [FK_tblARInvoiceDetail_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId])
 );
 
 GO
