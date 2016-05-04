@@ -19,7 +19,6 @@
 	[intCompanyLocationId] INT  NULL,
 	[strTransferTicket] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[strSettleTicket] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
-	[intUnitMeasureId] [int] NULL, 
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRStorageHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
