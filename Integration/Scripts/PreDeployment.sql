@@ -164,6 +164,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r "..\dbo\Views\vyuTMOriginItemUsedBySite.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateGeneratedCallEntryView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryHistoryCallEntryView.sql"
 
 
 
