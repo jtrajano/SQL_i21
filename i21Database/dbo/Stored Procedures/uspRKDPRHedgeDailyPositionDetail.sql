@@ -886,7 +886,7 @@ SELECT	@strDescription, 'Quantity Sales' [strType], 'Quantity Sales',isnull(dblQ
 	
 	INSERT INTO @tempFinal (strCommodityCode,strType,strSubType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId)
-SELECT  @strDescription, 'Purchase Gross Dollars' [strType], 'Purchase Gross Dollars',isnull(dblOpenReceive,0) dblTotal,
+	SELECT  @strDescription, 'Purchase Gross Dollars' [strType], 'Purchase Gross Dollars',isnull(dblOpenReceive,0)*isnull(dblUnitCost,0) dblTotal,
 			cd.intContractHeaderId, ch.strContractNumber + '-' + convert(varchar,cd.intContractSeq) strContractNumber
 			,cl.strLocationName
 			,r.strReceiptNumber strTicketNumber
@@ -894,7 +894,7 @@ SELECT  @strDescription, 'Purchase Gross Dollars' [strType], 'Purchase Gross Dol
 			,r.strVendorRefNo as strCustomerReference
 			,'Purchase Contract' as strDistributionOption
 			,dblUnitCost AS dblUnitCost
-			,isnull(dblOpenReceive,0)*isnull(dblUnitCost,0) AS dblQtyReceived
+			,isnull(dblOpenReceive,0) AS dblQtyReceived
 			,ch.intCommodityId			
 		FROM tblICInventoryReceipt r
 		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Purchase Contract')
