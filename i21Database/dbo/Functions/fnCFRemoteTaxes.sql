@@ -43,7 +43,7 @@ RETURNS @tblTaxTable TABLE
 		,[strTaxCode]					NVARCHAR(100)						
 		,[ysnTaxExempt]					BIT
 		,[strTaxGroup]					NVARCHAR(100)
-		,[ysnInvalid]					BIT
+		,[ysnInvalidSetup]				BIT
 		,[strNotes]						NVARCHAR(MAX)
 		,[strReason]					NVARCHAR(MAX)
     )
@@ -70,6 +70,7 @@ BEGIN
 		,ysnTaxExempt					BIT
 		,strNotes						NVARCHAR(MAX)
 		,strReason						NVARCHAR(MAX)
+		,ysnInvalidSetup				BIT
 	)
 
 	DECLARE @tblTaxCodeRecord TABLE
@@ -109,7 +110,8 @@ BEGIN
 		,smTaxCode.ysnCheckoffTax
 		,ysnTaxExempt = E.ysnTaxExempt
 		,strNotes = E.strExemptionNotes
-		,''
+		,strReason = E.strExemptionNotes
+		,E.ysnInvalidSetup
 	FROM tblCFNetwork cfNetwork
 	INNER JOIN tblCFNetworkTaxCode cfNetworkTax
 		ON cfNetwork.intNetworkId = cfNetworkTax.intNetworkId
@@ -129,6 +131,28 @@ BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'Federal Excise Tax Rate' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
 			INSERT INTO @tblTaxTable
+			(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				 0
 				,0	
@@ -139,15 +163,15 @@ BEGIN
 				,[strTaxableByOtherTaxes]	
 				,[strCalculationMethod]		
 				,@FederalExciseTaxRate					
-				,null					
-				,null			
+				,0					
+				,0			
 				,[intSalesTaxAccountId]			
 				,0		
 				,[ysnCheckoffTax]			
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
-				,''				
-				,0				
+				,''			
+				,[ysnInvalidSetup]	
 				,[strNotes]		
 				,''			
 			FROM
@@ -157,7 +181,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -172,6 +196,28 @@ BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'State Excise Tax Rate 1' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
 			INSERT INTO @tblTaxTable
+			(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				 0
 				,0	
@@ -189,8 +235,8 @@ BEGIN
 				,[ysnCheckoffTax]			
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
-				,''				
-				,0				
+				,''			
+				,[ysnInvalidSetup]	
 				,[strNotes]		
 				,''			
 			FROM
@@ -200,7 +246,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -215,6 +261,28 @@ BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'State Excise Tax Rate 2' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
 			INSERT INTO @tblTaxTable
+			(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				 0
 				,0	
@@ -233,7 +301,7 @@ BEGIN
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
 				,''				
-				,0				
+				,[ysnInvalidSetup]
 				,[strNotes]		
 				,''			
 			FROM
@@ -243,7 +311,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -258,6 +326,28 @@ BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'County Excise Tax Rate' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
 			INSERT INTO @tblTaxTable
+			(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				  0
 				,0	
@@ -275,8 +365,8 @@ BEGIN
 				,[ysnCheckoffTax]			
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
-				,''				
-				,0				
+				,''							
+				,[ysnInvalidSetup]	
 				,[strNotes]		
 				,''			
 			FROM
@@ -286,7 +376,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -301,6 +391,28 @@ BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'City Excise Tax Rate' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
 			INSERT INTO @tblTaxTable
+			(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				  0
 				,0	
@@ -318,8 +430,8 @@ BEGIN
 				,[ysnCheckoffTax]			
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
-				,''				
-				,0				
+				,''						
+				,[ysnInvalidSetup]		
 				,[strNotes]		
 				,''			
 			FROM
@@ -329,7 +441,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -344,6 +456,28 @@ BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'State Sales Tax Percentage Rate' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
 			INSERT INTO @tblTaxTable
+			(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				 0
 				,0	
@@ -362,7 +496,7 @@ BEGIN
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
 				,''				
-				,0				
+				,[ysnInvalidSetup]			
 				,[strNotes]		
 				,''			
 			FROM
@@ -372,7 +506,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -387,6 +521,28 @@ BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'County Sales Tax Percentage Rate' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
 			INSERT INTO @tblTaxTable
+			(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				  0
 				,0	
@@ -404,8 +560,8 @@ BEGIN
 				,[ysnCheckoffTax]			
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
-				,''				
-				,0				
+				,''						
+				,[ysnInvalidSetup]	
 				,[strNotes]		
 				,''			
 			FROM
@@ -415,7 +571,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -429,7 +585,28 @@ BEGIN
 	BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'City Sales Tax Percentage Rate' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
-			INSERT INTO @tblTaxTable
+			INSERT INTO @tblTaxTable	(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				  0
 				,0	
@@ -447,8 +624,8 @@ BEGIN
 				,[ysnCheckoffTax]			
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
-				,''				
-				,0				
+				,''						
+				,[ysnInvalidSetup]	
 				,[strNotes]		
 				,''			
 			FROM
@@ -458,7 +635,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -472,7 +649,28 @@ BEGIN
 	BEGIN
 		IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE strNetworkTaxCode = 'Other Sales Tax Percentage Rate' AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 		BEGIN 
-			INSERT INTO @tblTaxTable
+			INSERT INTO @tblTaxTable(
+				[intTransactionDetailTaxId]
+				,[intTransactionDetailId]	
+				,[intTaxGroupMasterId]		
+				,[intTaxGroupId]			
+				,[intTaxCodeId]				
+				,[intTaxClassId]			
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[intTaxAccountId]			
+				,[ysnSeparateOnInvoice]		
+				,[ysnCheckoffTax]			
+				,[strTaxCode]				
+				,[ysnTaxExempt]				
+				,[strTaxGroup]				
+				,[ysnInvalidSetup]			
+				,[strNotes]					
+				,[strReason]		
+			)
 			SELECT TOP 1
 				  0
 				,0	
@@ -490,8 +688,8 @@ BEGIN
 				,[ysnCheckoffTax]			
 				,[strTaxCode]				
 				,[ysnTaxExempt]				
-				,''				
-				,0				
+				,''					
+				,[ysnInvalidSetup]		
 				,[strNotes]		
 				,''			
 			FROM
@@ -501,7 +699,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @tblTaxTable(
-				 [ysnInvalid]
+				 [ysnInvalidSetup]
 				,[strReason]
 			)
 			VALUES(
@@ -791,6 +989,28 @@ BEGIN
 				IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 				BEGIN 
 					INSERT INTO @tblTaxTable
+					(
+						 [intTransactionDetailTaxId]
+						,[intTransactionDetailId]	
+						,[intTaxGroupMasterId]		
+						,[intTaxGroupId]			
+						,[intTaxCodeId]				
+						,[intTaxClassId]			
+						,[strTaxableByOtherTaxes]	
+						,[strCalculationMethod]		
+						,[dblRate]					
+						,[dblTax]					
+						,[dblAdjustedTax]			
+						,[intTaxAccountId]			
+						,[ysnSeparateOnInvoice]		
+						,[ysnCheckoffTax]			
+						,[strTaxCode]				
+						,[ysnTaxExempt]				
+						,[strTaxGroup]				
+						,[ysnInvalidSetup]			
+						,[strNotes]					
+						,[strReason]				
+					)
 					SELECT TOP 1
 						 0
 						,0	
@@ -801,17 +1021,17 @@ BEGIN
 						,[strTaxableByOtherTaxes]	
 						,[strCalculationMethod]		
 						,0				
-						,null					
-						,null			
+						,0					
+						,0			
 						,[intSalesTaxAccountId]			
 						,0		
 						,[ysnCheckoffTax]			
 						,[strTaxCode]				
 						,[ysnTaxExempt]				
 						,''				
-						,0				
+						,[ysnInvalidSetup]				
 						,[strNotes]		
-						,''			
+						,[strNotes]			
 					FROM
 						@tblNetworkTaxMapping
 					WHERE [intTaxCodeId] = @intCreatedInvoiceId
@@ -819,7 +1039,7 @@ BEGIN
 				ELSE
 				BEGIN
 					INSERT INTO @tblTaxTable(
-						 [ysnInvalid]
+						 [ysnInvalidSetup]
 						,[strReason]
 					)
 					VALUES(
@@ -833,8 +1053,6 @@ BEGIN
 			END
 		
 	END
-
-
 
     RETURN
 END

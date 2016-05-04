@@ -1066,7 +1066,7 @@ BEGIN
 	-- Price Profile Computation --
 	-------------------------------
 
-	select dblOriginalGrossPrice from tblCFTransaction
+	--select dblOriginalGrossPrice from tblCFTransaction
 	
 	SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
 	print 'rate'
