@@ -465,7 +465,8 @@ BEGIN
 				SET A.[ysnInsertedToAPIVC] = 1
 			FROM tblAPaptrxmst A
 			INNER JOIN #ReInsertedToaptrxmst B 
-				ON A.A4GLIdentity = B.intA4GLIdentity AND A.aptrx_ivc_no = B.aptrx_ivc_no_header AND A.aptrx_vnd_no = B.aptrx_vnd_no_header
+				ON A.A4GLIdentity = B.intA4GLIdentity AND A.aptrx_ivc_no = B.aptrx_ivc_no_header COLLATE Latin1_General_CS_AS
+				AND A.aptrx_vnd_no = B.aptrx_vnd_no_header COLLATE Latin1_General_CS_AS
 
 			SET @totalUpdatedysnInsertedToAPIVC = @@ROWCOUNT;
 
