@@ -9,6 +9,7 @@
 	-- Parameters for the new values: 
 	,@dblAdjustByQuantity AS NUMERIC(38,20)
 	,@dblNewUnitCost AS NUMERIC(38,20)
+	,@intItemUOMId AS INT 
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT
@@ -90,6 +91,33 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- Check if the item uom id is valid. 
+IF NOT EXISTS (
+	SELECT	TOP 1 1
+	FROM	dbo.tblICItemUOM
+	WHERE	intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMId	
+)
+BEGIN 
+	-- Item UOM is invalid or missing.
+	RAISERROR(80048, 11, 1)  
+	GOTO _Exit
+END 
+
+-- Check if the item uom id is valid for the lot record. 
+IF NOT EXISTS (
+	SELECT	TOP 1 1
+	FROM	dbo.tblICLot 
+	WHERE	intItemId = @intItemId
+			AND intLotId = @intLotId
+			AND (intItemUOMId = @intItemUOMId OR intWeightUOMId = @intItemUOMId) 
+)
+BEGIN 
+	-- Item UOM is invalid or missing.
+	RAISERROR(80048, 11, 1)  
+	GOTO _Exit
+END 
+
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the starting number for the inventory adjustment. 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -166,12 +194,22 @@ BEGIN
 			,intStorageLocationId		= Lot.intStorageLocationId
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
-			,intItemUOMId				= Lot.intItemUOMId
-			,dblQuantity				= Lot.dblQty
+			,intItemUOMId				= @intItemUOMId
+			,dblQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+													ELSE 0 
+											END 
 			,dblAdjustByQuantity		= @dblAdjustByQuantity
-			,dblNewQuantity				= Lot.dblQty + @dblAdjustByQuantity
+			,dblNewQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+													ELSE 0 
+											END 
+											+ @dblAdjustByQuantity
 			,intWeightUOMId				= Lot.intWeightUOMId
-			,dblWeight					= ABS(@dblAdjustByQuantity * Lot.dblWeightPerQty)
+			,dblWeight					=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN ABS(@dblAdjustByQuantity) 
+													ELSE 0 
+											END 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
 			,dblCost					= Lot.dblLastCost
 			,dblNewCost					= @dblNewUnitCost

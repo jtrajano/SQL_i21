@@ -238,6 +238,39 @@ BEGIN TRY
 				,ysnIsStorage 
 			)
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
+			IF(@dblRemainingUnits > 0)
+				BEGIN
+					INSERT INTO @ItemsForItemReceipt (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+					,ysnIsStorage 
+				)
+				EXEC dbo.uspSCGetScaleItemForItemReceipt 
+					 @intTicketId
+					,@strSourceType
+					,@intUserId
+					,@dblRemainingUnits
+					,@dblCost
+					,@intEntityId
+					,@intContractId
+					,'SPT'
+					,@LineItems
+				END
 			--IF (@dblRemainingUnits = @dblNetUnits)
 			--RETURN
 		END

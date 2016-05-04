@@ -445,6 +445,7 @@ BEGIN TRY
 		END
 		GOTO CONTINUEISH
 	END
+
 	BEGIN 
 		SELECT @intScaleStationId = SC.intScaleSetupId, @intItemId = SC.intItemId
 		FROM	dbo.tblSCTicket SC	        
@@ -467,14 +468,14 @@ BEGIN TRY
 	IF @intGRStorageId IS NULL 
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Invalid Default Storage Setup - uspSCStorageUpdate', 16, 1);
+		--RAISERROR('Invalid Default Storage Setup - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
 
 	IF @intDefaultStorageSchedule IS NULL 
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Invalid Default Schedule Storage in Commodity - uspSCStorageUpdate', 16, 1);
+		--RAISERROR('Invalid Default Schedule Storage in Inventory Commodity - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
 
@@ -486,9 +487,10 @@ BEGIN TRY
 	IF @matchStorageType !=  @intGRStorageId
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Storage type / Storage Schedule Mismatch - uspSCStorageUpdate', 16, 1);
+		--RAISERROR('Storage type / Storage Schedule Mismatch - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
+
 	BEGIN 
 		SELECT	@intCommodityUnitMeasureId = CommodityUOM.intUnitMeasureId
 		FROM	dbo.tblSCTicket SC	        

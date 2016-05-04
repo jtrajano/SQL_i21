@@ -3,7 +3,7 @@ AS
 	SELECT
 	l.strLotNumber,
 	r.intLotId,
-	strTransactionId AS [strWorkOrderBOLNo],
+	l.strTransactionId AS [strWorkOrderBOLNo],
 	i.strItemNo AS strBlend,
 	i1.strItemNo,
 	i1.strDescription,

@@ -26,7 +26,8 @@ SELECT	CD.intContractDetailId,
 		CASE	WHEN	CH.ysnLoad = 1
 					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
 					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
-		END		AS	dblAppliedQty
+		END		AS	dblAppliedQty,
+		dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate
 
 FROM	tblCTContractDetail			CD	
 JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId		LEFT

@@ -281,19 +281,19 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
 												ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
-		[dblDebit]						=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
+		[dblDebit]						=	CAST(CASE WHEN D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal
 												 WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
 												 WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0 AND D.[intInventoryReceiptChargeId] IS NULL THEN B.dblTotal / B.dblRate
 												ELSE (CASE WHEN A.intTransactionType IN (2, 3) THEN D.dblAmount * (-1) 
 														ELSE 
 															(CASE WHEN D.ysnInventoryCost = 0 
 																THEN 
-																	(CASE WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0
-																		THEN B.dblTotal / B.dblRate		
-																		ELSE B.dblTotal END) --Get the amount from voucher if NOT inventory cost
+																	(CASE WHEN B.dblRate > 0 AND B.ysnSubCurrency > 0 THEN B.dblTotal / B.dblRate		
+																		  WHEN B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate	
+																		ELSE B.dblTotal  END) --Get the amount from voucher if NOT inventory cost
 																ELSE D.dblAmount END)
 													END)
-											END, --Bill Detail
+											END AS DECIMAL(18,2)), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -348,7 +348,9 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
 		--[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
-		[dblDebit]						=	(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END)
+		[dblDebit]						=	(CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) 
+												  WHEN B.dblRate > 0 THEN  CAST(SUM(D.dblTax) / B.dblRate AS DECIMAL(18,2))
+											 ELSE SUM(D.dblTax) END)
 											* (CASE WHEN A.intTransactionType = 3 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -401,6 +403,7 @@ BEGIN
 	,A.intTransactionType
 	,A.strBillId
 	,A.intBillId
+	,B.dblRate
 	
 	RETURN
 END

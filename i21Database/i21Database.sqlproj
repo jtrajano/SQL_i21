@@ -3563,6 +3563,9 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalancePrintEach.sql" />
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
@@ -3728,6 +3731,14 @@
     <Build Include="dbo\Stored Procedures\uspAESEncrypt.sql" />
     <Build Include="dbo\Stored Procedures\uspAESDecrypt.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryHistoryCallEntry.sql" />
+    <Build Include="dbo\Views\vyuPRForm941Report.sql" />
+        <Build Include="dbo\Views\vyuSMUserRoleGroup.sql" />
+        <Build Include="dbo\Functions\fnARComputeDiscountForEarlyPayment.sql" />
+        <Build Include="dbo\Views\vyuTRGetQuoteHeader.sql" />
+        <Build Include="dbo\Views\vyuPRDailyTaxTotal.sql" />
+        <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
+        <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
+        <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3870,5 +3881,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountType.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\9_AlterTable.sql" />
   </ItemGroup>
 </Project>

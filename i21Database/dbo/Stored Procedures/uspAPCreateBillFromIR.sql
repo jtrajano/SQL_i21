@@ -137,7 +137,7 @@ BEGIN
 		[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
 		[intAccountId] 			=	@APAccount,
 		[strBillId]				=	@generatedBillRecordId,
-		[strReference] 			=	A.strBillOfLading,
+		[strReference] 			=	NULL,
 		[dblTotal] 				=	A.dblInvoiceAmount,
 		[dblAmountDue]			=	A.dblInvoiceAmount,
 		[intEntityId]			=	@userId,
@@ -154,7 +154,7 @@ BEGIN
 	(
 		SELECT 
 			C.intTermsId
-		FROM tblAPVendor B INNER JOIN [tblEMEntityLocation] C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
+		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
 		WHERE B.intEntityVendorId = A.intEntityVendorId
 	) Terms
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
@@ -279,25 +279,21 @@ BEGIN
 		[intContractDetailId]		=	A.intContractDetailId,
 		[intContractHeaderId]		=	A.intContractHeaderId,
 		[intUnitOfMeasureId]		=	NULL,
-		[intCostUOMId]				=	NULL,
+		[intCostUOMId]				=	ItemCostUOM.intUnitMeasureId,
 		[intWeightUOMId]			=	NULL,
 		[intLineNo]					=	1,
-		[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,1),
+		[dblWeightUnitQty]			=	1,
 		[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1),
-		[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
+		[dblUnitQty]				=	ISNULL(ItemCostUOM.dblUnitQty,1)
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
-	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = B.intCurrencyId) 
-											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = B.intCurrencyId)
-	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
-	INNER JOIN dbo.tblICInventoryReceiptItem C ON A.intInventoryReceiptId = C.intInventoryReceiptId
-	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = C.intWeightUOMId
-	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	INNER JOIN dbo.tblICInventoryReceiptCharge C ON A.intInventoryReceiptId = C.intInventoryReceiptId
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = C.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = C.intUnitMeasureId
-	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = C.intCurrencyId) 
+											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
