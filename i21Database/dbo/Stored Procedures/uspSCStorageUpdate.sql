@@ -709,7 +709,11 @@ BEGIN TRY
 					,intLotId = NULL 
 					,intSubLocationId = ScaleTicket.intSubLocationId
 					,intStorageLocationId = ScaleTicket.intStorageLocationId
-					,ysnIsStorage = 1
+					,ysnIsStorage = 
+					CASE 
+						WHEN ISNULL(@intDPContractId,0) > 0 THEN 0
+						WHEN ISNULL(@intDPContractId,0) = 0 THEN 1
+					END
 			FROM	dbo.tblSCTicket ScaleTicket
 					INNER JOIN dbo.tblICItemUOM ItemUOM
 						ON ScaleTicket.intItemId = ItemUOM.intItemId
