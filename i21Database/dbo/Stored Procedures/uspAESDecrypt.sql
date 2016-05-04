@@ -4,11 +4,9 @@
 AS
 BEGIN
 
-    OPEN MASTER KEY
-        DECRYPTION BY PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
-
-    OPEN SYMMETRIC KEY i21SymKey
-        DECRYPTION BY CERTIFICATE i21Certificate
+    OPEN SYMMETRIC KEY i21EncryptionSymKey
+        DECRYPTION BY CERTIFICATE i21EncryptionCert
+        WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
     SELECT @decryptedText =
         CONVERT(
@@ -16,6 +14,8 @@ BEGIN
             DecryptByKey(CAST(N'' as XML).value('xs:base64Binary(sql:variable(''@encryptedText''))', 'varbinary(128)'))
         )
     
+        CLOSE SYMMETRIC KEY i21EncryptionSymKey
+
     RETURN
 
 END
