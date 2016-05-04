@@ -53,7 +53,7 @@ BEGIN TRY
 		DELETE FROM tblWHPickForShipment WHERE id = @intMinId
 												 
 		SELECT @intMinId = MIN(id)
-		FROM tblWHPickForShipment WHERE id > @intMinId
+		FROM tblWHPickForShipment WHERE strShipmentNo = @strShipmentNo AND id > @intMinId
 	END
 	
 END TRY

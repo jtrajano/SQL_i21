@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFStageKit]
+CREATE PROCEDURE [dbo].[uspMFStageKit]
 	@intPickListId int,
 	@intUserId int
 AS

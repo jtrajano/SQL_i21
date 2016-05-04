@@ -171,7 +171,7 @@ BEGIN TRY
 	IF ISNULL(@existingInvoiceDetail, 0) > 0
 		BEGIN
 			UPDATE tblARInvoiceDetail 
-				SET dblQtyOrdered = dblQtyOrdered + ISNULL(@ItemQtyShipped ,0.000000),
+				SET dblQtyOrdered = dblQtyOrdered,
 					dblQtyShipped = dblQtyShipped + ISNULL(@ItemQtyShipped ,0.000000)
 			WHERE intInvoiceDetailId = @existingInvoiceDetail
 		END

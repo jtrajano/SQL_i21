@@ -1,49 +1,107 @@
 ﻿CREATE VIEW [dbo].[vyuPRMonthlyTaxTotal]
 AS
 SELECT	
-	Liability.intYear
-	,Liability.intQuarter
-	,Liability.intMonth
-	,dblLiabilityTotal = Liability.dblTotal
-	,dblTaxTotal = Tax.dblTotal
-	,dblMonthTotal = Liability.dblTotal + Tax.dblTotal
+	Months.intYear
+	,Months.intQuarter
+	,Months.intMonth
+	,dblFIT = ISNULL(FIT.dblTotal, 0)
+	,dblLiabilitySS = ISNULL(LiabilitySS.dblTotal, 0)
+	,dblLiabilityMed = ISNULL(LiabilityMed.dblTotal, 0)
+	,dblTaxTotalSS = ISNULL(TaxTotalSS.dblTotal, 0)
+	,dblTaxTotalMed = ISNULL(TaxTotalMed.dblTotal, 0)
+	,dblMonthTotal = ISNULL(LiabilitySS.dblTotal, 0) 
+					+ ISNULL(LiabilityMed.dblTotal, 0) 
+					+ ISNULL(TaxTotalSS.dblTotal, 0) 
+					+ ISNULL(TaxTotalMed.dblTotal, 0)
 FROM 
 	(SELECT 
-		intYear		= DATEPART(YEAR, [tblPRPaycheck].[dtmPayDate])
-		,intQuarter = DATEPART(Q, [tblPRPaycheck].[dtmPayDate])
-		,intMonth	= DATEPART(M, [tblPRPaycheck].[dtmPayDate])
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(tblPRPaycheckTax.dblTotal))
-	 FROM tblPRPaycheck INNER JOIN tblPRPaycheckTax 
-		ON tblPRPaycheck.intPaycheckId = tblPRPaycheckTax.intPaycheckId
-	 WHERE (((tblPRPaycheckTax.strCalculationType = 'USA Social Security' 
-		OR tblPRPaycheckTax.strCalculationType = 'USA Medicare') 
-		AND tblPRPaycheckTax.strPaidBy = 'Company')
-		AND tblPRPaycheck.ysnPosted = 1
-		AND tblPRPaycheck.ysnVoid = 0)
+		DISTINCT
+		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
+		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
+		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+		FROM vyuPRPaycheckTax
+	) Months
+	LEFT JOIN
+	(SELECT 
+		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
+		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
+		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+	 FROM vyuPRPaycheckTax
+	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Social Security'
+			AND vyuPRPaycheckTax.strPaidBy = 'Company'
 	 GROUP BY 
-		DATEPART(YEAR, [tblPRPaycheck].[dtmPayDate]), 
-		DATEPART(Q, [tblPRPaycheck].[dtmPayDate]), 
-		DATEPART(M, [tblPRPaycheck].[dtmPayDate])
-	) AS Liability 
-	INNER JOIN 
+		DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+	) AS LiabilitySS
+	ON Months.intMonth = LiabilitySS.intMonth 
+		AND Months.intQuarter = LiabilitySS.intQuarter
+		AND Months.intYear = LiabilitySS.intYear
+	LEFT JOIN
+	(SELECT 
+		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
+		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
+		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+	 FROM vyuPRPaycheckTax
+	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
+			AND vyuPRPaycheckTax.strPaidBy = 'Company'
+	 GROUP BY 
+		DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+	) AS LiabilityMed
+	ON Months.intMonth = LiabilityMed.intMonth 
+		AND Months.intQuarter = LiabilityMed.intQuarter
+		AND Months.intYear = LiabilityMed.intYear
+	LEFT JOIN
 	(SELECT	
-		intYear		= DATEPART(YEAR, [tblPRPaycheck].[dtmPayDate])
-		,intQuarter = DATEPART(Q, [tblPRPaycheck].[dtmPayDate])
-		,intMonth	= DATEPART(M, [tblPRPaycheck].[dtmPayDate])
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(tblPRPaycheckTax.dblTotal))
-	 FROM tblPRPaycheck INNER JOIN tblPRPaycheckTax 
-	   ON tblPRPaycheck.intPaycheckId = tblPRPaycheckTax.intPaycheckId
-	 WHERE ((tblPRPaycheckTax.strCalculationType = 'USA Federal Tax' 
-		OR (tblPRPaycheckTax.strCalculationType = 'USA Social Security' 
-			OR tblPRPaycheckTax.strCalculationType = 'USA Medicare') 
-			AND tblPRPaycheckTax.strPaidBy = 'Employee') 
-		AND tblPRPaycheck.ysnPosted = 1
-		AND tblPRPaycheck.ysnVoid = 0)
+		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
+		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
+		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+	 FROM vyuPRPaycheckTax
+	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Social Security'
+			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
 	GROUP BY
-		DATEPART(YEAR, [tblPRPaycheck].[dtmPayDate]), 
-		DATEPART(Q, [tblPRPaycheck].[dtmPayDate]), 
-		DATEPART(M, [tblPRPaycheck].[dtmPayDate])
-	) AS Tax 
-		ON Liability.intMonth = Tax.intMonth 
-		AND Liability.intQuarter = Tax.intQuarter
-		AND Liability.intYear = Tax.intYear
+		DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+	) AS TaxTotalSS
+	ON Months.intMonth = TaxTotalSS.intMonth 
+		AND Months.intQuarter = TaxTotalSS.intQuarter
+		AND Months.intYear = TaxTotalSS.intYear
+	LEFT JOIN
+	(SELECT 
+		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
+		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
+		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+	 FROM vyuPRPaycheckTax
+	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
+			AND vyuPRPaycheckTax.strPaidBy = 'Company'
+	 GROUP BY 
+		DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+	) AS TaxTotalMed
+	ON Months.intMonth = TaxTotalMed.intMonth 
+		AND Months.intQuarter = TaxTotalMed.intQuarter
+		AND Months.intYear = TaxTotalMed.intYear
+	LEFT JOIN
+	(SELECT	
+		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
+		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
+		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+	 FROM vyuPRPaycheckTax
+	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Federal Tax'
+	GROUP BY
+		DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(Q, vyuPRPaycheckTax.dtmPayDate), 
+		DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
+	) AS FIT
+	ON Months.intMonth = FIT.intMonth 
+		AND Months.intQuarter = FIT.intQuarter
+		AND Months.intYear = FIT.intYear

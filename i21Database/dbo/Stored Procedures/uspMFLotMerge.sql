@@ -2,6 +2,7 @@
  @intLotId INT,     
  @intNewLotId INT,  
  @dblMergeQty NUMERIC(38,20),
+ @intMergeItemUOMId int,
  @intUserId INT,
  @blnValidateLotReservation BIT = 0
 
@@ -54,12 +55,19 @@ BEGIN TRY
 		   @intLotStatusId = intLotStatusId,
 		   @intNewLocationId = intLocationId,
 		   @dblLotWeightPerUnit = dblWeightPerQty,
-		   @intSourceLotWeightUOM = intWeightUOMId,
 		   @intWeightUOMId = intWeightUOMId,
-		   @dblWeight = dblWeight
-	FROM tblICLot WHERE intLotId = @intLotId
+		   @intSourceLotWeightUOM = intWeightUOMId,
+		   @dblWeight = dblWeight,
+		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End,
+		   @intItemUOMId=intItemUOMId
+		FROM tblICLot WHERE intLotId = @intLotId
 
-	IF @dblMergeQty>@dblOldSourceWeight
+	--SELECT @intItemStockUOMId = intItemUOMId
+	--FROM dbo.tblICItemUOM
+	--WHERE intItemId = @intItemId
+	--	AND ysnStockUnit = 1
+
+	IF (CASE WHEN @intItemUOMId=@intMergeItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMergeQty*@dblLotWeightPerUnit ELSE -@dblMergeQty END)>@dblOldSourceWeight
 	BEGIN
 		SELECT @strStorageLocationName = strName FROM tblICStorageLocation WHERE intStorageLocationId = @intStorageLocationId
 		SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
@@ -77,16 +85,16 @@ BEGIN TRY
 	
 	IF @blnValidateLotReservation = 1
 	BEGIN
-		IF (@dblOldSourceWeight + (-@dblMergeQty)) < @dblLotReservedQty
+		IF (@dblOldSourceWeight + (CASE WHEN @intItemUOMId=@intMergeItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMergeQty*@dblLotWeightPerUnit ELSE -@dblMergeQty END)) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END
 	END
 
-	IF @dblLotWeightPerUnit > 0 
-	BEGIN
-		SELECT @dblMergeQty = dbo.fnDivide(@dblMergeQty, @dblLotWeightPerUnit)
-	END
+	--IF @dblLotWeightPerUnit > 0 
+	--BEGIN
+	--	SELECT @dblMergeQty = dbo.fnDivide(@dblMergeQty, @dblLotWeightPerUnit)
+	--END
 
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
 	
@@ -97,7 +105,8 @@ BEGIN TRY
 		   @strNewLotNumber = strLotNumber,
 		   @intNewLotStatusId = intLotStatusId,
 		   @dblNewLotWeightPerUnit = dblWeightPerQty,
-		   @intDestinationLotWeightUOM = intWeightUOMId
+		   @intDestinationLotWeightUOM = intWeightUOMId,
+		   @dblOldDestinationWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
 	FROM tblICLot WHERE intLotId = @intNewLotId
 		   
 	SELECT @dtmDate = GETDATE()
@@ -124,6 +133,17 @@ BEGIN TRY
 		RAISERROR(90009,11,1)
 	END												 
 
+	--IF ROUND(@dblNewLotWeightPerUnit,3) <> ROUND(@dblLotWeightPerUnit,3)
+	--BEGIN
+	--	RAISERROR(51196,11,1)
+	--END
+
+	--IF @dblOldDestinationWeight IS NULL
+	--SELECT @dblOldDestinationWeight=0
+
+	--IF @dblOldSourceWeight IS NULL
+	--SELECT @dblOldSourceWeight=0
+
 	BEGIN TRANSACTION
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
@@ -137,6 +157,7 @@ BEGIN TRY
 													 @intNewStorageLocationId = @intNewStorageLocationId,
 													 @strNewLotNumber = @strNewLotNumber,
 													 @dblAdjustByQuantity = @dblAdjustByQuantity,
+													 @intItemUOMId=@intMergeItemUOMId,
 													 @dblNewSplitLotQuantity = NULL,
 													 @dblNewWeight = NULL,
 													 @intNewItemUOMId = @intNewItemUOMId,
@@ -146,15 +167,17 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblNewLotWeightPerUnit
-	WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
-	
-	--UPDATE tblICLot
-	--SET dblWeight = dblQty
-	--WHERE dblQty <> dblWeight
-	--	AND intItemUOMId = intWeightUOMId
-	--and intLotId=@intLotId
+	--UPDATE dbo.tblICLot
+	--SET dblWeightPerQty = @dblLotWeightPerUnit,
+	--	dblWeight = CASE WHEN @dblLotWeightPerUnit = 0 THEN 0 ELSE @dblOldSourceWeight-@dblMergeWeight END,
+	--	dblQty = (@dblOldSourceWeight-@dblMergeWeight)/CASE WHEN @dblLotWeightPerUnit = 0 THEN 1 ELSE @dblLotWeightPerUnit END
+	--WHERE intLotId=@intLotId
+
+	--UPDATE dbo.tblICLot
+	--SET dblWeightPerQty = @dblNewLotWeightPerUnit,
+	--	dblWeight = CASE WHEN @dblNewLotWeightPerUnit = 0 THEN 0 ELSE @dblOldDestinationWeight+@dblMergeWeight END,
+	--	dblQty = (@dblOldDestinationWeight+@dblMergeWeight)/CASE WHEN @dblNewLotWeightPerUnit = 0 THEN 1 ELSE @dblNewLotWeightPerUnit END
+	--WHERE intLotId=@intNewLotId
 
 	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 	BEGIN
@@ -164,23 +187,25 @@ BEGIN TRY
 		EXEC dbo.uspMFLotAdjustQty
 			@intLotId = @intLotId,       
 			@dblNewLotQty = @dblLotQty,
+			@intAdjustItemUOMId=@intItemUOMId,
 			@intUserId = @intUserId ,
 			@strReasonCode = 'Weight qty same',
 			@strNotes = 'Weight qty same'
 	END
 
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR (@intWeightUOMId is null and (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		--EXEC dbo.uspMFLotAdjustQty
-		-- @intLotId =@intLotId,       
-		-- @dblNewLotQty =0,
-		-- @intUserId=@intUserId ,
-		-- @strReasonCode ='Residue qty clean up',
-		-- @strNotes ='Residue qty clean up'
-		UPDATE tblICLot
-		SET dblWeight = 0
-			,dblQty = 0
-		WHERE intLotId = @intLotId
+		EXEC dbo.uspMFLotAdjustQty
+		 @intLotId =@intLotId,       
+		 @dblNewLotQty =0,
+		 @intAdjustItemUOMId=@intItemUOMId,
+		 @intUserId=@intUserId ,
+		 @strReasonCode ='Residue qty clean up',
+		 @strNotes ='Residue qty clean up'
+		--UPDATE tblICLot
+		--SET dblWeight = 0
+		--	,dblQty = 0
+		--WHERE intLotId = @intLotId
 	END
 	COMMIT TRANSACTION
 END TRY  

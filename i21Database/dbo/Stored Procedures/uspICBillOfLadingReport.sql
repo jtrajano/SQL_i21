@@ -92,8 +92,8 @@ BEGIN TRY
 				,ShipmentItem.strItemDescription
 				,Lot.strLotNumber
 				,Lot.strLotAlias
-				,ShipmentItemLot.dblLotQty
-				,ShipmentItemLot.strLotUOM
+				,ISNULL(ShipmentItemLot.dblLotQty, ShipmentItem.dblQtyToShip) AS dblQty
+				,ISNULL(ShipmentItemLot.strLotUOM, ShipmentItem.strUnitMeasure) AS strUOM
 				,ShipmentItemLot.dblNetWeight
 				,SUM(ShipmentItemLot.dblNetWeight) OVER() AS dblTotalWeight
 				,intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)

@@ -962,6 +962,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Cost Adjust.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Ship Stocks.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Receive Stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnMultiply.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDivide.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for a successful post.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid company location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid lot id.sql" />

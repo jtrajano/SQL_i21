@@ -81,6 +81,7 @@ AS
 			ISNULL(PA.intAllocationUOMId,SA.intAllocationUOMId)													AS	intAllocationUOMId,
 			ISNULL(U5.strUnitMeasure,U6.strUnitMeasure)                                                         AS  strAllocationUOM,
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)							AS	ysnAllowedToShow,
+			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)											AS	dblExchangeRate,
 			CASE	WHEN	CD.intPricingTypeId = 2
 					THEN	CASE	WHEN	ISNULL(PF.intTotalLots,0) = 0 
 									THEN	'Unpriced'
