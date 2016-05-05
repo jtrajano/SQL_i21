@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblEMEntityPhoneNumber] (
     [ysnDisplayCountryCode]         BIT NULL,
     [intConcurrencyId]              INT CONSTRAINT [DF_tblEMEntityPhoneNumber_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
-	CONSTRAINT [FK_tblEMEntityPhoneNumber_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblEMEntityPhoneNumber_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]) ON DELETE CASCADE,
     CONSTRAINT [PK_tblEMEntityPhoneNumber] PRIMARY KEY CLUSTERED ([intEntityPhoneNumberId] ASC)
 );
 
