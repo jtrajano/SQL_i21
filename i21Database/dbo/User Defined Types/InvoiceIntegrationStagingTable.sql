@@ -81,12 +81,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
     ,[intItemId]							INT												NULL		-- The Item Id 
-	,[intPrepayTypeId]						INT												NULL		-- Valid values(prepaid) 
-																											-- 0. ""
-																											-- 1. "Standard"
-																											-- 2. "Unit"
-																											-- 3. "Percentage"	
-	,[dblPrepayRate]						NUMERIC(18, 6)									NULL		-- Prepay Rate
     ,[ysnInventory]							BIT												NULL		-- Indicate whether the line item is a inventory item or a miscellaneous item
 	,[strDocumentNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Document Number (Transaction Number(Provisional Invoice/Inbound Shipment/Inventory Shipment))
     ,[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Line Item Description(If NULL the item's description will be used)
@@ -106,8 +100,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
     ,[dblMaintenanceAmount]					NUMERIC(18, 6)									NULL
     ,[dblLicenseAmount]						NUMERIC(18, 6)									NULL
 	,[intTaxGroupId]						INT												NULL		-- Key Value from tblSMTaxGroup (Taxes)
-	,[intStorageLocationId]					INT												NULL		-- Key Value from tblICStorageLocation (Storage Location)
-	,[intCompanyLocationSubLocationId]		INT												NULL		-- Key Value from tblSMCompanyLocationSubLocation (Sub Location)
 	,[ysnRecomputeTax]						BIT												NULL		-- Indicate whether to recompute for Taxes based on the current Tax setup	
 	,[intSCInvoiceId]						INT												NULL		-- Service Charge Invoice Id
 	,[strSCInvoiceNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Service Charge Invoice Number	
