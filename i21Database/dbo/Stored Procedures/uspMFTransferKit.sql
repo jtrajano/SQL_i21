@@ -36,6 +36,7 @@ Declare @intItemIssuedUOMId int
 Declare @strBulkItemXml nvarchar(max)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
+		,@intQtyItemUOMId int
  
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess Where intAttributeTypeId=2
 
@@ -129,7 +130,7 @@ Begin Try
 	--Get the child Lots attached to Pick List
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId)
-	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
+	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
 	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId
@@ -138,8 +139,9 @@ Begin Try
 
 	While(@intMinChildLot is not null) --Loop Child Lot.
 	Begin
-		Select @dblPickQuantity=NULL,@intPickUOMId=NULL
+		Select @dblPickQuantity=NULL,@intPickUOMId=NULL,@intQtyItemUOMId=NULL
 		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId
+				,@intQtyItemUOMId=intItemUOMId
 		From @tblChildLot Where intRowNo=@intMinChildLot
 
 		Set @intNewLotId=NULL
@@ -147,6 +149,12 @@ Begin Try
 		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intBlendStagingLocationId --And dblQty > 0
 
 		Set @dblMoveQty=@dblReqQty/@dblWeightPerUnit
+
+		IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+		BEGIN
+			SELECT @dblPickQuantity=@dblReqQty
+			SELECT @intPickUOMId=@intQtyItemUOMId
+		END
 
 		If ISNULL(@intNewLotId,0) = 0 --Move
 			Begin

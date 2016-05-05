@@ -42,6 +42,8 @@
 	,@SourceId						INT				= 0
 		
 	,@ItemId						INT				= NULL
+	,@ItemPrepayTypeId				INT				= 0
+	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@ItemIsInventory				BIT				= 0
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
@@ -58,6 +60,8 @@
 	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
 	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
 	,@ItemTaxGroupId				INT				= NULL
+	,@ItemStorageLocationId			INT				= NULL
+	,@ItemCompanyLocationSubLocationId	INT				= NULL
 	,@RecomputeTax					BIT				= 0
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
@@ -405,6 +409,8 @@ BEGIN TRY
 	EXEC [dbo].[uspARAddItemToInvoice]
 		 @InvoiceId						= @NewId	
 		,@ItemId						= @ItemId
+		,@ItemPrepayTypeId				= @ItemPrepayTypeId
+		,@ItemPrepayRate				= @ItemPrepayRate
 		,@ItemIsInventory				= @ItemIsInventory
 		,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
 		,@ErrorMessage					= @AddDetailError	OUTPUT
@@ -424,6 +430,8 @@ BEGIN TRY
 		,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 		,@ItemLicenseAmount				= @ItemLicenseAmount
 		,@ItemTaxGroupId				= @ItemTaxGroupId
+		,@ItemStorageLocationId			= @ItemStorageLocationId 
+		,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId 
 		,@RecomputeTax					= @RecomputeTax
 		,@ItemSCInvoiceId				= @ItemSCInvoiceId
 		,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber

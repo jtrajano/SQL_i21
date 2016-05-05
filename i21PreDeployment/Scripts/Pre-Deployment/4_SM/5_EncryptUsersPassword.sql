@@ -26,6 +26,14 @@ DECLARE @EncryptionTable TABLE (
   encrypted_data VARBINARY(128)
 )
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityCredential' AND [COLUMN_NAME] = 'strPassword') 
+BEGIN
+	EXEC('
+	    ALTER TABLE [tblEMEntityCredential] ALTER COLUMN [strPassword] nvarchar(MAX)  COLLATE Latin1_General_CI_AS
+  ')
+END
+
+
 INSERT INTO @EncryptionTable
   SELECT intEntityCredentialId, EncryptByKey(Key_GUID('i21EncryptionSymKey'), strPassword)
   FROM tblEMEntityCredential

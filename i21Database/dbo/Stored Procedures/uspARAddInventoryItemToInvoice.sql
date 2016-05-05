@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddInventoryItemToInvoice]
 	 @InvoiceId						INT	
 	,@ItemId						INT
+	,@ItemPrepayTypeId				INT				= 0
+	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0	
@@ -20,6 +22,8 @@
 	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
 	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
 	,@ItemTaxGroupId				INT				= NULL
+	,@ItemStorageLocationId			INT				= NULL
+	,@ItemCompanyLocationSubLocationId	INT				= NULL
 	,@RecomputeTax					BIT				= 1
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
@@ -180,6 +184,8 @@ BEGIN TRY
 			INSERT INTO [tblARInvoiceDetail]
 				([intInvoiceId]
 				,[intItemId]
+				,[intPrepayTypeId]
+				,[dblPrepayRate]
 				,[strDocumentNumber]
 				,[strItemDescription]
 				,[intOrderUOMId]
@@ -204,6 +210,8 @@ BEGIN TRY
 				,[dblMaintenanceAmount]
 				,[dblLicenseAmount]
 				,[intTaxGroupId]
+				,[intCompanyLocationSubLocationId]
+				,[intStorageLocationId]
 				,[intSCInvoiceId]
 				,[strSCInvoiceNumber]
 				,[intInventoryShipmentItemId]
@@ -235,7 +243,9 @@ BEGIN TRY
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
-				,[intItemId]						= IC.[intItemId] 
+				,[intItemId]						= IC.[intItemId]
+				,[intPrepayTypeId]					= @ItemPrepayTypeId 
+				,[dblPrepayRate]					= @ItemPrepayRate
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
 				,[intOrderUOMId]					= @OrderUOMId
@@ -260,6 +270,8 @@ BEGIN TRY
 				,[dblMaintenanceAmount]				= @ItemMaintenanceAmount
 				,[dblLicenseAmount]					= @ItemLicenseAmount
 				,[intTaxGroupId]					= @ItemTaxGroupId
+				,[intCompanyLocationSubLocationId]	= @ItemCompanyLocationSubLocationId
+				,[intStorageLocationId]				= @ItemStorageLocationId
 				,[intSCInvoiceId]					= @ItemSCInvoiceId
 				,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
 				,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 

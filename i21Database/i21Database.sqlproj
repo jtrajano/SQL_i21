@@ -3741,6 +3741,14 @@
     <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
     <Build Include="dbo\Tables\tblCFTransactionNote.sql" />
     <Build Include="dbo\Stored Procedures\uspCFRecalculateTransaciton.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleGroup.sql" />
+    <Build Include="dbo\Functions\fnARComputeDiscountForEarlyPayment.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteHeader.sql" />
+    <Build Include="dbo\Views\vyuPRDailyTaxTotal.sql" />
+    <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
+    <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateRouteSequence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
