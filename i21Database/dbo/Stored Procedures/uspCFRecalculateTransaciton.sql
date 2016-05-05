@@ -56,10 +56,15 @@ BEGIN
 	SET @dblOriginalPrice = @OriginalPrice
 	SET @intTransactionId = @TransactionId
 
-	IF (@intTransactionId is not null)
+	IF (@intTransactionId > 0)
 	BEGIN
 		DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId
-	END	
+	END
+	ELSE
+	BEGIN
+		SET @intTransactionId = NULL
+	END
+		
 
 	--GET TAX GROUP ID--
 	SELECT TOP 1 
