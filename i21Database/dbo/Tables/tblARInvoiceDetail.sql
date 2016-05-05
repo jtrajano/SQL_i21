@@ -3,7 +3,6 @@
     [intInvoiceId]							INT												NOT NULL,
 	[strDocumentNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
     [intItemId]								INT												NULL,
-	[intPrepayTypeId]						INT												NULL DEFAULT 0,
     [strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblQtyOrdered]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intOrderUOMId]							INT												NULL,    
