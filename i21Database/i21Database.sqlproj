@@ -3750,6 +3750,8 @@
     <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateRouteSequence.sql" />
     <Build Include="dbo\Views\vyuHDGroupSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailCC.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailCC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
