@@ -112,7 +112,7 @@ BEGIN TRY
 	BEGIN
 		IF @blnValidateLotReservation = 1 
 		BEGIN
-			IF (@dblWeight + (-(CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMoveQty*@dblWeightPerQty ELSE -@dblMoveQty END))) < @dblLotReservedQty
+			IF (@dblLotAvailableQty + ((CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMoveQty*@dblWeightPerQty ELSE -@dblMoveQty END))) < @dblLotReservedQty
 			BEGIN
 				RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 			END
