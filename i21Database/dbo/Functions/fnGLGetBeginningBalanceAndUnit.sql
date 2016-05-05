@@ -24,11 +24,11 @@ BEGIN
 		  
 		FROM tblGLAccount A
 			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
-			LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
+			LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
 			CROSS APPLY (SELECT dtmDateFrom,dtmDateTo from tblGLFiscalYear where @dtmDate >= dtmDateFrom AND @dtmDate <= dtmDateTo) D
 		WHERE
 		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < @dtmDate)
-		OR (strAccountId =@strAccountId AND C.dtmDate >= D.dtmDateFrom AND C.dtmDate <@dtmDate) and strCode <> '')
+		OR (strAccountId =@strAccountId AND C.dtmDate >= D.dtmDateFrom AND C.dtmDate <@dtmDate) and strCode <> '' AND ysnIsUnposted = 0)  
 		insert into @tbl
 		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
 		
@@ -55,9 +55,9 @@ BEGIN
 					END)  beginBalanceUnit
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
-				LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
+				LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
 				CROSS APPLY (SELECT dtmDateFrom,dtmDateTo from tblGLFiscalYear where @dtmDate >= dtmDateFrom AND @dtmDate <= dtmDateTo) D
-			WHERE strAccountId = @strAccountId and ( C.dtmDate >= D.dtmDateFrom and  C.dtmDate < @dtmDate) and strCode <> ''
+			WHERE strAccountId = @strAccountId and ( C.dtmDate >= D.dtmDateFrom and  C.dtmDate < @dtmDate) and strCode <> ''  and ysnIsUnposted = 0
 			GROUP BY strAccountId
 	ELSE
 		INSERT  @tbl
@@ -74,8 +74,8 @@ BEGIN
 		
 		FROM tblGLAccount A
 			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
-			LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
-		WHERE strAccountId = @strAccountId and C.dtmDate < @dtmDate and strCode <> ''
+			LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
+		WHERE strAccountId = @strAccountId and C.dtmDate < @dtmDate and strCode <> '' and ysnIsUnposted = 0
 		GROUP BY strAccountId
 		RETURN
 END
