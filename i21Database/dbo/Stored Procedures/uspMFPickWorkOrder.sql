@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPickWorkOrder] @intWorkOrderId INT
 	,@dblProduceQty NUMERIC(38, 20)
-	,@intProduceUOMKey INT = NULL
+	,@intProduceUOMId INT = NULL
 	,@intUserId INT
 	,@intBatchId INT
-	,@PickPreference NVARCHAR(50) = ''
+	,@strPickPreference NVARCHAR(50) = ''
 	,@ysnExcessConsumptionAllowed BIT = 0
 	,@dblUnitQty NUMERIC(38, 20)
 	,@ysnProducedQtyByWeight BIT = 1
@@ -19,8 +19,8 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@intItemId INT
 		,@intRecipeId INT
-		,@intItemRecordKey INT
-		,@intLotRecordKey INT
+		,@intItemRecordId INT
+		,@intLotRecordId INT
 		,@dblReqQty NUMERIC(18, 6)
 		,@intLotId INT
 		,@dblQty NUMERIC(38, 20)
@@ -100,21 +100,21 @@ BEGIN TRY
 		BEGIN TRAN
 
 	DECLARE @tblItem TABLE (
-		intItemRecordKey INT Identity(1, 1)
+		intItemRecordId INT Identity(1, 1)
 		,intItemId INT
 		,dblReqQty NUMERIC(18, 6)
 		,intStorageLocationId INT
 		,intConsumptionMethodId INT
 		)
 	DECLARE @tblSubstituteItem TABLE (
-		intItemRecordKey INT Identity(1, 1)
+		intItemRecordId INT Identity(1, 1)
 		,intItemId INT
 		,intSubstituteItemId INT
 		,dblSubstituteRatio NUMERIC(18, 6)
 		,dblMaxSubstituteRatio NUMERIC(18, 6)
 		)
 	DECLARE @tblLot TABLE (
-		intLotRecordKey INT Identity(1, 1)
+		intLotRecordId INT Identity(1, 1)
 		,strLotNumber NVARCHAR(50)
 		,intLotId INT
 		,intItemId INT
@@ -315,7 +315,7 @@ BEGIN TRY
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio > 0
 
-	IF @PickPreference = 'Substitute Item'
+	IF @strPickPreference = 'Substitute Item'
 	BEGIN
 		INSERT INTO @tblSubstituteItem (
 			intItemId
@@ -350,24 +350,24 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @intItemRecordKey = Min(intItemRecordKey)
+	SELECT @intItemRecordId = Min(intItemRecordId)
 	FROM @tblItem
 
-	WHILE (@intItemRecordKey IS NOT NULL)
+	WHILE (@intItemRecordId IS NOT NULL)
 	BEGIN
-		SET @intLotRecordKey = NULL
+		SET @intLotRecordId = NULL
 
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
 			,@intStorageLocationId = intStorageLocationId
 			,@intConsumptionMethodId = intConsumptionMethodId
 		FROM @tblItem
-		WHERE intItemRecordKey = @intItemRecordKey
+		WHERE intItemRecordId = @intItemRecordId
 
 		DELETE
 		FROM @tblLot
 
-		IF @PickPreference = 'Substitute Item'
+		IF @strPickPreference = 'Substitute Item'
 		BEGIN
 			INSERT INTO @tblLot (
 				strLotNumber
@@ -794,11 +794,11 @@ BEGIN TRY
 			ORDER BY L.dtmDateCreated ASC
 		END
 
-		SELECT @intLotRecordKey = Min(intLotRecordKey)
+		SELECT @intLotRecordId = Min(intLotRecordId)
 		FROM @tblLot
 		WHERE dblQty > 0
 
-		WHILE (@intLotRecordKey IS NOT NULL)
+		WHILE (@intLotRecordId IS NOT NULL)
 		BEGIN
 			SELECT @intLotId = intLotId
 				,@dblQty = dblQty
@@ -807,7 +807,7 @@ BEGIN TRY
 				,@dblSubstituteRatio = dblSubstituteRatio
 				,@intItemUOMId = intItemUOMId
 			FROM @tblLot
-			WHERE intLotRecordKey = @intLotRecordKey
+			WHERE intLotRecordId = @intLotRecordId
 
 			IF @ysnSubstituteItem = 1
 			BEGIN
@@ -954,7 +954,7 @@ BEGIN TRY
 					,@dtmBusinessDate
 					,intStorageLocationId
 				FROM @tblLot
-				WHERE intLotRecordKey = @intLotRecordKey
+				WHERE intLotRecordId = @intLotRecordId
 
 				IF NOT EXISTS (
 						SELECT *
@@ -1002,7 +1002,7 @@ BEGIN TRY
 
 				UPDATE @tblLot
 				SET dblQty = dblQty - @dblReqQty
-				WHERE intLotRecordKey = @intLotRecordKey
+				WHERE intLotRecordId = @intLotRecordId
 
 				IF @ysnSubstituteItem = 1
 					AND @dblMaxSubstituteRatio <> 100
@@ -1058,7 +1058,7 @@ BEGIN TRY
 					,@dtmBusinessDate
 					,intStorageLocationId
 				FROM @tblLot
-				WHERE intLotRecordKey = @intLotRecordKey
+				WHERE intLotRecordId = @intLotRecordId
 
 				IF NOT EXISTS (
 						SELECT *
@@ -1106,7 +1106,7 @@ BEGIN TRY
 
 				UPDATE @tblLot
 				SET dblQty = 0
-				WHERE intLotRecordKey = @intLotRecordKey
+				WHERE intLotRecordId = @intLotRecordId
 
 				IF @ysnSubstituteItem = 1
 				BEGIN
@@ -1118,17 +1118,17 @@ BEGIN TRY
 				END
 			END
 
-			SELECT @intLotRecordKey = Min(intLotRecordKey)
+			SELECT @intLotRecordId = Min(intLotRecordId)
 			FROM @tblLot
 			WHERE dblQty > 0
-				AND intLotRecordKey > @intLotRecordKey
+				AND intLotRecordId > @intLotRecordId
 		END
 
 		NextItem:
 
-		SELECT @intItemRecordKey = Min(intItemRecordKey)
+		SELECT @intItemRecordId = Min(intItemRecordId)
 		FROM @tblItem
-		WHERE intItemRecordKey > @intItemRecordKey
+		WHERE intItemRecordId > @intItemRecordId
 	END
 
 	SELECT @intAttributeId = NULL
