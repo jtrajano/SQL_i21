@@ -43,15 +43,15 @@ BEGIN TRY
 		,@strYieldAdjustmentAllowed NVARCHAR(50)
 		,@intManufacturingProcessId INT
 		,@strAllInputItemsMandatoryforConsumption NVARCHAR(50)
-		,@intManufacturingCellId INT 
+		,@intManufacturingCellId INT
 		,@intPackagingCategoryId INT
 		,@strPackagingCategory NVARCHAR(50)
-		,@intInputItemId int
+		,@intInputItemId INT
 		,@strReqQty NVARCHAR(50)
 		,@strQty NVARCHAR(50)
-		,@dtmBusinessDate datetime
-		,@intBusinessShiftId int
-		,@strWorkOrderNo nvarchar(50)
+		,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
+		,@strWorkOrderNo NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -65,7 +65,7 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intManufacturingCellId = intManufacturingCellId
-		,@strWorkOrderNo=strWorkOrderNo
+		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -126,16 +126,16 @@ BEGIN TRY
 		,ysnSubstituteItem BIT
 		,dblSubstituteRatio NUMERIC(18, 6)
 		,dblMaxSubstituteRatio NUMERIC(18, 6)
-		,intStorageLocationId int
+		,intStorageLocationId INT
 		)
 
-	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime,@intLocationId) 
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intLocationId
-		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
-					AND @dtmBusinessDate+dtmShiftEndTime + intEndOffset
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 	SELECT @intRecipeId = intRecipeId
 	FROM dbo.tblMFWorkOrderRecipe a
@@ -155,9 +155,9 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmLastModified
 		,intLastModifiedUserId
-		,intShiftId 
+		,intShiftId
 		,dtmActualInputDateTime
-		,intStorageLocationId 
+		,intStorageLocationId
 		)
 	SELECT WI.intWorkOrderId
 		,WI.intItemId
@@ -172,9 +172,9 @@ BEGIN TRY
 		,WI.intCreatedUserId
 		,WI.dtmLastModified
 		,WI.intLastModifiedUserId
-		,WI.intShiftId 
-		,WI.dtmProductionDate 
-		,WI.intStorageLocationId 
+		,WI.intShiftId
+		,WI.dtmProductionDate
+		,WI.intStorageLocationId
 	FROM dbo.tblMFWorkOrderInputLot WI
 	JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
@@ -446,7 +446,7 @@ BEGIN TRY
 			WHERE SI.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
-				AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.intStorageLocationId = (
 					CASE 
 						WHEN @intStorageLocationId IS NULL
@@ -536,7 +536,7 @@ BEGIN TRY
 		WHERE L.intItemId = @intItemId
 			AND L.intLocationId = @intLocationId
 			AND L.intLotStatusId = 1
-			AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
+			AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 			AND L.intStorageLocationId = (
 				CASE 
 					WHEN @intStorageLocationId IS NULL
@@ -679,8 +679,8 @@ BEGIN TRY
 					,strGarden
 					,intDetailId
 					,ysnProduced
-					,strTransactionId			
-					,strSourceTransactionId	
+					,strTransactionId
+					,strSourceTransactionId
 					,intSourceTransactionTypeId
 					)
 				SELECT intLotId = NULL
@@ -708,9 +708,9 @@ BEGIN TRY
 					,strGarden = NULL
 					,intDetailId = @intWorkOrderId
 					,ysnProduced = 1
-					,strTransactionId			=@strWorkOrderNo
-					,strSourceTransactionId		=@strWorkOrderNo 
-					,intSourceTransactionTypeId	=8
+					,strTransactionId = @strWorkOrderNo
+					,strSourceTransactionId = @strWorkOrderNo
+					,intSourceTransactionTypeId = 8
 
 				EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 					,@intUserId
@@ -776,7 +776,7 @@ BEGIN TRY
 			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
-				AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.intStorageLocationId = (
 					CASE 
 						WHEN @intStorageLocationId IS NULL
@@ -805,7 +805,7 @@ BEGIN TRY
 				,@ysnSubstituteItem = ysnSubstituteItem
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 				,@dblSubstituteRatio = dblSubstituteRatio
-				,@intItemUOMId=intItemUOMId
+				,@intItemUOMId = intItemUOMId
 			FROM @tblLot
 			WHERE intLotRecordKey = @intLotRecordKey
 
@@ -822,24 +822,25 @@ BEGIN TRY
 			BEGIN
 				IF @ysnExcessConsumptionAllowed = 0
 				BEGIN
+					SELECT @strQty = CONVERT(DECIMAL(24, 4), SUM(dblQty))
+					FROM @tblLot
 
-					SELECT @strQty=CONVERT(decimal(24,4),SUM(dblQty)) FROM @tblLot
-					SELECT @strReqQty=CONVERT(decimal(24,4),@dblReqQty)
+					SELECT @strReqQty = CONVERT(DECIMAL(24, 4), @dblReqQty)
 
 					SELECT @strItemNo = strItemNo
 					FROM dbo.tblICItem
 					WHERE intItemId = @intItemId
 
-					Declare @intUnitMeasureId int
-							,@strUnitMeasure nvarchar(50)
+					DECLARE @intUnitMeasureId INT
+						,@strUnitMeasure NVARCHAR(50)
 
-					SELECT @intUnitMeasureId =intUnitMeasureId 
+					SELECT @intUnitMeasureId = intUnitMeasureId
 					FROM dbo.tblICItemUOM
-					WHERE intItemUOMId=@intItemUOMId
+					WHERE intItemUOMId = @intItemUOMId
 
-					SELECT @strUnitMeasure =' '+strUnitMeasure
-					FROM dbo.tblICUnitMeasure 
-					WHERE intUnitMeasureId=@intUnitMeasureId
+					SELECT @strUnitMeasure = ' ' + strUnitMeasure
+					FROM dbo.tblICUnitMeasure
+					WHERE intUnitMeasureId = @intUnitMeasureId
 
 					RAISERROR (
 							51096
@@ -925,9 +926,9 @@ BEGIN TRY
 					,intCreatedUserId
 					,dtmLastModified
 					,intLastModifiedUserId
-					,intShiftId 
+					,intShiftId
 					,dtmActualInputDateTime
-					,intStorageLocationId 
+					,intStorageLocationId
 					)
 				SELECT @intWorkOrderId
 					,@intItemId
@@ -951,7 +952,7 @@ BEGIN TRY
 					,@intUserId
 					,@intBusinessShiftId
 					,@dtmBusinessDate
-					,intStorageLocationId 
+					,intStorageLocationId
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
 
@@ -1029,9 +1030,9 @@ BEGIN TRY
 					,intCreatedUserId
 					,dtmLastModified
 					,intLastModifiedUserId
-					,intShiftId 
+					,intShiftId
 					,dtmActualInputDateTime
-					,intStorageLocationId 
+					,intStorageLocationId
 					)
 				SELECT @intWorkOrderId
 					,@intItemId
@@ -1055,7 +1056,7 @@ BEGIN TRY
 					,@intUserId
 					,@intBusinessShiftId
 					,@dtmBusinessDate
-					,intStorageLocationId 
+					,intStorageLocationId
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
 
