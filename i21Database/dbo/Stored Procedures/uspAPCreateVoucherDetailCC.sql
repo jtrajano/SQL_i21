@@ -20,6 +20,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intBillId]						,
 		[intAccountId]					,
 		[intCCSiteDetailId]				,
+		[strMiscDescription]			,
 		[dblTotal]						,
 		[dblQtyOrdered]					,
 		[dblQtyReceived]				,
