@@ -22,11 +22,14 @@ BEGIN TRY
 			,'' AS 'strItemDescription'
 			,'' AS 'strLotNumber'
 			,'' AS 'strLotAlias'
-			,'' AS 'dblLotQty'
-			,'' AS 'strLotUOM'
+			,'' AS 'dblQty'
+			,'' AS 'strUOM'
 			,'' AS 'intWarehouseInstructionHeaderId'
 			, '' AS 'dblNetWeight'
 			,'' AS 'dblTotalWeight'
+			, '' AS 'strCompanyName'
+			, '' AS 'strCompanyAddress'
+			, '' AS 'strParentLotNumber'
 		RETURN
 	END
 
@@ -97,10 +100,14 @@ BEGIN TRY
 				,ShipmentItemLot.dblNetWeight
 				,SUM(ShipmentItemLot.dblNetWeight) OVER() AS dblTotalWeight
 				,intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
+				,Shipment.strCompanyName
+				,Shipment.strCompanyAddress
+				,ParentLot.strParentLotNumber
 			FROM vyuICGetInventoryShipment Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 			LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
+			LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
 			LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Shipment.intShipViaId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
 			LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
