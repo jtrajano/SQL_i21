@@ -3749,6 +3749,7 @@
     <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
     <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateRouteSequence.sql" />
+    <Build Include="dbo\Views\vyuHDGroupSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
