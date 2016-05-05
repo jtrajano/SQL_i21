@@ -19,6 +19,7 @@
 	[dblTotalTax]							NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblTotal]								NUMERIC(18, 6)									NULL DEFAULT 0,
 	[ysnSubCurrency]						BIT												NULL DEFAULT 0,	
+	[ysnRestricted]							BIT												NULL DEFAULT 0,	
 	[intAccountId]							INT												NULL,
 	[intCOGSAccountId]						INT												NULL,
 	[intSalesAccountId]						INT												NULL,
