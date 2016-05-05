@@ -20,6 +20,8 @@
 	[intTaxGroupId]			INT				NULL,
 	[intTaxClassId]			INT				NULL,
 	[ysnActive]				BIT			 NOT NULL DEFAULT(1),
+    [dblLongitude]          NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
+    [dblLatitude]          NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblEMEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,

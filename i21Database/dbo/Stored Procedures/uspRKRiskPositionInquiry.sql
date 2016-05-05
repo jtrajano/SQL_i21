@@ -634,7 +634,7 @@ update @List set intOrderByHeading=6 WHERE Selection = 'Delta options'
 update @List set intOrderByHeading=7 WHERE Selection = 'F&O'
 update @List set intOrderByHeading=8 WHERE Selection like ('%Total F&O(b. in%')
 update @List set intOrderByHeading=9 WHERE Selection in('Outright coverage','Net market risk')
-update @List set intOrderByHeading=10 WHERE Selection ='Switch position'
+update @List set intOrderByHeading=10 WHERE Selection in('Switch position','Futures required')
 
 SELECT intRowNumber,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId    FROM @List    
