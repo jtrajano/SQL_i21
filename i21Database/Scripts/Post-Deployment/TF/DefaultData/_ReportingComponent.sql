@@ -56,6 +56,9 @@ DROP CONSTRAINT FK_tblTFValidVendor_tblTFReportingComponentDetail
 ALTER TABLE tblTFValidDestinationState
 DROP CONSTRAINT FK_tblTFValidDestinationState_tblTFReportingComponentDetail
 
+ALTER TABLE tblTFTaxCriteria
+DROP CONSTRAINT FK_tblTFTaxCriteria_tblTFReportingComponentDetail
+
 TRUNCATE TABLE tblTFReportingComponentDetail
 
 --ADD FOREIGN KEY BACK
@@ -95,6 +98,13 @@ FK_tblTFValidDestinationState_tblTFReportingComponentDetail FOREIGN KEY
 REFERENCES tblTFReportingComponentDetail
 ( intReportingComponentDetailId )
 
+ALTER TABLE tblTFTaxCriteria ADD CONSTRAINT
+FK_tblTFTaxCriteria_tblTFReportingComponentDetail FOREIGN KEY
+( intReportingComponentDetailId )
+REFERENCES tblTFReportingComponentDetail
+( intReportingComponentDetailId )
+
+
 
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFReportingComponent] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
@@ -117,9 +127,19 @@ BEGIN
 		-- VALID ORIGIN
 		INSERT [tblTFValidOriginDestinationState] ([intReportingComponentDetailId], [intOriginDestinationStateId], [strOriginDestinationState], [intConcurrencyId]) 
 		VALUES (@MasterPk, 0, N'IN', 0)
-		--DESTINATION
+		-- DESTINATION
 		INSERT [tblTFValidDestinationState] ([intReportingComponentDetailId], [intDestinationStateId], [strDestinationState], [intConcurrencyId]) 
 		VALUES (@MasterPk, 0, N'IN', 0)
+
+		-- TAX CATEGORY
+		INSERT [tblTFTaxCategory] ([intTaxAuthorityId], [strState], [strTaxCategory], [intConcurrencyId]) 
+		VALUES (14, N'IN', N'IN Excise Tax', 0)
+		INSERT [tblTFTaxCategory] ([intTaxAuthorityId], [strState], [strTaxCategory], [intConcurrencyId]) 
+		VALUES (14, N'IN', N'IN Inspection Fee', 0)
+		INSERT [tblTFTaxCategory] ([intTaxAuthorityId], [strState], [strTaxCategory], [intConcurrencyId]) 
+		VALUES (14, N'IN', N'IN Gasoline Use Tax (GUT)', 0)
+		INSERT [tblTFTaxCategory] ([intTaxAuthorityId], [strState], [strTaxCategory], [intConcurrencyId]) 
+		VALUES (14, N'IN', N'Federal Excise Tax', 0)
 
 		INSERT INTO [tblTFScheduleFieldTemplate] ([intReportingComponentDetailId],[strColumn])
 		VALUES(@MasterPk, 'strScheduleName')

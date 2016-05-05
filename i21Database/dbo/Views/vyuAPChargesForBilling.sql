@@ -66,6 +66,8 @@ SELECT
 	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
+	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
+	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -79,10 +81,10 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	INNER JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId = Receipt.intLocationId
-
+	
 	INNER JOIN vyuICGetInventoryReceiptCharge vReceiptCharge
 		ON ReceiptCharge.intInventoryReceiptChargeId = vReceiptCharge.intInventoryReceiptChargeId
-
+	
 	LEFT JOIN tblGLAccount OtherChargeExpense
 		ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') = OtherChargeExpense.intAccountId
 
@@ -91,7 +93,12 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN dbo.tblSMCurrency MainCurrency
 		ON MainCurrency.intCurrencyID = TransCurrency.intMainCurrencyId
+	
+	LEFT JOIN tblICItemUOM ItemCostUOM 
+		ON ItemCostUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 
+	LEFT JOIN tblICUnitMeasure CostUOM 
+		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
@@ -168,6 +175,8 @@ SELECT
 	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
+	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
+	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -193,7 +202,12 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN dbo.tblSMCurrency MainCurrency
 		ON MainCurrency.intCurrencyID = TransCurrency.intMainCurrencyId
+	
+	LEFT JOIN tblICItemUOM ItemCostUOM 
+		ON ItemCostUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 
+	LEFT JOIN tblICUnitMeasure CostUOM 
+		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
@@ -201,4 +215,4 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 WHERE	ReceiptCharge.ysnAccrue = 1 
 		AND ReceiptCharge.ysnPrice = 1
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
-		AND ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0 
+		AND ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0

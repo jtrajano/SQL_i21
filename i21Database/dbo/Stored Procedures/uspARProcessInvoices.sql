@@ -1048,7 +1048,7 @@ BEGIN TRY
 			,[strBillToState]			= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
 			,[strBillToZipCode]			= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 			,[strBillToCountry]			= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
-			,[ysnTemplate]				= ISNULL(@Template,0)
+			,[ysnRecurring]				= ISNULL(@Template,0)
 			,[ysnForgiven]				= ISNULL(@Forgiven,0)
 			,[ysnCalculated]			= ISNULL(@Calculated,0)
 			,[ysnSplitted]				= ISNULL(@Splitted,0)

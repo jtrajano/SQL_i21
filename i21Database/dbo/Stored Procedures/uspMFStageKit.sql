@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFStageKit]
+CREATE PROCEDURE [dbo].[uspMFStageKit]
 	@intPickListId int,
 	@intUserId int
 AS
@@ -39,6 +39,9 @@ Declare @intInputItemId INT
 Declare @ysnHasSubstitute bit
 Declare @strInputItemNo nvarchar(50)
 Declare @dblRecipeQty NUMERIC(38,20)
+		,@dblPickQuantity numeric(38,20)
+		,@intPickUOMId int
+		,@intItemUOMId int
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -236,12 +239,13 @@ Select @intMinLot=Min(intRowNo) from @tblPickListDetail
 
 While(@intMinLot is not null)
 Begin
-	Set @intNewLotId=NULL
+	Select @intNewLotId=NULL,@intItemUOMId=NULL
 
 	Select @intLotId=intLotId,@strLotNumber=strLotNumber,
 	@dblMoveQty=CASE WHEN intItemUOMId = intItemIssuedUOMId THEN dblPickQuantity / dblWeightPerQty ELSE dblPickQuantity END,
 	@intItemId=intItemId,
-	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity 
+	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId 
+	,@intItemUOMId=intItemUOMId
 	From @tblPickListDetail Where intRowNo=@intMinLot
 
 	If ROUND(@dblPhysicalQty,3) < ROUND(@dblQuantity,3)
@@ -257,12 +261,19 @@ Begin
 		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intKitStagingLocationId 
 		--And dtmExpiryDate > @dtmCurrentDateTime AND intLotStatusId = 1 AND dblQty > 0
 
+	IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+	BEGIN
+		SELECT @dblPickQuantity=@dblQuantity
+		SELECT @intPickUOMId=@intItemUOMId
+	END
+
 	If ISNULL(@intNewLotId,0) = 0
 		Begin
 			Exec [uspMFLotMove] @intLotId=@intLotId,
 								@intNewSubLocationId=@intNewSubLocationId,
 								@intNewStorageLocationId=@intKitStagingLocationId,
-								@dblMoveQty=@dblQuantity,
+								@dblMoveQty=@dblPickQuantity,
+								@intMoveItemUOMId=@intPickUOMId,
 								@intUserId=@intUserId
 
 			Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
@@ -272,7 +283,8 @@ Begin
 	Else
 		Exec [uspMFLotMerge] @intLotId=@intLotId,
 					@intNewLotId=@intNewLotId,
-					@dblMergeQty=@dblQuantity,
+					@dblMergeQty=@dblPickQuantity,
+					@intMergeItemUOMId=@intPickUOMId,
 					@intUserId=@intUserId
 
 	Update tblMFPickListDetail Set intStageLotId=@intNewLotId,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime

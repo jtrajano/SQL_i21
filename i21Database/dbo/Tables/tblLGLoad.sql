@@ -71,8 +71,6 @@
 [strBLDraftToBeSentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strDocPresentationType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intDocPresentationId] INT NULL,
-[ysnInventorized] [bit] NULL,
-[dtmInventorizedDate] DATETIME NULL,
 [dtmDocsReceivedDate] DATETIME NULL,
 [dtmETAPOL] DATETIME NULL,
 [dtmETSPOL] DATETIME NULL,
@@ -96,6 +94,7 @@
 [intTransportationMode] INT NULL,
 [intShipmentStatus] INT NULL,
 [ysnPosted] BIT NULL, 
+[dtmPostedDate] DATETIME NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),

@@ -28,6 +28,7 @@ Declare @index int
 Declare @id int
 Declare @strWorkOrderNo nvarchar(50)
 Declare @intStatusId int
+		,@intItemUOMId int
 
 Declare @tblWorkOrder table
 (
@@ -41,7 +42,8 @@ Declare @tblConsumedLot table
 	intWorkOrderConsumedLotId int,
 	intLotId int,
 	intItemId int,
-	dblQuantity numeric(18,6)
+	dblQuantity numeric(18,6),
+	intItemUOMId int
 )
 
 --Get the Comma Separated Work Order Ids into a table
@@ -109,8 +111,8 @@ Begin
 
 	--Get the consumed Lots for the workorder
 	Delete From @tblConsumedLot
-	Insert Into @tblConsumedLot(intWorkOrderConsumedLotId,intLotId,intItemId,dblQuantity)
-	Select wc.intWorkOrderConsumedLotId,wc.intLotId,wc.intItemId,wc.dblQuantity
+	Insert Into @tblConsumedLot(intWorkOrderConsumedLotId,intLotId,intItemId,dblQuantity,intItemUOMId)
+	Select wc.intWorkOrderConsumedLotId,wc.intLotId,wc.intItemId,wc.dblQuantity,wc.intItemUOMId
 	From tblMFWorkOrderConsumedLot wc 
 	Where wc.intWorkOrderId=@intWorkOrderId
 
@@ -123,13 +125,14 @@ Begin
 
 	While(@intMinConsumedLot is not null) --Loop WO Consumed Lots
 	Begin
-	Select @intWorkOrderConsumedLotId=intWorkOrderConsumedLotId,@intLotId=intLotId,@intItemId=intItemId ,@dblQuantity=dblQuantity
+	Select @intWorkOrderConsumedLotId=intWorkOrderConsumedLotId,@intLotId=intLotId,@intItemId=intItemId ,@dblQuantity=dblQuantity,@intItemUOMId=intItemUOMId
 	From @tblConsumedLot Where intRowNo=@intMinConsumedLot
 
 	Exec [uspMFLotMove] @intLotId=@intLotId,
 						@intNewSubLocationId=@intNewSubLocationId,
 						@intNewStorageLocationId=@intDestinationStagingLocationId,
 						@dblMoveQty=@dblQuantity,
+						@intMoveItemUOMId=@intItemUOMId,
 						@intUserId=@intUserId
 
 	Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intDestinationLocationId

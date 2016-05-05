@@ -6,25 +6,25 @@ SELECT
 	intSourceType = 1
 	,intOrderId = TMO.intDispatchId
 	,strOrderNumber = TMO.strOrderNumber
-	,strLocationName = TMO.strLocation
-	,intLocationId = TMO.intLocationId
+	,strLocationName = TMO.strCompanyLocationName
+	,intLocationId = TMO.intCompanyLocationId
 	,strLocationAddress = CompLoc.strAddress
 	,strLocationCity = CompLoc.strCity
 	,strLocationZipCode = CompLoc.strZipPostalCode
 	,strLocationState = CompLoc.strStateProvince
 	,strLocationCountry = CompLoc.strCountry
-	,dblFromLongitude = 0.0
-	,dblFromLatitude = 0.0
+	,dblFromLongitude = CompLoc.dblLongitude
+	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = TMO.dtmRequestedDate
 	,strEntityName = TMO.strCustomerName
-	,strEntityAddress = Site.strSiteAddress
-	,strEntityCity = Site.strCity
-	,strEntityZipCode = Site.strZipCode
-	,strEntityState = Site.strState
-	,strEntityCountry = Site.strCountry
-	,strDestination = Site.strSiteAddress + ', ' + Site.strCity + ', ' + Site.strState + ' ' + Site.strZipCode 
-	,dblToLongitude = Site.dblLongitude
-	,dblToLatitude = Site.dblLatitude
+	,strEntityAddress = TMO.strSiteAddress
+	,strEntityCity = TMO.strSiteCity
+	,strEntityZipCode = TMO.strSiteZipCode
+	,strEntityState = TMO.strSiteState
+	,strEntityCountry = TMO.strSiteCountry
+	,strDestination = TMO.strSiteAddress + ', ' + TMO.strSiteCity + ', ' + TMO.strSiteState + ' ' + TMO.strSiteZipCode 
+	,dblToLongitude = TMO.dblLongitude
+	,dblToLatitude = TMO.dblLatitude
 	,strOrderStatus = TMO.strOrderStatus
 	,strDriver = TMO.strDriverName
 	,strItemNo = TMO.strProduct
@@ -32,10 +32,9 @@ SELECT
 	,strCustomerReference = ''
 	,strOrderComments = TMO.strComments
 
-FROM vyuTMOpenCallEntry TMO 
-JOIN tblSMCompanyLocation CompLoc ON CompLoc.strLocationNumber = TMO.strLocation
-JOIN tblTMSite Site ON Site.intSiteID = TMO.intSiteID
-WHERE TMO.strOrderStatus = 'Generated' AND TMO.strOrderNumber IS NOT NULL
+FROM vyuTMGeneratedCallEntry TMO 
+LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
+WHERE TMO.strOrderStatus = 'Generated'
 
 UNION ALL
 
@@ -50,8 +49,8 @@ SELECT
 	,strLocationZipCode = LGLD.strSLocationZipCode
 	,strLocationState = LGLD.strSLocationState
 	,strLocationCountry = LGLD.strSLocationCountry
-	,dblFromLongitude = 0.0
-	,dblFromLatitude = 0.0
+	,dblFromLongitude = CompLoc.dblLongitude
+	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = LGL.dtmScheduledDate
 	,strEntityName = LGLD.strCustomer
 	,strEntityAddress = LGLD.strShipToAddress
@@ -71,5 +70,6 @@ SELECT
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
+JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intSCompanyLocationId
 WHERE LGL.intPurchaseSale = 2 AND LGL.intShipmentStatus = 1
 ) t1

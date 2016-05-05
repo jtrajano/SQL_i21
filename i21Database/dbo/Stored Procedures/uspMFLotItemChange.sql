@@ -22,6 +22,10 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @intTransactionCount INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
+			,@intAdjustItemUOMId int
+			,@intUnitMeasureId int
+			,@strUnitMeasure nvarchar(50)
+			,@strItemNo nvarchar(50)
 
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
 		
@@ -30,18 +34,34 @@ BEGIN TRY
 		   @intSubLocationId = intSubLocationId,
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
-		   @intLotStatusId = intLotStatusId,
-		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intItemUOMId = intItemUOMId,
-		   @dblLotQty = dblQty	   
+		   @dblAdjustByQuantity=-dblQty,
+		   @intAdjustItemUOMId= intItemUOMId  
 	FROM tblICLot WHERE intLotId = @intLotId
+
+	SELECT @intUnitMeasureId=intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId=@intItemUOMId
+
+	IF NOT EXISTS(SELECT *FROM dbo.tblICItemUOM WHERE intItemId=@intNewItemId AND intUnitMeasureId=@intUnitMeasureId)
+	BEGIN
+		SELECT @strUnitMeasure =strUnitMeasure 
+		FROM dbo.tblICUnitMeasure 
+		WHERE intUnitMeasureId =@intUnitMeasureId 
+
+		SELECT @strItemNo=strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId=@intNewItemId
+
+		RAISERROR(90016
+				,11
+				,1
+				,@strUnitMeasure
+				,@strItemNo)
+	END
 	
 	SELECT @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	SELECT @dblAdjustByQuantity = - @dblLotQty
-
 	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
 													   ,@dtmDate = @dtmDate
 													   ,@intLocationId = @intLocationId
@@ -52,7 +72,7 @@ BEGIN TRY
 													   ,@intNewItemId = @intNewItemId
 													   ,@intNewSubLocationId = @intSubLocationId
 													   ,@intNewStorageLocationId = @intStorageLocationId
-													   ,@intItemUOMId=@intItemUOMId
+													   ,@intItemUOMId=@intAdjustItemUOMId
 													   ,@intSourceId = @intSourceId
 													   ,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 													   ,@intEntityUserSecurityId  = @intUserId

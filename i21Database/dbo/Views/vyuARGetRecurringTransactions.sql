@@ -7,7 +7,7 @@ SELECT intInvoiceId AS intTransactionId
 	 , dtmDate
 FROM tblARInvoice
 WHERE strTransactionType IN ('Invoice', 'Debit Memo')
-  AND ysnTemplate = 1
+  AND ysnRecurring = 1
 
 UNION
 

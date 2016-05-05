@@ -140,12 +140,3 @@ BEGIN
 	JOIN tblICCommodityUnitMeasure b ON b.intCommodityId=a.intCommodityId AND b.ysnStockUnit=1   
 END
 GO
-IF EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intUnitMeasureId IS NULL AND strType='From Scale')
-BEGIN
-	UPDATE a 
-	SET a.intUnitMeasureId=b.intUnitMeasureId
-	FROM tblGRStorageHistory a
-	JOIN tblGRCustomerStorage b ON b.intCustomerStorageId=a.intCustomerStorageId
-	JOIN tblICCommodityUnitMeasure c ON c.intCommodityId=b.intCommodityId 
-	WHERE c.ysnStockUnit=1 AND a.strType='From Scale'    
-END

@@ -96,4 +96,3 @@ BEGIN
 		Order by W.intWorkOrderInputLotId
 	END
 END
-

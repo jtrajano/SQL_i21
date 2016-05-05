@@ -4,6 +4,7 @@
     [strTransactionId] NVARCHAR(50) NOT NULL, 
 	[intMeterAccountId] INT NOT NULL,
     [dtmTransaction] DATETIME NOT NULL DEFAULT (GETDATE()), 
+	[strInvoiceComment] NVARCHAR(100) NULL,
 	[intInvoiceId] INT NULL,
 	[ysnPosted] BIT NULL DEFAULT((0)),
 	[dtmPostedDate] DATETIME NULL,

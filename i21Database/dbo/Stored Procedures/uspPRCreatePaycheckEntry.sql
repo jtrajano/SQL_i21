@@ -6,6 +6,7 @@
 	,@strPayGroupIds		NVARCHAR(MAX) = ''
 	,@strDepartmentIds		NVARCHAR(MAX) = ''
 	,@ysnUseStandardHours	BIT = 1
+	,@ysnExcludeDeductions  BIT = 0
 	,@intUserId				INT = NULL
 	,@intPaycheckId			INT = NULL OUTPUT
 AS
@@ -366,7 +367,7 @@ DECLARE @intEmployeeDeductionId INT
 /* Insert Deductions to Temp Table for iteration */
 SELECT tblPREmployeeDeduction.intEmployeeDeductionId 
 INTO #tmpDeductions FROM tblPREmployeeDeduction 
-WHERE [intEntityEmployeeId] = @intEmployee 
+WHERE [intEntityEmployeeId] = @intEmployee AND @ysnExcludeDeductions = 0
 
 /* Add Each Deduction to Paycheck */
 WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
@@ -459,7 +460,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 						ELSE
 							dblAmount
 						END
-	WHERE intEntityEmployeeId = @intEmployee
+	WHERE intEntityEmployeeId = @intEmployee AND (intPayGroupId IS NULL OR intPayGroupId IN (SELECT intPayGroupId FROM #tmpPayGroups))
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDepartments')) DROP TABLE #tmpDepartments
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayGroups')) DROP TABLE #tmpPayGroups

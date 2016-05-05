@@ -55,8 +55,8 @@ BEGIN
 				,dtmDispatchedDate = A.dtmDispatchingDate
 				,intConcurrencyId = A.intConcurrencyId
 				,intDispatchId = A.intDispatchID
-				,intCompanyLocationId  = B.intLocationId
-				,strCompanyLocationName  = I.vwloc_loc_no
+				,intCompanyLocationId  = J.intCompanyLocationId
+				,strCompanyLocationName  = J.strLocationName
 				,dblLocationLongitude = 0.0
 				,dblLocationLatitude = 0.0
 				,strSiteCity = B.strCity
@@ -82,7 +82,9 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN vwlocmst I
 				ON B.intLocationId = I.A4GLIdentity
-			WHERE A.strWillCallStatus = ''Generated''
+			LEFT JOIN tblSMCompanyLocation J
+				ON I.vwloc_loc_no  COLLATE Latin1_General_CI_AS = J.strLocationNumber
+			WHERE J.intCompanyLocationId IS NOT NULL
 		')
 	END
 	ELSE
@@ -142,7 +144,6 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
-			WHERE A.strWillCallStatus = ''Generated''
 		')
 	END
 END

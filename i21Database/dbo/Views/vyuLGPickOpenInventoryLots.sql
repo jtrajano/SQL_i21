@@ -73,7 +73,7 @@ SELECT Lot.intLotId
 	, L.strBLNumber
 	, CTDetail.strEntityName as strVendor
 	, L.strLoadNumber
-	, L.dtmInventorizedDate
+	, L.dtmPostedDate
 
 FROM tblICLot Lot
 JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
@@ -83,7 +83,7 @@ LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId AND LDCL.intLoadContainerId = LC.intLoadContainerId
-LEFT JOIN vyuCTContractDetailView CTDetail ON CTDetail.intContractDetailId = L.intContractDetailId
+LEFT JOIN vyuCTContractDetailView CTDetail ON CTDetail.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Lot.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lot.intItemUOMId

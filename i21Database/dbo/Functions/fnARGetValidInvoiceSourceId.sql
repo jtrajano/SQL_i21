@@ -44,7 +44,11 @@ IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND IS
 
 -- 11. "Consumption Site"
 IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intSiteId], 0) <> 0)
-	RETURN 11			
+	RETURN 11	
+	
+-- 12. "Meter Billing"
+IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intMeterReadingId], 0) <> 0)
+	RETURN 12				
 	
 
 	RETURN @SourceId

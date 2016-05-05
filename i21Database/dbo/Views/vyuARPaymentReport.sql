@@ -28,7 +28,7 @@ SELECT
 	,[strInvoiceType]		= ARI.[strTransactionType]
 	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN 1 ELSE 0 END
 	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
-	,[dtmDueDate]			= ISNULL(ARI.[dtmDueDate], 0.00)
+	,[dtmDueDate]			= ARI.[dtmDueDate]
 	,[dblInterest]			= ISNULL(ARPD.[dblInterest], 0.00)
 	,[dblDiscount]			= ISNULL(ARPD.[dblDiscount], 0.00)
 	,[dblPayment]			= ISNULL(ARPD.[dblPayment], 0.00)
@@ -133,10 +133,10 @@ SELECT
 	,[strInvoiceType]		= ARI.[strTransactionType]
 	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN 1 ELSE 0 END
 	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
-	,[dtmDueDate]			= ISNULL(ARI.[dtmDueDate], 0.00)
+	,[dtmDueDate]			= ARI.[dtmDueDate]
 	,[dblInterest]			= ISNULL(ARI.[dblInterest], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
 	,[dblDiscount]			= ISNULL(ARI.[dblDiscount], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
-	,[dblPayment]			= ISNULL(ARI.[dblPayment], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
+	,[dblPayment]			= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
 	,[strCompanyName]		= CASE WHEN SMCL.[strUseLocationAddress] = 'Letterhead'
 								THEN ''
 							  ELSE
@@ -205,8 +205,6 @@ LEFT OUTER JOIN
 INNER JOIN
 	tblARInvoice ARI
 		ON ARP.[intPaymentId] = ARI.[intPaymentId]
-		AND ARI.[ysnPosted] = 1
-		AND ARI.[ysnPaid] = 1
-		AND ARI.[dblPayment] <> 0		
+		AND ARI.[ysnPosted] = 1	
 
 GO

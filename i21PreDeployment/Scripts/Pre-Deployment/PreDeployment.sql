@@ -43,6 +43,7 @@
 :r .\4_SM\2_DropProcedureUspCMPostMessages.sql
 :r .\4_SM\3_DataMigration.sql
 :r .\4_SM\4_DataUpdateSecurityUserRequireApprovalFor.sql
+:r .\4_SM\5_EncryptUsersPassword.sql
 
 -- CM
 :r .\5_CM\1_DropTriggers.sql

@@ -7,7 +7,7 @@ AS
 			SELECT	CQ.intContractDetailId,
 					BL.strBLNumber,
 					BC.strContainerNumber,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,CC.intUnitMeasureId,LP.intWeightUOMId,(BC.dblNetWt / BC.dblQuantity) * CC.dblQuantity) dblShippedWeight,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,BC.intWeightUnitMeasureId,LP.intWeightUOMId,BC.dblNetWt) dblShippedWeight,
 					IU.intItemUOMId,
 					IM.strUnitMeasure,
 					SH.ysnDirectShipment
@@ -27,7 +27,7 @@ AS
 			SELECT	AD.intSContractDetailId,
 					BL.strBLNumber,
 					BC.strContainerNumber,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,CC.intUnitMeasureId,LP.intWeightUOMId,(BC.dblNetWt / BC.dblQuantity) * CC.dblQuantity) dblShippedWeight,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,BC.intWeightUnitMeasureId,LP.intWeightUOMId,BC.dblNetWt) dblShippedWeight,
 					IU.intItemUOMId,
 					IM.strUnitMeasure,
 					SH.ysnDirectShipment

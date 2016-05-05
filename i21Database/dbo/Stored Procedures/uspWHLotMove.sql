@@ -5,7 +5,7 @@
 	,@intUserId INT
 	,@blnValidateLotReservation BIT = 0
 	,@blnInventoryMove BIT = 0
-	,@intItemUOMId int =NULL
+	,@intItemUOMId INT = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -36,6 +36,7 @@ BEGIN TRY
 	DECLARE @strUnitMeasure NVARCHAR(50)
 			,@dblOldQty NUMERIC(38,20)
 			,@dblSourceOldQty NUMERIC(38,20)
+			,@intLotItemUOMId int
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -49,6 +50,7 @@ BEGIN TRY
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
 		,@intItemUOMId=CASE WHEN @intItemUOMId Is NULL THEN intItemUOMId ELSE @intItemUOMId END
+		,@intLotItemUOMId=intItemUOMId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -72,7 +74,7 @@ BEGIN TRY
 	ELSE ISNULL(@dblWeight, 0)
 	END)
 	
-	IF @dblMoveQty>@dblLotQty
+	IF (CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblMoveQty*@dblWeightPerQty ELSE @dblMoveQty END)>@dblLotAvailableQty
 	BEGIN
 		SET @ErrMsg = 'Move qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 		RAISERROR (@ErrMsg,11,1)
@@ -110,7 +112,7 @@ BEGIN TRY
 	BEGIN
 		IF @blnValidateLotReservation = 1 
 		BEGIN
-			IF (@dblLotAvailableQty + ((-@dblMoveQty)*(Case When @dblWeightPerQty=0 Then 1 else @dblWeightPerQty End))) < @dblLotReservedQty
+			IF (@dblWeight + (-(CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMoveQty*@dblWeightPerQty ELSE -@dblMoveQty END))) < @dblLotReservedQty
 			BEGIN
 				RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 			END
@@ -119,21 +121,17 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-			SELECT @dblOldQty=dblQty
-			FROM dbo.tblICLot
-			WHERE strLotNumber = @strNewLotNumber
-				AND intStorageLocationId = @intNewStorageLocationId
 
-			IF @dblOldQty IS NULL
-			SELECT @dblOldQty=0
+			--IF @dblOldQty IS NULL
+			--SELECT @dblOldQty=0
 
-			SELECT @dblSourceOldQty=dblQty
-			FROM dbo.tblICLot
-			WHERE strLotNumber = @strLotNumber
-				AND intStorageLocationId = @intStorageLocationId
+			--SELECT @dblSourceOldQty=dblQty
+			--FROM dbo.tblICLot
+			--WHERE strLotNumber = @strLotNumber
+			--	AND intStorageLocationId = @intStorageLocationId
 
-			IF @dblSourceOldQty IS NULL
-			SELECT @dblSourceOldQty=0
+			--IF @dblSourceOldQty IS NULL
+			--SELECT @dblSourceOldQty=0
 
 			EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 				,@dtmDate
@@ -146,27 +144,23 @@ BEGIN TRY
 				,@intNewStorageLocationId
 				,@strNewLotNumber
 				,@dblMoveQty
+				,@intItemUOMId
 				,@intSourceId
 				,@intSourceTransactionTypeId
 				,@intUserId
 				,@intInventoryAdjustmentId
 	
-			UPDATE dbo.tblICLot
-			SET dblWeightPerQty = @dblWeightPerQty,
-				dblQty =@dblSourceOldQty-@dblMoveQty,
-				dblWeight = @dblWeightPerQty * (@dblSourceOldQty-@dblMoveQty)
-			WHERE intSubLocationId =@intSubLocationId AND intStorageLocationId=@intStorageLocationId AND strLotNumber=@strLotNumber
+			--UPDATE dbo.tblICLot
+			--SET dblWeightPerQty = @dblWeightPerQty,
+			--	dblQty =@dblSourceOldQty-@dblMoveQty,
+			--	dblWeight = @dblWeightPerQty * (@dblSourceOldQty-@dblMoveQty)
+			--WHERE intSubLocationId =@intSubLocationId AND intStorageLocationId=@intStorageLocationId AND strLotNumber=@strLotNumber
 
-			UPDATE dbo.tblICLot
-			SET dblWeightPerQty = @dblWeightPerQty,
-				dblQty =@dblOldQty+ @dblMoveQty,
-				dblWeight = @dblWeightPerQty * (@dblMoveQty+@dblOldQty)
-			WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
-	
-			SELECT @intNewLotId = intLotId
-			FROM dbo.tblICLot
-			WHERE strLotNumber = @strNewLotNumber
-				AND intStorageLocationId = @intNewStorageLocationId
+			--UPDATE dbo.tblICLot
+			--SET dblWeightPerQty = @dblWeightPerQty,
+			--	dblQty =@dblOldQty+ @dblMoveQty,
+			--	dblWeight = @dblWeightPerQty * (@dblMoveQty+@dblOldQty)
+			--WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
 			IF EXISTS (SELECT * FROM dbo.tblMFWorkOrderProducedLot WHERE intLotId = @intLotId AND dblPhysicalCount = @dblMoveQty)
 			BEGIN
@@ -215,12 +209,14 @@ BEGIN TRY
 			--WHERE dblQty <> dblWeight
 			--	AND intItemUOMId = intWeightUOMId
 			--and intLotId=@intLotId
-
+			SELECT @dblLotQty=NULL
 			IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 			BEGIN
+				SELECT @dblLotQty = Case When intWeightUOMId is null Then dblQty Else dblWeight End FROM tblICLot WHERE intLotId = @intLotId
 				EXEC dbo.uspMFLotAdjustQty
 					@intLotId = @intLotId,       
 					@dblNewLotQty = @dblLotQty,
+					@intAdjustItemUOMId=@intLotItemUOMId,
 					@intUserId = @intUserId ,
 					@strReasonCode = 'Weight qty same',
 					@strNotes = 'Weight qty same'
@@ -228,16 +224,17 @@ BEGIN TRY
 
 			IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 			BEGIN
-				--EXEC dbo.uspMFLotAdjustQty
-				-- @intLotId =@intLotId,       
-				-- @dblNewLotQty =0,
-				-- @intUserId=@intUserId ,
-				-- @strReasonCode ='Residue qty clean up',
-				-- @strNotes ='Residue qty clean up'
-				UPDATE tblICLot
-				SET dblWeight = 0
-					,dblQty = 0
-				WHERE intLotId = @intLotId
+				EXEC dbo.uspMFLotAdjustQty
+				 @intLotId =@intLotId,       
+				 @dblNewLotQty =0,
+				 @intAdjustItemUOMId=@intLotItemUOMId,
+				 @intUserId=@intUserId ,
+				 @strReasonCode ='Residue qty clean up',
+				 @strNotes ='Residue qty clean up'
+				--UPDATE tblICLot
+				--SET dblWeight = 0
+				--	,dblQty = 0
+				--WHERE intLotId = @intLotId
 			END
 	
 	COMMIT TRANSACTION

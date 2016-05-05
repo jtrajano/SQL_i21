@@ -5,6 +5,7 @@ SELECT MR.intMeterReadingId
 	, MR.strTransactionId
 	, MR.intMeterAccountId
 	, MR.intInvoiceId
+	, MR.strInvoiceComment
 	, Invoice.strInvoiceNumber
 	, MA.intEntityCustomerId
 	, MA.strCustomerName
@@ -16,6 +17,7 @@ SELECT MR.intMeterReadingId
 	, MR.dtmTransaction
 	, MR.ysnPosted
 	, MR.dtmPostedDate
+	, MR.intEntityId
 	, MR.intSort
 FROM tblMBMeterReading MR
 LEFT JOIN vyuMBGetMeterAccount MA ON MA.intMeterAccountId = MR.intMeterAccountId

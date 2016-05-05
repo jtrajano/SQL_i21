@@ -44,8 +44,8 @@ SELECT
 		InsCur.strCurrency as strInsuranceCurrency,
 		L.dtmDocsToBroker,
 		L.dtmScheduledDate,
-		CASE WHEN L.ysnInventorized = 1 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnInventorized,
-		L.dtmInventorizedDate,
+		CASE WHEN L.ysnPosted = 1 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnInventorized,
+		L.dtmPostedDate,
 		L.dtmDocsReceivedDate,
 		L.dtmETAPOL,
 		L.dtmETSPOL,
@@ -78,7 +78,7 @@ SELECT
 		IsNull(WG.dblFranchise, 0) as dblFranchise,
 		PCT.dtmStartDate,
 		PCT.dtmEndDate,
-		CASE WHEN DATEDIFF (day, L.dtmInventorizedDate, PCT.dtmEndDate) >= 0 THEN
+		CASE WHEN DATEDIFF (day, L.dtmPostedDate, PCT.dtmEndDate) >= 0 THEN
 				CAST(1 as Bit)
 			ELSE
 				CAST (0 as Bit)
@@ -109,7 +109,7 @@ SELECT
 		IsNull(WG.dblFranchise, 0) as dblSFranchise,
 		SCT.dtmStartDate AS dtmSStartDate,
 		SCT.dtmEndDate AS dtmSEndDate,
-		CASE WHEN DATEDIFF (day, L.dtmInventorizedDate, SCT.dtmEndDate) >= 0 THEN
+		CASE WHEN DATEDIFF (day, L.dtmPostedDate, SCT.dtmEndDate) >= 0 THEN
 				CAST(1 as Bit)
 			ELSE
 				CAST (0 as Bit)

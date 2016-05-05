@@ -46,11 +46,12 @@ BEGIN TRY
 		,@intManufacturingCellId INT 
 		,@intPackagingCategoryId INT
 		,@strPackagingCategory NVARCHAR(50)
+		,@intInputItemId int
 		,@strReqQty NVARCHAR(50)
 		,@strQty NVARCHAR(50)
 		,@dtmBusinessDate datetime
 		,@intBusinessShiftId int
-		,@intInputItemId int
+		,@strWorkOrderNo nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -64,6 +65,7 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intManufacturingCellId = intManufacturingCellId
+		,@strWorkOrderNo=strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -677,6 +679,9 @@ BEGIN TRY
 					,strGarden
 					,intDetailId
 					,ysnProduced
+					,strTransactionId			
+					,strSourceTransactionId	
+					,intSourceTransactionTypeId
 					)
 				SELECT intLotId = NULL
 					,strLotNumber = @strLotNumber
@@ -703,6 +708,9 @@ BEGIN TRY
 					,strGarden = NULL
 					,intDetailId = @intWorkOrderId
 					,ysnProduced = 1
+					,strTransactionId			=@strWorkOrderNo
+					,strSourceTransactionId		=@strWorkOrderNo 
+					,intSourceTransactionTypeId	=8
 
 				EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 					,@intUserId

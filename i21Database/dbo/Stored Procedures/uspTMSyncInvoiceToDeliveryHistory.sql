@@ -501,6 +501,7 @@ BEGIN
 							,dtmWillCallDispatch
 							,strWillCallOrderNumber
 							,intWillCallContractId
+							,intWillCallRouteId
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -548,6 +549,7 @@ BEGIN
 							,dtmWillCallDispatch = NULL
 							,strWillCallOrderNumber = NULL
 							,intWillCallContractId = NULL
+							,intWillCallRouteId = G.intRouteId
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -679,6 +681,7 @@ BEGIN
 						,dblSiteLastGalsInTank
 						,dblSiteEstimatedPercentLeft
 						,dtmSiteLastReadingUpdate
+						,intWillCallRouteId
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -740,6 +743,7 @@ BEGIN
 						,dblSiteLastGalsInTank = A.dblLastGalsInTank
 						,dblSiteEstimatedPercentLeft = A.dblEstimatedPercentLeft
 						,dtmSiteLastReadingUpdate = ISNULL(A.dtmLastReadingUpdate,DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))
+						,intWillCallRouteId = G.intRouteId
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -928,6 +932,7 @@ BEGIN
 			,ysnMeterReading
 			,intInvoiceId
 			,intInvoiceDetailId
+			,intWillCallRouteId
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -978,6 +983,7 @@ BEGIN
 			,ysnMeterReading = 1
 			,intInvoiceId = C.intInvoiceId
 			,intInvoiceDetailId = B.intInvoiceDetailId
+			,intWillCallRouteId = G.intRouteId
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId
