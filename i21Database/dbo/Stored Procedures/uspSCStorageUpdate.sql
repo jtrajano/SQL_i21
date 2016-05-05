@@ -548,7 +548,8 @@ BEGIN TRY
 			   ,[strStorageTicketNumber]
 			   ,[intItemId]
 			   ,[intCompanyLocationSubLocationId]
-			   ,[intStorageLocationId])
+			   ,[intStorageLocationId]
+			   ,[intUnitMeasureId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -586,6 +587,7 @@ BEGIN TRY
 			,SC.[intItemId]
 			,SC.[intSubLocationId]
 			,SC.[intStorageLocationId]
+			,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 

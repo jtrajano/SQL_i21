@@ -76,8 +76,8 @@ print  @CFPricingOut
 IF(@CFPriceOut IS NOT NULL) 
 
    BEGIN    
-
-	IF(@CFPricingOut = 'Inventory - Standard Pricing')
+   
+	IF(LOWER(@CFPricingOut) like '%inventory%')
 
 		BEGIN 
 			IF (@CFOriginalPrice IS NOT NULL AND @CFOriginalPrice > 0)
@@ -88,7 +88,7 @@ IF(@CFPriceOut IS NOT NULL)
 			ELSE
 				BEGIN
 					SET @CFStandardPrice = @CFPriceOut
-					SET @CFPricingOut = 'Inventory - Standard Pricing'
+					SET @CFPricingOut = @CFPricingOut
 				END
 		END
 
@@ -1066,7 +1066,7 @@ BEGIN
 	-- Price Profile Computation --
 	-------------------------------
 
-	select dblOriginalGrossPrice from tblCFTransaction
+	--select dblOriginalGrossPrice from tblCFTransaction
 	
 	SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
 	print 'rate'
