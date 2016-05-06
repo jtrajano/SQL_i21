@@ -3760,6 +3760,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReverseAutoBlend.sql" />
     <Build Include="dbo\Views\vyuQMLotQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportLotQualityComparison.sql" />
+    <Build Include="dbo\Views\vyuARCommissionDetail.sql" />
+    <Build Include="dbo\User Defined Types\CommissionDetailTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
