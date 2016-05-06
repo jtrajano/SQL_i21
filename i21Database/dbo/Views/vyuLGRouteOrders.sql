@@ -27,6 +27,6 @@ SELECT
 FROM tblLGRouteOrder Route
 LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = Route.intDispatchID
 LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = Route.intLoadDetailId
-	 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
+LEFT JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
 
 
