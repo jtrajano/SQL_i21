@@ -104,6 +104,6 @@ LEFT JOIN tblSMTaxGroup VendorTax ON VendorTax.intTaxGroupId = VendorLocation.in
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = LG.intCustomerEntityId
 LEFT JOIN tblEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = LG.intCustomerEntityLocationId
 LEFT JOIN tblSMTaxGroup CustomerTax ON CustomerTax.intTaxGroupId = CustomerLocation.intTaxGroupId
-LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId
+LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 WHERE ISNULL(LG.ysnDispatched, 0) = 1
 	AND ISNULL(LG.dblDeliveredQuantity, 0) <= 0
