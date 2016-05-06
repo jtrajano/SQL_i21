@@ -3753,6 +3753,7 @@
     <Build Include="dbo\Views\vyuHDGroupSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailCC.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailCC.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostLoadSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
