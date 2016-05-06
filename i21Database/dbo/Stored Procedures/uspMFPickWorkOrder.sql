@@ -52,6 +52,15 @@ BEGIN TRY
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
 		,@strWorkOrderNo NVARCHAR(50)
+		,@strLotTracking NVARCHAR(50)
+		,@strLifeTimeType NVARCHAR(50)
+		,@intLifeTime INT
+		,@dtmExpiryDate DATETIME
+		,@intItemLocationId INT
+		,@strLotNumber NVARCHAR(50)
+		,@intItemUOMId INT
+		,@intSubLocationId INT
+		,@intCategoryId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -105,6 +114,7 @@ BEGIN TRY
 		,dblReqQty NUMERIC(18, 6)
 		,intStorageLocationId INT
 		,intConsumptionMethodId INT
+		,strLotTracking NVARCHAR(50)
 		)
 	DECLARE @tblSubstituteItem TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -200,6 +210,7 @@ BEGIN TRY
 		,dblReqQty
 		,intStorageLocationId
 		,intConsumptionMethodId
+		,strLotTracking
 		)
 	SELECT ri.intItemId
 		,CASE 
@@ -207,11 +218,7 @@ BEGIN TRY
 				AND @ysnProducedQtyByWeight = 1
 				AND P.dblMaxWeightPerPack > 0
 				THEN (
-						--CASE 
-						--     WHEN @dblUnitQty > P.dblWeight
-						--            THEN CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack)))
-						--     ELSE CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / @dblUnitQty)))
-						--     END
+						
 						CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20))
 						)
 			WHEN C.strCategoryCode = @strPackagingCategory
@@ -220,6 +227,7 @@ BEGIN TRY
 			END AS RequiredQty
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
+		,I.strLotTracking
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -263,11 +271,7 @@ BEGIN TRY
 					AND @ysnProducedQtyByWeight = 1
 					AND P.dblMaxWeightPerPack > 0
 					THEN (
-							--CASE 
-							--     WHEN @dblUnitQty > P.dblWeight
-							--            THEN CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack)))
-							--     ELSE CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / @dblUnitQty)))
-							--     END
+							
 							CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20))
 							)
 				WHEN C.strCategoryCode = @strPackagingCategory
@@ -277,6 +281,7 @@ BEGIN TRY
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
+		,I.strLotTracking
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -361,14 +366,155 @@ BEGIN TRY
 			,@dblReqQty = dblReqQty
 			,@intStorageLocationId = intStorageLocationId
 			,@intConsumptionMethodId = intConsumptionMethodId
+			,@strLotTracking = strLotTracking
 		FROM @tblItem
 		WHERE intItemRecordId = @intItemRecordId
 
 		DELETE
 		FROM @tblLot
 
-		IF @strPickPreference = 'Substitute Item'
+		IF @strLotTracking = 'No'
 		BEGIN
+			INSERT INTO @tblLot (
+				intItemId
+				,dblQty
+				,dblIssuedQuantity
+				,dblWeightPerUnit
+				,intItemUOMId
+				,intItemIssuedUOMId
+				,ysnSubstituteItem
+				,intStorageLocationId
+				)
+			SELECT S.intItemId
+				,S.dblOnHand - S.dblUnitReserved AS dblQty
+				,S.dblOnHand - S.dblUnitReserved AS dblIssuedQuantity
+				,1 AS dblWeightPerUnit
+				,S.intItemUOMId
+				,S.intItemUOMId
+				,0 AS ysnSubstituteItem
+				,S.intStorageLocationId
+			FROM dbo.tblICItemStockUOM S
+			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
+				AND SL.ysnAllowConsume = 1
+			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+				AND IU.ysnStockUnit = 1
+			WHERE S.intItemId = @intItemId
+				AND IL.intLocationId = @intLocationId
+				AND S.intStorageLocationId = (
+					CASE 
+						WHEN @intStorageLocationId IS NULL
+							THEN S.intStorageLocationId
+						ELSE (
+								CASE 
+									WHEN @intConsumptionMethodId = 2
+										THEN @intStorageLocationId
+									ELSE S.intStorageLocationId
+									END
+								)
+						END
+					)
+				AND S.dblOnHand - S.dblUnitReserved > 0
+		END
+		ELSE
+		BEGIN
+			IF @strPickPreference = 'Substitute Item'
+			BEGIN
+				INSERT INTO @tblLot (
+					strLotNumber
+					,intLotId
+					,intItemId
+					,dblQty
+					,dblIssuedQuantity
+					,dblWeightPerUnit
+					,intItemUOMId
+					,intItemIssuedUOMId
+					,ysnSubstituteItem
+					,dblSubstituteRatio
+					,dblMaxSubstituteRatio
+					,intStorageLocationId
+					)
+				SELECT L.strLotNumber
+					,L.intLotId
+					,L.intItemId
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN dblWeight
+							ELSE dblQty
+							END
+						) - ISNULL((
+							SELECT SUM(dblQty)
+							FROM tblICStockReservation SR
+							WHERE SR.intLotId = L.intLotId
+							), 0)
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN L.dblQty
+							ELSE dblQty / (
+									CASE 
+										WHEN L.dblWeightPerQty = 0
+											OR L.dblWeightPerQty IS NULL
+											THEN 1
+										ELSE L.dblWeightPerQty
+										END
+									)
+							END
+						) - ISNULL((
+							SELECT SUM(dblQty)
+							FROM tblICStockReservation SR
+							WHERE SR.intLotId = L.intLotId
+							), 0) / (
+						CASE 
+							WHEN L.dblWeightPerQty = 0
+								OR L.dblWeightPerQty IS NULL
+								THEN 1
+							ELSE L.dblWeightPerQty
+							END
+						)
+					,CASE 
+						WHEN L.dblWeightPerQty IS NULL
+							OR L.dblWeightPerQty = 0
+							THEN 1
+						ELSE L.dblWeightPerQty
+						END
+					,CASE 
+						WHEN L.intWeightUOMId IS NULL
+							OR L.intWeightUOMId = 0
+							THEN L.intItemUOMId
+						ELSE L.intWeightUOMId
+						END
+					,L.intItemUOMId
+					,1 AS ysnSubstituteItem
+					,SI.dblSubstituteRatio
+					,SI.dblMaxSubstituteRatio
+					,L.intStorageLocationId
+				FROM dbo.tblICLot L
+				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+					AND SL.ysnAllowConsume = 1
+				JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
+				WHERE SI.intItemId = @intItemId
+					AND L.intLocationId = @intLocationId
+					AND L.intLotStatusId = 1
+					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND L.intStorageLocationId = (
+						CASE 
+							WHEN @intStorageLocationId IS NULL
+								THEN L.intStorageLocationId
+							ELSE (
+									CASE 
+										WHEN @intConsumptionMethodId = 2
+											THEN @intStorageLocationId
+										ELSE L.intStorageLocationId
+										END
+									) 
+							END
+						)
+					AND L.dblQty > 0
+				ORDER BY L.dtmDateCreated ASC
+			END
+
 			INSERT INTO @tblLot (
 				strLotNumber
 				,intLotId
@@ -379,8 +525,6 @@ BEGIN TRY
 				,intItemUOMId
 				,intItemIssuedUOMId
 				,ysnSubstituteItem
-				,dblSubstituteRatio
-				,dblMaxSubstituteRatio
 				,intStorageLocationId
 				)
 			SELECT L.strLotNumber
@@ -435,15 +579,12 @@ BEGIN TRY
 					ELSE L.intWeightUOMId
 					END
 				,L.intItemUOMId
-				,1 AS ysnSubstituteItem
-				,SI.dblSubstituteRatio
-				,SI.dblMaxSubstituteRatio
+				,0 AS ysnSubstituteItem
 				,L.intStorageLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
-			JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
-			WHERE SI.intItemId = @intItemId
+			WHERE L.intItemId = @intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
@@ -457,136 +598,35 @@ BEGIN TRY
 										THEN @intStorageLocationId
 									ELSE L.intStorageLocationId
 									END
-								) --By location, then apply location filter
+								) 
 						END
 					)
 				AND L.dblQty > 0
 			ORDER BY L.dtmDateCreated ASC
-		END
 
-		INSERT INTO @tblLot (
-			strLotNumber
-			,intLotId
-			,intItemId
-			,dblQty
-			,dblIssuedQuantity
-			,dblWeightPerUnit
-			,intItemUOMId
-			,intItemIssuedUOMId
-			,ysnSubstituteItem
-			,intStorageLocationId
-			)
-		SELECT L.strLotNumber
-			,L.intLotId
-			,L.intItemId
-			,(
-				CASE 
-					WHEN intWeightUOMId IS NOT NULL
-						THEN dblWeight
-					ELSE dblQty
-					END
-				) - ISNULL((
-					SELECT SUM(dblQty)
-					FROM tblICStockReservation SR
-					WHERE SR.intLotId = L.intLotId
-					), 0)
-			,(
-				CASE 
-					WHEN intWeightUOMId IS NOT NULL
-						THEN L.dblQty
-					ELSE dblQty / (
-							CASE 
-								WHEN L.dblWeightPerQty = 0
-									OR L.dblWeightPerQty IS NULL
-									THEN 1
-								ELSE L.dblWeightPerQty
-								END
-							)
-					END
-				) - ISNULL((
-					SELECT SUM(dblQty)
-					FROM tblICStockReservation SR
-					WHERE SR.intLotId = L.intLotId
-					), 0) / (
-				CASE 
-					WHEN L.dblWeightPerQty = 0
-						OR L.dblWeightPerQty IS NULL
-						THEN 1
-					ELSE L.dblWeightPerQty
-					END
-				)
-			,CASE 
-				WHEN L.dblWeightPerQty IS NULL
-					OR L.dblWeightPerQty = 0
-					THEN 1
-				ELSE L.dblWeightPerQty
-				END
-			,CASE 
-				WHEN L.intWeightUOMId IS NULL
-					OR L.intWeightUOMId = 0
-					THEN L.intItemUOMId
-				ELSE L.intWeightUOMId
-				END
-			,L.intItemUOMId
-			,0 AS ysnSubstituteItem
-			,L.intStorageLocationId
-		FROM dbo.tblICLot L
-		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-			AND SL.ysnAllowConsume = 1
-		WHERE L.intItemId = @intItemId
-			AND L.intLocationId = @intLocationId
-			AND L.intLotStatusId = 1
-			AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-			AND L.intStorageLocationId = (
-				CASE 
-					WHEN @intStorageLocationId IS NULL
-						THEN L.intStorageLocationId
-					ELSE (
-							CASE 
-								WHEN @intConsumptionMethodId = 2
-									THEN @intStorageLocationId
-								ELSE L.intStorageLocationId
-								END
-							) --By location, then apply location filter
-					END
-				)
-			AND L.dblQty > 0
-		ORDER BY L.dtmDateCreated ASC
-
-		IF NOT EXISTS (
-				SELECT *
-				FROM @tblLot
-				)
-			AND @ysnExcessConsumptionAllowed = 1
-		BEGIN
-			--*****************************************************
-			--Create staging lot
-			--*****************************************************
-			DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
-
-			IF OBJECT_ID('tempdb..#GeneratedLotItems') IS NOT NULL
-				DROP TABLE #GeneratedLotItems
-
-			CREATE TABLE #GeneratedLotItems (
-				intLotId INT
-				,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-				,intDetailId INT
-				,intParentLotId INT
-				,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				)
-
-			-- Create and validate the lot numbers
+			IF NOT EXISTS (
+					SELECT *
+					FROM @tblLot
+					)
+				AND @ysnExcessConsumptionAllowed = 1
 			BEGIN
-				DECLARE @strLifeTimeType NVARCHAR(50)
-					,@intLifeTime INT
-					,@dtmExpiryDate DATETIME
-					,@strLotTracking NVARCHAR(50)
-					,@intItemLocationId INT
-					,@strLotNumber NVARCHAR(50)
-					,@intItemUOMId INT
-					,@intSubLocationId INT
-					,@intCategoryId INT
+				--*****************************************************
+				--Create staging lot
+				--*****************************************************
+				DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
+				IF OBJECT_ID('tempdb..#GeneratedLotItems') IS NOT NULL
+					DROP TABLE #GeneratedLotItems
+
+				CREATE TABLE #GeneratedLotItems (
+					intLotId INT
+					,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+					,intDetailId INT
+					,intParentLotId INT
+					,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+					)
+
+				-- Create and validate the lot numbers
 				SELECT @strLifeTimeType = strLifeTimeType
 					,@intLifeTime = intLifeTime
 					,@strLotTracking = strLotTracking
@@ -618,8 +658,6 @@ BEGIN TRY
 
 				IF @strLotTracking <> 'Yes - Serial Number'
 				BEGIN
-					--EXEC dbo.uspSMGetStartingNumber 55
-					--	,@strLotNumber OUTPUT
 					SELECT @intSubLocationId = @intSubLocationId
 					FROM dbo.tblICStorageLocation
 					WHERE intStorageLocationId = @intStorageLocationId
@@ -714,84 +752,84 @@ BEGIN TRY
 
 				EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 					,@intUserId
-			END
 
-			--*****************************************************
-			--End of create staging lot
-			--*****************************************************
-			INSERT INTO @tblLot (
-				strLotNumber
-				,intLotId
-				,intItemId
-				,dblQty
-				,dblIssuedQuantity
-				,dblWeightPerUnit
-				,intItemUOMId
-				,intItemIssuedUOMId
-				,ysnSubstituteItem
-				,intStorageLocationId
-				)
-			SELECT L.strLotNumber
-				,L.intLotId
-				,L.intItemId
-				,(
-					CASE 
-						WHEN intWeightUOMId IS NOT NULL
-							THEN dblWeight
-						ELSE dblQty
-						END
+				--*****************************************************
+				--End of create staging lot
+				--*****************************************************
+				INSERT INTO @tblLot (
+					strLotNumber
+					,intLotId
+					,intItemId
+					,dblQty
+					,dblIssuedQuantity
+					,dblWeightPerUnit
+					,intItemUOMId
+					,intItemIssuedUOMId
+					,ysnSubstituteItem
+					,intStorageLocationId
 					)
-				,(
-					CASE 
-						WHEN intWeightUOMId IS NOT NULL
-							THEN L.dblQty
-						ELSE dblQty / (
-								CASE 
-									WHEN L.dblWeightPerQty = 0
-										OR L.dblWeightPerQty IS NULL
-										THEN 1
-									ELSE L.dblWeightPerQty
-									END
-								)
+				SELECT L.strLotNumber
+					,L.intLotId
+					,L.intItemId
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN dblWeight
+							ELSE dblQty
+							END
+						)
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN L.dblQty
+							ELSE dblQty / (
+									CASE 
+										WHEN L.dblWeightPerQty = 0
+											OR L.dblWeightPerQty IS NULL
+											THEN 1
+										ELSE L.dblWeightPerQty
+										END
+									)
+							END
+						)
+					,CASE 
+						WHEN L.dblWeightPerQty IS NULL
+							OR L.dblWeightPerQty = 0
+							THEN 1
+						ELSE L.dblWeightPerQty
 						END
-					)
-				,CASE 
-					WHEN L.dblWeightPerQty IS NULL
-						OR L.dblWeightPerQty = 0
-						THEN 1
-					ELSE L.dblWeightPerQty
-					END
-				,CASE 
-					WHEN L.intWeightUOMId IS NULL
-						OR L.intWeightUOMId = 0
-						THEN L.intItemUOMId
-					ELSE L.intWeightUOMId
-					END
-				,L.intItemUOMId
-				,0 AS ysnSubstituteItem
-				,L.intStorageLocationId
-			FROM dbo.tblICLot L
-			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-				AND SL.ysnAllowConsume = 1
-			WHERE L.intItemId = @intItemId
-				AND L.intLocationId = @intLocationId
-				AND L.intLotStatusId = 1
-				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND L.intStorageLocationId = (
-					CASE 
-						WHEN @intStorageLocationId IS NULL
-							THEN L.intStorageLocationId
-						ELSE (
-								CASE 
-									WHEN @intConsumptionMethodId = 2
-										THEN @intStorageLocationId
-									ELSE L.intStorageLocationId
-									END
-								) --By location, then apply location filter
+					,CASE 
+						WHEN L.intWeightUOMId IS NULL
+							OR L.intWeightUOMId = 0
+							THEN L.intItemUOMId
+						ELSE L.intWeightUOMId
 						END
-					)
-				AND L.dblQty > 0
-			ORDER BY L.dtmDateCreated ASC
+					,L.intItemUOMId
+					,0 AS ysnSubstituteItem
+					,L.intStorageLocationId
+				FROM dbo.tblICLot L
+				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+					AND SL.ysnAllowConsume = 1
+				WHERE L.intItemId = @intItemId
+					AND L.intLocationId = @intLocationId
+					AND L.intLotStatusId = 1
+					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND L.intStorageLocationId = (
+						CASE 
+							WHEN @intStorageLocationId IS NULL
+								THEN L.intStorageLocationId
+							ELSE (
+									CASE 
+										WHEN @intConsumptionMethodId = 2
+											THEN @intStorageLocationId
+										ELSE L.intStorageLocationId
+										END
+									) 
+							END
+						)
+					AND L.dblQty > 0
+				ORDER BY L.dtmDateCreated ASC
+			END
 		END
 
 		SELECT @intLotRecordId = Min(intLotRecordId)
@@ -871,8 +909,6 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						--Select @intStorageLocationId=intNewLotBin from tblSMCompanyLocationSubLocation Where intCompanyLocationId=@intLocationId 
-						--Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
 						SELECT @intStorageLocationId = intStorageLocationId
 							,@intSubLocationId = intSubLocationId
 						FROM tblICLot
