@@ -11,11 +11,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000)
+DECLARE @ErrorMessage NVARCHAR(MAX)
 DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
-DECLARE @CreatedInvoices INT
-DECLARE @UpdatedInvoices INT
+DECLARE @CreatedInvoices NVARCHAR(MAX)
+DECLARE @UpdatedInvoices NVARCHAR(MAX)
 
 BEGIN TRY
 
@@ -231,38 +231,56 @@ BEGIN TRY
 	END
 
 	DECLARE @strReceiptLink NVARCHAR(100),
-		@strBOL NVARCHAR(50)
+		@strBOL NVARCHAR(50),
+		@InvoiceId INT
 
 	IF (@CreatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
 	BEGIN
-		UPDATE tblTRLoadDistributionHeader 
-		SET intInvoiceId = @CreatedInvoices
-		WHERE intLoadHeaderId = @intLoadHeaderId
-
-		UPDATE tblTRLoadHeader 
-		SET ysnPosted = @ysnPostOrUnPost
-		WHERE intLoadHeaderId = @intLoadHeaderId
-
-		SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @CreatedInvoices, ',', 'strReceiptLink'))
-		SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
 		
-		UPDATE tblARInvoice
-		SET strBOLNumber = @strBOL
-		WHERE intInvoiceId = @CreatedInvoices
+		SELECT Item INTO #tmpCreated FROM [fnSplitStringWithTrim](@CreatedInvoices,',')
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCreated)
+		BEGIN
+			SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpCreated
+
+			UPDATE tblTRLoadDistributionHeader 
+			SET intInvoiceId = @InvoiceId
+			WHERE intLoadHeaderId = @intLoadHeaderId
+
+			UPDATE tblTRLoadHeader 
+			SET ysnPosted = @ysnPostOrUnPost
+			WHERE intLoadHeaderId = @intLoadHeaderId
+
+			SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @intLoadHeaderId, ',', 'strReceiptLink'))
+			SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
+		
+			UPDATE tblARInvoice
+			SET strBOLNumber = @strBOL
+			WHERE intInvoiceId = @InvoiceId
+
+			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
+		END
 	END
 
 	IF (@UpdatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
 	BEGIN
-		UPDATE tblTRLoadHeader 
-		SET ysnPosted = @ysnPostOrUnPost
-		WHERE intLoadHeaderId = @intLoadHeaderId
+		SELECT Item INTO #tmpUpdated FROM [fnSplitStringWithTrim](@UpdatedInvoices,',')
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUpdated)
+		BEGIN
+			SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdated
 
-		SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @UpdatedInvoices, ',', 'strReceiptLink'))
-		SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
+			UPDATE tblTRLoadHeader 
+			SET ysnPosted = @ysnPostOrUnPost
+			WHERE intLoadHeaderId = @intLoadHeaderId
+
+			SET @strReceiptLink = (SELECT dbo.fnTRConcatString('', @intLoadHeaderId, ',', 'strReceiptLink'))
+			SET @strBOL = (SELECT dbo.fnTRConcatString(@strReceiptLink, @intLoadHeaderId, ',', 'strBillOfLading'))
 		
-		UPDATE tblARInvoice
-		SET strBOLNumber = @strBOL
-		WHERE intInvoiceId = @UpdatedInvoices
+			UPDATE tblARInvoice
+			SET strBOLNumber = @strBOL
+			WHERE intInvoiceId = @InvoiceId
+
+			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
+		END
 	END
 
 END TRY
