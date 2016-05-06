@@ -5166,4 +5166,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTaxCriteriaId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1c1a3368-c18d-4594-a65c-72775ee7ce09" ChangeDateTime="05/06/2016 03:14:48">
+    <Property Name="ElementName" Value="[dbo].[tblGRCompanyPreference].[intScaleUncompletedTicketDaysAlert]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketUncompletedDaysAlert" />
+  </Operation>
 </Operations>

@@ -6,13 +6,6 @@ SELECT
 	,Route.intDispatchID
 	,Route.intLoadDetailId
 	,Route.intSequence
-	,Route.dblFromLatitude
-	,Route.dblFromLongitude
-	,Route.strFromAddress
-	,Route.strFromCity
-	,Route.strFromState
-	,Route.strFromZipCode
-	,Route.strFromCountry
 	,Route.dblToLatitude
 	,Route.dblToLongitude
 	,Route.strToAddress
@@ -34,6 +27,6 @@ SELECT
 FROM tblLGRouteOrder Route
 LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = Route.intDispatchID
 LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = Route.intLoadDetailId
-	 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
+LEFT JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
 
 

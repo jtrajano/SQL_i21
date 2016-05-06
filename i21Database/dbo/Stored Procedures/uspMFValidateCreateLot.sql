@@ -57,6 +57,7 @@ BEGIN TRY
 		,@strUpperToleranceQuantity nvarchar(50)
 		,@strLowerToleranceQuantity nvarchar(50)
 		,@strQuantity nvarchar(50)
+		,@strAttributeValue nvarchar(50)
 	
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
@@ -345,15 +346,8 @@ BEGIN TRY
 				,@strExistingStorageLocationName
 				)
 	END
-	Select @dtmCreated=@dtmCreated+dtmShiftStartTime+intStartOffset from tblMFShift Where intShiftId=@intShiftId 
-	IF @dtmCreated > @dtmCurrentDateTime
-	BEGIN
-		RAISERROR (
-				51075
-				,11
-				,1
-				)
-	END
+
+	
 
 	IF @ysnCreateNewLot = 0
 		AND NOT EXISTS (
@@ -386,6 +380,23 @@ BEGIN TRY
 			,@intManufacturingProcessId=intManufacturingProcessId 
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Future Date Production Allowed'
+	
+		Select @strAttributeValue=strAttributeValue
+		From tblMFManufacturingProcessAttribute
+		Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+		Select @dtmCreated=@dtmCreated+dtmShiftStartTime+intStartOffset from tblMFShift Where intShiftId=@intShiftId 
+
+		IF @strAttributeValue='False' AND @dtmCreated > @dtmCurrentDateTime
+		BEGIN
+			RAISERROR (
+					51075
+					,11
+					,1
+					)
+		END
 
 		IF @intItemId NOT IN (
 				SELECT RI.intItemId
