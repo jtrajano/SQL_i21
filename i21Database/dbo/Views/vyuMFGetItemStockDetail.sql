@@ -53,6 +53,7 @@ LEFT JOIN (
 			, intStorageLocationId
 			, dblTotalQty = SUM(dblQty)
 		FROM tblICStockReservation
+		Where ISNULL(ysnPosted,0)=0
 		GROUP BY intItemId
 			, intItemLocationId
 			, intItemUOMId
