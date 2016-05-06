@@ -75,10 +75,10 @@ BEGIN TRY
 
 			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
-				,@intProduceUOMKey = @intItemUOMId
+				,@intProduceUOMId = @intItemUOMId
 				,@intBatchId = @intBatchId
 				,@intUserId = @intUserId
-				,@PickPreference='Substitute Item'
+				,@strPickPreference='Substitute Item'
 				,@ysnExcessConsumptionAllowed=@ysnExcessConsumptionAllowed
 				,@dblUnitQty =NULL
 

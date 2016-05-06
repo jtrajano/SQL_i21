@@ -1659,6 +1659,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Prospects
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'EntityManagement.view.Entity:searchEntityProspect' WHERE strMenuName = 'Prospects and Customers' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitor Search' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Competitor Search', N'Help Desk', @CRMParentMenuId, N'Competitor Search', N'Activity', N'Screen', N'EntityManagement.view.Entity?searchCommand=searchEntityCompetitor', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'EntityManagement.view.Entity?searchCommand=searchEntityCompetitor' WHERE strMenuName = 'Competitor Search' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+
 /* Start of delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 /* End of delete */
@@ -4501,6 +4507,14 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Prospects and
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @ProspectsAndCustomersMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@ProspectsAndCustomersMenuId)
+END
+
+DECLARE @CompetitorSearchMenuId INT
+SELECT  @CompetitorSearchMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Competitor Search' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitor Search' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CompetitorSearchMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId]) VALUES (@CompetitorSearchMenuId)
 END
 
 /* CONTRACT MANAGEMENT */
