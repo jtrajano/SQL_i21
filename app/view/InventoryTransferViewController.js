@@ -288,7 +288,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     }
                 },
                 colAvailableQty: 'dblAvailableQty',
-                //colAvailableQty: '{getAvailableQty}',
                 colAvailableUOM: 'strAvailableUOM',
 
                 colToSubLocation: {
@@ -331,18 +330,18 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     }
                 },
                 colTransferQty: 'dblQuantity',
-                colTransferUOM: {
-                    dataIndex: 'strUnitMeasure',
-                    editor: {
-                        readOnly: '{checkLotExists}',
-                        store: '{itemUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryTransfer.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
-                    }
-                },
+                //colTransferUOM: {
+                //    dataIndex: 'strUnitMeasure',
+                //    editor: {
+                //        readOnly: '{checkLotExists}',
+                //        store: '{itemUOM}',
+                //        defaultFilters: [{
+                //            column: 'intItemId',
+                //            value: '{grdInventoryTransfer.selection.intItemId}',
+                //            conjunction: 'and'
+                //        }]
+                //    }
+                //},
                 colNewLotID: {
                     dataIndex: 'strNewLotId'
                 },
@@ -539,13 +538,15 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
         else if (combo.itemId === 'cboFromSubLocation') {
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
-            //current.set('strFromSubLocationName', records[0].get('strSubLocationName'));
             current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
-            //current.set('strFromStorageLocationName', records[0].get('strStorageLocationName'));
+
+            current.set('strFromStorageLocationName', records[0].get('strStorageLocationName'));
+
             current.set('strAvailableUOM', records[0].get('strUnitMeasure'));
 
             current.set('dblOriginalAvailableQty', records[0].get('dblAvailableQty'));
             current.set('dblOriginalStorageQty', records[0].get('dblStorageQty'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
 
             switch (current.get('intOwnershipType')) {
                 case 1:
@@ -560,13 +561,15 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
         else if (combo.itemId === 'cboFromStorage') {
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
-            current.set('strFromSubLocationName', records[0].get('strSubLocationName'));
             current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
-            //current.set('strFromStorageLocationName', records[0].get('strStorageLocationName'));
+
+            current.set('strFromSubLocationName', records[0].get('strSubLocationName'));
+
             current.set('strAvailableUOM', records[0].get('strUnitMeasure'));
 
             current.set('dblOriginalAvailableQty', records[0].get('dblAvailableQty'));
             current.set('dblOriginalStorageQty', records[0].get('dblStorageQty'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
 
             switch (current.get('intOwnershipType')) {
                 case 1:
@@ -593,13 +596,17 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
         else if (combo.itemId === 'cboToSubLocation') {
             current.set('intToSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
+            current.set('intToStorageLocationId', null);
+            current.set('strToStorageLocationName', null);
         }
         else if (combo.itemId === 'cboToStorage') {
             current.set('intToStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('intToSubLocationId', records[0].get('intSubLocationId'));
+            current.set('strToSubLocationName', records[0].get('strSubLocationName'));
         }
-        else if (combo.itemId === 'cboUOM') {
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-        }
+        //else if (combo.itemId === 'cboUOM') {
+        //    current.set('intItemUOMId', records[0].get('intItemUOMId'));
+        //}
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('intItemWeightUOMId', records[0].get('intItemUOMId'));
         }
@@ -839,9 +846,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             "#cboToStorage": {
                 select: this.onTransferDetailSelect
             },
-            "#cboUOM": {
-                select: this.onTransferDetailSelect
-            },
+            //"#cboUOM": {
+            //    select: this.onTransferDetailSelect
+            //},
             "#cboWeightUOM": {
                 select: this.onTransferDetailSelect
             },

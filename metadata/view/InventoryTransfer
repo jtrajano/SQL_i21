@@ -1115,7 +1115,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter15",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1270,7 +1270,7 @@
                                                             "dataIndex: 'strDescription',",
                                                             "dataType: 'string',",
                                                             "text: 'Description',",
-                                                            "width: 120",
+                                                            "flex: 1",
                                                             "},",
                                                             "{",
                                                             "dataIndex: 'strLotTracking',",
@@ -1756,6 +1756,47 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblQuantity",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colTransferQty",
+                                                "text": "Transfer Qty",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn1",
+                                            "designerId": "18ecee92-1698-457c-b15a-50193a40a53f",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "width": 100
+                                                    },
+                                                    "name": "MyNumberField",
+                                                    "designerId": "d0c2d56f-2f2d-4e31-afab-34b0961cd6e3"
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",
@@ -1897,120 +1938,6 @@
                                                         "columns": "array"
                                                     },
                                                     "designerId": "601a13a5-f546-415b-b5df-0a27af2f8049",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblQuantity",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colTransferQty",
-                                                "text": "Transfer Qty",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn1",
-                                            "designerId": "18ecee92-1698-457c-b15a-50193a40a53f",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "width": 100
-                                                    },
-                                                    "name": "MyNumberField",
-                                                    "designerId": "d0c2d56f-2f2d-4e31-afab-34b0961cd6e3"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strUOM",
-                                                "itemId": "colTransferUOM",
-                                                "text": "UOM",
-                                                "width": 70
-                                            },
-                                            "name": "MyColumn",
-                                            "designerId": "e6827937-bdeb-480e-91ff-1452c7abc9ed",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intItemUOMId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Unit Of Measure Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Measure',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\txtype: 'checkcolumn',",
-                                                            "\t\tdataIndex: 'ysnStockUnit',",
-                                                            "\t\tdataType: 'boolean',",
-                                                            "\t\ttext: 'Stock Unit',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strUnitMeasure",
-                                                        "itemId": "cboUOM",
-                                                        "valueField": "strUnitMeasure"
-                                                    },
-                                                    "name": "MyComboBox7",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "c66f6b30-e8a9-44f7-921f-eea58cab3620",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -2289,7 +2216,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

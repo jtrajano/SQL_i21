@@ -595,7 +595,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     dataIndex: 'strDescription',
                                                                     dataType: 'string',
                                                                     text: 'Description',
-                                                                    width: 120
+                                                                    flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'strLotTracking',
@@ -897,6 +897,20 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         format: '0,000.##'
                                                     },
                                                     {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colTransferQty',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQuantity',
+                                                        text: 'Transfer Qty',
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            width: 100
+                                                        }
+                                                    },
+                                                    {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colToSubLocation',
                                                         width: 96,
@@ -980,60 +994,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             itemId: 'cboToStorage',
                                                             displayField: 'strName',
                                                             valueField: 'strName'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colTransferQty',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQuantity',
-                                                        text: 'Transfer Qty',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            width: 100
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colTransferUOM',
-                                                        width: 70,
-                                                        dataIndex: 'strUOM',
-                                                        text: 'UOM',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    xtype: 'checkcolumn',
-                                                                    dataIndex: 'ysnStockUnit',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Stock Unit',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {
