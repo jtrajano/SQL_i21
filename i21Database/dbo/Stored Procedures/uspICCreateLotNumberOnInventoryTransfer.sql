@@ -154,10 +154,11 @@ BEGIN
 			,strVendorLotNo
 			,strGarden
 			,intDetailId
-			,strParentLotNumber
-			,strParentLotAlias
 			,intSplitFromLotId
 			,intOwnershipType
+			,dblGrossWeight
+			,strParentLotNumber
+			,strParentLotAlias
 			,strTransactionId
 			,strSourceTransactionId
 			,intSourceTransactionTypeId
@@ -169,9 +170,22 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= TransferItem.intToSubLocationId
 			,intStorageLocationId	= TransferItem.intToStorageLocationId
-			,dblQty					= TransferItem.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
+			,dblQty					=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
+										* TransferItem.dblQuantity 
 			,intItemUOMId			= ISNULL(TransferItem.intItemUOMId, TransferItem.intItemUOMId) 
-			,dblWeight				= SourceLot.dblWeightPerQty * ABS(TransferItem.dblQuantity) 
+			--,dblWeight				= SourceLot.dblWeightPerQty * ABS(TransferItem.dblQuantity) 
+
+			,dblWeight				= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
+										* CASE	WHEN ISNULL(SourceLot.intWeightUOMId, 0) <> 0	THEN 
+													dbo.fnMultiply(
+														ISNULL(TransferItem.dblQuantity, 0)
+														, ISNULL(SourceLot.dblWeightPerQty, 0) 
+													) 
+												ELSE 
+													0
+										END 
+
+
 			,intWeightUOMId			= SourceLot.intWeightUOMId
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
@@ -186,10 +200,11 @@ BEGIN
 			,strVendorLotNo			= SourceLot.strVendorLotNo
 			,strGarden				= SourceLot.strGarden
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
-			,strParentLotNumber		= ParentLotSourceLot.strParentLotNumber
-			,strParentLotAlias		= ParentLotSourceLot.strParentLotAlias
 			,intSplitFromLotId		= SourceLot.intLotId
 			,intOwnershipType		= TransferItem.intOwnershipType
+			,dblGrossWeight			= SourceLot.dblGrossWeight
+			,strParentLotNumber		= ParentLotSourceLot.strParentLotNumber
+			,strParentLotAlias		= ParentLotSourceLot.strParentLotAlias
 			,strTransactionId			= [Transfer].strTransferNo
 			,strSourceTransactionId		= SourceLot.strTransactionId
 			,intSourceTransactionTypeId = SourceLot.intSourceTransactionTypeId
@@ -205,7 +220,6 @@ BEGIN
 				ON SourceLot.intLotId = TransferItem.intLotId
 			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
-
 	WHERE	[Transfer].strTransferNo = @strTransactionId
 
 END 
