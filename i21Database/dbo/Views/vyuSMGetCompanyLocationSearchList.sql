@@ -14,6 +14,8 @@ SELECT
 ,compLoc.[strFax]
 ,compLoc.[strEmail]
 ,compLoc.[strWebsite]
+,compLoc.[dblLongitude]
+,compLoc.[dblLatitude]
 ,compLoc.[strInternalNotes]
 ,compLoc.[strUseLocationAddress]
 ,compLoc.[strSkipSalesmanDefault]
