@@ -236,7 +236,7 @@ BEGIN
 		,@SourceId					= [intSourceId]				
 		,@CompanyLocationId			= [intCompanyLocationId]		
 		,@CurrencyId				= [intCurrencyId]			
-		,@Date						= [dtmDate]					
+		,@Date						= CAST([dtmDate] AS DATE)					
 		,@TermId					= [intTermId]
 		,@Comment					= [strComments]				
 		,@ShipViaId					= [intShipViaId]			
@@ -353,7 +353,7 @@ BEGIN
 		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND ([intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND ([dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (CAST([dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL([intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL([intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL([intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -565,7 +565,7 @@ BEGIN
 		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -809,7 +809,7 @@ BEGIN
 		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -920,7 +920,7 @@ BEGIN TRY
 			,@CurrencyId					= [intCurrencyId]
 			,@SubCurrencyCents				= [intSubCurrencyCents]
 			,@TermId						= [intTermId]
-			,@Date							= [dtmDate]
+			,@Date							= CAST([dtmDate] AS DATE)
 			,@DueDate						= [dtmDueDate]
 			,@ShipDate						= [dtmShipDate]
 			,@EntitySalespersonId			= [intEntitySalespersonId]
