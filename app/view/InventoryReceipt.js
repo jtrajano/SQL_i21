@@ -742,8 +742,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             {
                                                                                                 xtype: 'label',
                                                                                                 itemId: 'lblWeightLossMsg',
-                                                                                                style: '{ color: red }',
-                                                                                                text: 'My Label'
+                                                                                                text: 'Wgt or Vol Gain/Loss: '
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'label',
+                                                                                                hidden: true,
+                                                                                                itemId: 'lblWeightLossMsgValue',
+                                                                                                style: 'color: red; padding-left: 5px',
+                                                                                                text: '0.00'
                                                                                             }
                                                                                         ]
                                                                                     }

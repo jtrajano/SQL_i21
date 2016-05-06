@@ -1596,14 +1596,34 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "itemId": "lblWeightLossMsg",
-                                                                                        "style": "{ color: red }",
-                                                                                        "text": "My Label"
+                                                                                        "style": null,
+                                                                                        "text": "Wgt or Vol Gain/Loss: "
                                                                                     },
                                                                                     "name": "MyLabel8",
                                                                                     "configAlternates": {
                                                                                         "style": "string"
                                                                                     },
                                                                                     "designerId": "ab69e307-c7ba-4fe7-8807-5c496262f7dd"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.Label",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "hidden": true,
+                                                                                        "id": null,
+                                                                                        "itemId": "lblWeightLossMsgValue",
+                                                                                        "style": "color: red; padding-left: 5px",
+                                                                                        "text": "0.00"
+                                                                                    },
+                                                                                    "name": "MyLabel9",
+                                                                                    "configAlternates": {
+                                                                                        "style": "string"
+                                                                                    },
+                                                                                    "designerId": "c120a302-36f3-4abf-b4ab-222fcbf7402b"
                                                                                 }
                                                                             ]
                                                                         }

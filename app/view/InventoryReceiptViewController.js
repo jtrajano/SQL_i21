@@ -343,10 +343,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnQuality: {
                 hidden: '{current.ysnPosted}'
             },
-
             lblWeightLossMsg: {
                 hidden: false,
                 text: '{getWeightLossText}'
+            },
+            lblWeightLossMsgValue: {
+                text: '{getWeightLossValueText}',
+                hidden: '{hidelblWeightLossMsgValue}'
             },
             grdInventoryReceipt: {
                 readOnly: '{readOnlyReceiptItemGrid}',
