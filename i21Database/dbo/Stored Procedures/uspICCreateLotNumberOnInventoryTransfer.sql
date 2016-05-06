@@ -172,20 +172,20 @@ BEGIN
 			,intStorageLocationId	= TransferItem.intToStorageLocationId
 			,dblQty					=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 										* TransferItem.dblQuantity 
-			,intItemUOMId			= ISNULL(TransferItem.intItemUOMId, TransferItem.intItemUOMId) 
-			--,dblWeight				= SourceLot.dblWeightPerQty * ABS(TransferItem.dblQuantity) 
-
+			,intItemUOMId			= TransferItem.intItemUOMId
 			,dblWeight				= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
-										* CASE	WHEN ISNULL(SourceLot.intWeightUOMId, 0) <> 0	THEN 
+										* CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId <> TransferItem.intItemUOMId THEN 
+													-- Transfer qty is in bags. Convert it to wgt. 
 													dbo.fnMultiply(
 														ISNULL(TransferItem.dblQuantity, 0)
 														, ISNULL(SourceLot.dblWeightPerQty, 0) 
 													) 
+												WHEN SourceLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId = TransferItem.intItemUOMId THEN 
+													-- Transfer qty is in wgt. No need to convert it. 
+													ISNULL(TransferItem.dblQuantity, 0)
 												ELSE 
 													0
 										END 
-
-
 			,intWeightUOMId			= SourceLot.intWeightUOMId
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
