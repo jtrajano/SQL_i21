@@ -3754,6 +3754,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailCC.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailCC.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPostLoadSchedule.sql" />
+    <Build Include="dbo\Views\vyuLGRoute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
