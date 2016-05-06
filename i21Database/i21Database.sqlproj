@@ -3758,6 +3758,8 @@
     <Build Include="dbo\Stored Procedures\uspMFAutoBlend.sql" />
     <Build Include="dbo\Functions\fnMFConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReverseAutoBlend.sql" />
+    <Build Include="dbo\Views\vyuQMLotQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportLotQualityComparison.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
