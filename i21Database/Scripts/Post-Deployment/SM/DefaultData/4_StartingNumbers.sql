@@ -936,6 +936,13 @@ GO
 		SET [strPrefix] = 'D-'
 		WHERE strTransactionType = N'Dividend Number'
 	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Notice')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET [strPrefix] = 'DN-'
+		WHERE strTransactionType = N'Delivery Notice'
+	END
 GO
 	PRINT N'BEGIN RENAME S'
 
