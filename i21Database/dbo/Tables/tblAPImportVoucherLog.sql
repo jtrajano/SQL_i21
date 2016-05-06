@@ -5,5 +5,6 @@
     [intEntityId] INT NOT NULL, 
     [dtmDate] DATETIME NOT NULL, 
     [intLogType] INT NOT NULL, 
+    [ysnSuccess] BIT NOT NULL, 
     CONSTRAINT [PK_tblAPImportVoucherLog] PRIMARY KEY ([intImportLogId])
 )
