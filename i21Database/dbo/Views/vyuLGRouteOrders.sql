@@ -6,13 +6,6 @@ SELECT
 	,Route.intDispatchID
 	,Route.intLoadDetailId
 	,Route.intSequence
-	,Route.dblFromLatitude
-	,Route.dblFromLongitude
-	,Route.strFromAddress
-	,Route.strFromCity
-	,Route.strFromState
-	,Route.strFromZipCode
-	,Route.strFromCountry
 	,Route.dblToLatitude
 	,Route.dblToLongitude
 	,Route.strToAddress
