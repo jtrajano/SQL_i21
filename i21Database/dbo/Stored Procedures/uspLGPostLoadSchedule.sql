@@ -20,10 +20,10 @@ BEGIN
 	END
 	ELSE IF @intPurchaseSale = 2
 	BEGIN
-		EXEC uspLGPostInventoryShipment @ysnPost = @ysnPost
+		SELECT 'EXEC uspLGPostInventoryShipment @ysnPost = @ysnPost
 			,@ysnRecap = 0
 			,@strTransactionId = @strLoadNumber
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId'
 	END
 	ELSE IF @intPurchaseSale = 3
 	BEGIN
