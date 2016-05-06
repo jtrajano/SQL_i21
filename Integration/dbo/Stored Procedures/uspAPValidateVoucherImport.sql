@@ -2,7 +2,7 @@
 	@UserId INT,
 	@DateFrom DATETIME = NULL,
 	@DateTo DATETIME = NULL,
-	@totalImported INT OUTPUT
+	@isValid BIT OUTPUT
 AS
 
 
