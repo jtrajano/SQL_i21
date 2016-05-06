@@ -118,7 +118,7 @@ Insert into @tblReservedQty
 Select ri.intItemId,Sum(sr.dblQty) AS dblReservedQty 
 From tblICStockReservation sr 
 Join tblMFRecipeItem ri on ri.intItemId=sr.intItemId 
-where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
+where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 AND ISNULL(sr.ysnPosted,0)=0
 group by ri.intItemId
 
 --Substitute
@@ -126,7 +126,7 @@ Insert into @tblReservedQty
 Select rs.intSubstituteItemId,Sum(sr.dblQty) AS dblReservedQty 
 From tblICStockReservation sr 
 Join tblMFRecipeSubstituteItem rs on rs.intSubstituteItemId=sr.intItemId 
-where rs.intRecipeId=@intRecipeId
+where rs.intRecipeId=@intRecipeId AND ISNULL(sr.ysnPosted,0)=0
 group by rs.intSubstituteItemId
 
 Select i.intItemId,i.strItemNo,i.strDescription,a.dblRequiredQty,ISNULL(b.dblPhysicalQty,0) AS dblPhysicalQty,

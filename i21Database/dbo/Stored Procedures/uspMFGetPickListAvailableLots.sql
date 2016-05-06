@@ -105,7 +105,7 @@ AND l.intStorageLocationId NOT IN (@intKitStagingLocationId,@intBlendStagingLoca
 
 Insert into @tblReservedQty
 Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 
-From tblICStockReservation sr Join #tempLot tl on sr.intLotId=tl.intLotId
+From tblICStockReservation sr Join #tempLot tl on sr.intLotId=tl.intLotId Where ISNULL(sr.ysnPosted,0)=0
 group by sr.intLotId
 
 Select tl.*,

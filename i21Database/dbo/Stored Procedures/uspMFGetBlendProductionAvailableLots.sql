@@ -25,7 +25,7 @@ Declare @tblReservedQty table
 Insert into @tblReservedQty
 Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 
 From tblICStockReservation sr 
-where sr.intItemId=@intItemId
+where sr.intItemId=@intItemId AND ISNULL(sr.ysnPosted,0)=0
 group by sr.intLotId
 
 Select l.intLotId,l.strLotNumber,l.intItemId,i.strItemNo,i.strDescription,ISNULL(l.strLotAlias,'') AS strLotAlias,l.dblWeight AS dblPhysicalQty,
