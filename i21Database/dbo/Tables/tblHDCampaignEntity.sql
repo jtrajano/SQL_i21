@@ -3,6 +3,8 @@
 	[intCampaignEntityId] [int] IDENTITY(1,1) NOT NULL,
 	[intOpportunityCampaignId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
+	[strResponse] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCampaignEntity] PRIMARY KEY CLUSTERED ([intCampaignEntityId] ASC),
 	CONSTRAINT [UQ_tblHDCampaignEntity_intOpportunityCampaignId_intEntityCustomerId] UNIQUE ([intOpportunityCampaignId],[intEntityId]),
@@ -37,3 +39,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDCampaignEntity',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Reference Id for Customer Contact',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDCampaignEntity',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Response',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDCampaignEntity',
+    @level2type = N'COLUMN',
+    @level2name = N'strResponse'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Comment',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDCampaignEntity',
+    @level2type = N'COLUMN',
+    @level2name = N'strComment'
