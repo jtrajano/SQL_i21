@@ -14,9 +14,9 @@ BEGIN
 
 	IF @intPurchaseSale = 1
 	BEGIN
-		EXEC uspLGUpdateInboundIntransitQty @intLoadId = @intLoadId
+		SELECT 'EXEC uspLGUpdateInboundIntransitQty @intLoadId = @intLoadId
 			,@ysnInventorize = @ysnPost
-			,@ysnUnShip = 0
+			,@ysnUnShip = 0'
 	END
 	ELSE IF @intPurchaseSale = 2
 	BEGIN
