@@ -16,6 +16,7 @@ SELECT
 	,Rte.intDriverEntityId
 	,strDriver = Driver.strName
 	,Rte.dtmDispatchedDate
+	,Rte.dblTruckCapacity
 	,Rte.strComments
 	,Rte.intFromCompanyLocationId
 	,Rte.intFromCompanyLocationSubLocationId
@@ -29,10 +30,10 @@ SELECT
 									END
 								END
 	,strFromCity			= CASE WHEN IsNull(Rte.intFromCompanyLocationSubLocationId, 0) <> 0 THEN 
-									SubCompLoc.strAddress 
+									SubCompLoc.strCity 
 								ELSE 
 									CASE WHEN IsNull(Rte.intFromCompanyLocationId, 0) <> 0 THEN 
-										CompLoc.strAddress
+										CompLoc.strCity
 									ELSE
 										''
 									END
@@ -82,7 +83,16 @@ SELECT
 										0.0
 									END
 								END
-	
+	,strFromLocation			= CASE WHEN IsNull(Rte.intFromCompanyLocationId, 0) <> 0 THEN 
+										CompLoc.strLocationName
+									ELSE
+										''
+									END
+	,strFromSubLocation			= CASE WHEN IsNull(Rte.intFromCompanyLocationSubLocationId, 0) <> 0 THEN 
+									SubCompLoc.strSubLocationName
+								ELSE 
+									''
+								END
 FROM tblLGRoute Rte
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Rte.intDriverEntityId
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = Rte.intFromCompanyLocationId
