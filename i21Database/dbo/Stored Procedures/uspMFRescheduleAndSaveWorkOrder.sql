@@ -382,6 +382,7 @@ BEGIN TRY
 			WHERE S.intNoOfUnit > 0
 				AND intManufacturingCellId = @intManufacturingCellId
 				AND S.intStatusId <> 1
+				AND S.dtmExpectedDate>=@dtmCurrentDate
 				AND NOT EXISTS (
 					SELECT *
 					FROM @tblMFScheduleWorkOrderDetail SD
@@ -986,6 +987,7 @@ BEGIN TRY
 				WHERE S.intNoOfUnit > 0
 					AND intManufacturingCellId = @intManufacturingCellId
 					AND S.intStatusId <> 1
+					AND S.dtmExpectedDate>=@dtmCurrentDate
 					AND NOT EXISTS (
 						SELECT *
 						FROM @tblMFScheduleWorkOrderDetail SD
@@ -999,6 +1001,7 @@ BEGIN TRY
 					FROM @tblMFScheduleWorkOrder S
 					WHERE S.intNoOfUnit > 0
 						AND S.intStatusId <> 1
+						AND S.dtmExpectedDate>=@dtmCurrentDate
 					)
 				BREAK
 
@@ -1013,6 +1016,7 @@ BEGIN TRY
 					FROM @tblMFScheduleWorkOrder S
 					WHERE intNoOfUnit > 0
 						AND S.intStatusId <> 1
+						AND S.dtmExpectedDate>=@dtmCurrentDate
 						AND intWorkOrderId <> @intWorkOrderId
 					)
 				OR @intGapDuetoEarliestStartDate > 0
@@ -1030,12 +1034,14 @@ BEGIN TRY
 				FROM @tblMFScheduleWorkOrder S
 				WHERE intNoOfUnit > 0
 					AND S.intStatusId <> 1
+					AND S.dtmExpectedDate>=@dtmCurrentDate
 				)
 		BEGIN
 			SELECT @intWorkOrderId = intWorkOrderId
 			FROM @tblMFScheduleWorkOrder S
 			WHERE intNoOfUnit > 0
 				AND S.intStatusId <> 1
+				AND S.dtmExpectedDate>=@dtmCurrentDate
 			ORDER BY intExecutionOrder ASC
 
 			SELECT @strWorkOrderNo = strWorkOrderNo
