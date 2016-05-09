@@ -76,7 +76,7 @@ BEGIN TRY
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 	
 	IF (@dblLotAvailableQty + (@dblAdjustByQuantity*(Case When @dblWeightPerQty=0 Then 1 else @dblWeightPerQty End))) < @dblLotReservedQty
 	BEGIN

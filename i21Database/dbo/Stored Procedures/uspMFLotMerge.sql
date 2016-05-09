@@ -81,7 +81,7 @@ BEGIN TRY
 		RAISERROR (@ErrMsg,11,1)
 	END
 	
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 	
 	IF @blnValidateLotReservation = 1
 	BEGIN

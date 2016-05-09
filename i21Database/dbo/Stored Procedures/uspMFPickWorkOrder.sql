@@ -446,7 +446,7 @@ BEGIN TRY
 						) - ISNULL((
 							SELECT SUM(dblQty)
 							FROM tblICStockReservation SR
-							WHERE SR.intLotId = L.intLotId
+							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 							), 0)
 					,(
 						CASE 
@@ -464,7 +464,7 @@ BEGIN TRY
 						) - ISNULL((
 							SELECT SUM(dblQty)
 							FROM tblICStockReservation SR
-							WHERE SR.intLotId = L.intLotId
+							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 							), 0) / (
 						CASE 
 							WHEN L.dblWeightPerQty = 0
@@ -539,7 +539,7 @@ BEGIN TRY
 					) - ISNULL((
 						SELECT SUM(dblQty)
 						FROM tblICStockReservation SR
-						WHERE SR.intLotId = L.intLotId
+						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 						), 0)
 				,(
 					CASE 
@@ -557,7 +557,7 @@ BEGIN TRY
 					) - ISNULL((
 						SELECT SUM(dblQty)
 						FROM tblICStockReservation SR
-						WHERE SR.intLotId = L.intLotId
+						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 						), 0) / (
 					CASE 
 						WHEN L.dblWeightPerQty = 0
