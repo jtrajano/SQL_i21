@@ -73,7 +73,7 @@ BEGIN TRY
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
+	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId,ISNULL(@intWeightUOMId,@intItemUOMId),ISNULL(dblQty,0))) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 	
 	IF (@dblLotAvailableQty + (CASE WHEN @intItemUOMId=@intSplitItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblAdjustByQuantity*@dblWeightPerQty ELSE @dblAdjustByQuantity END)) < @dblLotReservedQty
 	BEGIN
