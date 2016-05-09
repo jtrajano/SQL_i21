@@ -1208,10 +1208,9 @@ BEGIN TRY
 				AND NOT EXISTS (
 					SELECT *
 					FROM tblMFWorkOrderConsumedLot WC
-					JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
 					WHERE (
-							L.intItemId = ri.intItemId
-							OR L.intItemId = SI.intSubstituteItemId
+							WC.intItemId = ri.intItemId
+							OR WC.intItemId = SI.intSubstituteItemId
 							)
 						AND WC.intWorkOrderId = @intWorkOrderId
 					)
@@ -1240,10 +1239,9 @@ BEGIN TRY
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFWorkOrderConsumedLot WC
-				JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
 				WHERE (
-						L.intItemId = ri.intItemId
-						OR L.intItemId = SI.intSubstituteItemId
+						WC.intItemId = ri.intItemId
+						OR WC.intItemId = SI.intSubstituteItemId
 						)
 					AND WC.intWorkOrderId = @intWorkOrderId
 				)
