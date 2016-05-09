@@ -444,8 +444,9 @@ BEGIN TRY
 							ELSE dblQty
 							END
 						) - ISNULL((
-							SELECT SUM(dblQty)
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 							FROM tblICStockReservation SR
+							JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
 							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 							), 0)
 					,(
@@ -462,8 +463,9 @@ BEGIN TRY
 									)
 							END
 						) - ISNULL((
-							SELECT SUM(dblQty)
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 							FROM tblICStockReservation SR
+							JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
 							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 							), 0) / (
 						CASE 
@@ -537,8 +539,9 @@ BEGIN TRY
 						ELSE dblQty
 						END
 					) - ISNULL((
-						SELECT SUM(dblQty)
+						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 						FROM tblICStockReservation SR
+						JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
 						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 						), 0)
 				,(
@@ -555,8 +558,9 @@ BEGIN TRY
 								)
 						END
 					) - ISNULL((
-						SELECT SUM(dblQty)
+						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 						FROM tblICStockReservation SR
+						JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
 						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 						), 0) / (
 					CASE 
@@ -604,11 +608,11 @@ BEGIN TRY
 				AND L.dblQty > 0
 			ORDER BY L.dtmDateCreated ASC
 
-			IF NOT EXISTS (
-					SELECT *
-					FROM @tblLot
-					)
-				AND @ysnExcessConsumptionAllowed = 1
+			 IF NOT EXISTS (
+                    SELECT *
+                    FROM @tblLot
+                    )
+                AND @ysnExcessConsumptionAllowed = 1
 			BEGIN
 				--*****************************************************
 				--Create staging lot
