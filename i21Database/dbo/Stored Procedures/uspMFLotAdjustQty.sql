@@ -63,7 +63,7 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
 
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId,ISNULL(@intWeightUOMId,@intItemUOMId),ISNULL(dblQty,0))) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 
 	IF @blnValidateLotReservation = 1 
 	BEGIN

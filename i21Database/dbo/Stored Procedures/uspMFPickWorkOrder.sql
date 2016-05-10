@@ -61,6 +61,7 @@ BEGIN TRY
 		,@intItemUOMId INT
 		,@intSubLocationId INT
 		,@intCategoryId INT
+		,@intItemIssuedUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -444,9 +445,10 @@ BEGIN TRY
 							ELSE dblQty
 							END
 						) - ISNULL((
-							SELECT SUM(dblQty)
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 							FROM tblICStockReservation SR
-							WHERE SR.intLotId = L.intLotId
+							JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
+							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 							), 0)
 					,(
 						CASE 
@@ -462,9 +464,10 @@ BEGIN TRY
 									)
 							END
 						) - ISNULL((
-							SELECT SUM(dblQty)
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 							FROM tblICStockReservation SR
-							WHERE SR.intLotId = L.intLotId
+							JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
+							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 							), 0) / (
 						CASE 
 							WHEN L.dblWeightPerQty = 0
@@ -537,9 +540,10 @@ BEGIN TRY
 						ELSE dblQty
 						END
 					) - ISNULL((
-						SELECT SUM(dblQty)
+						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 						FROM tblICStockReservation SR
-						WHERE SR.intLotId = L.intLotId
+						JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
+						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 						), 0)
 				,(
 					CASE 
@@ -555,9 +559,10 @@ BEGIN TRY
 								)
 						END
 					) - ISNULL((
-						SELECT SUM(dblQty)
+						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
 						FROM tblICStockReservation SR
-						WHERE SR.intLotId = L.intLotId
+						JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
+						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
 						), 0) / (
 					CASE 
 						WHEN L.dblWeightPerQty = 0
@@ -604,11 +609,11 @@ BEGIN TRY
 				AND L.dblQty > 0
 			ORDER BY L.dtmDateCreated ASC
 
-			IF NOT EXISTS (
-					SELECT *
-					FROM @tblLot
-					)
-				AND @ysnExcessConsumptionAllowed = 1
+			 IF NOT EXISTS (
+                    SELECT *
+                    FROM @tblLot
+                    )
+                AND @ysnExcessConsumptionAllowed = 1
 			BEGIN
 				--*****************************************************
 				--Create staging lot
@@ -843,7 +848,8 @@ BEGIN TRY
 				,@ysnSubstituteItem = ysnSubstituteItem
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 				,@dblSubstituteRatio = dblSubstituteRatio
-				,@intItemUOMId = intItemUOMId
+				,@intItemUOMId=intItemUOMId
+				,@intItemIssuedUOMId=intItemIssuedUOMId
 			FROM @tblLot
 			WHERE intLotRecordId = @intLotRecordId
 
@@ -934,6 +940,7 @@ BEGIN TRY
 						-- Parameters for the new values: 
 						,@dblAdjustByQuantity = @dblAdjustByQuantity
 						,@dblNewUnitCost = NULL
+						,@intItemUOMId=@intItemIssuedUOMId
 						-- Parameters used for linking or FK (foreign key) relationships
 						,@intSourceId = 1
 						,@intSourceTransactionTypeId = 8
@@ -1204,10 +1211,9 @@ BEGIN TRY
 				AND NOT EXISTS (
 					SELECT *
 					FROM tblMFWorkOrderConsumedLot WC
-					JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
 					WHERE (
-							L.intItemId = ri.intItemId
-							OR L.intItemId = SI.intSubstituteItemId
+							WC.intItemId = ri.intItemId
+							OR WC.intItemId = SI.intSubstituteItemId
 							)
 						AND WC.intWorkOrderId = @intWorkOrderId
 					)
@@ -1236,10 +1242,9 @@ BEGIN TRY
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFWorkOrderConsumedLot WC
-				JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
 				WHERE (
-						L.intItemId = ri.intItemId
-						OR L.intItemId = SI.intSubstituteItemId
+						WC.intItemId = ri.intItemId
+						OR WC.intItemId = SI.intSubstituteItemId
 						)
 					AND WC.intWorkOrderId = @intWorkOrderId
 				)

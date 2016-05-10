@@ -394,7 +394,7 @@ Begin
 
 	Insert @tblReservedQty(intLotId,dblReservedQty)
 	Select sr.intLotId,sum(sr.dblQty) from tblICLot l join tblICStockReservation sr on l.intLotId=sr.intLotId 
-	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId
+	Join @tblPickedLots tpl on l.intLotId=tpl.intLotId Where ISNULL(sr.ysnPosted,0)=0
 	Group by sr.intLotId
 
 	Insert Into @tblChildLot(intLotId,dblQuantity)

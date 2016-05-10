@@ -1185,11 +1185,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vouchers'
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Voucher', intSort = 2 WHERE strMenuName = 'Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Recurring Transactions' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Recurring Transactions', N'Accounts Payable', @AccountsPayableParentMenuId, N'', N'Activity', N'Screen', N'i21.view.RecurringTransaction', N'small-menu-activity', 1, 0, 0, 1, 3, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'i21.view.RecurringTransaction', intSort = 3 WHERE strMenuName = 'Recurring Transactions' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Recurring Transactions' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Recurring Transactions', N'Accounts Payable', @AccountsPayableParentMenuId, N'', N'Activity', N'Screen', N'i21.view.RecurringTransaction', N'small-menu-activity', 1, 0, 0, 1, 3, 1)
+--ELSE
+--	UPDATE tblSMMasterMenu SET strCommand = 'i21.view.RecurringTransaction', intSort = 3 WHERE strMenuName = 'Recurring Transactions' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId) 
 UPDATE tblSMMasterMenu SET strCommand = 'i21.view.BatchPosting?module=Purchasing', intSort = 4 WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
@@ -1263,6 +1263,7 @@ ELSE
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Paid Bills History' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Open Payable Details' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'AP Transaction By GLAccount' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Recurring Transactions' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 /* End of Delete */
 
 /* RENAME COMMAND - ACCOUNTS PAYABLE */

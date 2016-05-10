@@ -6,7 +6,7 @@
     [strUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
 	[strJIRAUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strFullName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
-    [strPassword]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
+    [strPassword]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
 	[strOverridePassword] NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 	[strDashboardRole]  NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strFirstName]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,

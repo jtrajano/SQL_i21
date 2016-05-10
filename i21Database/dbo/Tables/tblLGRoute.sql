@@ -9,7 +9,8 @@ CREATE TABLE [dbo].[tblLGRoute]
 	[strComments] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[intFromCompanyLocationId] INT NULL, 
 	[intFromCompanyLocationSubLocationId] INT NULL,
-	
+	[dblTruckCapacity] NUMERIC(18, 6) NULL,
+
 	CONSTRAINT [PK_tblLGRoute] PRIMARY KEY ([intRouteId]), 
 	CONSTRAINT [FK_tblLGRoute_tblEMEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblLGRoute_tblSMCompanyLocation_intFromCompanyLocationId] FOREIGN KEY ([intFromCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

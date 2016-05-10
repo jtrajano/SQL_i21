@@ -13,6 +13,7 @@
 	[intTicketStatusId] [int] NOT NULL,
 	[intLineOfBusinessId] [int] NULL,
 	[strLineOfBusinessId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[intOpportunityCampaignId] [int] NULL,
 	[intTicketPriorityId] [int] NULL,
 	[intTicketProductId] [int] NULL,
 	[intModuleId] [int] NULL,
@@ -50,7 +51,8 @@
     CONSTRAINT [FK_Ticket_Module] FOREIGN KEY ([intModuleId]) REFERENCES [dbo].[tblHDModule] ([intModuleId]),
     CONSTRAINT [FK_Ticket_Version] FOREIGN KEY ([intVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId]),
     CONSTRAINT [FK_Ticket_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
-    CONSTRAINT [FK_tblHDTicket_tblHDLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [dbo].[tblHDLineOfBusiness] ([intLineOfBusinessId])
+    CONSTRAINT [FK_tblHDTicket_tblHDLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [dbo].[tblHDLineOfBusiness] ([intLineOfBusinessId]),
+    CONSTRAINT [FK_tblHDTicket_ttblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId])
 )
 
 GO
@@ -549,3 +551,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicket',
     @level2type = N'COLUMN',
     @level2name = N'dtmCompleted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Campaign Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intOpportunityCampaignId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Lines of Business',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strLineOfBusinessId'

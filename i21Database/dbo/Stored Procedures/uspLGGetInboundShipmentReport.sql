@@ -47,23 +47,24 @@ BEGIN
 SELECT 
 		L.strLoadNumber AS strTrackingNumber,
 		--LD.intDeliveryNoticeNumber,
-		--L.dtmDeliveryNoticeDate,
-		--L.dtmDeliveryDate,
+		LW.dtmDeliveryNoticeDate,
+		LW.dtmDeliveryDate,
 		LW.intSubLocationId,
 		L.intShippingLineEntityId,
 		--SH.intTruckerEntityId,
-		--L.dtmPickupDate,
-		--SH.dtmLastFreeDate,
-		--LD.dtmStrippingReportReceivedDate,
-		--LD.dtmSampleAuthorizedDate,
-		--L.strStrippingReportComments,
-		--L.strFreightComments,
-		--L.strSampleComments,
-		--L.strOtherComments,
+		LW.dtmPickupDate,
+		LW.dtmLastFreeDate,
+		LW.dtmStrippingReportReceivedDate,
+		LW.dtmSampleAuthorizedDate,
+		LW.strStrippingReportComments,
+		LC.strFreightComments,
+		LW.strSampleComments,
+		LW.strOtherComments,
 		L.strOriginPort,
 		L.strDestinationPort,
 		L.strDestinationCity,
 		L.dtmBLDate,
+		L.dtmScheduledDate,
 		L.dtmETAPOL,
 		L.dtmETAPOD,
 		L.dtmETSPOL,
@@ -144,6 +145,8 @@ SELECT
 		WH.strZipCode as strWarehouseZipCode,
 
 		WI.intWarehouseInstructionHeaderId,
+		LW.intLoadWarehouseId,
+		Via.strName strShipVia,
 		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
 FROM		tblLGLoad L
@@ -162,6 +165,7 @@ LEFT JOIN	tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoad
 LEFT JOIN	tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 LEFT JOIN	tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN	tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+LEFT JOIN	tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
 LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId

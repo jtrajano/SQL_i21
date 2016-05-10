@@ -209,6 +209,7 @@ BEGIN TRY
 			-- Parameters for the new values: 
 			,@dblAdjustByQuantity = @dblAdjustByQuantity
 			,@dblNewUnitCost = NULL
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -280,10 +281,21 @@ BEGIN TRY
 				,@intSplitSubLocationId = @intSourceSubLocationId
 		END
 
+		DECLARE @intSplitItemUOMId INT
+
+		SELECT @intSplitItemUOMId = (
+				CASE 
+					WHEN @intWeightUOMId IS NULL
+						THEN @intNewItemUOMId
+					ELSE @intWeightUOMId
+					END
+				)
+
 		EXEC dbo.uspMFLotSplit @intLotId = @intInputLotId
 			,@intSplitSubLocationId = @intSplitSubLocationId
 			,@intSplitStorageLocationId = @intSplitStorageLocationId
 			,@dblSplitQty = @dblNewWeight
+			,@intSplitItemUOMId = @intSplitItemUOMId
 			,@intUserId = @intUserId
 			,@strSplitLotNumber = @strSplitLotNumber OUTPUT
 			,@strNewLotNumber = @strNewLotNumber
@@ -308,6 +320,7 @@ BEGIN TRY
 			,@intNewItemId = @intNewItemId
 			,@intNewSubLocationId = @intSourceSubLocationId
 			,@intNewStorageLocationId = @intSourceStorageLocationId
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -351,6 +364,7 @@ BEGIN TRY
 			,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
 			,@intNewWeightUOMId = NULL
 			,@dblNewUnitCost = NULL
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -383,6 +397,7 @@ BEGIN TRY
 			,@intNewStorageLocationId = @intDestinationStorageLocationId
 			,@strNewLotNumber = @strLotNumber
 			,@dblMoveQty = @dblAdjustByQuantity
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -415,6 +430,5 @@ BEGIN CATCH
 			)
 END CATCH
 GO
-
 
 
