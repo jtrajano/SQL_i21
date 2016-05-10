@@ -116,127 +116,133 @@
             // 
             this.xrTableCell1.BackColor = System.Drawing.Color.Transparent;
             this.xrTableCell1.BorderColor = System.Drawing.Color.Black;
-            this.xrTableCell1.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
-            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTableCell1.Borders = DevExpress.XtraPrinting.BorderSide.None;
             this.xrTableCell1.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.SalesOrder No")});
-            this.xrTableCell1.Font = new System.Drawing.Font("Arial", 8F);
+            this.xrTableCell1.Font = new System.Drawing.Font("Arial", 9F);
             this.xrTableCell1.ForeColor = System.Drawing.Color.Black;
             this.xrTableCell1.Name = "xrTableCell1";
+            this.xrTableCell1.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.xrTableCell1.StylePriority.UseBackColor = false;
             this.xrTableCell1.StylePriority.UseBorderColor = false;
             this.xrTableCell1.StylePriority.UseBorders = false;
             this.xrTableCell1.StylePriority.UseFont = false;
             this.xrTableCell1.StylePriority.UseForeColor = false;
+            this.xrTableCell1.StylePriority.UsePadding = false;
             this.xrTableCell1.StylePriority.UseTextAlignment = false;
-            this.xrTableCell1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
-            this.xrTableCell1.Weight = 0.41420126426854786D;
+            this.xrTableCell1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.xrTableCell1.Weight = 0.4789202939829178D;
             // 
             // xrTableCell2
             // 
             this.xrTableCell2.BackColor = System.Drawing.Color.Transparent;
             this.xrTableCell2.BorderColor = System.Drawing.Color.Black;
-            this.xrTableCell2.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
-            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTableCell2.Borders = DevExpress.XtraPrinting.BorderSide.None;
             this.xrTableCell2.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.Item No")});
-            this.xrTableCell2.Font = new System.Drawing.Font("Arial", 8F);
+            this.xrTableCell2.Font = new System.Drawing.Font("Arial", 9F);
             this.xrTableCell2.ForeColor = System.Drawing.Color.Black;
             this.xrTableCell2.Name = "xrTableCell2";
+            this.xrTableCell2.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.xrTableCell2.StylePriority.UseBackColor = false;
             this.xrTableCell2.StylePriority.UseBorderColor = false;
             this.xrTableCell2.StylePriority.UseBorders = false;
             this.xrTableCell2.StylePriority.UseFont = false;
             this.xrTableCell2.StylePriority.UseForeColor = false;
+            this.xrTableCell2.StylePriority.UsePadding = false;
             this.xrTableCell2.StylePriority.UseTextAlignment = false;
-            this.xrTableCell2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
-            this.xrTableCell2.Weight = 0.35966456077507969D;
+            this.xrTableCell2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.xrTableCell2.Weight = 0.35966437116882505D;
             // 
             // xrTableCell3
             // 
             this.xrTableCell3.BackColor = System.Drawing.Color.Transparent;
             this.xrTableCell3.BorderColor = System.Drawing.Color.Black;
-            this.xrTableCell3.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
-            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTableCell3.Borders = DevExpress.XtraPrinting.BorderSide.None;
             this.xrTableCell3.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.Item")});
-            this.xrTableCell3.Font = new System.Drawing.Font("Arial", 8F);
+            this.xrTableCell3.Font = new System.Drawing.Font("Arial", 9F);
             this.xrTableCell3.ForeColor = System.Drawing.Color.Black;
             this.xrTableCell3.Name = "xrTableCell3";
+            this.xrTableCell3.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.xrTableCell3.StylePriority.UseBackColor = false;
             this.xrTableCell3.StylePriority.UseBorderColor = false;
             this.xrTableCell3.StylePriority.UseBorders = false;
             this.xrTableCell3.StylePriority.UseFont = false;
             this.xrTableCell3.StylePriority.UseForeColor = false;
+            this.xrTableCell3.StylePriority.UsePadding = false;
             this.xrTableCell3.StylePriority.UseTextAlignment = false;
-            this.xrTableCell3.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
-            this.xrTableCell3.Weight = 0.887105813111074D;
+            this.xrTableCell3.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.xrTableCell3.Weight = 0.82238697300295871D;
             // 
             // xrTableCell4
             // 
             this.xrTableCell4.BackColor = System.Drawing.Color.White;
             this.xrTableCell4.BorderColor = System.Drawing.Color.Black;
-            this.xrTableCell4.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
-            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTableCell4.Borders = DevExpress.XtraPrinting.BorderSide.None;
             this.xrTableCell4.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.UOM")});
-            this.xrTableCell4.Font = new System.Drawing.Font("Arial", 8.25F);
+            this.xrTableCell4.Font = new System.Drawing.Font("Arial", 9F);
             this.xrTableCell4.ForeColor = System.Drawing.Color.Black;
             this.xrTableCell4.Name = "xrTableCell4";
+            this.xrTableCell4.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.xrTableCell4.StylePriority.UseBackColor = false;
             this.xrTableCell4.StylePriority.UseBorderColor = false;
             this.xrTableCell4.StylePriority.UseBorders = false;
             this.xrTableCell4.StylePriority.UseFont = false;
             this.xrTableCell4.StylePriority.UseForeColor = false;
+            this.xrTableCell4.StylePriority.UsePadding = false;
             this.xrTableCell4.StylePriority.UseTextAlignment = false;
-            this.xrTableCell4.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.xrTableCell4.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.xrTableCell4.Weight = 0.36671557003224386D;
             // 
             // xrTableCell5
             // 
             this.xrTableCell5.BackColor = System.Drawing.Color.Transparent;
             this.xrTableCell5.BorderColor = System.Drawing.Color.Black;
-            this.xrTableCell5.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
-            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTableCell5.Borders = DevExpress.XtraPrinting.BorderSide.None;
             this.xrTableCell5.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.Quantity", "{0:#.####}")});
-            this.xrTableCell5.Font = new System.Drawing.Font("Arial", 8F);
+            this.xrTableCell5.Font = new System.Drawing.Font("Arial", 9F);
             this.xrTableCell5.ForeColor = System.Drawing.Color.Black;
             this.xrTableCell5.Name = "xrTableCell5";
+            this.xrTableCell5.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.xrTableCell5.StylePriority.UseBackColor = false;
             this.xrTableCell5.StylePriority.UseBorderColor = false;
             this.xrTableCell5.StylePriority.UseBorders = false;
             this.xrTableCell5.StylePriority.UseFont = false;
             this.xrTableCell5.StylePriority.UseForeColor = false;
+            this.xrTableCell5.StylePriority.UsePadding = false;
             this.xrTableCell5.StylePriority.UseTextAlignment = false;
             xrSummary1.FormatString = "{0:#.####}";
             this.xrTableCell5.Summary = xrSummary1;
-            this.xrTableCell5.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.xrTableCell5.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.xrTableCell5.Weight = 0.35256481283515168D;
             // 
             // xrTableCell6
             // 
             this.xrTableCell6.BackColor = System.Drawing.Color.Transparent;
             this.xrTableCell6.BorderColor = System.Drawing.Color.Black;
-            this.xrTableCell6.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
-            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrTableCell6.Borders = DevExpress.XtraPrinting.BorderSide.None;
             this.xrTableCell6.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.Pallets")});
-            this.xrTableCell6.Font = new System.Drawing.Font("Arial", 8F);
+            this.xrTableCell6.Font = new System.Drawing.Font("Arial", 9F);
             this.xrTableCell6.ForeColor = System.Drawing.Color.Black;
             this.xrTableCell6.Name = "xrTableCell6";
+            this.xrTableCell6.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.xrTableCell6.StylePriority.UseBackColor = false;
             this.xrTableCell6.StylePriority.UseBorderColor = false;
             this.xrTableCell6.StylePriority.UseBorders = false;
             this.xrTableCell6.StylePriority.UseFont = false;
             this.xrTableCell6.StylePriority.UseForeColor = false;
+            this.xrTableCell6.StylePriority.UsePadding = false;
             this.xrTableCell6.StylePriority.UseTextAlignment = false;
-            this.xrTableCell6.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.xrTableCell6.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.xrTableCell6.Weight = 0.31205567128559542D;
             // 
             // TopMargin
             // 
-            this.TopMargin.HeightF = 5F;
+            this.TopMargin.HeightF = 36.25F;
             this.TopMargin.Name = "TopMargin";
             this.TopMargin.Padding = new DevExpress.XtraPrinting.PaddingInfo(0, 0, 0, 0, 100F);
             this.TopMargin.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
@@ -267,28 +273,35 @@
             this.pageFooterBand1.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
             this.xrPageInfo1,
             this.xrPageInfo2});
-            this.pageFooterBand1.HeightF = 29F;
+            this.pageFooterBand1.HeightF = 29.00001F;
             this.pageFooterBand1.Name = "pageFooterBand1";
             // 
             // xrPageInfo1
             // 
-            this.xrPageInfo1.Format = "{0:dddd, MMMM dd, yyyy hh:mm tt}";
-            this.xrPageInfo1.LocationFloat = new DevExpress.Utils.PointFloat(6F, 6F);
+            this.xrPageInfo1.Font = new System.Drawing.Font("Arial", 8F);
+            this.xrPageInfo1.Format = "{0:dd MMMM yyyy H:mm}";
+            this.xrPageInfo1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 6.00001F);
             this.xrPageInfo1.Name = "xrPageInfo1";
             this.xrPageInfo1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
             this.xrPageInfo1.PageInfo = DevExpress.XtraPrinting.PageInfo.DateTime;
-            this.xrPageInfo1.SizeF = new System.Drawing.SizeF(313F, 23F);
+            this.xrPageInfo1.SizeF = new System.Drawing.SizeF(319F, 23F);
             this.xrPageInfo1.StyleName = "PageInfo";
+            this.xrPageInfo1.StylePriority.UseFont = false;
+            this.xrPageInfo1.StylePriority.UseTextAlignment = false;
+            this.xrPageInfo1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             // 
             // xrPageInfo2
             // 
+            this.xrPageInfo2.Font = new System.Drawing.Font("Arial", 7F, System.Drawing.FontStyle.Italic);
             this.xrPageInfo2.Format = "Page {0} of {1}";
-            this.xrPageInfo2.LocationFloat = new DevExpress.Utils.PointFloat(331F, 6F);
+            this.xrPageInfo2.LocationFloat = new DevExpress.Utils.PointFloat(331F, 6.00001F);
             this.xrPageInfo2.Name = "xrPageInfo2";
             this.xrPageInfo2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
-            this.xrPageInfo2.SizeF = new System.Drawing.SizeF(313F, 23F);
+            this.xrPageInfo2.SizeF = new System.Drawing.SizeF(319F, 23F);
             this.xrPageInfo2.StyleName = "PageInfo";
-            this.xrPageInfo2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
+            this.xrPageInfo2.StylePriority.UseFont = false;
+            this.xrPageInfo2.StylePriority.UseTextAlignment = false;
+            this.xrPageInfo2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
             // 
             // reportHeaderBand1
             // 
@@ -363,153 +376,182 @@
             // 
             // tableCell2
             // 
-            this.tableCell2.BackColor = System.Drawing.Color.Transparent;
-            this.tableCell2.BorderColor = System.Drawing.Color.Black;
-            this.tableCell2.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
-            | DevExpress.XtraPrinting.BorderSide.Right) 
+            this.tableCell2.BackColor = System.Drawing.Color.Gainsboro;
+            this.tableCell2.BorderColor = System.Drawing.Color.DimGray;
+            this.tableCell2.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
-            this.tableCell2.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Bold);
+            this.tableCell2.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
             this.tableCell2.ForeColor = System.Drawing.Color.Black;
             this.tableCell2.Name = "tableCell2";
+            this.tableCell2.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.tableCell2.StylePriority.UseBackColor = false;
             this.tableCell2.StylePriority.UseBorderColor = false;
             this.tableCell2.StylePriority.UseBorders = false;
             this.tableCell2.StylePriority.UseFont = false;
             this.tableCell2.StylePriority.UseForeColor = false;
+            this.tableCell2.StylePriority.UsePadding = false;
             this.tableCell2.StylePriority.UseTextAlignment = false;
-            this.tableCell2.Text = "Sales Order No";
-            this.tableCell2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
-            this.tableCell2.Weight = 0.42067326058650306D;
+            this.tableCell2.Text = "Sales Order No.";
+            this.tableCell2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.tableCell2.Weight = 0.4864034311702633D;
             // 
             // tableCell3
             // 
-            this.tableCell3.BackColor = System.Drawing.Color.Transparent;
-            this.tableCell3.BorderColor = System.Drawing.Color.Black;
-            this.tableCell3.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
-            | DevExpress.XtraPrinting.BorderSide.Right) 
+            this.tableCell3.BackColor = System.Drawing.Color.Gainsboro;
+            this.tableCell3.BorderColor = System.Drawing.Color.DimGray;
+            this.tableCell3.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.tableCell3.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
             this.tableCell3.ForeColor = System.Drawing.Color.Black;
             this.tableCell3.Name = "tableCell3";
+            this.tableCell3.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.tableCell3.StylePriority.UseBackColor = false;
             this.tableCell3.StylePriority.UseBorderColor = false;
             this.tableCell3.StylePriority.UseBorders = false;
+            this.tableCell3.StylePriority.UseFont = false;
             this.tableCell3.StylePriority.UseForeColor = false;
+            this.tableCell3.StylePriority.UsePadding = false;
             this.tableCell3.StylePriority.UseTextAlignment = false;
-            this.tableCell3.Text = "Item No";
-            this.tableCell3.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.tableCell3.Text = "Item No.";
+            this.tableCell3.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.tableCell3.Weight = 0.36528423834128637D;
             // 
             // tableCell4
             // 
-            this.tableCell4.BackColor = System.Drawing.Color.Transparent;
-            this.tableCell4.BorderColor = System.Drawing.Color.Black;
-            this.tableCell4.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
-            | DevExpress.XtraPrinting.BorderSide.Right) 
+            this.tableCell4.BackColor = System.Drawing.Color.Gainsboro;
+            this.tableCell4.BorderColor = System.Drawing.Color.DimGray;
+            this.tableCell4.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.tableCell4.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
             this.tableCell4.ForeColor = System.Drawing.Color.Black;
             this.tableCell4.Name = "tableCell4";
+            this.tableCell4.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.tableCell4.StylePriority.UseBackColor = false;
             this.tableCell4.StylePriority.UseBorderColor = false;
             this.tableCell4.StylePriority.UseBorders = false;
+            this.tableCell4.StylePriority.UseFont = false;
             this.tableCell4.StylePriority.UseForeColor = false;
+            this.tableCell4.StylePriority.UsePadding = false;
             this.tableCell4.StylePriority.UseTextAlignment = false;
             this.tableCell4.Text = "Item";
-            this.tableCell4.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
-            this.tableCell4.Weight = 0.90096664157580586D;
+            this.tableCell4.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.tableCell4.Weight = 0.83523647099204568D;
             // 
             // tableCell5
             // 
-            this.tableCell5.BackColor = System.Drawing.Color.White;
-            this.tableCell5.BorderColor = System.Drawing.Color.Black;
-            this.tableCell5.Borders = ((DevExpress.XtraPrinting.BorderSide)((DevExpress.XtraPrinting.BorderSide.Top | DevExpress.XtraPrinting.BorderSide.Bottom)));
-            this.tableCell5.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tableCell5.BackColor = System.Drawing.Color.Gainsboro;
+            this.tableCell5.BorderColor = System.Drawing.Color.DimGray;
+            this.tableCell5.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.tableCell5.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
             this.tableCell5.ForeColor = System.Drawing.Color.Black;
             this.tableCell5.Name = "tableCell5";
+            this.tableCell5.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.tableCell5.StylePriority.UseBackColor = false;
             this.tableCell5.StylePriority.UseBorderColor = false;
             this.tableCell5.StylePriority.UseBorders = false;
             this.tableCell5.StylePriority.UseFont = false;
             this.tableCell5.StylePriority.UseForeColor = false;
+            this.tableCell5.StylePriority.UsePadding = false;
             this.tableCell5.StylePriority.UseTextAlignment = false;
             this.tableCell5.Text = "UOM";
-            this.tableCell5.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.tableCell5.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.tableCell5.Weight = 0.37244575391330104D;
             // 
             // tableCell6
             // 
-            this.tableCell6.BackColor = System.Drawing.Color.Transparent;
-            this.tableCell6.BorderColor = System.Drawing.Color.Black;
-            this.tableCell6.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
-            | DevExpress.XtraPrinting.BorderSide.Right) 
+            this.tableCell6.BackColor = System.Drawing.Color.Gainsboro;
+            this.tableCell6.BorderColor = System.Drawing.Color.DimGray;
+            this.tableCell6.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.tableCell6.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
             this.tableCell6.ForeColor = System.Drawing.Color.Black;
             this.tableCell6.Name = "tableCell6";
+            this.tableCell6.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.tableCell6.StylePriority.UseBackColor = false;
             this.tableCell6.StylePriority.UseBorderColor = false;
             this.tableCell6.StylePriority.UseBorders = false;
+            this.tableCell6.StylePriority.UseFont = false;
             this.tableCell6.StylePriority.UseForeColor = false;
+            this.tableCell6.StylePriority.UsePadding = false;
             this.tableCell6.StylePriority.UseTextAlignment = false;
             this.tableCell6.Text = "Quantity";
-            this.tableCell6.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.tableCell6.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.tableCell6.Weight = 0.35807317980296044D;
             // 
             // tableCell7
             // 
-            this.tableCell7.BackColor = System.Drawing.Color.Transparent;
-            this.tableCell7.BorderColor = System.Drawing.Color.Black;
+            this.tableCell7.BackColor = System.Drawing.Color.Gainsboro;
+            this.tableCell7.BorderColor = System.Drawing.Color.DimGray;
             this.tableCell7.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.tableCell7.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
             this.tableCell7.ForeColor = System.Drawing.Color.Black;
             this.tableCell7.Name = "tableCell7";
+            this.tableCell7.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 0, 0, 100F);
             this.tableCell7.StylePriority.UseBackColor = false;
             this.tableCell7.StylePriority.UseBorderColor = false;
             this.tableCell7.StylePriority.UseBorders = false;
+            this.tableCell7.StylePriority.UseFont = false;
             this.tableCell7.StylePriority.UseForeColor = false;
+            this.tableCell7.StylePriority.UsePadding = false;
             this.tableCell7.StylePriority.UseTextAlignment = false;
             this.tableCell7.Text = "Pallets";
-            this.tableCell7.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.tableCell7.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.tableCell7.Weight = 0.31693202206456933D;
             // 
             // xrLabel2
             // 
-            this.xrLabel2.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
-            | DevExpress.XtraPrinting.BorderSide.Right)));
-            this.xrLabel2.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold);
-            this.xrLabel2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 85.41663F);
+            this.xrLabel2.BackColor = System.Drawing.Color.Gainsboro;
+            this.xrLabel2.BorderColor = System.Drawing.Color.DimGray;
+            this.xrLabel2.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
+            | DevExpress.XtraPrinting.BorderSide.Right) 
+            | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel2.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.xrLabel2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 85.41662F);
             this.xrLabel2.Name = "xrLabel2";
-            this.xrLabel2.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
-            this.xrLabel2.SizeF = new System.Drawing.SizeF(286.9583F, 22.91667F);
+            this.xrLabel2.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 5, 5, 0, 100F);
+            this.xrLabel2.SizeF = new System.Drawing.SizeF(96.99999F, 98.29169F);
+            this.xrLabel2.StylePriority.UseBackColor = false;
+            this.xrLabel2.StylePriority.UseBorderColor = false;
             this.xrLabel2.StylePriority.UseBorders = false;
             this.xrLabel2.StylePriority.UseFont = false;
+            this.xrLabel2.StylePriority.UsePadding = false;
             this.xrLabel2.StylePriority.UseTextAlignment = false;
-            this.xrLabel2.Text = "Customer Ship to Address";
+            this.xrLabel2.Text = "Customer Ship to Address:";
             this.xrLabel2.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             // 
             // xrLabel1
             // 
-            this.xrLabel1.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Right) 
+            this.xrLabel1.BorderColor = System.Drawing.Color.DimGray;
+            this.xrLabel1.Borders = ((DevExpress.XtraPrinting.BorderSide)(((DevExpress.XtraPrinting.BorderSide.Top | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
+            this.xrLabel1.CanGrow = false;
             this.xrLabel1.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
             new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.Ship To Address")});
-            this.xrLabel1.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.xrLabel1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 108.3333F);
+            this.xrLabel1.Font = new System.Drawing.Font("Arial", 9F);
+            this.xrLabel1.LocationFloat = new DevExpress.Utils.PointFloat(96.99999F, 85.4166F);
             this.xrLabel1.Name = "xrLabel1";
-            this.xrLabel1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
-            this.xrLabel1.SizeF = new System.Drawing.SizeF(286.9583F, 75.37501F);
+            this.xrLabel1.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 0, 5, 0, 100F);
+            this.xrLabel1.SizeF = new System.Drawing.SizeF(189.9583F, 98.29171F);
+            this.xrLabel1.StylePriority.UseBorderColor = false;
             this.xrLabel1.StylePriority.UseBorders = false;
             this.xrLabel1.StylePriority.UseFont = false;
+            this.xrLabel1.StylePriority.UsePadding = false;
             this.xrLabel1.StylePriority.UseTextAlignment = false;
-            this.xrLabel1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+            this.xrLabel1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             // 
             // xrLabel17
             // 
+            this.xrLabel17.Font = new System.Drawing.Font("Arial", 18F, System.Drawing.FontStyle.Bold);
             this.xrLabel17.ForeColor = System.Drawing.Color.Black;
             this.xrLabel17.LocationFloat = new DevExpress.Utils.PointFloat(10.00001F, 10F);
             this.xrLabel17.Name = "xrLabel17";
             this.xrLabel17.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
             this.xrLabel17.SizeF = new System.Drawing.SizeF(638F, 33F);
             this.xrLabel17.StyleName = "Title";
+            this.xrLabel17.StylePriority.UseFont = false;
             this.xrLabel17.StylePriority.UseForeColor = false;
             this.xrLabel17.StylePriority.UseTextAlignment = false;
             this.xrLabel17.Text = "Inventory Shipment";
@@ -573,7 +615,7 @@
             this.sqlDataSource1});
             this.DataMember = "uspICReportInventoryShipment";
             this.DataSource = this.sqlDataSource1;
-            this.Margins = new System.Drawing.Printing.Margins(100, 100, 5, 100);
+            this.Margins = new System.Drawing.Printing.Margins(100, 100, 36, 100);
             this.Parameters.AddRange(new DevExpress.XtraReports.Parameters.Parameter[] {
             this.xmlParam});
             this.StyleSheet.AddRange(new DevExpress.XtraReports.UI.XRControlStyle[] {
