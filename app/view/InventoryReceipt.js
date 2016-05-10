@@ -112,7 +112,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         tabIndex: -1,
                                         itemId: 'btnPrint',
                                         ui: 'i21-button-toolbar-small',
-                                        text: 'Print'
+                                        text: 'Pick List'
                                     },
                                     {
                                         xtype: 'button',

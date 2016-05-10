@@ -1846,7 +1846,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                 iRely.Functions.openScreen('Reporting.view.ReportViewer', {
                     selectedReport: 'BillOfLadingReport',
-                    selectedGroup: 'Manufacturing',
+                    selectedGroup: 'Inventory',
                     selectedParameters: filters
                 });
             }
@@ -2205,7 +2205,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             callbackFn: function() {
                 iRely.Functions.openScreen('Reporting.view.ReportViewer', {
                     selectedReport: 'InventoryShipment',
-                    selectedGroup: 'Manufacturing',
+                    selectedGroup: 'Inventory',
                     selectedParameters: filters
                 });
             }

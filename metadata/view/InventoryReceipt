@@ -193,7 +193,7 @@
                                 "itemId": "btnPrint",
                                 "layout|flex": null,
                                 "tabIndex": -1,
-                                "text": "Print",
+                                "text": "Pick List",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
@@ -1566,7 +1566,6 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-
                                                                             "name": "filter1",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
@@ -5770,7 +5769,6 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-
                                                     "name": "filter13",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
