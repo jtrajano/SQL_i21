@@ -441,14 +441,66 @@ SELECT
 	[intContractHeaderId]	=	NULL,	
 	[strContractNumber]		=	NULL,
 	[intPrepayType]			=	B.intPrepayTypeId,
-	[dblTotal]				=	A.dblTotal,
-	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
-	[dblBalance]			=	A.dblAmountDue,
-	[dblAmountApplied]		=	0,
+	--[dblTotal]				=	A.dblTotal,
+	--[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
+	--[dblBalance]			=	A.dblAmountDue,
+	--[dblAmountApplied]		=	0,
+	[dblTotal]				=	B.dblTotal,
+	[dblBillAmount]			=	CurrentBill.dblTotal,
+	[dblBalance]			=	CASE B.intPrepayTypeId 
+									--STANDARD ALLOCATION COMPUTATION
+									WHEN 1 THEN
+											CurrentBill.allocatedAmount * A.dblAmountDue 
+									--UNIT ALLOCATION COMPUTATION
+									WHEN 2 THEN 
+										CASE WHEN (A.dblAmountDue < A.dblTotal) 
+											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
+											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+									--PERCENTAGE ALLOCATION COMPUTATION              
+									WHEN 3 THEN
+										CASE WHEN (A.dblAmountDue < A.dblTotal)
+											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
+													  THEN	A.dblAmountDue
+													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+												 END   
+										END                                        
+									ELSE 0 END,
+	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+									WHEN 1 THEN
+											A.dblAmountDue 
+									WHEN 2 THEN 
+										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+											THEN B.dblTotal
+											ELSE B.dblTotal END
+									WHEN 3 THEN
+										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN B.dblTotal
+											ELSE B.dblTotal END
+									ELSE 0 END),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+CROSS APPLY
+(
+	SELECT
+		C.intItemId
+		,C.dblTotal
+		,C.dblCost
+		,C.dblQtyReceived
+		,C.intBillDetailId
+		,C.intLineNo
+		,Total.dblDetailTotal
+		,Total.dblTotalQtyReceived
+		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
+	FROM tblAPBillDetail C
+	CROSS APPLY (
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		WHERE  intBillId = @billId
+	) Total
+	WHERE intBillId = @billId
+) CurrentBill 
 WHERE A.intTransactionType IN (2)
 --AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
 AND B.intContractHeaderId IS NULL
