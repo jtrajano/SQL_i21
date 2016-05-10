@@ -151,7 +151,9 @@ CREATE PROCEDURE [dbo].[uspCFImportInvoiceCycle]
 		END
 	
 		PRINT @TotalSuccess
-		SELECT @TotalFailed = COUNT(*) - @TotalSuccess from cfactmst
+		SELECT @TotalFailed = COUNT(*) - @TotalSuccess FROM cfactmst
+				WHERE cfact_ivc_cyc COLLATE Latin1_General_CI_AS NOT IN (select strInvoiceCycle from tblCFInvoiceCycle) 
+				AND cfact_ivc_cyc IS NOT NULL 
 		PRINT @TotalFailed
 
 	END
