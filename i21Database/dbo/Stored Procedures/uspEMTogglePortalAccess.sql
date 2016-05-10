@@ -63,9 +63,13 @@ BEGIN
 		begin
 			if(@strPassword = '')
 				set @strPassword = '1234'
+			
+			declare @dc nvarchar(max)
+			exec uspAESEncrypt @strPassword, @dc output
+
 
 			insert into [tblEMEntityCredential](intEntityId,strUserName,strPassword)
-			select @intEntityContactId, @userName, @strPassword
+			select @intEntityContactId, @userName, @dc
 		end
 		
 
