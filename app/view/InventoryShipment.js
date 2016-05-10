@@ -1377,6 +1377,16 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     dataType: 'string',
                                                                                     text: 'Description',
                                                                                     flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSubLocationName',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboStorageLocation',

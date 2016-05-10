@@ -353,7 +353,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         defaultFilters: [
                             {
                                 column: 'intLocationId',
-                                value: '{current.intLocationId}',
+                                value: '{current.intShipFromLocationId}',
                                 conjunction: 'and'
                             },
                             {
@@ -893,6 +893,21 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitPrice', records[0].get('dblSalePrice'));
             current.set('intItemUOMId', records[0].get('intItemUnitMeasureId'));
+        }
+        else if (combo.itemId === 'cboSubLocation') {
+            if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
+                current.set('intSubLocationId', records[0].get('intSubLocationId'));
+                current.set('intStorageLocationId', null);
+                current.set('strStorageLocationName', null);
+            }
+        }
+
+        else if (combo.itemId === 'cboStorageLocation') {
+            if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
+                current.set('intSubLocationId', records[0].get('intSubLocationId'));
+                current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+                current.set('strSubLocationName', records[0].get('strSubLocationName'));
+            }
         }
     },
 
@@ -1936,6 +1951,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 { dataIndex: 'strCustomerNumber', text: 'Customer Number', width: 100, dataType: 'string' },
                 { dataIndex: 'strCustomerName', text: 'Customer Name', width: 100, dataType: 'string' },
 
+                { dataIndex: 'intLocationId', text: 'Location Id', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'numeric', hidden: true },
                 { dataIndex: 'strItemNo', text: 'Item No', width: 100, dataType: 'string' },
                 { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, dataType: 'string' },
@@ -2050,10 +2066,25 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                                 dblNetWeight: lotDetails.get('dblNetWt'),
                                                                 strStorageLocation: lotDetails.get('strStorageLocation')
                                                             });
+
+                                                            if (currentVM.get('intShipFromLocationId') != lot.get('intLocationId') ){
+                                                                newItemLot.set('strStorageLocation', null);
+                                                            }
+
                                                             newItem.tblICInventoryShipmentItemLots().add(newItemLot);
                                                         }
                                                     });
                                                     newItem.set('dblQuantity', totalQty);
+
+                                                    // Check if the shipment location matches the location of the order.
+                                                    // If not, clear the sub and storage location.
+                                                    if (currentVM.get('intShipFromLocationId') != lot.get('intLocationId') ){
+                                                        newItem.set('intSubLocationId', null);
+                                                        newItem.set('intStorageLocationId', null);
+                                                        newItem.set('strSubLocationName', null);
+                                                        newItem.set('strStorageLocationName', null);
+                                                    }
+
                                                     currentVM.tblICInventoryShipmentItems().add(newItem);
                                                 }
                                             });
@@ -2098,6 +2129,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 intOwnershipType: 1,
                                 intCommodityId: order.get('intCommodityId')
                             };
+
+                            // Check if the shipment location matches the location of the order.
+                            // If not, clear the sub and storage location.
+                            if (currentVM.get('intShipFromLocationId') != order.get('intLocationId') ){
+                                newRecord.intSubLocationId = null;
+                                newRecord.intStorageLocationId = null;
+                                newRecord.strSubLocationName = null;
+                                newRecord.strStorageLocationName = null;
+                            }
                             currentVM.tblICInventoryShipmentItems().add(newRecord);
                         }
 
@@ -2288,6 +2328,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnPrint": {
                 click: this.onPrintClick
+            },
+            "#cboSubLocation": {
+                select: this.onItemNoSelect
+            },
+            "#cboStorageLocation": {
+                select: this.onItemNoSelect
             }
         })
     }
