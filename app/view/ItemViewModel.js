@@ -859,7 +859,6 @@ Ext.define('Inventory.view.ItemViewModel', {
             switch (get('current.strType')) {
                 case 'Kit':
                 case 'Non-Inventory':
-                case 'Other Charge':
                 case 'Service':
                 case 'Software':
                     this.data.current.set('intCommodityId', null);
