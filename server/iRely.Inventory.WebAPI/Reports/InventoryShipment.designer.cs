@@ -702,7 +702,7 @@
             this.sqlDataSource1});
             this.DataMember = "uspICReportInventoryShipment";
             this.DataSource = this.sqlDataSource1;
-            this.Margins = new System.Drawing.Printing.Margins(100, 100, 36, 47);
+            this.Margins = new System.Drawing.Printing.Margins(100, 100, 36, 100);
             this.Parameters.AddRange(new DevExpress.XtraReports.Parameters.Parameter[] {
             this.xmlParam});
             this.StyleSheet.AddRange(new DevExpress.XtraReports.UI.XRControlStyle[] {
