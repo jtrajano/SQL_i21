@@ -3778,6 +3778,8 @@
     <Build Include="dbo\tblSCUncompletedTicketAlert.sql" />
     <Build Include="dbo\Views\vyuLGLoadWarehouseContainerView.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportLotQualityDetail.sql" />
+    <Build Include="dbo\Tables\tblMFMarginBy.sql" />
+    <Build Include="dbo\Views\vyuMFGetItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
