@@ -193,7 +193,7 @@
                                 "itemId": "btnPrint",
                                 "layout|flex": null,
                                 "tabIndex": -1,
-                                "text": "Pick List",
+                                "text": "Print",
                                 "ui": "i21-button-toolbar-small",
                                 "width": null
                             },
