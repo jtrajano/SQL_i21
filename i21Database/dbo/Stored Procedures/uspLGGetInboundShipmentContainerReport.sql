@@ -40,13 +40,21 @@ BEGIN
 	--FROM	@temp_xml_table   
 	--WHERE	[fieldname] = 'intReferenceNumber' 
 
-SELECT	SH.*,
+SELECT  LC.strContainerNumber,
+		LV.strBLNumber,
+		LV.strMarks,
+		LDV.*,
+		LC.dblQuantity AS dblContainerContractQty,
 		CD.strCustomerContract,
 		CD.dtmContractDate,
 		CD.strContractBasis,
 		CD.strContractBasisDescription,
 		CD.strApprovalBasis
 FROM vyuLGLoadDetailView LDV
+JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
+LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = LDV.intLoadId
+LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LDV.intPContractDetailId
-WHERE SH.strTrackingNumber = @xmlParam	
+WHERE LDV.strLoadNumber = @xmlParam	
 END
