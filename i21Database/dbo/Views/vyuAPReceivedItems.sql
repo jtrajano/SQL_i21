@@ -60,6 +60,7 @@ FROM
 		,[dblUnitQty]				=	tblReceived.itemUnitQty
 		,[intCurrencyId]			=	tblReceived.intCurrencyId
 		,[strCurrency]				=	tblReceived.strCurrency
+		,[strVendorLocation]		=	tblReceived.strVendorLocation
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -94,6 +95,7 @@ FROM
 				,ItemUOM.dblUnitQty AS itemUnitQty
 				,A.intCurrencyId
 				,H.strCurrency
+				,EL.strLocationName AS strVendorLocation
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -108,6 +110,7 @@ FROM
 											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A1.intCurrencyId)
 				LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 				LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A1.intCurrencyId
+				LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A1.intShipFromId
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
 			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
@@ -136,6 +139,7 @@ FROM
 				,G.dblRate
 				,A1.intSubCurrencyCents
 				,H.strCurrency
+				,EL.strLocationName
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -198,11 +202,12 @@ FROM
 	,[dblNetWeight]				=	0
 	,[strCostUOM]				=	NULL
 	,[strgrossNetUOM]			=	NULL
-	,[dblWeightUnitQty]			=	0
-	,[dblCostUniNULL]			=	0
-	,[dblUnitQty]				=	0
+	,[dblWeightUnitQty]			=	1
+	,[dblCostUnitQty]			=	1
+	,[dblUnitQty]				=	1
 	,[intCurrencyId]			=	A.intCurrencyId
 	,[strCurrency]				=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+	,[strVendorLocation]		=	EL.strLocationName
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -212,6 +217,7 @@ FROM
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitOfMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
 		OUTER APPLY
 		(
 			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
@@ -274,6 +280,7 @@ FROM
 	,[dblUnitQty]				=	ItemUOM.dblUnitQty
 	,[intCurrencyId]			=	A.intCurrencyId
 	,[strCurrency]				=   (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+	,[strVendorLocation]		=	EL.strLocationName
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -294,6 +301,7 @@ FROM
 											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
+	LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -360,6 +368,7 @@ FROM
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	A.intCurrencyId
 		,[strCurrency]								=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+		,[strVendorLocation]						=	NULL
 	FROM [vyuAPChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
@@ -435,6 +444,7 @@ FROM
 		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 		,[intCurrencyId]							=	(SELECT TOP 1 intCurrencyID FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)
 		,[strCurrency]								=	A.strCurrency
+		,[strVendorLocation]						=	NULL
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -497,6 +507,7 @@ FROM
 		,[dblUnitQty]								=	1--dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
 		,[intCurrencyId]							=	CC.intCurrencyId
 		,[strCurrency]								=	CC.strCurrency
+		,[strVendorLocation]						=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 

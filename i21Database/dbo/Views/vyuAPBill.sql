@@ -42,14 +42,17 @@ SELECT
 	--					INNER JOIN dbo.tblSMUserSecurity G ON F.intUserSecurityId = G.intUserSecurityID WHERE B.intApprovalListId = F.intApprovalListId),
 	CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover,
 	dtmApprovalDate,
-	GL.strBatchId
+	GL.strBatchId,
+	EL.strLocationName AS strVendorLocation
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
 		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
-	ON A.[intEntityVendorId] = B.[intEntityVendorId]
+		ON A.[intEntityVendorId] = B.[intEntityVendorId]
 	INNER JOIN dbo.tblGLAccount C
 		ON A.intAccountId = C.intAccountId
+	INNER JOIN dbo.tblEMEntityLocation EL
+		ON EL.intEntityLocationId = A.intShipFromId
 	OUTER APPLY
 	(
 		SELECT TOP 1
