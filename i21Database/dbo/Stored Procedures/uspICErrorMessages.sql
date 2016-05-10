@@ -402,3 +402,8 @@ EXEC sp_addmessage 80080,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80081) EXEC sp_dropmessage 80081, 'us_english'	
 SET @strmessage = 'Net quantity mistmatch. It is %s on item %s but the total net from the lot(s) is %s.'
 EXEC sp_addmessage 80081,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80082) EXEC sp_dropmessage 80082, 'us_english'	
+SET @strmessage = 'The net quantity for item %s is missing.'
+EXEC sp_addmessage 80082,11,@strmessage,'us_english','False'
+
