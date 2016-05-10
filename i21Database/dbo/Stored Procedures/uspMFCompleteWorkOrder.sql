@@ -290,6 +290,7 @@ BEGIN TRY
 			,@intInputLotSubLocationId=intSubLocationId
 			,@intInputLotWeightUOMId=intWeightUOMId
 			,@dblInputLotWeightPerQty=dblWeightPerQty 
+			,@intItemUOMId =intItemUOMId
 		FROM dbo.tblICLot L
 		WHERE intLotId = @intInputLotId
 
@@ -317,6 +318,7 @@ BEGIN TRY
 					-- Parameters for the new values: 
 					,@dblAdjustByQuantity =@dblAdjustByQuantity
 					,@dblNewUnitCost =NULL
+					,@intItemUOMId =@intItemUOMId 
 					-- Parameters used for linking or FK (foreign key) relationships
 					,@intSourceId = 1
 					,@intSourceTransactionTypeId = 8
