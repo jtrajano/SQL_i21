@@ -72,6 +72,9 @@ BEGIN TRY
 		,@ysnConsumptionRequired bit
 		,@ysnPostConsumption bit
 		,@strInputQuantityReadOnly nvarchar(50)
+		,@intInputItemId int
+		,@strInputItemLotTracking nvarchar(50)
+		,@intInputItemUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -101,7 +104,9 @@ BEGIN TRY
 		,@strOutputLotNumber = strOutputLotNumber
 		,@strVendorLotNo = strVendorLotNo
 		,@intInputLotId = intInputLotId
+		,@intInputItemId=intInputItemId
 		,@dblInputWeight = dblInputWeight
+		,@intInputItemUOMId=intInputItemUOMId
 		,@intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
@@ -139,7 +144,9 @@ BEGIN TRY
 			,strOutputLotNumber NVARCHAR(50)
 			,strVendorLotNo NVARCHAR(50)
 			,intInputLotId INT
+			,intInputItemId INT
 			,dblInputWeight NUMERIC(38, 20)
+			,intInputItemUOMId int
 			,intLocationId INT
 			,intSubLocationId INT
 			,intStorageLocationId INT
@@ -456,44 +463,82 @@ BEGIN TRY
 				AND (ri.intItemId = @intInputLotItemId OR rs.intSubstituteItemId=@intInputLotItemId)
 		END
 
-		INSERT INTO dbo.tblMFWorkOrderConsumedLot (
-			intWorkOrderId
-			,intItemId
-			,intLotId
-			,dblQuantity
-			,intItemUOMId
-			,dblIssuedQuantity
-			,intItemIssuedUOMId
-			,intBatchId
-			,intSequenceNo
-			,dtmCreated
-			,intCreatedUserId
-			,dtmLastModified
-			,intLastModifiedUserId
-			)
-		SELECT @intWorkOrderId
-			,intItemId
-			,intLotId
-			,CASE 
-				WHEN @dblInputWeight = 0
-					THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
-				ELSE @dblInputWeight
-				END
-			,ISNULL(intWeightUOMId,intItemUOMId)
-			,CASE 
-				WHEN @dblInputWeight = 0
-					THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
-				ELSE @dblInputWeight
-				END
-			,ISNULL(intWeightUOMId,intItemUOMId)
-			,@intBatchId
-			,1
-			,@dtmCurrentDate
-			,@intUserId
-			,@dtmCurrentDate
-			,@intUserId
-		FROM dbo.tblICLot L
-		WHERE intLotId = @intInputLotId
+		SELECT @strInputItemLotTracking=strLotTracking
+		FROM dbo.tblICItem 
+		WHERE intItemId=@intInputItemId
+
+		IF @strInputItemLotTracking='Lot Level'
+		BEGIN
+			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+				intWorkOrderId
+				,intItemId
+				,intLotId
+				,dblQuantity
+				,intItemUOMId
+				,dblIssuedQuantity
+				,intItemIssuedUOMId
+				,intBatchId
+				,intSequenceNo
+				,dtmCreated
+				,intCreatedUserId
+				,dtmLastModified
+				,intLastModifiedUserId
+				)
+			SELECT @intWorkOrderId
+				,intItemId
+				,intLotId
+				,CASE 
+					WHEN @dblInputWeight = 0
+						THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
+					ELSE @dblInputWeight
+					END
+				,ISNULL(intWeightUOMId,intItemUOMId)
+				,CASE 
+					WHEN @dblInputWeight = 0
+						THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
+					ELSE @dblInputWeight
+					END
+				,ISNULL(intWeightUOMId,intItemUOMId)
+				,@intBatchId
+				,1
+				,@dtmCurrentDate
+				,@intUserId
+				,@dtmCurrentDate
+				,@intUserId
+			FROM dbo.tblICLot L
+			WHERE intLotId = @intInputLotId
+		END
+		ELSE
+		BEGIN
+			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+				intWorkOrderId
+				,intItemId
+				,intLotId
+				,dblQuantity
+				,intItemUOMId
+				,dblIssuedQuantity
+				,intItemIssuedUOMId
+				,intBatchId
+				,intSequenceNo
+				,dtmCreated
+				,intCreatedUserId
+				,dtmLastModified
+				,intLastModifiedUserId
+				)
+			SELECT @intWorkOrderId
+				,@intInputItemId
+				,NULL
+				,@dblInputWeight
+				,@intInputItemUOMId
+				,@dblInputWeight
+				,@intInputItemUOMId
+				,@intBatchId
+				,1
+				,@dtmCurrentDate
+				,@intUserId
+				,@dtmCurrentDate
+				,@intUserId
+		END
 
 		EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
 			,@intLocationId = @intLocationId
