@@ -3776,6 +3776,7 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCustomerPaymentsRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutDepartmentSaleRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutDepositDetailsRecap.sql" />
+    <Build Include="dbo\tblSCUncompletedTicketAlert.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
