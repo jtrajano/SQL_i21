@@ -210,6 +210,31 @@ BEGIN
 		END 
 	END 
 
+	-- Do not allow post if there is Gross/Net UOM and net qty is zero. 
+	IF @ysnPost = 1 AND @ysnRecap = 0 
+	BEGIN 
+		SET @intItemId = NULL 
+		SET @strItemNo = NULL 
+
+		SELECT	TOP 1 
+				@intItemId = Item.intItemId
+				,@strItemNo = Item.strItemNo
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND ReceiptItem.intWeightUOMId IS NOT NULL 
+				AND ISNULL(ReceiptItem.dblNet, 0) = 0 
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- 'The net quantity for item {Item Name} is missing.'
+			RAISERROR(80082, 11, 1, @strItemNo)  
+			GOTO Post_Exit    
+		END 
+	END 
+
 END
 
 -- Get the next batch number
