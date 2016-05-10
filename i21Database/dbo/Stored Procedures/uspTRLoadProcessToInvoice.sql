@@ -245,6 +245,7 @@ BEGIN TRY
 			UPDATE tblTRLoadDistributionHeader 
 			SET intInvoiceId = @InvoiceId
 			WHERE intLoadHeaderId = @intLoadHeaderId
+				AND strDestination = 'Customer'
 
 			UPDATE tblTRLoadHeader 
 			SET ysnPosted = @ysnPostOrUnPost
