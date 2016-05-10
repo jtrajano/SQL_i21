@@ -937,9 +937,17 @@ BEGIN
 															,ItemUOM.dblUnitQty
 														)
 											END 											
+										
+										-- When it is a credit memo:
+										 WHEN (dblQty > 0 AND strTransactionId LIKE 'SI%') THEN 
 											
-										 WHEN (dblQty > 0 AND strTransactionId LIKE 'SI%' AND dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST) THEN 
-											dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId, RebuilInvTrans.intItemUOMId) 
+											CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+														-- If using Average Costing, use Ave Cost.
+														dbo.fnGetItemAverageCost(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) 
+													ELSE
+														-- Otherwise, get the last cost. 
+														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId)
+											END 
 
 										 ELSE 
 											RebuilInvTrans.dblCost
