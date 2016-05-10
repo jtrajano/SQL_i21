@@ -46,7 +46,7 @@ SELECT	SH.*,
 		CD.strContractBasis,
 		CD.strContractBasisDescription,
 		CD.strApprovalBasis
-FROM vyuLGInboundShipmentView SH 
-LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = SH.intContractDetailId
+FROM vyuLGLoadDetailView LDV
+LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LDV.intPContractDetailId
 WHERE SH.strTrackingNumber = @xmlParam	
 END

@@ -1,33 +1,32 @@
 CREATE VIEW vyuLGDropShipmentDetails
 AS
 SELECT
-	Shipment.intTrackingNumber
-	,PS.intShipmentPurchaseSalesContractId
-	,PS.intShipmentContractQtyId 
-	,PS.intShipmentId
+	L.strLoadNumber
+	,LD.intLoadId
+	,LD.intLoadDetailId
 	,Alloc.intCompanyLocationId
 	,Alloc.intCommodityId
 	,Alloc.strCommodity
 	,Alloc.strLocationName
-	,PS.intAllocationDetailId
+	,LD.intAllocationDetailId
 	,Alloc.strSeller
 	,Alloc.strPurchaseContractNumber
 	,Alloc.strPContractNumber
 	,Alloc.intPContractSeq
-	,PS.dblPAllocatedQty
-	,dblGrossWt = (ShipContract.dblGrossWt / ShipContract.dblQuantity) * PS.dblPAllocatedQty
-	,dblTareWt = (ShipContract.dblTareWt / ShipContract.dblQuantity) * PS.dblPAllocatedQty
-	,dblNetWt = (ShipContract.dblNetWt / ShipContract.dblQuantity) * PS.dblPAllocatedQty
-	,Shipment.intWeightUnitMeasureId
+	,Alloc.dblPAllocatedQty
+	,dblGrossWt = (LD.dblGross / LD.dblQuantity) * Alloc.dblPAllocatedQty
+	,dblTareWt = (LD.dblTare / LD.dblQuantity) * Alloc.dblPAllocatedQty
+	,dblNetWt = (LD.dblNet / LD.dblQuantity) * Alloc.dblPAllocatedQty
+	,L.intWeightUnitMeasureId
 	,UOM.strUnitMeasure as strWeightUOM
-	,ShipContract.intItemId as intPItemId
+	,LD.intItemId as intPItemId
 	,Alloc.strPItemUOM
 	,Alloc.strPItemNo
 	,Alloc.strPItemDescription
 	,Alloc.intPContractDetailId
 	,Alloc.intPUnitMeasureId
 
-	,PS.dblSAllocatedQty
+	,Alloc.dblSAllocatedQty
 	,Alloc.intSItemId
 	,Alloc.strSItemUOM
 	,Alloc.strSContractNumber
@@ -39,9 +38,7 @@ SELECT
 	,Alloc.intSContractDetailId
 	,Alloc.intSUnitMeasureId
 	,Alloc.dblSCashPrice
-
-FROM tblLGShipmentPurchaseSalesContract PS
-LEFT JOIN tblLGShipmentContractQty ShipContract On ShipContract.intShipmentContractQtyId = PS.intShipmentContractQtyId
-LEFT JOIN tblLGShipment Shipment ON Shipment.intShipmentId = PS.intShipmentId
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = Shipment.intWeightUnitMeasureId
-LEFT JOIN vyuLGAllocatedContracts Alloc ON Alloc.intAllocationDetailId = PS.intAllocationDetailId
+FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = L.intUnitMeasureId
+LEFT JOIN vyuLGAllocatedContracts Alloc ON Alloc.intAllocationDetailId = LD.intAllocationDetailId
