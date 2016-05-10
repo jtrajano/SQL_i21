@@ -244,7 +244,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
-								,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -252,8 +252,12 @@ ELSE
 								,[intContractDetailId]				= RE.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
-								FROM	@ReceiptStagingTable RE
-								WHERE	RE.dblFreightRate != 0 
+								FROM tblCTContractCost ContractCost
+								LEFT JOIN @ReceiptStagingTable RE
+								ON RE.intContractDetailId = ContractCost.intContractDetailId
+								WHERE ContractCost.intItemId = @intFreightItemId
+								AND RE.intContractDetailId IS NOT NULL
+								AND RE.dblFreightRate != 0 
 						IF ISNULL(@intLoadCostId,0) != 0
 							BEGIN
 								INSERT INTO @OtherCharges
@@ -394,7 +398,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
-								,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -402,8 +406,12 @@ ELSE
 								,[intContractDetailId]				= RE.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
-								FROM	@ReceiptStagingTable RE
-								WHERE	RE.dblFreightRate != 0 
+								FROM tblCTContractCost ContractCost
+								LEFT JOIN @ReceiptStagingTable RE
+								ON RE.intContractDetailId = ContractCost.intContractDetailId
+								WHERE ContractCost.intItemId = @intFreightItemId
+								AND RE.intContractDetailId IS NOT NULL
+								AND RE.dblFreightRate != 0 
 					END
 				ELSE IF ISNULL(@intFreightItemId,0) != 0
 					BEGIN
@@ -855,7 +863,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
-								,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -863,8 +871,12 @@ ELSE
 								,[intContractDetailId]				= RE.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
-								FROM	@ReceiptStagingTable RE
-								WHERE	RE.dblFreightRate != 0 
+								FROM tblCTContractCost ContractCost
+								LEFT JOIN @ReceiptStagingTable RE
+								ON RE.intContractDetailId = ContractCost.intContractDetailId
+								WHERE ContractCost.intItemId = @intFreightItemId
+								AND RE.intContractDetailId IS NOT NULL
+								AND RE.dblFreightRate != 0 
 					END
 				ELSE IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) = 0 AND @ysnDeductFreightFarmer = 1
 					BEGIN
@@ -901,7 +913,7 @@ ELSE
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
-								,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
 								,[dblAmount]						= 0
 								,[strAllocateCostBy]				=  NULL
@@ -909,8 +921,12 @@ ELSE
 								,[intContractDetailId]				= RE.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= @ysnPrice
-								FROM	@ReceiptStagingTable RE
-								WHERE	RE.dblFreightRate != 0 
+								FROM tblCTContractCost ContractCost
+								LEFT JOIN @ReceiptStagingTable RE
+								ON RE.intContractDetailId = ContractCost.intContractDetailId
+								WHERE ContractCost.intItemId = @intFreightItemId
+								AND RE.intContractDetailId IS NOT NULL
+								AND RE.dblFreightRate != 0 
 					END
 				ELSE IF ISNULL(@intFreightItemId,0) != 0
 					BEGIN

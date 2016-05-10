@@ -155,7 +155,7 @@ Begin
 		End
 
 	Select @strLotNumber=strLotNumber,
-	@dblAvailableUnit=(l.dblWeight - (Select ISNULL(SUM(ISNULL(sr.dblQty,0)),0) From tblICStockReservation sr Where sr.intLotId=@intLotId)) / 
+	@dblAvailableUnit=(l.dblWeight - (Select ISNULL(SUM(ISNULL(sr.dblQty,0)),0) From tblICStockReservation sr Where sr.intLotId=@intLotId AND ISNULL(sr.ysnPosted,0)=0)) / 
 	(CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END)
 	From tblICLot l Where intLotId=@intLotId
 

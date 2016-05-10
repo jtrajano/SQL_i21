@@ -13,5 +13,6 @@
     [strGrainBankinUnitsorPounds] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [ysnCalculateGrainBankonADB] BIT NULL DEFAULT 1, 
     [ysnAllowGrainBankOverdraw] BIT NULL, 
+	[intTicketUncompletedDaysAlert] INT NULL , 
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
 )

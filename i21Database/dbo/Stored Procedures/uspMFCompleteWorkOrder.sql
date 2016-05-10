@@ -528,7 +528,7 @@ BEGIN TRY
 		Begin
 			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblProduceQty
-				,@intProduceUOMKey = @intProduceUnitMeasureId
+				,@intProduceUOMId = @intProduceUnitMeasureId
 				,@intBatchId = @intBatchId
 				,@intUserId = @intUserId
 				,@dblUnitQty=@dblUnitQty
@@ -547,7 +547,7 @@ BEGIN TRY
 		Begin
 			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 				,@dblProduceQty = @dblPhysicalCount
-				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@intProduceUOMId = @intPhysicalItemUOMId
 				,@intBatchId = @intBatchId
 				,@intUserId = @intUserId
 				,@dblUnitQty=@dblUnitQty

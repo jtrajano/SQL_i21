@@ -85,6 +85,7 @@ BEGIN
 			LEFT JOIN tblSMCompanyLocation J
 				ON I.vwloc_loc_no  COLLATE Latin1_General_CI_AS = J.strLocationNumber
 			WHERE J.intCompanyLocationId IS NOT NULL
+				AND A.strOrderNumber IS NOT NULL
 		')
 	END
 	ELSE
@@ -144,6 +145,7 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
+			WHERE A.strOrderNumber IS NOT NULL
 		')
 	END
 END

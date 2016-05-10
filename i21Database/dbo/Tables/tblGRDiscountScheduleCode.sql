@@ -19,13 +19,15 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
 	[intSort] INT NULL , 
     [strDiscountChargeType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL,
+	[intItemId] INT NULL,  
     CONSTRAINT [PK_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] PRIMARY KEY ([intDiscountScheduleCodeId]), 
     CONSTRAINT [UK_tblGRDiscountScheduleCode_strDiscountCode_intDiscountScheduleId_dtmEffectiveDate_dtmTerminationDate] UNIQUE ([strDiscountCode], [intDiscountScheduleId], [dtmEffectiveDate], [dtmTerminationDate]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGLAccount_intPurchaseAccountId] FOREIGN KEY ([intPurchaseAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGLAccount_intSalesAccountId] FOREIGN KEY ([intSalesAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRDiscountCalculationOption_intValueFieldId_intDiscountCalculationOptionId] FOREIGN KEY ([intDiscountCalculationOptionId]) REFERENCES [tblGRDiscountCalculationOption]([intValueFieldId]),
-	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRShrinkCalculationOption_intValueFieldId_intShrinkCalculationOptionId] FOREIGN KEY ([intShrinkCalculationOptionId]) REFERENCES [tblGRShrinkCalculationOption]([intValueFieldId])
+	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRShrinkCalculationOption_intValueFieldId_intShrinkCalculationOptionId] FOREIGN KEY ([intShrinkCalculationOptionId]) REFERENCES [tblGRShrinkCalculationOption]([intValueFieldId]),
+	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
 
 GO

@@ -110,7 +110,7 @@ BEGIN
 			,[strSourceTransactionId]
 			,[intSourceTransactionTypeId]
 	)
-	SELECT	[intLotId]					= NewLot.intLotId 
+	SELECT	[intLotId]					= TargetLot.intLotId 
 			,[intItemId]				= Detail.intItemId
 			,[intItemLocationId]		= ItemLocation.intItemLocationId
 			,[intItemUOMId]				= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) --ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
@@ -125,9 +125,10 @@ BEGIN
 			,[dtmExpiryDate]			= SourceLot.dtmExpiryDate
 			,[strLotAlias]				= SourceLot.strLotAlias
 			,[intLotStatusId]			= SourceLot.intLotStatusId
-			,[intParentLotId]			= SourceLot.intParentLotId
-			,[strParentLotNumber]		= ParentLotSourceLot.strParentLotNumber
-			,[strParentLotAlias]		= ParentLotSourceLot.strParentLotAlias
+										-- If target lot exists, do not overwrite the parent lot info. 
+			,[intParentLotId]			= TargetLot.intParentLotId 
+			,[strParentLotNumber]		= ParentLotTargetLot.strParentLotNumber 
+			,[strParentLotAlias]		= ParentLotTargetLot.strParentLotAlias 
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
 			,[dblWeight]				=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
@@ -216,14 +217,16 @@ BEGIN
 				ON SourceLot.intLotId = Detail.intLotId
 			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
-			LEFT JOIN dbo.tblICLot NewLot
-				ON NewLot.strLotNumber = Detail.strNewLotNumber
-				AND NewLot.intItemId = Detail.intItemId
-				AND NewLot.intItemLocationId = ItemLocation.intItemLocationId
-				AND ISNULL(NewLot.intSubLocationId, 0) = ISNULL(Detail.intNewSubLocationId, 0)
-				AND ISNULL(NewLot.intStorageLocationId, 0) = ISNULL(Detail.intNewStorageLocationId, 0)				
+			LEFT JOIN dbo.tblICLot TargetLot
+				ON TargetLot.strLotNumber = Detail.strNewLotNumber
+				AND TargetLot.intItemId = Detail.intItemId
+				AND TargetLot.intItemLocationId = ItemLocation.intItemLocationId
+				AND ISNULL(TargetLot.intSubLocationId, 0) = ISNULL(Detail.intNewSubLocationId, 0)
+				AND ISNULL(TargetLot.intStorageLocationId, 0) = ISNULL(Detail.intNewStorageLocationId, 0)				
 			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
+			LEFT JOIN dbo.tblICParentLot ParentLotTargetLot
+				ON ParentLotTargetLot.intParentLotId = TargetLot.intParentLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 END 
 

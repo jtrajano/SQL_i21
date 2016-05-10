@@ -30,9 +30,9 @@ BEGIN
 	
 	UNION ALL
 	
-	SELECT wocl.intLotId, 
+	SELECT IsNULL(wocl.intLotId,0) AS intLotId, 
 		   wocl.intWorkOrderId, 
-		   l.strLotNumber, 
+		   IsNULL(l.strLotNumber,'') AS strLotNumber,
 		   'INPUT' AS strType, 
 		   wo.strWorkOrderNo, 
 		   i.strItemNo, 
@@ -47,6 +47,6 @@ BEGIN
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = wocl.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = wocl.intCreatedUserId
-	JOIN tblICLot l ON l.intLotId = wocl.intLotId
+	LEFT JOIN tblICLot l ON l.intLotId = wocl.intLotId
 	WHERE IsNULL(wocl.intBatchId,@intBatchId) = @intBatchId AND wocl.intWorkOrderId=@intWorkOrderId
 END

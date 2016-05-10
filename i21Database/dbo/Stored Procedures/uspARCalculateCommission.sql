@@ -25,6 +25,7 @@ DECLARE  @intCommissionAccountId	INT
 	   , @ysnPaymentRequired		BIT
 	   , @dtmStartDate				DATETIME
 	   , @dtmEndDate				DATETIME
+	   , @tmpTblCommissionDetail	CommissionDetailTableType	
 
 DECLARE @HURDLETYPE_DRAW			NVARCHAR(20) = 'Draw'
       , @HURDLETYPE_FIXED			NVARCHAR(20) = 'Fixed'	  
@@ -78,10 +79,12 @@ IF @strHurdleType = @HURDLETYPE_DRAW
 IF @strBasis = @BASIS_HOURS
 	BEGIN
 		DECLARE @dblTotalHrs NUMERIC(18,6) = 0
-		DECLARE @tmpHDTicketHoursWorkedTable TABLE (intHours NUMERIC(18,6), ysnBillable BIT)
+		DECLARE @tmpHDTicketHoursWorkedTable TABLE (intTicketHoursWorkedId INT, dtmDate DATETIME, intHours NUMERIC(18,6), ysnBillable BIT)
 
 		INSERT INTO @tmpHDTicketHoursWorkedTable
-		SELECT intHours
+		SELECT intTicketHoursWorkedId
+		     , dtmDate
+			 , intHours
 			 , ysnBillable
 		FROM tblHDTicketHoursWorked 
 		WHERE intAgentEntityId = @intEntityId
@@ -91,6 +94,21 @@ IF @strBasis = @BASIS_HOURS
 			DELETE FROM @tmpHDTicketHoursWorkedTable WHERE ysnBillable = 0
 		ELSE IF (@strHourType = @HOURTYPE_TOTAL)
 			DELETE FROM @tmpHDTicketHoursWorkedTable WHERE ysnBillable = 1
+
+		INSERT INTO @tmpTblCommissionDetail
+			( [intEntityId]			
+			, [intCommissionPlanId]	
+			, [intSourceId]			
+			, [strSourceType]		
+			, [dtmSourceDate]		
+			, [dblAmount])			 
+		SELECT @intEntityId
+			, @intCommissionPlanId
+			, intTicketHoursWorkedId
+			, 'Help Desk'
+			, dtmDate
+			, intHours
+		FROM @tmpHDTicketHoursWorkedTable
 
 		SELECT @dblTotalHrs = SUM(intHours) FROM @tmpHDTicketHoursWorkedTable
 
@@ -117,6 +135,24 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strAccounts)
 
 				SELECT @dblTotalRevenue = SUM(dblDebit - dblCredit)
+				FROM tblGLDetail 
+				WHERE ysnIsUnposted = 0 
+					AND intAccountId IN (SELECT intAccountId FROM @tmpAccountsTable)
+					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+				
+				INSERT INTO @tmpTblCommissionDetail
+					( [intEntityId]			
+					, [intCommissionPlanId]	
+					, [intSourceId]			
+					, [strSourceType]		
+					, [dtmSourceDate]		
+					, [dblAmount])			 
+				SELECT @intEntityId
+					, @intCommissionPlanId
+					, intGLDetailId
+					, 'GL Detail'
+					, dtmDate
+					, @dblTotalRevenue
 				FROM tblGLDetail 
 				WHERE ysnIsUnposted = 0 
 					AND intAccountId IN (SELECT intAccountId FROM @tmpAccountsTable)

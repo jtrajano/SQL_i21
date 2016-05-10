@@ -106,13 +106,13 @@ BEGIN TRY
 		RAISERROR (51182,11,1)
 	END
 	
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId,ISNULL(@intWeightUOMId,@intItemUOMId),ISNULL(dblQty,0))) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 
 	IF @blnIsPartialMove = 1
 	BEGIN
 		IF @blnValidateLotReservation = 1 
 		BEGIN
-			IF (@dblWeight + (-(CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMoveQty*@dblWeightPerQty ELSE -@dblMoveQty END))) < @dblLotReservedQty
+			IF (@dblLotAvailableQty + ((CASE WHEN @intLotItemUOMId=@intItemUOMId AND @intWeightUOMId IS NOT NULL THEN -@dblMoveQty*@dblWeightPerQty ELSE -@dblMoveQty END))) < @dblLotReservedQty
 			BEGIN
 				RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 			END

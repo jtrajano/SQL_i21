@@ -1,7 +1,8 @@
 ﻿PRINT '*** Start Import phone to new table***'
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityPhoneNumber')
-	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCountry'  AND [COLUMN_NAME] = 'strCityAreaMask')
-	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCountry'  AND [COLUMN_NAME] = 'strLocalMask')
+	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCountry'  AND [COLUMN_NAME] = 'strCountryFormat')
+	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCountry'  AND [COLUMN_NAME] = 'strAreaCityFormat')
+	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCountry'  AND [COLUMN_NAME] = 'strLocalNumberFormat')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCountry'  AND [COLUMN_NAME] = 'intCountryID')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' AND [COLUMN_NAME] = 'strPhone')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' AND [COLUMN_NAME] = 'intDefaultCountryId')
@@ -10,9 +11,9 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 't
 BEGIN
 	PRINT '*** EXECUTE ***'
 
-	EXEC('	insert into tblEMEntityPhoneNumber(strPhone, strMaskArea, strMaskLocal, intEntityId, strPhoneCountry, ysnDisplayCountryCode)
+	EXEC('	insert into tblEMEntityPhoneNumber(strPhone, strFormatCountry, strFormatArea, strFormatLocal, intCountryId, intEntityId, strPhoneCountry)
 				select 
-					strCountryCode + strPhone, strCityAreaMask, strLocalMask, intEntityId, strCountryCode, ysnDisplayCountryCode
+					strCountryCode + strPhone, strCountryFormat, strAreaCityFormat, strLocalNumberFormat, intCountryID, intEntityId, strCountryCode
 				from tblEMEntity a
 					join tblSMCountry b
 						on a.intDefaultCountryId = b.intCountryID

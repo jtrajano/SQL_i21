@@ -231,7 +231,7 @@ Select @intMinLot=Min(intRowNo) From @tblLotSummary
 While(@intMinLot is not null)
 Begin
 	Select @intInputLotId=intLotId,@dblInputReqQty=dblQty,@intInputItemId=intItemId From @tblLotSummary Where intRowNo=@intMinLot
-	Select @dblInputAvlQty=dblWeight - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=@intInputLotId) 
+	Select @dblInputAvlQty=dblWeight - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=@intInputLotId AND ISNULL(ysnPosted,0)=0) 
 	From tblICLot Where intLotId=@intInputLotId
 
 	if @dblInputReqQty > @dblInputAvlQty
