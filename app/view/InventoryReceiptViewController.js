@@ -352,23 +352,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
-                    dataIndex: 'strOrderNumber',
-                    editor: {
-                        readOnly: '{readOnlyOrderNumberDropdown}',
-                        store: '{orderNumbers}',
-                        defaultFilters: [
-                            {
-                                column: 'ysnCompleted',
-                                value: 'false',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intEntityVendorId',
-                                value: '{current.intEntityVendorId}',
-                                conjunction: 'and'
-                            }
-                        ]
-                    }
+                    dataIndex: 'strOrderNumber'
+                    //editor: {
+                    //    readOnly: '{readOnlyOrderNumberDropdown}',
+                    //    store: '{orderNumbers}',
+                    //    defaultFilters: [
+                    //        {
+                    //            column: 'ysnCompleted',
+                    //            value: 'false',
+                    //            conjunction: 'and'
+                    //        },
+                    //        {
+                    //            column: 'intEntityVendorId',
+                    //            value: '{current.intEntityVendorId}',
+                    //            conjunction: 'and'
+                    //        }
+                    //    ]
+                    //}
                 },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
@@ -1112,11 +1112,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onPageChange: function(pagingStatusBar, record, eOpts) {
         var win = pagingStatusBar.up('window');
         var me = win.controller;
-        var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
+        var current = win.viewModel.data.current;
 
-        me.validateWeightLoss(win, ReceiptItems.data.items);
-        me.showSummaryTotals(win);
-        me.showOtherCharges(win);
+        if (current){
+            var ReceiptItems = current.tblICInventoryReceiptItems();
+
+            me.validateWeightLoss(win, ReceiptItems.data.items);
+            me.showSummaryTotals(win);
+            me.showOtherCharges(win);
+        }
     },
 
     createRecord: function (config, action) {
@@ -1395,8 +1399,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var grid = combo.up('grid');
         var cboCurrency = win.down('#cboCurrency');
-        var grdLotTracking = win.down('#grdLotTracking');
-        grdLotTracking.store.reload();
+
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
 
@@ -3492,7 +3495,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (iRely.Functions.isEmpty(record.get('strOrderNumber'))) {
                         switch (columnId) {
                             case 'colOrderNumber' :
-                                return controller.purchaseOrderDropdown(win);
+                                //return controller.purchaseOrderDropdown(win);
+                                return false;
                                 break;
                             case 'colSourceNumber' :
                                 return false;
@@ -3515,7 +3519,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     switch (columnId) {
                         case 'colOrderNumber' :
                             if (iRely.Functions.isEmpty(record.get('strOrderNumber')))
-                                return controller.purchaseContractDropdown(win);
+                                //return controller.purchaseContractDropdown(win);
+                                return false;
                             else
                                 return false;
                             break;
@@ -3538,7 +3543,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (iRely.Functions.isEmpty(record.get('strOrderNumber'))) {
                         switch (columnId) {
                             case 'colOrderNumber' :
-                                return controller.transferOrderDropdown(win);
+                                //return controller.transferOrderDropdown(win);
+                                return false;
                                 break;
                             case 'colSourceNumber' :
                                 return false;

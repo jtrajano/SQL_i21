@@ -818,99 +818,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        dataIndex: 'strOrderNumber',
                                                                         itemId: 'colOrderNumber',
                                                                         width: 90,
-                                                                        dataIndex: 'strOrderNumber',
-                                                                        text: 'Order Number',
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intSalesOrderId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Sales Order Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intSalesOrderDetailId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Sales Order Detail Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intCompanyLocationId',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Location Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intItemId',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Item Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intItemUOMId',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Item UOM Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strSalesOrderNumber',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Sales Order',
-                                                                                    width: 100
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strItemNo',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Item No',
-                                                                                    width: 100
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strItemDescription',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Description',
-                                                                                    width: 120
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strLotTracking',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Lot Tracking',
-                                                                                    width: 100
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'dblQtyOrdered',
-                                                                                    dataType: 'float',
-                                                                                    text: 'Order Qty',
-                                                                                    width: 100
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strUnitMeasure',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Order UOM',
-                                                                                    width: 100
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'dblPrice',
-                                                                                    dataType: 'float',
-                                                                                    text: 'Unit Price',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strStorageLocation',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Storage Location',
-                                                                                    hidden: true
-                                                                                }
-                                                                            ],
-                                                                            pickerWidth: 625,
-                                                                            itemId: 'cboOrderNumber',
-                                                                            width: 500,
-                                                                            matchFieldWidth: false,
-                                                                            displayField: 'strSalesOrderNumber',
-                                                                            valueField: 'strSalesOrderNumber'
-                                                                        }
+                                                                        text: 'Order Number'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',

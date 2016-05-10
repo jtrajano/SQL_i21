@@ -304,15 +304,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 readOnly: '{readOnlyOnPickLots}',
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
-                    dataIndex: 'strOrderNumber',
-                    editor: {
-                        store: '{soDetails}',
-                        defaultFilters: [{
-                            column: 'intEntityCustomerId',
-                            value: '{current.intEntityCustomerId}',
-                            conjunction: 'and'
-                        }]
-                    }
+                    dataIndex: 'strOrderNumber'
+                    //editor: {
+                    //    store: '{soDetails}',
+                    //    defaultFilters: [{
+                    //        column: 'intEntityCustomerId',
+                    //        value: '{current.intEntityCustomerId}',
+                    //        conjunction: 'and'
+                    //    }]
+                    //}
                 },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
@@ -1650,7 +1650,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     {
                         switch (columnId) {
                             case 'colOrderNumber' :
-                                return controller.salesOrderDropdown(win);
+                                //return controller.salesOrderDropdown(win);
+                                return false;
                                 break;
                             case 'colSourceNumber' :
                                 return false;
@@ -1673,7 +1674,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     {
                         switch (columnId) {
                             case 'colOrderNumber' :
-                                return controller.salesContractDropdown(win);
+                                //return controller.salesContractDropdown(win);
+                                return false;
                                 break;
                             case 'colSourceNumber' :
                                 switch (current.get('intSourceType')) {
@@ -1710,7 +1712,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     {
                         switch (columnId) {
                             case 'colOrderNumber' :
-                                return controller.transferOrderDropdown(win);
+                                //return controller.transferOrderDropdown(win);
+                                return false;
                                 break;
                             case 'colSourceNumber' :
                                 return false;
