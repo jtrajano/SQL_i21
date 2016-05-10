@@ -249,7 +249,7 @@
             // 
             // BottomMargin
             // 
-            this.BottomMargin.HeightF = 100F;
+            this.BottomMargin.HeightF = 47.2084F;
             this.BottomMargin.Name = "BottomMargin";
             this.BottomMargin.Padding = new DevExpress.XtraPrinting.PaddingInfo(0, 0, 0, 0, 100F);
             this.BottomMargin.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
@@ -615,7 +615,7 @@
             this.sqlDataSource1});
             this.DataMember = "uspICReportInventoryShipment";
             this.DataSource = this.sqlDataSource1;
-            this.Margins = new System.Drawing.Printing.Margins(100, 100, 36, 100);
+            this.Margins = new System.Drawing.Printing.Margins(100, 100, 36, 47);
             this.Parameters.AddRange(new DevExpress.XtraReports.Parameters.Parameter[] {
             this.xmlParam});
             this.StyleSheet.AddRange(new DevExpress.XtraReports.UI.XRControlStyle[] {
