@@ -52,6 +52,7 @@ BEGIN TRY
 		,@dtmBusinessDate datetime
 		,@intBusinessShiftId int
 		,@strWorkOrderNo nvarchar(50)
+		,@intItemIssuedUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -795,6 +796,7 @@ BEGIN TRY
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 				,@dblSubstituteRatio = dblSubstituteRatio
 				,@intItemUOMId=intItemUOMId
+				,@intItemIssuedUOMId=intItemIssuedUOMId
 			FROM @tblLot
 			WHERE intLotRecordKey = @intLotRecordKey
 
@@ -886,6 +888,7 @@ BEGIN TRY
 						-- Parameters for the new values: 
 						,@dblAdjustByQuantity = @dblAdjustByQuantity
 						,@dblNewUnitCost = NULL
+						,@intItemUOMId=@intItemIssuedUOMId
 						-- Parameters used for linking or FK (foreign key) relationships
 						,@intSourceId = 1
 						,@intSourceTransactionTypeId = 8

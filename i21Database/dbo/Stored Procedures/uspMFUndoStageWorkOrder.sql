@@ -27,8 +27,9 @@ BEGIN TRY
 			,ysnNegativeQtyAllowed BIT
 			,intUserId INT
 			)
+
 	IF @intTransactionCount = 0
-	BEGIN TRANSACTION
+		BEGIN TRANSACTION
 
 	DECLARE @RecordKey INT
 		,@intLotId INT
@@ -50,6 +51,7 @@ BEGIN TRY
 		,@intSubLocationId INT
 		,@intConsumptionMethodId INT
 		,@intWeightUOMId INT
+		,@intItemUOMId INT
 
 	SELECT @intLotId = intLotId
 		,@intInputItemId = intItemId
@@ -73,6 +75,7 @@ BEGIN TRY
 
 	SELECT @strNewLotNumber = strLotNumber
 		,@dblWeightPerQty = dblWeightPerQty
+		,@intItemUOMId = intItemUOMId
 	FROM dbo.tblICLot
 	WHERE intLotId = @intLotId
 
@@ -135,6 +138,7 @@ BEGIN TRY
 		,@intNewItemUOMId = NULL
 		,@intNewWeightUOMId = NULL
 		,@dblNewUnitCost = NULL
+		,@intItemUOMId = @intItemUOMId
 		-- Parameters used for linking or FK (foreign key) relationships
 		,@intSourceId = 1
 		,@intSourceTransactionTypeId = 8
@@ -146,11 +150,14 @@ BEGIN TRY
 		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
-	
-	UPDATE tblMFProductionSummary SET dblInputQuantity=dblInputQuantity-@dblNewWeight WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intInputItemId
+
+	UPDATE tblMFProductionSummary
+	SET dblInputQuantity = dblInputQuantity - @dblNewWeight
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intItemId = @intInputItemId
 
 	IF @intTransactionCount = 0
-	COMMIT TRANSACTION
+		COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
@@ -158,7 +165,8 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0 AND @intTransactionCount = 0
+	IF XACT_STATE() != 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0
