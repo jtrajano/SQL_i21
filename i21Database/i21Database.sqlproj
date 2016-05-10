@@ -3769,7 +3769,6 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutFuelSaleRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCategoryFuelSaleRecap.sql" />
-    <Build Include="dbo\Stored Procedures\Procedure1.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTaxRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutRegisterMOPRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCustomerChargesRecap.sql" />
