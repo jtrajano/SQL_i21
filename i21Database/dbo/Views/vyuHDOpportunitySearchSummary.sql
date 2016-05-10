@@ -8,6 +8,7 @@
 			vyuHDProjectSearch
 		where
 			strProjectStatus <> 'Closed'
+			and strProjectType = 'CRM'
 			and strSalesPerson is not null
 		group by
 			strSalesPerson
