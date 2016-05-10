@@ -3765,6 +3765,17 @@
     <Build Include="dbo\Stored Procedures\uspEMUpdatePhoneFormat.sql" />
     <Build Include="dbo\Views\vyuHDOpportunitySearchSummary.sql" />
     <Build Include="dbo\Views\vyuLGDropShipmentDetailsView.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutFuelSaleRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCategoryFuelSaleRecap.sql" />
+    <Build Include="dbo\Stored Procedures\Procedure1.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTaxRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutRegisterMOPRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCustomerChargesRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCustomerPaymentsRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutDepartmentSaleRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutDepositDetailsRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
