@@ -41,6 +41,6 @@ BEGIN
 	--WHERE	[fieldname] = 'intReferenceNumber' 
 
 SELECT SH.*
-FROM vyuLGDropShipmentDetails SH 
+FROM vyuLGDropShipmentDetailsView SH 
 WHERE SH.strLoadNumber = @xmlParam	
 END

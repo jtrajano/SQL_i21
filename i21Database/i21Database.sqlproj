@@ -3764,6 +3764,7 @@
     <Build Include="dbo\User Defined Types\CommissionDetailTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdatePhoneFormat.sql" />
     <Build Include="dbo\Views\vyuHDOpportunitySearchSummary.sql" />
+    <Build Include="dbo\Views\vyuLGDropShipmentDetailsView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
