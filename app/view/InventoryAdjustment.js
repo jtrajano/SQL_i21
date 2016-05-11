@@ -1031,6 +1031,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'strCompanyLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Company Location Name',
+                                                                    hidden: true
+                                                                },
+                                                                {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
                                                                     text: 'Sub Location Name',
@@ -1075,6 +1081,30 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'string',
                                                                     text: 'Description',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Sub Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location Name',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboNewStorageLocation',

@@ -650,7 +650,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
 
             // Clear the values for the following fields:
-
             current.set('strSubLocation', null);
             current.set('strStorageLocation', null);
             current.set('intLotId', null);
@@ -843,12 +842,33 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
         else if (combo.itemId === 'cboNewLocation') {
             current.set('intNewLocationId', record.get('intCompanyLocationId'));
+
+            // Blank out the new sub location and storage location
+            current.set('intNewSubLocationId', null);
+            current.set('intNewStorageLocationId', null);
+            current.set('strNewSubLocation', null);
+            current.set('strNewStorageLocation', null);
         }
         else if (combo.itemId === 'cboNewSubLocation') {
             current.set('intNewSubLocationId', record.get('intCompanyLocationSubLocationId'));
+
+            // Blank out the new sub storage location
+            current.set('intNewStorageLocationId', null);
+            current.set('strNewStorageLocation', null);
+
+            // Specify the new location as well
+            current.set('intNewLocationId', record.get('intCompanyLocationId'));
+            current.set('strNewLocation', record.get('strCompanyLocationName'));
         }
         else if (combo.itemId === 'cboNewStorageLocation') {
             current.set('intNewStorageLocationId', record.get('intStorageLocationId'));
+
+            // Specify the new location and sub location as well.
+            current.set('intNewLocationId', record.get('intLocationId'));
+            current.set('strNewLocation', record.get('strLocationName'));
+
+            current.set('intNewSubLocationId', record.get('intSubLocationId'));
+            current.set('strNewSubLocation', record.get('strSubLocationName'));
         }
     },
 
