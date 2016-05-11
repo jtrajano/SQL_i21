@@ -36,6 +36,8 @@
 	[strCustomerReference] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intAllocationDetailId] INT NULL,
 	[intPickLotDetailId] INT NULL,
+	[intPSubLocationId] INT NULL, 
+	[intSSubLocationId] INT NULL, 
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 
@@ -51,5 +53,7 @@
 	CONSTRAINT [FK_tblLGLoadDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblICItemUOM_intWeightItemUOMId] FOREIGN KEY ([intWeightItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblLGAllocationDetail_intAllocationDetailId] FOREIGN KEY ([intAllocationDetailId]) REFERENCES [tblLGAllocationDetail]([intAllocationDetailId]),
-	CONSTRAINT [FK_tblLGLoadDetail_tblLGPickLotDetail_intPickLotDetailId] FOREIGN KEY ([intPickLotDetailId]) REFERENCES [tblLGPickLotDetail]([intPickLotDetailId])
+	CONSTRAINT [FK_tblLGLoadDetail_tblLGPickLotDetail_intPickLotDetailId] FOREIGN KEY ([intPickLotDetailId]) REFERENCES [tblLGPickLotDetail]([intPickLotDetailId]),
+	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intPSubLocationId] FOREIGN KEY ([intPSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
+	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intSSubLocationId] FOREIGN KEY ([intSSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId])
 )
