@@ -318,7 +318,8 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateGeneratedCallEntryView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryHistoryCallEntryView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateVoucherImport.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPVoucherImportBackUpAPIVCMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPIVCMST.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPTRXMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPIVCMST.sql" />
   </ItemGroup>
 </Project>

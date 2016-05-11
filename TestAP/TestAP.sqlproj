@@ -94,8 +94,12 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="FakeData\Fake aptrxmst records.sql" />
-    <Build Include="StoredProcedure\test uspAPImportVoucherAPTRXMST.sql" />
+    <Build Include="StoredProcedure\test uspAPImportVoucherBackUpAPTRXMST.sql" />
     <Build Include="Schema\CreateTestClasses.sql" />
+    <Build Include="StoredProcedure\test uspAPImportVoucherBackupAPTRXMST with duplicate.sql" />
+    <Build Include="FakeData\Fake apivcmst records.sql" />
+    <Build Include="StoredProcedure\test uspAPImportVoucherBackUpAPIVCMST.sql" />
+    <Build Include="FakeData\Fake apchkmst records.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Script.PreDeployment1.sql" />

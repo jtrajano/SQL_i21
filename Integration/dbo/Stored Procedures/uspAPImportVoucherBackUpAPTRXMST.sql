@@ -11,61 +11,132 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
---BACK UP aptrxmst
-IF OBJECT_ID('tempdb..#tmp_aptrxmstImport') IS NOT NULL DROP TABLE #tmp_aptrxmstImport
+DECLARE @transCount INT = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
 
-SELECT
-	[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
-	[aptrx_ivc_no]			=	CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + '-DUP' ELSE A.aptrx_ivc_no END,
-	[aptrx_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
-	[aptrx_sys_time]    	=	A.[aptrx_sys_time]		,
-	[aptrx_cbk_no]      	=	A.[aptrx_cbk_no]		,
-	[aptrx_chk_no]      	=	A.[aptrx_chk_no]		,
-	[aptrx_trans_type]  	=	A.[aptrx_trans_type]	,
-	[aptrx_batch_no]    	=	A.[aptrx_batch_no]		,
-	[aptrx_pur_ord_no]  	=	A.[aptrx_pur_ord_no]	,
-	[aptrx_po_rcpt_seq] 	=	A.[aptrx_po_rcpt_seq]	,
-	[aptrx_ivc_rev_dt]  	=	A.[aptrx_ivc_rev_dt]	,
-	[aptrx_disc_rev_dt] 	=	A.[aptrx_disc_rev_dt]	,
-	[aptrx_due_rev_dt]  	=	A.[aptrx_due_rev_dt]	,
-	[aptrx_chk_rev_dt]  	=	A.[aptrx_chk_rev_dt]	,
-	[aptrx_gl_rev_dt]   	=	A.[aptrx_gl_rev_dt]		,
-	[aptrx_disc_pct]    	=	A.[aptrx_disc_pct]		,
-	[aptrx_orig_amt]    	=	A.[aptrx_orig_amt]		,
-	[aptrx_disc_amt]    	=	A.[aptrx_disc_amt]		,
-	[aptrx_wthhld_amt]  	=	A.[aptrx_wthhld_amt]	,
-	[aptrx_net_amt]     	=	A.[aptrx_net_amt]		,
-	[aptrx_1099_amt]    	=	A.[aptrx_1099_amt]		,
-	[aptrx_comment]     	=	A.[aptrx_comment]		,
-	[aptrx_orig_type]   	=	A.[aptrx_orig_type]		,
-	[aptrx_name]        	=	A.[aptrx_name]			,
-	[aptrx_recur_yn]    	=	A.[aptrx_recur_yn]		,
-	[aptrx_currency]    	=	A.[aptrx_currency]		,
-	[aptrx_currency_rt] 	=	A.[aptrx_currency_rt]	,
-	[aptrx_currency_cnt]	=	A.[aptrx_currency_cnt]	,
-	[aptrx_user_id]     	=	A.[aptrx_user_id]		,
-	[aptrx_user_rev_dt]		=	A.[aptrx_user_rev_dt]	,	
-	[A4GLIdentity]			=	A.[A4GLIdentity]		
-	INTO #tmp_aptrxmstImport
-FROM aptrxmst A
-OUTER APPLY (
-	SELECT E.* FROM aptrxmst E
-	WHERE EXISTS(
-		SELECT 1 FROM tblAPaptrxmst F
-		WHERE A.aptrx_ivc_no = F.aptrx_ivc_no
-		AND A.aptrx_vnd_no = F.aptrx_vnd_no
+--BACK UP aptrxmst
+IF OBJECT_ID('tempdb..##tmp_aptrxmstImport') IS NOT NULL DROP TABLE ##tmp_aptrxmstImport
+
+CREATE TABLE ##tmp_aptrxmstImport(
+	[aptrx_vnd_no] [char](10) NOT NULL,
+	[aptrx_ivc_no] [char](18) NOT NULL,
+	[aptrx_sys_rev_dt] [int] NOT NULL,
+	[aptrx_sys_time] [int] NOT NULL,
+	[aptrx_cbk_no] [char](2) NOT NULL,
+	[aptrx_chk_no] [char](8) NOT NULL,
+	[aptrx_trans_type] [char](1) NULL,
+	[aptrx_batch_no] [smallint] NULL,
+	[aptrx_pur_ord_no] [char](8) NULL,
+	[aptrx_po_rcpt_seq] [smallint] NULL,
+	[aptrx_ivc_rev_dt] [int] NULL,
+	[aptrx_disc_rev_dt] [int] NULL,
+	[aptrx_due_rev_dt] [int] NULL,
+	[aptrx_chk_rev_dt] [int] NULL,
+	[aptrx_gl_rev_dt] [int] NULL,
+	[aptrx_disc_pct] [decimal](4, 2) NULL,
+	[aptrx_orig_amt] [decimal](11, 2) NULL,
+	[aptrx_disc_amt] [decimal](11, 2) NULL,
+	[aptrx_wthhld_amt] [decimal](11, 2) NULL,
+	[aptrx_net_amt] [decimal](11, 2) NULL,
+	[aptrx_1099_amt] [decimal](11, 2) NULL,
+	[aptrx_comment] [char](30) NULL,
+	[aptrx_orig_type] [char](1) NULL,
+	[aptrx_name] [char](50) NULL,
+	[aptrx_recur_yn] [char](1) NULL,
+	[aptrx_currency] [char](3) NULL,
+	[aptrx_currency_rt] [decimal](15, 8) NULL,
+	[aptrx_currency_cnt] [char](8) NULL,
+	[aptrx_user_id] [char](16) NULL,
+	[aptrx_user_rev_dt] [int] NULL,
+	[A4GLIdentity] [numeric](9, 0) NOT NULL,
+	[ysnInsertedToAPIVC] [BIT] NULL,
+	CONSTRAINT [k_aptrxmst] PRIMARY KEY NONCLUSTERED (
+		[aptrx_vnd_no] ASC,
+		[aptrx_ivc_no] ASC
 	)
-	AND A.aptrx_vnd_no = E.aptrx_vnd_no
-	AND A.aptrx_ivc_no = E.aptrx_ivc_no
-) DuplicateDataBackup
-WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
-				THEN
-					CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
-				ELSE 1 END)
-	AND A.aptrx_trans_type IN ('I','C','A','O')
-	AND A.aptrx_orig_amt != 0
+)
 
 --BACK UP RECORDS TO BE IMPORTED FROM aptrxmst
+IF @DateFrom IS NULL --ONE TIME IMPORT
+BEGIN
+	INSERT INTO ##tmp_aptrxmstImport
+	SELECT
+		[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
+		[aptrx_ivc_no]			=	A.[aptrx_ivc_no]		,
+		[aptrx_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
+		[aptrx_sys_time]    	=	A.[aptrx_sys_time]		,
+		[aptrx_cbk_no]      	=	A.[aptrx_cbk_no]		,
+		[aptrx_chk_no]      	=	A.[aptrx_chk_no]		,
+		[aptrx_trans_type]  	=	A.[aptrx_trans_type]	,
+		[aptrx_batch_no]    	=	A.[aptrx_batch_no]		,
+		[aptrx_pur_ord_no]  	=	A.[aptrx_pur_ord_no]	,
+		[aptrx_po_rcpt_seq] 	=	A.[aptrx_po_rcpt_seq]	,
+		[aptrx_ivc_rev_dt]  	=	A.[aptrx_ivc_rev_dt]	,
+		[aptrx_disc_rev_dt] 	=	A.[aptrx_disc_rev_dt]	,
+		[aptrx_due_rev_dt]  	=	A.[aptrx_due_rev_dt]	,
+		[aptrx_chk_rev_dt]  	=	A.[aptrx_chk_rev_dt]	,
+		[aptrx_gl_rev_dt]   	=	A.[aptrx_gl_rev_dt]		,
+		[aptrx_disc_pct]    	=	A.[aptrx_disc_pct]		,
+		[aptrx_orig_amt]    	=	A.[aptrx_orig_amt]		,
+		[aptrx_disc_amt]    	=	A.[aptrx_disc_amt]		,
+		[aptrx_wthhld_amt]  	=	A.[aptrx_wthhld_amt]	,
+		[aptrx_net_amt]     	=	A.[aptrx_net_amt]		,
+		[aptrx_1099_amt]    	=	A.[aptrx_1099_amt]		,
+		[aptrx_comment]     	=	A.[aptrx_comment]		,
+		[aptrx_orig_type]   	=	A.[aptrx_orig_type]		,
+		[aptrx_name]        	=	A.[aptrx_name]			,
+		[aptrx_recur_yn]    	=	A.[aptrx_recur_yn]		,
+		[aptrx_currency]    	=	A.[aptrx_currency]		,
+		[aptrx_currency_rt] 	=	A.[aptrx_currency_rt]	,
+		[aptrx_currency_cnt]	=	A.[aptrx_currency_cnt]	,
+		[aptrx_user_id]     	=	A.[aptrx_user_id]		,
+		[aptrx_user_rev_dt]		=	A.[aptrx_user_rev_dt]	,	
+		[A4GLIdentity]			=	A.[A4GLIdentity]		,
+		[ysnInsertedToAPIVC]	=	1
+	FROM aptrxmst A
+	WHERE A.aptrx_orig_amt != 0
+END
+ELSE
+BEGIN
+	INSERT INTO ##tmp_aptrxmstImport
+	SELECT
+		[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
+		[aptrx_ivc_no]			=	A.[aptrx_ivc_no]		,
+		[aptrx_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
+		[aptrx_sys_time]    	=	A.[aptrx_sys_time]		,
+		[aptrx_cbk_no]      	=	A.[aptrx_cbk_no]		,
+		[aptrx_chk_no]      	=	A.[aptrx_chk_no]		,
+		[aptrx_trans_type]  	=	A.[aptrx_trans_type]	,
+		[aptrx_batch_no]    	=	A.[aptrx_batch_no]		,
+		[aptrx_pur_ord_no]  	=	A.[aptrx_pur_ord_no]	,
+		[aptrx_po_rcpt_seq] 	=	A.[aptrx_po_rcpt_seq]	,
+		[aptrx_ivc_rev_dt]  	=	A.[aptrx_ivc_rev_dt]	,
+		[aptrx_disc_rev_dt] 	=	A.[aptrx_disc_rev_dt]	,
+		[aptrx_due_rev_dt]  	=	A.[aptrx_due_rev_dt]	,
+		[aptrx_chk_rev_dt]  	=	A.[aptrx_chk_rev_dt]	,
+		[aptrx_gl_rev_dt]   	=	A.[aptrx_gl_rev_dt]		,
+		[aptrx_disc_pct]    	=	A.[aptrx_disc_pct]		,
+		[aptrx_orig_amt]    	=	A.[aptrx_orig_amt]		,
+		[aptrx_disc_amt]    	=	A.[aptrx_disc_amt]		,
+		[aptrx_wthhld_amt]  	=	A.[aptrx_wthhld_amt]	,
+		[aptrx_net_amt]     	=	A.[aptrx_net_amt]		,
+		[aptrx_1099_amt]    	=	A.[aptrx_1099_amt]		,
+		[aptrx_comment]     	=	A.[aptrx_comment]		,
+		[aptrx_orig_type]   	=	A.[aptrx_orig_type]		,
+		[aptrx_name]        	=	A.[aptrx_name]			,
+		[aptrx_recur_yn]    	=	A.[aptrx_recur_yn]		,
+		[aptrx_currency]    	=	A.[aptrx_currency]		,
+		[aptrx_currency_rt] 	=	A.[aptrx_currency_rt]	,
+		[aptrx_currency_cnt]	=	A.[aptrx_currency_cnt]	,
+		[aptrx_user_id]     	=	A.[aptrx_user_id]		,
+		[aptrx_user_rev_dt]		=	A.[aptrx_user_rev_dt]	,	
+		[A4GLIdentity]			=	A.[A4GLIdentity]		,
+		[ysnInsertedToAPIVC]	=	1
+	FROM aptrxmst A
+	WHERE A.aptrx_orig_amt != 0
+	AND 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
+END
+
 SET IDENTITY_INSERT tblAPaptrxmst ON
 INSERT INTO tblAPaptrxmst(
 	[aptrx_vnd_no]				,
@@ -101,41 +172,9 @@ INSERT INTO tblAPaptrxmst(
 	[A4GLIdentity]				,
 	[ysnInsertedToAPIVC]
 )
-SELECT
-	[aptrx_vnd_no]				=	A.[aptrx_vnd_no]			,
-	[aptrx_ivc_no]				=	A.[aptrx_ivc_no]			,
-	[aptrx_sys_rev_dt]   		=	A.[aptrx_sys_rev_dt]   		,
-	[aptrx_sys_time]     		=	A.[aptrx_sys_time]     		,
-	[aptrx_cbk_no]       		=	A.[aptrx_cbk_no]       		,
-	[aptrx_chk_no]       		=	A.[aptrx_chk_no]       		,
-	[aptrx_trans_type]   		=	A.[aptrx_trans_type]   		,
-	[aptrx_batch_no]     		=	A.[aptrx_batch_no]     		,
-	[aptrx_pur_ord_no]   		=	A.[aptrx_pur_ord_no]   		,
-	[aptrx_po_rcpt_seq]  		=	A.[aptrx_po_rcpt_seq]  		,
-	[aptrx_ivc_rev_dt]   		=	A.[aptrx_ivc_rev_dt]   		,
-	[aptrx_disc_rev_dt]  		=	A.[aptrx_disc_rev_dt]  		,
-	[aptrx_due_rev_dt]   		=	A.[aptrx_due_rev_dt]   		,
-	[aptrx_chk_rev_dt]   		=	A.[aptrx_chk_rev_dt]   		,
-	[aptrx_gl_rev_dt]    		=	A.[aptrx_gl_rev_dt]    		,
-	[aptrx_disc_pct]     		=	A.[aptrx_disc_pct]     		,
-	[aptrx_orig_amt]     		=	A.[aptrx_orig_amt]     		,
-	[aptrx_disc_amt]     		=	A.[aptrx_disc_amt]     		,
-	[aptrx_wthhld_amt]   		=	A.[aptrx_wthhld_amt]   		,
-	[aptrx_net_amt]      		=	A.[aptrx_net_amt]      		,
-	[aptrx_1099_amt]     		=	A.[aptrx_1099_amt]     		,
-	[aptrx_comment]      		=	A.[aptrx_comment]      		,
-	[aptrx_orig_type]    		=	A.[aptrx_orig_type]    		,
-	[aptrx_name]         		=	A.[aptrx_name]         		,
-	[aptrx_recur_yn]     		=	A.[aptrx_recur_yn]     		,
-	[aptrx_currency]     		=	A.[aptrx_currency]     		,
-	[aptrx_currency_rt]  		=	A.[aptrx_currency_rt]  		,
-	[aptrx_currency_cnt] 		=	A.[aptrx_currency_cnt] 		,
-	[aptrx_user_id]      		=	A.[aptrx_user_id]      		,
-	[aptrx_user_rev_dt]			=	A.[aptrx_user_rev_dt]		,
-	[A4GLIdentity]				=	A.[A4GLIdentity]			,
-	[ysnInsertedToAPIVC]		=	1
-FROM #tmp_aptrxmstImport A
+SELECT * FROM ##tmp_aptrxmstImport
 SET IDENTITY_INSERT tblAPaptrxmst OFF
+
 --BACK UP RECORDS FROM aptrxmst TO apivcmst to make sure origin will not abel to create duplicate vendor order number
 INSERT INTO apivcmst(
 	[apivc_vnd_no]				,
@@ -181,17 +220,18 @@ SELECT
 	[apivc_wthhld_amt]  	=	A.[aptrx_wthhld_amt]	,
 	[apivc_net_amt]     	=	A.[aptrx_net_amt]		,
 	[apivc_1099_amt]    	=	A.[aptrx_1099_amt]		,
-	[apivc_comment]     	=	'Imported Origin Bill - i21 Record'		,
+	[apivc_comment]     	=	'Imported Origin Bill - i21 Rec',
 	[apivc_recur_yn]    	=	A.[aptrx_recur_yn]		,
 	[apivc_currency]    	=	A.[aptrx_currency]		,
 	[apivc_currency_rt] 	=	A.[aptrx_currency_rt]	,
 	[apivc_currency_cnt]	=	A.[aptrx_currency_cnt]	,
 	[apivc_user_id]     	=	A.[aptrx_user_id]		,
 	[apivc_user_rev_dt]		=	A.[aptrx_user_rev_dt]	
-FROM #tmp_aptrxmstImport A
+FROM ##tmp_aptrxmstImport A
 
 --BACK UP apeglmst
-IF OBJECT_ID('tempdb..#tmp_apeglmstImport') IS NOT NULL DROP TABLE tmp_apeglmstImport
+IF OBJECT_ID('tempdb..#tmp_apeglmstImport') IS NOT NULL DROP TABLE #tmp_apeglmstImport
+
 SELECT
 	[apegl_cbk_no]			=	A.[apegl_cbk_no]		,
 	[apegl_trx_ind]			=	A.[apegl_trx_ind]		,
@@ -206,7 +246,7 @@ SELECT
 	[aptrx_ivc_no_header]	=	B.aptrx_ivc_no
 	INTO #tmp_apeglmstImport
 FROM apeglmst A
-INNER JOIN #tmp_aptrxmstImport  B
+INNER JOIN ##tmp_aptrxmstImport  B
 ON B.aptrx_ivc_no = A.apegl_ivc_no 
 	AND B.aptrx_vnd_no = A.apegl_vnd_no
 
@@ -262,9 +302,11 @@ SELECT
 	[aphgl_gl_un]			=	A.[apegl_gl_un]		
 FROM #tmp_apeglmstImport A
 
+IF @transCount = 0 COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
 	DECLARE @errorBackingUp NVARCHAR(500) = ERROR_MESSAGE();
+	ROLLBACK TRANSACTION
 	RAISERROR(@errorBackingUp, 16, 1);
 END CATCH
 
