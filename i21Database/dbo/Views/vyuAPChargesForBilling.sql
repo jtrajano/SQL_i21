@@ -62,12 +62,12 @@ SELECT
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
-	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[intCurrencyId]							= ISNULL(ReceiptCharge.intCurrencyId,Receipt.intCurrencyId)
 	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
 	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
-	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
+	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -171,12 +171,12 @@ SELECT
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
-	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[intCurrencyId]							= ISNULL(ReceiptCharge.intCurrencyId,Receipt.intCurrencyId)
 	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
 	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
-	,[intCostUnitMeasureId]						= CostUOM.intUnitMeasureId
+	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -212,7 +212,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
 
-WHERE	ReceiptCharge.ysnAccrue = 1 
-		AND ReceiptCharge.ysnPrice = 1
+WHERE	--ReceiptCharge.ysnAccrue = 1 
+		ReceiptCharge.ysnPrice = 1
 		AND ISNULL(Receipt.ysnPosted, 0) = 1
 		AND ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0
