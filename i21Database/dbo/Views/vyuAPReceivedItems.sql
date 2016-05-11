@@ -280,6 +280,9 @@ FROM
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	LEFT JOIN (tblCTContractHeader CH INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId)  ON CH.intEntityId = A.intEntityVendorId 
+																															AND CH.intContractHeaderId = B.intOrderId 
+																															AND CD.intContractDetailId = B.intLineNo 
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
@@ -305,6 +308,7 @@ FROM
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
+	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL AND B.dblUnitCost != 0) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE AND 0 RECEIPT COST
 	UNION ALL
 
 	--OTHER CHARGES

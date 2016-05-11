@@ -20,6 +20,7 @@ DECLARE @shipFrom INT, @shipTo INT;
 DECLARE @receiptLocation INT;
 DECLARE @userLocation INT;
 DECLARE @location INT;
+DECLARE @cashPrice DECIMAL;
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -93,7 +94,23 @@ BEGIN
 		RAISERROR('Please setup default AP Account.', 16, 1);
 		GOTO DONE
 	END
-			
+		
+	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
+		INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+		INNER JOIN tblICItemLocation D ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
+		LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId)  ON E.intEntityId = A.intEntityVendorId 
+																															AND E.intContractHeaderId = B.intOrderId 
+																															AND E1.intContractDetailId = B.intLineNo 
+		WHERE A.intInventoryReceiptId = @receiptId AND E1.intPricingTypeId = 2)
+
+
+	IF (@cashPrice = 0)
+		BEGIN
+			RAISERROR('Cannot create Voucher for Basis Contract with 0 Cash Price.', 16, 1);
+			GOTO DONE			 									       
+		END
+					
 	INSERT INTO tblAPBill(
 		[intEntityVendorId],
 		[strVendorOrderNumber], 
@@ -212,7 +229,10 @@ BEGIN
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Orig Calculation
 												   END)
 										END,
-		[dblCost]					=	B.dblUnitCost,
+		[dblCost]					=	CASE WHEN B.dblUnitCost IS NULL
+											 THEN (CASE WHEN E1.dblCashPrice IS NOT NULL THEN E1.dblCashPrice ELSE B.dblUnitCost END)
+											 ELSE B.dblUnitCost
+										END,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
