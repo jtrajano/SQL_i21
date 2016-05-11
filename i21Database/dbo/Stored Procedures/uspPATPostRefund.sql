@@ -148,7 +148,47 @@ GROUP BY
 		Total.dblCashPayout,
 		Ref.dblCashRefund
 
-SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	
+SELECT	intRefundId, 
+		intFiscalYearId, 
+		dtmRefundDate, 
+		strRefund,
+		dblMinimumRefund, 
+		dblServiceFee,		   
+		dblCashCutoffAmount, 
+		dblFedWithholdingPercentage, 
+		dblPurchaseVolume = SUM(dblPurchaseVolume), 
+		dblSaleVolume = SUM(dblSaleVolume), 
+		dblLessFWT = SUM(dblLessFWT), 
+		dblLessService = SUM(dblLessService),
+		dblCheckAmount = SUM(dblCheckAmount),
+		dblNoRefund = SUM(dblNoRefund),
+		ysnPosted,
+		intCustomerId,
+		strStockStatus,
+		ysnEligibleRefund,
+		ysnQualified, 
+		dblRefundAmount = SUM(dblRefundAmount),
+		dblCashRefund = SUM(dblCashRefund),
+		dblEquityRefund = SUM(dblEquityRefund),
+		dblRefundRate = SUM(dblRefundRate), 
+		dblVolume = SUM(dblVolume)
+INTO #tmpRefundDataCombined
+FROM #tmpRefundData
+GROUP BY	intCustomerId,
+			intRefundId,
+			intFiscalYearId,
+			dtmRefundDate,
+			strRefund,
+			dblMinimumRefund, 
+			dblServiceFee,		   
+			dblCashCutoffAmount, 
+			dblFedWithholdingPercentage,
+			ysnPosted,
+			strStockStatus,
+			ysnEligibleRefund,
+			ysnQualified
+
+SELECT @totalRecords = COUNT(*) FROM #tmpRefundDataCombined	
 
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
@@ -179,7 +219,7 @@ DECLARE @validRefundIds NVARCHAR(MAX)
 
 -- CREATE TEMP GL ENTRIES
 SELECT DISTINCT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
-FROM #tmpRefundData
+FROM #tmpRefundDataCombined
 ORDER BY 1
 
 IF ISNULL(@ysnPosted,0) = 1
@@ -356,6 +396,7 @@ Post_Cleanup:
 	--INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundDataCombined
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundPostData')) DROP TABLE #tmpRefundPostData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCurrentData')) DROP TABLE #tmpCurrentData
 END
