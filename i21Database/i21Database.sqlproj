@@ -3774,11 +3774,11 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCustomerPaymentsRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutDepartmentSaleRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutDepositDetailsRecap.sql" />
-    <Build Include="dbo\tblSCUncompletedTicketAlert.sql" />
     <Build Include="dbo\Views\vyuLGLoadWarehouseContainerView.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportLotQualityDetail.sql" />
     <Build Include="dbo\Tables\tblMFMarginBy.sql" />
     <Build Include="dbo\Views\vyuMFGetItem.sql" />
+    <Build Include="dbo\Tables\tblSCUncompletedTicketAlert.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
