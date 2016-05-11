@@ -8,7 +8,7 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg						NVARCHAR(MAX),
 			@intContractDetailId		INT,
-			@dblCashPrice				NUMERIC(9,4),
+			@dblCashPrice				NUMERIC(18,6),
 			@intPricingTypeId			INT,
 			@ysnMultiplePriceFixation	BIT
 	

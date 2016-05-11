@@ -19,15 +19,38 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..##tblColumns') IS NOT NULL  	
 		DROP TABLE ##tblColumns	
 
+	CREATE TABLE ##tblColumns
+	(
+		DATA_TYPE					NVARCHAR(256),
+		CHARACTER_MAXIMUM_LENGTH	INT,
+		NUMERIC_PRECISION			TINYINT,
+		NUMERIC_SCALE				INT,
+		COLUMN_NAME					NVARCHAR(256),
+		ORDINAL_POSITION			INT,
+		ysnIdentity					BIT,
+	)
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML ,'<row xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>'
 
-	SELECT	DISTINCT COL.*, 
-			CAST((COLUMNPROPERTY(OBJECT_ID(COL.TABLE_NAME),COL.COLUMN_NAME,'IsIdentity')) AS BIT) ysnIdentity
-	INTO	##tblColumns
-	FROM	INFORMATION_SCHEMA.COLUMNS COL 
-	WHERE	COL.TABLE_NAME = @strTblName
-	ORDER BY ORDINAL_POSITION
-
+	IF @strTblName LIKE '#%'
+	BEGIN
+		INSERT INTO ##tblColumns
+		SELECT	DISTINCT DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION,NUMERIC_SCALE,COLUMN_NAME,ORDINAL_POSITION,
+				ISNULL(CAST((COLUMNPROPERTY(OBJECT_ID(COL.TABLE_NAME),COL.COLUMN_NAME,'IsIdentity')) AS BIT),0) ysnIdentity
+		FROM	tempdb.INFORMATION_SCHEMA.COLUMNS COL 
+		WHERE	COL.TABLE_NAME LIKE @strTblName+'%' 
+		ORDER BY ORDINAL_POSITION
+	END
+	ELSE
+	BEGIN
+		INSERT INTO ##tblColumns
+		SELECT	DISTINCT DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION,NUMERIC_SCALE,COLUMN_NAME,ORDINAL_POSITION,
+				ISNULL(CAST((COLUMNPROPERTY(OBJECT_ID(COL.TABLE_NAME),COL.COLUMN_NAME,'IsIdentity')) AS BIT),0) ysnIdentity
+		FROM	INFORMATION_SCHEMA.COLUMNS COL 
+		WHERE	COL.TABLE_NAME = @strTblName
+		ORDER BY ORDINAL_POSITION
+	END
+	
 	SELECT TOP 1 @strColumns = 
 				STUFF(													
 				   (SELECT											
@@ -40,7 +63,7 @@ BEGIN TRY
 				   ,1,2, ''											
 			  ) 											
 	FROM ##tblColumns CH														
-
+	
 	SELECT @strXMLColumns =
 				STUFF(													
 				   (SELECT											
@@ -58,10 +81,10 @@ BEGIN TRY
 			  ) 											
 	FROM ##tblColumns CH
 	WHERE ORDINAL_POSITION = 1
-
+	
 	SET @strSQL  = ''
 	SET @strSQL  = ' INSERT INTO ' + @strTblName + '('+@strColumns+') '
-	SET @strSQL += ' SELECT ' + @strColumns + ' FROM OPENXML(@idoc, '''+@strTblName+'s/'+@strTblName+''',2) WITH('+@strXMLColumns+')'
+	SET @strSQL += ' SELECT ' + @strColumns + ' FROM OPENXML(@idoc, '''+REPLACE(@strTblName,'#','')+'s/'+REPLACE(@strTblName,'#','')+''',2) WITH('+@strXMLColumns+')'
 	SET @strSQL += ' SELECT @intId = CAST(SCOPE_IDENTITY() AS INT)'
 	
 	EXEC sp_executesql @strSQL,N'@idoc INT,@intId INT OUTPUT',@idoc = @idoc,@intId = @intId OUTPUT
