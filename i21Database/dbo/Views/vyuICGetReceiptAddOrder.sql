@@ -148,6 +148,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 
+			LEFT JOIN dbo.tblSMCurrency DefaultCurrency
+				ON DefaultCurrency.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 				
+
 	WHERE	ysnAllowedToShow = 1
 			AND strContractType = 'Purchase'
 
