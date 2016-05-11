@@ -191,7 +191,7 @@ BEGIN
 				INNER JOIN dbo.tblICItem Item
 					ON Item.intItemId = ReceiptItem.intItemId
 				INNER JOIN (
-					SELECT	dblTotalLotNet = ROUND(SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0)), 2) 
+					SELECT	dblTotalLotNet = SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0))
 							,intInventoryReceiptItemId
 					FROM	dbo.tblICInventoryReceiptItemLot 
 					GROUP BY intInventoryReceiptItemId					
