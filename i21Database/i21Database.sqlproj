@@ -3779,6 +3779,7 @@
     <Build Include="dbo\Tables\tblMFMarginBy.sql" />
     <Build Include="dbo\Views\vyuMFGetItem.sql" />
     <Build Include="dbo\Tables\tblSCUncompletedTicketAlert.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCheckItemUsedInDiscountCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
