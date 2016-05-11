@@ -1618,6 +1618,8 @@ namespace iRely.Inventory.Model
         public bool? ysnSubCurrency { get; set; }
         public int intCurrencyId { get; set; }
         public string strSubCurrency { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblNet { get; set; }
     }
 
     public class vyuICGetInventoryReceiptVoucher

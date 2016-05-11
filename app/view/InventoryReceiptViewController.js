@@ -3933,7 +3933,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'ysnSubCurrency', text: 'Cost Currency', width: 100, dataType: 'boolean', hidden: true},
                 {dataIndex: 'strSubCurrency', text: 'Cost Currency', width: 100, dataType: 'string', hidden: true},
                 { xtype: 'numbercolumn', dataIndex: 'dblFranchise', text: 'Franchise', width: 100, dataType: 'float', hidden: true},
-                { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true}
+                { xtype: 'numbercolumn', dataIndex: 'dblContainerWeightPerQty', text: 'Container Weight Per Qty', width: 100, dataType: 'float', hidden: true},
+
+                { xtype: 'numbercolumn', dataIndex: 'dblGross', text: 'Gross', width: 100, dataType: 'float'},
+                { xtype: 'numbercolumn', dataIndex: 'dblNet', text: 'Net', width: 100, dataType: 'float'}
 
             ];
             search.title = "Add Orders";
@@ -3996,10 +3999,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             dblFranchise: order.get('dblFranchise'),
                             dblContainerWeightPerQty: order.get('dblContainerWeightPerQty'),
                             ysnSubCurrency: order.get('ysnSubCurrency'),
-                            strSubCurrency: order.get('strSubCurrency')
+                            strSubCurrency: order.get('strSubCurrency'),
+                            dblGross: order.get('dblGross'),
+                            dblNet: order.get('dblNet')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
-                        currentVM.tblICInventoryReceiptItems().add(newRecord);
+
+                        // Add the item record.
+                        var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
+
+                        // Calculate the line total
+                        var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
+                        newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
 
                         if (ReceiptType === 'Purchase Contract') {
                             ContractStore.load({
