@@ -194,6 +194,15 @@ SELECT LoadDetail.intLoadDetailId
 		,Load.dtmDispatchMailSent
 		,Load.dtmCancelDispatchMailSent
 		,Load.intCompanyLocationId
+		,Load.intTransUsedBy
+		,strTransUsedBy = CASE 
+			WHEN Load.intTransUsedBy = 1 
+				THEN 'None'
+			WHEN Load.intTransUsedBy = 2
+				THEN 'Scale Ticket'
+			WHEN Load.intTransUsedBy = 3
+				THEN 'Transport Load'
+			END
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
