@@ -507,8 +507,8 @@ BEGIN
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMove
 			,intLotId				= Detail.intNewLotId
-			,intSubLocationId		= Detail.intSubLocationId
-			,intStorageLocationId	= Detail.intStorageLocationId
+			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
+			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId			
 			INNER JOIN dbo.tblICInventoryTransaction FromStock
