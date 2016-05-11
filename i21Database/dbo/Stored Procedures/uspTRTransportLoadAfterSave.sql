@@ -247,101 +247,34 @@ BEGIN
 			AND currentSnapshot.intTransactionDetailId NOT IN (SELECT intTransactionDetailId FROM #tmpPreviousSnapshot
 																WHERE strSourceType = @SourceType_Invoice)
         
-        
-      --  foreach (var loadHeader in loadHeaders)
-      --  {
-            
-      --      foreach (var receipt in receitps)
-      --      {
-      --          
-      --          else
-      --          {
-      --              var oldreceipt = oldLoadHeader.tblTRLoadReceipts.Where(x => x.intLoadReceiptId == receipt.intLoadReceiptId).FirstOrDefault();
-      --              decimal? dblOldQuantity = 0;
-      --              decimal? dblNewQuantity = 0;
-      --              if (receipt.strGrossOrNet == "Gross")
-      --              {
-      --                  dblOldQuantity = oldreceipt.dblGross * -1;
-      --              }
-      --              else
-      --              {
-      --                  dblOldQuantity = oldreceipt.dblNet * -1;
-      --              }
+        UNION ALL
 
-      --              if (receipt.strGrossOrNet == "Gross")
-      --              {
-      --                  dblNewQuantity = receipt.dblGross;
-      --              }
-      --              else
-      --              {
-      --                  dblNewQuantity = receipt.dblNet;
-      --              }
+		-- Check Updated rows
+		SELECT previousSnapshot.intSourceId
+			, previousSnapshot.strSourceType
+			, 2 --Update
+			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (previousSnapshot.dblQuantity - currentSnapshot.dblQuantity)
+					ELSE (previousSnapshot.dblQuantity * -1) END -- Check if there was a change on Contract Detail Id used, insert record negating previous Contract Detail Id
+			, previousSnapshot.intContractDetailId
+		FROM @tmpCurrentSnapshot currentSnapshot
+		INNER JOIN #tmpPreviousSnapshot previousSnapshot
+			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
+		WHERE (currentSnapshot.intContractDetailId != NULL AND previousSnapshot.intContractDetailId != NULL)
+			AND (currentSnapshot.dblQuantity <> previousSnapshot.dblQuantity)
 
-      --              if (Math.Abs(dblOldQuantity ?? 0) != Math.Abs(dblNewQuantity ?? 0))
-      --              {
-      --                  if (oldreceipt.intContractDetailId != null)
-      --                  {
-      --                      EXEC uspCTUpdateScheduleQuantity @intContractDetailId =  oldreceipt.intContractDetailId 
-						--	, @dblQuantityToUpdate= dblOldQuantity 
-						--	, @intUserId= userId 
-						--	, @intExternalId= receipt.intLoadReceiptId 
-						--	, @strScreenName= "Transport Purchase"
+		UNION ALL 
 
-      --                  }
-      --                  if (receipt.intContractDetailId != null)
-      --                  {
-      --                      EXEC uspCTUpdateScheduleQuantity @intContractDetailId =  receipt.intContractDetailId 
-						--	, @dblQuantityToUpdate= dblNewQuantity 
-						--	, @intUserId= userId 
-						--	, @intExternalId= receipt.intLoadReceiptId 
-						--	, @strScreenName= "Transport Purchase"
-
-      --                  }
-      --              }
-      --          }
-      --      }
-      --      var distibutionHeaders = loadHeader.tblTRLoadDistributionHeaders;
-      --      foreach (var distibutionHeader in distibutionHeaders)
-      --      {
-      --          var distibutionDetails = distibutionHeader.tblTRLoadDistributionDetails;
-      --          foreach (var distibutionDetail in distibutionDetails)
-      --          {
-      --              
-      --              {
-      --                  var olddistribuitonHeader = oldLoadHeader.tblTRLoadDistributionHeaders.Where(x => x.intLoadDistributionHeaderId == distibutionDetail.intLoadDistributionHeaderId).FirstOrDefault();
-      --                  var olddistribuitonDetail = olddistribuitonHeader.tblTRLoadDistributionDetails.Where(x => x.intLoadDistributionDetailId == distibutionDetail.intLoadDistributionDetailId).FirstOrDefault();
-      --                  decimal? dblOldQuantity = olddistribuitonDetail.dblUnits;
-      --                  decimal? dblNewQuantity = 0;
-      --                  dblOldQuantity = dblOldQuantity * -1;
-
-      --                  dblNewQuantity = distibutionDetail.dblUnits;
-
-      --                  if (Math.Abs(dblOldQuantity ?? 0) != Math.Abs(dblNewQuantity ?? 0))
-      --                  {
-      --                      if (olddistribuitonDetail.intContractDetailId != null)
-      --                      {
-      --                          EXEC uspCTUpdateScheduleQuantity @intContractDetailId = olddistribuitonDetail.intContractDetailId 
-						--		, @dblQuantityToUpdate= dblOldQuantity 
-						--		, @intUserId= userId 
-						--		, @intExternalId= distibutionDetail.intLoadDistributionDetailId 
-						--		, @strScreenName= "Transport Sale"
-
-      --                      }
-      --                      if (distibutionDetail.intContractDetailId != null)
-      --                      {
-      --                          EXEC uspCTUpdateScheduleQuantity @intContractDetailId = distibutionDetail.intContractDetailId 
-						--		, @dblQuantityToUpdate= dblNewQuantity 
-						--		, @intUserId= userId 
-						--		, @intExternalId= distibutionDetail.intLoadDistributionDetailId 
-						--		, @strScreenName= "Transport Sale"
-
-      --                      }
-      --                  }
-
-      --              }
-      --          }
-
-      --      }
+		-- Add another row if there was a change on Contract Detail Id used, for the new Contract Detail Id
+		SELECT currentSnapshot.intSourceId
+			, currentSnapshot.strSourceType
+			, 2 --Update
+			, currentSnapshot.dblQuantity
+			, currentSnapshot.intContractDetailId
+		FROM @tmpCurrentSnapshot currentSnapshot
+		INNER JOIN #tmpPreviousSnapshot previousSnapshot
+			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
+		WHERE (currentSnapshot.intContractDetailId != NULL AND previousSnapshot.intContractDetailId != NULL)
+			AND currentSnapshot.intContractDetailId != previousSnapshot.intContractDetailId
 
 	END
 
@@ -364,7 +297,7 @@ BEGIN
 			, @intContractDetailId = intContractDetailId
 		FROM	@tblToProcess 
 
-		IF (@intActivity = 1)
+		IF (@intActivity = 1 OR @intActivity = 2)
 		BEGIN
 			IF (@strTransactionType = @SourceType_InventoryReceipt OR @strTransactionType = @SourceType_InventoryTransfer)
 				SET @strScreenName = 'Transport Purchase'
@@ -377,13 +310,9 @@ BEGIN
 					, @dblQuantityToUpdate = @dblQuantity 
 					, @intUserId = @UserId 
 					, @intExternalId = @intTransactionId 
-					, @strScreenName = 'Transport Purchase'
+					, @strScreenName = @strScreenName
 			END
 		END
-		--ELSE IF (@intActivity = 2)
-		--BEGIN
-			
-		--END
 		ELSE IF (@intActivity = 3)
 		BEGIN
 			IF (@strTransactionType = @SourceType_InventoryReceipt)
@@ -434,8 +363,10 @@ BEGIN
 	WHERE intTransactionId = @LoadHeaderId
 		AND strTransactionType = @TransactionType_TransportLoad
 
-	--UPDATE tblLGLoad
-	--SET intLoadHeaderId = NULL
-	--WHERE intLoadHeaderId = @LoadHeaderId
-
+	IF (@ForDelete = 1)
+	BEGIN
+		UPDATE tblLGLoad
+		SET intLoadHeaderId = NULL
+		WHERE intLoadHeaderId = @LoadHeaderId
+	END
 END
