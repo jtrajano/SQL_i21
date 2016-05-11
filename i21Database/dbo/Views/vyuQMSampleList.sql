@@ -36,7 +36,10 @@ SELECT S.intSampleId
 	,CH.intContractHeaderId
 	,I.intItemId
 	--,SH.intShipmentId
+	,S.intItemBundleId
 	,SH.intLoadId
+	,C.intLoadContainerId
+	,S.intCompanyLocationSubLocationId
 	,ISNULL(L.intLotId, (SELECT TOP 1 intLotId FROM tblICLot WHERE intParentLotId = PL.intParentLotId)) AS intLotId
 	,S.intSampleUOMId
 	,S.intRepresentingUOMId
