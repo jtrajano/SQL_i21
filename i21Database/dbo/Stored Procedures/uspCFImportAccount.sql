@@ -256,8 +256,8 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 										 WHERE strSalespersonId = RTRIM(LTRIM(cfact_sls_id)) COLLATE Latin1_General_CI_AS),
 
 					@intTermsCode = (SELECT TOP 1 intTermID 
-									 FROM tblSMTerm 
-									 WHERE strTerm = RTRIM(LTRIM(cfact_terms)) COLLATE Latin1_General_CI_AS),
+                                     FROM tblSMTerm 
+                                     WHERE strTermCode = RTRIM(LTRIM(cfact_terms)) COLLATE Latin1_General_CI_AS),
 
 					@intAccountStatusCodeId = (SELECT TOP 1 intAccountStatusId 
 											FROM tblARAccountStatus 
@@ -365,9 +365,9 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 											when RTRIM(LTRIM(cfact_print_misc_auth_yn)) = 'Y' then 'TRUE'
 											else 'FALSE'
 											end),
-					@intFeeProfileId = ISNULL((SELECT TOP 1 intFeeProfileId 
-												FROM tblCFFeeProfile 
-												WHERE strFeeProfileId = RTRIM(LTRIM(cfact_fee_prf_id)) COLLATE Latin1_General_CI_AS),0),
+					@intFeeProfileId = (SELECT TOP 1 intFeeProfileId 
+                                                FROM tblCFFeeProfile 
+                                                WHERE strFeeProfileId = RTRIM(LTRIM(cfact_fee_prf_id)) COLLATE Latin1_General_CI_AS),
 					@strPrintSiteAddress = (case
 											when RTRIM(LTRIM(cfact_print_site_addr)) = 'N' then 'None'
 											when RTRIM(LTRIM(cfact_print_site_addr)) = 'R' then 'Remote'

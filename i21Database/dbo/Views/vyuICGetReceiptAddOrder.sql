@@ -59,6 +59,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, ysnSubCurrency = CAST(0  AS BIT)
 		, intCurrencyId = POView.intCurrencyId
 		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
+		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from PO
+		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from PO
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -126,9 +128,11 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strBOL = NULL
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
-		, ysnSubCurrency = CAST(ysnSubCurrency AS BIT)
-		, intCurrencyId = ISNULL(ContractView.intMainCurrencyId, ContractView.intCurrencyId) 
-		, strSubCurrency = CASE WHEN ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ContractView.strMainCurrency END 
+		, ysnSubCurrency = CAST(ContractView.ysnSubCurrency AS BIT)
+		, intCurrencyId = ISNULL( ISNULL(ContractView.intMainCurrencyId, ContractView.intCurrencyId), DefaultCurrency.intCurrencyID)
+		, strSubCurrency = CASE WHEN ContractView.ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ISNULL(ContractView.strMainCurrency, DefaultCurrency.strCurrency) END 
+		, dblGross = CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts. 
+		, dblNet = CAST(ContractView.dblNetWeight AS NUMERIC(38, 20))
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -143,6 +147,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, intPriceItemUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
+
+			LEFT JOIN dbo.tblSMCurrency DefaultCurrency
+				ON DefaultCurrency.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 				
 
 	WHERE	ysnAllowedToShow = 1
 			AND strContractType = 'Purchase'
@@ -205,6 +212,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, ysnSubCurrency = CAST(LogisticsView.ysnSubCurrency AS BIT)
 		, intCurrencyId = Currency.intCurrencyID
 		, strSubCurrency = CASE WHEN LogisticsView.ysnSubCurrency = 1 THEN LogisticsView.strCurrency ELSE LogisticsView.strMainCurrency END 
+		, dblGross = CAST(LogisticsView.dblGrossWt AS NUMERIC(38, 20))
+		, dblNet = CAST(LogisticsView.dblNetWt AS NUMERIC(38, 20))
 	FROM	vyuLGShipmentContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency
 				ON Currency.strCurrency = ISNULL(LogisticsView.strMainCurrency, LogisticsView.strCurrency) 
 
@@ -284,6 +293,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, ysnSubCurrency = CAST(0 AS BIT) 
 		, tblSMCompanyPreference.intDefaultCurrencyId
 		, strSubCurrency = NULL 
+		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from transfer
+		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
+
 	FROM	vyuICGetInventoryTransferDetail TransferView
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON TransferView.intItemUOMId = ItemUOM.intItemUOMId

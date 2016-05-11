@@ -59,11 +59,9 @@ BEGIN TRY
 			,intItemId
 			,dblQuantity
 			,[intItemUOMId]
-			,intManufacturingCellId
 			,intLocationId
 			,intVersionNo
 			,intRecipeTypeId
-			,intCostDistributionMethodId
 			,intManufacturingProcessId
 			,ysnActive
 			,ysnImportOverride
@@ -82,11 +80,9 @@ BEGIN TRY
 			,intItemId
 			,dblQuantity
 			,[intItemUOMId]
-			,intManufacturingCellId
 			,intLocationId
 			,intVersionNo
 			,intRecipeTypeId
-			,intCostDistributionMethodId
 			,intManufacturingProcessId
 			,ysnActive
 			,ysnImportOverride
@@ -128,11 +124,10 @@ BEGIN TRY
 			,ysnOutputItemMandatory
 			,dblScrap
 			,ysnConsumptionRequired
-			,dblLaborCostPerUnit
-			,intLaborCostCurrencyId
-			,dblOverheadCostPerUnit
-			,intOverheadCostCurrencyId
 			,dblPercentage
+			,intMarginById
+			,dblMargin
+			,ysnCostAppliedAtInvoice
 			,intWorkOrderId
 			,intCreatedUserId
 			,dtmCreated
@@ -164,11 +159,10 @@ BEGIN TRY
 			,ysnOutputItemMandatory
 			,dblScrap
 			,ysnConsumptionRequired
-			,dblLaborCostPerUnit
-			,intLaborCostCurrencyId
-			,dblOverheadCostPerUnit
-			,intOverheadCostCurrencyId
-			,dblPercentage
+			,[dblCostAllocationPercentage]
+			,intMarginById
+			,dblMargin
+			,ysnCostAppliedAtInvoice
 			,@intWorkOrderId
 			,intCreatedUserId
 			,dtmCreated

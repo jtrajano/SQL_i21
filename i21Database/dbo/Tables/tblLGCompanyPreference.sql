@@ -12,6 +12,7 @@
 [intDefaultPositionId] INT NULL,
 [intDefaultLeastCostSourceType] INT NULL,
 [strALKMapKey] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+[intTransUsedBy] INT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

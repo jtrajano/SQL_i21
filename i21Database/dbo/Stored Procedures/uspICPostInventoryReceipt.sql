@@ -191,7 +191,7 @@ BEGIN
 				INNER JOIN dbo.tblICItem Item
 					ON Item.intItemId = ReceiptItem.intItemId
 				INNER JOIN (
-					SELECT	dblTotalLotNet = ROUND(SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0)), 2) 
+					SELECT	dblTotalLotNet = SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0))
 							,intInventoryReceiptItemId
 					FROM	dbo.tblICInventoryReceiptItemLot 
 					GROUP BY intInventoryReceiptItemId					
@@ -206,6 +206,31 @@ BEGIN
 		BEGIN 
 			-- 'Net quantity mistmatch. It is {Net Qty} on item {Item} but the total net from the lot(s) is {Lot total Net Qty}.'
 			RAISERROR(80081, 11, 1, @strNetQty, @strItemNo, @strLotNetQty)  
+			GOTO Post_Exit    
+		END 
+	END 
+
+	-- Do not allow post if there is Gross/Net UOM and net qty is zero. 
+	IF @ysnPost = 1 AND @ysnRecap = 0 
+	BEGIN 
+		SET @intItemId = NULL 
+		SET @strItemNo = NULL 
+
+		SELECT	TOP 1 
+				@intItemId = Item.intItemId
+				,@strItemNo = Item.strItemNo
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND ReceiptItem.intWeightUOMId IS NOT NULL 
+				AND ISNULL(ReceiptItem.dblNet, 0) = 0 
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- 'The net quantity for item {Item Name} is missing.'
+			RAISERROR(80082, 11, 1, @strItemNo)  
 			GOTO Post_Exit    
 		END 
 	END 

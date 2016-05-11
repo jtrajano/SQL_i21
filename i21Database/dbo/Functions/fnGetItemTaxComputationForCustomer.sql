@@ -253,7 +253,7 @@ BEGIN
 			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
 				SET @ItemTaxAmount = 0.00;
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
+			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00)
 				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/100) );
 				
 			IF(@CheckoffTax = 1)

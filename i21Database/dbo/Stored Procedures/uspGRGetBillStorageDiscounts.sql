@@ -123,6 +123,7 @@ BEGIN TRY
 	JOIN tblICItem Item ON Item.intItemId = a.intItemId
 	JOIN @BillStorageDiscounts bill ON bill.intCustomerStorageId=a.intCustomerStorageId
 	WHERE a.intEntityId= CASE WHEN @PortalEntityId>0 THEN @PortalEntityId ELSE a.intEntityId END
+	ORDER BY E.strName,c.strLocationName
 	
 END TRY
 

@@ -2000,3 +2000,15 @@ UPDATE tblMFCompanyPreference
 SET intForecastFirstEditableMonth = 0
 WHERE intForecastFirstEditableMonth IS NULL
 GO
+IF NOT EXISTS(SELECT * FROM tblMFMarginBy WHERE intMarginById = 1)
+BEGIN
+    INSERT INTO tblMFMarginBy(intMarginById,strName)
+    VALUES(1,'Percentage')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFMarginBy WHERE intMarginById = 2)
+BEGIN
+    INSERT INTO tblMFMarginBy(intMarginById,strName)
+    VALUES(2,'Amount')
+END
+GO

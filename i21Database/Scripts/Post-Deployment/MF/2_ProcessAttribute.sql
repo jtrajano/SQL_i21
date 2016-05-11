@@ -467,9 +467,26 @@ BEGIN
 		)
 	SELECT 22
 		,'Default Residue Qty'
-		,5
+		,3
 		,1
-		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+		,NULL
+END
+ELSE
+BEGIN
+	UPDATE dbo.tblMFAttribute SET intAttributeDataTypeId=3,strSQL=NULL WHERE intAttributeId = 22 
+END
+GO
+IF EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intAttributeId = 22
+			AND strAttributeValue = 'False'
+		)
+BEGIN
+	UPDATE tblMFManufacturingProcessAttribute
+	SET strAttributeValue = '0.01'
+	WHERE intAttributeId = 22
+		AND strAttributeValue = 'False'
 END
 GO
 IF NOT EXISTS (

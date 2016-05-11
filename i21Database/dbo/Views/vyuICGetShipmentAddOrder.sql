@@ -6,7 +6,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 	SELECT 	
 		strOrderType = 'Sales Order'
 		, strSourceType = 'None'
-		, intLocationId = intCompanyLocationId
+		, intLocationId = SODetail.intCompanyLocationId
 		, strShipFromLocation = SODetail.strLocationName
 		, intEntityCustomerId
 		, strCustomerNumber
@@ -16,15 +16,15 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, strOrderNumber = SODetail.strSalesOrderNumber
 		, intSourceId = NULL
 		, strSourceNumber = NULL
-		, intItemId
+		, SODetail.intItemId
 		, strItemNo
 		, strItemDescription
 		, strLotTracking
-		, intCommodityId
-		, intSubLocationId
-		, strSubLocationName
-		, intStorageLocationId
-		, strStorageLocationName = SODetail.strStorageLocation
+		, SODetail.intCommodityId
+		,DefaultFromItemLocation.intSubLocationId
+		,SubLocation.strSubLocationName
+		,DefaultFromItemLocation.intStorageLocationId
+		,strStorageLocationName = StorageLocation.strName
 		, intOrderUOMId = intItemUOMId
 		, strOrderUOM = strUnitMeasure
 		, dblOrderUOMConvFactor = dblUOMConversion
@@ -45,7 +45,13 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblLineTotal = ISNULL(dblQtyShipped, 0) * ISNULL(dblPrice, 0)
 		, intGradeId = NULL
 		, strGrade = NULL
-	FROM vyuSOSalesOrderDetail SODetail
+	FROM vyuSOSalesOrderDetail SODetail LEFT JOIN dbo.tblICItemLocation DefaultFromItemLocation
+			ON DefaultFromItemLocation.intItemId = SODetail.intItemId
+			AND DefaultFromItemLocation.intLocationId = SODetail.intCompanyLocationId
+		LEFT JOIN dbo.tblSMCompanyLocationSubLocation SubLocation
+			ON SubLocation.intCompanyLocationSubLocationId = DefaultFromItemLocation.intSubLocationId
+		LEFT JOIN dbo.tblICStorageLocation StorageLocation
+			ON StorageLocation.intStorageLocationId = DefaultFromItemLocation.intStorageLocationId
 	WHERE ysnProcessed = 0
 
 	UNION ALL 

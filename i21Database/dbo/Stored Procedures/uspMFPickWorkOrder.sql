@@ -61,6 +61,7 @@ BEGIN TRY
 		,@intItemUOMId INT
 		,@intSubLocationId INT
 		,@intCategoryId INT
+		,@intItemIssuedUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -847,7 +848,8 @@ BEGIN TRY
 				,@ysnSubstituteItem = ysnSubstituteItem
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 				,@dblSubstituteRatio = dblSubstituteRatio
-				,@intItemUOMId = intItemUOMId
+				,@intItemUOMId=intItemUOMId
+				,@intItemIssuedUOMId=intItemIssuedUOMId
 			FROM @tblLot
 			WHERE intLotRecordId = @intLotRecordId
 
@@ -938,6 +940,7 @@ BEGIN TRY
 						-- Parameters for the new values: 
 						,@dblAdjustByQuantity = @dblAdjustByQuantity
 						,@dblNewUnitCost = NULL
+						,@intItemUOMId=@intItemIssuedUOMId
 						-- Parameters used for linking or FK (foreign key) relationships
 						,@intSourceId = 1
 						,@intSourceTransactionTypeId = 8

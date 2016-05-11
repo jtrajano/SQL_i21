@@ -5173,4 +5173,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTicketUncompletedDaysAlert" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="65ae7276-45cb-4adb-9ac6-8c8447646957" ChangeDateTime="05/09/2016 10:24:57">
+    <Property Name="ElementName" Value="[dbo].[tblMFRecipeItem].[dblPercentage]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFRecipeItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblCostAllocationPercentage]" />
+  </Operation>
 </Operations>

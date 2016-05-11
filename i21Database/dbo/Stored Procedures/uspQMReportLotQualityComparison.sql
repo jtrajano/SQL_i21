@@ -1,9 +1,6 @@
-﻿CREATE PROCEDURE uspQMReportLotQualityComparison
-     @intWorkOrderId INT = NULL
-	,@strProcessName NVARCHAR(50) = NULL
-	,@dtmPlannedDate DATETIME = NULL
-	,@strShiftName NVARCHAR(50) = NULL
-	,@strItemNo NVARCHAR(50) = NULL
+﻿-- Exec uspQMReportLotQualityComparison '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>intWorkOrderId</fieldname><condition>EQUAL TO</condition><from>8552</from><join /><begingroup /><endgroup /><datatype>Int32</datatype></filter></filters></xmlparam>'
+CREATE PROCEDURE uspQMReportLotQualityComparison
+     @xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -13,64 +10,74 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @strProcessName NVARCHAR(50) = NULL
+		,@strShiftName NVARCHAR(50) = NULL
+		,@strItemNo NVARCHAR(50) = NULL
+		,@dtmPlannedDate DATETIME = NULL
+	DECLARE @intWorkOrderId INT
+		,@xmlDocumentId INT
 
-	IF ISNULL(@intWorkOrderId, 0) = 0
+	IF LTRIM(RTRIM(@xmlParam)) = ''
+		SET @xmlParam = NULL
+
+	IF (@xmlParam IS NULL)
 	BEGIN
-		IF ISNULL(@strProcessName, '') = ''
-			RAISERROR (
-					'Provide a process.'
-					,16
-					,1
-					)
+		SELECT NULL intWorkOrderId
+			,'INPUT' strInputLot
+			,'OUTPUT' strOutputLot
+			,NULL strProcessName
+			,NULL strShiftName
+			,NULL strItemNo
+			,NULL dtmPlannedDate
 
-		IF ISNULL(@dtmPlannedDate, '') = ''
-			RAISERROR (
-					'Provide a date.'
-					,16
-					,1
-					)
-
-		IF ISNULL(@strShiftName, '') = ''
-			RAISERROR (
-					'Provide a shift.'
-					,16
-					,1
-					)
-
-		IF ISNULL(@strItemNo, '') = ''
-			RAISERROR (
-					'Provide a item.'
-					,16
-					,1
-					)
-
-		SELECT @intWorkOrderId = W.intWorkOrderId
-		FROM dbo.tblMFWorkOrder W
-		JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-			AND MP.strProcessName = @strProcessName
-		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-			AND I.strItemNo = @strItemNo
-		JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
-			AND S.strShiftName = @strShiftName
-		WHERE W.dtmPlannedDate = DATEADD(dd, DATEDIFF(dd, 0, @dtmPlannedDate), 0)
+		RETURN
 	END
-	ELSE
-	BEGIN
-		SELECT @strProcessName = MP.strProcessName
-			,@strShiftName = S.strShiftName
-			,@strItemNo = I.strItemNo
-			,@dtmPlannedDate = W.dtmPlannedDate
-		FROM dbo.tblMFWorkOrder W
-		JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-		JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
-		WHERE W.intWorkOrderId = @intWorkOrderId
-			AND W.dtmPlannedDate IS NOT NULL
-	END
+
+	DECLARE @temp_xml_table TABLE (
+		[fieldname] NVARCHAR(50)
+		,condition NVARCHAR(20)
+		,[from] NVARCHAR(50)
+		,[to] NVARCHAR(50)
+		,[join] NVARCHAR(10)
+		,[begingroup] NVARCHAR(50)
+		,[endgroup] NVARCHAR(50)
+		,[datatype] NVARCHAR(50)
+		)
+
+	EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT
+		,@xmlParam
+
+	INSERT INTO @temp_xml_table
+	SELECT *
+	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
+			[fieldname] NVARCHAR(50)
+			,condition NVARCHAR(20)
+			,[from] NVARCHAR(50)
+			,[to] NVARCHAR(50)
+			,[join] NVARCHAR(10)
+			,[begingroup] NVARCHAR(50)
+			,[endgroup] NVARCHAR(50)
+			,[datatype] NVARCHAR(50)
+			)
+
+	SELECT @intWorkOrderId = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'intWorkOrderId'
+
+	SELECT @strProcessName = MP.strProcessName
+		,@strShiftName = S.strShiftName
+		,@strItemNo = I.strItemNo
+		,@dtmPlannedDate = W.dtmPlannedDate
+	FROM dbo.tblMFWorkOrder W
+	JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
+	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
+	JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
+	WHERE W.intWorkOrderId = @intWorkOrderId
+		AND W.dtmPlannedDate IS NOT NULL
 
 	SELECT @intWorkOrderId AS intWorkOrderId
-		,'INPUT' AS InputLot
-		,'OUTPUT' AS OutputLot
+		,'INPUT' AS strInputLot
+		,'OUTPUT' AS strOutputLot
 		,@strProcessName AS strProcessName
 		,@strShiftName AS strShiftName
 		,@strItemNo AS strItemNo

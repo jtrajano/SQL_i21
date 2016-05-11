@@ -140,13 +140,3 @@ BEGIN
 	JOIN tblICCommodityUnitMeasure b ON b.intCommodityId=a.intCommodityId AND b.ysnStockUnit=1   
 END
 GO
-IF EXISTS(SELECT 1 FROM tblGRDiscountScheduleCode WHERE intItemId IS NULL)
-BEGIN
-	UPDATE SC 
-	SET SC.intItemId=Item.intItemId
-	FROM tblGRDiscountScheduleCode SC 
-	JOIN tblICItem Item ON ISNULL(Item.strShortName,'')=SC.strDiscountCode
-	WHERE SC.intItemId IS NULL
-END
-
-GO
