@@ -208,9 +208,13 @@ SELECT
 	DisUnit.strUnitMeasure as strDischargeUnit,
 	SI.strLoadingPerUnit,
 	SI.strDischargePerUnit,
+	PCH.strCustomerContract AS strPCustomerContract,
+	SCH.strCustomerContract AS strSCustomerContract,
 	dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 
 FROM		tblLGShippingInstruction SI
+LEFT JOIN	tblLGShippingInstructionContractQty PSICQ ON PSICQ.intShippingInstructionId = SI.intShippingInstructionId AND PSICQ.intPurchaseSale = 1
+LEFT JOIN	tblLGShippingInstructionContractQty SSICQ ON SSICQ.intShippingInstructionId = SI.intShippingInstructionId AND SSICQ.intPurchaseSale = 2
 LEFT JOIN	tblEntity Vendor	ON Vendor.intEntityId = SI.intVendorEntityId
 LEFT JOIN	tblEntity Customer	ON Customer.intEntityId = SI.intCustomerEntityId
 LEFT JOIN	tblEntity SLEntity ON SLEntity.intEntityId = SI.intShippingLineEntityId
@@ -236,5 +240,9 @@ LEFT JOIN	tblSMCurrency DemCurrency ON DemCurrency.intCurrencyID = SI.intDemurra
 LEFT JOIN	tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = SI.intDespatchCurrencyId
 LEFT JOIN	tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = SI.intLoadingUnitMeasureId
 LEFT JOIN	tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = SI.intDischargeUnitMeasureId
+LEFT JOIN	tblCTContractDetail PCD ON PCD.intContractDetailId = PSICQ.intContractDetailId 
+LEFT JOIN	tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId 
+LEFT JOIN	tblCTContractDetail SCD ON SCD.intContractDetailId = SSICQ.intContractDetailId 
+LEFT JOIN	tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 WHERE SI.intReferenceNumber = @intReferenceNumber
 END
