@@ -79,29 +79,82 @@ Ext.define('Inventory.model.ReceiptItem', {
         {type: 'presence', field: 'dblOpenReceive'}
     ],
 
-    validate: function(options) {
-        var errors = this.callParent(arguments);
-//        if (this.get('dblOpenReceive') <= 0) {
-//            errors.add({
-//                field: 'dblOpenReceive',
-//                message: 'Qty to Receive must be greater than zero(0).'
-//            })
-//        }
+    sign: function(n){
+        if (Ext.isNumeric(n)){
+            return n > 0 ? 1 : n == 0 ? 0 : -1;
+        }
+        return NaN;
+    },
+
+    validateSubAndStorageLocations: function(errors){
         if (this.get('strLotTracking') !== 'No') {
             if (iRely.Functions.isEmpty(this.get('intSubLocationId'))) {
                 errors.add({
                     field: 'strSubLocationName',
                     message: 'Sub Location must be present.'
-                })
+                });
+                return false;
             }
             if (iRely.Functions.isEmpty(this.get('intStorageLocationId'))) {
                 errors.add({
                     field: 'strStorageLocationName',
                     message: 'Storage Location must be present.'
-                })
+                });
+
+                return false;
             }
         }
+        return true;
+    },
+
+    validateNetQty: function(errors) {
+        if (this.get('intWeightUOMId')) {
+            if (!Ext.isNumeric(this.get('dblNet'))) {
+                errors.add({
+                    field: 'dblNet',
+                    message: 'Must have a Net Qty when Gross/Net UOM is specified.'
+                });
+                return false;
+            }
+            else {
+                if (this.get('dblNet') == 0) {
+                    errors.add({
+                        field: 'dblNet',
+                        message: 'Net Qty must be non-zero when Gross/Net UOM is specified.'
+                    });
+                    return false;
+                }
+
+                if (this.sign(this.get('dblOpenReceive')) == 1){
+                    if (this.sign(this.get('dblNet')) != 1){
+                        errors.add({
+                            field: 'dblNet',
+                            message: 'Net Qty must be a positive number when Qty to Receive is positive.'
+                        });
+                        return false;
+                    }
+                }
+                else if (this.sign(this.get('dblOpenReceive')) == -1){
+                    if (this.sign(this.get('dblNet')) != -1){
+                        errors.add({
+                            field: 'dblNet',
+                            message: 'Net Qty must be a negative number when Qty to Receive is negative.'
+                        });
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+    },
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+
+        this.validateSubAndStorageLocations(errors);
+        this.validateNetQty(errors);
+
         return errors;
     }
-
 });

@@ -2581,8 +2581,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
-                                                                                "itemId": "txtNet",
-                                                                                "minValue": 0
+                                                                                "itemId": "txtNet"
                                                                             },
                                                                             "name": "MyNumberField13",
                                                                             "designerId": "c4314fa1-98c8-4431-853e-04ff985393f2"

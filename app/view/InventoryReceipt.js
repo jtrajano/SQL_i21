@@ -1327,8 +1327,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Net',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
-                                                                                    itemId: 'txtNet',
-                                                                                    minValue: 0
+                                                                                    itemId: 'txtNet'
                                                                                 }
                                                                             },
                                                                             {
