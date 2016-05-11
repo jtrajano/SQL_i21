@@ -4,6 +4,7 @@
 	[intCommissionScheduleId]       INT NOT NULL,
     [intEntityId]					INT NULL, 
 	[intCommissionPlanId]			INT NULL, 
+	[intSort]						INT NULL DEFAULT ((0)),
     [dblPercentage]					NUMERIC(18, 6) NULL, 
     [intConcurrencyId]				INT NOT NULL DEFAULT ((0)),
 	CONSTRAINT [PK_tblARCommissionScheduleDetail_intCommissionScheduleDetailId] PRIMARY KEY CLUSTERED ([intCommissionScheduleDetailId] ASC),

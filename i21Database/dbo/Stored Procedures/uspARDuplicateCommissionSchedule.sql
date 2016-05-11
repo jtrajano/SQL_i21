@@ -58,12 +58,14 @@ AS
 			([intCommissionScheduleId]
 			,[intEntityId]
 			,[intCommissionPlanId]
+			,[intSort]
 			,[dblPercentage]
 			,[intConcurrencyId])
 		SELECT 
 			@NewCommissionScheduleId
 			,[intEntityId]
 			,[intCommissionPlanId]
+			,[intSort]
 			,[dblPercentage]
 			,1
 		FROM
