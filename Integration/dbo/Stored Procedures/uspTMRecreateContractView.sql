@@ -79,6 +79,7 @@ BEGIN
 						,strItemDescription =  ''''
 						,strCustomerName =  ''''
 						,strItemUnitDescription = ''''
+						,ysnMaxPrice = CASE WHEN agcnt_ppd_yndm = ''M'' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 					FROM agcntmst
 				
 				')
@@ -121,6 +122,7 @@ BEGIN
 						,strItemDescription =  ''''
 						,strCustomerName =  ''''
 						,strItemUnitDescription = ''''
+						,ysnMaxPrice = CASE WHEN ptcnt_max_prc_yn = ''Y'' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 					FROM ptcntmst
 				
 				')
@@ -162,7 +164,8 @@ BEGIN
 				,strItemDescription =  E.strDescription
 				,strCustomerName = C.strName
 				,strItemUnitDescription = G.strUnitMeasure
-			FROM tblCTContractHeader A
+				,ysnMaxPrice = CAST(0 AS BIT)
+ 			FROM tblCTContractHeader A
 			INNER JOIN vyuCTContractHeaderNotMapped H
 				ON A.intContractHeaderId = H.intContractHeaderId
 			INNER JOIN tblCTContractDetail B
