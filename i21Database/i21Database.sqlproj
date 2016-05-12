@@ -3786,6 +3786,14 @@
     <Build Include="dbo\Functions\fnGLComputeBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractHeader.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalSalesRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotaTaxRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalMOPRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalCustomerChargesRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalCustomerPaymentsRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalToDepositRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalDepositRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCashOverShortRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
