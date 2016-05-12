@@ -321,5 +321,6 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPIVCMST.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPTRXMST.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPIVCMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPTRXMST.sql" />
   </ItemGroup>
 </Project>

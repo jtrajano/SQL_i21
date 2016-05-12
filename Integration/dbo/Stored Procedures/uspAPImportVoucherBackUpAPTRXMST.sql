@@ -11,8 +11,18 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @strID	NVARCHAR(40);
+DECLARE @nextNumber INT;
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @reSeedIdentity NVARCHAR(200);
+
 IF @transCount = 0 BEGIN TRANSACTION
+
+SELECT	
+	@strID = A.strPrefix,
+	@nextNumber = A.intNumber
+FROM	tblSMStartingNumber A
+WHERE	A.intStartingNumberId = 9
 
 --BACK UP aptrxmst
 IF OBJECT_ID('tempdb..##tmp_aptrxmstImport') IS NOT NULL DROP TABLE ##tmp_aptrxmstImport
@@ -56,10 +66,47 @@ CREATE TABLE ##tmp_aptrxmstImport(
 	)
 )
 
+SET @reSeedIdentity = 'ALTER TABLE ##tmp_aptrxmstImport ADD intNextNumber INT IDENTITY(' + CAST(@nextNumber AS VARCHAR) + ', 1);'
+EXEC(@reSeedIdentity)
+
 --BACK UP RECORDS TO BE IMPORTED FROM aptrxmst
 IF @DateFrom IS NULL --ONE TIME IMPORT
 BEGIN
 	INSERT INTO ##tmp_aptrxmstImport
+	(
+		[aptrx_vnd_no]		
+		,[aptrx_ivc_no]		
+		,[aptrx_sys_rev_dt]  
+		,[aptrx_sys_time]    
+		,[aptrx_cbk_no]      
+		,[aptrx_chk_no]      
+		,[aptrx_trans_type]  
+		,[aptrx_batch_no]    
+		,[aptrx_pur_ord_no]  
+		,[aptrx_po_rcpt_seq] 
+		,[aptrx_ivc_rev_dt]  
+		,[aptrx_disc_rev_dt] 
+		,[aptrx_due_rev_dt]  
+		,[aptrx_chk_rev_dt]  
+		,[aptrx_gl_rev_dt]   
+		,[aptrx_disc_pct]    
+		,[aptrx_orig_amt]    
+		,[aptrx_disc_amt]    
+		,[aptrx_wthhld_amt]  
+		,[aptrx_net_amt]     
+		,[aptrx_1099_amt]    
+		,[aptrx_comment]     
+		,[aptrx_orig_type]   
+		,[aptrx_name]        
+		,[aptrx_recur_yn]    
+		,[aptrx_currency]    
+		,[aptrx_currency_rt] 
+		,[aptrx_currency_cnt]
+		,[aptrx_user_id]     
+		,[aptrx_user_rev_dt]	
+		,[A4GLIdentity]		
+		,[ysnInsertedToAPIVC]
+	)
 	SELECT
 		[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 		[aptrx_ivc_no]			=	A.[aptrx_ivc_no]		,
@@ -99,6 +146,40 @@ END
 ELSE
 BEGIN
 	INSERT INTO ##tmp_aptrxmstImport
+	(
+		[aptrx_vnd_no]		
+		,[aptrx_ivc_no]		
+		,[aptrx_sys_rev_dt]  
+		,[aptrx_sys_time]    
+		,[aptrx_cbk_no]      
+		,[aptrx_chk_no]      
+		,[aptrx_trans_type]  
+		,[aptrx_batch_no]    
+		,[aptrx_pur_ord_no]  
+		,[aptrx_po_rcpt_seq] 
+		,[aptrx_ivc_rev_dt]  
+		,[aptrx_disc_rev_dt] 
+		,[aptrx_due_rev_dt]  
+		,[aptrx_chk_rev_dt]  
+		,[aptrx_gl_rev_dt]   
+		,[aptrx_disc_pct]    
+		,[aptrx_orig_amt]    
+		,[aptrx_disc_amt]    
+		,[aptrx_wthhld_amt]  
+		,[aptrx_net_amt]     
+		,[aptrx_1099_amt]    
+		,[aptrx_comment]     
+		,[aptrx_orig_type]   
+		,[aptrx_name]        
+		,[aptrx_recur_yn]    
+		,[aptrx_currency]    
+		,[aptrx_currency_rt] 
+		,[aptrx_currency_cnt]
+		,[aptrx_user_id]     
+		,[aptrx_user_rev_dt]	
+		,[A4GLIdentity]		
+		,[ysnInsertedToAPIVC]
+	)
 	SELECT
 		[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 		[aptrx_ivc_no]			=	A.[aptrx_ivc_no]		,
@@ -137,6 +218,11 @@ BEGIN
 	AND 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
 END
 
+-- Increment the next number
+UPDATE	tblSMStartingNumber
+SET		intNumber = (SELECT MAX(intNextNumber) FROM ##tmp_aptrxmstImport)
+WHERE	intStartingNumberId = 9
+
 SET IDENTITY_INSERT tblAPaptrxmst ON
 INSERT INTO tblAPaptrxmst(
 	[aptrx_vnd_no]				,
@@ -172,7 +258,40 @@ INSERT INTO tblAPaptrxmst(
 	[A4GLIdentity]				,
 	[ysnInsertedToAPIVC]
 )
-SELECT * FROM ##tmp_aptrxmstImport
+SELECT 
+	[aptrx_vnd_no]		
+	,[aptrx_ivc_no]		
+	,[aptrx_sys_rev_dt]  
+	,[aptrx_sys_time]    
+	,[aptrx_cbk_no]      
+	,[aptrx_chk_no]      
+	,[aptrx_trans_type]  
+	,[aptrx_batch_no]    
+	,[aptrx_pur_ord_no]  
+	,[aptrx_po_rcpt_seq] 
+	,[aptrx_ivc_rev_dt]  
+	,[aptrx_disc_rev_dt] 
+	,[aptrx_due_rev_dt]  
+	,[aptrx_chk_rev_dt]  
+	,[aptrx_gl_rev_dt]   
+	,[aptrx_disc_pct]    
+	,[aptrx_orig_amt]    
+	,[aptrx_disc_amt]    
+	,[aptrx_wthhld_amt]  
+	,[aptrx_net_amt]     
+	,[aptrx_1099_amt]    
+	,[aptrx_comment]     
+	,[aptrx_orig_type]   
+	,[aptrx_name]        
+	,[aptrx_recur_yn]    
+	,[aptrx_currency]    
+	,[aptrx_currency_rt] 
+	,[aptrx_currency_cnt]
+	,[aptrx_user_id]     
+	,[aptrx_user_rev_dt]	
+	,[A4GLIdentity]		
+	,[ysnInsertedToAPIVC]
+FROM ##tmp_aptrxmstImport
 SET IDENTITY_INSERT tblAPaptrxmst OFF
 
 --BACK UP RECORDS FROM aptrxmst TO apivcmst to make sure origin will not abel to create duplicate vendor order number

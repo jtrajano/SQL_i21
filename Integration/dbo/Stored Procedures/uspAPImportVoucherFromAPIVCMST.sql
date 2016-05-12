@@ -22,11 +22,48 @@ DECLARE @defaultTermId INT;
 DECLARE @defaultCurrencyId INT;
 DECLARE @totalInsertedBill INT;
 DECLARE @transCount INT = @@TRANCOUNT;
+--LOCATION VARIABLES
+DECLARE @shipToAddress NVARCHAR(200)
+DECLARE @shipToCity NVARCHAR(50)
+DECLARE @shipToState NVARCHAR(50)
+DECLARE @shipToZipCode NVARCHAR(12)
+DECLARE @shipToCountry NVARCHAR(25)
+DECLARE @shipToPhone NVARCHAR(25)
+DECLARE @shipToAttention NVARCHAR(200)
+--STARTING RECORD NUMBER
+DECLARE @voucher NVARCHAR(5)
+DECLARE @prepay NVARCHAR(5)
+DECLARE @debitMemo NVARCHAR(5)
 
 IF @transCount = 0 BEGIN TRANSACTION
 
+--SET STARTING RECORD NUMBER PREFIX
+SELECT
+	@voucher = strPrefix
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 9
+
+SELECT
+	@prepay = strPrefix
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 20
+
+SELECT
+	@debitMemo = strPrefix
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 18
+
 --GET THE USER LOCATION
-SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
+SELECT 
+	@userLocation		= A.intCompanyLocationId ,
+	@shipToAddress		= A.strAddress,
+	@shipToCity			= A.strCity,
+	@shipToState		= A.strStateProvince,
+	@shipToZipCode		= A.strZipPostalCode,
+	@shipToCountry		= A.strCountry,
+	@shipToPhone		= A.strPhone,
+	@shipToAttention	= A.strAddress
+FROM tblSMCompanyLocation A
 	INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
 WHERE intEntityUserSecurityId = @UserId
 
@@ -40,20 +77,42 @@ ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
 INSERT INTO tblAPBill
 (
-	[strMiscDescription]	,
-	[dblQtyOrdered]			,
-	[dblQtyReceived]		,
-	[intAccountId]			,
-	[dblTotal]				,
-	[dblCost]				,
-	[dbl1099]				,
-	[int1099Form]			,
-	[int1099Category]		,
-	[intLineNo]
+	[intEntityVendorId],
+	[strVendorOrderNumber], 
+	[strBillId],
+	[intTermsId], 
+	[dtmDate], 
+	[dtmDateCreated], 
+	[dtmBillDate],
+	[dtmDueDate], 
+	[intAccountId], 
+	[strReference], 
+	[strPONumber],
+	[dblTotal], 
+	[dbl1099],
+	[dblPayment], 
+	[dblAmountDue],
+	[intEntityId],
+	[ysnPosted],
+	[ysnPaid],
+	[intTransactionType],
+	[dblDiscount],
+	[dblWithheld],
+	[intShipToId],
+	[intShipFromId],
+	[intShipFromId],
+	[intPayToAddressId],
+	[intCurrencyId],
+	[ysnOrigin]
 )
 SELECT
 	[intEntityVendorId]		=	D.intEntityVendorId, 
 	[strVendorOrderNumber] 	=	A.apivc_ivc_no,
+	[strBillId]				=	(CASE WHEN A.apivc_trans_type = 'I' AND A.apivc_orig_amt > 0 THEN @voucher
+										WHEN A.apivc_trans_type = 'O' AND A.apivc_orig_amt > 0 THEN @voucher
+									WHEN A.apivc_trans_type = 'A' THEN @prepay
+									WHEN A.apivc_trans_type = 'C' OR A.apivc_orig_amt < 0 THEN @debitMemo
+									ELSE 0 END) + CAST(A.intNextNumber AS VARCHAR),
 	[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
 									WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
 										WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), @defaultTermId),
@@ -89,6 +148,19 @@ SELECT
 	[intCurrencyId]			=	@defaultCurrencyId,
 	[intShipToId]			=	@userLocation,
 	[intShipFromId]			=	loc.intEntityLocationId,
+	[intPayToAddressId]		=	loc.intEntityLocationId,
+	[strShipFromAddress]	=	loc.strAddress,
+	[strShipFromCity]		=	loc.strCity,
+	[strShipFromCountry]	=	loc.strCountry,
+	[strShipFromPhone]		=	loc.strPhone,
+	[strShipFromState]		=	loc.strState,
+	[strShipFromZipCode]	=	loc.strZipCode,
+	strShipToAddress		=	@shipToAddress,
+	[strShipToCity]			=	@shipToCity,
+	[strShipToCountry]		=	@shipToCountry,
+	[strShipToPhone]		=	@shipToPhone,
+	[strShipToState]		=	@shipToState,
+	[strShipToZipCode]		=	@shipToZipCode,
 	[A4GLIdentity]			=	A.[A4GLIdentity]
 FROM ##tmp_apivcmstImport A
 	LEFT JOIN apcbkmst B
@@ -97,24 +169,8 @@ FROM ##tmp_apivcmstImport A
 		ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 	LEFT JOIN tblEMEntityLocation loc
 		ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
-	OUTER APPLY (
-		SELECT E.* FROM apivcmst E
-		WHERE EXISTS(
-			SELECT 1 FROM tblAPBill F
-			INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityVendorId
-			WHERE E.apivc_ivc_no = F.strVendorOrderNumber COLLATE Latin1_General_CS_AS
-			AND E.apivc_vnd_no = G.strVendorId COLLATE Latin1_General_CS_AS
-		)
-		AND A.apivc_vnd_no = E.apivc_vnd_no
-		AND A.apivc_ivc_no = E.apivc_ivc_no
-	) DuplicateData
-	WHERE 1 = (CASE WHEN @creditCardOnly = 1 AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1
-				WHEN @creditCardOnly = 0 THEN 1	
-			ELSE 0 END)
-	AND NOT EXISTS(
-		SELECT 1 FROM tblAPapivcmst H
-		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
-	)
+
+SET @totalInsertedBill = @@ROWCOUNT
 
 IF @totalInsertedBill <= 0 
 BEGIN
@@ -122,6 +178,72 @@ BEGIN
 	SET @totalImported = 0;
 	RETURN;
 END
+
+--IMPORT DETAIL
+INSERT INTO tblAPBillDetail
+(
+	[intBillId],
+	[strMiscDescription],
+	[dblQtyOrdered],
+	[dblQtyReceived],
+	[intAccountId],
+	[dblTotal],
+	[dblCost],
+	[dbl1099],
+	[int1099Form],
+	[int1099Category],
+	[intLineNo]
+)
+SELECT 
+	[intBillId]				=	A.intBillId,
+	[strMiscDescription]	=	A.strReference,
+	[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN ('C','A') AND C.aphgl_gl_amt > 0 THEN
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1) --make it negative if detail of debit memo is positive
+								ELSE 
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 
+										ELSE 
+											(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_un * -1 ELSE C.aphgl_gl_un END)
+									END) 
+								END),
+	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') AND C.aphgl_gl_amt > 0 THEN
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1)
+								ELSE 
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 
+									ELSE 
+										(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_un * -1 ELSE C.aphgl_gl_un END)
+									END) 
+								END),
+	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
+	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') THEN C.aphgl_gl_amt * -1
+										--(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+									ELSE C.aphgl_gl_amt END,
+	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') THEN
+										(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
+									ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
+	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
+								THEN 
+									(
+										((CASE WHEN C2.apivc_trans_type IN ('C','A') THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+											/
+											(A.dblTotal)
+										)
+										*
+										A.dblTotal
+									)
+								ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
+	[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
+	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
+	[intLineNo]				=	C.aphgl_dist_no,
+	[A4GLIdentity]			=	C.[A4GLIdentity]
+FROM tblAPBill A
+INNER JOIN tblAPVendor B
+	ON A.intEntityVendorId = B.intEntityVendorId
+INNER JOIN (##tmp_apivcmstImport C2 INNER JOIN aphglmst C 
+			ON C2.apivc_ivc_no = C.aphgl_ivc_no 
+			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
+ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
+	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
+ORDER BY C.aphgl_dist_no
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY

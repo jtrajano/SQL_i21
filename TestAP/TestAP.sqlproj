@@ -61,6 +61,7 @@
     <Folder Include="FakeData" />
     <Folder Include="StoredProcedure" />
     <Folder Include="Schema" />
+    <Folder Include="StoredProcedure\AP Import" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">
@@ -94,12 +95,20 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="FakeData\Fake aptrxmst records.sql" />
-    <Build Include="StoredProcedure\test uspAPImportVoucherBackUpAPTRXMST.sql" />
     <Build Include="Schema\CreateTestClasses.sql" />
-    <Build Include="StoredProcedure\test uspAPImportVoucherBackupAPTRXMST with duplicate.sql" />
     <Build Include="FakeData\Fake apivcmst records.sql" />
-    <Build Include="StoredProcedure\test uspAPImportVoucherBackUpAPIVCMST.sql" />
     <Build Include="FakeData\Fake apchkmst records.sql" />
+    <Build Include="FakeData\Fake tblSMUserSecurity records.sql" />
+    <Build Include="FakeData\Fake tblSMCompanyLocation records.sql" />
+    <Build Include="FakeData\Fake apcbkmst records.sql" />
+    <Build Include="StoredProcedure\AP Import\DropConstraints.sql" />
+    <Build Include="StoredProcedure\AP Import\test uspAPImportVoucherBackUpAPIVCMST with duplicate.sql" />
+    <Build Include="StoredProcedure\AP Import\test uspAPImportVoucherBackUpAPIVCMST.sql" />
+    <Build Include="StoredProcedure\AP Import\test uspAPImportVoucherBackupAPTRXMST with duplicate.sql" />
+    <Build Include="StoredProcedure\AP Import\test uspAPImportVoucherBackUpAPTRXMST.sql" />
+    <Build Include="StoredProcedure\AP Import\test if non-existent user is allowed to import.sql" />
+    <Build Include="StoredProcedure\AP Import\test if user without default location is allowed to import.sql" />
+    <Build Include="StoredProcedure\AP Import\test if allowed to import even the AP Account is not exists in i21.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Script.PreDeployment1.sql" />

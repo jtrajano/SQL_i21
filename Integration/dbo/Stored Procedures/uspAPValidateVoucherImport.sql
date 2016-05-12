@@ -12,6 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+
 DECLARE @log TABLE
 (
 	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
@@ -21,10 +22,10 @@ DECLARE @log TABLE
 	[ysnSuccess] BIT NOT NULL
 )
 
-IF(@UserId <= 0)
+IF(NOT EXISTS(SELECT 1 FROM tblSMUserSecurity A WHERE A.intEntityUserSecurityId = @UserId))
 BEGIN
 	INSERT INTO @log
-	SELECT 'You cannot import without user.', @UserId, GETDATE(), 1
+	SELECT 'Invalid user provided.', @UserId, GETDATE(), 1, 0
 END
 
 --MAKE SURE USER HAS DEFAULT LOCATION
@@ -44,13 +45,13 @@ IF (EXISTS(
 	SELECT 1 FROM apcbkmst A INNER JOIN aptrxmst B ON A.apcbk_no = B.aptrx_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 	AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 				THEN
-					CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+					CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 				ELSE 1 END)
 	UNION ALL
 	SELECT 1 FROM apcbkmst A INNER JOIN apivcmst B ON A.apcbk_no = B.apivc_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 	AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 				THEN
-					CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+					CASE WHEN CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 				ELSE 1 END)
 	)
 )
@@ -83,7 +84,7 @@ IF EXISTS(
 								CASE WHEN CONVERT(DATE, CAST(C.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 							ELSE 1 END)
 		)
-		)
+	)
 BEGIN
 	INSERT INTO @log
 	SELECT 'Invalid AP Account found in origin table apcbkmst. Please call iRely assistance.', @UserId, GETDATE(), 4, 0
@@ -125,8 +126,56 @@ BEGIN
 	SELECT @error, @UserId, GETDATE(), 6, 0
 END
 
+--VERIFY IF VOUCHER'S VENDOR ORDER NUMBER HAVEN'T USED IN i21
+INSERT INTO @log
+SELECT
+	A.aptrx_ivc_no + ' already used in i21.'
+	,@UserId
+	,GETDATE()
+	,7
+	,0
+FROM aptrxmst A
+CROSS APPLY (
+	SELECT 
+		B.intBillId
+	FROM tblAPBill B
+	INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
+	WHERE B.strVendorOrderNumber COLLATE Latin1_General_CS_AS = A.aptrx_ivc_no
+	AND C.strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no
+) Vouchers
+WHERE 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
+UNION ALL
+SELECT
+	A.apivc_ivc_no + ' already used in i21.'
+	,@UserId
+	,GETDATE()
+	,7
+	,0
+FROM apivcmst A
+CROSS APPLY (
+	SELECT 
+		B.intBillId
+	FROM tblAPBill B
+	INNER JOIN tblAPVendor C ON B.intEntityVendorId = C.intEntityVendorId
+	WHERE B.strVendorOrderNumber COLLATE Latin1_General_CS_AS = A.apivc_ivc_no
+	AND C.strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no
+) Vouchers
+WHERE 1 = (CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END)
+
+
+INSERT INTO tblAPImportVoucherLog
+(
+	[strDescription], 
+    [intEntityId], 
+    [dtmDate], 
+    [intLogType], 
+    [ysnSuccess]
+)
+SELECT * FROM @log
+
 IF EXISTS(SELECT 1 FROM @log) SET @isValid = 0;
-ELSE SET @isValid = 1;
+ELSE SET @isValid = 1
 
 END TRY
 BEGIN CATCH
