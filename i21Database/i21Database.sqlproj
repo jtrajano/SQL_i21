@@ -3783,6 +3783,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateContract.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadItem.sql" />
+    <Build Include="dbo\Functions\fnGLComputeBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
