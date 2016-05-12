@@ -971,6 +971,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid storage location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid sub location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add multiple line items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotMove for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotMerge for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentItemChange for validating the company location.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">
