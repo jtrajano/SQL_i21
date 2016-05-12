@@ -3937,9 +3937,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Batch Posting', N'Meter Billing', @MeterBillingParentMenuId, N'Batch Posting', N'Activity', N'Screen', N'i21.view.BatchPosting?module=MeterBilling', N'small-menu-activity', 1, 1, 0, 1, 2, 0)
+	VALUES (N'Batch Posting', N'Meter Billing', @MeterBillingParentMenuId, N'Batch Posting', N'Activity', N'Screen', N'i21.view.BatchPosting?module=Meter Billing', N'small-menu-activity', 1, 1, 0, 1, 2, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.BatchPosting?module=MeterBilling', intSort = 2 WHERE strMenuName = 'Meter Readings' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.BatchPosting?module=Meter Billing', intSort = 2 WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
 	
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Consignment Rate' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId)
