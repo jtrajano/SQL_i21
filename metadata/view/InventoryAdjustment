@@ -2067,7 +2067,7 @@
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'strCompanyLocationName',",
+                                                            "\t\tdataIndex: 'strLocationName',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Company Location Name',",
                                                             "\t\thidden: true",
