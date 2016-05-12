@@ -50,6 +50,8 @@ BEGIN TRY
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
 		,@intManufacturingCellId INT
+		,@strInventoryTracking NVARCHAR(50)
+		,@intWorkOrderInputLotId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -107,46 +109,63 @@ BEGIN TRY
 			,dblDefaultResidueQty NUMERIC(38, 20)
 			)
 
-	IF @intInputLotId IS NULL
-		OR @intInputLotId = 0
-	BEGIN
-		RAISERROR (
-				51112
-				,14
-				,1
-				)
-	END
+	SELECT @strInventoryTracking = strInventoryTracking
+	FROM dbo.tblICItem
+	WHERE intItemId = @intInputItemId
 
-	SELECT @strLotNumber = strLotNumber
-		,@intInputLotId = intLotId
-		,@dblWeight = (
-			CASE 
-				WHEN intWeightUOMId IS NOT NULL
-					THEN dblWeight
-				ELSE dblQty
-				END
-			)
-		,@intNewItemUOMId = intItemUOMId
-		,@dblWeightPerQty = (
-			CASE 
-				WHEN dblWeightPerQty IS NULL
-					OR dblWeightPerQty = 0
-					THEN 1
-				ELSE dblWeightPerQty
-				END
-			)
-		,@intWeightUOMId = intWeightUOMId
-	FROM tblICLot
-	WHERE intLotId = @intInputLotId
-
-	IF @intInputLotId IS NULL
-		OR @intInputLotId = 0
+	IF @strInventoryTracking = 'Lot Level'
 	BEGIN
-		RAISERROR (
-				51113
-				,14
-				,1
+		IF @intInputLotId IS NULL
+			OR @intInputLotId = 0
+		BEGIN
+			RAISERROR (
+					51112
+					,14
+					,1
+					)
+		END
+
+		SELECT @strLotNumber = strLotNumber
+			,@intInputLotId = intLotId
+			,@dblWeight = (
+				CASE 
+					WHEN intWeightUOMId IS NOT NULL
+						THEN dblWeight
+					ELSE dblQty
+					END
 				)
+			,@intNewItemUOMId = intItemUOMId
+			,@dblWeightPerQty = (
+				CASE 
+					WHEN dblWeightPerQty IS NULL
+						OR dblWeightPerQty = 0
+						THEN 1
+					ELSE dblWeightPerQty
+					END
+				)
+			,@intWeightUOMId = intWeightUOMId
+		FROM tblICLot
+		WHERE intLotId = @intInputLotId
+
+		IF @intInputLotId IS NULL
+			OR @intInputLotId = 0
+		BEGIN
+			RAISERROR (
+					51113
+					,14
+					,1
+					)
+		END
+
+		IF @dblWeight <= 0
+			AND @ysnNegativeQuantityAllowed = 0
+		BEGIN
+			RAISERROR (
+					51110
+					,14
+					,1
+					)
+		END
 	END
 
 	IF @intWorkOrderId IS NULL
@@ -174,16 +193,6 @@ BEGIN TRY
 					,@strItemNo
 					)
 		END
-	END
-
-	IF @dblWeight <= 0
-		AND @ysnNegativeQuantityAllowed = 0
-	BEGIN
-		RAISERROR (
-				51110
-				,14
-				,1
-				)
 	END
 
 	SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
@@ -339,18 +348,12 @@ BEGIN TRY
 		,intLastModifiedUserId
 		)
 	SELECT @intWorkOrderId
-		,intItemId
-		,intLotId
+		,@intInputItemId
+		,@intInputLotId
 		,@dblInputWeight
-		,ISNULL(intWeightUOMId, intItemUOMId)
-		,@dblInputWeight / (
-			CASE 
-				WHEN dblWeightPerQty = 0
-					THEN 1
-				ELSE dblWeightPerQty
-				END
-			)
-		,intItemUOMId
+		,@intInputWeightUOMId
+		,@dblInputWeight
+		,@intInputWeightUOMId
 		,1
 		,@dtmPlannedDate
 		,@intPlannedShiftId
@@ -366,8 +369,8 @@ BEGIN TRY
 		,@intUserId
 		,@dtmCurrentDateTime
 		,@intUserId
-	FROM dbo.tblICLot
-	WHERE intLotId = @intInputLotId
+
+	SELECT @intWorkOrderInputLotId = SCOPE_IDENTITY()
 
 	IF @intConsumptionMethodId = 1 --By Lot consumption
 	BEGIN
@@ -387,6 +390,7 @@ BEGIN TRY
 	END
 
 	IF @intConsumptionMethodId = 2
+		AND @strInventoryTracking = 'Lot Level'
 	BEGIN
 		SET @dblNewWeight = CASE 
 				WHEN @ysnEmptyOut = 0
@@ -472,7 +476,7 @@ BEGIN TRY
 		WHERE intStorageLocationId = @intConsumptionStorageLocationId
 			AND intItemId = @intInputItemId
 			AND intLotId <> @intInputLotId
-			AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
+			AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 			AND intLotStatusId = 1
 		ORDER BY dtmDateCreated DESC
 
@@ -610,6 +614,114 @@ BEGIN TRY
 				,@intEntityUserSecurityId = @intUserId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 		END
+	END
+
+	IF @intConsumptionMethodId = 2
+		AND @strInventoryTracking = 'Item Level'
+	BEGIN
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tempdb..sysobjects
+				WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult')
+				)
+		BEGIN
+			CREATE TABLE #tmpAddInventoryTransferResult (
+				intSourceId INT
+				,intInventoryTransferId INT
+				)
+		END
+
+		DECLARE @TransferEntries AS InventoryTransferStagingTable
+
+		-- Insert the data needed to create the inventory transfer.
+		INSERT INTO @TransferEntries (
+			-- Header
+			[dtmTransferDate]
+			,[strTransferType]
+			,[intSourceType]
+			,[strDescription]
+			,[intFromLocationId]
+			,[intToLocationId]
+			,[ysnShipmentRequired]
+			,[intStatusId]
+			,[intShipViaId]
+			,[intFreightUOMId]
+			-- Detail
+			,[intItemId]
+			,[intLotId]
+			,[intItemUOMId]
+			,[dblQuantityToTransfer]
+			,[strNewLotId]
+			,[intFromSubLocationId]
+			,[intToSubLocationId]
+			,[intFromStorageLocationId]
+			,[intToStorageLocationId]
+			-- Integration Field
+			,[intInventoryTransferId]
+			,[intSourceId]
+			,[strSourceId]
+			,[strSourceScreenName]
+			)
+		SELECT -- Header
+			[dtmTransferDate] = @dtmPlannedDate
+			,[strTransferType] = 'Storage to Storage'
+			,[intSourceType] = 0
+			,[strDescription] = NULL
+			,[intFromLocationId] = @intLocationId
+			,[intToLocationId] = @intLocationId
+			,[ysnShipmentRequired] = 0
+			,[intStatusId] = 3
+			,[intShipViaId] = NULL
+			,[intFreightUOMId] = NULL
+			-- Detail
+			,[intItemId] = @intInputItemId
+			,[intLotId] = NULL
+			,[intItemUOMId] = @intInputWeightUOMId
+			,[dblQuantityToTransfer] = @dblInputWeight
+			,[strNewLotId] = NULL
+			,[intFromSubLocationId] = @intSubLocationId
+			,[intToSubLocationId] = @intConsumptionSubLocationId
+			,[intFromStorageLocationId] = @intStorageLocationId
+			,[intToStorageLocationId] = @intConsumptionStorageLocationId
+			-- Integration Field
+			,[intInventoryTransferId] = NULL
+			,[intSourceId] = @intWorkOrderInputLotId
+			,[strSourceId] = @strWorkOrderNo
+			,[strSourceScreenName] = 'Process Production Consume'
+
+		-- Call uspICAddInventoryTransfer stored procedure.
+		EXEC dbo.uspICAddInventoryTransfer @TransferEntries
+			,@intUserId
+
+		-- Post the Inventory Transfers                                            
+		DECLARE @intTransferId INT
+			,@strTransactionId NVARCHAR(50);
+
+		WHILE EXISTS (
+				SELECT TOP 1 1
+				FROM #tmpAddInventoryTransferResult
+				)
+		BEGIN
+			SELECT @intTransferId = NULL
+				,@strTransactionId = NULL
+
+			SELECT TOP 1 @intTransferId = intInventoryTransferId
+			FROM #tmpAddInventoryTransferResult
+
+			-- Post the Inventory Transfer that was created
+			SELECT @strTransactionId = strTransferNo
+			FROM tblICInventoryTransfer
+			WHERE intInventoryTransferId = @intTransferId
+
+			EXEC dbo.uspICPostInventoryTransfer 1
+				,0
+				,@strTransactionId
+				,@intUserId;
+
+			DELETE
+			FROM #tmpAddInventoryTransferResult
+			WHERE intInventoryTransferId = @intTransferId
+		END;
 	END
 
 	IF NOT EXISTS (
