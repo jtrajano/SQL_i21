@@ -1031,7 +1031,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strCompanyLocationName',
+                                                                    dataIndex: 'strLocationName',
                                                                     dataType: 'string',
                                                                     text: 'Company Location Name',
                                                                     hidden: true

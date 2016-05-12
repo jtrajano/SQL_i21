@@ -858,7 +858,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
             // Specify the new location as well
             current.set('intNewLocationId', record.get('intCompanyLocationId'));
-            current.set('strNewLocation', record.get('strCompanyLocationName'));
+            current.set('strNewLocation', record.get('strLocationName'));
         }
         else if (combo.itemId === 'cboNewStorageLocation') {
             current.set('intNewStorageLocationId', record.get('intStorageLocationId'));
