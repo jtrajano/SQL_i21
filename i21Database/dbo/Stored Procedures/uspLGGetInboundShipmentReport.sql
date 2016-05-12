@@ -106,6 +106,7 @@ SELECT
 		SLLocation.strCountry as strShippingLineCountry,
 		SLLocation.strState as strShippingLineState,
 		SLLocation.strZipCode as strShippingLineZipCode,
+		SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,'') as strShippingLineWithAddress,
 
 		TREntity.strName as strTrucker,
 		TREntity.strEmail as strTruckerEmail,
