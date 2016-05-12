@@ -145,7 +145,7 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
-			WHERE AND ISNULL(A.strOrderNumber,'''') = ''''
+			WHERE ISNULL(A.strOrderNumber,'''') = ''''
 		')
 	END
 END
