@@ -184,14 +184,14 @@ BEGIN
 		SELECT	TOP 1 
 				@intItemId = Item.intItemId
 				,@strItemNo = Item.strItemNo
-				,@strNetQty = CONVERT(NVARCHAR, CAST(ReceiptItem.dblNet AS MONEY), 1)
-				,@strLotNetQty = CONVERT(NVARCHAR, CAST(ReceiptItemLot.dblTotalLotNet AS MONEY), 1)
+				,@strNetQty = CONVERT(NVARCHAR, CAST(ReceiptItem.dblNet AS MONEY), 2)
+				,@strLotNetQty = CONVERT(NVARCHAR, CAST(ReceiptItemLot.dblTotalLotNet AS MONEY), 2)
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
 				INNER JOIN dbo.tblICItem Item
 					ON Item.intItemId = ReceiptItem.intItemId
 				INNER JOIN (
-					SELECT	dblTotalLotNet = ROUND(SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0)), 2) 
+					SELECT	dblTotalLotNet = SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0))
 							,intInventoryReceiptItemId
 					FROM	dbo.tblICInventoryReceiptItemLot 
 					GROUP BY intInventoryReceiptItemId					

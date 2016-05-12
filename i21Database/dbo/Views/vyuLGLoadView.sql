@@ -44,6 +44,15 @@ SELECT -- Load Header
 		WHEN intTransportationMode = 2
 			THEN 'Ocean Vessel'
 		END
+	,LOAD.intTransUsedBy
+	,strTransUsedBy = CASE 
+		WHEN LOAD.intTransUsedBy = 1 
+			THEN 'None'
+		WHEN LOAD.intTransUsedBy = 2
+			THEN 'Scale Ticket'
+		WHEN LOAD.intTransUsedBy = 3
+			THEN 'Transport Load'
+		END
 	,strPosition = P.strPosition
 	,intGenerateReferenceNumber = GLoad.intReferenceNumber
 	,intGenerateSequence = LOAD.intGenerateSequence

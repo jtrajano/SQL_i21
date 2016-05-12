@@ -407,3 +407,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80082) EXEC sp_dropmessa
 SET @strmessage = 'The net quantity for item %s is missing.'
 EXEC sp_addmessage 80082,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80083) EXEC sp_dropmessage 80083, 'us_english'	
+SET @strmessage = 'The new Item Location is invalid or missing for %s.'
+EXEC sp_addmessage 80083,11,@strmessage,'us_english','False'
+

@@ -73,7 +73,7 @@ BEGIN
 		
 		UNION
 		
-		SELECT DISTINCT NULL AS intLotId
+		SELECT DISTINCT 0 AS intLotId
 			,S.intItemId
 			,NULL AS strLotNumber
 			,I.strItemNo
@@ -172,7 +172,7 @@ BEGIN
 					END
 				)
 		UNION
-		SELECT DISTINCT NULL AS intLotId
+		SELECT DISTINCT 0 AS intLotId
 			,I.intItemId
 			,NULL AS strLotNumber
 			,I.strItemNo

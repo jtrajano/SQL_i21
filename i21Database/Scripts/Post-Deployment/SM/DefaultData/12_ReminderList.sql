@@ -190,4 +190,31 @@
 				[intSort]           =        8
 	END	
 
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9)
+	BEGIN
+		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Overdue',
+				[strType]        	=        N'Scale Ticket',
+				[strMessage]		=        N'{0} Overdue Ticket(s).',
+				[strQuery]  		=        N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus from tblSCUncompletedTicketAlert SCAlert
+												LEFT JOIN tblSCTicket SCTicket ON SCAlert.intCompanyLocationId = SCTicket.intProcessingLocationId
+												WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
+												AND ysnHasGeneratedTicketNumber = 1
+												AND strTicketStatus = ''O''
+												AND SCAlert.intEntityId = {0}',
+				[strNamespace]      =        N'Grain.view.ScaleStationSelection',
+				[intSort]           =        9
+	END
+	
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal' AND [intSort] = 10)
+	BEGIN
+		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Overdue',
+				[strType]        	=        N'Scale Ticket',
+				[strMessage]		=        N'{0} Overdue Ticket(s).',
+				[strQuery]  		=        N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus,intProcessingLocationId,SCAlert.intEntityId from tblSCUncompletedTicketAlert SCAlert,tblSCTicket SCTicket',
+				[strNamespace]      =        N'Grain.view.ScaleStationSelection',
+				[intSort]           =        10
+	END
+
 GO

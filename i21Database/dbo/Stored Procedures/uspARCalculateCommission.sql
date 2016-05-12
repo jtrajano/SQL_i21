@@ -25,7 +25,6 @@ DECLARE  @intCommissionAccountId	INT
 	   , @ysnPaymentRequired		BIT
 	   , @dtmStartDate				DATETIME
 	   , @dtmEndDate				DATETIME
-	   , @tmpTblCommissionDetail	CommissionDetailTableType	
 
 DECLARE @HURDLETYPE_DRAW			NVARCHAR(20) = 'Draw'
       , @HURDLETYPE_FIXED			NVARCHAR(20) = 'Fixed'	  
@@ -95,21 +94,6 @@ IF @strBasis = @BASIS_HOURS
 		ELSE IF (@strHourType = @HOURTYPE_TOTAL)
 			DELETE FROM @tmpHDTicketHoursWorkedTable WHERE ysnBillable = 1
 
-		INSERT INTO @tmpTblCommissionDetail
-			( [intEntityId]			
-			, [intCommissionPlanId]	
-			, [intSourceId]			
-			, [strSourceType]		
-			, [dtmSourceDate]		
-			, [dblAmount])			 
-		SELECT @intEntityId
-			, @intCommissionPlanId
-			, intTicketHoursWorkedId
-			, 'Help Desk'
-			, dtmDate
-			, intHours
-		FROM @tmpHDTicketHoursWorkedTable
-
 		SELECT @dblTotalHrs = SUM(intHours) FROM @tmpHDTicketHoursWorkedTable
 
 		IF @strCalculationType = @CALCTYPE_PERUNIT
@@ -140,24 +124,6 @@ ELSE IF @strBasis = @BASIS_REVENUE
 					AND intAccountId IN (SELECT intAccountId FROM @tmpAccountsTable)
 					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 				
-				INSERT INTO @tmpTblCommissionDetail
-					( [intEntityId]			
-					, [intCommissionPlanId]	
-					, [intSourceId]			
-					, [strSourceType]		
-					, [dtmSourceDate]		
-					, [dblAmount])			 
-				SELECT @intEntityId
-					, @intCommissionPlanId
-					, intGLDetailId
-					, 'GL Detail'
-					, dtmDate
-					, @dblTotalRevenue
-				FROM tblGLDetail 
-				WHERE ysnIsUnposted = 0 
-					AND intAccountId IN (SELECT intAccountId FROM @tmpAccountsTable)
-					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-
 				IF @ysnMarginalSales = 1
 					BEGIN
 						SET @dblTotalRevenue = @dblTotalRevenue - @dblTotalCOGSAmount

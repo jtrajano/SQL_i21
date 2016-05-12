@@ -3,7 +3,7 @@
 	[intWorkOrderInputLotId] INT NOT NULL IDENTITY(1,1), 
     [intWorkOrderId] INT NOT NULL, 
 	[intItemId] int NULL,
-    [intLotId] INT NOT NULL, 
+    [intLotId] INT NULL, 
     [dblQuantity] NUMERIC(38, 20) NOT NULL, 
     [intItemUOMId] INT NOT NULL, 
     [dblIssuedQuantity] NUMERIC(38, 20) NULL, 

@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
-	 @strCardId						NVARCHAR(MAX)
+	 @strGUID						NVARCHAR(MAX)
+	,@strProcessDate				NVARCHAR(MAX)
+	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
 	,@strProductId					NVARCHAR(MAX)
 	,@strNetworkId					NVARCHAR(MAX)	= NULL
@@ -131,7 +133,7 @@ BEGIN
 		,[strTaxGroup]					NVARCHAR(100)
 		,[ysnInvalid]					BIT
 		,[strReason]					NVARCHAR(MAX)
-		,[strNotes]						NVARCHAR(MAX)
+		,[strTaxExemptReason]			NVARCHAR(MAX)
 	)
 	DECLARE @tblTaxRateTable		TABLE
 	(
@@ -196,12 +198,18 @@ BEGIN
 						FROM tblCFSite
 						WHERE strSiteNumber = @strSiteId
 
+			IF (@intSiteId = 0)
+			BEGIN 
+				SET @intSiteId = NULL
+			END
+		END
+
 	IF(@intNetworkId = 0)
 		BEGIN
 			SELECT TOP 1 @intNetworkId = intNetworkId 
 			FROM tblCFNetwork
 			WHERE strNetwork = @strNetworkId
-	END
+		END
 	
 	------------------------------------------------------------
 	--					AUTO CREATE SITE
@@ -266,9 +274,8 @@ BEGIN
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
 
-			END
-			
 	END
+			
 	SELECT TOP 1 
 		 @intCardId = C.intCardId
 		,@intCustomerId = A.intCustomerId
@@ -627,46 +634,79 @@ BEGIN
 		------------------------------------------------------------
 		IF(@intARItemId = 0 OR @intARItemId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 site item list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 site item list')
 		END
 		IF(@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find customer number using card number ' + @strCardId + ' into i21 card account list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find customer number using card number ' + @strCardId + ' into i21 card account list')
 		END
 		IF(@intARItemLocationId = 0 OR @intARItemLocationId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid location for site ' + @strSiteId)
+			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid location for site ' + @strSiteId)
 		END
 		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid UOM for product number ' + @strProductId)
+			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid UOM for product number ' + @strProductId)
 		END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find network ' + @strNetworkId + ' into i21 network list')
+			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find network ' + @strNetworkId + ' into i21 network list')
 		END
 		IF(@intSiteId = 0 OR @intSiteId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find site ' + @strSiteId + ' into i21 site list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find site ' + @strSiteId + ' into i21 site list')
 		END
 		IF(@ysnSiteCreated != 0)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site ' + @strSiteId + ' has been automatically created')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site ' + @strSiteId + ' has been automatically created')
 		END
 		IF(@intCardId = 0 OR @intCardId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
 		END
 		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid quantity - ' + @dblQuantity)
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid quantity - ' + @dblQuantity)
 		END
 		IF(@ysnSiteItemUsed = 0 AND @ysnNetworkItemUsed = 1)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Network item ' + @strProductId + ' has been used')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Network item ' + @strProductId + ' has been used')
 		END
 		ELSE IF(@ysnSiteItemUsed = 1 AND @ysnNetworkItemUsed = 0)
 		BEGIN 
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site item ' + @strProductId + ' has been used')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site item ' + @strProductId + ' has been used')
 		END
 
@@ -782,7 +822,7 @@ BEGIN
 			,[strTaxGroup]				
 			,[ysnInvalid]				
 			,[strReason]
-			,[strNotes]
+			,[strTaxExemptReason]
 			)		
 		SELECT
 			 [intTransactionDetailTaxId]
@@ -848,6 +888,22 @@ BEGIN
 		WHERE ysnCheckoffTax = 1
 
 
+		INSERT INTO tblCFTransactionNote (
+			strProcess
+			,dtmProcessDate
+			,strGuid
+			,intTransactionId
+			,strNote
+		)
+		SELECT
+			'Import'
+			,@strProcessDate
+			,@strGUID
+			,@Pk
+			,'Tax code ' + strTaxCode + ' is checked off' 
+		FROM @tblTaxTable
+		WHERE ysnCheckoffTax = 1
+
 		INSERT INTO tblCFFailedImportedTransaction
 		(
 			intTransactionId
@@ -855,9 +911,27 @@ BEGIN
 		)
 		SELECT
 			@Pk 					 	
-			,strNotes
+			,strTaxExemptReason
 		FROM @tblTaxTable
 		WHERE ysnTaxExempt = 1
+
+		INSERT INTO tblCFTransactionNote (
+			strProcess
+			,dtmProcessDate
+			,strGuid
+			,intTransactionId
+			,strNote
+		)
+		SELECT
+			'Import'
+			,@strProcessDate
+			,@strGUID
+			,@Pk
+			,strTaxExemptReason
+		FROM @tblTaxTable
+		WHERE ysnTaxExempt = 1
+
+		
 		
 		------------------------------------------------------------
 		--			VALIDATION FOR UNMAPPED NETWORK TAX			  --
@@ -869,6 +943,22 @@ BEGIN
 		)
 		SELECT
 			@Pk 					 	
+			,strReason
+		FROM @tblTaxTable
+		WHERE ysnInvalid = 1
+
+		INSERT INTO tblCFTransactionNote (
+			strProcess
+			,dtmProcessDate
+			,strGuid
+			,intTransactionId
+			,strNote
+		)
+		SELECT
+			'Import'
+			,@strProcessDate
+			,@strGUID
+			,@Pk
 			,strReason
 		FROM @tblTaxTable
 		WHERE ysnInvalid = 1
@@ -1114,5 +1204,4 @@ BEGIN
 			GOTO CALCULATEPRICE
 		END
 		------------------------------------------------------------
-
 	END

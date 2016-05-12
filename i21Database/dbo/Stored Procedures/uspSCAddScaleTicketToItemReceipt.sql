@@ -31,7 +31,8 @@ DECLARE @strTicketNumber AS NVARCHAR(40)
 DECLARE @dblTicketFees AS DECIMAL(7, 2)
 DECLARE @intFeeItemId AS INT
 DECLARE @checkContract AS INT
-DECLARE @intLoadContractId AS INT,
+DECLARE @intContractDetailId AS INT,
+		@intLoadContractId AS INT,
 		@intLoadId AS INT,
 		@intLoadCostId AS INT,
 		@intHaulerId AS INT,
@@ -46,7 +47,7 @@ BEGIN
 END
 
 BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
+	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId, @intContractDetailId = SC.intContractId
 		FROM	dbo.tblICItemUOM UM	
 	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
@@ -828,7 +829,53 @@ ELSE
 			END
 		ELSE
 			BEGIN
-				IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) != 0
+				IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) != 0 AND ISNULL(@intContractDetailId,0) = 0 
+					BEGIN
+							INSERT INTO @OtherCharges
+							(
+									[intEntityVendorId] 
+									,[strBillOfLadding] 
+									,[strReceiptType] 
+									,[intLocationId] 
+									,[intShipViaId] 
+									,[intShipFromId] 
+									,[intCurrencyId]  	
+									,[intChargeId] 
+									,[ysnInventoryCost] 
+									,[strCostMethod] 
+									,[dblRate] 
+									,[intCostUOMId] 
+									,[intOtherChargeEntityVendorId] 
+									,[dblAmount] 
+									,[strAllocateCostBy] 
+									,[intContractHeaderId]
+									,[intContractDetailId] 
+									,[ysnAccrue]
+									,[ysnPrice]
+							) 
+							SELECT	[intEntityVendorId]					= RE.intEntityVendorId
+									,[strBillOfLadding]					= RE.strBillOfLadding
+									,[strReceiptType]					= RE.strReceiptType
+									,[intLocationId]					= RE.intLocationId
+									,[intShipViaId]						= RE.intShipViaId
+									,[intShipFromId]					= RE.intShipFromId
+									,[intCurrencyId]  					= RE.intCurrencyId
+									,[intChargeId]						= @intFreightItemId
+									,[ysnInventoryCost]					= 0
+									,[strCostMethod]					= 'Per Unit'
+									,[dblRate]							= RE.dblFreightRate
+									,[intCostUOMId]						= RE.intItemUOMId
+									,[intOtherChargeEntityVendorId]		= @intHaulerId
+									,[dblAmount]						= 0
+									,[strAllocateCostBy]				= NULL
+									,[intContractHeaderId]				= NULL
+									,[intContractDetailId]				= NULL
+									,[ysnAccrue]						= @ysnAccrue
+									,[ysnPrice]							= @ysnPrice
+									FROM @ReceiptStagingTable RE
+									WHERE RE.dblFreightRate != 0
+						END
+				ELSE IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) != 0
 					BEGIN
 						INSERT INTO @OtherCharges
 						(

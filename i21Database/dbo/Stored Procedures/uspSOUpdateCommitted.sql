@@ -85,7 +85,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	TD.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped) * -1
+		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped) 
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
@@ -202,14 +202,13 @@ BEGIN
 		Detail.intSalesOrderId = @SalesOrderId
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intSalesOrderDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @SalesOrderId AND strTransactionType = 'Order')	
-		
+	
 	UPDATE
 		@items
 	SET
 		dblQty = dblQty * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)	
 
-
+		--select * from @items
 	EXEC uspICIncreaseOrderCommitted @items
 
 END
-GO

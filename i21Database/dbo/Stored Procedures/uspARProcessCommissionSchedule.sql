@@ -31,8 +31,8 @@ AS
 
 	INSERT INTO @tblARCommissionSchedules
 	SELECT intCommissionScheduleId
-		 , intEntityId			= CASE WHEN strScheduleType = 'Individual' THEN intEntityId ELSE NULL END
-		 , intCommissionPlanId	= CASE WHEN strScheduleType = 'Group' THEN intCommissionPlanId ELSE NULL END
+		 , intEntityId			= CASE WHEN strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN intEntityId ELSE NULL END
+		 , intCommissionPlanId	= CASE WHEN strScheduleType = @SCHEDTYPE_GROUP THEN intCommissionPlanId ELSE NULL END
 		 , strReviewPeriod
 		 , strScheduleType
 		 , dtmStartDate
@@ -44,24 +44,16 @@ AS
 	WHERE ysnActive = 1
 
 	--FILTER BY COMMISSION SCHEDULE ID AND ACTIVE = 1
-	IF EXISTS(SELECT TOP 1 1 FROM @tmpCommissionSchedule)
+	IF EXISTS(SELECT TOP 1 1 FROM @tmpCommissionSchedule) AND ISNULL(@commissionIds, '') <> ''
 		BEGIN
 			DELETE FROM @tblARCommissionSchedules
 			WHERE intCommissionScheduleId NOT IN (SELECT intCommissionScheduleId FROM @tmpCommissionSchedule)
 		END
-
-	----FILTER BY START DATE AND END DATE
-	--IF @dtmStartDate IS NOT NULL AND @dtmEndDate IS NOT NULL
-	--	BEGIN
-	--		DELETE FROM @tblARCommissionSchedules
-	--		WHERE CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmStartDate))) NOT BETWEEN CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmStartDate))) 
-	--																							AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmEndDate))) 
-	--	END
-			
+				
 	--GET COMM. SCHED. DETAILS WHERE intCommissionScheduleId
 	IF EXISTS(SELECT NULL FROM @tblARCommissionSchedules)
 		BEGIN
-			DECLARE @tblARCommissionScheduleDetails TABLE (intEntityId INT, intCommissionPlanId INT, dblPercentage NUMERIC(18,6))
+			DECLARE @tblARCommissionScheduleDetails TABLE (intCommissionScheduleDetailId INT, intEntityId INT, intCommissionPlanId INT, dblPercentage NUMERIC(18,6))
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionSchedules)
 				BEGIN
@@ -92,92 +84,64 @@ AS
 					SET @dtmStartDate = CASE WHEN @dtmStartDate < @dtmSchedStartDate THEN @dtmSchedStartDate ELSE @dtmStartDate END
 					SET @dtmEndDate = CASE WHEN @dtmEndDate > @dtmSchedEndDate THEN @dtmSchedEndDate ELSE @dtmEndDate END
 					
-					IF @strScheduleType = @SCHEDTYPE_INDIVIDUAL
-						BEGIN
-							INSERT INTO @tblARCommissionScheduleDetails (intCommissionPlanId)
-							SELECT CSD.intCommissionPlanId
-							FROM tblARCommissionScheduleDetail CSD
-								INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionPlanId = CP.intCommissionPlanId
-							WHERE CSD.intCommissionScheduleId = @intActiveCommSchedId
-								AND CP.ysnActive = 1
-						END
-					ELSE IF @strScheduleType = @SCHEDTYPE_GROUP
-						BEGIN
-							INSERT INTO @tblARCommissionScheduleDetails (intEntityId, dblPercentage)
-							SELECT CSD.intEntityId, ISNULL(dblPercentage, 0)
-							FROM tblARCommissionScheduleDetail CSD
-								INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionPlanId = CP.intCommissionPlanId
-							WHERE CSD.intCommissionScheduleId = @intActiveCommSchedId
-								AND CP.ysnActive = 1
-						END					
-							
+					INSERT INTO @tblARCommissionScheduleDetails
+					SELECT CSD.intCommissionScheduleDetailId
+						 , CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN @intSchedEntityId ELSE CSD.intEntityId END
+						 , CASE WHEN @strScheduleType = @SCHEDTYPE_GROUP THEN @intSchedCommPlanId ELSE CSD.intCommissionPlanId END
+						 , CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN 0 ELSE CSD.dblPercentage END
+					FROM tblARCommissionScheduleDetail CSD						
+						INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionPlanId = CP.intCommissionPlanId
+					WHERE CSD.intCommissionScheduleId = @intActiveCommSchedId
+						AND CP.ysnActive = 1
+					
 					--CALCULATE COMMISSION PLANS
 					IF EXISTS(SELECT NULL FROM @tblARCommissionScheduleDetails)
 						BEGIN
-							WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
+							DECLARE @dblLineTotal			NUMERIC(18,6) = 0
+								  , @intNewCommissionId		INT
+							
+							INSERT INTO tblARCommission
+								( intCommissionScheduleId
+								, intCommissionPlanId
+								, intEntityId
+								, dtmStartDate
+								, dtmEndDate
+								, ysnConditional
+								, ysnApproved
+								, ysnRejected
+								, ysnPayroll
+								, ysnPayables
+								, dblTotalAmount
+								, strReason
+								, intConcurrencyId)
+							SELECT TOP 1
+								  @intActiveCommSchedId
+								, CS.intCommissionPlanId
+								, CS.intEntityId
+								, @dtmStartDate
+								, @dtmEndDate
+								, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
+								, 0
+								, 0
+								, CS.ysnPayroll
+								, CS.ysnPayables
+								, @dblLineTotal
+								, NULL
+								, 1
+							FROM tblARCommissionSchedule CS
+								LEFT JOIN tblARCommissionPlan CP ON CS.intCommissionPlanId = CP.intCommissionPlanId
+							WHERE CS.intCommissionScheduleId = @intActiveCommSchedId
+
+							SET @intNewCommissionId = SCOPE_IDENTITY()
+
+							IF @strScheduleType = @SCHEDTYPE_GROUP
 								BEGIN
-									DECLARE @intCommissionPlanId		INT
-									      , @intEntityId				INT
-										  , @dblPercentage				NUMERIC(18,6) = 0
-										  , @dblLineTotal				NUMERIC(18,6) = 0
-										  , @dblCalculationAmount		NUMERIC(18,6) = 0
-										  , @strCalculationType			NVARCHAR(20)
-										  , @strBasis					NVARCHAR(20)
-										  , @intNewCommissionId			INT
-										  , @CommissionDetailTableType	CommissionDetailTableType
+									EXEC dbo.uspARCalculateCommission @intSchedCommPlanId, @intSchedEntityId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
 
-									SELECT TOP 1
-											@intCommissionPlanId = CASE WHEN @strScheduleType = @SCHEDTYPE_GROUP THEN intCommissionPlanId ELSE @intSchedCommPlanId END
-										  , @intEntityId		 = CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN intEntityId ELSE @intSchedEntityId END
-										  , @dblPercentage		 = ISNULL(dblPercentage, 0)
-									FROM @tblARCommissionScheduleDetails
-									SELECT TOP 1 
-										    @strBasis				= strBasis 
-										  , @strCalculationType		= strCalculationType
-										  , @dblCalculationAmount	= dblCalculationAmount
-									FROM tblARCommissionPlan WHERE intCommissionPlanId = @intCommissionPlanId
-											
-									EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+									UPDATE tblARCommission SET dblTotalAmount = @dblLineTotal WHERE intCommissionId = @intNewCommissionId
 
-									IF @dblLineTotal > 0
-										BEGIN
-											INSERT INTO tblARCommission
-												( intCommissionScheduleId
-												, intCommissionPlanId
-												, intEntityId
-												, dtmStartDate
-												, dtmEndDate
-												, ysnConditional
-												, ysnApproved
-												, ysnRejected
-												, ysnPayroll
-												, ysnPayables
-												, dblTotalAmount
-												, dblCalculationAmount
-												, strBasis
-												, strCalculationType
-												, strReason
-												, intConcurrencyId)
-											SELECT TOP 1
-											      @intActiveCommSchedId
-												, @intCommissionPlanId
-												, @intEntityId
-												, @dtmStartDate
-												, @dtmEndDate
-												, CASE WHEN @strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
-												, 0
-												, 0
-												, @ysnPayroll
-												, @ysnPayables
-												, @dblLineTotal
-												, @dblCalculationAmount
-												, @strBasis
-												, @strCalculationType
-												, NULL
-												, 1
-
-											SET @intNewCommissionId = SCOPE_IDENTITY()
-
+									IF EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
+										BEGIN											
 											INSERT INTO tblARCommissionDetail
 												( intCommissionId
 												, intEntityId	
@@ -188,19 +152,62 @@ AS
 												, dblAmount)
 											SELECT 
 												  @intNewCommissionId
-												, @intEntityId
-												, @intCommissionPlanId
+												, intEntityId
+												, intCommissionPlanId
 												, 0
 												, ''
 												, GETDATE()
-												, 0
-											FROM tblARCommissionDetail
+												, @dblLineTotal * ISNULL(dblPercentage, 0)
+											FROM @tblARCommissionScheduleDetails
 										END
 
-									DELETE FROM @tblARCommissionScheduleDetails WHERE intCommissionPlanId = @intCommissionPlanId
+									DELETE FROM @tblARCommissionScheduleDetails
+								END
+							ELSE IF @strScheduleType = @SCHEDTYPE_INDIVIDUAL
+								BEGIN
+									DECLARE @totalAmount NUMERIC(18,6) = 0
+
+									WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
+									BEGIN
+										DECLARE @intCommissionScheduleDetailId	INT
+											  , @intCommissionPlanId			INT
+											  , @intEntityId					INT
+
+										SELECT TOP 1
+												@intCommissionScheduleDetailId	= intCommissionScheduleDetailId
+											  , @intCommissionPlanId			= intCommissionPlanId
+										FROM @tblARCommissionScheduleDetails
+																				
+										EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intSchedEntityId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+
+										INSERT INTO tblARCommissionDetail
+											( intCommissionId
+											, intEntityId	
+											, intCommissionPlanId
+											, intSourceId
+											, strSourceType
+											, dtmSourceDate
+											, dblAmount)
+										SELECT TOP 1
+											  @intNewCommissionId
+											, @intSchedEntityId
+											, @intCommissionPlanId
+											, 0
+											, ''
+											, GETDATE()
+											, @dblLineTotal
+										FROM @tblARCommissionScheduleDetails
+										
+										SET @totalAmount = @totalAmount + @dblLineTotal
+																			
+										DELETE FROM @tblARCommissionScheduleDetails WHERE intCommissionScheduleDetailId = @intCommissionScheduleDetailId
+									END
+
+									UPDATE tblARCommission SET dblTotalAmount = @totalAmount WHERE intCommissionId = @intNewCommissionId
 								END
 						END
-
+					
+					
 					DELETE FROM @tblARCommissionSchedules WHERE intCommissionScheduleId = @intActiveCommSchedId
 				END
 		END
