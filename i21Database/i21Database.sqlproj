@@ -3785,6 +3785,7 @@
     <Build Include="dbo\Tables\tblSCUncompletedTicketAlert.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCheckItemUsedInDiscountCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateContract.sql" />
+    <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3893,6 +3894,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\19_UpdateUsedCustomerBudget.sql" />
     <None Include="Scripts\Post-Deployment\EM\025_UpdatePhoneNumberAndCreateBackup.sql" />
     <None Include="Scripts\Post-Deployment\EM\026_ImportPhoneNumbersToNewTable.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

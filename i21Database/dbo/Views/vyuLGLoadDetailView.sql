@@ -15,6 +15,8 @@ SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.dblDeliveredGross
 		,LoadDetail.dblDeliveredTare
 		,LoadDetail.dblDeliveredNet
+		,PCLSL.strSubLocationName AS strPSubLocationName
+		,SCLSL.strSubLocationName AS strSSubLocationName
 		,strWeightItemUOM = WeightUOM.strUnitMeasure
 		,LoadDetail.intVendorEntityId
 		,dblItemUOMCF = ItemUOM.dblUnitQty
@@ -228,3 +230,5 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentType
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
 LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PDetail.intWeightId
 LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SDetail.intWeightId
+LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
