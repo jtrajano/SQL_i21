@@ -130,7 +130,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblContainerWeightPerQty = 0.00
 		, ysnSubCurrency = CAST(ContractView.ysnSubCurrency AS BIT)
 		, intCurrencyId = ISNULL( ISNULL(ContractView.intMainCurrencyId, ContractView.intCurrencyId), DefaultCurrency.intCurrencyID)
-		, strSubCurrency = CASE WHEN ContractView.ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ISNULL(ContractView.strMainCurrency, DefaultCurrency.strCurrency) END 
+		, strSubCurrency = CASE WHEN ContractView.ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ISNULL(ContractView.strMainCurrency, ISNULL(ContractView.strCurrency, DefaultCurrency.strCurrency)) END 
 		, dblGross = CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts. 
 		, dblNet = CAST(ContractView.dblNetWeight AS NUMERIC(38, 20))
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM
