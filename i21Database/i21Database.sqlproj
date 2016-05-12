@@ -3785,6 +3785,7 @@
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadItem.sql" />
     <Build Include="dbo\Functions\fnGLComputeBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractHeader.sql" />
+    <Build Include="dbo\Views\vyuEMEntityCredentialContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
