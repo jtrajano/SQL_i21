@@ -196,19 +196,6 @@ BEGIN
 						FROM tblCFSite
 						WHERE strSiteNumber = @strSiteId
 
-			IF (@intSiteId = 0)
-			BEGIN 
-				SET @intSiteId = NULL
-			END
-		END
-		ELSE
-		BEGIN
-			SELECT TOP 1 @intCustomerLocationId = intARLocationId
-						,@intTaxMasterId = intTaxGroupId
-						FROM tblCFSite
-						WHERE intSiteId = @intSiteId
-		END
-
 	IF(@intNetworkId = 0)
 		BEGIN
 			SELECT TOP 1 @intNetworkId = intNetworkId 
@@ -281,6 +268,7 @@ BEGIN
 
 			END
 			
+	END
 	SELECT TOP 1 
 		 @intCardId = C.intCardId
 		,@intCustomerId = A.intCustomerId
