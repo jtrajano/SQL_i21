@@ -39,6 +39,7 @@
 	,@intPPHostId					INT				= 0
 	,@strPPSiteType					NVARCHAR(MAX)	= NULL
 	,@strSiteType					NVARCHAR(MAX)	= NULL
+	,@strCreditCard					NVARCHAR(MAX)	= NULL
 	--------------------------------------
 
 	-------------REMOTE TAXES-------------
@@ -91,9 +92,10 @@ BEGIN
 	------------------------------------------------------------
 
 	--LOGS--
-	DECLARE @ysnSiteCreated			BIT = 0
-	DECLARE @ysnSiteItemUsed		BIT = 0
-	DECLARE @ysnNetworkItemUsed		BIT = 0
+	DECLARE @ysnSiteCreated				BIT = 0
+	DECLARE @ysnSiteItemUsed			BIT = 0
+	DECLARE @ysnNetworkItemUsed			BIT = 0
+	DECLARE @ysnSiteAcceptCreditCard	BIT = 0
 	--LOGS--
 
 
@@ -193,6 +195,7 @@ BEGIN
 			SELECT TOP 1 @intSiteId = intSiteId 
 						,@intCustomerLocationId = intARLocationId
 						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
 						FROM tblCFSite
 						WHERE strSiteNumber = @strSiteId
 
@@ -205,6 +208,7 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @intCustomerLocationId = intARLocationId
 						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
 						FROM tblCFSite
 						WHERE intSiteId = @intSiteId
 		END
@@ -281,13 +285,129 @@ BEGIN
 
 			END
 			
-	SELECT TOP 1 
-		 @intCardId = C.intCardId
-		,@intCustomerId = A.intCustomerId
-	FROM tblCFCard C
-	INNER JOIN tblCFAccount A
-	ON C.intAccountId = A.intAccountId
-	WHERE C.strCardNumber = @strCardId
+	--FIND CARD--
+	
+	DECLARE @ysnLocalCard BIT
+	DECLARE @ysnCreditCardMatched INT = 0
+
+	--CREDIT CARD--
+	IF(@ysnSiteAcceptCreditCard = 1)
+	BEGIN
+		IF(@strCreditCard IS NOT NULL AND @strCreditCard != '' AND (@intSiteId IS NOT NULL OR @intSiteId > 0))
+		BEGIN
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnCreditCardMatched = 0)
+			BEGIN
+				--SEARCH FOR FULL MATCH-- 1234
+				SET @strCreditCard = @strCreditCard
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnCreditCardMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnCreditCardMatched = 0)
+			BEGIN
+				--SEARCH FOR 1 PARTIAL WILDCARD MATCH-- ex 123*
+				SET @strCreditCard = STUFF(@strCreditCard, 4, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnCreditCardMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+			
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnCreditCardMatched = 0)
+			BEGIN
+				--SEARCH FOR 2 PARTIAL WILDCARD MATCH-- ex 12**
+				SET @strCreditCard = STUFF(@strCreditCard, 3, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnCreditCardMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnCreditCardMatched = 0)
+			BEGIN
+				--SEARCH FOR 3 PARTIAL WILDCARD MATCH-- ex 1***
+				SET @strCreditCard = STUFF(@strCreditCard, 2, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnCreditCardMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnCreditCardMatched = 0)
+			BEGIN
+				--SEARCH FOR FULL WILDCARD MATCH-- ex ****
+				SET @strCreditCard = STUFF(@strCreditCard, 1, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnCreditCardMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnCreditCardMatched = 0)
+			BEGIN
+				--CARD MATCHING--
+				SELECT TOP 1 
+					 @intCardId = C.intCardId
+					,@intCustomerId = A.intCustomerId
+				FROM tblCFCard C
+				INNER JOIN tblCFAccount A
+				ON C.intAccountId = A.intAccountId
+				WHERE C.strCardNumber = @strCardId
+			END
+			ELSE
+			BEGIN
+				IF(@ysnLocalCard = 1)
+				BEGIN
+					--RESET CARD VALUE AND USE LOCAL CARD MATCHING--
+					SET @intCardId = 0
+					--CARD MATCHING--
+					SELECT TOP 1 
+						 @intCardId = C.intCardId
+						,@intCustomerId = A.intCustomerId
+					FROM tblCFCard C
+					INNER JOIN tblCFAccount A
+					ON C.intAccountId = A.intAccountId
+					WHERE C.strCardNumber = @strCardId
+				END
+				ELSE
+				BEGIN
+					SELECT TOP 1 
+						@intCustomerId = A.intCustomerId
+					FROM tblCFCard C
+					INNER JOIN tblCFAccount A
+					ON C.intAccountId = A.intAccountId
+					WHERE C.intCardId = @intCardId
+				END
+			END
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 
+			 @intCardId = C.intCardId
+			,@intCustomerId = A.intCustomerId
+		FROM tblCFCard C
+		INNER JOIN tblCFAccount A
+		ON C.intAccountId = A.intAccountId
+		WHERE C.strCardNumber = @strCardId
+	END
+
+	IF (@intCardId = 0)
+	BEGIN
+		SET @intCardId = NULL
+	END
 
 	--FIND IN SITE ITEM--
 	IF(@intProductId = 0)
@@ -371,11 +491,7 @@ BEGIN
 						FROM tblCFCard C
 						INNER JOIN tblCFAccount A
 						ON C.intAccountId = A.intAccountId
-						WHERE strCardNumber	= @strCardId)
-
-		SET @intCardId =(SELECT TOP 1 intCardId	
-						FROM tblCFCard
-						WHERE strCardNumber	= @strCardId)
+						WHERE intCardId	= @intCardId)
 
 		SET @intPrcItemUOMId = (SELECT TOP 1 intIssueUOMId
 								FROM tblICItemLocation
@@ -468,7 +584,8 @@ BEGIN
 			@CFContractDetailId			=	@intPrcContractDetailId		output,
 			@CFContractNumber			=	@intPrcContractNumber		output,
 			@CFContractSeq				=	@intPrcContractSeq			output,
-			@CFPriceBasis				=	@strPrcPriceBasis			output
+			@CFPriceBasis				=	@strPrcPriceBasis			output,
+			@CFCreditCard				=   @ysnCreditCardMatched
 		--SELECT  
 		--	 @dblPrcPriceOut			AS price
 		--	,@strPrcPricingOut			AS pricing
@@ -967,8 +1084,8 @@ BEGIN
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
 			,@QxT = ROUND (@dblQuantity * dblRate,2)
-			,@QxOP = ROUND (@QxOP - (@dblQuantity * dblRate),2)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * dblRate),2)
+			,@QxOP = @QxOP - (@dblQuantity * dblRate)
+			,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * dblRate)
 			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  dblRate,2)
 			,@strLoopTaxCode = strTaxCode
 			,@Rate = dblRate
@@ -1012,9 +1129,9 @@ BEGIN
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
 			,@OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
-			,@CPTax = ROUND (@QxCP * (dblRate/100),2)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
-			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (dblRate/100)),2)
+			,@CPTax = ROUND (((@QxCP / (dblRate/100 +1 )) * (dblRate/100)),2)
+			,@dblOPTotalTax = @dblOPTotalTax + ((@QxOP / (dblRate/100 +1 )) * (dblRate/100))
+			,@dblCPTotalTax = @dblCPTotalTax + ((@QxCP / (dblRate/100 +1 )) * (dblRate/100))
 			,@strLoopTaxCode = strTaxCode
 			,@Rate = dblRate
 			,@CalculationMethod = strCalculationMethod
@@ -1049,49 +1166,65 @@ BEGIN
 
 
 
-
-
 		------------------------------------------------------------
 		--						TRANSACTION PRICE				  --
 		------------------------------------------------------------
-		INSERT INTO tblCFTransactionPrice(
-			 [intTransactionId]
-			,[strTransactionPriceId]
-			,[dblOriginalAmount]
-			,[dblCalculatedAmount]
+		IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0)
+			BEGIN
+		INSERT INTO tblCFTransactionPrice (
+		 strTransactionPriceId	
+		,dblOriginalAmount		
+		,dblCalculatedAmount
+		,intTransactionId	
 		)
 		VALUES
 		(
-			@Pk
-			,'Gross Price'
-			,@dblPrcOriginalPrice	-- +TAX
-			--@dblPrcPriceOut + @dblCPTotalTax-- +TAX
-			,(case
-				when @strPriceMethod = 'Import File Price' 
-				then @dblPrcOriginalPrice
-				else @dblPrcPriceOut + @dblCPTotalTax
-			end)
+			 'Gross Price'
+			,@dblPrcOriginalPrice
+			,@dblPrcPriceOut
+			,@Pk
 		),
 		(
-			@Pk
-			,'Net Price'
-			,Round(@dblPrcOriginalPrice - Round((@dblOPTotalTax/@dblQuantity),6),5)
-			,(case
-				when @strPriceMethod = 'Import File Price' 
-				then Round(@dblPrcOriginalPrice - Round((@dblOPTotalTax/@dblQuantity),6),5)
-				else @dblPrcPriceOut
-			end)
+			 'Net Price'
+			,@dblPrcOriginalPrice - (@dblOPTotalTax / @dblQuantity)
+			,@dblPrcPriceOut - (@dblCPTotalTax / @dblQuantity)
+			,@Pk
 		),
 		(
-			@Pk
-			,'Total Amount'
-			,Round(@dblPrcOriginalPrice * @dblQuantity,2)
-			,(case
-				when @strPriceMethod = 'Import File Price' 
-				then Round(@dblPrcOriginalPrice * @dblQuantity,2)
-				else Round((@dblPrcPriceOut + @dblCPTotalTax) * @dblQuantity,2)
-			end)
+			 'Total Amount'
+			,@dblPrcOriginalPrice * @dblQuantity
+			,@dblPrcPriceOut * @dblQuantity
+			,@Pk
 		)
+	END
+		ELSE
+			BEGIN
+		INSERT INTO tblCFTransactionPrice (
+		 strTransactionPriceId	
+		,dblOriginalAmount		
+		,dblCalculatedAmount	
+		,intTransactionId	
+		)
+		VALUES
+		(
+			 'Gross Price'
+			,@dblPrcOriginalPrice
+			,@dblPrcPriceOut + (@dblCPTotalTax / @dblQuantity)
+			,@Pk 
+		),
+		(
+			 'Net Price'
+			,@dblPrcOriginalPrice - (@dblOPTotalTax / @dblQuantity)
+			,@dblPrcPriceOut
+			,@Pk
+		),
+		(
+			 'Total Amount'
+			,@dblPrcOriginalPrice * @dblQuantity
+			,(@dblPrcPriceOut + (@dblCPTotalTax / @dblQuantity)) * @dblQuantity
+			,@Pk
+		)
+	END
 		END
 
 		--IF (@ysnInvalid = 0)
