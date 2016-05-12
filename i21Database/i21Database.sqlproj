@@ -3784,6 +3784,7 @@
     <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadItem.sql" />
     <Build Include="dbo\Functions\fnGLComputeBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidateContractHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
