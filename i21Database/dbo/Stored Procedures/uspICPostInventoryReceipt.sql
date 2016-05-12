@@ -184,8 +184,8 @@ BEGIN
 		SELECT	TOP 1 
 				@intItemId = Item.intItemId
 				,@strItemNo = Item.strItemNo
-				,@strNetQty = CONVERT(NVARCHAR, CAST(ReceiptItem.dblNet AS MONEY), 1)
-				,@strLotNetQty = CONVERT(NVARCHAR, CAST(ReceiptItemLot.dblTotalLotNet AS MONEY), 1)
+				,@strNetQty = CONVERT(NVARCHAR, CAST(ReceiptItem.dblNet AS MONEY), 2)
+				,@strLotNetQty = CONVERT(NVARCHAR, CAST(ReceiptItemLot.dblTotalLotNet AS MONEY), 2)
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
 				INNER JOIN dbo.tblICItem Item
