@@ -52,9 +52,11 @@ BEGIN TRY
 		RETURN;
 	END
 
-	UPDATE tblLGLoadDetail SET intItemId = @intItemId, intItemUOMId=@intItemUOMId WHERE intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId AND intItemId <> @intItemId
+	UPDATE tblLGLoadDetail SET intItemId = @intItemId WHERE intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId AND intItemId <> @intItemId
 
 	UPDATE tblLGLoadDetail SET intWeightItemUOMId = @intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intWeightItemUOMId = intItemUOMId AND intItemUOMId <> @intItemUOMId
+
+	UPDATE tblLGLoadDetail SET intItemUOMId=@intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intItemUOMId <> @intItemUOMId
 
 END TRY
 BEGIN CATCH
