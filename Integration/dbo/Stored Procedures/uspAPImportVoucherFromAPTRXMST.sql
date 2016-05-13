@@ -55,11 +55,11 @@ SELECT
 	@userLocation		= A.intCompanyLocationId ,
 	@shipToAddress		= A.strAddress,
 	@shipToCity			= A.strCity,
-	@shipToState		= A.strStateProvince,
+	@shipToState			= A.strStateProvince,
 	@shipToZipCode		= A.strZipPostalCode,
 	@shipToCountry		= A.strCountry,
-	@shipToPhone		= A.strPhone,
-	@shipToAttention	= A.strAddress
+	@shipToPhone			= A.strPhone,
+	@shipToAttention		= A.strAddress
 FROM tblSMCompanyLocation A
 	INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
 WHERE intEntityUserSecurityId = @UserId
@@ -96,6 +96,18 @@ INSERT INTO tblAPBill
 	[intShipToId],
 	[intShipFromId],
 	[intPayToAddressId],
+	[strShipFromAddress]	,	
+	[strShipFromCity],		
+	[strShipFromCountry]	,	
+	[strShipFromPhone],		
+	[strShipFromState],		
+	[strShipFromZipCode],		
+	[strShipToAddress],		
+	[strShipToCity],			
+	[strShipToCountry],		
+	[strShipToPhone]	,		
+	[strShipToState]	,		
+	[strShipToZipCode],
 	[intCurrencyId],
 	[ysnOrigin]
 )
@@ -131,12 +143,23 @@ SELECT
 									ELSE 0 END,
 	[dblDiscount]				=	ISNULL(A.aptrx_disc_amt,0),
 	[dblWithheld]				=	A.aptrx_wthhld_amt,
-	[ysnOrigin]					=	1,
 	[intShipToId]				=	@userLocation,
 	[intShipFromId]				=	loc.intEntityLocationId,
 	[intPayToAddressId]			=	loc.intEntityLocationId,
+	[strShipFromAddress]			=	loc.strAddress,
+	[strShipFromCity]			=	loc.strCity,
+	[strShipFromCountry]			=	loc.strCountry,
+	[strShipFromPhone]			=	loc.strPhone,
+	[strShipFromState]			=	loc.strState,
+	[strShipFromZipCode]			=	loc.strZipCode,
+	[strShipToAddress]			=	@shipToAddress,
+	[strShipToCity]				=	@shipToCity,
+	[strShipToCountry]			=	@shipToCountry,
+	[strShipToPhone]				=	@shipToPhone,
+	[strShipToState]				=	@shipToState,
+	[strShipToZipCode]			=	@shipToZipCode,
 	[intCurrencyId]				=	@defaultCurrencyId,
-	[A4GLIdentity]				=	A.A4GLIdentity
+	[ysnOrigin]					=	1
 FROM ##tmp_aptrxmstImport A
 	LEFT JOIN apcbkmst B
 		ON A.aptrx_cbk_no = B.apcbk_no
@@ -192,9 +215,7 @@ SELECT
 	[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN ('C','A','I') THEN
 										(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END) --Cost should always positive
 									ELSE C.apegl_gl_amt END) / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
-	[intLineNo]				=	C.apegl_dist_no,
-	[A4GLIdentity]			=	C.A4GLIdentity,
-	[strVendorOrderNumber]	=	A.strVendorOrderNumber
+	[intLineNo]				=	C.apegl_dist_no
 FROM tblAPBill A
 	INNER JOIN #InsertedUnpostedBill A2
 		ON A.intBillId  = A2.intBillId

@@ -100,8 +100,19 @@ INSERT INTO tblAPBill
 	[dblWithheld],
 	[intShipToId],
 	[intShipFromId],
-	[intShipFromId],
 	[intPayToAddressId],
+	[strShipFromAddress]	,	
+	[strShipFromCity],		
+	[strShipFromCountry]	,	
+	[strShipFromPhone],		
+	[strShipFromState],		
+	[strShipFromZipCode],		
+	[strShipToAddress],		
+	[strShipToCity],			
+	[strShipToCountry],		
+	[strShipToPhone]	,		
+	[strShipToState]	,		
+	[strShipToZipCode],		
 	[intCurrencyId],
 	[ysnOrigin]
 )
@@ -144,24 +155,23 @@ SELECT
 									ELSE 0 END,
 	[dblDiscount]			=	ISNULL(A.apivc_disc_avail,0),
 	[dblWithheld]			=	A.apivc_wthhld_amt,
-	[ysnOrigin]				=	1,
-	[intCurrencyId]			=	@defaultCurrencyId,
 	[intShipToId]			=	@userLocation,
 	[intShipFromId]			=	loc.intEntityLocationId,
 	[intPayToAddressId]		=	loc.intEntityLocationId,
-	[strShipFromAddress]	=	loc.strAddress,
+	[strShipFromAddress]		=	loc.strAddress,
 	[strShipFromCity]		=	loc.strCity,
-	[strShipFromCountry]	=	loc.strCountry,
+	[strShipFromCountry]		=	loc.strCountry,
 	[strShipFromPhone]		=	loc.strPhone,
 	[strShipFromState]		=	loc.strState,
-	[strShipFromZipCode]	=	loc.strZipCode,
-	strShipToAddress		=	@shipToAddress,
+	[strShipFromZipCode]		=	loc.strZipCode,
+	[strShipToAddress]		=	@shipToAddress,
 	[strShipToCity]			=	@shipToCity,
 	[strShipToCountry]		=	@shipToCountry,
-	[strShipToPhone]		=	@shipToPhone,
-	[strShipToState]		=	@shipToState,
+	[strShipToPhone]			=	@shipToPhone,
+	[strShipToState]			=	@shipToState,
 	[strShipToZipCode]		=	@shipToZipCode,
-	[A4GLIdentity]			=	A.[A4GLIdentity]
+	[intCurrencyId]			=	@defaultCurrencyId,
+	[ysnOrigin]					=	1
 FROM ##tmp_apivcmstImport A
 	LEFT JOIN apcbkmst B
 		ON A.apivc_cbk_no = B.apcbk_no
@@ -233,8 +243,7 @@ SELECT
 								ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
 	[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
 	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
-	[intLineNo]				=	C.aphgl_dist_no,
-	[A4GLIdentity]			=	C.[A4GLIdentity]
+	[intLineNo]				=	C.aphgl_dist_no
 FROM tblAPBill A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityVendorId
