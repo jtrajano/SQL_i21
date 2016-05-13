@@ -3810,6 +3810,7 @@
     <Build Include="dbo\Tables\tblMFCostSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemsCost.sql" />
     <Build Include="dbo\Views\vyuGLPostRemind.sql" />
+    <Build Include="dbo\Tables\tblSMRemoteServer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
