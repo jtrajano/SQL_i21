@@ -3794,6 +3794,8 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalToDepositRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalDepositRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCashOverShortRecap.sql" />
+    <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

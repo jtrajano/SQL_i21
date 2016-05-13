@@ -21,7 +21,7 @@ SELECT A.strInvoiceNumber
 	 , dblPrepaids			= 0.000000
 	 , dtmDate
 	 , dtmDueDate
-	 , intCompanyLocationId	 
+	 , intCompanyLocationId	  
 FROM
 (SELECT dtmDate				= I.dtmPostDate
 	 , I.strInvoiceNumber
