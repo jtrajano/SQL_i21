@@ -3562,7 +3562,6 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalancePrintEach.sql" />
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblARQuotePage.sql" />
@@ -3810,6 +3809,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeItems.sql" />
     <Build Include="dbo\Tables\tblMFCostSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemsCost.sql" />
+    <Build Include="dbo\Views\vyuGLPostRemind.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
