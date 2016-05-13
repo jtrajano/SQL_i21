@@ -3807,6 +3807,9 @@
     <Build Include="dbo\User Defined Types\RouteOrdersTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRouteUpdateOrders.sql" />
     <None Include="Scripts\Post-Deployment\EM\028_MassCountryFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeItems.sql" />
+    <Build Include="dbo\Tables\tblMFCostSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemsCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
