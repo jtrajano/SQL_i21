@@ -6,7 +6,7 @@ BEGIN
 	--Update Dispatch
 	UPDATE tblTMDispatch
 		SET intRouteId = A.intRouteId
-			,intDriverID = A.intOriginDriverId
+			,intDriverID = A.[intDriverEntityId]
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 	FROM @RouteOrder A
 	WHERE tblTMDispatch.intDispatchID = A.intOrderId
