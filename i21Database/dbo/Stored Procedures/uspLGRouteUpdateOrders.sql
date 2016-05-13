@@ -14,7 +14,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-	DECLARE		@ErrMsg		NVARCHAR(MAX)
+	DECLARE		@ErrMsg		NVARCHAR(MAX);
+	DECLARE		@intSourceType INT;
 
 	IF @ysnPost = 1 
 	BEGIN
@@ -43,6 +44,19 @@ SET ANSI_WARNINGS OFF
 			Exec dbo.uspTMUpdateRouteSequence @OrdersFromRouting
 
 			UPDATE tblLGRoute SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intRouteId = @intRouteId
+
+			SELECT @intSourceType = intSourceType FROM tblLGRoute WHERE intRouteId = @intRouteId
+			
+			IF (@intSourceType = 1) 
+			BEGIN
+				UPDATE EL SET 
+					dblLatitude = RO.dblToLatitude
+					,dblLongitude = RO.dblToLongitude
+				FROM tblEMEntityLocation EL 
+				JOIN tblLGLoadDetail LD ON LD.intCustomerEntityLocationId = EL.intEntityLocationId
+				JOIN tblLGRouteOrder RO ON RO.intLoadDetailId = LD.intLoadDetailId
+				WHERE EL.dblLatitude = 0 AND EL.dblLongitude = 0 AND RO.intRouteId=@intRouteId
+			END
 	END
 	ELSE IF @ysnPost = 0
 	BEGIN
