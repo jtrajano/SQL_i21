@@ -27,7 +27,8 @@ BEGIN TRY
 			@strContractStatus		NVARCHAR(MAX),
 			@intScaleUOMId			INT,
 			@intScaleUnitMeasureId	INT,
-			@intItemUOMId			INT
+			@intItemUOMId			INT,
+			@intNewContractHeaderId	INT
 
 	DECLARE @Processed TABLE
 	(
@@ -83,7 +84,12 @@ BEGIN TRY
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
-			RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT')  
+			EXEC uspCTCreateContract @intTicketId,'Scale',@intUserId,null,@intNewContractHeaderId OUTPUT
+			SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
+			IF	ISNULL(@intContractDetailId,0) = 0
+			BEGIN
+				RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT') 
+			END 
 		END
 	END
 
