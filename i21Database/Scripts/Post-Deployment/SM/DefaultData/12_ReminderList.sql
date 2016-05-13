@@ -190,4 +190,95 @@
 				[intSort]           =        8
 	END	
 
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction')
+	BEGIN
+		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Approve',
+				[strType]        	=        N'Transaction',
+				[strMessage]		=        N'{0} {1} {2} unapproved.',
+				[strQuery]  		=        N'	SELECT 
+													intTransactionId 
+												FROM tblSMApproval 
+												WHERE	ysnCurrent = 1 AND 
+														strStatus IN (''Waiting for Approval'') AND 
+														intApproverId = {0}',
+				[strNamespace]      =        N'i21.view.Approval?activeTab=Pending',
+				[intSort]           =        9
+	END	
+
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Transaction' AND [strType] = N'Approved')
+	BEGIN
+		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Transaction Approved',
+				[strType]        	=        N'',
+				[strMessage]		=        N'{0} Transaction(s) {2} approved.',
+				[strQuery]  		=        N'	SELECT 
+													intTransactionId 
+												FROM tblSMApproval 
+												WHERE intTransactionId IN (
+													SELECT intTransactionId 
+													FROM tblSMTransaction 
+													WHERE strApprovalStatus = ''Approved''
+												) and ysnCurrent = 1  and strStatus = ''Approved'' 
+												AND intSubmittedById = {0}
+												GROUP BY intTransactionId',
+				[strNamespace]      =        N'i21.view.Approval?activeTab=Approved',
+				[intSort]           =        10
+	END	
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Transaction' AND [strType] = N'Closed')
+	BEGIN
+		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Transaction Closed',
+				[strType]        	=        N'',
+				[strMessage]		=        N'{0} Transaction(s) {2} closed.',
+				[strQuery]  		=        N'	SELECT 
+													intTransactionId 
+												FROM tblSMApproval 
+												WHERE intTransactionId IN (
+														SELECT intTransactionId 
+														FROM tblSMTransaction 
+														WHERE strApprovalStatus = ''Closed''
+													) 
+													AND ysnCurrent = 1 
+													AND strStatus = ''Closed'' 
+													AND intSubmittedById = {0}
+												GROUP BY intTransactionId',
+				[strNamespace]      =        N'i21.view.Approval?activeTab=Closed',
+				[intSort]           =        11
+	END	
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Transaction' AND [strType] = N'Unsubmitted')
+	BEGIN
+		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Transaction Unsubmitted',
+				[strType]        	=        N'',
+				[strMessage]		=        N'{0} Transaction(s) {2} unsubmitted.',
+				[strQuery]  		=        N'	SELECT 
+													intTransactionId 
+												FROM tblSMApproval 
+												WHERE	ysnCurrent = 1 AND 
+														strStatus IN (''Waiting for Submit'') AND 
+														intSubmittedById= {0}',
+				[strNamespace]      =        N'i21.view.Approval?activeTab=Closed',
+				[intSort]           =        12
+	END	
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Transaction' AND [strType] = N'Rejected')
+	BEGIN
+		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
+		SELECT [strReminder]        =        N'Transaction Rejected',
+				[strType]        	=        N'',
+				[strMessage]		=        N'{0} Transaction(s) {2} rejected.',
+				[strQuery]  		=        N'	SELECT 
+													intTransactionId 
+												FROM tblSMApproval 
+												WHERE	ysnCurrent = 1 AND 
+														strStatus IN (''Rejected'') AND 
+														intSubmittedById= {0}',
+				[strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
+				[intSort]           =        13
+	END	
 GO
