@@ -148,7 +148,7 @@ BEGIN TRY
 		,[intShipmentId]						= NULL
 		,[intTransactionId]						= NULL
 		,[intEntityId]							= @UserEntityId
-		,[ysnResetDetails]						= 0
+		,[ysnResetDetails]						= 1
 		,[ysnPost]								= CASE WHEN (@ysnPostOrUnPost = 0) THEN NULL ELSE @ysnPostOrUnPost END
 		,[intInvoiceDetailId]					= NULL
 		,[intItemId]							= DD.intItemId
