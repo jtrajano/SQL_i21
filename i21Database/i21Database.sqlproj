@@ -3798,6 +3798,8 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCashOverShortRecap.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailCurrencies.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherLog.sql" />
+    <Build Include="dbo\User Defined Types\RouteOrdersTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRouteUpdateOrders.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
