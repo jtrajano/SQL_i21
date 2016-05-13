@@ -124,6 +124,8 @@ BEGIN
 		UPDATE 
 		SET		dblDebit = gl_summary.dblDebit + Source_Query.dblDebit 
 				,dblCredit = gl_summary.dblCredit + Source_Query.dblCredit 
+				,dblCreditUnit = gl_summary.dblCreditUnit + Source_Query.dblCreditUnit
+				,dblDebitUnit = gl_summary.dblDebitUnit + Source_Query.dblDebitUnit
 				,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
 	-- Insert a new gl summary record 
