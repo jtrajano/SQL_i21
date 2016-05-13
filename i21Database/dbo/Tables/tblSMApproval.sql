@@ -11,7 +11,6 @@
 	[strComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDate] [datetime] NULL,
 	[ysnCurrent] [bit] NULL,
-	[ysnEmailNotification] [bit] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMApproval_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]), 
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_Approver] FOREIGN KEY ([intApproverId]) REFERENCES [tblEMEntity]([intEntityId]), 
