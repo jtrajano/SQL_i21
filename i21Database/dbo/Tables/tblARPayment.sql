@@ -7,6 +7,7 @@
 	[intBankAccountId]		INT             NULL,
     [intPaymentMethodId]	INT             NOT NULL,
     [intLocationId]			INT             NULL,
+	[intInvoiceId]			INT             NULL,
     [dblAmountPaid]			NUMERIC (18, 6) NULL,
     [dblUnappliedAmount]	NUMERIC (18, 6) NULL,
     [dblOverpayment]		NUMERIC (18, 6) NULL,
@@ -22,7 +23,8 @@
     CONSTRAINT [PK_tblARPayment_intPaymentId] PRIMARY KEY CLUSTERED ([intPaymentId] ASC),
     CONSTRAINT [FK_tblARPayment_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
 	CONSTRAINT [FK_tblARPayment_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARPayment_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
+	CONSTRAINT [FK_tblARPayment_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
+	CONSTRAINT [FK_tblARPayment_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])
 );
 
 
