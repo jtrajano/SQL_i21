@@ -1,58 +1,31 @@
 ﻿CREATE PROCEDURE uspTMUpdateRouteSequence 
-	@OrdersFromRouting RouteOrdersTableType READONLY
+	@RouteOrder RouteOrdersTableType READONLY
 AS
 BEGIN
 
-	DECLARE @ysnUpdated BIT 
-	DECLARE @intSiteId INT
+	--Update Dispatch
+	UPDATE tblTMDispatch
+		SET intRouteId = A.intRouteId
+			,intDriverID = A.intOriginDriverId
+			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+	FROM @RouteOrder A
+	WHERE tblTMDispatch.intDispatchID = A.intOrderId
 
-	--SELECT TOP 1 @intSiteId = intSiteID FROM tblTMDispatch WHERE intDispatchID = @intDispatchId
+	---Update Site
+	UPDATE tblTMSite
+	SET dblLongitude = A.dblLongitude
+		,dblLatitude =A.dblLatitude
+		,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+	FROM ( 
+		SELECT A.*
+			,B.intSiteID
+		FROM @RouteOrder A
+		INNER JOIN tblTMDispatch B
+			ON A.intOrderId = B.intDispatchID
+	) A
+	WHERE tblTMSite.intSiteID = A.intSiteID
+		AND (tblTMSite.dblLongitude IS NULL OR tblTMSite.dblLatitude IS NULL)
 
-	--SET @ysnUpdated = 0
-
-	--IF(ISNULL(@intDriverId,0) <> 0)
-	--BEGIN
-	--	UPDATE tblTMDispatch
-	--	SET intDriverID = @intDriverId
-	--	WHERE intDispatchID = @intDispatchId
-	--END
-
-
-	--IF(ISNULL(@intRoutingId,0) <> 0)
-	--BEGIN
-	--	UPDATE tblTMDispatch
-	--	SET intRouteId = @intRoutingId
-	--	WHERE intDispatchID = @intDispatchId
-	--END
-
-	
-	--IF(@dblLatitude IS NOT NULL)
-	--BEGIN
-	--	UPDATE tblTMSite
-	--	SET dblLatitude = @dblLatitude
-	--	WHERE intSiteID = @intSiteId
-	--	SET @ysnUpdated = 1
-	--END
-
-	--IF(@dblLongitude IS NOT NULL)
-	--BEGIN
-	--	UPDATE tblTMSite
-	--	SET dblLongitude = @dblLongitude
-	--	WHERE intSiteID = @intSiteId
-	--	SET @ysnUpdated = 1
-	--END
-
-	--IF(@ysnUpdated = 1)
-	--BEGIN
-	--	UPDATE tblTMSite
-	--	SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-	--	WHERE intSiteID = @intSiteId
-	--END
-
-	--UPDATE tblTMDispatch
-	--SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-	--	,strWillCallStatus = 'Routed'
-	--WHERE intDispatchID = @intDispatchId
 
 	
 END
