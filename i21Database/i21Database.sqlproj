@@ -3794,6 +3794,7 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalDepositRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCashOverShortRecap.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailCurrencies.sql" />
+    <Build Include="dbo\Tables\tblAPImportVoucherLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,0 +1,261 @@
+﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherBackUpAPIVCMST]
+	@DateFrom DATETIME = NULL,
+	@DateTo DATETIME = NULL
+AS
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
+BEGIN TRY
+
+DECLARE @transCount INT = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
+
+IF OBJECT_ID('tempdb..##tmp_apivcmstImport') IS NOT NULL DROP TABLE ##tmp_apivcmstImport
+
+CREATE TABLE ##tmp_apivcmstImport(
+	[apivc_vnd_no] [char](10) NOT NULL,
+	[apivc_ivc_no] [char](18) NOT NULL,
+	[apivc_status_ind] [char](1) NOT NULL,
+	[apivc_cbk_no] [char](2) NOT NULL,
+	[apivc_chk_no] [char](8) NOT NULL,
+	[apivc_trans_type] [char](1) NULL,
+	[apivc_pay_ind] [char](1) NULL,
+	[apivc_ap_audit_no] [smallint] NULL,
+	[apivc_pur_ord_no] [char](8) NULL,
+	[apivc_po_rcpt_seq] [smallint] NULL,
+	[apivc_ivc_rev_dt] [int] NULL,
+	[apivc_disc_rev_dt] [int] NULL,
+	[apivc_due_rev_dt] [int] NULL,
+	[apivc_chk_rev_dt] [int] NULL,
+	[apivc_gl_rev_dt] [int] NULL,
+	[apivc_orig_amt] [decimal](11, 2) NULL,
+	[apivc_disc_avail] [decimal](11, 2) NULL,
+	[apivc_disc_taken] [decimal](11, 2) NULL,
+	[apivc_wthhld_amt] [decimal](11, 2) NULL,
+	[apivc_net_amt] [decimal](11, 2) NULL,
+	[apivc_1099_amt] [decimal](11, 2) NULL,
+	[apivc_comment] [char](30) NULL,
+	[apivc_adv_chk_no] [int] NULL,
+	[apivc_recur_yn] [char](1) NULL,
+	[apivc_currency] [char](3) NULL,
+	[apivc_currency_rt] [decimal](15, 8) NULL,
+	[apivc_currency_cnt] [char](8) NULL,
+	[apivc_user_id] [char](16) NULL,
+	[apivc_user_rev_dt] [int] NULL,
+	[A4GLIdentity] [numeric](9, 0) NOT NULL,
+	[apchk_A4GLIdentity] INT NULL,
+	 CONSTRAINT [k_apivcmst] PRIMARY KEY NONCLUSTERED 
+	(
+		[apivc_vnd_no] ASC,
+		[apivc_ivc_no] ASC
+	)
+)
+
+IF @DateFrom IS NULL
+BEGIN
+	INSERT INTO ##tmp_apivcmstImport
+	SELECT
+		[apivc_vnd_no]			=	A.[apivc_vnd_no]		,
+		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
+		[apivc_status_ind]		=	A.[apivc_status_ind]	,
+		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
+		[apivc_chk_no]			=	A.[apivc_chk_no]		,
+		[apivc_trans_type]		=	A.[apivc_trans_type]	,
+		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
+		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
+		[apivc_pur_ord_no]		=	A.[apivc_pur_ord_no]	,
+		[apivc_po_rcpt_seq]		=	A.[apivc_po_rcpt_seq]	,
+		[apivc_ivc_rev_dt]		=	A.[apivc_ivc_rev_dt]	,
+		[apivc_disc_rev_dt]		=	A.[apivc_disc_rev_dt]	,
+		[apivc_due_rev_dt]		=	A.[apivc_due_rev_dt]	,
+		[apivc_chk_rev_dt]		=	A.[apivc_chk_rev_dt]	,
+		[apivc_gl_rev_dt]		=	A.[apivc_gl_rev_dt]		,
+		[apivc_orig_amt]		=	A.[apivc_orig_amt]		,
+		[apivc_disc_avail]		=	A.[apivc_disc_avail]	,
+		[apivc_disc_taken]		=	A.[apivc_disc_taken]	,
+		[apivc_wthhld_amt]		=	A.[apivc_wthhld_amt]	,
+		[apivc_net_amt]			=	A.[apivc_net_amt]		,
+		[apivc_1099_amt]		=	A.[apivc_1099_amt]		,
+		[apivc_comment]			=	A.[apivc_comment]		,
+		[apivc_adv_chk_no]		=	A.[apivc_adv_chk_no]	,
+		[apivc_recur_yn]		=	A.[apivc_recur_yn]		,
+		[apivc_currency]		=	A.[apivc_currency]		,
+		[apivc_currency_rt]		=	A.[apivc_currency_rt]	,
+		[apivc_currency_cnt]	=	A.[apivc_currency_cnt]	,
+		[apivc_user_id]			=	A.[apivc_user_id]		,
+		[apivc_user_rev_dt]		=	A.[apivc_user_rev_dt]	,
+		[A4GLIdentity]			=	A.[A4GLIdentity]		,
+		[apchk_A4GLIdentity]	=	PaymentInfo.A4GLIdentity
+	FROM apivcmst A
+	OUTER APPLY (
+		SELECT 
+			G.A4GLIdentity
+		FROM apchkmst G
+		WHERE G.apchk_vnd_no = A.apivc_vnd_no
+			AND G.apchk_chk_no = A.apivc_chk_no
+			AND G.apchk_rev_dt = A.apivc_chk_rev_dt
+			AND G.apchk_cbk_no = A.apivc_cbk_no
+			AND G.apchk_chk_amt <> 0
+	) PaymentInfo
+	WHERE A.apivc_orig_amt != 0
+END
+ELSE
+BEGIN
+	INSERT INTO ##tmp_apivcmstImport
+	SELECT
+		[apivc_vnd_no]			=	A.[apivc_vnd_no]		,
+		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
+		[apivc_status_ind]		=	A.[apivc_status_ind]	,
+		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
+		[apivc_chk_no]			=	A.[apivc_chk_no]		,
+		[apivc_trans_type]		=	A.[apivc_trans_type]	,
+		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
+		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
+		[apivc_pur_ord_no]		=	A.[apivc_pur_ord_no]	,
+		[apivc_po_rcpt_seq]		=	A.[apivc_po_rcpt_seq]	,
+		[apivc_ivc_rev_dt]		=	A.[apivc_ivc_rev_dt]	,
+		[apivc_disc_rev_dt]		=	A.[apivc_disc_rev_dt]	,
+		[apivc_due_rev_dt]		=	A.[apivc_due_rev_dt]	,
+		[apivc_chk_rev_dt]		=	A.[apivc_chk_rev_dt]	,
+		[apivc_gl_rev_dt]		=	A.[apivc_gl_rev_dt]		,
+		[apivc_orig_amt]		=	A.[apivc_orig_amt]		,
+		[apivc_disc_avail]		=	A.[apivc_disc_avail]	,
+		[apivc_disc_taken]		=	A.[apivc_disc_taken]	,
+		[apivc_wthhld_amt]		=	A.[apivc_wthhld_amt]	,
+		[apivc_net_amt]			=	A.[apivc_net_amt]		,
+		[apivc_1099_amt]		=	A.[apivc_1099_amt]		,
+		[apivc_comment]			=	A.[apivc_comment]		,
+		[apivc_adv_chk_no]		=	A.[apivc_adv_chk_no]	,
+		[apivc_recur_yn]		=	A.[apivc_recur_yn]		,
+		[apivc_currency]		=	A.[apivc_currency]		,
+		[apivc_currency_rt]		=	A.[apivc_currency_rt]	,
+		[apivc_currency_cnt]	=	A.[apivc_currency_cnt]	,
+		[apivc_user_id]			=	A.[apivc_user_id]		,
+		[apivc_user_rev_dt]		=	A.[apivc_user_rev_dt]	,
+		[A4GLIdentity]			=	A.[A4GLIdentity]		,
+		[apchk_A4GLIdentity]	=	PaymentInfo.A4GLIdentity
+	FROM apivcmst A
+	OUTER APPLY (
+		SELECT 
+			G.A4GLIdentity
+		FROM apchkmst G
+		WHERE G.apchk_vnd_no = A.apivc_vnd_no
+			AND G.apchk_chk_no = A.apivc_chk_no
+			AND G.apchk_rev_dt = A.apivc_chk_rev_dt
+			AND G.apchk_cbk_no = A.apivc_cbk_no
+			AND G.apchk_chk_amt <> 0
+	) PaymentInfo
+	WHERE A.apivc_orig_amt != 0
+	AND 1 = CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+END
+
+--BACK UP apivcmst
+SET IDENTITY_INSERT tblAPapivcmst ON
+INSERT INTO tblAPapivcmst(
+	[apivc_vnd_no],
+	[apivc_ivc_no],
+	[apivc_status_ind],
+	[apivc_cbk_no],
+	[apivc_chk_no],
+	[apivc_trans_type],
+	[apivc_pay_ind],
+	[apivc_ap_audit_no],
+	[apivc_pur_ord_no],
+	[apivc_po_rcpt_seq],
+	[apivc_ivc_rev_dt],
+	[apivc_disc_rev_dt],
+	[apivc_due_rev_dt],
+	[apivc_chk_rev_dt],
+	[apivc_gl_rev_dt],
+	[apivc_orig_amt],
+	[apivc_disc_avail],
+	[apivc_disc_taken],
+	[apivc_wthhld_amt],
+	[apivc_net_amt],
+	[apivc_1099_amt],
+	[apivc_comment],
+	[apivc_adv_chk_no],
+	[apivc_recur_yn],
+	[apivc_currency],
+	[apivc_currency_rt],
+	[apivc_currency_cnt],
+	[apivc_user_id],
+	[apivc_user_rev_dt],
+	[A4GLIdentity],
+	[apchk_A4GLIdentity]
+)
+SELECT
+	[apivc_vnd_no]			=	A.[apivc_vnd_no]		,
+	[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
+	[apivc_status_ind]		=	A.[apivc_status_ind]	,
+	[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
+	[apivc_chk_no]			=	A.[apivc_chk_no]		,
+	[apivc_trans_type]		=	A.[apivc_trans_type]	,
+	[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
+	[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
+	[apivc_pur_ord_no]		=	A.[apivc_pur_ord_no]	,
+	[apivc_po_rcpt_seq]		=	A.[apivc_po_rcpt_seq]	,
+	[apivc_ivc_rev_dt]		=	A.[apivc_ivc_rev_dt]	,
+	[apivc_disc_rev_dt]		=	A.[apivc_disc_rev_dt]	,
+	[apivc_due_rev_dt]		=	A.[apivc_due_rev_dt]	,
+	[apivc_chk_rev_dt]		=	A.[apivc_chk_rev_dt]	,
+	[apivc_gl_rev_dt]		=	A.[apivc_gl_rev_dt]		,
+	[apivc_orig_amt]		=	A.[apivc_orig_amt]		,
+	[apivc_disc_avail]		=	A.[apivc_disc_avail]	,
+	[apivc_disc_taken]		=	A.[apivc_disc_taken]	,
+	[apivc_wthhld_amt]		=	A.[apivc_wthhld_amt]	,
+	[apivc_net_amt]			=	A.[apivc_net_amt]		,
+	[apivc_1099_amt]		=	A.[apivc_1099_amt]		,
+	[apivc_comment]			=	A.[apivc_comment]		,
+	[apivc_adv_chk_no]		=	A.[apivc_adv_chk_no]	,
+	[apivc_recur_yn]		=	A.[apivc_recur_yn]		,
+	[apivc_currency]		=	A.[apivc_currency]		,
+	[apivc_currency_rt]		=	A.[apivc_currency_rt]	,
+	[apivc_currency_cnt]	=	A.[apivc_currency_cnt]	,
+	[apivc_user_id]			=	A.[apivc_user_id]		,
+	[apivc_user_rev_dt]		=	A.[apivc_user_rev_dt]	,
+	[A4GLIdentity]			=	A.[A4GLIdentity]		,
+	[apchk_A4GLIdentity]	=	A.[apchk_A4GLIdentity]
+FROM ##tmp_apivcmstImport A
+SET IDENTITY_INSERT tblAPapivcmst OFF
+
+--BACK UP aphglmst
+INSERT INTO tblAPaphglmst(
+	[aphgl_cbk_no]		,
+	[aphgl_trx_ind]		,
+	[aphgl_vnd_no]		,
+	[aphgl_ivc_no]		,
+	[aphgl_dist_no]		,
+	[aphgl_alt_cbk_no]	,
+	[aphgl_gl_acct]		,
+	[aphgl_gl_amt]		,
+	[aphgl_gl_un]		,
+	[A4GLIdentity]		
+)		
+SELECT
+	[aphgl_cbk_no]		=	A.[aphgl_cbk_no]		,
+	[aphgl_trx_ind]		=	A.[aphgl_trx_ind]		,
+	[aphgl_vnd_no]		=	A.[aphgl_vnd_no]		,
+	[aphgl_ivc_no]		=	B.[apivc_ivc_no]		,
+	[aphgl_dist_no]		=	A.[aphgl_dist_no]		,
+	[aphgl_alt_cbk_no]	=	A.[aphgl_alt_cbk_no]	,
+	[aphgl_gl_acct]		=	A.[aphgl_gl_acct]		,
+	[aphgl_gl_amt]		=	A.[aphgl_gl_amt]		,
+	[aphgl_gl_un]		=	A.[aphgl_gl_un]			,
+	[A4GLIdentity]		=	A.[A4GLIdentity]		
+FROM aphglmst A 
+INNER JOIN ##tmp_apivcmstImport B 
+	ON B.apivc_ivc_no = A.aphgl_ivc_no 
+	AND B.apivc_vnd_no = A.aphgl_vnd_no
+
+IF @transCount = 0 COMMIT TRANSACTION
+END TRY
+BEGIN CATCH
+	DECLARE @errorValidating NVARCHAR(500) = ERROR_MESSAGE();
+	ROLLBACK TRANSACTION
+	RAISERROR(@errorValidating, 16, 1);
+END CATCH
