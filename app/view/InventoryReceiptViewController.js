@@ -1011,7 +1011,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var cepItemLots = grdLotTracking.getPlugin('cepItemLots');
         if (cepItemLots) {
             cepItemLots.on({
-                validateedit: me.onEditLots,
+               // validateedit: me.onEditLots,
+                edit: me.onEditLots,
                 scope: me
             });
         }
@@ -1182,11 +1183,37 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             record.set('strContainerNo', currentReceiptItem.get('strContainer'));
         }
 
-        var total = (lotCF * qty) * weightCF;
+      /*  var total = (lotCF * qty) * weightCF;
         record.set('dblGrossWeight', total);
         var tare = config.dummy.get('dblTareWeight');
         var netTotal = total - tare;
-        record.set('dblNetWeight', netTotal);
+        record.set('dblNetWeight', netTotal);*/
+        
+        
+        // If gross qty is zero, auto-calculate it. Otherwise, keep it the same value.
+
+        grossQty = record.get('dblGrossWeight');
+        grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
+        if (grossQty == 0){
+            
+            if (lotCF === weightCF) {
+                grossQty = qty;
+            }
+            else if (weightCF !== 0){
+                grossQty = (lotCF * qty) / weightCF;
+            }
+            
+        }
+
+        record.set('dblGrossWeight', grossQty);
+
+
+        // Calculate the net qty
+
+        var tare = record.get('dblTareWeight');
+        tare = Ext.isNumeric(tare) ? tare : 0.00;
+        grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
+        record.set('dblNetWeight', grossQty - tare);
 
         action(record);
     },
@@ -1915,13 +1942,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         weightCF = itemUOMCF;
                     }
 
-                    var grossQty;
-                    grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
+                    // If gross qty is zero, auto-calculate it. Otherwise, keep it the same value.
+                    
+                        grossQty = lot.get('dblGrossWeight');
+                        grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
+                        if (grossQty == 0){
+                            grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
+                        }
 
-                    lot.set('dblGrossWeight', grossQty);
-                    var tare = lot.get('dblTareWeight');
-                    var netTotal = grossQty - tare;
-                    lot.set('dblNetWeight', netTotal);
+                        lot.set('dblGrossWeight', grossQty);
+                    
+
+                    // Calculate the net qty
+                    
+                        var tare = lot.get('dblTareWeight');
+                        tare = Ext.isNumeric(tare) ? tare : 0.00;
+                        grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
+                        lot.set('dblNetWeight', grossQty - tare);
                 }
             });
         }
@@ -2569,6 +2606,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var netTotal = grossQty - tare;
             context.record.set('dblNetWeight', netTotal);
         }
+        
         else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
             var gross = context.record.get('dblGrossWeight');
             var tare = context.record.get('dblTareWeight');
