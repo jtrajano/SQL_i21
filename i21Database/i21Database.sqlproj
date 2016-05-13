@@ -3806,6 +3806,7 @@
     <None Include="Scripts\Post-Deployment\EM\027_MassUpdatePhoneNumber.sql" />
     <Build Include="dbo\User Defined Types\RouteOrdersTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRouteUpdateOrders.sql" />
+    <None Include="Scripts\Post-Deployment\EM\028_MassCountryFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

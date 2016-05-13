@@ -307,6 +307,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\023_RenameEntityContactEmailDistribution.sql
 :r .\EM\024_delete_old_entity_table.sql
 :r .\EM\025_UpdatePhoneNumberAndCreateBackup.sql
+:r .\EM\028_MassCountryFormat.sql
 :r .\EM\026_ImportPhoneNumbersToNewTable.sql
 :r .\EM\027_MassUpdatePhoneNumber.sql
 -- Quality Module

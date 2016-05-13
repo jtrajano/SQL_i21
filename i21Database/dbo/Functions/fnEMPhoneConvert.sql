@@ -53,7 +53,7 @@ BEGIN
 	END
 
 	
-	WHILE @Index < LEN(@Value)
+	WHILE @Index <= LEN(@Value)
 	BEGIN
 		SET @CurVal = SUBSTRING(@Value, @Index, 1)
 		SET @IsDelim = [dbo].[fnEMIsPhoneDelimeter](@CurVal)

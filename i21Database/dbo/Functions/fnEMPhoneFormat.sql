@@ -21,6 +21,10 @@ BEGIN
 	BEGIN
 		SET @RetValue = '(' + @Value + ')'
 	END
+	ELSE IF @Format = 'parentheses + space' 
+	BEGIN
+		SET @RetValue = '(' + @Value + ') '
+	END
 	ELSE IF @Format = 'period' 
 	BEGIN
 		SET @RetValue = @Value + '.'
