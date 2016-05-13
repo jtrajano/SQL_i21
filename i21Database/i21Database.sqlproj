@@ -3781,6 +3781,9 @@
     <Build Include="dbo\Stored Procedures\uspGRCheckItemUsedInDiscountCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateContract.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
+    <Build Include="dbo\Tables\tblEMEntityLineOfBusiness.sql" />
+    <Build Include="dbo\Tables\tblEMEntityCRMInformation.sql" />
+    <Build Include="dbo\Tables\tblEMEntityAreaOfInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadItem.sql" />
     <Build Include="dbo\Functions\fnGLComputeBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractHeader.sql" />
