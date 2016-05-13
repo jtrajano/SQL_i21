@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets244487af2aad911c511f500bf6ee0b5bacb07851e697777b3b25987f1c0bdcf0))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets75bc06446abe093c41b0cdb438d65064803c98cb5ae3953620d6b08f686b3ac1))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets244487af2aad911c511f500bf6ee0b5bacb07851e697777b3b25987f1c0bdcf0 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets75bc06446abe093c41b0cdb438d65064803c98cb5ae3953620d6b08f686b3ac1 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "244487af2aad911c511f500bf6ee0b5bacb07851e697777b3b25987f1c0bdcf0"; }
+            get { return "75bc06446abe093c41b0cdb438d65064803c98cb5ae3953620d6b08f686b3ac1"; }
         }
 
         /// <summary>
@@ -8702,7 +8702,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItemLot
-        [CodeFirstDatabaseSchema.tblICInventoryShipmentItemLot](T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemLotId, T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemId, T1.tblICInventoryShipmentItemLot_intLotId, T1.tblICInventoryShipmentItemLot_dblQuantityShipped, T1.tblICInventoryShipmentItemLot_dblGrossWeight, T1.tblICInventoryShipmentItemLot_dblTareWeight, T1.tblICInventoryShipmentItemLot_strWarehouseCargoNumber, T1.tblICInventoryShipmentItemLot_intSort, T1.tblICInventoryShipmentItemLot_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryShipmentItemLot](T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemLotId, T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemId, T1.tblICInventoryShipmentItemLot_intLotId, T1.tblICInventoryShipmentItemLot_dblQuantityShipped, T1.tblICInventoryShipmentItemLot_dblGrossWeight, T1.tblICInventoryShipmentItemLot_dblTareWeight, T1.tblICInventoryShipmentItemLot_dblWeightPerQty, T1.tblICInventoryShipmentItemLot_strWarehouseCargoNumber, T1.tblICInventoryShipmentItemLot_intSort, T1.tblICInventoryShipmentItemLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemLotId AS tblICInventoryShipmentItemLot_intInventoryShipmentItemLotId, 
@@ -8711,6 +8711,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblQuantityShipped AS tblICInventoryShipmentItemLot_dblQuantityShipped, 
             T.dblGrossWeight AS tblICInventoryShipmentItemLot_dblGrossWeight, 
             T.dblTareWeight AS tblICInventoryShipmentItemLot_dblTareWeight, 
+            T.dblWeightPerQty AS tblICInventoryShipmentItemLot_dblWeightPerQty, 
             T.strWarehouseCargoNumber AS tblICInventoryShipmentItemLot_strWarehouseCargoNumber, 
             T.intSort AS tblICInventoryShipmentItemLot_intSort, 
             T.intConcurrencyId AS tblICInventoryShipmentItemLot_intConcurrencyId, 
@@ -9059,7 +9060,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItemLots
-        [iRely.Inventory.Model.tblICInventoryShipmentItemLot](T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemLotId, T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemId, T1.tblICInventoryShipmentItemLot_intLotId, T1.tblICInventoryShipmentItemLot_dblQuantityShipped, T1.tblICInventoryShipmentItemLot_dblGrossWeight, T1.tblICInventoryShipmentItemLot_dblTareWeight, T1.tblICInventoryShipmentItemLot_strWarehouseCargoNumber, T1.tblICInventoryShipmentItemLot_intSort, T1.tblICInventoryShipmentItemLot_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryShipmentItemLot](T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemLotId, T1.tblICInventoryShipmentItemLot_intInventoryShipmentItemId, T1.tblICInventoryShipmentItemLot_intLotId, T1.tblICInventoryShipmentItemLot_dblQuantityShipped, T1.tblICInventoryShipmentItemLot_dblGrossWeight, T1.tblICInventoryShipmentItemLot_dblTareWeight, T1.tblICInventoryShipmentItemLot_dblWeightPerQty, T1.tblICInventoryShipmentItemLot_strWarehouseCargoNumber, T1.tblICInventoryShipmentItemLot_intSort, T1.tblICInventoryShipmentItemLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemLotId AS tblICInventoryShipmentItemLot_intInventoryShipmentItemLotId, 
@@ -9068,6 +9069,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblQuantityShipped AS tblICInventoryShipmentItemLot_dblQuantityShipped, 
             T.dblGrossWeight AS tblICInventoryShipmentItemLot_dblGrossWeight, 
             T.dblTareWeight AS tblICInventoryShipmentItemLot_dblTareWeight, 
+            T.dblWeightPerQty AS tblICInventoryShipmentItemLot_dblWeightPerQty, 
             T.strWarehouseCargoNumber AS tblICInventoryShipmentItemLot_strWarehouseCargoNumber, 
             T.intSort AS tblICInventoryShipmentItemLot_intSort, 
             T.intConcurrencyId AS tblICInventoryShipmentItemLot_intConcurrencyId, 

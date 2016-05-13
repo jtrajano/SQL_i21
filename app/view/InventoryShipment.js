@@ -818,9 +818,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strOrderNumber',
                                                                         itemId: 'colOrderNumber',
                                                                         width: 90,
+                                                                        dataIndex: 'strOrderNumber',
                                                                         text: 'Order Number'
                                                                     },
                                                                     {
@@ -1468,6 +1468,24 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     text: 'Quantity',
                                                                                     flex: 1,
                                                                                     format: '0,000.##'
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strWeightUOM',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Lot Wgt UOM',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intWeightUOMId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Lot Wgt UOM Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblWeightPerQty',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Wgt Per Qty',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboLot',
@@ -1514,39 +1532,34 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
                                                                         itemId: 'colGrossWeight',
                                                                         width: 100,
-                                                                        align: 'right',
                                                                         dataIndex: 'dblGrossWeight',
                                                                         text: 'Gross',
-                                                                        format: '0,000',
                                                                         editor: {
-                                                                            xtype: 'numeric'
+                                                                            xtype: 'numberfield'
                                                                         }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
                                                                         itemId: 'colTareWeight',
                                                                         width: 100,
-                                                                        align: 'right',
                                                                         dataIndex: 'dblTareWeight',
                                                                         text: 'Tare',
-                                                                        format: '0,000',
                                                                         editor: {
-                                                                            xtype: 'numeric'
+                                                                            xtype: 'numberfield'
                                                                         }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
                                                                         itemId: 'colNetWeight',
+                                                                        modelValidation: true,
                                                                         width: 100,
                                                                         align: 'right',
                                                                         dataIndex: 'dblNetWeight',
                                                                         text: 'Net',
-                                                                        format: '0,000'
+                                                                        format: '0,000.##'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',

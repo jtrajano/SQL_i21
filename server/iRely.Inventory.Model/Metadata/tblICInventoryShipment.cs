@@ -877,6 +877,7 @@ namespace iRely.Inventory.Model
         public decimal? dblQuantityShipped { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
+        public decimal? dblWeightPerQty { get; set; }
         public string strWarehouseCargoNumber { get; set; }
         public int? intSort { get; set; }
         
@@ -969,22 +970,22 @@ namespace iRely.Inventory.Model
                 _uom = value;
             }
         }
-        private decimal _itemUOMConv;
-        [NotMapped]
-        public decimal dblItemUOMConv
-        {
-            get
-            {
-                if (tblICInventoryShipmentItem != null)
-                    return tblICInventoryShipmentItem.dblItemUOMConv;
-                else
-                    return _itemUOMConv;
-            }
-            set
-            {
-                _itemUOMConv = value;
-            }
-        }
+        //private decimal? _itemUOMConv;
+        //[NotMapped]
+        //public decimal? dblItemUOMConv
+        //{
+        //    get
+        //    {
+        //        if (tblICInventoryShipmentItem != null)
+        //            return tblICLot.dblItemUOMConv;
+        //        else
+        //            return _itemUOMConv;
+        //    }
+        //    set
+        //    {
+        //        _itemUOMConv = value;
+        //    }
+        //}
         private string _weightUOM;
         [NotMapped]
         public string strWeightUOM
@@ -992,8 +993,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_weightUOM))
-                    if (tblICInventoryShipmentItem != null)
-                        return tblICInventoryShipmentItem.strWeightUOM;
+                    if (tblICLot != null)
+                        return tblICLot.strWeightUOM;
                     else
                         return null;
                 else
@@ -1004,14 +1005,14 @@ namespace iRely.Inventory.Model
                 _weightUOM = value;
             }
         }
-        private decimal _weightConv;
+        private decimal? _weightConv;
         [NotMapped]
-        public decimal dblWeightItemUOMConv
+        public decimal? dblWeightItemUOMConv
         {
             get
             {
-                if (tblICInventoryShipmentItem != null)
-                    return tblICInventoryShipmentItem.dblWeightItemUOMConv;
+                if (tblICLot != null)
+                    return tblICLot.dblWeightUOMConv;
                 else
                     return _weightConv;
             }

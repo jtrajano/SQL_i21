@@ -2974,6 +2974,24 @@
                                                                             "text: 'Quantity',",
                                                                             "flex: 1,",
                                                                             "format: '0,000.##'",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strWeightUOM',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Lot Wgt UOM',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'intWeightUOMId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "text: 'Lot Wgt UOM Id',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'dblWeightPerQty',",
+                                                                            "dataType: 'float',",
+                                                                            "text: 'Wgt Per Qty',",
+                                                                            "hidden: true",
                                                                             "}",
                                                                             "]"
                                                                         ],
@@ -3107,10 +3125,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "align": "right",
                                                                 "dataIndex": "dblGrossWeight",
-                                                                "dataType": "numeric",
-                                                                "format": "0,000",
                                                                 "itemId": "colGrossWeight",
                                                                 "text": "Gross",
                                                                 "width": 100
@@ -3133,7 +3148,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "designer|createAlias": "numeric"
+                                                                        "designer|createAlias": "numberfield"
                                                                     },
                                                                     "name": "MyNumberField61",
                                                                     "designerId": "a28d406d-4116-46ef-a4e4-c42f95760e40"
@@ -3148,10 +3163,10 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "align": "right",
+                                                                "align": null,
                                                                 "dataIndex": "dblTareWeight",
-                                                                "dataType": "numeric",
-                                                                "format": "0,000",
+                                                                "dataType": null,
+                                                                "format": null,
                                                                 "itemId": "colTareWeight",
                                                                 "text": "Tare",
                                                                 "width": 100
@@ -3174,7 +3189,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "designer|createAlias": "numeric"
+                                                                        "designer|createAlias": "numberfield"
                                                                     },
                                                                     "name": "MyNumberField62",
                                                                     "designerId": "5219b6a7-759f-497b-a122-1a2a5efa6917"
@@ -3192,8 +3207,9 @@
                                                                 "align": "right",
                                                                 "dataIndex": "dblNetWeight",
                                                                 "dataType": "numeric",
-                                                                "format": "0,000",
+                                                                "format": "0,000.##",
                                                                 "itemId": "colNetWeight",
+                                                                "modelValidation": true,
                                                                 "text": "Net",
                                                                 "width": 100
                                                             },

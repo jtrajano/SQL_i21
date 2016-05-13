@@ -928,19 +928,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('dblAvailableQty', records[0].get('dblAvailableQty'));
             current.set('strUnitMeasure', records[0].get('strItemUOM'));
             current.set('strStorageLocation', records[0].get('strStorageLocation'));
+            current.set('intWeightUOMId', records[0].get('intWeightUOMId'));
+            current.set('strWeightUOM', records[0].get('strWeightUOM'));
+            current.set('dblWeightPerQty', records[0].get('dblWeightPerQty'));
 
             var shipmentItem = win.viewModel.data.currentShipmentItem;
             if (shipmentItem) {
+                // Assign a default ship qty for the lot.
                 var shipQty = shipmentItem.get('dblQuantity');
                 var availQty = current.get('dblAvailableQty');
-                if (shipQty > availQty){
-                    current.set('dblQuantityShipped', availQty);
-                }
-                else{
-                    current.set('dblQuantityShipped', shipQty);
-                }
-            }
+                var lotDefaultQty = shipQty > availQty ? availQty : shipQty;
 
+                current.set('dblQuantityShipped', lotDefaultQty);
+
+                // Calculate the Gross Wgt based on the default lot qty.
+                //var wgtPerQty = records[0].get('dblWeightPerQty');
+                //var grossWgt;
+                //
+                //grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
+                //current.set('dblGrossWeight', grossWgt);
+            }
         }
     },
 

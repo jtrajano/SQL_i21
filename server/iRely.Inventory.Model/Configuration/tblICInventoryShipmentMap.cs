@@ -215,6 +215,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblQuantityShipped).HasColumnName("dblQuantityShipped").HasPrecision(38, 20);
             this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(38, 20);
             this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(38, 20);
+            this.Property(t => t.dblWeightPerQty).HasColumnName("dblWeightPerQty").HasPrecision(38, 20);
             this.Property(t => t.strWarehouseCargoNumber).HasColumnName("strWarehouseCargoNumber");
             this.Property(t => t.intSort).HasColumnName("intSort");
 

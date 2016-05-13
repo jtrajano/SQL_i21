@@ -45,9 +45,9 @@ Ext.define('Inventory.model.ShipmentItemLot', {
         },
         { name: 'strWarehouseCargoNumber', type: 'string' },
         { name: 'intSort', type: 'int', allowNull: true },
-
         { name: 'strLotId', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'dblWeightPerQty', type: 'float' }
     ],
 
     validators: [
