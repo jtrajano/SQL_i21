@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	@dtmStartDate AS DATETIME 
 	,@strItemNo AS NVARCHAR(50) = NULL 
+	,@isPeriodic AS BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -968,8 +969,10 @@ BEGIN
 															)
 															,ItemUOM.dblUnitQty
 														)
-											END 											
-											
+											END 		
+																				
+										-- When it is a credit memo:
+										 WHEN (dblQty > 0 AND strTransactionId LIKE 'SI%') THEN 											
 											CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														-- If using Average Costing, use Ave Cost.
 														dbo.fnGetItemAverageCost(
