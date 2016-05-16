@@ -3442,7 +3442,6 @@
     <Build Include="dbo\Views\vyuMFGetTraceabilityObject.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
-    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailAsOfDateReport.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileBPayee.sql" />
@@ -3687,8 +3686,6 @@
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImport.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustmentNotMapped.sql" />
-    <Build Include="dbo\Functions\fnGLGetActivityBalance.sql" />
-    <Build Include="dbo\Functions\fnGLGetBalancesDateCriteria.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinDetails.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBins.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryTransferView.sql" />
@@ -3784,7 +3781,6 @@
     <Build Include="dbo\Tables\tblEMEntityCRMInformation.sql" />
     <Build Include="dbo\Tables\tblEMEntityAreaOfInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadItem.sql" />
-    <Build Include="dbo\Functions\fnGLComputeBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractHeader.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalSalesRecap.sql" />
