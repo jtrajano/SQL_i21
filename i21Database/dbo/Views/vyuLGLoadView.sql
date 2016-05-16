@@ -133,7 +133,7 @@ SELECT -- Load Header
 		LOAD.intPositionId,
 		[intWeightUnitMeasureId],
 		strWeightUnitMeasure = [strUnitMeasure],
-		[strBLNumber],
+		ISNULL([strBLNumber],'') AS [strBLNumber],
 		[dtmBLDate],
 		[strOriginPort],
 		[strDestinationPort],

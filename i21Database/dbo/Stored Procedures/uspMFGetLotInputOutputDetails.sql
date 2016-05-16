@@ -24,7 +24,6 @@ BEGIN
 		,um.strUnitMeasure
 		,wopl.dtmCreated AS dtmTimeLogged
 		,us.strUserName
-		,0 AS intSequenceNo
 	FROM tblMFWorkOrderProducedLot wopl
 	JOIN tblMFWorkOrder wo ON wo.intWorkOrderId = wopl.intWorkOrderId
 	JOIN tblICItem i ON i.intItemId = wopl.intItemId
@@ -48,9 +47,6 @@ BEGIN
 		,um.strUnitMeasure
 		,wocl.dtmCreated AS dtmTimeLogged
 		,us.strUserName
-		,Row_NUMBER() OVER (
-			ORDER BY intWorkOrderConsumedLotId
-			) AS intSequenceNo
 	FROM tblMFWorkOrderConsumedLot wocl
 	JOIN tblMFWorkOrder wo ON wo.intWorkOrderId = wocl.intWorkOrderId
 	JOIN tblICItem i ON i.intItemId = wocl.intItemId
