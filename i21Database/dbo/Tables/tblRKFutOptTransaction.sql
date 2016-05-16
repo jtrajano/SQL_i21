@@ -28,8 +28,26 @@
     [intBookId] INT NULL, 
     [intSubBookId] INT NULL, 
     [ysnOffset] BIT NULL,
-	[intContractDetailId] INT NULL
-
+	[intBankId] INT,
+	[intBankAccountId] INT,
+	[intContractDetailId] INT NULL,
+	[intSelectedInstrumentTypeId] INT NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
+	[intFromCurrencyId] INT NULL,
+	[intToCurrencyId] INT NULL,
+	[dblExchangeRate]  NUMERIC(18, 6) NULL,
+	[dblMatchAmount] NUMERIC(18, 6) NULL,
+	[dblAllocatedAmount] NUMERIC(18, 6) NULL,
+	[dblUnAllocatedAmount] NUMERIC(18, 6) NULL,
+	[dblSpotRate] NUMERIC(18, 6) NULL,
+	[ysnSwap] bit,
+	[intSwapContractTypeId] INT NULL, 
+	[dtmSwapMaturityDate] DATETIME NULL, 
+    [dblSwapContractAmount] NUMERIC(18, 6) NULL, 
+    [dblSwapExchangeRate] NUMERIC(18, 6) NULL, 
+    [dblSwapMatchAmount] NUMERIC(18, 6) NULL, 
+	[ysnSwapConfirm] BIT NULL,  
+	
     CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
@@ -42,7 +60,8 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTSubBook_intBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]), 
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
-	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTContractDetail_intContractDetailId] FOREIGN KEY([intContractDetailId])REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
-
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTContractDetail_intContractDetailId] FOREIGN KEY([intContractDetailId])REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY(intCurrencyExchangeRateTypeId)REFERENCES [dbo].[tblSMCurrencyExchangeRateType] (intCurrencyExchangeRateTypeId),
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank] ([intBankId]),
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 )
-

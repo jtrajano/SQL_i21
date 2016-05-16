@@ -3808,6 +3808,9 @@
     <Build Include="dbo\Views\vyuGLPostRemind.sql" />
     <Build Include="dbo\Tables\tblSMRemoteServer.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerByMarket.sql" />
+    <Build Include="dbo\Views\vyuRKGetBankDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetTraderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
