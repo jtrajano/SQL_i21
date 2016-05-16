@@ -8,6 +8,7 @@ BEGIN
 		SET intRouteId = A.intRouteId
 			,intDriverID = A.[intDriverEntityId]
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+			,strWillCallStatus = 'Routed'
 	FROM @RouteOrder A
 	WHERE tblTMDispatch.intDispatchID = A.intOrderId
 
