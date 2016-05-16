@@ -198,7 +198,12 @@
 		SELECT [strReminder]        =        N'Overdue',
 				[strType]        	=        N'Scale Ticket',
 				[strMessage]		=        N'{0} Overdue Ticket(s).',
-				[strQuery]  		=        N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus,intProcessingLocationId,SCAlert.intEntityId from tblSCUncompletedTicketAlert SCAlert,tblSCTicket SCTicket',
+				[strQuery]  		=        N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus,intProcessingLocationId,SCAlert.intEntityId from tblSCUncompletedTicketAlert SCAlert,tblSCTicket SCTicket
+												WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
+												AND ysnHasGeneratedTicketNumber = 1
+												AND strTicketStatus = ''O''
+												AND ISNULL(intCompanyLocationId,0) = 0
+												AND SCAlert.intEntityId = {0}',
 				[strNamespace]      =        N'Grain.view.ScaleStationSelection',
 				[intSort]           =        10
 	END
