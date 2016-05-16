@@ -3786,6 +3786,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCheckItemUsedInDiscountCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateContract.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
+    <Build Include="dbo\Tables\tblEMEntityRequireApprovalFor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
