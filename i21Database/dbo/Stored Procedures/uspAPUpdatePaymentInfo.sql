@@ -12,8 +12,17 @@ BEGIN TRY
 
 DECLARE @totalPaymentToUpdate INT, @totalPaymentUpdated INT;
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @paymentIds TABLE(intId INT, strReferenceNo NVARCHAR(20))
 --if this is greater than 1, someone already created the transaction and WE ARE COVERED BY THE TRANSACTION SO DON''T WORRY
 IF @transCount = 0 BEGIN TRANSACTION
+
+INSERT INTO @paymentIds
+SELECT 
+	A.intPaymentId
+	,B.strReferenceNo
+FROM tblAPPayment A
+INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+WHERE B.strLink = @strBatchId
 
 SELECT 
 	@totalPaymentToUpdate = COUNT(*)
@@ -23,8 +32,7 @@ WHERE B.strLink = @strBatchId
 UPDATE A
 	SET A.strPaymentInfo = B.strReferenceNo
 FROM tblAPPayment A
-INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-WHERE B.strLink = @strBatchId
+INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
 
 SET @totalPaymentUpdated = @@ROWCOUNT;
 
