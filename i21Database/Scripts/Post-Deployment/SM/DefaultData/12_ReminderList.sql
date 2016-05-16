@@ -171,21 +171,7 @@
 		SELECT [strReminder]        =        N'Process',
 				[strType]        	=        N'General Journal',
 				[strMessage]		=        N'{0} {1} {2} left unposted.',
-				[strQuery]  		=        N'SELECT A.intJournalId FROM tblGLJournal A 
-												CROSS APPLY(
-													select PostRemind_intDaysAfterEvent, PostRemind_intDaysBeforeEvent, PostRemind_strRemindUsers from tblGLCompanyPreferenceOption
-													where ISNULL(PostRemind_strNotificationMessage,'''') <> ''''
-												) Options
-												CROSS APPLY(
-													select intEntityId from tblEMEntity where intEntityId in (select Item from dbo.fnSplitString(Options.PostRemind_strRemindUsers,'',''))
-													and intEntityId = A.intEntityId
-												) Entity
-												CROSS APPLY(
-													SELECT TOP 1 dtmEndDate FROM tblGLFiscalYearPeriod WHERE A.dtmDate BETWEEN dtmStartDate and dtmEndDate
-												)Fiscal
-												WHERE A.dtmDate BETWEEN DATEADD(DAY, Options.PostRemind_intDaysBeforeEvent * -1, Fiscal.dtmEndDate) AND DATEADD(DAY, Options.PostRemind_intDaysAfterEvent, Fiscal.dtmEndDate) 
-												AND ysnPosted = 0
-												AND A.intEntityId = {0}',
+				[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
 				[strNamespace]      =        N'GeneralLedger.view.GeneralJournal?unposted=1',
 				[intSort]           =        8
 	END	
