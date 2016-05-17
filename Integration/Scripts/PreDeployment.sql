@@ -166,6 +166,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateGeneratedCallEntryView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryHistoryCallEntryView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeviceSearchView.sql"
+
 
 
 
