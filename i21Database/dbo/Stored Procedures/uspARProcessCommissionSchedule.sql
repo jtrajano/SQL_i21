@@ -18,7 +18,7 @@ AS
 			
 	DECLARE @tblARCommissionSchedules TABLE (
 		  intCommissionScheduleId	INT
-		, intEntityId				INT
+		, strEntityIds				NVARCHAR(500)
 		, intCommissionPlanId		INT
 		, strReviewPeriod			NVARCHAR(20)
 		, strScheduleType			NVARCHAR(20)
@@ -31,7 +31,7 @@ AS
 
 	INSERT INTO @tblARCommissionSchedules
 	SELECT intCommissionScheduleId
-		 , intEntityId			= CASE WHEN strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN intEntityId ELSE NULL END
+		 , strEntityIds			= CASE WHEN strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN strEntityIds ELSE NULL END
 		 , intCommissionPlanId	= CASE WHEN strScheduleType = @SCHEDTYPE_GROUP THEN intCommissionPlanId ELSE NULL END
 		 , strReviewPeriod
 		 , strScheduleType
@@ -57,9 +57,9 @@ AS
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionSchedules)
 				BEGIN
-					DECLARE @intActiveCommSchedId	INT
-						  , @intSchedEntityId		INT
+					DECLARE @intActiveCommSchedId	INT						  
 						  , @intSchedCommPlanId		INT
+						  , @strEntityIds			NVARCHAR(500)
 						  , @strReviewPeriod		NVARCHAR(20)
 						  , @strScheduleType		NVARCHAR(20)
 						  , @dtmSchedStartDate		DATETIME
@@ -69,9 +69,9 @@ AS
 						  , @ysnAdjustPrevious		BIT
 
 					SELECT TOP 1 
-							  @intActiveCommSchedId		= intCommissionScheduleId
-							, @intSchedEntityId			= intEntityId
+							  @intActiveCommSchedId		= intCommissionScheduleId							
 							, @intSchedCommPlanId		= intCommissionPlanId
+							, @strEntityIds				= strEntityIds
 							, @strReviewPeriod			= strReviewPeriod
 							, @strScheduleType			= strScheduleType
 							, @dtmSchedStartDate		= dtmStartDate
@@ -86,7 +86,7 @@ AS
 					
 					INSERT INTO @tblARCommissionScheduleDetails
 					SELECT CSD.intCommissionScheduleDetailId
-						 , CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN @intSchedEntityId ELSE CSD.intEntityId END
+						 , CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN NULL ELSE CSD.intEntityId END
 						 , CASE WHEN @strScheduleType = @SCHEDTYPE_GROUP THEN @intSchedCommPlanId ELSE CSD.intCommissionPlanId END
 						 , CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN 0 ELSE CSD.dblPercentage END
 					FROM tblARCommissionScheduleDetail CSD						
@@ -117,7 +117,7 @@ AS
 							SELECT TOP 1
 								  @intActiveCommSchedId
 								, CS.intCommissionPlanId
-								, CS.intEntityId
+								, CS.strEntityIds
 								, @dtmStartDate
 								, @dtmEndDate
 								, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
@@ -136,7 +136,7 @@ AS
 
 							IF @strScheduleType = @SCHEDTYPE_GROUP
 								BEGIN
-									EXEC dbo.uspARCalculateCommission @intSchedCommPlanId, @intSchedEntityId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+									EXEC dbo.uspARCalculateCommission @intSchedCommPlanId, NULL, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
 
 									UPDATE tblARCommission SET dblTotalAmount = @dblLineTotal WHERE intCommissionId = @intNewCommissionId
 
@@ -166,44 +166,56 @@ AS
 							ELSE IF @strScheduleType = @SCHEDTYPE_INDIVIDUAL
 								BEGIN
 									DECLARE @totalAmount NUMERIC(18,6) = 0
+									DECLARE @tblEntities TABLE(intEntityId INT)
 
-									WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
-									BEGIN
-										DECLARE @intCommissionScheduleDetailId	INT
-											  , @intCommissionPlanId			INT
-											  , @intEntityId					INT
+									INSERT INTO @tblEntities
+									SELECT intID FROM fnGetRowsFromDelimitedValues(@strEntityIds)
 
-										SELECT TOP 1
-												@intCommissionScheduleDetailId	= intCommissionScheduleDetailId
-											  , @intCommissionPlanId			= intCommissionPlanId
-										FROM @tblARCommissionScheduleDetails
+									IF EXISTS(SELECT TOP 1 1 FROM @tblEntities) AND ISNULL(@strEntityIds, '') <> ''
+										BEGIN
+											DECLARE @intEntityId INT = NULL
+
+											SELECT TOP 1 @intEntityId = intEntityId FROM @tblEntities											
+
+											WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
+												BEGIN
+													DECLARE @intCommissionScheduleDetailId	INT
+														  , @intCommissionPlanId			INT
+
+													SELECT TOP 1
+															@intCommissionScheduleDetailId	= intCommissionScheduleDetailId
+														  , @intCommissionPlanId			= intCommissionPlanId
+													FROM @tblARCommissionScheduleDetails
 																				
-										EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intSchedEntityId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+													EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
 
-										INSERT INTO tblARCommissionDetail
-											( intCommissionId
-											, intEntityId	
-											, intCommissionPlanId
-											, intSourceId
-											, strSourceType
-											, dtmSourceDate
-											, dblAmount)
-										SELECT TOP 1
-											  @intNewCommissionId
-											, @intSchedEntityId
-											, @intCommissionPlanId
-											, 0
-											, ''
-											, GETDATE()
-											, @dblLineTotal
-										FROM @tblARCommissionScheduleDetails
+													INSERT INTO tblARCommissionDetail
+														( intCommissionId
+														, intEntityId	
+														, intCommissionPlanId
+														, intSourceId
+														, strSourceType
+														, dtmSourceDate
+														, dblAmount)
+													SELECT TOP 1
+														  @intNewCommissionId
+														, @intEntityId
+														, @intCommissionPlanId
+														, 0
+														, ''
+														, GETDATE()
+														, @dblLineTotal
+													FROM @tblARCommissionScheduleDetails
 										
-										SET @totalAmount = @totalAmount + @dblLineTotal
+													SET @totalAmount = @totalAmount + @dblLineTotal
 																			
-										DELETE FROM @tblARCommissionScheduleDetails WHERE intCommissionScheduleDetailId = @intCommissionScheduleDetailId
-									END
+													DELETE FROM @tblARCommissionScheduleDetails WHERE intCommissionScheduleDetailId = @intCommissionScheduleDetailId
+												END
 
-									UPDATE tblARCommission SET dblTotalAmount = @totalAmount WHERE intCommissionId = @intNewCommissionId
+											UPDATE tblARCommission SET dblTotalAmount = @totalAmount WHERE intCommissionId = @intNewCommissionId
+
+											DELETE FROM @tblEntities WHERE intEntityId = @intEntityId
+										END									
 								END
 						END
 					

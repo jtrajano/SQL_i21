@@ -107,6 +107,7 @@ BEGIN TRY
 		FROM	#tmpExtracted
 		
 		EXEC	uspCTGetTableDataInXML '#tmpContractHeader',null,@strTblXML OUTPUT,'tblCTContractHeader'
+		EXEC	uspCTValidateContractHeader @strTblXML,'Added'
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractHeader',@strTblXML,@intContractHeaderId OUTPUT
 		
 		INSERT	INTO #tmpContractDetail(intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intCreatedById,intConcurrencyId)
@@ -114,6 +115,7 @@ BEGIN TRY
 		FROM	#tmpExtracted
 
 		EXEC	uspCTGetTableDataInXML '#tmpContractDetail',null,@strTblXML OUTPUT,'tblCTContractDetail'
+		EXEC	uspCTValidateContractDetail @strTblXML,'Added'
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@strTblXML,@intContractDetailId OUTPUT
 	END
 

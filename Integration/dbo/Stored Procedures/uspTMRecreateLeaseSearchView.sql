@@ -93,7 +93,7 @@ BEGIN
 				LEFT JOIN tblTMLeaseDevice K
 					ON A.intLeaseId = K.intLeaseId
 				LEFT JOIN tblTMDevice C
-					ON K.intLeaseId = C.intLeaseId
+					ON K.intDeviceId = C.intDeviceId
 				LEFT JOIN(
 					SELECT DISTINCT 
 						S.intSiteID

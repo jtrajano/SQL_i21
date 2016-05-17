@@ -8,7 +8,7 @@
 	[aphgl_gl_acct] [decimal](16, 8) NOT NULL,
 	[aphgl_gl_amt] [decimal](11, 2) NULL,
 	[aphgl_gl_un] [decimal](13, 4) NULL,
-	[A4GLIdentity] [numeric](9, 0) IDENTITY(1,1) NOT NULL,
+	[A4GLIdentity] [numeric](9, 0) NOT NULL,
 	[intBillDetailId] INT
  CONSTRAINT [k_tblAPaphglmst] PRIMARY KEY NONCLUSTERED 
 (

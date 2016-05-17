@@ -96,6 +96,9 @@ BEGIN
 			begin
 				set @CurTableName = 'tblAPVendor'
 				set @CurTableKey = 'intEntityVendorId'
+
+				INSERT INTO @EntityRelationShips(stment)
+				VALUES('DELETE FROM tblAPImportedVendors where strVendorId in (select strVendorId from tblAPVendor where intEntityVendorId = ' + @CurMergeId + ' )')
 			end
 			else if @curtype = 'Salesperson'
 			begin
@@ -278,7 +281,8 @@ BEGIN
 			BEGIN 
 				EXEC('ALTER TABLE tblSMUserSecurity ADD CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName])')
 			END 
-
+			
+			EXEC('UPDATE tblEMEntity set strEntityNo = null where intEntityId = ' + @CurMergeId)
 			COMMIT
 		END TRY
 		BEGIN CATCH

@@ -2012,3 +2012,15 @@ BEGIN
     VALUES(2,'Amount')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFCostSource WHERE intCostSourceId = 1)
+BEGIN
+    INSERT INTO tblMFCostSource(intCostSourceId,strName)
+    VALUES(1,'Item')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFCostSource WHERE intCostSourceId = 2)
+BEGIN
+    INSERT INTO tblMFCostSource(intCostSourceId,strName)
+    VALUES(2,'Sales Contract')
+END
+GO

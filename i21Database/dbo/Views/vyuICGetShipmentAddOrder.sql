@@ -8,11 +8,11 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, strSourceType = 'None'
 		, intLocationId = SODetail.intCompanyLocationId
 		, strShipFromLocation = SODetail.strLocationName
-		, intEntityCustomerId
-		, strCustomerNumber
-		, strCustomerName
+		, SODetail.intEntityCustomerId
+		, SODetail.strCustomerNumber
+		, SODetail.strCustomerName
 		, intLineNo = intSalesOrderDetailId
-		, intOrderId = intSalesOrderId
+		, intOrderId = SODetail.intSalesOrderId
 		, strOrderNumber = SODetail.strSalesOrderNumber
 		, intSourceId = NULL
 		, strSourceNumber = NULL
@@ -45,14 +45,18 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblLineTotal = ISNULL(dblQtyShipped, 0) * ISNULL(dblPrice, 0)
 		, intGradeId = NULL
 		, strGrade = NULL
-	FROM vyuSOSalesOrderDetail SODetail LEFT JOIN dbo.tblICItemLocation DefaultFromItemLocation
+	FROM vyuSOSalesOrderDetail SODetail INNER JOIN vyuSOSalesOrderSearch SO
+			ON SODetail.intSalesOrderId = SO.intSalesOrderId
+		LEFT JOIN dbo.tblICItemLocation DefaultFromItemLocation
 			ON DefaultFromItemLocation.intItemId = SODetail.intItemId
 			AND DefaultFromItemLocation.intLocationId = SODetail.intCompanyLocationId
 		LEFT JOIN dbo.tblSMCompanyLocationSubLocation SubLocation
 			ON SubLocation.intCompanyLocationSubLocationId = DefaultFromItemLocation.intSubLocationId
 		LEFT JOIN dbo.tblICStorageLocation StorageLocation
 			ON StorageLocation.intStorageLocationId = DefaultFromItemLocation.intStorageLocationId
-	WHERE ysnProcessed = 0
+	--WHERE ysnProcessed = 0
+	WHERE	ISNULL(SODetail.dblQtyShipped, 0) < ISNULL(SODetail.dblQtyOrdered, 0) 
+			AND ISNULL(SO.strOrderStatus, '') IN ('Open', 'Partial', 'Pending')
 
 	UNION ALL 
 

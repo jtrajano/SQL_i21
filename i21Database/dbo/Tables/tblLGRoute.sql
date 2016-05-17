@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[tblLGRoute]
 	[intFromCompanyLocationId] INT NULL, 
 	[intFromCompanyLocationSubLocationId] INT NULL,
 	[dblTruckCapacity] NUMERIC(18, 6) NULL,
+	[ysnPosted] BIT NULL, 
+	[dtmPostedDate] DATETIME NULL,
 
 	CONSTRAINT [PK_tblLGRoute] PRIMARY KEY ([intRouteId]), 
 	CONSTRAINT [FK_tblLGRoute_tblEMEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES [tblEMEntity]([intEntityId]),

@@ -20,6 +20,8 @@ SELECT
 	,Rte.strComments
 	,Rte.intFromCompanyLocationId
 	,Rte.intFromCompanyLocationSubLocationId
+	,Rte.ysnPosted
+	,Rte.dtmPostedDate
 	,strFromAddress			= CASE WHEN IsNull(Rte.intFromCompanyLocationSubLocationId, 0) <> 0 THEN 
 									SubCompLoc.strAddress 
 								ELSE 

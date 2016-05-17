@@ -52,5 +52,5 @@ AS
 		ON A.intUserID = H.[intEntityUserSecurityId]
 	LEFT JOIN tblSMCompanyLocation I
 		ON B.intLocationId = I.intCompanyLocationId
-	WHERE A.strOrderNumber IS NOT NULL
+	WHERE ISNULL(A.strOrderNumber,'') <> ''
 GO

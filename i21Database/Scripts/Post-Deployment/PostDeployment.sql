@@ -151,7 +151,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\7_FiscalYearPeriod.sql
 :r .\GL\DefaultData\8_AccountCurrency.sql
 :r .\GL\DefaultData\9_AlterTable.sql
-:r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
 :r .\GL\ReportData\TrialBalance.sql
@@ -214,7 +213,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\RemoveBillTemplate.sql
 :r .\AP\UpdateVoucherForApproval.sql
 :r .\AP\UpdateBillPayToAddress.sql
-:r .\AP\UpdateBillGLEntriesRecords.sql
+:r .\AP\UpdateBillGLEntriesRecords.SQL
+:r .\AP\UpdateBillDetailCurrencies.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
@@ -307,7 +307,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\023_RenameEntityContactEmailDistribution.sql
 :r .\EM\024_delete_old_entity_table.sql
 :r .\EM\025_UpdatePhoneNumberAndCreateBackup.sql
+:r .\EM\028_MassCountryFormat.sql
 :r .\EM\026_ImportPhoneNumbersToNewTable.sql
+:r .\EM\027_MassUpdatePhoneNumber.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

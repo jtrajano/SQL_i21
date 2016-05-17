@@ -3,6 +3,7 @@ AS
 SELECT  L.intLoadId
 		,LDV.intLoadDetailId
 		,LC.intLoadContainerId
+		,LDCL.intLoadDetailContainerLinkId
 		,L.strLoadNumber
 		,L.strBLNumber
 		,L.dtmBLDate
@@ -49,6 +50,10 @@ SELECT  L.intLoadId
 		,LC.ysnUSDAHold
 		,PCDV.strContractNumber AS strPContractNumber
 		,SCDV.strContractNumber AS strSContractNumber
+		,strContainerSampleStatus = (SELECT TOP 1 SS.strStatus
+								     FROM tblQMSample S
+									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+									 AND S.strContainerNumber = LC.strContainerNumber)
 FROM vyuLGLoadView L
 JOIN vyuLGLoadDetailView LDV ON L.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId

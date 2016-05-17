@@ -5,6 +5,10 @@
 )
 RETURNS @tbl TABLE (
 strAccountId NVARCHAR(100),
+debit NUMERIC(18,6),
+credit NUMERIC(18,6),
+debitUnit NUMERIC(18,6),
+creditUnit NUMERIC(18,6),
 beginBalance NUMERIC (18,6),
 beginBalanceUnit NUMERIC(18,6)
 )
@@ -19,18 +23,19 @@ BEGIN
 		;WITH cte as(
 		SELECT  
 				 @strAccountId AS strAccountId,
-				(dblCredit - dblDebit) as beginbalance,
-				(dblCreditUnit - dblDebitUnit) as beginbalanceunit
+				 SUM(dblDebit) AS debit,SUM(dblCredit) AS credit,SUM(dblDebitUnit) AS debitUnit,SUM(dblCreditUnit) AS creditUnit,
+				 SUM(dblCredit - dblDebit)*-1 as beginBalance,
+				 SUM(dblCreditUnit - dblDebitUnit) as beginBalanceUnit
 		  
 		FROM tblGLAccount A
 			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 			LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
 			CROSS APPLY (SELECT dtmDateFrom,dtmDateTo from tblGLFiscalYear where @dtmDate >= dtmDateFrom AND @dtmDate <= dtmDateTo) D
 		WHERE
-		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < @dtmDate)
-		OR (strAccountId =@strAccountId AND C.dtmDate >= D.dtmDateFrom AND C.dtmDate <@dtmDate) and strCode <> '')
+		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < D.dtmDateFrom)
+		OR (strAccountId =@strAccountId AND C.dtmDate BETWEEN D.dtmDateFrom AND @dtmDate) and strCode <> '')
 		insert into @tbl
-		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
+		select strAccountId,debit,credit,debitUnit,creditUnit, beginBalance ,beginBalanceUnit from cte 
 		
 		RETURN 
 	END
@@ -42,9 +47,10 @@ BEGIN
 			INSERT  @tbl
 			SELECT  
 					strAccountId,
+					SUM(dblDebit) AS debit,SUM(dblCredit) AS credit,SUM(dblDebitUnit) AS debitUnit,SUM(dblCreditUnit) AS creditUnit,
 					SUM ( CASE 
 						  WHEN D.dtmDateFrom IS NULL THEN 0 
-						  WHEN @accountType = 'Revenue' THEN dblCredit - dblDebit
+						  WHEN @accountType = 'Revenue' THEN (dblCredit - dblDebit) *-1
 						  ELSE dblDebit - dblCredit
 					END)  beginBalance,
 					SUM( 
@@ -63,9 +69,10 @@ BEGIN
 		INSERT  @tbl
 		SELECT  
 				strAccountId,
+				SUM(dblDebit) AS debit,SUM(dblCredit) AS credit,SUM(dblDebitUnit) AS debitUnit,SUM(dblCreditUnit) AS creditUnit,
 				SUM( 
-				CASE WHEN B.strAccountType = 'Asset' THEN dblDebit - dblCredit
-						ELSE dblCredit - dblDebit
+				CASE WHEN B.strAccountType = 'Asset' THEN (dblDebit - dblCredit)
+						ELSE (dblCredit - dblDebit )*-1
 				END)  beginBalance,
 				SUM( 
 				CASE WHEN B.strAccountType = 'Asset' THEN dblDebitUnit - dblCreditUnit

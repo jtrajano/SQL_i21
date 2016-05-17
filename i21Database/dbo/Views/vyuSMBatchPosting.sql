@@ -36,6 +36,8 @@ FROM
 	WHERE ysnPosted = 0 AND strBankTransactionTypeName IN ('Bank Deposit', 'Bank Transaction', 'Misc Checks')
 	UNION ALL
 	SELECT 'Bank Transfer', intTransactionId, strTransactionId, dblAmount, '' AS strVendorInvoiceNumber, NULL AS intEntityVendorId, intEntityId, dtmDate, strDescription FROM tblCMBankTransfer WHERE ysnPosted = 0
+	UNION ALL
+	SELECT 'Meter Reading', intMeterReadingId, strTransactionId, Total.dblNetPrice, '' AS strVendorInvoiceNumber, intEntityCustomerId, intEntityId, dtmTransaction, '' AS strDescription FROM vyuMBGetMeterReading Header CROSS APPLY(SELECT SUM(dblNetPrice) dblNetPrice FROM tblMBMeterReadingDetail Detail WHERE Detail.intMeterReadingId = Header.intMeterReadingId) Total WHERE ISNULL(ysnPosted, 0) = 0
 ) BatchPosting
 LEFT JOIN tblEMEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
 LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityUserSecurityId

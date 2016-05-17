@@ -3,6 +3,13 @@ AS
 SELECT 
 	Rte.intRouteOrderId
 	,Rte.intRouteId
+	,R.strRouteNumber
+	,R.strDriver
+	,R.dtmDispatchedDate
+	,R.dblTruckCapacity
+	,R.strComments
+	,R.strFromLocation
+	,R.strFromSubLocation
 	,Rte.intDispatchID
 	,Rte.intLoadDetailId
 	,Rte.intSequence
@@ -18,7 +25,6 @@ SELECT
 	,dtmScheduledDate =			CASE WHEN IsNull(Rte.intDispatchID, 0) <> 0 THEN TMO.dtmRequestedDate ELSE LD.dtmScheduledDate END
 	,strEntityName =			CASE WHEN IsNull(Rte.intDispatchID, 0) <> 0 THEN TMO.strCustomerName ELSE LD.strCustomer END
 	,strOrderStatus =			CASE WHEN IsNull(Rte.intDispatchID, 0) <> 0 THEN TMO.strOrderStatus ELSE LGL.strShipmentStatus END
-	,strDriver =				CASE WHEN IsNull(Rte.intDispatchID, 0) <> 0 THEN TMO.strDriverName ELSE LD.strDriver END
 	,strItemNo =				CASE WHEN IsNull(Rte.intDispatchID, 0) <> 0 THEN TMO.strProduct ELSE LD.strItemNo END
 	,dblQuantity =				CASE WHEN IsNull(Rte.intDispatchID, 0) <> 0 THEN TMO.dblQuantity ELSE LD.dblQuantity END
 	,strCustomerReference =		CASE WHEN IsNull(Rte.intDispatchID, 0) <> 0 THEN '' ELSE LD.strCustomerReference END
@@ -60,6 +66,7 @@ SELECT
 									''
 								END
 FROM tblLGRouteOrder Rte
+JOIN vyuLGRoute R ON R.intRouteId = Rte.intRouteId
 LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = Rte.intDispatchID
 LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = Rte.intLoadDetailId
 LEFT JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
