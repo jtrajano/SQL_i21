@@ -12,8 +12,16 @@ BEGIN
 
 	SELECT ilt.dtmCreated AS dtmDateTime
 		,l.strLotNumber AS strLotNo
-		,i.strItemNo AS strItem
-		,i.strDescription AS strDescription
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN i.strItemNo
+			ELSE i1.strItemNo
+			END AS strItem
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN i.strDescription
+			ELSE i1.strDescription
+			END AS strDescription
 		,c.strCategoryCode
 		,clsl.strSubLocationName AS strSubLocation
 		,sl.strName AS strStorageLocation
@@ -33,7 +41,11 @@ BEGIN
 				THEN L1.strLotNumber
 			ELSE iad.strNewLotNumber
 			END AS strRelatedLotId
-		,'' AS strPreviousItem
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN NULL
+			ELSE i.strItemNo
+			END AS strPreviousItem
 		,CASE 
 			WHEN iad.intNewLotId = @intLotId
 				THEN clsl2.strSubLocationName
@@ -61,7 +73,7 @@ BEGIN
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
+	LEFT JOIN tblICItem i ON i.intItemId = iad.intItemId
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
@@ -75,6 +87,7 @@ BEGIN
 	LEFT JOIN tblICStorageLocation sl2 ON sl2.intStorageLocationId = iad.intStorageLocationId
 	LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
 	LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
+	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
 	
 	UNION ALL
