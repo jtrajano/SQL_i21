@@ -38,7 +38,7 @@ CREATE TABLE #tmpCreatedBillDetail (
 	UNIQUE ([intBillDetailId])
 );
 
-BEGIN TRANSACTION
+--BEGIN TRANSACTION
 
 INSERT INTO #tmpReceiptIds(intInventoryReceiptId) SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@receiptIds)
 
@@ -65,7 +65,7 @@ IF NOT EXISTS(SELECT 1 FROM tblICInventoryReceiptItem A
 					AND A.dblOpenReceive != A.dblBillQty)
 BEGIN
 	RAISERROR('All of the item in the receipt was fully billed.', 16, 1);
-	GOTO DONE
+	--GOTO DONE
 END
 
 --removed first the constraint
@@ -92,7 +92,7 @@ BEGIN
 	IF @APAccount IS NULL OR @APAccount <= 0
 	BEGIN
 		RAISERROR('Please setup default AP Account.', 16, 1);
-		GOTO DONE
+		--GOTO DONE
 	END
 		
 	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
@@ -103,12 +103,10 @@ BEGIN
 																															AND E.intContractHeaderId = B.intOrderId 
 																															AND E1.intContractDetailId = B.intLineNo 
 		WHERE A.intInventoryReceiptId = @receiptId AND E1.intPricingTypeId = 2)
-
-
 	IF (@cashPrice = 0)
 		BEGIN
-			RAISERROR('Cannot create Voucher for Basis Contract with 0 Cash Price.', 16, 1);
-			GOTO DONE			 									       
+			RAISERROR('Cannot create Voucher with 0.00 amount.', 16, 1);
+			--GOTO DONE			 									       
 		END
 					
 	INSERT INTO tblAPBill(
@@ -383,14 +381,14 @@ END
 ALTER TABLE tblAPBill
 	ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
-DONE:
-IF @@ERROR != 0
-BEGIN
-	ROLLBACK TRANSACTION
-END
-ELSE
-BEGIN
-	COMMIT TRANSACTION
-END
+--DONE:
+--IF @@ERROR != 0
+--BEGIN
+--	ROLLBACK TRANSACTION
+--END
+--ELSE
+--BEGIN
+--	COMMIT TRANSACTION
+--END
 
 SELECT * FROM #tmpReceiptBillIds
