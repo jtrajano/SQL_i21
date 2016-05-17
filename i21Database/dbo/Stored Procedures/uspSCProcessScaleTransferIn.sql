@@ -74,9 +74,9 @@ BEGIN TRY
 			,intShipFromId				= (SELECT SS.intLocationId from tblSCTicket as ST JOIN tblSCScaleSetup as SS
 											ON ST.intScaleSetupId = SS.intScaleSetupId
 											WHERE ST.intMatchTicketId = @intMatchTicketId)
-			,intLocationId				= SC.intProcessingLocationId
+			,intLocationId				= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
 			,intItemId					= SC.intItemId
-			,intItemLocationId			= SC.intProcessingLocationId
+			,intItemLocationId			= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
 			,intItemUOMId				=	CASE	
 												WHEN SC.intContractId is NULL  
 													THEN (SELECT TOP 1 
