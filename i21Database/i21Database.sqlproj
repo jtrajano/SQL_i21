@@ -3813,6 +3813,8 @@
     <Build Include="dbo\Views\vyuRKGetTraderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCCTransactionToAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspCCTransactionToARInvoice.sql" />
+    <Build Include="dbo\Tables\tblCMBankFileGenerationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankFileGenerationLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
