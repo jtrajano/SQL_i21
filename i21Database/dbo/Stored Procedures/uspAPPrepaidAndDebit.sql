@@ -66,10 +66,12 @@ SELECT
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
-													  THEN	A.dblAmountDue
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
+													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
+																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+															END
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
-												 END   
+												 END  
 										END
 									ELSE 0 END,	
 	[dblAmountApplied]		=	B.dblTotal - (CASE B.intPrepayTypeId 
@@ -156,10 +158,12 @@ SELECT
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
-													  THEN	A.dblAmountDue
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
+													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
+																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+															END
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
-												 END   
+												 END  
 										END
 									ELSE 0 END,
 	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
@@ -246,10 +250,12 @@ SELECT
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
-													  THEN	A.dblAmountDue
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
+													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
+																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+															END
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
-												 END   
+												 END  
 										END                                       
 									ELSE 0 END,
 	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
@@ -336,10 +342,12 @@ SELECT
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
-													  THEN	A.dblAmountDue
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
+													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
+																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+															END
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
-												 END   
+												 END  
 										END
 									ELSE 0 END,
 	[dblAmountApplied]		=	B.dblTotal - (CASE B.intPrepayTypeId 
@@ -460,10 +468,12 @@ SELECT
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
-													  THEN	A.dblAmountDue
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
+													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
+																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+															END
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
-												 END   
+												 END  
 										END                                        
 									ELSE 0 END,
 	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
@@ -549,10 +559,12 @@ SELECT
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
-													  THEN	A.dblAmountDue
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
+													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
+																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+															END
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
-												 END   
+												 END  
 										END                                        
 									ELSE 0 END,
 	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
@@ -608,6 +620,7 @@ UNION ALL
 --PREPAYMENT MISC //SAME ITEM
 --=========================================================
 SELECT
+
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
 	[intLineApplied]		=	CurrentBill.intLineNo, 
@@ -638,10 +651,12 @@ SELECT
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
 											THEN ((B.dblTotal - dblAmountDue) * CurrentBill.allocatedAmount)
-											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal)
-													  THEN	A.dblAmountDue
+											ELSE CASE WHEN (A.dblAmountDue < CurrentBill.dblTotal) --Validate if prepayment amount if less than voucher total.
+													  THEN	CASE WHEN  (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount)  > A.dblAmountDue  --validate if the percetage computation is greater than prepayment.
+																 THEN A.dblAmountDue ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
+															END
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
-												 END   
+												 END  
 										END                                        
 									ELSE 0 END,
 	[dblAmountApplied]			=	B.dblTotal - (CASE B.intPrepayTypeId 
