@@ -490,13 +490,16 @@ BEGIN
 						,ICTrans.dtmDate  
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
-						,dblCost = 							
-							ISNULL (
+						,dblCost = ISNULL (
 								dbo.fnDivide(
-									(	SELECT SUM (
-													-1 
-													-- Round the values of each of the items. 
-													* ROUND(CAST(dbo.fnMultiply(dblQty, dblCost) + dblValue AS NUMERIC(18, 6)) ,2)
+									(	SELECT SUM( 
+													dbo.fnMultiply(
+														-1
+														,ROUND(
+															dbo.fnMultiply(dblQty, dblCost) + dblValue
+															, 2
+														)
+													)
 												)												
 										FROM	dbo.tblICInventoryTransaction 
 										WHERE	strTransactionId = @strTransactionId 
