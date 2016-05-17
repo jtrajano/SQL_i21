@@ -490,9 +490,23 @@ BEGIN
 						,ICTrans.dtmDate  
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
-						,dblCost = ISNULL (
+						,dblCost = 
+							-- Round the values of each of the items. 
+							ISNULL (
 								dbo.fnDivide(
-									(SELECT SUM( dbo.fnMultiply(-1, dbo.fnMultiply(dblQty, dblCost)) ) FROM dbo.tblICInventoryTransaction WHERE strTransactionId = @strTransactionId AND strBatchId = @strBatchId) 
+									(	SELECT SUM( 
+													dbo.fnMultiply(
+														-1
+														,ROUND(
+															dbo.fnMultiply(dblQty, dblCost) + dblValue
+															, 2
+														)
+													)
+												)												
+										FROM	dbo.tblICInventoryTransaction 
+										WHERE	strTransactionId = @strTransactionId 
+												AND strBatchId = @strBatchId
+									) 
 									, ICTrans.dblQty
 								) 
 								, 0
@@ -1091,12 +1105,12 @@ BEGIN
 				UPDATE	@GLEntries 
 				SET		dblDebit = (SELECT SUM(dblCredit) FROM @GLEntries WHERE strTransactionType = 'Consume') 
 				WHERE	strTransactionType = 'Produce'
-						--AND dblDebit <> 0 
+						AND dblDebit <> 0 
 
 				UPDATE	@GLEntries 
 				SET		dblCredit = (SELECT SUM(dblDebit) FROM @GLEntries WHERE strTransactionType = 'Consume') 
 				WHERE	strTransactionType = 'Produce'
-						--AND dblCredit <> 0 
+						AND dblCredit <> 0 
 			END 							
 
 		END 
