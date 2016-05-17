@@ -4075,14 +4075,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                     });
                     search.close();
-                    win.context.data.saveRecord();
+                    //win.context.data.saveRecord();
                 },
                 openallclick: function () {
                     search.close();
                 }
             });
             search.show();
-        }
+        };
         showAddScreen();
     },
 
