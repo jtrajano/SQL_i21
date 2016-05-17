@@ -639,7 +639,6 @@
     <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
     <None Include="i21Database.publish.xml" />
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
-    <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
     <None Include="Scripts\Post-Deployment\CM\3_PopulateSourceSystemData.sql" />
@@ -3443,7 +3442,6 @@
     <Build Include="dbo\Views\vyuMFGetTraceabilityObject.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
-    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingDetailAsOfDateReport.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileBPayee.sql" />
@@ -3563,7 +3561,6 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalancePrintEach.sql" />
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblARQuotePage.sql" />
@@ -3689,8 +3686,6 @@
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptTransactionImport.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustmentNotMapped.sql" />
-    <Build Include="dbo\Functions\fnGLGetActivityBalance.sql" />
-    <Build Include="dbo\Functions\fnGLGetBalancesDateCriteria.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinDetails.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBins.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryTransferView.sql" />
@@ -3782,8 +3777,10 @@
     <Build Include="dbo\Stored Procedures\uspGRCheckItemUsedInDiscountCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateContract.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
+    <Build Include="dbo\Tables\tblEMEntityLineOfBusiness.sql" />
+    <Build Include="dbo\Tables\tblEMEntityCRMInformation.sql" />
+    <Build Include="dbo\Tables\tblEMEntityAreaOfInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadItem.sql" />
-    <Build Include="dbo\Functions\fnGLComputeBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidateContractHeader.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalSalesRecap.sql" />
@@ -3794,8 +3791,28 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalToDepositRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutTotalDepositRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCashOverShortRecap.sql" />
-    <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessPayments.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailCurrencies.sql" />
+    <Build Include="dbo\Tables\tblAPImportVoucherLog.sql" />
+    <Build Include="dbo\Functions\fnEMGetNumberFromString.sql" />
+    <Build Include="dbo\Functions\fnEMIsCharNumber.sql" />
+    <Build Include="dbo\Functions\fnEMPhoneConvert.sql" />
+    <Build Include="dbo\Functions\fnEMPhoneFormat.sql" />
+    <Build Include="dbo\Functions\fnEMIsPhoneDelimeter.sql" />
+    <None Include="Scripts\Post-Deployment\EM\027_MassUpdatePhoneNumber.sql" />
+    <Build Include="dbo\User Defined Types\RouteOrdersTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGRouteUpdateOrders.sql" />
+    <None Include="Scripts\Post-Deployment\EM\028_MassCountryFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeItems.sql" />
+    <Build Include="dbo\Tables\tblMFCostSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemsCost.sql" />
+    <Build Include="dbo\Views\vyuGLPostRemind.sql" />
+    <Build Include="dbo\Tables\tblSMRemoteServer.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerByMarket.sql" />
+    <Build Include="dbo\Views\vyuRKGetBankDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetTraderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCTransactionToAPBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCTransactionToARInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

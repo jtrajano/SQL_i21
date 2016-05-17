@@ -59,8 +59,8 @@ SELECT
 	,strEntityState = LGLD.strShipToState
 	,strEntityCountry = LGLD.strShipToCountry
 	,strDestination = LGLD.strShipToAddress + ', ' + LGLD.strShipToCity + ', ' + LGLD.strShipToState + ' ' + LGLD.strShipToZipCode 
-	,dblToLongitude = 0.0
-	,dblToLatitude = 0.0
+	,dblToLongitude = EML.dblLatitude
+	,dblToLatitude = EML.dblLongitude
 	,strOrderStatus = LGL.strShipmentStatus
 	,strDriver = LGL.strDriver
 	,strItemNo = LGLD.strItemNo
@@ -71,5 +71,6 @@ SELECT
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intSCompanyLocationId
+JOIN tblEMEntityLocation EML ON EML.intEntityLocationId = LGLD.intCustomerEntityLocationId
 WHERE LGL.intPurchaseSale = 2 AND LGL.intShipmentStatus = 1
 ) t1

@@ -1,62 +1,32 @@
 ﻿CREATE PROCEDURE uspTMUpdateRouteSequence 
-	@intDispatchId AS INT
-	,@intDriverId AS INT = NULL
-	,@intRoutingId AS INT = NULL
-	,@dblLatitude AS NUMERIC(18,6) = NULL
-	,@dblLongitude AS NUMERIC(18,6) = NULL
+	@RouteOrder RouteOrdersTableType READONLY
 AS
 BEGIN
 
-	DECLARE @ysnUpdated BIT 
-	DECLARE @intSiteId INT
-
-	SELECT TOP 1 @intSiteId = intSiteID FROM tblTMDispatch WHERE intDispatchID = @intDispatchId
-
-	SET @ysnUpdated = 0
-
-	IF(ISNULL(@intDriverId,0) <> 0)
-	BEGIN
-		UPDATE tblTMDispatch
-		SET intDriverID = @intDriverId
-		WHERE intDispatchID = @intDispatchId
-	END
-
-
-	IF(ISNULL(@intRoutingId,0) <> 0)
-	BEGIN
-		UPDATE tblTMDispatch
-		SET intRouteId = @intRoutingId
-		WHERE intDispatchID = @intDispatchId
-	END
-
-	
-	IF(@dblLatitude IS NOT NULL)
-	BEGIN
-		UPDATE tblTMSite
-		SET dblLatitude = @dblLatitude
-		WHERE intSiteID = @intSiteId
-		SET @ysnUpdated = 1
-	END
-
-	IF(@dblLongitude IS NOT NULL)
-	BEGIN
-		UPDATE tblTMSite
-		SET dblLongitude = @dblLongitude
-		WHERE intSiteID = @intSiteId
-		SET @ysnUpdated = 1
-	END
-
-	IF(@ysnUpdated = 1)
-	BEGIN
-		UPDATE tblTMSite
-		SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-		WHERE intSiteID = @intSiteId
-	END
-
+	--Update Dispatch
 	UPDATE tblTMDispatch
-	SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-		,strWillCallStatus = 'Routed'
-	WHERE intDispatchID = @intDispatchId
+		SET intRouteId = A.intRouteId
+			,intDriverID = A.[intDriverEntityId]
+			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+			,strWillCallStatus = CASE WHEN A.intRouteId IS NULL THEN 'Generated' ELSE 'Routed' END
+	FROM @RouteOrder A
+	WHERE tblTMDispatch.intDispatchID = A.intOrderId
+
+	---Update Site
+	UPDATE tblTMSite
+	SET dblLongitude = A.dblLongitude
+		,dblLatitude =A.dblLatitude
+		,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+	FROM ( 
+		SELECT A.*
+			,B.intSiteID
+		FROM @RouteOrder A
+		INNER JOIN tblTMDispatch B
+			ON A.intOrderId = B.intDispatchID
+	) A
+	WHERE tblTMSite.intSiteID = A.intSiteID
+		AND (ISNULL(tblTMSite.dblLongitude,0) = 0 OR ISNULL(tblTMSite.dblLatitude,0) = 0)
+
 
 	
 END

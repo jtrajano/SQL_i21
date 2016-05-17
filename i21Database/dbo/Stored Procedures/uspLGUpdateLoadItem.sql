@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGUpdateLoadItem]
 	@intContractDetailId INT
-	,@intItemId INT
-	,@intItemUOMId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -16,7 +14,7 @@ DECLARE @ErrorState INT;
 DECLARE @ErrMsg      NVARCHAR(MAX);
 DECLARE @strItemType NVARCHAR(MAX);
 DECLARE @intContractTypeId INT; 
-DECLARE @intCount INT;
+DECLARE @intCount INT, @intItemId INT, @intItemUOMId INT;
 
 BEGIN TRY
 	IF (IsNull(@intContractDetailId, 0) = 0)
@@ -24,18 +22,8 @@ BEGIN TRY
 		RAISERROR('Invalid Contract Sequence Identifier', 11, 1);
 		RETURN;
 	END
-	IF (IsNull(@intItemId, 0) = 0)
-	BEGIN
-		RAISERROR('Invalid Item Identifier', 11, 1);
-		RETURN;
-	END
-	IF (IsNull(@intItemUOMId, 0) = 0)
-	BEGIN
-		RAISERROR('Invalid Item UOM Identifier', 11, 1);
-		RETURN;
-	END
 
-	SELECT @intContractTypeId = CT.intContractTypeId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId=@intContractDetailId
+	SELECT @intContractTypeId = CT.intContractTypeId, @intItemId=CT.intItemId, @intItemUOMId=CT.intItemUOMId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId=@intContractDetailId
 	SELECT @strItemType = Item.strType FROM tblICItem Item WHERE Item.intItemId = @intItemId
 	SELECT @intCount = COUNT(LD.intLoadDetailId) FROM tblLGLoadDetail LD  
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -64,8 +52,11 @@ BEGIN TRY
 		RETURN;
 	END
 
-	UPDATE tblLGLoadDetail SET intItemId = @intItemId, intItemUOMId=@intItemUOMId WHERE intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId
-	UPDATE tblLGLoadDetail SET intWeightItemUOMId = @intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intWeightItemUOMId = intItemUOMId
+	UPDATE tblLGLoadDetail SET intItemId = @intItemId WHERE intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId AND intItemId <> @intItemId
+
+	UPDATE tblLGLoadDetail SET intWeightItemUOMId = @intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intWeightItemUOMId = intItemUOMId AND intItemUOMId <> @intItemUOMId
+
+	UPDATE tblLGLoadDetail SET intItemUOMId=@intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intItemUOMId <> @intItemUOMId
 
 END TRY
 BEGIN CATCH

@@ -4,7 +4,8 @@
 	@dblMinimumRefund NUMERIC(18,6) = 10,
 	@dblCashCutoffAmount NUMERIC(18,6) = 10,
 	@FWT NUMERIC(18,6) = 5,
-	@LessService NUMERIC(18,6) = 25
+	@LessService NUMERIC(18,6) = 25,
+	@intRefundId INT = 0
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -19,7 +20,15 @@ BEGIN
 
 CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
 
-
+IF (@intRefundId > 0)
+BEGIN
+	SET @intFiscalYearId = (SELECT intFiscalYearId FROM tblPATRefund WHERE intRefundId = @intRefundId)
+	SET @strStockStatus = (SELECT strRefund FROM tblPATRefund WHERE intRefundId = @intRefundId)
+	SET @dblMinimumRefund =	(SELECT dblMinimumRefund FROM tblPATRefund WHERE intRefundId = @intRefundId)
+	SET @dblCashCutoffAmount = (SELECT dblCashCutoffAmount FROM tblPATRefund WHERE intRefundId = @intRefundId)
+	SET @FWT = (SELECT dblFedWithholdingPercentage FROM tblPATRefund WHERE intRefundId = @intRefundId)
+	SET @LessService = (SELECT dblServiceFee FROM tblPATRefund WHERE intRefundId = @intRefundId)
+END
 
 IF(@strStockStatus = 'A')
 BEGIN

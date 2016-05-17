@@ -5180,4 +5180,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[dblCostAllocationPercentage]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="709910bb-3e08-4f3c-b1b9-66060cfd0b15" ChangeDateTime="05/16/2016 12:22:11">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[intFromCurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFromCurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="574058cb-e75b-4689-9692-b254dba18e4d" ChangeDateTime="05/16/2016 12:22:17">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[intToCurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strToCurrencyId" />
+  </Operation>
 </Operations>

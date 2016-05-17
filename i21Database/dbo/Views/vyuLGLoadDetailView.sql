@@ -205,6 +205,7 @@ SELECT LoadDetail.intLoadDetailId
 			WHEN Load.intTransUsedBy = 3
 				THEN 'Transport Load'
 			END
+		,Load.intSourceType
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId

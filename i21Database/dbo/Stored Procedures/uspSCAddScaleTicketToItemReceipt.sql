@@ -180,6 +180,60 @@ LEFT JOIN tblSCTicket SCTIicket
 ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
 WHERE intTicketId = @intTicketId
 
+		INSERT INTO @OtherCharges
+		(
+				[intEntityVendorId] 
+				,[strBillOfLadding] 
+				,[strReceiptType] 
+				,[intLocationId] 
+				,[intShipViaId] 
+				,[intShipFromId] 
+				,[intCurrencyId]  	
+				,[intChargeId] 
+				,[ysnInventoryCost] 
+				,[strCostMethod] 
+				,[dblRate] 
+				,[intCostUOMId] 
+				,[intOtherChargeEntityVendorId] 
+				,[dblAmount] 
+				,[strAllocateCostBy] 
+				,[intContractHeaderId]
+				,[intContractDetailId] 
+				,[ysnAccrue]
+				,[ysnPrice]
+		)
+		SELECT	
+		[intEntityVendorId]					= RE.intEntityVendorId
+		,[strBillOfLadding]					= RE.strBillOfLadding
+		,[strReceiptType]					= RE.strReceiptType
+		,[intLocationId]					= RE.intLocationId
+		,[intShipViaId]						= RE.intShipViaId
+		,[intShipFromId]					= RE.intShipFromId
+		,[intCurrencyId]  					= RE.intCurrencyId
+		,[intChargeId]						= IC.intItemId
+		,[ysnInventoryCost]					= 0
+		,[strCostMethod]					= IC.strCostMethod
+		,[dblRate]							= CASE
+												WHEN IC.strCostMethod = 'Per Unit' THEN IC.dblAmount
+												WHEN IC.strCostMethod = 'Amount' THEN 0
+											END
+		,[intCostUOMId]						= IC.intCostUOMId
+		,[intOtherChargeEntityVendorId]		= NULL
+		,[dblAmount]						= CASE
+												WHEN IC.strCostMethod = 'Per Unit' THEN 0
+												WHEN IC.strCostMethod = 'Amount' THEN IC.dblAmount
+											END
+		,[strAllocateCostBy]				= NULL
+		,[intContractHeaderId]				= NULL
+		,[intContractDetailId]				= NULL
+		,[ysnAccrue]						= IC.ysnAccrue
+		,[ysnPrice]							= IC.ysnPrice
+		FROM @ReceiptStagingTable RE
+		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
+		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount > 0
+
 IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 	BEGIN
 		SET @ysnAccrue = 1
@@ -829,7 +883,7 @@ ELSE
 			END
 		ELSE
 			BEGIN
-				IF ISNULL(@intFreightItemId,0) != 0 AND ISNULL(@intHaulerId,0) != 0 AND ISNULL(@intContractDetailId,0) = 0 
+				IF ISNULL(@intContractDetailId,0) = 0 
 					BEGIN
 							INSERT INTO @OtherCharges
 							(
@@ -865,7 +919,10 @@ ELSE
 									,[strCostMethod]					= 'Per Unit'
 									,[dblRate]							= RE.dblFreightRate
 									,[intCostUOMId]						= RE.intItemUOMId
-									,[intOtherChargeEntityVendorId]		= @intHaulerId
+									,[intOtherChargeEntityVendorId]		= CASE
+																			WHEN @intHaulerId = 0 THEN NULL
+																			WHEN @intHaulerId != 0 THEN @intHaulerId
+																		  END
 									,[dblAmount]						= 0
 									,[strAllocateCostBy]				= NULL
 									,[intContractHeaderId]				= NULL

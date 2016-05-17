@@ -93,8 +93,10 @@ FROM
 				,ItemWeightUOM.dblUnitQty AS weightUnitQty
 				,ItemCostUOM.dblUnitQty AS costUnitQty
 				,ItemUOM.dblUnitQty AS itemUnitQty
-				,A.intCurrencyId
-				,H.strCurrency
+				,CASE WHEN B1.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
+					  ELSE ISNULL(A1.intCurrencyId,0) END AS intCurrencyId
+				,CASE WHEN B1.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
+					  ELSE H.strCurrency END AS strCurrency 
 				,EL.strLocationName AS strVendorLocation
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
@@ -111,6 +113,7 @@ FROM
 				LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 				LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A1.intCurrencyId
 				LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A1.intShipFromId
+				LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A1.intCurrencyId 
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
 			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
@@ -140,6 +143,9 @@ FROM
 				,A1.intSubCurrencyCents
 				,H.strCurrency
 				,EL.strLocationName
+				,SubCurrency.intCurrencyID
+				,SubCurrency.strCurrency
+				,A1.intCurrencyId
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -278,8 +284,12 @@ FROM
 	,[dblWeightUnitQty]			=	ItemWeightUOM.dblUnitQty
 	,[dblCostUnitQty]			=	ItemCostUOM.dblUnitQty
 	,[dblUnitQty]				=	ItemUOM.dblUnitQty
-	,[intCurrencyId]			=	A.intCurrencyId
-	,[strCurrency]				=   (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+	,[intCurrencyId]			=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
+										 ELSE ISNULL(A.intCurrencyId,0) 
+									END	
+	,[strCurrency]				=   CASE WHEN B.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
+									ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+									END
 	,[strVendorLocation]		=	EL.strLocationName
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -302,6 +312,7 @@ FROM
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
+	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -366,13 +377,18 @@ FROM
 		,[dblWeightUnitQty]							=	1
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
-		,[intCurrencyId]							=	A.intCurrencyId
-		,[strCurrency]								=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
+															 ELSE ISNULL(A.intCurrencyId,0) 
+														END	
+		,[strCurrency]								=   CASE WHEN A.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
+															 ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+														END
 		,[strVendorLocation]						=	NULL
 	FROM [vyuAPChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
+	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD

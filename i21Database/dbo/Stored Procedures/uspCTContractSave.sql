@@ -30,6 +30,8 @@ BEGIN TRY
 			EXEC uspICUpdateInventoryReceiptUnitCost @intContractDetailId,@dblCashPrice
 		END
 		
+		EXEC uspLGUpdateLoadItem @intContractDetailId
+
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 

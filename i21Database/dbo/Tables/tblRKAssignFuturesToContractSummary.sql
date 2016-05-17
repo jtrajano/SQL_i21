@@ -8,7 +8,7 @@
 	[dtmMatchDate] DATETIME NOT NULL, 
 	[intFutOptTransactionId] INT NOT NULL,
     [dblAssignedLots] NUMERIC(18, 6) NOT NULL, 
-	[intHedgedLots] INT NOT NULL,
+	[intHedgedLots] NUMERIC(18, 6) NOT NULL,
 	[ysnIsHedged] Bit NULL,
     [intFutOptAssignedId] INT NULL, 
     CONSTRAINT [PK_tblRKAssignFuturesToContractSummary] PRIMARY KEY (intAssignFuturesToContractSummaryId),
