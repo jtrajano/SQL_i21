@@ -192,7 +192,7 @@
 				[intSort]           =        9
 	END
 	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal' AND [intSort] = 10)
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10)
 	BEGIN
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
 		SELECT [strReminder]        =        N'Overdue',
@@ -201,11 +201,17 @@
 				[strQuery]  		=        N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus,intProcessingLocationId,SCAlert.intEntityId from tblSCUncompletedTicketAlert SCAlert,tblSCTicket SCTicket
 												WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
 												AND ysnHasGeneratedTicketNumber = 1
-												AND strTicketStatus = ''O''
+												AND (strTicketStatus = ''O'' OR strTicketStatus = ''A'')
 												AND ISNULL(intCompanyLocationId,0) = 0
 												AND SCAlert.intEntityId = {0}',
 				[strNamespace]      =        N'Grain.view.ScaleStationSelection',
 				[intSort]           =        10
 	END
-
+	ELSE
+		UPDATE [dbo].[tblSMReminderList] SET [strQuery] = N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus,intProcessingLocationId,SCAlert.intEntityId from tblSCUncompletedTicketAlert SCAlert,tblSCTicket SCTicket
+		WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
+		AND ysnHasGeneratedTicketNumber = 1
+		AND (strTicketStatus = ''O'' OR strTicketStatus = ''A'')
+		AND ISNULL(intCompanyLocationId,0) = 0
+		AND SCAlert.intEntityId = {0}' WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
 GO
