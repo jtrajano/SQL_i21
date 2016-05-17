@@ -64,7 +64,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -75,7 +75,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId = ARTD.intItemId		
 		AND (ARID.intItemUOMId <> ARTD.intItemUOMId OR ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped))
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -112,7 +112,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
@@ -123,7 +123,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0		
@@ -159,7 +159,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -170,7 +170,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0
@@ -212,8 +212,8 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType IN ('Invoice', 'Cash'))	
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 
@@ -254,7 +254,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
 		AND ISNULL(ARTD.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0
@@ -291,7 +291,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -305,7 +305,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId = ARTD.intItemId		
 		AND ARID.intItemUOMId <> ARTD.intItemUOMId 
 		AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
@@ -343,7 +343,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -357,7 +357,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId = ARTD.intItemId		
 		AND ARID.intItemUOMId = ARTD.intItemUOMId 
 		AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
@@ -395,7 +395,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
@@ -409,7 +409,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId = ARTD.intItemId		
 		AND ARID.intItemUOMId <> ARTD.intItemUOMId 
 		AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
@@ -447,7 +447,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
@@ -461,7 +461,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId = ARTD.intItemId		
 		AND ARID.intItemUOMId = ARTD.intItemUOMId 
 		AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
@@ -499,7 +499,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblSOSalesOrderDetail SOTD
 			ON ARTD.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 			
@@ -513,7 +513,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId	
 		AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)
 		AND (ISNULL(ARTD.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARTD.intSalesOrderDetailId, 0) <> 0)		
@@ -549,7 +549,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType = 'Invoice'
+			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -560,7 +560,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)							
 
@@ -604,7 +604,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
 		AND dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, SOTD.intItemUOMId, ARTD.dblQtyShipped) > SOTD.dblQtyOrdered 	
 		AND (ISNULL(ARTD.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARTD.intSalesOrderDetailId, 0) <> 0)		
@@ -647,7 +647,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 		
@@ -691,7 +691,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.dblQtyShipped = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)		
 		
@@ -734,7 +734,7 @@ BEGIN
 	WHERE 
 		ISNULL(@FromPosting,0) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.dblQtyShipped < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)		
 	
