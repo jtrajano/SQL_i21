@@ -27,7 +27,7 @@ BEGIN
 					SET intRouteId = A.intRouteId
 						,intDriverID = A.intOriginDriverId
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-						,strWillCallStatus = ''Routed''
+						,strWillCallStatus = CASE WHEN A.intRouteId IS NULL THEN ''Generated'' ELSE ''Routed'' END
 				FROM(
 					SELECT 
 						A.*
@@ -53,7 +53,7 @@ BEGIN
 						ON A.intOrderId = B.intDispatchID
 				) A
 				WHERE tblTMSite.intSiteID = A.intSiteID
-					AND (tblTMSite.dblLongitude IS NULL OR tblTMSite.dblLatitude IS NULL)
+					AND (ISNULL(tblTMSite.dblLongitude,0) = 0 OR ISNULL(tblTMSite.dblLatitude,0) = 0)
 
 
 	
@@ -73,7 +73,7 @@ BEGIN
 					SET intRouteId = A.intRouteId
 						,intDriverID = A.[intDriverEntityId]
 						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-						,strWillCallStatus = ''Routed''
+						,strWillCallStatus = CASE WHEN A.intRouteId IS NULL THEN ''Generated'' ELSE ''Routed'' END
 				FROM @RouteOrder A
 				WHERE tblTMDispatch.intDispatchID = A.intOrderId
 
@@ -90,7 +90,7 @@ BEGIN
 						ON A.intOrderId = B.intDispatchID
 				) A
 				WHERE tblTMSite.intSiteID = A.intSiteID
-					AND (tblTMSite.dblLongitude IS NULL OR tblTMSite.dblLatitude IS NULL)
+					AND (ISNULL(tblTMSite.dblLongitude,0) = 0 OR ISNULL(tblTMSite.dblLatitude,0) = 0)
 
 
 	
