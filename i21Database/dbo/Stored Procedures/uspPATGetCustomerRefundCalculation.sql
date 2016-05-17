@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetCustomerRefundCalculation]
 			@intFiscalYearId INT = NULL,
-			@strStockStatus CHAR(1) = NULL
+			@strStockStatus CHAR(1) = NULL,
+			@intRefundId INT = NULL
 AS
 BEGIN
 
@@ -16,7 +17,11 @@ BEGIN
 
 CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
 
-
+IF (@intRefundId IS NOT NULL)
+BEGIN
+	SET @intFiscalYearId = (SELECT intFiscalYearId FROM tblPATRefund WHERE intRefundId = @intRefundId)
+	SET @strStockStatus = (SELECT strRefund FROM tblPATRefund WHERE intRefundId = @intRefundId)
+END
 
 IF(@strStockStatus = 'A')
 BEGIN
@@ -40,6 +45,8 @@ END
 
 DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM tblPATCompanyPreference)
 
+	IF (@intRefundId IS NULL)
+	BEGIN
 		 SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 				strCustomerName = ENT.strName,
 				ysnEligibleRefund = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND SUM(RRD.dblRate) < @dblMinimumRefund THEN 1 ELSE 0 END),
@@ -107,7 +114,56 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 				Total.dblCashRefund,
 				Total.dblRefundAmount,
 				RR.intRefundTypeId
-
+	END
+	ELSE
+	BEGIN
+		SELECT	intCustomerId = RCus.intRefundCustomerId,
+				strCustomerName = EN.strName,
+				ysnEligibleRefund = (CASE WHEN ARC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND RCatPCat.dblRefundRate < R.dblMinimumRefund THEN 1 ELSE 0 END),
+				ARC.strStockStatus,
+				RCatPCat.strPurchaseSale,
+				RCatPCat.intPatronageCategoryId,
+				TC.strTaxCode,
+				RCatPCat.intRefundTypeId,
+				RCatPCat.strRefundType,
+				RCatPCat.strRefundDescription,
+				RCatPCat.dblCashPayout,
+				RCatPCat.ysnQualified,
+				dtmLastActivityDate = R.dtmRefundDate,
+				RCus.dblRefundAmount,
+				RCus.dblCashRefund,
+				RCus.dblEquityRefund
+		FROM tblPATRefundCustomer RCus
+		INNER JOIN tblPATRefund R
+			ON RCus.intRefundId = R.intRefundId
+		INNER JOIN tblEMEntity EN
+			ON EN.intEntityId = RCus.intCustomerId
+		INNER JOIN tblARCustomer ARC
+			ON ARC.intEntityCustomerId = RCus.intCustomerId
+		INNER JOIN
+		(
+			SELECT	intRefundCustomerId = RCat.intRefundCustomerId,
+					intPatronageCategoryId = RCat.intPatronageCategoryId,
+					dblRefundRate = RCat.dblRefundRate,
+					strPurchaseSale = PCat.strPurchaseSale,
+					intRefundTypeId = RRD.intRefundTypeId,
+					strRefundType = RR.strRefundType,
+					strRefundDescription = RR.strRefundDescription,
+					dblCashPayout = RR.dblCashPayout,
+					ysnQualified = RR.ysnQualified
+			FROM tblPATRefundCategory RCat
+			INNER JOIN tblPATPatronageCategory PCat
+				ON RCat.intPatronageCategoryId	 = PCat.intPatronageCategoryId
+			INNER JOIN tblPATRefundRateDetail RRD
+				ON RRD.intPatronageCategoryId = RCat.intPatronageCategoryId
+			INNER JOIN tblPATRefundRate RR
+				ON RR.intRefundTypeId = RRD.intRefundTypeId
+		) RCatPCat
+			ON RCatPCat.intRefundCustomerId = RCus.intRefundCustomerId
+		LEFT JOIN tblSMTaxCode TC
+			ON TC.intTaxCodeId = ARC.intTaxCodeId
+		WHERE R.intRefundId = @intRefundId
+	END
 	DROP TABLE #statusTable
 	-- ==================================================================
 	-- End Transaction
