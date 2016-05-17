@@ -25,8 +25,8 @@ DROP TABLE  #tempLotHistory
 			   um.strUnitMeasure AS strTransactionQtyUOM, 
 			   iad.strNewLotNumber AS strRelatedLotId, 
 			   '' AS strPreviousItem, 
-			   '' AS strSourceSubLocation, 
-			   NULL AS strSourceStorageLocation, 
+			   Case When iad.intNewLotId=@intLotId Then clsl2.strSubLocationName Else clsl1.strSubLocationName  End AS strSourceSubLocation, 
+			   Case When iad.intNewLotId=@intLotId Then sl2.strName Else sl1.strName End AS strSourceStorageLocation, 
 			   NULL AS strNewStatus, 
 			   NULL AS strOldStatus, 
 			   NULL AS strNewLotAlias, 
@@ -47,13 +47,19 @@ DROP TABLE  #tempLotHistory
 		LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId 
 		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-
 		LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId,l.intItemUOMId)
 		LEFT JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
-
 		LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
-		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
-		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
+
+		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
+		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ilt.intStorageLocationId
+
+		LEFT JOIN tblSMCompanyLocationSubLocation clsl1 ON clsl1.intCompanyLocationSubLocationId = iad.intNewSubLocationId
+		LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
+
+		LEFT JOIN tblSMCompanyLocationSubLocation clsl2 ON clsl2.intCompanyLocationSubLocationId = iad.intSubLocationId
+		LEFT JOIN tblICStorageLocation sl2 ON sl2.intStorageLocationId = iad.intStorageLocationId
+
 		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
 		WHERE l.intLotId = @intLotId
 		
