@@ -39,7 +39,7 @@
 
 GO
 CREATE UNIQUE CLUSTERED INDEX [APIaptrxmst0]
-    ON [dbo].[tblAPaptrxmst]([aptrx_vnd_no] ASC, [intBillId] ASC);
+    ON [dbo].[tblAPaptrxmst]([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC, [intBillId] ASC);
 
 
 GO
