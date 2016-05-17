@@ -179,7 +179,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblLineTotal = 0
 		, strLotTracking
 		, intPCommodityId
-		, intContainerId = NULL
+		, intContainerId = intLoadContainerId
 		, strContainer = strContainerNumber
 		, intSubLocationId = intSubLocationId
 		, strSubLocationName 
@@ -225,7 +225,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 	  AND LogisticsView.intSourceType = 2 
 	  AND LogisticsView.intTransUsedBy = 1 
 	  AND LogisticsView.intPurchaseSale = 1
-	
+	  AND LogisticsView.ysnPosted = 1
+
 	UNION ALL
 
 	SELECT

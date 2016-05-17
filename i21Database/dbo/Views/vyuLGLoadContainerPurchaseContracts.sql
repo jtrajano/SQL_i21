@@ -104,6 +104,7 @@ SELECT
 	,LWC.intLoadContainerId intWarehouseContainerId
 	,L.intSourceType
 	,L.intTransUsedBy
+	,L.ysnPosted
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId

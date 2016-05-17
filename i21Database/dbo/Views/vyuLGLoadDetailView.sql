@@ -206,6 +206,7 @@ SELECT LoadDetail.intLoadDetailId
 				THEN 'Transport Load'
 			END
 		,Load.intSourceType
+		,Load.ysnPosted
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
