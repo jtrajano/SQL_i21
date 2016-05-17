@@ -11,7 +11,9 @@ SELECT
 		A.dblHeaderQuantity,
 		A.strContractStatus  
 	FROM vyuCTContractDetailView A
-	WHERE A.intContractStatusId != 5
+	WHERE A.intContractStatusId != 5 AND A.intContractHeaderId NOT IN (SELECT intContractHeaderId FROM dbo.tblAPBill APB
+		INNER JOIN  tblAPBillDetail APD ON APB.intBillId = APD.intBillId
+		WHERE intTransactionType = 2)
 	GROUP BY 	
 		A.intContractHeaderId,
 		A.strContractNumber, 
