@@ -3,7 +3,7 @@ AS
 	SELECT
 	l.strLotNumber,
 	r.intLotId,
-	l.strTransactionId AS [strWorkOrderBOLNo],
+	r.strTransactionId AS [strWorkOrderBOLNo],
 	i.strItemNo AS strBlend,
 	i1.strItemNo,
 	i1.strDescription,
@@ -11,7 +11,7 @@ AS
 	um.strUnitMeasure,
 	itt.strName strTransactionType
 	FROM tblICStockReservation r
-	JOIN tblICItem i1 ON i1.intItemId = r.intItemId
+	JOIN tblICItem i1 ON i1.intItemId = r.intItemId AND ISNULL(r.ysnPosted,0)=0
 	JOIN tblICLot l ON l.intLotId = r.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = r.intInventoryTransactionType
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = r.intItemUOMId
