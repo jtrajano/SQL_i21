@@ -236,8 +236,8 @@
 	BEGIN
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
 		SELECT [strReminder]        =        N'Approved',
-				[strMessage]        =        N'{0} Transaction(s) {2} approved.',
 				[strType]           =        N'Transaction',
+				[strMessage]        =        N'{0} Transaction(s) {2} approved.',
 				[strQuery]          =        N'SELECT 
                                                     intTransactionId 
                                                 FROM tblSMApproval 
