@@ -3811,7 +3811,8 @@
     <Build Include="dbo\Views\vyuRKGetBrokerByMarket.sql" />
     <Build Include="dbo\Views\vyuRKGetBankDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetTraderDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspCCToAPBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCTransactionToAPBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCTransactionToARInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
