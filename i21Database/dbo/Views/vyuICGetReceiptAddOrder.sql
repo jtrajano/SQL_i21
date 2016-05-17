@@ -196,7 +196,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strWeightUOM = GrossNetUnitMeasure.strUnitMeasure
 		-- Conversion factor
 		, dblItemUOMConvFactor = ItemUOM.dblUnitQty
-		, dblWeightUOMConvFactor = CostUOM.dblUnitQty
+		, dblWeightUOMConvFactor = GrossNetUOM.dblUnitQty
 		-- Cost UOM
 		, intCostUOMId = CostUOM.intItemUOMId
 		, strCostUOM = CostUnitMeasure.strUnitMeasure
