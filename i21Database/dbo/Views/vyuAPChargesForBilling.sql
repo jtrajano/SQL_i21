@@ -62,7 +62,7 @@ SELECT
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
-	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[intCurrencyId]							= ISNULL(ReceiptCharge.intCurrencyId,Receipt.intCurrencyId)
 	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
@@ -171,7 +171,7 @@ SELECT
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
-	,[intCurrencyId]							= ReceiptCharge.intCurrencyId
+	,[intCurrencyId]							= ISNULL(ReceiptCharge.intCurrencyId,Receipt.intCurrencyId)
 	,[ysnSubCurrency]							= ReceiptCharge.ysnSubCurrency
 	,[intMainCurrencyId]						= CASE WHEN ReceiptCharge.ysnSubCurrency = 1 THEN MainCurrency.intCurrencyID ELSE TransCurrency.intCurrencyID END 
 	,[intSubCurrencyCents]						= TransCurrency.intCent
