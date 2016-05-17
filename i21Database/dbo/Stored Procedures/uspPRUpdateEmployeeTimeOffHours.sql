@@ -38,8 +38,11 @@ BEGIN
 		,dblRate
 		,dblPerPeriod
 		,strPeriod
+		,dblMaxEarned
+		,dblMaxCarryover
 		,dblRateFactor
 		,strAwardPeriod
+		,ysnHasCarryover = CAST (0 AS BIT)
 	INTO #tmpEmployees
 	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
 		ON E.intEntityEmployeeId = T.intEntityEmployeeId
@@ -62,9 +65,13 @@ BEGIN
 							ELSE
 								dtmNextAward
 							END
-
+	
+	--Mark periods that exceed 1 year
 	UPDATE #tmpEmployees 
-		--Calculate Total Accrued Hours
+		SET ysnHasCarryover = CASE WHEN (DATEDIFF(YY, dtmLastAward, GETDATE()) > 1) THEN 1 ELSE 0 END
+
+	--Calculate Total Accrued Hours
+	UPDATE #tmpEmployees 
 		SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour') THEN 
 									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
 											FROM tblPRPaycheck P 
@@ -78,21 +85,61 @@ BEGIN
 												WHERE P.ysnPosted = 1
 													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
 													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= GETDATE() 
-													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
-								WHEN (strPeriod = 'Day') THEN 
-									DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0) * dblRate * dblRateFactor
+								WHEN (strPeriod = 'Day') THEN
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(DD, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Week') THEN 
-									DATEDIFF(WK, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(WK, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(WK, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(WK, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Month') THEN
-									DATEDIFF(MM, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(MM, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(MM, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(MM, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Quarter') THEN
-									DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(QQ, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Year') THEN
-									DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(YY, dtmLastAward, GETDATE()) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								ELSE 0
-							END * dblRate * dblRateFactor
+							END
 		--Calculate Total Earned Hours
-		,dblEarnedHours = CASE WHEN (GETDATE() >= dtmNextAward) THEN
+		,dblEarnedHours = CASE WHEN (GETDATE() >= CASE WHEN (ysnHasCarryover = 1) THEN DATEADD(YY, -1, dtmNextAward) ELSE dtmNextAward END) THEN
 								CASE WHEN (strPeriod = 'Hour') THEN 
 									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
 											FROM tblPRPaycheck P 
@@ -106,19 +153,59 @@ BEGIN
 												WHERE P.ysnPosted = 1
 													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityEmployeeId
 													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
-													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
+													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0) * dblRate * dblRateFactor
 								WHEN (strPeriod = 'Day') THEN 
-									DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Week') THEN 
-									DATEDIFF(WK, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(WK, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(WK, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(WK, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Month') THEN
-									DATEDIFF(MM, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(MM, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(MM, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(MM, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Quarter') THEN
-									DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								WHEN (strPeriod = 'Year') THEN
-									DATEDIFF(YY, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
+									CASE WHEN (ysnHasCarryover = 1) THEN
+										CASE WHEN (((DATEDIFF(YY, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor) < dblMaxCarryover) THEN
+												((DATEDIFF(YY, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor)
+											ELSE
+												dblMaxCarryover
+											END
+									ELSE
+										(DATEDIFF(YY, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)) * dblRate * dblRateFactor
+									END
 								ELSE 0
-							END * dblRate * dblRateFactor
+							END
 						ELSE 0
 						END
 		
@@ -133,7 +220,11 @@ BEGIN
 		
 		--Update Accrued Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursAccrued = T.dblAccruedHours
+			SET dblHoursAccrued = CASE WHEN ((T.dblMaxEarned > 0) AND (T.dblAccruedHours > T.dblMaxEarned)) THEN
+									T.dblMaxEarned 
+								  ELSE
+									T.dblAccruedHours
+								  END
 		FROM
 		#tmpEmployees T
 		WHERE T.intEntityEmployeeId = @intEmployeeId
@@ -142,19 +233,19 @@ BEGIN
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
-									dblMaxEarned
+			SET dblHoursEarned = CASE WHEN ((T.dblMaxEarned > 0) AND (dblHoursEarned + T.dblEarnedHours) > T.dblMaxEarned) THEN
+									T.dblMaxEarned
 								 ELSE
 									(dblHoursEarned + T.dblEarnedHours)
 								END
 				,dblHoursAccrued = dblHoursAccrued - T.dblEarnedHours
-				,dtmLastAward = T.dtmNextAward
+				,dtmLastAward = CASE WHEN (T.ysnHasCarryover = 1) THEN DATEADD(YY, -1, T.dtmNextAward) ELSE T.dtmNextAward END
 		FROM
 		#tmpEmployees T
 		WHERE T.intEntityEmployeeId = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId 
-				AND T.dtmNextAward <= CAST(GETDATE() AS DATE)
+				AND CASE WHEN (T.ysnHasCarryover = 1) THEN DATEADD(YY, -1, T.dtmNextAward) ELSE T.dtmNextAward END <= CAST(GETDATE() AS DATE)
 
 		DELETE FROM #tmpEmployees WHERE intEntityEmployeeId = @intEmployeeId
 	END
