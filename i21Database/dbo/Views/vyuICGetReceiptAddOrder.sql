@@ -156,34 +156,33 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 
 	UNION ALL
 
-	SELECT
-		intLocationId
+	SELECT  intCompanyLocationId
 		, intEntityVendorId
 		, strVendor
 		, strVendor
 		, strReceiptType = 'Purchase Contract'
-		, intLineNo = intContractDetailId
-		, intOrderId = intContractHeaderId
-		, strOrderNumber = strContractNumber
+		, intLineNo = intPContractDetailId
+		, intOrderId = intPContractHeaderId
+		, strOrderNumber = strPContractNumber
 		, dblOrdered = dblQuantity
-		, dblReceived = dblReceivedQty
+		, dblReceived = dblDeliveredQuantity
 		, intSourceType = 2
-		, intSourceId = intShipmentContractQtyId
-		, strSourceNumber = CAST(intTrackingNumber AS NVARCHAR(50))
+		, intSourceId = intLoadDetailId
+		, strSourceNumber = strLoadNumber
 		, LogisticsView.intItemId
 		, strItemNo
 		, strItemDescription
-		, dblQtyToReceive = dblQuantity - dblReceivedQty
+		, dblQtyToReceive = dblQuantity - dblDeliveredQuantity
 		, intLoadToReceive = 0
 		, dblCost
 		, dblTax = 0
 		, dblLineTotal = 0
 		, strLotTracking
-		, intCommodityId
-		, intContainerId = intShipmentBLContainerId
+		, intPCommodityId
+		, intContainerId = NULL
 		, strContainer = strContainerNumber
 		, intSubLocationId = intSubLocationId
-		, strSubLocationName
+		, strSubLocationName 
 		, intStorageLocationId = NULL
 		, strStorageLocationName = NULL
 		, intOrderUOMId = ItemUOM.intItemUOMId
@@ -197,13 +196,13 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strWeightUOM = GrossNetUnitMeasure.strUnitMeasure
 		-- Conversion factor
 		, dblItemUOMConvFactor = ItemUOM.dblUnitQty
-		, dblWeightUOMConvFactor = GrossNetUOM.dblUnitQty
+		, dblWeightUOMConvFactor = CostUOM.dblUnitQty
 		-- Cost UOM
 		, intCostUOMId = CostUOM.intItemUOMId
 		, strCostUOM = CostUnitMeasure.strUnitMeasure
 		, dblCostUOMConvFactor = CostUOM.dblUnitQty
-		, intLifeTime
-		, strLifeTimeType
+		, intPLifeTime
+		, strPLifeTimeType
 		, ysnLoad = 0
 		, dblAvailableQty = 0
 		, strBOL = LogisticsView.strBLNumber
@@ -212,28 +211,20 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, ysnSubCurrency = CAST(LogisticsView.ysnSubCurrency AS BIT)
 		, intCurrencyId = Currency.intCurrencyID
 		, strSubCurrency = CASE WHEN LogisticsView.ysnSubCurrency = 1 THEN LogisticsView.strCurrency ELSE LogisticsView.strMainCurrency END 
-		, dblGross = CAST(LogisticsView.dblGrossWt AS NUMERIC(38, 20))
-		, dblNet = CAST(LogisticsView.dblNetWt AS NUMERIC(38, 20))
-	FROM	vyuLGShipmentContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency
-				ON Currency.strCurrency = ISNULL(LogisticsView.strMainCurrency, LogisticsView.strCurrency) 
-
-			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
-			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
-				ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
-
-			LEFT JOIN dbo.tblICItemUOM GrossNetUOM
-				ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
-			LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure
-				ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
-
-			LEFT JOIN dbo.tblICItemUOM CostUOM
-				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intCostUOMId)
-			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
-				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-
-	WHERE LogisticsView.dblBalanceToReceive > 0
-		AND LogisticsView.ysnDirectShipment = 0
+		, dblGross = CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
+		, dblNet = CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
+	FROM	vyuLGLoadContainerReceiptContracts LogisticsView 
+	LEFT JOIN dbo.tblSMCurrency Currency ON Currency.strCurrency = ISNULL(LogisticsView.strMainCurrency, LogisticsView.strCurrency) 
+	LEFT JOIN dbo.tblICItemUOM ItemUOM ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
+	LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN dbo.tblICItemUOM GrossNetUOM ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
+	LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
+	LEFT JOIN dbo.tblICItemUOM CostUOM ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
+	LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
+	WHERE LogisticsView.dblBalanceToReceive > 0 
+	  AND LogisticsView.intSourceType = 2 
+	  AND LogisticsView.intTransUsedBy = 1 
+	  AND LogisticsView.intPurchaseSale = 1
 	
 	UNION ALL
 
