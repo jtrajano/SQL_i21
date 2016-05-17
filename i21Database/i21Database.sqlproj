@@ -3815,6 +3815,8 @@
     <Build Include="dbo\Stored Procedures\uspCCTransactionToARInvoice.sql" />
     <Build Include="dbo\Tables\tblCMBankFileGenerationLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankFileGenerationLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
