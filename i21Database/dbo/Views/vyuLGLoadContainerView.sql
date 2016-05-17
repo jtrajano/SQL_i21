@@ -50,7 +50,7 @@ SELECT  L.intLoadId
 		,LC.ysnUSDAHold
 		,PCDV.strContractNumber AS strPContractNumber
 		,SCDV.strContractNumber AS strSContractNumber
-		,strContainerSampleStatus = (SELECT TOP 1 SS.strStatus
+		,strSampleStatus = (SELECT TOP 1 SS.strStatus
 								     FROM tblQMSample S
 									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 									 AND S.strContainerNumber = LC.strContainerNumber)
