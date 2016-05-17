@@ -41,6 +41,7 @@
 	,@intPPHostId					INT				= 0
 	,@strPPSiteType					NVARCHAR(MAX)	= NULL
 	,@strSiteType					NVARCHAR(MAX)	= NULL
+	,@strCreditCard					NVARCHAR(MAX)	= NULL
 	--------------------------------------
 
 	-------------REMOTE TAXES-------------
@@ -93,9 +94,10 @@ BEGIN
 	------------------------------------------------------------
 
 	--LOGS--
-	DECLARE @ysnSiteCreated			BIT = 0
-	DECLARE @ysnSiteItemUsed		BIT = 0
-	DECLARE @ysnNetworkItemUsed		BIT = 0
+	DECLARE @ysnSiteCreated				BIT = 0
+	DECLARE @ysnSiteItemUsed			BIT = 0
+	DECLARE @ysnNetworkItemUsed			BIT = 0
+	DECLARE @ysnSiteAcceptCreditCard	BIT = 0
 	--LOGS--
 
 
@@ -195,6 +197,7 @@ BEGIN
 			SELECT TOP 1 @intSiteId = intSiteId 
 						,@intCustomerLocationId = intARLocationId
 						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
 						FROM tblCFSite
 						WHERE strSiteNumber = @strSiteId
 
@@ -202,6 +205,14 @@ BEGIN
 			BEGIN 
 				SET @intSiteId = NULL
 			END
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @intCustomerLocationId = intARLocationId
+						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						FROM tblCFSite
+						WHERE intSiteId = @intSiteId
 		END
 
 	IF(@intNetworkId = 0)
@@ -275,14 +286,126 @@ BEGIN
 			SET @ysnSiteCreated = 1;
 
 	END
+	
+	--FIND CARD--
+	
+	DECLARE @ysnLocalCard BIT
+	DECLARE @ysnMatched INT = 0
+	IF(@ysnSiteAcceptCreditCard = 1)
+	BEGIN
+		IF(@strCreditCard IS NOT NULL AND @strCreditCard != '' AND (@intSiteId IS NOT NULL OR @intSiteId > 0))
+		BEGIN
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR FULL MATCH-- 1234
+				SET @strCreditCard = @strCreditCard
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR 1 PARTIAL WILDCARD MATCH-- ex 123*
+				SET @strCreditCard = STUFF(@strCreditCard, 4, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
 			
-	SELECT TOP 1 
-		 @intCardId = C.intCardId
-		,@intCustomerId = A.intCustomerId
-	FROM tblCFCard C
-	INNER JOIN tblCFAccount A
-	ON C.intAccountId = A.intAccountId
-	WHERE C.strCardNumber = @strCardId
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR 2 PARTIAL WILDCARD MATCH-- ex 12**
+				SET @strCreditCard = STUFF(@strCreditCard, 3, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR 3 PARTIAL WILDCARD MATCH-- ex 1***
+				SET @strCreditCard = STUFF(@strCreditCard, 2, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR FULL WILDCARD MATCH-- ex ****
+				SET @strCreditCard = STUFF(@strCreditCard, 1, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--CARD MATCHING--
+				SELECT TOP 1 
+					 @intCardId = C.intCardId
+					,@intCustomerId = A.intCustomerId
+				FROM tblCFCard C
+				INNER JOIN tblCFAccount A
+				ON C.intAccountId = A.intAccountId
+				WHERE C.strCardNumber = @strCardId
+			END
+			ELSE
+			BEGIN
+				IF(@ysnLocalCard = 1)
+				BEGIN
+					--CARD MATCHING--
+					SELECT TOP 1 
+						 @intCardId = C.intCardId
+						,@intCustomerId = A.intCustomerId
+					FROM tblCFCard C
+					INNER JOIN tblCFAccount A
+					ON C.intAccountId = A.intAccountId
+					WHERE C.strCardNumber = @strCardId
+				END
+				ELSE
+				BEGIN
+					SELECT TOP 1 
+						@intCustomerId = A.intCustomerId
+					FROM tblCFCard C
+					INNER JOIN tblCFAccount A
+					ON C.intAccountId = A.intAccountId
+					WHERE C.intCardId = @intCardId
+				END
+			END
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 
+			 @intCardId = C.intCardId
+			,@intCustomerId = A.intCustomerId
+		FROM tblCFCard C
+		INNER JOIN tblCFAccount A
+		ON C.intAccountId = A.intAccountId
+		WHERE C.strCardNumber = @strCardId
+	END
+
+	IF (@intCardId = 0)
+	BEGIN
+		SET @intCardId = NULL
+	END
 
 	--FIND IN SITE ITEM--
 	IF(@intProductId = 0)
@@ -366,11 +489,7 @@ BEGIN
 						FROM tblCFCard C
 						INNER JOIN tblCFAccount A
 						ON C.intAccountId = A.intAccountId
-						WHERE strCardNumber	= @strCardId)
-
-		SET @intCardId =(SELECT TOP 1 intCardId	
-						FROM tblCFCard
-						WHERE strCardNumber	= @strCardId)
+						WHERE C.intCardId= @intCardId)
 
 		SET @intPrcItemUOMId = (SELECT TOP 1 intIssueUOMId
 								FROM tblICItemLocation
