@@ -102,6 +102,8 @@ SELECT
 	,LW.dtmStrippingReportReceivedDate
 	,LW.dtmSampleAuthorizedDate
 	,LWC.intLoadContainerId intWarehouseContainerId
+	,L.intSourceType
+	,L.intTransUsedBy
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
