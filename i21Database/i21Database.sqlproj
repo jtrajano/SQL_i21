@@ -3822,6 +3822,7 @@
     <Build Include="dbo\Stored Procedures\uspCMBankFileGenerationLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByDay.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
