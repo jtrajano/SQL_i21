@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetCustomerPatronage] 
 	@intFiscalYearId INT = NULL,
 	@intCustomerPatronId INT = NULL,
-	@intRefundId INT = NULL
+	@intRefundId INT = 0
 AS
 BEGIN
 				
-				IF (@intRefundId IS NULL)
+				IF (@intRefundId <= 0)
 				BEGIN
 					SELECT DISTINCT RRD.intPatronageCategoryId,
 						   PC.strDescription,
@@ -33,7 +33,7 @@ BEGIN
 							RCatPCat.strCategoryCode,
 							dblRate = RCatPCat.dblRefundRate,
 							RCatPCat.dblVolume,
-							dblTotalRefund = RCus.dblRefundAmount
+							RCus.dblRefundAmount
 					FROM tblPATRefundCustomer RCus
 					INNER JOIN tblPATRefund R
 						ON RCus.intRefundId = R.intRefundId
