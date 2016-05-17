@@ -77,6 +77,7 @@ SELECT DISTINCT
 		L.strTrailerNo1,
 		L.strTrailerNo2,
 		L.strTrailerNo3,
-		L.strTruckNo
+		L.strTruckNo,
+		strCarrierShipmentStandardText = (SELECT TOP 1 strCarrierShipmentStandardText FROM tblLGCompanyPreference)
 	FROM vyuLGLoadDetailView L WHERE L.[strLoadNumber] = @strLoadNumber
 END
