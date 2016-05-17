@@ -96,7 +96,7 @@ BEGIN TRY
 	WHERE [fieldname] = 'strLocationName'
 
 	SELECT @dtmFromDate = [from]
-		,@dtmToDate = [To]
+		,@dtmToDate = [to]
 	FROM @temp_EfficiencySummaryWeekly
 	WHERE [fieldname] = 'Date'
 
