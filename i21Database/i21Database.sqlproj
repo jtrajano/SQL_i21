@@ -3818,6 +3818,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
     <Build Include="dbo\Views\vyuMFStockReservation.sql" />
     <Build Include="dbo\Views\vyuCTContractExportET.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInvoiceToPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -112,27 +112,27 @@ DECLARE
 
 
 SELECT TOP 1
-	 @EntityCustomerId					= A.[intEntityCustomerId]
-	,@CompanyLocationId					= A.[intLocationId]
-	,@CurrencyId						= A.[intCurrencyId]
+	 @EntityCustomerId					= ARC.[intEntityCustomerId]
+	,@CompanyLocationId					= ARP.[intLocationId]
+	,@CurrencyId						= ARP.[intCurrencyId]
 	,@SubCurrencyCents					= NULL
 	,@TermId							= NULL
 	,@EntityId							= @UserId
-	,@InvoiceDate						= A.dtmDatePaid
-	,@DueDate							= A.dtmDatePaid
-	,@ShipDate							= A.dtmDatePaid
-	,@PostDate							= A.dtmDatePaid
+	,@InvoiceDate						= ARP.dtmDatePaid
+	,@DueDate							= ARP.dtmDatePaid
+	,@ShipDate							= ARP.dtmDatePaid
+	,@PostDate							= ARP.dtmDatePaid
 	,@TransactionType					= 'Prepayment'
 	,@Type								= 'Standard'
 	,@EntitySalespersonId				= NULL				
 	,@FreightTermId						= NULL
 	,@ShipViaId							= NULL
-	,@PaymentMethodId					= A.[intPaymentMethodId]
+	,@PaymentMethodId					= ARP.[intPaymentMethodId]
 	,@InvoiceOriginId					= NULL
 	,@PONumber							= ''
 	,@BOLNumber							= ''
 	,@DeliverPickUp						= NULL
-	,@Comment							= A.strRecordNumber			
+	,@Comment							= ARP.strRecordNumber			
 	,@ShipToLocationId					= NULL
 	,@BillToLocationId					= NULL
 	,@Template							= 0			
@@ -155,13 +155,13 @@ SELECT TOP 1
 	,@ItemPrepayRate					= @ZeroDecimal
 	,@ItemIsInventory					= 0
 	,@ItemDocumentNumber				= NULL			
-	,@ItemDescription					= 'Prepayment for '+ A.strRecordNumber
+	,@ItemDescription					= 'Prepayment for '+ ARP.strRecordNumber
 	,@OrderUOMId						= NULL
 	,@ItemQtyOrdered					= @ZeroDecimal
 	,@ItemUOMId							= NULL
 	,@ItemQtyShipped					= 1.000000
 	,@ItemDiscount						= @ZeroDecimal
-	,@ItemPrice							= A.[dblAmountPaid]	
+	,@ItemPrice							= ARP.[dblAmountPaid]	
 	,@RefreshPrice						= 0
 	,@ItemMaintenanceType				= NULL
 	,@ItemFrequency						= NULL
@@ -200,12 +200,12 @@ SELECT TOP 1
 	,@ItemVirtualMeterReading			= 0
 	,@SubCurrency						= 0	
 FROM
-	[tblARPayment] A
+	[tblARPayment] ARP
 INNER JOIN
-	[tblARCustomer] C
-		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+	[tblARCustomer] ARC
+		ON ARP.[intEntityCustomerId] = ARC.[intEntityCustomerId]
 WHERE 
-	A.[intPaymentId] = @PaymentId
+	ARP.[intPaymentId] = @PaymentId
 
 
 EXEC [dbo].[uspARCreateCustomerInvoice]
