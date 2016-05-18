@@ -30,6 +30,7 @@ BEGIN TRY
 			, '' AS 'strCompanyName'
 			, '' AS 'strCompanyAddress'
 			, '' AS 'strParentLotNumber'
+			, '' AS 'strCustomerName'
 		RETURN
 	END
 
@@ -103,6 +104,7 @@ BEGIN TRY
 				,Shipment.strCompanyName
 				,Shipment.strCompanyAddress
 				,ParentLot.strParentLotNumber
+				,Shipment.strCustomerName
 			FROM vyuICGetInventoryShipment Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
