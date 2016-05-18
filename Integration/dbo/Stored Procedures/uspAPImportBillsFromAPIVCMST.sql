@@ -138,6 +138,7 @@ BEGIN
 					[intCurrencyId]			=	(SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency LIKE ''%USD%''),
 					[intShipToId]			=	@userLocation,
 					[intShipFromId]			=	loc.intEntityLocationId,
+					[intPayToAddressId]		=	loc.intEntityLocationId,
 					[A4GLIdentity]			=	A.[A4GLIdentity]
 				FROM apivcmst A
 					LEFT JOIN apcbkmst B
@@ -196,6 +197,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intPayToAddressId],
 				[intCurrencyId],
 				[ysnOrigin]
 			)
@@ -222,6 +224,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intPayToAddressId],
 				[intCurrencyId],
 				[ysnOrigin])
 			OUTPUT inserted.intBillId

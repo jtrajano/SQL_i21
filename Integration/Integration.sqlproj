@@ -323,5 +323,6 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPIVCMST.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPTRXMST.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
+    <None Include="dbo\Views\vyuCMBankTransaction.sql" />
   </ItemGroup>
 </Project>
