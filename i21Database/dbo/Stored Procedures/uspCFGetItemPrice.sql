@@ -20,6 +20,7 @@
 ,@CFAvailableQuantity	NUMERIC(18,6)   = NULL OUTPUT 
 ,@CFTransferCost		NUMERIC(18,6)   = NULL
 ,@CFOriginalPrice		NUMERIC(18,6)   = NULL OUTPUT
+,@CFCreditCard			BIT				= 0
 
 AS
 
@@ -76,19 +77,27 @@ print  @CFPricingOut
 IF(@CFPriceOut IS NOT NULL) 
 
    BEGIN    
-   
-	IF(LOWER(@CFPricingOut) like '%inventory%')
+
+	IF(@CFPricingOut = 'Inventory - Standard Pricing')
 
 		BEGIN 
 			IF (@CFOriginalPrice IS NOT NULL AND @CFOriginalPrice > 0)
 				BEGIN 
 					SET @CFStandardPrice = @CFOriginalPrice  
 					SET @CFPricingOut = 'Import File Price'
+
+					IF (@CFCreditCard = 1)
+					BEGIN -- ALWAYS USE IMPORT FILE PRICE ON CREDIT CARD TRANSACTION
+						SET @CFPriceOut = @CFStandardPrice
+						RETURN
+					END
+
+					
 				END 
 			ELSE
 				BEGIN
 					SET @CFStandardPrice = @CFPriceOut
-					SET @CFPricingOut = @CFPricingOut
+					SET @CFPricingOut = 'Inventory - Standard Pricing'
 				END
 		END
 
