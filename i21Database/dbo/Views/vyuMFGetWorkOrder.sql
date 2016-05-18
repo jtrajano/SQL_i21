@@ -55,6 +55,7 @@ SELECT C.intManufacturingCellId
 	,W.intSupervisorId
 	,SS.strUserName AS strSupervisor
 	,W.intBlendRequirementId
+	,MP.intAttributeTypeId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	AND W.intStatusId <> 13
