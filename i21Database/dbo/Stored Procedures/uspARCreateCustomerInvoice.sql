@@ -25,6 +25,7 @@
 	,@Comment						NVARCHAR(500)	= ''			
 	,@ShipToLocationId				INT				= NULL
 	,@BillToLocationId				INT				= NULL
+	,@Posted						BIT				= 0			
 	,@Template						BIT				= 0			
 	,@Forgiven						BIT				= 0			
 	,@Calculated					BIT				= 0			
@@ -306,7 +307,7 @@ BEGIN TRY
 		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
 		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
-		,[ysnPosted]					= (CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END)
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Prepayment') THEN @Posted ELSE 0 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
@@ -418,7 +419,7 @@ BEGIN TRY
 		,@ItemDocumentNumber			= @ItemDocumentNumber
 		,@ItemDescription				= @ItemDescription
 		,@OrderUOMId					= @OrderUOMId
-		,@ItemQtyOrdered				= @ItemQtyShipped
+		,@ItemQtyOrdered				= @ItemQtyOrdered
 		,@ItemUOMId						= @ItemUOMId
 		,@ItemQtyShipped				= @ItemQtyShipped
 		,@ItemDiscount					= @ItemDiscount
