@@ -151,6 +151,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\7_FiscalYearPeriod.sql
 :r .\GL\DefaultData\8_AccountCurrency.sql
 :r .\GL\DefaultData\9_AlterTable.sql
+:r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
 :r .\GL\ReportData\TrialBalance.sql

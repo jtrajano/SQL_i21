@@ -67,7 +67,7 @@ BEGIN
 				,intCustomerNumber = B.intCustomerNumber
 				,intClockLocation = A.intClockID
 				,ysnPastDue = CAST((CASE WHEN ISNULL(C.vwcus_high_past_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
-				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(C.vwcus_balance,0.0) < C.vwcus_cred_limit  THEN 0 ELSE 1 END)  AS BIT)
+				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(C.vwcus_balance,0.0) <= C.vwcus_cred_limit  THEN 0 ELSE 1 END)  AS BIT)
 				,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(C.vwcus_budget_amt_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 				,dblARBalance = ISNULL(C.vwcus_balance,0.0)
 				,dblPastDue = ISNULL(C.vwcus_high_past_due,0.0)
@@ -141,7 +141,7 @@ BEGIN
 				,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
 				,intCustomerNumber = B.intCustomerNumber
 				,ysnPastDue = CAST((CASE WHEN ISNULL(I.dblHighPastDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
-				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.dblBalance,0.0) < I.dblCreditLimit  THEN 0 ELSE 1 END)  AS BIT)
+				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.dblBalance,0.0) <= I.dblCreditLimit  THEN 0 ELSE 1 END)  AS BIT)
 				,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(I.dblTotalDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 				,dblARBalance = ISNULL(I.dblBalance,0.0)
 				,dblPastDue = ISNULL(I.dblHighPastDue,0.0)
