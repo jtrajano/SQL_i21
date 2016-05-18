@@ -69,6 +69,7 @@ BEGIN
 			,@strVendorLotNo
 			,@strParentLotNumber
 			,@strVesselNo
+			,@dtmProductionDate
 	END
 	ELSE
 	BEGIN
@@ -87,6 +88,7 @@ BEGIN
 			,@strVendorLotNo = @strVendorLotNo
 			,@strParentLotNumber = @strParentLotNumber
 			,@intStorageLocationId = @intStorageLocationId
+			,@dtmProductionDate=@dtmProductionDate
 	END
 
 	IF EXISTS (
