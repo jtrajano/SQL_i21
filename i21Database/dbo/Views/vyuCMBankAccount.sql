@@ -45,6 +45,10 @@ SELECT	i21.intBankAccountId
 		,i21.intMICRCheckNoPosition
 		,i21.strMICRLeftSymbol
 		,i21.strMICRRightSymbol
+		,i21.strUserDefineMessage
+		,i21.strSignatureLineCaption
+		,i21.ysnShowTwoSignatureLine
+		,i21.dblGreaterThanAmount
 		,i21.intCreatedUserId
 		,i21.dtmCreated
 		,i21.intLastModifiedUserId
@@ -122,6 +126,10 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intMICRCheckNoPosition
 						,strMICRLeftSymbol
 						,strMICRRightSymbol
+						,strUserDefineMessage	
+						,strSignatureLineCaption
+						,ysnShowTwoSignatureLine
+						,dblGreaterThanAmount
 						,intCreatedUserId
 						,dtmCreated
 						,intLastModifiedUserId
@@ -170,6 +178,10 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 						,strMICRLeftSymbol					= i.strMICRLeftSymbol
 						,strMICRRightSymbol					= i.strMICRRightSymbol
+						,strUserDefineMessage				= i.strUserDefineMessage
+						,strSignatureLineCaption			= i.strSignatureLineCaption
+						,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+						,dblGreaterThanAmount				= i.dblGreaterThanAmount
 						,intCreatedUserId					= i.intCreatedUserId
 						,dtmCreated							= i.dtmCreated
 						,intLastModifiedUserId				= i.intLastModifiedUserId
@@ -234,6 +246,10 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strUserDefineMessage				= i.strUserDefineMessage
+					,strSignatureLineCaption			= i.strSignatureLineCaption
+					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+					,dblGreaterThanAmount				= i.dblGreaterThanAmount
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId
