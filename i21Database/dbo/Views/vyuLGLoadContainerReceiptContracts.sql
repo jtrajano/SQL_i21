@@ -59,6 +59,7 @@ SELECT
 	,intPurchaseSale
 	,intTransUsedBy
 	,intSourceType
+	,ysnPosted
 FROM vyuLGLoadDetailView WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
 
 UNION ALL
@@ -123,4 +124,5 @@ SELECT
 	,intPurchaseSale
 	,intTransUsedBy
 	,intSourceType
+	,ysnPosted
 FROM vyuLGLoadContainerPurchaseContracts
