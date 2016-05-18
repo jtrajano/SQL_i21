@@ -13,7 +13,7 @@ BEGIN TRY
 			,'' AS 'strShipFromAddress'
 			,'' AS 'strBOLNumber'
 			,'' AS 'strOrderNumber'
-			,'' AS 'strPONumber'
+			,'' AS 'strCustomerPO'
 			,'' AS 'dtmShipDate'
 			,'' AS 'strShipVia'
 			,'' AS 'strDeliveryInstruction'
@@ -96,9 +96,9 @@ BEGIN TRY
 				,ShipmentItem.strItemDescription
 				,Lot.strLotNumber
 				,Lot.strLotAlias
-				,ISNULL(ShipmentItemLot.dblLotQty, ShipmentItem.dblQtyToShip) AS dblQty
+				,ISNULL(ShipmentItemLot.dblLotQty, ISNULL(ShipmentItem.dblQtyToShip, 0)) AS dblQty
 				,ISNULL(ShipmentItemLot.strLotUOM, ShipmentItem.strUnitMeasure) AS strUOM
-				,ShipmentItemLot.dblNetWeight
+				,ISNULL(ShipmentItemLot.dblNetWeight,0) AS dblNetWeight
 				,SUM(ShipmentItemLot.dblNetWeight) OVER() AS dblTotalWeight
 				,intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
 				,Shipment.strCompanyName
@@ -113,7 +113,7 @@ BEGIN TRY
 			LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityShipViaId = Shipment.intShipViaId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
 			LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
-		    LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ShipmentItem.intOrderId AND ShipmentItem.strOrderType = @strOrderType
+		    LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ShipmentItem.intOrderId AND ShipmentItem.strOrderType = 'Sales Order'
 				
 			) AS a
 		WHERE strShipmentNumber = @strShipmentNo 
