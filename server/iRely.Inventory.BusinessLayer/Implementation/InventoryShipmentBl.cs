@@ -33,6 +33,26 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryShipment>()
                 .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "strshipmentnumber" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryShipmentId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "strshipmentnumber" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryShipmentId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
             var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
 
             return new SearchResult()
@@ -217,6 +237,26 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryShipmentItem>()
                 .Filter(param, true);
+            
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "strshipmentnumber" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryShipmentId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "strshipmentnumber" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryShipmentId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
             var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
 
             return new SearchResult()
@@ -230,6 +270,26 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryShipmentItemLot>()
                 .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "strshipmentnumber" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryShipmentId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "strshipmentnumber" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryShipmentId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
             var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
 
             return new SearchResult()
