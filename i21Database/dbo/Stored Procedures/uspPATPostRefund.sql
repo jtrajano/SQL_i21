@@ -51,9 +51,9 @@ SELECT	Ref.intRefundId,
 		Ref.dblFedWithholdingPercentage, 
 		Total.dblPurchaseVolume, 
 		Total.dblSaleVolume, 
-		dblLessFWT = Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100), 
+		dblLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) END, 
 		dblLessService = Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100),
-		dblCheckAmount = (Total.dblVolume * (Total.dblCashPayout/100)) - (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) -  (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100)),
+		dblCheckAmount = (Total.dblVolume * (Total.dblCashPayout/100)) - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) END) -  (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100)),
 		dblNoRefund = (CASE WHEN Total.dblVolume > Ref.dblMinimumRefund THEN 0 ELSE Total.dblVolume END),
 		Ref.ysnPosted,
 		RCus.intRefundCustomerId,
@@ -77,6 +77,8 @@ LEFT JOIN tblPATRefundCategory RCat
 ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
 INNER JOIN tblPATCustomerVolume CVol
 ON CVol.intCustomerPatronId = RCus.intCustomerId
+INNER JOIN tblARCustomer ARC
+ON RCus.intCustomerId = ARC.intEntityCustomerId
 INNER JOIN
 (
 	select
@@ -146,7 +148,8 @@ GROUP BY
 		RCat.dblRefundRate, 
 		Total.dblVolume,
 		Total.dblCashPayout,
-		Ref.dblCashRefund
+		Ref.dblCashRefund,
+		ARC.ysnSubjectToFWT
 
 SELECT	intRefundId, 
 		intFiscalYearId, 
