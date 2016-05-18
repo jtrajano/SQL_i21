@@ -191,6 +191,8 @@
 				[strNamespace]      =        N'Grain.view.ScaleStationSelection',
 				[intSort]           =        9
 	END
+	ELSE
+		UPDATE [dbo].[tblSMReminderList] SET [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true' WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9
 	
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10)
 	BEGIN
@@ -213,5 +215,7 @@
 		AND ysnHasGeneratedTicketNumber = 1
 		AND (strTicketStatus = ''O'' OR strTicketStatus = ''A'')
 		AND ISNULL(intCompanyLocationId,0) = 0
-		AND SCAlert.intEntityId = {0}' WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
+		AND SCAlert.intEntityId = {0}' 
+		, [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true'
+		WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
 GO

@@ -60,9 +60,9 @@ END
 					   dblRefundAmount = Total.dblRefundAmount,
 					   dblEquityRefund = CASE WHEN (Total.dblRefundAmount - Total.dblCashRefund) < 0 THEN 0 ELSE Total.dblRefundAmount - Total.dblCashRefund END,
 					   dblCashRefund = Total.dblCashRefund,
-					   dbLessFWT = Total.dbLessFWT ,
+					   dbLessFWT = CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END,
 					   dblLessServiceFee = Total.dblCashRefund * (Total.dblLessServiceFee/100),
-					   dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) < 0) THEN 0 ELSE Total.dblCashRefund - Total.dbLessFWT - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) END,
+					   dblCheckAmount =  CASE WHEN (Total.dblCashRefund - (CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) < 0) THEN 0 ELSE Total.dblCashRefund - (CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE Total.dbLessFWT END) - (Total.dblCashRefund * (Total.dblLessServiceFee/100)) END,
 					   dblTotalVolume = Total.dblVolume,
 					   dblTotalRefund = Total.dblTotalRefund
 				  FROM (
@@ -109,7 +109,8 @@ END
 			   WHERE CV.intFiscalYear = @intFiscalYearId AND CV.dblVolume <> 0.00
 			   GROUP BY CV.intCustomerPatronId, 
 						ENT.strName, 
-						AC.strStockStatus, 
+						AC.strStockStatus,
+						AC.ysnSubjectToFWT, 
 						TC.strTaxCode, 
 						dblTotalPurchases,
 						dblTotalSales,
@@ -133,9 +134,9 @@ END
 				RCus.dblRefundAmount,
 				dblEquityRefund = CASE WHEN RCus.dblEquityRefund < 0 THEN 0 ELSE RCus.dblEquityRefund END,
 				RCus.dblCashRefund,
-				dblLessFWT = RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100),
+				dbLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END,
 				dblLessServiceFee = RCus.dblCashRefund * (R.dblServiceFee/100),
-				dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100)) - (RCus.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RCus.dblCashRefund - (RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100)) - (RCus.dblCashRefund * (R.dblServiceFee/100)) END,
+				dblCheckAmount = CASE WHEN (RCus.dblCashRefund - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) < 0) THEN 0 ELSE RCus.dblCashRefund - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE RCus.dblCashRefund * (R.dblFedWithholdingPercentage/100) END) - (RCus.dblCashRefund * (R.dblServiceFee/100)) END,
 				dblTotalVolume = RCatPCat.dblVolume,
 				dblTotalRefund = RCus.dblRefundAmount
 		FROM tblPATRefundCustomer RCus
