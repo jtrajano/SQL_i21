@@ -3817,6 +3817,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByDay.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
     <Build Include="dbo\Views\vyuMFStockReservation.sql" />
+    <Build Include="dbo\Views\vyuCTContractExportET.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
