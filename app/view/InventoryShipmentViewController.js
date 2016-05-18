@@ -89,7 +89,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         read: '../Inventory/api/InventoryShipment/SearchShipmentItems'
                     },
                     columns: [
-                        {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                        {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                         {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Shipment', drillDownClick: 'onViewShipmentNo'},
                         {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
                         {dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'int'},
@@ -115,7 +115,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         read: '../Inventory/api/InventoryShipment/SearchShipmentItemLots'
                     },
                     columns: [
-                        {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                        {dataIndex: 'intInventoryShipmentId', text: "Shipment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                         {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewShipmentNo'},
                         {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
                         {dataIndex: 'strOrderType', text: 'Order Type', flex: 1, dataType: 'int'},
