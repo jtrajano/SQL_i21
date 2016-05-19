@@ -5,9 +5,18 @@ SELECT        cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransacti
                          cfTransaction.dtmTransactionDate, cfTransaction.strTransactionType, cfTransaction.dblQuantity, cfCard.strCustomerNumber, cfCard.strName, cfCard.strCardNumber, cfCard.strCardDescription, 
                          cfNetwork.strNetwork, cfSite.strSiteNumber, cfSite.strSiteName, cfItem.strProductNumber, cfItem.strItemNo, cfItem.strDescription, cfTransPrice.dblCalculatedAmount AS dblCalculatedTotalAmount, 
                          cfTransPrice.dblOriginalAmount AS dblOriginalTotalAmount, cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount, cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, 
-                         cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount, cfTransNetPrice.dblOriginalAmount AS dblOriginalNetAmount, cfTransNetPrice.dblCalculatedAmount - cfItem.dblAverageCost AS dblMargin, 
-                         cfTransaction.ysnInvalid, cfTransaction.ysnPosted, tblCFTransactionTax_1.dblTaxCalculatedAmount, tblCFTransactionTax_1.dblTaxOriginalAmount, ctContracts.strContractNumber, cfTransaction.strPriceMethod, 
-                         cfTransaction.strPriceBasis, cfTransaction.dblTransferCost
+                         cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount, cfTransNetPrice.dblOriginalAmount AS dblOriginalNetAmount, 
+                        
+						 CASE cfTransaction.strTransactionType 
+						 WHEN 'Local/Network' 
+						 THEN CASE cfTransaction.ysnPosted 
+						 WHEN 1 THEN cfTransNetPrice.dblCalculatedAmount - cfItem.dblAverageCost ELSE cfTransNetPrice.dblCalculatedAmount
+                          - cfItem.dblStandardCost END
+						   WHEN 'Extended Remote' 
+						   THEN cfTransGrossPrice.dblCalculatedAmount - cfTransaction.dblTransferCost 
+						   WHEN 'Remote' THEN cfTransGrossPrice.dblCalculatedAmount - cfTransaction.dblTransferCost
+                          ELSE 0 END AS dblMargin, cfTransaction.ysnInvalid, cfTransaction.ysnPosted, tblCFTransactionTax_1.dblTaxCalculatedAmount, tblCFTransactionTax_1.dblTaxOriginalAmount, ctContracts.strContractNumber, 
+                         cfTransaction.strPriceMethod, cfTransaction.strPriceBasis, cfTransaction.dblTransferCost
 FROM            dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                          dbo.tblCFNetwork AS cfNetwork ON cfTransaction.intNetworkId = cfNetwork.intNetworkId LEFT OUTER JOIN
                              (SELECT        smiCompanyLocation.strLocationName, cfiSite.intSiteId, cfiSite.intNetworkId, cfiSite.intTaxGroupId, cfiSite.strSiteNumber, cfiSite.intARLocationId, cfiSite.intCardId, cfiSite.strTaxState, 
@@ -23,7 +32,7 @@ FROM            dbo.tblCFTransaction AS cfTransaction LEFT OUTER JOIN
                                                          dbo.tblSMCompanyLocation AS smiCompanyLocation ON cfiSite.intARLocationId = smiCompanyLocation.intCompanyLocationId) AS cfSite ON 
                          cfTransaction.intSiteId = cfSite.intSiteId LEFT OUTER JOIN
                          dbo.tblCFVehicle AS cfVehicle ON cfTransaction.intVehicleId = cfVehicle.intVehicleId LEFT OUTER JOIN
-                             (SELECT        cfiItem.intItemId, cfiItem.strProductNumber, iciItem.strDescription, iciItem.intItemId AS intARItemId, iciItem.strItemNo, iciItemPricing.dblAverageCost
+                             (SELECT        cfiItem.intItemId, cfiItem.strProductNumber, iciItem.strDescription, iciItem.intItemId AS intARItemId, iciItem.strItemNo, iciItemPricing.dblAverageCost, iciItemPricing.dblStandardCost
                                FROM            dbo.tblCFItem AS cfiItem LEFT OUTER JOIN
                                                          dbo.tblCFSite AS cfiSite ON cfiSite.intSiteId = cfiItem.intSiteId LEFT OUTER JOIN
                                                          dbo.tblICItem AS iciItem ON cfiItem.intARItemId = iciItem.intItemId LEFT OUTER JOIN
