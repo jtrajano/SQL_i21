@@ -376,6 +376,26 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryReceiptVoucher>()
                 .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "strbillid" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intBillId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "strbillid" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intBillId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
             var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();
 
             return new SearchResult()

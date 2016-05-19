@@ -1643,5 +1643,6 @@ namespace iRely.Inventory.Model
         public decimal? dblAmountToVoucher { get; set; }
         public string strBillId { get; set; }
         public DateTime? dtmBillDate { get; set; }
+        public int intBillId { get; set; }
     }
 }

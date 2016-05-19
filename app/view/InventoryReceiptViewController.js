@@ -156,9 +156,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         read: '../Inventory/api/InventoryReceipt/GetReceiptVouchers'
                     },
                     columns: [
-                        {dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true },
+                        {dataIndex: 'intInventoryReceiptId', text: 'Inventory Receipt Id', flex: 1, dataType: 'numeric', key: true, hidden: true },
                         {dataIndex: 'intInventoryReceiptItemId', text: 'Inventory Receipt Item Id', flex: 1, dataType: 'numeric', hidden: true },
-                        {dataIndex: 'strBillId', text: 'Voucher No', flex: 1, dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
+                        {dataIndex: 'strBillId', text: 'Voucher No', flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'string', drillDownText: 'View Voucher', drillDownClick: 'onViewVoucher' },
                         {dataIndex: 'dtmBillDate', text: 'Voucher Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
 
                         {dataIndex: 'strVendor', text: 'Vendor', flex: 1, dataType: 'string' },

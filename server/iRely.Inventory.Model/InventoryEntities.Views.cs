@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets75bc06446abe093c41b0cdb438d65064803c98cb5ae3953620d6b08f686b3ac1))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf2fddd47b49421d0942baf8f9b154c91f9d8f35639a8f6bfd8f2a83aabeb9ebc))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets75bc06446abe093c41b0cdb438d65064803c98cb5ae3953620d6b08f686b3ac1 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsf2fddd47b49421d0942baf8f9b154c91f9d8f35639a8f6bfd8f2a83aabeb9ebc : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "75bc06446abe093c41b0cdb438d65064803c98cb5ae3953620d6b08f686b3ac1"; }
+            get { return "f2fddd47b49421d0942baf8f9b154c91f9d8f35639a8f6bfd8f2a83aabeb9ebc"; }
         }
 
         /// <summary>
@@ -11761,7 +11761,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptVoucher
-        [CodeFirstDatabaseSchema.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblQtyToReceive, T1.vyuICGetInventoryReceiptVoucher_dblLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblQtyVouchered, T1.vyuICGetInventoryReceiptVoucher_dblVoucherAmount, T1.vyuICGetInventoryReceiptVoucher_dblQtyToVoucher, T1.vyuICGetInventoryReceiptVoucher_dblAmountToVoucher, T1.vyuICGetInventoryReceiptVoucher_strBillId, T1.vyuICGetInventoryReceiptVoucher_dtmBillDate)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblQtyToReceive, T1.vyuICGetInventoryReceiptVoucher_dblLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblQtyVouchered, T1.vyuICGetInventoryReceiptVoucher_dblVoucherAmount, T1.vyuICGetInventoryReceiptVoucher_dblQtyToVoucher, T1.vyuICGetInventoryReceiptVoucher_dblAmountToVoucher, T1.vyuICGetInventoryReceiptVoucher_strBillId, T1.vyuICGetInventoryReceiptVoucher_dtmBillDate, T1.vyuICGetInventoryReceiptVoucher_intBillId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, 
@@ -11783,6 +11783,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblAmountToVoucher AS vyuICGetInventoryReceiptVoucher_dblAmountToVoucher, 
             T.strBillId AS vyuICGetInventoryReceiptVoucher_strBillId, 
             T.dtmBillDate AS vyuICGetInventoryReceiptVoucher_dtmBillDate, 
+            T.intBillId AS vyuICGetInventoryReceiptVoucher_intBillId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetInventoryReceiptVouchers AS T
     ) AS T1");
@@ -11796,7 +11797,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryReceiptVouchers
-        [iRely.Inventory.Model.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblQtyToReceive, T1.vyuICGetInventoryReceiptVoucher_dblLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblQtyVouchered, T1.vyuICGetInventoryReceiptVoucher_dblVoucherAmount, T1.vyuICGetInventoryReceiptVoucher_dblQtyToVoucher, T1.vyuICGetInventoryReceiptVoucher_dblAmountToVoucher, T1.vyuICGetInventoryReceiptVoucher_strBillId, T1.vyuICGetInventoryReceiptVoucher_dtmBillDate)
+        [iRely.Inventory.Model.vyuICGetInventoryReceiptVoucher](T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, T1.vyuICGetInventoryReceiptVoucher_intInventoryReceiptId, T1.vyuICGetInventoryReceiptVoucher_strVendor, T1.vyuICGetInventoryReceiptVoucher_strLocationName, T1.vyuICGetInventoryReceiptVoucher_strReceiptNumber, T1.vyuICGetInventoryReceiptVoucher_dtmReceiptDate, T1.vyuICGetInventoryReceiptVoucher_strBillOfLading, T1.vyuICGetInventoryReceiptVoucher_strReceiptType, T1.vyuICGetInventoryReceiptVoucher_strOrderNumber, T1.vyuICGetInventoryReceiptVoucher_strItemDescription, T1.vyuICGetInventoryReceiptVoucher_dblUnitCost, T1.vyuICGetInventoryReceiptVoucher_dblQtyToReceive, T1.vyuICGetInventoryReceiptVoucher_dblLineTotal, T1.vyuICGetInventoryReceiptVoucher_dblQtyVouchered, T1.vyuICGetInventoryReceiptVoucher_dblVoucherAmount, T1.vyuICGetInventoryReceiptVoucher_dblQtyToVoucher, T1.vyuICGetInventoryReceiptVoucher_dblAmountToVoucher, T1.vyuICGetInventoryReceiptVoucher_strBillId, T1.vyuICGetInventoryReceiptVoucher_dtmBillDate, T1.vyuICGetInventoryReceiptVoucher_intBillId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetInventoryReceiptVoucher_intInventoryReceiptItemId, 
@@ -11818,6 +11819,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblAmountToVoucher AS vyuICGetInventoryReceiptVoucher_dblAmountToVoucher, 
             T.strBillId AS vyuICGetInventoryReceiptVoucher_strBillId, 
             T.dtmBillDate AS vyuICGetInventoryReceiptVoucher_dtmBillDate, 
+            T.intBillId AS vyuICGetInventoryReceiptVoucher_intBillId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryReceiptVoucher AS T
     ) AS T1");
