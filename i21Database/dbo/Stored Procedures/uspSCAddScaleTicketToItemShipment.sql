@@ -181,9 +181,7 @@ END
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
-       ([intConcurrencyId]
-       ,[strDiscountCode]
-       ,[strDiscountCodeDescription]
+       ([intConcurrencyId]     
        ,[dblGradeReading]
        ,[strCalcMethod]
        ,[strShrinkWhat]
@@ -199,9 +197,7 @@ BEGIN
        ,[strSourceType]
 	   ,[intSort]
 	   ,[strDiscountChargeType])
-	SELECT	DISTINCT [intConcurrencyId]= 1
-       ,[strDiscountCode] = SD.[strDiscountCode]
-       ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
+	SELECT	DISTINCT [intConcurrencyId]= 1      
        ,[dblGradeReading]= SD.[dblGradeReading]
        ,[strCalcMethod]= SD.[strCalcMethod]
        ,[strShrinkWhat]= 
