@@ -260,18 +260,10 @@ BEGIN TRY
 		WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
 			THEN DELETE
 		WHEN MATCHED
-			THEN UPDATE SET EQ.dblEquity = CASE WHEN B.ysnPosted = 1 THEN 
-													(EQ.dblEquity + (CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
-																		(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																	B.dblRefundAmount - (B.dblRefundAmount * .25) END)) 
-										   ELSE (EQ.dblEquity - (CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
-																		(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																	B.dblRefundAmount - (B.dblRefundAmount * .25) END)) END
+			THEN UPDATE SET EQ.dblEquity = CASE WHEN B.ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END
 		WHEN NOT MATCHED BY TARGET
 			THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dtmLastActivityDate, intConcurrencyId)
-				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
-																		(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																	B.dblRefundAmount - (B.dblRefundAmount * .25) END, GETDATE(), 1);
+				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, B.dblEquityRefund, GETDATE(), 1);
 
 
 --=====================================================================================================================================
