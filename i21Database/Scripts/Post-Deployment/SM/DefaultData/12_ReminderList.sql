@@ -192,7 +192,14 @@
 				[intSort]           =        9
 	END
 	ELSE
-		UPDATE [dbo].[tblSMReminderList] SET [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true' WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9
+		UPDATE [dbo].[tblSMReminderList] SET [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true&searchCommand=reminderSearchConfig'
+		,[strQuery] = N'SELECT intTicketUncompletedDaysAlert,ysnHasGeneratedTicketNumber,strTicketStatus from tblSCUncompletedTicketAlert SCAlert
+		LEFT JOIN tblSCTicket SCTicket ON SCAlert.intCompanyLocationId = SCTicket.intProcessingLocationId
+		WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
+		AND ysnHasGeneratedTicketNumber = 1
+		AND (strTicketStatus = ''O'' OR strTicketStatus = ''A'')
+		AND SCAlert.intEntityId = {0}'  
+		WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 9
 	
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10)
 	BEGIN
@@ -216,6 +223,6 @@
 		AND (strTicketStatus = ''O'' OR strTicketStatus = ''A'')
 		AND ISNULL(intCompanyLocationId,0) = 0
 		AND SCAlert.intEntityId = {0}' 
-		, [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true'
+		, [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true&searchCommand=reminderSearchConfig'
 		WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
 GO
