@@ -22,7 +22,7 @@ BEGIN
 	RETURNS @tblSpecialPriceTableReturn TABLE(
 		strContractNumber NVARCHAR(20)
 		,A4GLIdentity INT
-		,ysnMaxprice BIT
+		,ysnMaxPrice BIT
 		,dblPrice NUMERIC(18,6)
 	)
 	AS
@@ -33,7 +33,7 @@ BEGIN
 		INSERT INTO @tblSpecialPriceTableReturn(
 			strContractNumber
 			,A4GLIdentity
-			,ysnMaxprice
+			,ysnMaxPrice
 			,dblPrice
 		)
 		SELECT TOP 1 

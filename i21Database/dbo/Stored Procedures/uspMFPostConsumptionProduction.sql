@@ -13,6 +13,7 @@
 	,@strVendorLotNo NVARCHAR(50) = NULL
 	,@strParentLotNumber NVARCHAR(50)
 	,@intStorageLocationId INT
+	,@dtmProductionDate datetime=NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -37,7 +38,6 @@ BEGIN
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
 		,@dtmExpiryDate DATETIME
-		,@dtmPlannedDate DATETIME
 		,@intItemStockUOMId INT
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmDate DATETIME
@@ -45,13 +45,6 @@ BEGIN
 	SELECT @dtmDate = GETDATE()
 
 	SELECT TOP 1 @intLocationId = W.intLocationId
-		,@dtmPlannedDate = (
-			CASE 
-				WHEN dtmPlannedDate > @dtmDate
-					THEN @dtmDate
-				ELSE dtmPlannedDate
-				END
-			)
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder W
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -120,6 +113,11 @@ BEGIN
 		AND cl.intBatchId = @intBatchId
 		AND ISNULL(cl.intLotId, 0) = 0
 
+	If @dtmProductionDate>@dtmDate OR @dtmProductionDate IS NULL
+	BEGIN
+		SELECT @dtmProductionDate=@dtmDate
+	END
+
 	INSERT INTO @ItemsForPost (
 		intItemId
 		,intItemLocationId
@@ -144,7 +142,7 @@ BEGIN
 	SELECT intItemId = l.intItemId
 		,intItemLocationId = l.intItemLocationId
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-		,dtmDate = @dtmPlannedDate
+		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
 		,dblCost = l.dblLastCost
@@ -273,7 +271,7 @@ BEGIN
 		,dblWeight = @dblWeight
 		,intWeightUOMId = @intWeightUOMId
 		,dtmExpiryDate = @dtmExpiryDate
-		,dtmManufacturedDate = @dtmPlannedDate
+		,dtmManufacturedDate = @dtmProductionDate
 		,intOriginId = NULL
 		,intGradeId = NULL
 		,strBOLNo = NULL
@@ -296,8 +294,6 @@ BEGIN
 	SELECT TOP 1 @intLotId = intLotId
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
-
-	SELECT @dtmDate = GETDATE()
 
 	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
 		,@strParentLotAlias = ''
@@ -341,7 +337,7 @@ BEGIN
 				ELSE @intWeightUOMId
 				END
 			)
-		,dtmDate = @dtmPlannedDate
+		,dtmDate = @dtmProductionDate
 		,dblQty = (
 			CASE 
 				WHEN @intItemStockUOMId = @intItemUOMId

@@ -43,4 +43,4 @@ strSocialSecurity = ISNULL((
 		WHERE PayCheck.strPaycheckId = tblCMBankTransaction.strTransactionId 
 ),'')
 FROM tblCMBankTransaction
-WHERE dbo.fnIsDepositEntry(strLink) = 0
+ --dbo.fnIsDepositEntry(strLink) = 0

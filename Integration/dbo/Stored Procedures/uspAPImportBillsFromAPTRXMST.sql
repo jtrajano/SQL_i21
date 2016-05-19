@@ -137,6 +137,7 @@ BEGIN
 					[ysnOrigin]					=	1,
 					[intShipToId]				=	@userLocation,
 					[intShipFromId]				=	loc.intEntityLocationId,
+					[intPayToAddressId]			=	loc.intEntityLocationId,
 					[intCurrencyId]				=	(SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency LIKE ''%USD%''),
 					[A4GLIdentity]				=	A.A4GLIdentity
 				FROM #tmpaptrxmstimport A
@@ -176,6 +177,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intPayToAddressId],
 				[intCurrencyId],
 				[ysnOrigin]
 			)
@@ -200,6 +202,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intPayToAddressId],
 				[intCurrencyId],
 				[ysnOrigin])
 			OUTPUT inserted.intBillId

@@ -126,7 +126,7 @@ BEGIN TRY
 			WHERE intProductValueId > 0
 			)
 	BEGIN
-		SET @SQL = @SQL + 'UNION ALL SELECT NULL,NULL,NULL,NULL,NULL,NULL,NULL,0, Param FROM dbo.fn_SQLInClause(''' + @strProperties + ''')'
+		SET @SQL = @SQL + 'UNION ALL SELECT NULL,NULL,NULL,NULL,NULL,NULL,NULL,0, Item FROM dbo.fnSplitStringWithTrim(''' + @strProperties + ''','','')'
 	END
 
 	EXEC sp_executesql @SQL

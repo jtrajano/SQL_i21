@@ -2026,11 +2026,9 @@
     <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByAttributeName.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndUnits.sql" />
-    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndWeights.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByUnits.sql" />
-    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByWeights.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemAllocatedCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
@@ -3741,7 +3739,6 @@
     <Build Include="dbo\Views\vyuPRDailyTaxTotal.sql" />
     <Build Include="dbo\Views\vyuPRForm941BReport.sql" />
     <Build Include="dbo\Functions\fnCalculateCostFromNetWgt.sql" />
-    <Build Include="dbo\Functions\fnCalculateReceiptLineTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateRouteSequence.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityCompetitor.sql" />
     <Build Include="dbo\Views\vyuHDGroupSearch.sql" />
@@ -3818,8 +3815,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
     <Build Include="dbo\Views\vyuMFStockReservation.sql" />
     <Build Include="dbo\Views\vyuCTContractExportET.sql" />
-    <Build Include="dbo\Stored Procedures\uspARAddInvoiceToPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertOffsetAccountForOriginTrans.sql" />
+    <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
