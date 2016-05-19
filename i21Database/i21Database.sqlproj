@@ -3696,6 +3696,10 @@
     <Build Include="dbo\Stored Procedures\uspMBPostMeterReading.sql" />
     <Build Include="dbo\Stored Procedures\uspMBBatchPostMeterReading.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityCampaign.sql" />
+    <Build Include="dbo\Tables\tblSMTransaction.sql" />
+    <Build Include="dbo\Tables\tblSMApproval.sql" />
+    <Build Include="dbo\Views\vyuSMApproval.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationRequireApprovalFor.sql" />
     <Build Include="dbo\Views\vyuHDOpportunityCampaignSearch.sql" />
     <Build Include="dbo\Tables\tblIPSQLType.sql" />
     <Build Include="dbo\Tables\tblIPParameter.sql" />
@@ -3773,6 +3777,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCheckItemUsedInDiscountCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateContract.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
+    <Build Include="dbo\Tables\tblEMEntityRequireApprovalFor.sql" />
     <Build Include="dbo\Tables\tblEMEntityLineOfBusiness.sql" />
     <Build Include="dbo\Tables\tblEMEntityCRMInformation.sql" />
     <Build Include="dbo\Tables\tblEMEntityAreaOfInterest.sql" />
