@@ -3815,6 +3815,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
     <Build Include="dbo\Views\vyuMFStockReservation.sql" />
     <Build Include="dbo\Views\vyuCTContractExportET.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertOffsetAccountForOriginTrans.sql" />
+    <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

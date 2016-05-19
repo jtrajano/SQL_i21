@@ -387,3 +387,4 @@ ROLLBACK_INSERT:
 IMPORT_EXIT:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
+	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
