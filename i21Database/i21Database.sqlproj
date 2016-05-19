@@ -3817,6 +3817,7 @@
     <Build Include="dbo\Views\vyuCTContractExportET.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOffsetAccountForOriginTrans.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
+    <Build Include="dbo\Views\vyuGRGetDiscountCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
