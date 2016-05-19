@@ -148,12 +148,22 @@ Ext.define('Inventory.model.ReceiptItem', {
             return true;
         }
     },
-
+    
+    validateQtyToReceive: function(errors) {
+        if (this.get('dblOpenReceive') === 0) {
+                errors.add({
+                    field: 'dblOpenReceive',
+                    message: 'Quantity to Receive must not be equal to zero.'
+                });
+        }
+    },
+    
     validate: function(options) {
         var errors = this.callParent(arguments);
 
         this.validateSubAndStorageLocations(errors);
         this.validateNetQty(errors);
+        this.validateQtyToReceive(errors);
 
         return errors;
     }
