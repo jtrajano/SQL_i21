@@ -3826,6 +3826,11 @@
     <Build Include="dbo\Tables\tblCCCompanyPreferenceOption.sql" />
     <Build Include="dbo\Stored Procedures\uspCCTransactionToCMBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCCPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickListForSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSavePickListForSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeletePickListForSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSalesOrderPickListAvailableLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateShipmentFromSalesOrderPickList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
