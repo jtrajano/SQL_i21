@@ -18,7 +18,12 @@ SELECT
 	, ISNULL(ReceiptItem.dblBillQty,0) dblQtyVouchered
 	, ISNULL(ReceiptItem.dblBillQty,0) dblVoucherAmount
 	, (ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0)) dblQtyToVoucher
-	, ((ReceiptItem.dblLineTotal/ReceiptItem.dblQtyToReceive)*(ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0))) dblAmountToVoucher
+	, dblAmountToVoucher =
+	  CASE
+		WHEN ReceiptItem.dblQtyToReceive = 0
+		THEN 0
+		ELSE (ReceiptItem.dblLineTotal/ReceiptItem.dblQtyToReceive)*(ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0))
+	  END
 	, strBillId = ISNULL(Bill.strBillId, 'New Voucher')
 	, Bill.dtmBillDate
 FROM vyuICGetInventoryReceiptItem ReceiptItem
