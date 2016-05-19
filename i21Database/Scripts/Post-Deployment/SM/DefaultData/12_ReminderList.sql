@@ -188,7 +188,7 @@
 												AND ysnHasGeneratedTicketNumber = 1
 												AND strTicketStatus = ''O''
 												AND SCAlert.intEntityId = {0}',
-				[strNamespace]      =        N'Grain.view.ScaleStationSelection',
+				[strNamespace]      =        N'Grain.view.ScaleStationSelection?showSearch=true&searchCommand=reminderSearchConfig',
 				[intSort]           =        9
 	END
 	ELSE
@@ -213,7 +213,7 @@
 												AND (strTicketStatus = ''O'' OR strTicketStatus = ''A'')
 												AND ISNULL(intCompanyLocationId,0) = 0
 												AND SCAlert.intEntityId = {0}',
-				[strNamespace]      =        N'Grain.view.ScaleStationSelection',
+				[strNamespace]      =        N'Grain.view.ScaleStationSelection?showSearch=true&searchCommand=reminderSearchConfig',
 				[intSort]           =        10
 	END
 	ELSE
