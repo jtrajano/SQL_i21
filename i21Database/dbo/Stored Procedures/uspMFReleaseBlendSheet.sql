@@ -426,7 +426,7 @@ End
 						'Active'
 						,'Quarantine'
 						)
-					AND l.dtmExpiryDate >= GETDATE()
+					AND (l.dtmExpiryDate IS NULL OR l.dtmExpiryDate >= GETDATE())
 					AND l.dblWeight >0
 
 					--Iclude Sub Items
@@ -437,7 +437,7 @@ End
 						'Active'
 						,'Quarantine'
 						)
-					AND l.dtmExpiryDate >= GETDATE()
+					AND (l.dtmExpiryDate IS NULL OR l.dtmExpiryDate >= GETDATE())
 					AND l.dblWeight >0)
 
 				if @dblBulkItemAvlQty < @dblInputReqQty
