@@ -3817,6 +3817,10 @@
     <Build Include="dbo\Views\vyuCTContractExportET.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOffsetAccountForOriginTrans.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInvoiceToPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessPayments.sql" />
+    <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
