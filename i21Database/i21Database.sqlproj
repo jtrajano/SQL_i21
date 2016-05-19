@@ -3819,6 +3819,8 @@
     <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountCode.sql" />
     <Build Include="dbo\Tables\tblCCCompanyPreferenceOption.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCTransactionToCMBankTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
