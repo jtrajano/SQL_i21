@@ -14,7 +14,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 read: '../Inventory/api/InventoryCount/Search'
             },
             columns: [
-                {dataIndex: 'intInventoryCountId', text: "Count Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'intInventoryCountId', text: "Count Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strCountNo', text: 'Count No', flex: 1, dataType: 'string'},
                 {dataIndex: 'strLocationName', text: 'Location', flex: 1, dataType: 'string'},
                 {dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string'},

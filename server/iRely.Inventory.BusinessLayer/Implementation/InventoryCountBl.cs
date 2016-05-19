@@ -27,6 +27,26 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryCount>()
                 .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "strcountno" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryCountId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "strcountno" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryCountId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
             var data = await query.Execute(param, "intInventoryCountId").ToListAsync();
 
             return new SearchResult()
