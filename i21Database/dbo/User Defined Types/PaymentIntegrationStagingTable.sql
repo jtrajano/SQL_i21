@@ -18,13 +18,13 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[intBankAccountId]						INT												NULL		-- Bank Account Id ([tblCMBankAccount].[intBankAccountId])	
 	,[intPaymentMethodId]					INT												NOT NULL	-- Payment Method Id([tblSMPaymentMethod].[intPaymentMethodID])	
 	,[intLocationId]						INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
-	,[intHeaderInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Prepayment/Overpayment) for Prepayment and OverPayment
 	,[dblAmountPaid]						NUMERIC(18, 6)									NULL		-- Amount Paid
-	,[dblUnappliedAmount]					NUMERIC(18, 6)									NULL		-- Unapplied Paid
 	,[strRecordNumber]						NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Record/Payment Number	
 	,[strPaymentInfo]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Payment Info / Check Number
 	,[strNotes]								NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Notes
 	,[ysnApplytoBudget]						BIT												NULL		-- 	
+	,[ysnApplyOnAccount]					BIT												NULL		-- 	
+	,[ysnAllowPrepayment]					BIT												NULL		-- 	
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Payments will be posted
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
@@ -35,14 +35,12 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 
 	--Detail																																															
 	,[intPaymentDetailId]					INT												NULL		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
-    ,[intInvoiceId]							INT												NOT NULL	-- Key Value from tblARInvoice ([tblARInvoice].[intInvoiceId])
-	,[intTermId]							INT												NOT NULL	-- Term Id(Term used in Invoice)	
-	,[intInvoiceAccountId]					INT												NOT NULL	-- Invoice Account Id ([tblGLAccount].[intAccountId])
-	,[dblInvoiceTotal]						NUMERIC(18, 6)									NULL		-- Invoice Total
+    ,[intInvoiceId]							INT												NOT NULL	-- Key Value from tblARInvoice ([tblARInvoice].[intInvoiceId])	
+	,[ysnApplyTermDiscount]					BIT												NULL		-- 	
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- Discount
 	,[dblDiscountAvailable]					NUMERIC(18, 6)									NULL		-- Discount Available
 	,[dblInterest]							NUMERIC(18, 6)									NULL		-- Interest
-	,[dblAmountDue]							NUMERIC(18, 6)									NULL		-- Amount Due
 	,[dblPayment]							NUMERIC(18, 6)									NULL		-- Payment	
+	,[ysnAllowOverpayment]					BIT												NULL		-- 	
 
 )

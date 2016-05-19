@@ -1,23 +1,23 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessPayments]
-	 @InvoiceEntries				PaymentIntegrationStagingTable					READONLY	
+	 @PaymentEntries				PaymentIntegrationStagingTable					READONLY	
 	,@UserId						INT
 	,@GroupingOption				INT								= 0	
-																	-- 0  = [intId] - An Invoice will be created for each record in @InvoiceEntries
+																	-- 0  = [intId] - A Payment will be created for each record in @PaymentEntries
 																	-- 1  = [intEntityCustomerId]
 																	-- 2  = [intEntityCustomerId], [intSourceId]
-																	-- 3  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId]
-																	-- 4  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId]
-																	-- 5  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate]
-																	-- 6  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId]
-																	-- 7  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId]
-																	-- 8  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId]
-																	-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]
-																	-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
-																	-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
+																	-- 3  = [intEntityCustomerId], [intSourceId], [intLocationId]
+																	-- 4  = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId]
+																	-- 5  = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId], [dtmDatePaid]
+																	-- 6  = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]
+																	-- 7  = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]
+																	-- 8  = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [ysnApplytoBudget]
+																	-- 9  = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [ysnApplytoBudget], [ysnApplyOnAccount]
+																	-- 10 = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [ysnApplytoBudget], [ysnApplyOnAccount], [dblAmountPaid]
+																	-- 11 = [intEntityCustomerId], [intSourceId], [intLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [ysnApplytoBudget], [ysnApplyOnAccount], [dblAmountPaid], [strNotes]
 	,@RaiseError					BIT								= 0
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
-	,@CreatedIvoices				NVARCHAR(MAX)					= NULL			OUTPUT
-	,@UpdatedIvoices				NVARCHAR(MAX)					= NULL			OUTPUT
+	,@CreatedPayments				NVARCHAR(MAX)					= NULL			OUTPUT
+	,@UpdatedPayments				NVARCHAR(MAX)					= NULL			OUTPUT
 	,@BatchIdForNewPost				NVARCHAR(50)					= NULL			OUTPUT
 	,@PostedNewCount				INT								= 0				OUTPUT
 	,@BatchIdForNewPostRecap		NVARCHAR(50)					= NULL			OUTPUT
@@ -1799,7 +1799,7 @@ IF ISNULL(@RaiseError,0) = 0
 --	@TempInvoiceIdTable
 
 	
---SET @CreatedIvoices = @CreateIds
+--SET @CreatedPayments = @CreateIds
 
 
 --DECLARE @UpdatedIds VARCHAR(MAX)
@@ -1820,7 +1820,7 @@ IF ISNULL(@RaiseError,0) = 0
 --	@TempInvoiceIdTable
 
 	
---SET @UpdatedIvoices = @UpdatedIds
+--SET @UpdatedPayments = @UpdatedIds
 
 
 

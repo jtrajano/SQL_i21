@@ -12,6 +12,8 @@
 	,@ApplyOnAccount	BIT				= 0
 	,@Notes				NVARCHAR(250)	= ''
 	,@EntityId			INT
+	,@AllowPrepayment	BIT				= 0
+	,@AllowOverpayment	BIT				= 0
 	,@RaiseError		BIT				= 0
 	,@ErrorMessage		NVARCHAR(250)	= NULL			OUTPUT
 	,@NewPaymentId		INT				= NULL			OUTPUT 	
@@ -43,16 +45,8 @@ SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompa
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
-
---IF(@ARAccountId IS NULL OR @ARAccountId = 0)
---	BEGIN
---		SET @ErrorMessage = 'There is no setup for AR Account in the Company Configuration.';
---		IF ISNULL(@RaiseError,0) = 1
---			RAISERROR(@ErrorMessage, 16, 1);
---		RETURN 0;
---	END
 	
-IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId)
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId)
 	BEGIN
 		SET @ErrorMessage = 'The customer Id provided does not exists!'
 		IF ISNULL(@RaiseError,0) = 1
@@ -60,15 +54,32 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @Entity
 		RETURN 0;
 	END
 
-IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId AND ysnActive = 1)
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND ysnActive = 1)
 	BEGIN
 		SET @ErrorMessage = 'The customer provided is not active!'
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END	
-	
-IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
+
+IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId)
+	BEGIN
+		SET @ErrorMessage = 'The payment method Id provided does not exists!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END
+
+
+IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId AND [ysnActive] = 1)
+	BEGIN
+		SET @ErrorMessage = 'The payment method provided is not active!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END	
+		
+IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
 	BEGIN
 		SET @ErrorMessage = 'The company location Id provided does not exists!'
 		IF ISNULL(@RaiseError,0) = 1
@@ -76,7 +87,7 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 		RETURN 0;
 	END	
 
-IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ysnLocationActive = 1)
+IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId AND [ysnLocationActive] = 1)
 	BEGIN
 		SET @ErrorMessage = 'The company location provided is not active!'
 		IF ISNULL(@RaiseError,0) = 1
@@ -84,13 +95,41 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 		RETURN 0;
 	END	
 	
-IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
+IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId)
 	BEGIN
 		SET @ErrorMessage = 'The entity Id provided does not exists!'
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);		
 		RETURN 0;
 	END
+
+IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId AND [ysnActive] = 1)
+	BEGIN
+		SET @ErrorMessage = 'The entity provided is not active!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END	
+
+
+IF @AllowPrepayment = 0 AND @InvoiceId IS NULL AND @AmountPaid > @ZeroDecimal
+	BEGIN
+		SET @ErrorMessage = 'This will create a prepayment which has not been allowed!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END	
+
+IF @AllowOverpayment = 0 AND @ApplyTermDiscount = 0 AND @InvoiceId IS NOT NULL AND @AmountPaid > (@Payment + @Discount - @Interest)
+	BEGIN
+		SET @ErrorMessage = 'This will create a overpayment which has not been allowed!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END
+
+
+SET @AmountPaid = ROUND(@AmountPaid, [dbo].[fnARGetDefaultDecimal]())
 
 	
 IF ISNULL(@RaiseError,0) = 0	
@@ -156,6 +195,11 @@ END CATCH
 
 IF @InvoiceId IS NOT NULL
 BEGIN
+
+	SET @Payment = ROUND(@Payment, [dbo].[fnARGetDefaultDecimal]())
+	SET @Discount = ROUND(@Discount, [dbo].[fnARGetDefaultDecimal]())
+	SET @Interest = ROUND(@Interest, [dbo].[fnARGetDefaultDecimal]())
+
 	BEGIN TRY
 		EXEC [dbo].[uspARAddInvoiceToPayment]		
 			 @PaymentId				= @NewId
@@ -164,6 +208,7 @@ BEGIN
 			,@ApplyTermDiscount		= @ApplyTermDiscount
 			,@Discount				= @Discount	
 			,@Interest				= @Interest
+			,@AllowOverpayment		= @AllowOverpayment
 			,@RaiseError			= @RaiseError
 			,@ErrorMessage			= @AddDetailError	OUTPUT
 			,@NewPaymentDetailId	= @NewDetailId		OUTPUT

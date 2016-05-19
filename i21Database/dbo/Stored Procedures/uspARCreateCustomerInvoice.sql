@@ -4,6 +4,7 @@
 	,@CurrencyId					INT				= NULL
 	,@SubCurrencyCents				INT				= NULL
 	,@TermId						INT				= NULL
+	,@AccountId						INT				= NULL
 	,@EntityId						INT
 	,@InvoiceDate					DATETIME	
 	,@DueDate						DATETIME		= NULL
@@ -110,7 +111,7 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 
 SET @ZeroDecimal = 0.000000	
 SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
-SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
@@ -127,9 +128,41 @@ IF ISNULL(@Type, '') = ''
 	SET @Type = 'Standard'
 
 
-IF(@ARAccountId IS NULL OR @ARAccountId = 0)
+IF ISNULL(@AccountId, 0) <> 0 AND @TransactionType <>  'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @AccountId)
+	BEGIN
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "AR Account".';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+ELSE
+	SET @ARAccountId = @AccountId
+
+IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType <>  'Prepayment'
+	SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+
+IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType <>  'Prepayment'
 	BEGIN
 		SET @ErrorMessage = 'There is no setup for AR Account in the Company Configuration.';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+
+IF ISNULL(@AccountId, 0) <> 0 AND @TransactionType =  'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @AccountId)
+	BEGIN
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "Customer Prepayments".';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+ELSE
+	SET @ARAccountId = @AccountId
+
+
+IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType =  'Prepayment'
+	BEGIN
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "Customer Prepayments".';
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
