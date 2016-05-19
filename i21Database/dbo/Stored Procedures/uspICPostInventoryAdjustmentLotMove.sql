@@ -543,19 +543,19 @@ BEGIN
 				ON Detail.intInventoryAdjustmentDetailId = FromStock.intTransactionDetailId
 				AND Detail.intInventoryAdjustmentId = FromStock.intTransactionId
 				AND FromStock.intItemId = Detail.intItemId
+			-- Source Lot
 			INNER JOIN dbo.tblICLot SourceLot
 				ON SourceLot.intLotId = FromStock.intLotId
 			INNER JOIN dbo.tblICItemLocation SourceLotItemLocation 
 				ON SourceLotItemLocation.intLocationId = Header.intLocationId 
 				AND SourceLotItemLocation.intItemId = SourceLot.intItemId
-
 			LEFT JOIN dbo.tblICItemUOM SourceLotItemUOM
 				ON SourceLotItemUOM.intItemUOMId = SourceLot.intItemUOMId
 				AND SourceLotItemUOM.intItemId = SourceLot.intItemId
 			LEFT JOIN dbo.tblICItemUOM SourceLotWeightUOM 
 				ON SourceLotWeightUOM.intItemUOMId = SourceLot.intWeightUOMId
 				AND SourceLotWeightUOM.intItemId = SourceLot.intItemId
-
+			-- New Lot 
 			LEFT JOIN dbo.tblICLot NewLot
 				ON NewLot.intLotId = Detail.intNewLotId
 			LEFT JOIN dbo.tblICItemLocation NewLotItemLocation 
