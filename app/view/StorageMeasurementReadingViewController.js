@@ -10,10 +10,11 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                 read: '../Inventory/api/StorageMeasurementReading/Search'
             },
             columns: [
-                {dataIndex: 'intLocationId',text: 'Location', flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'intLocationId',text: 'Location', flex: 1, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strLocationName',text: 'Location', flex: 1, dataType: 'string'},
                 {dataIndex: 'dtmDate', text: 'Date', flex: 1,  dataType: 'datetime', xtype: 'datecolumn'},
-                {dataIndex: 'strReadingNo', text: 'Reading No', flex: 1,  dataType: 'string'}
+                {dataIndex: 'strReadingNo', text: 'Reading No', flex: 1,  dataType: 'string'},
+                {dataIndex: 'intStorageMeasurementReadingId', text: 'Reading Id', flex: 1, defaultSort:true, sortOrder: 'DESC', dataType: 'numeric', hidden: true}
             ],
             buttons: [
                 {
