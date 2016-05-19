@@ -48,6 +48,7 @@ BEGIN TRY
 		,@dtmCurrentDateTime DATETIME
 		,@dtmProductionDate DATETIME
 	Declare @intCategoryId int
+	Declare @strInActiveItems nvarchar(max)
 
 	SELECT @dtmCurrentDateTime = GetDate()
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -719,6 +720,25 @@ End
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
+		EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
+		,@intLocationId = @intLocationId
+		,@intUserId = @intUserId
+		,@intWorkOrderId = @intWorkOrderId
+
+		--Check for Input Items validity
+		SELECT @strInActiveItems = COALESCE(@strInActiveItems + ', ', '') + i.strItemNo
+		FROM @tblLot l join tblICItem i on l.intItemId=i.intItemId 
+		Where l.intItemId NOT IN (Select intItemId From tblMFWorkOrderRecipeItem 
+		Where intWorkOrderId=@intWorkOrderId AND intRecipeItemTypeId=1 
+		Union
+		Select intItemId From tblMFWorkOrderRecipeSubstituteItem Where intWorkOrderId=@intWorkOrderId)
+
+		If ISNULL(@strInActiveItems,'')<>''
+		Begin
+			Set @ErrMsg='Recipe ingredient items ' + @strInActiveItems + ' are inactive. Please remove the lots belong to the inactive items from blend sheet.'
+			RaisError(@ErrMsg,16,1)
+		End
+
 		--Insert Into Input/Consumed Lot
 		IF @ysnEnableParentLot = 0
 		BEGIN
@@ -893,11 +913,6 @@ End
 					WHERE intWorkOrderId = @intWorkOrderId
 					)
 			WHERE intWorkOrderId = @intWorkOrderId
-
-		EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
-			,@intLocationId = @intLocationId
-			,@intUserId = @intUserId
-			,@intWorkOrderId = @intWorkOrderId
 
 		--Create Quality Computations
 		EXEC uspMFCreateBlendRecipeComputation @intWorkOrderId = @intWorkOrderId
