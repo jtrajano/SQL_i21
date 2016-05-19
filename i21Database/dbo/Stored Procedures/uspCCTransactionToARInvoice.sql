@@ -3,7 +3,6 @@
 	,@UserId			INT	
 	,@Post				BIT	= NULL
 	,@Recap				BIT	= NULL
-	,@InvoiceId			INT = NULL
 	,@ErrorMessage		NVARCHAR(250) OUTPUT
 	,@CreatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
 	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT

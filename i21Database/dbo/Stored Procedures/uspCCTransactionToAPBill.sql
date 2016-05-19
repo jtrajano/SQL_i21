@@ -7,6 +7,7 @@
 	,@success			BIT = NULL OUTPUT
 	,@errorMessage NVARCHAR(MAX) = NULL OUTPUT
 	,@createdBillId INT = NULL OUTPUT
+
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -58,10 +59,10 @@ BEGIN TRY
 		,@vendorOrderNumber = @ccdReference
 		,@voucherDate = @dtmDate
 		,@voucherDetaiCC = @voucherDetailCC
-		,@billId = @billId OUTPUT
+		,@billId = @createdBillId OUTPUT
 
 	EXEC [dbo].[uspAPPostBill]
-		@batchId = @billId,
+		@batchId = @createdBillId,
 		@billBatchId = NULL,
 		@transactionType = NULL,
 		@post = 1,
@@ -69,8 +70,8 @@ BEGIN TRY
 		@isBatch = 0,
 		@param = NULL,
 		@userId = @userId,
-		@beginTransaction = @billId,
-		@endTransaction = @billId,
+		@beginTransaction = @createdBillId,
+		@endTransaction = @createdBillId,
 		@success = @success OUTPUT
 
 END TRY
