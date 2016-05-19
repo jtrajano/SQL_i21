@@ -26,6 +26,26 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryAdjustment>()
                 .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "stradjustmentno" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryAdjustmentId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "stradjustmentno" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryAdjustmentId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+
             var data = await query.ExecuteProjection(param, "intInventoryAdjustmentId").ToListAsync();
 
             return new SearchResult()
@@ -39,6 +59,26 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryAdjustmentDetail>()
                 .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "stradjustmentno" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryAdjustmentId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "stradjustmentno" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryAdjustmentId", direction = "DESC" });
+                }
+            }
+
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+            
             var data = await query.ExecuteProjection(param, "intInventoryAdjustmentDetailId").ToListAsync();
 
             return new SearchResult()
