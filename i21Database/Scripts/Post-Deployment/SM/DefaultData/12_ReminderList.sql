@@ -225,7 +225,6 @@
 		AND SCAlert.intEntityId = {0}' 
 		, [strNamespace] = N'Grain.view.ScaleStationSelection?showSearch=true&searchCommand=reminderSearchConfig'
 		WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
-		AND SCAlert.intEntityId = {0}' WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
 
 
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction')
