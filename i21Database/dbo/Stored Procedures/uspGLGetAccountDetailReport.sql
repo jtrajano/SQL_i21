@@ -143,8 +143,8 @@ strCompanyName = Company.strCompanyName
 ,Segment.[Primary Account]
 ,Segment.Location
 FROM
-tblGLDetail A
-INNER JOIN tblGLAccount Account ON A.intAccountId = Account.intAccountId
+tblGLAccount Account
+LEFT JOIN tblGLDetail A ON A.intAccountId = Account.intAccountId
 INNER JOIN tblGLAccountGroup Grp ON Account.intAccountGroupId = Grp.intAccountGroupId
 LEFT JOIN tblGLTempCOASegment Segment ON Account.intAccountId = Segment.intAccountId
 OUTER APPLY(
