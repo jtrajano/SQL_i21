@@ -5194,4 +5194,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strToCurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b3e04db5-4228-4696-9be2-172f4420a45e" ChangeDateTime="05/19/2016 07:44:23">
+    <Property Name="ElementName" Value="[dbo].[tblCCCompanyPreferenceOption].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCCCompanyPreferenceOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceOption" />
+  </Operation>
 </Operations>
