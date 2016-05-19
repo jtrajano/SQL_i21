@@ -51,6 +51,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intMICRCheckNoPosition
 				,i21.strMICRLeftSymbol
 				,i21.strMICRRightSymbol
+				,i21.strFractionalRoutingNumber
 				,i21.strUserDefineMessage
 				,i21.strSignatureLineCaption
 				,i21.ysnShowTwoSignatureLine
@@ -216,6 +217,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition
 					,strMICRLeftSymbol
 					,strMICRRightSymbol
+					,strFractionalRoutingNumber
 					,strUserDefineMessage	
 					,strSignatureLineCaption
 					,ysnShowTwoSignatureLine
@@ -268,6 +270,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
 					,strUserDefineMessage				= i.strUserDefineMessage
 					,strSignatureLineCaption			= i.strSignatureLineCaption
 					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
@@ -430,6 +433,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
 					,strUserDefineMessage				= i.strUserDefineMessage
 					,strSignatureLineCaption			= i.strSignatureLineCaption
 					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
