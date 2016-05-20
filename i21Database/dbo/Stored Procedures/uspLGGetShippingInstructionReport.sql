@@ -4,7 +4,16 @@ AS
 BEGIN
 	DECLARE @intLoadId			INT,
 			@xmlDocumentId		INT 
-			
+	DECLARE @strCompanyName				NVARCHAR(100),
+			@strCompanyAddress			NVARCHAR(100),
+			@strContactName				NVARCHAR(50),
+			@strCounty					NVARCHAR(25),
+			@strCity					NVARCHAR(25),
+			@strState					NVARCHAR(50),
+			@strZip						NVARCHAR(12),
+			@strCountry					NVARCHAR(25),
+			@strPhone					NVARCHAR(50)
+						
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
@@ -39,6 +48,17 @@ BEGIN
 	SELECT	@intLoadId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intLoadId' 
+
+	SELECT TOP 1 @strCompanyName = strCompanyName
+			,@strCompanyAddress = strAddress
+			,@strContactName = strContactName
+			,@strCounty = strCounty
+			,@strCity = strCity
+			,@strState = strState
+			,@strZip = strZip
+			,@strCountry = strCountry
+			,@strPhone = strPhone
+	FROM tblSMCompanySetup
 
 SELECT TOP 1 L.intLoadId
 	,L.dtmScheduledDate
@@ -84,7 +104,7 @@ SELECT TOP 1 L.intLoadId
 			THEN FirstNotifyCompany.strCompanyName
 		WHEN 'Vendor'
 			THEN FirstNotify.strName
-		END strFirstNotifyParty
+		END strFirstNotify
 	,CASE FLNP.strType
 		WHEN 'Bank'
 			THEN FirstNotifyBank.strEmail
@@ -164,7 +184,7 @@ SELECT TOP 1 L.intLoadId
 			THEN SecondNotifyCompany.strCompanyName
 		WHEN 'Vendor'
 			THEN SecondNotify.strName
-		END strSecondNotifyParty
+		END strSecondNotify
 	,CASE SLNP.strType
 		WHEN 'Bank'
 			THEN SecondNotifyBank.strEmail
@@ -244,7 +264,7 @@ SELECT TOP 1 L.intLoadId
 			THEN ConsigneeNotifyCompany.strCompanyName
 		WHEN 'Vendor'
 			THEN ConsigneeNotify.strName
-		END strConsigneeParty
+		END strConsignee
 	,CASE CLNP.strType
 		WHEN 'Bank'
 			THEN ConsigneeNotifyBank.strEmail
@@ -331,6 +351,16 @@ SELECT TOP 1 L.intLoadId
 	,L.strLoadingPerUnit
 	,L.strDischargePerUnit
 	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strContactName AS strCompanyContactName 
+	,@strCounty AS strCompanyCounty 
+	,@strCity AS strCompanyCity 
+	,@strState AS strCompanyState 
+	,@strZip AS strCompanyZip 
+	,@strCountry AS strCompanyCountry 
+	,@strPhone AS strCompanyPhone 
+
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadContainer LC ON L.intLoadId = LC.intLoadId

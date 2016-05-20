@@ -52,6 +52,6 @@ JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intSContractDetailId
-WHERE L.intLoadId = @xmlParam and L.intPurchaseSale = 2
+WHERE L.intLoadId = @xmlParam and L.intPurchaseSale IN (2,3)
 END
 

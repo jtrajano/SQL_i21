@@ -6,6 +6,15 @@ BEGIN
 			@strTrackingNumber			NVARCHAR(50),
 			@intLoadWarehouseId			INT,
 			@xmlDocumentId				INT 
+	DECLARE @strCompanyName				NVARCHAR(100),
+			@strCompanyAddress			NVARCHAR(100),
+			@strContactName				NVARCHAR(50),
+			@strCounty					NVARCHAR(25),
+			@strCity					NVARCHAR(25),
+			@strState					NVARCHAR(50),
+			@strZip						NVARCHAR(12),
+			@strCountry					NVARCHAR(25),
+			@strPhone					NVARCHAR(50)
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -49,6 +58,17 @@ BEGIN
 	SELECT	@intLoadWarehouseId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intLoadWarehouseId' 
+
+	SELECT TOP 1 @strCompanyName = strCompanyName
+				,@strCompanyAddress = strAddress
+				,@strContactName = strContactName
+				,@strCounty = strCounty
+				,@strCity = strCity
+				,@strState = strState
+				,@strZip = strZip
+				,@strCountry = strCountry
+				,@strPhone = strPhone
+	FROM tblSMCompanySetup
 
 IF ISNULL(@intLoadWarehouseId,0) = 0 
 	BEGIN
@@ -155,8 +175,16 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WI.intWarehouseInstructionHeaderId,
 				LW.intLoadWarehouseId,
 				Via.strName strShipVia,
-				dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-
+				dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+				@strCompanyName AS strCompanyName,
+				@strCompanyAddress AS strCompanyAddress,
+				@strContactName AS strCompanyContactName ,
+				@strCounty AS strCompanyCounty ,
+				@strCity AS strCompanyCity ,
+				@strState AS strCompanyState ,
+				@strZip AS strCompanyZip ,
+				@strCountry AS strCompanyCountry ,
+				@strPhone AS strCompanyPhone 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
@@ -284,8 +312,16 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WI.intWarehouseInstructionHeaderId,
 				LW.intLoadWarehouseId,
 				Via.strName strShipVia,
-				dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-
+				dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+				@strCompanyName AS strCompanyName,
+				@strCompanyAddress AS strCompanyAddress,
+				@strContactName AS strCompanyContactName ,
+				@strCounty AS strCompanyCounty ,
+				@strCity AS strCompanyCity ,
+				@strState AS strCompanyState ,
+				@strZip AS strCompanyZip ,
+				@strCountry AS strCompanyCountry ,
+				@strPhone AS strCompanyPhone 
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
