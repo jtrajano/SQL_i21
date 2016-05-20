@@ -152,7 +152,7 @@ BEGIN TRY
 		,[ysnPost]								= CASE WHEN (@ysnRecap = 1) THEN NULL ELSE @ysnPostOrUnPost END
 		,[intInvoiceDetailId]					= NULL
 		,[intItemId]							= DD.intItemId
-		,[ysnInventory]							= 1
+		,[ysnInventory]							= [dbo].[fnIsStockTrackingItem](DD.intItemId)
 		,[strItemDescription]					= Item.strDescription
 		,[intItemUOMId]							= Item.intIssueUOMId
 		,[dblQtyOrdered]						= DD.dblUnits
