@@ -379,12 +379,7 @@ BEGIN
 	BEGIN TRY
 		IF ISNULL(@SourceTransaction, '') <> 'Import'
 			BEGIN
-				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@LoadDistributionHeaderId,0) = 0
-					BEGIN
-						SET @SourceColumn = 'intLoadDistributionHeaderId'
-						SET @SourceTable = 'tblTRLoadDistributionHeader'
-					END
-				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
+				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@LoadDistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
 					BEGIN
 						SET @SourceColumn = 'intLoadDistributionHeaderId'
 						SET @SourceTable = 'tblTRLoadDistributionHeader'
@@ -991,12 +986,7 @@ BEGIN TRY
 			[intId]
 
 		BEGIN TRY
-			IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@LoadDistributionHeaderId,0) = 0
-				BEGIN
-					SET @SourceColumn = 'intLoadDistributionHeaderId'
-					SET @SourceTable = 'tblTRLoadDistributionHeader'
-				END
-			IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
+			IF ISNULL(@SourceTransaction,'') = 'Transport Load'
 				BEGIN
 					SET @SourceColumn = 'intLoadDistributionHeaderId'
 					SET @SourceTable = 'tblTRLoadDistributionHeader'

@@ -3836,6 +3836,11 @@
     <Build Include="dbo\Tables\tblTRImportRackPrice.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPriceDetail.sql" />
     <Build Include="dbo\Functions\fnEMSplitWithGetByIdx.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInvoiceToPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessPaymentFromInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessPayments.sql" />
+    <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
