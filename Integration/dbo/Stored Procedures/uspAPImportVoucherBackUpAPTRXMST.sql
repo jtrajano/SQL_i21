@@ -22,7 +22,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 --BACK UP aptrxmst
 IF OBJECT_ID('dbo.tmp_aptrxmstImport') IS NOT NULL DROP TABLE tmp_aptrxmstImport
 
-CREATE TABLE ##tmp_aptrxmstImport(
+CREATE TABLE tmp_aptrxmstImport(
 	[aptrx_vnd_no] [char](10) NOT NULL,
 	[aptrx_ivc_no] [char](18) NOT NULL,
 	[aptrx_sys_rev_dt] [int] NOT NULL,
@@ -374,7 +374,18 @@ INNER JOIN tmp_aptrxmstImport  B
 ON B.aptrx_ivc_no = A.apegl_ivc_no 
 	AND B.aptrx_vnd_no = A.apegl_vnd_no
 
-INSERT INTO tblAPapeglmst
+INSERT INTO tblAPapeglmst(
+	[apegl_cbk_no]		,	
+	[apegl_trx_ind]		,	
+	[apegl_vnd_no]		,	
+	[apegl_ivc_no]		,	
+	[apegl_dist_no]		,	
+	[apegl_alt_cbk_no]	,	
+	[apegl_gl_acct]		,	
+	[apegl_gl_amt]		,	
+	[apegl_gl_un]		,	
+	[A4GLIdentity]			
+)
 SELECT * FROM tmp_apeglmstImport
 
 SET @totalAPEGLMST = @@ROWCOUNT

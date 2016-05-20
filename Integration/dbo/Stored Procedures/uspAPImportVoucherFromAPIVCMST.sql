@@ -259,8 +259,7 @@ SELECT
 								ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
 	[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
 	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
-	[intLineNo]				=	C.aphgl_dist_no,
-	[A4GLIdentity]			=	C.[A4GLIdentity]
+	[intLineNo]				=	C.aphgl_dist_no
 FROM tblAPBill A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityVendorId

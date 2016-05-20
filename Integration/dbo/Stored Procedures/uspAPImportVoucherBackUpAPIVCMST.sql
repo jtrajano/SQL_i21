@@ -273,7 +273,18 @@ INNER JOIN tmp_apivcmstImport B
 	ON B.apivc_ivc_no = A.aphgl_ivc_no 
 	AND B.apivc_vnd_no = A.aphgl_vnd_no
 
-INSERT INTO tblAPaphglmst
+INSERT INTO tblAPaphglmst(
+	[aphgl_cbk_no]		,
+	[aphgl_trx_ind]		,
+	[aphgl_vnd_no]		,
+	[aphgl_ivc_no]		,
+	[aphgl_dist_no]		,
+	[aphgl_alt_cbk_no]	,
+	[aphgl_gl_acct]		,
+	[aphgl_gl_amt]		,
+	[aphgl_gl_un]		,
+	[A4GLIdentity]		
+)
 SELECT * FROM tmp_aphglmstImport
 
 SET @totalAPHGLMST = @@ROWCOUNT
