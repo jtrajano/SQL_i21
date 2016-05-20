@@ -179,9 +179,7 @@ BEGIN TRY
 		--Discounts Part
 		INSERT INTO tblQMTicketDiscount 
 		(
-			intConcurrencyId
-			,strDiscountCode
-			,strDiscountCodeDescription
+			intConcurrencyId		
 			,dblGradeReading
 			,dblShrinkPercent
 			,strShrinkWhat
@@ -191,9 +189,7 @@ BEGIN TRY
 			,intTicketFileId
 			,strSourceType
 		)
-		SELECT 1
-			,strDiscountCode
-			,strDiscountCodeDescription
+		SELECT 1		
 			,dblGradeReading
 			,dblShrinkPercent
 			,strShrinkWhat

@@ -3696,6 +3696,10 @@
     <Build Include="dbo\Stored Procedures\uspMBPostMeterReading.sql" />
     <Build Include="dbo\Stored Procedures\uspMBBatchPostMeterReading.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityCampaign.sql" />
+    <Build Include="dbo\Tables\tblSMTransaction.sql" />
+    <Build Include="dbo\Tables\tblSMApproval.sql" />
+    <Build Include="dbo\Views\vyuSMApproval.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationRequireApprovalFor.sql" />
     <Build Include="dbo\Views\vyuHDOpportunityCampaignSearch.sql" />
     <Build Include="dbo\Tables\tblIPSQLType.sql" />
     <Build Include="dbo\Tables\tblIPParameter.sql" />
@@ -3773,6 +3777,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCheckItemUsedInDiscountCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateContract.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerView.sql" />
+    <Build Include="dbo\Tables\tblEMEntityRequireApprovalFor.sql" />
     <Build Include="dbo\Tables\tblEMEntityLineOfBusiness.sql" />
     <Build Include="dbo\Tables\tblEMEntityCRMInformation.sql" />
     <Build Include="dbo\Tables\tblEMEntityAreaOfInterest.sql" />
@@ -3817,11 +3822,19 @@
     <Build Include="dbo\Views\vyuCTContractExportET.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOffsetAccountForOriginTrans.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
-    <Build Include="dbo\Stored Procedures\uspARAddInvoiceToPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessPayments.sql" />
-    <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessPaymentFromInvoice.sql" />
+    <Build Include="dbo\Views\vyuGRGetDiscountCode.sql" />
+    <Build Include="dbo\Tables\tblCCCompanyPreferenceOption.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCTransactionToCMBankTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickListForSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSavePickListForSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeletePickListForSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSalesOrderPickListAvailableLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateShipmentFromSalesOrderPickList.sql" />
+    <Build Include="dbo\Views\vyuCCCustomer.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityCampaignCommunication.sql" />
+    <Build Include="dbo\Tables\tblTRImportRackPrice.sql" />
+    <Build Include="dbo\Tables\tblTRImportRackPriceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

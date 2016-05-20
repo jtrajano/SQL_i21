@@ -59,8 +59,8 @@ SELECT
 	,strEntityState = LGLD.strShipToState
 	,strEntityCountry = LGLD.strShipToCountry
 	,strDestination = LGLD.strShipToAddress + ', ' + LGLD.strShipToCity + ', ' + LGLD.strShipToState + ' ' + LGLD.strShipToZipCode 
-	,dblToLongitude = EML.dblLatitude
-	,dblToLatitude = EML.dblLongitude
+	,dblToLongitude = EML.dblLongitude
+	,dblToLatitude = EML.dblLatitude
 	,strOrderStatus = LGL.strShipmentStatus
 	,strDriver = LGL.strDriver
 	,strItemNo = LGLD.strItemNo

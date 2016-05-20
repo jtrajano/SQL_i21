@@ -650,7 +650,7 @@ BEGIN TRY
 				AND LS.strPrimaryStatus IN (
 					Select strStatusName From @tblLotStatus
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
@@ -946,7 +946,7 @@ BEGIN TRY
 				AND LS.strPrimaryStatus IN (
 					Select strStatusName From @tblLotStatus
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId

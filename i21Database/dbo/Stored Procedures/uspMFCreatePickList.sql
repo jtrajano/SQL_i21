@@ -366,7 +366,7 @@ Begin
 				WHERE L.intItemId = tpl.intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1 
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
@@ -386,7 +386,7 @@ Begin
 				WHERE L.intItemId = tpl.intItemId
 				AND L.intLocationId = @intLocationId
 				AND L.intLotStatusId = 1 
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId

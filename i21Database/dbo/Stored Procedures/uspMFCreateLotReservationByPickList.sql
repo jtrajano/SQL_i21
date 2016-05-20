@@ -91,6 +91,35 @@ Select @intLocationId=intLocationId,@strPickListNo=strPickListNo From tblMFPickL
 			JOIN tblICLot l ON l.intLotId = pld.intStageLotId
 	WHERE	pld.intPickListId = @intPickListId
 
+	--Non Lot Tracked
+	INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+	)
+	SELECT	intItemId = pld.intItemId
+			,intItemLocationId = il.intItemLocationId
+			,intItemUOMId = pld.intItemUOMId
+			,intLotId = NULL
+			,intSubLocationId = pld.intSubLocationId
+			,intStorageLocationId = pld.intStorageLocationId
+			,dblQty = pld.dblQuantity
+			,intTransactionId = pld.intPickListId
+			,strTransactionId = pl.strPickListNo
+			,intTransactionTypeId = @intInventoryTransactionType
+	FROM	tblMFPickListDetail pld 
+			Join tblMFPickList pl on pld.intPickListId=pl.intPickListId
+			JOIN tblICItem i on pld.intItemId=i.intItemId
+			JOIN tblICItemLocation il on i.intItemId=il.intItemId AND pld.intLocationId=il.intLocationId
+	WHERE	pld.intPickListId = @intPickListId AND ISNULL(pld.intLotId,0)=0
+
 	--Insert Bulk Items if any
 	INSERT INTO @ItemsToReserve (
 			intItemId

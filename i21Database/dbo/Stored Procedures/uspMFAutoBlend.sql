@@ -317,7 +317,7 @@ Begin
 SELECT L.intLotId
 	,L.strLotNumber
 	,L.intItemId
-	,ISNULL(L.dblWeight,0) - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=L.intLotId) AS dblQty
+	,ISNULL(L.dblWeight,0) - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=L.intLotId AND ISNULL(ysnPosted,0)=0) AS dblQty
 	,L.intLocationId
 	,L.intSubLocationId
 	,L.intStorageLocationId
@@ -339,7 +339,7 @@ WHERE L.intItemId = @intRawItemId
 		'Active'
 		)
 	AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-	AND ISNULL(L.dblWeight,0) - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=L.intLotId)  >= .01
+	AND ISNULL(L.dblWeight,0) - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=L.intLotId AND ISNULL(ysnPosted,0)=0)  >= .01
 	AND ISNULL(SL.ysnAllowConsume,0)=1 
 	ORDER BY L.dtmDateCreated
 

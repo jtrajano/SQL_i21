@@ -23,6 +23,9 @@ BEGIN
 	WHERE intLocationId = @intLocationId
 		AND strShiftName = @strShiftName
 
+	IF OBJECT_ID('tempdb..#datelist') IS NOT NULL
+		DROP TABLE #datelist
+
 	CREATE TABLE #datelist (dtmShiftDate DATETIME)
 
 	INSERT INTO #datelist (dtmShiftDate)
@@ -100,6 +103,4 @@ BEGIN
 
 	--PRINT @SQL
 	EXEC sp_executesql @SQL
-
-	DROP TABLE #datelist
 END

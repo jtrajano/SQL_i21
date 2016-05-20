@@ -5194,4 +5194,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strToCurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b3e04db5-4228-4696-9be2-172f4420a45e" ChangeDateTime="05/19/2016 07:44:23">
+    <Property Name="ElementName" Value="[dbo].[tblCCCompanyPreferenceOption].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCCCompanyPreferenceOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceOption" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1b3a523e-9ad9-446e-938b-df6502839446" ChangeDateTime="05/20/2016 05:13:45">
+    <Property Name="ElementName" Value="[dbo].[tblTRImportRackPrice].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRImportRackPrice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportRackPriceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="48ba377c-2098-4d1e-8c0a-27719226c9e3" ChangeDateTime="05/20/2016 05:18:55">
+    <Property Name="ElementName" Value="[dbo].[tblTRImportRackPriceDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRImportRackPriceDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportRackPriceDetailId" />
+  </Operation>
 </Operations>

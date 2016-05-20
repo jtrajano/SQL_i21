@@ -131,6 +131,9 @@ BEGIN TRY
 		,@strFieldName1 NVARCHAR(MAX)
 		,@strColumnName1 NVARCHAR(MAX)
 
+	IF OBJECT_ID('tempdb..#datelist') IS NOT NULL
+		DROP TABLE #datelist
+
 	CREATE TABLE #datelist (
 		dtmDate NVARCHAR(50)
 		,dtmShiftDate DATETIME
@@ -242,11 +245,14 @@ BEGIN TRY
 	ORDER BY intShiftId
 		,dtmShiftDate
 
+	IF OBJECT_ID('TestPvtEff') IS NOT NULL
+		DROP TABLE TestPvtEff
+
 	SET @SQL = 'SELECT strShiftIndicator,strCellName,dblTargetEfficiency,0 YTD, 0 MTD,0 WTD, NULL [1] ,NULL [2] ,NULL [3] ,NULL [4] ,NULL [5] ,NULL [6] ,NULL [7] , ' + @strColumnName + '
 	INTO TestPvtEff FROM ( '
 	SET @SQL = @SQL + 
 		'SELECT strCellName,dblTargetEfficiency,strShift,dblEfficiencyPercentage,
-							CASE	WHEN [intShiftId] IN (1,2,3) OR [intShiftId] IN (21,22,23)
+							CASE WHEN [intShiftId] IN (1,2,3) OR [intShiftId] IN (21,22,23)
 										THEN ''GROUP1''
 									WHEN [intShiftId] IN (8,9,10) OR [intShiftId] IN (24,25,26)
 										THEN ''GROUP2''
@@ -286,6 +292,9 @@ BEGIN TRY
 	SET @yy = DATEPART(yy, @dtmFromDate)
 	SET @d = DATEADD(d, DATEDIFF(d, @dtmToDate, CONVERT(NVARCHAR(10), '1 Jan ' + @yy, 101)), @dtmToDate)
 
+	IF OBJECT_ID('tempdb..#YearEff') IS NOT NULL
+		DROP TABLE #YearEff
+
 	CREATE TABLE #YearEff (
 		strCellName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dblTargetEfficiency DECIMAL(24, 10)
@@ -320,6 +329,9 @@ BEGIN TRY
 
 	SET @d = DATEADD(d, DATEDIFF(d, @dtmToDate, CONVERT(NVARCHAR(10), @m + '/1/' + @yy, 101)), @dtmToDate)
 
+	IF OBJECT_ID('tempdb..#MonthEff') IS NOT NULL
+		DROP TABLE #MonthEff
+
 	CREATE TABLE #MonthEff (
 		strCellName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,MonthEfficiency DECIMAL(24, 10)
@@ -349,6 +361,9 @@ BEGIN TRY
     GROUP BY t.strCellName'
 
 	EXEC sp_executesql @SQL
+
+	IF OBJECT_ID('tempdb..#WeeklyEff') IS NOT NULL
+		DROP TABLE #WeeklyEff
 
 	CREATE TABLE #WeeklyEff (
 		strCellName NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -380,6 +395,9 @@ BEGIN TRY
 
 	EXEC sp_executesql @SQL
 
+	IF OBJECT_ID('tempdb..#DayTemp') IS NOT NULL
+		DROP TABLE #DayTemp
+
 	CREATE TABLE #DayTemp (
 		strCellName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dtmShiftDate DATETIME
@@ -405,6 +423,9 @@ BEGIN TRY
 
 	EXEC sp_executesql @SQL
 
+	IF OBJECT_ID('DailyAvgTemp') IS NOT NULL
+		DROP TABLE DailyAvgTemp
+
 	SET @SQL = 'SELECT strCellName, ' + @strColumnName1 + ' INTO DailyAvgTemp
 	FROM (SELECT * FROM #DayTemp) P
 	PIVOT
@@ -415,6 +436,53 @@ BEGIN TRY
 	GROUP BY strCellName'
 
 	EXEC sp_executesql @SQL
+
+	IF OBJECT_ID('TestPvtEff') IS NULL
+	BEGIN
+		SELECT '' AS 'strShiftIndicator'
+			,'' AS 'strCellName'
+			,'' AS 'dblTargetEfficiency'
+			,'' AS 'YTD'
+			,'' AS 'MTD'
+			,'' AS 'WTD'
+			,'' AS '1'
+			,'' AS '2'
+			,'' AS '3'
+			,'' AS '4'
+			,'' AS '5'
+			,'' AS '6'
+			,'' AS '7'
+			,'' AS '11'
+			,'' AS '12'
+			,'' AS '13'
+			,'' AS '14'
+			,'' AS '15'
+			,'' AS '16'
+			,'' AS '17'
+			,'' AS '21'
+			,'' AS '22'
+			,'' AS '23'
+			,'' AS '24'
+			,'' AS '25'
+			,'' AS '26'
+			,'' AS '27'
+			,'' AS '31'
+			,'' AS '32'
+			,'' AS '33'
+			,'' AS '34'
+			,'' AS '35'
+			,'' AS '36'
+			,'' AS '37'
+			,'' AS ID1
+			,'' AS ID2
+			,'' AS ID3
+			,'' AS ID4
+			,'' AS ID5
+			,'' AS ID6
+			,'' AS ID7
+
+		RETURN
+	END
 
 	UPDATE TestPvtEff
 	SET YTD = a.YearEfficiency
@@ -446,6 +514,9 @@ BEGIN TRY
 	ALTER TABLE TestPvtEff ADD ID6 FLOAT
 
 	ALTER TABLE TestPvtEff ADD ID7 FLOAT
+
+	IF OBJECT_ID('tempdb..#PlantEfficencyDaily') IS NOT NULL
+		DROP TABLE #PlantEfficencyDaily
 
 	CREATE TABLE #PlantEfficencyDaily (
 		[1] INT
@@ -484,46 +555,17 @@ BEGIN TRY
 	FROM TestPvtEff E
 		,TEMP T
 
+	UPDATE TestPvtEff
+	SET strShiftIndicator = 'GROUP1'
+
 	SELECT *
 	FROM TestPvtEff
-
-	DROP TABLE TestPvtEff
-
-	DROP TABLE DailyAvgTemp
-
-	DROP TABLE #datelist
-
-	DROP TABLE #YearEff
-
-	DROP TABLE #MonthEff
-
-	DROP TABLE #WeeklyEff
-
-	DROP TABLE #DayTemp
-
-	DROP TABLE #PlantEfficencyDaily
 END TRY
 
 BEGIN CATCH
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	SET @ErrMsg = 'uspMFReportEfficiencySummaryByWeek - ' + ERROR_MESSAGE()
-
-	DROP TABLE TestPvtEff
-
-	DROP TABLE DailyAvgTemp
-
-	DROP TABLE #datelist
-
-	DROP TABLE #YearEff
-
-	DROP TABLE #MonthEff
-
-	DROP TABLE #WeeklyEff
-
-	DROP TABLE #DayTemp
-
-	DROP TABLE #PlantEfficencyDaily
 
 	RAISERROR (
 			@ErrMsg

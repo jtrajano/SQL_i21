@@ -73,7 +73,7 @@ BEGIN TRY
 		LEFT JOIN tblEMEntityLocation E ON E.intEntityLocationId = S.intShipToLocationId
 		LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = S.intShipToCompanyLocationId
 		LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SI.intOrderId
-		LEFT JOIN tblEntity EN ON S.intEntityCustomerId = EN.intEntityId
+		LEFT JOIN tblEMEntity EN ON S.intEntityCustomerId = EN.intEntityId
 		WHERE S.strShipmentNumber =@strShipmentNo
 	END
 END TRY

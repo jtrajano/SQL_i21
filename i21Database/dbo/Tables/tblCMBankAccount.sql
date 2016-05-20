@@ -40,6 +40,7 @@
     [intMICRCheckNoPosition]           INT            DEFAULT 1 NOT NULL,
     [strMICRLeftSymbol]                NVARCHAR (1)   COLLATE Latin1_General_CI_AS NULL,
     [strMICRRightSymbol]               NVARCHAR (1)   COLLATE Latin1_General_CI_AS NULL,
+	[strFractionalRoutingNumber]       NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
 	[strUserDefineMessage]             NVARCHAR (60)  COLLATE Latin1_General_CI_AS NULL,
 	[strSignatureLineCaption]          NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
 	[ysnShowTwoSignatureLine]          BIT            NULL,

@@ -645,9 +645,7 @@ BEGIN TRY
 	if @intHoldCustomerStorageId is NULL
 	BEGIN
 		INSERT INTO [dbo].[tblQMTicketDiscount]
-           ([intConcurrencyId]
-           ,[strDiscountCode]
-           ,[strDiscountCodeDescription]
+           ([intConcurrencyId]         
            ,[dblGradeReading]
            ,[strCalcMethod]
            ,[strShrinkWhat]
@@ -663,9 +661,8 @@ BEGIN TRY
            ,[strSourceType]
 		   ,[intSort]
 		   ,[strDiscountChargeType])
-		SELECT	 [intConcurrencyId]= 1
-           ,[strDiscountCode] = SD.[strDiscountCode]
-           ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
+		SELECT	 
+			[intConcurrencyId]= 1       
            ,[dblGradeReading]= SD.[dblGradeReading]
            ,[strCalcMethod]= SD.[strCalcMethod]
            ,[strShrinkWhat]= 

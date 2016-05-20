@@ -33,6 +33,7 @@ Declare @dblWeightPerUnit numeric(38,20)
 Declare @dblMoveQty numeric(38,20)
 Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
+DECLARE @strInActiveLots NVARCHAR(MAX) 
 Declare @strBulkItemXml nvarchar(max)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
@@ -108,6 +109,18 @@ Select @intPickListId=intPickListId,@intBlendItemId=intItemId From tblMFWorkOrde
 
 If (Select COUNT(1) From tblMFWorkOrder Where intPickListId=@intPickListId)=1
 Begin Try
+
+	--Only Active lots are allowed to transfer
+	SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
+	FROM tblMFPickListDetail tpl Join tblICLot l on tpl.intStageLotId=l.intLotId 
+	Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId Where tpl.intPickListId=@intPickListId AND ls.strPrimaryStatus<>'Active'
+
+	If ISNULL(@strInActiveLots,'')<>''
+	Begin
+		Set @ErrMsg='Lots ' + @strInActiveLots + ' are not active. Unable to perform transfer operation.'
+		RaisError(@ErrMsg,16,1)
+	End
+
 	Begin Tran
 
 	If @ysnBlendSheetRequired=0

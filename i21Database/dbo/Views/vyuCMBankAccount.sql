@@ -45,6 +45,7 @@ SELECT	i21.intBankAccountId
 		,i21.intMICRCheckNoPosition
 		,i21.strMICRLeftSymbol
 		,i21.strMICRRightSymbol
+		,i21.strFractionalRoutingNumber
 		,i21.strUserDefineMessage
 		,i21.strSignatureLineCaption
 		,i21.ysnShowTwoSignatureLine
@@ -126,6 +127,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intMICRCheckNoPosition
 						,strMICRLeftSymbol
 						,strMICRRightSymbol
+						,strFractionalRoutingNumber
 						,strUserDefineMessage	
 						,strSignatureLineCaption
 						,ysnShowTwoSignatureLine
@@ -178,6 +180,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 						,strMICRLeftSymbol					= i.strMICRLeftSymbol
 						,strMICRRightSymbol					= i.strMICRRightSymbol
+						,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
 						,strUserDefineMessage				= i.strUserDefineMessage
 						,strSignatureLineCaption			= i.strSignatureLineCaption
 						,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
@@ -246,6 +249,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
 					,strUserDefineMessage				= i.strUserDefineMessage
 					,strSignatureLineCaption			= i.strSignatureLineCaption
 					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine

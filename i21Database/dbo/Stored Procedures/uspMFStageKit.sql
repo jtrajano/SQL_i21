@@ -38,6 +38,7 @@ Declare @dblPickQty NUMERIC(38,20)
 Declare @intInputItemId INT
 Declare @ysnHasSubstitute bit
 Declare @strInputItemNo nvarchar(50)
+DECLARE @strInActiveLots NVARCHAR(MAX) 
 Declare @dblRecipeQty NUMERIC(38,20)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
@@ -118,6 +119,17 @@ pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
 CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId --Exclude Lots that are already in Kit Staging Location
+
+--Only Active lots are allowed to stage
+SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
+FROM @tblPickListDetail tpl Join tblICLot l on tpl.intLotId=l.intLotId 
+Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId Where ls.strPrimaryStatus<>'Active'
+
+If ISNULL(@strInActiveLots,'')<>''
+Begin
+	Set @ErrMsg='Lots ' + @strInActiveLots + ' are not active. Unable to perform stage operation.'
+	RaisError(@ErrMsg,16,1)
+End
 
 If @ysnBlendSheetRequired=0
 Begin
