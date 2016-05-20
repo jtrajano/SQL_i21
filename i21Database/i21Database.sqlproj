@@ -3831,6 +3831,7 @@
     <Build Include="dbo\Stored Procedures\uspMFDeletePickListForSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSalesOrderPickListAvailableLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateShipmentFromSalesOrderPickList.sql" />
+    <Build Include="dbo\Views\vyuCCCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
