@@ -185,7 +185,7 @@
             // xrTableCell19
             // 
             this.xrTableCell19.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICBillOfLadingReport.dblQty", "{0:n0}")});
+            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICBillOfLadingReport.dblQty", "{0:n3}")});
             this.xrTableCell19.Name = "xrTableCell19";
             this.xrTableCell19.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 5, 0, 0, 100F);
             this.xrTableCell19.StylePriority.UsePadding = false;
@@ -207,7 +207,7 @@
             // xrTableCell22
             // 
             this.xrTableCell22.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICBillOfLadingReport.dblNetWeight", "{0:n0}")});
+            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICBillOfLadingReport.dblNetWeight", "{0:n3}")});
             this.xrTableCell22.Name = "xrTableCell22";
             this.xrTableCell22.Padding = new DevExpress.XtraPrinting.PaddingInfo(5, 10, 0, 0, 100F);
             this.xrTableCell22.StylePriority.UsePadding = false;
@@ -322,7 +322,7 @@
             this.xrLabel23.StylePriority.UseFont = false;
             this.xrLabel23.StylePriority.UsePadding = false;
             this.xrLabel23.StylePriority.UseTextAlignment = false;
-            xrSummary1.FormatString = "{0:n0}";
+            xrSummary1.FormatString = "{0:n3}";
             xrSummary1.Running = DevExpress.XtraReports.UI.SummaryRunning.Group;
             this.xrLabel23.Summary = xrSummary1;
             this.xrLabel23.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
