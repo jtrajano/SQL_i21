@@ -3835,6 +3835,7 @@
     <Build Include="dbo\Tables\tblHDOpportunityCampaignCommunication.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPrice.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPriceDetail.sql" />
+    <Build Include="dbo\Functions\fnEMSplitWithGetByIdx.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
