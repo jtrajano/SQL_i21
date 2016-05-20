@@ -3841,6 +3841,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessPaymentFromInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessPayments.sql" />
     <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
+    <Build Include="dbo\Views\vyuGRGetQualityDiscountCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
