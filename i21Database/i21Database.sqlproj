@@ -3832,6 +3832,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetSalesOrderPickListAvailableLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateShipmentFromSalesOrderPickList.sql" />
     <Build Include="dbo\Views\vyuCCCustomer.sql" />
+    <Build Include="dbo\Tables\tblHDOpportunityCampaignCommunication.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
