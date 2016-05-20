@@ -29,14 +29,12 @@
 	[apivc_user_id] [char](16) NULL,
 	[apivc_user_rev_dt] [int] NULL,
 	[A4GLIdentity] [numeric](9, 0) IDENTITY(1,1) NOT NULL,
-	[apchk_A4GLIdentity] INT NOT NULL,
-	[intBillId] INT
+	[apchk_A4GLIdentity] INT NULL,
+	[intBillId] INT NULL
  CONSTRAINT [k_tblAPapivcmst] PRIMARY KEY NONCLUSTERED 
 (
 	[apivc_vnd_no] ASC,
-	[apivc_ivc_no] ASC,
-	[intBillId] ASC,
-	[apchk_A4GLIdentity] ASC
+	[apivc_ivc_no] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
     [dtmDateImported] DATETIME NULL DEFAULT GETDATE()
 ) ON [PRIMARY]

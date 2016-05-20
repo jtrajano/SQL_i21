@@ -13,6 +13,9 @@ EXEC [AP].[Fake apchkmst records];
 
 EXEC [dbo].[uspAPImportVoucherBackUpAPIVCMST] @DateFrom = NULL, @DateTo = NULL
 
+--MAKE SURE THE PRIMARY KEY CONSTRAINT WOULD VALIDATED
+EXEC tSQLt.ApplyConstraint 'dbo.tblAPapivcmst', '[k_tblAPapivcmst]'
+
 DECLARE @count_tblAPapivcmst INT = (SELECT COUNT(*) FROM dbo.tblAPapivcmst)
 DECLARE @count_tblAPaphglmst INT = (SELECT COUNT(*) FROM dbo.tblAPaphglmst)
 

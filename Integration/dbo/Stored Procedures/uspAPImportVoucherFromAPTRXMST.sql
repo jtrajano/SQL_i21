@@ -137,7 +137,7 @@ SELECT
 	[intPayToAddressId]			=	loc.intEntityLocationId,
 	[intCurrencyId]				=	@defaultCurrencyId,
 	[A4GLIdentity]				=	A.A4GLIdentity
-FROM ##tmp_aptrxmstImport A
+FROM tmp_aptrxmstImport A
 	LEFT JOIN apcbkmst B
 		ON A.aptrx_cbk_no = B.apcbk_no
 	INNER JOIN tblAPVendor D
@@ -153,6 +153,8 @@ BEGIN
 	SET @totalImported = 0;
 	RETURN;
 END
+
+SET @totalImported = @totalInsertedBill;
 
 --IMPORT DETAIL
 INSERT INTO tblAPBillDetail
@@ -207,11 +209,26 @@ FROM tblAPBill A
 		AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
 ORDER BY C.apegl_dist_no
 
+INSERT INTO tblAPImportVoucherLog
+(
+	[strDescription], 
+    [intEntityId], 
+    [dtmDate], 
+    [intLogType], 
+    [ysnSuccess]
+)
+SELECT
+	CAST(@totalImported AS NVARCHAR) + ' records imported from aptrxmst.'
+	,@UserId
+	,GETDATE()
+	,8
+	,1
+
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
 	DECLARE @errorBackingUp NVARCHAR(500) = ERROR_MESSAGE();
-	ROLLBACK TRANSACTION
+	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
 	RAISERROR(@errorBackingUp, 16, 1);
 END CATCH
 

@@ -1,6 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherBackUpAPIVCMST]
+﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherBackupAPIVCMST]
 	@DateFrom DATETIME = NULL,
-	@DateTo DATETIME = NULL
+	@DateTo DATETIME = NULL,
+	@totalAPIVCMST INT OUTPUT,
+	@totalAPHGLMST INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,9 +16,9 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
-IF OBJECT_ID('tempdb..##tmp_apivcmstImport') IS NOT NULL DROP TABLE ##tmp_apivcmstImport
+IF OBJECT_ID('dbo.tmp_apivcmstImport') IS NOT NULL DROP TABLE tmp_apivcmstImport
 
-CREATE TABLE ##tmp_apivcmstImport(
+CREATE TABLE tmp_apivcmstImport(
 	[apivc_vnd_no] [char](10) NOT NULL,
 	[apivc_ivc_no] [char](18) NOT NULL,
 	[apivc_status_ind] [char](1) NOT NULL,
@@ -48,7 +50,7 @@ CREATE TABLE ##tmp_apivcmstImport(
 	[apivc_user_rev_dt] [int] NULL,
 	[A4GLIdentity] [numeric](9, 0) NOT NULL,
 	[apchk_A4GLIdentity] INT NULL,
-	 CONSTRAINT [k_apivcmst] PRIMARY KEY NONCLUSTERED 
+	 CONSTRAINT [k_tmpapivcmst] PRIMARY KEY NONCLUSTERED 
 	(
 		[apivc_vnd_no] ASC,
 		[apivc_ivc_no] ASC
@@ -57,7 +59,7 @@ CREATE TABLE ##tmp_apivcmstImport(
 
 IF @DateFrom IS NULL
 BEGIN
-	INSERT INTO ##tmp_apivcmstImport
+	INSERT INTO tmp_apivcmstImport
 	SELECT
 		[apivc_vnd_no]			=	A.[apivc_vnd_no]		,
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
@@ -105,7 +107,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	INSERT INTO ##tmp_apivcmstImport
+	INSERT INTO tmp_apivcmstImport
 	SELECT
 		[apivc_vnd_no]			=	A.[apivc_vnd_no]		,
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
@@ -220,11 +222,30 @@ SELECT
 	[apivc_user_rev_dt]		=	A.[apivc_user_rev_dt]	,
 	[A4GLIdentity]			=	A.[A4GLIdentity]		,
 	[apchk_A4GLIdentity]	=	A.[apchk_A4GLIdentity]
-FROM ##tmp_apivcmstImport A
+FROM tmp_apivcmstImport A
+
+SET @totalAPIVCMST = @@ROWCOUNT;
+
 SET IDENTITY_INSERT tblAPapivcmst OFF
 
+IF OBJECT_ID('tmp_aphglmstImport') IS NOT NULL DROP TABLE tmp_aphglmstImport
+
+CREATE TABLE tmp_aphglmstImport
+(
+	[aphgl_cbk_no] [char](2) NOT NULL,
+	[aphgl_trx_ind] [char](1) NOT NULL,
+	[aphgl_vnd_no] [char](10) NOT NULL,
+	[aphgl_ivc_no] [char](50) NOT NULL,
+	[aphgl_dist_no] [smallint] NOT NULL,
+	[aphgl_alt_cbk_no] [char](2) NOT NULL,
+	[aphgl_gl_acct] [decimal](16, 8) NOT NULL,
+	[aphgl_gl_amt] [decimal](11, 2) NULL,
+	[aphgl_gl_un] [decimal](13, 4) NULL,
+	[A4GLIdentity] [numeric](9, 0) NOT NULL
+)
+
 --BACK UP aphglmst
-INSERT INTO tblAPaphglmst(
+INSERT INTO tmp_aphglmstImport(
 	[aphgl_cbk_no]		,
 	[aphgl_trx_ind]		,
 	[aphgl_vnd_no]		,
@@ -248,14 +269,19 @@ SELECT
 	[aphgl_gl_un]		=	A.[aphgl_gl_un]			,
 	[A4GLIdentity]		=	A.[A4GLIdentity]		
 FROM aphglmst A 
-INNER JOIN ##tmp_apivcmstImport B 
+INNER JOIN tmp_apivcmstImport B 
 	ON B.apivc_ivc_no = A.aphgl_ivc_no 
 	AND B.apivc_vnd_no = A.aphgl_vnd_no
+
+INSERT INTO tblAPaphglmst
+SELECT * FROM tmp_aphglmstImport
+
+SET @totalAPHGLMST = @@ROWCOUNT
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
 	DECLARE @errorValidating NVARCHAR(500) = ERROR_MESSAGE();
-	ROLLBACK TRANSACTION
+	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
 	RAISERROR(@errorValidating, 16, 1);
 END CATCH

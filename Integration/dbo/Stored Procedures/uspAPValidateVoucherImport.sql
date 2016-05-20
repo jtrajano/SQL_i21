@@ -42,7 +42,7 @@ END
 
 --VALIDATE THE AP ACCOUNT IF NO VALUE
 INSERT INTO @log
-SELECT 
+SELECT DISTINCT
 	CAST(A.apcbk_gl_ap AS NVARCHAR) + ' is not a valid AP Account.', @UserId, GETDATE(), 3, 0
 FROM apcbkmst A INNER JOIN aptrxmst B ON A.apcbk_no = B.aptrx_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
@@ -50,7 +50,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 				CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 			ELSE 1 END)
 UNION ALL
-SELECT 
+SELECT DISTINCT
 	CAST(A.apcbk_gl_ap AS NVARCHAR)+ ' is not a valid AP Account.', @UserId, GETDATE(), 3, 0 
 FROM apcbkmst A INNER JOIN apivcmst B ON A.apcbk_no = B.apivc_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
@@ -62,7 +62,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 
 --VALIDATE THE AP ACCOUNT IF NOT EXISTS
 INSERT INTO @log
-SELECT
+SELECT DISTINCT
 	'AP Account ' + CAST(A.apcbk_gl_ap AS NVARCHAR) + ' in apcbkmst does not exists in i21.', @UserId, GETDATE(), 3, 0
 FROM apcbkmst A
 WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
@@ -75,7 +75,7 @@ AND A.apcbk_no IN (
 					ELSE 1 END)
 )
 UNION ALL
-SELECT
+SELECT DISTINCT
 	'AP Account ' + CAST(A.apcbk_gl_ap AS NVARCHAR) + ' in apcbkmst does not exists in i21.', @UserId, GETDATE(), 3, 0
 FROM apcbkmst A
 WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
@@ -88,7 +88,7 @@ AND A.apcbk_no IN (
 )
 
 INSERT INTO @log
-SELECT 
+SELECT DISTINCT
 	 'Invalid GL Account ' + CAST(A.apegl_gl_acct AS NVARCHAR)  + ' found in origin table apeglmst.', @UserId, GETDATE(), 5, 0
 FROM apeglmst A
 INNER JOIN aptrxmst B ON A.apegl_vnd_no = B.aptrx_vnd_no AND A.apegl_ivc_no = B.aptrx_ivc_no
@@ -98,7 +98,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 			CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 		ELSE 1 END)
 UNION ALL
-SELECT
+SELECT DISTINCT
 	'Invalid GL Account ' + CAST(A.aphgl_gl_acct AS NVARCHAR) + ' found in origin table aphglmst.', @UserId, GETDATE(), 5, 0
 FROM aphglmst A
 INNER JOIN apivcmst B ON A.aphgl_vnd_no = B.apivc_vnd_no AND A.aphgl_ivc_no = B.apivc_ivc_no
