@@ -31,11 +31,11 @@ WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 /* Get all Vendor Ids from Payable Taxes and Deductions */
 SELECT DISTINCT intVendorId INTO #tmpVendors FROM
 (SELECT intVendorId FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
-	WHERE PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId IS NOT NULL 
+	WHERE PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL AND TT.intVendorId IS NOT NULL 
 	AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
  UNION ALL
  SELECT intVendorId FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId IS NOT NULL 
+	WHERE PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL AND TD.intVendorId IS NOT NULL 
 	AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 ) PayableTaxesAndDeductions
 
@@ -180,13 +180,13 @@ BEGIN
 	FROM 
 		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intExpenseAccountId, strItem = TT.strTax, dblTotal = SUM(PT.dblTotal)
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
-			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) 
+			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL
 			  AND TT.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
 			GROUP BY TT.intVendorId, PT.intExpenseAccountId, TT.strTax
 		 UNION ALL
 		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intExpenseAccountId, strItem = TD.strDeduction, dblTotal = SUM(PD.dblTotal)
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) 
+			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL
 			  AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 			GROUP BY TD.intVendorId, PD.intExpenseAccountId, TD.strDeduction
 		) A
@@ -201,13 +201,13 @@ BEGIN
 	/* Update Paycheck Taxes Bill Id */
 	UPDATE tblPRPaycheckTax SET intBillId = @intBillId 
 	FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax ON TT.intTypeTaxId = tblPRPaycheckTax.intTypeTaxId
-	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intVendorId = @intVendorEntityId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL AND TT.intVendorId = @intVendorEntityId
 	  AND ((@isVoid = 0 AND tblPRPaycheckTax.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckTax.intBillId IS NOT NULL))
 
 	/* Update Paycheck Deductions Bill Id */
 	UPDATE tblPRPaycheckDeduction SET intBillId = @intBillId 
 	FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction ON TD.intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId
-	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intVendorId = @intVendorEntityId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL AND TD.intVendorId = @intVendorEntityId
 	  AND ((@isVoid = 0 AND tblPRPaycheckDeduction.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckDeduction.intBillId IS NOT NULL))
 
 	DELETE FROM #tmpVendors WHERE intVendorId = @intVendorEntityId
