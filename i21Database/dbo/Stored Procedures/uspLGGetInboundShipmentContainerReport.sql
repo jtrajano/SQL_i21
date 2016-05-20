@@ -42,7 +42,7 @@ BEGIN
 
 SELECT DISTINCT LC.strContainerNumber,
 		LV.strBLNumber,
-		LV.strMarks,
+		LC.strMarks,
 		LDV.*,
 		LC.dblQuantity AS dblContainerContractQty,
 		CD.strCustomerContract,
@@ -63,7 +63,7 @@ UNION
 
 SELECT DISTINCT LC.strContainerNumber,
 		LV.strBLNumber,
-		LV.strMarks,
+		LC.strMarks,
 		LDV.*,
 		LC.dblQuantity AS dblContainerContractQty,
 		CD.strCustomerContract,
