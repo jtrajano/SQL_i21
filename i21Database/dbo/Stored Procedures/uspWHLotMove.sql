@@ -212,7 +212,7 @@ BEGIN TRY
 			SELECT @dblLotQty=NULL
 			IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 			BEGIN
-				SELECT @dblLotQty = Case When intWeightUOMId is null Then dblQty Else dblWeight End FROM tblICLot WHERE intLotId = @intLotId
+				SELECT @dblLotQty = dblQty, @intLotItemUOMId=intItemUOMId FROM tblICLot WHERE intLotId = @intLotId
 				EXEC dbo.uspMFLotAdjustQty
 					@intLotId = @intLotId,       
 					@dblNewLotQty = @dblLotQty,
