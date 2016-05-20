@@ -102,6 +102,11 @@ BEGIN TRY
 				)
 	END
 
+	IF @dblLotQty = @dblNewLotQty AND @blnValidateLotReservation=0
+	BEGIN
+		RETURN
+	END
+
 	IF @dblLotQty = @dblNewLotQty
 	BEGIN
 		RAISERROR (
