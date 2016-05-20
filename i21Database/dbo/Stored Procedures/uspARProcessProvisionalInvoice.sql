@@ -121,7 +121,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -206,7 +206,7 @@ BEGIN TRY
 		,[ysnSplitted]						= 0
 		,[intPaymentId]						= NULL
 		,[intSplitId]						= NULL
-		,[intDistributionHeaderId]			= NULL
+		,[intLoadDistributionHeaderId]		= NULL
 		,[strActualCostId]					= NULL
 		,[intShipmentId]					= NULL
 		,[intTransactionId]					= NULL

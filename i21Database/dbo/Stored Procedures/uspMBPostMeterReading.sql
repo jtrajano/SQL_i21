@@ -54,7 +54,7 @@ BEGIN
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -132,7 +132,7 @@ BEGIN
 		,[ysnSplitted]							= 0
 		,[intPaymentId]							= NULL
 		,[intSplitId]							= NULL
-		,[intDistributionHeaderId]				= NULL
+		,[intLoadDistributionHeaderId]			= NULL
 		,[strActualCostId]						= ''
 		,[intShipmentId]						= NULL
 		,[intTransactionId]						= NULL

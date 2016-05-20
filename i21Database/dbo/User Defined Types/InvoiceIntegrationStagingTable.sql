@@ -65,8 +65,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnSplitted]							BIT												NULL	
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Prepayment/Overpayment) 
 	,[intSplitId]							INT												NULL		-- Key Value from tblEMEntitySplit (Customer Split) 
-	,[intDistributionHeaderId]				INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load) 
-	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load-New Screen) 
+	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRLoadDistributionHeader (Transport Load-New Screen) 
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing
 	,[intShipmentId]						INT												NULL		-- Key Value from tblLGShipment (Inbound Shipment) 	
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
@@ -117,6 +116,9 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[dblShipmentNetWt]						NUMERIC(18, 6)									NULL
 	,[intTicketId]							INT												NULL		-- Key Value from tblSCTicket (Scale Ticket)
 	,[intTicketHoursWorkedId]				INT												NULL		-- Key Value from tblHDTicketHoursWorked (Help Desk)
+	,[intCustomerStorageId]					INT												NULL		-- Key Value from tblGRCustomerStorage (Grain)
+	,[intSiteDetailId]						INT												NULL		-- Key Value from tblCCSiteDetail (CCR)
+	,[intLoadDetailId]						INT												NULL		-- Key Value from tblLGLoadDetail (CCR)
 	,[intOriginalInvoiceDetailId]			INT												NULL		-- Key Value from tblARInvoiceDetail (Provisional Invoice)
 	,[intSiteId]							INT												NULL		-- Key Value from tblTMSite (Tank MAnagement)
 	,[strBillingBy]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- tblTMSite.[strBillingBy] (Tank MAnagement)

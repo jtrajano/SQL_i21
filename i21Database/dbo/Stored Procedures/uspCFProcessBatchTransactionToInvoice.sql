@@ -77,7 +77,7 @@ END
 					,[ysnSplitted]
 					,[intPaymentId]
 					,[intSplitId]
-					,[intDistributionHeaderId]
+					,[intLoadDistributionHeaderId]
 					,[strActualCostId]
 					,[intShipmentId]
 					,[intTransactionId]
@@ -153,7 +153,7 @@ END
 					,[ysnSplitted]							= 0
 					,[intPaymentId]							= NULL
 					,[intSplitId]							= NULL
-					,[intDistributionHeaderId]				= NULL
+					,[intLoadDistributionHeaderId]			= NULL
 					,[strActualCostId]						= ''
 					,[intShipmentId]						= NULL
 					,[intTransactionId]						= cfTrans.intTransactionId

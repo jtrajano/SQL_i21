@@ -37,7 +37,10 @@
 	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000		
 	,@ItemTicketId					INT				= NULL		
-	,@ItemTicketHoursWorkedId		INT				= NULL		
+	,@ItemTicketHoursWorkedId		INT				= NULL	
+	,@ItemCustomerStorageId			INT				= NULL		
+	,@ItemSiteDetailId				INT				= NULL		
+	,@ItemLoadDetailId				INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
@@ -221,6 +224,9 @@ BEGIN TRY
 				,[dblShipmentNetWt]
 				,[intTicketId]
 				,[intTicketHoursWorkedId]
+				,[intCustomerStorageId]
+				,[intSiteDetailId]
+				,[intLoadDetailId]
 				,[intOriginalInvoiceDetailId]
 				,[intSiteId]
 				,[strBillingBy]
@@ -239,7 +245,7 @@ BEGIN TRY
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
 				,[intOrderUOMId]					= @OrderUOMId
-				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
+				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
@@ -277,7 +283,10 @@ BEGIN TRY
 				,[dblShipmentNetWt]					= @ItemShipmentNetWt
 				,[intTicketId]						= @ItemTicketId
 				,[intTicketHoursWorkedId]			= @ItemTicketHoursWorkedId 
-				,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId 
+				,[intCustomerStorageId]				= @ItemCustomerStorageId
+				,[intSiteDetailId]					= @ItemSiteDetailId
+				,[intLoadDetailId]					= @ItemLoadDetailId
+				,[intOriginalInvoiceDetailId]		= @ItemOriginalInvoiceDetailId 
 				,[intSiteId]						= @ItemSiteId
 				,[strBillingBy]						= @ItemBillingBy
 				,[dblPercentFull]					= @ItemPercentFull

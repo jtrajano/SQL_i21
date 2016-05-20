@@ -196,7 +196,7 @@ INSERT INTO @EntriesForInvoice
 	,[ysnSplitted]
 	,[intPaymentId]
 	,[intSplitId]
-	,[intDistributionHeaderId]
+	,[intLoadDistributionHeaderId]
 	,[strActualCostId]
 	,[intShipmentId]
 	,[intTransactionId]
