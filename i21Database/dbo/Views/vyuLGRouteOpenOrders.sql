@@ -3,7 +3,7 @@ AS
 
 SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intSourceType)) as intKeyColumn,*  FROM (
 SELECT 
-	intSourceType = 1
+	intSourceType = 2
 	,intOrderId = TMO.intDispatchId
 	,strOrderNumber = TMO.strOrderNumber
 	,strLocationName = TMO.strCompanyLocationName
@@ -39,7 +39,7 @@ WHERE TMO.strOrderStatus = 'Generated' AND IsNull(TMO.intDispatchId, 0) NOT IN (
 UNION ALL
 
 SELECT
-	intSourceType = 2
+	intSourceType = 1
 	,intOrderId = LGLD.intLoadDetailId
 	,strOrderNumber = LGLD.strLoadNumber
 	,strLocationName = LGLD.strSLocationName
