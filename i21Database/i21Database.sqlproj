@@ -3833,6 +3833,8 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateShipmentFromSalesOrderPickList.sql" />
     <Build Include="dbo\Views\vyuCCCustomer.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityCampaignCommunication.sql" />
+    <Build Include="dbo\Tables\tblTRImportRackPrice.sql" />
+    <Build Include="dbo\Tables\tblTRImportRackPriceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
