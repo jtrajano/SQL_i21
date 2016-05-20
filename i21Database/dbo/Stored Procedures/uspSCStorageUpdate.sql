@@ -268,10 +268,7 @@ BEGIN TRY
 			IF @dblRunningBalance > @dblUnits
 				BEGIN
 				UPDATE tblGRCustomerStorage 
-				SET dblOpenBalance = CASE 
-				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance - @dblUnits)
-				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance - @dblUnits
-				END 
+				SET dblOpenBalance = @dblRunningBalance - @dblUnits
 				WHERE intCustomerStorageId = @intStorageTicketId
 				INSERT INTO [dbo].[tblGRStorageHistory]
 				   ([intConcurrencyId]
@@ -294,11 +291,7 @@ BEGIN TRY
 				   ,NULL
 				   ,NULL
 				   ,NULL
-				   --,@dblUnits
-				   ,CASE 
-						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits)
-						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits
-					END 
+				   ,@dblUnits
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
 				   ,'TakeOut From Scale'
@@ -359,10 +352,7 @@ BEGIN TRY
 				SET dblOpenBalance = 0
 				WHERE intCustomerStorageId = @intStorageTicketId
 				SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
-				SET @dblUnits = CASE 
-									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits - @dblRunningBalance)
-									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits - @dblRunningBalance
-								END 
+				SET @dblUnits = @dblUnits - @dblRunningBalance
 				INSERT INTO [dbo].[tblGRStorageHistory]
 				   ([intConcurrencyId]
 				   ,[intCustomerStorageId]
@@ -384,11 +374,7 @@ BEGIN TRY
 				   ,NULL
 				   ,NULL
 				   ,NULL
-				   --,@dblRunningBalance
-				   ,CASE 
-						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance)
-						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance
-					END 
+				   ,@dblRunningBalance
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
 				   ,'TakeOut From Scale'
@@ -560,14 +546,8 @@ BEGIN TRY
 			,[intDiscountScheduleId]= SC.intDiscountId
 			,[dblTotalPriceShrink]= 0
 			,[dblTotalWeightShrink]= 0 
-			,[dblOriginalBalance]= CASE 
-									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
-									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
-								END  
-			,[dblOpenBalance]= CASE 
-									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
-									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
-								END 
+			,[dblOriginalBalance]= @dblNetUnits
+			,[dblOpenBalance]= @dblNetUnits
 			,[dtmDeliveryDate]= GETDATE()
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
@@ -623,11 +603,7 @@ BEGIN TRY
 		   ,NULL
 		   ,NULL
 		   ,@intContractHeaderId
-		   --,@dblNetUnits
-		   ,CASE 
-				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
-				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
-			END 
+		   ,@dblNetUnits
 		   ,dbo.fnRemoveTimeOnDate(GETDATE())
 		   ,0
 		   ,'Generated From Scale'
