@@ -9,6 +9,7 @@
 	[intOpportunitySourceId] [int] NULL,
 	[intTicketTypeId] [int] NULL,
 	[intOpportunityCampaignId] [int] NULL,
+	[intCompetitorEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
 	[dtmClose] [datetime] NULL,
 	[dtmGoLive] [datetime] NULL,
@@ -50,7 +51,8 @@
 	--CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEMEntityContact] ([intEntityContactId])
 	CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblHDProject_tblHDSalesPipeStatus] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblHDSalesPipeStatus] ([intSalesPipeStatusId]),
-	CONSTRAINT [FK_tblHDProject_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId])
+	CONSTRAINT [FK_tblHDProject_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId]),
+	CONSTRAINT [FK_tblHDProject_tblEMENtity_intCompetitorEntityId] FOREIGN KEY ([intCompetitorEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
 GO
