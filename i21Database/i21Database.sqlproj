@@ -3842,6 +3842,9 @@
     <Build Include="dbo\Stored Procedures\uspARProcessPayments.sql" />
     <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
     <Build Include="dbo\Views\vyuGRGetQualityDiscountCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspARApproveCommission.sql" />
+    <Build Include="dbo\Tables\tblARCommissionRecapDetail.sql" />
+    <Build Include="dbo\Tables\tblARCommissionRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

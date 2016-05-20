@@ -1,10 +1,25 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessCommissionSchedule]
-	  @commissionIds	NVARCHAR(MAX)	= ''
-	, @dtmStartDate		DATETIME		= NULL
-	, @dtmEndDate		DATETIME		= NULL
-	, @ysnRecap			BIT				= 1
-	, @batchId			NVARCHAR(100)	= NULL OUTPUT
+	  @commissionScheduleIds	NVARCHAR(MAX)	= ''
+	, @dtmStartDate				DATETIME		= NULL
+	, @dtmEndDate				DATETIME		= NULL
+	, @ysnRecap					BIT				= 1
+	, @batchId					NVARCHAR(100)	= NULL OUTPUT
 AS
+	--VALIDATE DATES
+	IF @dtmStartDate IS NULL
+		BEGIN
+			RAISERROR('Start Date is Required', 16, 1);
+			RETURN 0;
+		END
+
+	IF @dtmEndDate IS NULL
+		BEGIN
+			RAISERROR('End Date is Required', 16, 1);
+			RETURN 0;
+		END
+
+	SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+
 	--CONSTANT VARIABLES
 	DECLARE @SCHEDTYPE_INDIVIDUAL	NVARCHAR(20) = 'Individual'
 	      , @SCHEDTYPE_GROUP		NVARCHAR(20) = 'Group'
@@ -14,7 +29,7 @@ AS
 	DECLARE @tmpCommissionSchedule TABLE (intCommissionScheduleId INT)	
 
 	INSERT INTO @tmpCommissionSchedule
-	SELECT intID FROM fnGetRowsFromDelimitedValues(@commissionIds)
+	SELECT intID FROM fnGetRowsFromDelimitedValues(@commissionScheduleIds)
 			
 	DECLARE @tblARCommissionSchedules TABLE (
 		  intCommissionScheduleId	INT
@@ -44,16 +59,21 @@ AS
 	WHERE ysnActive = 1
 
 	--FILTER BY COMMISSION SCHEDULE ID AND ACTIVE = 1
-	IF EXISTS(SELECT TOP 1 1 FROM @tmpCommissionSchedule) AND ISNULL(@commissionIds, '') <> ''
+	IF EXISTS(SELECT TOP 1 1 FROM @tmpCommissionSchedule) AND ISNULL(@commissionScheduleIds, '') <> ''
 		BEGIN
 			DELETE FROM @tblARCommissionSchedules
 			WHERE intCommissionScheduleId NOT IN (SELECT intCommissionScheduleId FROM @tmpCommissionSchedule)
 		END
 				
-	--GET COMM. SCHED. DETAILS WHERE intCommissionScheduleId
+	--GET COMMISSION SCHEDULE DETAILS BY intCommissionScheduleId
 	IF EXISTS(SELECT NULL FROM @tblARCommissionSchedules)
 		BEGIN
-			DECLARE @tblARCommissionScheduleDetails TABLE (intCommissionScheduleDetailId INT, intEntityId INT, intCommissionPlanId INT, dblPercentage NUMERIC(18,6))
+			DECLARE @tblARCommissionScheduleDetails TABLE (
+				intCommissionScheduleDetailId	INT
+			  , intEntityId						INT
+			  , intCommissionPlanId				INT
+			  , dblPercentage NUMERIC(18,6)
+			)
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionSchedules)
 				BEGIN
@@ -99,53 +119,98 @@ AS
 						BEGIN
 							DECLARE @dblLineTotal			NUMERIC(18,6) = 0
 								  , @intNewCommissionId		INT
-							
-							INSERT INTO tblARCommission
-								( intCommissionScheduleId
-								, intCommissionPlanId
-								, intEntityId
-								, dtmStartDate
-								, dtmEndDate
-								, ysnConditional
-								, ysnApproved
-								, ysnRejected
-								, ysnPayroll
-								, ysnPayables
-								, dblTotalAmount
-								, strReason
-								, intConcurrencyId)
-							SELECT TOP 1
-								  @intActiveCommSchedId
-								, CS.intCommissionPlanId
-								, CS.strEntityIds
-								, @dtmStartDate
-								, @dtmEndDate
-								, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
-								, 0
-								, 0
-								, CS.ysnPayroll
-								, CS.ysnPayables
-								, @dblLineTotal
-								, NULL
-								, 1
-							FROM tblARCommissionSchedule CS
-								LEFT JOIN tblARCommissionPlan CP ON CS.intCommissionPlanId = CP.intCommissionPlanId
-							WHERE CS.intCommissionScheduleId = @intActiveCommSchedId
-
-							SET @intNewCommissionId = SCOPE_IDENTITY()
+								  , @intNewCommissionRecapId INT
 
 							IF @strScheduleType = @SCHEDTYPE_GROUP
 								BEGIN
-									EXEC dbo.uspARCalculateCommission @intSchedCommPlanId, NULL, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+									INSERT INTO tblARCommissionRecap
+										( intCommissionScheduleId
+										, intCommissionPlanId
+										, intEntityId
+										, intApproverEntityId
+										, dtmStartDate
+										, dtmEndDate
+										, ysnConditional
+										, ysnApproved
+										, ysnRejected
+										, ysnPayroll
+										, ysnPayables
+										, dblTotalAmount
+										, strReason
+										, strBatchId
+										, intConcurrencyId)
+									SELECT TOP 1
+										  @intActiveCommSchedId
+										, CS.intCommissionPlanId
+										, CS.strEntityIds
+										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN AL.intEntityUserSecurityId ELSE NULL END
+										, @dtmStartDate
+										, @dtmEndDate
+										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
+										, 0
+										, 0
+										, CS.ysnPayroll
+										, CS.ysnPayables
+										, @dblLineTotal
+										, NULL
+										, @batchId
+										, 1
+									FROM tblARCommissionSchedule CS
+										LEFT JOIN tblARCommissionPlan CP ON CS.intCommissionPlanId = CP.intCommissionPlanId
+										LEFT JOIN (SELECT TOP 1 * FROM tblSMApprovalListUserSecurity ORDER BY intApproverLevel) AL ON AL.intApprovalListId = CP.intApprovalListId
+									WHERE CS.intCommissionScheduleId = @intActiveCommSchedId
 
-									UPDATE tblARCommission SET dblTotalAmount = @dblLineTotal WHERE intCommissionId = @intNewCommissionId
+									SET @intNewCommissionRecapId = SCOPE_IDENTITY()
+
+									EXEC dbo.uspARCalculateCommission @intSchedCommPlanId, NULL, @intNewCommissionRecapId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+
+									UPDATE tblARCommissionRecap SET dblTotalAmount = @dblLineTotal WHERE intCommissionRecapId = @intNewCommissionRecapId
+
+									IF @ysnRecap = 0
+										BEGIN
+											INSERT INTO tblARCommission
+												( intCommissionScheduleId
+												, intCommissionPlanId
+												, intEntityId
+												, intApproverEntityId
+												, dtmStartDate
+												, dtmEndDate
+												, ysnConditional
+												, ysnApproved
+												, ysnRejected
+												, ysnPayroll
+												, ysnPayables
+												, dblTotalAmount
+												, strReason
+												, intConcurrencyId)
+											SELECT TOP 1
+												  intCommissionScheduleId
+												, intCommissionPlanId
+												, intEntityId
+												, intApproverEntityId
+												, dtmStartDate
+												, dtmEndDate
+												, ysnConditional
+												, ysnApproved
+												, ysnRejected
+												, ysnPayroll
+												, ysnPayables
+												, dblTotalAmount
+												, strReason
+												, 1
+											FROM tblARCommissionRecap
+											WHERE intCommissionRecapId = @intNewCommissionRecapId
+
+											SET @intNewCommissionId = SCOPE_IDENTITY()
+
+											DELETE FROM tblARCommissionRecap WHERE intCommissionRecapId = @intNewCommissionRecapId
+										END																		
 
 									IF EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
 										BEGIN											
 											INSERT INTO tblARCommissionDetail
 												( intCommissionId
 												, intEntityId	
-												, intCommissionPlanId
 												, intSourceId
 												, strSourceType
 												, dtmSourceDate
@@ -153,7 +218,6 @@ AS
 											SELECT 
 												  @intNewCommissionId
 												, intEntityId
-												, intCommissionPlanId
 												, 0
 												, ''
 												, GETDATE()
@@ -164,57 +228,136 @@ AS
 									DELETE FROM @tblARCommissionScheduleDetails
 								END
 							ELSE IF @strScheduleType = @SCHEDTYPE_INDIVIDUAL
-								BEGIN
-									DECLARE @totalAmount NUMERIC(18,6) = 0
-									DECLARE @tblEntities TABLE(intEntityId INT)
-
-									INSERT INTO @tblEntities
-									SELECT intID FROM fnGetRowsFromDelimitedValues(@strEntityIds)
-
-									IF EXISTS(SELECT TOP 1 1 FROM @tblEntities) AND ISNULL(@strEntityIds, '') <> ''
-										BEGIN
-											DECLARE @intEntityId INT = NULL
-
-											SELECT TOP 1 @intEntityId = intEntityId FROM @tblEntities											
-
+								BEGIN																		
+									IF ISNULL(@strEntityIds, '') <> ''
+										BEGIN											
+											--loop through commission plans
 											WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
 												BEGIN
+													DECLARE @tblEntities TABLE(intEntityId INT)
 													DECLARE @intCommissionScheduleDetailId	INT
-														  , @intCommissionPlanId			INT
+															, @intCommissionPlanId			INT
+
+													--get all selected entities
+													INSERT INTO @tblEntities
+													SELECT intID FROM fnGetRowsFromDelimitedValues(@strEntityIds)
 
 													SELECT TOP 1
 															@intCommissionScheduleDetailId	= intCommissionScheduleDetailId
-														  , @intCommissionPlanId			= intCommissionPlanId
+															, @intCommissionPlanId			= intCommissionPlanId
 													FROM @tblARCommissionScheduleDetails
-																				
-													EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+															
+													WHILE EXISTS(SELECT TOP 1 1 FROM @tblEntities)
+														BEGIN
+															DECLARE @intEntityId INT = NULL
+															SELECT TOP 1 @intEntityId = intEntityId FROM @tblEntities
+															
+															INSERT INTO tblARCommissionRecap
+																( intCommissionScheduleId
+																, intCommissionPlanId
+																, intEntityId
+																, intApproverEntityId
+																, dtmStartDate
+																, dtmEndDate
+																, ysnConditional
+																, ysnApproved
+																, ysnRejected
+																, ysnPayroll
+																, ysnPayables
+																, dblTotalAmount
+																, strReason
+																, strBatchId
+																, intConcurrencyId)
+															SELECT TOP 1
+																  @intActiveCommSchedId
+																, @intCommissionPlanId
+																, @intEntityId
+																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN AL.intEntityUserSecurityId ELSE NULL END
+																, @dtmStartDate
+																, @dtmEndDate
+																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
+																, 0
+																, 0
+																, CS.ysnPayroll
+																, CS.ysnPayables
+																, @dblLineTotal
+																, NULL
+																, @batchId
+																, 1
+															FROM tblARCommissionSchedule CS
+																LEFT JOIN tblARCommissionPlan CP ON CP.intCommissionPlanId = @intCommissionPlanId
+																LEFT JOIN (SELECT TOP 1 * FROM tblSMApprovalListUserSecurity ORDER BY intApproverLevel) AL ON AL.intApprovalListId = CP.intApprovalListId
+															WHERE CS.intCommissionScheduleId = @intActiveCommSchedId
 
-													INSERT INTO tblARCommissionDetail
-														( intCommissionId
-														, intEntityId	
-														, intCommissionPlanId
-														, intSourceId
-														, strSourceType
-														, dtmSourceDate
-														, dblAmount)
-													SELECT TOP 1
-														  @intNewCommissionId
-														, @intEntityId
-														, @intCommissionPlanId
-														, 0
-														, ''
-														, GETDATE()
-														, @dblLineTotal
-													FROM @tblARCommissionScheduleDetails
-										
-													SET @totalAmount = @totalAmount + @dblLineTotal
+															SET @intNewCommissionRecapId = SCOPE_IDENTITY()
+
+															EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId, @intNewCommissionRecapId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
+
+															UPDATE tblARCommissionRecap SET dblTotalAmount = @dblLineTotal WHERE intCommissionRecapId = @intNewCommissionRecapId
+
+															IF @ysnRecap = 0
+																BEGIN
+																	INSERT INTO tblARCommission
+																		( intCommissionScheduleId
+																		, intCommissionPlanId
+																		, intEntityId
+																		, intApproverEntityId
+																		, dtmStartDate
+																		, dtmEndDate
+																		, ysnConditional
+																		, ysnApproved
+																		, ysnRejected
+																		, ysnPayroll
+																		, ysnPayables
+																		, dblTotalAmount
+																		, strReason
+																		, intConcurrencyId)
+																	SELECT TOP 1
+																		  intCommissionScheduleId
+																		, intCommissionPlanId
+																		, intEntityId
+																		, intApproverEntityId
+																		, dtmStartDate
+																		, dtmEndDate
+																		, ysnConditional
+																		, ysnApproved
+																		, ysnRejected
+																		, ysnPayroll
+																		, ysnPayables
+																		, dblTotalAmount
+																		, strReason
+																		, 1
+																	FROM tblARCommissionRecap
+																	WHERE intCommissionRecapId = @intNewCommissionRecapId
+
+																	SET @intNewCommissionId = SCOPE_IDENTITY()
+
+																	INSERT INTO tblARCommissionDetail
+																		( intCommissionId
+																		, intEntityId	
+																		, intSourceId
+																		, strSourceType
+																		, dtmSourceDate
+																		, dblAmount
+																		, intConcurrencyId)
+																	SELECT @intNewCommissionId
+																		, intEntityId
+																		, intSourceId
+																		, strSourceType
+																		, dtmSourceDate
+																		, dblAmount
+																		, intConcurrencyId
+																	FROM tblARCommissionRecapDetail
+																	WHERE intCommissionRecapId = @intNewCommissionRecapId
+
+																	DELETE FROM tblARCommissionRecap WHERE intCommissionRecapId = @intNewCommissionRecapId
+																END
+
+															DELETE FROM @tblEntities WHERE intEntityId = @intEntityId
+														END															
 																			
 													DELETE FROM @tblARCommissionScheduleDetails WHERE intCommissionScheduleDetailId = @intCommissionScheduleDetailId
 												END
-
-											UPDATE tblARCommission SET dblTotalAmount = @totalAmount WHERE intCommissionId = @intNewCommissionId
-
-											DELETE FROM @tblEntities WHERE intEntityId = @intEntityId
 										END									
 								END
 						END
