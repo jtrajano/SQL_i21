@@ -385,11 +385,23 @@ namespace iRely.Inventory.BusinessLayer
                 if (ps.property.ToLower() == "strbillid" && ps.direction == "ASC")
                 {
                     sorts.Add(new SearchSort() { property = "intBillId", direction = "ASC" });
+                    sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "ASC" });
                 }
 
                 else if (ps.property.ToLower() == "strbillid" && ps.direction == "DESC")
                 {
                     sorts.Add(new SearchSort() { property = "intBillId", direction = "DESC" });
+                    sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "DESC" });
+                }
+
+                else if (ps.property.ToLower() == "strreceiptnumber" && ps.direction == "ASC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "ASC" });
+                }
+
+                else if (ps.property.ToLower() == "strreceiptnumber" && ps.direction == "DESC")
+                {
+                    sorts.Add(new SearchSort() { property = "intInventoryReceiptId", direction = "DESC" });
                 }
             }
 
