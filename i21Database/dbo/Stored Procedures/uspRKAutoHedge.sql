@@ -29,7 +29,10 @@ BEGIN   Try
 			@intContractHeaderId INT,
 			@intContractDetailId INT,
 			@strXml  nvarchar(max),
-			@intMatchedLots INT
+			@intMatchedLots INT,
+			@ysnMultiplePriceFixation BIT,
+			@strXmlNew  nvarchar(max),
+			@dblNoOfLots numeric(18,6)
     
 
 
@@ -178,16 +181,37 @@ BEGIN
 
 		SET @strXml = '<root><Transaction>';
 		SET @strXml = @strXml + '<intContractHeaderId>' + LTRIM(@intContractHeaderId) + '</intContractHeaderId>'
-		IF ISNULL(@intContractDetailId,0) > 0
-			SET @strXml = @strXml + '<intContractDetailId>' + LTRIM(@intContractDetailId) + '</intContractDetailId>'
+		SET @strXml = @strXml + '<intContractDetailId>#ID#</intContractDetailId>'
 		SET @strXml = @strXml + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
 		SET @strXml = @strXml + '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
-		SET @strXml = @strXml + '<intHedgedLots>' + LTRIM(@intNoOfContract) + '</intHedgedLots>'
+		SET @strXml = @strXml + '<intHedgedLots>#LOT#</intHedgedLots>'
 		SET @strXml = @strXml + '<dblAssignedLots>0</dblAssignedLots>'
 		SET @strXml = @strXml + '<ysnIsHedged>1</ysnIsHedged>'
 		SET @strXml = @strXml + '</Transaction></root>'
 
-		EXEC uspRKAssignFuturesToContractSummarySave @strXml
+	  SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+
+	  IF @ysnMultiplePriceFixation = 1 
+	  BEGIN
+		
+		SELECT  @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+
+		WHILE ISNULL(@intContractDetailId,0) > 0
+		BEGIN
+			SELECT @dblNoOfLots = dblNoOfLots FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+			SET @strXmlNew = REPLACE(@strXml,'#ID#',LTRIM(@intContractDetailId))
+			SET @strXmlNew = REPLACE(@strXmlNew,'#LOT#',LTRIM(@dblNoOfLots))
+			EXEC uspRKAssignFuturesToContractSummarySave @strXmlNew
+
+			SELECT  @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
+		END
+	  END
+	  ELSE
+	  BEGIN
+			SET @strXmlNew = REPLACE(@strXml,'#ID#',LTRIM(@intContractDetailId))
+			SET @strXmlNew = REPLACE(@strXmlNew,'#LOT#',LTRIM(@intNoOfContract))
+			EXEC uspRKAssignFuturesToContractSummarySave @strXmlNew
+	  END
 END
   
 END TRY    

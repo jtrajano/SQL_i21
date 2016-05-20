@@ -18,7 +18,7 @@ Declare @intContractDetailId  int
 Declare @dtmMatchDate datetime      
 Declare @intFutOptTransactionId int      
 Declare @dblAssignedLots int     
-Declare @dblHedgedLots int
+Declare @dblHedgedLots NUMERIC(18,6)
 DECLARE @ErrMsg nvarchar(max)       
     
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml        
@@ -97,7 +97,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	dtmMatchDate datetime,
 	intFutOptTransactionId int,
 	dblAssignedLots numeric(16,10),
-	intHedgedLots int,
+	intHedgedLots NUMERIC(18,6),
 	ysnIsHedged bit 
  )          
        
