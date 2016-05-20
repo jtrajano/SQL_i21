@@ -485,6 +485,7 @@ BEGIN TRY
 			SET [intSourceId] = @SourceId
 		WHERE
 			[intInvoiceId] = @NewId
+			AND ISNULL([intSourceId],0) <> 0
 	END
 
 	EXEC [dbo].[uspARReComputeInvoiceAmounts] @NewId

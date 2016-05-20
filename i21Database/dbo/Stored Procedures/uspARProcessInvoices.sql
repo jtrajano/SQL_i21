@@ -59,9 +59,9 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
 	SELECT * INTO #TempInvoiceEntries FROM @InvoiceEntries 
 	WHERE 
-		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage')) 
+		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
@@ -354,7 +354,7 @@ BEGIN
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
+		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND ([intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST([dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -568,7 +568,7 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -818,7 +818,7 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
