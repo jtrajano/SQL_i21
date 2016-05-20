@@ -3,7 +3,7 @@ AS
 
 SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intSourceType)) as intKeyColumn,*  FROM (
 SELECT 
-	intSourceType = 1
+	intSourceType = 2
 	,intOrderId = TMO.intDispatchId
 	,strOrderNumber = TMO.strOrderNumber
 	,strLocationName = TMO.strCompanyLocationName
@@ -34,12 +34,12 @@ SELECT
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
-WHERE TMO.strOrderStatus = 'Generated'
+WHERE TMO.strOrderStatus = 'Generated' AND IsNull(TMO.intDispatchId, 0) NOT IN (SELECT IsNull(intDispatchID, 0) FROM tblLGRouteOrder)
 
 UNION ALL
 
 SELECT
-	intSourceType = 2
+	intSourceType = 1
 	,intOrderId = LGLD.intLoadDetailId
 	,strOrderNumber = LGLD.strLoadNumber
 	,strLocationName = LGLD.strSLocationName
@@ -72,5 +72,5 @@ FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intSCompanyLocationId
 JOIN tblEMEntityLocation EML ON EML.intEntityLocationId = LGLD.intCustomerEntityLocationId
-WHERE LGL.intPurchaseSale = 2 AND LGL.intShipmentStatus = 1
+WHERE LGL.intPurchaseSale = 2 AND LGL.intShipmentStatus = 1 AND IsNull(LGLD.intLoadDetailId, 0) NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblLGRouteOrder)
 ) t1

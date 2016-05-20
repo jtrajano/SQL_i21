@@ -60,7 +60,6 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@Splitted					BIT
 		,@PaymentId					INT
 		,@SplitId					INT
-		,@DistributionHeaderId		INT
 		,@LoadDistributionHeaderId	INT
 		,@ActualCostId				NVARCHAR(50)
 		,@ShipmentId				INT
@@ -98,7 +97,6 @@ SELECT
 	,@Splitted						= 0		--[ysnSplitted]
 	,@PaymentId						= NULL	--[intPaymentId]
 	,@SplitId						= [intSplitId]
-	,@DistributionHeaderId			= NULL	--[intDistributionHeaderId]
 	,@LoadDistributionHeaderId		= NULL	--[intLoadDistributionHeaderId]
 	,@ActualCostId					= NULL	--[strActualCostId]
 	,@ShipmentId					= NULL	--[intShipmentId]
@@ -122,7 +120,7 @@ IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standar
 		RETURN 0;
 	END
 
-IF ISNULL(@DistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
+IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 	BEGIN	
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION
@@ -224,7 +222,7 @@ BEGIN TRY
 		,@Splitted								= @Splitted	
 		,@PaymentId								= @PaymentId
 		,@SplitId								= @SplitId
-		,@DistributionHeaderId					= @LoadDistributionHeaderId
+		,@LoadDistributionHeaderId				= @LoadDistributionHeaderId
 		,@ActualCostId							= @ActualCostId		
 		,@ShipmentId							= @ShipmentId
 		,@TransactionId							= @TransactionId

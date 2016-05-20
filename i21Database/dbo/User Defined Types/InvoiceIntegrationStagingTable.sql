@@ -36,6 +36,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 10. "Process Grain Storage"
 																											-- 11. "Consumption Site"
 																											-- 12. "Meter Billing"
+																											-- 13. "Load/Shipment Schedules"
+																											-- 14. "Credit Card Reconciliation"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
@@ -65,8 +67,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnSplitted]							BIT												NULL	
 	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Prepayment/Overpayment) 
 	,[intSplitId]							INT												NULL		-- Key Value from tblEMEntitySplit (Customer Split) 
-	,[intDistributionHeaderId]				INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load) 
-	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load-New Screen) 
+	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRLoadDistributionHeader (Transport Load-New Screen) 
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing
 	,[intShipmentId]						INT												NULL		-- Key Value from tblLGShipment (Inbound Shipment) 	
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
@@ -125,6 +126,9 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[dblShipmentNetWt]						NUMERIC(18, 6)									NULL
 	,[intTicketId]							INT												NULL		-- Key Value from tblSCTicket (Scale Ticket)
 	,[intTicketHoursWorkedId]				INT												NULL		-- Key Value from tblHDTicketHoursWorked (Help Desk)
+	,[intCustomerStorageId]					INT												NULL		-- Key Value from tblGRCustomerStorage (Grain)
+	,[intSiteDetailId]						INT												NULL		-- Key Value from tblCCSiteDetail (Credit Card Reconciliation)
+	,[intLoadDetailId]						INT												NULL		-- Key Value from tblLGLoadDetail (Load/Shipment Schedules)
 	,[intOriginalInvoiceDetailId]			INT												NULL		-- Key Value from tblARInvoiceDetail (Provisional Invoice)
 	,[intSiteId]							INT												NULL		-- Key Value from tblTMSite (Tank MAnagement)
 	,[strBillingBy]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- tblTMSite.[strBillingBy] (Tank MAnagement)

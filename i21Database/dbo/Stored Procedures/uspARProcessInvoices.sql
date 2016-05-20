@@ -59,9 +59,9 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
 	SELECT * INTO #TempInvoiceEntries FROM @InvoiceEntries 
 	WHERE 
-		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage')) 
+		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
@@ -161,7 +161,6 @@ DECLARE  @Id									INT
 		,@Splitted								BIT
 		,@PaymentId								INT
 		,@SplitId								INT
-		,@DistributionHeaderId					INT
 		,@LoadDistributionHeaderId				INT
 		,@ActualCostId							NVARCHAR(50)
 		,@ShipmentId							INT
@@ -214,6 +213,9 @@ DECLARE  @Id									INT
 		,@ItemShipmentNetWt						NUMERIC(18,6)
 		,@ItemTicketId							INT
 		,@ItemTicketHoursWorkedId				INT
+		,@ItemCustomerStorageId					INT
+		,@ItemSiteDetailId						INT
+		,@ItemLoadDetailId						INT
 		,@ItemOriginalInvoiceDetailId			INT			
 		,@ItemSiteId							INT
 		,@ItemBillingBy							NVARCHAR(100)
@@ -290,7 +292,6 @@ BEGIN
 		,@Splitted						= [ysnSplitted]
 		,@PaymentId						= [intPaymentId]
 		,@SplitId						= [intSplitId]
-		,@DistributionHeaderId			= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
 		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
@@ -342,6 +343,9 @@ BEGIN
 		,@ItemShipmentNetWt				= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentNetWt] ELSE NULL END)
 		,@ItemTicketId					= (CASE WHEN @GroupingOption = 0 THEN [intTicketId] ELSE NULL END)
 		,@ItemTicketHoursWorkedId		= (CASE WHEN @GroupingOption = 0 THEN [intTicketHoursWorkedId] ELSE NULL END)
+		,@ItemCustomerStorageId			= (CASE WHEN @GroupingOption = 0 THEN [intCustomerStorageId] ELSE NULL END)
+		,@ItemSiteDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intSiteDetailId] ELSE NULL END)
+		,@ItemLoadDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intLoadDetailId] ELSE NULL END)
 		,@ItemOriginalInvoiceDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intOriginalInvoiceDetailId] ELSE NULL END)
 		,@ItemSiteId					= (CASE WHEN @GroupingOption = 0 THEN [intSiteId] ELSE NULL END)
 		,@ItemBillingBy					= (CASE WHEN @GroupingOption = 0 THEN [strBillingBy] ELSE NULL END)
@@ -358,7 +362,7 @@ BEGIN
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
+		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND ([intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST([dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -377,8 +381,8 @@ BEGIN
 			BEGIN
 				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@LoadDistributionHeaderId,0) = 0
 					BEGIN
-						SET @SourceColumn = 'intDistributionHeaderId'
-						SET @SourceTable = 'tblTRDistributionHeader'
+						SET @SourceColumn = 'intLoadDistributionHeaderId'
+						SET @SourceTable = 'tblTRLoadDistributionHeader'
 					END
 				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
 					BEGIN
@@ -434,7 +438,7 @@ BEGIN
 	IF ISNULL(@Type, '') = ''
 		SET @Type = 'Standard'
 	
-	IF ISNULL(ISNULL(@DistributionHeaderId, @LoadDistributionHeaderId), 0) > 0
+	IF ISNULL(@LoadDistributionHeaderId, 0) > 0
 		BEGIN
 			SET @Type = 'Transport Delivery'
 		END
@@ -475,7 +479,6 @@ BEGIN
 			,@Splitted						= @Splitted
 			,@PaymentId						= @PaymentId
 			,@SplitId						= @SplitId
-			,@DistributionHeaderId			= @DistributionHeaderId
 			,@LoadDistributionHeaderId		= @LoadDistributionHeaderId
 			,@ActualCostId					= @ActualCostId
 			,@ShipmentId					= @ShipmentId
@@ -523,6 +526,9 @@ BEGIN
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt		
 			,@ItemTicketId					= @ItemTicketId
 			,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+			,@ItemCustomerStorageId			= @ItemCustomerStorageId
+			,@ItemSiteDetailId				= @ItemSiteDetailId
+			,@ItemLoadDetailId				= @ItemLoadDetailId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
 			,@ItemBillingBy					= @ItemBillingBy
@@ -579,7 +585,7 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -640,6 +646,9 @@ BEGIN
 					,@ItemShipmentNetWt				= [dblShipmentNetWt]
 					,@ItemTicketId					= [intTicketId]
 					,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+					,@ItemCustomerStorageId			= [intCustomerStorageId]
+					,@ItemSiteDetailId				= [intSiteDetailId]
+					,@ItemLoadDetailId				= [intLoadDetailId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
@@ -703,6 +712,9 @@ BEGIN
 						,@ItemTicketId					= @ItemTicketId
 						,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 						,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+						,@ItemCustomerStorageId			= @ItemCustomerStorageId
+						,@ItemSiteDetailId				= @ItemSiteDetailId
+						,@ItemLoadDetailId				= @ItemLoadDetailId
 						,@ItemSiteId					= @ItemSiteId
 						,@ItemBillingBy					= @ItemBillingBy
 						,@ItemPercentFull				= @ItemPercentFull
@@ -827,7 +839,7 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage'))))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
@@ -961,7 +973,6 @@ BEGIN TRY
 			,@Splitted						= [ysnSplitted]
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]			
-			,@DistributionHeaderId			= [intDistributionHeaderId]
 			,@LoadDistributionHeaderId		= [intLoadDistributionHeaderId]
 			,@ActualCostId					= [strActualCostId]
 			,@ShipmentId					= [intShipmentId]
@@ -982,8 +993,8 @@ BEGIN TRY
 		BEGIN TRY
 			IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@LoadDistributionHeaderId,0) = 0
 				BEGIN
-					SET @SourceColumn = 'intDistributionHeaderId'
-					SET @SourceTable = 'tblTRDistributionHeader'
+					SET @SourceColumn = 'intLoadDistributionHeaderId'
+					SET @SourceTable = 'tblTRLoadDistributionHeader'
 				END
 			IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@DistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
 				BEGIN
@@ -1084,7 +1095,6 @@ BEGIN TRY
 			,[ysnSplitted]				= ISNULL(@Splitted,0)
 			,[intPaymentId]				= @PaymentId
 			,[intSplitId]				= @SplitId
-			,[intDistributionHeaderId]	= @DistributionHeaderId
 			,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId
 			,[strActualCostId]			= @ActualCostId
 			,[intShipmentId]			= @ShipmentId
@@ -1186,6 +1196,9 @@ BEGIN TRY
 						,@ItemShipmentNetWt				= [dblShipmentNetWt]
 						,@ItemTicketId					= [intTicketId]
 						,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+						,@ItemCustomerStorageId			= [intCustomerStorageId]
+						,@ItemSiteDetailId				= [intSiteDetailId]
+						,@ItemLoadDetailId				= [intLoadDetailId]
 						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 						,@ItemSiteId					= [intSiteId]
 						,@ItemBillingBy					= [strBillingBy]
@@ -1242,6 +1255,9 @@ BEGIN TRY
 							,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 							,@ItemTicketId					= @ItemTicketId
 							,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+							,@ItemCustomerStorageId			= @ItemCustomerStorageId
+							,@ItemSiteDetailId				= @ItemSiteDetailId
+							,@ItemLoadDetailId				= @ItemLoadDetailId
 							,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 							,@ItemSiteId					= @ItemSiteId
 							,@ItemBillingBy					= @ItemBillingBy
@@ -1406,6 +1422,9 @@ BEGIN TRY
 					,@ItemTicketId					= [intTicketId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+					,@ItemCustomerStorageId			= [intCustomerStorageId]
+					,@ItemSiteDetailId				= [intSiteDetailId]
+					,@ItemLoadDetailId				= [intLoadDetailId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
 					,@ItemPercentFull				= [dblPercentFull]
@@ -1507,6 +1526,9 @@ BEGIN TRY
 						,[dblShipmentNetWt]						= @ItemShipmentNetWt
 						,[intTicketId]							= @ItemTicketId
 						,[intTicketHoursWorkedId]				= @ItemTicketHoursWorkedId
+						,[intCustomerStorageId]					= @ItemCustomerStorageId
+						,[intSiteDetailId]						= @ItemSiteDetailId
+						,[intLoadDetailId]						= @ItemLoadDetailId
 						,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId
 						,[intSiteId]							= @ItemSiteId
 						,[strBillingBy]							= @ItemBillingBy

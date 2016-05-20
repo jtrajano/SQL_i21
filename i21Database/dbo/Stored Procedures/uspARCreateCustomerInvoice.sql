@@ -33,7 +33,6 @@
 	,@Splitted						BIT				= 0			
 	,@PaymentId						INT				= NULL
 	,@SplitId						INT				= NULL
-	,@DistributionHeaderId			INT				= NULL
 	,@LoadDistributionHeaderId		INT				= NULL
 	,@ActualCostId					NVARCHAR(50)	= NULL			
 	,@ShipmentId					INT				= NULL
@@ -81,6 +80,9 @@
 	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000			
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL		
+	,@ItemCustomerStorageId			INT				= NULL		
+	,@ItemSiteDetailId				INT				= NULL		
+	,@ItemLoadDetailId				INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
@@ -285,7 +287,6 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
 		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
@@ -348,7 +349,6 @@ BEGIN TRY
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
 		,[intPaymentId]					= @PaymentId 
 		,[intSplitId]					= @SplitId 
-		,[intDistributionHeaderId]		= @DistributionHeaderId 
 		,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId 
 		,[strActualCostId]				= @ActualCostId 
 		,[intShipmentId]				= @ShipmentId 
@@ -484,6 +484,9 @@ BEGIN TRY
 		,@ItemShipmentNetWt				= @ItemShipmentNetWt
 		,@ItemTicketId					= @ItemTicketId
 		,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+		,@ItemCustomerStorageId			= @ItemCustomerStorageId
+		,@ItemSiteDetailId				= @ItemSiteDetailId
+		,@ItemLoadDetailId				= @ItemLoadDetailId
 		,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 		,@ItemSiteId					= @ItemSiteId
 		,@ItemBillingBy					= @ItemBillingBy
@@ -524,6 +527,7 @@ BEGIN TRY
 			SET [intSourceId] = @SourceId
 		WHERE
 			[intInvoiceId] = @NewId
+			AND ISNULL([intSourceId],0) <> 0
 	END
 
 	EXEC [dbo].[uspARReComputeInvoiceAmounts] @NewId
