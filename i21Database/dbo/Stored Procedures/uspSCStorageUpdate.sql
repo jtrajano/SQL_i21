@@ -587,7 +587,7 @@ BEGIN TRY
 			,SC.[intItemId]
 			,SC.[intSubLocationId]
 			,SC.[intStorageLocationId]
-			,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
+			,(SELECT intUnitMeasureId FROM tblSCScaleSetup WHERE intScaleSetupId = SC.intScaleSetupId)
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
