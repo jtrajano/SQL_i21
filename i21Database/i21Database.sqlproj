@@ -3845,6 +3845,7 @@
     <Build Include="dbo\Stored Procedures\uspARApproveCommission.sql" />
     <Build Include="dbo\Tables\tblARCommissionRecapDetail.sql" />
     <Build Include="dbo\Tables\tblARCommissionRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
