@@ -4,6 +4,10 @@
 AS
 SET NOCOUNT ON;
 
+Declare @strLotNumber nvarchar(50)
+
+Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
+
 If @ysnParentLot=0
 	Select 'Receipt' AS strTransactionName,rh.intInventoryReceiptId,rh.strReceiptNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
 	mt.intCategoryId,mt.strCategoryCode,CASE WHEN l.intWeightUOMId is null then rm.dblQuantity Else rm.dblGrossWeight End AS dblQuantity,
@@ -20,7 +24,7 @@ If @ysnParentLot=0
 	Left Join tblICItemUOM iu1 on l.intWeightUOMId=iu1.intItemUOMId
 	Left Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join vyuAPVendor v on rh.intEntityVendorId=v.intEntityVendorId
-	Where l.intLotId=@intLotId
+	Where l.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)
 
 If @ysnParentLot=1
 	Select TOP 1 'Receipt' AS strTransactionName,rh.intInventoryReceiptId,rh.strReceiptNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
