@@ -1376,7 +1376,7 @@ BEGIN TRY
 					,@InvoiceDetailId				= [intInvoiceDetailId] 
 					,@ItemId						= [intItemId]
 					,@ItemPrepayTypeId				= [intPrepayTypeId]
-					,@ItemPrepayRate				= [dblPrepayrate]
+					,@ItemPrepayRate				= [dblPrepayRate]
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
