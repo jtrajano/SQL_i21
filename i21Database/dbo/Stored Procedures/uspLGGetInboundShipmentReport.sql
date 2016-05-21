@@ -139,6 +139,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				SLLocation.strCountry as strShippingLineCountry,
 				SLLocation.strState as strShippingLineState,
 				SLLocation.strZipCode as strShippingLineZipCode,
+				SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,'') as strShippingLineWithAddress,
 
 				TerminalEntity.strName as strTerminal,
 				TerminalEntity.strEmail as strTerminalEmail,
@@ -276,6 +277,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				SLLocation.strCountry as strShippingLineCountry,
 				SLLocation.strState as strShippingLineState,
 				SLLocation.strZipCode as strShippingLineZipCode,
+				SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,'') as strShippingLineWithAddress,
 
 				TerminalEntity.strName as strTerminal,
 				TerminalEntity.strEmail as strTerminalEmail,

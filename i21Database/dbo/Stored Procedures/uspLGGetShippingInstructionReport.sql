@@ -337,7 +337,7 @@ SELECT TOP 1 L.intLoadId
 		WHEN 'Vendor'
 			THEN CNLocation.strZipCode
 		END strConsigneeZipCode
-	,L.strMarks
+	,LC.strMarks
 	,L.strMarkingInstructions
 	,L.strComments
 	,L.dblDemurrage
