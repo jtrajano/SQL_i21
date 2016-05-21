@@ -46,7 +46,8 @@ SELECT L.intLoadId,
 	   CT.intContractSeq,
 	   LD.dblQuantity,
 	   UM.strUnitMeasure,
-	   CT.strItemDescription
+	   CT.strItemDescription,
+	   CT.strCustomerContract AS strSCustomerContract
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
