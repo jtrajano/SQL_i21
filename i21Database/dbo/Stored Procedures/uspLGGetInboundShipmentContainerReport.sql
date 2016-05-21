@@ -49,7 +49,8 @@ SELECT DISTINCT LC.strContainerNumber,
 		CD.dtmContractDate,
 		CD.strContractBasis,
 		CD.strContractBasisDescription,
-		CD.strApprovalBasis
+		CD.strApprovalBasis,
+		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
@@ -70,7 +71,8 @@ SELECT DISTINCT LC.strContainerNumber,
 		CD.dtmContractDate,
 		CD.strContractBasis,
 		CD.strContractBasisDescription,
-		CD.strApprovalBasis
+		CD.strApprovalBasis,
+		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
