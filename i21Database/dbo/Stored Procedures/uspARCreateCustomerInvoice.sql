@@ -138,7 +138,8 @@ IF ISNULL(@AccountId, 0) <> 0 AND @TransactionType <>  'Prepayment' AND NOT EXIS
 		RETURN 0;
 	END
 ELSE
-	SET @ARAccountId = @AccountId
+	IF @TransactionType <> 'Prepayment'
+		SET @ARAccountId = @AccountId
 
 IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType <>  'Prepayment'
 	SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
@@ -151,6 +152,9 @@ IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType <>  'Prepayment'
 		RETURN 0;
 	END
 
+IF @TransactionType = 'Prepayment'
+	SET @ARAccountId = NULL
+
 IF ISNULL(@AccountId, 0) <> 0 AND @TransactionType =  'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @AccountId)
 	BEGIN
 		SET @ErrorMessage = 'There account id provided is not a valid account of category "Customer Prepayments".';
@@ -159,7 +163,8 @@ IF ISNULL(@AccountId, 0) <> 0 AND @TransactionType =  'Prepayment' AND NOT EXIST
 		RETURN 0;
 	END
 ELSE
-	SET @ARAccountId = @AccountId
+	IF @TransactionType = 'Prepayment'
+		SET @ARAccountId = @AccountId
 
 
 IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType =  'Prepayment'
