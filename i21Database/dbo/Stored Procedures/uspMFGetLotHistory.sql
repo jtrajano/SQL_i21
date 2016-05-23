@@ -10,7 +10,7 @@ BEGIN
 	SELECT @dblPrimaryQty = 0
 		,@dblPrimaryWeight = 0
 
-	SELECT ilt.dtmCreated AS dtmDateTime
+	SELECT ilt.dtmDate AS dtmDateTime
 		,l.strLotNumber AS strLotNo
 		,CASE 
 			WHEN iad.intNewItemId IS NULL
