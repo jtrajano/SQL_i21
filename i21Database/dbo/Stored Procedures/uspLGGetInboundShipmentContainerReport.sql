@@ -45,11 +45,14 @@ SELECT DISTINCT LC.strContainerNumber,
 		LC.strMarks,
 		LDV.*,
 		LC.dblQuantity AS dblContainerContractQty,
-		CD.strCustomerContract,
+		CD.strCustomerContract AS strCustomerContractNo,
 		CD.dtmContractDate,
 		CD.strContractBasis,
 		CD.strContractBasisDescription,
 		CD.strApprovalBasis,
+		LC.dblGrossWt AS dblContainerGrossWt,
+		LC.dblNetWt AS dblContainerNetWt,
+		LC.dblTareWt AS dblContainerTareWt,
 		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
@@ -67,11 +70,14 @@ SELECT DISTINCT LC.strContainerNumber,
 		LC.strMarks,
 		LDV.*,
 		LC.dblQuantity AS dblContainerContractQty,
-		CD.strCustomerContract,
+		CD.strCustomerContract AS strCustomerContractNo,
 		CD.dtmContractDate,
 		CD.strContractBasis,
 		CD.strContractBasisDescription,
 		CD.strApprovalBasis,
+		LC.dblGrossWt AS dblContainerGrossWt,
+		LC.dblNetWt AS dblContainerNetWt,
+		LC.dblTareWt AS dblContainerTareWt,
 		LDV.strPContractNumber  + '/' +  CONVERT(NVARCHAR,LDV.intPContractSeq) AS strContractNumberWithSeq
 FROM vyuLGLoadDetailView LDV
 JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId

@@ -360,6 +360,7 @@ SELECT TOP 1 L.intLoadId
 	,@strZip AS strCompanyZip 
 	,@strCountry AS strCompanyCountry 
 	,@strPhone AS strCompanyPhone 
+	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId

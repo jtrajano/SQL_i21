@@ -185,7 +185,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strState AS strCompanyState ,
 				@strZip AS strCompanyZip ,
 				@strCountry AS strCompanyCountry ,
-				@strPhone AS strCompanyPhone 
+				@strPhone AS strCompanyPhone ,
+				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
@@ -323,7 +325,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				@strState AS strCompanyState ,
 				@strZip AS strCompanyZip ,
 				@strCountry AS strCompanyCountry ,
-				@strPhone AS strCompanyPhone 
+				@strPhone AS strCompanyPhone ,
+				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
