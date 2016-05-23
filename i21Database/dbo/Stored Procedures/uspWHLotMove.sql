@@ -58,10 +58,9 @@ BEGIN TRY
 	SELECT @strItemNumber = strItemNo FROM tblICItem WHERE intItemId = @intItemId
 		
 	SELECT @strUnitMeasure = UM.strUnitMeasure
-	FROM tblICLot l
-	JOIN tblICItemUOM U ON U.intItemUOMId = l.intItemUOMId
+	FROM tblICItemUOM U 
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
-	WHERE intLotId = @intLotId
+	WHERE U.intItemUOMId = @intItemUOMId
 
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
