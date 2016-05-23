@@ -51,11 +51,12 @@ INSERT INTO @EntriesForInvoice(
 	,[dblPrice]
 	,[intTaxGroupId]
 	,[ysnRecomputeTax]
+	,[intSiteDetailId]
 )
 SELECT [strTransactionType] = 'Credit Memo' 
 	,[strSourceTransaction] = 'Credit Card Reconciliation'
-	,[intSourceId] = ccSiteHeader.intSiteHeaderId
-	,[strSourceId] = ccSiteHeader.intSiteHeaderId
+	,[intSourceId] = null
+	,[strSourceId] = ccSiteDetail.intSiteDetailId
 	,[intEntityCustomerId] = ccSite.intCustomerId
 	,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
 	,[intCurrencyId] = 1
@@ -71,7 +72,7 @@ SELECT [strTransactionType] = 'Credit Memo'
 	,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblGross ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
 	,[intTaxGroupId] = null
 	,[ysnRecomputeTax] = 0
-
+	,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
 FROM tblCCSiteHeader ccSiteHeader 
 INNER JOIN tblCCVendorDefault ccVendorDefault ON ccSiteHeader.intVendorDefaultId = ccVendorDefault.intVendorDefaultId 
 INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
