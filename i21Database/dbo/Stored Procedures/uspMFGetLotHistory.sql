@@ -10,10 +10,18 @@ BEGIN
 	SELECT @dblPrimaryQty = 0
 		,@dblPrimaryWeight = 0
 
-	SELECT ilt.dtmDate AS dtmDateTime
+	SELECT ilt.dtmCreated AS dtmDateTime
 		,l.strLotNumber AS strLotNo
-		,i.strItemNo AS strItem
-		,i.strDescription AS strDescription
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN i.strItemNo
+			ELSE i1.strItemNo
+			END AS strItem
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN i.strDescription
+			ELSE i1.strDescription
+			END AS strDescription
 		,c.strCategoryCode
 		,clsl.strSubLocationName AS strSubLocation
 		,sl.strName AS strStorageLocation
@@ -28,10 +36,26 @@ BEGIN
 				ELSE l.dblWeightPerQty
 				END) AS dblTransactionQty
 		,um.strUnitMeasure AS strTransactionQtyUOM
-		,iad.strNewLotNumber AS strRelatedLotId
-		,'' AS strPreviousItem
-		,'' AS strSourceSubLocation
-		,NULL AS strSourceStorageLocation
+		,CASE 
+			WHEN iad.intNewLotId = @intLotId
+				THEN L1.strLotNumber
+			ELSE iad.strNewLotNumber
+			END AS strRelatedLotId
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN NULL
+			ELSE i.strItemNo
+			END AS strPreviousItem
+		,CASE 
+			WHEN iad.intNewLotId = @intLotId
+				THEN clsl2.strSubLocationName
+			ELSE clsl1.strSubLocationName
+			END AS strSourceSubLocation
+		,CASE 
+			WHEN iad.intNewLotId = @intLotId
+				THEN sl2.strName
+			ELSE sl1.strName
+			END AS strSourceStorageLocation
 		,NULL AS strNewStatus
 		,NULL AS strOldStatus
 		,NULL AS strNewLotAlias
@@ -49,15 +73,21 @@ BEGIN
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
+	LEFT JOIN tblICItem i ON i.intItemId = iad.intItemId
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
 	LEFT JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
 	LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
-	LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
-	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
+	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ilt.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation clsl1 ON clsl1.intCompanyLocationSubLocationId = iad.intNewSubLocationId
+	LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation clsl2 ON clsl2.intCompanyLocationSubLocationId = iad.intSubLocationId
+	LEFT JOIN tblICStorageLocation sl2 ON sl2.intStorageLocationId = iad.intStorageLocationId
 	LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
+	LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
+	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
 	
 	UNION ALL
