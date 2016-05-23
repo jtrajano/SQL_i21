@@ -396,7 +396,7 @@
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strVendorId",
+                                                                        "displayField": "strName",
                                                                         "enableDrillDown": true,
                                                                         "fieldLabel": "Vendor",
                                                                         "itemId": "cboDefaultVendor",

@@ -212,7 +212,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                     margin: '0 5',
                                                                     fieldLabel: 'Vendor',
                                                                     labelWidth: 50,
-                                                                    displayField: 'strVendorId',
+                                                                    displayField: 'strName',
                                                                     valueField: 'intEntityVendorId'
                                                                 }
                                                             ]

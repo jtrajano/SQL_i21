@@ -251,11 +251,24 @@ Ext.define('Inventory.view.ItemLocationViewController', {
     },
 
     onVendorDrilldown: function(combo) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        
         if (iRely.Functions.isEmpty(combo.getValue())) {
             iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
         }
         else {
-            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', combo.getValue());
+             iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+                action: 'view',
+                filters: [
+                    {
+                        column: 'intEntityId',
+                        value: current.get('intVendorId')
+                    }
+                ],
+                 
+                 viewConfig: { modal: true }
+            });
         }
     },
 
