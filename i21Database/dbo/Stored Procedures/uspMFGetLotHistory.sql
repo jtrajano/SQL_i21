@@ -9,7 +9,7 @@ DROP TABLE  #tempLotHistory
  DECLARE @dblPrimaryQty NUMERIC(38,20),@dblPrimaryWeight NUMERIC(38,20)
  SELECT @dblPrimaryQty=0, @dblPrimaryWeight=0     
 
-		SELECT ilt.dtmCreated AS dtmDateTime, 
+		SELECT ilt.dtmDate AS dtmDateTime, 
 			   l.strLotNumber AS strLotNo, 
 			   i.strItemNo AS strItem, 
 			   i.strDescription AS strDescription, 
