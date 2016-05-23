@@ -16,7 +16,10 @@ SELECT
 	 convert(bit,0)  as ysnPostNetToArCustomer,
 	 0  as intSharedFeePercentage,
 	 C.intCompanyOwnedSiteId,
-	 C.intDealerSiteId
+	 C.intDealerSiteId,
+	 null as intAccountId,
+ 	 B.intCreditCardReceivableAccountId,
+	 B.intFeeExpenseAccountId
 FROM
      dbo.tblCCVendorDefault A
 	JOIN dbo.tblCCCompanyOwnedSite B
@@ -44,7 +47,10 @@ SELECT
 	E.ysnPostNetToArCustomer,
 	E.intSharedFeePercentage,
 	C.intCompanyOwnedSiteId,
-	C.intDealerSiteId
+	C.intDealerSiteId,
+	E.intAccountId,
+	null as intCreditCardReceivableAccountId,
+	null as intFeeExpenseAccountId
 FROM
      
 	 dbo.tblCCVendorDefault A

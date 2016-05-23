@@ -21,7 +21,16 @@ BEGIN TRY
 	DECLARE @strTransactionId NVARCHAR(40)
 	DECLARE @dblSumAmount DECIMAL(18, 6)
 	DECLARE @transCount INT = 0
-	
+	DECLARE @CCRItemToCMItem TABLE
+	(
+		intSiteHeaderId int, 
+		strItem nvarchar(100)
+	)
+
+	INSERT INTO @CCRItemToCMItem VALUES (23,'Dealer Sites Net')
+	INSERT INTO @CCRItemToCMItem VALUES (23,'Company Owned Gross')
+	INSERT INTO @CCRItemToCMItem VALUES (23,'Company Owned Fees')
+
 	EXEC uspSMGetStartingNumber 13, @strTransactionId OUT
 
 	-- CM Header
@@ -57,26 +66,30 @@ BEGIN TRY
 	SELECT 
 		[intTransactionId] = 0,
 		[dtmDate] = dtmDate,
-		[intGLAccountId] = intBankAccountId,
-		[strDescription] = strSiteType, 
-		[dblDebit] = SUM(dblGross),
-		[dblCredit] = SUM(dblFees)
+		intBankAccountId,
+		[strDescription] = strItem, 
+		[dblDebit] = SUM(ISNULL(dblDebit,0)),
+		[dblCredit] = SUM(ISNULL(dblCredit,0))
 	FROM (
-	SELECT ccSiteHeader.dtmDate, 
-		ccVendorDefault.intBankAccountId,
-		ccSite.strSiteType,
-		ccSiteDetail.dblGross,
-		ccSiteDetail.dblFees,
-		ccSiteDetail.dblNet,
-		(CASE WHEN ccSite.strSiteType LIKE 'Company Owned%' THEN ccSiteDetail.dblFees ELSE 0 END) dblDebit,
-		(CASE WHEN ccSite.strSiteType LIKE 'Dealer Site%' THEN ccSiteDetail.dblNet ELSE 0 END) + 
-		(CASE WHEN ccSite.strSiteType LIKE 'Company Owned%' THEN ccSiteDetail.dblGross ELSE 0 END) dblCredit
+	SELECT ccSiteHeader.intSiteHeaderId
+	    ,ccSiteHeader.dtmDate
+	    ,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSite.intAccountId 
+			WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intCreditCardReceivableAccountId  
+			WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intFeeExpenseAccountId
+			ELSE null END)  AS intBankAccountId
+		,ccItem.strItem
+		,(CASE WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblFees 
+			ELSE null END) dblDebit
+		,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblNet 
+			WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblGross 
+			ELSE null END) dblCredit
 	FROM tblCCSiteHeader ccSiteHeader
-		INNER  JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 		LEFT JOIN tblCCSiteDetail ccSiteDetail ON ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 		LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
-	WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSiteHeader.strApType = 'Cash Deposited') A
-	GROUP BY dtmDate,intBankAccountId, strSiteType
+		LEFT JOIN @CCRItemToCMItem ccItem ON ccItem.intSiteHeaderId = ccSiteDetail.intSiteHeaderId
+	WHERE ccSiteHeader.intSiteHeaderId = 23 AND ccSiteHeader.strApType = 'Cash Deposited') A
+	WHERE (dblDebit IS NOT NULL OR dblCredit IS NOT NULL)
+	GROUP BY dtmDate, intBankAccountId, strItem
 
 	SELECT @transCount=COUNT(*) FROM @BankTransactionDetail
 		
@@ -86,7 +99,7 @@ BEGIN TRY
 		DECLARE @dblSumDebit DECIMAL(18,6)
 		DECLARE @dblSumCredit DECIMAL(18,6)
 
-		SELECT @dblSumDebit = SUM(dblDebit), @dblSumCredit =SUM(dblCredit) FROM @BankTransactionDetail
+		SELECT @dblSumDebit = SUM(ISNULL(dblDebit,0)), @dblSumCredit =SUM(ISNULL(dblCredit,0)) FROM @BankTransactionDetail
 		SET @dblSumAmount = @dblSumCredit - @dblSumDebit
 
 		UPDATE @BankTransaction SET dblAmount = @dblSumAmount
