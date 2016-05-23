@@ -5215,4 +5215,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intImportRackPriceDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4f2093d3-3a36-45d5-be1e-88bc564ee90a" ChangeDateTime="05/23/2016 06:47:40">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[intCompetitorEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCompetitorEntityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2e98636a-5481-4408-8f40-b152f6582d91" ChangeDateTime="05/23/2016 06:47:48">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[intCurrentSolutionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCurrentSolutionId" />
+  </Operation>
 </Operations>
