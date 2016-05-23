@@ -50,8 +50,8 @@ Declare @tblTemp AS table
 	intParentLotId int,
 	strProcessName nvarchar(50),
 	strType nvarchar(2),
-	strVendor nvarchar(50),
-	strCustomer nvarchar(50),
+	strVendor nvarchar(200),
+	strCustomer nvarchar(200),
 	intAttributeTypeId int Default 0,
 	intImageTypeId int Default 0
 )
@@ -75,8 +75,8 @@ Declare @tblData AS table
 	intParentLotId int,
 	strProcessName nvarchar(50),
 	strType nvarchar(2),
-	strVendor nvarchar(50),
-	strCustomer nvarchar(50),
+	strVendor nvarchar(200),
+	strCustomer nvarchar(200),
 	intAttributeTypeId int Default 0,
 	intImageTypeId int Default 0
 )
@@ -100,8 +100,8 @@ Declare @tblNodeData AS table
 	intParentLotId int,
 	strProcessName nvarchar(50),
 	strType nvarchar(2),
-	strVendor nvarchar(50),
-	strCustomer nvarchar(50),
+	strVendor nvarchar(200),
+	strCustomer nvarchar(200),
 	intAttributeTypeId int Default 0,
 	intImageTypeId int Default 0
 )
