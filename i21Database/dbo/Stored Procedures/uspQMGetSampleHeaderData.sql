@@ -27,6 +27,7 @@ BEGIN
 		,@intProductValueId AS intProductValueId
 		,C.intContractHeaderId
 		,C.intContractDetailId
+		,C.intItemContractId
 		--,C.intItemId
 		--,C.strItemDescription AS strDescription
 		,CAST(CASE 
@@ -71,6 +72,7 @@ BEGIN
 		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
+		,C.intItemContractId
 		--,C.intItemId
 		--,C.strItemDescription AS strDescription
 		,S.intItemId
@@ -98,6 +100,7 @@ BEGIN
 		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
+		,C.intItemContractId
 		--,C.intItemId
 		--,C.strItemDescription AS strDescription
 		,S.intItemId
