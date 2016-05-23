@@ -12,11 +12,12 @@
     [dblOvertimeHours] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intEmployeeEarningId] INT NULL, 
 	[intEmployeeDepartmentId] INT NULL, 
-    [intTimeEntryId] INT NULL, 
+    [intPayGroupDetailId] INT NULL, 
 	[intPaycheckId] INT NULL, 
     [strNotes] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [ysnApproved] BIT NULL DEFAULT ((0)), 
-    [intConcurrencyId] INT NULL DEFAULT ((1))
+    [intConcurrencyId] INT NULL DEFAULT ((1)),
+	CONSTRAINT [FK_tblPRTimecard_tblPRPayGroupDetail] FOREIGN KEY ([intPayGroupDetailId]) REFERENCES [tblPRPayGroupDetail]([intPayGroupDetailId]) ON DELETE SET NULL
 )
 
 GO
@@ -73,15 +74,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTimecard',
     @level2type = N'COLUMN',
     @level2name = N'intEmployeeEarningId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Time Entry Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTimecard',
-    @level2type = N'COLUMN',
-    @level2name = N'intTimeEntryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Notes',
@@ -172,3 +164,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTimecard',
     @level2type = N'COLUMN',
     @level2name = N'intPaycheckId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Pay Group Detail Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTimecard',
+    @level2type = N'COLUMN',
+    @level2name = N'intPayGroupDetailId'
