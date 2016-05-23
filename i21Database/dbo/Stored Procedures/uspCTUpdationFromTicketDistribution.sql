@@ -27,7 +27,8 @@ BEGIN TRY
 			@strContractStatus		NVARCHAR(MAX),
 			@intScaleUOMId			INT,
 			@intScaleUnitMeasureId	INT,
-			@intItemUOMId			INT
+			@intItemUOMId			INT,
+			@intNewContractHeaderId	INT
 
 	DECLARE @Processed TABLE
 	(
@@ -46,14 +47,12 @@ BEGIN TRY
 			@strInOutFlag	=	strInOutFlag 
 	FROM	tblSCTicket
 	WHERE	intTicketId		=	@intTicketId
-	
-	SELECT	@intScaleUOMId			=	IU.intItemUOMId,
-			@intScaleUnitMeasureId	=	IU.intUnitMeasureId
-	FROM	tblSCTicket     SC         
-	JOIN	tblSCScaleSetup SS	ON	SS.intScaleSetupId	=	SC.intScaleSetupId
-	JOIN	tblICItemUOM    IU	ON	IU.intItemId		=	SC.intItemId AND
-									IU.intUnitMeasureId =	SS.intUnitMeasureId
-	WHERE SC.intTicketId = @intTicketId
+
+	SELECT  @intScaleUOMId			=	IU.intItemUOMId,
+			@intScaleUnitMeasureId  =   IU.intUnitMeasureId
+    FROM    tblICItemUOM	IU    
+    JOIN	tblSCTicket		SC	ON	SC.intItemId = IU.intItemId  
+    WHERE   SC.intTicketId = @intTicketId AND IU.ysnStockUnit = 1
 
 	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
 	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
@@ -85,7 +84,12 @@ BEGIN TRY
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
-			RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT')  
+			EXEC uspCTCreateContract @intTicketId,'Scale',@intUserId,null,@intNewContractHeaderId OUTPUT
+			SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
+			IF	ISNULL(@intContractDetailId,0) = 0
+			BEGIN
+				RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT') 
+			END 
 		END
 	END
 

@@ -40,6 +40,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
@@ -66,6 +67,7 @@ BEGIN
 				,[ysnCheckoffTax]
 				,[strTaxCode]
 				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
 				,[strTaxGroup]
 				,[strNotes]
 			FROM

@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPostConsumptionProduction] @intWorkOrderId INT
 	,@intItemId INT
 	,@strLotNumber NVARCHAR(50)
-	,@dblWeight NUMERIC(38,20)
+	,@dblWeight NUMERIC(38, 20)
 	,@intWeightUOMId INT
-	,@dblUnitQty NUMERIC(38,20) = NULL
-	,@dblQty NUMERIC(38,20)
+	,@dblUnitQty NUMERIC(38, 20) = NULL
+	,@dblQty NUMERIC(38, 20)
 	,@intItemUOMId INT
 	,@intUserId INT = NULL
 	,@intBatchId INT
@@ -13,6 +13,7 @@
 	,@strVendorLotNo NVARCHAR(50) = NULL
 	,@strParentLotNumber NVARCHAR(50)
 	,@intStorageLocationId INT
+	,@dtmProductionDate datetime=NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -32,12 +33,11 @@ BEGIN
 		,@strItemNo AS NVARCHAR(50)
 		,@intLocationId INT
 		,@intSubLocationId INT
-		,@dblNewCost NUMERIC(38,20)
-		,@dblNewUnitCost NUMERIC(38,20)
+		,@dblNewCost NUMERIC(38, 20)
+		,@dblNewUnitCost NUMERIC(38, 20)
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
 		,@dtmExpiryDate DATETIME
-		,@dtmPlannedDate DATETIME
 		,@intItemStockUOMId INT
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmDate DATETIME
@@ -45,13 +45,6 @@ BEGIN
 	SELECT @dtmDate = GETDATE()
 
 	SELECT TOP 1 @intLocationId = W.intLocationId
-		,@dtmPlannedDate = (
-			CASE 
-				WHEN dtmPlannedDate > @dtmDate
-					THEN @dtmDate
-				ELSE dtmPlannedDate
-				END
-			)
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder W
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -62,6 +55,68 @@ BEGIN
 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 		,@strBatchId OUTPUT
+
+	--Non Lot Tracking
+	INSERT INTO @ItemsForPost (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,intTransactionTypeId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
+		)
+	SELECT intItemId = cl.intItemId
+		,intItemLocationId = il.intItemLocationId
+		,intItemUOMId = cl.intItemIssuedUOMId
+		,dtmDate = GetDate()
+		,dblQty = (- cl.dblIssuedQuantity)
+		,dblUOMQty = ItemUOM.dblUnitQty
+		,dblCost = 0 --l.dblLastCost
+		,dblSalesPrice = 0
+		,intCurrencyId = NULL
+		,dblExchangeRate = 1
+		,intTransactionId = @intBatchId
+		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
+		,strTransactionId = (
+			CASE 
+				WHEN @strLotNumber IS NULL
+					OR @strLotNumber = ''
+					THEN @strWorkOrderNo
+				ELSE @strLotNumber
+				END
+			)
+		,intTransactionTypeId = @INVENTORY_CONSUME
+		,intLotId = NULL
+		,intSubLocationId = cl.intSubLocationId
+		,intStorageLocationId = cl.intStorageLocationId
+		,intSourceTransactionId = @INVENTORY_CONSUME
+		,strSourceTransactionId = @strWorkOrderNo
+	FROM tblMFWorkOrderConsumedLot cl
+	INNER JOIN tblICItem i ON cl.intItemId = i.intItemId
+	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
+	INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId
+		AND il.intLocationId = @intLocationId
+	WHERE cl.intWorkOrderId = @intWorkOrderId
+		AND cl.intBatchId = @intBatchId
+		AND ISNULL(cl.intLotId, 0) = 0
+
+	If @dtmProductionDate>@dtmDate OR @dtmProductionDate IS NULL
+	BEGIN
+		SELECT @dtmProductionDate=@dtmDate
+	END
 
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -81,11 +136,13 @@ BEGIN
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
 		)
 	SELECT intItemId = l.intItemId
 		,intItemLocationId = l.intItemLocationId
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-		,dtmDate = @dtmPlannedDate
+		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
 		,dblCost = l.dblLastCost
@@ -106,6 +163,8 @@ BEGIN
 		,intLotId = l.intLotId
 		,intSubLocationId = l.intSubLocationId
 		,intStorageLocationId = l.intStorageLocationId
+		,intSourceTransactionId = @INVENTORY_CONSUME
+		,strSourceTransactionId = @strWorkOrderNo
 	FROM tblMFWorkOrderConsumedLot cl
 	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
@@ -133,7 +192,7 @@ BEGIN
 	SET @dblNewCost = ABS(@dblNewCost)
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
 
-	DECLARE @dblCostPerStockUOM NUMERIC(38,20)
+	DECLARE @dblCostPerStockUOM NUMERIC(38, 20)
 
 	IF @intItemStockUOMId = @intItemUOMId
 	BEGIN
@@ -196,6 +255,9 @@ BEGIN
 		,strGarden
 		,intDetailId
 		,ysnProduced
+		,strTransactionId
+		,strSourceTransactionId
+		,intSourceTransactionTypeId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -209,7 +271,7 @@ BEGIN
 		,dblWeight = @dblWeight
 		,intWeightUOMId = @intWeightUOMId
 		,dtmExpiryDate = @dtmExpiryDate
-		,dtmManufacturedDate = @dtmPlannedDate
+		,dtmManufacturedDate = @dtmProductionDate
 		,intOriginId = NULL
 		,intGradeId = NULL
 		,strBOLNo = NULL
@@ -222,6 +284,9 @@ BEGIN
 		,strGarden = NULL
 		,intDetailId = @intWorkOrderId
 		,ysnProduced = 1
+		,strTransactionId = @strWorkOrderNo
+		,strSourceTransactionId = @strWorkOrderNo
+		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
@@ -230,8 +295,6 @@ BEGIN
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
 
-	SELECT @dtmDate = GETDATE()
-
 	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
 		,@strParentLotAlias = ''
 		,@intItemId = @intItemId
@@ -239,8 +302,8 @@ BEGIN
 		,@intLotStatusId = 1
 		,@intEntityUserSecurityId = @intUserId
 		,@intLotId = @intLotId
-		,@intSubLocationId=@intSubLocationId
-		,@intLocationId=@intLocationId
+		,@intSubLocationId = @intSubLocationId
+		,@intLocationId = @intLocationId
 
 	DELETE
 	FROM @ItemsForPost
@@ -262,6 +325,8 @@ BEGIN
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
 		)
 	SELECT intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
@@ -272,7 +337,7 @@ BEGIN
 				ELSE @intWeightUOMId
 				END
 			)
-		,dtmDate = @dtmPlannedDate
+		,dtmDate = @dtmProductionDate
 		,dblQty = (
 			CASE 
 				WHEN @intItemStockUOMId = @intItemUOMId
@@ -298,6 +363,8 @@ BEGIN
 		,intLotId = @intLotId
 		,intSubLocationId = @intSubLocationId
 		,intStorageLocationId = @intStorageLocationId
+		,intSourceTransactionId = @INVENTORY_PRODUCE
+		,strSourceTransactionId = @strWorkOrderNo
 
 	EXEC dbo.uspICPostCosting @ItemsForPost
 		,@strBatchId
@@ -353,7 +420,7 @@ BEGIN
 		,1
 
 	DECLARE @intRecordId INT
-	,@intLotId1 INT
+		,@intLotId1 INT
 	DECLARE @tblMFLot TABLE (
 		intRecordId INT Identity(1, 1)
 		,intLotId INT
@@ -401,11 +468,12 @@ BEGIN
 				,dblQty = 0
 			WHERE intLotId = @intLotId1
 		END
-			UPDATE tblICLot
-			SET dblWeight = dblQty
-			WHERE dblQty <> dblWeight
-				AND intItemUOMId = intWeightUOMId
-			and intLotId=@intLotId1
+
+		UPDATE tblICLot
+		SET dblWeight = dblQty
+		WHERE dblQty <> dblWeight
+			AND intItemUOMId = intWeightUOMId
+			AND intLotId = @intLotId1
 
 		SELECT @intRecordId = Min(intRecordId)
 		FROM @tblMFLot

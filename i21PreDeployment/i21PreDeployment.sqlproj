@@ -264,4 +264,10 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\17_DropDependencies_RenameTable.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\4_DataUpdateSecurityUserRequireApprovalFor.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\5_EncryptUsersPassword.sql" />
+  </ItemGroup>
 </Project>

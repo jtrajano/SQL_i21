@@ -2,8 +2,7 @@
 (
 	[intCommissionPlanId]	INT NOT NULL IDENTITY,
 	[strCommissionPlanName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[strDescription]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
-	[strEntities]           NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,	
 	[strBasis]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strHourType]			NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 	[strUnitType]			NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,

@@ -6,6 +6,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccountStructure';
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegment';
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccount';
+		EXEC tSQLt.FakeTable 'dbo.tblGLAccountCategory';
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegmentMapping', @Identity = 1;	
 
 		-- Declare the account ids
@@ -61,10 +62,10 @@ BEGIN
 		-- Add fake data for Account Segment
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		DECLARE @SegmentId_BANK_OF_AMERICA AS INT = 1
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_BANK_OF_AMERICA, '100100', 'BANK OF AMERICA', @AccountStructureId_Primary)
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId, intAccountCategoryId) VALUES (@SegmentId_BANK_OF_AMERICA, '100100', 'BANK OF AMERICA', @AccountStructureId_Primary, 1)
 		
 		DECLARE @SegmentId_MISC_EXPENSES AS INT = 4
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_MISC_EXPENSES, '400100', 'MISC EXPENSES', @AccountStructureId_Primary)
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId, intAccountCategoryId) VALUES (@SegmentId_MISC_EXPENSES, '400100', 'MISC EXPENSES', @AccountStructureId_Primary, 2)
 
 		DECLARE @SegmentId_DEFAULT_LOCATION AS INT = 100
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_DEFAULT_LOCATION, '1000', 'DEFAULT', @AccountStructureId_Location)
@@ -122,4 +123,24 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@MiscExpenses_BetterHaven, @SegmentId_MISC_EXPENSES);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@MiscExpenses_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);			
 		END
+
+		-- Fake data for Account Category 
+		BEGIN 
+			INSERT INTO tblGLAccountCategory (
+				intAccountCategoryId
+				,strAccountCategory
+				,strAccountGroupFilter
+				,ysnRestricted			
+			)
+			SELECT	intAccountCategoryId	= 1
+					,strAccountCategory		= 'Cash Account'
+					,strAccountGroupFilter	= 'CashAccounts'
+					,ysnRestricted			= 1
+			UNION ALL 
+			SELECT	intAccountCategoryId	= 2
+					,strAccountCategory		= 'Expenses'
+					,strAccountGroupFilter	= NULL 
+					,ysnRestricted			= 0
+
+		END 
 END

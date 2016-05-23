@@ -1,22 +1,20 @@
 ﻿CREATE PROCEDURE uspPATGetEquityPatronageDetails 
-	@intRefundTypeId INT = NULL
+	@intCustomerId INT = NULL
 AS
 BEGIN
-	SELECT RR.intRefundTypeId, 
-		   PC.strCategoryCode,
-		   PC.strPurchaseSale,
-		   PC.strUnitAmount,
-		   CE.dblEquity,
-		   RR.intConcurrencyId
-	  FROM tblPATRefundRate RR
-INNER JOIN tblPATRefundRateDetail RRD
-		ON RRD.intRefundTypeId = RR.intRefundTypeId
-INNER JOIN tblPATPatronageCategory PC
-		ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-INNER JOIN tblPATCustomerEquity CE
-		ON CE.intRefundTypeId = RR.intRefundTypeId
-	 WHERE RR.intRefundTypeId = @intRefundTypeId
-
-
+	SELECT	RRD.intRefundTypeId,
+			PC.strCategoryCode,
+			PC.strPurchaseSale,
+			PC.strUnitAmount,
+			CE.dblEquity,
+			RRD.intConcurrencyId
+	FROM tblPATCustomerVolume CV
+	INNER JOIN tblPATPatronageCategory PC
+		ON CV.intPatronageCategoryId = PC.intPatronageCategoryId
+	INNER JOIN tblPATRefundRateDetail RRD
+		ON RRD.intPatronageCategoryId = PC.intPatronageCategoryId
+	INNER JOIN tblPATCustomerEquity CE
+		ON CE.intRefundTypeId = RRD.intRefundTypeId AND CE.intCustomerId = CV.intCustomerPatronId
+	WHERE CV.intCustomerPatronId = @intCustomerId
 END
 GO

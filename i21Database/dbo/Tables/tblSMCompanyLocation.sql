@@ -13,6 +13,8 @@
     [strFax] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strEmail] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strWebsite] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[dblLatitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
+    [dblLongitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [strInternalNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strUseLocationAddress] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strSkipSalesmanDefault] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL , 

@@ -17,6 +17,7 @@ BEGIN
 
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwlocmst') = 1 
 	)
 	BEGIN
 		EXEC('
@@ -41,7 +42,7 @@ BEGIN
 												END) COLLATE Latin1_General_CI_AS 
 					,strOwnership = A.strOwnership
 					,intDeviceId = A.intDeviceId
-					,strLocationName = H.strLocationName
+					,strLocationName = H.vwloc_name
 					,dblTankCapacity = A.dblTankCapacity
 					,intLocationId = A.intLocationId
 					,strSiteCity = C.strCity
@@ -68,8 +69,8 @@ BEGIN
 					ON C.intCustomerID = F.intCustomerID
 				LEFT JOIN vwcusmst G
 					ON F.intCustomerNumber = G.A4GLIdentity
-				LEFT JOIN tblSMCompanyLocation H
-					ON A.intLocationId = H.intCompanyLocationId
+				LEFT JOIN vwlocmst H
+					ON A.intLocationId = H.A4GLIdentity
 				LEFT JOIN tblTMTankType I
 					ON A.intTankTypeId = I.intTankTypeId
 				LEFT JOIN tblTMLeaseDevice J

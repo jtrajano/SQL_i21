@@ -240,4 +240,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intDetailId]				INT NOT NULL
 	,[intNoPallet]				INT NULL DEFAULT ((0))
 	,[intUnitPallet]			INT NULL DEFAULT ((0))
+	,[strTransactionId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+	,[strSourceTransactionId]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+	,[intSourceTransactionTypeId] INT NULL 
 )

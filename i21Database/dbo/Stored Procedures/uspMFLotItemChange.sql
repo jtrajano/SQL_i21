@@ -22,26 +22,53 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @intTransactionCount INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
+			,@intAdjustItemUOMId int
+			,@intUnitMeasureId int
+			,@strUnitMeasure nvarchar(50)
+			,@strItemNo nvarchar(50)
 
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
+	DECLARE @dblLotReservedQty NUMERIC(16,8)
 		
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
 		   @intSubLocationId = intSubLocationId,
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
-		   @intLotStatusId = intLotStatusId,
-		   @dblLotWeightPerUnit = dblWeightPerQty,
 		   @intItemUOMId = intItemUOMId,
-		   @dblLotQty = dblQty	   
+		   @dblAdjustByQuantity=-dblQty,
+		   @intAdjustItemUOMId= intItemUOMId  
 	FROM tblICLot WHERE intLotId = @intLotId
+
+	SELECT @dblLotReservedQty = dblQty  FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
+	IF (ISNULL(@dblLotReservedQty,0) > 0)
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
+	
+	SELECT @intUnitMeasureId=intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId=@intItemUOMId
+
+	IF NOT EXISTS(SELECT *FROM dbo.tblICItemUOM WHERE intItemId=@intNewItemId AND intUnitMeasureId=@intUnitMeasureId)
+	BEGIN
+		SELECT @strUnitMeasure =strUnitMeasure 
+		FROM dbo.tblICUnitMeasure 
+		WHERE intUnitMeasureId =@intUnitMeasureId 
+
+		SELECT @strItemNo=strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId=@intNewItemId
+
+		RAISERROR(90016
+				,11
+				,1
+				,@strUnitMeasure
+				,@strItemNo)
+	END
 	
 	SELECT @dtmDate = GETDATE(), 
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	SELECT @dblAdjustByQuantity = - @dblLotQty
-
 	EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
 													   ,@dtmDate = @dtmDate
 													   ,@intLocationId = @intLocationId
@@ -52,6 +79,7 @@ BEGIN TRY
 													   ,@intNewItemId = @intNewItemId
 													   ,@intNewSubLocationId = @intSubLocationId
 													   ,@intNewStorageLocationId = @intStorageLocationId
+													   ,@intItemUOMId=@intAdjustItemUOMId
 													   ,@intSourceId = @intSourceId
 													   ,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 													   ,@intEntityUserSecurityId  = @intUserId

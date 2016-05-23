@@ -297,7 +297,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql" />
     <None Include="dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql" />
-    <None Include="dbo\Views\vyuTMLeaseSearch.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql" />
@@ -315,5 +314,15 @@
     <None Include="dbo\Views\vyuTMOriginItemUsedBySite.sql" />
     <None Include="Scripts\TM\PopulateLocationIdInDeviceTable.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeviceSearchView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateGeneratedCallEntryView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryHistoryCallEntryView.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateVoucherImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPIVCMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPTRXMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPIVCMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPTRXMST.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
+    <None Include="dbo\Views\vyuCMBankTransaction.sql" />
   </ItemGroup>
 </Project>

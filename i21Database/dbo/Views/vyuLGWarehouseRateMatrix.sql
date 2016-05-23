@@ -7,7 +7,7 @@ SELECT
 		,WMD.intType
 		,WMD.intSort
 		,WMD.dblUnitRate
-		,WMD.intCommodityUnitMeasureId
+		,WMD.[intItemUOMId]
 		,WMD.ysnPrint
 		,WMD.strComments
 		,WMD.intItemId
@@ -27,10 +27,9 @@ SELECT
 		,UOM.strUnitMeasure
 		,UOM.strUnitType
 		,Currency.strCurrency
-
 FROM tblLGWarehouseRateMatrixDetail WMD
 JOIN tblLGWarehouseRateMatrixHeader WMH ON WMH.intWarehouseRateMatrixHeaderId = WMD.intWarehouseRateMatrixHeaderId
-LEFT JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intCommodityUnitMeasureId = WMD.intCommodityUnitMeasureId
-LEFT JOIN tblICUnitMeasure UOM	ON UOM.intUnitMeasureId = CUOM.intUnitMeasureId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = WMD.intItemUOMId
+LEFT JOIN tblICUnitMeasure UOM	ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = WMH.intCurrencyId
 LEFT JOIN tblICItem Item ON Item.intItemId = WMD.intItemId

@@ -232,8 +232,6 @@ BEGIN
 				,intStorageLocationId	= @StorageSilo_RM_DL
 	END 
 
-	SELECT * FROM tblICLot
-
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryAdjustmentLotMerge
@@ -285,8 +283,6 @@ BEGIN
 		FROM	dbo.tblICInventoryTransaction
 		WHERE	intTransactionId = @intTransactionId
 	END 
-
-	SELECT * FROM tblICLot
 
 	-- Assert 
 	BEGIN 

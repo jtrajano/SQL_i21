@@ -138,6 +138,7 @@ BEGIN
 													END   
 										 END)COLLATE Latin1_General_CI_AS
 				,intCustomerPricingLevel = CAST(NULL AS INT)
+				,strCustomerContactEmail = ''''
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
@@ -262,6 +263,7 @@ BEGIN
 													END   
 										 END)COLLATE Latin1_General_CI_AS
 				,intCustomerPricingLevel = CAST(NULL AS INT)
+				,strCustomerContactEmail = ''''
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
@@ -347,6 +349,7 @@ BEGIN
 				,ysnOriginIntegration = CAST(0 AS BIT)
 				,strFullCustomerName = Ent.strName
 				,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
+				,strCustomerContactEmail = Con.strEmail
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId

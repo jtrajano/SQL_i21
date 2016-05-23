@@ -14,6 +14,7 @@
 RETURNS @returntable TABLE
 (
 	 [ysnTaxExempt]			BIT
+	,[ysnInvalidSetup]		BIT
 	,[strExemptionNotes]	NVARCHAR(500)
 	,[dblExemptionPercent]	NUMERIC(18,6)
 )
@@ -22,10 +23,12 @@ BEGIN
 	DECLARE	@TaxCodeExemption	NVARCHAR(500)
 			,@ExemptionPercent	NUMERIC(18,6)
 			,@TaxExempt			BIT
+			,@InvalidSetup		BIT
 	
 	SET @TaxCodeExemption = NULL
 	SET @ExemptionPercent = 0.00000
 	SET @TaxExempt = 0
+	SET @InvalidSetup = 0
 
 	IF @IsCustomerSiteTaxable IS NULL
 		BEGIN
@@ -38,6 +41,7 @@ BEGIN
 					INSERT INTO @returntable
 					SELECT 
 						 [ysnTaxExempt] = 1
+						,[ysnInvalidSetup] = @InvalidSetup
 						,[strExemptionNotes] = @TaxCodeExemption
 						,[dblExemptionPercent] = @ExemptionPercent
 					RETURN 
@@ -55,6 +59,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = @ExemptionPercent
 			RETURN 			 
@@ -80,6 +85,7 @@ BEGIN
 	BEGIN
 		SET @TaxCodeExemption	= ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
 								+ ISNULL(' is not included in Item Category - ' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ' tax class setup.', '') 	
+		SET @InvalidSetup = 1
 	END
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
@@ -87,6 +93,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = @ExemptionPercent
 			RETURN 	
@@ -125,6 +132,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -162,6 +170,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -199,6 +208,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -234,6 +244,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -275,6 +286,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -311,6 +323,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -348,6 +361,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -379,6 +393,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -417,6 +432,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -455,6 +471,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -488,6 +505,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -519,6 +537,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -551,6 +570,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -586,6 +606,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -614,11 +635,12 @@ BEGIN
 	ORDER BY
 		dtmStartDate	
 		
-		
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -654,6 +676,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -674,6 +697,7 @@ BEGIN
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = 1
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
@@ -682,6 +706,7 @@ BEGIN
 	INSERT INTO @returntable
 	SELECT 
 		[ysnTaxExempt] = @TaxExempt
+		,[ysnInvalidSetup] = @InvalidSetup
 		,[strExemptionNotes] = @TaxCodeExemption
 		,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)				
 	RETURN		

@@ -105,6 +105,9 @@ BEGIN
 			,[intOwnershipType]
 			,[intGradeId]
 			,[intDetailId]
+			,[strTransactionId]
+			,[strSourceTransactionId]
+			,[intSourceTransactionTypeId]
 	)
 	SELECT	[intLotId]					= Detail.intNewLotId 
 			,[intItemId]				= Detail.intNewItemId
@@ -113,7 +116,7 @@ BEGIN
 			,[strLotNumber]				= SourceLot.strLotNumber
 			,[intSubLocationId]			= SourceLot.intSubLocationId
 			,[intStorageLocationId]		= SourceLot.intStorageLocationId
-			,[dblQty]					= SourceLot.dblQty
+			,[dblQty]					= 1 --SourceLot.dblQty
 			,[dtmExpiryDate]			= SourceLot.dtmExpiryDate
 			,[strLotAlias]				= SourceLot.strLotAlias
 			,[intLotStatusId]			= SourceLot.intLotStatusId
@@ -122,7 +125,15 @@ BEGIN
 			,[strParentLotAlias]		= NULL -- ParentLotSourceLot.strParentLotAlias
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
-			,[dblWeight]				= SourceLot.dblWeight
+			,[dblWeight]				= -- SourceLot.dblWeight
+											CASE	WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
+														-- When cutting a bag into weights, then qty becomes wgt. 
+														1 
+													ELSE 
+														-- Lot will still use the same qty, then use the same wgt-per-qty. 
+														ISNULL(Detail.dblWeightPerQty, 0) 
+											END
+
 			,[intWeightUOMId]			= NewWeightUOM.intItemUOMId
 			,[intOriginId]				= SourceLot.intOriginId
 			,[strBOLNo]					= SourceLot.strBOLNo
@@ -141,6 +152,10 @@ BEGIN
 			,[intOwnershipType]			= SourceLot.intOwnershipType
 			,[intGradeId]				= SourceLot.intGradeId
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
+			,[strTransactionId]			= Header.strAdjustmentNo
+			,[strSourceTransactionId]	= SourceLot.strTransactionId
+			,[intSourceTransactionTypeId] = SourceLot.intSourceTransactionTypeId
+
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 
@@ -153,7 +168,7 @@ BEGIN
 
 			LEFT JOIN dbo.tblICItemUOM NewItemUOM
 				ON NewItemUOM.intItemId = Detail.intNewItemId
-				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceLot.intItemUOMId)
+				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)-- SourceLot.intItemUOMId)
 
 			LEFT JOIN dbo.tblICItemUOM NewWeightUOM
 				ON NewWeightUOM.intItemId = Detail.intNewItemId

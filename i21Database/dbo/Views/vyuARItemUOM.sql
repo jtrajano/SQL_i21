@@ -2,6 +2,7 @@
 AS
 SELECT     
 A.intItemUOMId, 
+A.intUnitMeasureId,
 A.intItemId, 
 B.strUnitMeasure
 FROM dbo.tblICItemUOM AS A INNER JOIN

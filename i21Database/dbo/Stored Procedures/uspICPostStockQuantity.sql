@@ -150,17 +150,21 @@ BEGIN
 					-- Item is a Lot and with Weight. 
 					-------------------------------------------
 
-					-- Get the Pack Qty (intItemUOMId) 
+					-- Get the Pack Qty (Lot.intItemUOMId) 
 					UNION ALL 
 					SELECT	intItemId = @intItemId					
-							,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN Lot.intItemUOMId -- Stock is in weight, then get the pack UOM id. 
-													ELSE @intItemUOMId
+							,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN 
+														Lot.intItemUOMId -- Stock is in weight, then get the pack UOM id. 
+													ELSE 
+														@intItemUOMId
 											END 
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
 							,intStorageLocationId = @intStorageLocationId
-							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN dbo.fnDivide(@dblQty, Lot.dblWeightPerQty) -- Stock is in weights, then convert it to packs. 
-											ELSE @dblQty
+							,Qty =	CASE	WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN 
+												dbo.fnDivide(@dblQty, ISNULL(Lot.dblWeightPerQty, 0)) -- Stock is in weights, then convert it to packs. 
+											ELSE 
+												@dblQty
 									END 
 					FROM	dbo.tblICLot Lot 
 					WHERE	Lot.intLotId = @intLotId
@@ -168,7 +172,7 @@ BEGIN
 							AND Lot.intWeightUOMId IS NOT NULL 
 							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0			
 					
-					-- Get the Weight Qty (intItemUOMId) 
+					-- Get the Weight Qty (Lot.intWeightUOMId) 
 					UNION ALL 
 					SELECT	intItemId = @intItemId					
 							,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN Lot.intWeightUOMId -- Stock is in packs, then get the weight UOM id.
@@ -206,16 +210,16 @@ BEGIN
 							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
+								AND LotStockUOM.intItemUOMId <> Lot.intItemUOMId 
+								AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intItemLocationId = @intItemLocationId
 							AND Lot.intWeightUOMId IS NOT NULL 
-							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
-							AND LotWeightUOM.intItemUOMId <> LotStockUOM.intItemUOMId 
+							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0						
 
 					---------------------------------------------
 					-- Item is a Lot and does NOT have a Weight. 
 					---------------------------------------------
-
 					-- Get the Pack Qty (intItemUOMId) 
 					UNION ALL 
 					SELECT	intItemId = @intItemId

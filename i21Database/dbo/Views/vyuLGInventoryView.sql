@@ -18,14 +18,14 @@ SELECT
 	,Shipment.strVendor
 	,Shipment.strItemNo
 	,Shipment.strItemDescription
-	,Shipment.intTrackingNumber
+	,'' strTrackingNumber
 	,Shipment.strBLNumber
 	,Shipment.strContainerNumber
 	,Shipment.strMarks
 	,'' as strLotNumber
 	,Shipment.strSubLocationName as strWarehouse
 	,'' as strCondition
-	,Shipment.dtmInventorizedDate
+	,Shipment.dtmPostedDate
 	,dblQtyInStockUOM = (Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0)) * dbo.fnICConvertUOMtoStockUnit (Shipment.intItemId, Shipment.intItemUOMId, 1)
 	,Shipment.intItemId
 	,intWeightItemUOMId = (SELECT U.intItemUOMId FROM tblICItemUOM U WHERE U.intItemId = Shipment.intItemId AND U.intUnitMeasureId=Shipment.intWeightUOMId)
@@ -48,14 +48,14 @@ SELECT
 	,Spot.strVendor
 	,Spot.strItemNo
 	,Spot.strItemDescription
-	,Spot.intTrackingNumber
+	,Spot.strLoadNumber AS strTrackingNumber
 	,Spot.strBLNumber
 	,Spot.strContainerNumber
 	,Spot.strMarkings as strMarks
 	,Spot.strLotNumber
 	,Spot.strSubLocationName as strWarehouse
 	,Spot.strCondition
-	,Spot.dtmInventorizedDate
+	,Spot.dtmPostedDate
 	,dblQtyInStockUOM = Spot.dblQty * dbo.fnICConvertUOMtoStockUnit (Spot.intItemId, Spot.intItemUOMId, 1)
 	,Spot.intItemId
 	,intWeightItemUOMId = Spot.intItemWeightUOMId

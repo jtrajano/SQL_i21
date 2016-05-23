@@ -52,7 +52,7 @@
     [ysnPosted]						BIT             								NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)),
     [ysnPaid]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPaid] DEFAULT ((0)),
 	[ysnProcessed]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnProcessed] DEFAULT ((0)),
-	[ysnTemplate]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnTemplate] DEFAULT ((0)),
+	[ysnRecurring]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnTemplate] DEFAULT ((0)),
 	[ysnForgiven]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnForgiven] DEFAULT ((0)),
 	[ysnCalculated]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCalculated] DEFAULT ((0)),
 	[ysnSplitted]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnSplitted] DEFAULT ((0)),		
@@ -63,7 +63,8 @@
 	[intLoadDistributionHeaderId]	INT												NULL,
 	[strActualCostId]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[intShipmentId]					INT												NULL,        	
-	[intTransactionId]				INT												NULL,        	
+	[intTransactionId]				INT												NULL,
+	[intMeterReadingId]        		INT												NULL,
 	[intOriginalInvoiceId]			INT												NULL,        	
 	[intEntityId]					INT												NOT NULL	DEFAULT ((0)), 
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
@@ -81,6 +82,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [tblTRLoadDistributionHeader]([intLoadDistributionHeaderId]),
 	CONSTRAINT [FK_tblARInvoice_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]),
 	CONSTRAINT [FK_tblARInvoice_tblCFTransaction_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [tblCFTransaction]([intTransactionId]),
+	CONSTRAINT [FK_tblARInvoice_tblMBMeterReading_intMeterReadingId] FOREIGN KEY ([intMeterReadingId]) REFERENCES [tblMBMeterReading]([intMeterReadingId])
 );
 
 

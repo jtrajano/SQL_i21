@@ -28,6 +28,7 @@ RETURNS @returntable TABLE
 	,[ysnCheckoffTax]				BIT
 	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT DEFAULT 0
+	,[ysnInvalidSetup]				BIT DEFAULT 0
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
 )
@@ -54,6 +55,7 @@ BEGIN
 			,[ysnCheckoffTax]				BIT
 			,[strTaxCode]					NVARCHAR(100)						
 			,[ysnTaxExempt]					BIT
+			,[ysnInvalidSetup]				BIT
 			,[strTaxGroup]					NVARCHAR(100)
 			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT DEFAULT 0
@@ -79,6 +81,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
 	)
@@ -98,6 +101,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
 	FROM

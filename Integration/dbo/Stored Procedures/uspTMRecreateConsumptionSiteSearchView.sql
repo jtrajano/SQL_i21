@@ -17,6 +17,7 @@ BEGIN
 
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1 
 	)
 	BEGIN
 		EXEC('
@@ -51,6 +52,7 @@ BEGIN
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
 				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 				,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
+				,strContactEmailAddress = ''''
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -100,6 +102,7 @@ BEGIN
 				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
 				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
+				,strContactEmailAddress = G.strEmail
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID

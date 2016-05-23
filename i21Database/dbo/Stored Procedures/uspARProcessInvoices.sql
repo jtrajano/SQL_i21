@@ -57,7 +57,11 @@ IF ISNULL(@RaiseError,0) = 0
 
 BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
-	SELECT * INTO #TempInvoiceEntries FROM @InvoiceEntries WHERE ISNULL([intSourceId],0) <> 0
+	SELECT * INTO #TempInvoiceEntries FROM @InvoiceEntries 
+	WHERE 
+		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
+		OR
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
@@ -157,11 +161,11 @@ DECLARE  @Id									INT
 		,@Splitted								BIT
 		,@PaymentId								INT
 		,@SplitId								INT
-		,@DistributionHeaderId					INT
 		,@LoadDistributionHeaderId				INT
 		,@ActualCostId							NVARCHAR(50)
 		,@ShipmentId							INT
 		,@TransactionId							INT
+		,@MeterReadingId						INT
 		,@OriginalInvoiceId						INT
 		,@EntityId								INT
 		,@ResetDetails							BIT
@@ -170,6 +174,8 @@ DECLARE  @Id									INT
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
+		,@ItemPrepayTypeId						INT
+		,@ItemPrepayRate						NUMERIC(18, 6)
 		,@Inventory								BIT
 		,@ItemDocumentNumber					NVARCHAR(100)
 		,@ItemDescription						NVARCHAR(250)
@@ -188,6 +194,8 @@ DECLARE  @Id									INT
 		,@ItemMaintenanceAmount					NUMERIC(18, 6)
 		,@ItemLicenseAmount						NUMERIC(18, 6)
 		,@ItemTaxGroupId						INT
+		,@ItemStorageLocationId					INT
+		,@ItemCompanyLocationSubLocationId		INT
 		,@RecomputeTax							BIT
 		,@ItemSCInvoiceId						INT
 		,@ItemSCInvoiceNumber					NVARCHAR(25)
@@ -205,6 +213,9 @@ DECLARE  @Id									INT
 		,@ItemShipmentNetWt						NUMERIC(18,6)
 		,@ItemTicketId							INT
 		,@ItemTicketHoursWorkedId				INT
+		,@ItemCustomerStorageId					INT
+		,@ItemSiteDetailId						INT
+		,@ItemLoadDetailId						INT
 		,@ItemOriginalInvoiceDetailId			INT			
 		,@ItemSiteId							INT
 		,@ItemBillingBy							NVARCHAR(100)
@@ -231,7 +242,7 @@ BEGIN
 		,@SourceId					= [intSourceId]				
 		,@CompanyLocationId			= [intCompanyLocationId]		
 		,@CurrencyId				= [intCurrencyId]			
-		,@Date						= [dtmDate]					
+		,@Date						= CAST([dtmDate] AS DATE)					
 		,@TermId					= [intTermId]
 		,@Comment					= [strComments]				
 		,@ShipViaId					= [intShipViaId]			
@@ -281,11 +292,11 @@ BEGIN
 		,@Splitted						= [ysnSplitted]
 		,@PaymentId						= [intPaymentId]
 		,@SplitId						= [intSplitId]
-		,@DistributionHeaderId			= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@LoadDistributionHeaderId		= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intLoadDistributionHeaderId], [intSourceId]) ELSE NULL END)
 		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
 		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
+		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional Invoice' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@ResetDetails					= [ysnResetDetails]
@@ -294,6 +305,8 @@ BEGIN
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
+		,@ItemPrepayTypeId 				= (CASE WHEN @GroupingOption = 0 THEN [intPrepayTypeId] ELSE NULL END) 
+		,@ItemPrepayRate 				= (CASE WHEN @GroupingOption = 0 THEN [dblPrepayRate] ELSE NULL END) 
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
 		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL([strDocumentNumber],[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
@@ -311,6 +324,8 @@ BEGIN
 		,@ItemMaintenanceAmount			= (CASE WHEN @GroupingOption = 0 THEN [dblMaintenanceAmount] ELSE NULL END)
 		,@ItemLicenseAmount				= (CASE WHEN @GroupingOption = 0 THEN [dblLicenseAmount] ELSE NULL END)
 		,@ItemTaxGroupId				= (CASE WHEN @GroupingOption = 0 THEN [intTaxGroupId] ELSE NULL END)
+		,@ItemStorageLocationId			= (CASE WHEN @GroupingOption = 0 THEN [intStorageLocationId] ELSE NULL END)
+		,@ItemCompanyLocationSubLocationId	= (CASE WHEN @GroupingOption = 0 THEN [intCompanyLocationSubLocationId] ELSE NULL END)
 		,@RecomputeTax					= (CASE WHEN @GroupingOption = 0 THEN [ysnRecomputeTax] ELSE 0 END)
 		,@ItemSCInvoiceId				= (CASE WHEN @GroupingOption = 0 THEN [intSCInvoiceId] ELSE NULL END)
 		,@ItemSCInvoiceNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSCInvoiceNumber] ELSE NULL END)
@@ -328,6 +343,9 @@ BEGIN
 		,@ItemShipmentNetWt				= (CASE WHEN @GroupingOption = 0 THEN [dblShipmentNetWt] ELSE NULL END)
 		,@ItemTicketId					= (CASE WHEN @GroupingOption = 0 THEN [intTicketId] ELSE NULL END)
 		,@ItemTicketHoursWorkedId		= (CASE WHEN @GroupingOption = 0 THEN [intTicketHoursWorkedId] ELSE NULL END)
+		,@ItemCustomerStorageId			= (CASE WHEN @GroupingOption = 0 THEN [intCustomerStorageId] ELSE NULL END)
+		,@ItemSiteDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intSiteDetailId] ELSE NULL END)
+		,@ItemLoadDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intLoadDetailId] ELSE NULL END)
 		,@ItemOriginalInvoiceDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intOriginalInvoiceDetailId] ELSE NULL END)
 		,@ItemSiteId					= (CASE WHEN @GroupingOption = 0 THEN [intSiteId] ELSE NULL END)
 		,@ItemBillingBy					= (CASE WHEN @GroupingOption = 0 THEN [strBillingBy] ELSE NULL END)
@@ -344,10 +362,10 @@ BEGIN
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND @GroupingOption < 2))
+		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND ([intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND ([dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (CAST([dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL([intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL([intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL([intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -361,10 +379,10 @@ BEGIN
 	BEGIN TRY
 		IF ISNULL(@SourceTransaction, '') <> 'Import'
 			BEGIN
-				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
+				IF ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@LoadDistributionHeaderId,0) = 0 AND ISNULL(@LoadDistributionHeaderId,0) <> 0
 					BEGIN
-						SET @SourceColumn = 'intDistributionHeaderId'
-						SET @SourceTable = 'tblTRDistributionHeader'
+						SET @SourceColumn = 'intLoadDistributionHeaderId'
+						SET @SourceTable = 'tblTRLoadDistributionHeader'
 					END
 				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
 					BEGIN
@@ -376,13 +394,23 @@ BEGIN
 						SET @SourceColumn = 'intTransactionId'
 						SET @SourceTable = 'tblCFTransaction'
 					END
+				IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
+					BEGIN
+						SET @SourceColumn = 'intMeterReadingId'
+						SET @SourceTable = 'tblMBMeterReading' 
+					END
 				IF ISNULL(@SourceTransaction,'') = 'Provisional Invoice'
 					BEGIN
 						SET @SourceColumn = 'intInvoiceId'
 						SET @SourceTable = 'tblARInvoice'
-					END
+					END					
+				IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
+					BEGIN
+						SET @SourceColumn = 'intInventoryShipmentId'
+						SET @SourceTable = 'tblICInventoryShipment'
+					END		
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Provisional Invoice')
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment')
 					BEGIN
 						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 					END
@@ -405,7 +433,7 @@ BEGIN
 	IF ISNULL(@Type, '') = ''
 		SET @Type = 'Standard'
 	
-	IF ISNULL(ISNULL(@DistributionHeaderId, @LoadDistributionHeaderId), 0) > 0
+	IF ISNULL(@LoadDistributionHeaderId, 0) > 0
 		BEGIN
 			SET @Type = 'Transport Delivery'
 		END
@@ -446,16 +474,18 @@ BEGIN
 			,@Splitted						= @Splitted
 			,@PaymentId						= @PaymentId
 			,@SplitId						= @SplitId
-			,@DistributionHeaderId			= @DistributionHeaderId
 			,@LoadDistributionHeaderId		= @LoadDistributionHeaderId
 			,@ActualCostId					= @ActualCostId
 			,@ShipmentId					= @ShipmentId
 			,@TransactionId 				= @TransactionId
+			,@MeterReadingId				= @MeterReadingId
 			,@OriginalInvoiceId 			= @OriginalInvoiceId
 			,@PeriodsToAccrue				= @PeriodsToAccrue
 			,@SourceId						= @NewSourceId
 
 			,@ItemId						= @ItemId
+			,@ItemPrepayTypeId				= @ItemPrepayTypeId
+			,@ItemPrepayRate				= @ItemPrepayRate
 			,@ItemIsInventory				= @Inventory
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
@@ -472,6 +502,8 @@ BEGIN
 			,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 			,@ItemLicenseAmount				= @ItemLicenseAmount
 			,@ItemTaxGroupId				= @ItemTaxGroupId
+			,@ItemStorageLocationId			= @ItemStorageLocationId 
+			,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId 
 			,@RecomputeTax					= @RecomputeTax
 			,@ItemSCInvoiceId				= @ItemSCInvoiceId
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
@@ -489,6 +521,9 @@ BEGIN
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt		
 			,@ItemTicketId					= @ItemTicketId
 			,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+			,@ItemCustomerStorageId			= @ItemCustomerStorageId
+			,@ItemSiteDetailId				= @ItemSiteDetailId
+			,@ItemLoadDetailId				= @ItemLoadDetailId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
 			,@ItemBillingBy					= @ItemBillingBy
@@ -545,10 +580,10 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND @GroupingOption < 2))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -570,6 +605,8 @@ BEGIN
 				SELECT TOP 1
 					 @ShipmentId					= [intShipmentId]		 	
 					,@ItemId						= [intItemId]
+					,@ItemPrepayTypeId				= [intPrepayTypeId]
+					,@ItemPrepayRate 				= [dblPrepayRate]
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
@@ -604,6 +641,9 @@ BEGIN
 					,@ItemShipmentNetWt				= [dblShipmentNetWt]
 					,@ItemTicketId					= [intTicketId]
 					,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+					,@ItemCustomerStorageId			= [intCustomerStorageId]
+					,@ItemSiteDetailId				= [intSiteDetailId]
+					,@ItemLoadDetailId				= [intLoadDetailId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
@@ -626,6 +666,8 @@ BEGIN
 					EXEC [dbo].[uspARAddItemToInvoice]
 						 @InvoiceId						= @NewInvoiceId	
 						,@ItemId						= @ItemId
+						,@ItemPrepayTypeId				= @ItemPrepayTypeId
+						,@ItemPrepayRate 				= @ItemPrepayRate
 						,@ItemIsInventory				= @Inventory
 						,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
 						,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
@@ -633,7 +675,7 @@ BEGIN
 						,@ItemDocumentNumber			= @ItemDocumentNumber
 						,@ItemDescription				= @ItemDescription
 						,@OrderUOMId					= @OrderUOMId
-						,@ItemQtyOrdered				= @ItemQtyShipped
+						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemUOMId						= @ItemUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
@@ -665,6 +707,9 @@ BEGIN
 						,@ItemTicketId					= @ItemTicketId
 						,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 						,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+						,@ItemCustomerStorageId			= @ItemCustomerStorageId
+						,@ItemSiteDetailId				= @ItemSiteDetailId
+						,@ItemLoadDetailId				= @ItemLoadDetailId
 						,@ItemSiteId					= @ItemSiteId
 						,@ItemBillingBy					= @ItemBillingBy
 						,@ItemPercentFull				= @ItemPercentFull
@@ -789,10 +834,10 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND @GroupingOption < 2))
+		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -903,7 +948,7 @@ BEGIN TRY
 			,@CurrencyId					= [intCurrencyId]
 			,@SubCurrencyCents				= [intSubCurrencyCents]
 			,@TermId						= [intTermId]
-			,@Date							= [dtmDate]
+			,@Date							= CAST([dtmDate] AS DATE)
 			,@DueDate						= [dtmDueDate]
 			,@ShipDate						= [dtmShipDate]
 			,@EntitySalespersonId			= [intEntitySalespersonId]
@@ -923,11 +968,11 @@ BEGIN TRY
 			,@Splitted						= [ysnSplitted]
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]			
-			,@DistributionHeaderId			= [intDistributionHeaderId]
 			,@LoadDistributionHeaderId		= [intLoadDistributionHeaderId]
 			,@ActualCostId					= [strActualCostId]
 			,@ShipmentId					= [intShipmentId]
 			,@TransactionId 				= [intTransactionId]
+			,@MeterReadingId				= [intMeterReadingId]
 			,@OriginalInvoiceId				= [intOriginalInvoiceId]
 			,@EntityId						= [intEntityId]
 			,@ResetDetails					= [ysnResetDetails]
@@ -943,8 +988,8 @@ BEGIN TRY
 		BEGIN TRY
 			IF ISNULL(@SourceTransaction,'') = 'Transport Load'
 				BEGIN
-					SET @SourceColumn = 'intDistributionHeaderId'
-					SET @SourceTable = 'tblTRDistributionHeader'
+					SET @SourceColumn = 'intLoadDistributionHeaderId'
+					SET @SourceTable = 'tblTRLoadDistributionHeader'
 				END
 			IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
 				BEGIN
@@ -956,14 +1001,24 @@ BEGIN TRY
 					SET @SourceColumn = 'intTransactionId'
 					SET @SourceTable = 'tblCFTransaction'
 				END
-
+			IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
+					BEGIN
+						SET @SourceColumn = 'intMeterReadingId'
+						SET @SourceTable = 'tblMBMeterReading' 
+					END
 			IF ISNULL(@SourceTransaction,'') = 'Provisional Invoice'
 				BEGIN
 					SET @SourceColumn = 'intInvoiceId'
 					SET @SourceTable = 'tblARInvoice'
 				END
 
-			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Provisional Invoice')
+			IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
+					BEGIN
+						SET @SourceColumn = 'intInventoryShipmentId'
+						SET @SourceTable = 'tblICInventoryShipment'
+					END
+
+			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment')
 				BEGIN
 					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 				END
@@ -983,7 +1038,7 @@ BEGIN TRY
 			[tblARInvoice]
 		SET 
 			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Prepayment') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
-			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store') THEN [tblARInvoice].[strType] ELSE @Type END
+			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
 			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])
@@ -1024,17 +1079,17 @@ BEGIN TRY
 			,[strBillToState]			= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
 			,[strBillToZipCode]			= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 			,[strBillToCountry]			= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
-			,[ysnTemplate]				= ISNULL(@Template,0)
+			,[ysnRecurring]				= ISNULL(@Template,0)
 			,[ysnForgiven]				= ISNULL(@Forgiven,0)
 			,[ysnCalculated]			= ISNULL(@Calculated,0)
 			,[ysnSplitted]				= ISNULL(@Splitted,0)
 			,[intPaymentId]				= @PaymentId
 			,[intSplitId]				= @SplitId
-			,[intDistributionHeaderId]	= @DistributionHeaderId
 			,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId
 			,[strActualCostId]			= @ActualCostId
 			,[intShipmentId]			= @ShipmentId
 			,[intTransactionId]			= @TransactionId 
+			,[intMeterReadingId]		= @MeterReadingId
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
@@ -1095,6 +1150,8 @@ BEGIN TRY
 					SELECT TOP 1
 						 @ShipmentId					= [intShipmentId]		 	
 						,@ItemId						= [intItemId]
+						,@ItemPrepayTypeId				= [intPrepayTypeId]
+						,@ItemPrepayRate				= [dblPrepayRate]
 						,@Inventory						= [ysnInventory]
 						,@ItemDocumentNumber			= [strDocumentNumber]
 						,@ItemDescription				= [strItemDescription]
@@ -1129,6 +1186,9 @@ BEGIN TRY
 						,@ItemShipmentNetWt				= [dblShipmentNetWt]
 						,@ItemTicketId					= [intTicketId]
 						,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+						,@ItemCustomerStorageId			= [intCustomerStorageId]
+						,@ItemSiteDetailId				= [intSiteDetailId]
+						,@ItemLoadDetailId				= [intLoadDetailId]
 						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 						,@ItemSiteId					= [intSiteId]
 						,@ItemBillingBy					= [strBillingBy]
@@ -1150,6 +1210,8 @@ BEGIN TRY
 						EXEC [dbo].[uspARAddItemToInvoice]
 							 @InvoiceId						= @ExistingInvoiceId	
 							,@ItemId						= @ItemId
+							,@ItemPrepayTypeId				= @ItemPrepayTypeId
+							,@ItemPrepayRate				= @ItemPrepayRate
 							,@ItemIsInventory				= @Inventory
 							,@NewInvoiceDetailId			= @NewExistingDetailId	OUTPUT 
 							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
@@ -1157,7 +1219,7 @@ BEGIN TRY
 							,@ItemDocumentNumber			= @ItemDocumentNumber
 							,@ItemDescription				= @ItemDescription
 							,@OrderUOMId					= @OrderUOMId
-							,@ItemQtyOrdered				= @ItemQtyShipped
+							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemUOMId						= @ItemUOMId
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
@@ -1183,6 +1245,9 @@ BEGIN TRY
 							,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 							,@ItemTicketId					= @ItemTicketId
 							,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+							,@ItemCustomerStorageId			= @ItemCustomerStorageId
+							,@ItemSiteDetailId				= @ItemSiteDetailId
+							,@ItemLoadDetailId				= @ItemLoadDetailId
 							,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 							,@ItemSiteId					= @ItemSiteId
 							,@ItemBillingBy					= @ItemBillingBy
@@ -1310,6 +1375,8 @@ BEGIN TRY
 					 @ShipmentId					= [intShipmentId]		 	
 					,@InvoiceDetailId				= [intInvoiceDetailId] 
 					,@ItemId						= [intItemId]
+					,@ItemPrepayTypeId				= [intPrepayTypeId]
+					,@ItemPrepayRate				= [dblPrepayRate]
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= [strDocumentNumber]
 					,@ItemDescription				= [strItemDescription]
@@ -1345,6 +1412,9 @@ BEGIN TRY
 					,@ItemTicketId					= [intTicketId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemTicketHoursWorkedId		= [intTicketHoursWorkedId]
+					,@ItemCustomerStorageId			= [intCustomerStorageId]
+					,@ItemSiteDetailId				= [intSiteDetailId]
+					,@ItemLoadDetailId				= [intLoadDetailId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
 					,@ItemPercentFull				= [dblPercentFull]
@@ -1411,6 +1481,8 @@ BEGIN TRY
 						[tblARInvoiceDetail]
 					SET	
 						 [intItemId]							= @ItemId
+						,[intPrepayTypeId]						= @ItemPrepayTypeId
+						,[dblPrepayRate]						= @ItemPrepayRate
 						,[strDocumentNumber]					= @ItemDocumentNumber
 						,[strItemDescription]					= @ItemDescription
 						,[intOrderUOMId]						= @OrderUOMId
@@ -1444,6 +1516,9 @@ BEGIN TRY
 						,[dblShipmentNetWt]						= @ItemShipmentNetWt
 						,[intTicketId]							= @ItemTicketId
 						,[intTicketHoursWorkedId]				= @ItemTicketHoursWorkedId
+						,[intCustomerStorageId]					= @ItemCustomerStorageId
+						,[intSiteDetailId]						= @ItemSiteDetailId
+						,[intLoadDetailId]						= @ItemLoadDetailId
 						,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId
 						,[intSiteId]							= @ItemSiteId
 						,[strBillingBy]							= @ItemBillingBy

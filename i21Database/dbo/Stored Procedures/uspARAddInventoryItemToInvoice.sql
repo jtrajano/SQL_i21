@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddInventoryItemToInvoice]
 	 @InvoiceId						INT	
 	,@ItemId						INT
+	,@ItemPrepayTypeId				INT				= 0
+	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0	
@@ -20,6 +22,8 @@
 	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
 	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
 	,@ItemTaxGroupId				INT				= NULL
+	,@ItemStorageLocationId			INT				= NULL
+	,@ItemCompanyLocationSubLocationId	INT				= NULL
 	,@RecomputeTax					BIT				= 1
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
@@ -37,7 +41,10 @@
 	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000		
 	,@ItemTicketId					INT				= NULL		
-	,@ItemTicketHoursWorkedId		INT				= NULL		
+	,@ItemTicketHoursWorkedId		INT				= NULL	
+	,@ItemCustomerStorageId			INT				= NULL		
+	,@ItemSiteDetailId				INT				= NULL		
+	,@ItemLoadDetailId				INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
@@ -171,7 +178,7 @@ BEGIN TRY
 	IF ISNULL(@existingInvoiceDetail, 0) > 0
 		BEGIN
 			UPDATE tblARInvoiceDetail 
-				SET dblQtyOrdered = dblQtyOrdered + ISNULL(@ItemQtyShipped ,0.000000),
+				SET dblQtyOrdered = dblQtyOrdered,
 					dblQtyShipped = dblQtyShipped + ISNULL(@ItemQtyShipped ,0.000000)
 			WHERE intInvoiceDetailId = @existingInvoiceDetail
 		END
@@ -180,6 +187,8 @@ BEGIN TRY
 			INSERT INTO [tblARInvoiceDetail]
 				([intInvoiceId]
 				,[intItemId]
+				,[intPrepayTypeId]
+				,[dblPrepayRate]
 				,[strDocumentNumber]
 				,[strItemDescription]
 				,[intOrderUOMId]
@@ -204,6 +213,8 @@ BEGIN TRY
 				,[dblMaintenanceAmount]
 				,[dblLicenseAmount]
 				,[intTaxGroupId]
+				,[intCompanyLocationSubLocationId]
+				,[intStorageLocationId]
 				,[intSCInvoiceId]
 				,[strSCInvoiceNumber]
 				,[intInventoryShipmentItemId]
@@ -221,6 +232,9 @@ BEGIN TRY
 				,[dblShipmentNetWt]
 				,[intTicketId]
 				,[intTicketHoursWorkedId]
+				,[intCustomerStorageId]
+				,[intSiteDetailId]
+				,[intLoadDetailId]
 				,[intOriginalInvoiceDetailId]
 				,[intSiteId]
 				,[strBillingBy]
@@ -235,11 +249,13 @@ BEGIN TRY
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
-				,[intItemId]						= IC.[intItemId] 
+				,[intItemId]						= IC.[intItemId]
+				,[intPrepayTypeId]					= @ItemPrepayTypeId 
+				,[dblPrepayRate]					= @ItemPrepayRate
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
 				,[intOrderUOMId]					= @OrderUOMId
-				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
+				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
@@ -260,6 +276,8 @@ BEGIN TRY
 				,[dblMaintenanceAmount]				= @ItemMaintenanceAmount
 				,[dblLicenseAmount]					= @ItemLicenseAmount
 				,[intTaxGroupId]					= @ItemTaxGroupId
+				,[intCompanyLocationSubLocationId]	= @ItemCompanyLocationSubLocationId
+				,[intStorageLocationId]				= @ItemStorageLocationId
 				,[intSCInvoiceId]					= @ItemSCInvoiceId
 				,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
 				,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 
@@ -277,7 +295,10 @@ BEGIN TRY
 				,[dblShipmentNetWt]					= @ItemShipmentNetWt
 				,[intTicketId]						= @ItemTicketId
 				,[intTicketHoursWorkedId]			= @ItemTicketHoursWorkedId 
-				,[intOriginalInvoiceDetailId]			= @ItemOriginalInvoiceDetailId 
+				,[intCustomerStorageId]				= @ItemCustomerStorageId
+				,[intSiteDetailId]					= @ItemSiteDetailId
+				,[intLoadDetailId]					= @ItemLoadDetailId
+				,[intOriginalInvoiceDetailId]		= @ItemOriginalInvoiceDetailId 
 				,[intSiteId]						= @ItemSiteId
 				,[strBillingBy]						= @ItemBillingBy
 				,[dblPercentFull]					= @ItemPercentFull

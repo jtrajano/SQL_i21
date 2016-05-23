@@ -142,6 +142,10 @@ USING	(
         SELECT    id = 33
                 ,name = 'Invoice'
                 ,form = 'Invoice'
+		UNION ALL 
+		SELECT	id = 34
+				,name = 'Pick List'
+				,form = 'Pick List'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

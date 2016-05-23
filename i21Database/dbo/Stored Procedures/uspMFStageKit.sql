@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFStageKit]
+CREATE PROCEDURE [dbo].[uspMFStageKit]
 	@intPickListId int,
 	@intUserId int
 AS
@@ -29,8 +29,22 @@ Declare @intBlendStagingLocationId int
 Declare @dblPickedQty numeric(38,20)
 Declare @dblQuantity numeric(38,20)
 Declare @strRemItems nvarchar(max)=''
+Declare @strBulkItemXml nvarchar(max)
+Declare @intWorkOrderId INT
+Declare @intMinItemCount int
+Declare @dblReqQty NUMERIC(38,20)
+Declare @intConsumptionMethodId INT
+Declare @dblPickQty NUMERIC(38,20)
+Declare @intInputItemId INT
+Declare @ysnHasSubstitute bit
+Declare @strInputItemNo nvarchar(50)
+DECLARE @strInActiveLots NVARCHAR(MAX) 
+Declare @dblRecipeQty NUMERIC(38,20)
+		,@dblPickQuantity numeric(38,20)
+		,@intPickUOMId int
+		,@intItemUOMId int
 
-Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
+Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
 Select @intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
 
@@ -79,11 +93,14 @@ Declare @tblPickListDetail table
 )
 
 DECLARE @tblInputItem TABLE (
-	intItemId INT
+	intRowNo int IDENTITY
+	,intItemId INT
 	,dblRequiredQty NUMERIC(38,20)
 	,ysnIsSubstitute BIT
 	,intConsumptionMethodId INT
 	,intConsumptionStorageLocationId INT
+	,intParentItemId INT
+	,ysnHasSubstitute BIT
 	)
 
 Declare @tblRemainingPickedItems AS table
@@ -103,6 +120,17 @@ CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dbl
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId --Exclude Lots that are already in Kit Staging Location
 
+--Only Active lots are allowed to stage
+SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
+FROM @tblPickListDetail tpl Join tblICLot l on tpl.intLotId=l.intLotId 
+Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId Where ls.strPrimaryStatus<>'Active'
+
+If ISNULL(@strInActiveLots,'')<>''
+Begin
+	Set @ErrMsg='Lots ' + @strInActiveLots + ' are not active. Unable to perform stage operation.'
+	RaisError(@ErrMsg,16,1)
+End
+
 If @ysnBlendSheetRequired=0
 Begin
 
@@ -110,7 +138,7 @@ Begin
 	Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
 	Select @dblPickedQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
 
-	SELECT @intRecipeId = intRecipeId
+	SELECT @intRecipeId = intRecipeId,@dblRecipeQty = dblQuantity
 	FROM tblMFWorkOrderRecipe
 	WHERE intItemId = @intBlendItemId
 		AND intLocationId = @intLocationId
@@ -123,6 +151,7 @@ Begin
 		,ysnIsSubstitute
 		,intConsumptionMethodId
 		,intConsumptionStorageLocationId
+		,intParentItemId
 		)
 	SELECT 
 		ri.intItemId
@@ -130,108 +159,89 @@ Begin
 		,0
 		,ri.intConsumptionMethodId
 		,ri.intStorageLocationId
+		,0 AS intParentItemId
 	FROM tblMFWorkOrderRecipeItem ri
 	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
+	
+	UNION
+	
+	SELECT 
+		rs.intSubstituteItemId AS intItemId
+		,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
+		,1
+		,ri.intConsumptionMethodId
+		,ri.intStorageLocationId
+		,ri.intItemId
+	FROM tblMFWorkOrderRecipeSubstituteItem rs
+	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
+	JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+	WHERE r.intRecipeId = @intRecipeId
+		AND rs.intRecipeItemTypeId = 1
+		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
 
-	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,intConsumptionStorageLocationId)
-	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.intConsumptionStorageLocationId 
-	From @tblInputItem ti Left Join 
-	(Select intItemId,SUM(dblQuantity) AS dblQuantity From tblMFPickListDetail Where intPickListId=@intPickListId Group by intItemId) tpl on  ti.intItemId=tpl.intItemId
-	WHERE Round((ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)),0) > 0
+	Update a Set a.ysnHasSubstitute=1 from @tblInputItem a Join @tblInputItem b on a.intItemId=b.intParentItemId
+	Update @tblInputItem Set ysnHasSubstitute=0 Where ysnHasSubstitute is null
 
-	--intSalesOrderLineItemId = 0 implies WOs are created from Blend Managemnet Screen And Lots are already attached
-	If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
-		Delete From @tblRemainingPickedItems
+	Select @intMinItemCount=Min(intRowNo) From @tblInputItem Where ysnIsSubstitute=0
 
-	--If (Select Count(1) From @tblRemainingPickedItems Where intConsumptionMethodId=1) > 0
-	--Begin
-	--	Set @ErrMsg='Staging is not allowed because there is shortage of inventory in pick list. Please pick lots with available inventory and save the pick list before staging.'
-	--	RaisError(@ErrMsg,16,1)
-	--End
-
-	--For Lot Items
-	If (Select COUNT(1) From @tblRemainingPickedItems Where intConsumptionMethodId=1)>0
-		SELECT  @strRemItems = STUFF(( SELECT ',' + i.strItemNo
-		FROM @tblRemainingPickedItems tpl Join tblICItem i on tpl.intItemId=i.intItemId Where tpl.intConsumptionMethodId=1
-		FOR
-		XML PATH('')
-		), 1, 1, '')
-
-	--For Bulk Items there in Recipe
-	If Exists (Select 1 From @tblRemainingPickedItems Where intConsumptionMethodId in (2,3))
+	While(@intMinItemCount is not null)
 	Begin
-		Delete From @tblRemainingPickedItems Where intConsumptionMethodId not in (2,3)
+		Set @dblPickQty=0
 
-		Declare @intBulkMinItemCount int
-		Declare @intConsumptionMethodId int
-		Declare @intConsumptionStorageLocationId int
-		Declare @intBulkItemId int
-		Declare @dblBulkAvailableQty numeric(38,20)
-		Declare @dblBulkRemainingQty numeric(38,20)
+		Select @dblReqQty=dblRequiredQty,@intConsumptionMethodId=intConsumptionMethodId,@intInputItemId=intItemId,@ysnHasSubstitute=ysnHasSubstitute 
+		From @tblInputItem Where intRowNo=@intMinItemCount
+		Select @dblPickQty=ISNULL(SUM(dblQuantity),0) From tblMFPickListDetail Where intPickListId=@intPickListId AND intItemId=@intInputItemId
+		Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
 
-		Select @intBulkMinItemCount=Min(intRowNo) From @tblRemainingPickedItems
-
-		While(@intBulkMinItemCount is not null)
+		If @intConsumptionMethodId=1
 		Begin
-			Select @intBulkItemId=intItemId,@intConsumptionMethodId=intConsumptionMethodId,@intConsumptionStorageLocationId=intConsumptionStorageLocationId,
-					@dblBulkRemainingQty=dblRemainingQuantity From @tblRemainingPickedItems Where intRowNo=@intBulkMinItemCount
+			--Item has substitute
+			If @ysnHasSubstitute=0 AND @dblPickQty<@dblReqQty
+				Set @strRemItems=@strRemItems + @strInputItemNo + ','
 
-			If @intConsumptionMethodId =2 
-				Select @dblBulkAvailableQty=ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot l 
-				JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
-				Where intItemId=@intBulkItemId AND intStorageLocationId=@intConsumptionStorageLocationId AND dblQty > 0 
-				AND ls.strPrimaryStatus IN (
-					'Active'
-					,'Quarantine'
-					)
-				AND l.dtmExpiryDate >= GETDATE()
-					AND l.intStorageLocationId NOT IN (
-					@intKitStagingLocationId
-					,@intBlendStagingLocationId
-					)
-			If @intConsumptionMethodId =3 
-				Select @dblBulkAvailableQty=ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot l 
-				JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId 
-				Where intItemId=@intBulkItemId AND intLocationId=@intLocationId AND dblQty > 0
-				AND ls.strPrimaryStatus IN (
-					'Active'
-					,'Quarantine'
-					)
-				AND l.dtmExpiryDate >= GETDATE()
-				AND l.dtmExpiryDate >= GETDATE()
-					AND l.intStorageLocationId NOT IN (
-					@intKitStagingLocationId
-					,@intBlendStagingLocationId
-					)
-
-			If @dblBulkAvailableQty < @dblBulkRemainingQty
+			--Item does not have substitute
+			If @ysnHasSubstitute=1 AND @dblPickQty<@dblReqQty
 			Begin
-				SET @strRemItems=''
-				SELECT  @strRemItems = STUFF(( SELECT ',' + i.strItemNo
-                FROM @tblRemainingPickedItems tpl Join tblICItem i on tpl.intItemId=i.intItemId Where tpl.intItemId=@intBulkItemId
-				  FOR
-					XML PATH('')
-				  ), 1, 1, '')
+				--Find Remaining Qty (Req - Selected for main item)
+				Set @dblReqQty=@dblReqQty-ISNULL(@dblPickQty,0)
 
-				Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory and save the pick list before staging.'
-				RaisError(@ErrMsg,16,1)
+				--Calculate Req Qty for Substitute item based on remaining qty
+				Set @dblReqQty=(@dblReqQty * (@dblQtyToProduce / @dblRecipeQty))
+
+				Select @dblPickQty=ISNULL(SUM(ISNULL(dblQuantity,0)),0) From tblMFPickListDetail Where intPickListId=@intPickListId 
+				AND intItemId IN (Select intItemId From @tblInputItem Where intParentItemId=@intInputItemId)
+
+				If @dblPickQty<@dblReqQty
+				Begin
+					Select @strInputItemNo=strItemNo From tblICItem Where intItemId=(Select TOP 1 intItemId From @tblInputItem Where intParentItemId=@intInputItemId)
+					Set @strRemItems=@strRemItems + @strInputItemNo + ','
+				End
+		
 			End
-
-			Select @intBulkMinItemCount=Min(intRowNo) From @tblRemainingPickedItems Where intRowNo > @intBulkMinItemCount
 		End
-	End
-
-	If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)>0
-	Begin
-		if @dblPickedQty < (@dblQtyToProduce - (Select ISNULL(SUM(dblRemainingQuantity),0) From @tblRemainingPickedItems Where intConsumptionMethodId in (2,3)))
+		Else
 		Begin
-			Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory and save the pick list before staging.'
-			RaisError(@ErrMsg,16,1)
+			--For Bulk Item Pick Qty is the same as reserved qty
+			Select @dblPickQty = ISNULL(SUM(ISNULL(dblQty,0)),0) 
+			From tblICStockReservation Where intTransactionId=@intPickListId AND intInventoryTransactionType=34 AND intItemId=@intInputItemId
+
+			If @dblPickQty<@dblReqQty
+				Set @strRemItems=@strRemItems + @strInputItemNo + ','
 		End
+
+		Select @intMinItemCount=Min(intRowNo) From @tblInputItem Where intRowNo>@intMinItemCount AND ysnIsSubstitute=0
 	End
+
+	If LTRIM(RTRIM(@strRemItems))<>''
+	Begin
+		Set @strRemItems=SUBSTRING(@strRemItems,1,LEN(@strRemItems)-1)
+		Set @ErrMsg='Staging is not allowed because there is shortage of inventory of item(s) (' + @strRemItems + ') in pick list. Please pick lots with available inventory. If inventory is available then save the pick list before staging.'
+		RaisError(@ErrMsg,16,1)
+	End
+
 End
 
 Begin Tran
@@ -241,12 +251,13 @@ Select @intMinLot=Min(intRowNo) from @tblPickListDetail
 
 While(@intMinLot is not null)
 Begin
-	Set @intNewLotId=NULL
+	Select @intNewLotId=NULL,@intItemUOMId=NULL
 
 	Select @intLotId=intLotId,@strLotNumber=strLotNumber,
 	@dblMoveQty=CASE WHEN intItemUOMId = intItemIssuedUOMId THEN dblPickQuantity / dblWeightPerQty ELSE dblPickQuantity END,
 	@intItemId=intItemId,
-	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity 
+	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId 
+	,@intItemUOMId=intItemUOMId
 	From @tblPickListDetail Where intRowNo=@intMinLot
 
 	If ROUND(@dblPhysicalQty,3) < ROUND(@dblQuantity,3)
@@ -262,12 +273,19 @@ Begin
 		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intKitStagingLocationId 
 		--And dtmExpiryDate > @dtmCurrentDateTime AND intLotStatusId = 1 AND dblQty > 0
 
+	IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+	BEGIN
+		SELECT @dblPickQuantity=@dblQuantity
+		SELECT @intPickUOMId=@intItemUOMId
+	END
+
 	If ISNULL(@intNewLotId,0) = 0
 		Begin
 			Exec [uspMFLotMove] @intLotId=@intLotId,
 								@intNewSubLocationId=@intNewSubLocationId,
 								@intNewStorageLocationId=@intKitStagingLocationId,
-								@dblMoveQty=@dblQuantity,
+								@dblMoveQty=@dblPickQuantity,
+								@intMoveItemUOMId=@intPickUOMId,
 								@intUserId=@intUserId
 
 			Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
@@ -277,7 +295,8 @@ Begin
 	Else
 		Exec [uspMFLotMerge] @intLotId=@intLotId,
 					@intNewLotId=@intNewLotId,
-					@dblMergeQty=@dblQuantity,
+					@dblMergeQty=@dblPickQuantity,
+					@intMergeItemUOMId=@intPickUOMId,
 					@intUserId=@intUserId
 
 	Update tblMFPickListDetail Set intStageLotId=@intNewLotId,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime
@@ -287,7 +306,23 @@ Begin
 End
 
 --Reserve Lots
-Exec [uspMFCreateLotReservationByPickList] @intPickListId
+--Get Bulk Items From Reserved Lots
+Set @strBulkItemXml='<root>'
+
+--Bulk Item
+Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
+'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
+'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
+From tblICStockReservation sr 
+Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+
+Set @strBulkItemXml=@strBulkItemXml+'</root>'
+
+If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+	Set @strBulkItemXml=''
+
+Exec [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml
 
 Update tblMFWorkOrder Set intKitStatusId=12,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime Where intPickListId=@intPickListId
 

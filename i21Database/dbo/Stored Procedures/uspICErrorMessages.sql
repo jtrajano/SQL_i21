@@ -390,3 +390,24 @@ EXEC sp_addmessage 80077,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80078) EXEC sp_dropmessage 80078, 'us_english'	
 SET @strmessage = 'Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s.'
 EXEC sp_addmessage 80078,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80079) EXEC sp_dropmessage 80079, 'us_english'	
+SET @strmessage = 'Item UOM for %s is invalid or missing.'
+EXEC sp_addmessage 80079,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80080) EXEC sp_dropmessage 80080, 'us_english'	
+SET @strmessage = 'Item UOM %s for %s is invalid or missing.'
+EXEC sp_addmessage 80080,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80081) EXEC sp_dropmessage 80081, 'us_english'	
+SET @strmessage = 'Net quantity mistmatch. It is %s on item %s but the total net from the lot(s) is %s.'
+EXEC sp_addmessage 80081,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80082) EXEC sp_dropmessage 80082, 'us_english'	
+SET @strmessage = 'The net quantity for item %s is missing.'
+EXEC sp_addmessage 80082,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80083) EXEC sp_dropmessage 80083, 'us_english'	
+SET @strmessage = 'The new Item Location is invalid or missing for %s.'
+EXEC sp_addmessage 80083,11,@strmessage,'us_english','False'
+

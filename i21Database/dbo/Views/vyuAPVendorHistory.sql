@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuAPVendorHistory
 --WITH SCHEMABINDING
 AS
+
 SELECT 
 	tblAPVendor.intEntityVendorId as intEntityId
 	,intEntityVendorId = tblAPVendor.intEntityVendorId
@@ -22,7 +23,7 @@ SELECT
 	,dblAmountDue = (CASE WHEN A.intTransactionType != 1 AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 ELSE ISNULL(A.dblAmountDue,0) END) 
 	,A.ysnPosted
 	,B1.strPaymentInfo
-	,A.dtmDatePaid
+	,B1.dtmDatePaid
 	,B1.intPaymentId
 FROM dbo.tblAPBill A
 		LEFT JOIN (dbo.tblAPPayment B1 
@@ -54,4 +55,4 @@ GROUP BY A.intBillId,
 	B1.strPaymentInfo,
 	B1.intPaymentId,
 	A.intTransactionType,
-	A.dtmDatePaid
+	B1.dtmDatePaid

@@ -5,6 +5,7 @@ WITH SCHEMABINDING
 SELECT 
 	C.intSiteId, 
 	A.intVendorDefaultId,
+	C.intCustomerId,
 	C.strSite,
 	C.strSiteDescription,
 	G.strPaymentMethod,
@@ -30,6 +31,7 @@ UNION ALL
 SELECT
     F.intSiteId, 
 	D.intVendorDefaultId,
+	F.intCustomerId,
 	F.strSite,
 	F.strSiteDescription,
 	J.strPaymentMethod,

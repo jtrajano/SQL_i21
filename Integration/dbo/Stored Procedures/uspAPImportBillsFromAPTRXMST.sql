@@ -24,6 +24,9 @@ BEGIN
 		SET ANSI_WARNINGS OFF
 
 		BEGIN TRY
+
+		DECLARE @totalVouchers INT;
+		DECLARE @totalVoucherDetails INT;
 		DECLARE @totalDeletedAPTRXMST INT;
 		DECLARE @totalDeletedAPEGLMST INT;
 		DECLARE @totalInsertedBill INT;
@@ -46,7 +49,7 @@ BEGIN
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedUnpostedBill_intBillId] ON #InsertedUnpostedBill([intBillId]);
 			CREATE TABLE #InsertedUnpostedBillDetail(intBillDetailId INT PRIMARY KEY CLUSTERED, A4GLIdentity INT)
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedUnpostedBillDetail_intBillDetailId] ON #InsertedUnpostedBillDetail([intBillDetailId]);
-			CREATE TABLE #ReInsertedToaptrxmst(intA4GLIdentity INT)
+			CREATE TABLE #ReInsertedToaptrxmst(intA4GLIdentity INT, aptrx_ivc_no_header CHAR(50), aptrx_vnd_no_header CHAR(50))
 			CREATE TABLE #ReInsertedToapeglmst(intA4GLIdentity INT, aptrx_ivc_no_header CHAR(50))
 
 			--CHECK FOR MISSING VENDOR IN i21
@@ -78,9 +81,29 @@ BEGIN
 					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
 			WHERE intEntityUserSecurityId = @UserId
 
-			--removed first the constraint
+			IF OBJECT_ID(''tempdb..#tmpaptrxmstimport'') IS NOT NULL DROP TABLE #tmpaptrxmstimport
+
+			SELECT * INTO #tmpaptrxmstimport
+			FROM aptrxmst A
+			WHERE A.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
+				AND A.aptrx_orig_amt != 0
+				AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+							THEN
+								CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+							ELSE 1 END)
+			
+			IF NOT EXISTS(SELECT 1 FROM #tmpaptrxmstimport)
+			BEGIN
+				SET @totalImported = 0;
+				GOTO DONE; --Nothing to import.
+			END
+
+			SET @totalVouchers = (SELECT COUNT(*) FROM #tmpaptrxmstimport)
+
+			--removed first the constraint because every voucher created has empty
 			ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
+			--INSERT INTO VOUCHER
 			MERGE INTO tblAPBill AS destination
 			USING (
 				SELECT
@@ -114,9 +137,10 @@ BEGIN
 					[ysnOrigin]					=	1,
 					[intShipToId]				=	@userLocation,
 					[intShipFromId]				=	loc.intEntityLocationId,
+					[intPayToAddressId]			=	loc.intEntityLocationId,
 					[intCurrencyId]				=	(SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency LIKE ''%USD%''),
 					[A4GLIdentity]				=	A.A4GLIdentity
-				FROM aptrxmst A
+				FROM #tmpaptrxmstimport A
 					LEFT JOIN apcbkmst B
 						ON A.aptrx_cbk_no = B.apcbk_no
 					INNER JOIN tblAPVendor D
@@ -129,16 +153,6 @@ BEGIN
 						WHERE dbo.fnTrim(A.aptrx_ivc_no) = dbo.fnTrim(F.strVendorOrderNumber) COLLATE Latin1_General_CS_AS
 						AND dbo.fnTrim(A.aptrx_vnd_no) = dbo.fnTrim(G.strVendorId) COLLATE Latin1_General_CS_AS
 					) DuplicateData
-					WHERE A.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
-					AND A.aptrx_orig_amt != 0
-					AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
-								THEN
-									CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
-								ELSE 1 END)
-					AND NOT EXISTS(
-						SELECT 1 FROM tblAPaptrxmst H
-						WHERE A.aptrx_ivc_no = H.aptrx_ivc_no AND A.aptrx_vnd_no = H.aptrx_vnd_no
-					)
 			) AS sourceData
 			ON  (1 = 0)
 			WHEN NOT MATCHED THEN
@@ -163,6 +177,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intPayToAddressId],
 				[intCurrencyId],
 				[ysnOrigin]
 			)
@@ -187,6 +202,7 @@ BEGIN
 				[dblWithheld],
 				[intShipToId],
 				[intShipFromId],
+				[intPayToAddressId],
 				[intCurrencyId],
 				[ysnOrigin])
 			OUTPUT inserted.intBillId
@@ -198,14 +214,40 @@ BEGIN
 				, inserted.intTransactionType 
 				, sourceData.A4GLIdentity INTO #InsertedUnpostedBill;
 
-			SET @totalInsertedBill = (SELECT COUNT(*) FROM #InsertedUnpostedBill)
+			SET @totalInsertedBill = (SELECT COUNT(*) FROM #InsertedUnpostedBill);
+
+			SELECT @totalInsertedBill
 
 			IF @totalInsertedBill <= 0
 			BEGIN
-				ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
-				SET @totalImported = 0;
-				RETURN;
+				RAISERROR(''Failed to insert records in voucher.'', 16, 1);
 			END
+			ELSE IF @totalInsertedBill != @totalVouchers
+			BEGIN
+				RAISERROR(''Invalid record count inserted in voucher.'', 16, 1);
+			END
+
+			IF OBJECT_ID(''tempdb..#tmpapeglmstimport'') IS NOT NULL DROP TABLE #tmpapeglmstimport
+
+			SELECT C.* INTO #tmpapeglmstimport
+			FROM tblAPBill A
+				INNER JOIN #InsertedUnpostedBill A2
+					ON A.intBillId  = A2.intBillId
+				INNER JOIN tblAPVendor B
+					ON A.intEntityVendorId = B.intEntityVendorId
+				INNER JOIN (#tmpaptrxmstimport C2 INNER JOIN apeglmst C 
+								ON C2.aptrx_ivc_no = C.apegl_ivc_no 
+								AND C2.aptrx_vnd_no = C.apegl_vnd_no)
+					ON A2.strVendorOrderNumberOrig COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
+					AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
+			ORDER BY C.apegl_dist_no
+
+			IF NOT EXISTS(SELECT 1 FROM #tmpapeglmstimport)
+			BEGIN
+				RAISERROR(''No voucher details to import.'', 16, 1);
+			END
+
+			SET @totalVoucherDetails = (SELECT COUNT(*) FROM #tmpapeglmstimport);
 
 			--IMPORT BILL DETAILS FROM aphglmst
 			MERGE INTO tblAPBillDetail AS destination
@@ -244,21 +286,11 @@ BEGIN
 						ON A.intBillId  = A2.intBillId
 					INNER JOIN tblAPVendor B
 						ON A.intEntityVendorId = B.intEntityVendorId
-					INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
+					INNER JOIN (#tmpaptrxmstimport C2 INNER JOIN #tmpapeglmstimport C 
 									ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 									AND C2.aptrx_vnd_no = C.apegl_vnd_no)
 						ON A2.strVendorOrderNumberOrig COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 						AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
-				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
-								THEN
-									CASE WHEN CONVERT(DATE, CAST(C2.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
-								ELSE 1 END)
-				AND C2.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
-				AND C2.aptrx_orig_amt != 0
-				AND NOT EXISTS(
-						SELECT 1 FROM tblAPaptrxmst H
-						WHERE C2.aptrx_ivc_no = H.aptrx_ivc_no AND C2.aptrx_vnd_no = H.aptrx_vnd_no
-					)
 				ORDER BY C.apegl_dist_no
 			) AS sourceData
 			ON (1 = 0)
@@ -288,6 +320,11 @@ BEGIN
 			INTO #InsertedUnpostedBillDetail;
 
 			SET @totalInsertedBillDetail = (SELECT COUNT(*) FROM #InsertedUnpostedBillDetail)
+
+			IF @totalInsertedBillDetail != @totalVoucherDetails
+			BEGIN
+				RAISERROR(''Invalid record count inserted on voucher detail.'', 16, 1);
+			END
 
 			--BACK UP aptrxmst
 			SET IDENTITY_INSERT tblAPaptrxmst ON
@@ -326,7 +363,7 @@ BEGIN
 				[intBillId]					,
 				[ysnInsertedToAPIVC]
 			)
-			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToaptrxmst
+			OUTPUT inserted.A4GLIdentity, inserted.aptrx_ivc_no, inserted.aptrx_vnd_no INTO #ReInsertedToaptrxmst
 			SELECT
 				[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 				[aptrx_ivc_no]			=	C.strVendorOrderNumber	, --CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
@@ -361,27 +398,11 @@ BEGIN
 				[A4GLIdentity]			=	A.[A4GLIdentity]		,
 				[intBillId]				=	B.intBillId				,
 				[ysnInsertedToAPIVC]	=	0
-			FROM aptrxmst A
+			FROM #tmpaptrxmstimport A
 			INNER JOIN #InsertedUnpostedBill B
 				ON A.A4GLIdentity = B.A4GLIdentity
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
-			--OUTER APPLY (
-			--	SELECT E.* FROM aptrxmst E
-			--	WHERE EXISTS(
-			--		SELECT 1 FROM tblAPaptrxmst F
-			--		WHERE A.aptrx_ivc_no = F.aptrx_ivc_no
-			--		AND A.aptrx_vnd_no = F.aptrx_vnd_no
-			--	)
-			--	AND A.aptrx_vnd_no = E.aptrx_vnd_no
-			--	AND A.aptrx_ivc_no = E.aptrx_ivc_no
-			--) DuplicateDataBackup
-			WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
-							THEN
-								CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
-							ELSE 1 END)
-				AND A.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
-				AND A.aptrx_orig_amt != 0
 
 			SET @totalInsertedTBLAPTRXMST = @@ROWCOUNT;
 			SET IDENTITY_INSERT tblAPaptrxmst OFF
@@ -439,20 +460,23 @@ BEGIN
 				[apivc_currency_cnt]	=	A.[aptrx_currency_cnt]	,
 				[apivc_user_id]     	=	A.[aptrx_user_id]		,
 				[apivc_user_rev_dt]		=	A.[aptrx_user_rev_dt]	
-			FROM tblAPaptrxmst A
-			WHERE A.A4GLIdentity IN (SELECT intA4GLIdentity FROM #ReInsertedToaptrxmst)
+			FROM #tmpaptrxmstimport A
 
 			SET @totalInsertedapivcmst = @@ROWCOUNT;
 
 			UPDATE A
 				SET A.[ysnInsertedToAPIVC] = 1
 			FROM tblAPaptrxmst A
-			WHERE A.A4GLIdentity IN (SELECT intA4GLIdentity FROM #ReInsertedToaptrxmst)
+			INNER JOIN #ReInsertedToaptrxmst B 
+				ON A.A4GLIdentity = B.intA4GLIdentity AND A.aptrx_ivc_no = B.aptrx_ivc_no_header COLLATE Latin1_General_CS_AS
+				AND A.aptrx_vnd_no = B.aptrx_vnd_no_header COLLATE Latin1_General_CS_AS
 
 			SET @totalUpdatedysnInsertedToAPIVC = @@ROWCOUNT;
 
+			SELECT @totalInsertedTBLAPTRXMST, @totalUpdatedysnInsertedToAPIVC
+
 			IF @totalInsertedTBLAPTRXMST != @totalInsertedapivcmst RAISERROR(''Unexpected number of records to re-insert in apivcmst'', 16, 1);
-			IF @totalInsertedTBLAPTRXMST != @totalUpdatedysnInsertedToAPIVC RAISERROR(''Unexpected number of records to update in tblAPaptrxmst'', 16, 1);
+			IF @totalInsertedTBLAPTRXMST != @totalUpdatedysnInsertedToAPIVC RAISERROR(''Unexpected number of records to updated in tblAPaptrxmst'', 16, 1);
 
 			--BACK UP apeglmst
 			SET IDENTITY_INSERT tblAPapeglmst ON
@@ -471,18 +495,12 @@ BEGIN
 					[A4GLIdentity]		=	A.[A4GLIdentity]		,
 					[intBillDetailId]	=	C.intBillDetailId		,
 					[aptrx_ivc_no_header]	=	B.aptrx_ivc_no
-				FROM apeglmst A
-				INNER JOIN aptrxmst  B
+				FROM #tmpapeglmstimport A
+				INNER JOIN #tmpaptrxmstimport  B
 				ON B.aptrx_ivc_no = A.apegl_ivc_no 
 					AND B.aptrx_vnd_no = A.apegl_vnd_no
 				INNER JOIN #InsertedUnpostedBillDetail C
 					ON A.[A4GLIdentity] = C.[A4GLIdentity]
-				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
-								THEN
-									CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
-								ELSE 1 END)
-				AND B.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
-				AND B.aptrx_orig_amt != 0
 			) AS sourceData
 			ON (1=0)
 			WHEN NOT MATCHED THEN
@@ -540,7 +558,7 @@ BEGIN
 				[apegl_gl_acct]		,
 				[apegl_gl_amt]		,
 				[apegl_gl_un]		
-			FROM tblAPapeglmst A
+			FROM #tmpapeglmstimport A
 			INNER JOIN #ReInsertedToapeglmst B ON A.A4GLIdentity = B.intA4GLIdentity
 
 			SET @totalReinsertedaphglmst = @@ROWCOUNT;
@@ -612,6 +630,7 @@ BEGIN
 
 			ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
+			DONE:
 			IF @transCount = 0 COMMIT TRANSACTION
 
 		END TRY
@@ -637,3 +656,4 @@ BEGIN
 		END
 	')
 END
+

@@ -22,5 +22,5 @@ SELECT [AccountDetail].[intAccountId]
 	  ,[AccountDetail].[intAccountCategoryId]
 	  ,ISNULL([BankAccount].[ysnActive], 1) AS [ysnBankActive]
 FROM [vyuGLAccountDetail] [AccountDetail]
-LEFT JOIN [tblCMBankAccount] [BankAccount] ON [AccountDetail].[intAccountId] = [BankAccount].[intGLAccountId]
+INNER JOIN [tblCMBankAccount] [BankAccount] ON [AccountDetail].[intAccountId] = [BankAccount].[intGLAccountId]
 WHERE [BankAccount].[ysnActive] = 1 OR [BankAccount].[ysnActive] IS NULL

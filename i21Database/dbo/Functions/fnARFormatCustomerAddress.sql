@@ -24,10 +24,10 @@ BEGIN
 	SET @strState = CASE WHEN @strState = '' THEN NULL ELSE @strState END
 	SET @strZipCode = CASE WHEN @strZipCode = '' THEN NULL ELSE @strZipCode END
 	SET @strCountry = CASE WHEN @strCountry = '' THEN NULL ELSE @strCountry END
-	SET @ysnIncludeEntityName = CASE WHEN @ysnIncludeEntityName is null THEN 0 ELSE @ysnIncludeEntityName END
+	SET @ysnIncludeEntityName = CASE WHEN @ysnIncludeEntityName IS NULL THEN 0 ELSE @ysnIncludeEntityName END
 
 	if @ysnIncludeEntityName = 0
-		SET @strBillToName = null
+		SET @strBillToName = NULL
 
 	IF @strBillToName IS NULL
 		BEGIN

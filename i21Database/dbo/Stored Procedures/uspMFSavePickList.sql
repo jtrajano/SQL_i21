@@ -33,6 +33,7 @@ Declare @ysnBlendSheetRequired bit
 Declare @intLocationId int
 Declare @intBlendItemId int
 Declare @intWorkOrderId int
+Declare @strBulkItemXml nvarchar(max)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -154,7 +155,7 @@ Begin
 		End
 
 	Select @strLotNumber=strLotNumber,
-	@dblAvailableUnit=(l.dblWeight - (Select ISNULL(SUM(ISNULL(sr.dblQty,0)),0) From tblICStockReservation sr Where sr.intLotId=@intLotId)) / 
+	@dblAvailableUnit=(l.dblWeight - (Select ISNULL(SUM(ISNULL(sr.dblQty,0)),0) From tblICStockReservation sr Where sr.intLotId=@intLotId AND ISNULL(sr.ysnPosted,0)=0)) / 
 	(CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END)
 	From tblICLot l Where intLotId=@intLotId
 
@@ -208,6 +209,37 @@ If ISNULL(@strPickListNo,'') = ''
 	End
 
 Select @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where strWorkOrderNo = (Select TOP 1 strWorkOrderNo From @tblWorkOrder)
+
+--Xml for Bulk Items for Reservation
+Set @strBulkItemXml='<root>'
+
+--Input Item
+Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+'<intItemId>' + convert(varchar,tpl.intItemId) + '</intItemId>' +
+'<intItemUOMId>' + convert(varchar,tpl.intItemUOMId) + '</intItemUOMId>' + 
+'<dblQuantity>' + convert(varchar,tpl.dblQuantity) + '</dblQuantity>' + '</lot>'
+From @tblPickListDetail tpl 
+Join tblMFWorkOrderRecipeItem ri on tpl.intItemId=ri.intItemId 
+Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+AND r.intWorkOrderId = @intWorkOrderId
+
+--Sub Item
+Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' +  
+'<intItemId>' + convert(varchar,tpl.intItemId) + '</intItemId>' + 
+'<intItemUOMId>' + convert(varchar,tpl.intItemUOMId) + '</intItemUOMId>' + 
+'<dblQuantity>' + convert(varchar,tpl.dblQuantity) + '</dblQuantity>' + '</lot>'
+From @tblPickListDetail tpl 
+Join tblMFWorkOrderRecipeSubstituteItem rs on tpl.intItemId=rs.intSubstituteItemId
+Join tblMFWorkOrderRecipeItem ri on rs.intItemId=ri.intItemId 
+Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+AND r.intWorkOrderId = @intWorkOrderId
+
+Set @strBulkItemXml=@strBulkItemXml+'</root>'
+
+If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+	Set @strBulkItemXml=''
 
 --Do not save items if consumption method is not By Lot
 Delete tpl From @tblPickListDetail tpl 
@@ -264,10 +296,17 @@ Begin
 	Update pl Set pl.intAssignedToId=tpl.intAssignedToId,pl.intLastModifiedUserId=tpl.intUserId,pl.dtmLastModified=@dtmCurrentDate,pl.intConcurrencyId=@intConCurrencyId 
 	From tblMFPickList pl Join @tblPickList tpl on pl.intPickListId=tpl.intPickListId
 
-	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,
-	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId
+	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.dblQuantity=tpld.dblQuantity,pld.dblIssuedQuantity=tpld.dblIssuedQuantity,
+	pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,pld.intParentLotId=tpld.intParentLotId,pld.intStorageLocationId=tpld.intStorageLocationId,
+	pld.intItemUOMId=tpld.intItemUOMId,pld.intItemIssuedUOMId=tpld.intItemIssuedUOMId,pld.intPickUOMId=tpld.intPickUOMId,
+	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId,
+	pld.intItemId=tpld.intItemId
 	From tblMFPickListDetail pld Join @tblPickListDetail tpld on pld.intPickListDetailId=tpld.intPickListDetailId 
 	Where pld.intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId
+
+	--Delete Records if not there in @tblPickListDetail table
+	Delete From tblMFPickListDetail Where intPickListId=@intPickListId AND 
+	intPickListDetailId NOT IN (Select intPickListDetailId From @tblPickListDetail) AND intLotId=intStageLotId
 
 	--insert new picked lots
 	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
@@ -282,7 +321,7 @@ End
 SET @intPickListIdOut=@intPickListId
 
 --Reserve Lots
-Exec [uspMFCreateLotReservationByPickList] @intPickListId
+Exec [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml
 
 Commit Tran
 

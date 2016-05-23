@@ -35,8 +35,10 @@
     [dblDeliveryTotal] NUMERIC(18, 6) NULL, 
     [intContractId] INT NULL, 
     [ysnLockPrice] BIT NOT NULL DEFAULT 0, 
+    [intRouteId] INT NULL, 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
-    CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
+    CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
+	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])
 );
 
 
@@ -364,3 +366,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'ysnLockPrice'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Route Sequence Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'intRouteId'

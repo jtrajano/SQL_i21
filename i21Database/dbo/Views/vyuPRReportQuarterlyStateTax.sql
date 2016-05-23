@@ -8,8 +8,8 @@ SELECT
 	,tblPREmployee.strLastName
 	,tblPRPaycheck.intYear
 	,tblPRPaycheck.intQuarter
-	,MAX(tblPRPaycheck.dblGross) AS dblGross
-	,MAX(tblPRPaycheck.dblAdjustedGross) AS dblAdjustedGross
+	,SUM(tblPRPaycheck.dblGross) AS dblGross
+	,SUM(tblPRPaycheck.dblAdjustedGross) AS dblAdjustedGross
 	,SUM(vyuPRPaycheckTax.dblStateTotal) AS dblStateTotal
 	,SUM(vyuPRPaycheckTax.dblLocalTotal) AS dblLocalTotal
 	,(SELECT TOP 1 strState FROM tblPRTypeTaxState WHERE intTypeTaxStateId = vyuPRPaycheckTax.intTypeTaxStateId) strState

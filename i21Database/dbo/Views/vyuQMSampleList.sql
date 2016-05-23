@@ -8,9 +8,9 @@ SELECT S.intSampleId
 	,I1.strItemNo AS strBundleItemNo
 	,I.strItemNo
 	,I.strDescription
-	--,C.strContainerNumber
 	,S.strContainerNumber
-	,SH.intTrackingNumber
+	--,SH.intTrackingNumber
+	,SH.strLoadNumber
 	,S.strLotNumber
 	,SS.strStatus
 	,S.dtmSampleReceivedDate
@@ -35,7 +35,11 @@ SELECT S.intSampleId
 	,ST.intSampleTypeId
 	,CH.intContractHeaderId
 	,I.intItemId
-	,SH.intShipmentId
+	--,SH.intShipmentId
+	,S.intItemBundleId
+	,SH.intLoadId
+	,C.intLoadContainerId
+	,S.intCompanyLocationSubLocationId
 	,ISNULL(L.intLotId, (SELECT TOP 1 intLotId FROM tblICLot WHERE intParentLotId = PL.intParentLotId)) AS intLotId
 	,S.intSampleUOMId
 	,S.intRepresentingUOMId
@@ -46,8 +50,10 @@ LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHe
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem I1 ON I1.intItemId = S.intItemBundleId
-LEFT JOIN dbo.tblLGShipmentBLContainer C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId
-LEFT JOIN dbo.tblLGShipment SH ON SH.intShipmentId = S.intShipmentId
+--LEFT JOIN dbo.tblLGShipmentBLContainer C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId
+--LEFT JOIN dbo.tblLGShipment SH ON SH.intShipmentId = S.intShipmentId
+LEFT JOIN dbo.tblLGLoadContainer C ON C.intLoadContainerId = S.intLoadContainerId
+LEFT JOIN dbo.tblLGLoad SH ON SH.intLoadId = S.intLoadId
 LEFT JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = S.intTestedById
 LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = S.intEntityId
 LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId = 6

@@ -154,10 +154,14 @@ BEGIN
 			,strVendorLotNo
 			,strGarden
 			,intDetailId
-			,strParentLotNumber
-			,strParentLotAlias
 			,intSplitFromLotId
 			,intOwnershipType
+			,dblGrossWeight
+			,strParentLotNumber
+			,strParentLotAlias
+			,strTransactionId
+			,strSourceTransactionId
+			,intSourceTransactionTypeId
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -166,9 +170,22 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= TransferItem.intToSubLocationId
 			,intStorageLocationId	= TransferItem.intToStorageLocationId
-			,dblQty					= TransferItem.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
-			,intItemUOMId			= ISNULL(TransferItem.intItemUOMId, TransferItem.intItemUOMId) 
-			,dblWeight				= SourceLot.dblWeightPerQty * ABS(TransferItem.dblQuantity) 
+			,dblQty					=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
+										* TransferItem.dblQuantity 
+			,intItemUOMId			= TransferItem.intItemUOMId
+			,dblWeight				= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
+										* CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId <> TransferItem.intItemUOMId THEN 
+													-- Transfer qty is in bags. Convert it to wgt. 
+													dbo.fnMultiply(
+														ISNULL(TransferItem.dblQuantity, 0)
+														, ISNULL(SourceLot.dblWeightPerQty, 0) 
+													) 
+												WHEN SourceLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId = TransferItem.intItemUOMId THEN 
+													-- Transfer qty is in wgt. No need to convert it. 
+													ISNULL(TransferItem.dblQuantity, 0)
+												ELSE 
+													0
+										END 
 			,intWeightUOMId			= SourceLot.intWeightUOMId
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
@@ -176,30 +193,34 @@ BEGIN
 			,intGradeId				= SourceLot.intGradeId
 			,strBOLNo				= SourceLot.strBOLNo
 			,strVessel				= SourceLot.strVessel
-			,strReceiptNumber		= Transfer.strTransferNo
+			,strReceiptNumber		= [Transfer].strTransferNo
 			,strMarkings			= SourceLot.strMarkings
 			,strNotes				= SourceLot.strNotes
 			,intEntityVendorId		= SourceLot.intEntityVendorId
 			,strVendorLotNo			= SourceLot.strVendorLotNo
 			,strGarden				= SourceLot.strGarden
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
-			,strParentLotNumber		= ParentLotSourceLot.strParentLotNumber
-			,strParentLotAlias		= ParentLotSourceLot.strParentLotAlias
 			,intSplitFromLotId		= SourceLot.intLotId
 			,intOwnershipType		= TransferItem.intOwnershipType
-	FROM	dbo.tblICInventoryTransfer Transfer INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
-				ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId
+			,dblGrossWeight			= SourceLot.dblGrossWeight
+			,strParentLotNumber		= ParentLotSourceLot.strParentLotNumber
+			,strParentLotAlias		= ParentLotSourceLot.strParentLotAlias
+			,strTransactionId			= [Transfer].strTransferNo
+			,strSourceTransactionId		= SourceLot.strTransactionId
+			,intSourceTransactionTypeId = SourceLot.intSourceTransactionTypeId
+
+	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
+				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item
 				ON TransferItem.intItemId = Item.intItemId		
 			INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON TransferItem.intItemId = ItemLocation.intItemId
-				AND Transfer.intToLocationId = ItemLocation.intLocationId	
+				AND [Transfer].intToLocationId = ItemLocation.intLocationId	
 			INNER JOIN tblICLot SourceLot 
 				ON SourceLot.intLotId = TransferItem.intLotId
 			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
-
-	WHERE	Transfer.strTransferNo = @strTransactionId
+	WHERE	[Transfer].strTransferNo = @strTransactionId
 
 END 
 

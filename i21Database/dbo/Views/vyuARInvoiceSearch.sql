@@ -22,7 +22,7 @@ SELECT
 	,ysnProcessed					= I.ysnProcessed
 	,ysnForgiven					= I.ysnForgiven
 	,ysnCalculated					= I.ysnCalculated
-	,ysnRecurring					= I.ysnTemplate
+	,ysnRecurring					= I.ysnRecurring
 	,dblInvoiceTotal				= ISNULL(I.dblInvoiceTotal, 0)
 	,dblDiscount					= ISNULL(I.dblDiscount,0)
 	,dblDiscountAvailable			= ISNULL(I.dblDiscountAvailable,0)

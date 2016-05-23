@@ -1,4 +1,4 @@
-CREATE VIEW dbo.vyuGLDetail
+CREATE VIEW [dbo].[vyuGLDetail]
 AS
      SELECT 
 		  A.intGLDetailId,
@@ -36,8 +36,10 @@ AS
             A.dblCreditReport,
             A.dblReportingRate,
             A.dblForeignRate,
-			A.intJournalLineNo
+			A.intJournalLineNo,
+			J.strDocument
      FROM tblGLDetail AS A
+		  LEFT JOIN tblGLJournalDetail J ON A.intJournalLineNo = J.intJournalDetailId
           LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
           LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
           LEFT JOIN tblSMCurrency AS D ON D.intCurrencyID = A.intCurrencyId

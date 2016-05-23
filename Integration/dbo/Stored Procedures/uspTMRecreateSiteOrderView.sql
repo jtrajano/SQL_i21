@@ -67,7 +67,7 @@ BEGIN
 				,intCustomerNumber = B.intCustomerNumber
 				,intClockLocation = A.intClockID
 				,ysnPastDue = CAST((CASE WHEN ISNULL(C.vwcus_high_past_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
-				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(C.vwcus_balance,0.0) < C.vwcus_cred_limit  THEN 0 ELSE 1 END)  AS BIT)
+				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(C.vwcus_balance,0.0) <= C.vwcus_cred_limit  THEN 0 ELSE 1 END)  AS BIT)
 				,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(C.vwcus_budget_amt_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 				,dblARBalance = ISNULL(C.vwcus_balance,0.0)
 				,dblPastDue = ISNULL(C.vwcus_high_past_due,0.0)
@@ -114,7 +114,7 @@ BEGIN
 				,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
 				,(A.strSiteAddress + CHAR(10) + A.strCity + '', '' + A.strState +  '' '' +  A.strZipCode) AS strSiteAddress
 				,A.strLocation
-				,E.vwsls_name AS strDriverName
+				,E.strEntityNo AS strDriverName
 				,D.strItemNo AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
 				,CAST(ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(D.dblDefaultFull,0) = 0 THEN 100 ELSE D.dblDefaultFull END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS INT) AS intCalculatedQuantity
@@ -140,13 +140,13 @@ BEGIN
 				,D.strDescription AS strProductDescription
 				,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
 				,intCustomerNumber = B.intCustomerNumber
-				,ysnPastDue = CAST((CASE WHEN ISNULL(I.vwcus_high_past_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
-				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.vwcus_balance,0.0) < I.vwcus_cred_limit  THEN 0 ELSE 1 END)  AS BIT)
-				,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(I.vwcus_budget_amt_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
-				,dblARBalance = ISNULL(I.vwcus_balance,0.0)
-				,dblPastDue = ISNULL(I.vwcus_high_past_due,0.0)
-				,dblBudgetAmount = ISNULL(I.vwcus_budget_amt_due,0.0)
-				,dblCreditLimit = ISNULL(I.vwcus_cred_limit,0.0)
+				,ysnPastDue = CAST((CASE WHEN ISNULL(I.dblHighPastDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.dblBalance,0.0) <= I.dblCreditLimit  THEN 0 ELSE 1 END)  AS BIT)
+				,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(I.dblTotalDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+				,dblARBalance = ISNULL(I.dblBalance,0.0)
+				,dblPastDue = ISNULL(I.dblHighPastDue,0.0)
+				,dblBudgetAmount = ISNULL(I.dblTotalDue,0.0)
+				,dblCreditLimit = ISNULL(I.dblCreditLimit,0.0)
 				,intLocationId = A.intLocationId
 				,A.intCustomerID
 				,intClockLocation = A.intClockID
@@ -157,8 +157,16 @@ BEGIN
 				ON A.intCustomerID = B.intCustomerID
 			INNER JOIN tblEMEntity C
 				ON B.intCustomerNumber = C.intEntityId
-			LEFT JOIN vwslsmst E
-				ON A.intDriverID = E.A4GLIdentity
+			LEFT JOIN (
+				SELECT 
+					A.intEntityId
+					,A.strEntityNo
+				FROM tblEMEntity A
+				INNER JOIN [tblEMEntityType] C
+					ON A.intEntityId = C.intEntityId
+				WHERE strType = ''Salesperson''
+				) E
+				ON A.intDriverID = E.intEntityId
 			LEFT JOIN tblICItem D
 				ON A.intProduct = D.intItemId
 			LEFT JOIN tblTMRoute F
@@ -167,9 +175,19 @@ BEGIN
 				ON A.intSiteID = G.intSiteID
 			LEFT JOIN tblICCategory H
 				ON D.intCategoryId = H.intCategoryId	
-			INNER JOIN vwcusmst I
-				ON B.intCustomerNumber = I.A4GLIdentity
-			WHERE A.ysnActive = 1
+			INNER JOIN (
+				SELECT 
+					Ent.intEntityId
+					,dblHighPastDue = ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0)
+					,dblBalance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
+					,dblTotalDue = ISNULL(CI.dblTotalDue,0.0)
+					,dblCreditLimit = ISNULL(CI.dblCreditLimit,0.0)
+				FROM tblEMEntity Ent
+				INNER JOIN tblARCustomer Cus 
+					ON Ent.intEntityId = Cus.intEntityCustomerId
+				LEFT JOIN [vyuARCustomerInquiryReport] CI
+					ON Ent.intEntityId = CI.intEntityCustomerId) I
+				ON B.intCustomerNumber = I.intEntityId
 			
 		')
 	END

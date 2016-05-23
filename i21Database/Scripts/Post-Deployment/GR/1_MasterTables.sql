@@ -131,3 +131,12 @@ IF EXISTS(SELECT 1 FROM tblGRStorageScheduleRule WHERE strAllowancePeriod IS NUL
 BEGIN
 	UPDATE tblGRStorageScheduleRule SET strAllowancePeriod='Day(s)',dtmAllowancePeriodFrom=NULL,dtmAllowancePeriodTo=NULL WHERE strAllowancePeriod IS NULL
 END
+GO
+IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intUnitMeasureId IS NULL)
+BEGIN
+	UPDATE a 
+	SET a.intUnitMeasureId=b.intUnitMeasureId
+	FROM tblGRCustomerStorage a
+	JOIN tblICCommodityUnitMeasure b ON b.intCommodityId=a.intCommodityId AND b.ysnStockUnit=1   
+END
+GO

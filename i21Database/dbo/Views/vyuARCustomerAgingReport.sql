@@ -5,6 +5,7 @@ SELECT A.strCustomerName
      , A.intEntityCustomerId
 	 , dblCreditLimit		= (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , dblTotalAR			= SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
+	 , dblTotalARDiscount	= SUM(B.dblTotalDue) - SUM(B.dblDiscountTerm) - SUM(B.dblAvailableCredit)
 	 , dblFuture			= 0.000000
 	 , dbl0Days				= SUM(B.dbl0Days)
      , dbl10Days			= SUM(B.dbl10Days)
@@ -84,9 +85,9 @@ FROM tblARInvoice I
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
-				 , intInvoiceId
+				 , PD.intInvoiceId
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
-			GROUP BY intInvoiceId) 
+			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -182,6 +183,7 @@ LEFT JOIN
   , (dblInvoiceTotal) - (dblAmountPaid) - (dblDiscount) + (dblInterest) AS dblTotalDue
   , dblDiscount
   , dblAvailableCredit
+  , dblDiscountTerm
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, GETDATE()) <= 0
 		 THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl0Days
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, GETDATE()) > 0 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, GETDATE()) <= 10
@@ -203,7 +205,8 @@ FROM
 	  , dblInterest		= 0
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId
-	  , dblAvailableCredit = 0
+	  , dblAvailableCredit	= 0
+	  , dblDiscountTerm		= dbo.fnARComputeDiscountForEarlyPayment(GETDATE(), I.intInvoiceId)
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 WHERE I.ysnPosted = 1
@@ -225,14 +228,15 @@ SELECT I.intInvoiceId
 	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	  , dblDiscountTerm     = 0
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
-				 , intInvoiceId
+				 , PD.intInvoiceId
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
-			GROUP BY intInvoiceId) 
+			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -252,7 +256,8 @@ SELECT I.intInvoiceId
      , dblInterest              = 0     
      , dtmDueDate               = P.dtmDatePaid
      , I.intEntityCustomerId
-     , dblAvailableCredit        = ISNULL(PD.dblPayment, 0)
+     , dblAvailableCredit       = ISNULL(PD.dblPayment, 0)
+	 , dblDiscountTerm			= 0
 FROM tblARPayment P
     INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
     LEFT JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId 
@@ -278,6 +283,7 @@ SELECT I.intInvoiceId
   , dtmDueDate				= ISNULL(I.dtmDueDate, GETDATE())
   , I.intEntityCustomerId
   , dblAvailableCredit		= 0
+  , dblDiscountTerm			= 0
 FROM tblARInvoice I 
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
@@ -290,10 +296,10 @@ WHERE I.ysnPosted  = 1
 										WHERE AG.strAccountGroup = 'Receivables')) AS TBL) AS B    
     
 ON
-A.intEntityCustomerId = B.intEntityCustomerId
-AND A.intInvoiceId = B.intInvoiceId
-AND A.dblInvoiceTotal = B.dblInvoiceTotal
-AND A.dblAmountPaid =B.dblAmountPaid
-AND A.dblAvailableCredit = B.dblAvailableCredit
+A.intEntityCustomerId		= B.intEntityCustomerId
+AND A.intInvoiceId			= B.intInvoiceId
+AND A.dblInvoiceTotal		= B.dblInvoiceTotal
+AND A.dblAmountPaid			= B.dblAmountPaid
+AND A.dblAvailableCredit	= B.dblAvailableCredit
 
 GROUP BY A.strCustomerName, A.intEntityCustomerId, A.strEntityNo

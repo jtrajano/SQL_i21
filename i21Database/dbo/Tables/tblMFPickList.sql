@@ -6,6 +6,7 @@
 	[intKitStatusId] INT NOT NULL, 
     [intAssignedToId] INT NOT NULL, 
     [intLocationId] INT NOT NULL,
+	[intSalesOrderId] INT NULL,
 	[dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL,
 	[dtmLastModified] DATETIME NULL, 

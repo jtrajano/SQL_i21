@@ -16,12 +16,6 @@
 	,@CountySalesTaxPercentageRate	NUMERIC(18,6)	= 0.000000
 	,@CitySalesTaxPercentageRate  	NUMERIC(18,6)	= 0.000000
 	,@OtherSalesTaxPercentageRate 	NUMERIC(18,6)	= 0.000000
-	--,@LC7							NUMERIC(18,6)	= 0.000000
-	--,@LC8							NUMERIC(18,6)	= 0.000000
-	--,@LC9							NUMERIC(18,6)	= 0.000000
-	--,@LC10						NUMERIC(18,6)	= 0.000000
-	--,@LC11						NUMERIC(18,6)	= 0.000000
-	--,@LC12						NUMERIC(18,6)	= 0.000000
 AS    
 		
 SELECT
@@ -42,9 +36,9 @@ SELECT
 	,[strTaxCode]
 	,[ysnTaxExempt]
 	,[strTaxGroup]
-	,[ysnInvalid]
+	,[ysnInvalidSetup]
 	,[strReason]
-	,[strTaxExemptReason]
+	,[strNotes]
 FROM
 	[dbo].[fnCFRemoteTaxes](
 	@TaxState		
@@ -57,13 +51,7 @@ FROM
 	,@StateSalesTaxPercentageRate 	
 	,@CountySalesTaxPercentageRate		
 	,@CitySalesTaxPercentageRate  		
-	,@OtherSalesTaxPercentageRate 		
-	--,@LC7		
-	--,@LC8		
-	--,@LC9		
-	--,@LC10			
-	--,@LC11			
-	--,@LC12			
+	,@OtherSalesTaxPercentageRate 	
 	,@intNetworkId
 	,@intARItemId				
 	,@intARItemLocationId			

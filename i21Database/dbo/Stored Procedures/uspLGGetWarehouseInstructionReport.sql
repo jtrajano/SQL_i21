@@ -40,5 +40,5 @@ BEGIN
 	--FROM	@temp_xml_table   
 	--WHERE	[fieldname] = 'intReferenceNumber' 
 
-SELECT * FROM tblLGWarehouseInstructionDetail WH WHERE WH.intWarehouseInstructionHeaderId = @xmlParam AND WH.ysnPrint = 1 ORDER BY WH.intSort ASC
+SELECT * FROM tblLGLoadWarehouseServices WH WHERE WH.intLoadWarehouseId = @xmlParam AND WH.ysnPrint = 1 ORDER BY WH.intSort ASC
 END

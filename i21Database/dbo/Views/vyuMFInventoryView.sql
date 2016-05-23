@@ -63,41 +63,31 @@ SELECT l.intLotId
 	,'' AS strCostUOM
 	,0 AS intContainerId
 	,'' AS strContainerNo
-	,ISNULL((
-			SELECT SUM(dblQty)
-			FROM tblICStockReservation
-			WHERE intLotId = l.intLotId
-			), 0) dblReservedQty
-	,Convert(DECIMAL(18, 4), ISNULL((
-				(
-					SELECT SUM(dblQty)
-					FROM tblICStockReservation
-					WHERE intLotId = l.intLotId
-					) / CASE 
-					WHEN ISNULL(l.dblWeightPerQty, 0) = 0
-						THEN 1
-					ELSE l.dblWeightPerQty
-					END
-				), 0)) dblReservedNoOfPacks
-	,l.dblWeight - ISNULL((
-			SELECT SUM(dblQty)
-			FROM tblICStockReservation
-			WHERE intLotId = l.intLotId
-			), 0) dblAvailableQty
+	,ISNULL(S.dblQty, 0) AS dblReservedQty
+	,Convert(DECIMAL(18, 4), ISNULL(S.dblQty, 0) / CASE 
+			WHEN ISNULL(l.dblWeightPerQty, 0) = 0
+				THEN 1
+			ELSE l.dblWeightPerQty
+			END) AS dblReservedNoOfPacks
+	,CASE 
+		WHEN l.intWeightUOMId IS NULL
+			THEN l.dblQty
+		ELSE l.dblWeight
+		END - ISNULL(S.dblQty, 0) dblAvailableQty
 	,Convert(DECIMAL(18, 4), (
 			(
-				l.dblWeight - ISNULL((
-						SELECT SUM(dblQty)
-						FROM tblICStockReservation
-						WHERE intLotId = l.intLotId
-						), 0)
+				CASE 
+					WHEN l.intWeightUOMId IS NULL
+						THEN l.dblQty
+					ELSE l.dblWeight
+					END - ISNULL(S.dblQty, 0)
 				) / CASE 
 				WHEN ISNULL(l.dblWeightPerQty, 0) = 0
 					THEN 1
 				ELSE l.dblWeightPerQty
 				END
 			)) dblAvailableNoOfPacks
-	,'' strReservedQtyUOM
+	,um1.strUnitMeasure AS strReservedQtyUOM
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -114,3 +104,4 @@ LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId
 LEFT JOIN tblARCustomer c1 ON c1.intEntityCustomerId = ito.intOwnerId
 LEFT JOIN tblEMEntity e ON e.intEntityId = l.intEntityVendorId
+LEFT JOIN vyuMFStockReservation S ON S.intLotId = l.intLotId

@@ -30,6 +30,7 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 -- Posting variables
 DECLARE @strBatchId AS NVARCHAR(40) 
 		,@strItemNo AS NVARCHAR(50)
+		,@intItemId AS INT
 		,@ysnAllowBlankGLEntries AS BIT = 1
 
 -- Create the gl entries variable 
@@ -64,115 +65,189 @@ END
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
-DECLARE @strBillNumber AS NVARCHAR(50)
-DECLARE @strChargeItem AS NVARCHAR(50)
+BEGIN 
+	DECLARE @strBillNumber AS NVARCHAR(50)
+	DECLARE @strChargeItem AS NVARCHAR(50)
 
 
--- Validate if the Inventory Receipt exists   
-IF @intTransactionId IS NULL  
-BEGIN   
-	-- Cannot find the transaction.  
-	RAISERROR(50004, 11, 1)  
-	GOTO Post_Exit  
-END   
-  
--- Validate the date against the FY Periods  
-IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
-BEGIN   
-	-- Unable to find an open fiscal year period to match the transaction date.  
-	RAISERROR(50005, 11, 1)  
-	GOTO Post_Exit  
-END  
-  
--- Check if the transaction is already posted  
-IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
-BEGIN   
-	-- The transaction is already posted.  
-	RAISERROR(50007, 11, 1)  
-	GOTO Post_Exit  
-END   
-  
--- Check if the transaction is already posted  
-IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
-BEGIN   
-	-- The transaction is already unposted.  
-	RAISERROR(50008, 11, 1)  
-	GOTO Post_Exit  
-END   
-
--- Check Company preference: Allow User Self Post  
-IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
-	AND @intEntityUserSecurityId <> @intCreatedEntityId 
-	AND @ysnRecap = 0   
-BEGIN   
-	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
-	IF @ysnPost = 1   
+	-- Validate if the Inventory Receipt exists   
+	IF @intTransactionId IS NULL  
 	BEGIN   
-		RAISERROR(50013, 11, 1, 'Post')  
+		-- Cannot find the transaction.  
+		RAISERROR(50004, 11, 1)  
+		GOTO Post_Exit  
+	END   
+  
+	-- Validate the date against the FY Periods  
+	IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
+	BEGIN   
+		-- Unable to find an open fiscal year period to match the transaction date.  
+		RAISERROR(50005, 11, 1)  
+		GOTO Post_Exit  
+	END  
+  
+	-- Check if the transaction is already posted  
+	IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
+	BEGIN   
+		-- The transaction is already posted.  
+		RAISERROR(50007, 11, 1)  
+		GOTO Post_Exit  
+	END   
+  
+	-- Check if the transaction is already posted  
+	IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
+	BEGIN   
+		-- The transaction is already unposted.  
+		RAISERROR(50008, 11, 1)  
 		GOTO Post_Exit  
 	END   
 
-	IF @ysnPost = 0  
-	BEGIN  
-		RAISERROR(50013, 11, 1, 'Unpost')  
-		GOTO Post_Exit    
-	END  
-END   
+	-- Check Company preference: Allow User Self Post  
+	IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
+		AND @intEntityUserSecurityId <> @intCreatedEntityId 
+		AND @ysnRecap = 0   
+	BEGIN   
+		-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
+		IF @ysnPost = 1   
+		BEGIN   
+			RAISERROR(50013, 11, 1, 'Post')  
+			GOTO Post_Exit  
+		END   
 
--- Do not allow unpost if Bill has been created for the inventory receipt
-IF @ysnPost = 0 AND @ysnRecap = 0 
-BEGIN 
+		IF @ysnPost = 0  
+		BEGIN  
+			RAISERROR(50013, 11, 1, 'Unpost')  
+			GOTO Post_Exit    
+		END  
+	END   
 
-	SELECT	TOP 1 
-			@strBillNumber = Bill.strBillId
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-			LEFT JOIN dbo.tblAPBillDetail BillItems
-				ON BillItems.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-			INNER JOIN dbo.tblAPBill Bill
-				ON Bill.intBillId = BillItems.intBillId
-	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
-			AND BillItems.intBillDetailId IS NOT NULL
-
-	IF ISNULL(@strBillNumber, '') <> ''
+	-- Do not allow unpost if Bill has been created for the inventory receipt
+	IF @ysnPost = 0 AND @ysnRecap = 0 
 	BEGIN 
-		-- 'Unable to Unreceive. The inventory receipt is already billed in {Bill Id}.'
-		RAISERROR(80056, 11, 1, @strBillNumber)  
-		GOTO Post_Exit    
+
+		SELECT	TOP 1 
+				@strBillNumber = Bill.strBillId
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				LEFT JOIN dbo.tblAPBillDetail BillItems
+					ON BillItems.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+				INNER JOIN dbo.tblAPBill Bill
+					ON Bill.intBillId = BillItems.intBillId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND BillItems.intBillDetailId IS NOT NULL
+
+		IF ISNULL(@strBillNumber, '') <> ''
+		BEGIN 
+			-- 'Unable to Unreceive. The inventory receipt is already billed in {Bill Id}.'
+			RAISERROR(80056, 11, 1, @strBillNumber)  
+			GOTO Post_Exit    
+		END 
+
 	END 
 
-END 
-
--- Do not allow unpost if other charge is already billed. 
-IF @ysnPost = 0 AND @ysnRecap = 0 
-BEGIN 
-	SET @strBillNumber = NULL 
-	SELECT	TOP 1 
-			@strBillNumber = Bill.strBillId
-			,@strChargeItem = Item.strItemNo
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
-				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
-			INNER JOIN dbo.tblICItem Item
-				ON Item.intItemId = Charge.intChargeId				
-			LEFT JOIN dbo.tblAPBillDetail BillItems
-				ON BillItems.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
-			INNER JOIN dbo.tblAPBill Bill
-				ON Bill.intBillId = BillItems.intBillId
-	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
-			AND BillItems.intBillDetailId IS NOT NULL
-
-	IF ISNULL(@strBillNumber, '') <> ''
+	-- Do not allow unpost if other charge is already billed. 
+	IF @ysnPost = 0 AND @ysnRecap = 0 
 	BEGIN 
-		-- 'Unable to Unreceive. The {Other Charge} is already billed in {Bill Id}.'
-		RAISERROR(51174, 11, 1, @strChargeItem, @strBillNumber)  
-		GOTO Post_Exit    
+		SET @strBillNumber = NULL 
+		SELECT	TOP 1 
+				@strBillNumber = Bill.strBillId
+				,@strChargeItem = Item.strItemNo
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
+					ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = Charge.intChargeId				
+				LEFT JOIN dbo.tblAPBillDetail BillItems
+					ON BillItems.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
+				INNER JOIN dbo.tblAPBill Bill
+					ON Bill.intBillId = BillItems.intBillId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND BillItems.intBillDetailId IS NOT NULL
+
+		IF ISNULL(@strBillNumber, '') <> ''
+		BEGIN 
+			-- 'Unable to Unreceive. The {Other Charge} is already billed in {Bill Id}.'
+			RAISERROR(51174, 11, 1, @strChargeItem, @strBillNumber)  
+			GOTO Post_Exit    
+		END 
+
 	END 
 
-END 
+	-------------------------------------------------------------------------------------
+	-- Note: Need to change this validation as a settable configuration in IC. 
+	-- Dallmayr seems to use Item Net weight as the "received weight". 
+	-- They clean the coffee per lot. Net wgt at Lot is the actual wgt. 
+	-- See IC-2176 for more info. 
+	-------------------------------------------------------------------------------------
+	-- Do not allow post if there is Gross/Net UOM and there is a Net Qty mismatch between the line item and its lot. 
+	--IF @ysnPost = 1 AND @ysnRecap = 0 
+	--BEGIN 
+	--	SET @intItemId = NULL 
+	--	SET @strItemNo = NULL 
+
+	--	DECLARE @strNetQty AS NVARCHAR(50)
+	--			,@strLotNetQty AS NVARCHAR(50)
+
+	--	SELECT	TOP 1 
+	--			@intItemId = Item.intItemId
+	--			,@strItemNo = Item.strItemNo
+	--			,@strNetQty = CONVERT(NVARCHAR, CAST(ReceiptItem.dblNet AS MONEY), 2)
+	--			,@strLotNetQty = CONVERT(NVARCHAR, CAST(ReceiptItemLot.dblTotalLotNet AS MONEY), 2)
+	--	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+	--				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+	--			INNER JOIN dbo.tblICItem Item
+	--				ON Item.intItemId = ReceiptItem.intItemId
+	--			INNER JOIN (
+	--				SELECT	dblTotalLotNet = SUM(ISNULL(dblGrossWeight, 0) - ISNULL(dblTareWeight, 0))
+	--						,intInventoryReceiptItemId
+	--				FROM	dbo.tblICInventoryReceiptItemLot 
+	--				GROUP BY intInventoryReceiptItemId					
+	--			) ReceiptItemLot 
+	--				ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+	--	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+	--			AND ReceiptItem.intWeightUOMId IS NOT NULL 
+	--			AND dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (1, 2)  
+	--			AND ReceiptItem.dblNet <> ReceiptItemLot.dblTotalLotNet
+
+	--	IF @intItemId IS NOT NULL 
+	--	BEGIN 
+	--		-- 'Net quantity mistmatch. It is {Net Qty} on item {Item} but the total net from the lot(s) is {Lot total Net Qty}.'
+	--		RAISERROR(80081, 11, 1, @strNetQty, @strItemNo, @strLotNetQty)  
+	--		GOTO Post_Exit    
+	--	END 
+	--END 
+
+	-- Do not allow post if there is Gross/Net UOM and net qty is zero. 
+	IF @ysnPost = 1 AND @ysnRecap = 0 
+	BEGIN 
+		SET @intItemId = NULL 
+		SET @strItemNo = NULL 
+
+		SELECT	TOP 1 
+				@intItemId = Item.intItemId
+				,@strItemNo = Item.strItemNo
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND ReceiptItem.intWeightUOMId IS NOT NULL 
+				AND ISNULL(ReceiptItem.dblNet, 0) = 0 
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- 'The net quantity for item {Item Name} is missing.'
+			RAISERROR(80082, 11, 1, @strItemNo)  
+			GOTO Post_Exit    
+		END 
+	END 
+
+END
 
 -- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
-IF @@ERROR <> 0 GOTO Post_Exit;
+BEGIN 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
+	IF @@ERROR <> 0 GOTO Post_Exit;
+END
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
@@ -352,51 +427,40 @@ BEGIN
 							
 				,dblCost =	
 							-- New Hierarchy:
-							-- 1. If there is a Gross/Net UOM, use the Net Qty. 
-								-- 2.1. If it is not a Lot, use the item's Net Qty. 
-								-- 2.2. If it is a Lot, use the Lot's Net Qty. 
-							-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
-								-- 2.1. If it is not a Lot, use the item Qty. 
-								-- 2.2. If it is a Lot, use the lot qty. 
-
-							CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
+							-- 1. If there is a Gross/Net UOM, convert the cost from Cost UOM to Gross/Net UOM. 
+							-- 2. If Gross/Net UOM is not specified, then: 
+								-- 2.1. If it is not a Lot, convert the cost from Cost UOM to Receive UOM. 
+								-- 2.2. If it is a Lot, convert the cost from Cost UOM to Lot UOM. 
+							-- 3. If sub-currency exists, then convert it to sub-currency. 
+							CASE	
 									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
-									
-											CASE	
-													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-													
-													ELSE 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-											END
+										-- Convert the Cost UOM to Gross/Net UOM. 
+										dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+										+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 
-									-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
+									-- If Gross/Net UOM is missing, 
 									ELSE 
-
 											CASE	
-													-- It is an non-Lot item. 
+													-- If non-lot, convert the cost Cost UOM to Receive UOM
 													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
 														-- Convert the Cost UOM to Item UOM. 
 														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 													
-													-- It is a Lot item. 
-													ELSE 
-														-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
+													-- If lot, convert the cost Cost UOM to Lot UOM
+													ELSE 														
 														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 											END 
 
 							END
-
+							-- and then convert the cost to the sub-currency value. 
 							/ 
 							CASE	WHEN DetailItem.ysnSubCurrency = 1 THEN 
 										CASE WHEN ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Header.intSubCurrencyCents, 1) ELSE 1 END 
 									ELSE 
 										1
-							END 								
+							END
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
@@ -422,6 +486,9 @@ BEGIN
 					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM WeightUOM
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
+				LEFT JOIN dbo.tblICItemUOM CostUOM
+					ON CostUOM.intItemUOMId = DetailItem.intCostUOMId
+
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   
@@ -692,50 +759,40 @@ BEGIN
 							
 				,dblCost =	
 							-- New Hierarchy:
-							-- 1. If there is a Gross/Net UOM, use the Net Qty. 
-								-- 2.1. If it is not a Lot, use the item's Net Qty. 
-								-- 2.2. If it is a Lot, use the Lot's Net Qty. 
-							-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
-								-- 2.1. If it is not a Lot, use the item Qty. 
-								-- 2.2. If it is a Lot, use the lot qty. 
-
-							CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
+							-- 1. If there is a Gross/Net UOM, convert the cost from Cost UOM to Gross/Net UOM. 
+							-- 2. If Gross/Net UOM is not specified, then: 
+								-- 2.1. If it is not a Lot, convert the cost from Cost UOM to Receive UOM. 
+								-- 2.2. If it is a Lot, convert the cost from Cost UOM to Lot UOM. 
+							-- 3. If sub-currency exists, then convert it to sub-currency. 
+							CASE	
 									WHEN DetailItem.intWeightUOMId IS NOT NULL THEN 
-									
-											CASE	
-													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-													
-													ELSE 
-														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-											END
+										-- Convert the Cost UOM to Gross/Net UOM. 
+										dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intWeightUOMId, DetailItem.dblUnitCost) 
+										+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 
-									-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
+									-- If Gross/Net UOM is missing, 
 									ELSE 
-
 											CASE	
-													-- It is an non-Lot item. 
+													-- If non-lot, convert the cost Cost UOM to Receive UOM
 													WHEN ISNULL(DetailItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) = 0 THEN 
 														-- Convert the Cost UOM to Item UOM. 
 														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItem.dblUnitCost) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 													
-													-- It is a Lot item. 
-													ELSE 
-														-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
+													-- If lot, convert the cost Cost UOM to Lot UOM
+													ELSE 														
 														dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intCostUOMId, DetailItem.intUnitMeasureId), DetailItemLot.intItemUnitMeasureId, DetailItem.dblUnitCost) 
 														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 											END 
 
-							END 
+							END
+							-- and then convert the cost to the sub-currency value. 
 							/ 
 							CASE	WHEN DetailItem.ysnSubCurrency = 1 THEN 
 										CASE WHEN ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN ISNULL(Header.intSubCurrencyCents, 1) ELSE 1 END 
 									ELSE 
 										1
-							END 
+							END
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
@@ -1065,4 +1122,3 @@ BEGIN
 END
 
 Post_Exit:
-

@@ -380,6 +380,10 @@ Begin
 			WHILE @@FETCH_STATUS = 0      
 			BEGIN     
 
+				Set @intContractId=NULL
+				Set @intContainerId=NULL
+				Set @intShipmentId=NULL
+
 				-- From Lot to WorkOrders
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,

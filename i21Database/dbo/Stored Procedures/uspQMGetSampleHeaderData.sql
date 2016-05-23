@@ -59,42 +59,60 @@ ELSE IF @intProductTypeId = 9 -- Container Line Item
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
-		,S.intShipmentId
-		,S.intShipmentContractQtyId
-		,S.intShipmentBLContainerId
-		,S.intShipmentBLContainerContractId
+		--,S.intShipmentId
+		--,S.intShipmentContractQtyId
+		--,S.intShipmentBLContainerId
+		--,S.intShipmentBLContainerContractId
+		,S.intLoadId
+		,S.intLoadDetailId
+		,S.intLoadContainerId
+		,S.intLoadDetailContainerLinkId
 		,S.strContainerNumber
 		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
-		,C.intItemId
-		,C.strItemDescription AS strDescription
+		--,C.intItemId
+		--,C.strItemDescription AS strDescription
+		,S.intItemId
+		,S.strItemDescription AS strDescription
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
-	FROM vyuLGShipmentContainerReceiptContracts S
-	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
-	WHERE S.intShipmentBLContainerContractId = @intProductValueId
+	--FROM vyuLGShipmentContainerReceiptContracts S
+	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
+	--WHERE S.intShipmentBLContainerContractId = @intProductValueId
+	FROM vyuLGLoadContainerReceiptContracts S
+	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
+		AND S.strType = 'Inbound'
+	WHERE S.intLoadDetailContainerLinkId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 10 -- Shipment Line Item  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
-		,S.intShipmentId
-		,S.intShipmentContractQtyId
+		--,S.intShipmentId
+		--,S.intShipmentContractQtyId
+		,S.intLoadId
+		,S.intLoadDetailId
 		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
-		,C.intItemId
-		,C.strItemDescription AS strDescription
+		--,C.intItemId
+		--,C.strItemDescription AS strDescription
+		,S.intItemId
+		,S.strItemDescription AS strDescription
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
-	FROM vyuLGShipmentContainerReceiptContracts S
-	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
-	WHERE S.intShipmentContractQtyId = @intProductValueId
+	--FROM vyuLGShipmentContainerReceiptContracts S
+	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
+	--WHERE S.intShipmentContractQtyId = @intProductValueId
+	FROM vyuLGLoadContainerReceiptContracts S
+	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
+		AND S.strType = 'Inbound'
+	WHERE S.intLoadDetailId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 6 -- Lot  
 BEGIN

@@ -29,7 +29,7 @@ BEGIN TRY
      JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
      JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
      JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId  
-     LEFT JOIN dbo.tblLGShipmentBLContainer AS C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId  
+     LEFT JOIN dbo.tblLGLoadContainer AS C ON C.intLoadContainerId = S.intLoadContainerId  
      ) t  
     ORDER BY ''],['' + strTestName,strPropertyName  
     FOR XML Path('''')  
@@ -61,7 +61,7 @@ BEGIN TRY
    ,I1.strItemNo AS strBundleItemNo
    ,I.strItemNo  
    ,I.strDescription  
-   ,C.strContainerNumber  
+   ,ISNULL(C.strContainerNumber, S.strContainerNumber) AS strContainerNumber 
    ,S.strSampleNumber  
    ,ST.strSampleTypeName  
    ,SS.strStatus  
@@ -79,7 +79,7 @@ BEGIN TRY
   JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
   JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
   JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId  
-  LEFT JOIN dbo.tblLGShipmentBLContainer AS C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId  
+  LEFT JOIN dbo.tblLGLoadContainer AS C ON C.intLoadContainerId = S.intLoadContainerId  
   ) t  
  PIVOT(max(strPropertyValue) FOR strPropertyName IN (' 
 		+ @str + ')) pvt) AS DT'

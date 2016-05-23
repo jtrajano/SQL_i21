@@ -30,6 +30,7 @@ DECLARE @strDummyDistributionOption AS NVARCHAR(3) = NULL
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @intTicketId AS INT = @intSourceTransactionId
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
+DECLARE @dblRemainingQuantity AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
@@ -238,6 +239,40 @@ BEGIN TRY
 				,ysnIsStorage 
 			)
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
+			SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
+			IF(@dblRemainingUnits > ISNULL(@dblRemainingQuantity,0))
+				BEGIN
+					INSERT INTO @ItemsForItemReceipt (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+					,ysnIsStorage 
+				)
+				EXEC dbo.uspSCGetScaleItemForItemReceipt 
+					 @intTicketId
+					,@strSourceType
+					,@intUserId
+					,@dblRemainingUnits
+					,@dblCost
+					,@intEntityId
+					,@intContractId
+					,'SPT'
+					,@LineItems
+				END
 			--IF (@dblRemainingUnits = @dblNetUnits)
 			--RETURN
 		END

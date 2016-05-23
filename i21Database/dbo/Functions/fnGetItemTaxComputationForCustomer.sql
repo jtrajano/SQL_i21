@@ -31,6 +31,7 @@ RETURNS @returntable TABLE
 	,[ysnCheckoffTax]				BIT
 	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT
+	,[ysnInvalidSetup]				BIT
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
 )
@@ -58,6 +59,7 @@ BEGIN
 			,[ysnCheckoffTax]				BIT
 			,[strTaxCode]					NVARCHAR(100)						
 			,[ysnTaxExempt]					BIT
+			,[ysnInvalidSetup]				BIT
 			,[strTaxGroup]					NVARCHAR(100)
 			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT
@@ -90,6 +92,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes] 
 	)
@@ -110,6 +113,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
@@ -249,7 +253,7 @@ BEGIN
 			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
 				SET @ItemTaxAmount = 0.00;
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
+			IF(@TaxExempt = 1 AND @ExemptionPercent <> 0.00)
 				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/100) );
 				
 			IF(@CheckoffTax = 1)
@@ -283,6 +287,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes] 
 	)
@@ -304,6 +309,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
 	FROM

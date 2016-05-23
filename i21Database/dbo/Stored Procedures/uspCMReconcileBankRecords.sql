@@ -41,6 +41,22 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		
 SET @dtmLog = GETDATE()
 
+CREATE TABLE #tmpOriginDepositTransaction(strLink NVARCHAR(50))
+
+	INSERT INTO #tmpOriginDepositTransaction
+	SELECT	strLink = ( CAST(a.apchk_cbk_no AS NVARCHAR(2)) 
+									+ CAST(a.apchk_rev_dt AS NVARCHAR(10)) 
+									+ CAST(a.apchk_trx_ind AS NVARCHAR(1)) 
+									+ CAST(a.apchk_chk_no AS NVARCHAR(8))
+						) COLLATE Latin1_General_CI_AS
+					FROM	dbo.apchkmst a INNER JOIN dbo.aptrxmst b
+								ON a.apchk_cbk_no = b.aptrx_cbk_no
+								AND a.apchk_chk_no = b.aptrx_chk_no
+								AND a.apchk_trx_ind = b.aptrx_trans_type			
+								AND a.apchk_rev_dt = b.aptrx_chk_rev_dt
+								AND a.apchk_vnd_no = b.aptrx_vnd_no
+					WHERE	 b.aptrx_trans_type = 'O' -- Other CW transactions
+
 -- Log the status of the transactions to clear prior to the reconciliation. 
 INSERT INTO [dbo].[tblCMBankReconciliationAudit]
 (
@@ -70,7 +86,8 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)		
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		--AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN (SELECT strLink COLLATE Latin1_General_CI_AS  FROM #tmpOriginDepositTransaction) --This is to improved the query by not using fnIsDespositEntry
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback		
 
 -- Commented due to this jira CM-915 and created a counter part on integration project
@@ -103,7 +120,8 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		--AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN (SELECT strLink COLLATE Latin1_General_CI_AS  FROM #tmpOriginDepositTransaction) --This is to improved the query by not using fnIsDespositEntry
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
 --=====================================================================================================================================

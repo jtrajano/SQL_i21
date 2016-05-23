@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddItemToInvoice]
 	 @InvoiceId						INT	
 	,@ItemId						INT				= NULL
+	,@ItemPrepayTypeId				INT				= 0
+	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@ItemIsInventory				BIT				= 0
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
@@ -21,6 +23,8 @@
 	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
 	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
 	,@ItemTaxGroupId				INT				= NULL
+	,@ItemStorageLocationId			INT				= NULL
+	,@ItemCompanyLocationSubLocationId	INT				= NULL
 	,@RecomputeTax					BIT				= 1
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
@@ -38,7 +42,10 @@
 	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000			
 	,@ItemTicketId					INT				= NULL		
-	,@ItemTicketHoursWorkedId		INT				= NULL		
+	,@ItemTicketHoursWorkedId		INT				= NULL	
+	,@ItemCustomerStorageId			INT				= NULL		
+	,@ItemSiteDetailId				INT				= NULL		
+	,@ItemLoadDetailId				INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
@@ -77,6 +84,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 		EXEC [dbo].[uspARAddInventoryItemToInvoice]
 			 @InvoiceId						= @InvoiceId	
 			,@ItemId						= @ItemId
+			,@ItemPrepayTypeId				= @ItemPrepayTypeId
+			,@ItemPrepayRate				= @ItemPrepayRate
 			,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
 			,@ErrorMessage					= @AddDetailError	OUTPUT
 			,@RaiseError					= @RaiseError
@@ -96,6 +105,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
 			,@ItemLicenseAmount				= @ItemLicenseAmount
 			,@ItemTaxGroupId				= @ItemTaxGroupId
+			,@ItemStorageLocationId			= @ItemStorageLocationId 
+			,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId 
 			,@RecomputeTax					= @RecomputeTax
 			,@ItemSCInvoiceId				= @ItemSCInvoiceId
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
@@ -114,6 +125,9 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt
 			,@ItemTicketId					= @ItemTicketId
 			,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+			,@ItemCustomerStorageId			= @ItemCustomerStorageId
+			,@ItemSiteDetailId				= @ItemSiteDetailId
+			,@ItemLoadDetailId				= @ItemLoadDetailId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
 			,@ItemBillingBy					= @ItemBillingBy
@@ -152,6 +166,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 			INSERT INTO tblARInvoiceDetail
 				([intInvoiceId]
 				,[intItemId]
+				,[intPrepayTypeId]
+				,[dblPrepayRate]
 				,[strItemDescription]
 				,[strDocumentNumber]
 				,[intOrderUOMId]
@@ -168,6 +184,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[dblPercentFull]
 				,[intPerformerId]
 				,[intTaxGroupId]
+				,[intCompanyLocationSubLocationId] 
+				,[intStorageLocationId] 
 				,[intEntitySalespersonId]
 				,[intSalesOrderDetailId]
 				,[strSalesOrderNumber]
@@ -175,6 +193,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
+				,@ItemPrepayTypeId
+				,@ItemPrepayRate 
 				,@ItemDescription
 				,@ItemDocumentNumber
 				,@OrderUOMId
@@ -191,6 +211,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemPercentFull
 				,@ItemPerformerId							
 				,@ItemTaxGroupId
+				,@ItemCompanyLocationSubLocationId
+				,@ItemStorageLocationId
 				,@EntitySalespersonId					
 				,@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber
@@ -225,6 +247,8 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 		BEGIN TRY
 		EXEC [dbo].[uspARAddMiscItemToInvoice]
 			 @InvoiceId						= @InvoiceId
+			,@ItemPrepayTypeId				= @ItemPrepayTypeId
+			,@ItemPrepayRate				= @ItemPrepayRate
 			,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
 			,@ErrorMessage					= @AddDetailError	OUTPUT
 			,@RaiseError					= @RaiseError

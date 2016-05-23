@@ -29,7 +29,7 @@ SELECT
 	,intEntityVendorId = intVendorEntityId
 	,strVendor
 	,strItemNo
-	,strItemDescription = strItemNo COLLATE Latin1_General_CI_AS
+	,strItemDescription
 	,strLotTracking
 	,strType
 	,strUnitMeasure = strItemUOM COLLATE Latin1_General_CI_AS
@@ -56,6 +56,10 @@ SELECT
 	,strSubLocationName = NULL
 	,intLoadContainerId = -1
 	,intLoadDetailContainerLinkId = -1
+	,intPurchaseSale
+	,intTransUsedBy
+	,intSourceType
+	,ysnPosted
 FROM vyuLGLoadDetailView WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
 
 UNION ALL
@@ -117,4 +121,8 @@ SELECT
 	,strSubLocationName
 	,intLoadContainerId
 	,intLoadDetailContainerLinkId
+	,intPurchaseSale
+	,intTransUsedBy
+	,intSourceType
+	,ysnPosted
 FROM vyuLGLoadContainerPurchaseContracts

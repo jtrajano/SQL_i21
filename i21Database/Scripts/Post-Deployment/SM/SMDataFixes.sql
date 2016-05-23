@@ -125,3 +125,5 @@ GO
 		)
 	END
 GO
+	UPDATE A SET A.strAnnouncement = REPLACE(REPLACE(A.strAnnouncement, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload/Announcement') FROM tblSMAnnouncement A WHERE A.strAnnouncement LIKE '%/HelpDesk/redactorUpload/%'
+GO

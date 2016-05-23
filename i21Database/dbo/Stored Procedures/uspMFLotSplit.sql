@@ -3,6 +3,7 @@
  @intSplitSubLocationId INT,  
  @intSplitStorageLocationId INT,  
  @dblSplitQty NUMERIC(38,20),  
+ @intSplitItemUOMId int,
  @intUserId INT,
  @strSplitLotNumber NVARCHAR(100)=NULL OUTPUT,
  @strNewLotNumber NVARCHAR(100) = NULL,    
@@ -36,12 +37,14 @@ BEGIN TRY
 			,@intCategoryId int
 	DECLARE @dblWeightPerQty NUMERIC(38, 20)
 	DECLARE @intWeightUOMId INT
-	DECLARE @intItemStockUOMId INT
+	
 	DECLARE @dblLotReservedQty NUMERIC(38, 20)
 	DECLARE @dblWeight NUMERIC(38,20)
 	DECLARE @dblLotQty NUMERIC(38,20)
 	DECLARE @dblLotAvailableQty NUMERIC(38,20)
-
+			,@dblOldDestinationWeight NUMERIC(38,20)
+			,@dblOldSourceWeight NUMERIC(38,20)
+	
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
 	SELECT @intItemId = intItemId, 
@@ -54,14 +57,10 @@ BEGIN TRY
 		   @intItemUOMId = intItemUOMId,	 
 		   @dblWeightPerQty = dblWeightPerQty,
 		   @intWeightUOMId = intWeightUOMId,
-		   @dblWeight = dblWeight
+		   @dblWeight = dblWeight,
+		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
 	FROM tblICLot WHERE intLotId = @intLotId
 
-	SELECT @intItemStockUOMId = intItemUOMId
-	FROM dbo.tblICItemUOM
-	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
-		
 	SELECT @dblLotAvailableQty = (CASE 
 		WHEN ISNULL(@dblWeight, 0) = 0
 			THEN ISNULL(@dblLotQty, 0)
@@ -74,18 +73,13 @@ BEGIN TRY
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId,ISNULL(@intWeightUOMId,@intItemUOMId),ISNULL(dblQty,0))) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 	
-	IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
+	IF (@dblLotAvailableQty + (CASE WHEN @intItemUOMId=@intSplitItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblAdjustByQuantity*@dblWeightPerQty ELSE @dblAdjustByQuantity END)) < @dblLotReservedQty
 	BEGIN
 		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 	END
 
-	IF @dblWeightPerQty > 0 
-	BEGIN
-		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
-	END
-	
 	SELECT @strLotTracking = strLotTracking
 			,@intCategoryId=intCategoryId
 	FROM dbo.tblICItem
@@ -103,29 +97,21 @@ BEGIN TRY
 	BEGIN 
 		IF (@strLotTracking = 'Yes - Serial Number')
 		BEGIN
-			--EXEC dbo.uspSMGetStartingNumber 24, @strNewLotNumber OUTPUT
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-						,@intItemId = @intItemId
-						,@intManufacturingId = NULL
-						,@intSubLocationId = @intSubLocationId
-						,@intLocationId = @intLocationId
-						,@intOrderTypeId = NULL
-						,@intBlendRequirementId = NULL
-						,@intPatternCode = 24
-						,@ysnProposed = 0
-						,@strPatternString = @strNewLotNumber OUTPUT
+			SET @strNewLotNumber = 'Split Lot Serial Number'
 		END
 		ELSE 
 		BEGIN
 			RAISERROR('Lot tracking for the item is set as manual. Please supply the split lot number.',11,1)
 		END
 	END
-
+	
 	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
 	BEGIN
 		RAISERROR(90008,11,1)
 	END
-							 
+
+	BEGIN TRANSACTION
+									 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
 													 @intLocationId	= @intLocationId,
@@ -137,33 +123,26 @@ BEGIN TRY
 													 @intNewStorageLocationId = @intSplitStorageLocationId,
 													 @strNewLotNumber = @strNewLotNumber,
 													 @dblAdjustByQuantity = @dblAdjustByQuantity,
+													 @intItemUOMId=@intSplitItemUOMId,
 													 @dblNewSplitLotQuantity = NULL,
 													 @dblNewWeight = NULL,
-													 @intNewItemUOMId = @intNewItemUOMId,
+													 @intNewItemUOMId = NULL,
 													 @intNewWeightUOMId = NULL,
 													 @dblNewUnitCost = NULL,
 													 @intSourceId = @intSourceId,
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-	UPDATE dbo.tblICLot
-	SET dblWeightPerQty = @dblWeightPerQty
-	WHERE intSubLocationId =@intSplitSubLocationId AND intStorageLocationId=@intSplitStorageLocationId AND strLotNumber=@strNewLotNumber
 	
 	SELECT @strSplitLotNumber = strLotNumber FROM tblICLot WHERE intSplitFromLotId = @intLotId
 	SELECT @strSplitLotNumber AS strSplitLotNumber
-
-	--UPDATE tblICLot
-	--SET dblWeight = dblQty
-	--WHERE dblQty <> dblWeight
-	--	AND intItemUOMId = intWeightUOMId
-	--and intLotId=@intLotId
 
 	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
 	BEGIN
 		EXEC dbo.uspMFLotAdjustQty
 			@intLotId = @intLotId,       
 			@dblNewLotQty = @dblLotQty,
+			@intAdjustItemUOMId=@intItemUOMId,
 			@intUserId = @intUserId ,
 			@strReasonCode = 'Weight qty same',
 			@strNotes = 'Weight qty same'
@@ -171,23 +150,20 @@ BEGIN TRY
 
 	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		--EXEC dbo.uspMFLotAdjustQty
-		-- @intLotId =@intLotId,       
-		-- @dblNewLotQty =0,
-		-- @intUserId=@intUserId ,
-		-- @strReasonCode ='Residue qty clean up',
-		-- @strNotes ='Residue qty clean up'
-		UPDATE tblICLot
-		SET dblWeight = 0
-			,dblQty = 0
-		WHERE intLotId = @intLotId
+		EXEC dbo.uspMFLotAdjustQty
+		 @intLotId =@intLotId,       
+		 @dblNewLotQty =0,
+		 @intAdjustItemUOMId=@intItemUOMId,
+		 @intUserId=@intUserId ,
+		 @strReasonCode ='Residue qty clean up',
+		 @strNotes ='Residue qty clean up'
 	END
-													 
+COMMIT TRANSACTION													 
 END TRY  
   
 BEGIN CATCH  
   
- IF XACT_STATE() != 0 AND @TransactionCount = 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
+ IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
  SET @ErrMsg = ERROR_MESSAGE()      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')     
   

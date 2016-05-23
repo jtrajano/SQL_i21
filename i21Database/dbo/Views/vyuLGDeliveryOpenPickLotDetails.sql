@@ -3,10 +3,12 @@ AS
 SELECT PL.intPickLotDetailId,
   PL.intPickLotHeaderId,
   PLH.strCustomer,
+  PLH.intCustomerEntityId,
   PLH.intReferenceNumber,
   PLH.dtmPickDate,
   PLH.strCommodity,
   PLH.strLocationName,
+  PLH.intCompanyLocationId,
   PLH.strWeightUnitMeasure,
   PL.intAllocationDetailId,
   PL.intLotId,
@@ -64,3 +66,4 @@ JOIN vyuCTContractDetailView SCD ON SCD.intContractDetailId  = AD.intSContractDe
 JOIN tblICUnitMeasure  UM ON UM.intUnitMeasureId   = PL.intLotUnitMeasureId
 JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasureId
 JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
+WHERE PL.intPickLotDetailId NOT IN (SELECT IsNull(LD.intPickLotDetailId, 0) FROM tblLGLoadDetail LD)

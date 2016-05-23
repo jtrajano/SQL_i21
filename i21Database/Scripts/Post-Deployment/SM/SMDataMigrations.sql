@@ -261,7 +261,7 @@ GO
 		SELECT strTicketCommentImageId, strFileIdentifier, strFileName,  REPLACE(REPLACE(strFileLocation, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload\Announcement'), blbFile FROM tblHDUpload
 
 		INSERT INTO tblSMAnnouncement(intAnnouncementTypeId, dtmStartDate, dtmEndDate, strAnnouncement, intSort, strImageId)
-		SELECT AnnouncementType1.intAnnouncementTypeId, Announcement.dtmStartDate, Announcement.dtmEndDate, Announcement.strAnnouncement, Announcement.intSort, Announcement.strImageId 
+		SELECT AnnouncementType1.intAnnouncementTypeId, Announcement.dtmStartDate, Announcement.dtmEndDate, REPLACE(REPLACE(Announcement.strAnnouncement, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload/Announcement'), Announcement.intSort, Announcement.strImageId 
 		FROM tblSMAnnouncementType AnnouncementType1
 		INNER JOIN tblHDAnnouncementType AnnouncementType2 ON AnnouncementType1.strAnnouncementType = AnnouncementType2.strAnnouncementType
 		INNER JOIN tblHDAnnouncement Announcement ON AnnouncementType2.intAnnouncementTypeId = Announcement.intAnnouncementTypeId
@@ -527,5 +527,42 @@ GO
 	Exec uspSMResolveContactRoleMenus @roleId
 
 	SET @currentRow = @currentRow + 1
+	END
+GO
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Level/Sorting Order - Approval List')
+	BEGIN
+
+		DECLARE @currentRow INT
+		DECLARE @totalRows INT
+
+		SET @currentRow = 1
+		SELECT @totalRows = Count(*) FROM [dbo].[tblSMApprovalList]
+
+		WHILE (@currentRow <= @totalRows)
+		BEGIN
+
+		Declare @approvalListId INT
+		SELECT @approvalListId = intApprovalListId FROM (  
+			SELECT ROW_NUMBER() OVER(ORDER BY intApprovalListId ASC) AS 'ROWID', *
+			FROM [dbo].[tblSMApprovalList]
+		) a
+		WHERE ROWID = @currentRow
+
+		UPDATE A1 SET A1.intApproverLevel = intSortLevel, A1.intSort = intSortLevel
+		FROM
+		(
+			SELECT A.intApproverLevel, A.intSort, CAST (ROW_NUMBER() OVER (ORDER BY B.intApproverLevel, B.intApprovalListUserSecurityId ASC) AS INT) as intSortLevel
+			FROM tblSMApprovalListUserSecurity A
+			INNER JOIN tblSMApprovalListUserSecurity B ON A.intApprovalListUserSecurityId = B.intApprovalListUserSecurityId
+			WHERE B.intApprovalListId = @approvalListId
+		) A1
+
+		SET @currentRow = @currentRow + 1
+		END
+		
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Update Level/Sorting Order - Approval List', 'Update Level/Sorting Order - Approval List', GETDATE())
+
 	END
 GO

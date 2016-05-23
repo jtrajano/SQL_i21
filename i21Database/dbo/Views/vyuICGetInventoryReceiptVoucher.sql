@@ -18,14 +18,21 @@ SELECT
 	, ISNULL(ReceiptItem.dblBillQty,0) dblQtyVouchered
 	, ISNULL(ReceiptItem.dblBillQty,0) dblVoucherAmount
 	, (ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0)) dblQtyToVoucher
-	, ((ReceiptItem.dblLineTotal/ReceiptItem.dblQtyToReceive)*(ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0))) dblAmountToVoucher
+	, dblAmountToVoucher =
+	  CASE
+		WHEN ReceiptItem.dblQtyToReceive = 0
+		THEN 0
+		ELSE (ReceiptItem.dblLineTotal/ReceiptItem.dblQtyToReceive)*(ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0))
+	  END
 	, strBillId = ISNULL(Bill.strBillId, 'New Voucher')
 	, Bill.dtmBillDate
+	, Bill.intBillId
 FROM vyuICGetInventoryReceiptItem ReceiptItem
 	LEFT JOIN (
 		SELECT DISTINCT strBillId
 			, dtmBillDate
 			, intInventoryReceiptItemId
+			, Detail.intBillId
 		FROM tblAPBillDetail Detail
 			LEFT JOIN tblAPBill Header ON Header.intBillId = Detail.intBillId
 		WHERE ISNULL(intInventoryReceiptItemId, '') <> ''

@@ -96,6 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\WorkOrder.sql
 :r .\TM\Reports\DataSource\CallEntryPrintOut.sql
 :r .\TM\Reports\Layout\CallEntryPrintOut.sql
+:r .\TM\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
@@ -123,7 +124,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
-:r "..\..\..\Integration\dbo\Views\vyuTMLeaseSearch.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
@@ -149,6 +150,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql
 :r .\GL\DefaultData\7_FiscalYearPeriod.sql
 :r .\GL\DefaultData\8_AccountCurrency.sql
+:r .\GL\DefaultData\9_AlterTable.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
@@ -192,6 +194,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
 :r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
 :r .\AR\DefaultData\19_UpdateUsedCustomerBudget.sql
+:r .\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -211,7 +214,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\RemoveBillTemplate.sql
 :r .\AP\UpdateVoucherForApproval.sql
 :r .\AP\UpdateBillPayToAddress.sql
-:r .\AP\UpdateBillGLEntriesRecords.sql
+:r .\AP\UpdateBillGLEntriesRecords.SQL
+:r .\AP\UpdateBillDetailCurrencies.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
@@ -304,7 +308,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\023_RenameEntityContactEmailDistribution.sql
 :r .\EM\024_delete_old_entity_table.sql
 :r .\EM\025_UpdatePhoneNumberAndCreateBackup.sql
-
+:r .\EM\028_MassCountryFormat.sql
+:r .\EM\026_ImportPhoneNumbersToNewTable.sql
+:r .\EM\027_MassUpdatePhoneNumber.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

@@ -9,6 +9,8 @@ AS
 		,[strScheduleType]
 		,[dtmStartDate]
 		,[dtmEndDate]
+		,[strEntityIds]
+		,[intCommissionPlanId]
 		,[ysnActive]
 		,[ysnPayables]
 		,[ysnPayroll]
@@ -21,6 +23,8 @@ AS
 		,[strScheduleType]
 		,[dtmStartDate]
 		,[dtmEndDate]
+		,[strEntityIds]
+		,[intCommissionPlanId]
 		,[ysnActive]
 		,[ysnPayables]
 		,[ysnPayroll]
@@ -54,13 +58,15 @@ AS
 			([intCommissionScheduleId]
 			,[intEntityId]
 			,[intCommissionPlanId]
-			,[ysnAdjustPrevious]
+			,[intSort]
+			,[dblPercentage]
 			,[intConcurrencyId])
 		SELECT 
 			@NewCommissionScheduleId
 			,[intEntityId]
 			,[intCommissionPlanId]
-			,[ysnAdjustPrevious]
+			,[intSort]
+			,[dblPercentage]
 			,1
 		FROM
 			[tblARCommissionScheduleDetail]

@@ -75,36 +75,40 @@ BEGIN
 	WHERE	intInventoryReceiptId = @intTransactionId 
 END 
 
--- Update the received quantities back to the Purchase Order
-IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER 
-	AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
+-- Call the integration scripts based on Receipt type
 BEGIN 
-	EXEC dbo.uspPOReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
-	GOTO _Exit;
-END
+	-- Update the received quantities back to the Contract Management
+	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
+	BEGIN 
+		EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+	END
 
--- Update the received quantities back to the Purchase Contract
-IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
-BEGIN 
-	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
-END
+	-- Update the received quantities back to the Purchasing
+	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
+	BEGIN 
+		EXEC dbo.uspPOReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+	END
+END 
 
--- Update the received quantities back to Inbound Shipment 
-IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
+-- Call the integration scripts based on Source type
 BEGIN 
-	EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
-END
+	-- Update the received quantities back to Inbound Shipment 
+	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
+	BEGIN 
+		EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+	END
 
--- Update the received quantities back to a Scale Ticket
-IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_SCALE
-BEGIN 
-	EXEC dbo.uspSCReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
-END
+	-- Update the received quantities back to a Scale Ticket
+	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_SCALE
+	BEGIN 
+		EXEC dbo.uspSCReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+	END
 
--- Update the received quantities back to Transport Order
-IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_TRANSPORT
-BEGIN 
-	EXEC dbo.uspTRReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
-END
+	-- Update the received quantities back to Transport Order
+	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_TRANSPORT
+	BEGIN 
+		EXEC dbo.uspTRReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+	END
+END 
 
 _Exit: 

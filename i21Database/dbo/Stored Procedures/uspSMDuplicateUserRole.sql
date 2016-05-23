@@ -25,6 +25,8 @@ BEGIN
 
 	EXEC uspSMUpdateUserRoleMenus @newUserRoleId, 1, 0
 
+	DELETE FROM tblSMUserRoleMenu WHERE intUserRoleId = @newUserRoleId AND intMenuId NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId  = @intUserRoleId)
+
 	UPDATE B SET B.ysnVisible = A.ysnVisible
 	FROM tblSMUserRoleMenu A
 	JOIN tblSMUserRoleMenu B

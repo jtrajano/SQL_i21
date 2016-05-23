@@ -27,49 +27,52 @@ BEGIN
 			, intSourceId
 			, dblQuantity
 			, intItemId
-			, intItemUOMId)
+			, intItemUOMId
+			, intContractDetailId)
 		SELECT strTransactionType = @TransactionType_TransportLoad
-			, intTransactionId = @TransactionId
+			, intTransactionId = LR.intLoadHeaderId
 			, intTransactionDetailId = LR.intLoadReceiptId
 			, strSourceType = @SourceType_InventoryReceipt
 			, intSourceId = LR.intInventoryReceiptId
-			, dblQuantity = LR.dblGross
+			, dblQuantity = CASE WHEN (SP.strGrossOrNet = 'Gross') THEN LR.dblGross ELSE LR.dblNet END
 			, intItemId = LR.intItemId
 			, intItemUOMId = NULL
+			, LR.intContractDetailId
 		FROM tblTRLoadReceipt LR
 			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
 			LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = LR.intInventoryReceiptId
+			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
 		WHERE LH.intLoadHeaderId = @TransactionId
 			AND ISNULL(LR.intInventoryReceiptId, '') <> ''
-
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
-			, intTransactionId = @TransactionId
+			, intTransactionId = LR.intLoadHeaderId
 			, intTransactionDetailId = LR.intLoadReceiptId
 			, strSourceType = @SourceType_InventoryTransfer
 			, intSourceId = LR.intInventoryTransferId
-			, dblQuantity = LR.dblGross
+			, dblQuantity = CASE WHEN (SP.strGrossOrNet = 'Gross') THEN LR.dblGross ELSE LR.dblNet END
 			, intItemId = LR.intItemId
 			, intItemUOMId = NULL
+			, LR.intContractDetailId
 		FROM tblTRLoadReceipt LR
 			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
 			LEFT JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = LR.intInventoryTransferId
+			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
 		WHERE LH.intLoadHeaderId = @TransactionId
 			AND ISNULL(LR.intInventoryTransferId, '') <> ''
-
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
-			, intTransactionId = @TransactionId
+			, intTransactionId = DH.intLoadHeaderId
 			, intTransactionDetailId = DH.intLoadDistributionHeaderId
 			, strSourceType = @SourceType_Invoice
 			, intSourceId = DH.intInvoiceId
-			, dblQuantity = 0.00
+			, dblQuantity = DD.dblUnits
 			, intItemId = NULL
 			, intItemUOMId = NULL
+			, DD.intContractDetailId
 		FROM tblTRLoadDistributionHeader DH
-			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId
-			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DH.intInvoiceId
-		WHERE LH.intLoadHeaderId = @TransactionId
+			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+		WHERE DH.intLoadHeaderId = @TransactionId
 			AND ISNULL(DH.intInvoiceId, '') <> ''
 
 	END

@@ -23,3 +23,8 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE name = 'tblRKM2MInquiryTransact
 	END
 
 GO
+IF EXISTS( SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS	WHERE TABLE_NAME = 'tblRKAssignFuturesToContractSummary' AND  COLUMN_NAME = 'intHedgedLots' and DATA_TYPE = 'int')
+BEGIN
+	DELETE FROM tblRKAssignFuturesToContractSummary
+END
+GO

@@ -31,6 +31,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@LastReconDate AS DATETIME
+
+		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
@@ -52,4 +55,23 @@ WHERE	ysnPosted = 1
 			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT, @VOID_CHECK)
 			OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		--AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
+					SELECT
+					( CAST(a.apchk_cbk_no AS NVARCHAR(2)) 
+									+ CAST(a.apchk_rev_dt AS NVARCHAR(10)) 
+									+ CAST(a.apchk_trx_ind AS NVARCHAR(1)) 
+									+ CAST(a.apchk_chk_no AS NVARCHAR(8))
+						) COLLATE Latin1_General_CI_AS
+					FROM	dbo.apchkmst a INNER JOIN dbo.aptrxmst b
+								ON a.apchk_cbk_no = b.aptrx_cbk_no
+								AND a.apchk_chk_no = b.aptrx_chk_no
+								AND a.apchk_trx_ind = b.aptrx_trans_type			
+								AND a.apchk_rev_dt = b.aptrx_chk_rev_dt
+								AND a.apchk_vnd_no = b.aptrx_vnd_no
+					WHERE	 b.aptrx_trans_type = 'O' -- Other CW transactions
+			)
+		AND 1 = CASE 
+			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
+			ELSE 1 
+			END --CM-1143

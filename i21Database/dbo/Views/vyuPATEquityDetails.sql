@@ -1,17 +1,14 @@
 ﻿CREATE VIEW [dbo].[vyuPATEquityDetails]
 	AS 
-	 SELECT CE.intCustomerEquityId,
-			CE.intRefundTypeId,
-			RR.strRefundType,
-			CE.intCustomerId,
+	 SELECT CE.intCustomerId,
 			ENT.strName,
 			CE.intFiscalYearId,
 			FY.strFiscalYear,
 			AR.strStockStatus,
 			TC.strTaxCode,
-			CE.dtmLastActivityDate,
+			dtmLastActivityDate = MAX(CE.dtmLastActivityDate),
 			CE.strEquityType,
-			CE.dblEquity,
+			dblEquity = SUM(CE.dblEquity),
 			CE.intConcurrencyId 
 	   FROM tblPATCustomerEquity CE
  INNER JOIN tblEMEntity ENT
@@ -24,3 +21,11 @@
 		 ON AR.intEntityCustomerId = CE.intCustomerId
   LEFT JOIN tblSMTaxCode TC
 		 ON TC.intTaxCodeId = AR.intTaxCodeId
+		 GROUP BY	CE.intCustomerId,
+					ENT.strName,
+					CE.intFiscalYearId,
+					FY.strFiscalYear,
+					AR.strStockStatus,
+					TC.strTaxCode,
+					CE.strEquityType,
+					CE.intConcurrencyId
