@@ -4,7 +4,7 @@
 	[intCustomGridTabId]		INT             NOT NULL,
     [strFieldName]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strDataType]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [intSort]					INT             NOT NULL,
+    [intSort]					INT             NOT NULL DEFAULT (1),
     [intConcurrencyId]			INT				NOT NULL DEFAULT (1),
-	CONSTRAINT [FK_tblSMCustomGridField_tblSMCustomGridTab] FOREIGN KEY ([intCustomGridTabId]) REFERENCES [tblSMCustomGridField]([intCustomGridTabId])
+	CONSTRAINT [FK_tblSMCustomGridField_tblSMCustomGridTab] FOREIGN KEY ([intCustomGridTabId]) REFERENCES [tblSMCustomGridTab]([intCustomGridTabId])
 )

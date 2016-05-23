@@ -3846,6 +3846,11 @@
     <Build Include="dbo\Tables\tblARCommissionRecapDetail.sql" />
     <Build Include="dbo\Tables\tblARCommissionRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGrid.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridField.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridTab.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridRow.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridCell.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
