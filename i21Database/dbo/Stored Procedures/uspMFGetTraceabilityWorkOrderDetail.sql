@@ -68,7 +68,7 @@ ELSE
 			Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 			Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-			Where wi.intLotId=@intLotId) t
+			Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 			group by t.strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,
 			t.intLotId,t.strProcessName,t.intAttributeTypeId
 
