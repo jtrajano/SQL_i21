@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFTransactions](
 	[intTransactionId] [int] IDENTITY(1,1) NOT NULL,
-	[uniqTransactionGuid] NVARCHAR(150) NULL,
+	[uniqTransactionGuid] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
 	[intReportingComponentDetailId] [int] NULL,
 	[intTaxAuthorityId] [int] NULL,
 	[strTaxAuthority] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
