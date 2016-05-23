@@ -14,3 +14,9 @@ FROM vyuMFInventoryView
 Union
 SELECT DISTINCT intParentLotId AS intId , strParentLotNumber AS strName, 5 AS intObjectTypeId,intItemId,0 AS intLocationId 
 FROM vyuMFGetParentLot
+Union
+SELECT DISTINCT intInventoryReceiptId AS intId , strReceiptNumber AS strName, 6 AS intObjectTypeId,0 AS intItemId,0 AS intLocationId 
+FROM tblICInventoryReceipt
+Union
+SELECT DISTINCT intInventoryShipmentId AS intId , strShipmentNumber AS strName, 7 AS intObjectTypeId,0 AS intItemId,0 AS intLocationId 
+FROM tblICInventoryShipment

@@ -243,6 +243,84 @@ Begin
 
 	End
 
+	--Receipt
+	If @intObjectTypeId=6
+	Begin
+		Select TOP 1 @intContractId=lg.intContractHeaderId,@intShipmentId=lg.intShipmentId,@intContainerId=lg.intShipmentBLContainerId 
+		From vyuLGShipmentContainerReceiptContracts lg Join tblICInventoryReceiptItem ri on lg.intShipmentBLContainerId=ri.intContainerId 
+		Where ri.intInventoryReceiptId=@intLotId
+
+		--Contract -> In Shipment -> Container ->Receipt
+		If ISNULL(@intContainerId,0)>0
+		Begin
+
+			--Contract
+			Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+			dblQuantity,strUOM,dtmTransactionDate,strVendor,intImageTypeId,strType)
+			Exec uspMFGetTraceabilityContractDetail @intContractId,@intDirectionId
+
+			Update @tblNodeData Set intRecordId=1,intParentId=0
+
+			--In Shipment
+			Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+			dblQuantity,strUOM,dtmTransactionDate,strVendor,strType)
+			Exec uspMFGetTraceabilityInboundShipmentDetail @intShipmentId,@intDirectionId
+
+			Update @tblNodeData Set intRecordId=2,intParentId=1 Where intParentId is null
+
+			--Container
+			Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+			dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strType)
+			Exec uspMFGetTraceabilityContainerDetail @intContainerId,@intDirectionId
+
+			Update @tblNodeData Set intRecordId=3,intParentId=2 Where intParentId is null
+
+		End
+		
+		--Contract -> Receipt
+		If ISNULL(@intContainerId,0)=0
+		Begin
+
+			Select TOP 1 @intContractId = ISNULL(ri.intOrderId,0)
+			From tblICInventoryReceiptItem ri 
+			Join tblICInventoryReceipt rh on ri.intInventoryReceiptId=rh.intInventoryReceiptId 
+			Where rh.intInventoryReceiptId=@intLotId And rh.strReceiptType='Purchase Contract'
+
+			If ISNULL(@intContractId,0)>0
+			Begin
+				Select TOP 1 @intContractId=lg.intContractHeaderId,@intShipmentId=lg.intShipmentId,@intContainerId=lg.intShipmentBLContainerId 
+				From vyuLGShipmentContainerReceiptContracts lg Join tblICInventoryReceiptItem ri on lg.intShipmentBLContainerId=ri.intContainerId 
+				Where ri.intInventoryReceiptId=@intLotId
+
+				--Contract
+				Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+				dblQuantity,strUOM,dtmTransactionDate,strVendor,intImageTypeId,strType)
+				Exec uspMFGetTraceabilityContractDetail @intContractId,@intDirectionId
+
+				Update @tblNodeData Set intRecordId=1,intParentId=0
+
+				--Receipt
+				Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+				dblQuantity,strUOM,dtmTransactionDate,strVendor,strType)
+				Exec uspMFGetTraceabilityReceiptDetail @intLotId
+
+				Update @tblNodeData Set intRecordId=2,intParentId=1 Where intParentId is null
+			End
+		End
+
+		--Receipt Only
+		If ISNULL(@intContractId,0)=0
+		Begin
+			--Receipt
+			Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+			dblQuantity,strUOM,dtmTransactionDate,strVendor,strType)
+			Exec uspMFGetTraceabilityReceiptDetail @intLotId
+
+			Update @tblNodeData Set intRecordId=1,intParentId=0
+
+		End
+	End
+
 	--Counter Data for the while loop
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData
 
@@ -346,19 +424,44 @@ End
 --Reverse
 If @intDirectionId=2
 Begin
-	--Ship
-	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-					dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
-	Exec uspMFGetTraceabilityLotShipDetail @intLotId,@ysnParentLot
+	--Lot
+	If @intObjectTypeId = 4
+	Begin
+		--Ship
+		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
+		Exec uspMFGetTraceabilityLotShipDetail @intLotId,@ysnParentLot
 
-	Update @tblNodeData Set intRecordId=1,intParentId=0
+		Update @tblNodeData Set intRecordId=1,intParentId=0
 
-	--Lot Detail
-	Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
-	Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId,@ysnParentLot
+		--Lot Detail
+		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
+		Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId,@ysnParentLot
 
-	Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
+		Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
+	End
+
+	--Shipment
+	If @intObjectTypeId = 7
+	Begin
+		--Ship
+		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+						dblQuantity,strUOM,dtmTransactionDate,strCustomer,strType)
+		Exec uspMFGetTraceabilityShipmentDetail @intLotId
+
+		Update @tblNodeData Set intRecordId=1,intParentId=0
+
+		--Lots From Shipment
+		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intImageTypeId)
+		Exec uspMFGetTraceabilityShipmentLots @intLotId,@ysnParentLot
+
+		--Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
+
+		DECLARE @intRecCounter INT = 1
+		Update @tblNodeData Set @intRecCounter = intRecordId = @intRecCounter + 1 ,intParentId=1,strType='L' Where intParentId is null
+	End
 
 	--Counter Data for the while loop
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData

@@ -3848,6 +3848,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
     <Build Include="dbo\Tables\tblPRPayGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGeneratePayGroupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
