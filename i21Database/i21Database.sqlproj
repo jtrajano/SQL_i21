@@ -3872,6 +3872,9 @@
     <None Include="Scripts\Post-Deployment\EM\029_FillInPhoneAndMobile.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessImportRackPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateImportRackPriceId.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
