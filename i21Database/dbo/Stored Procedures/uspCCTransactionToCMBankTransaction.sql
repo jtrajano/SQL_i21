@@ -27,9 +27,9 @@ BEGIN TRY
 		strItem nvarchar(100)
 	)
 
-	INSERT INTO @CCRItemToCMItem VALUES (23,'Dealer Sites Net')
-	INSERT INTO @CCRItemToCMItem VALUES (23,'Company Owned Gross')
-	INSERT INTO @CCRItemToCMItem VALUES (23,'Company Owned Fees')
+	INSERT INTO @CCRItemToCMItem VALUES (@intSiteHeaderId,'Dealer Sites Net')
+	INSERT INTO @CCRItemToCMItem VALUES (@intSiteHeaderId,'Company Owned Gross')
+	INSERT INTO @CCRItemToCMItem VALUES (@intSiteHeaderId,'Company Owned Fees')
 
 	EXEC uspSMGetStartingNumber 13, @strTransactionId OUT
 
@@ -87,7 +87,7 @@ BEGIN TRY
 		LEFT JOIN tblCCSiteDetail ccSiteDetail ON ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 		LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
 		LEFT JOIN @CCRItemToCMItem ccItem ON ccItem.intSiteHeaderId = ccSiteDetail.intSiteHeaderId
-	WHERE ccSiteHeader.intSiteHeaderId = 23 AND ccSiteHeader.strApType = 'Cash Deposited') A
+	WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSiteHeader.strApType = 'Cash Deposited') A
 	WHERE (dblDebit IS NOT NULL OR dblCredit IS NOT NULL)
 	GROUP BY dtmDate, intBankAccountId, strItem
 
