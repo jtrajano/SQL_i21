@@ -3857,6 +3857,7 @@
     <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuLGContainerReceiptView.sql" />
     <Build Include="dbo\Views\vyuLGContainerPositionView.sql" />
+    <Build Include="dbo\Views\vyuSMTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
