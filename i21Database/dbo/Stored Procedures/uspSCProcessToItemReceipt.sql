@@ -463,11 +463,11 @@ BEGIN TRY
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 	END
 
-	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	if @strLotTracking = 'No'
-		BEGIN
+	--SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+	--if @strLotTracking = 'No'
+	--	BEGIN
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
-		END
+	--	END
 
 	--EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 	--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
