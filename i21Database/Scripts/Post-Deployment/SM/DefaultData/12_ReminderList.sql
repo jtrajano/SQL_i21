@@ -165,10 +165,10 @@
 				[intSort]           =        7
 	END	
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal')
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Post' AND [strType] = N'General Journal')
 	BEGIN
 		INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])	
-		SELECT [strReminder]        =        N'Process',
+		SELECT [strReminder]        =        N'Post',
 				[strType]        	=        N'General Journal',
 				[strMessage]		=        N'{0} {1} {2} left unposted.',
 				[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
