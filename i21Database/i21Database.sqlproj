@@ -3846,6 +3846,8 @@
     <Build Include="dbo\Tables\tblARCommissionRecapDetail.sql" />
     <Build Include="dbo\Tables\tblARCommissionRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionMargin.sql" />
+    <Build Include="dbo\Functions\fnCFGetTransactionMargin.sql" />
     <Build Include="dbo\Tables\tblEMEntityMobileNumber.sql" />
     <Build Include="dbo\Tables\tblEMEntityContactNumber.sql" />
   </ItemGroup>
