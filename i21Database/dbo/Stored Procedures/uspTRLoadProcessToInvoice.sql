@@ -109,7 +109,7 @@ BEGIN TRY
 		,[intInvoiceId]							= DH.intInvoiceId --NULL Value will create new invoice
 		,[intEntityCustomerId]					= DH.intEntityCustomerId
 		,[intCompanyLocationId]					= DH.intCompanyLocationId
-		,[intCurrencyId]						= 1
+		,[intCurrencyId]						= NULL
 		,[intTermId]							= EL.intTermsId
 		,[dtmDate]								= TL.dtmLoadDateTime
 		,[dtmDueDate]							= NULL
