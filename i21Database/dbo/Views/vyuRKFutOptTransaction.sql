@@ -9,7 +9,9 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			fm.[strFutureMonth] AS [strFutureMonthYear], 
 			om.[strOptionMonth] AS [strOptionMonthYear], 
 			ft.[strOptionType] AS [strOptionType], 
-			CASE WHEN (1 = ft.[intInstrumentTypeId]) THEN N'Futures' ELSE N'Options' END AS [strInstrumentType], 
+			CASE WHEN (ft.[intInstrumentTypeId]=1) THEN N'Futures'
+				 WHEN (ft.[intInstrumentTypeId]=2) THEN N'Options'
+				 WHEN (ft.[intInstrumentTypeId]=3) THEN N'Currency Contract' END AS [strInstrumentType], 
 			ft.[dblStrike] AS [dblStrike], 
 			ft.[strInternalTradeNo] AS [strInternalTradeNo], 
 			e.[strName] AS [strName], 
