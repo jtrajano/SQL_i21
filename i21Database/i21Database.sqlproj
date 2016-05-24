@@ -3853,6 +3853,7 @@
     <Build Include="dbo\Tables\tblSMUserSecurityFilterType.sql" />
     <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCCNotification.sql" />
+    <Build Include="dbo\Views\vyuSMTaxGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
