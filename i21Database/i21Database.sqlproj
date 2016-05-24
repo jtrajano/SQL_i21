@@ -3851,6 +3851,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
+    <Build Include="dbo\Views\vyuSMImportFieldMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
