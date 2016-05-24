@@ -54,49 +54,11 @@ BEGIN TRY
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 								ELSE CAST(NULL AS NUMERIC(18,0)) 
 						END		AS dblValueInCCCurrency,
-						CASE	WHEN BD.intInventoryReceiptChargeId IS NULL 
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, RI.dblGross) 
+						CASE	WHEN BD.intWeightUOMId IS NOT NULL
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, BD.dblNetWeight) 
 								ELSE NULL 
 						END
 						dblQuantity,
-						RI.intWeightUOMId AS intQuantityUOMId ,
-						@intCleanCostCurrencyId intCCCurrencyId,
-						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
-								ELSE	BD.dblTotal 
-						END		AS		dblValueInOtherCurrency,
-						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS INT)
-								ELSE	BL.intCurrencyId 
-						END		AS		intOtherCurrencyId,
-						CAST(NULL AS NUMERIC(18,0))  AS dblFX,
-						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
-								ELSE	CAST(1 AS BIT)
-						END		AS		ysnValueEnable,
-						CAST(0 AS BIT)	AS ysnQuantityEnable,
-						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
-								ELSE	CAST(0 AS BIT)
-						END		AS		ysnOtherCurrencyEnable,
-						IM.strItemNo,
-						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN ''
-								ELSE	CU.strCurrency 
-						END		AS		strOtherCurrency
-
-
-				FROM	tblAPBillDetail				BD
-				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
-				JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId					
-				JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	BD.intInventoryReceiptItemId	LEFT
-				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intChargeId					=	BD.intInventoryReceiptChargeId	LEFT
-				JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId					=	RI.intWeightUOMId				LEFT
-				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
-				WHERE	RI.intInventoryReceiptId = @intInventoryReceiptId AND BL.intTransactionType = 1 AND BD.intInventoryReceiptChargeId IS NULL
-				
-				UNION ALL 
-				
-				SELECT	BD.intItemId,
-						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
-								ELSE CAST(NULL AS NUMERIC(18,0)) 
-						END		AS dblValueInCCCurrency,
-						NULL AS dblQuantity,
 						BD.intWeightUOMId AS intQuantityUOMId ,
 						@intCleanCostCurrencyId intCCCurrencyId,
 						CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(NULL AS NUMERIC(18,0))
@@ -120,13 +82,13 @@ BEGIN TRY
 
 
 				FROM	tblAPBillDetail				BD
-				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
-				JOIN	tblICItem					IM	ON	IM.intItemId					=	BD.intItemId					
-				JOIN	tblICInventoryReceiptCharge	RC	ON	RC.intInventoryReceiptChargeId	=	BD.intInventoryReceiptChargeId	LEFT
-				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
-				WHERE	RC.intInventoryReceiptId =@intInventoryReceiptId AND BL.intTransactionType = 1 AND BD.intInventoryReceiptChargeId IS NOT NULL
+				JOIN	tblAPBill					BL	ON	BL.intBillId		=	BD.intBillId
+				JOIN	tblICItem					IM	ON	IM.intItemId		=	BD.intItemId					
+				JOIN	tblICItemUOM                IU  ON  IU.intItemUOMId     =   BD.intWeightUOMId    LEFT
+                JOIN	tblSMCurrency               CU  ON  CU.intCurrencyID    =   BL.intCurrencyId
+                WHERE	BD.intContractDetailId = @intContractDetailId AND BL.intTransactionType = 1 
 				
-				UNION ALL
+				UNION ALL 
 				
 				SELECT	DISTINCT
 						BD.intItemId,
