@@ -101,7 +101,7 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 		
 
 SET @ZeroDecimal = 0.000000	
-SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
+SET @DefaultCurrency = ISNULL((SELECT [intCurrencyId] FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId),(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
@@ -134,7 +134,15 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @Entity
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
-	END	
+	END
+
+IF ISNULL(@DefaultCurrency,0) = 0 AND NOT EXISTS(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)
+	BEGIN
+		SET @ErrorMessage = 'There is no setup for default currency in the Company Preference.'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN

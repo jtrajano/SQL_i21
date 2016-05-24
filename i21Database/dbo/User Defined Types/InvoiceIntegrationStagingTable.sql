@@ -22,7 +22,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
 	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
 	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
-	,[intCurrencyId]						INT												NOT NULL	-- Currency Id	
+	,[intCurrencyId]						INT												NULL		-- Currency Id	
 	,[intSubCurrencyCents]					INT												NULL		-- Subcurrency Rate
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
 	,[intPeriodsToAccrue]					INT												NULL		-- Default(1) Period to Accrue	

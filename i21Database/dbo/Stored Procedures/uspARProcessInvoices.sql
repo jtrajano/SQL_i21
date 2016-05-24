@@ -335,8 +335,8 @@ BEGIN
 		AND ([intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
 		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND @GroupingOption < 2))
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
-		AND ([intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND ([dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
+		AND (CAST([dtmDate] AS DATE) = CAST(@Date AS DATE) OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL([intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL([intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL([intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -532,8 +532,8 @@ BEGIN
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
 		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND @GroupingOption < 2))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
-		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
+		AND (CAST(I.[dtmDate] AS DATE) = CAST(@Date AS DATE) OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -776,8 +776,8 @@ BEGIN
 		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
 		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND @GroupingOption < 2))
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
-		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
+		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
+		AND (CAST(I.[dtmDate] AS DATE) = CAST(@Date AS DATE) OR (@Date IS NULL AND @GroupingOption < 5))
 		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
 		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
 		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
@@ -963,7 +963,7 @@ BEGIN TRY
 		SET 
 			 [intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
-			,[intCurrencyId]			= ISNULL(@CurrencyId, C.[intCurrencyId])
+			,[intCurrencyId]			= ISNULL(ISNULL(@CurrencyId, C.[intCurrencyId]), (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
 			,[intSubCurrencyCents]		= (CASE WHEN ISNULL([intSubCurrencyCents],0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, C.[intCurrencyId])),1) ELSE 1 END) 	
 			,[intTermId]				= ISNULL(@TermId, EL.[intTermsId])
 			,[dtmDate]					= @Date
