@@ -135,6 +135,7 @@ Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickL
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = @intWorkOrderId
+		AND ri.intConsumptionMethodId=1
 	
 	UNION
 	
@@ -150,6 +151,7 @@ Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickL
 	WHERE r.intRecipeId = @intRecipeId
 		AND rs.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = @intWorkOrderId
+		AND ri.intConsumptionMethodId=1
 
 	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute,intParentItemId)
 	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute,ti.intParentItemId 
