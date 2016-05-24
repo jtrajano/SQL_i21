@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuCCNotification]
 AS
 SELECT ccSiteHeader.intSiteHeaderId,
-	   ccVendor.strName strCompanyName,
-	   ccVendor.strLocationName strCompanyLocationName,
+	   ccVendor.strName AS strCompanyName,
+	   ccVendor.strAddress AS strCompanyAddress,
        ccSiteDetail.intSiteDetailId,
        ccCustomer.intCustomerId,
        ccCustomer.strCustomerName,

@@ -6,7 +6,7 @@ SELECT DISTINCT
     A.intVendorDefaultId,
 	B.intEntityVendorId intEntityId,	
 	B.intEntityVendorId intVendorId,
-	G.intCompanyLocationId,
+	D.strAddress,
 	G.strLocationName,
 	B.intPaymentMethodId,
     F.strPaymentMethod,
