@@ -9,15 +9,13 @@ SELECT A.intSiteId,
        A.intPaymentMethodId,
        A.intCustomerId,
        D.intTermsId,
-       B.intSalespersonId
-FROM   dbo.tblCCSite AS A
-       INNER JOIN
-       dbo.tblARCustomer AS B
-       ON B.intEntityCustomerId = A.intCustomerId
-       INNER JOIN
-       dbo.tblEMEntity AS C
-       ON C.intEntityId = B.intEntityCustomerId
-       LEFT OUTER JOIN
-       dbo.[tblEMEntityLocation] AS D
-       ON D.intEntityLocationId = B.intEntityCustomerId
-          AND D.ysnDefaultLocation = 1
+       B.intSalespersonId,
+	   C.strEntityNo AS strCustomerEntityNo,
+	   C.strName AS strCustomerName
+FROM dbo.tblCCSite AS A
+	INNER JOIN dbo.tblARCustomer AS B
+		ON B.intEntityCustomerId = A.intCustomerId
+	INNER JOIN dbo.tblEMEntity AS C
+		ON C.intEntityId = B.intEntityCustomerId
+	LEFT OUTER JOIN dbo.[tblEMEntityLocation] AS D
+		ON D.intEntityLocationId = B.intEntityCustomerId AND D.ysnDefaultLocation = 1

@@ -42,14 +42,12 @@ BEGIN TRY
 	INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 	WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
 
-	INSERT INTO @voucherDetailCC([intBillId] 
-		,[intAccountId] 
+	INSERT INTO @voucherDetailCC([intAccountId] 
 		,[intSiteDetailId] 
 		,[strMiscDescription] 
 		,[dblCost]
 		,[dblQtyReceived])
-	SELECT [intBillId] = 0
-		,[intAccountId] = intAccountId
+	SELECT [intAccountId] = intAccountId
 		,[intSiteDetailId] = intSiteDetailId
 		,[strMiscDescription] = strItem
 		,[dblCost] = SUM(dblCost)
