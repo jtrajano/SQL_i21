@@ -6,6 +6,7 @@
     [strModule]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strTableName]     NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnApproval]	   BIT NULL,
+	[ysnCustomGrid]	   BIT NULL,
     [intConcurrencyId] INT            CONSTRAINT [DF__tblSMScre__intCo__381B131F] DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK__tblSMScr__552B34714D4B3A2F] PRIMARY KEY CLUSTERED ([intScreenId] ASC)
 );
