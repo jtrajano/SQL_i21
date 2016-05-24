@@ -3850,6 +3850,7 @@
     <Build Include="dbo\Functions\fnCFGetTransactionMargin.sql" />
     <Build Include="dbo\Tables\tblEMEntityMobileNumber.sql" />
     <Build Include="dbo\Tables\tblEMEntityContactNumber.sql" />
+    <Build Include="dbo\Tables\tblSMUserSecurityFilterType.sql" />
     <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCCNotification.sql" />
   </ItemGroup>
