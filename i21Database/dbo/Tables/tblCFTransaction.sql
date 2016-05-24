@@ -1,14 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblCFTransaction] (
     [intTransactionId]        INT             IDENTITY (1, 1) NOT NULL,
-    [intPriceIndexId]         INT             NULL,
-    [intPriceProfileId]       INT             NULL,
-    [intSiteGroupId]          INT             NULL,
-    [strPriceProfileId]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strPriceIndexId]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strSiteGroup]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [dblPriceProfileRate]     NUMERIC (18, 6) NULL,
-    [dblPriceIndexRate]       NUMERIC (18, 6) NULL,
-    [dtmPriceIndexDate]       DATETIME        NULL,
     [intContractDetailId]     INT             NULL,
     [intContractId]           INT             NULL,
     [dblQuantity]             NUMERIC (18, 6) NULL,
@@ -58,8 +49,6 @@
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
-
-
 
 
 
