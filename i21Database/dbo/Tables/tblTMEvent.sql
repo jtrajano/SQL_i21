@@ -14,6 +14,7 @@
     [intSiteID]             INT            DEFAULT 0 NULL,
     [strLevel]              NVARCHAR (20)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [dtmTankMonitorReading] DATETIME NULL, 
+    [strDeviceDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL, 
     CONSTRAINT [PK_tblTMEvent] PRIMARY KEY CLUSTERED ([intEventID] ASC),
     CONSTRAINT [FK_tblTMEvent_tblTMEventType] FOREIGN KEY ([intEventTypeID]) REFERENCES [dbo].[tblTMEventType] ([intEventTypeID])
 );
@@ -154,3 +155,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMEvent',
     @level2type = N'COLUMN',
     @level2name = N'dtmTankMonitorReading'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Device Description',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMEvent',
+    @level2type = N'COLUMN',
+    @level2name = N'strDeviceDescription'
