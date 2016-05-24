@@ -60,6 +60,18 @@ BEGIN
 	DECLARE @guid							NVARCHAR(MAX)
 	DECLARE	@runDate						DATETIME
 
+	DECLARE @intPriceProfileId				INT
+	DECLARE @intPriceIndexId 				INT
+	DECLARE @intSiteGroupId 				INT
+
+	DECLARE @strPriceProfileId				NVARCHAR(MAX)
+	DECLARE @strPriceIndexId				NVARCHAR(MAX)
+	DECLARE @strSiteGroup					NVARCHAR(MAX)
+	DECLARE @dblPriceProfileRate			NUMERIC(18,6)
+	DECLARE @dblPriceIndexRate				NUMERIC(18,6)
+	DECLARE	@dtmPriceIndexDate				DATETIME					
+
+
 
 	-- IF RECALCULATE FROM IMPORTING--
 	-- SAVE RESULT ON GLOBAL TEMP TABLE
@@ -90,6 +102,16 @@ BEGIN
 		,intContractNumber				INT
 		,intContractSeq					INT
 		,strPriceBasis					NVARCHAR(MAX)
+		,intPriceProfileId				INT
+		,intPriceIndexId 				INT
+		,intSiteGroupId 				INT
+		,strPriceProfileId				NVARCHAR(MAX)
+		,strPriceIndexId				NVARCHAR(MAX)
+		,strSiteGroup					NVARCHAR(MAX)
+		,dblPriceProfileRate			NUMERIC(18,6)
+		,dblPriceIndexRate				NUMERIC(18,6)
+		,dtmPriceIndexDate				DATETIME
+		,dblMargin						NUMERIC(18,6)
 	);
 
 		IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
@@ -206,78 +228,39 @@ BEGIN
 	@CFContractNumber			=	@intContractNumber		output,
 	@CFContractSeq				=	@intContractSeq			output,
 	@CFPriceBasis				=	@strPriceBasis			output,
-	@CFCreditCard				=	@ysnCreditCardUsed      
+	@CFCreditCard				=	@ysnCreditCardUsed,      
+	@CFPriceProfileId			=	@intPriceProfileId		output,
+	@CFPriceIndexId				=	@intPriceIndexId 		output,
+	@CFSiteGroupId				= 	@intSiteGroupId 		output
 
-	--PRICING OUT--
-	--if @IsImporting is true then save pricing to global temp table
-	IF(@IsImporting = 1)
-		BEGIN
-			INSERT INTO ##tblCFTransactionPricingType
-			(
-			 intItemId
-			,intCustomerId
-			,intLocationId
-			,dblQuantity
-			,intItemUOMId
-			,dtmTransactionDate
-			,strTransactionType
-			,intNetworkId
-			,intSiteId
-			,dblTransferCost
-			,dblOriginalPrice
-			,dblPrice				
-			,strPriceMethod		
-			,dblAvailableQuantity	
-			,intContractHeaderId	
-			,intContractDetailId	
-			,intContractNumber		
-			,intContractSeq		
-			,strPriceBasis	
-			)
-			SELECT
-			 @intItemId					AS intItemId
-			,@intCustomerId				AS intCustomerId
-			,@intLocationId				AS intLocationId
-			,@dblQuantity				AS dblQuantity
-			,@intItemUOMId				AS intItemUOMId
-			,@dtmTransactionDate		AS dtmTransactionDate
-			,@strTransactionType		AS strTransactionType
-			,@intNetworkId				AS intNetworkId
-			,@intSiteId					AS intSiteId
-			,@dblTransferCost			AS dblTransferCost
-			,@dblOriginalPrice			AS dblOriginalPrice
-			,@dblPrice					AS dblPrice				
-			,@strPriceMethod			AS strPriceMethod		
-			,@dblAvailableQuantity		AS dblAvailableQuantity	
-			,@intContractHeaderId		AS intContractHeaderId	
-			,@intContractDetailId		AS intContractDetailId	
-			,@intContractNumber			AS intContractNumber		
-			,@intContractSeq			AS intContractSeq		
-			,@strPriceBasis				AS strPriceBasis	
-		END
-	ELSE
-		BEGIN
-			SELECT
-			 @intItemId					AS intItemId
-			,@intCustomerId				AS intCustomerId
-			,@intLocationId				AS intLocationId
-			,@dblQuantity				AS dblQuantity
-			,@intItemUOMId				AS intItemUOMId
-			,@dtmTransactionDate		AS dtmTransactionDate
-			,@strTransactionType		AS strTransactionType
-			,@intNetworkId				AS intNetworkId
-			,@intSiteId					AS intSiteId
-			,@dblTransferCost			AS dblTransferCost
-			,@dblOriginalPrice			AS dblOriginalPrice
-			,@dblPrice					AS dblPrice				
-			,@strPriceMethod			AS strPriceMethod		
-			,@dblAvailableQuantity		AS dblAvailableQuantity	
-			,@intContractHeaderId		AS intContractHeaderId	
-			,@intContractDetailId		AS intContractDetailId	
-			,@intContractNumber			AS intContractNumber		
-			,@intContractSeq			AS intContractSeq		
-			,@strPriceBasis				AS strPriceBasis	
-		END
+	SELECT TOP 1 
+	@strPriceProfileId = cfPriceProfile.strPriceProfile
+	,@dblPriceProfileRate = cfPriceProfileDetail.dblRate
+	FROM tblCFPriceProfileHeader AS cfPriceProfile
+	INNER JOIN tblCFPriceProfileDetail AS cfPriceProfileDetail 
+	ON cfPriceProfile.intPriceProfileHeaderId = cfPriceProfileDetail.intPriceProfileHeaderId
+	WHERE cfPriceProfile.intPriceProfileHeaderId = @intPriceProfileId
+
+	SELECT TOP 1
+	@strPriceIndexId = strPriceIndex
+	FROM
+	tblCFPriceIndex
+	WHERE intPriceIndexId = @intPriceIndexId
+
+	SELECT TOP 1
+	@dblPriceIndexRate = cfIndexPricingDetail.dblIndexPrice
+	,@dtmPriceIndexDate = cfIndexPricingHeader.dtmDate
+	FROM tblCFIndexPricingBySiteGroupHeader AS cfIndexPricingHeader
+	INNER JOIN tblCFIndexPricingBySiteGroup AS cfIndexPricingDetail
+	ON cfIndexPricingHeader.intIndexPricingBySiteGroupHeaderId = cfIndexPricingDetail.intIndexPricingBySiteGroupHeaderId
+	WHERE cfIndexPricingHeader.intPriceIndexId = @intPriceIndexId 
+	AND cfIndexPricingHeader.intSiteGroupId = @intSiteGroupId
+	AND cfIndexPricingDetail.intARItemID = @intItemId
+
+	SELECT TOP 1
+	@strSiteGroup = strSiteGroup
+	FROM tblCFSiteGroup
+	WHERE intSiteGroupId = @intSiteGroupId
 
 
 	-- TAX TABLE --
@@ -674,7 +657,7 @@ BEGIN
 					,[dblTax]					
 					,[dblAdjustedTax]			
 					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
+					,[intSalesTaxAccountId] 	
 					,[intTaxAccountId]    		
 					,[ysnSeparateOnInvoice]		
 					,[ysnCheckoffTax]			
@@ -1224,6 +1207,121 @@ BEGIN
 		END
 
 END
+	
+
+	DECLARE @dblMargin NUMERIC(18,6)
+
+	SELECT @dblMargin = dblMargin , @dblTransferCost = dblCost
+	FROM [dbo].[fnCFGetTransactionMargin](
+	 0
+	,@intItemId			
+	,@intLocationId	
+	,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price')
+	,(SELECT TOP 1 dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price')
+	,@dblTransferCost	
+	,@strTransactionType
+	)
+
+	--PRICING OUT--
+	--if @IsImporting is true then save pricing to global temp table
+	IF(@IsImporting = 1)
+		BEGIN
+			INSERT INTO ##tblCFTransactionPricingType
+			(
+			 intItemId
+			,intCustomerId
+			,intLocationId
+			,dblQuantity
+			,intItemUOMId
+			,dtmTransactionDate
+			,strTransactionType
+			,intNetworkId
+			,intSiteId
+			,dblTransferCost
+			,dblOriginalPrice
+			,dblPrice				
+			,strPriceMethod		
+			,dblAvailableQuantity	
+			,intContractHeaderId	
+			,intContractDetailId	
+			,intContractNumber		
+			,intContractSeq		
+			,strPriceBasis	
+			,intPriceProfileId	
+			,intPriceIndexId 	
+			,intSiteGroupId 	
+			,strPriceProfileId	
+			,strPriceIndexId	
+			,strSiteGroup		
+			,dblPriceProfileRate
+			,dblPriceIndexRate	
+			,dtmPriceIndexDate
+			,dblMargin	
+			)
+			SELECT
+			 @intItemId					AS intItemId
+			,@intCustomerId				AS intCustomerId
+			,@intLocationId				AS intLocationId
+			,@dblQuantity				AS dblQuantity
+			,@intItemUOMId				AS intItemUOMId
+			,@dtmTransactionDate		AS dtmTransactionDate
+			,@strTransactionType		AS strTransactionType
+			,@intNetworkId				AS intNetworkId
+			,@intSiteId					AS intSiteId
+			,@dblTransferCost			AS dblTransferCost
+			,@dblOriginalPrice			AS dblOriginalPrice
+			,@dblPrice					AS dblPrice				
+			,@strPriceMethod			AS strPriceMethod		
+			,@dblAvailableQuantity		AS dblAvailableQuantity	
+			,@intContractHeaderId		AS intContractHeaderId	
+			,@intContractDetailId		AS intContractDetailId	
+			,@intContractNumber			AS intContractNumber		
+			,@intContractSeq			AS intContractSeq		
+			,@strPriceBasis				AS strPriceBasis	
+			,@intPriceProfileId			AS intPriceProfileId	
+			,@intPriceIndexId 			AS intPriceIndexId 	
+			,@intSiteGroupId 			AS intSiteGroupId 	
+			,@strPriceProfileId			AS strPriceProfileId	
+			,@strPriceIndexId			AS strPriceIndexId	
+			,@strSiteGroup				AS strSiteGroup		
+			,@dblPriceProfileRate		AS dblPriceProfileRate
+			,@dblPriceIndexRate			AS dblPriceIndexRate	
+			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
+			,@dblMargin					AS dblMargin
+		END
+	ELSE
+		BEGIN
+			SELECT
+			 @intItemId					AS intItemId
+			,@intCustomerId				AS intCustomerId
+			,@intLocationId				AS intLocationId
+			,@dblQuantity				AS dblQuantity
+			,@intItemUOMId				AS intItemUOMId
+			,@dtmTransactionDate		AS dtmTransactionDate
+			,@strTransactionType		AS strTransactionType
+			,@intNetworkId				AS intNetworkId
+			,@intSiteId					AS intSiteId
+			,@dblTransferCost			AS dblTransferCost
+			,@dblOriginalPrice			AS dblOriginalPrice
+			,@dblPrice					AS dblPrice				
+			,@strPriceMethod			AS strPriceMethod		
+			,@dblAvailableQuantity		AS dblAvailableQuantity	
+			,@intContractHeaderId		AS intContractHeaderId	
+			,@intContractDetailId		AS intContractDetailId	
+			,@intContractNumber			AS intContractNumber		
+			,@intContractSeq			AS intContractSeq		
+			,@strPriceBasis				AS strPriceBasis	
+			,@intPriceProfileId			AS intPriceProfileId	
+			,@intPriceIndexId 			AS intPriceIndexId 	
+			,@intSiteGroupId 			AS intSiteGroupId 	
+			,@strPriceProfileId			AS strPriceProfileId		
+			,@strPriceIndexId			AS strPriceIndexId		
+			,@strSiteGroup				AS strSiteGroup			
+			,@dblPriceProfileRate		AS dblPriceProfileRate	
+			,@dblPriceIndexRate			AS dblPriceIndexRate		
+			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
+			,@dblMargin					AS dblMargin	
+		END
 
 IF(@IsImporting = 1)
 BEGIN
