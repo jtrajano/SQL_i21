@@ -3,13 +3,13 @@
 GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.GeneralJournal') 
 		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId]) 
-			VALUES (N'GeneralJournal', N'General Journal', N'GeneralLedger.view.GeneralJournal', N'General Ledger', N'tblGLJournal', 1,  0)
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId]) 
+			VALUES (N'GeneralJournal', N'General Journal', N'GeneralLedger.view.GeneralJournal', N'General Ledger', N'tblGLJournal',   0)
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
-			SET strTableName = N'tblGLJournal', ysnApproval = 1
+			SET strTableName = N'tblGLJournal'
 			WHERE strNamespace = 'GeneralLedger.view.GeneralJournal'
 		END
 
@@ -109,30 +109,6 @@ GO
 			UPDATE tblSMScreen
 			SET  ysnApproval = 1
 			WHERE strNamespace = 'AccountsReceivable.view.SalesOrder'
-		END
-
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract') 
-		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId]) 
-			VALUES (N'Contract', N'Contract', N'ContractManagement.view.Contract', N'Contract Management', N'', 1,  0)
-		END
-	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET  ysnApproval = 1
-			WHERE strNamespace = 'ContractManagement.view.Contract'
-		END
-
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.FuturesOptionsTransactions') 
-		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId]) 
-			VALUES (N'Futures Options Transactions', N'Futures Options Transactions', N'RiskManagement.view.FuturesOptionsTransactions', N'Risk Management', N'', 1,  0)
-		END
-	ELSE
-		BEGIN
-			UPDATE tblSMScreen
-			SET  ysnApproval = 1
-			WHERE strNamespace = 'RiskManagement.view.FuturesOptionsTransactions'
 		END
 
 GO
