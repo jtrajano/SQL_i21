@@ -14,7 +14,7 @@
 	DECLARE @ysnAG BIT = 0
     DECLARE @ysnPT BIT = 0
 
-	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END
+	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END 
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
 	FROM coctlmst	
 	
