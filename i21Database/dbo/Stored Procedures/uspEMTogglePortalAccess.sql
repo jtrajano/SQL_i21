@@ -68,8 +68,8 @@ BEGIN
 			exec uspAESEncrypt @strPassword, @dc output
 
 
-			insert into [tblEMEntityCredential](intEntityId,strUserName,strPassword)
-			select @intEntityContactId, @userName, @dc
+			insert into [tblEMEntityCredential](intEntityId,strUserName,strPassword,ysnNotEncrypted)
+			select @intEntityContactId, @userName, @dc, 0
 		end
 		
 
