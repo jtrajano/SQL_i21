@@ -13,13 +13,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
-DECLARE @ReceiptNumber AS NVARCHAR(20)
-
-DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
-DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
-DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'
-
 DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
@@ -104,9 +97,14 @@ INSERT into @ReceiptStagingTable(
 		,strSourceScreenName
 )	
 SELECT 
+		--strReceiptType				= CASE 
+		--								WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
+		--								WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
+		--							  END
 		strReceiptType				= CASE 
-										WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
+										WHEN LI.strSourceTransactionId = 'SPT' THEN 'Purchase Contract'
+										WHEN LI.strSourceTransactionId = 'CNT' THEN 'Purchase Contract'
+										ELSE 'Direct'
 									  END
 		,intEntityVendorId			= @intEntityId
 		,strBillOfLadding			= NULL

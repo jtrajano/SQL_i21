@@ -21,8 +21,8 @@ SELECT DISTINCT
 	A.strImportFilePath,
 	A.strImportFileName,
 	A.strImportAuxiliaryFileName,
-	A.intImportFileHeaderId
-
+	A.intImportFileHeaderId,
+	D.strAddress
 FROM
      dbo.tblCCVendorDefault A
 	INNER JOIN dbo.tblCCDealerSite AS I
@@ -32,13 +32,13 @@ FROM
 	INNER JOIN dbo.tblEMEntity C
 		ON B.intEntityVendorId = C.intEntityId
 	LEFT JOIN dbo.[tblEMEntityLocation] D
-		ON B.intDefaultLocationId = D.intEntityLocationId    
+		ON D.intEntityId = C.intEntityId  and D.ysnActive = 1
     LEFT Join dbo.tblSMTerm E
-	    on D.intTermsId = E.intTermID
+	    on E.intTermID = D.intTermsId
     LEFT Join dbo.tblSMPaymentMethod F
-	    on B.intPaymentMethodId = F.intPaymentMethodID
+	    on F.intPaymentMethodID = B.intPaymentMethodId
 	LEFT JOIN dbo.tblSMCompanyLocation G
-		ON A.intCompanyLocationId = G.intCompanyLocationId
+		ON G.intCompanyLocationId = A.intCompanyLocationId
     LEFT JOIN dbo.tblCMBankAccount H
 		ON A.intBankAccountId = H.intBankAccountId
 	

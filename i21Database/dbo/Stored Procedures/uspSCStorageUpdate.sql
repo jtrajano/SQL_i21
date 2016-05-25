@@ -691,6 +691,7 @@ BEGIN TRY
 						WHEN ISNULL(@intDPContractId,0) > 0 THEN 0
 						WHEN ISNULL(@intDPContractId,0) = 0 THEN 1
 					END
+					,strSourceTransactionId  = @strDistributionOption
 			FROM	dbo.tblSCTicket ScaleTicket
 					INNER JOIN dbo.tblICItemUOM ItemUOM
 						ON ScaleTicket.intItemId = ItemUOM.intItemId

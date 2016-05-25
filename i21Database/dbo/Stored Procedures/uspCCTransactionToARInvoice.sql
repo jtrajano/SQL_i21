@@ -51,11 +51,12 @@ INSERT INTO @EntriesForInvoice(
 	,[dblPrice]
 	,[intTaxGroupId]
 	,[ysnRecomputeTax]
+	,[intSiteDetailId]
 )
 SELECT [strTransactionType] = 'Credit Memo' 
 	,[strSourceTransaction] = 'Credit Card Reconciliation'
-	,[intSourceId] = ccSiteHeader.intSiteHeaderId
-	,[strSourceId] = ccSiteHeader.intSiteHeaderId
+	,[intSourceId] = null
+	,[strSourceId] = ccSiteDetail.intSiteDetailId
 	,[intEntityCustomerId] = ccSite.intCustomerId
 	,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
 	,[intCurrencyId] = 1
@@ -67,18 +68,18 @@ SELECT [strTransactionType] = 'Credit Memo'
 	,[ysnPost] = 1
 	,[intItemId] =  CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
 	,[strItemDescription] = ccItem.strItem
-	,[dblQtyShipped] = 1	
+	,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
 	,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblGross ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
 	,[intTaxGroupId] = null
 	,[ysnRecomputeTax] = 0
-
+	,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
 FROM tblCCSiteHeader ccSiteHeader 
 INNER JOIN tblCCVendorDefault ccVendorDefault ON ccSiteHeader.intVendorDefaultId = ccVendorDefault.intVendorDefaultId 
 INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
 LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId
-WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
+WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intDealerSiteId IS NOT NULL
 
 --REMOVE -1 items
 DELETE FROM @EntriesForInvoice WHERE intItemId = -1

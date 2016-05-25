@@ -5,7 +5,7 @@ SELECT
 		a.intEntityId,   
 		a.strEntityNo, 
 		a.strName,  
-		g.strPhone,  
+		phone.strPhone,  
 		e.strAddress,  
 		e.strCity,  
 		e.strState,  
@@ -25,3 +25,5 @@ SELECT
 			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
 		left join tblEMEntity g  
 			on f.intEntityContactId = g.intEntityId  
+		LEFT JOIN tblEMEntityPhoneNumber phone
+			ON phone.intEntityId = g.intEntityId
