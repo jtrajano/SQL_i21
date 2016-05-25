@@ -84,19 +84,19 @@ AS
 	END
 	ELSE
 	BEGIN
-		IF (
-				SELECT intItemId
-				FROM tblICParentLot
-				WHERE intParentLotId = @intParentLotId
-		) <> @intItemId
-		BEGIN 
-			RAISERROR (
-				'Lot and Parent Lot cannot have different item.'
-				,16
-				,1
-			)
-			RETURN -1;
-		END 
+		--IF (
+		--		SELECT intItemId
+		--		FROM tblICParentLot
+		--		WHERE intParentLotId = @intParentLotId
+		--) <> @intItemId
+		--BEGIN 
+		--	RAISERROR (
+		--		'Lot and Parent Lot cannot have different item.'
+		--		,16
+		--		,1
+		--	)
+		--	RETURN -1;
+		--END 
 			
 
 		UPDATE tblICLot
