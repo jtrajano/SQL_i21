@@ -9,6 +9,8 @@
 	[intOpportunitySourceId] [int] NULL,
 	[intTicketTypeId] [int] NULL,
 	[intOpportunityCampaignId] [int] NULL,
+	[strCompetitorEntityId] NVARCHAR(255) NULL,
+	[strCurrentSolutionId] NVARCHAR(255) NULL,
 	[dtmCreated] [datetime] NULL,
 	[dtmClose] [datetime] NULL,
 	[dtmGoLive] [datetime] NULL,

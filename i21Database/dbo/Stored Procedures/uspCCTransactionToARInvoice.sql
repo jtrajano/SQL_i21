@@ -3,7 +3,6 @@
 	,@UserId			INT	
 	,@Post				BIT	= NULL
 	,@Recap				BIT	= NULL
-	,@InvoiceId			INT = NULL
 	,@ErrorMessage		NVARCHAR(250) OUTPUT
 	,@CreatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
 	,@UpdatedIvoices	NVARCHAR(MAX)  = NULL OUTPUT
@@ -19,11 +18,22 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+DECLARE @CCRItemToARItem TABLE
+(
+  intSiteHeaderId int, 
+  strItem nvarchar(100)
+)
+DECLARE @intDealerSiteCreditItem INT, @intDealerSiteFeeItem INT
+SELECT TOP 1 @intDealerSiteCreditItem = intDealerSiteCreditItem, @intDealerSiteFeeItem = intDealerSiteFeeItem FROM tblCCCompanyPreferenceOption
+
+INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId,'Dealer Site Credits')
+INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId,'Dealer Site Fees')
 
 SET @success = 0
 
 INSERT INTO @EntriesForInvoice(
-	 [strSourceTransaction]
+	[strTransactionType]
+	,[strSourceTransaction]
 	,[intSourceId]
 	,[strSourceId]
 	,[intEntityCustomerId]
@@ -34,14 +44,19 @@ INSERT INTO @EntriesForInvoice(
 	,[dtmShipDate]
 	,[intEntitySalespersonId]
 	,[intEntityId]
+	,[ysnPost]
+	,[intItemId]
+	,[strItemDescription]
 	,[dblQtyShipped]
 	,[dblPrice]
 	,[intTaxGroupId]
 	,[ysnRecomputeTax]
+	,[intSiteDetailId]
 )
-SELECT [strSourceTransaction] = 'Credit Card Reconciliation'
-	,[intSourceId] = ccSiteHeader.intSiteHeaderId
-	,[strSourceId] = ccSiteHeader.intSiteHeaderId
+SELECT [strTransactionType] = 'Credit Memo' 
+	,[strSourceTransaction] = 'Credit Card Reconciliation'
+	,[intSourceId] = null
+	,[strSourceId] = ccSiteDetail.intSiteDetailId
 	,[intEntityCustomerId] = ccSite.intCustomerId
 	,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
 	,[intCurrencyId] = 1
@@ -50,16 +65,24 @@ SELECT [strSourceTransaction] = 'Credit Card Reconciliation'
 	,[dtmShipDate]  = ccSiteHeader.dtmDate
 	,[intEntitySalespersonId] = ccCustomer.intSalespersonId
 	,[intEntityId] = @UserId
-	,[dblQtyShipped] = 1
-	,[dblPrice] = CASE WHEN ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet ELSE ccSiteDetail.dblFees END
+	,[ysnPost] = 1
+	,[intItemId] =  CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
+	,[strItemDescription] = ccItem.strItem
+	,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
+	,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 THEN ccSiteDetail.dblNet WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblGross ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
 	,[intTaxGroupId] = null
 	,[ysnRecomputeTax] = 0
+	,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
 FROM tblCCSiteHeader ccSiteHeader 
-LEFT JOIN tblCCVendorDefault ccVendorDefault ON ccSiteHeader.intVendorDefaultId = ccVendorDefault.intVendorDefaultId 
+INNER JOIN tblCCVendorDefault ccVendorDefault ON ccSiteHeader.intVendorDefaultId = ccVendorDefault.intVendorDefaultId 
+INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
 LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId
-WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
+WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intDealerSiteId IS NOT NULL
+
+--REMOVE -1 items
+DELETE FROM @EntriesForInvoice WHERE intItemId = -1
 
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
@@ -67,7 +90,7 @@ EXEC [dbo].[uspARProcessInvoices]
 		 @InvoiceEntries	= @EntriesForInvoice
 		,@LineItemTaxEntries = @TaxDetails
 		,@UserId			= @UserId
-		,@GroupingOption	= 11
+		,@GroupingOption	= 7
 		,@RaiseError		= 1
 		,@ErrorMessage		= @ErrorMessage OUTPUT
 		,@CreatedIvoices	= @CreatedIvoices OUTPUT
@@ -89,4 +112,3 @@ BEGIN CATCH
 	SET	@success = 0
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
-

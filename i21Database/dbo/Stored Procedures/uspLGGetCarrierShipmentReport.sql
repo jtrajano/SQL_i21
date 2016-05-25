@@ -4,6 +4,15 @@ AS
 BEGIN
 	DECLARE @strLoadNumber			NVARCHAR(MAX),
 			@xmlDocumentId			INT 
+	DECLARE @strCompanyName			NVARCHAR(100),
+			@strCompanyAddress		NVARCHAR(100),
+			@strContactName			NVARCHAR(50),
+			@strCounty				NVARCHAR(25),
+			@strCity				NVARCHAR(25),
+			@strState				NVARCHAR(50),
+			@strZip					NVARCHAR(12),
+			@strCountry				NVARCHAR(25),
+			@strPhone				NVARCHAR(50)
 	
 	DECLARE @strHaulerAddress NVARCHAR(MAX), @strHaulerCity NVARCHAR(MAX), @strHaulerCountry NVARCHAR(MAX), @strHaulerState NVARCHAR(MAX), @strHaulerZip NVARCHAR(MAX)
 
@@ -42,6 +51,17 @@ BEGIN
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strLoadNumber' 
 
+	SELECT TOP 1 @strCompanyName = strCompanyName
+		,@strCompanyAddress = strAddress
+		,@strContactName = strContactName
+		,@strCounty = strCounty
+		,@strCity = strCity
+		,@strState = strState
+		,@strZip = strZip
+		,@strCountry = strCountry
+		,@strPhone = strPhone
+	FROM tblSMCompanySetup
+
 	SELECT
 		@strHaulerAddress = (SELECT EL.strAddress from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
 		@strHaulerCity = (SELECT EL.strCity from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
@@ -51,13 +71,6 @@ BEGIN
 	FROM vyuLGLoadDetailView L WHERE L.[strLoadNumber] = @strLoadNumber
 
 SELECT DISTINCT 
-		(SELECT TOP(1) C.strCompanyName FROM tblSMCompanySetup C) as strCompanyName,
-		(SELECT TOP(1) C.strAddress FROM tblSMCompanySetup C) as strCompanyAddress,
-		(SELECT TOP(1) C.strCountry FROM tblSMCompanySetup C) as strCompanyCountry,
-		(SELECT TOP(1) C.strCity FROM tblSMCompanySetup C) as strCompanyCity,
-		(SELECT TOP(1) C.strState FROM tblSMCompanySetup C) as strCompanyState,
-		(SELECT TOP(1) C.strZip FROM tblSMCompanySetup C) as strCompanyZip,
-
 		L.[strLoadNumber],
 		L.strEquipmentType,
 		L.dtmScheduledDate,
@@ -77,6 +90,17 @@ SELECT DISTINCT
 		L.strTrailerNo1,
 		L.strTrailerNo2,
 		L.strTrailerNo3,
-		L.strTruckNo
+		L.strTruckNo,
+		strCarrierShipmentStandardText = (SELECT TOP 1 strCarrierShipmentStandardText FROM tblLGCompanyPreference),
+		@strCompanyName AS strCompanyName,
+		@strCompanyAddress AS strCompanyAddress,
+		@strContactName AS strCompanyContactName ,
+		@strCounty AS strCompanyCounty ,
+		@strCity AS strCompanyCity ,
+		@strState AS strCompanyState ,
+		@strZip AS strCompanyZip ,
+		@strCountry AS strCompanyCountry ,
+		@strPhone AS strCompanyPhone,
+		@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 	FROM vyuLGLoadDetailView L WHERE L.[strLoadNumber] = @strLoadNumber
 END

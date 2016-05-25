@@ -42,7 +42,7 @@ BEGIN
 												END) COLLATE Latin1_General_CI_AS 
 					,strOwnership = A.strOwnership
 					,intDeviceId = A.intDeviceId
-					,strLocationName = H.vwloc_loc_no
+					,strLocationName = H.vwloc_name
 					,dblTankCapacity = A.dblTankCapacity
 					,intLocationId = A.intLocationId
 					,strSiteCity = C.strCity

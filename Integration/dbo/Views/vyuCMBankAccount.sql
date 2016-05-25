@@ -51,6 +51,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intMICRCheckNoPosition
 				,i21.strMICRLeftSymbol
 				,i21.strMICRRightSymbol
+				,i21.strFractionalRoutingNumber
+				,i21.strUserDefineMessage
+				,i21.strSignatureLineCaption
+				,i21.ysnShowTwoSignatureLine
+				,i21.dblGreaterThanAmount
 				,i21.intCreatedUserId
 				,i21.dtmCreated
 				,i21.intLastModifiedUserId
@@ -212,6 +217,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition
 					,strMICRLeftSymbol
 					,strMICRRightSymbol
+					,strFractionalRoutingNumber
+					,strUserDefineMessage	
+					,strSignatureLineCaption
+					,ysnShowTwoSignatureLine
+					,dblGreaterThanAmount
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -260,6 +270,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
+					,strUserDefineMessage				= i.strUserDefineMessage
+					,strSignatureLineCaption			= i.strSignatureLineCaption
+					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+					,dblGreaterThanAmount				= i.dblGreaterThanAmount
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId
@@ -418,6 +433,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
+					,strUserDefineMessage				= i.strUserDefineMessage
+					,strSignatureLineCaption			= i.strSignatureLineCaption
+					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+					,dblGreaterThanAmount				= i.dblGreaterThanAmount
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId

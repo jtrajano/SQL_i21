@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetRefundCalculation]
 	@intFiscalYearId INT = NULL,
 	@strStockStatus CHAR(1) = NULL,
-	@intRefundId INT = NULL
+	@intRefundId INT = 0
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -17,7 +17,7 @@ BEGIN
 
 CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
 
-IF (@intRefundId IS NOT NULL)
+IF (@intRefundId > 0)
 BEGIN
 	SET @intFiscalYearId = (SELECT intFiscalYearId FROM tblPATRefund WHERE intRefundId = @intRefundId)
 	SET @strStockStatus = (SELECT strRefund FROM tblPATRefund WHERE intRefundId = @intRefundId)
@@ -45,7 +45,7 @@ BEGIN
 END
 
 
-	IF (@intRefundId IS NULL)
+	IF (@intRefundId <= 0)
 	BEGIN
 		SELECT DISTINCT RR.intRefundTypeId,
 						RR.strRefundType,

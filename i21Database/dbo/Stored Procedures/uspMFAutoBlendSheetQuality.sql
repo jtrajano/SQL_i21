@@ -537,7 +537,7 @@ BEGIN TRY
 					'Active'
 					,'Quarantine'
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight > 0
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
@@ -732,7 +732,7 @@ BEGIN TRY
 							AND ISNUMERIC(r.strPropertyValue) = 1
 						INNER JOIN #tblParentLot pl ON r.intProductValueId=pl.intParentLotId
 							AND r.intProductTypeId = ' + CONVERT(varchar,@intProductTypeId) + '
-							AND pl.dtmExpiryDate >= getdate()
+							AND (pl.dtmExpiryDate IS NULL OR pl.dtmExpiryDate >= getdate())
 							AND r.intSampleId = (
 								SELECT MAX(intSampleId)
 								FROM tblQMTestResult
@@ -1176,7 +1176,7 @@ BEGIN TRY
 					'Active'
 					,'Quarantine'
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight > 0
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId

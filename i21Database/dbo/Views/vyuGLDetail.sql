@@ -6,6 +6,7 @@ AS
 		  A.dtmDate,
             A.strBatchId,
             B.strAccountId,
+            B.strDescription strAccountDescription,
             C.strAccountGroup,
             C.strAccountType,
             A.dblDebit,

@@ -21,7 +21,7 @@ SELECT A.strInvoiceNumber
 	 , dblPrepaids			= 0.000000
 	 , dtmDate
 	 , dtmDueDate
-	 , intCompanyLocationId	 
+	 , intCompanyLocationId	  
 FROM
 (SELECT dtmDate				= I.dtmPostDate
 	 , I.strInvoiceNumber
@@ -90,9 +90,9 @@ FROM tblARInvoice I
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
-				 , intInvoiceId
+				 , PD.intInvoiceId 
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
-			GROUP BY intInvoiceId) 
+			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
@@ -245,9 +245,9 @@ FROM tblARInvoice I
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) AS dblPayment
-				 , intInvoiceId
+				 , PD.intInvoiceId 
 			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
-			GROUP BY intInvoiceId) 
+			GROUP BY PD.intInvoiceId) 
 		) PD ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))

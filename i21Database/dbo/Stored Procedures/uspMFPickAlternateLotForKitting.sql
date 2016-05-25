@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @strBlendProductionStagingLocation NVARCHAR(100)
 	DECLARE @strKitStagingArea NVARCHAR(100)
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intLotStatusId INT 
 
 	SELECT @intPickListId = intPickListId,
 		   @intCompanyLocationId = intLocationId
@@ -65,6 +66,13 @@ BEGIN TRY
 	IF ISNULL(@intAlternateLotId,0) = 0
 	BEGIN
 		RAISERROR('ALTERNATE LOT DOES NOT EXISTS IN THE SCANNED LOCATION',16,1)
+	END
+
+	SELECT @intLotStatusId = intLotStatusId FROM tblICLot WHERE intLotId = @intAlternateLotId
+
+	IF (@intLotStatusId <> 1)
+	BEGIN
+		RAISERROR('SCANNED LOT IS NOT ACTIVE. PLEASE SCAN AN ACTIVE LOT TO CONTINUE.',16,1)
 	END
 
 	IF EXISTS (

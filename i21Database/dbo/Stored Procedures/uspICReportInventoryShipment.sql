@@ -63,6 +63,8 @@ BEGIN TRY
 			,UM.strUnitMeasure [UOM]
 			,ISNULL(SI.dblQuantity,0) [Quantity]
 			,'' [Pallets]
+			, EN.strName
+			, S.dtmShipDate
 		FROM tblICInventoryShipment S
 		LEFT JOIN tblICInventoryShipmentItem SI ON S.intInventoryShipmentId = SI.intInventoryShipmentId
 		LEFT JOIN tblICItem I ON I.intItemId = SI.intItemId
@@ -71,6 +73,7 @@ BEGIN TRY
 		LEFT JOIN tblEMEntityLocation E ON E.intEntityLocationId = S.intShipToLocationId
 		LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = S.intShipToCompanyLocationId
 		LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SI.intOrderId
+		LEFT JOIN tblEMEntity EN ON S.intEntityCustomerId = EN.intEntityId
 		WHERE S.strShipmentNumber =@strShipmentNo
 	END
 END TRY

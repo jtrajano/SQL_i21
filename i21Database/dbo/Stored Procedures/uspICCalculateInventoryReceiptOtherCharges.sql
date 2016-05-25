@@ -69,12 +69,10 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= ROUND (			
 												Charge.dblRate 
-												* dbo.fnCalculateQtyBetweenUOM(ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId), dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), 
-												CASE
-													WHEN ReceiptItem.dblNet = '0.00000000000000000000'
-													THEN ReceiptItem.dblOpenReceive
-													ELSE ReceiptItem.dblNet
-												END
+												* dbo.fnCalculateQtyBetweenUOM(
+													ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
+													, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
+													, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 												)
 												, 2
 											 )
@@ -219,7 +217,7 @@ BEGIN
 END 
 
 -- Update the Other Charge amounts
--- Also, the sub-currency amounts must be converted back the currency amounts.
+-- Also, the sub-currency amounts must be converted back to the currency amounts.
 BEGIN 
 	UPDATE	Charge
 	SET		dblAmount = ROUND(	

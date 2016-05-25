@@ -189,8 +189,8 @@ BEGIN
 		SELECT NULL
 			,@dtmFromDate
 			,intShiftId
-			,@dtmFromDate + dtmShiftStartTime
-			,@dtmFromDate + dtmShiftEndTime
+			,@dtmFromDate + dtmShiftStartTime+intStartOffset 
+			,@dtmFromDate + dtmShiftEndTime+intEndOffset 
 			,0
 			,(
 				CASE 

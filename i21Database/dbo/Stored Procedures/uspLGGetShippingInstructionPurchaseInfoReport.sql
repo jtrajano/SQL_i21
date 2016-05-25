@@ -46,11 +46,12 @@ SELECT L.intLoadId,
 	   CT.intContractSeq,
 	   LD.dblQuantity,
 	   UM.strUnitMeasure,
-	   CT.strItemDescription
+	   CT.strItemDescription,
+	   CT.strCustomerContract AS strPCustomerContract
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intPContractDetailId
-WHERE L.intLoadId = @xmlParam and L.intPurchaseSale = 1
+WHERE L.intLoadId = @xmlParam and L.intPurchaseSale IN (1,3)
 END

@@ -97,16 +97,7 @@ BEGIN TRY
 	BEGIN 
 		IF (@strLotTracking = 'Yes - Serial Number')
 		BEGIN
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-						,@intItemId = @intItemId
-						,@intManufacturingId = NULL
-						,@intSubLocationId = @intSubLocationId
-						,@intLocationId = @intLocationId
-						,@intOrderTypeId = NULL
-						,@intBlendRequirementId = NULL
-						,@intPatternCode = 24
-						,@ysnProposed = 0
-						,@strPatternString = @strNewLotNumber OUTPUT
+			SET @strNewLotNumber = 'Split Lot Serial Number'
 		END
 		ELSE 
 		BEGIN

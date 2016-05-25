@@ -49,6 +49,14 @@ SET ANSI_WARNINGS OFF
 			
 			IF (@intSourceType = 1) 
 			BEGIN
+				UPDATE Load SET 
+					intDriverEntityId = Rte.intDriverEntityId
+				FROM tblLGLoad Load 
+				JOIN tblLGLoadDetail LD ON LD.intLoadId = Load.intLoadId
+				JOIN tblLGRouteOrder RO ON RO.intLoadDetailId = LD.intLoadDetailId
+				JOIN tblLGRoute Rte ON Rte.intRouteId = RO.intRouteId
+				WHERE Rte.intRouteId=@intRouteId
+
 				UPDATE EL SET 
 					dblLatitude = RO.dblToLatitude
 					,dblLongitude = RO.dblToLongitude
