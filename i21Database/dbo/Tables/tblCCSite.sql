@@ -5,7 +5,7 @@
 	[intCompanyOwnedSiteId] INT NULL,
 	[strSite] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strSiteDescription] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intPaymentMethodId] INT NOT NULL,
+	[intPaymentMethodId] INT NULL,
 	[intCustomerId] INT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
