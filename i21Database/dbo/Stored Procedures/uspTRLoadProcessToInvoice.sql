@@ -78,6 +78,7 @@ BEGIN TRY
 		,[intItemId]							= DD.intItemId
 		,[ysnInventory]							= [dbo].[fnIsStockTrackingItem](DD.intItemId)
 		,[strItemDescription]					= Item.strDescription
+		,[intOrderUOMId]						= Item.intIssueUOMId
 		,[intItemUOMId]							= Item.intIssueUOMId
 		,[dblQtyOrdered]						= DD.dblUnits
 		,[dblQtyShipped]						= DD.dblUnits
@@ -180,6 +181,7 @@ BEGIN TRY
 		,[intItemId]
 		,[ysnInventory]
 		,[strItemDescription]
+		,[intOrderUOMId]
 		,[intItemUOMId]
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
@@ -256,6 +258,7 @@ BEGIN TRY
 		,[intItemId]							= TR.intItemId
 		,[ysnInventory]							= TR.ysnInventory
 		,[strItemDescription]					= TR.strItemDescription
+		,[intOrderUOMId]						= TR.intOrderUOMId
 		,[intItemUOMId]							= TR.intItemUOMId
 		,[dblQtyOrdered]						= TR.dblQtyOrdered
 		,[dblQtyShipped]						= TR.dblQtyShipped
@@ -380,6 +383,7 @@ BEGIN TRY
 		,[intItemId]
 		,[ysnInventory]
 		,[strItemDescription]
+		,[intOrderUOMId]
 		,[intItemUOMId]
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
@@ -455,6 +459,7 @@ BEGIN TRY
 		,[intItemId]							= @intFreightItemId
 		,[ysnInventory]							= [dbo].[fnIsStockTrackingItem](@intFreightItemId)
 		,[strItemDescription]					= Item.strDescription
+		,[intOrderUOMId]						= @intFreightItemUOMId
 		,[intItemUOMId]							= @intFreightItemUOMId
 		,[dblQtyOrdered]						= IE.dblQtyOrdered
 		,[dblQtyShipped]						= IE.dblQtyShipped
@@ -538,6 +543,7 @@ BEGIN TRY
 			,[intItemId]
 			,[ysnInventory]
 			,[strItemDescription]
+			,[intOrderUOMId]
 			,[intItemUOMId]
 			,[dblQtyOrdered]
 			,[dblQtyShipped]
@@ -613,6 +619,7 @@ BEGIN TRY
 			,[intItemId]							= @intSurchargeItemId
 			,[ysnInventory]							= [dbo].[fnIsStockTrackingItem](@intSurchargeItemId)
 			,[strItemDescription]					= Item.strDescription
+			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
 			,[dblQtyOrdered]						= 1
 			,[dblQtyShipped]						= 1
