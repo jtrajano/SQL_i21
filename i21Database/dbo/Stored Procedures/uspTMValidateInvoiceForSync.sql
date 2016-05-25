@@ -12,7 +12,8 @@ BEGIN
 	DECLARE @strInvoiceNumber NVARCHAR(100)
 	DECLARE @intRowCount INT
 	DECLARE @strSiteBillingBy NVARCHAR(10)
-
+	DECLARE @strClassFill NVARCHAR(15)
+	DECLARE @intSiteItemId INT
 
 	SET @ResultLog = ''
 
@@ -49,6 +50,8 @@ BEGIN
 		SELECT 
 			@intClockId = intClockID
 			,@strSiteBillingBy = strBillingBy
+			,@intSiteItemId = intProduct
+			,@strClassFill = strClassFillOption
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
 		
@@ -69,6 +72,26 @@ BEGIN
 			SET @ResultLog = @ResultLog + 'Exception:The Site Clock Location does not exists in Tank Management.' + CHAR(10)
 			GOTO DONEVALIDATING
 		END
+
+		--Check Product Class
+		IF(@intSiteItemId <> @intItemId)
+		BEGIN
+			IF(@strClassFill = 'No')
+			BEGIN
+				SET @ResultLog = @ResultLog + 'Exception:The Invoice item is different than the site item.' + CHAR(10)
+				GOTO DONEVALIDATING
+			END
+
+			IF(@strClassFill = 'Product Class')
+			BEGIN
+				IF((SELECT TOP 1 intCategoryId FROM tblICItem WHERE intItemId = @intItemId) <> (SELECT TOP 1 intCategoryId FROM tblICItem WHERE intItemId = @intSiteItemId) )
+				BEGIN
+					SET @ResultLog = @ResultLog + 'Exception:The Invoice item class is different than the site item class.' + CHAR(10)
+				GOTO DONEVALIDATING
+				END
+			END
+		END
+
 		
 		IF((SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @intItemId) = 'Service')
 		BEGIN
