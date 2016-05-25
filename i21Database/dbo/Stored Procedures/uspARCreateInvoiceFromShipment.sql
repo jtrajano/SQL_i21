@@ -162,6 +162,8 @@ INNER JOIN
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
+WHERE
+	ICIS.[intInventoryShipmentId] = @ShipmentId
 		
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		
 
