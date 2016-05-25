@@ -3889,6 +3889,9 @@
     <Build Include="dbo\Tables\tblARPrepaidAndCredit.sql" />
     <Build Include="dbo\Views\vyuARPrepaidAndCredit.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaidForInvoice.sql" />
+    <Build Include="dbo\Views\vyuAPClearables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
