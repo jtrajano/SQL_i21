@@ -3858,6 +3858,9 @@
     <Build Include="dbo\Views\vyuLGContainerReceiptView.sql" />
     <Build Include="dbo\Views\vyuLGContainerPositionView.sql" />
     <Build Include="dbo\Views\vyuSMTerm.sql" />
+    <Build Include="dbo\Views\vyuAPClearables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
