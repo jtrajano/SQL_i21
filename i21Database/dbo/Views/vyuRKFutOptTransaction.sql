@@ -1,6 +1,7 @@
 ﻿CREATE View vyuRKFutOptTransaction
 
 AS  
+
 SELECT *,isnull(dblContractSize,0)*intOpenContract as dblHedgeQty FROM (
 SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId], 
 			ft.[intFutOptTransactionHeaderId] AS [intFutOptTransactionHeaderId], 
@@ -28,7 +29,27 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			sb.[strBook] AS [strBook], 
 			ssb.[strSubBook] AS [strSubBook], 
 			ft.[dtmFilledDate] AS [dtmFilledDate],
-			ft.intCommodityId					
+			ft.intCommodityId
+			,strBankName
+			,strBankAccountNo
+			,case when intSelectedInstrumentTypeId=1 then 'Exchange Traded' else 'OTC' end strSelectedInstrumentType
+			,ft.strContractType			
+			,strCurrencyExchangeRateType
+			,ft.strFromCurrency
+			,ft.strToCurrency
+			,ft.dblContractAmount
+			,ft.dblExchangeRate
+			,ft.dblMatchAmount
+			,ft.dblAllocatedAmount
+			,ft.dblUnAllocatedAmount
+			,ft.dblSpotRate
+			,ft.ysnSwap
+			,ft.strSwapContractType
+			,ft.dtmSwapMaturityDate
+			,ft.dblSwapContractAmount
+			,ft.dblSwapExchangeRate
+			,ft.dblSwapMatchAmount
+			,ft.ysnSwapConfirm								
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
@@ -41,4 +62,7 @@ LEFT OUTER JOIN [dbo].[tblRKFutureMarket] AS [fot] ON ft.[intFutureMarketId] = [
 LEFT OUTER JOIN [dbo].[tblICUnitMeasure] AS um ON [fot].[intUnitMeasureId] = um.[intUnitMeasureId]
 LEFT OUTER JOIN [dbo].[tblICCommodity] AS sc ON ft.[intCommodityId] = sc.[intCommodityId]
 LEFT OUTER JOIN [dbo].[tblSMCompanyLocation] AS cl ON ft.[intLocationId] = cl.[intCompanyLocationId]
+LEFT OUTER JOIN [dbo].[tblCMBank] AS b ON ft.[intBankId] = b.[intBankId]
+LEFT OUTER JOIN [dbo].[tblCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
+LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 )t
