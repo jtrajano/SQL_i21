@@ -3852,6 +3852,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
     <Build Include="dbo\Views\vyuSMImportFieldMapping.sql" />
+    <Build Include="dbo\Functions\fnTRSearchSupplyPointId.sql" />
+    <Build Include="dbo\Functions\fnTRSearchItemId.sql" />
+    <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuLGContainerReceiptView.sql" />
     <Build Include="dbo\Views\vyuLGContainerPositionView.sql" />
   </ItemGroup>
