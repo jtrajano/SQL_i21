@@ -14,46 +14,15 @@ BEGIN
 		SET ANSI_WARNINGS OFF
 
 		-- VARIABLES NEEDED 
-		DECLARE @strStockStatus NVARCHAR(50), @strPreferedStockStatus NVARCHAR(50), @intFiscalYear INT, @intEligible INT
+		DECLARE @strStockStatus NVARCHAR(50),
+				@intFiscalYear INT
 
+
+			
 		-- GET STOCK STATUS
 		SET @strStockStatus = (SELECT strStockStatus FROM tblARCustomer where intEntityCustomerId = @intEntityCustomerId)
-
+	
 		IF(@strStockStatus = '' OR @strStockStatus IS NULL)
-		BEGIN -- NOT ELIGIBLE FOR PATRONAGE
-			RETURN;
-		END
-
-		-- GET STOCK STATUS FROM PREFERENCE
-		SET @strPreferedStockStatus = (SELECT strRefund FROM tblPATCompanyPreference)
-
-		CREATE TABLE #statusTable ( strStockStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL )
-
-		IF(@strPreferedStockStatus = 'A')
-		BEGIN
-			DELETE FROM #statusTable
-			INSERT INTO #statusTable VALUES ('Voting');
-			INSERT INTO #statusTable VALUES ('Non-Voting');
-			INSERT INTO #statusTable VALUES ('Producer');
-			INSERT INTO #statusTable VALUES ('Other');
-		END
-		ELSE IF(@strPreferedStockStatus = 'S')
-		BEGIN
-			DELETE FROM #statusTable
-			INSERT INTO #statusTable VALUES ('Voting');
-			INSERT INTO #statusTable VALUES ('Non-Voting');
-		END
-		ELSE IF(@strPreferedStockStatus = 'V')
-		BEGIN
-			DELETE FROM #statusTable
-			INSERT INTO #statusTable VALUES ('Voting');
-		END
-		
-		SET @intEligible = CASE WHEN @strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN 1 ELSE 0 END
-
-		DROP TABLE #statusTable
-
-		IF( @intEligible = 0 )
 		BEGIN -- NOT ELIGIBLE FOR PATRONAGE
 			RETURN;
 		END
