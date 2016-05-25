@@ -365,8 +365,14 @@ FROM
 		,[dblWeightUnitQty]							=	1
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
-		,[intCurrencyId]							=	ISNULL(A.intCurrencyId,0)
-		,[strCurrency]								=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
+															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
+															 ELSE  ISNULL(A.intCurrencyId,0)
+														END			
+		,[strCurrency]								=	CASE WHEN A.ysnSubCurrency > 0 
+															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
+															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+														END	
 	FROM [vyuAPChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
@@ -502,8 +508,14 @@ FROM
 		,[dblWeightUnitQty]							=	1
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
-		,[intCurrencyId]							=	ISNULL(CC.intCurrencyId,0)
-		,[strCurrency]								=	CC.strCurrency
+		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
+															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
+															 ELSE  ISNULL(CC.intCurrencyId,0)
+														END			
+		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
+															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
+															 ELSE  CC.strCurrency
+														END	
 	FROM		vyuCTContractCostView		CC
 	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
