@@ -43,6 +43,7 @@
     [intSalesPersonId]        INT             NULL,
     [ysnInvalid]              BIT             NULL,
     [ysnCreditCardUsed]       BIT             NULL,
+    [ysnOriginHistory]        BIT             NULL,
     [ysnPosted]               BIT             NULL,
     [strTransactionId]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceReportNumber]  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -58,6 +59,8 @@
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
 
 
 
