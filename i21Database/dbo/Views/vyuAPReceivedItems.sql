@@ -377,12 +377,14 @@ FROM
 		,[dblWeightUnitQty]							=	1
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
-		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
-															 ELSE ISNULL(A.intCurrencyId,0) 
+		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
+															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
+															 ELSE  ISNULL(A.intCurrencyId,0)
+														END			
+		,[strCurrency]								=	CASE WHEN A.ysnSubCurrency > 0 
+															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
+															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 														END	
-		,[strCurrency]								=   CASE WHEN A.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
-															 ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
-														END
 		,[strVendorLocation]						=	NULL
 	FROM [vyuAPChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
@@ -520,9 +522,15 @@ FROM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	1
 		,[dblCostUnitQty]							=	1
-		,[dblUnitQty]								=	1--dbo.fnLGGetItemUnitConversion (CD.intItemId, CD.intPriceItemUOMId, CD.intNetWeightUOMId)
-		,[intCurrencyId]							=	CC.intCurrencyId
-		,[strCurrency]								=	CC.strCurrency
+		,[dblUnitQty]								=	1
+		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
+															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
+															 ELSE  ISNULL(CC.intCurrencyId,0)
+														END			
+		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
+															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
+															 ELSE  CC.strCurrency
+														END	
 		,[strVendorLocation]						=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
