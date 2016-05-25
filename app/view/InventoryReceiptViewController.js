@@ -4012,6 +4012,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
                         newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
 
+                        // Calculate the taxes
+                        win.viewModel.data.currentReceiptItem = newReceiptItem;
+                        me.calculateItemTaxes();
+
                         if (ReceiptType === 'Purchase Contract') {
                             ContractStore.load({
                                 filters: [
