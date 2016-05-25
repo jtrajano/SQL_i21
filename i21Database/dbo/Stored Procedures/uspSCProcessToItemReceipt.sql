@@ -236,7 +236,8 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage 
+				,ysnIsStorage
+				,strSourceTransactionId  
 			)
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
 			SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
@@ -261,6 +262,7 @@ BEGIN TRY
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage 
+					,strSourceTransactionId 
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
@@ -297,7 +299,8 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage 
+				,ysnIsStorage
+				,strSourceTransactionId  
 			)
 			EXEC dbo.uspSCGetScaleItemForItemReceipt 
 				 @intTicketId
@@ -342,7 +345,8 @@ BEGIN TRY
 					,intLotId
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-					,ysnIsStorage 
+					,ysnIsStorage
+					,strSourceTransactionId 
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
@@ -412,7 +416,8 @@ BEGIN TRY
 							,intLotId
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage 
+							,ysnIsStorage
+							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
 						--EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
@@ -444,7 +449,8 @@ BEGIN TRY
 							,intLotId
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage 
+							,ysnIsStorage
+							,strSourceTransactionId 
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
 				END
