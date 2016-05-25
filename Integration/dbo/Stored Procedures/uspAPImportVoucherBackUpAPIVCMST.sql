@@ -13,8 +13,27 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @nextVoucherNumber INT;
+DECLARE @nextPrePayNumber INT;
+DECLARE @nextDebitNumber INT;
+
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
+
+SELECT
+	@nextVoucherNumber = A.intNumber
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 9
+
+SELECT
+	@nextPrePayNumber = A.intNumber
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 20
+
+SELECT
+	@nextDebitNumber = A.intNumber
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 18
 
 IF OBJECT_ID('dbo.tmp_apivcmstImport') IS NOT NULL DROP TABLE tmp_apivcmstImport
 

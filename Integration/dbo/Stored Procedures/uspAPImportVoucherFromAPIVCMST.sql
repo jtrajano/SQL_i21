@@ -84,12 +84,15 @@ SELECT TOP 1 @defaultTermId = intTermID FROM tblSMTerm WHERE strTerm = 'Due on R
 SELECT TOP 1 @defaultCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurrency LIKE '%USD%'
 
 ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
+
+IF OBJECT_ID(N'tempdb..#tmpVoucherTransactions') IS NOT NULL DROP TABLE #tmpVoucherTransactions
+CREATE TABLE #tmpVoucherTransactions(intId INT);
+
 EXEC sp_executesql N'
-INSERT INTO tblAPBill WITH(TABLOCK)
+INSERT INTO tblAPBill
 (
 	[intEntityVendorId],
 	[strVendorOrderNumber], 
-	[strBillId],
 	[intTermsId], 
 	[dtmDate], 
 	[dtmDateCreated], 
@@ -110,19 +113,26 @@ INSERT INTO tblAPBill WITH(TABLOCK)
 	[dblWithheld],
 	[intShipToId],
 	[intShipFromId],
-	[intShipFromId],
 	[intPayToAddressId],
+	[strShipFromAddress]	,	
+	[strShipFromCity],		
+	[strShipFromCountry]	,	
+	[strShipFromPhone],		
+	[strShipFromState],		
+	[strShipFromZipCode],		
+	[strShipToAddress],		
+	[strShipToCity],			
+	[strShipToCountry],		
+	[strShipToPhone]	,		
+	[strShipToState]	,		
+	[strShipToZipCode],		
 	[intCurrencyId],
 	[ysnOrigin]
 )
+OUTPUT inserted.intBillId INTO #tmpVoucherTransactions
 SELECT
 	[intEntityVendorId]		=	D.intEntityVendorId, 
 	[strVendorOrderNumber] 	=	A.apivc_ivc_no,
-	[strBillId]				=	(CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN @voucher + CAST(@nextVoucherNumber + (ROW_NUMBER() OVER(ORDER BY (SELECT 1))) AS NVARCHAR)
-										WHEN A.apivc_trans_type = ''O'' AND A.apivc_orig_amt > 0 THEN @voucher + CAST(@nextVoucherNumber + (ROW_NUMBER() OVER(ORDER BY (SELECT 1))) AS NVARCHAR)
-									WHEN A.apivc_trans_type = ''A'' THEN @prepay + CAST(@nextPrePayNumber + (ROW_NUMBER() OVER(ORDER BY (SELECT 1))) AS NVARCHAR)
-									WHEN A.apivc_trans_type = ''C'' OR A.apivc_orig_amt < 0 THEN @debitMemo + CAST(@nextDebitNumber + (ROW_NUMBER() OVER(ORDER BY (SELECT 1))) AS NVARCHAR)
-									ELSE NULL END),
 	[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
 									WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
 										WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), @defaultTermId),
@@ -147,15 +157,13 @@ SELECT
 	[intEntityId]			=	ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
 	[ysnPosted]				=	1,
 	[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
-	[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN 1
+	[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN 1
 										WHEN A.apivc_trans_type = ''O'' AND A.apivc_orig_amt > 0 THEN 1
 									WHEN A.apivc_trans_type = ''A'' THEN 2
 									WHEN A.apivc_trans_type = ''C'' OR A.apivc_orig_amt < 0 THEN 3
-									ELSE 0 END,
+									ELSE 0 END),
 	[dblDiscount]			=	ISNULL(A.apivc_disc_avail,0),
 	[dblWithheld]			=	A.apivc_wthhld_amt,
-	[ysnOrigin]				=	1,
-	[intCurrencyId]			=	@defaultCurrencyId,
 	[intShipToId]			=	@userLocation,
 	[intShipFromId]			=	loc.intEntityLocationId,
 	[intPayToAddressId]		=	loc.intEntityLocationId,
@@ -165,13 +173,14 @@ SELECT
 	[strShipFromPhone]		=	loc.strPhone,
 	[strShipFromState]		=	loc.strState,
 	[strShipFromZipCode]	=	loc.strZipCode,
-	strShipToAddress		=	@shipToAddress,
+	[strShipToAddress]		=	@shipToAddress,
 	[strShipToCity]			=	@shipToCity,
 	[strShipToCountry]		=	@shipToCountry,
 	[strShipToPhone]		=	@shipToPhone,
 	[strShipToState]		=	@shipToState,
 	[strShipToZipCode]		=	@shipToZipCode,
-	[A4GLIdentity]			=	A.[A4GLIdentity]
+	[intCurrencyId]			=	@defaultCurrencyId,
+	[ysnOrigin]				=	1
 FROM tmp_apivcmstImport A
 	LEFT JOIN apcbkmst B
 		ON A.apivc_cbk_no = B.apcbk_no
@@ -183,17 +192,50 @@ FROM tmp_apivcmstImport A
 SET @totalImported = @@ROWCOUNT;
 ',N'@voucher NVARCHAR(50), @debitMemo NVARCHAR(50), @prepay NVARCHAR(5), @defaultTermId INT, @userLocation INT,
 @shipToAddress NVARCHAR(200), @shipToCity NVARCHAR(50), @shipToCountry NVARCHAR(25), @shipToPhone NVARCHAR(25), @shipToZipCode NVARCHAR(12),
-@shipToState NVARCHAR(12), @UserId INT, @defaultCurrencyId INT, @nextVoucherNumber INT, @nextPrePayNumber INT, @nextDebitNumber INT,
- @totalImported INT OUTPUT',
+@shipToState NVARCHAR(12), @UserId INT, @defaultCurrencyId INT, @totalImported INT OUTPUT',
 @voucher = @voucher, @debitMemo = @debitMemo, @prepay = @prepay, @defaultTermId = @defaultTermId, @userLocation = @userLocation,
 @shipToAddress = @shipToAddress, @shipToCity = @shipToCity, @shipToCountry = @shipToCountry, @shipToPhone = @shipToPhone,
 @shipToZipCode	= @shipToZipCode, @shipToState= @shipToState, @UserId = @UserId, @defaultCurrencyId = @defaultCurrencyId,
-@nextVoucherNumber = @nextVoucherNumber, @nextPrePayNumber = @nextPrePayNumber, @nextDebitNumber = @nextDebitNumber,
-@totalImported = @totalInsertedBill OUTPUT
+@totalImported = @totalInsertedBill OUTPUT;
+
+IF OBJECT_ID('tempdb..#tmpVouchersWithRecord') IS NOT NULL DROP TABLE #tmpVouchersWithRecord
+
+CREATE TABLE #tmpVouchersWithRecord
+(
+	intBillId INT NOT NULL,
+	intTransactionType INT NOT NULL,
+	intRecordNumber INT NOT NULL
+)
+
+INSERT INTO #tmpVouchersWithRecord
+SELECT
+	A.intBillId,
+	A.intTransactionType,
+	(CASE A.intTransactionType 
+		WHEN 1 
+			THEN @nextVoucherNumber 
+		WHEN 2
+			THEN @nextPrePayNumber
+		WHEN 3
+			THEN @nextDebitNumber END) +
+		ROW_NUMBER() OVER(PARTITION BY A.intTransactionType ORDER BY A.intBillId)
+FROM tblAPBill A
+INNER JOIN #tmpVoucherTransactions B ON A.intBillId = B.intId
+
+--UPDATE strBillId
+UPDATE A
+	SET A.strBillId = (CASE A.intTransactionType
+						WHEN 1
+							THEN @voucher
+						WHEN 2
+							THEN @prepay
+						WHEN 3
+							THEN @debitMemo
+						END) + (CAST(B.intRecordNumber AS NVARCHAR))
+FROM tblAPBill A
+INNER JOIN #tmpVouchersWithRecord B ON A.intBillId = B.intBillId
 
 ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
-
---TODO UPDATE STARTING NUMBER
 
 IF @totalInsertedBill <= 0 
 BEGIN
@@ -202,6 +244,31 @@ BEGIN
 	IF @transCount = 0 COMMIT TRANSACTION
 	RETURN;
 END
+
+--UPDATE STARTING NUMBER
+UPDATE A
+	SET A.intNumber = ISNULL(totalVoucher.dblTotalVoucher + 1, A.intNumber)
+FROM tblSMStartingNumber A
+CROSS APPLY (
+	SELECT MAX(intRecordNumber) AS dblTotalVoucher FROM #tmpVouchersWithRecord WHERE intTransactionType = 1
+) totalVoucher
+WHERE A.intStartingNumberId = 9
+
+UPDATE A
+	SET A.intNumber = ISNULL(totalDebitMemo.dblTotalDebitMemo + 1, A.intNumber)
+FROM tblSMStartingNumber A
+CROSS APPLY (
+	SELECT MAX(intRecordNumber) AS dblTotalDebitMemo FROM #tmpVouchersWithRecord WHERE intTransactionType =3
+) totalDebitMemo
+WHERE A.intStartingNumberId = 18
+
+UPDATE A
+	SET A.intNumber = ISNULL(totalPrepay.dblTotalPrepay + 1, A.intNumber)
+FROM tblSMStartingNumber A
+CROSS APPLY (
+	SELECT MAX(intRecordNumber) AS dblTotalPrepay FROM #tmpVouchersWithRecord WHERE intTransactionType = 2
+) totalPrepay
+WHERE A.intStartingNumberId = 20
 
 SET @totalHeaderImported = @totalInsertedBill;
 
@@ -263,7 +330,7 @@ SELECT
 FROM tblAPBill A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityVendorId
-INNER JOIN (tmp_apivcmstImport C2 INNER JOIN aphglmst C 
+INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C 
 			ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
 ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
@@ -271,6 +338,8 @@ ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 ORDER BY C.aphgl_dist_no
 
 SET @totalInsertedBillDetail = @@ROWCOUNT;
+
+SET @totalDetailImported = @totalInsertedBillDetail;
 
 INSERT INTO tblAPImportVoucherLog
 (
@@ -297,12 +366,12 @@ SELECT
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
-	DECLARE @errorBackingUp NVARCHAR(500) = ERROR_MESSAGE();
+	DECLARE @errorImport NVARCHAR(500) = ERROR_MESSAGE();
 	IF XACT_STATE() = -1
 		ROLLBACK TRANSACTION;
 	IF @transCount = 0 AND XACT_STATE() = 1
 		ROLLBACK TRANSACTION
 	IF @transCount > 0 AND XACT_STATE() = 1
 		ROLLBACK TRANSACTION uspAPImportVoucherFromAPIVCMST
-	RAISERROR(@errorBackingUp, 16, 1);
+	RAISERROR(@errorImport, 16, 1);
 END CATCH

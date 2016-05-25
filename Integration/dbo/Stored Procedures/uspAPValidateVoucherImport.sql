@@ -87,6 +87,7 @@ AND A.apcbk_no IN (
 					ELSE 1 END)
 )
 
+--GET ALL INVALID GL ACCOUNT DETAIL
 INSERT INTO @log
 SELECT DISTINCT
 	 'Invalid GL Account ' + CAST(A.apegl_gl_acct AS NVARCHAR)  + ' found in origin table apeglmst.', @UserId, GETDATE(), 5, 0
@@ -171,6 +172,32 @@ CROSS APPLY (
 WHERE 1 = (CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END)
 
+----CHECK IF VENDOR IS MISSING IN i21
+--INSERT INTO @log
+--SELECT
+--	CAST(A.apivc_vnd_no AS NVARCHAR) + ' is missing in i21'
+--	,@UserId
+--	,GETDATE()
+--	,8
+--	,0
+--FROM apivcmst A
+--LEFT JOIN tblAPVendor B
+--	ON A.apivc_vnd_no COLLATE Latin1_General_CS_AS = B.strVendorId
+--WHERE B.strVendorId IS NULL
+--AND 1 = (CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+--				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END)
+--UNION ALL
+--SELECT
+--	CAST(A.aptrx_vnd_no AS NVARCHAR) + ' is missing in i21'
+--	,@UserId
+--	,GETDATE()
+--	,8
+--	,0
+--FROM aptrxmst A
+--LEFT JOIN tblAPVendor B
+--	ON A.aptrx_vnd_no COLLATE Latin1_General_CS_AS = B.strVendorId
+--WHERE B.strVendorId IS NULL
+--AND 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
 
 INSERT INTO tblAPImportVoucherLog
 (
