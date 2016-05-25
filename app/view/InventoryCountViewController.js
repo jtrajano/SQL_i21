@@ -8,7 +8,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
     config: {
         searchConfig: {
-            title: 'Search InventoryCount',
+            title: 'Search Inventory Count',
             type: 'Inventory.InventoryCount',
             api: {
                 read: '../Inventory/api/InventoryCount/Search'
@@ -66,7 +66,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         },
         binding: {
             bind: {
-                title: 'InventoryCount - {current.strCountNo}'
+                title: 'Inventory Count - {current.strCountNo}'
             },
 
             btnPrintCountSheets: {
