@@ -308,7 +308,7 @@ Begin
 	ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
 	pld.intStageLotId,(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0))/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
-	um1.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId=@intKitStagingLocationId Then 'Staged' Else 'Picking' End AS strStatus
+	um2.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId=@intKitStagingLocationId Then 'Staged' Else 'Picking' End AS strStatus
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId 
 	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 
 	Join tblICItem i on l.intItemId=i.intItemId
@@ -317,6 +317,8 @@ Begin
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICItemUOM iu1 on pld.intItemIssuedUOMId=iu1.intItemUOMId
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+	Join tblICItemUOM iu2 on l.intItemUOMId=iu2.intItemUOMId
+	Join tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId
 	Left Join @tblReservedQty rq on pld.intLotId=rq.intLotId
 	Where pld.intPickListId=@intPickListId
 	UNION --Bulk Items from Reservation table
@@ -644,7 +646,7 @@ Begin
 	((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
 	pld.intStageLotId,((ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) + pld.dblQuantity)/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
-	um1.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId=@intKitStagingLocationId Then 'Staged' Else '' End AS strStatus
+	um2.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId=@intKitStagingLocationId Then 'Staged' Else '' End AS strStatus
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId 
 	Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 
 	Join tblICItem i on l.intItemId=i.intItemId
@@ -653,6 +655,8 @@ Begin
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICItemUOM iu1 on pld.intItemIssuedUOMId=iu1.intItemUOMId
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+	Join tblICItemUOM iu2 on l.intItemUOMId=iu2.intItemUOMId
+	Join tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId
 	Left Join @tblReservedQty rq on pld.intStageLotId=rq.intLotId
 	Where pld.intPickListId=@intPickListId
 	UNION --Bulk Items from Reservation table
