@@ -402,7 +402,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strDescription",
-                                                "fieldLabel": "Receipt Type",
+                                                "fieldLabel": "Order Type",
                                                 "itemId": "cboReceiptType",
                                                 "labelAlign": "top",
                                                 "labelWidth": 80,

@@ -210,12 +210,7 @@
                                                                             "id": "ce852480-76ec-459e-abce-97f5745b94ac"
                                                                         },
                                                                         {
-                                                                            "id": "68d72edf-cde5-4ff3-a50e-4a2e01235288",
-                                                                            "cn": [
-                                                                                {
-                                                                                    "id": "0a6ed62d-91ef-4898-b155-b5e264cc89c3"
-                                                                                }
-                                                                            ]
+                                                                            "id": "68d72edf-cde5-4ff3-a50e-4a2e01235288"
                                                                         },
                                                                         {
                                                                             "id": "1ba3c601-349c-473b-8784-559c0928fab2",
@@ -2488,7 +2483,6 @@
                                 },
                                 {
                                     "id": "d688d73e-f311-4ad3-a381-364ba7101732",
-                                    "expanded": false,
                                     "cn": [
                                         {
                                             "id": "826e7c25-8530-4ff4-ab10-61cdac615d28"
@@ -9365,15 +9359,15 @@
     },
     "tabState": {
         "openTabs": [
-            "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
+            "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
         ]
     },
     "canvasState": {
-        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
+        "topInstance": "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
     },
     "inspectorState": {
-        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
-        "selectedInstance": "ec20827f-687c-42c1-8af5-391cab615cc9"
+        "topInstance": "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
+        "selectedInstance": "58629368-1c5d-4bd4-a66c-db6a81be0557"
     },
     "editMode": "design",
     "userSettings": {
