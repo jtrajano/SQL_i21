@@ -3861,6 +3861,7 @@
     <Build Include="dbo\Views\vyuAPClearables.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
