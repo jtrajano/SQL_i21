@@ -61,11 +61,13 @@ BEGIN TRY
 		FROM tblWHPickForShipment WHERE strShipmentNo = @strShipmentNo AND id > @intMinId
 	END
 
+	--Delete existing reservation against the shipment
 	IF EXISTS(SELECT * FROM tblICStockReservation WHERE intTransactionId = @intInventoryShipmentId)
 	BEGIN
 		DELETE FROM tblICStockReservation WHERE intTransactionId = @intInventoryShipmentId
 	END
 
+	--Create new reservation against all the lots attached in the shipment.
 	INSERT INTO @ItemsToReserve (
 			intItemId
 			,intItemLocationId
