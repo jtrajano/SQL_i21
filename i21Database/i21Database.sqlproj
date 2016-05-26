@@ -3857,6 +3857,10 @@
     <Build Include="dbo\Stored Procedures\uspPATRefundVoucherToAPBill.sql" />
     <Build Include="dbo\Functions\fnPATGetCustomerRequiredDetailsForVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessRefundsToVoucher.sql" />
+    <Build Include="dbo\Tables\tblCTContractImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportFromXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
