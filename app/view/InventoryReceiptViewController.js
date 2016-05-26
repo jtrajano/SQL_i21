@@ -18,7 +18,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
                 {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName'},
                 {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName'},
                 {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string'},
@@ -99,7 +99,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     columns: [
                         {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                         {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
@@ -127,7 +127,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     columns: [
                         {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                         {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
 
@@ -166,7 +166,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string' },
                         {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
                         {dataIndex: 'strBillOfLading', text: 'BOL', flex: 1, dataType: 'string' },
-                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string' },
+                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
                         {dataIndex: 'strOrderNumber', text: 'Order No', flex: 1, dataType: 'string' },
                         {dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
                         {dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
