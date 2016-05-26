@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATRefundVoucherToAPBill]
 	 @intPatronId					INT
-	,@intPatronGLAccountId			INT
 	,@dblRefundAmount				DECIMAL
 	,@intUserId						INT	
 	,@intBillId						INT = 0
@@ -84,3 +83,4 @@ BEGIN CATCH
 	SET	@bitSuccess = 0
 	RAISERROR (@strErrorMessage , @intErrorSeverity, @intErrorState, @intErrorNumber)
 END CATCH
+GO
