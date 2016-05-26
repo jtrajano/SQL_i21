@@ -55,6 +55,8 @@ CREATE TABLE tmp_aptrxmstImport(
 	[aptrx_user_rev_dt] [int] NULL,
 	[A4GLIdentity] [numeric](9, 0) NOT NULL,
 	[ysnInsertedToAPIVC] [BIT] NULL,
+	[intBackupId]			INT NULL, --Use this to update the linking between the back up and created voucher
+	[intId]			INT IDENTITY(1,1) NOT NULL,
 	CONSTRAINT [k_tmpaptrxmst] PRIMARY KEY NONCLUSTERED (
 		[aptrx_vnd_no] ASC,
 		[aptrx_ivc_no] ASC
@@ -210,41 +212,12 @@ BEGIN
 	AND 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
 END
 
-SET IDENTITY_INSERT tblAPaptrxmst ON
-INSERT INTO tblAPaptrxmst(
-	[aptrx_vnd_no]				,
-	[aptrx_ivc_no]				,
-	[aptrx_sys_rev_dt]   		,
-	[aptrx_sys_time]     		,
-	[aptrx_cbk_no]       		,
-	[aptrx_chk_no]       		,
-	[aptrx_trans_type]   		,
-	[aptrx_batch_no]     		,
-	[aptrx_pur_ord_no]   		,
-	[aptrx_po_rcpt_seq]  		,
-	[aptrx_ivc_rev_dt]   		,
-	[aptrx_disc_rev_dt]  		,
-	[aptrx_due_rev_dt]   		,
-	[aptrx_chk_rev_dt]   		,
-	[aptrx_gl_rev_dt]    		,
-	[aptrx_disc_pct]     		,
-	[aptrx_orig_amt]     		,
-	[aptrx_disc_amt]     		,
-	[aptrx_wthhld_amt]   		,
-	[aptrx_net_amt]      		,
-	[aptrx_1099_amt]     		,
-	[aptrx_comment]      		,
-	[aptrx_orig_type]    		,
-	[aptrx_name]         		,
-	[aptrx_recur_yn]     		,
-	[aptrx_currency]     		,
-	[aptrx_currency_rt]  		,
-	[aptrx_currency_cnt] 		,
-	[aptrx_user_id]      		,
-	[aptrx_user_rev_dt]			,
-	[A4GLIdentity]				,
-	[ysnInsertedToAPIVC]
-)
+IF OBJECT_ID('tempdb..#tmpUnpostedBackupId') IS NOT NULL DROP TABLE #tmpUnpostedBackupId
+CREATE TABLE #tmpUnpostedBackupId(intBackupId INT, intId INT)
+
+MERGE INTO tblAPaptrxmst AS destination
+USING
+(
 SELECT 
 	[aptrx_vnd_no]		
 	,[aptrx_ivc_no]		
@@ -278,11 +251,90 @@ SELECT
 	,[aptrx_user_rev_dt]	
 	,[A4GLIdentity]		
 	,[ysnInsertedToAPIVC]
-FROM tmp_aptrxmstImport
+	,[intId]
+FROM tmp_aptrxmstImport	
+) AS SourceData
+ON (1=0)
+WHEN NOT MATCHED THEN
+INSERT
+(
+	[aptrx_vnd_no]				,
+	[aptrx_ivc_no]				,
+	[aptrx_sys_rev_dt]   		,
+	[aptrx_sys_time]     		,
+	[aptrx_cbk_no]       		,
+	[aptrx_chk_no]       		,
+	[aptrx_trans_type]   		,
+	[aptrx_batch_no]     		,
+	[aptrx_pur_ord_no]   		,
+	[aptrx_po_rcpt_seq]  		,
+	[aptrx_ivc_rev_dt]   		,
+	[aptrx_disc_rev_dt]  		,
+	[aptrx_due_rev_dt]   		,
+	[aptrx_chk_rev_dt]   		,
+	[aptrx_gl_rev_dt]    		,
+	[aptrx_disc_pct]     		,
+	[aptrx_orig_amt]     		,
+	[aptrx_disc_amt]     		,
+	[aptrx_wthhld_amt]   		,
+	[aptrx_net_amt]      		,
+	[aptrx_1099_amt]     		,
+	[aptrx_comment]      		,
+	[aptrx_orig_type]    		,
+	[aptrx_name]         		,
+	[aptrx_recur_yn]     		,
+	[aptrx_currency]     		,
+	[aptrx_currency_rt]  		,
+	[aptrx_currency_cnt] 		,
+	[aptrx_user_id]      		,
+	[aptrx_user_rev_dt]			,
+	[A4GLIdentity]				,
+	[ysnInsertedToAPIVC]
+)
+VALUES
+(
+	[aptrx_vnd_no]				,
+	[aptrx_ivc_no]				,
+	[aptrx_sys_rev_dt]   		,
+	[aptrx_sys_time]     		,
+	[aptrx_cbk_no]       		,
+	[aptrx_chk_no]       		,
+	[aptrx_trans_type]   		,
+	[aptrx_batch_no]     		,
+	[aptrx_pur_ord_no]   		,
+	[aptrx_po_rcpt_seq]  		,
+	[aptrx_ivc_rev_dt]   		,
+	[aptrx_disc_rev_dt]  		,
+	[aptrx_due_rev_dt]   		,
+	[aptrx_chk_rev_dt]   		,
+	[aptrx_gl_rev_dt]    		,
+	[aptrx_disc_pct]     		,
+	[aptrx_orig_amt]     		,
+	[aptrx_disc_amt]     		,
+	[aptrx_wthhld_amt]   		,
+	[aptrx_net_amt]      		,
+	[aptrx_1099_amt]     		,
+	[aptrx_comment]      		,
+	[aptrx_orig_type]    		,
+	[aptrx_name]         		,
+	[aptrx_recur_yn]     		,
+	[aptrx_currency]     		,
+	[aptrx_currency_rt]  		,
+	[aptrx_currency_cnt] 		,
+	[aptrx_user_id]      		,
+	[aptrx_user_rev_dt]			,
+	[A4GLIdentity]				,
+	[ysnInsertedToAPIVC]
+)
+OUTPUT inserted.intId, SourceData.intId INTO #tmpUnpostedBackupId;
 
 SET @totalAPTRXMST = @@ROWCOUNT;
 
-SET IDENTITY_INSERT tblAPaptrxmst OFF
+--UPDATE temp data for the back up link
+UPDATE A
+	SET A.intBackupId = B.intBackupId
+FROM tmp_aptrxmstImport A
+INNER JOIN #tmpUnpostedBackupId B ON A.intId = B.intId
 
 --BACK UP RECORDS FROM aptrxmst TO apivcmst to make sure origin will not abel to create duplicate vendor order number
 INSERT INTO apivcmst(
@@ -354,7 +406,8 @@ CREATE TABLE tmp_apeglmstImport
 	[apegl_gl_acct] [decimal](16, 8) NOT NULL,
 	[apegl_gl_amt] [decimal](11, 2) NULL,
 	[apegl_gl_un] [decimal](13, 4) NULL,
-	[A4GLIdentity] [numeric](9, 0)
+	[A4GLIdentity] [numeric](9, 0),
+	[intHeaderId] INT NULL
 )
 
 INSERT INTO tmp_apeglmstImport
@@ -368,7 +421,8 @@ SELECT
 	[apegl_gl_acct]			=	A.[apegl_gl_acct]		,
 	[apegl_gl_amt]			=	A.[apegl_gl_amt]		,
 	[apegl_gl_un]			=	A.[apegl_gl_un]			,
-	[A4GLIdentity]			=	A.[A4GLIdentity]		
+	[A4GLIdentity]			=	A.[A4GLIdentity]		,
+	[intHeaderId]			=	B.intBackupId
 FROM apeglmst A
 INNER JOIN tmp_aptrxmstImport  B
 ON B.aptrx_ivc_no = A.apegl_ivc_no 
@@ -384,7 +438,8 @@ INSERT INTO tblAPapeglmst(
 	[apegl_gl_acct]		,	
 	[apegl_gl_amt]		,	
 	[apegl_gl_un]		,	
-	[A4GLIdentity]			
+	[A4GLIdentity]		,
+	[intHeaderId]	
 )
 SELECT * FROM tmp_apeglmstImport
 

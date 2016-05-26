@@ -86,10 +86,74 @@ SELECT TOP 1 @defaultCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurr
 ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
 IF OBJECT_ID(N'tempdb..#tmpVoucherTransactions') IS NOT NULL DROP TABLE #tmpVoucherTransactions
-CREATE TABLE #tmpVoucherTransactions(intId INT);
+CREATE TABLE #tmpVoucherTransactions(intBillId INT, intBackupId INT);
 
-EXEC sp_executesql N'
-INSERT INTO tblAPBill
+MERGE INTO tblAPBill AS destination
+USING
+(
+SELECT
+	[intEntityVendorId]		=	D.intEntityVendorId, 
+	[strVendorOrderNumber] 	=	A.apivc_ivc_no,
+	[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
+									WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
+										WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), @defaultTermId),
+	[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+	[dtmDateCreated] 		=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+	[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+	[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+	[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
+	[strReference] 			=	A.apivc_comment,
+	[strPONumber]			=	A.apivc_pur_ord_no,
+	[dbl1099]				=	A.apivc_1099_amt,
+	[dblTotal] 				=	CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
+									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
+	[dblPayment]			=	CASE WHEN A.apivc_status_ind = 'P' THEN
+									CASE WHEN (A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A') THEN A.apivc_orig_amt
+										ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
+								ELSE 0 END,
+	[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = 'P' THEN 0 ELSE 
+										CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
+											ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
+									END,
+	[intEntityId]			=	ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
+	[ysnPosted]				=	1,
+	[ysnPaid]				=	CASE WHEN A.apivc_status_ind = 'P' THEN 1 ELSE 0 END,
+	[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = 'I' AND A.apivc_orig_amt > 0 THEN 1
+										WHEN A.apivc_trans_type = 'O' AND A.apivc_orig_amt > 0 THEN 1
+									WHEN A.apivc_trans_type = 'A' THEN 2
+									WHEN A.apivc_trans_type = 'C' OR A.apivc_orig_amt < 0 THEN 3
+									ELSE 0 END),
+	[dblDiscount]			=	ISNULL(A.apivc_disc_avail,0),
+	[dblWithheld]			=	A.apivc_wthhld_amt,
+	[intShipToId]			=	@userLocation,
+	[intShipFromId]			=	loc.intEntityLocationId,
+	[intPayToAddressId]		=	loc.intEntityLocationId,
+	[strShipFromAddress]	=	loc.strAddress,
+	[strShipFromCity]		=	loc.strCity,
+	[strShipFromCountry]	=	loc.strCountry,
+	[strShipFromPhone]		=	loc.strPhone,
+	[strShipFromState]		=	loc.strState,
+	[strShipFromZipCode]	=	loc.strZipCode,
+	[strShipToAddress]		=	@shipToAddress,
+	[strShipToCity]			=	@shipToCity,
+	[strShipToCountry]		=	@shipToCountry,
+	[strShipToPhone]		=	@shipToPhone,
+	[strShipToState]		=	@shipToState,
+	[strShipToZipCode]		=	@shipToZipCode,
+	[intCurrencyId]			=	@defaultCurrencyId,
+	[ysnOrigin]				=	1,
+	[intBackupId]			=	A.intBackupId
+FROM tmp_apivcmstImport A
+	LEFT JOIN apcbkmst B
+		ON A.apivc_cbk_no = B.apcbk_no
+	INNER JOIN tblAPVendor D
+		ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
+	LEFT JOIN tblEMEntityLocation loc
+		ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
+) AS SourceData
+ON (1=0)
+WHEN NOT MATCHED THEN
+INSERT
 (
 	[intEntityVendorId],
 	[strVendorOrderNumber], 
@@ -129,77 +193,53 @@ INSERT INTO tblAPBill
 	[intCurrencyId],
 	[ysnOrigin]
 )
-OUTPUT inserted.intBillId INTO #tmpVoucherTransactions
-SELECT
-	[intEntityVendorId]		=	D.intEntityVendorId, 
-	[strVendorOrderNumber] 	=	A.apivc_ivc_no,
-	[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
-									WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
-										WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), @defaultTermId),
-	[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	[dtmDateCreated] 		=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
-	[strReference] 			=	A.apivc_comment,
-	[strPONumber]			=	A.apivc_pur_ord_no,
-	[dbl1099]				=	A.apivc_1099_amt,
-	[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
-									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
-	[dblPayment]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN
-									CASE WHEN (A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'') THEN A.apivc_orig_amt
-										ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
-								ELSE 0 END,
-	[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
-										CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
-											ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
-									END,
-	[intEntityId]			=	ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
-	[ysnPosted]				=	1,
-	[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
-	[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN 1
-										WHEN A.apivc_trans_type = ''O'' AND A.apivc_orig_amt > 0 THEN 1
-									WHEN A.apivc_trans_type = ''A'' THEN 2
-									WHEN A.apivc_trans_type = ''C'' OR A.apivc_orig_amt < 0 THEN 3
-									ELSE 0 END),
-	[dblDiscount]			=	ISNULL(A.apivc_disc_avail,0),
-	[dblWithheld]			=	A.apivc_wthhld_amt,
-	[intShipToId]			=	@userLocation,
-	[intShipFromId]			=	loc.intEntityLocationId,
-	[intPayToAddressId]		=	loc.intEntityLocationId,
-	[strShipFromAddress]	=	loc.strAddress,
-	[strShipFromCity]		=	loc.strCity,
-	[strShipFromCountry]	=	loc.strCountry,
-	[strShipFromPhone]		=	loc.strPhone,
-	[strShipFromState]		=	loc.strState,
-	[strShipFromZipCode]	=	loc.strZipCode,
-	[strShipToAddress]		=	@shipToAddress,
-	[strShipToCity]			=	@shipToCity,
-	[strShipToCountry]		=	@shipToCountry,
-	[strShipToPhone]		=	@shipToPhone,
-	[strShipToState]		=	@shipToState,
-	[strShipToZipCode]		=	@shipToZipCode,
-	[intCurrencyId]			=	@defaultCurrencyId,
-	[ysnOrigin]				=	1
-FROM tmp_apivcmstImport A
-	LEFT JOIN apcbkmst B
-		ON A.apivc_cbk_no = B.apcbk_no
-	INNER JOIN tblAPVendor D
-		ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
-	LEFT JOIN tblEMEntityLocation loc
-		ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
+VALUES
+(
+	[intEntityVendorId],
+	[strVendorOrderNumber], 
+	[intTermsId], 
+	[dtmDate], 
+	[dtmDateCreated], 
+	[dtmBillDate],
+	[dtmDueDate], 
+	[intAccountId], 
+	[strReference], 
+	[strPONumber],
+	[dblTotal], 
+	[dbl1099],
+	[dblPayment], 
+	[dblAmountDue],
+	[intEntityId],
+	[ysnPosted],
+	[ysnPaid],
+	[intTransactionType],
+	[dblDiscount],
+	[dblWithheld],
+	[intShipToId],
+	[intShipFromId],
+	[intPayToAddressId],
+	[strShipFromAddress]	,	
+	[strShipFromCity],		
+	[strShipFromCountry]	,	
+	[strShipFromPhone],		
+	[strShipFromState],		
+	[strShipFromZipCode],		
+	[strShipToAddress],		
+	[strShipToCity],			
+	[strShipToCountry],		
+	[strShipToPhone]	,		
+	[strShipToState]	,		
+	[strShipToZipCode],		
+	[intCurrencyId],
+	[ysnOrigin]
+)
+OUTPUT inserted.intBillId, SourceData.intBackupId INTO #tmpVoucherTransactions;
 
-SET @totalImported = @@ROWCOUNT;
-',N'@voucher NVARCHAR(50), @debitMemo NVARCHAR(50), @prepay NVARCHAR(5), @defaultTermId INT, @userLocation INT,
-@shipToAddress NVARCHAR(200), @shipToCity NVARCHAR(50), @shipToCountry NVARCHAR(25), @shipToPhone NVARCHAR(25), @shipToZipCode NVARCHAR(12),
-@shipToState NVARCHAR(12), @UserId INT, @defaultCurrencyId INT, @totalImported INT OUTPUT',
-@voucher = @voucher, @debitMemo = @debitMemo, @prepay = @prepay, @defaultTermId = @defaultTermId, @userLocation = @userLocation,
-@shipToAddress = @shipToAddress, @shipToCity = @shipToCity, @shipToCountry = @shipToCountry, @shipToPhone = @shipToPhone,
-@shipToZipCode	= @shipToZipCode, @shipToState= @shipToState, @UserId = @UserId, @defaultCurrencyId = @defaultCurrencyId,
-@totalImported = @totalInsertedBill OUTPUT;
+SET @totalInsertedBill = @@ROWCOUNT;
 
 IF OBJECT_ID('tempdb..#tmpVouchersWithRecord') IS NOT NULL DROP TABLE #tmpVouchersWithRecord
 
+--UPDATE strBillId
 CREATE TABLE #tmpVouchersWithRecord
 (
 	intBillId INT NOT NULL,
@@ -220,9 +260,8 @@ SELECT
 			THEN @nextDebitNumber END) +
 		ROW_NUMBER() OVER(PARTITION BY A.intTransactionType ORDER BY A.intBillId)
 FROM tblAPBill A
-INNER JOIN #tmpVoucherTransactions B ON A.intBillId = B.intId
+INNER JOIN #tmpVoucherTransactions B ON A.intBillId = B.intBillId
 
---UPDATE strBillId
 UPDATE A
 	SET A.strBillId = (CASE A.intTransactionType
 						WHEN 1
@@ -236,6 +275,12 @@ FROM tblAPBill A
 INNER JOIN #tmpVouchersWithRecord B ON A.intBillId = B.intBillId
 
 ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
+
+--UPDATE THE BACK UP TABLE FOREIGN KEY
+UPDATE A
+	SET A.intBillId = B.intBillId
+FROM tblAPapivcmst A
+INNER JOIN #tmpVoucherTransactions B ON A.intId = B.intBackupId
 
 IF @totalInsertedBill <= 0 
 BEGIN
@@ -340,6 +385,12 @@ ORDER BY C.aphgl_dist_no
 SET @totalInsertedBillDetail = @@ROWCOUNT;
 
 SET @totalDetailImported = @totalInsertedBillDetail;
+
+--UPDATE THE intBillId of tblAPapivcmst
+UPDATE A
+	SET A.intBillId = B.intBillId
+FROM tblAPapivcmst A
+INNER JOIN #tmpVoucherTransactions B ON A.intId = B.intBackupId
 
 INSERT INTO tblAPImportVoucherLog
 (
