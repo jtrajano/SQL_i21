@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityDiagram]
-	--@intLotId int,
-	@strLotNumber nvarchar(50),
+	@intLotId int,
 	@intLocationId int,
 	@intDirectionId int,
 	@ysnParentLot bit=0,
@@ -8,7 +7,6 @@
 AS
 SET NOCOUNT ON;
 
-Declare @intLotId int
 Declare @intRowCount int
 Declare @intMaxRecordCount int
 Declare @intId int
@@ -17,20 +15,7 @@ Declare @strType nvarchar(2)
 Declare @intContractId int
 Declare @intShipmentId int
 Declare @intContainerId int
-
-If @intObjectTypeId<>4 -- Other than Lot its Id value getting passed
-Begin
-	Set @intLotId=CAST(@strLotNumber AS INT)
-End
-
-If @intObjectTypeId=4
-Begin
-	If @ysnParentLot=0
-		Select TOP 1 @intLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intLocationId=@intLocationId
-	Else
-		Select TOP 1 @intLotId=intParentLotId From tblICParentLot where strParentLotNumber=@strLotNumber
-End
-
+ 
 Declare @tblTemp AS table
 (
 	intRecordId int,
@@ -129,7 +114,7 @@ Begin
 	--In Shipment
 	If @intObjectTypeId=2
 	Begin
-		Select TOP 1 @intContractId=intContractHeaderId From vyuLGShipmentContainerReceiptContracts Where intShipmentId=@intLotId
+		Select TOP 1 @intContractId=intPContractHeaderId From vyuLGLoadContainerReceiptContracts Where intLoadId=@intLotId
 
 		--Contract
 		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
@@ -149,7 +134,7 @@ Begin
 	--Container
 	If @intObjectTypeId=3
 	Begin
-		Select TOP 1 @intContractId=intContractHeaderId,@intShipmentId=intShipmentId From vyuLGShipmentContainerReceiptContracts Where intShipmentBLContainerId=@intLotId
+		Select TOP 1 @intContractId=intPContractHeaderId,@intShipmentId=intLoadId From vyuLGLoadContainerReceiptContracts Where intLoadContainerId=@intLotId
 
 		--Contract
 		Insert Into @tblNodeData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
@@ -246,8 +231,8 @@ Begin
 	--Receipt
 	If @intObjectTypeId=6
 	Begin
-		Select TOP 1 @intContractId=lg.intContractHeaderId,@intShipmentId=lg.intShipmentId,@intContainerId=lg.intShipmentBLContainerId 
-		From vyuLGShipmentContainerReceiptContracts lg Join tblICInventoryReceiptItem ri on lg.intShipmentBLContainerId=ri.intContainerId 
+		Select TOP 1 @intContractId=lg.intPContractHeaderId,@intShipmentId=lg.intLoadId,@intContainerId=lg.intLoadContainerId 
+		From vyuLGLoadContainerReceiptContracts lg Join tblICInventoryReceiptItem ri on lg.intLoadContainerId=ri.intContainerId 
 		Where ri.intInventoryReceiptId=@intLotId
 
 		--Contract -> In Shipment -> Container ->Receipt
@@ -288,8 +273,8 @@ Begin
 
 			If ISNULL(@intContractId,0)>0
 			Begin
-				Select TOP 1 @intContractId=lg.intContractHeaderId,@intShipmentId=lg.intShipmentId,@intContainerId=lg.intShipmentBLContainerId 
-				From vyuLGShipmentContainerReceiptContracts lg Join tblICInventoryReceiptItem ri on lg.intShipmentBLContainerId=ri.intContainerId 
+				Select TOP 1 @intContractId=lg.intPContractHeaderId,@intShipmentId=lg.intLoadId,@intContainerId=lg.intLoadContainerId 
+				From vyuLGLoadContainerReceiptContracts lg Join tblICInventoryReceiptItem ri on lg.intLoadContainerId=ri.intContainerId 
 				Where ri.intInventoryReceiptId=@intLotId
 
 				--Contract
@@ -383,6 +368,12 @@ Begin
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
 					Exec uspMFGetTraceabilityWorkOrderOutputDetail @intId,@ysnParentLot
 			
+				-- Lot Split
+				If @strType='L'
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intImageTypeId)
+					Exec uspMFGetTraceabilityLotSplitDetail @intId,@intDirectionId,@ysnParentLot
+
 				-- Lot Ship
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
@@ -499,6 +490,12 @@ Begin
 					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intAttributeTypeId,intImageTypeId)
 					Exec uspMFGetTraceabilityWorkOrderInputDetail @intId,@ysnParentLot
 			
+				-- Lot Split
+				If @strType='L'
+					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+					dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType,intImageTypeId)
+					Exec uspMFGetTraceabilityLotSplitDetail @intId,@intDirectionId,@ysnParentLot
+
 				-- Lot Receipt
 				If @strType='L'
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
@@ -529,7 +526,7 @@ Begin
 				--Get In Shipment From Container
 				if @strType='CN'
 				Begin
-					Select TOP 1 @intShipmentId=intShipmentId From vyuLGShipmentContainerReceiptContracts where intShipmentBLContainerId=@intId
+					Select TOP 1 @intShipmentId=intLoadId From vyuLGLoadContainerReceiptContracts where intLoadContainerId=@intId
 
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strVendor,strType)
@@ -539,7 +536,7 @@ Begin
 				--Get Contract From In Shipment
 				if @strType='IS'
 				Begin
-					Select TOP 1 @intContractId=intContractHeaderId From vyuLGShipmentContainerReceiptContracts where intShipmentId=@intId
+					Select TOP 1 @intContractId=intPContractHeaderId From vyuLGLoadContainerReceiptContracts where intLoadId=@intId
 
 					Insert Into @tblData(strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 					dblQuantity,strUOM,dtmTransactionDate,strVendor,intImageTypeId,strType)
