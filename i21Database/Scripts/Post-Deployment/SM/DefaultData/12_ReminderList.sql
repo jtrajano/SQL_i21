@@ -316,6 +316,22 @@
                                                         intSubmittedById= {0}',
                 [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
-    END    
+    END
 
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order')
+		BEGIN
+			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			SELECT [strReminder]        =        N'Approve',
+				   [strType]        	=        N'Purchase Order',
+				   [strMessage]			=        N'{0} {1} {2} unapproved.',
+				   [strQuery]  			=        N'SELECT * FROM vyuPOForApproval WHERE intEntityApproverId = {0} AND ysnApproved = 0',
+				   [strNamespace]       =        N'AccountsPayable.view.VendorExpenseApproval', 
+				   [intSort]            =        16
+		END
+	ELSE
+		BEGIN
+			UPDATE [dbo].[tblSMReminderList]
+			SET	[strMessage] = N'{0} {1} {2} unapproved.'
+			WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order' 
+		END
 GO
