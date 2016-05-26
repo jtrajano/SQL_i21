@@ -3865,6 +3865,7 @@
     <Build Include="dbo\Functions\fnARGetCustomerDefaultCurreny.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

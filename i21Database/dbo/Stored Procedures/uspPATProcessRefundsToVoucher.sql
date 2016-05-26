@@ -22,7 +22,7 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		EXEC uspPATRefundVoucherToAPBill @intCustomerId,@dblCheckAmount,@intUserId
+		EXEC uspPATRefundVoucherToAPBill @intRefundId,@intCustomerId,@dblCheckAmount,@intUserId
 
 		FETCH NEXT FROM the_cursor INTO @intCustomerId,@dblCheckAmount
 	END

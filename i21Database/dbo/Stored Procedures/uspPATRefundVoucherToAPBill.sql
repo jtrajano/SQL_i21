@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATRefundVoucherToAPBill]
-	 @intPatronId					INT
+	 @intRefundId					INT
+	,@intPatronId					INT
 	,@dblRefundAmount				DECIMAL
 	,@intUserId						INT	
 	,@intBillId						INT = 0
@@ -27,7 +28,7 @@ BEGIN TRY
 	-- Company preference item ID
 	SELECT @intPatronageItemId =  intItemId FROM tblICItem WHERE strType = 'Non-Inventory' AND strItemNo = 'PAT' --temporary. need to set from preference.
 
-	SELECT @strVendorOderNumber = CONCAT( 'PAT-',CONVERT(VARCHAR,GETDATE(),112),CAST((RAND() * (899999) + 100000) AS INT))
+	SELECT @strVendorOderNumber = CONCAT( 'PAT-',@intRefundId,'-',CONVERT(VARCHAR,GETDATE(),112),CAST((RAND() * (899999) + 100000) AS INT))
 
 	-- Fill-up voucher details
 	INSERT INTO @voucherDetailNonInventory
