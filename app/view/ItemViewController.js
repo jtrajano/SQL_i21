@@ -3335,6 +3335,39 @@ Ext.define('Inventory.view.ItemViewController', {
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityCustomer', grid, 'intOwnerId');
     },
 
+    onPatronageBeforeSelect: function(combo, record) {
+        if (record.length <= 0)
+            return;
+		
+		var stockUnitExist = false;
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+                if (current.tblICItemUOMs()) {
+                    Ext.Array.each(current.tblICItemUOMs().data.items, function (itemStock) {
+                        if (!itemStock.dummy) {
+                            if(itemStock.get('ysnStockUnit') == '1')
+								stockUnitExist = true;
+                        }
+                    });
+                }
+            
+        }
+		
+		if (stockUnitExist == false)
+		{
+			var msgBox = iRely.Functions;
+            msgBox.showCustomDialog(
+            msgBox.dialogType.ERROR,
+            msgBox.dialogButtonType.OK,
+            "Stock is required for Patronage Category."
+			);
+
+            return false;
+		}
+    },
+    
     //</editor-fold>
 
     init: function(application) {
@@ -3518,7 +3551,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 drilldown: this.onFuelCategoryDrilldown
             },
             "#cboPatronage": {
-                drilldown: this.onPatronageDrilldown
+                drilldown: this.onPatronageDrilldown,
+                beforeselect: this.onPatronageBeforeSelect
             },
             "#cboPatronageDirect": {
                 drilldown: this.onPatronageDirectDrilldown
