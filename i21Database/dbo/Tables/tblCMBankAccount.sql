@@ -32,6 +32,8 @@
     [strEFTCompanyId]                  NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
     [strEFTBankName]                   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strMICRDescription]               NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
+	[strMICRBankAccountNo]             NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
+    [strMICRRoutingNo]                 NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
     [intMICRBankAccountSpacesCount]    INT            DEFAULT 0 NOT NULL,
     [intMICRBankAccountSpacesPosition] INT            DEFAULT 1 NOT NULL,
     [intMICRCheckNoSpacesCount]        INT            DEFAULT 0 NOT NULL,

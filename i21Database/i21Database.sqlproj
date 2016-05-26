@@ -3861,6 +3861,7 @@
     <Build Include="dbo\Stored Procedures\uspCTImportFromXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\4_DataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

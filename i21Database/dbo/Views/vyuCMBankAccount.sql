@@ -37,6 +37,8 @@ SELECT	i21.intBankAccountId
 		,i21.strEFTCompanyId
 		,i21.strEFTBankName
 		,i21.strMICRDescription
+		,i21.strMICRRoutingNo
+		,i21.strMICRBankAccountNo
 		,i21.intMICRBankAccountSpacesCount
 		,i21.intMICRBankAccountSpacesPosition
 		,i21.intMICRCheckNoSpacesCount
@@ -119,6 +121,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEFTCompanyId
 						,strEFTBankName
 						,strMICRDescription
+						,strMICRRoutingNo
+						,strMICRBankAccountNo
 						,intMICRBankAccountSpacesCount
 						,intMICRBankAccountSpacesPosition
 						,intMICRCheckNoSpacesCount
@@ -172,6 +176,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEFTCompanyId					= i.strEFTCompanyId
 						,strEFTBankName						= i.strEFTBankName
 						,strMICRDescription					= i.strMICRDescription
+						,strMICRRoutingNo					= i.strMICRRoutingNo
+						,strMICRBankAccountNo				= i.strMICRBankAccountNo
 						,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 						,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 						,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -241,6 +247,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
+					,strMICRRoutingNo					= i.strMICRRoutingNo
+					,strMICRBankAccountNo				= i.strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
