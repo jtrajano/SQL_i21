@@ -3897,6 +3897,7 @@
     <Build Include="dbo\Views\vyuLGContainerPositionView.sql" />
     <Build Include="dbo\Tables\tblPRPayGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGeneratePayGroupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
