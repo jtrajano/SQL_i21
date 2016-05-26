@@ -374,7 +374,9 @@ FROM
 															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 														END	
 	FROM [vyuAPChargesForBilling] A
-	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
+																																						   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
+																																						   ELSE  ISNULL(A.intCurrencyId,0) END) 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	OUTER APPLY 
@@ -459,6 +461,7 @@ FROM
 	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
 	UNION ALL
 	SELECT
+	DISTINCT  
 		[intEntityVendorId]							=	CC.intVendorId
 		,[dtmDate]									=	CD.dtmStartDate
 		,[strReference]								=	'' --?
@@ -480,7 +483,7 @@ FROM
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[dblUnitCost]								=	ISNULL(CC.dblRate,0)
 		,[dblTax]									=	0
-		,[dblRate]									=	ISNULL(G1.dblRate,0)
+		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,0) ELSE ISNULL(G1.dblRate,0) END
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(RC.intCent,0)
 		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -527,5 +530,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
+	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CD.intMainCurrencyId) 
+	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
 ) Items
