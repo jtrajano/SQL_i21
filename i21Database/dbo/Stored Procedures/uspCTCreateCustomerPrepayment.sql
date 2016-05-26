@@ -30,6 +30,7 @@ INSERT INTO @EntriesForInvoice
 	,[intSourceId]
 	,[strSourceId]
 	,[intInvoiceId]
+	,[strTransactionType]
 	,[intEntityCustomerId]
 	,[intCompanyLocationId]
 	,[intCurrencyId]
@@ -122,9 +123,10 @@ INSERT INTO @EntriesForInvoice
 	)
 SELECT
 	 [strSourceTransaction]					= 'Sales Contract'
-	,[intSourceId]							= CTCDV.[intContractDetailId]
+	,[intSourceId]							= CTCHV.[intContractHeaderId]
 	,[strSourceId]							= CTCHV.[strContractNumber] 
 	,[intInvoiceId]							= AR.[intInvoiceId]
+	,[strTransactionType]					= 'Prepayment'
 	,[intEntityCustomerId]					= CTCHV.[intEntityId] 
 	,[intCompanyLocationId]					= CTCDV.[intCompanyLocationId] 
 	,[intCurrencyId]						= CTCDV.[intCurrencyId] 
@@ -159,7 +161,7 @@ SELECT
 	,[intEntityId]							= @UserId
 	,[ysnResetDetails]						= 0
 	,[ysnRecap]								= 0
-	,[ysnPost]								= 0
+	,[ysnPost]								= NULL
 																																																		
 	,[intInvoiceDetailId]					= AR.[intInvoiceDetailId] 
 	,[intItemId]							= CTCDV.[intItemId] 
@@ -236,29 +238,6 @@ LEFT OUTER JOIN
 		AND CTCHV.[intContractHeaderId] = AR.[intContractHeaderId] 
 WHERE
 	CTCHV.[intContractHeaderId] = @ContractHeaderId
-
-
-IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
-BEGIN
-	SELECT TOP 1
-		 @InvoiceNumber		= ARI.[strInvoiceNumber]
-		,@ContractNumber	= CTCHV.[strContractNumber] 
-	FROM
-		tblARInvoice ARI
-	INNER JOIN
-		vyuCTContractHeaderView CTCHV
-			ON CTCHV.[intContractHeaderId] = ARI.[intContractHeaderId] 
-	WHERE
-		ARI.[intContractHeaderId] = @ContractHeaderId 
-
-	DECLARE @ErrorMessage NVARCHAR(250)
-
-	SET @ErrorMessage = 'Invoice(' + @InvoiceNumber + ') was already created for this Contract ' + @ContractNumber + '.'
-
-	RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
-END
-	
 	
 DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
 		,@CurrentErrorMessage NVARCHAR(250)
