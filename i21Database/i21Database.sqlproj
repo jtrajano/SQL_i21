@@ -3862,7 +3862,8 @@
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearing.sql" />
     <Build Include="dbo\Views\vyuCFTransactionMargin.sql" />
-    <Build Include="dbo\Functions\fnCFGetTransactionMargin.sql" />    <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />  </ItemGroup>
+    <Build Include="dbo\Functions\fnCFGetTransactionMargin.sql" />    
+    <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />
     <Build Include="dbo\Tables\tblCTContractImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportFromXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
