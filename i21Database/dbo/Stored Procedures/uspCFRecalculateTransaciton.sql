@@ -152,7 +152,7 @@ BEGIN
 	SET @dblOriginalPrice = @OriginalPrice
 	SET @intTransactionId = @TransactionId
 
-	IF (@intTransactionId > 0)
+	IF (@intTransactionId > 0 AND @IsImporting = 0)
 	BEGIN
 		DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId
 	END

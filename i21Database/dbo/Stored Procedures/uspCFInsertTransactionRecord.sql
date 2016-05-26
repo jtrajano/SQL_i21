@@ -48,7 +48,7 @@
 	--  1. REMOTE TRANSACTION			--
 	--  2. EXT. REMOTE TRANSACTION 		--
 	--------------------------------------
-	,@TaxState							NVARCHAR(MAX)
+	,@TaxState							NVARCHAR(MAX)	= ''
 	,@FederalExciseTaxRate        		NUMERIC(18,6)	= 0.000000
 	,@StateExciseTaxRate1         		NUMERIC(18,6)	= 0.000000
 	,@StateExciseTaxRate2         		NUMERIC(18,6)	= 0.000000
@@ -58,6 +58,8 @@
 	,@CountySalesTaxPercentageRate		NUMERIC(18,6)	= 0.000000
 	,@CitySalesTaxPercentageRate  		NUMERIC(18,6)	= 0.000000
 	,@OtherSalesTaxPercentageRate 		NUMERIC(18,6)	= 0.000000
+	
+	,@ysnOriginHistory					BIT				= 0
 	--,@LC7							NUMERIC(18,6)	= 0.000000
 	--,@LC8							NUMERIC(18,6)	= 0.000000
 	--,@LC9							NUMERIC(18,6)	= 0.000000
@@ -120,7 +122,7 @@ BEGIN
 	------------------------------------------------------------
 
 
-
+	SET @ysnPosted = @ysnOriginHistory
 
 	------------------------------------------------------------
 	--					SET VARIABLE VALUE					  --
@@ -461,14 +463,17 @@ BEGIN
 		END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
+			SET @intNetworkId = NULL
 			SET @ysnInvalid = 1
 		END
 		IF(@intSiteId = 0 OR @intSiteId IS NULL)
 		BEGIN
+			SET @intSiteId = NULL
 			SET @ysnInvalid = 1
 		END
 		IF(@intCardId = 0 OR @intCardId IS NULL)
 		BEGIN
+			SET @intCardId = NULL
 			SET @ysnInvalid = 1
 		END
 		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
@@ -515,6 +520,7 @@ BEGIN
 			,[ysnPosted]
 			,[ysnInvalid]
 			,[ysnCreditCardUsed]			
+			,[ysnOriginHistory]
 		)
 		VALUES
 		(
@@ -552,9 +558,11 @@ BEGIN
 			,@ysnPosted
 			,@ysnInvalid
 			,@ysnCreditCardUsed		
+			,@ysnOriginHistory
 		)			
 	
 		DECLARE @Pk	INT		
+		DECLARE @test varchar(10)
 		SELECT @Pk  = SCOPE_IDENTITY();
 
 

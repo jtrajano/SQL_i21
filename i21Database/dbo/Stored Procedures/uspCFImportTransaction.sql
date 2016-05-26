@@ -51,6 +51,12 @@
 		DECLARE @dblOriginalNetPrice			NUMERIC(18,6)	= 0.000000
 		DECLARE @dblCalculatedPumpPrice			NUMERIC(18,6)	= 0.000000
 		DECLARE @dblOriginalPumpPrice			NUMERIC(18,6)	= 0.000000
+		DECLARE @guid							NVARCHAR(MAX)
+		DECLARE @processDate					NVARCHAR(MAX)
+
+
+		SET @guid = NEWID()
+		SET @processDate = CONVERT(VARCHAR(10), GETDATE(), 101)
 
 		--Import only those are not yet imported
 		SELECT A4GLIdentity INTO #tmpcftrxmst
@@ -149,6 +155,9 @@
 				,@dblOriginalNetPrice		= @dblOriginalNetPrice
 				,@dblCalculatedPumpPrice	= @dblCalculatedPumpPrice
 				,@dblOriginalPumpPrice		= @dblOriginalPumpPrice
+				,@ysnOriginHistory			= 1
+				,@strGUID					= @guid
+				,@strProcessDate			= @processDate
 
 
 				COMMIT TRANSACTION
