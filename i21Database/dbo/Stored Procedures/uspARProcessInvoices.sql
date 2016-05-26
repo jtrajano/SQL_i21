@@ -518,7 +518,7 @@ BEGIN
 				,@actionType		= 'Processed'						-- Action Type
 				,@changeDescription	= @SourceScreen						-- Description
 				,@fromValue			= @SourceNumber						-- Previous Value
-				,@toValue			= @InvoiceNumber					-- New Value	
+				,@toValue			= @InvoiceNumber					-- New Value			
 		END	       
 	
 	UPDATE
@@ -762,6 +762,11 @@ BEGIN
 					
 		END		
 	END
+
+	IF ISNULL(@NewInvoiceId, 0) <> 0
+		BEGIN			
+			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @NewInvoiceId, @ForDelete = 0, @UserId = @EntityId	
+		END	 
 		
 	UPDATE #EntriesForProcessing
 	SET
@@ -1049,6 +1054,12 @@ BEGIN TRY
 		WHERE
 			[tblARInvoice].[intInvoiceId] = @ExistingInvoiceId
 			AND C.[intEntityCustomerId] = @EntityCustomerId
+
+
+		IF ISNULL(@ExistingInvoiceId, 0) <> 0
+			BEGIN			
+				EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @ExistingInvoiceId
+			END	 
 			
 
 		DECLARE @ForExistingDetailId INT
@@ -1487,7 +1498,7 @@ BEGIN TRY
 						[intTempDetailIdForTaxes] = @TempDetailIdForTaxes
 						
 					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
-									@TaxDetails	= @TaxDetails
+								@TaxDetails	= @TaxDetails
 								,@UserId		= @EntityId
 								,@ClearExisting	= @ClearDetailTaxes
 								,@RaiseError	= @RaiseError
@@ -1524,7 +1535,12 @@ BEGIN TRY
 					
 			END
 			
-		END		
+		END
+		
+		IF ISNULL(@ExistingInvoiceId, 0) <> 0
+			BEGIN			
+				EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @ExistingInvoiceId, @ForDelete = 0, @UserId = @EntityId	
+			END			
 			
 		UPDATE #EntriesForProcessing
 		SET
@@ -1554,9 +1570,7 @@ BEGIN TRY
 		IF @RecomputeTax = 1
 			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
 		ELSE
-			EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId
-
-		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 0, @UserId = @UserId
+			EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId		
 			
 		UPDATE #EntriesForProcessing SET [ysnRecomputed] = 1 WHERE [intInvoiceId] = @InvoiceId
 	END	

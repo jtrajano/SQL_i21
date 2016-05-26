@@ -22,7 +22,7 @@
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
 	,@DeliverPickUp					NVARCHAR(100)	= NULL
-	,@Comment						NVARCHAR(500)	= ''			
+	,@Comment						NVARCHAR(500)	= NULL			
 	,@ShipToLocationId				INT				= NULL
 	,@BillToLocationId				INT				= NULL
 	,@Template						BIT				= 0			
@@ -108,8 +108,15 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE)
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
 	SET @DeliverPickUp = ISNULL((SELECT TOP 1 strDeliverPickupDefault FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
 	
-IF @Comment IS NULL OR LTRIM(RTRIM(@Comment)) = ''
-	SET @Comment = ISNULL((SELECT TOP 1 ISNULL(strInvoiceComments,'') FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
+IF @Comment IS NULL
+	BEGIN
+		EXEC [dbo].[uspARGetDefaultComment]
+			@intCompanyLocationId = @CompanyLocationId,
+			@intEntityCustomerId = @EntityCustomerId,
+			@strTransactionType = @TransactionType,
+			@strType = @Type,
+			@strDefaultComment = @Comment OUTPUT
+	END
 
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)
