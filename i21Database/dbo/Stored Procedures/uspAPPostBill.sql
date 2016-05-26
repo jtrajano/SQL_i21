@@ -183,7 +183,7 @@ INSERT INTO @adjustedEntries
 SELECT
 	[intItemId]							=	B.intItemId
 	,[intItemLocationId]				=	D.intItemLocationId
-	,[intItemUOMId]						=   ISNULL(Lot.intWeightUOMId, Lot.intItemUOMId) --E2.intUnitMeasureId
+	,[intItemUOMId]						=   ISNULL(ISNULL(Lot.intWeightUOMId, Lot.intItemUOMId),E2.intUnitMeasureId)
 	,[dtmDate] 							=	A.dtmDate
 	,[dblQty] 							=	B.dblQtyReceived
 	,[dblUOMQty] 						=	B.dblQtyReceived
