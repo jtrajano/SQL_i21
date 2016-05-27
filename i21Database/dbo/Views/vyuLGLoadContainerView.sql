@@ -53,7 +53,7 @@ SELECT  L.intLoadId
 		,strSampleStatus = (SELECT TOP 1 SS.strStatus
 								     FROM tblQMSample S
 									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-									 AND S.strContainerNumber = LC.strContainerNumber)
+									 AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
 FROM vyuLGLoadView L
 JOIN vyuLGLoadDetailView LDV ON L.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
