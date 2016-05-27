@@ -3866,6 +3866,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
