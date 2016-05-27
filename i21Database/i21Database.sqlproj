@@ -3868,6 +3868,8 @@
     <Build Include="dbo\Stored Procedures\uspCTImportFromXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessImportRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateImportRackPriceId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
