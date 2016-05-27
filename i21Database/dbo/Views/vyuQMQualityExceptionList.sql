@@ -15,16 +15,22 @@ SELECT TR.intTestResultId
 	,TR.strIsMandatory
 	--,CH.strContractNumber
 	--,SC.strContainerNumber
-	,COALESCE(CH.strContractNumber, CH1.strContractNumber, CH2.strContractNumber) AS strContractNumber
+	,COALESCE(CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq), CH1.strContractNumber + ' - ' + LTRIM(CD1.intContractSeq), CH2.strContractNumber + ' - ' + LTRIM(CD2.intContractSeq)) AS strContractNumber
 	,COALESCE(SC.strContainerNumber, S.strContainerNumber) AS strContainerNumber
-	,ISNULL(L.intLotId,PL.intParentLotId) AS intLotId
-	,ISNULL(L.strLotNumber,PL.strParentLotNumber) AS strLotNumber
+	,ISNULL(L.intLotId, PL.intParentLotId) AS intLotId
+	,ISNULL(L.strLotNumber, PL.strParentLotNumber) AS strLotNumber
 	,S.strSampleNumber
 	,E.strName
 	,SS.strStatus
 	,S.intSampleId
-	,(SELECT strShipperCode from dbo.fnQMGetShipperName(S.strMarks)) AS strShipperCode
-	,(SELECT strShipperName from dbo.fnQMGetShipperName(S.strMarks)) AS strShipperName
+	,(
+		SELECT strShipperCode
+		FROM dbo.fnQMGetShipperName(S.strMarks)
+		) AS strShipperCode
+	,(
+		SELECT strShipperName
+		FROM dbo.fnQMGetShipperName(S.strMarks)
+		) AS strShipperName
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
