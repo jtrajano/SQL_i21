@@ -135,7 +135,7 @@ BEGIN TRY
 		,intContractHeaderId
 	FROM OPENXML(@idoc, 'root/ItemsToTransfer', 2) WITH 
 	(
-			intCustomerStorageId INT
+			 intCustomerStorageId INT
 			,intEntityId INT
 			,intCompanyLocationId INT
 			,intStorageTypeId INT
@@ -143,7 +143,7 @@ BEGIN TRY
 			,dblOpenBalance DECIMAL(24,10)
 			,intContractHeaderId INT
 	)
-
+	
 	INSERT INTO @Action 
 	(
 		intEntityId
@@ -171,6 +171,11 @@ BEGIN TRY
 			,intCompanyLocationId INT
 			,intContractHeaderId INT
 	)
+	UPDATE a 
+	SET a.dblOpenBalance=b.dblOpenBalance
+	FROM @ItemsToMove a
+	JOIN tblGRCustomerStorage b ON b.intCustomerStorageId=a.intCustomerStorageId
+	
     SELECT @ItemId=intItemId from tblGRCustomerStorage WHERE intCustomerStorageId=(SELECT Top 1 intCustomerStorageId FROM @ItemsToMove)
 	
 	SELECT @intUnitMeasureId=a.intUnitMeasureId 
@@ -393,6 +398,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 					)
 				SELECT 1
 					,[intEntityId]
@@ -428,6 +434,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,intItemId
+					,[intUnitMeasureId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -560,6 +567,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 					)
 				SELECT 1
 					,[intEntityId]
@@ -595,6 +603,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -726,6 +735,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 					)
 				SELECT 1
 					,[intEntityId]
@@ -761,6 +771,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -893,6 +904,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -928,6 +940,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -1060,6 +1073,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -1095,6 +1109,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -1226,6 +1241,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -1261,6 +1277,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -1395,6 +1412,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -1430,6 +1448,7 @@ BEGIN TRY
 					,[intCurrencyId]
 					,[strStorageTicketNumber]
 					,[intItemId]
+					,[intUnitMeasureId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
