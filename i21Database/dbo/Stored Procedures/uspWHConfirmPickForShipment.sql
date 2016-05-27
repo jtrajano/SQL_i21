@@ -10,9 +10,6 @@ BEGIN TRY
 	DECLARE @intLotItemId INT
 	DECLARE @dblLotQty NUMERIC(18, 6)
 	DECLARE @dblLotWeight NUMERIC(18, 6)
-	DECLARE @ItemsToReserve AS dbo.ItemReservationTableType
-	DECLARE @intInventoryTransactionType AS INT=5
-	DECLARE @intInventoryShipmentId INT
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -22,8 +19,6 @@ BEGIN TRY
 	BEGIN
 		RAISERROR ('NO LOT HAS BEEN STAGED FOR THIS SHIPMENT NO', 11, 1)
 	END
-
-	SELECT @intInventoryShipmentId  = intInventoryShipmentId FROM tblICInventoryShipment WHERE strShipmentNumber = @strShipmentNo
 
 	SELECT @intMinId = MIN(id)
 	FROM tblWHPickForShipment
@@ -60,44 +55,6 @@ BEGIN TRY
 		SELECT @intMinId = MIN(id)
 		FROM tblWHPickForShipment WHERE strShipmentNo = @strShipmentNo AND id > @intMinId
 	END
-
-	--Delete existing reservation against the shipment
-	IF EXISTS(SELECT * FROM tblICStockReservation WHERE intTransactionId = @intInventoryShipmentId)
-	BEGIN
-		DELETE FROM tblICStockReservation WHERE intTransactionId = @intInventoryShipmentId
-	END
-
-	--Create new reservation against all the lots attached in the shipment.
-	INSERT INTO @ItemsToReserve (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			,dblQty
-			,intTransactionId
-			,strTransactionId
-			,intTransactionTypeId
-	)
-	SELECT intItemId = L.intItemId
-			,intItemLocationId = L.intItemLocationId
-			,intItemUOMId = L.intItemUOMId
-			,intLotId = L.intLotId
-			,intSubLocationId = L.intSubLocationId
-			,intStorageLocationId = L.intStorageLocationId
-			,dblQty = L.dblQty
-			,intTransactionId = SHP.intInventoryShipmentId
-			,strTransactionId = SHP.strShipmentNumber
-			,intTransactionTypeId = @intInventoryTransactionType
-	FROM tblICInventoryShipment SHP
-	JOIN tblICInventoryShipmentItem SHI ON SHI.intInventoryShipmentId = SHP.intInventoryShipmentId
-	JOIN tblICInventoryShipmentItemLot SHL ON SHL.intInventoryShipmentItemId = SHI.intInventoryShipmentItemId
-	JOIN tblICLot L ON L.intLotId = SHL.intLotId
-	WHERE SHP.intInventoryShipmentId = @intInventoryShipmentId
-	
-	EXEC dbo.uspICCreateStockReservation @ItemsToReserve,@intInventoryShipmentId,@intInventoryTransactionType	
-
 END TRY
 
 BEGIN CATCH
