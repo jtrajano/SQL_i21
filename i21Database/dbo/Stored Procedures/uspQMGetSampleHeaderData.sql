@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetSampleHeaderData]
-	@intProductTypeId INT
+     @intProductTypeId INT
 	,@intProductValueId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -81,6 +81,7 @@ BEGIN
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
+		,S.strMarks
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentBLContainerContractId = @intProductValueId
@@ -109,6 +110,7 @@ BEGIN
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
+		,S.strMarks
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentContractQtyId = @intProductValueId
