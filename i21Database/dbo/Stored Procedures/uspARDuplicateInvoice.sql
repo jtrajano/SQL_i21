@@ -88,7 +88,7 @@ SELECT
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
-	,@Comments						= [strComments] + (CASE WHEN ISNULL(@ForRecurring,0) = 0 THEN ' DUP: ' + [strInvoiceNumber] ELSE '' END)
+	,@Comments						= [strComments] + (CASE WHEN [ysnRecurring] = 1 THEN '' ELSE ' DUP: ' + [strInvoiceNumber] END)
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
 	,@Template						= 0		--[ysnTemplate]
