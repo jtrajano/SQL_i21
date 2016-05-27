@@ -34,6 +34,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\15_Module.sql
 :r .\SM\DefaultData\16_PaymentMethod.sql
 :r .\SM\DefaultData\17_Notification.sql
+:r .\SM\DefaultData\18_SecurityPolicy.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL

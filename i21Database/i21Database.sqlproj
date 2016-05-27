@@ -3867,6 +3867,8 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
+    <Build Include="dbo\Tables\tblSMSecurityPolicy.sql" />
+    <Build Include="dbo\Tables\tblSMUserSecurityPasswordHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4013,5 +4015,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\9_AlterTable.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\18_SecurityPolicy.sql" />
   </ItemGroup>
 </Project>
