@@ -4023,7 +4023,6 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\9_AlterTable.sql" />
   </ItemGroup>
-</Project>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\18_SecurityPolicy.sql" />
   </ItemGroup>
