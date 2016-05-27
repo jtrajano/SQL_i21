@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherPayment]
 	@UserId INT,
-	@dateFrom DATETIME,
-	@dateTo DATETIME
+	@DateFrom DATETIME,
+	@DateTo DATETIME,
+	@totalCreated INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -13,7 +14,10 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @defaultCurrencyId INT;
+--PAYMENT METHOD ID
 DECLARE @check INT, @eft INT, @wire INT, @withdrawal INT, @deposit INT;
+--MISSING PAYMENT VARIABLES
+DECLARE @defaultBankAccountId INT, @defaultBankGLAccountId INT;
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 
@@ -28,15 +32,15 @@ SELECT TOP 1 @defaultCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurr
 MERGE INTO tblSMPaymentMethod AS Destination
 USING
 (
-	SELECT strPaymentMethod = 'EFT', 1
+	SELECT strPaymentMethod = 'EFT', ysnActive = 1
 	UNION ALL
-	SELECT strPaymentMethod = 'Wire', 1
+	SELECT strPaymentMethod = 'Wire', ysnActive = 1
 	UNION ALL
-	SELECT strPaymentMethod = 'Check', 1
+	SELECT strPaymentMethod = 'Check', ysnActive = 1
 	UNION ALL
-	SELECT strPaymentMethod = 'Withdrawal', 1
+	SELECT strPaymentMethod = 'Withdrawal', ysnActive = 1
 	UNION ALL
-	SELECT strPaymentMethod = 'Deposit', 1
+	SELECT strPaymentMethod = 'Deposit', ysnActive = 1
 ) AS SourceData
 ON (LOWER(Destination.strPaymentMethod) = LOWER(SourceData.strPaymentMethod))
 WHEN NOT MATCHED THEN
@@ -51,29 +55,58 @@ VALUES
 	ysnActive
 );
 
-SELECT @check = intPaymentMethodId FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'
-SELECT @eft = intPaymentMethodId FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'eft'
-SELECT @wire = intPaymentMethodId FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'wire'
-SELECT @withdrawal = intPaymentMethodId FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'withdrawal'
-SELECT @deposit = intPaymentMethodId FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'deposit'
+SELECT @check = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'
+SELECT @eft = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'eft'
+SELECT @wire = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'wire'
+SELECT @withdrawal = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'withdrawal'
+SELECT @deposit = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'deposit'
+
+IF OBJECT_ID('tempdb..#tmpPaymentCreated') IS NOT NULL DROP TABLE #tmpPaymentCreated
+CREATE TABLE #tmpPaymentCreated(intPaymentId INT, intId INT);
 
 --CREATE PAYMENT
-CREATE TABLE #tmpBillsPayment
+MERGE INTO tblAPPayment AS destination
+USING
 (
-	[id] INT IDENTITY(1,1),
-	[strCheckBookNo] NVARCHAR(4),
-	[strVendorId] NVARCHAR(10),
-	[dblAmount] DECIMAL(18,6),
-	[dtmDate] DATETIME,
-	[strCheckNo] NVARCHAR(16),
-	[dblDiscount] DECIMAL(18,6),
-	[strPaymentMethod] NVARCHAR(20),
-	[strBills] NVARCHAR(MAX),
-	CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([id] ASC)
-);
-CREATE NONCLUSTERED INDEX [IX_tmpBillsPayment_strVendorId] ON #tmpBillsPayment([strVendorId]);
-
-INSERT INTO tblAPPayment
+SELECT
+	[intAccountId]			= D.intGLAccountId,
+	[intBankAccountId]		= D.intBankAccountId,
+	[intPaymentMethodId]	= CASE
+									WHEN ISNULL(E.apchk_chk_amt, A.apivc_net_amt) > 0 THEN 
+										CASE 
+											WHEN LEFT(A.apivc_chk_no, 1) = 'E' THEN @eft
+											WHEN LEFT(A.apivc_chk_no, 1) = 'W' THEN @wire
+											WHEN ISNULL(E.apchk_trx_ind,'C') = 'C' THEN @check --DEFAULT TO CHECK IF PAYMENT IS MISSING
+											ELSE @withdrawal
+										END
+									WHEN ISNULL(E.apchk_chk_amt, A.apivc_net_amt) < 0 THEN @deposit
+								END,
+	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
+	[intEntityVendorId]		= B.intEntityVendorId,
+	[strPaymentInfo]		= A.apivc_chk_no,
+	[strNotes]				= NULL,
+	[dtmDatePaid]			= CASE WHEN ISDATE(A.apivc_chk_rev_dt) = 1 
+										THEN CONVERT(DATE, CAST(A.apivc_chk_rev_dt AS CHAR(12)), 112) 
+									WHEN ISDATE(A.apivc_gl_rev_dt) = 1 
+										THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) --USE VOUCHER DATE IF CHECK DATE IS INVALID
+									ELSE GETDATE() END,
+	[dblAmountPaid]			= ISNULL(E.apchk_chk_amt, A.apivc_net_amt), --IF MISSING PAYMENT, USE THE NET AMOUNT (THE DISCOUNT IS DEDUCTED)
+	[dblUnapplied]			= 0,
+	[ysnPosted]				= 1,
+	[dblWithheld]			= 0,
+	[intEntityId]			= @UserId,
+	[intConcurrencyId]		= 0,
+	[intId]					= A.intId
+FROM tmp_apivcmstImport A
+INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no
+INNER JOIN tblCMBankAccount D ON A.apivc_cbk_no = D.strCbkNo COLLATE Latin1_General_CS_AS
+LEFT JOIN apchkmst E ON A.apchk_A4GLIdentity = E.A4GLIdentity
+WHERE A.apivc_status_ind = 'P' AND ISNULL(A.apivc_chk_no,'') != ''
+) AS SourceData
+ON (1=0)
+WHEN NOT MATCHED THEN
+INSERT
 (
 	[intAccountId],
 	[intBankAccountId],
@@ -90,35 +123,72 @@ INSERT INTO tblAPPayment
 	[intEntityId],
 	[intConcurrencyId]
 )
-SELECT
-	[intAccountId]			= E.intGLAccountId,
-	[intBankAccountId]		= E.intBankAccountId,
-	[intPaymentMethodId]	= CASE
-									WHEN A.apchk_chk_amt > 0 THEN 
-										CASE 
-											WHEN LEFT(A.apchk_chk_no, 1) = 'E' THEN @eft
-											WHEN LEFT(A.apchk_chk_no, 1) = 'W' THEN @wire
-											WHEN A.apchk_trx_ind = 'C' THEN @check
-											ELSE @withdrawal
-										END
-									WHEN A.apchk_chk_amt < 0 THEN @deposit
-								END,
-	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = E.intBankAccountId), @defaultCurrencyId),
-	[intEntityVendorId]		= C.intEntityVendorId,
-	[strPaymentInfo]		= B.apchk_chk_no,
-	[strNotes]				= NULL,
-	[dtmDatePaid]			= CASE WHEN ISDATE(B.apchk_rev_dt) = 1 THEN CONVERT(DATE, CAST(B.apchk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	[dblAmountPaid]			= B.apchk_chk_amt,
-	[dblUnapplied]			= 0,
-	[ysnPosted]				= 1,
-	[dblWithheld]			= 0,
-	[intEntityId]			= @UserId,
-	[intConcurrencyId]		= 0
-FROM tmp_apivcmstImport A
-INNER JOIN apchkmst D ON A.apchk_A4GLIdentity = D.A4GLIdentity
-INNER JOIN tblAPapivcmst B ON A.intBackupId = B.intId
-INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-INNER JOIN tblCMBankAccount E ON D.apchk_cbk_no = E.strCbkNo COLLATE Latin1_General_CS_AS
+VALUES
+(
+	[intAccountId],
+	[intBankAccountId],
+	[intPaymentMethodId],
+	[intCurrencyId],
+	[intEntityVendorId],
+	[strPaymentInfo],
+	[strNotes],
+	[dtmDatePaid],
+	[dblAmountPaid],
+	[dblUnapplied],
+	[ysnPosted],
+	[dblWithheld],
+	[intEntityId],
+	[intConcurrencyId]
+)
+OUTPUT inserted.intPaymentId, SourceData.intId INTO #tmpPaymentCreated;
+
+SET @totalCreated = @@ROWCOUNT;
+
+--INSERT PAYMENT DETAIL
+MERGE INTO tblAPPaymentDetail AS destination
+USING
+(
+	SELECT 
+		[intPaymentId]	= B.intPaymentId,
+		[intBillId]		= D.intBillId,
+		[intAccountId]	= D.intAccountId,
+		[dblDiscount]	= D.dblDiscount,
+		[dblWithheld]	= A.apivc_wthhld_amt,
+		[dblAmountDue]	= D.dblAmountDue,
+		[dblPayment]	= A.apivc_net_amt,
+		[dblInterest]	= 0,
+		[dblTotal]		= A.dblTotal
+	FROM tmp_apivcmstImport A
+	INNER JOIN #tmpPaymentCreated B ON A.intId = B.intId
+	INNER JOIN tblAPapivcmst C ON A.intBackupId = C.intId
+	INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
+) AS SourceData
+ON (1=0)
+WHEN NOT MATCHED THEN
+INSERT
+(
+	[intPaymentId],
+	[intBillId],
+	[intAccountId],
+	[dblDiscount],
+	[dblWithheld],
+	[dblAmountDue],
+	[dblPayment],
+	[dblInterest],
+	[dblTotal]
+)
+VALUES
+(
+	[intPaymentId],
+	[intBillId],
+	[intAccountId],
+	[dblDiscount],
+	[dblWithheld],
+	[dblAmountDue],
+	[dblPayment],
+	[dblInterest],
+	[dblTotal]
+);
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
