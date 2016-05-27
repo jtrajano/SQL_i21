@@ -192,7 +192,7 @@ BEGIN
 	BEGIN 
 		SET @x = 0.01785714285714285714 
 		SET @y = 1.00000000000000000000 
-		SET @expected = 0.01785714285714285700
+		SET @expected = 0.01785714285714285714
 		SELECT @result = dbo.fnDivide(@x, @y)
 
 		-- Assert the result is true
