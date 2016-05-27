@@ -448,7 +448,7 @@ FROM
 		,[dblWeightUnitQty]							=	ISNULL(ItemWeightUOM.dblUnitQty,1)
 		,[dblCostUnitQty]							=	ISNULL(ItemCostUOM.dblUnitQty,1)
 		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
-		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,0) FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)
+		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)
 		,[strCurrency]								=	A.strCurrency
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
@@ -513,11 +513,11 @@ FROM
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
-															 ELSE  ISNULL(CC.intCurrencyId,0)
+															 ELSE  ISNULL(CC.intCurrencyId,CD.intMainCurrencyId)
 														END			
 		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
-															 ELSE  CC.strCurrency
+															 ELSE  ISNULL(CC.strCurrency, (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = CD.intMainCurrencyId))
 														END	
 	FROM		vyuCTContractCostView		CC
 	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
