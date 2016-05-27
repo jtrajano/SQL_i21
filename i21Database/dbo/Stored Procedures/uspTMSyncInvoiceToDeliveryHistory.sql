@@ -502,6 +502,7 @@ BEGIN
 							,strWillCallOrderNumber
 							,intWillCallContractId
 							,intWillCallRouteId
+							,intWillCallDispatchId
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -550,6 +551,7 @@ BEGIN
 							,strWillCallOrderNumber = NULL
 							,intWillCallContractId = NULL
 							,intWillCallRouteId = G.intRouteId
+							,intWillCallDispatchId = G.intDispatchID
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -682,6 +684,7 @@ BEGIN
 						,dblSiteEstimatedPercentLeft
 						,dtmSiteLastReadingUpdate
 						,intWillCallRouteId
+						,intWillCallDispatchId
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -744,6 +747,7 @@ BEGIN
 						,dblSiteEstimatedPercentLeft = A.dblEstimatedPercentLeft
 						,dtmSiteLastReadingUpdate = ISNULL(A.dtmLastReadingUpdate,DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))
 						,intWillCallRouteId = G.intRouteId
+						,intWillCallDispatchId = G.intDispatchID
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -933,6 +937,7 @@ BEGIN
 			,intInvoiceId
 			,intInvoiceDetailId
 			,intWillCallRouteId
+			,intWillCallDispatchId
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -984,6 +989,7 @@ BEGIN
 			,intInvoiceId = C.intInvoiceId
 			,intInvoiceDetailId = B.intInvoiceDetailId
 			,intWillCallRouteId = G.intRouteId
+			,intWillCallDispatchId = G.intDispatchID
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId

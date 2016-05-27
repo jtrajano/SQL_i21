@@ -1,6 +1,6 @@
 ﻿-- Exec uspQMReportLotQualityComparison '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>intWorkOrderId</fieldname><condition>EQUAL TO</condition><from>8552</from><join /><begingroup /><endgroup /><datatype>Int32</datatype></filter></filters></xmlparam>'
 CREATE PROCEDURE uspQMReportLotQualityComparison
-     @xmlParam NVARCHAR(MAX) = NULL
+ @xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -16,6 +16,20 @@ BEGIN TRY
 		,@dtmPlannedDate DATETIME = NULL
 	DECLARE @intWorkOrderId INT
 		,@xmlDocumentId INT
+	DECLARE @strCompanyName NVARCHAR(100)
+		,@strCompanyAddress NVARCHAR(100)
+		,@strCity NVARCHAR(25)
+		,@strState NVARCHAR(50)
+		,@strZip NVARCHAR(12)
+		,@strCountry NVARCHAR(25)
+
+	SELECT TOP 1 @strCompanyName = strCompanyName
+		,@strCompanyAddress = strAddress
+		,@strCity = strCity
+		,@strState = strState
+		,@strZip = strZip
+		,@strCountry = strCountry
+	FROM dbo.tblSMCompanySetup
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -29,6 +43,10 @@ BEGIN TRY
 			,NULL strShiftName
 			,NULL strItemNo
 			,NULL dtmPlannedDate
+			,@strCompanyName AS strCompanyName
+			,@strCompanyAddress AS strCompanyAddress
+			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+			,@strCountry AS strCompanyCountry
 
 		RETURN
 	END
@@ -82,6 +100,10 @@ BEGIN TRY
 		,@strShiftName AS strShiftName
 		,@strItemNo AS strItemNo
 		,@dtmPlannedDate AS dtmPlannedDate
+		,@strCompanyName AS strCompanyName
+		,@strCompanyAddress AS strCompanyAddress
+		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+		,@strCountry AS strCompanyCountry
 END TRY
 
 BEGIN CATCH
