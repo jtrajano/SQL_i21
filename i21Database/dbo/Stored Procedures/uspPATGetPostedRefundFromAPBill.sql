@@ -2,6 +2,6 @@
 	@intRefundId					INT
 AS
 BEGIN
-	SELECT intBillId FROM tblAPBill WHERE strVendorOrderNumber LIKE CONCAT('PAT-',@intRefundId,'-%') AND ysnPosted = 1
+	SELECT intBillId FROM tblAPBill WHERE strVendorOrderNumber LIKE 'PAT-'+ CONVERT(VARCHAR,@intRefundId) + '-%' AND ysnPosted = 1
 END
 GO
