@@ -3812,6 +3812,7 @@
     <Build Include="dbo\Views\vyuRKGetBrokerByMarket.sql" />
     <Build Include="dbo\Views\vyuRKGetBankDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetTraderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCToAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspCCTransactionToAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspCCTransactionToARInvoice.sql" />
     <Build Include="dbo\Tables\tblCMBankFileGenerationLog.sql" />
@@ -3872,6 +3873,9 @@
     <Build Include="dbo\Stored Procedures\uspTRUpdateImportRackPriceId.sql" />
     <Build Include="dbo\Tables\tblSMSecurityPolicy.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityPasswordHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCToAPBill.sql" />
+    <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
+    <Build Include="dbo\Views\vyuPOForApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
