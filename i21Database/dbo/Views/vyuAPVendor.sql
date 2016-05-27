@@ -63,6 +63,9 @@ FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
 		ON A.intEntityId = B.[intEntityVendorId]
+	INNER JOIN tblEMEntityType EntType
+		ON EntType.intEntityId = B.intEntityVendorId
+			AND EntType.strType = 'Vendor'
 	INNER JOIN dbo.[tblEMEntityLocation] C
 		ON B.intEntityVendorId = C.intEntityId and C.ysnDefaultLocation = 1
 	--INNER JOIN (dbo.tblEMEntityContact D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
