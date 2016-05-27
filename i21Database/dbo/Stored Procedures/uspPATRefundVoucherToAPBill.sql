@@ -28,7 +28,7 @@ BEGIN TRY
 	-- Company preference item ID
 	SELECT @intPatronageItemId =  intItemId FROM tblICItem WHERE strType = 'Non-Inventory' AND strItemNo = 'PAT' --temporary. need to set from preference.
 
-	SELECT @strVendorOderNumber = CONCAT( 'PAT-',@intRefundId,'-',CONVERT(VARCHAR,GETDATE(),112),CAST((RAND() * (899999) + 100000) AS INT))
+	SELECT @strVendorOderNumber = 'PAT-' + CONVERT(VARCHAR,@intRefundId) + '-' + CONVERT(VARCHAR,GETDATE(),112) + CONVERT(VARCHAR,CAST((RAND() * (899999) + 100000) AS INT))
 
 	-- Fill-up voucher details
 	INSERT INTO @voucherDetailNonInventory
