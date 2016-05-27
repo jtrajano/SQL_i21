@@ -44,12 +44,12 @@ Left JOIN tblRKOptionsMonth om on om.strOptionMonth=replace(ti.strOptionMonth,'-
 LEFT JOIN tblCTBook b on b.strBook=ti.strBook
 LEFT JOIN tblCTSubBook sb on sb.strSubBook=ti.strSubBook)t order by strInternalTradeNo
 
-INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,dtmTransactionDate,intEntityId,intBrokerageAccountId,intFutureMarketId,
+INSERT INTO tblRKFutOptTransaction (intSelectedInstrumentTypeId,intFutOptTransactionHeaderId,intConcurrencyId,dtmTransactionDate,intEntityId,intBrokerageAccountId,intFutureMarketId,
 									intInstrumentTypeId,intCommodityId,intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,strBrokerTradeNo,
 									strBuySell,intNoOfContract,intFutureMonthId,intOptionMonthId,strOptionType,dblStrike,dblPrice,strReference,strStatus,
 									dtmFilledDate,intBookId,intSubBookId)
 
-SELECT * FROM #temp 
+SELECT 1,* FROM #temp 
 END
 select @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
 UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'

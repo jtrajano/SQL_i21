@@ -15,26 +15,35 @@ SELECT SO.intSalesOrderId
 						   END 
 	 , strOrderType				= ISNULL(SO.strType, 'Standard')
      , strCustomerName			= E.strName
-	 , L.strLocationName
-	 , SO.dtmDate
-	 , CUR.strCurrency
-	 , SO.strBOLNumber
-	 , SO.strOrderStatus
-	 , SO.strSalesOrderNumber
-	 , SO.strPONumber
-	 , SV.strShipVia
-	 , T.strTerm
-	 , SO.dtmDueDate
-	 , FT.strFreightTerm
-	 , I.strItemNo
-	 , SD.intSalesOrderDetailId
-	 , CH.strContractNumber
-	 , SD.strItemDescription
-	 , UOM.strUnitMeasure
-	 , SDT.intTaxCodeId
-	 , SO.strTransactionType
-	 , QT.strTemplateName
-	 , QT.intQuoteTemplateId
+	 , strLocationName			= L.strLocationName
+	 , dtmDate					= SO.dtmDate
+	 , strCurrency				= CUR.strCurrency
+	 , strBOLNumber				= SO.strBOLNumber
+	 , strOrderStatus			= SO.strOrderStatus
+	 , strSalesOrderNumber		= SO.strSalesOrderNumber
+	 , strPONumber				= SO.strPONumber
+	 , strShipVia				= SV.strShipVia
+	 , strTerm					= T.strTerm
+	 , dtmDueDate				= SO.dtmDueDate
+	 , strFreightTerm			= FT.strFreightTerm
+	 , strItemNo				= I.strItemNo
+	 , strType					= I.strType
+	 , intCategoryId			= I.intCategoryId
+	 , strCategoryCode			= ICC.strCategoryCode
+	 , strCategoryDescription   = ISNULL(ICC.strDescription, 'Miscellaneous Item Category')
+	 , intSalesOrderDetailId	= SD.intSalesOrderDetailId
+	 , strContractNumber		= CH.strContractNumber
+	 , strItemDescription		= SD.strItemDescription
+	 , strUnitMeasure			= UOM.strUnitMeasure
+	 , intTaxCodeId				= SDT.intTaxCodeId
+	 , strTransactionType		= SO.strTransactionType
+	 , intQuoteTemplateId		= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.intQuoteTemplateId ELSE NULL END
+	 , strTemplateName			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.strTemplateName ELSE NULL END	 
+	 , strOrganization			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.strOrganization ELSE NULL END
+	 , ysnDisplayTitle			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.ysnDisplayTitle ELSE NULL END
+	 , intProductTypeId			= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.intProductTypeId ELSE NULL END
+	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN ISNULL(PD.strProductTypeDescription, 'Miscellaneous Product Type') ELSE NULL END
+	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.strProductTypeName ELSE NULL END
 	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName, ysnIncludeEntityName)
 	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, E.strName, ysnIncludeEntityName)
 	 , strSalespersonName		= ESP.strName
@@ -52,6 +61,8 @@ SELECT SO.intSalesOrderId
 	 , dblTotalTax				= ISNULL(SO.dblTax, 0)
 	 , dblPrice					= ISNULL(SD.dblPrice, 0)
 	 , dblItemPrice				= ISNULL(SD.dblTotal, 0)
+	 , dblCategoryTotal			= CATEGORYTOTAL.dblCategoryTotal
+	 , dblProductTotal			= PRODUCTTYPETOTAL.dblProductTotal
 	 , strTaxCode				= SMT.strTaxCode
 	 , dblTaxDetail				= SDT.dblAdjustedTax
 	 , intDetailCount			= (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
@@ -60,7 +71,9 @@ SELECT SO.intSalesOrderId
 	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')	 
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
-	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId 
+	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId
+	LEFT JOIN tblICCategory ICC ON I.intCategoryId = ICC.intCategoryId
+	LEFT JOIN (tblARProductTypeDetail PDD INNER JOIN tblARProductType PD ON PDD.intProductTypeId = PD.intProductTypeId) ON PDD.intCategoryId = ICC.intCategoryId
 	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
@@ -75,5 +88,16 @@ LEFT JOIN tblSMShipVia SV ON SO.intShipViaId = SV.intEntityShipViaId
 INNER JOIN tblSMTerm T ON SO.intTermId = T.intTermID
 LEFT JOIN tblEMEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId
-LEFT JOIN [tblEMEntitySplit] ES ON SO.intSplitId = ES.intSplitId
+LEFT JOIN tblEMEntitySplit ES ON SO.intSplitId = ES.intSplitId
 LEFT JOIN tblARQuoteTemplate QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId
+LEFT JOIN (SELECT SUM(SD.dblTotal) AS dblCategoryTotal, SD.intSalesOrderDetailId FROM tblSOSalesOrderDetail SD
+	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId
+	LEFT JOIN tblICCategory ICC ON I.intCategoryId = ICC.intCategoryId
+GROUP BY I.intCategoryId, SD.intSalesOrderDetailId) AS CATEGORYTOTAL
+ON SD.intSalesOrderDetailId = CATEGORYTOTAL.intSalesOrderDetailId
+LEFT JOIN (SELECT SUM(SD.dblTotal) AS dblProductTotal, PD.intProductTypeId, SD.intSalesOrderId FROM tblSOSalesOrderDetail SD
+	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId
+	LEFT JOIN tblICCategory ICC ON I.intCategoryId = ICC.intCategoryId
+	LEFT JOIN (tblARProductTypeDetail PDD INNER JOIN tblARProductType PD ON PDD.intProductTypeId = PD.intProductTypeId) ON PDD.intCategoryId = ICC.intCategoryId
+GROUP BY PD.intProductTypeId, SD.intSalesOrderId) AS PRODUCTTYPETOTAL
+ON PD.intProductTypeId = PRODUCTTYPETOTAL.intProductTypeId AND SD.intSalesOrderId = PRODUCTTYPETOTAL.intSalesOrderId

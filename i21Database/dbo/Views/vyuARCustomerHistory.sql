@@ -30,7 +30,8 @@ FROM tblARInvoice I
 INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId 
 INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0))
-	
+AND strInvoiceOriginId NOT IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE ysnRecurring = 1)
+
 UNION	
 	
 SELECT dtmDate				= P.dtmDatePaid

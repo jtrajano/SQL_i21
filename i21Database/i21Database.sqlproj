@@ -3859,6 +3859,21 @@
     <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCCNotification.sql" />
     <Build Include="dbo\Views\vyuSMTerm.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATRefundVoucherToAPBill.sql" />
+    <Build Include="dbo\Functions\fnPATGetCustomerRequiredDetailsForVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATProcessRefundsToVoucher.sql" />
+    <Build Include="dbo\Tables\tblCTContractImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportFromXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\4_DataFix.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultCurreny.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
+    <Build Include="dbo\Tables\tblSMSecurityPolicy.sql" />
+    <Build Include="dbo\Tables\tblSMUserSecurityPasswordHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4005,5 +4020,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\9_AlterTable.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\18_SecurityPolicy.sql" />
   </ItemGroup>
 </Project>

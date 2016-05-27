@@ -34,6 +34,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\15_Module.sql
 :r .\SM\DefaultData\16_PaymentMethod.sql
 :r .\SM\DefaultData\17_Notification.sql
+:r .\SM\DefaultData\18_SecurityPolicy.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
@@ -165,6 +166,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\1_BankTransactionTypes.sql
 :r .\CM\2_DataImportStatus.sql
 :r .\CM\3_PopulateSourceSystemData.sql
+:r .\CM\4_DataFix.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql

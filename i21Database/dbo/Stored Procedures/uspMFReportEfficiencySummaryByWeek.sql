@@ -1,4 +1,4 @@
-﻿--EXEC uspMFReportEfficiencySummaryByWeek '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocationName</fieldname><condition>Equal To</condition><from>Pinnacle Premix - Visalia</from><to /><join>And</join><begingroup /><endgroup /><datatype>String</datatype></filter><filter><fieldname>ProductionLine</fieldname><condition>Equal To</condition><from>_All</from><to /><join>And</join><begingroup /><endgroup /><datatype>String</datatype></filter><filter><fieldname>Date</fieldname><condition>Between</condition><from>2012-02-03 00:00:00</from><to>2012-02-29 00:00:00</to><join>And</join><begingroup /><endgroup /><datatype>DateTime</datatype></filter></filters></xmlparam>'
+﻿--EXEC uspMFReportEfficiencySummaryByWeek '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocationName</fieldname><condition>Equal To</condition><from>Pinnacle Premix - Visalia</from><to /><join>And</join><begingroup /><endgroup /><datatype>String</datatype></filter><filter><fieldname>ProductionLine</fieldname><condition>Equal To</condition><from>_All</from><to /><join>And</join><begingroup /><endgroup /><datatype>String</datatype></filter><filter><fieldname>Date</fieldname><condition>Between</condition><from>2016-05-16 00:00:00</from><to>2016-05-20 00:00:00</to><join>And</join><begingroup /><endgroup /><datatype>DateTime</datatype></filter></filters></xmlparam>'
 CREATE PROCEDURE uspMFReportEfficiencySummaryByWeek
      @xmlParam NVARCHAR(MAX) = NULL
 AS
@@ -16,6 +16,20 @@ BEGIN TRY
 		,@strCellName NVARCHAR(50)
 		,@intManufacturingCellId NVARCHAR(MAX)
 		,@strLocationName NVARCHAR(50)
+	DECLARE @strCompanyName NVARCHAR(100)
+		,@strCompanyAddress NVARCHAR(100)
+		,@strCity NVARCHAR(25)
+		,@strState NVARCHAR(50)
+		,@strZip NVARCHAR(12)
+		,@strCountry NVARCHAR(25)
+
+	SELECT TOP 1 @strCompanyName = strCompanyName
+		,@strCompanyAddress = strAddress
+		,@strCity = strCity
+		,@strState = strState
+		,@strZip = strZip
+		,@strCountry = strCountry
+	FROM dbo.tblSMCompanySetup
 
 	IF ISNULL(@xmlParam, '') = ''
 	BEGIN
@@ -60,6 +74,10 @@ BEGIN TRY
 			,'' AS ID5
 			,'' AS ID6
 			,'' AS ID7
+			,@strCompanyName AS strCompanyName
+			,@strCompanyAddress AS strCompanyAddress
+			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+			,@strCountry AS strCompanyCountry
 
 		RETURN
 	END
@@ -480,6 +498,10 @@ BEGIN TRY
 			,'' AS ID5
 			,'' AS ID6
 			,'' AS ID7
+			,@strCompanyName AS strCompanyName
+			,@strCompanyAddress AS strCompanyAddress
+			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+			,@strCountry AS strCompanyCountry
 
 		RETURN
 	END
@@ -558,7 +580,65 @@ BEGIN TRY
 	UPDATE TestPvtEff
 	SET strShiftIndicator = 'GROUP1'
 
+	IF NOT EXISTS (
+			SELECT 1
+			FROM TestPvtEff
+			)
+	BEGIN
+		SELECT '' AS 'strShiftIndicator'
+			,'' AS 'strCellName'
+			,'' AS 'dblTargetEfficiency'
+			,'' AS 'YTD'
+			,'' AS 'MTD'
+			,'' AS 'WTD'
+			,'' AS '1'
+			,'' AS '2'
+			,'' AS '3'
+			,'' AS '4'
+			,'' AS '5'
+			,'' AS '6'
+			,'' AS '7'
+			,'' AS '11'
+			,'' AS '12'
+			,'' AS '13'
+			,'' AS '14'
+			,'' AS '15'
+			,'' AS '16'
+			,'' AS '17'
+			,'' AS '21'
+			,'' AS '22'
+			,'' AS '23'
+			,'' AS '24'
+			,'' AS '25'
+			,'' AS '26'
+			,'' AS '27'
+			,'' AS '31'
+			,'' AS '32'
+			,'' AS '33'
+			,'' AS '34'
+			,'' AS '35'
+			,'' AS '36'
+			,'' AS '37'
+			,'' AS ID1
+			,'' AS ID2
+			,'' AS ID3
+			,'' AS ID4
+			,'' AS ID5
+			,'' AS ID6
+			,'' AS ID7
+			,@strCompanyName AS strCompanyName
+			,@strCompanyAddress AS strCompanyAddress
+			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+			,@strCountry AS strCompanyCountry
+
+		RETURN
+	END
+
 	SELECT *
+		,@strCompanyName AS strCompanyName
+		,@strCompanyAddress AS strCompanyAddress
+		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+		,@strCountry AS strCompanyCountry
 	FROM TestPvtEff
 END TRY
 
