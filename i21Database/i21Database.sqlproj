@@ -3874,6 +3874,10 @@
     <Build Include="dbo\Tables\tblSMUserSecurityPasswordHistory.sql" />
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
     <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Functions\fnPATGetCustomerRequiredDetailsForVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATProcessRefundsToVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATRefundVoucherToAPBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
