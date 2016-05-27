@@ -3869,6 +3869,7 @@
     <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
     <Build Include="dbo\Tables\tblSMSecurityPolicy.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityPasswordHistory.sql" />
+    <None Include="Scripts\Post-Deployment\EM\029_FillInPhoneAndMobile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
