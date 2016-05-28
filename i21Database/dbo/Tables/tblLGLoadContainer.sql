@@ -6,7 +6,7 @@
 
 [strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [dblQuantity] NUMERIC(18, 6) NULL,
-[intItemUOMId] INT NULL,
+[intUnitMeasureId] INT NULL,
 [dblGrossWt] NUMERIC(18, 6) NULL,
 [dblTareWt] NUMERIC(18, 6) NULL,
 [dblNetWt] NUMERIC(18, 6) NULL,
@@ -43,7 +43,7 @@
 CONSTRAINT [PK_tblLGLoadContainer] PRIMARY KEY ([intLoadContainerId]), 
 CONSTRAINT [FK_tblLGLoadContainer_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
 
-CONSTRAINT [FK_tblLGLoadContainer_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+CONSTRAINT [FK_tblLGLoadContainer_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 CONSTRAINT [FK_tblLGLoadContainer_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 
 CONSTRAINT [FK_tblLGLoadContainer_tblICItemUOM_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
