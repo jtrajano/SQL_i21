@@ -16,6 +16,7 @@ SELECT
 	, A.dtmDueDate
 	, A.ysnPosted 
 	, A.ysnPaid
+	, A.intAccountId
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
 	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
@@ -35,6 +36,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, C.dtmDueDate 
 	, C.ysnPosted 
 	, C.ysnPaid
+	, B.intAccountId
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId

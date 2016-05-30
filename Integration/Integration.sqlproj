@@ -324,5 +324,8 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPTRXMST.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMissingVendorFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPOriginBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCheckAPBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedVouchers.sql" />
   </ItemGroup>
 </Project>

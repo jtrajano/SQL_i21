@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateMissingVendorFromOrigin]
 	@UserId INT,
-	@dateFrom DATETIME,
-	@dateTo DATETIME,
+	@DateFrom DATETIME,
+	@DateTo DATETIME,
 	@totalCreated INT OUTPUT
 AS
 
@@ -25,13 +25,22 @@ ELSE
 
 INSERT INTO @missingVendor
 SELECT dbo.fnTrim(apivc_vnd_no) FROM (
-		SELECT apivc_vnd_no FROM apivcmst A
+		SELECT DISTINCT apivc_vnd_no FROM apivcmst A
 			LEFT JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 			WHERE B.strVendorId IS NULL
+			AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL THEN 
+						(CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+							AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END)
+					ELSE 1 END)
 		UNION ALL
-		SELECT aptrx_vnd_no FROM aptrxmst A
+		SELECT DISTINCT aptrx_vnd_no FROM aptrxmst A
 			LEFT JOIN tblAPVendor B ON A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 			WHERE B.strVendorId IS NULL
+			AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL THEN 
+						(CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+							THEN 1 ELSE 0 END)
+					ELSE 1 END)
+
 ) MissingVendors
 
 SET @totalCreated = @@ROWCOUNT

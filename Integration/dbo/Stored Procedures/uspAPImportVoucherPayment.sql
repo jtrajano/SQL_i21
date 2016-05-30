@@ -157,7 +157,7 @@ USING
 		[dblAmountDue]	= D.dblAmountDue,
 		[dblPayment]	= A.apivc_net_amt,
 		[dblInterest]	= 0,
-		[dblTotal]		= A.dblTotal
+		[dblTotal]		= D.dblTotal
 	FROM tmp_apivcmstImport A
 	INNER JOIN #tmpPaymentCreated B ON A.intId = B.intId
 	INNER JOIN tblAPapivcmst C ON A.intBackupId = C.intId

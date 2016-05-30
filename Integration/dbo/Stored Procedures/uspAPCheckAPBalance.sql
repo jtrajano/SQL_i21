@@ -1,0 +1,5 @@
+﻿CREATE PROCEDURE [dbo].[uspAPCheckAPBalance]
+	@balance DECIMAL(18,6) OUTPUT
+AS
+
+RETURN;

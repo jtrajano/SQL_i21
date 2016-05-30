@@ -3,7 +3,8 @@
 	@DateFrom DATETIME = NULL,
 	@DateTo DATETIME = NULL,
 	@totalHeaderImported INT OUTPUT,
-	@totalDetailImported INT OUTPUT
+	@totalDetailImported INT OUTPUT,
+	@totalUnpostedVoucher DECIMAL(18,6) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -222,17 +223,17 @@ OUTPUT inserted.intBillId, SourceData.intBackupId INTO #tmpVoucherTransactions;
 
 SET @totalInsertedBill = @@ROWCOUNT
 
-IF OBJECT_ID('tempdb..#tmpVouchersWithRecord') IS NOT NULL DROP TABLE #tmpVouchersWithRecord
+IF OBJECT_ID('tempdb..#tmpVouchersWithRecordNumber') IS NOT NULL DROP TABLE #tmpVouchersWithRecordNumber
 
 --UPDATE strBillId
-CREATE TABLE #tmpVouchersWithRecord
+CREATE TABLE #tmpVouchersWithRecordNumber
 (
 	intBillId INT NOT NULL,
 	intTransactionType INT NOT NULL,
 	intRecordNumber INT NOT NULL
 )
 
-INSERT INTO #tmpVouchersWithRecord
+INSERT INTO #tmpVouchersWithRecordNumber
 SELECT
 	A.intBillId,
 	A.intTransactionType,
@@ -257,7 +258,7 @@ UPDATE A
 							THEN @debitMemo
 						END) + (CAST(B.intRecordNumber AS NVARCHAR))
 FROM tblAPBill A
-INNER JOIN #tmpVouchersWithRecord B ON A.intBillId = B.intBillId
+INNER JOIN #tmpVouchersWithRecordNumber B ON A.intBillId = B.intBillId
 
 ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
@@ -279,7 +280,7 @@ UPDATE A
 	SET A.intNumber = ISNULL(totalVoucher.dblTotalVoucher + 1, A.intNumber)
 FROM tblSMStartingNumber A
 CROSS APPLY (
-	SELECT MAX(intRecordNumber) AS dblTotalVoucher FROM #tmpVouchersWithRecord WHERE intTransactionType = 1
+	SELECT MAX(intRecordNumber) AS dblTotalVoucher FROM #tmpVouchersWithRecordNumber WHERE intTransactionType = 1
 ) totalVoucher
 WHERE A.intStartingNumberId = 9
 
@@ -287,7 +288,7 @@ UPDATE A
 	SET A.intNumber = ISNULL(totalDebitMemo.dblTotalDebitMemo + 1, A.intNumber)
 FROM tblSMStartingNumber A
 CROSS APPLY (
-	SELECT MAX(intRecordNumber) AS dblTotalDebitMemo FROM #tmpVouchersWithRecord WHERE intTransactionType =3
+	SELECT MAX(intRecordNumber) AS dblTotalDebitMemo FROM #tmpVouchersWithRecordNumber WHERE intTransactionType =3
 ) totalDebitMemo
 WHERE A.intStartingNumberId = 18
 
@@ -295,7 +296,7 @@ UPDATE A
 	SET A.intNumber = ISNULL(totalPrepay.dblTotalPrepay + 1, A.intNumber)
 FROM tblSMStartingNumber A
 CROSS APPLY (
-	SELECT MAX(intRecordNumber) AS dblTotalPrepay FROM #tmpVouchersWithRecord WHERE intTransactionType = 2
+	SELECT MAX(intRecordNumber) AS dblTotalPrepay FROM #tmpVouchersWithRecordNumber WHERE intTransactionType = 2
 ) totalPrepay
 WHERE A.intStartingNumberId = 20
 
@@ -359,6 +360,11 @@ UPDATE A
 	SET A.intBillId = B.intBillId
 FROM tblAPaptrxmst A
 INNER JOIN #tmpVoucherTransactions B ON A.intId = B.intBackupId
+
+--GET TOTAL UNPOSTED VOUCHER
+SELECT 
+	@totalUnpostedVoucher = SUM(A.aptrx_orig_amt)
+FROM tmp_aptrxmstImport A
 
 INSERT INTO tblAPImportVoucherLog
 (

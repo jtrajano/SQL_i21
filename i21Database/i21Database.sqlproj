@@ -3847,6 +3847,7 @@
     <Build Include="dbo\Tables\tblARCommissionRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
