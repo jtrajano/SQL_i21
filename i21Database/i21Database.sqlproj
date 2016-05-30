@@ -3597,7 +3597,7 @@
     <Build Include="dbo\Tables\tblHDActivityRecipient.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateStatus.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFRunPrecompile.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetInventoryTax.sql" />
     <Build Include="dbo\Views\vyuSMEntityRole.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\13_GlobalJulianCalendar.sql" />
     <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
@@ -3884,6 +3884,8 @@
     <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
+    <Build Include="dbo\Tables\tblTFValidOriginState.sql" />
+    <Build Include="dbo\Tables\tblTFValidVendor.sql" />
     <Build Include="dbo\Tables\tblARPrepaidAndCredit.sql" />
     <Build Include="dbo\Views\vyuARPrepaidAndCredit.sql" />
   </ItemGroup>

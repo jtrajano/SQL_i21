@@ -1,24 +1,19 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFRunTax]
 
---@dtmStartDate DATETIME,
---@dtmEndDate DATETIME,
-
 @Guid UNIQUEIDENTIFIER,
-@TA INT,
-@FormCode NVARCHAR(50),
-@ScheduleCode NVARCHAR(50)
+@ScheduleCode NVARCHAR(250)
 
 AS
---SUMMARY COUNTING SELF PARAMETERS
---DECLARE @paramSummaryLineItem NVARCHAR(max)
---DECLARE @summaryLineItem NVARCHAR(max)
+
+DECLARE @TA INT
+DECLARE @FormCode NVARCHAR(50)
 --SUMMARY VARIABLES
-DECLARE @SmrySummaryItems NVARCHAR(max)
+DECLARE @SmrySummaryItems NVARCHAR(MAX)
 DECLARE @SmryParamId NVARCHAR(MAX)
 DECLARE @SmryFET NVARCHAR(MAX)
 DECLARE @SmrySET NVARCHAR(MAX)
 DECLARE @SmrySST NVARCHAR(MAX)
-DECLARE @SmryScheduleCodeParam NVARCHAR(MAX)
+DECLARE @SmryScheduleCode NVARCHAR(MAX)
 DECLARE @SmrySummaryItemId NVARCHAR(20)
 DECLARE @SmryConfigValue NVARCHAR(20)
 DECLARE @SmrySummaryDescription NVARCHAR(MAX)
@@ -31,8 +26,6 @@ DECLARE @SmryQuery NVARCHAR(MAX)
 --DETAIL VARIABLES
 DECLARE @Kerosene NVARCHAR(MAX)
 DECLARE @Others NVARCHAR(MAX)
-DECLARE @paramSplitted NVARCHAR(MAX)
-DECLARE @paramId NVARCHAR(MAX)
 DECLARE @DetailColumnValue_gas NVARCHAR(MAX)
 DECLARE @DetailColumnValue_kerosene NVARCHAR(MAX)
 DECLARE @DetailColumnValue_others NVARCHAR(MAX)
@@ -56,82 +49,35 @@ DECLARE @tblTempSummaryItem TABLE (
 DECLARE @tblTempTaxReportSummary TABLE(
 	intDefaultValue INT
 )
-delete from tblTFTaxReportSummary
+DELETE FROM tblTFTaxReportSummary
 	-- ======================== HEADER ==============================
-	INSERT INTO tblTFTaxReportSummary (uniqGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strTaxType, dtmDateRun, strTaxPayerName,
-			strLicenseNumber, strEmail, strFEINSSN, strCity, strState, strZipCode, strTelephoneNumber, strContactName)		
-		    VALUES(@Guid, @TA, @FormCode, @ScheduleCode, 'Header', (CAST(GETDATE() AS DATE)),
-				(SELECT top 1 strTaxPayerName FROM tblTFTransactions),
-				(SELECT top 1 strLicenseNumber FROM tblTFTransactions),
-				(SELECT top 1 strEmail FROM tblTFTransactions),
-				(SELECT top 1 strFEINSSN FROM tblTFTransactions),
-				(SELECT top 1 strCity FROM tblTFTransactions),
-				(SELECT top 1 strState FROM tblTFTransactions),
-				(SELECT top 1 strZipCode FROM tblTFTransactions),
-				(SELECT top 1 strTelephoneNumber FROM tblTFTransactions),
-				(SELECT top 1 strContactName FROM tblTFTransactions)
-		   )
+INSERT INTO tblTFTaxReportSummary (uniqGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strTaxType, dtmDateRun, strTaxPayerName,
+			strLicenseNumber, strEmail, strFEINSSN, strCity, strState, strZipCode, strTelephoneNumber, strContactName)
+
+			SELECT DISTINCT @Guid, intTaxAuthorityId, strFormCode, '', '', dtmDate, strTaxPayerName, 
+					strLicenseNumber, strEmail, strFEINSSN, strCity, strState, strZipCode, strTelephoneNumber, strContactName from tblTFTransactions
 
 	-- ======================== SUMMARY ==============================
+
+	SET @FormCode = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
+	SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
+
 	INSERT INTO @tblTempSummaryItem (TaxReportSummaryItemId)  -- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
-	SELECT intTaxReportSummaryItems FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intSummaryTaxAuthorityId = @TA AND strTaxType = 'Summary'  ORDER BY intTaxReportSummaryItems DESC
-	SET @SmrySummaryItemsCount = (SELECT count(*) FROM @tblTempSummaryItem)
+	SELECT intTaxReportSummaryItems FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND strTaxType = 'Summary'  ORDER BY intTaxReportSummaryItems DESC
 
+	SET @SmrySummaryItemsCount = (SELECT COUNT(*) FROM @tblTempSummaryItem)
 
-	DECLARE @query NVARCHAR(MAX)
-	DECLARE @paramSplit NVARCHAR(MAX)
-	DECLARE @param NVARCHAR(MAX)
-	DECLARE @ScheduleCodeParam NVARCHAR(max) = ''
-
-	DECLARE @tblTempSchedCodeParam TABLE(
-			Id INT IDENTITY(1,1),
-			strTempScheduleCode NVARCHAR(120))
-
-	SELECT @query = 'SELECT ''' + REPLACE (@ScheduleCode,',',''' UNION SELECT ''') + ''''
-	INSERT INTO @tblTempSchedCodeParam (strTempScheduleCode)
-	EXEC(@query)
-	SET @paramSplit = (SELECT COUNT(strTempScheduleCode) FROM @tblTempSchedCodeParam)
-
-	DECLARE @count int
-	DECLARE @val NVARCHAR(MAX) = ''
-	SET @count = (SELECT COUNT(strTempScheduleCode) FROM @tblTempSchedCodeParam)
- 
-		WHILE(@paramSplit > 0)
-		BEGIN
-		
-			SET @param = (SELECT strTempScheduleCode FROM @tblTempSchedCodeParam WHERE Id = @paramSplit)
-
-			
-			SET @ScheduleCodeParam += '''' + @param + ''','
-
-				if (@paramSplit < @count - 1)
-				begin
-				    set @ScheduleCodeParam = (select substring(@ScheduleCodeParam, 1, len(@ScheduleCodeParam) -1))
-					set @ScheduleCodeParam = '' + @ScheduleCodeParam + '' 
-					
-				end
-		
-			SET @paramSplit = @paramSplit - 1
-		END
-		
 
 		WHILE(@SmrySummaryItemsCount > 0) -- LOOP ON SUMMARY ITEMS AND INSERT INTO SUMMARY TABLE
 		BEGIN
 			-- GET SCHEDULE CODE PARAMETERS FOR FILTERING
 			SET @SmryParamId = (SELECT TaxReportSummaryItemId FROM @tblTempSummaryItem WHERE Id = @SmrySummaryItemsCount)
-			SET @SmryScheduleCodeParam = (SELECT strSummaryScheduleCode FROM tblTFTaxReportTemplate WHERE intTaxReportSummaryItems = @SmryParamId)
+			SET @SmryScheduleCode = (SELECT strSummaryScheduleCode FROM tblTFTaxReportTemplate WHERE intTaxReportSummaryItems = @SmryParamId)
 			SET @SmrySummaryItemId = (SELECT intTaxReportSummaryItemId FROM tblTFTaxReportTemplate WHERE intTaxReportSummaryItems = @SmryParamId)
 
-			SET @SmryScheduleCodeParam = REPLACE(@SmryScheduleCodeParam,',',''',''')
-			--SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-			--SET @paramSummaryLineItem = REPLACE(@summaryLineItem,',',''',''')
+			SET @SmryScheduleCode = REPLACE(@SmryScheduleCode,',',''',''')
 
-			-- END GET SCHEDULE CODE PARAMETERS FOR FILTERING
-			--DECLARE @Item4Id INT
-			--	SET @Item4Id = (SELECT TOP 1 intTaxReportSummaryItems FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND strSummaryTaxAuthority = @TA AND strTaxType = 'Summary' AND strSummarySection = 2 AND intSummaryItemNumber = 4)
-
-
-			IF (@SmryScheduleCodeParam IS NOT NULL)
+			IF (@SmryScheduleCode IS NOT NULL)
 			BEGIN
 
 				SET @SmrySummaryDescription = (SELECT strSummaryItemDescription FROM tblTFTaxReportTemplate WHERE intTaxReportSummaryItems = @SmryParamId)
@@ -143,141 +89,131 @@ delete from tblTFTaxReportSummary
 
 				IF @SmrySummaryItemId = 'MF-360-Summary-001'
 					BEGIN
-					print @SmryScheduleCodeParam
-					print @ScheduleCode
-					SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT sum(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
-					SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
+					--PRINT @SmryReportingComponentId
+						SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 					ELSE IF @SmrySummaryItemId = 'MF-360-Summary-002'
 					BEGIN
-						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
-						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
+						SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 					ELSE IF @SmrySummaryItemId = 'MF-360-Summary-003'
 					BEGIN
-						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') and strType = ''Gasoline'' AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
-						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
+						SET @SmryQuery = 'SELECT dblGross FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''')' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-004'
 					BEGIN
-						SET @SmryQuery  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE strSection = ''Section 2:    Calculation of Gasoline Taxes Due'' AND b.intItemNumber IN (''' + @SmryScheduleCodeParam + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'
+					--SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryReportingComponentId + ''')' 
+						SET @SmryQuery  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @SmryScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @SmryScheduleCode + ''')'
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
-		
+
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-005'
 					BEGIN
-						SET @SmryQuery = 'SELECT strColumnValue * ' + @SmryConfigValue + ' FROM tblTFTaxReportSummary WHERE strSection = ''Section 2:    Calculation of Gasoline Taxes Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT strColumnValue * ' + @SmryConfigValue + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-006'
 					BEGIN
-						SET @SmryQuery  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE strSection = ''Section 2:    Calculation of Gasoline Taxes Due'' AND b.intItemNumber IN (''' + @SmryScheduleCodeParam + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'
+						SET @SmryQuery  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @SmryScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @SmryScheduleCode + ''')'
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-007'
 					BEGIN
-						SET @SmryQuery = 'SELECT strColumnValue * ' + @SmryConfigValue + ' FROM tblTFTaxReportSummary WHERE strSection = ''Section 2:    Calculation of Gasoline Taxes Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						--SET @SmryQuery = 'SELECT strColumnValue * ' + @SmryConfigValue + ' FROM tblTFTaxReportSummary WHERE strSection = ''Section 2:    Calculation of Gasoline Taxes Due'' and intItemNumber IN (''' + @SmryReportingComponentId + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-008'
 					BEGIN
-						SET @SmryQuery = 'SELECT top 1 strColumnValue FROM tblTFTaxReportSummary WHERE strSection = ''Section 2:    Calculation of Gasoline Taxes Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT top 1 strColumnValue FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-009'
 					BEGIN
-						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE strSection = ''Section 2:    Calculation of Gasoline Taxes Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-010'
 					BEGIN
-						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
-						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
+						
+						SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''')' 
+					
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-011'
 					BEGIN
-						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')' 
-						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
+						SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''')' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-012'
 					BEGIN
-						SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-						SET @SmryQuery = 'SELECT SUM(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
-						SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
+						SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-013'
 					BEGIN
-						SET @SmryQuery  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE strSection = ''Section 3:    Calculation of Oil Inspection Fees Due'' AND  b.intItemNumber IN (''' + @SmryScheduleCodeParam + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'
+						SET @SmryQuery  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @SmryScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @SmryScheduleCode + ''')'
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 		
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-014'
 					BEGIN
-						SET @SmryQuery = 'SELECT strColumnValue * ' + @SmryConfigValue + ' FROM tblTFTaxReportSummary WHERE strSection = ''Section 3:    Calculation of Oil Inspection Fees Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						--SET @SmryQuery = 'SELECT strColumnValue * ' + @SmryConfigValue + ' FROM tblTFTaxReportSummary WHERE strSection = ''Section 3:    Calculation of Oil Inspection Fees Due'' and intItemNumber IN (''' + @SmryReportingComponentId + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-015'
 					BEGIN
-						SET @SmryQuery = 'SELECT strColumnValue FROM tblTFTaxReportSummary WHERE strSection = ''Section 3:    Calculation of Oil Inspection Fees Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT strColumnValue FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-016'
 					BEGIN
-						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE strSection = ''Section 3:    Calculation of Oil Inspection Fees Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-017'
 					BEGIN
-						SET @SmryQuery = 'SELECT SUM(strColumnValue)  FROM tblTFTaxReportSummary WHERE strSection IN(''Section 2:    Calculation of Gasoline Taxes Due'', ''Section 3:    Calculation of Oil Inspection Fees Due'') and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT SUM(strColumnValue)  FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 
 				--ELSE IF @SmrySummaryItemId = 'MF-360-Summary-018'
 				--	BEGIN
-				--		SET @SmryQuery = 'SELECT strColumnValue  FROM tblTFTaxReportSummary WHERE strSection = ''Section 3:    Calculation of Oil Inspection Fees Due'' and intItemSequenceNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+				--		SET @SmryQuery = 'SELECT strColumnValue  FROM tblTFTaxReportSummary WHERE strSection = ''Section 3:    Calculation of Oil Inspection Fees Due'' and intItemSequenceNumber IN (''' + @SmryReportingComponentId + ''')'  
 				--		INSERT INTO @tblTempSummaryTotal
 				--		EXEC(@SmryQuery)
 				--	END
 
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-020'
 					BEGIN
-						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE strSection = ''Section 4:    Calculation of Total Amount Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 				ELSE IF @SmrySummaryItemId = 'MF-360-Summary-022'
 					BEGIN
-						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE strSection = ''Section 4:    Calculation of Total Amount Due'' and intItemNumber IN (''' + @SmryScheduleCodeParam + ''')'  
+						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCode + ''')'  
 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
@@ -285,11 +221,10 @@ delete from tblTFTaxReportSummary
 				
 				--ELSE
 				--	BEGIN
-				--		SET @SmryQuery = 'SELECT sum(dblTax) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''')'
+				--		SET @SmryQuery = 'SELECT sum(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryReportingComponentId + ''')'
 				--		INSERT INTO @tblTempSummaryTotal
 				--		EXEC(@SmryQuery)
 				--	END
-
 			
 
 				SET @SmryTempTotal = (SELECT ISNULL(dbLColumnValue, 0) FROM @tblTempSummaryTotal)
@@ -316,7 +251,7 @@ delete from tblTFTaxReportSummary
 						 @Guid,
 						 (@TA),
 						 (@FormCode),
-						 (@SmryScheduleCodeParam),
+						 (@SmryScheduleCode),
 						 ('Summary'),
 						 (''),
 						 @SmrySummaryDescription,
@@ -333,81 +268,75 @@ delete from tblTFTaxReportSummary
 			SET @SmrySummaryItemsCount = @SmrySummaryItemsCount - 1
 		END
 
-	-- ======================== DETAIL ==============================
-	declare @ItemTotal nvarchar(max)
-	declare @itemQuery NVARCHAR(max)
-	declare @CountItems INT
 
-	declare @ItemDescription nvarchar(max)
+	-- ======================== DETAIL ==============================
+	DECLARE @ItemTotal NVARCHAR(MAX)
+	DECLARE @itemQuery NVARCHAR(MAX)
+	DECLARE @CountItems INT
+
+	DECLARE @ItemDescription nvarchar(MAX)
 	SELECT @q = 'SELECT ''' + REPLACE (@ScheduleCode,',',''' UNION SELECT ''') + ''''
 	INSERT INTO @tblTempScheduleCodeParam (strTempScheduleCode)
 	EXEC(@q)
 
-	SET @CountItems = (SELECT count(strSummaryFormCode) FROM tblTFTaxReportTemplate WHERE strTaxType = 'Details')
+	SET @CountItems = (SELECT COUNT(strSummaryFormCode) FROM tblTFTaxReportTemplate WHERE strTaxType = 'Details')
 
-
-	--SET @paramSplitted = (SELECT COUNT(strTempScheduleCode) FROM @tblTempScheduleCodeParam)
- 
 		WHILE(@CountItems > 0)
-		BEGIN
+			BEGIN
+				DECLARE @tplScheduleCode NVARCHAR(MAX)
+				-- GET SCHEDULE CODES BY COUNT ID FROM TEMPLATE TABLE
+				SET @tplScheduleCode = (SELECT strSummaryScheduleCode FROM tblTFTaxReportTemplate WHERE strTaxType = 'Details' and intSummaryItemNumber = @CountItems)
 
+				-- GET SCHEDULE CODE BY PASSED PARAM
+				DECLARE @paramScheduleCode NVARCHAR(MAX)
+				SET @paramScheduleCode = (SELECT strTempScheduleCode FROM @tblTempScheduleCodeParam WHERE strTempScheduleCode = @tplScheduleCode)
 			
-
-			--SET @paramId = (SELECT strTempScheduleCode FROM @tblTempScheduleCodeParam WHERE Id = @paramSplitted)
-			SET @paramId = (SELECT strSummaryScheduleCode FROM tblTFTaxReportTemplate WHERE strTaxType = 'Details' and intSummaryItemNumber = @CountItems)
-
-			declare @schedParamId nvarchar(MAX)
-			set @schedParamId = (select strTempScheduleCode from @tblTempScheduleCodeParam where strTempScheduleCode = @paramId)
-		
-
+				SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblGross), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol')
+				SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblGross), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'K-1 / K-2 Kerosene')
+				SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblGross), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'All Other Products')
+				SET @ItemTotal = (SELECT ISNULL(sum(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN(@paramScheduleCode))
 			
-			SET @DetailColumnValue_gas = (SELECT ISNULL(sum(dblTax), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Gasoline')
-			SET @DetailColumnValue_kerosene = (SELECT ISNULL(sum(dblTax), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Kerosene')
-			SET @DetailColumnValue_others = (SELECT ISNULL(sum(dblTax), 0) AS 'FET' FROM tblTFTransactions where strScheduleCode = @schedParamId AND strType = 'Others')
-			--SET @ScheduleCodeCount = (SELECT sum(dblTax) FROM tblTFTransactions where strScheduleCode = @paramId and strFormCode = @FormCode)
-			SET @ItemTotal = (SELECT ISNULL(sum(dblTax), 0) FROM tblTFTransactions where strScheduleCode IN(@schedParamId))
-			
-			--IF (@ScheduleCodeCount > 0)
-			--BEGIN
-				-- GAS
-				set @ItemDescription = (SELECT strSummaryItemDescription FROM tblTFTaxReportTemplate where intSummaryItemNumber = @CountItems AND strTaxType = 'Details')
-				
-				if (@CountItems = 8 OR @CountItems = 9 OR @CountItems = 20 OR @CountItems = 21)
-				begin
-					SET @paramId = REPLACE(@paramId,',',''',''')
-					SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
-					print @ScheduleCode
-					SET @itemQuery = 'SELECT ISNULL(sum(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @paramId + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
-					SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
+				--IF (@ScheduleCodeCount > 0)
+				--BEGIN
+					PRINT @TA
+					SET @ItemDescription = (SELECT strSummaryItemDescription FROM tblTFTaxReportTemplate WHERE intSummaryItemNumber = @CountItems AND strTaxType = 'Details')
+
+					-- ITEMS THAT HAVE MULTIPLE SCHEDULE CODES TO COMPUTE
+					IF (@CountItems = 8 OR @CountItems = 9 OR @CountItems = 20 OR @CountItems = 21)
+						BEGIN
+							SET @tplScheduleCode = REPLACE(@tplScheduleCode,',',''',''')
+							SET @ScheduleCode = REPLACE(@ScheduleCode,',',''',''')
+					
+							SET @itemQuery = 'SELECT ISNULL(sum(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @tplScheduleCode + ''') AND strScheduleCode IN (''' + @ScheduleCode + ''')'  
+							SET @ScheduleCode = REPLACE(@ScheduleCode,''',''',',')
 	
-					INSERT INTO @tblTempSummaryTotal
-					EXEC(@itemQuery)
+							INSERT INTO @tblTempSummaryTotal
+							EXEC(@itemQuery)
 			
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode,strScheduleCode,strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'','Details','TOTAL', '',(SELECT ISNULL(dbLColumnValue, 0) FROM @tblTempSummaryTotal), @ItemDescription, CAST(GETDATE() AS DATE))
+							DELETE FROM @tblTempSummaryTotal
+						END
+					ELSE 
+						BEGIN
+							-- GAS
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,@tplScheduleCode, 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',@DetailColumnValue_gas, @ItemDescription, CAST(GETDATE() AS DATE))
 
-					INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode,strScheduleCode,strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-					VALUES(@Guid,@TA,@FormCode,'','Details','TOTAL', '',(select ISNULL(dbLColumnValue, 0) from @tblTempSummaryTotal), @ItemDescription, CAST(GETDATE() AS DATE))
-				    delete from @tblTempSummaryTotal
-				end
-				else 
-				begin
-					-- GAS
-					INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
-					VALUES(@Guid,@TA,@FormCode,@paramId, 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',@DetailColumnValue_gas, @ItemDescription, CAST(GETDATE() AS DATE))
+							-- KEROSENE
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,@tplScheduleCode, 2, 'Details','K-1/K-2 Kerosene B', '',@DetailColumnValue_kerosene, @ItemDescription, CAST(GETDATE() AS DATE))
 
-					-- KEROSENE
-					INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-					VALUES(@Guid,@TA,@FormCode,@paramId, 2, 'Details','K-1/K-2 Kerosene B', '',@DetailColumnValue_kerosene, @ItemDescription, CAST(GETDATE() AS DATE))
+							-- OTHERS
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,@tplScheduleCode, 3, 'Details','All Other Products C', '',@DetailColumnValue_others, @ItemDescription, CAST(GETDATE() AS DATE))
 
-					-- OTHERS
-					INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-					VALUES(@Guid,@TA,@FormCode,@paramId, 3, 'Details','All Other Products C', '',@DetailColumnValue_others, @ItemDescription, CAST(GETDATE() AS DATE))
+							-- TOTAL
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,@tplScheduleCode, 4, 'Details','TOTAL', '',@ItemTotal, @ItemDescription, CAST(GETDATE() AS DATE))
+						END
+				SET @CountItems = @CountItems - 1 
+			END
 
-					-- TOTAL
-					INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-					VALUES(@Guid,@TA,@FormCode,@paramId, 4, 'Details','TOTAL', '',@ItemTotal, @ItemDescription, CAST(GETDATE() AS DATE))
 
-				end
-			
-			SET @CountItems = @CountItems - 1 
-
-		END
+			--EXEC uspTFRunTax '66f6568c-a9cd-487b-ba80-e59876eb683f', ''

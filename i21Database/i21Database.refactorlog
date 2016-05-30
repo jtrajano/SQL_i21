@@ -5243,4 +5243,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intUnitMeasureId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7b6b1da2-a2bd-4dcc-b9ec-b9ca0f946b73" ChangeDateTime="05/30/2016 08:06:27">
+    <Property Name="ElementName" Value="[dbo].[tblTFValidOriginDestinationState].[intValidOriginDestinationStateId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFValidOriginDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intValidOriginStateId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c0b1dd68-09da-42ea-811f-6c0eed1bdc5f" ChangeDateTime="05/30/2016 08:06:47">
+    <Property Name="ElementName" Value="[dbo].[tblTFValidOriginDestinationState].[strOriginDestinationState]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFValidOriginDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strOriginState" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="999bf408-999f-4ea4-85ae-69397303233f" ChangeDateTime="05/30/2016 08:14:23">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxCriteria].[intTaxCategoryid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxCriteria]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxCategoryId" />
+  </Operation>
 </Operations>

@@ -1,8 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblTFValidDestinationState](
 	[intValidDestinationStateId] [int] IDENTITY(1,1) NOT NULL,
 	[intReportingComponentDetailId] [int] NOT NULL,
-	[intDestinationStateId] [int] NOT NULL,
+	[intOriginDestinationStateId] [int] NOT NULL,
 	[strDestinationState] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strStatus] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblTFValidDestinationState] PRIMARY KEY CLUSTERED 
 (
