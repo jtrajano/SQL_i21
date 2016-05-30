@@ -3971,6 +3971,7 @@
     <Build Include="dbo\Stored Procedures\uspSMCascadeModule.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailLotsView.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
+    <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
