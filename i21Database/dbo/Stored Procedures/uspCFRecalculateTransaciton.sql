@@ -156,7 +156,7 @@ BEGIN
 	BEGIN
 		DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId
 	END
-	ELSE
+	ELSE IF(@intTransactionId = 0)
 	BEGIN
 		SET @intTransactionId = NULL
 	END
@@ -428,7 +428,7 @@ BEGIN
 		,@dtmTransactionDate			=@dtmTransactionDate
 		,@intCustomerId					=@intCustomerId
 		,@strTaxCodeId					=@strTaxCodes
-		,@TaxState						=NULL
+		,@TaxState						=@TaxState
 		,@FederalExciseTaxRate        	=@FederalExciseTaxRate        	
 		,@StateExciseTaxRate1         	=@StateExciseTaxRate1         	
 		,@StateExciseTaxRate2         	=@StateExciseTaxRate2         	
@@ -501,6 +501,30 @@ BEGIN
 		,@TaxGroupId		=@intTaxGroupId
 		,@CustomerId		=@intCustomerId
 	END
+
+	IF (@intTransactionId is not null)
+		BEGIN
+			INSERT INTO tblCFTransactionNote (
+			intTransactionId
+			,strProcess
+			,dtmProcessDate
+			,strNote
+			,strGuid
+		)
+		SELECT 
+		 @intTransactionId
+		,'Calculation'
+		,@runDate
+		,ISNULL(strTaxExemptReason,ISNULL(strNotes,ISNULL(strReason,'Invalid Setup -' + strTaxCode)))
+		,@guid
+		FROM @tblTransactionTax
+		WHERE (intTaxGroupId =0 OR intTaxGroupId IS NULL) 
+		AND	  (intTaxClassId =0 OR intTaxClassId IS NULL)
+		AND	  (intTaxCodeId =0 OR intTaxCodeId IS NULL)
+		AND	  (strCalculationMethod ='' OR strCalculationMethod IS NULL)
+		AND	  (ysnInvalidSetup =1)
+	END
+
 
 	INSERT INTO @tblTaxRateTable	
 	SELECT 

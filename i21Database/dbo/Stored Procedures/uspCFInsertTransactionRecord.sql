@@ -423,9 +423,17 @@ BEGIN
 		DECLARE @strPrcPriceBasis			NVARCHAR(MAX)	
 		DECLARE @dblCalcQuantity			NUMERIC(18,6)
 		DECLARE @dblCalcOverfillQuantity	NUMERIC(18,6)
+		DECLARE @intPriceProfileId			INT
+		DECLARE @intPriceIndexId			INT
+		DECLARE @intSiteGroupId				INT
+		DECLARE @strPriceProfileId			NVARCHAR(MAX)
+		DECLARE @strPriceIndexId			NVARCHAR(MAX)
+		DECLARE @strSiteGroup				NVARCHAR(MAX)
+		DECLARE @dblPriceProfileRate		NUMERIC(18,6)
+		DECLARE @dblPriceIndexRate			NUMERIC(18,6)
+		DECLARE @dtmPriceIndexDate			DATETIME
+		DECLARE @dblMargin					NUMERIC(18,6)
 	------------------------------------------------------------
-
-
 
 
 
@@ -613,8 +621,8 @@ BEGIN
 		END
 		IF(@ysnSiteCreated != 0)
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site ' + @strSiteId + ' has been automatically created')
+			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site ' + @strSiteId + ' has been automatically created')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site ' + @strSiteId + ' has been automatically created')
 		END
@@ -634,15 +642,15 @@ BEGIN
 		END
 		IF(@ysnSiteItemUsed = 0 AND @ysnNetworkItemUsed = 1)
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Network item ' + @strProductId + ' has been used')
+			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Network item ' + @strProductId + ' has been used')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Network item ' + @strProductId + ' has been used')
 		END
 		ELSE IF(@ysnSiteItemUsed = 1 AND @ysnNetworkItemUsed = 0)
 		BEGIN 
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site item ' + @strProductId + ' has been used')
+			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site item ' + @strProductId + ' has been used')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site item ' + @strProductId + ' has been used')
 		END
@@ -691,6 +699,15 @@ BEGIN
 		,@intContractId	 				= intContractDetailId
 		,@dblCalcOverfillQuantity 		= 0
 		,@dblCalcQuantity 				= 0
+		,@intPriceProfileId 			= intPriceProfileId 	
+		,@intPriceIndexId				= intPriceIndexId	
+		,@intSiteGroupId				= intSiteGroupId		
+		,@strPriceProfileId				= strPriceProfileId	
+		,@strPriceIndexId				= strPriceIndexId	
+		,@strSiteGroup					= strSiteGroup		
+		,@dblPriceProfileRate			= dblPriceProfileRate
+		,@dblPriceIndexRate				= dblPriceIndexRate	
+		,@dtmPriceIndexDate				= dtmPriceIndexDate	
 		FROM ##tblCFTransactionPricingType
 
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
@@ -700,6 +717,15 @@ BEGIN
 				,strPriceBasis = null
 				,dblTransferCost = 0
 				,strPriceMethod = 'Standard Pricing'
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Import File Price')
@@ -709,6 +735,15 @@ BEGIN
 				,strPriceBasis = null
 				,dblTransferCost = 0
 				,strPriceMethod = 'Import File Price'
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Special Pricing')
@@ -718,11 +753,20 @@ BEGIN
 				,strPriceBasis = null
 				,dblTransferCost = 0
 				,strPriceMethod = 'Special Pricing'
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Price Profile')
 		BEGIN
-				IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price')
+				IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price' OR @strPrcPriceBasis = 'Full Retail')
 				BEGIN
 					SET @dblTransferCost = @dblTransferCost
 				END
@@ -733,9 +777,18 @@ BEGIN
 
 				UPDATE tblCFTransaction 
 				SET intContractId = null 
-				,strPriceBasis = @strPrcPriceBasis
-				,dblTransferCost = @dblTransferCost
-				,strPriceMethod = 'Price Profile'
+				,strPriceBasis			= @strPrcPriceBasis
+				,dblTransferCost		= @dblTransferCost
+				,strPriceMethod			= 'Price Profile'
+				,intPriceProfileId 		= @intPriceProfileId 	
+				,intPriceIndexId		= @intPriceIndexId	
+				,intSiteGroupId			= @intSiteGroupId		
+				,strPriceProfileId		= @strPriceProfileId	
+				,strPriceIndexId		= @strPriceIndexId	
+				,strSiteGroup			= @strSiteGroup		
+				,dblPriceProfileRate	= @dblPriceProfileRate
+				,dblPriceIndexRate		= @dblPriceIndexRate	
+				,dtmPriceIndexDate		= @dtmPriceIndexDate	
 				WHERE intTransactionId = @Pk
 					
 		END
@@ -763,6 +816,15 @@ BEGIN
 				,intContractId = @intPrcContractHeaderId
 				,intContractDetailId = @intPrcContractDetailId
 				,dblQuantity = @dblQuantity
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
 				WHERE intTransactionId = @Pk
 
 				------------------------------------------------------------
