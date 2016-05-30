@@ -3883,6 +3883,7 @@
     <Build Include="dbo\Views\vyuARCustomerBalancesForET.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
