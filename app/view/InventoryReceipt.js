@@ -807,9 +807,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'strSourceNumber',
                                                                                 itemId: 'colOrderNumber',
                                                                                 width: 100,
+                                                                                dataIndex: 'strSourceNumber',
                                                                                 text: 'Order Number'
                                                                             },
                                                                             {

@@ -74,7 +74,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             
-            modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());
+            modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());    
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeWorkCenterMap());
             modelBuilder.Configurations.Add(new tblICRinFeedStockMap());
@@ -170,6 +170,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemAccountMap());
             modelBuilder.Configurations.Add(new vyuICGetItemPricingMap());
             modelBuilder.Configurations.Add(new vyuICGetItemLocationMap());
+            modelBuilder.Configurations.Add(new vyuSMGetCompanyLocationSearchListMap());
 
             modelBuilder.Configurations.Add(new tblICCompanyPreferenceMap());
             modelBuilder.Configurations.Add(new tblSMStartingNumberMap());

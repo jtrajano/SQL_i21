@@ -57,6 +57,20 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuSMGetCompanyLocationSearchListMap : EntityTypeConfiguration<vyuSMGetCompanyLocationSearchList>
+    {
+        public vyuSMGetCompanyLocationSearchListMap()
+        {
+            this.HasKey(t => t.intCompanyLocationId);
+
+            this.ToTable("vyuSMGetCompanyLocationSearchList");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strLocationNumber).HasColumnName("strLocationNumber");
+            this.Property(t => t.strLocationType).HasColumnName("strLocationType");
+        }
+    }
+
     public class vyuAPVendorMap : EntityTypeConfiguration<vyuAPVendor>
     {
         public vyuAPVendorMap()

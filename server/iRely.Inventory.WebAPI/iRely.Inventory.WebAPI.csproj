@@ -356,6 +356,7 @@
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUOMController.cs" />
     <Compile Include="Controllers\CompanyPreferenceController.cs" />
+    <Compile Include="Controllers\ImportDataController.cs" />
     <Compile Include="Controllers\ParentLotController.cs" />
     <Compile Include="Controllers\RestrictionController.cs" />
     <Compile Include="Controllers\ItemMotorFuelTaxController.cs" />
@@ -504,7 +505,9 @@
     <Content Include="Scripts\knockout-2.1.0.debug.js" />
     <Content Include="Scripts\knockout-2.1.0.js" />
     <Content Include="Scripts\modernizr-2.5.3.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -563,6 +566,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reports\WorkingInstruction.resx">
       <DependentUpon>WorkingInstruction.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
