@@ -7,5 +7,5 @@
 	[ysnBuild]					BIT             NOT NULL DEFAULT 0,	
     [intSort]					INT             NOT NULL DEFAULT (1),
     [intConcurrencyId]			INT				NOT NULL DEFAULT (1),
-	CONSTRAINT [FK_tblSMCustomGridField_tblSMCustomGridTab] FOREIGN KEY ([intCustomGridTabId]) REFERENCES [tblSMCustomGridTab]([intCustomGridTabId])
+	CONSTRAINT [FK_tblSMCustomGridField_tblSMCustomGridTab] FOREIGN KEY ([intCustomGridTabId]) REFERENCES [tblSMCustomGridTab]([intCustomGridTabId]) ON DELETE CASCADE
 )
