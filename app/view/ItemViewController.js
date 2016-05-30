@@ -1775,17 +1775,17 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
     beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
-      /*  var win = obj.up('window');
-        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
-        var origStockUnitUOMId
-
-            if (grdUnitOfMeasure.store){
-                var record = grdUnitOfMeasure.store.findRecord('ysnStockUnit', true);
-                if (record){
-					origStockUnitUOMId = record.get('intItemUOMId');
-					Inventory.view.ItemViewController.origStockUnitUOMId = origStockUnitUOMId;
+        if (obj.dataIndex === 'ysnStockUnit'){
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = win.viewModel.data.current;
+            
+            if (checked === false && current.get('intPatronageCategoryId') > 0)
+                {
+                   iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
+                   return false;
                 }
-            }*/
+        }  
     },
     
     onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
@@ -3357,13 +3357,7 @@ Ext.define('Inventory.view.ItemViewController', {
 		
 		if (stockUnitExist == false)
 		{
-			var msgBox = iRely.Functions;
-            msgBox.showCustomDialog(
-            msgBox.dialogType.ERROR,
-            msgBox.dialogButtonType.OK,
-            "Stock is required for Patronage Category."
-			);
-
+			iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
             return false;
 		}
     },
