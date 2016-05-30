@@ -27,7 +27,7 @@ AS
 			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
 			CD.strDestinationPointType,			CD.intItemContractId,			CD.intNoOfLoad,
 			CD.dblQuantityPerLoad,				CD.strReference,				CD.intStorageScheduleRuleId,
-			CD.dblNetWeight,
+			CD.dblNetWeight,					CD.ysnUseFXPrice,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -58,7 +58,6 @@ AS
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity)				AS	dblQtyInPriceUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SM.intItemUOMId,CD.dblQuantity)					AS	dblQtyInStockUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(SM.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInStockUOM,
-			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,1)							AS	dblQtyToPriceUOMConvFactor,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,CD.intItemUOMId,1)							AS	dblPriceToQtyConvFactor,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CD.intItemUOMId,1)							AS	dblWeightToQtyConvFactor,
 			CD.dblFutures	/ CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainFutures,
@@ -113,6 +112,10 @@ AS
 			CAST(CASE WHEN IM.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) AS ysnBundleItem,
 			dbo.fnCTGetContractPrice(CD.intContractDetailId) dblContractPrice,
 
+			AD.intSeqCurrencyId,				AD.ysnSeqSubCurrency,			AD.intSeqPriceUOMId,
+			AD.dblSeqPrice,						AD.strSeqCurrency,				AD.strSeqPriceUOM,
+			AD.dblQtyToPriceUOMConvFactor,
+
 			--Header Detail
 
 			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,
@@ -141,7 +144,8 @@ AS
 			CH.strCropYear,						CH.ysnExported,					CH.dtmExported
 			
 	FROM	tblCTContractDetail				CD	CROSS
-	JOIN	tblCTCompanyPreference			CP
+	JOIN	tblCTCompanyPreference			CP	CROSS
+	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	

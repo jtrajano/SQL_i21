@@ -90,6 +90,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dtmFXValidFrom]  [datetime] NULL,
 	[dtmFXValidTo]  [datetime] NULL,
 	[dblRate] [numeric](18, 6) NULL,
+	[ysnUseFXPrice] BIT,
 	[intFXPriceUOMId] [int] NULL,
 	[strFXRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dblAssumedFX] [numeric](18, 6) NULL,
