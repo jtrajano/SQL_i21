@@ -3878,6 +3878,7 @@
     <Build Include="dbo\Stored Procedures\uspPATProcessRefundsToVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspPATRefundVoucherToAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
+    <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
