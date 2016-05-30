@@ -54,7 +54,7 @@ BEGIN
 				,dtmCallInDate = A.dtmWillCallCallInDate
 				,dtmDispatchedDate = A.dtmWillCallDispatch
 				,intConcurrencyId = A.intConcurrencyId
-				,intDispatchId = CAST(NULL AS INT)
+				,intDispatchId = CAST(A.intWillCallDispatchId AS INT)
 				,intCompanyLocationId  = J.intCompanyLocationId
 				,strCompanyLocationName  = J.strLocationName
 				,dblLocationLongitude = 0.0
