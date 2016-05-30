@@ -98,7 +98,7 @@ BEGIN TRY
 		,intSampleStatusId
 		,intItemId
 		,intItemContractId
-		,intContractHeaderId
+		--,intContractHeaderId
 		,intContractDetailId
 		--,intShipmentBLContainerContractId
 		--,intShipmentId
@@ -145,7 +145,7 @@ BEGIN TRY
 		,intSampleStatusId
 		,intItemId
 		,intItemContractId
-		,intContractHeaderId
+		--,intContractHeaderId
 		,intContractDetailId
 		--,intShipmentBLContainerContractId
 		--,intShipmentId
@@ -190,7 +190,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
-			,intContractHeaderId INT
+			--,intContractHeaderId INT
 			,intContractDetailId INT
 			--,intShipmentBLContainerId INT
 			--,intShipmentBLContainerContractId INT
