@@ -138,5 +138,5 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			ON LogisticView.intShipmentId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 2
 		LEFT JOIN tblLGPickLotHeader PickLot
-			ON PickLot.intPickLotHeaderId = ShipmentItem.intLineNo
+			ON PickLot.intPickLotHeaderId = ShipmentItem.intSourceId
 			 AND Shipment.intSourceType = 3
