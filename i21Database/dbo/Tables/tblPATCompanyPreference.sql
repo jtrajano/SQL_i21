@@ -14,6 +14,7 @@
 	[dblFederalBackup] [numeric](18, 6) NULL,
 	[intCheckbookAccountId] [int] NULL,
 	[strPrintCheck] [nvarchar](2) COLLATE Latin1_General_CI_AS NULL,
+	[intPaymentItemId] [int] NULL,
 	[dblMinimumDividends] [numeric](18, 6) NULL,
 	[ysnProRatedDividends] [bit] NULL,
 	[dtmCutoffDate] [datetime] NULL,
