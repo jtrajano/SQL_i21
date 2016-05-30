@@ -2291,7 +2291,6 @@
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiry.sql" />
     <Build Include="dbo\Functions\fnRKConvertQuantityToTargetUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendProductionAvailableLots.sql" />
-    <Build Include="dbo\Tables\tblTFValidVendor.sql" />
     <Build Include="dbo\Tables\tblTFValidProductCode.sql" />
     <Build Include="dbo\Tables\tblTFValidLocalTax.sql" />
     <Build Include="dbo\Tables\tblTFValidAccountStatusCode.sql" />
@@ -3597,6 +3596,7 @@
     <Build Include="dbo\Tables\tblHDActivityRecipient.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateStatus.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetInventoryTax.sql" />
     <Build Include="dbo\Views\vyuSMEntityRole.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\13_GlobalJulianCalendar.sql" />
     <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
@@ -3878,6 +3878,8 @@
     <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
+    <Build Include="dbo\Tables\tblTFValidOriginState.sql" />
+    <Build Include="dbo\Tables\tblTFValidVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
