@@ -313,6 +313,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\028_MassCountryFormat.sql
 :r .\EM\026_ImportPhoneNumbersToNewTable.sql
 :r .\EM\027_MassUpdatePhoneNumber.sql
+:r .\EM\029_FillInPhoneAndMobile.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

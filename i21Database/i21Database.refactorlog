@@ -5229,4 +5229,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strCurrentSolutionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f8236c75-445a-47e4-91ee-2edbf5cdedee" ChangeDateTime="05/24/2016 10:26:12">
+    <Property Name="ElementName" Value="[dbo].[tblTRImportRackPriceDetailItem].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRImportRackPriceDetailItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportRackPriceDetailItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0b358eb0-fdb0-4933-9b82-a9ac49cacbce" ChangeDateTime="05/28/2016 06:01:58">
+    <Property Name="ElementName" Value="[dbo].[tblLGLoadContainer].[intItemUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGLoadContainer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intUnitMeasureId]" />
+  </Operation>
 </Operations>

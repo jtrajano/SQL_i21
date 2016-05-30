@@ -93,7 +93,7 @@ BEGIN
            ,NULL --Processed Date
            ,0 --Processed
 		   ,0 --Recurring
-           ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
+           ,[strComments] + (CASE WHEN [ysnRecurring] = 1 THEN '' ELSE ' DUP: ' + [strSalesOrderNumber] END)
 		   ,[strFooterComments]s
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
