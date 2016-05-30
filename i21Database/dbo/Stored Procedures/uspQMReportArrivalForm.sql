@@ -142,7 +142,7 @@ BEGIN TRY
 			AND S.intSampleId = ' + CONVERT(NVARCHAR, @intSampleId) + 
 		'JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView CH ON CH.intContractDetailId = S.intContractDetailId
 		LEFT JOIN vyuCTEntity E ON E.intEntityId = S.intEntityId
 		) AS s
 	PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @strFieldNames + ')) AS pvt'

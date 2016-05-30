@@ -25,7 +25,7 @@ ELSE IF @intProductTypeId = 8 -- Contract Line Item
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
-		,C.intContractHeaderId
+		--,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.intItemContractId
 		--,C.intItemId
@@ -70,7 +70,7 @@ BEGIN
 		,S.intLoadDetailContainerLinkId
 		,S.strContainerNumber
 		,S.dblQuantity AS dblRepresentingQty
-		,C.intContractHeaderId
+		--,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.intItemContractId
 		--,C.intItemId
@@ -99,7 +99,7 @@ BEGIN
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.dblQuantity AS dblRepresentingQty
-		,C.intContractHeaderId
+		--,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.intItemContractId
 		--,C.intItemId

@@ -43,7 +43,7 @@ BEGIN TRY
 		,intSampleStatusId = x.intSampleStatusId
 		,intItemId = x.intItemId
 		,intItemContractId = x.intItemContractId
-		,intContractHeaderId = x.intContractHeaderId
+		--,intContractHeaderId = x.intContractHeaderId
 		,intContractDetailId = x.intContractDetailId
 		--,intShipmentBLContainerContractId = x.intShipmentBLContainerContractId
 		--,intShipmentId = x.intShipmentId
@@ -86,7 +86,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
-			,intContractHeaderId INT
+			--,intContractHeaderId INT
 			,intContractDetailId INT
 			--,intShipmentBLContainerId INT
 			--,intShipmentBLContainerContractId INT
