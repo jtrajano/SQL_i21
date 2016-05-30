@@ -116,7 +116,7 @@ BEGIN
 				,dtmCallInDate = A.dtmWillCallCallInDate
 				,dtmDispatchedDate = A.dtmWillCallDispatch
 				,intConcurrencyId = A.intConcurrencyId
-				,intDispatchId = CAST(NULL AS INT)
+				,intDispatchId = CAST(A.intWillCallDispatchId AS INT)
 				,intCustomerID = B.intCustomerID
 				,intCompanyLocationId  = B.intLocationId
 				,strCompanyLocationName  = I.strLocationName
