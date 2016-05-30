@@ -20,7 +20,6 @@ DECLARE @intMinPickDetail int
 Declare @intLocationId int
 Declare @intSalesOrderId INT
 Declare @strSalesOrderNumber NVARCHAR(50)
-Declare @intMinSalesOrderItem INT
 Declare @intItemId INT
 Declare @dblReqQty NUMERIC(38,20)
 Declare @strItemNo nvarchar(50)
@@ -61,14 +60,6 @@ Declare @tblPickListDetail table
 	intUserId int
 )
 
-DECLARE @tblInputItem TABLE (
-	intRowNo INT IDENTITY(1, 1)
-	,intItemId INT
-	,dblQty NUMERIC(38,20)
-	,intItemUOMId int
-	,strLotTracking nvarchar(50)
-	)
-
 INSERT INTO @tblPickList(
  intPickListId,strPickListNo,strWorkOrderNo,intAssignedToId,intLocationId,intSalesOrderId,intUserId)
  Select intPickListId,strPickListNo,strWorkOrderNo,intAssignedToId,intLocationId,intSalesOrderId,intUserId
@@ -107,6 +98,8 @@ INSERT INTO @tblPickListDetail(
 	intUserId int
 	)
 
+Delete From @tblPickListDetail Where ISNULL(dblPickQuantity,0)=0
+
 Select TOP 1 @intSalesOrderId=intSalesOrderId From @tblPickList
 Select @strSalesOrderNumber=strSalesOrderNumber,@intLocationId=intCompanyLocationId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
 Select @intPickListId=intPickListId From tblMFPickList Where intSalesOrderId=ISNULL(@intSalesOrderId,0)
@@ -120,42 +113,10 @@ Update @tblPickListDetail set intSubLocationId=NULL Where ISNULL(intSubLocationI
 Update @tblPickListDetail set intStorageLocationId=NULL Where ISNULL(intStorageLocationId,0)=0
 Update @tblPickListDetail Set intParentLotId=NULL Where ISNULL(intLotId,0)=0
 
-Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId)
-Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
-Where intSalesOrderId=@intSalesOrderId Group By sd.intItemId,sd.intItemUOMId
-
-Select @intMinSalesOrderItem=MIN(intRowNo) From @tblInputItem
-
-While @intMinSalesOrderItem is not null
-Begin
-	Select @intItemId=intItemId,@dblReqQty=dblQty,@intItemUOMId=intItemUOMId From @tblInputItem Where intRowNo=@intMinSalesOrderItem
-	Select @strItemNo=strItemNo From tblICItem Where intItemId=@intItemId
-
-	If NOT Exists(Select 1 From @tblPickListDetail Where intItemId=@intItemId)
-	Begin
-		Set @ErrMsg='Item ' + @strItemNo + ' is not selected in the pick list.'
-		RaisError(@ErrMsg,16,1)
-	End
-
-	Select @dblSelQty=SUM(dblQuantity) From @tblPickListDetail Where intItemId=@intItemId
-	Select @strUOM=um.strUnitMeasure From tblICUnitMeasure um Join tblICItemUOM iu on um.intUnitMeasureId=iu.intUnitMeasureId 
-	Where iu.intItemUOMId = @intItemUOMId
-
-	If @dblSelQty < @dblReqQty
-	Begin
-		Set @ErrMsg='Item ' + @strItemNo + ' is required ' + dbo.fnRemoveTrailingZeroes(@dblReqQty) + ' ' + @strUOM + ' but selected ' + dbo.fnRemoveTrailingZeroes(@dblSelQty) + ' ' + @strUOM + '.'
-		RaisError(@ErrMsg,16,1)
-	End
-
-	Select @intMinSalesOrderItem=MIN(intRowNo) From @tblInputItem Where intRowNo>@intMinSalesOrderItem
-End
-
 Begin Tran
 
 If ISNULL(@intPickListId,0)=0
 Begin
-	--Declare @intCategoryId int
-	--Select @intCategoryId=intCategoryId from dbo.tblICItem Where intItemId=@intBlendItemId
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 						,@intItemId = NULL
 						,@intManufacturingId = NULL
