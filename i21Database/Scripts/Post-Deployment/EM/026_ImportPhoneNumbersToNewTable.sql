@@ -70,6 +70,7 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 't
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' AND [COLUMN_NAME] = 'intDefaultCountryId')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntity' AND [COLUMN_NAME] = 'intEntityId')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMContactDetail' AND [COLUMN_NAME] = 'strValue')
+	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMContactDetail' AND [COLUMN_NAME] = 'intContactDetailId')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMContactDetail' AND [COLUMN_NAME] = 'intContactDetailTypeId')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMContactDetailType' AND [COLUMN_NAME] = 'strType')
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMContactDetailType' AND [COLUMN_NAME] = 'intContactDetailTypeId')
@@ -77,9 +78,9 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 't
 BEGIN
 	PRINT '*** EXECUTE ***'
 
-	EXEC('	insert into tblEMEntityContactNumber(strPhone, strFormatCountry, strFormatArea, strFormatLocal, intCountryId, intEntityId, strPhoneCountry)
+	EXEC('	insert into tblEMEntityContactNumber(strPhone, strFormatCountry, strFormatArea, strFormatLocal, intCountryId, intContactDetailId, strPhoneCountry)
 				select 
-				strCountryCode + '' '' + a.strValue, strCountryFormat, strAreaCityFormat, strLocalNumberFormat, intCountryID, a.intEntityId, strCountryCode
+				strCountryCode + '' '' + a.strValue, strCountryFormat, strAreaCityFormat, strLocalNumberFormat, intCountryID, a.intContactDetailId, strCountryCode
 					from tblEMContactDetail a
 				join tblEMContactDetailType b
 					on a.intContactDetailTypeId = b.intContactDetailTypeId
