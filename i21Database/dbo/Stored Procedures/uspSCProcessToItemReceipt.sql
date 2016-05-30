@@ -470,7 +470,7 @@ BEGIN TRY
 	END
 
 	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	IF @strLotTracking != 'Yes-Manual'
+	IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 		END
