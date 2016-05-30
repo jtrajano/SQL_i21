@@ -81,6 +81,7 @@ SELECT
 	,SCT.strPricingType as strSPricingType
 	,SCT.strOriginDest as strSOriginDest
 	,SCT.dblNoOfLots as dblSNoOfLots
+	,ysnDelivered = CONVERT(BIT,(CASE WHEN SCT.dblBalance <= 0 THEN 1 ELSE 0 END))
 
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
