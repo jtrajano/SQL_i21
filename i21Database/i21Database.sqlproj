@@ -3884,6 +3884,8 @@
     <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
+    <Build Include="dbo\Tables\tblARPrepaidAndCredit.sql" />
+    <Build Include="dbo\Views\vyuARPrepaidAndCredit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
