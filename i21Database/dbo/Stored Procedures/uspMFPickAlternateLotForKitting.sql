@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @strBlendProductionStagingLocation NVARCHAR(100)
 	DECLARE @strKitStagingArea NVARCHAR(100)
 	DECLARE @strErrMsg NVARCHAR(MAX)
+	DECLARE @intLotStatusId INT
 
 	SELECT @intPickListId = intPickListId,
 		   @intCompanyLocationId = intLocationId
@@ -67,6 +68,13 @@ BEGIN TRY
 		RAISERROR('ALTERNATE LOT DOES NOT EXISTS IN THE SCANNED LOCATION',16,1)
 	END
 
+	SELECT @intLotStatusId = intLotStatusId FROM tblICLot WHERE intLotId = @intAlternateLotId
+
+	IF (@intLotStatusId <> 1)
+	BEGIN
+		RAISERROR('SCANNED LOT IS NOT ACTIVE. PLEASE SCAN AN ACTIVE LOT TO CONTINUE.',16,1)
+	END
+
 	IF EXISTS (
 			SELECT 1
 			FROM tblMFPickListDetail pld
@@ -91,6 +99,15 @@ BEGIN TRY
 		BEGIN
 			RAISERROR ('SUFFICIENT QTY IS NOT AVAILABLE FOR THE ALTERNATE LOT.',16,1)
 		END
+	END
+
+	IF NOT EXISTS(SELECT PLD.intLotId, L.intItemId FROM tblMFPickList PL 
+				  JOIN tblMFPickListDetail PLD ON PL.intPickListId = PLD.intPickListId
+				  JOIN tblICLot L ON L.intLotId = PLD.intLotId
+				  WHERE PL.strPickListNo = @strPickListNo AND L.strLotNumber = @strAlternateLotNo)
+	BEGIN
+		SET @strErrMsg= 'SCANNED ITEM IS NOT AVAILABLE IN THE PICKLIST.'
+		RAISERROR(@strErrMsg,16,1)
 	END
 
 	BEGIN TRANSACTION
