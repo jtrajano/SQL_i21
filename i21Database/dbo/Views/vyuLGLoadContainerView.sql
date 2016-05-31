@@ -46,14 +46,23 @@ SELECT  L.intLoadId
 		,LC.ysnCustomsHold
 		,LC.ysnDutyPaid
 		,LC.ysnFDAHold
-		,LC.ysnRejected
+		,CONVERT(BIT,ISNULL(LC.ysnRejected,0)) AS ysnRejected
 		,LC.ysnUSDAHold
 		,PCDV.strContractNumber AS strPContractNumber
+		,PCDV.intContractSeq AS intPContractSeq
 		,SCDV.strContractNumber AS strSContractNumber
+		,SCDV.intContractSeq AS	intSContractSeq
 		,strSampleStatus = (SELECT TOP 1 SS.strStatus
 								     FROM tblQMSample S
 									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 									 AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
+		,LDCL.strIntegrationNumber
+		,LDCL.dtmIntegrationRequested
+		,LDCL.strIntegrationOrderNumber
+		,LDCL.dtmIntegrationOrderDate
+		,LDCL.dblIntegrationOrderPrice
+		,CONVERT(BIT,ISNULL(LDCL.ysnExported,0)) AS ysnExported
+
 FROM vyuLGLoadView L
 JOIN vyuLGLoadDetailView LDV ON L.intLoadId = LDV.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
