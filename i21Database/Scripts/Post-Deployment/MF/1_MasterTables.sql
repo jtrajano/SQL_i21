@@ -2024,3 +2024,8 @@ BEGIN
     VALUES(2,'Sales Contract')
 END
 GO
+UPDATE dbo.tblMFWorkOrder
+SET intBatchID = NULL
+WHERE intBlendRequirementId IS NULL
+	AND intBatchID IS NOT NULL
+Go

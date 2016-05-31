@@ -138,6 +138,7 @@ BEGIN TRY
 		,dblSubstituteRatio NUMERIC(18, 6)
 		,dblMaxSubstituteRatio NUMERIC(18, 6)
 		,intStorageLocationId INT
+		,intSubLocationId int
 		)
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
@@ -385,6 +386,7 @@ BEGIN TRY
 				,intItemIssuedUOMId
 				,ysnSubstituteItem
 				,intStorageLocationId
+				,intSubLocationId
 				)
 			SELECT S.intItemId
 				,S.dblOnHand - S.dblUnitReserved AS dblQty
@@ -394,6 +396,7 @@ BEGIN TRY
 				,S.intItemUOMId
 				,0 AS ysnSubstituteItem
 				,S.intStorageLocationId
+				,SL.intSubLocationId
 			FROM dbo.tblICItemStockUOM S
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
@@ -434,6 +437,7 @@ BEGIN TRY
 					,dblSubstituteRatio
 					,dblMaxSubstituteRatio
 					,intStorageLocationId
+					,intSubLocationId
 					)
 				SELECT L.strLotNumber
 					,L.intLotId
@@ -493,6 +497,7 @@ BEGIN TRY
 					,SI.dblSubstituteRatio
 					,SI.dblMaxSubstituteRatio
 					,L.intStorageLocationId
+					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
@@ -529,6 +534,7 @@ BEGIN TRY
 				,intItemIssuedUOMId
 				,ysnSubstituteItem
 				,intStorageLocationId
+				,intSubLocationId
 				)
 			SELECT L.strLotNumber
 				,L.intLotId
@@ -586,6 +592,7 @@ BEGIN TRY
 				,L.intItemUOMId
 				,0 AS ysnSubstituteItem
 				,L.intStorageLocationId
+				,L.intSubLocationId
 			FROM dbo.tblICLot L
 			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				AND SL.ysnAllowConsume = 1
@@ -772,6 +779,7 @@ BEGIN TRY
 					,intItemIssuedUOMId
 					,ysnSubstituteItem
 					,intStorageLocationId
+					,intSubLocationId
 					)
 				SELECT L.strLotNumber
 					,L.intLotId
@@ -812,6 +820,7 @@ BEGIN TRY
 					,L.intItemUOMId
 					,0 AS ysnSubstituteItem
 					,L.intStorageLocationId
+					,L.intSubLocationId
 				FROM dbo.tblICLot L
 				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 					AND SL.ysnAllowConsume = 1
@@ -972,6 +981,7 @@ BEGIN TRY
 					,intShiftId
 					,dtmActualInputDateTime
 					,intStorageLocationId
+					,intSubLocationId
 					)
 				SELECT @intWorkOrderId
 					,@intItemId
@@ -996,6 +1006,7 @@ BEGIN TRY
 					,@intBusinessShiftId
 					,@dtmBusinessDate
 					,intStorageLocationId
+					,intSubLocationId
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
@@ -1076,6 +1087,7 @@ BEGIN TRY
 					,intShiftId
 					,dtmActualInputDateTime
 					,intStorageLocationId
+					,intSubLocationId
 					)
 				SELECT @intWorkOrderId
 					,@intItemId
@@ -1100,6 +1112,7 @@ BEGIN TRY
 					,@intBusinessShiftId
 					,@dtmBusinessDate
 					,intStorageLocationId
+					,intSubLocationId
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
