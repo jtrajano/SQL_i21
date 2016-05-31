@@ -3888,6 +3888,7 @@
     <Build Include="dbo\Tables\tblTFValidVendor.sql" />
     <Build Include="dbo\Tables\tblARPrepaidAndCredit.sql" />
     <Build Include="dbo\Views\vyuARPrepaidAndCredit.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePrepaidForInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
