@@ -1,4 +1,30 @@
 ﻿GO
+	-- FIX MODULES
+	ALTER TABLE tblHDModule NOCHECK CONSTRAINT FK_tblHDModule_tblSMModule_intSMModuleId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Depot' AND intModuleId <> 107)
+	BEGIN
+		DELETE FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Depot'
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Autofueling' AND intModuleId <> 108)
+	BEGIN
+		DELETE FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Autofueling'
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Heating Oil/Warehouse' AND intModuleId <> 109)
+	BEGIN
+		DELETE FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Heating Oil/Warehouse'
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Web Access' AND intModuleId <> 110)
+	BEGIN
+		DELETE FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Web Access'
+	END
+
+	ALTER TABLE tblHDModule CHECK CONSTRAINT FK_tblHDModule_tblSMModule_intSMModuleId
+
+GO
 	SET IDENTITY_INSERT [dbo].[tblSMModule] ON
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'General Ledger')
@@ -957,6 +983,42 @@
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
 	       [intSort]						=		106
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Depot')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		107,
+		   [strApplicationName]				=		N'Autofueling',
+		   [strModule]						=		N'Depot',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		107
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Autofueling')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		108,
+		   [strApplicationName]				=		N'Autofueling',
+		   [strModule]						=		N'Autofueling',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		108
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Heating Oil/Warehouse')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		109,
+		   [strApplicationName]				=		N'Autofueling',
+		   [strModule]						=		N'Heating Oil/Warehouse',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		109
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Autofueling' AND strModule = 'Web Access')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
+	SELECT [intModuleId]					=		110,
+		   [strApplicationName]				=		N'Autofueling',
+		   [strModule]						=		N'Web Access',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		110
 
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
