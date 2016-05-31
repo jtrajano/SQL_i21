@@ -6,8 +6,9 @@ SELECT
 	,[intInvoiceId]						= NULL
 	,[intInvoiceDetailId]				= NULL
 	,[intPrepaymentId]					= ARI.[intInvoiceId]
-	,[intPrepaymentDetailId]			= ARID.[intInvoiceDetailId]
+	,[intPrepaymentDetailId]			= ARID.[intInvoiceDetailId]	
 	,[strPrepaymentNumber]				= ARI.[strInvoiceNumber]
+	,[intEntityCustomerId]				= ARI.[intEntityCustomerId] 
 	,[strPrepayType]					= (	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN 'Standard'
 												WHEN ARID.[intPrepayTypeId] =  2 THEN 'Unit'
 												WHEN ARID.[intPrepayTypeId] =  3 THEN 'Percentage'
@@ -26,18 +27,76 @@ SELECT
 	,[dblPrepayRate]					= ARID.[dblPrepayRate]
 	,[dblLineItemTotal]					= ARID.[dblTotal]
 	,[dblInvoiceTotal]					= ARI.[dblInvoiceTotal]
-	,[dblPrepaidAmount]					= (	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-												WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-												WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
-												ELSE 0.000000
-											END
-										  )
-	,[dblPostedAmount]					= 0.000000
-	,[dblPostedDetailAmount]			= 0.000000
+	,[dblPrepaidAmount]					= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														ELSE 0.000000
+													END
+										  ), 0.000000)
+	,[dblTotalPostedAmount]				= ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentId] = ARI.[intInvoiceId]
+										  ), 0.000000)
+	,[dblTotalPostedDetailAmount]		= ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceDetailAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentDetailId] = ARID.[intInvoiceDetailId]
+										  ), 0.000000)
 	,[dblAppliedInvoiceAmount]			= 0.000000
 	,[dblAppliedInvoiceDetailAmount]	= 0.000000
-	,[dblInvoiceBalance]				= 0.000000
-	,[dblInvoiceDetailBalance]			= 0.000000
+	,[dblInvoiceBalance]				= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														ELSE 0.000000
+													END
+										  ), 0.000000)
+										  -
+										  ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentId] = ARI.[intInvoiceId]
+										  ), 0.000000)
+	,[dblInvoiceDetailBalance]			= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														ELSE 0.000000
+													END
+										  ), 0.000000)
+										  -
+										  ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceDetailAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentDetailId] = ARID.[intInvoiceDetailId]
+										  ), 0.000000)
 	,[ysnApplied]						= 0
 	,[ysnPosted]						= 0	
 FROM
@@ -70,9 +129,10 @@ SELECT
 	 [intPrepaidAndCreditId]			= ARPAC.[intPrepaidAndCreditId]
 	,[intInvoiceId]						= ARPAC.[intInvoiceId]
 	,[intInvoiceDetailId]				= ARPAC.[intInvoiceDetailId]
-	,[intPrepaymentId]					= ARI.[intInvoiceId]
-	,[intPrepaymentDetailId]			= ARID.[intInvoiceDetailId]
+	,[intPrepaymentId]					= ARPAC.[intPrepaymentId]
+	,[intPrepaymentDetailId]			= ARPAC.[intPrepaymentDetailId]
 	,[strPrepaymentNumber]				= ARI.[strInvoiceNumber]
+	,[intEntityCustomerId]				= ARI.[intEntityCustomerId] 
 	,[strPrepayType]					= (	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN 'Standard'
 												WHEN ARID.[intPrepayTypeId] =  2 THEN 'Unit'
 												WHEN ARID.[intPrepayTypeId] =  3 THEN 'Percentage'
@@ -91,18 +151,76 @@ SELECT
 	,[dblPrepayRate]					= ARID.[dblPrepayRate]
 	,[dblLineItemTotal]					= ARID.[dblTotal]
 	,[dblInvoiceTotal]					= ARI.[dblInvoiceTotal]
-	,[dblPrepaidAmount]					= (	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-												WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-												WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
-												ELSE 0.000000
-											END
-										  )
-	,[dblPostedAmount]					= ARPAC.[dblPostedAmount]
-	,[dblPostedDetailAmount]			= ARPAC.[dblPostedDetailAmount]
+	,[dblPrepaidAmount]					= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														ELSE 0.000000
+													END
+										  ), 0.000000)
+	,[dblTotalPostedAmount]				= ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentId] = ARPAC.[intPrepaymentId]
+										  ), 0.000000)
+	,[dblTotalPostedDetailAmount]		= ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceDetailAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentDetailId] = ARPAC.[intPrepaymentDetailId]
+										  ), 0.000000)
 	,[dblAppliedInvoiceAmount]			= ARPAC.[dblAppliedInvoiceAmount]
 	,[dblAppliedInvoiceDetailAmount]	= ARPAC.[dblAppliedInvoiceDetailAmount]
-	,[dblInvoiceBalance]				= 0.000000
-	,[dblInvoiceDetailBalance]			= 0.000000
+	,[dblInvoiceBalance]				= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														ELSE 0.000000
+													END
+										  ), 0.000000)
+										  -
+										  ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentId] = ARPAC.[intPrepaymentId]
+										  ), 0.000000)
+	,[dblInvoiceDetailBalance]			= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
+														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
+														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
+														ELSE 0.000000
+													END
+										  ), 0.000000)
+										  -
+										  ISNULL((
+												SELECT
+													SUM(PAC.[dblAppliedInvoiceDetailAmount])
+												FROM 
+													tblARPrepaidAndCredit PAC 
+												INNER JOIN
+													tblARInvoice I
+														ON PAC.[intInvoiceId] = I.intInvoiceId 
+														AND I.ysnPosted = 1
+												WHERE
+													PAC.[intPrepaymentDetailId] = ARPAC.[intPrepaymentDetailId]
+										  ), 0.000000)
 	,[ysnApplied]						= ARPAC.[ysnApplied]
 	,[ysnPosted]						= ARPAC.[ysnPosted]
 	
