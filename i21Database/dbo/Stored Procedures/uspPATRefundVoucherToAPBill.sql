@@ -2,7 +2,8 @@
 	 @intRefundId					INT
 	,@intPatronId					INT
 	,@dblRefundAmount				DECIMAL
-	,@intUserId						INT	
+	,@intUserId						INT
+	,@intPaymentItemId				INT	
 	,@intBillId						INT = 0
 	,@bitSuccess					BIT = NULL OUTPUT
 	,@strErrorMessage				NVARCHAR(MAX) = NULL OUTPUT
@@ -25,9 +26,6 @@ BEGIN TRY
 	DECLARE @intVendorId INT
 	DECLARE @strVendorOderNumber NVARCHAR(MAX)
 
-	-- Company preference item ID
-	SELECT @intPatronageItemId =  intItemId FROM tblICItem WHERE strType = 'Non-Inventory' AND strItemNo = 'PAT' --temporary. need to set from preference.
-
 	SELECT @strVendorOderNumber = 'PAT-' + CONVERT(VARCHAR,@intRefundId) + '-' + CONVERT(VARCHAR,GETDATE(),112) + CONVERT(VARCHAR,CAST((RAND() * (899999) + 100000) AS INT))
 
 	-- Fill-up voucher details
@@ -41,7 +39,7 @@ BEGIN TRY
 		,[intTaxGroupId])
 	VALUES
 		(NULL											
-		,@intPatronageItemId							
+		,@intPaymentItemId							
 		,'Patronage Refund Voucher (Tax Inclusive)'		
 		,1												
 		,0												
