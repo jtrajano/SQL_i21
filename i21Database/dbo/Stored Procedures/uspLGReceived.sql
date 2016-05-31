@@ -25,7 +25,9 @@ SET ANSI_WARNINGS OFF
 				@dblContractQty					NUMERIC(18,6),
 				@dblContainerQty				NUMERIC(18,6),
 				@ysnInventorize					BIT,
-				@ysnReverse						BIT = 0
+				@ysnReverse						BIT = 0,
+				@intLoadId						INT,
+				@dblNetWeight					NUMERIC(18,6)
 
 	SELECT @strReceiptType = strReceiptType, @intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 	IF (@strReceiptType <> 'Purchase Contract' AND @intSourceType <> 2)
@@ -36,13 +38,14 @@ SET ANSI_WARNINGS OFF
 	BEGIN
 		SELECT	@intSourceId					=	NULL,
 				@intContainerId					=	NULL,
-				@dblQty							=	NULL
-
+				@dblQty							=	NULL,
+				@dblNetWeight					=	NULL
 				
 		SELECT	@intSourceId					=	intSourceId,
 				@intContainerId					=	intContainerId,
 				@dblQty							=	dblQty,
-				@intLotId						=	intLotId
+				@intLotId						=	intLotId,
+				@dblNetWeight					=	dblNetWeight
 		FROM	@ItemsFromInventoryReceipt 
 		WHERE	intLotId						=	 @intLotId
 		
@@ -52,16 +55,16 @@ SET ANSI_WARNINGS OFF
 			SET @ErrMsg = 'Contract for this shipment does not exist'
 			RAISERROR(@ErrMsg,16,1)
 		END
-
+		
 		IF NOT EXISTS(SELECT * FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId)
 		BEGIN		
 			SET @ErrMsg = 'Container for this shipment does not exist'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		
-		SELECT @dblContractQty = IsNull(dblReceivedQty, 0) FROM tblLGShipmentContractQty WHERE intShipmentContractQtyId = @intSourceId
-		SELECT @dblContainerQty = IsNull(dblReceivedQty, 0) FROM tblLGShipmentBLContainerContract WHERE intShipmentContractQtyId = @intSourceId AND intShipmentBLContainerId = @intContainerId		
-		
+		SELECT @dblContractQty = ISNULL(dblDeliveredQuantity,0) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+		SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) FROM tblLGLoadDetailContainerLink
+
 		IF (@dblContractQty + @dblQty) < 0
 		BEGIN		
 			SET @ErrMsg = 'Negative contract quantity is not allowed'
@@ -74,9 +77,9 @@ SET ANSI_WARNINGS OFF
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		UPDATE tblLGShipmentContractQty 		SET dblReceivedQty = (@dblContractQty + @dblQty) WHERE intShipmentContractQtyId = @intSourceId
-		UPDATE tblLGShipmentBLContainerContract SET dblReceivedQty = (@dblContainerQty + @dblQty) WHERE intShipmentContractQtyId = @intSourceId AND intShipmentBLContainerId = @intContainerId
-		
+		UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
+		UPDATE tblLGLoadDetailContainerLink SET dblReceivedQty = (@dblContainerQty + @dblQty)  WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId
+	
 		SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
 
 		INSERT into @ItemsToIncreaseInTransitInBound(
@@ -109,12 +112,19 @@ SET ANSI_WARNINGS OFF
 		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
 		SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId
 	END
-	SELECT TOP(1) @intShipmentId = intShipmentId FROM tblLGShipmentContractQty WHERE intShipmentContractQtyId = @intSourceId
-	SELECT @ysnInventorize = ysnInventorized FROM tblLGShipment WHERE intShipmentId = @intShipmentId
-	IF (@ysnReverse = 0) AND (@ysnInventorize != 1)
+	
+	SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+
+	IF @ysnReverse = 0
 	BEGIN
-		UPDATE tblLGShipment SET ysnInventorized = 1, dtmInventorizedDate=GETDATE() WHERE intShipmentId=@intShipmentId		
+		UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 	END
+	ELSE 
+	BEGIN
+		UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+		UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+	END
+
 END TRY
 
 BEGIN CATCH
