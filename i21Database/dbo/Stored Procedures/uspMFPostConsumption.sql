@@ -4,6 +4,7 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@intUserId INT = NULL
 	,@intEntityId INT = NULL
 	,@strRetBatchId NVARCHAR(40) = NULL OUT
+	,@intBatchId INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,46 +12,35 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Constants  
---DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
-DECLARE @INVENTORY_CONSUME AS INT = 8
--- Get the Inventory Receipt batch number
-DECLARE @strBatchId AS NVARCHAR(40)
-DECLARE @strItemNo AS NVARCHAR(50)
--- Create the gl entries variable 
-DECLARE @GLEntries AS RecapTableType
+	,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
+	,@INVENTORY_CONSUME AS INT = 8
+	,@strBatchId AS NVARCHAR(40)
+	,@GLEntries AS RecapTableType
+	,@dtmDate AS DATETIME
+	,@intTransactionId AS INT
+	,@intCreatedEntityId AS INT
+	,@strTransactionId NVARCHAR(50)
+	,@intLocationId INT
+	,@ItemsForPost AS ItemCostingTableType
+	,@intRecordId INT
+	,@intLotId INT
+	,@intItemUOMId INT
+DECLARE @tblMFLot TABLE (
+	intRecordId INT Identity(1, 1)
+	,intLotId INT
+	,intItemUOMId INT
+	)
 
--- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)
 
--- Create the type of lot numbers
-DECLARE @LotType_Manual AS INT = 1
-	,@LotType_Serial AS INT = 2
-
--- Read the transaction info   
-BEGIN
-	DECLARE @dtmDate AS DATETIME
-	DECLARE @intTransactionId AS INT
-	DECLARE @intCreatedEntityId AS INT
-	DECLARE @ysnAllowUserSelfPost AS BIT
-	DECLARE @ysnTransactionPostedFlag AS BIT
-	DECLARE @strTransactionId NVARCHAR(50)
-	DECLARE @intItemId INT
-	DECLARE @strLotTracking NVARCHAR(50)
-	DECLARE @intLocationId INT
-
-	SELECT TOP 1 @intTransactionId = intWorkOrderId
-		,@strTransactionId = strWorkOrderNo
-		,@ysnTransactionPostedFlag = 0
-		,@dtmDate = GetDate()
-		,@intCreatedEntityId = @intUserId
-		,@intItemId = intItemId
-		,@intLocationId = intLocationId
-	FROM dbo.tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
-END
+SELECT TOP 1 @intTransactionId = @intBatchId
+	,@strTransactionId = strWorkOrderNo
+	,@dtmDate = GetDate()
+	,@intCreatedEntityId = @intUserId
+	,@intLocationId = intLocationId
+FROM dbo.tblMFWorkOrder
+WHERE intWorkOrderId = @intWorkOrderId
 
 SELECT @dtmDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
 
@@ -65,18 +55,11 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 
 SELECT @strRetBatchId = @strBatchId
 
-SELECT @strLotTracking = strLotTracking
-FROM tblICItem
-WHERE intItemId = @intItemId
-
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
-	-- Get the items to post  
-	DECLARE @ItemsForPost AS ItemCostingTableType
-
 	--Non Lot Tracking
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -118,12 +101,12 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-	FROM tblMFWorkOrderConsumedLot cl
-	INNER JOIN tblICItem i ON cl.intItemId = i.intItemId
-	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
-	INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId
+	FROM dbo.tblMFWorkOrderConsumedLot cl
+	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
+	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
+	JOIN dbo.tblICItemLocation il ON i.intItemId = il.intItemId
 		AND il.intLocationId = @intLocationId
-	WHERE cl.intWorkOrderId = @intTransactionId
+	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND ISNULL(cl.intLotId, 0) = 0
 
 	--Lot Tracking
@@ -167,70 +150,70 @@ BEGIN
 		,intStorageLocationId = l.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-	FROM tblMFWorkOrderConsumedLot cl
-	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
-	INNER JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
+	FROM dbo.tblMFWorkOrderConsumedLot cl
+	JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
+	JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
-	WHERE cl.intWorkOrderId = @intTransactionId
+	WHERE cl.intWorkOrderId = @intWorkOrderId
 
 	-- Call the post routine 
-	BEGIN
-		-- Call the post routine 
-		INSERT INTO @GLEntries (
-			[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			)
-		EXEC dbo.uspICPostCosting @ItemsForPost
-			,@strBatchId
-			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-			,@intUserId
+	INSERT INTO @GLEntries (
+		[dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]
+		,[dblDebitReport]
+		,[dblCreditForeign]
+		,[dblCreditReport]
+		,[dblReportingRate]
+		,[dblForeignRate]
+		)
+	EXEC dbo.uspICPostCosting @ItemsForPost
+		,@strBatchId
+		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+		,@intUserId
 
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,@ysnPost
-	END
+	EXEC dbo.uspGLBookEntries @GLEntries
+		,@ysnPost
 
-	UPDATE tblMFWorkOrder
+	UPDATE dbo.tblMFWorkOrder
 	SET strBatchId = @strBatchId
+		,intBatchID = @intBatchId
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	DECLARE @intRecordId INT
-		,@intLotId INT
-	DECLARE @tblMFLot TABLE (
-		intRecordId INT Identity(1, 1)
-		,intLotId INT
-		)
+	UPDATE dbo.tblMFWorkOrderConsumedLot
+	SET strBatchId = @strBatchId
+		,intBatchId = @intBatchId
+	WHERE intWorkOrderId = @intWorkOrderId
 
-	INSERT INTO @tblMFLot (intLotId)
+	INSERT INTO @tblMFLot (
+		intLotId
+		,intItemUOMId
+		)
 	SELECT intLotId
+		,intItemUOMId
 	FROM dbo.tblMFWorkOrderConsumedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -242,6 +225,7 @@ BEGIN
 		SELECT @intLotId = NULL
 
 		SELECT @intLotId = intLotId
+			,@intItemUOMId = intItemUOMId
 		FROM @tblMFLot
 		WHERE intRecordId = @intRecordId
 
@@ -260,23 +244,13 @@ BEGIN
 					) < 0.01
 				)
 		BEGIN
-			--EXEC dbo.uspMFLotAdjustQty
-			-- @intLotId =@intLotId,       
-			-- @dblNewLotQty =0,
-			-- @intUserId=@intUserId ,
-			-- @strReasonCode ='Residue qty clean up',
-			-- @strNotes ='Residue qty clean up'
-			UPDATE tblICLot
-			SET dblWeight = 0
-				,dblQty = 0
-			WHERE intLotId = @intLotId
+			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
+				,@dblNewLotQty = 0
+				,@intAdjustItemUOMId = @intItemUOMId
+				,@intUserId = @intUserId
+				,@strReasonCode = 'Residue qty clean up'
+				,@strNotes = 'Residue qty clean up'
 		END
-
-		UPDATE tblICLot
-		SET dblWeight = dblQty
-		WHERE dblQty <> dblWeight
-			AND intItemUOMId = intWeightUOMId
-			AND intLotId = @intLotId
 
 		SELECT @intRecordId = Min(intRecordId)
 		FROM @tblMFLot

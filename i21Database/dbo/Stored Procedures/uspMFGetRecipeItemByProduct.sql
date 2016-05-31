@@ -115,6 +115,7 @@ BEGIN
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
+		AND r.intWorkOrderId=@intWorkOrderId
 		ORDER BY ri.intRecipeItemId
 	END
 END
