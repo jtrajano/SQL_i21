@@ -1,5 +1,4 @@
-﻿-- This function returns new adjust by quantity. 
-CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
+﻿CREATE FUNCTION [dbo].[fnCFGetTransactionMargin] (
 	 @intTransactionId		INT = 0
 	 ,@intItemId			INT = 0
 	 ,@intLocationId		INT = 0
@@ -30,7 +29,7 @@ BEGIN
 			CASE cfTransaction.ysnPosted 
 			WHEN 1 
 			THEN cfTransNetPrice.dblCalculatedAmount - cfItem.dblAverageCost 
-			ELSE cfTransNetPrice.dblCalculatedAmount - cfItem.dblStandardCost
+			ELSE cfTransNetPrice.dblCalculatedAmount - cfItem.dblLastCost
 		END
 	WHEN 'Extended Remote' 
 	THEN cfTransGrossPrice.dblCalculatedAmount - cfTransaction.dblTransferCost 
@@ -44,7 +43,7 @@ BEGIN
 			CASE cfTransaction.ysnPosted 
 			WHEN 1 
 			THEN cfItem.dblAverageCost 
-			ELSE cfItem.dblStandardCost
+			ELSE cfItem.dblLastCost
 		END
 	WHEN 'Extended Remote' 
 	THEN cfTransaction.dblTransferCost 
@@ -53,7 +52,7 @@ BEGIN
 	ELSE 0 
 	END
 	FROM tblCFTransaction AS cfTransaction INNER JOIN 
-	(SELECT cfiItem.intItemId, cfiItem.strProductNumber, iciItem.strDescription, iciItem.intItemId AS intARItemId, iciItem.strItemNo, iciItemPricing.dblAverageCost, iciItemPricing.dblStandardCost
+	(SELECT cfiItem.intItemId, cfiItem.strProductNumber, iciItem.strDescription, iciItem.intItemId AS intARItemId, iciItem.strItemNo, iciItemPricing.dblAverageCost, iciItemPricing.dblStandardCost, iciItemPricing.dblLastCost
 	FROM  dbo.tblCFItem AS cfiItem LEFT OUTER JOIN
 	dbo.tblCFSite AS cfiSite ON cfiSite.intSiteId = cfiItem.intSiteId LEFT OUTER JOIN
 	dbo.tblICItem AS iciItem ON cfiItem.intARItemId = iciItem.intItemId LEFT OUTER JOIN
@@ -78,7 +77,7 @@ BEGIN
 	CASE @strTransactionType 
 	WHEN 'Local/Network' 
 		THEN 
-			@dblNetPrice - dblStandardCost
+			@dblNetPrice - dblLastCost
 	WHEN 'Extended Remote' 
 	THEN @dblGrossPrice - @dblTransferCost 
 	WHEN 'Remote' 
@@ -87,7 +86,7 @@ BEGIN
 	END),
 	dblCost = CASE @strTransactionType 
 	WHEN 'Local/Network' 
-		THEN dblStandardCost
+		THEN dblLastCost
 	WHEN 'Extended Remote' 
 	THEN @dblTransferCost 
 	WHEN 'Remote' 
@@ -104,3 +103,5 @@ RETURN
 
 
 END
+
+
