@@ -2,7 +2,8 @@
 AS
 
 SELECT
-	 [intInvoiceId]						= NULL
+	 [intPrepaidAndCreditId]			= NULL
+	,[intInvoiceId]						= NULL
 	,[intInvoiceDetailId]				= NULL
 	,[intPrepaymentId]					= ARI.[intInvoiceId]
 	,[intPrepaymentDetailId]			= ARID.[intInvoiceDetailId]
@@ -66,7 +67,8 @@ UNION
 
 
 SELECT
-	 [intInvoiceId]						= ARPAC.[intInvoiceId]
+	 [intPrepaidAndCreditId]			= ARPAC.[intPrepaidAndCreditId]
+	,[intInvoiceId]						= ARPAC.[intInvoiceId]
 	,[intInvoiceDetailId]				= ARPAC.[intInvoiceDetailId]
 	,[intPrepaymentId]					= ARI.[intInvoiceId]
 	,[intPrepaymentDetailId]			= ARID.[intInvoiceDetailId]
@@ -102,7 +104,7 @@ SELECT
 	,[dblInvoiceBalance]				= 0.000000
 	,[dblInvoiceDetailBalance]			= 0.000000
 	,[ysnApplied]						= ARPAC.[ysnApplied]
-	,[ysnPosted]						= ARPAC.[ysnPosted]	
+	,[ysnPosted]						= ARPAC.[ysnPosted]
 	
 FROM
 	tblARPrepaidAndCredit ARPAC
