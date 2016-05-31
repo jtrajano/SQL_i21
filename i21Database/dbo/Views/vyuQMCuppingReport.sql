@@ -7,8 +7,8 @@ SELECT S.intSampleId
 	,I.strDescription
 	,E.strEntityName
 	,E.strEntityNumber
-	,CD.strContractNumber
-	,CD.intContractSeq
+	,CD.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
+	,IC.strContractItemName
 	,S.strMarks
 	,S.strContainerNumber
 	,SL.strSubLocationDescription
@@ -25,6 +25,7 @@ JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 LEFT JOIN dbo.vyuCTEntity AS E ON E.intEntityId = S.intEntityId
 LEFT JOIN dbo.vyuCTContractDetailView AS CD ON CD.intContractDetailId = S.intContractDetailId
+LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation AS SL ON SL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 LEFT JOIN dbo.tblQMReportCuppingPropertyMapping AS Property_cup_map ON UPPER(Property_cup_map.strPropertyName) = 'OVERALL CUP ANALYSIS'
 LEFT JOIN dbo.tblQMProperty AS Property_cup ON UPPER(Property_cup.strPropertyName) = UPPER(Property_cup_map.strActualPropertyName)
