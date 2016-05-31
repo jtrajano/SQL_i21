@@ -111,7 +111,7 @@ BEGIN TRY
 		vyuARPrepaidAndCredit ARPAC
 	WHERE
 		ARPAC.[dblInvoiceBalance] <> 0
-		AND ARPAC.[intInvoiceId] <> @InvoiceId
+		AND ISNULL(ARPAC.[intInvoiceId],0) <> @InvoiceId
 		AND ARPAC.[intEntityCustomerId] = @EntityCustomerId
 		AND NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intEntityCustomerId] =  ARPAC.[intEntityCustomerId] AND vyuARPrepaidAndCredit.[intPrepaymentId] =  ARPAC.[intPrepaymentId] AND vyuARPrepaidAndCredit.[intInvoiceId] = @InvoiceId)
 		

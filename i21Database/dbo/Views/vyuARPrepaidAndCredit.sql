@@ -97,8 +97,8 @@ SELECT
 												WHERE
 													PAC.[intPrepaymentDetailId] = ARID.[intInvoiceDetailId]
 										  ), 0.000000)
-	,[ysnApplied]						= 0
-	,[ysnPosted]						= 0	
+	,[ysnApplied]						= NULL
+	,[ysnPosted]						= NULL	
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -221,8 +221,8 @@ SELECT
 												WHERE
 													PAC.[intPrepaymentDetailId] = ARPAC.[intPrepaymentDetailId]
 										  ), 0.000000)
-	,[ysnApplied]						= ARPAC.[ysnApplied]
-	,[ysnPosted]						= ARPAC.[ysnPosted]
+	,[ysnApplied]						= ISNULL(ARPAC.[ysnApplied],0)
+	,[ysnPosted]						= ISNULL(ARPAC.[ysnPosted],0)
 	
 FROM
 	tblARPrepaidAndCredit ARPAC
