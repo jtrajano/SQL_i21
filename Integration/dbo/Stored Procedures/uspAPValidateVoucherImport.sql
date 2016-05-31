@@ -2,6 +2,7 @@
 	@UserId INT,
 	@DateFrom DATETIME = NULL,
 	@DateTo DATETIME = NULL,
+	@logKey NVARCHAR(100) OUTPUT,
 	@isValid BIT OUTPUT
 AS
 
@@ -12,6 +13,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+
+DECLARE @key NVARCHAR(100) = NEWID()
+SET @logKey = @key;
 
 DECLARE @log TABLE
 (
@@ -187,10 +191,18 @@ INSERT INTO tblAPImportVoucherLog
 	[strDescription], 
     [intEntityId], 
     [dtmDate], 
+	[strLogKey],
     [intLogType], 
     [ysnSuccess]
 )
-SELECT * FROM @log
+SELECT 
+	[strDescription], 
+    [intEntityId], 
+    [dtmDate], 
+	@key,
+    [intLogType], 
+    [ysnSuccess]
+FROM @log
 
 IF EXISTS(SELECT 1 FROM @log) SET @isValid = 0;
 ELSE SET @isValid = 1

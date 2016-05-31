@@ -1,4 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPValidateImportedVouchers]
+	@UserId INT,
+	@logKey NVARCHAR(100),
+	@isValid INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -7,9 +10,17 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @log TABLE
+(
+	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
+    [intEntityId] INT NOT NULL, 
+    [dtmDate] DATETIME NOT NULL
+)
+
 --GET THOSE VOUCHERS WHERE TOTAL DETAIL IS NOT EQUAL TO TOTAL HEADER
+INSERT INTO @log
 SELECT 
-* 
+	strBillId + ' total do not matched.', @UserId, GETDATE(), 1, 0
 FROM (
 	SELECT 
 	intBillId
@@ -30,7 +41,6 @@ FROM (
 			INNER JOIN tblAPapivcmst A2 ON A.intBackupId = A2.intId
 			INNER JOIN tblAPBill C ON A2.intBillId = C.intBillId
 				LEFT JOIN tblAPBillDetail B ON C.intBillId = B.intBillId
-			WHERE C.ysnOrigin = 1 --from Origin and posted in origin
 			) ImportedBills
 	GROUP BY 
 	intBillId
@@ -40,3 +50,15 @@ FROM (
 	,ysnPosted
 	) Summary
 WHERE i21Total <> i21DetailTotal --Verify if total and detail total are equal
+
+INSERT INTO tblAPImportValidationLog
+(
+	[strDescription], 
+    [intEntityId], 
+	[strLogKey],
+    [dtmDate]
+)
+SELECT * FROM @log
+
+IF EXISTS(SELECT 1 FROM @log) SET @isValid = 0;
+ELSE SET @isValid = 1

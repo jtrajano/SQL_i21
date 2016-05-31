@@ -335,7 +335,7 @@ SELECT
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
 	[dblTotal]				=	CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN C.apegl_gl_amt * -1
-										--(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END)
+										WHEN C.apegl_gl_amt < 0 AND C2.aptrx_trans_type = 'I' THEN C.apegl_gl_amt * -1
 									ELSE C.apegl_gl_amt END, --Do not make the total positive if cost is negative
 	[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN ('C','A','I') THEN
 										(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END) --Cost should always positive

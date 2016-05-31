@@ -1,5 +1,11 @@
 ﻿/**
 	EXECUTE THIS SCRIPT AFTER THE uspAPImportVoucherBackUpFromAPIVCMST
+	RULES ON IMPORTING VOUCHERS FROM ORIGIN
+	Voucher Header
+	1. If transaction type is 'C' it is Debit Memo
+	2. If amount is negative, it is Debit Memo
+	Voucher Detail
+	1. If transaction type is 'I' and amount is negative, amount should be positive.
 */
 CREATE PROCEDURE [dbo].[uspAPImportVoucherFromAPIVCMST]
 	@UserId INT,
@@ -354,7 +360,7 @@ SELECT
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
 	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') THEN C.aphgl_gl_amt * -1
-										--(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+											WHEN C.aphgl_gl_amt < 0 AND C2.apivc_trans_type = 'I' THEN C.aphgl_gl_amt * -1
 									ELSE C.aphgl_gl_amt END,
 	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') THEN
 										(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
