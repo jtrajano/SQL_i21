@@ -206,7 +206,7 @@ BEGIN
 	SELECT @cols1 = REPLACE (@cols1,'strUOMCode,',''''' as strUOMCode,')
 	SELECT @cols1 = REPLACE (@cols1,'Location,',''''' as Location,')
 
-	SELECT @cols1 =  REPLACE(@cols,',dblBeginBalance,dblBeginBalanceUnit','')
+	SELECT @cols1 =  REPLACE(@cols1,',dblBeginBalance,dblBeginBalanceUnit','')
 
 	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1)'
 	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + CASE WHEN @Where1 <> 'Where' THEN  @Where1 ELSE '' END + ' GROUP BY strAccountId),
