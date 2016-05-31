@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATProcessRefundsToVoucher]
 	 @intUserId						INT
 	,@intRefundId					INT
+	,@intPaymentItemId				INT
 	,@strErrorMessage				NVARCHAR(MAX) = NULL OUTPUT
 AS
 
@@ -22,7 +23,7 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		EXEC uspPATRefundVoucherToAPBill @intRefundId,@intCustomerId,@dblCheckAmount,@intUserId
+		EXEC uspPATRefundVoucherToAPBill @intRefundId,@intCustomerId,@dblCheckAmount,@intUserId,@intPaymentItemId
 
 		FETCH NEXT FROM the_cursor INTO @intCustomerId,@dblCheckAmount
 	END
