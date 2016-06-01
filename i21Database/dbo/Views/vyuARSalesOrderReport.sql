@@ -28,7 +28,7 @@ SELECT SO.intSalesOrderId
 	 , strFreightTerm			= FT.strFreightTerm
 	 , strItemNo				= I.strItemNo
 	 , strType					= I.strType
-	 , intCategoryId			= I.intCategoryId
+	 , intCategoryId			= CASE WHEN QT.strOrganization IN ('Product Type', 'Item Category') THEN I.intCategoryId ELSE NULL END
 	 , strCategoryCode			= ICC.strCategoryCode
 	 , strCategoryDescription   = ISNULL(ICC.strDescription, 'No/Miscellaneous Item Category')
 	 , intSalesOrderDetailId	= SD.intSalesOrderDetailId
@@ -41,7 +41,7 @@ SELECT SO.intSalesOrderId
 	 , strTemplateName			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.strTemplateName ELSE NULL END	 
 	 , strOrganization			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.strOrganization ELSE NULL END
 	 , ysnDisplayTitle			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.ysnDisplayTitle ELSE NULL END
-	 , intProductTypeId			= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.intProductTypeId ELSE NULL END
+	 , intProductTypeId			= CASE WHEN SO.strTransactionType = 'Quote' AND QT.strOrganization = 'Product Type' THEN PD.intProductTypeId ELSE NULL END
 	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN ISNULL(PD.strProductTypeDescription, 'No/Miscellaneous Product Type') ELSE NULL END
 	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.strProductTypeName ELSE NULL END
 	 , dtmExpirationDate		= CASE WHEN SO.strTransactionType = 'Quote' THEN SO.dtmExpirationDate ELSE NULL END
