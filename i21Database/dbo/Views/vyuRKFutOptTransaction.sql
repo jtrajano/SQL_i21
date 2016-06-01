@@ -44,13 +44,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dblUnAllocatedAmount
 			,ft.dblSpotRate
 			,ft.ysnLiquidation
-			,ft.ysnSwap
-			,ft.strSwapBuySell
-			,ft.dtmSwapMaturityDate
-			,ft.dblSwapContractAmount
-			,ft.dblSwapExchangeRate
-			,ft.dblSwapMatchAmount
-			,ft.ysnSwapLiquidation							
+			,ft.ysnSwap					
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
@@ -113,13 +107,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dblUnAllocatedAmount
 			,ft.dblSpotRate
 			,ft.ysnLiquidation
-			,ft.ysnSwap
-			,ft.strSwapBuySell
-			,ft.dtmSwapMaturityDate
-			,ft.dblSwapContractAmount
-			,ft.dblSwapExchangeRate
-			,ft.dblSwapMatchAmount
-			,ft.ysnSwapLiquidation							
+			,ft.ysnSwap						
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
@@ -159,7 +147,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			fot.dblContractSize as dblContractSize,
 			(SELECT CONVERT(DECIMAL,SUM(intOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId=ft.intFutOptTransactionId) as intOpenContract,
 			um.[strUnitMeasure] AS [strUnitMeasure], 
-			ft.[strBuySell] AS [strBuySell], 
+			ft.[strSwapBuySell] AS [strBuySell], 
 			ft.[dblPrice] AS [dblPrice], 
 			sc.[strCommodityCode] AS [strCommodityCode], 
 			cl.[strLocationName] AS [strLocationName], 
@@ -171,24 +159,18 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,strBankName
 			,strBankAccountNo
 			,case when intSelectedInstrumentTypeId=1 then 'Exchange Traded' else 'OTC' end strSelectedInstrumentType
-			,ft.[dtmMaturityDate]
+			,ft.dtmSwapMaturityDate as [dtmMaturityDate]
 			,strCurrencyExchangeRateType
 			,ft.strFromCurrency
 			,ft.strToCurrency
-			,ft.dblContractAmount
-			,ft.dblExchangeRate
-			,ft.dblMatchAmount
-			,ft.dblAllocatedAmount
-			,ft.dblUnAllocatedAmount
-			,ft.dblSpotRate
-			,ft.ysnLiquidation
+			,ft.dblSwapContractAmount as dblContractAmount
+			,ft.dblSwapExchangeRate as dblExchangeRate
+			,ft.dblSwapMatchAmount as dblMatchAmount
+			,null dblAllocatedAmount
+			,null dblUnAllocatedAmount
+			,null dblSpotRate
+			,ft.ysnSwapLiquidation as ysnLiquidation
 			,ft.ysnSwap
-			,ft.strSwapBuySell
-			,ft.dtmSwapMaturityDate
-			,ft.dblSwapContractAmount
-			,ft.dblSwapExchangeRate
-			,ft.dblSwapMatchAmount
-			,ft.ysnSwapLiquidation							
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
@@ -206,4 +188,3 @@ LEFT OUTER JOIN [dbo].[tblCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[in
 LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 where intSelectedInstrumentTypeId=2 and isnull(ft.ysnSwap,0) = 1
 )t
-
