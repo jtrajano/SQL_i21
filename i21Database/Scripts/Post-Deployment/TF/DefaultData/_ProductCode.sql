@@ -6,19 +6,7 @@ DECLARE @intTaxAuthorityId INT
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'
 IF (@intTaxAuthorityId IS NOT NULL)
-
 BEGIN
-	ALTER TABLE tblICItemMotorFuelTax
-	DROP CONSTRAINT FK_tblICItemMotorFuelTax_tblTFProductCode
-
-	TRUNCATE TABLE tblTFProductCode
-
-	ALTER TABLE tblICItemMotorFuelTax ADD CONSTRAINT
-	FK_tblICItemMotorFuelTax_tblTFProductCode FOREIGN KEY
-	( intProductCodeId)
-	REFERENCES tblTFProductCode
-	( intProductCodeId)
-
 	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
 	BEGIN
 		INSERT INTO [tblTFProductCode]
