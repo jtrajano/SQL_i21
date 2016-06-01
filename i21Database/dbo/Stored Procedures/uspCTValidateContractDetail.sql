@@ -180,19 +180,19 @@ BEGIN TRY
 
 	IF @RowState  = 'Modified'
 	BEGIN
-		SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShippingInstructionContractQty WHERE intContractDetailId = @intContractDetailId
-		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
-		BEGIN
-			SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in shipping instruction.'
-			RAISERROR(@ErrMsg,16,1) 
-		END
+		--SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShippingInstructionContractQty WHERE intContractDetailId = @intContractDetailId
+		--IF @dblQuantityUsed > @dblNewQuantityInOldUOM
+		--BEGIN
+		--	SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in shipping instruction.'
+		--	RAISERROR(@ErrMsg,16,1) 
+		--END
 
-		SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShipmentContractQty WHERE intContractDetailId = @intContractDetailId
-		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
-		BEGIN
-			SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Inbound shipments.'
-			RAISERROR(@ErrMsg,16,1) 
-		END
+		--SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShipmentContractQty WHERE intContractDetailId = @intContractDetailId
+		--IF @dblQuantityUsed > @dblNewQuantityInOldUOM
+		--BEGIN
+		--	SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Inbound shipments.'
+		--	RAISERROR(@ErrMsg,16,1) 
+		--END
 
 		IF @intContractTypeId = 1
 		BEGIN
