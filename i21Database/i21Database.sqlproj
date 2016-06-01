@@ -3896,6 +3896,7 @@
     <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
     <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
+    <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

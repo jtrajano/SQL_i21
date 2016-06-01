@@ -103,6 +103,10 @@ BEGIN TRY
 	SET		intContractHeaderId = @intDestinationHeaderId
 	WHERE	intContractDetailId = @intContractDetailId
 
+	UPDATE	tblCTPriceFiation
+	SET		intContractHeaderId = @intDestinationHeaderId
+	WHERE	intContractDetailId = @intContractDetailId
+
 END TRY
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      
