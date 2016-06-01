@@ -502,14 +502,14 @@ BEGIN
 					SELECT dblWeight
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId1
-					) < 0.01
+					) < 0.00001
 				)
 			AND (
 				(
 					SELECT dblQty
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId1
-					) < 0.01
+					) < 0.00001
 				)
 		BEGIN
 			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
