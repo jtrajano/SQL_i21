@@ -3,6 +3,8 @@
 GO
 	PRINT N'SKIPPING CONSTRAINT CHECKING'
 	ALTER TABLE tblSMSecurityPolicy NOCHECK CONSTRAINT FK_tblSMSecurityPolicy_tblEMEntity
+	ALTER TABLE tblSMUserSecurity NOCHECK CONSTRAINT FK_UserSecurity_tblSMSecurityPolicy
+
 GO
 	DELETE FROM tblSMSecurityPolicy WHERE intSecurityPolicyId = 1	
 GO
@@ -18,4 +20,5 @@ GO
 GO
 	PRINT N'RETURNING CONSTRAINT CHECKING'
 	ALTER TABLE tblSMSecurityPolicy CHECK CONSTRAINT FK_tblSMSecurityPolicy_tblEMEntity
+	ALTER TABLE tblSMUserSecurity CHECK CONSTRAINT FK_UserSecurity_tblSMSecurityPolicy
 GO
