@@ -73,7 +73,13 @@ BEGIN
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
-	LEFT JOIN tblICItem i ON i.intItemId = ISNULL((Case When ilt.intTransactionTypeId  in (4,5) Then ilt.intItemId Else iad.intItemId End),ilt.intItemId) 
+	LEFT JOIN tblICItem i ON i.intItemId = ISNULL((
+				CASE 
+					WHEN ilt.intTransactionTypeId = 15
+						THEN iad.intItemId
+					ELSE ilt.intItemId
+					END
+				), ilt.intItemId)
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 	LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
