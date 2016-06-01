@@ -388,8 +388,8 @@ BEGIN
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
 													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Incoming lot is already in wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
 															WHEN ISNULL(LotMaster.intItemUOMId, 0) = ISNULL(LotMaster.intWeightUOMId, 0) AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Lot is purely in wgt. Any bag wgt passed on it is converted to wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
-															WHEN ISNULL(LotMaster.intItemUOMId, 0) <> LotToUpdate.intItemUOMId THEN 1 
-															WHEN ISNULL(LotMaster.intWeightUOMId, 0) <> LotToUpdate.intWeightUOMId THEN 2
+															WHEN ISNULL(LotMaster.intItemUOMId, LotToUpdate.intItemUOMId) <> LotToUpdate.intItemUOMId THEN 1 
+															WHEN ISNULL(LotMaster.intWeightUOMId, LotToUpdate.intWeightUOMId) <> LotToUpdate.intWeightUOMId THEN 2
 															WHEN ISNULL(LotMaster.intSubLocationId, 0) <> ISNULL(LotToUpdate.intSubLocationId, 0) THEN 3
 															WHEN ISNULL(LotMaster.intStorageLocationId, 0) <> ISNULL(LotToUpdate.intStorageLocationId, 0) THEN 4
 															ELSE 0 
@@ -482,7 +482,7 @@ BEGIN
 				-- 1. It is editing from the source transaction id
 				-- 2. The item UOM, Weight UOM, Sub Location, and Storage Location matches exactly. 
 				-- Otherwise, it returns zero. 
-				,@intInsertedLotId		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
+				,@intInsertedLotId		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) <= 0 THEN 
 														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
@@ -499,7 +499,7 @@ BEGIN
 														LotMaster.intLotId 
 													ELSE 0 
 											END
-				,@intLotId				=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
+				,@intLotId				=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) <= 0 THEN 
 														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
@@ -616,24 +616,26 @@ BEGIN
 		END 
 
 		-- Insert the parent lot 
-		SET @intParentLotId = NULL
+		IF ISNULL(@intInsertedLotId, 0) <> 0
+		BEGIN 
+			SET @intParentLotId = NULL
+			SET @intErrorFoundOnMFCreateUpdateParentLotNumber = 0 
 
-		SET @intErrorFoundOnMFCreateUpdateParentLotNumber = 0 
+			EXEC @intErrorFoundOnMFCreateUpdateParentLotNumber = dbo.uspMFCreateUpdateParentLotNumber 
+				@strParentLotNumber
+				,@strParentLotAlias
+				,@intItemId
+				,@dtmExpiryDate
+				,@intLotStatusId_ItemLotTable
+				,@intEntityUserSecurityId
+				,@intLotId
+				,@intParentLotId OUTPUT 
+				,@intSubLocationId
+				,@intLocationId
 
-		EXEC @intErrorFoundOnMFCreateUpdateParentLotNumber = dbo.uspMFCreateUpdateParentLotNumber 
-			@strParentLotNumber
-			,@strParentLotAlias
-			,@intItemId
-			,@dtmExpiryDate
-			,@intLotStatusId_ItemLotTable
-			,@intEntityUserSecurityId
-			,@intLotId
-			,@intParentLotId OUTPUT 
-			,@intSubLocationId
-			,@intLocationId
-
-		IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
-			RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;
+			IF @intErrorFoundOnMFCreateUpdateParentLotNumber <> 0
+				RETURN @intErrorFoundOnMFCreateUpdateParentLotNumber;
+		END 
 
 		-- Insert into a temp table 
 		BEGIN 
