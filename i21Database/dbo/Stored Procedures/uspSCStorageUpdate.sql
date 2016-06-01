@@ -669,6 +669,11 @@ BEGIN TRY
 	END
 	
 	BEGIN
+			IF @intGRStorageId > 0
+			BEGIN
+				SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
+			END
+
 			SELECT intItemId = ScaleTicket.intItemId
 					,intLocationId = ItemLocation.intItemLocationId 
 					,intItemUOMId = ItemUOM.intItemUOMId
