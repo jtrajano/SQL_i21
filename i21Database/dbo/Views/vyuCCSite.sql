@@ -10,6 +10,7 @@ SELECT
 	C.strSiteDescription,
 	D.strPaymentMethod,
 	H.strName as strCustomerName,
+	J.strEmail,
     case when B.ysnPassedThruArCustomer is null then 'Company Owned' 
 	     when B.ysnPassedThruArCustomer = 1 then 'Company Owned Pass Thru' else 'Company Owned' 		 
 		 end strSiteType,
@@ -32,6 +33,10 @@ FROM
 	    ON F.intEntityCustomerId = C.intCustomerId
 	LEFT JOIN dbo.tblEMEntity H
 	    ON H.intEntityId = F.intEntityCustomerId
+	INNER JOIN dbo.tblEMEntityToContact I 
+		ON I.intEntityId = H.intEntityId AND I.ysnDefaultContact = 1
+	INNER JOIN dbo.tblEMEntity J 
+		ON J.intEntityId = I.intEntityContactId
 UNION ALL
 SELECT
     C.intSiteId, 
@@ -41,6 +46,7 @@ SELECT
 	C.strSiteDescription,
 	D.strPaymentMethod,
 	H.strName as strCustomerName,
+	J.strEmail,
     case when E.ysnSharedFee is null then 'Dealer Site' 
 	     when E.ysnSharedFee = 1 then 'Dealer Site Shared Fees' else 'Dealer Site' 		 
 		 end strSiteType,
@@ -51,8 +57,7 @@ SELECT
 	E.intAccountId,
 	null as intCreditCardReceivableAccountId,
 	null as intFeeExpenseAccountId
-FROM
-     
+FROM  
 	 dbo.tblCCVendorDefault A
 	JOIN dbo.tblCCDealerSite E
 		ON A.intVendorDefaultId = E.intVendorDefaultId
@@ -64,8 +69,8 @@ FROM
 	    ON F.intEntityCustomerId = C.intCustomerId
 	LEFT JOIN dbo.tblEMEntity H
 	    ON H.intEntityId = F.intEntityCustomerId
-
-
-	
-	
+	INNER JOIN dbo.tblEMEntityToContact I 
+		ON I.intEntityId = H.intEntityId AND I.ysnDefaultContact = 1
+	INNER JOIN dbo.tblEMEntity J 
+		ON J.intEntityId = I.intEntityContactId
 
