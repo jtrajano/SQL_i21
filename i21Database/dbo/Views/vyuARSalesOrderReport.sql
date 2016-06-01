@@ -30,7 +30,7 @@ SELECT SO.intSalesOrderId
 	 , strType					= I.strType
 	 , intCategoryId			= I.intCategoryId
 	 , strCategoryCode			= ICC.strCategoryCode
-	 , strCategoryDescription   = ISNULL(ICC.strDescription, 'Miscellaneous Item Category')
+	 , strCategoryDescription   = ISNULL(ICC.strDescription, 'No/Miscellaneous Item Category')
 	 , intSalesOrderDetailId	= SD.intSalesOrderDetailId
 	 , strContractNumber		= CH.strContractNumber
 	 , strItemDescription		= SD.strItemDescription
@@ -42,7 +42,7 @@ SELECT SO.intSalesOrderId
 	 , strOrganization			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.strOrganization ELSE NULL END
 	 , ysnDisplayTitle			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.ysnDisplayTitle ELSE NULL END
 	 , intProductTypeId			= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.intProductTypeId ELSE NULL END
-	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN ISNULL(PD.strProductTypeDescription, 'Miscellaneous Product Type') ELSE NULL END
+	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN ISNULL(PD.strProductTypeDescription, 'No/Miscellaneous Product Type') ELSE NULL END
 	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.strProductTypeName ELSE NULL END
 	 , dtmExpirationDate		= CASE WHEN SO.strTransactionType = 'Quote' THEN SO.dtmExpirationDate ELSE NULL END
 	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName, ysnIncludeEntityName)
@@ -91,14 +91,14 @@ LEFT JOIN tblEMEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId
 LEFT JOIN tblEMEntitySplit ES ON SO.intSplitId = ES.intSplitId
 LEFT JOIN tblARQuoteTemplate QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId
-LEFT JOIN (SELECT SUM(SD.dblTotal) AS dblCategoryTotal, SD.intSalesOrderDetailId FROM tblSOSalesOrderDetail SD
+LEFT JOIN (SELECT SUM(SD.dblTotal) AS dblCategoryTotal, I.intCategoryId, SD.intSalesOrderId FROM tblSOSalesOrderDetail SD
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId
 	LEFT JOIN tblICCategory ICC ON I.intCategoryId = ICC.intCategoryId
-GROUP BY I.intCategoryId, SD.intSalesOrderDetailId) AS CATEGORYTOTAL
-ON SD.intSalesOrderDetailId = CATEGORYTOTAL.intSalesOrderDetailId
+GROUP BY I.intCategoryId, SD.intSalesOrderId) AS CATEGORYTOTAL
+ON ISNULL(I.intCategoryId, 0) = ISNULL(CATEGORYTOTAL.intCategoryId, 0) AND SD.intSalesOrderId = CATEGORYTOTAL.intSalesOrderId
 LEFT JOIN (SELECT SUM(SD.dblTotal) AS dblProductTotal, PD.intProductTypeId, SD.intSalesOrderId FROM tblSOSalesOrderDetail SD
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId
 	LEFT JOIN tblICCategory ICC ON I.intCategoryId = ICC.intCategoryId
 	LEFT JOIN (tblARProductTypeDetail PDD INNER JOIN tblARProductType PD ON PDD.intProductTypeId = PD.intProductTypeId) ON PDD.intCategoryId = ICC.intCategoryId
 GROUP BY PD.intProductTypeId, SD.intSalesOrderId) AS PRODUCTTYPETOTAL
-ON PD.intProductTypeId = PRODUCTTYPETOTAL.intProductTypeId AND SD.intSalesOrderId = PRODUCTTYPETOTAL.intSalesOrderId
+ON ISNULL(PD.intProductTypeId, 0) = ISNULL(PRODUCTTYPETOTAL.intProductTypeId, 0) AND SD.intSalesOrderId = PRODUCTTYPETOTAL.intSalesOrderId
