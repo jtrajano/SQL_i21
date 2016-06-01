@@ -48,7 +48,7 @@
 	[dtmSwapMaturityDate] DATETIME NULL, 
     [dblSwapContractAmount] NUMERIC(18, 6) NULL, 
     [dblSwapExchangeRate] NUMERIC(18, 6) NULL,     
-	[ysnSwapConfirm] BIT NULL,
+	[dblSwapMatchAmount] NUMERIC(18, 6) NULL, 
 	[ysnSwapLiquidation]  BIT NULL,
 	
     CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
@@ -68,3 +68,4 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank] ([intBankId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 )
+

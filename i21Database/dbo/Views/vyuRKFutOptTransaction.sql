@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKFutOptTransaction
+﻿CREATE View vyuRKFutOptTransaction
 
 AS  
 
@@ -33,6 +33,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,strBankName
 			,strBankAccountNo
 			,case when intSelectedInstrumentTypeId=1 then 'Exchange Traded' else 'OTC' end strSelectedInstrumentType
+			,ft.[dtmMaturityDate]
 			,strCurrencyExchangeRateType
 			,ft.strFromCurrency
 			,ft.strToCurrency
@@ -48,6 +49,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dtmSwapMaturityDate
 			,ft.dblSwapContractAmount
 			,ft.dblSwapExchangeRate
+			,ft.dblSwapMatchAmount
 			,ft.ysnSwapLiquidation							
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
@@ -100,6 +102,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,strBankName
 			,strBankAccountNo
 			,case when intSelectedInstrumentTypeId=1 then 'Exchange Traded' else 'OTC' end strSelectedInstrumentType
+			,ft.[dtmMaturityDate]
 			,strCurrencyExchangeRateType
 			,ft.strFromCurrency
 			,ft.strToCurrency
@@ -115,6 +118,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dtmSwapMaturityDate
 			,ft.dblSwapContractAmount
 			,ft.dblSwapExchangeRate
+			,ft.dblSwapMatchAmount
 			,ft.ysnSwapLiquidation							
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
@@ -167,6 +171,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,strBankName
 			,strBankAccountNo
 			,case when intSelectedInstrumentTypeId=1 then 'Exchange Traded' else 'OTC' end strSelectedInstrumentType
+			,ft.[dtmMaturityDate]
 			,strCurrencyExchangeRateType
 			,ft.strFromCurrency
 			,ft.strToCurrency
@@ -182,6 +187,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dtmSwapMaturityDate
 			,ft.dblSwapContractAmount
 			,ft.dblSwapExchangeRate
+			,ft.dblSwapMatchAmount
 			,ft.ysnSwapLiquidation							
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
