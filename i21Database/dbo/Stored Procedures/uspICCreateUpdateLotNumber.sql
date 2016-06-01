@@ -407,12 +407,27 @@ BEGIN
 														CASE	-- Retain the same Wgt Per Qty if the incoming stock is in wgt. 
 																WHEN LotToUpdate.dblQty > 0 AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 
 																	LotMaster.dblWeightPerQty
-																-- Increase the weight per Qty if there is an incoming stock for the lot. 
-																WHEN LotToUpdate.dblQty > 0 AND LotToUpdate.dblWeightPerQty <> LotMaster.dblWeightPerQty THEN 
+
+																-- If lot master does not have weight uom, calculate a new one based on the incoming lot. 
+																WHEN LotToUpdate.dblQty > 0 AND LotMaster.intWeightUOMId IS NULL AND LotToUpdate.intWeightUOMId IS NOT NULL THEN 
 																	dbo.fnCalculateWeightUnitQty(
 																		(
 																			LotMaster.dblQty 
-																			+ dbo.fnCalculateQtyBetweenUOM(LotToUpdate.intItemUOMId, LotMaster.intWeightUOMId, LotToUpdate.dblQty) 
+																			+ dbo.fnCalculateQtyBetweenUOM(LotToUpdate.intItemUOMId, LotMaster.intItemUOMId, LotToUpdate.dblQty) 
+																		)
+																		,(
+																			-- convert the pack qty from the lot master into weight. 
+																			dbo.fnCalculateQtyBetweenUOM(LotMaster.intItemUOMId, LotToUpdate.intWeightUOMId, LotMaster.dblQty)
+																			+ LotToUpdate.dblWeight
+																		)
+																	)
+
+																-- Increase the weight per Qty if there is an incoming stock for the lot. 
+																WHEN LotToUpdate.dblQty > 0 AND LotMaster.intWeightUOMId IS NOT NULL AND LotToUpdate.dblWeightPerQty <> LotMaster.dblWeightPerQty THEN 
+																	dbo.fnCalculateWeightUnitQty(
+																		(
+																			LotMaster.dblQty 
+																			+ dbo.fnCalculateQtyBetweenUOM(LotToUpdate.intItemUOMId, LotMaster.intItemUOMId, LotToUpdate.dblQty) 
 																		)
 																		,(
 																			dbo.fnMultiply(LotMaster.dblQty, LotMaster.dblWeightPerQty)	
@@ -425,7 +440,13 @@ BEGIN
 
 											END
 				,intItemUOMId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemUOMId ELSE LotMaster.intItemUOMId END
-				,intWeightUOMId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intWeightUOMId ELSE LotMaster.intWeightUOMId END
+				,intWeightUOMId			=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
+														LotToUpdate.intWeightUOMId 
+													WHEN ISNULL(LotMaster.dblQty, 0) < 0 AND LotMaster.intWeightUOMId IS NULL THEN 
+														LotToUpdate.intWeightUOMId 
+													ELSE 
+														LotMaster.intWeightUOMId 
+											END
 				,intSubLocationId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intSubLocationId ELSE LotMaster.intSubLocationId END
 				,intStorageLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
 
@@ -482,11 +503,11 @@ BEGIN
 				-- 1. It is editing from the source transaction id
 				-- 2. The item UOM, Weight UOM, Sub Location, and Storage Location matches exactly. 
 				-- Otherwise, it returns zero. 
-				,@intInsertedLotId		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) <= 0 THEN 
+				,@intInsertedLotId		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
 														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
-														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+														AND ISNULL(LotMaster.intWeightUOMId, LotToUpdate.intWeightUOMId) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 													) THEN 
@@ -499,11 +520,11 @@ BEGIN
 														LotMaster.intLotId 
 													ELSE 0 
 											END
-				,@intLotId				=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) <= 0 THEN 
+				,@intLotId				=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 
 														LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
-														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+														AND ISNULL(LotMaster.intWeightUOMId, LotToUpdate.intWeightUOMId) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 													) THEN 
