@@ -28,8 +28,16 @@ AS
 	--INSERT PARSE SELECTED COMM. SCHED. FROM STRING INTO TEMP TABLE
 	DECLARE @tmpCommissionSchedule TABLE (intCommissionScheduleId INT)	
 
-	INSERT INTO @tmpCommissionSchedule
-	SELECT intID FROM fnGetRowsFromDelimitedValues(@commissionScheduleIds)
+	IF (@commissionScheduleIds = '')
+		BEGIN
+			INSERT INTO @tmpCommissionSchedule
+			SELECT intCommissionScheduleId FROM tblARCommissionSchedule WHERE ysnActive = 1
+		END
+	ELSE
+		BEGIN
+			INSERT INTO @tmpCommissionSchedule
+			SELECT intID FROM fnGetRowsFromDelimitedValues(@commissionScheduleIds)
+		END	
 			
 	DECLARE @tblARCommissionSchedules TABLE (
 		  intCommissionScheduleId	INT
@@ -203,27 +211,27 @@ AS
 
 											SET @intNewCommissionId = SCOPE_IDENTITY()
 
-											DELETE FROM tblARCommissionRecap WHERE intCommissionRecapId = @intNewCommissionRecapId
-										END																		
+											IF EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
+											BEGIN											
+												INSERT INTO tblARCommissionDetail
+													( intCommissionId
+													, intEntityId	
+													, intSourceId
+													, strSourceType
+													, dtmSourceDate
+													, dblAmount)
+												SELECT 
+													  @intNewCommissionId
+													, intEntityId
+													, 0
+													, ''
+													, GETDATE()
+													, @dblLineTotal * ISNULL(dblPercentage, 0)
+												FROM @tblARCommissionScheduleDetails
+											END
 
-									IF EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
-										BEGIN											
-											INSERT INTO tblARCommissionDetail
-												( intCommissionId
-												, intEntityId	
-												, intSourceId
-												, strSourceType
-												, dtmSourceDate
-												, dblAmount)
-											SELECT 
-												  @intNewCommissionId
-												, intEntityId
-												, 0
-												, ''
-												, GETDATE()
-												, @dblLineTotal * ISNULL(dblPercentage, 0)
-											FROM @tblARCommissionScheduleDetails
-										END
+											DELETE FROM tblARCommissionRecap WHERE intCommissionRecapId = @intNewCommissionRecapId
+										END									
 
 									DELETE FROM @tblARCommissionScheduleDetails
 								END
