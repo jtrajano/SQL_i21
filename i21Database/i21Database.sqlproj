@@ -3892,6 +3892,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearing.sql" />
     <Build Include="dbo\Views\vyuSMImportFieldMapping.sql" />
+    <Build Include="dbo\Views\vyuGRGetUnpaidStorageDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
