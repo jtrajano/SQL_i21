@@ -41,7 +41,7 @@
 	[dblMatchAmount] NUMERIC(18, 6) NULL,
 	[dblAllocatedAmount] NUMERIC(18, 6) NULL,
 	[dblUnAllocatedAmount] NUMERIC(18, 6) NULL,
-	[dblSpotRate] NUMERIC(18, 6) NULL,
+	[dblSpotRate] NUMERIC(18, 6) NULL,	
 	[ysnLiquidation]  BIT NULL,
 	[ysnSwap] bit,
 	[strSwapBuySell] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -68,4 +68,3 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank] ([intBankId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 )
-
