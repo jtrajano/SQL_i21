@@ -9,6 +9,7 @@
     [strUserName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strPassword] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intTimeout] INT NULL DEFAULT 60,
+	[ysnUseCurrentDatabase] BIT DEFAULT 0,
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
