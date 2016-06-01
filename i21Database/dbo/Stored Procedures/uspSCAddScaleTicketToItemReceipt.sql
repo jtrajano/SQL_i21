@@ -126,12 +126,9 @@ SELECT
 									 )
 		,intCostUOMId				= (select intPriceItemUOMId from tblCTContractDetail  where intContractDetailId = LI.intTransactionDetailId)	   
 		,intContractHeaderId		= CASE 
-										WHEN LI.intTransactionDetailId IS NULL THEN 
-											NULL
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN 
-											(select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = LI.intTransactionDetailId)
+										WHEN LI.intTransactionDetailId IS NULL THEN NULL
+										WHEN LI.intTransactionDetailId IS NOT NULL THEN (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = LI.intTransactionDetailId)
 									  END
-		
 		,intContractDetailId		= LI.intTransactionDetailId
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
