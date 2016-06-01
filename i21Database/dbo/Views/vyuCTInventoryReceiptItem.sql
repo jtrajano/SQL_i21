@@ -11,9 +11,14 @@ AS
 						IR.intSourceType,
 						CQ.intShipmentId,
 						CQ.intContractDetailId,
-						IR.intEntityVendorId
+						IR.intEntityVendorId,
+						CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber,
+						SH.intTrackingNumber
 				FROM	tblICInventoryReceiptItem	RI
 				JOIN	tblICInventoryReceipt		IR	ON	RI.intInventoryReceiptId	=	IR.intInventoryReceiptId
 				JOIN	tblLGShipmentContractQty	CQ	ON	CQ.intShipmentContractQtyId =	RI.intSourceId
+				JOIN	tblLGShipment				SH	ON	SH.intShipmentId			=	CQ.intShipmentId
+				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	CQ.intContractDetailId
+				JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
 				WHERE	IR.strReceiptType = 'Purchase Contract' AND IR.intSourceType = 2
 			)t
