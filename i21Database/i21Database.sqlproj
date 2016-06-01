@@ -3879,7 +3879,7 @@
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
     <Build Include="dbo\Tables\tblTFValidOriginState.sql" />
-    <Build Include="dbo\Tables\tblTFValidVendor.sql" />        
+    <Build Include="dbo\Tables\tblTFValidVendor.sql" />
     <Build Include="dbo\Views\vyuAPClearables.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearing.sql" />
@@ -3888,6 +3888,7 @@
     <Build Include="dbo\Tables\tblQMTestMethod.sql" />
     <Build Include="dbo\Tables\tblQMCOAMapping.sql" />
     <Build Include="dbo\Tables\tblQMCOAMappingDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
