@@ -254,16 +254,10 @@ FROM
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptChargeId]	= NULL
-	,[dblUnitCost]				=	CASE WHEN (CD.ysnUseFXPrice > 0) --Consider First Contract Pricing
-									THEN CD.dblSeqPrice
-									ELSE (
-											CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
+	,[dblUnitCost]				=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
 												 THEN (CASE WHEN CD.dblCashPrice IS NOT NULL THEN CD.dblCashPrice ELSE B.dblUnitCost END)
 												 ELSE B.dblUnitCost
-											END
-									)
-									END     
-											
+											END  	
 	,[dblTax]					=	B.dblTax
 	,[dblRate]					=	ISNULL(G1.dblRate,0)
 	,[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END
