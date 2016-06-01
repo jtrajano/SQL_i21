@@ -35,9 +35,9 @@ BEGIN TRY
 		,[intCompanyLocationId]					= DH.intCompanyLocationId
 		,[intCurrencyId]						= NULL
 		,[intTermId]							= EL.intTermsId
-		,[dtmDate]								= TL.dtmLoadDateTime
+		,[dtmDate]								= DH.dtmInvoiceDateTime
 		,[dtmDueDate]							= NULL
-		,[dtmShipDate]							= TL.dtmLoadDateTime
+		,[dtmShipDate]							= DH.dtmInvoiceDateTime
 		,[intEntitySalespersonId]				= DH.intEntitySalespersonId
 		,[intFreightTermId]						= NULL 
 		,[intShipViaId]							= ISNULL(TL.intShipViaId, EL.intShipViaId) 
