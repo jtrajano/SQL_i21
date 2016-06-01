@@ -307,7 +307,7 @@ BEGIN TRY
 	SELECT TOP 1
 		   @intFreightItemId	= intItemForFreightId
 		 , @intSurchargeItemId	= intSurchargeItemId
-		 , @ysnItemizeSurcharge = ysnItemizeSurcharge
+		 , @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
 	FROM tblTRCompanyPreference
 
 	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM @EntriesForInvoice 
