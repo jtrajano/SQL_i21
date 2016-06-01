@@ -129,7 +129,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             {
                                 xtype: 'menuitem',
                                 itemId: 'mnuAccounts',
-                                text: 'Accounts'
+                                text: 'Item GL Accounts'
                             },
                             {
                                 xtype: 'menuitem',
@@ -209,8 +209,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                     margin: '0 0 5 0',
                     layout: {
                         type: 'hbox',
-                        align: 'middle',
-                        padding: '15 0 0 0'
+                        align: 'middle'
                     },
                     items: [
                         {
@@ -419,8 +418,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                     margin: '0 0 5 0',
                     layout: {
                         type: 'hbox',
-                        align: 'middle',
-                        padding: '15 0 0 0'
+                        align: 'middle'
                     },
                     items: [
                         {
@@ -490,8 +488,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                     margin: '0 0 5 0',
                     layout: {
                         type: 'hbox',
-                        align: 'middle',
-                        padding: '15 0 0 0'
+                        align: 'middle'
                     },
                     items: [
                         {
@@ -678,8 +675,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             padding: '',
                             layout: {
                                 type: 'hbox',
-                                align: 'middle',
-                                padding: '15 0 0 0'
+                                align: 'middle'
                             },
                             items: [
                                 {
@@ -722,7 +718,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     flex: 1,
                                     height: 40,
                                     itemId: 'btnImportItemAccounts',
-                                    text: 'Import Accounts'
+                                    text: 'Import Item GL Accounts'
                                 },
                                 {
                                     xtype: 'container',

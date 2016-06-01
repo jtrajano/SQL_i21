@@ -308,7 +308,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "itemId": "mnuAccounts",
-                                        "text": "Accounts"
+                                        "text": "Item GL Accounts"
                                     },
                                     "name": "MyMenuItem11",
                                     "designerId": "088305e3-c9b9-401a-8caf-ba56f5cd2ed3"
@@ -480,7 +480,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "container|align": "middle",
-                        "container|padding": "15 0 0 0",
+                        "container|padding": null,
                         "itemId": "cntFuelCategories",
                         "layout": "hbox",
                         "margin": "0 0 5 0"
@@ -889,7 +889,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "container|align": "middle",
-                        "container|padding": "15 0 0 0",
+                        "container|padding": null,
                         "itemId": "cntStorageLocations",
                         "layout": "hbox",
                         "margin": "0 0 5 0"
@@ -1026,7 +1026,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "container|align": "middle",
-                        "container|padding": "15 0 0 0",
+                        "container|padding": null,
                         "itemId": "cntLineOfBusiness",
                         "layout": "hbox",
                         "margin": "0 0 5 0"
@@ -1389,7 +1389,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "container|align": "middle",
-                                "container|padding": "15 0 0 0",
+                                "container|padding": null,
                                 "itemId": "cntImportItems",
                                 "layout": "hbox",
                                 "margin": "0 0 5 0",
@@ -1477,7 +1477,7 @@
                                         "height": 40,
                                         "itemId": "btnImportItemAccounts",
                                         "layout|flex": 1,
-                                        "text": "Import Accounts"
+                                        "text": "Import Item GL Accounts"
                                     },
                                     "name": "MyButton25",
                                     "designerId": "43a0e272-6030-4363-90eb-6139b1d180ad"
