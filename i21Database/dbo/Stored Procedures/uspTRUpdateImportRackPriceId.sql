@@ -1,6 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRUpdateImportRackPriceId]
-	@ImportRackPriceId INT
+	@ImportRackPriceId INT OUTPUT
 AS
+
+SELECT TOP 1 @ImportRackPriceId = intImportRackPriceId
+FROM tblTRImportRackPrice
+ORDER BY intImportRackPriceId DESC
 
 UPDATE tblTRImportRackPriceDetail
 SET intSupplyPointId = dbo.fnTRSearchSupplyPointId(strSupplyPoint)
