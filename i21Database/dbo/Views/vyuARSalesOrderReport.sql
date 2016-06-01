@@ -44,6 +44,7 @@ SELECT SO.intSalesOrderId
 	 , intProductTypeId			= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.intProductTypeId ELSE NULL END
 	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN ISNULL(PD.strProductTypeDescription, 'Miscellaneous Product Type') ELSE NULL END
 	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.strProductTypeName ELSE NULL END
+	 , dtmExpirationDate		= CASE WHEN SO.strTransactionType = 'Quote' THEN SO.dtmExpirationDate ELSE NULL END
 	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName, ysnIncludeEntityName)
 	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, E.strName, ysnIncludeEntityName)
 	 , strSalespersonName		= ESP.strName
