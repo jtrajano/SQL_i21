@@ -3902,6 +3902,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetCOASampleProperties.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUnReservePickListBySalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUnReservePickListByShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRecallReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
