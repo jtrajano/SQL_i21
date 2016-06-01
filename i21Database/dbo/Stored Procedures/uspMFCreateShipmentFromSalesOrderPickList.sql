@@ -75,7 +75,7 @@ End
 
 Begin Tran
 	--Create Shipment Header and Line	
-	Exec uspICAddSalesOrderToInventoryShipment @intSalesOrderId,@intUserId,@intInventoryShipmentId OUT
+	Exec uspSOProcessToItemShipment @intSalesOrderId,@intUserId,0,@intInventoryShipmentId OUT
 
 	Select @intMinPickListDetail=MIN(intPickListDetailId) From tblMFPickListDetail Where intPickListId=@intPickListId AND ISNULL(intLotId,0)>0
 

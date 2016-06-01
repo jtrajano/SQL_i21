@@ -3898,6 +3898,8 @@
     <Build Include="dbo\Tables\tblPRPayGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGeneratePayGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUnReservePickListBySalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUnReservePickListByShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
