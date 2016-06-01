@@ -18,3 +18,9 @@
 	CONSTRAINT [FK_tblTRLoadHeader_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [dbo].[tblLGLoad] ([intLoadId])
 
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTRLoadHeader_intLoadHeaderId] ON [dbo].[tblTRLoadHeader] ([intLoadHeaderId] ASC)
+
+GO

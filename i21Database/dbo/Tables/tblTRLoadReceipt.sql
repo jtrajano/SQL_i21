@@ -33,3 +33,9 @@
 	CONSTRAINT [FK_tblTRLoadReceipt_tblICInventoryTransfer_intInventoryTransferId] FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer]([intInventoryTransferId]),
 	CONSTRAINT [FK_tblTRLoadReceipt_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId])				
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTRLoadReceipt_intLoadReceiptId] ON [dbo].[tblTRLoadReceipt] ([intLoadReceiptId] ASC)
+
+GO
