@@ -26,6 +26,6 @@
 	CONSTRAINT [UK_tblCTCleanCost_strReferenceNumber] UNIQUE ([strReferenceNumber]),
 	CONSTRAINT [FK_tblCTCleanCost_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTCleanCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
-	CONSTRAINT [FK_tblCTCleanCost_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]),
+	CONSTRAINT [FK_tblCTCleanCost_tblLGShipment_intShipmentId_intLoadId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGLoad]([intLoadId]),
 	CONSTRAINT [FK_tblCTCleanCost_tblICInventoryReceipt_intInventoryReceiptId] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId])
 )
