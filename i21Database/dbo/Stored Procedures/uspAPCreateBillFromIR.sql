@@ -20,6 +20,7 @@ DECLARE @shipFrom INT, @shipTo INT;
 DECLARE @receiptLocation INT;
 DECLARE @userLocation INT;
 DECLARE @location INT;
+DECLARE @cashPrice DECIMAL;
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -37,7 +38,7 @@ CREATE TABLE #tmpCreatedBillDetail (
 	UNIQUE ([intBillDetailId])
 );
 
-BEGIN TRANSACTION
+--BEGIN TRANSACTION
 
 INSERT INTO #tmpReceiptIds(intInventoryReceiptId) SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@receiptIds)
 
@@ -64,7 +65,7 @@ IF NOT EXISTS(SELECT 1 FROM tblICInventoryReceiptItem A
 					AND A.dblOpenReceive != A.dblBillQty)
 BEGIN
 	RAISERROR('All of the item in the receipt was fully billed.', 16, 1);
-	GOTO DONE
+	--GOTO DONE
 END
 
 --removed first the constraint
@@ -91,9 +92,23 @@ BEGIN
 	IF @APAccount IS NULL OR @APAccount <= 0
 	BEGIN
 		RAISERROR('Please setup default AP Account.', 16, 1);
-		GOTO DONE
+		--GOTO DONE
 	END
-			
+		
+	SET @cashPrice = (SELECT SUM(E1.dblCashPrice) FROM tblICInventoryReceipt A
+		INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+		INNER JOIN tblICItemLocation D ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
+		LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId)  ON E.intEntityId = A.intEntityVendorId 
+																															AND E.intContractHeaderId = B.intOrderId 
+																															AND E1.intContractDetailId = B.intLineNo 
+		WHERE A.intInventoryReceiptId = @receiptId AND E1.intPricingTypeId = 2)
+	IF (@cashPrice = 0)
+		BEGIN
+			RAISERROR('Cannot create Voucher with 0.00 amount.', 16, 1);
+			--GOTO DONE			 									       
+		END
+					
 	INSERT INTO tblAPBill(
 		[intEntityVendorId],
 		[strVendorOrderNumber], 
@@ -205,15 +220,18 @@ BEGIN
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 --SubCur True
 											 THEN (CASE WHEN B.dblNet > 0 
-														THEN CAST(B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1)  * (B.dblNet ) * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
-														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (B.dblUnitCost / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Calculate Sub-Cur 
+														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)  * (B.dblNet ) * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Calculate Sub-Cur 
 												   END) 
 											 ELSE (CASE WHEN B.dblNet > 0 --SubCur False
-														THEN CAST(B.dblUnitCost *(B.dblNet ) * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2)) --Base Gross/Net UOM 
-														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Orig Calculation
+														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END *(B.dblNet ) * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2)) --Base Gross/Net UOM 
+														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Orig Calculation
 												   END)
 										END,
-		[dblCost]					=	B.dblUnitCost,
+		[dblCost]					=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
+											 THEN (CASE WHEN E1.dblCashPrice IS NOT NULL THEN E1.dblCashPrice ELSE B.dblUnitCost END)
+											 ELSE B.dblUnitCost
+										END,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
@@ -243,7 +261,7 @@ BEGIN
 				AND E.intContractHeaderId = B.intOrderId 
 				AND E1.intContractDetailId = B.intLineNo
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
-											OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
+											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = A.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A.intCurrencyId
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
@@ -370,14 +388,14 @@ END
 ALTER TABLE tblAPBill
 	ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
-DONE:
-IF @@ERROR != 0
-BEGIN
-	ROLLBACK TRANSACTION
-END
-ELSE
-BEGIN
-	COMMIT TRANSACTION
-END
+--DONE:
+--IF @@ERROR != 0
+--BEGIN
+--	ROLLBACK TRANSACTION
+--END
+--ELSE
+--BEGIN
+--	COMMIT TRANSACTION
+--END
 
 SELECT * FROM #tmpReceiptBillIds
