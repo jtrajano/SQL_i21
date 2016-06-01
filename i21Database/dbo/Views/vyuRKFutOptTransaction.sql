@@ -48,7 +48,6 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dtmSwapMaturityDate
 			,ft.dblSwapContractAmount
 			,ft.dblSwapExchangeRate
-			,ft.dblSwapMatchAmount
 			,ft.ysnSwapLiquidation							
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
@@ -116,7 +115,6 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dtmSwapMaturityDate
 			,ft.dblSwapContractAmount
 			,ft.dblSwapExchangeRate
-			,ft.dblSwapMatchAmount
 			,ft.ysnSwapLiquidation							
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
@@ -184,7 +182,6 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dtmSwapMaturityDate
 			,ft.dblSwapContractAmount
 			,ft.dblSwapExchangeRate
-			,ft.dblSwapMatchAmount
 			,ft.ysnSwapLiquidation							
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
