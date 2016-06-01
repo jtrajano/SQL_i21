@@ -7,8 +7,8 @@ DECLARE @MasterPk	INT
 DECLARE @ScheduleFieldTemplateMasterPk INT
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'
-IF (@intTaxAuthorityId IS NOT NULL)
-
+IF (@intTaxAuthorityId IS NULL)
+BEGIN
 
 TRUNCATE TABLE tblTFScheduleFieldTemplate
 TRUNCATE TABLE tblTFScheduleFields
@@ -114,7 +114,7 @@ REFERENCES tblTFReportingComponentDetail
 ( intReportingComponentDetailId )
 
 
-BEGIN
+
 	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFReportingComponent] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
 	BEGIN
 		
@@ -11459,7 +11459,7 @@ DECLARE @MasterPk	INT
 DECLARE @ScheduleFieldTemplateMasterPk INT
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OR'
-IF (@intTaxAuthorityId IS NOT NULL)	
+IF (@intTaxAuthorityId IS NULL)	
 
 BEGIN
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType])
