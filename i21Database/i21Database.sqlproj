@@ -3900,6 +3900,8 @@
     <Build Include="dbo\Tables\tblSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetCOASampleProperties.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUnReservePickListBySalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUnReservePickListByShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
