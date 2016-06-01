@@ -22,7 +22,17 @@ BEGIN TRY
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	
+	DECLARE @intParentLotId INT
+	DECLARE @intChildLotCount INT
+	DECLARE @intLotRecordId INT
+	DECLARE @tblLotsWithSameParentLot TABLE (
+		intLotRecordId INT Identity(1, 1)
+		,strLotNumber NVARCHAR(100)
+		,intLotId INT
+		,intParentLotId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
+		,intLocationId INT)	
 	
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -30,9 +40,14 @@ BEGIN TRY
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
 		   @dtmLotExpiryDate = dtmExpiryDate,
-		   @dtmLotCreateDate = dtmDateCreated
+		   @dtmLotCreateDate = dtmDateCreated,
+		   @intParentLotId = intParentLotId
 	FROM tblICLot WHERE intLotId = @intLotId
 	
+	SELECT @intChildLotCount = COUNT(*)
+	FROM tblICLot
+	WHERE intParentLotId = @intParentLotId
+
 	SELECT @dtmDate = GETDATE()
 	
 	SELECT @intSourceId = 1,@intSourceTransactionTypeId= 8
@@ -57,17 +72,58 @@ BEGIN TRY
 		RAISERROR(90008,11,1)
 	END
 
-	EXEC uspICInventoryAdjustment_CreatePostExpiryDateChange @intItemId,
-															 @dtmDate,
-															 @intLocationId,
-															 @intSubLocationId,
-															 @intStorageLocationId,
-															 @strLotNumber,
-															 @dtmNewExpiryDate,
-															 @intSourceId,
-															 @intSourceTransactionTypeId,
-															 @intUserId,
-															 @intInventoryAdjustmentId OUTPUT
+	IF (@intChildLotCount > 1) 
+	BEGIN
+		INSERT INTO @tblLotsWithSameParentLot 
+		SELECT strLotNumber,intLotId,intParentLotId,intSubLocationId,intStorageLocationId,intLocationId FROM tblICLot WHERE intParentLotId = @intParentLotId
+
+		SELECT @intLotRecordId = MIN(intLotRecordId)
+		FROM @tblLotsWithSameParentLot
+
+		WHILE (@intLotRecordId IS NOT NULL)
+		BEGIN
+			SET @strLotNumber = NULL
+			SET @intSubLocationId = NULL
+			SET @intStorageLocationId = NULL
+			SET @intLocationId = NULL
+
+			SELECT @strLotNumber = strLotNumber
+				,@intSubLocationId = intSubLocationId
+				,@intStorageLocationId = intStorageLocationId
+				,@intLocationId = intLocationId
+			FROM @tblLotsWithSameParentLot
+			WHERE intLotRecordId = @intLotRecordId
+
+			EXEC uspICInventoryAdjustment_CreatePostExpiryDateChange @intItemId,
+																	 @dtmDate,
+																	 @intLocationId,
+																	 @intSubLocationId,
+																	 @intStorageLocationId,
+																	 @strLotNumber,
+																	 @dtmNewExpiryDate,
+																	 @intSourceId,
+																	 @intSourceTransactionTypeId,
+																	 @intUserId,
+																	 @intInventoryAdjustmentId OUTPUT
+
+			SELECT @intLotRecordId = MIN(intLotRecordId)
+			FROM @tblLotsWithSameParentLot WHERE intLotRecordId > @intLotRecordId
+		END
+	END
+	ELSE 
+	BEGIN
+		EXEC uspICInventoryAdjustment_CreatePostExpiryDateChange @intItemId,
+																 @dtmDate,
+																 @intLocationId,
+																 @intSubLocationId,
+																 @intStorageLocationId,
+																 @strLotNumber,
+																 @dtmNewExpiryDate,
+																 @intSourceId,
+																 @intSourceTransactionTypeId,
+																 @intUserId,
+																 @intInventoryAdjustmentId OUTPUT
+	END
 
 END TRY  
   
