@@ -82,6 +82,13 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                 })
             }
         }
+        
+       if (this.get('strWeightUOM') === '' && this.get('dblNetWeight') !== 0) {
+                errors.add({
+                    field: 'strWeightUOM',
+                    message: 'Lot Weight UOM must be present. Please add value in Gross/Net UOM.'
+                });
+        }
         return errors;
     }
 });
