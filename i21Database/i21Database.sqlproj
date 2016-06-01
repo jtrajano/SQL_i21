@@ -3901,6 +3901,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUnReservePickListBySalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUnReservePickListByShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecallReport.sql" />
+    <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
