@@ -87,9 +87,9 @@ UPDATE
 SET
 	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
 							THEN
-								ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()) 								
+								ROUND(ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 							ELSE
-								ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) - ((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]())
+								ROUND(ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN 1 ELSE 1 END)) * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN 1 ELSE 1 END)) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 						END							
 					  )
 WHERE
