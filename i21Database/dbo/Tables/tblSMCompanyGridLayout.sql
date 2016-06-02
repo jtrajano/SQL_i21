@@ -4,6 +4,7 @@
     [strGridLayoutName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strGridLayoutFields] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[strGridLayoutFilters] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[strGridLayoutSorters] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strScreen] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [strGrid] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive] BIT NULL, 
