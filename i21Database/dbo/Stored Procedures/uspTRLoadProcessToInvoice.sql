@@ -59,7 +59,7 @@ BEGIN TRY
 		,[ysnSplitted]							= 0
 		,[intPaymentId]							= NULL
 		,[intSplitId]							= NULL
-		,[intDistributionHeaderId]				= DH.intLoadDistributionHeaderId
+		,[intLoadDistributionHeaderId]			= DH.intLoadDistributionHeaderId
 		,[strActualCostId]						= (CASE WHEN (TR.strOrigin) = 'Terminal' AND (DH.strDestination) = 'Customer'
 														THEN (TL.strTransaction)
 													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Customer' AND (TR.intCompanyLocationId) = (DH.intCompanyLocationId)
@@ -170,7 +170,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -247,7 +247,7 @@ BEGIN TRY
 		,[ysnSplitted]							= TR.ysnSplitted
 		,[intPaymentId]							= TR.intPaymentId
 		,[intSplitId]							= TR.intSplitId
-		,[intDistributionHeaderId]				= TR.intDistributionHeaderId
+		,[intLoadDistributionHeaderId]			= TR.[intLoadDistributionHeaderId]
 		,[strActualCostId]						= TR.strActualCostId
 		,[intShipmentId]						= TR.intShipmentId
 		,[intTransactionId]						= TR.intTransactionId
@@ -372,7 +372,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
+		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -448,7 +448,7 @@ BEGIN TRY
 		,[ysnSplitted]							= IE.ysnSplitted
 		,[intPaymentId]							= IE.intPaymentId
 		,[intSplitId]							= IE.intSplitId
-		,[intDistributionHeaderId]				= IE.intDistributionHeaderId
+		,[intLoadDistributionHeaderId]			= IE.[intLoadDistributionHeaderId]
 		,[strActualCostId]						= IE.strActualCostId
 		,[intShipmentId]						= IE.intShipmentId
 		,[intTransactionId]						= IE.intTransactionId
@@ -532,7 +532,7 @@ BEGIN TRY
 			,[ysnSplitted]
 			,[intPaymentId]
 			,[intSplitId]
-			,[intDistributionHeaderId]
+			,[intLoadDistributionHeaderId]
 			,[strActualCostId]
 			,[intShipmentId]
 			,[intTransactionId]
@@ -608,7 +608,7 @@ BEGIN TRY
 			,[ysnSplitted]							= IE.ysnSplitted
 			,[intPaymentId]							= IE.intPaymentId
 			,[intSplitId]							= IE.intSplitId
-			,[intDistributionHeaderId]				= IE.intDistributionHeaderId
+			,[intLoadDistributionHeaderId]			= IE.[intLoadDistributionHeaderId]
 			,[strActualCostId]						= IE.strActualCostId
 			,[intShipmentId]						= IE.intShipmentId
 			,[intTransactionId]						= IE.intTransactionId
