@@ -327,5 +327,6 @@
     <Build Include="dbo\Stored Procedures\uspAPOriginBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCheckAPBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRevertImportVoucher.sql" />
   </ItemGroup>
 </Project>

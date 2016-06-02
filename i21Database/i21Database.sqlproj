@@ -3850,7 +3850,6 @@
     <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetAPGLBalance.sql" />
-    <Build Include="dbo\Tables\tblAPImportValidationLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
