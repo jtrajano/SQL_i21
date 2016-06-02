@@ -127,6 +127,8 @@ BEGIN
 		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@intCustomerId, @dtmTransactionDate, smTaxCode.intTaxCodeId, smTaxClass.intTaxClassId, smTaxCode.strState, @intItemId, @intItemCategoryId, @intCustomerLocationId,null) E
 	WHERE cfNetwork.intNetworkId = @intNetworkId
 
+	
+
 	DECLARE @intFirstLevelMatch INT
 	DECLARE @intSecondLevelMatch INT
 	DECLARE @intThirdLevelMatch INT
@@ -1186,6 +1188,7 @@ BEGIN
 				SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM @tblTaxCodeRecord WHERE RecordKey = @intCreatedRecordKey
 				
 				IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
+				--IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping ) != 0)
 				BEGIN 
 					INSERT INTO @tblTaxTable
 					(
