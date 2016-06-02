@@ -88,7 +88,7 @@ SELECT
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
-	,@Comments						= [strComments] + (CASE WHEN [ysnRecurring] = 1 THEN '' ELSE ' DUP: ' + [strInvoiceNumber] END)
+	,@Comments						= 'DUP: ' + [strInvoiceNumber] 
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
 	,@Template						= 0		--[ysnTemplate]
@@ -517,7 +517,17 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
-
+BEGIN TRY
+	UPDATE tblARInvoice SET ysnRecurring = @ForRecurring WHERE intInvoiceId = @NewInvoiceId
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = @CurrentErrorMessage
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION 
