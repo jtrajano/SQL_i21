@@ -20,19 +20,19 @@ Declare @tblInputItem AS TABLE
 Select @intSalesOrderDetailId=intLineNo From tblICInventoryShipmentItem si Join tblICInventoryShipment sh on si.intInventoryShipmentId=sh.intInventoryShipmentId 
 Where intInventoryShipmentItemId=@intInventoryShipmentItemId AND sh.intOrderType=2
 
-Select @intRecipeId=intRecipeId,@intSalesOrderId=intSalesOrderId From tblSOSalesOrderDetail Where intSalesOrderDetailId=@intSalesOrderDetailId
+Select @intRecipeId=0,@intSalesOrderId=intSalesOrderId From tblSOSalesOrderDetail Where intSalesOrderDetailId=@intSalesOrderDetailId
 
 Select @intLocationId=intCompanyLocationId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
 
-If ISNULL(@intRecipeId,0)>0 --Recipe Added to SO
-Begin
-	Select @dblRecipeQty=dblQuantity From tblMFRecipe Where intRecipeId=@intRecipeId
+--If ISNULL(@intRecipeId,0)>0 --Recipe Added to SO
+--Begin
+--	Select @dblRecipeQty=dblQuantity From tblMFRecipe Where intRecipeId=@intRecipeId
 
-	Select @dblShipQty=SUM(dbo.fnICConvertUOMtoStockUnit(intItemId,intItemUOMId,dblQuantity))
-	From tblICInventoryShipmentItem Where intOrderId=@intSalesOrderId AND intLineNo 
-	IN (Select intSalesOrderDetailId From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId AND intRecipeId=@intRecipeId)
-End
-Else
+--	Select @dblShipQty=SUM(dbo.fnICConvertUOMtoStockUnit(intItemId,intItemUOMId,dblQuantity))
+--	From tblICInventoryShipmentItem Where intOrderId=@intSalesOrderId AND intLineNo 
+--	IN (Select intSalesOrderDetailId From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId AND intRecipeId=@intRecipeId)
+--End
+--Else
 Begin --Blend/FG Recipe
 	Select @intItemId=intItemId,@dblShipQty=dbo.fnICConvertUOMtoStockUnit(@intItemId,intItemUOMId,dblQuantity)
 	From tblICInventoryShipmentItem Where intInventoryShipmentItemId=@intInventoryShipmentItemId
