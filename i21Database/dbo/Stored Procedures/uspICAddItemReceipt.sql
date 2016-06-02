@@ -571,6 +571,7 @@ BEGIN
 					,@TransactionType
 					,@EntityId
 					,@TaxGroupId
+					,@ShipFromId
 
 				DECLARE	@Amount	NUMERIC(38,20) 
 						,@Qty	NUMERIC(38,20)
@@ -582,8 +583,8 @@ BEGIN
 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-						INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
-							ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+						--INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
+						--	ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 				WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 						AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 
