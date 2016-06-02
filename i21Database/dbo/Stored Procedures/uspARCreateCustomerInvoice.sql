@@ -157,9 +157,9 @@ IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Prepayment', 'Cash', '
 		RETURN 0;
 	END
 
+DECLARE @CompanyLocation NVARCHAR(250)
 IF @ARAccountId IS NULL AND @TransactionType IN ('Cash', 'Cash Refund')
 	BEGIN
-		DECLARE @CompanyLocation NVARCHAR(250)
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
 		SET @ErrorMessage = 'There is no Undeposited Funds account setup under Company Location - ' + @CompanyLocation + '.';
 		IF ISNULL(@RaiseError,0) = 1
@@ -175,6 +175,15 @@ IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND 
 		RETURN 0;
 	END
 
+
+IF @ARAccountId IS NULL AND @TransactionType = 'Prepayment'
+	BEGIN		
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
+		SET @ErrorMessage = 'There is no Customer Prepaid account setup under Company Location - ' + @CompanyLocation + '.';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
 
 IF  @TransactionType = 'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @ARAccountId)
 	BEGIN

@@ -49,7 +49,6 @@ DECLARE
 	,@Calculated						BIT				= 0			
 	,@Splitted							BIT				= 0			
 	,@SplitId							INT				= NULL
-	,@DistributionHeaderId				INT				= NULL
 	,@LoadDistributionHeaderId			INT				= NULL
 	,@ActualCostId						NVARCHAR(50)	= NULL			
 	,@ShipmentId						INT				= NULL
@@ -140,7 +139,6 @@ SELECT TOP 1
 	,@Calculated						= 0			
 	,@Splitted							= 0			
 	,@SplitId							= NULL
-	,@DistributionHeaderId				= NULL
 	,@LoadDistributionHeaderId			= NULL
 	,@ActualCostId						= NULL			
 	,@ShipmentId						= NULL
@@ -242,7 +240,6 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@Splitted							= @Splitted
 	,@PaymentId							= @PaymentId
 	,@SplitId							= @SplitId
-	,@DistributionHeaderId				= @DistributionHeaderId
 	,@LoadDistributionHeaderId			= @LoadDistributionHeaderId
 	,@ActualCostId						= @ActualCostId
 	,@ShipmentId						= @ShipmentId
