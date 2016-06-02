@@ -6,7 +6,7 @@
 	[strTemplate] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intProductId] INT NOT NULL, 
 	[intPropertyId] INT NOT NULL, 
-	[strTestName] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[strTestType] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[ysnIsRequired] BIT NOT NULL CONSTRAINT [DF_tblQMCOAMappingDetail_ysnIsRequired] DEFAULT 0, 
 	[intTestMethodId] INT, 
 	[strSpecification] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
@@ -17,7 +17,6 @@
 	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblQMCOAMappingDetail_dtmLastModified] DEFAULT GetDate(),
 		
 	CONSTRAINT [PK_tblQMCOAMappingDetail] PRIMARY KEY ([intCOAMappingDetailId]), 
-	CONSTRAINT [AK_tblQMCOAMappingDetail_strTemplate] UNIQUE ([strTemplate]), 
 	CONSTRAINT [FK_tblQMCOAMappingDetail_tblQMCOAMapping] FOREIGN KEY ([intCOAMappingId]) REFERENCES [tblQMCOAMapping]([intCOAMappingId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblQMCOAMappingDetail_tblQMProduct] FOREIGN KEY ([intProductId]) REFERENCES [tblQMProduct]([intProductId]), 
 	CONSTRAINT [FK_tblQMCOAMappingDetail_tblQMProperty] FOREIGN KEY ([intPropertyId]) REFERENCES [tblQMProperty]([intPropertyId]), 

@@ -2,7 +2,7 @@
 (
 	[intCOAMappingId] INT NOT NULL IDENTITY, 
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMCOAMapping_intConcurrencyId] DEFAULT 0, 
-	[intItemId] INT, 
+	[intItemId] INT NOT NULL, 
 	[strVersionNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[dtmEffectiveDate] DATETIME, 
 	[strRevisionNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
