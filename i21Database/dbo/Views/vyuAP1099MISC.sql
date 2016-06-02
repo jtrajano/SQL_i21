@@ -43,11 +43,11 @@ AS
 										, B.strCountry
 										, B.strPhone)
 		, B.strCompanyName
-		, A.strPayeeName
 		, strEIN = B.strEin--B.strFederalTaxID
 		, A.strFederalTaxId
 		, A.strAddress
 		, A.strVendorCompanyName
+		, A.strPayeeName
 		, A.strVendorId
 		, A.strZip
 		, A.strCity
