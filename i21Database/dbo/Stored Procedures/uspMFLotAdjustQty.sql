@@ -203,7 +203,7 @@ BEGIN TRY
 		AND intItemUOMId = intWeightUOMId
 	and intLotId=@intLotId
 
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.00001 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.00001 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
 			DECLARE @dblResidueWeight NUMERIC(38,20)
 			SELECT @dblResidueWeight = CASE WHEN intWeightUOMId IS NULL THEN dblQty ELSE dblWeight END,@intAdjustItemUOMId= CASE WHEN intWeightUOMId IS NULL THEN intItemUOMId ELSE intWeightUOMId End FROM tblICLot WHERE intLotId = @intLotId
