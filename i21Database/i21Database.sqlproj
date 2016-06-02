@@ -3889,6 +3889,13 @@
     <Build Include="dbo\Tables\tblQMCOAMapping.sql" />
     <Build Include="dbo\Tables\tblQMCOAMappingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotInformation.sql" />
+    <Build Include="dbo\Views\vyuLGContainerReceiptView.sql" />
+    <Build Include="dbo\Views\vyuLGContainerPositionView.sql" />
+    <Build Include="dbo\Tables\tblPRPayGroupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRGeneratePayGroupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />
+    <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
+    <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
