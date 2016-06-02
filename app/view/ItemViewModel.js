@@ -856,19 +856,54 @@ Ext.define('Inventory.view.ItemViewModel', {
 //            }
         },
         readOnlyCommodity: function (get) {
-            switch (get('current.strType')) {
-                case 'Kit':
-                case 'Non-Inventory':
-                case 'Service':
-                case 'Software':
-                case 'Bundle':
-                    this.data.current.set('intCommodityId', null);
-                    return true;
-                    break;
-                default:
+            //For Discount Item
+            var itemId = get('current.intItemId');
+            var me = this;           
+
+           if (get('current.strType') === 'Other Charge' && get('current.strCostType') === 'Discount') {
+               
+               var success = function (option, success, serverResponse)
+                {
+                   var RequiredData = serverResponse;
+
+                    if (RequiredData.intItemUsedInDiscountCode === 1) {
+                       me.data.current.set('ysnItemUsedInDiscountCode', true);
+                    }   
+
+                    else {
+                      me.data.current.set('ysnItemUsedInDiscountCode', false); 
+                    }
+
+                }
+                i21.ModuleMgr.Grain.IsItemUsedInDiscountCode(itemId, success);     
+
+               var usedInDiscountStatus = get('current.ysnItemUsedInDiscountCode');        
+               
+               if(usedInDiscountStatus === true) {
+                     return true;  
+                }
+               
+                else {
                     return false;
-                    break;
-            };
+                }
+            }
+            
+            else {
+                 switch (get('current.strType')) {
+                    case 'Kit':
+                    case 'Non-Inventory':
+                    case 'Service':
+                    case 'Software':
+                    case 'Bundle':
+                        this.data.current.set('intCommodityId', null);
+                        return true;
+                        break;
+                    default:
+                        return false;
+                        break;
+                  };
+            }
+
         },
         readOnlyBundle: function (get) {
             switch (get('current.strType')) {
@@ -1264,6 +1299,42 @@ Ext.define('Inventory.view.ItemViewModel', {
             if (get('current.strType') === 'Bundle') {
                 return true;
             }
+            else {
+                return false;
+            }
+        },
+        readOnlyForDiscountType: function(get) {
+            var itemId = get('current.intItemId');
+            var me = this;           
+
+           if (get('current.strType') === 'Other Charge' && get('current.strCostType') === 'Discount') {
+               
+               var success = function (option, success, serverResponse)
+                {
+                   var RequiredData = serverResponse;
+
+                    if (RequiredData.intItemUsedInDiscountCode === 1) {
+                       me.data.current.set('ysnItemUsedInDiscountCode', true);
+                    }   
+
+                    else {
+                      me.data.current.set('ysnItemUsedInDiscountCode', false); 
+                    }
+
+                }
+                i21.ModuleMgr.Grain.IsItemUsedInDiscountCode(itemId, success);     
+
+               var usedInDiscountStatus = get('current.ysnItemUsedInDiscountCode');        
+               
+               if(usedInDiscountStatus === true) {
+                     return true;  
+                }
+               
+                else {
+                    return false;
+                }
+            }
+            
             else {
                 return false;
             }

@@ -259,7 +259,8 @@ Ext.define('Inventory.view.ItemViewController', {
             txtModelNo: '{current.strModelNo}',
             cboType: {
                 value: '{current.strType}',
-                store: '{itemTypes}'
+                store: '{itemTypes}',
+                readOnly: '{readOnlyForDiscountType}'
             },
             txtShortName: '{current.strShortName}',
             cboManufacturer: {
@@ -272,7 +273,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboStatus: {
                 value: '{current.strStatus}',
-                store: '{itemStatuses}'
+                store: '{itemStatuses}',
+                readOnly: '{readOnlyForDiscountType}'
             },
             cboCategory: {
                 value: '{current.intCategoryId}',
@@ -735,7 +737,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboCostType: {
                 value: '{current.strCostType}',
-                store: '{costTypes}'
+                store: '{costTypes}',
+                readOnly: '{readOnlyForDiscountType}'
             },
             cboOnCost: {
                 value: '{current.intOnCostTypeId}',
