@@ -3904,6 +3904,7 @@
     <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
     <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
+    <None Include="Scripts\Post-Deployment\SM\CreateEncryptionCertificateAndSymmetricKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
