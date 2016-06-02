@@ -32,7 +32,8 @@ BEGIN   Try
 			@intMatchedLots INT,
 			@ysnMultiplePriceFixation BIT,
 			@strXmlNew  nvarchar(max),
-			@dblNoOfLots numeric(18,6)
+			@dblNoOfLots numeric(18,6),
+			@intSelectedInstrumentTypeId INT
     
 
 
@@ -65,7 +66,8 @@ SELECT
       @ysnOffset = ysnOffset ,
       @intCurrencyId = intCurrencyId,
 	  @intContractHeaderId = intContractHeaderId,
-	  @intContractDetailId = intContractDetailId
+	  @intContractDetailId = intContractDetailId,
+	  @intSelectedInstrumentTypeId = intSelectedInstrumentTypeId
 
 FROM OPENXML(@idoc,'root',2)          
 WITH(
@@ -93,7 +95,8 @@ ysnOffset bit,
 intCurrencyId INT,
 CurrentDate datetime,
 intContractHeaderId INT,
-intContractDetailId INT
+intContractDetailId INT,
+intSelectedInstrumentTypeId INT
 )      
 IF ISNULL(@intFutOptTransactionId,0) > 0
 BEGIN
@@ -150,7 +153,8 @@ BEGIN
               intSubBookId ,
               ysnOffset,
               intCurrencyId,
-              intConcurrencyId 
+              intConcurrencyId ,
+			  intSelectedInstrumentTypeId
                )    
             VALUES(CONVERT(DATETIME,CONVERT(CHAR(10),@dtmTransactionDate,110)) ,
               @intFutOptTransactionHeaderId,
@@ -174,7 +178,8 @@ BEGIN
               @intSubBookId ,
               @ysnOffset  ,
               @intCurrencyId,
-              1
+              1,
+			  @intSelectedInstrumentTypeId
       )          
 
       SET @intFutOptTransactionId = SCOPE_IDENTITY()
