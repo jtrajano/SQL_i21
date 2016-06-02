@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspTRGetCustomerFreight]
-	 @intEntityCustomerId AS INT,
+	 @intEntityCustomerId AS INT = NULL,
 	 @intItemId AS INT,
 	 @strZipCode NVARCHAR (MAX),
 	 @intShipViaId as int,
