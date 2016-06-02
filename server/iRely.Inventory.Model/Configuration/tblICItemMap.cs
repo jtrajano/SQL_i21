@@ -147,6 +147,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblMinStockWeeks).HasColumnName("dblMinStockWeeks").HasPrecision(18, 6);
             this.Property(t => t.dblFullContainerSize).HasColumnName("dblFullContainerSize").HasPrecision(18, 6);
             this.Property(t => t.ysnHasMFTImplication).HasColumnName("ysnHasMFTImplication");
+            this.Property(t => t.ysnItemUsedInDiscountCode).HasColumnName("ysnItemUsedInDiscountCode");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
