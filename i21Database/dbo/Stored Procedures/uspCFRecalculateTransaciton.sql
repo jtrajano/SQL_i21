@@ -396,6 +396,8 @@ BEGIN
 			SELECT @strTaxCodes = COALESCE(@strTaxCodes + ', ', '') + CONVERT(varchar(10), intTaxCodeId)
 			FROM tblCFTransactionTax
 			WHERE intTransactionId = @intTransactionId
+
+			SET @TaxState = (SELECT TOP 1 strTaxState from tblCFSite where intSiteId = @intSiteId)
 		END	
 
 		INSERT INTO @tblTransactionTax(
@@ -444,6 +446,8 @@ BEGIN
 			SELECT * 
 			INTO #ItemTax
 			FROM @tblTransactionTax
+			WHERE (strCalculationMethod != '' OR strCalculationMethod IS NOT NULL)
+			AND	  (ysnInvalidSetup = 0)
 
 			WHILE exists (SELECT * FROM #ItemTax)
 			BEGIN
