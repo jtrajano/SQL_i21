@@ -72,7 +72,7 @@ BEGIN TRY
 		,@dblReadingQuantity = dblReadingQuantity
 		,@intInputWeightUOMId = intInputWeightUOMId
 		,@intDestinationSubLocationId = intDestinationSubLocationId
-		,@intDestinationStorageLocationId = intDestStorageLocationId
+		,@intDestinationStorageLocationId = intDestinationStorageLocationId
 		,@intUserId = intUserId
 		,@ysnEmptyOut = ysnEmptyOut
 		,@ysnNegativeQuantityAllowed = ysnNegativeQuantityAllowed
@@ -94,7 +94,7 @@ BEGIN TRY
 			,dblReadingQuantity NUMERIC(18, 6)
 			,intInputWeightUOMId INT
 			,intDestinationSubLocationId INT
-			,intDestStorageLocationId INT
+			,intDestinationStorageLocationId INT
 			,intUserId INT
 			,ysnEmptyOut BIT
 			,ysnNegativeQuantityAllowed BIT
