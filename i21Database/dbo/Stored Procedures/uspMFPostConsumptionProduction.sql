@@ -236,13 +236,7 @@ BEGIN
 	WHERE RI.intWorkOrderId = @intWorkOrderId
 
 	SELECT @dblOtherCharges = @dblOtherCharges * @dblPercentage / 100
-
-	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0
-	BEGIN
-		SELECT @dblNewUnitCost = @dblNewUnitCost + @dblOtherCharges
-	END
-
+	
 	DECLARE @dblCostPerStockUOM NUMERIC(38, 20)
 
 	IF @intItemStockUOMId = @intItemUOMId
@@ -252,6 +246,12 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT @dblCostPerStockUOM = dbo.fnCalculateUnitCost(@dblNewUnitCost, @dblUnitQty)
+	END
+
+	IF @dblOtherCharges IS NOT NULL
+		AND @dblOtherCharges > 0
+	BEGIN
+		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblOtherCharges
 	END
 
 	CREATE TABLE #GeneratedLotItems (
