@@ -91,5 +91,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intArbitrationId_intCityId] FOREIGN KEY ([intArbitrationId]) REFERENCES [tblSMCity]([intCityId])
 )
 
-
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCTContractHeader_intContractHeaderId] ON [dbo].[tblCTContractHeader]([intContractHeaderId] ASC);
+GO
 
