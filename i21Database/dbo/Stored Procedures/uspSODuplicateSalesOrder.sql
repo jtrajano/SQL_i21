@@ -8,8 +8,11 @@
 	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT
 AS
 
+DECLARE @ForRecurring BIT = 0	
+
 BEGIN
 	SET @SalesOrderDate = CASE WHEN @SalesOrderDate IS NULL THEN GETDATE() ELSE @SalesOrderDate END
+	SELECT @ForRecurring = ysnRecurring FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId 
 
 	INSERT INTO tblSOSalesOrder
 		(   [intEntityCustomerId]
@@ -92,8 +95,8 @@ BEGIN
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
-		   ,0 --Recurring
-           ,[strComments] + (CASE WHEN [ysnRecurring] = 1 THEN '' ELSE ' DUP: ' + [strSalesOrderNumber] END)
+		   ,@ForRecurring          
+		   ,' DUP: ' + [strSalesOrderNumber] 
 		   ,[strFooterComments]s
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
