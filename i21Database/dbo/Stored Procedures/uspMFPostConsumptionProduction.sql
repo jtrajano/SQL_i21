@@ -512,7 +512,7 @@ BEGIN
 					) < 0.00001
 				)
 		BEGIN
-			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
+			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId1
 				,@dblNewLotQty = 0
 				,@intAdjustItemUOMId = @intItemUOMId
 				,@intUserId = @intUserId
