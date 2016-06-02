@@ -26,6 +26,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@intRecordId INT
 	,@intLotId INT
 	,@intItemUOMId INT
+	,@dblDefaultResidueQty NUMERIC(18, 6)
 DECLARE @tblMFLot TABLE (
 	intRecordId INT Identity(1, 1)
 	,intLotId INT
@@ -217,6 +218,9 @@ BEGIN
 	FROM dbo.tblMFWorkOrderConsumedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	SELECT @dblDefaultResidueQty = dblDefaultResidueQty
+	FROM dbo.tblMFCompanyPreference
+
 	SELECT @intRecordId = Min(intRecordId)
 	FROM @tblMFLot
 
@@ -234,15 +238,16 @@ BEGIN
 					SELECT dblWeight
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId
-					) < 0.01
+					) < @dblDefaultResidueQty
 				)
 			AND (
 				(
 					SELECT dblQty
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId
-					) < 0.01
+					) < @dblDefaultResidueQty
 				)
+			AND @dblDefaultResidueQty IS NOT NULL
 		BEGIN
 			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
 				,@dblNewLotQty = 0

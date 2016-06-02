@@ -42,6 +42,14 @@ BEGIN
 		,@intItemStockUOMId INT
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmDate DATETIME
+		,@intRecordId INT
+		,@intLotId1 INT
+		,@dblDefaultResidueQty NUMERIC(18, 6)
+	DECLARE @tblMFLot TABLE (
+		intRecordId INT Identity(1, 1)
+		,intLotId INT
+		,intItemUOMId INT
+		)
 
 	SELECT @dtmDate = GETDATE()
 
@@ -467,14 +475,6 @@ BEGIN
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
 
-	DECLARE @intRecordId INT
-		,@intLotId1 INT
-	DECLARE @tblMFLot TABLE (
-		intRecordId INT Identity(1, 1)
-		,intLotId INT
-		,intItemUOMId INT
-		)
-
 	INSERT INTO @tblMFLot (
 		intLotId
 		,intItemUOMId
@@ -483,6 +483,9 @@ BEGIN
 		,intItemUOMId
 	FROM dbo.tblMFWorkOrderConsumedLot
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @dblDefaultResidueQty = dblDefaultResidueQty
+	FROM dbo.tblMFCompanyPreference
 
 	SELECT @intRecordId = Min(intRecordId)
 	FROM @tblMFLot
@@ -502,15 +505,16 @@ BEGIN
 					SELECT dblWeight
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId1
-					) < 0.01
+					) < @dblDefaultResidueQty
 				)
 			AND (
 				(
 					SELECT dblQty
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId1
-					) < 0.01
+					) < @dblDefaultResidueQty
 				)
+			AND @dblDefaultResidueQty IS NOT NULL
 		BEGIN
 			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
 				,@dblNewLotQty = 0

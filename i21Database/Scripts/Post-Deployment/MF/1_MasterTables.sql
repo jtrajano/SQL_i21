@@ -2029,3 +2029,7 @@ SET intBatchID = NULL
 WHERE intBlendRequirementId IS NULL
 	AND intBatchID IS NOT NULL
 Go
+UPDATE tblMFCompanyPreference
+SET dblDefaultResidueQty = 0.00001
+WHERE dblDefaultResidueQty IS NULL
+GO

@@ -113,11 +113,6 @@ BEGIN TRY
 		RAISERROR(51195,11,1)
 	END
 
-	--IF ROUND(@dblNewLotWeightPerUnit,3) <> ROUND(@dblLotWeightPerUnit,3)
-	--BEGIN
-	--	RAISERROR(51196,11,1)
-	--END
-
 	BEGIN TRANSACTION
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
@@ -141,39 +136,12 @@ BEGIN TRY
 													 @intSourceTransactionTypeId = @intSourceTransactionTypeId,
 													 @intEntityUserSecurityId = @intUserId,
 													 @intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-	--IF @dblOldDestinationQty IS NULL
-	--SELECT @dblOldDestinationQty=0
+	DECLARE @dblDefaultResidueQty NUMERIC(18, 6)
 
-	--IF @dblOldSourceQty IS NULL
-	--SELECT @dblOldSourceQty=0
+	SELECT @dblDefaultResidueQty = dblDefaultResidueQty
+	FROM dbo.tblMFCompanyPreference
 
-	--UPDATE dbo.tblICLot
-	--SET dblWeightPerQty = @dblLotWeightPerUnit,
-	--	dblWeight = (@dblOldSourceQty-@dblMergeQty)*@dblLotWeightPerUnit,
-	--	dblQty = (@dblOldSourceQty-@dblMergeQty)
-	--WHERE intLotId=@intLotId
-
-	--UPDATE dbo.tblICLot
-	--SET dblWeightPerQty = @dblNewLotWeightPerUnit,
-	--	dblWeight = (@dblOldDestinationQty+@dblMergeQty)*@dblNewLotWeightPerUnit,
-	--	dblQty = (@dblOldDestinationQty+@dblMergeQty)
-	--WHERE intLotId=@intNewLotId
-	DECLARE @dblLotQty NUMERIC(38,20)
-	IF EXISTS (SELECT 1 FROM tblICLot WHERE dblQty <> dblWeight AND intItemUOMId = intWeightUOMId AND intLotId=@intLotId)
-	BEGIN
-		
-		SELECT @dblLotQty = Case When intWeightUOMId is null Then dblQty Else dblWeight End FROM tblICLot WHERE intLotId = @intLotId
-
-		EXEC dbo.uspMFLotAdjustQty
-			@intLotId = @intLotId,       
-			@dblNewLotQty = @dblLotQty,
-			@intAdjustItemUOMId=@intItemUOMId,
-			@intUserId = @intUserId ,
-			@strReasonCode = 'Weight qty same',
-			@strNotes = 'Weight qty same'
-	END
-
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR (@intWeightUOMId is null and (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < @dblDefaultResidueQty AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR (@intWeightUOMId is null and (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < @dblDefaultResidueQty AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)AND @dblDefaultResidueQty IS NOT NULL
 	BEGIN
 		
 		EXEC dbo.uspMFLotAdjustQty
@@ -183,10 +151,6 @@ BEGIN TRY
 		 @intUserId=@intUserId ,
 		 @strReasonCode ='Residue qty clean up',
 		 @strNotes ='Residue qty clean up'
-		--UPDATE tblICLot
-		--SET dblWeight = 0
-		--	,dblQty = 0
-		--WHERE intLotId = @intLotId
 	END
 	COMMIT TRANSACTION	
 
