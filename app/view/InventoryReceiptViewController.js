@@ -1591,11 +1591,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (detailRecord) {
             var current = {
                 ItemId: detailRecord.get('intItemId'),
-                LocationId: masterRecord.get('intLocationId'),
                 TransactionDate: masterRecord.get('dtmReceiptDate'),
+                LocationId: masterRecord.get('intLocationId'),
                 TransactionType: 'Purchase',
+                TaxGroupId: masterRecord.get('intTaxGroupId'),
                 EntityId: masterRecord.get('intEntityVendorId'),
-                TaxGroupId: masterRecord.get('intTaxGroupId')
+                BillShipToLocationId: masterRecord.get('intShipFromId')
             };
 
             if (reset)
@@ -1679,7 +1680,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 taxAmount = qtyOrdered * itemDetailTax.dblRate;
             }
 
-            taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
+            if (itemDetailTax.ysnCheckoffTax){
+                tax = tax * -1;
+            }
+
+            tax = i21.ModuleMgr.Inventory.roundDecimalFormat(tax, 2);
 
             if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
                 if (itemDetailTax.ysnTaxExempt)
