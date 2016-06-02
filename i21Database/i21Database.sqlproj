@@ -3902,6 +3902,8 @@
     <Build Include="dbo\Stored Procedures\uspMFUnReservePickListByShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecallReport.sql" />
     <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
+    <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
+    <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
