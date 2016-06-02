@@ -1,16 +1,16 @@
 ﻿CREATE VIEW [dbo].vyuSMUserRoleMenu
-AS 
-
-SELECT 
+AS
+SELECT DISTINCT
 intUserRoleMenuId,
-intUserRoleId,
+ISNULL(SubRole.intUserRoleId, RoleMenu.intUserRoleId) AS intUserRoleId,
+ISNULL(SubRole.intUserRoleID, RoleMenu.intUserRoleId) AS intSubRoleId,
 RoleMenu.intMenuId,
 RoleMenu.intParentMenuId,
 RoleMenu.ysnVisible,
 Menu.intSort,
 strMenuName,
 strModuleName,
-strDescription,
+Menu.strDescription,
 Menu.strCategory,
 strType,
 strCommand,
@@ -19,5 +19,6 @@ ysnExpanded,
 ysnIsLegacy,
 ysnLeaf,
 RoleMenu.intConcurrencyId
-FROM tblSMUserRoleMenu RoleMenu
+FROM vyuSMUserRoleSubRole SubRole
+RIGHT JOIN tblSMUserRoleMenu RoleMenu ON SubRole.intUserRoleID = RoleMenu.intUserRoleId
 LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId

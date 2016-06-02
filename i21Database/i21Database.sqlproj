@@ -3897,6 +3897,8 @@
     <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
     <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
     <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
+    <Build Include="dbo\Tables\tblSMUserRoleSubRole.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
