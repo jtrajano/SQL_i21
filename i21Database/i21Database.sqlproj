@@ -3601,6 +3601,7 @@
     <Build Include="dbo\Stored Procedures\uspICBillOfLadingReport.sql" />
     <Build Include="dbo\Functions\fnMFConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
