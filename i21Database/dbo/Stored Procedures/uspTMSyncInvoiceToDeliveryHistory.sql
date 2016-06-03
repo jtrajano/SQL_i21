@@ -354,7 +354,7 @@ BEGIN
 					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					ORDER BY dblPercentAfterDelivery DESC, intInvoiceDetailId ASC
 					
-					SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId) 
+					SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId,DEFAULT) 
 					
 					---Update Site Burn Rate, dblDegreeDayBetweenDelivery,intNextDeliveryDegreeDay based on the new calculated burn rate
 					UPDATE tblTMSite
@@ -369,7 +369,7 @@ BEGIN
 					----UPDATE Delivery history header for the new calc burnrate 
 					UPDATE tblTMDeliveryHistory
 						SET 
-						dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId)
+						dblBurnRateAfterDelivery = @dblNewBurnRate
 						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,0,@intNewDeliveryHistoryId)
 					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					
@@ -629,7 +629,7 @@ BEGIN
 			ELSE
 			BEGIN
 				---------GET New Burn rate 
-				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL) 
+				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL,DEFAULT) 
 				
 				IF(@strTransactionType = 'Invoice')
 				BEGIN
@@ -705,7 +705,7 @@ BEGIN
 						,dblQuantityDelivered = (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems)
 						,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
 						,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
-						,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,null)
+						,dblBurnRateAfterDelivery = @dblNewBurnRate
 						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,0,null)
 						,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
 						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intTopInvoiceDetailId,null)

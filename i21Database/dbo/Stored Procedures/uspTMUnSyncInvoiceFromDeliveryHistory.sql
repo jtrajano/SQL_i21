@@ -225,7 +225,7 @@ BEGIN
 				WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 				ORDER BY dblPercentAfterDelivery DESC, intInvoiceDetailId ASC
 				
-				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intDeliveryHistoryId) 
+				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intDeliveryHistoryId,0) 
 				
 				---Update Site Burn Rate, dblDegreeDayBetweenDelivery,intNextDeliveryDegreeDay based on the new calculated burn rate
 				UPDATE tblTMSite
@@ -240,7 +240,7 @@ BEGIN
 				----UPDATE Delivery history header for the new calc burnrate 
 				UPDATE tblTMDeliveryHistory
 					SET 
-					dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intDeliveryHistoryId)
+					dblBurnRateAfterDelivery = @dblNewBurnRate
 					,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,0,@intDeliveryHistoryId)
 				WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 				
