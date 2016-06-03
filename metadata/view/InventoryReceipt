@@ -2404,22 +2404,6 @@
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Number",
-                                                                    "reference": {
-                                                                        "name": "columns",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "dataIndex": "strTax",
-                                                                        "itemId": "colTax",
-                                                                        "text": "Tax",
-                                                                        "width": 85
-                                                                    },
-                                                                    "name": "MyNumberColumn56",
-                                                                    "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e"
-                                                                },
-                                                                {
                                                                     "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
@@ -2613,6 +2597,22 @@
                                                                             "type": "string"
                                                                         }
                                                                     ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Number",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strTax",
+                                                                        "itemId": "colTax",
+                                                                        "text": "Tax",
+                                                                        "width": 85
+                                                                    },
+                                                                    "name": "MyNumberColumn56",
+                                                                    "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e"
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",

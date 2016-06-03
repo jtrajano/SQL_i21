@@ -1254,13 +1254,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                xtype: 'numbercolumn',
-                                                                                itemId: 'colTax',
-                                                                                width: 85,
-                                                                                dataIndex: 'strTax',
-                                                                                text: 'Tax'
-                                                                            },
-                                                                            {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colWeightUOM',
                                                                                 modelValidation: true,
@@ -1336,6 +1329,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 85,
                                                                                 dataIndex: 'dblLineTotal',
                                                                                 text: 'Line Total'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colTax',
+                                                                                width: 85,
+                                                                                dataIndex: 'strTax',
+                                                                                text: 'Tax'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
