@@ -103,6 +103,7 @@ SELECT
 	,@TransactionId					= NULL	--[intTransactionId]
 	,@OriginalInvoiceId				= NULL	--[intOriginalInvoiceId]
 	,@EntityId						= @UserId
+	,@ForRecurring					= [ysnRecurring]
 FROM
 	tblARInvoice
 WHERE
