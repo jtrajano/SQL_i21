@@ -3909,6 +3909,8 @@
     <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUnreconcileBankRecords.sql" />
     <Build Include="dbo\Views\vyuSMUserLocationSubRolePermission.sql" />
+    <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
