@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuSMUserRoleSubRole]
 AS
-
 SELECT intUserRoleID,
 SubRole.intUserRoleId,
 strName,
