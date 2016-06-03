@@ -3960,6 +3960,7 @@
     <Build Include="dbo\Stored Procedures\uspARGetReceiptNumber.sql" />
     <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailViewSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
     <Build Include="dbo\Views\vyuLGLoadVesselViewSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspLGTransferContractLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitItemMove.sql" />
