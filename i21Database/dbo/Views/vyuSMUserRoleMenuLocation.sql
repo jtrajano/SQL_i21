@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuSMUserRoleMenuLocation]
 AS 
 SELECT DISTINCT
-Permission.intCompanyLocationId,
-Permission.intEntityUserSecurityId as intEntityId,
+SubRolePermimssion.intCompanyLocationId,
+SubRolePermimssion.intEntityUserSecurityId as intEntityId,
 RoleMenu.intMenuId,
 Menu.intParentMenuID as intParentMenuId,
 RoleMenu.ysnVisible,
@@ -19,4 +19,4 @@ ysnIsLegacy,
 ysnLeaf
 FROM tblSMUserRoleMenu RoleMenu
 LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
-INNER JOIN tblSMUserSecurityCompanyLocationRolePermission Permission ON Permission.intUserRoleId = RoleMenu.intUserRoleId
+INNER JOIN vyuSMUserLocationSubRolePermission SubRolePermimssion ON SubRolePermimssion.intUserRoleId = RoleMenu.intUserRoleId

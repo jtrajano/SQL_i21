@@ -3908,6 +3908,7 @@
     <Build Include="dbo\Tables\tblSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUnreconcileBankRecords.sql" />
+    <Build Include="dbo\Views\vyuSMUserLocationSubRolePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
