@@ -6,7 +6,6 @@
 	,@intPreviousDDReadingId INT 
 	,@ysnMultipleInvoice BIT = 0
 	,@intDeliveryHistoryId INT = NULL
-	,@ysnSync BIT =  1
 )
 RETURNS NUMERIC(18,6) AS
 BEGIN
@@ -97,21 +96,6 @@ BEGIN
 	IF(@ysnExceedMax = 1)
 	BEGIN
 		SET @dblReturnValue = ((@dblBurnRate * @dblCappedOrFloored)/100)
-
-		IF(@ysnSync = 1)
-		BEGIN
-
-			INSERT INTO tblTMSyncOutOfRange(
-				intSiteID,
-				dtmDateSync,
-				ysnCommit
-			)
-			SELECT 
-				intSiteID = @intSiteId
-				,dtmDateSync = DATEADD(dd, DATEDIFF(dd, 0, GETDATE()),0)
-				,ysnCommit = 1
-
-		END
 	END
 	ELSE
 	BEGIN
