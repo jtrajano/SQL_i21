@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE uspMFLotItemChange
  @intLotId INT,
  @intNewItemId INT,
- @intUserId INT
+ @intUserId INT,
+ @strNewLotNumber NVARCHAR(100) = NULL OUTPUT
 
 AS
 
@@ -84,6 +85,13 @@ BEGIN TRY
 													   ,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 													   ,@intEntityUserSecurityId  = @intUserId
 													   ,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+	SELECT TOP 1 @strNewLotNumber = strLotNumber
+	FROM tblICLot
+	WHERE intSplitFromLotId = @intLotId
+	ORDER BY intLotId DESC
+
+	SELECT @strNewLotNumber AS strNewLotNumber
 													 
 END TRY  
   
