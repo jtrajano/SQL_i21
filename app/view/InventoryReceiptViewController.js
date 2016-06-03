@@ -563,9 +563,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colGrossMargin: 'dblGrossMargin'
             },
 
-            pnlLotTracking: {
+            /*pnlLotTracking: {
                 hidden: '{hasItemSelection}'
-            },
+            },*/
             grdLotTracking: {
                 readOnly: '{current.ysnPosted}',
                 colLotId: {
@@ -949,7 +949,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             include: 'tblICInventoryReceiptInspections,' +
             'vyuICInventoryReceiptLookUp,' +
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
-            'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
+            /*'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +*/
             'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
             'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -1099,12 +1099,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.setupAdditionalBinding(win);
         }
     },
-
     onPageChange: function(pagingStatusBar, record, eOpts) {
         var win = pagingStatusBar.up('window');
+        var grd = win.down('#grdLotTracking');
+        grd.getStore().removeAll();
+
         var me = win.controller;
         var current = win.viewModel.data.current;
-
         if (current){
             var ReceiptItems = current.tblICInventoryReceiptItems();
 
@@ -1113,7 +1114,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.showOtherCharges(win);
         }
     },
-
     createRecord: function (config, action) {
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
@@ -1512,6 +1512,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strStorageLocation: current.get('strStorageLocationName'),
                         dtmExpiryDate: expiryDate
                     });
+                    //current.tblICInventoryReceiptItemLots().store.load();
                     current.tblICInventoryReceiptItemLots().add(newLot);
                     break;
             }
@@ -1530,6 +1531,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 qtyToReceive = (qtyToReceive * origCF) / newCF;
                 current.set('dblOpenReceive', qtyToReceive);
             }
+
+            //current.tblICInventoryReceiptItemLots().store.load();
 
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
@@ -1565,6 +1568,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
+            //current.tblICInventoryReceiptItemLots().store.load();
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
                     if (!lot.dummy) {
@@ -1582,6 +1586,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intSubLocationId', records[0].get('intSubLocationId'));
                 current.set('strSubLocationName', records[0].get('strSubLocationName'));
             }
+            //current.tblICInventoryReceiptItemLots().store.load();
             var lots = current.tblICInventoryReceiptItemLots();
 
             if (lots) {
@@ -1597,6 +1602,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         this.calculateGrossNet(current);
         win.viewModel.data.currentReceiptItem = current;
         this.calculateItemTaxes();
+
+        var pnlLotTracking = win.down("#pnlLotTracking");
+
+        if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
+            pnlLotTracking.setVisible(true);
+        } else {
+            pnlLotTracking.setVisible(false);
+        }
     },
 
     calculateItemTaxes: function (reset) {
@@ -3774,21 +3787,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (selModel) {
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
+            var pnlLotTracking = win.down("#pnlLotTracking");
 
             if (selected.length > 0) {
                 var current = selected[0];
+
                 if (current.dummy) {
                     vm.data.currentReceiptItem = null;
+                    pnlLotTracking.setVisible(false);
                 }
                 else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
                     vm.data.currentReceiptItem = current;
+                    pnlLotTracking.setVisible(true);
                 }
                 else {
+                    pnlLotTracking.setVisible(false);
                     vm.data.currentReceiptItem = null;
                 }
             }
             else {
                 vm.data.currentReceiptItem = null;
+                pnlLotTracking.setVisible(false);
             }
         }
     },

@@ -24,6 +24,43 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                         sorters: {
                             direction: 'DESC',
                             property: 'intSort'
+                        },
+                        autoLoad: true,
+                        pruneModifiedRecords: false,
+                        proxy: {
+                            api: {
+                                create: '../Inventory/api/InventoryReceiptItemLot/Post',
+                                read: '../Inventory/api/InventoryReceiptItemLot/GetLots',
+                                update: '../Inventory/api/InventoryReceiptItemLot/Put',
+                                destroy: '../Inventory/api/InventoryReceiptItemLot/Delete'
+                            },
+                            type: 'rest',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            },
+                            writer: {
+                                type: 'json',
+                                allowSingle: false
+                            }
+                        proxy: {
+                            api: {
+                                create: '../Inventory/api/InventoryReceiptItemLot/Post',
+                                read: '../Inventory/api/InventoryReceiptItemLot/GetLots',
+                                update: '../Inventory/api/InventoryReceiptItemLot/Put',
+                                destroy: '../Inventory/api/InventoryReceiptItemLot/Delete'
+                            },
+                            type: 'rest',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            },
+                            writer: {
+                                type: 'json',
+                                allowSingle: false
+                            }
                         }
                     }
                 }

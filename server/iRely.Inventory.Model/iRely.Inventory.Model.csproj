@@ -114,6 +114,8 @@
     <Compile Include="Configuration\tblSMCompanyLocationPricingLevelMap.cs" />
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Metadata\tblICInventoryReceiptItemLot.cs" />
+    <Compile Include="Metadata\tblICInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblICParentLot.cs" />
     <Compile Include="Metadata\tblICItemMotorFuelTax.cs" />
     <Compile Include="Metadata\tblICStorageMeasurementReading.cs" />
@@ -173,6 +175,8 @@
     <Compile Include="Metadata\tblICTag.cs" />
     <Compile Include="Metadata\tblICUnitMeasure.cs" />
     <Compile Include="Metadata\tblPATPatronageCategory.cs" />
+    <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
+    <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\LockInventory.cs" />
