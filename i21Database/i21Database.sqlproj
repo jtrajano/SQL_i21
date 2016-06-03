@@ -3904,6 +3904,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUnReservePickListByShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecallReport.sql" />
     <Build Include="dbo\Views\vyuSMUserLocationSubRolePermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetCOAApprovedSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
