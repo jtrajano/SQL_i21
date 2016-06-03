@@ -88,7 +88,7 @@ SELECT
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
-	,@Comments						=  'DUP: ' + [strInvoiceNumber] 
+	,@Comments						= 'DUP: ' + [strInvoiceNumber] 
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
 	,@Template						= 0		--[ysnTemplate]

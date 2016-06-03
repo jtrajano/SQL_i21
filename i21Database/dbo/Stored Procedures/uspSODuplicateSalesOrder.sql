@@ -93,7 +93,7 @@ BEGIN
            ,NULL --Processed Date
            ,0 --Processed
 		   ,[ysnRecurring]      
-		   ,' DUP: ' + [strSalesOrderNumber] 
+		   ,'DUP: ' + [strSalesOrderNumber] 
 		   ,[strFooterComments]s
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
