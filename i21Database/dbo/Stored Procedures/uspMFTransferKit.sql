@@ -143,7 +143,7 @@ Begin Try
 	--Get the child Lots attached to Pick List
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId)
-	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
+	Select l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
 	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId
@@ -281,7 +281,7 @@ Begin
 	--Get the parent Lots for the workorder
 	Delete From @tblParentLot
 	Insert Into @tblParentLot(intWorkOrderId,intParentLotId,dblReqQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select DISTINCT wi.intWorkOrderId,wi.intParentLotId,wi.dblQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
+	Select wi.intWorkOrderId,wi.intParentLotId,wi.dblQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
 	From tblMFWorkOrderInputParentLot wi 
 	Join tblMFPickListDetail pld on wi.intParentLotId=pld.intParentLotId
 	Where wi.intWorkOrderId=@intWorkOrderId And pld.intPickListId=@intPickListId
@@ -299,7 +299,7 @@ Begin
 	--Get the child Lots for the Parent Lot
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,l.dblWeight,@intItemUOMId,@intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
+	Select l.intLotId,l.strLotNumber,l.intItemId,l.dblWeight,@intItemUOMId,@intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
 	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId AND pld.intParentLotId=@intParentLotId AND l.intStorageLocationId=@intKitStagingLocationId AND l.dblWeight>0
