@@ -3946,6 +3946,8 @@
     <Build Include="dbo\Stored Procedures\uspLGTransferContractLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitItemMove.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
