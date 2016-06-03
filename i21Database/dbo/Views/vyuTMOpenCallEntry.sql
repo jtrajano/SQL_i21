@@ -20,8 +20,8 @@ AS
 		,intPriority = A.intPriority
 		,strComments = A.strComments
 		,strOrderStatus = A.strWillCallStatus
-		,dtmCallInDate = A.dtmCallInDate
-		,dtmDispatchedDate = A.dtmDispatchingDate
+		,dtmCallInDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmCallInDate),0)
+		,dtmDispatchedDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDispatchingDate),0)
 		,intConcurrencyId = A.intConcurrencyId
 		,intDispatchId = A.intDispatchID
 		,intCustomerID = B.intCustomerID
