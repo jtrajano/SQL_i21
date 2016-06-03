@@ -213,7 +213,7 @@ BEGIN
 						THEN P.dblStandardCost + RI.dblMargin
 					ELSE P.dblStandardCost + (@dblStandardCost * RI.dblMargin / 100)
 					END
-				) * @dblQty / R.dblQuantity)
+				)  / R.dblQuantity)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
 	JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
 		AND R.intRecipeId = RI.intRecipeId
