@@ -3912,6 +3912,7 @@
     <Build Include="dbo\Views\vyuPOForApproval.sql" />
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
     <Build Include="dbo\Views\vyuTRGetImportRackPriceDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
