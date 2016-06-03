@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPValidateImportedVouchers]
 	@UserId INT,
-	@logKey NVARCHAR(100),
+	@logKey NVARCHAR(100) OUTPUT,
 	@isValid INT OUTPUT
 AS
 
@@ -10,33 +10,30 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @key NVARCHAR(100) = NEWID()
+DECLARE @logDate DATETIME = GETDATE()
+
 DECLARE @log TABLE
 (
-	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
-    [intEntityId] INT NOT NULL, 
-    [dtmDate] DATETIME NOT NULL
+	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 
 --GET THOSE VOUCHERS WHERE TOTAL DETAIL IS NOT EQUAL TO TOTAL HEADER
 INSERT INTO @log
 SELECT 
-	strBillId + ' total do not matched.', @UserId, GETDATE(), 1, 0
+	strBillId + ' total do not matched.'
 FROM (
 	SELECT 
 	intBillId
 	,strBillId
-	,strVendorOrderNumber
 	,i21Total
 	,SUM(i21DetailTotal) i21DetailTotal
-	,ysnPosted
 	FROM (
 			SELECT 
 			C.intBillId
 			,C.strBillId
-			,C.strVendorOrderNumber
 			,C.dblTotal i21Total
 			,ISNULL(B.dblTotal,0) i21DetailTotal
-			,C.ysnPosted
 			FROM tmp_apivcmstImport A
 			INNER JOIN tblAPapivcmst A2 ON A.intBackupId = A2.intId
 			INNER JOIN tblAPBill C ON A2.intBillId = C.intBillId
@@ -45,20 +42,67 @@ FROM (
 	GROUP BY 
 	intBillId
 	,strBillId
-	,strVendorOrderNumber
 	,i21Total
-	,ysnPosted
 	) Summary
 WHERE i21Total <> i21DetailTotal --Verify if total and detail total are equal
 
-INSERT INTO tblAPImportValidationLog
+--GET THOSE PAID VOUCHERS THAT DO NOT HAVE PAYMENT
+INSERT INTO @log
+SELECT
+	C.strBillId + ' has been paid but do not have payment created.'
+FROM tmp_apivcmstImport A
+INNER JOIN tblAPapivcmst B ON A.intBackupId = B.intId
+INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+LEFT JOIN tblAPPaymentDetail D ON C.intBillId = D.intBillId
+WHERE C.ysnPaid = 1 AND D.intPaymentDetailId IS NULL
+
+--GET THOSE INVALID PAYMENT TRANSACTION
+INSERT INTO @log
+SELECT 
+	strPaymentRecordNum + CASE WHEN i21Total <> i21DetailTotal 
+							THEN ' total do not match.'
+							WHEN i21Total < 0
+							THEN ' total amount is negative.'
+							END
+FROM (
+	SELECT 
+	intPaymentId
+	,strPaymentRecordNum
+	,i21Total
+	,SUM(i21DetailTotal) i21DetailTotal
+	FROM (
+			SELECT 
+			E.intPaymentId
+			,E.strPaymentRecordNum
+			,E.dblAmountPaid i21Total
+			,ISNULL(D.dblPayment,0) i21DetailTotal
+			FROM tmp_apivcmstImport A
+			INNER JOIN tblAPapivcmst B ON A.intBackupId = B.intId
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			INNER JOIN tblAPPaymentDetail D ON C.intBillId = D.intBillId
+			INNER JOIN tblAPPayment E ON D.intPaymentId = E.intPaymentId
+			WHERE C.ysnPaid = 1
+			) ImportedBills
+	GROUP BY 
+	intPaymentId
+	,strPaymentRecordNum
+	,i21Total
+	) Summary
+WHERE i21Total <> i21DetailTotal OR i21Total < 0
+
+INSERT INTO tblAPImportVoucherLog
 (
 	[strDescription], 
     [intEntityId], 
 	[strLogKey],
     [dtmDate]
 )
-SELECT * FROM @log
+SELECT 
+	strDescription,
+	@UserId,
+	@logKey,
+	GETDATE()
+FROM @log
 
 IF EXISTS(SELECT 1 FROM @log) SET @isValid = 0;
 ELSE SET @isValid = 1

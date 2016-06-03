@@ -119,10 +119,63 @@ BEGIN
 		SELECT 1 FROM aptrxmst B WHERE A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no
 	)
 
+	DELETE A
+	FROM tblAPBill A
+	INNER JOIN tblAPaptrxmst B ON A.intBillId = B.intBillId
+	INNER JOIN tmp_aptrxmstImport C ON B.intBillId = C.intBackupId
+
 	--DELETE BACK UP RECORDS FROM tblAPapeglmst
 	DELETE A
 	FROM tblAPapeglmst A
-	INNER JOIN tmp_aptrxmstImport B ON A.intHeaderId= B.intId
+	INNER JOIN tmp_aptrxmstImport B ON A.intHeaderId= B.intBackupId
+
+	--DELETE REINSERTED RECORDS TO apivcmst
+	DELETE A
+	FROM apivcmst A
+	INNER JOIN tmp_aptrxmstImport B
+		ON A.apivc_vnd_no = B.aptrx_vnd_no AND A.apivc_ivc_no = B.aptrx_ivc_no
+	WHERE A.apivc_status_ind = 'R'
+
+	DELETE A
+	FROM aphglmst A
+	INNER JOIN tmp_aptrxmstImport B
+		ON A.aphgl_vnd_no = B.aptrx_vnd_no AND A.aphgl_ivc_no = B.aptrx_ivc_no
+
+	DELETE A
+	FROM tblAPapivcmst A
+	INNER JOIN tmp_aptrxmstImport B
+		ON A.apivc_vnd_no = B.aptrx_vnd_no AND A.apivc_ivc_no = B.aptrx_ivc_no
+
+	DELETE A
+	FROM tblAPaphglmst A
+	INNER JOIN tmp_aptrxmstImport B
+		ON A.aphgl_vnd_no = B.aptrx_vnd_no AND A.aphgl_ivc_no = B.aptrx_ivc_no
+	 
+
+END
+
+IF OBJECT_ID(N'dbo.tmp_apivcmstImport') IS NOT NULL
+BEGIN
+	
+	DELETE A
+	FROM tblAPapivcmst A
+	INNER JOIN tmp_apivcmstImport B ON A.intId = B.intBackupId
+
+	DELETE A
+	FROM tblAPaphglmst A
+	INNER JOIN tmp_apivcmstImport B ON A.intHeaderId = B.intBackupId
+
+	DELETE A
+	FROM tblAPPayment A
+	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	INNER JOIN tblAPapivcmst D ON C.intBillId = D.intBillId
+	INNER JOIN tmp_apivcmstImport E ON D.intBillId = E.intBackupId
+
+	DELETE A
+	FROM tblAPBill A
+	INNER JOIN tblAPapivcmst B ON A.intBillId = B.intBillId
+	INNER JOIN tmp_apivcmstImport C ON B.intBillId = C.intBackupId
 
 END
 

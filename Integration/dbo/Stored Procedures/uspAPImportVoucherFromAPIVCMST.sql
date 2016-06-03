@@ -29,6 +29,8 @@ DECLARE @defaultTermId INT;
 DECLARE @defaultCurrencyId INT;
 DECLARE @totalInsertedBill INT;
 DECLARE @totalInsertedBillDetail INT;
+DECLARE @key NVARCHAR(100) = NEWID()
+DECLARE @logDate DATETIME = GETDATE()
 --LOCATION VARIABLES
 DECLARE @shipToAddress NVARCHAR(200)
 DECLARE @shipToCity NVARCHAR(50)
@@ -408,23 +410,20 @@ INSERT INTO tblAPImportVoucherLog
 (
 	[strDescription], 
     [intEntityId], 
-    [dtmDate], 
-    [intLogType], 
-    [ysnSuccess]
+    [dtmDate],
+	[strLogKey]
 )
 SELECT
 	CAST(@totalHeaderImported AS NVARCHAR) + ' records imported from apivcmst.'
 	,@UserId
-	,GETDATE()
-	,8
-	,1
+	,@logDate
+	,@key
 UNION ALL
 SELECT
 	CAST(@totalDetailImported AS NVARCHAR) + ' records imported from aphglmst.'
 	,@UserId
-	,GETDATE()
-	,8
-	,1
+	,@logDate
+	,@key
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY

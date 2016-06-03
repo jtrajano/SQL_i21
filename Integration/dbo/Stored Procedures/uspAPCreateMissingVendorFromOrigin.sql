@@ -13,6 +13,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @key NVARCHAR(100) = NEWID()
 DECLARE @missingVendor TABLE(strVendorId NVARCHAR(100));
 DECLARE @missingVendorId NVARCHAR(100);
 DECLARE @missingVendorError NVARCHAR(500);
@@ -59,6 +60,19 @@ BEGIN
 	END
 END
 
+INSERT INTO tblAPImportVoucherLog
+(
+	[strDescription], 
+    [intEntityId], 
+    [dtmDate], 
+	[strLogKey]
+)
+SELECT 
+	A.strVendorId + ' created.', 
+    @UserId, 
+    GETDATE(), 
+	@key
+FROM @missingVendor A
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
 BEGIN CATCH

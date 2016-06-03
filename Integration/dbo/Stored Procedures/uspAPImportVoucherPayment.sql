@@ -96,7 +96,8 @@ SELECT
 	[dblWithheld]			= 0,
 	[intEntityId]			= @UserId,
 	[intConcurrencyId]		= 0,
-	[intId]					= A.intId
+	[intId]					= A.intId,
+	[ysnOrigin]				= 1
 FROM tmp_apivcmstImport A
 INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no
@@ -121,7 +122,8 @@ INSERT
 	[ysnPosted],
 	[dblWithheld],
 	[intEntityId],
-	[intConcurrencyId]
+	[intConcurrencyId],
+	[ysnOrigin]
 )
 VALUES
 (
@@ -138,7 +140,8 @@ VALUES
 	[ysnPosted],
 	[dblWithheld],
 	[intEntityId],
-	[intConcurrencyId]
+	[intConcurrencyId],
+	[ysnOrigin]
 )
 OUTPUT inserted.intPaymentId, SourceData.intId INTO #tmpPaymentCreated;
 
