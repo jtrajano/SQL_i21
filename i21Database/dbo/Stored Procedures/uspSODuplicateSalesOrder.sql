@@ -10,7 +10,7 @@ AS
 
 BEGIN
 	SET @SalesOrderDate = CASE WHEN @SalesOrderDate IS NULL THEN GETDATE() ELSE @SalesOrderDate END
-
+		
 	INSERT INTO tblSOSalesOrder
 		(   [intEntityCustomerId]
            ,[dtmDate]
@@ -92,8 +92,8 @@ BEGIN
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
-		   ,0 --Recurring
-           ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
+		   ,[ysnRecurring]      
+		   ,'DUP: ' + [strSalesOrderNumber] 
 		   ,[strFooterComments]s
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
