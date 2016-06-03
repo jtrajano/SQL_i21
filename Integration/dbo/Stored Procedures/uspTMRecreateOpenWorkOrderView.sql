@@ -37,9 +37,9 @@ BEGIN
 				,strSiteNumber = RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)
 				,strLocation = A.strLocation
 				,strWorkOrderCategory = D.strWorkOrderCategory
-				,dtmDateCreated = B.dtmDateCreated
-				,dtmDateScheduled = B.dtmDateScheduled
-				,dtmDateClosed = B.dtmDateClosed
+				,dtmDateCreated = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateCreated),0)
+				,dtmDateScheduled = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateScheduled),0)
+				,dtmDateClosed = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateClosed),0)
 				,strAddress = REPLACE(RTRIM(ISNULL(A.strSiteAddress,'''')) ,CHAR(13),'' '') + '', '' + RTRIM(ISNULL(A.strCity,'''')) + '', '' + RTRIM(ISNULL(A.strState,'''')) + '', '' + RTRIM(ISNULL(A.strZipCode,'''')) 
 				,strCloseReason = H.strCloseReason
 				,strPerformerName = I.vwsls_name COLLATE Latin1_General_CI_AS 
@@ -89,9 +89,9 @@ BEGIN
 				,strSiteNumber = RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)
 				,strLocation = E.strLocationName
 				,strWorkOrderCategory = D.strWorkOrderCategory
-				,dtmDateCreated = B.dtmDateCreated
-				,dtmDateScheduled = B.dtmDateScheduled
-				,dtmDateClosed = B.dtmDateClosed
+				,dtmDateCreated = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateCreated),0)
+				,dtmDateScheduled = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateScheduled),0)
+				,dtmDateClosed = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateClosed),0)
 				,strAddress = REPLACE(RTRIM(ISNULL(A.strSiteAddress,'''')) ,CHAR(13),'' '') + '', '' + RTRIM(ISNULL(A.strCity,'''')) + '', '' + RTRIM(ISNULL(A.strState,'''')) + '', '' + RTRIM(ISNULL(A.strZipCode,'''')) 
 				,strCloseReason = H.strCloseReason
 				,strPerformerName = I.strName

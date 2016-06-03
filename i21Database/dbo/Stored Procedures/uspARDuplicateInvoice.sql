@@ -103,7 +103,7 @@ SELECT
 	,@TransactionId					= NULL	--[intTransactionId]
 	,@OriginalInvoiceId				= NULL	--[intOriginalInvoiceId]
 	,@EntityId						= @UserId
-	,@ForRecurring					= [ysnRecurring]
+	,@ForRecurring					=  [ysnRecurring]
 FROM
 	tblARInvoice
 WHERE
@@ -519,7 +519,7 @@ BEGIN CATCH
 END CATCH
 
 BEGIN TRY
-	UPDATE tblARInvoice SET ysnRecurring = @ForRecurring WHERE intInvoiceId = @NewInvoiceId
+ UPDATE tblARInvoice SET ysnRecurring = @ForRecurring WHERE intInvoiceId = @NewInvoiceId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
