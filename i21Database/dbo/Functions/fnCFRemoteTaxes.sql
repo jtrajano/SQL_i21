@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnCFRemoteTaxes] 
     (   
-		 @strTaxState					NVARCHAR(MAX)   = 'ALL'
+		 @strTaxState					NVARCHAR(MAX)   = ''
 		,@strTaxCodeId					NVARCHAR(MAX)	= ''
 		,@FederalExciseTaxRate        	NUMERIC(18,6)	= 0.000000
 		,@StateExciseTaxRate1         	NUMERIC(18,6)	= 0.000000
@@ -80,10 +80,10 @@ BEGIN
 		Record      varchar(1000)   
 	)
 
-	IF (@strTaxState IS NULL OR @strTaxState = '')
-	BEGIN 
-		SET @strTaxState = 'ALL'
-	END
+	--IF (@strTaxState IS NULL OR @strTaxState = '')
+	--BEGIN 
+	--	SET @strTaxState = ''
+	--END
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
 			,@intItemCategoryId INT
@@ -293,7 +293,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 1' 
@@ -307,7 +307,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 1' 
@@ -321,7 +321,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 1' 
@@ -335,7 +335,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate1,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 1' 
@@ -406,7 +406,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 2' 
@@ -420,7 +420,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 2' 
@@ -434,7 +434,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 2' 
@@ -448,7 +448,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateExciseTaxRate2,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Excise Tax Rate 2' 
@@ -521,7 +521,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountyExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Excise Tax Rate' 
@@ -535,7 +535,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountyExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Excise Tax Rate' 
@@ -549,7 +549,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountyExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Excise Tax Rate' 
@@ -563,7 +563,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountyExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Excise Tax Rate' 
@@ -635,7 +635,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CityExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Excise Tax Rate' 
@@ -649,7 +649,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CityExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Excise Tax Rate' 
@@ -663,7 +663,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CityExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Excise Tax Rate' 
@@ -677,7 +677,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CityExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Excise Tax Rate' 
@@ -751,7 +751,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Sales Tax Percentage Rate' 
@@ -765,7 +765,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Sales Tax Percentage Rate' 
@@ -779,7 +779,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Sales Tax Percentage Rate' 
@@ -793,7 +793,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@StateSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'State Sales Tax Percentage Rate' 
@@ -867,7 +867,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Sales Tax Percentage Rate' 
@@ -881,7 +881,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Sales Tax Percentage Rate' 
@@ -895,7 +895,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Sales Tax Percentage Rate' 
@@ -909,7 +909,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CountySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'County Sales Tax Percentage Rate' 
@@ -983,7 +983,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CitySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Sales Tax Percentage Rate' 
@@ -997,7 +997,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CitySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Sales Tax Percentage Rate' 
@@ -1011,7 +1011,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CitySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Sales Tax Percentage Rate' 
@@ -1025,7 +1025,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@CitySalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'City Sales Tax Percentage Rate' 
@@ -1100,7 +1100,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@OtherSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'Other Sales Tax Percentage Rate' 
@@ -1114,7 +1114,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@OtherSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'Other Sales Tax Percentage Rate' 
@@ -1128,7 +1128,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@OtherSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'Other Sales Tax Percentage Rate' 
@@ -1142,7 +1142,7 @@ BEGIN
 				[intTransactionDetailTaxId],[intTransactionDetailId],[intTaxGroupMasterId],[intTaxGroupId],[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],[dblRate],[dblTax],[dblAdjustedTax],[intTaxAccountId],[ysnSeparateOnInvoice],[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],[strTaxGroup],[ysnInvalidSetup],[strNotes],[strReason]		
 			)
 			SELECT TOP 1
-				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@FederalExciseTaxRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
+				 0,0,0,0,[intTaxCodeId],[intTaxClassId],[strTaxableByOtherTaxes],[strCalculationMethod],@OtherSalesTaxPercentageRate,0,0,[intSalesTaxAccountId],0,[ysnCheckoffTax],[strTaxCode],[ysnTaxExempt],'',[ysnInvalidSetup],[strNotes],''			
 			FROM
 				@tblNetworkTaxMapping
 			WHERE strNetworkTaxCode = 'Other Sales Tax Percentage Rate' 
