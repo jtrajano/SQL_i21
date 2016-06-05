@@ -94,3 +94,13 @@ BEGIN
 END
 PRINT '*** End Defaults for Contact Type And Import***'
 
+
+
+
+if not exists(select top 1 1 from tblEMContactDetailType where strField = 'Skype' and strType = 'Email')
+begin
+	INSERT INTO tblEMContactDetailType ( 
+			strField,		strType,				strMasking,		ysnDefault
+	)
+	SELECT 	'Skype',		'Email',				'+',			1
+end
