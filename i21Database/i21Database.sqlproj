@@ -3912,6 +3912,7 @@
     <Build Include="dbo\Views\vyuPOForApproval.sql" />
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
     <Build Include="dbo\Views\vyuETSalespersonDriver.sql" />
+    <Build Include="dbo\Tables\tblEMEntityPasswordHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
