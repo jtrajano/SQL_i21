@@ -11,7 +11,8 @@
 		tax_exemption.strException,
 		tax_exemption.dtmStartDate,
 		tax_exemption.dtmEndDate,
-		tax_exemption.strState,		
+		tax_exemption.strState,
+		tax_exemption.dblPartialTax,		
 		ent.strName,
 		ent.strEntityNo
 
