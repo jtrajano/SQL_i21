@@ -198,7 +198,7 @@ SELECT @sqlCte += ',cteBase1 as(
 	          ELSE CAST(ISNULL(ISNULL(SUM(dblCreditUnit), 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END as [dblCreditUnit] 
 	,SUM(
 					CASE	WHEN A.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(dblDebit, 0 ) - isnull(dblCredit,0)
-							ELSE isnull(dblCredit, 0 ) - isnull(dblDebit,0)
+							ELSE (isnull(dblCredit, 0 ) - isnull(dblDebit,0)) * -1
 					END
 				) as dblTotal
 
