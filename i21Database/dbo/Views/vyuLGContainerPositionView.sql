@@ -35,14 +35,14 @@ SELECT dtmStartDate,
 		strItemNo					=	CD.strItemNo,
 		strItemDescription			=	CD.strItemDescription,
 		strContractBasis			=	CH.strContractBasisDescription,
-		strFixationStatus			=	case CD.strPricingType when 'Outright' then 'OT' else case CD.dblUnpricedLots when CD.dblNoOfLots then 'UF' else 'FX' end end,
+		strFixationStatus			=	CASE CD.strPricingType WHEN 'Cash' THEN 'OT' WHEN 'Priced' THEN 'FX' ELSE 'UF' END,  
 		strFinalPrice				=	dbo.fnRemoveTrailingZeroes (round(dbo.fnCalculateCostBetweenUOM(CD.intPriceItemUOMId,
 													(SELECT Top (1) IU.intItemUOMId FROM tblICItemUOM IU 
 													JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 													JOIN tblLGCompanyPreference C On C.intWeightUOMId = UOM.intUnitMeasureId),
 													CD.dblCashPrice)*CASE CD.ysnSubCurrency when 1 then 1 else 100 end,2) ),
-		dblQuantity					= CH.dblHeaderQuantity,
-		strQuantityUOM				= CH.strHeaderUnitMeasure,
+		dblQuantity					=	CD.dblDetailQuantity,  
+		strQuantityUOM				=	CD.strItemUOM,  
 		dblWeight					=	dbo.fnRemoveTrailingZeroes (round(IsNull(dbo.fnCalculateQtyBetweenUOM (CD.intNetWeightUOMId,
 												(SELECT Top (1) IU.intItemUOMId FROM tblICItemUOM IU 
 													JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
