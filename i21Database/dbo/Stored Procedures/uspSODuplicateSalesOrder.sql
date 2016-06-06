@@ -5,7 +5,8 @@
 	@UserId				INT = 0,
 	@SalesOrderDate     DATETIME = NULL,
 	@NewSalesOrderId	INT = NULL OUTPUT,
-	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT
+	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT,
+	@ForRecurring		BIT	= 0
 AS
 
 BEGIN
@@ -93,8 +94,11 @@ BEGIN
            ,NULL --Processed Date
            ,0 --Processed
 		   ,[ysnRecurring]      
-		   ,'DUP: ' + [strSalesOrderNumber] 
-		   ,[strFooterComments]s
+		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
+				THEN [strComments]
+				ELSE [strComments] + ' DUP: ' + [strSalesOrderNumber] 
+			END
+		   ,[strFooterComments]
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
