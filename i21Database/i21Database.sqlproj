@@ -3921,6 +3921,8 @@
     <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToARInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToCMBankTransaction.sql" />
+    <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
