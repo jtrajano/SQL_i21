@@ -191,6 +191,7 @@ BEGIN
 	 @paymentMethod INT,
 	 @vendorId INT,
 	 @paymentInfo NVARCHAR(10),
+	 @paymentRecordNum NVARCHAR(50),
 	 @notes NVARCHAR(500),
 	 @payment DECIMAL(18, 6),
 	 @datePaid DATETIME,
