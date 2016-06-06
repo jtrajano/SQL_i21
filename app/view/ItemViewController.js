@@ -2506,7 +2506,7 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colCustomerXrefCustomer') {
-            current.set('intCustomerId', records[0].get('intCustomerId'));
+            current.set('intCustomerId', records[0].get('intEntityCustomerId'));
         }
     },
 
@@ -2522,7 +2522,7 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colVendorXrefVendor') {
-            current.set('intVendorId', records[0].get('intVendorId'));
+            current.set('intVendorId', records[0].get('intEntityVendorId'));
         }
         else if (combo.column.itemId === 'colVendorXrefUnitMeasure') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
