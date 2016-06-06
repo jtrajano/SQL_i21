@@ -17,7 +17,7 @@ SELECT
 	C.strSiteDescription,
 	C.strSiteType,
 	D.strLocationName,
-	D.strVendorId,
+	D.strName AS strVendorName,
 	B.dtmDate
 FROM dbo.tblCCSiteDetail AS A
 	INNER JOIN dbo.tblCCSiteHeader AS B

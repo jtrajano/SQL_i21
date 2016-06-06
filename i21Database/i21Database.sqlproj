@@ -3909,6 +3909,7 @@
     <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuCCSiteDetail.sql" />
     <Build Include="dbo\Views\vyuCCSiteHeader.sql" />
+    <Build Include="dbo\Views\vyuCCSiteBatchDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
