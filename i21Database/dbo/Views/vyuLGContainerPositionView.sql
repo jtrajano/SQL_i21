@@ -57,7 +57,7 @@ SELECT dtmStartDate,
 		intNoOfReweigh				= (select count(intLineNo) from tblICInventoryReceiptItem where intOrderId=CD.intContractHeaderId),
 		intNoOfApprovals			= CASE WHEN SampStatus.strStatus = 'Approved' THEN 1 ELSE 0 END,
 		intNoOfRejects				= CASE WHEN SampStatus.strStatus = 'Rejected' THEN 1 ELSE 0 END,
-		intNoOfIntegrationRequests	= CASE WHEN IsNull(ContLink.strIntegrationOrderNumber, 0) <> 0 THEN 1 ELSE 0 END,
+		intNoOfIntegrationRequests	= CASE WHEN ContLink.strIntegrationOrderNumber is not null THEN 1 ELSE 0 END,
 		dblBasis					= dbo.fnRemoveTrailingZeroes (round(CD.dblBasis,2)),
 		strInternalComment=CD.strInternalComment,
 		intContractSeq=CD.intContractSeq
