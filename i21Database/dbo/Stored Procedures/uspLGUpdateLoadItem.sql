@@ -28,6 +28,8 @@ BEGIN TRY
 	SELECT @intCount = COUNT(LD.intLoadDetailId) FROM tblLGLoadDetail LD  
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		WHERE LD.intPContractDetailId = @intContractDetailId
+		AND LD.intItemId <> @intItemId
+
 	IF (@strItemType = 'Bundle' AND @intContractTypeId = 1 AND @intCount > 0)
 	BEGIN
 		RAISERROR('Bundle item cannot be changed for this purchase contract sequence, load/shipment already exists.', 11, 1);
@@ -36,7 +38,10 @@ BEGIN TRY
 
 	SELECT @intCount = COUNT(LD.intLoadDetailId) FROM tblLGLoadDetail LD  
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		WHERE L.ysnPosted = 1 AND (LD.intPContractDetailId = @intContractDetailId OR LD.intSContractDetailId = @intContractDetailId)
+		WHERE L.ysnPosted = 1 
+			AND (LD.intPContractDetailId = @intContractDetailId OR LD.intSContractDetailId = @intContractDetailId)
+			AND LD.intItemId <> @intItemId
+
 	IF (@intCount > 0)
 	BEGIN
 		RAISERROR('Item cannot be changed for this contract sequence. Already load / shipment using this contract sequence has been posted.', 11, 1);
@@ -45,7 +50,10 @@ BEGIN TRY
 	
 	SELECT @intCount = COUNT(LD.intLoadDetailId) FROM tblLGLoadDetail LD  
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		WHERE (IsNull(L.intTicketId, 0) <> 0 OR IsNull(L.intLoadHeaderId, 0) <> 0) AND (LD.intPContractDetailId = @intContractDetailId OR LD.intSContractDetailId = @intContractDetailId)
+		WHERE (IsNull(L.intTicketId, 0) <> 0 OR IsNull(L.intLoadHeaderId, 0) <> 0) 
+			AND (LD.intPContractDetailId = @intContractDetailId OR LD.intSContractDetailId = @intContractDetailId)
+			AND LD.intItemId <> @intItemId
+
 	IF (@intCount > 0)
 	BEGIN
 		RAISERROR('Item cannot be changed for this contract sequence. Already load / shipment has been assigned to a scale ticket / transport load.', 11, 1);
