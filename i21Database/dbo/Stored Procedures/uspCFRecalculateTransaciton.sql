@@ -797,6 +797,7 @@ BEGIN
 					 @QxT = ROUND (@dblQuantity * dblRate,2)
 					,@QxOP = @QxOP - (@dblQuantity * dblRate)
 					,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * dblRate)
+					,@dblCPTotalTax = @dblCPTotalTax + (@dblQuantity * dblRate)
 					FROM @tblTaxUnitTable
 
 					INSERT INTO @tblTransactionTaxOut
