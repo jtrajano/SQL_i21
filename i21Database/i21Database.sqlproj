@@ -3911,6 +3911,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusFGM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusMSM.sql" />
+    <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
