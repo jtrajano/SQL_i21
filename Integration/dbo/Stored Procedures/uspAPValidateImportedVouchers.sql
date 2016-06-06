@@ -18,12 +18,14 @@ DECLARE @log TABLE
 	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 
+SET @logKey = @key;
+
 --GET THOSE VOUCHERS WHERE TOTAL DETAIL IS NOT EQUAL TO TOTAL HEADER
 INSERT INTO @log
 SELECT 
 	strBillId + ' total do not matched.'
 FROM (
-	SELECT 
+	SELECT DISTINCT
 	intBillId
 	,strBillId
 	,i21Total
@@ -58,14 +60,14 @@ WHERE C.ysnPaid = 1 AND D.intPaymentDetailId IS NULL
 
 --GET THOSE INVALID PAYMENT TRANSACTION
 INSERT INTO @log
-SELECT 
+SELECT
 	strPaymentRecordNum + CASE WHEN i21Total <> i21DetailTotal 
 							THEN ' total do not match.'
 							WHEN i21Total < 0
 							THEN ' total amount is negative.'
 							END
 FROM (
-	SELECT 
+	SELECT DISTINCT
 	intPaymentId
 	,strPaymentRecordNum
 	,i21Total
@@ -100,7 +102,7 @@ INSERT INTO tblAPImportVoucherLog
 SELECT 
 	strDescription,
 	@UserId,
-	@logKey,
+	@key,
 	GETDATE()
 FROM @log
 

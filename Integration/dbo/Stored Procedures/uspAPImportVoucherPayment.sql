@@ -19,11 +19,20 @@ DECLARE @check INT, @eft INT, @wire INT, @withdrawal INT, @deposit INT;
 --MISSING PAYMENT VARIABLES
 DECLARE @defaultBankAccountId INT, @defaultBankGLAccountId INT;
 
+DECLARE @pay NVARCHAR(50);
+DECLARE @paymentRecordNum INT;
+
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 
 	BEGIN TRANSACTION
 ELSE 
 	SAVE TRANSACTION uspAPImportVoucherPayment
+
+SELECT
+	@pay = strPrefix,
+	@paymentRecordNum = A.intNumber
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 8
 
 --GET DEFAULT CURRENCY TO USE
 SELECT TOP 1 @defaultCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurrency LIKE '%USD%'
@@ -64,6 +73,8 @@ SELECT @deposit = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaym
 IF OBJECT_ID('tempdb..#tmpPaymentCreated') IS NOT NULL DROP TABLE #tmpPaymentCreated
 CREATE TABLE #tmpPaymentCreated(intPaymentId INT, intId INT);
 
+ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum]
+
 --CREATE PAYMENT
 MERGE INTO tblAPPayment AS destination
 USING
@@ -97,7 +108,8 @@ SELECT
 	[intEntityId]			= @UserId,
 	[intConcurrencyId]		= 0,
 	[intId]					= A.intId,
-	[ysnOrigin]				= 1
+	[ysnOrigin]				= 1,
+	[intPaymentRecordNum]	= (@paymentRecordNum + ROW_NUMBER() OVER(ORDER BY A.intId))
 FROM tmp_apivcmstImport A
 INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no
@@ -115,6 +127,7 @@ INSERT
 	[intCurrencyId],
 	[intEntityVendorId],
 	[strPaymentInfo],
+	[strPaymentRecordNum],
 	[strNotes],
 	[dtmDatePaid],
 	[dblAmountPaid],
@@ -133,6 +146,7 @@ VALUES
 	[intCurrencyId],
 	[intEntityVendorId],
 	[strPaymentInfo],
+	@pay + CAST(intPaymentRecordNum AS NVARCHAR),
 	[strNotes],
 	[dtmDatePaid],
 	[dblAmountPaid],
@@ -146,6 +160,20 @@ VALUES
 OUTPUT inserted.intPaymentId, SourceData.intId INTO #tmpPaymentCreated;
 
 SET @totalCreated = @@ROWCOUNT;
+
+ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
+
+IF @totalCreated <= 0 
+BEGIN
+	IF @transCount = 0 COMMIT TRANSACTION
+	RETURN;
+END
+
+--UPDATE STARTING NUMBER
+UPDATE A
+	SET A.intNumber = @paymentRecordNum + @totalCreated + 1
+FROM tblSMStartingNumber A
+WHERE A.intStartingNumberId = 8
 
 --INSERT PAYMENT DETAIL
 MERGE INTO tblAPPaymentDetail AS destination
