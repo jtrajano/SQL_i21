@@ -3913,6 +3913,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusMSM.sql" />
     <Build Include="dbo\Views\vyuPOForApproval.sql" />
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleMenuSubRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
