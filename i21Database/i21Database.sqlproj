@@ -3602,6 +3602,7 @@
     <Build Include="dbo\Functions\fnMFConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
