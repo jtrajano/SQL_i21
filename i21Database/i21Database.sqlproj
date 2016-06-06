@@ -3907,6 +3907,7 @@
     <None Include="Scripts\Post-Deployment\SM\CreateEncryptionCertificateAndSymmetricKey.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
+    <Build Include="dbo\Views\vyuCCSiteDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
