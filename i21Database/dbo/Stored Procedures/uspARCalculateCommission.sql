@@ -91,7 +91,9 @@ IF @strHurdleType = @HURDLETYPE_DRAW
 
 IF @strBasis = @BASIS_HOURS
 	BEGIN
-		DECLARE @dblTotalHrs NUMERIC(18,6) = 0
+		DECLARE @dblTotalHrs		NUMERIC(18,6) = 0
+		      , @dblTotalRecords	INT
+
 		DECLARE @tmpHDTicketHoursWorkedTable TABLE (
 			  intTicketHoursWorkedId INT
 			, dtmDate DATETIME
@@ -113,6 +115,8 @@ IF @strBasis = @BASIS_HOURS
 		ELSE IF (@strHourType = @HOURTYPE_TOTAL)
 			DELETE FROM @tmpHDTicketHoursWorkedTable WHERE ysnBillable = 1
 		
+		SET @dblTotalRecords = ISNULL((SELECT COUNT(*) FROM @tmpHDTicketHoursWorkedTable), 0)
+
 		--insert into recap
 		INSERT INTO tblARCommissionRecapDetail
 		SELECT @intCommissionRecapId
@@ -120,7 +124,7 @@ IF @strBasis = @BASIS_HOURS
 			 , intTicketHoursWorkedId
 			 , 'tblHDTicketHoursWorked'
 			 , dtmDate
-			 , intHours
+			 , CASE WHEN intHours > (@dblHurdle/@dblTotalRecords) THEN (intHours - (@dblHurdle/@dblTotalRecords)) * @dblCalculationAmount ELSE 0 END
 			 , 1
 		FROM @tmpHDTicketHoursWorkedTable
 
