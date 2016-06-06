@@ -3902,6 +3902,15 @@
     <Build Include="dbo\Stored Procedures\uspMFRecallReport.sql" />
     <Build Include="dbo\Views\vyuSMUserLocationSubRolePermission.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetCOAApprovedSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportISM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMCM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportFGM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTLM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusISM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusMCM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusFGM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutNucleusMSM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4011,6 +4020,15 @@
     <None Include="Scripts\Post-Deployment\EM\025_UpdatePhoneNumberAndCreateBackup.sql" />
     <None Include="Scripts\Post-Deployment\EM\026_ImportPhoneNumbersToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
+    <None Include="Scripts\Post-Deployment\ST\10_Checkout_Passport_FGM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\11_Checkout_Passport_ISM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\12_Checkout_Passport_MCM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\13_Checkout_Passport_MSM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\14_Checkout_Passport_TLM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\15_Checkout_Nucleus_FGM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\16_Checkout_Nucleus_ISM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\17_Checkout_Nucleus_MCM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\18_Checkout_Nucleus_MSM.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

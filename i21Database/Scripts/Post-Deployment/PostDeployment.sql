@@ -325,6 +325,15 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\7_Checkout_Radiant_MCM.sql
 :r .\ST\8_Checkout_Radiant_FGM.sql
 :r .\ST\9_Checkout_Radiant_MSM.sql
+:r .\ST\10_Checkout_Passport_FGM.sql
+:r .\ST\11_Checkout_Passport_ISM.sql
+:r .\ST\12_Checkout_Passport_MCM.sql
+:r .\ST\13_Checkout_Passport_MSM.sql
+:r .\ST\14_Checkout_Passport_TLM.sql
+:r .\ST\15_Checkout_Nucleus_FGM.sql
+:r .\ST\16_Checkout_Nucleus_ISM.sql
+:r .\ST\17_Checkout_Nucleus_MCM.sql
+:r .\ST\18_Checkout_Nucleus_MSM.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\_TaxAuthority.sql
