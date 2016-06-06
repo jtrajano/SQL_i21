@@ -365,7 +365,12 @@ INNER JOIN #tmpVoucherTransactions B ON A.intId = B.intBackupId
 
 --GET TOTAL UNPOSTED VOUCHER
 SELECT 
-	@totalUnpostedVoucher = SUM(A.aptrx_orig_amt)
+	@totalUnpostedVoucher = SUM(
+		(CASE WHEN A.aptrx_trans_type IN ('C','A') AND A.aptrx_orig_amt > 0
+				THEN A.aptrx_orig_amt * -1 
+			WHEN A.aptrx_trans_type IN ('I') AND A.aptrx_orig_amt < 0
+				THEN A.aptrx_orig_amt * -1 
+			ELSE A.aptrx_orig_amt END))
 FROM tmp_aptrxmstImport A
 
 INSERT INTO tblAPImportVoucherLog

@@ -403,7 +403,14 @@ INNER JOIN #tmpVoucherTransactions B ON A.intId = B.intBackupId
 
 --GET TOTAL POSTED VOUCHER
 SELECT 
-	@totalPostedVoucher = SUM(A.apivc_orig_amt - ISNULL(A.apivc_disc_taken,0))
+	@totalPostedVoucher = 
+	SUM(
+		(CASE WHEN A.apivc_trans_type IN ('C','A') AND A.apivc_orig_amt > 0
+				THEN A.apivc_orig_amt * -1 
+			WHEN A.apivc_trans_type IN ('I') AND A.apivc_orig_amt < 0
+				THEN A.apivc_orig_amt * -1 
+			ELSE A.apivc_orig_amt END))
+	- SUM(ISNULL(A.apivc_disc_taken,0))
 FROM tmp_apivcmstImport A
 
 INSERT INTO tblAPImportVoucherLog
