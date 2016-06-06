@@ -3603,6 +3603,7 @@
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
+    <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
