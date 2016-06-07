@@ -1380,7 +1380,7 @@ BEGIN
 			END 
 				
 			-- Fix discrepancies when posting Consume and Produce. 
-			IF ISNULL(@ysnPost, 1) = 1
+			IF ISNULL(@ysnPost, 1) = 1 AND EXISTS (SELECT TOP 1 1 FROM @GLEntries WHERE strTransactionType = 'Consume' OR strTransactionType = 'Produce')
 			BEGIN 
 				PRINT 'Update decimal issue for Produce'
 
