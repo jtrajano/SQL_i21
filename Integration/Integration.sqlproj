@@ -314,6 +314,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateDriverUsedBySiteView.sql" />
     <None Include="dbo\Views\vyuTMOriginItemUsedBySite.sql" />
     <None Include="dbo\Views\vyuCMBankTransaction.sql" />
-    <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
+    <None Include="dbo\Functions\fnGetDepositEntry.sql" />
   </ItemGroup>
 </Project>
