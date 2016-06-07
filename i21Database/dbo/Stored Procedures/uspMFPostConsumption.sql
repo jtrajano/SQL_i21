@@ -27,6 +27,11 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@intLotId INT
 	,@intItemUOMId INT
 	,@dblDefaultResidueQty NUMERIC(18, 6)
+	,@intItemId INT
+	,@intCategoryId INT
+	,@intManufacturingCellId INT
+	,@intSubLocationId INT
+	
 DECLARE @tblMFLot TABLE (
 	intRecordId INT Identity(1, 1)
 	,intLotId INT
@@ -35,13 +40,36 @@ DECLARE @tblMFLot TABLE (
 
 SET @ysnPost = ISNULL(@ysnPost, 0)
 
-SELECT TOP 1 @intTransactionId = @intBatchId
-	,@strTransactionId = strWorkOrderNo
+SELECT TOP 1 @strTransactionId = strWorkOrderNo
 	,@dtmDate = GetDate()
 	,@intCreatedEntityId = @intUserId
 	,@intLocationId = intLocationId
+	,@intItemId = intItemId
+	,@intManufacturingCellId = intManufacturingCellId
+	,@intSubLocationId = intSubLocationId
 FROM dbo.tblMFWorkOrder
 WHERE intWorkOrderId = @intWorkOrderId
+
+SELECT @intCategoryId = intCategoryId
+FROM dbo.tblICItem
+WHERE intItemId = @intItemId
+
+IF @intBatchId IS NULL
+	OR @intBatchId = 0
+BEGIN
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		,@intItemId = @intItemId
+		,@intManufacturingId = @intManufacturingCellId
+		,@intSubLocationId = @intSubLocationId
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 33
+		,@ysnProposed = 0
+		,@strPatternString = @intBatchId OUTPUT
+END
+
+SELECT @intTransactionId = @intBatchId
 
 SELECT @dtmDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
 
