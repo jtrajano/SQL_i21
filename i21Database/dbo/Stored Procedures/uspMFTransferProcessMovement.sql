@@ -247,7 +247,7 @@ BEGIN TRY
 		PRINT 'Call Lot Adjust routine.'
 	END
 
-	IF @dblWeight > @dblNewWeight
+	IF @ysnItemChanged = 1
 	BEGIN
 		SELECT @intCategoryId = intCategoryId
 		FROM dbo.tblICItem
@@ -274,6 +274,9 @@ BEGIN TRY
 				,@intSplitSubLocationId = intSubLocationId
 			FROM dbo.tblICStorageLocation
 			WHERE strName = @strTransferStorageLocationForNewLot
+				AND intLocationId = @intLocationId
+				--SELECT @intSourceStorageLocationId = @intSplitStorageLocationId
+				--SELECT @intSourceSubLocationId = @intSplitSubLocationId
 		END
 		ELSE
 		BEGIN
@@ -303,10 +306,7 @@ BEGIN TRY
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 		SELECT @strLotNumber = @strSplitLotNumber
-	END
 
-	IF @ysnItemChanged = 1
-	BEGIN
 		EXEC [dbo].[uspICInventoryAdjustment_CreatePostItemChange]
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
@@ -336,6 +336,12 @@ BEGIN TRY
 	WHERE intStorageLocationId = @intDestinationStorageLocationId
 
 	IF @strInternalCode = 'PROD_STAGING'
+		OR EXISTS (
+			SELECT *
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intDestinationStorageLocationId
+			)
 	BEGIN
 		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
 				CASE 
@@ -357,7 +363,7 @@ BEGIN TRY
 			,@intNewLocationId = @intLocationId
 			,@intNewSubLocationId = @intDestinationSubLocationId
 			,@intNewStorageLocationId = @intDestinationStorageLocationId
-			,@strNewLotNumber = @strDestinationLotNumber
+			,@strNewLotNumber = @strLotNumber
 			,@dblAdjustByQuantity = @dblAdjustByQuantity
 			,@dblNewSplitLotQuantity = NULL
 			,@dblNewWeight = NULL
@@ -373,7 +379,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT @dblAdjustByQuantity =  @dblNewWeight / (
+		SELECT @dblAdjustByQuantity = @dblNewWeight / (
 				CASE 
 					WHEN @intWeightUOMId IS NULL
 						THEN 1
@@ -381,8 +387,6 @@ BEGIN TRY
 					END
 				)
 
-		--SELECT @intInputItemId,@dtmCurrentDateTime,@intLocationId,@intSourceSubLocationId,@intSourceStorageLocationId,@strLotNumber,@intDestinationSubLocationId,@intDestinationStorageLocationId,@dblAdjustByQuantity
-		--Select 'Begin'
 		EXEC uspICInventoryAdjustment_CreatePostLotMove
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
@@ -403,7 +407,6 @@ BEGIN TRY
 			,@intSourceTransactionTypeId = 8
 			,@intEntityUserSecurityId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			--Select 'End'
 	END
 
 	IF @intTransactionCount = 0
