@@ -43,6 +43,12 @@ DECLARE @tblInputItem TABLE (
 		Where sh.intOrderType=2 AND sd.intOrderId=@intSalesOrderId)
 		RaisError('Shipmnet is alredy created for the sales order.',16,1)
 
+	If (Select ISNULL(strBOLNumber,'') From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)=''
+		RaisError('Please enter BOL number in Sales Order before shipping.',16,1)
+
+	If (Select ISNULL(intFreightTermId,0) From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)=0
+		RaisError('Please enter freight term in Sales Order before shipping.',16,1)
+
 Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId)
 Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
 Where intSalesOrderId=@intSalesOrderId Group By sd.intItemId,sd.intItemUOMId
@@ -84,7 +90,7 @@ Begin Tran
 	Begin
 		Select @intLotId=intLotId,@dblShipQty=dblPickQuantity,@intItemId=intItemId From tblMFPickListDetail Where intPickListDetailId=@intMinPickListDetail
 
-		Select TOP 1 @intInventoryShipmentItemId=intInventoryShipmentItemId From tblICInventoryShipmentItem Where intItemId=@intItemId
+		Select TOP 1 @intInventoryShipmentItemId=intInventoryShipmentItemId From tblICInventoryShipmentItem Where intInventoryShipmentId=@intInventoryShipmentId AND intItemId=@intItemId
 
 		INSERT INTO tblICInventoryShipmentItemLot(intInventoryShipmentItemId, intLotId, dblQuantityShipped, dblGrossWeight, dblTareWeight)
 		VALUES (@intInventoryShipmentItemId, @intLotId, @dblShipQty, 0, 0)
