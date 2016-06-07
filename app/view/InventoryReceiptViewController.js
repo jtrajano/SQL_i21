@@ -1681,7 +1681,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
 
             if (itemDetailTax.ysnCheckoffTax){
-                tax = tax * -1;
+               var tax = tax * -1;
             }
 
             tax = i21.ModuleMgr.Inventory.roundDecimalFormat(tax, 2);
