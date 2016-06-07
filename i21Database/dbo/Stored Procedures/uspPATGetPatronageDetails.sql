@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATGetPatronageDetails] 
-	@intCustomerId INT = NULL
+	 @intCustomerId INT = NULL
+	,@intFiscalYear INT = NULL
 AS
 BEGIN
 	SELECT CV.intPatronageCategoryId,
@@ -12,7 +13,7 @@ BEGIN
 	  FROM tblPATCustomerVolume CV
 INNER JOIN tblPATPatronageCategory PC
 		ON PC.intPatronageCategoryId = CV.intPatronageCategoryId
-	 WHERE intCustomerPatronId = @intCustomerId
+	 WHERE intCustomerPatronId = @intCustomerId AND intFiscalYear = @intFiscalYear
 
 END
 
