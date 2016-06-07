@@ -226,6 +226,7 @@ FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactio
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 WHERE	TRANS.strBatchId = @strBatchId
+;
 
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
