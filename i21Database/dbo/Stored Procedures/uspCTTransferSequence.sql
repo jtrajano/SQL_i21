@@ -103,7 +103,7 @@ BEGIN TRY
 	SET		intContractHeaderId = @intDestinationHeaderId
 	WHERE	intContractDetailId = @intContractDetailId
 
-	UPDATE	tblCTPriceFiation
+	UPDATE	tblCTPriceFixation
 	SET		intContractHeaderId = @intDestinationHeaderId
 	WHERE	intContractDetailId = @intContractDetailId
 
