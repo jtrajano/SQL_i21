@@ -210,9 +210,9 @@ BEGIN
 									ELSE CONVERT(VARCHAR(8),glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_grp_sub9_16),@segmentLength)
 								END
 					WHEN glfsf_action_type=''ACA'' THEN 
-								CONVERT(VARCHAR(8),glfsf_aca1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_aca9_16),@segmentLength)
+								CONVERT(VARCHAR(8),glfsf_aca1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),RTRIM(glfsf_aca9_16)),@segmentLength)
 					WHEN glfsf_action_type=''ACP'' THEN 
-								CONVERT(VARCHAR(8),glfsf_acp1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_acp9_16),@segmentLength)
+								CONVERT(VARCHAR(8),glfsf_acp1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),RTRIM(glfsf_acp9_16)),@segmentLength)
 					END,
 				CASE 
 					WHEN glfsf_gra_sub9_16 like ''%*%'' THEN ''YES''
@@ -221,12 +221,12 @@ BEGIN
 					WHEN glfsf_acp9_16 like ''%*%'' THEN ''YES''
 					ELSE ''NO''
 					END,
-				ISNULL(RTRIM(''00000000'' + glfsf_grp_sub9_16),
-					ISNULL(RTRIM(''00000000'' + glfsf_gra_sub9_16),
-					ISNULL(RTRIM(''00000000'' + glfsf_grp_sub9_16),
-					ISNULL(RTRIM(''00000000'' + glfsf_aca9_16),
-					ISNULL(RTRIM(''00000000'' + glfsf_acp9_16),
-					ISNULL(RTRIM(''00000000'' + glfsf_net_sub9_16),''00000000'')))))),
+				ISNULL(RTRIM(glfsf_grp_sub9_16),
+					ISNULL(RTRIM(glfsf_gra_sub9_16),
+					ISNULL(RTRIM(glfsf_grp_sub9_16),
+					ISNULL(RTRIM(glfsf_aca9_16),
+					ISNULL(RTRIM(glfsf_acp9_16),
+					ISNULL(RTRIM(glfsf_net_sub9_16),''00000000'')))))),
 				glfsf_no,
 				glfsf_line_no,
 				ISNULL(RTRIM(''00000000'' + glfsf_gra_beg1_8),		--1 to 8 beginning for building 
