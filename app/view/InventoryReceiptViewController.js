@@ -1671,8 +1671,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
             var taxableAmount,
-                taxAmount,
-                tax;
+                taxAmount;
+               
 
             taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
             if (itemDetailTax.strCalculationMethod === 'Percentage') {
@@ -1682,10 +1682,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
 
             if (itemDetailTax.ysnCheckoffTax){
-                tax = tax * -1;
+                taxAmount = taxAmount * -1;
             }
 
-            tax = i21.ModuleMgr.Inventory.roundDecimalFormat(tax, 2);
+            taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
 
             if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
                 if (itemDetailTax.ysnTaxExempt)
