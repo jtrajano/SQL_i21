@@ -4032,6 +4032,7 @@
     <None Include="Scripts\Post-Deployment\ST\16_Checkout_Nucleus_ISM.sql" />
     <None Include="Scripts\Post-Deployment\ST\17_Checkout_Nucleus_MCM.sql" />
     <None Include="Scripts\Post-Deployment\ST\18_Checkout_Nucleus_MSM.sql" />
+    <None Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
