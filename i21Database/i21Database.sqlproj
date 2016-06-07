@@ -3913,6 +3913,7 @@
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
     <Build Include="dbo\Views\vyuTRGetImportRackPriceDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
+    <Build Include="dbo\Tables\tblSMOfflineConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
