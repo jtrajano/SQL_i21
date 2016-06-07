@@ -315,6 +315,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\026_ImportPhoneNumbersToNewTable.sql
 :r .\EM\027_MassUpdatePhoneNumber.sql
 :r .\EM\029_FillInPhoneAndMobile.sql
+:r .\EM\030-FixSalesperson.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
