@@ -191,8 +191,8 @@ END
 
 -- Delete the inventory transaction record if it falls within the date range. 
 BEGIN 
-	DELETE FROM tblICInventoryTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1
-	DELETE FROM tblICInventoryLotTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1
+	DELETE FROM tblICInventoryTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE FROM tblICInventoryLotTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
 --------------------------------------------------------------------
@@ -1380,7 +1380,7 @@ BEGIN
 			END 
 				
 			-- Fix discrepancies when posting Consume and Produce. 
-			IF ISNULL(@ysnPost, 1) = 1
+			IF ISNULL(@ysnPost, 1) = 1 AND EXISTS (SELECT TOP 1 1 FROM @GLEntries WHERE strTransactionType = 'Consume' OR strTransactionType = 'Produce')
 			BEGIN 
 				PRINT 'Update decimal issue for Produce'
 

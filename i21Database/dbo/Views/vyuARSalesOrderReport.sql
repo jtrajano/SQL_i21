@@ -30,7 +30,7 @@ SELECT SO.intSalesOrderId
 	 , strType					= I.strType
 	 , intCategoryId			= CASE WHEN QT.strOrganization IN ('Product Type', 'Item Category') THEN I.intCategoryId ELSE NULL END
 	 , strCategoryCode			= ICC.strCategoryCode
-	 , strCategoryDescription   = ISNULL(ICC.strDescription, 'No/Miscellaneous Item Category')
+	 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 	 , intSalesOrderDetailId	= SD.intSalesOrderDetailId
 	 , strContractNumber		= CH.strContractNumber
 	 , strItemDescription		= SD.strItemDescription
@@ -42,7 +42,7 @@ SELECT SO.intSalesOrderId
 	 , strOrganization			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.strOrganization ELSE NULL END
 	 , ysnDisplayTitle			= CASE WHEN SO.strTransactionType = 'Quote' THEN QT.ysnDisplayTitle ELSE NULL END
 	 , intProductTypeId			= CASE WHEN SO.strTransactionType = 'Quote' AND QT.strOrganization = 'Product Type' THEN PD.intProductTypeId ELSE NULL END
-	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN ISNULL(PD.strProductTypeDescription, 'No/Miscellaneous Product Type') ELSE NULL END
+	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN CASE WHEN PD.intProductTypeId IS NULL THEN 'No Product Type' ELSE PD.strProductTypeName + ' - ' + PD.strProductTypeDescription END ELSE NULL END
 	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN PD.strProductTypeName ELSE NULL END
 	 , dtmExpirationDate		= CASE WHEN SO.strTransactionType = 'Quote' THEN SO.dtmExpirationDate ELSE NULL END
 	 , strBillTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName, ysnIncludeEntityName)

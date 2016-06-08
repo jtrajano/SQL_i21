@@ -14,6 +14,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @ErrorSeverity INT,
+		@ErrorNumber   INT,
+		@ErrorState INT
+
 BEGIN TRY
 
 	DECLARE @BankTransaction BankTransactionTable
@@ -109,16 +113,32 @@ BEGIN TRY
 			,@BankTransactionDetailEntries = @BankTransactionDetail
 			,@intTransactionId = @createdBankTransactionId OUTPUT
 
-		EXEC [dbo].[uspCMPostBankTransaction]
-			@ysnPost = 1
-			,@ysnRecap = 0
-			,@strTransactionId = @strTransactionId
-			,@intUserId = @userId
-			,@intEntityId = @userId
-			,@isSuccessful = @success OUTPUT
+			BEGIN TRY
+				EXEC [dbo].[uspCMPostBankTransaction]
+					@ysnPost = 1
+					,@ysnRecap = 0
+					,@strTransactionId = @strTransactionId
+					,@intUserId = @userId
+					,@intEntityId = @userId
+					,@isSuccessful = @success OUTPUT
 
-		IF ISNULL(@success, 0) = 0
-			SET @success = 0
+				IF ISNULL(@success, 0) = 0
+					SET @success = 0
+
+			END TRY
+			BEGIN CATCH
+				SET @ErrorSeverity = ERROR_SEVERITY()
+				SET @ErrorNumber   = ERROR_NUMBER()
+				SET @errorMessage  = ERROR_MESSAGE()
+				SET @ErrorState    = ERROR_STATE()
+				SET	@success = 0
+
+				IF(@strTransactionId IS NOT NULL)
+					DELETE tblAPBill WHERE intBillId = @strTransactionId
+
+				RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+
+			END CATCH
 		END
 	ELSE
 		BEGIN
@@ -127,10 +147,6 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	DECLARE @ErrorSeverity INT,
-			@ErrorNumber   INT,
-			@ErrorState INT,
-			@ErrorProc nvarchar(200);
 	SET @ErrorSeverity = ERROR_SEVERITY()
 	SET @ErrorNumber   = ERROR_NUMBER()
 	SET @errorMessage  = ERROR_MESSAGE()

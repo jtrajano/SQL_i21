@@ -111,7 +111,7 @@ BEGIN TRY
 	 ,a.dtmLastStorageAccrueDate
 	 ,a.dblStorageDue dblOldStorageDue
 	 ,bill.dblAdditionalCharge
-	 ,a.dblStorageDue+bill.dblAdditionalCharge AS dblNewStorageDue
+	 ,(a.dblStorageDue-a.dblStoragePaid)+bill.dblAdditionalCharge AS dblNewStorageDue
 	 ,a.dblStoragePaid dblOldStorageBilled
 	 ,CASE WHEN @PostType='Bill Storage' THEN (a.dblStoragePaid+bill.dblAdditionalCharge) ELSE a.dblStoragePaid END  AS dblNewStorageBilled
 	 ,a.dblOpenBalance* CASE WHEN @PostType='Bill Storage' THEN bill.dblAdditionalCharge ELSE 0 END  AS dblStorageDueAmount

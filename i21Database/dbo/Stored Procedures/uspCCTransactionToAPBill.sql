@@ -16,6 +16,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @ErrorSeverity INT,
+		@ErrorNumber   INT,
+		@ErrorState INT
+
 BEGIN TRY
 
 	DECLARE @voucherDetailCC AS VoucherDetailCC
@@ -82,25 +86,35 @@ BEGIN TRY
 		,@voucherDetaiCC = @voucherDetailCC
 		,@billId = @createdBillId OUTPUT
 
-	EXEC [dbo].[uspAPPostBill]
-		@batchId = @createdBillId,
-		@billBatchId = NULL,
-		@transactionType = NULL,
-		@post = 1,
-		@recap = 0,
-		@isBatch = 0,
-		@param = NULL,
-		@userId = @userId,
-		@beginTransaction = @createdBillId,
-		@endTransaction = @createdBillId,
-		@success = @success OUTPUT
+		BEGIN TRY
+			EXEC [dbo].[uspAPPostBill]
+				@batchId = @createdBillId,
+				@billBatchId = NULL,
+				@transactionType = NULL,
+				@post = 1,
+				@recap = 0,
+				@isBatch = 0,
+				@param = NULL,
+				@userId = @userId,
+				@beginTransaction = @createdBillId,
+				@endTransaction = @createdBillId,
+				@success = @success OUTPUT
+		END TRY
+		BEGIN CATCH
+			SET @ErrorSeverity = ERROR_SEVERITY()
+			SET @ErrorNumber   = ERROR_NUMBER()
+			SET @errorMessage  = ERROR_MESSAGE()
+			SET @ErrorState    = ERROR_STATE()
+			SET	@success = 0
 
+			IF(@createdBillId IS NOT NULL)
+				DELETE tblAPBill WHERE intBillId = @createdBillId
+
+			RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+		END CATCH
+	
 END TRY
 BEGIN CATCH
-	DECLARE @ErrorSeverity INT,
-			@ErrorNumber   INT,
-			@ErrorState INT,
-			@ErrorProc nvarchar(200);
 	SET @ErrorSeverity = ERROR_SEVERITY()
 	SET @ErrorNumber   = ERROR_NUMBER()
 	SET @errorMessage  = ERROR_MESSAGE()
