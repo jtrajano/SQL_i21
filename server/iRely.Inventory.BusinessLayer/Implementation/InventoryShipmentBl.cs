@@ -96,6 +96,9 @@ namespace iRely.Inventory.BusinessLayer
                             if (!salesOrderToUpdate.Contains(shipment.Entity.intInventoryShipmentId))
                                 salesOrderToUpdate.Add(shipment.Entity.intInventoryShipmentId);
                         }
+
+                        //Update Contract for deleted shipments 
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId", new SqlParameter("ShipmentId", ShipmentId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
                     }
 
                     // Call the Sales Order SP to update the SO status 
@@ -128,14 +131,13 @@ namespace iRely.Inventory.BusinessLayer
                         }
 
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId", new SqlParameter("ShipmentId", ShipmentId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
-                    }                    
-
-                    transaction.Commit();
+                    }
 
                     if (result.HasError)
                     {
                         throw result.BaseException;
                     }
+                    transaction.Commit();
                 }
                 catch (Exception ex)
                 {
