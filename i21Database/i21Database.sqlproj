@@ -3933,6 +3933,7 @@
     <Build Include="dbo\Views\vyuTRGetImportRackItemError.sql" />
     <Build Include="dbo\Views\vyuSCTicketAlertView.sql" />
     <Build Include="dbo\Views\vyuARItemCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMTransferContractSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
