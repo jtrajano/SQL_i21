@@ -80,3 +80,7 @@ EXEC sp_addmessage 90015,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90016) EXEC sp_dropmessage 90016, 'us_english'	
 SET @strmessage = 'Source Lot''s UOM %s is not configured as one of the UOM in destination item %s.'
 EXEC sp_addmessage 90016,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90017) EXEC sp_dropmessage 90017, 'us_english'	
+SET @strmessage = 'Production reversal is not allowed for lots having zero qty.'
+EXEC sp_addmessage 90017,11,@strmessage,'us_english','False'
