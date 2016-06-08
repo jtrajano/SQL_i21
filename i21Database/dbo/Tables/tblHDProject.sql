@@ -40,7 +40,7 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
-	CONSTRAINT [UNQ_ProjectName] UNIQUE ([strProjectName]),
+	CONSTRAINT [UNQ_ProjectName] UNIQUE ([strProjectName], [strType]),
     CONSTRAINT [FK_Project_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     --CONSTRAINT [FK_Project_Contact] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].[tblEMEntityContact] ([intEntityContactId]),
     CONSTRAINT [FK_Project_Contact] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),

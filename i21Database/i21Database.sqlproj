@@ -3910,6 +3910,14 @@
     <Build Include="dbo\Views\vyuCCSiteDetail.sql" />
     <Build Include="dbo\Views\vyuCCSiteHeader.sql" />
     <Build Include="dbo\Views\vyuCCSiteBatchDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUnreconcileBankRecords.sql" />
+    <Build Include="dbo\Views\vyuSMUserLocationSubRolePermission.sql" />
+    <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
+    <Build Include="dbo\Views\vyuTRGetImportRackPriceDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
+    <Build Include="dbo\Tables\tblSMOfflineConfiguration.sql" />
+    <Build Include="dbo\Views\vyuEMEntityContact2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

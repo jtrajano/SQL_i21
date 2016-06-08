@@ -44,6 +44,13 @@ AS
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'ysnShowPrice'
 
+DECLARE @strCompanyName NVARCHAR(100)
+	,@strCompanyAddress NVARCHAR(100)
+	,@strCity NVARCHAR(25)
+	,@strState NVARCHAR(50)
+	,@strZip NVARCHAR(12)
+	,@strCountry NVARCHAR(25)
+
 DECLARE @tblWO TABLE (
 	 intRowNo INT identity(1, 1)
 	,intWorkOrderId INT
@@ -56,6 +63,14 @@ DECLARE @tblWOFinal TABLE (
 	,strLotId NVARCHAR(max)
 	,intBatchId INT
 	)
+
+SELECT TOP 1 @strCompanyName = strCompanyName
+	,@strCompanyAddress = strAddress
+	,@strCity = strCity
+	,@strState = strState
+	,@strZip = strZip
+	,@strCountry = strCountry
+FROM dbo.tblSMCompanySetup
 
 INSERT INTO @tblWO (intWorkOrderId)
 SELECT DISTINCT intWorkOrderId
@@ -115,5 +130,9 @@ INNER JOIN @tblWOFinal b ON a.intBatchId = b.intBatchId
 SELECT DISTINCT @intBlendRequirementId AS intBlendRequirementId
 	,@ysnShowPrice AS ysnShowPrice
 	,intBatchId
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+	,@strCountry AS strCompanyCountry	
 FROM @tblWOFinal
 ORDER BY intBatchId

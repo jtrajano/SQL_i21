@@ -88,7 +88,10 @@ SELECT
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
-	,@Comments						= 'DUP: ' + [strInvoiceNumber] 
+	,@Comments						= CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
+										THEN [strComments]
+										ELSE [strComments] + ' DUP: ' + [strInvoiceNumber] 
+									  END
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
 	,@Template						= 0		--[ysnTemplate]
@@ -103,6 +106,7 @@ SELECT
 	,@TransactionId					= NULL	--[intTransactionId]
 	,@OriginalInvoiceId				= NULL	--[intOriginalInvoiceId]
 	,@EntityId						= @UserId
+	,@ForRecurring					=  [ysnRecurring]
 FROM
 	tblARInvoice
 WHERE
@@ -518,7 +522,7 @@ BEGIN CATCH
 END CATCH
 
 BEGIN TRY
-	UPDATE tblARInvoice SET ysnRecurring = @ForRecurring WHERE intInvoiceId = @NewInvoiceId
+ UPDATE tblARInvoice SET ysnRecurring = @ForRecurring WHERE intInvoiceId = @NewInvoiceId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

@@ -37,6 +37,8 @@ BEGIN
 	DECLARE @intNewDeliveryHistoryId INT
 	DECLARE @intTopInvoiceDetailId INT
 	DECLARE @strBillingBy NVARCHAR(15)
+	DECLARE @intSeasonResetId INT
+	DECLARE @dblLastAccumulatedDDOnSeasonReset NUMERIC(18,6)
 	
 
 
@@ -147,8 +149,17 @@ BEGIN
 					@intLastDegreeDays = intDegreeDays
 					,@dblLastAccumulatedDegreeDay = dblAccumulatedDD
 					,@intLastClockReadingId = intDDReadingID
+					,@intSeasonResetId = intSeasonResetArchiveID
 				FROM tblTMDDReadingSeasonResetArchive
 				WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmLastDeliveryDate), 0) 
+
+				SELECT TOP 1
+					@dblLastAccumulatedDDOnSeasonReset = ISNULL(dblAccumulatedDD,0.0)
+				FROM tblTMDDReadingSeasonResetArchive
+				WHERE intClockID = @intClockId AND intSeasonResetArchiveID = @intSeasonResetId
+				ORDER BY dtmDate DESC
+
+				SET @dblLastAccumulatedDegreeDay = @dblLastAccumulatedDegreeDay - ISNULL(@dblLastAccumulatedDDOnSeasonReset,0.0)
 			END
 		END
 		
