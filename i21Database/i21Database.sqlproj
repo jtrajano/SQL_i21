@@ -3921,6 +3921,7 @@
     <Build Include="dbo\Tables\tblETExportFilterTaxGroup.sql" />
     <Build Include="dbo\Tables\tblETExportFilterTerm.sql" />
     <Build Include="dbo\Views\vyuSCTicketAlertView.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMTransferContractSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
