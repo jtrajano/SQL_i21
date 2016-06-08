@@ -3920,6 +3920,7 @@
     <Build Include="dbo\Tables\tblETExportFilterLocation.sql" />
     <Build Include="dbo\Tables\tblETExportFilterTaxGroup.sql" />
     <Build Include="dbo\Tables\tblETExportFilterTerm.sql" />
+    <Build Include="dbo\Views\vyuSCTicketAlertView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
