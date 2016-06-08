@@ -2654,13 +2654,15 @@ IF @recap = 0
 					UPDATE 
 						tblARInvoice
 					SET
-						ysnPosted = 0
-						,ysnPaid = 0
-						,dblAmountDue = ISNULL(dblInvoiceTotal, @ZeroDecimal) - ISNULL(dblPayment, @ZeroDecimal)
-						,dblDiscount = ISNULL(dblDiscount, @ZeroDecimal)
-						,dblPayment = ISNULL(dblPayment, @ZeroDecimal)
-						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
-						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+						ysnPosted				= 0
+						,ysnPaid				= 0
+						,dblAmountDue			= ISNULL(dblInvoiceTotal, @ZeroDecimal) - ISNULL(dblPayment, @ZeroDecimal)
+						,dblDiscount			= @ZeroDecimal
+						,dblDiscountAvailable	= @ZeroDecimal
+						,dblInterest			= @ZeroDecimal
+						,dblPayment				= ISNULL(dblPayment, @ZeroDecimal)
+						,dtmPostDate			= CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
+						,intConcurrencyId		= ISNULL(intConcurrencyId,0) + 1
 					FROM
 						tblARInvoice 
 					WHERE 
@@ -2752,14 +2754,16 @@ IF @recap = 0
 					UPDATE 
 						tblARInvoice
 					SET
-						ysnPosted = 1
-						,ysnPaid = (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 OR tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
-						,dblInvoiceTotal = dblInvoiceTotal
-						,dblAmountDue = (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(dblInvoiceTotal, @ZeroDecimal) END) - (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(dblPayment, @ZeroDecimal) END)
-						,dblDiscount = ISNULL(dblDiscount, @ZeroDecimal)
-						,dblPayment = (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(dblPayment, @ZeroDecimal) END)
-						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
-						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
+						ysnPosted				= 1
+						,ysnPaid				= (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 OR tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
+						,dblInvoiceTotal		= dblInvoiceTotal
+						,dblAmountDue			= (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(dblInvoiceTotal, @ZeroDecimal) END) - (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(dblPayment, @ZeroDecimal) END)
+						,dblDiscount			= @ZeroDecimal
+						,dblDiscountAvailable	= @ZeroDecimal
+						,dblInterest			= @ZeroDecimal
+						,dblPayment				= (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(dblPayment, @ZeroDecimal) END)
+						,dtmPostDate			= CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
+						,intConcurrencyId		= ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 
