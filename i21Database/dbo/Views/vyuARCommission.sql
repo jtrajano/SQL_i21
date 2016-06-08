@@ -4,6 +4,7 @@ SELECT strCommissionEntityName	= E.strName
 	 , intCommissionEntityId	= C.intEntityId
      , CP.strCommissionPlanName
 	 , CS.strCommissionScheduleName
+	 , CP.dblHurdle
 	 , strDateRange				= CONVERT(NVARCHAR(20), C.dtmStartDate, 101) + ' - ' + CONVERT(NVARCHAR(20), C.dtmEndDate, 101)
 	 , C.*
 	 , strCompanyName			= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
