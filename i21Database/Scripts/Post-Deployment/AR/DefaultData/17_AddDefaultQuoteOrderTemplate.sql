@@ -5,6 +5,8 @@ DECLARE @tblARQuoteTemplate TABLE(intQuoteTemplateId INT)
 DECLARE @tblARQuoteTemplateDetail TABLE(intQuoteTemplateId INT, intQuoteTemplateDetailId INT)
 DECLARE @intQuoteTemplateId INT
 
+UPDATE tblARQuoteTemplateDetail SET intQuotePageId = NULL WHERE intQuotePageId = 0
+
 INSERT INTO @tblARQuoteTemplate
 SELECT intQuoteTemplateId 
 FROM tblARQuoteTemplate WHERE intQuoteTemplateId NOT IN(
