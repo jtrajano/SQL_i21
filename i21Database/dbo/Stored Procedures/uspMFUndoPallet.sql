@@ -92,6 +92,22 @@ BEGIN TRY
 		RETURN
 	END
 
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId
+				AND dblQty=0
+			) and @ysnForceUndo=0
+	BEGIN
+		RAISERROR (
+				90017
+				,11
+				,1
+				)
+
+		RETURN
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblICInventoryTransaction
