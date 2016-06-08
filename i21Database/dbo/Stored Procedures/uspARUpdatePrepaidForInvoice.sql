@@ -35,9 +35,9 @@ BEGIN TRY
 		tblARPrepaidAndCredit
 	WHERE
 		tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId
-		AND (NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intPrepaymentId] = tblARPrepaidAndCredit.[intPrepaymentId] AND vyuARPrepaidAndCredit.[dblInvoiceBalance] <> 0)
+		AND (NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intPrepaymentId] = tblARPrepaidAndCredit.[intPrepaymentId])
 			OR
-			NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intPrepaymentDetailId] = tblARPrepaidAndCredit.[intPrepaymentDetailId] AND vyuARPrepaidAndCredit.[dblInvoiceDetailBalance] <> 0))
+			NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intPrepaymentDetailId] = tblARPrepaidAndCredit.[intPrepaymentDetailId]))
 END TRY
 BEGIN CATCH	
 	SET @ErrorSeverity = ERROR_SEVERITY()
@@ -57,10 +57,10 @@ BEGIN TRY
 		,tblARPrepaidAndCredit.[intPrepaymentDetailId]			= ARPAC.[intPrepaymentDetailId]
 		,tblARPrepaidAndCredit.[dblPostedAmount]				= @ZeroDecimal
 		,tblARPrepaidAndCredit.[dblPostedDetailAmount]			= @ZeroDecimal
-		,tblARPrepaidAndCredit.[dblAppliedInvoiceAmount]		= (CASE WHEN ARPAC.[ysnApplied] = 1 THEN ARPAC.[dblAppliedInvoiceAmount] ELSE @ZeroDecimal END)
-		,tblARPrepaidAndCredit.[dblAppliedInvoiceDetailAmount]	= (CASE WHEN ARPAC.[ysnApplied] = 1 THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END)
-		,tblARPrepaidAndCredit.[ysnApplied]						= ARPAC.[ysnApplied]
-		,tblARPrepaidAndCredit.[ysnPosted]						= ARPAC.[ysnPosted]
+		,tblARPrepaidAndCredit.[dblAppliedInvoiceAmount]		= @ZeroDecimal
+		,tblARPrepaidAndCredit.[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
+		,tblARPrepaidAndCredit.[ysnApplied]						= 0
+		,tblARPrepaidAndCredit.[ysnPosted]						= 0
 		,tblARPrepaidAndCredit.[intConcurrencyId]				= tblARPrepaidAndCredit.[intConcurrencyId] + 1
 	FROM
 		vyuARPrepaidAndCredit ARPAC
@@ -95,7 +95,7 @@ BEGIN TRY
 		,[ysnApplied]
 		,[ysnPosted]
 		,[intConcurrencyId])
-	SELECT
+	SELECT DISTINCT
 		 [intInvoiceId]						= @InvoiceId
 		,[intInvoiceDetailId]				= NULL
 		,[intPrepaymentId]					= ARPAC.[intPrepaymentId]
@@ -113,6 +113,7 @@ BEGIN TRY
 		ARPAC.[dblInvoiceBalance] <> 0
 		AND ISNULL(ARPAC.[intInvoiceId],0) <> @InvoiceId
 		AND ARPAC.[intEntityCustomerId] = @EntityCustomerId
+		AND ARPAC.[dblInvoiceBalance] <> 0
 		AND NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intEntityCustomerId] =  ARPAC.[intEntityCustomerId] AND vyuARPrepaidAndCredit.[intPrepaymentId] =  ARPAC.[intPrepaymentId] AND vyuARPrepaidAndCredit.[intInvoiceId] = @InvoiceId)
 		
 

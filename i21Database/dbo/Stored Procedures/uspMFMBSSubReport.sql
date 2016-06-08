@@ -4,12 +4,23 @@
 	@intBatchId int=0
 AS
 
+DECLARE @strCompanyName NVARCHAR(100)
+	,@strCompanyAddress NVARCHAR(100)
+	,@strCity NVARCHAR(25)
+	,@strState NVARCHAR(50)
+	,@strZip NVARCHAR(12)
+	,@strCountry NVARCHAR(25)
+
 If @intBlendRequirementId=0
 	Begin
 		Select 0 intNoofDecimalPlaces,'' strBlendItemNo,''strBlendItemDesc,'' strDemandNo,'' strLotAlias,'' strRawItemNo, 0.0 dblCost,0.0 dblWeightPerQty,0.0	dblTotalIssuedQuantity,
 		'' strUOM,0	intTotalRow,0.0	dblTotal,0.0 dblTotalBlend,'' strGrade,'' strChop,'' strGarden,0.0 dblTestResult,''	strLocationName,CAST(0 AS BIT) ysnShowPrice,0 intBatchId,
 		'' strNoOfBlendSheet,0.0 dblTestResultSum,0 intUOMCount,null	[1], null [2],	null [3],null [4],null	[5],null [6],null	[7],null	[8],null	[9],null	[10],null	[11],null	[12],null	[13],	null [14],null	[15],null	[16],null	[17],null	[18],null	[19],null	[20], 
 		'' S1,''	S2,''	S3,''	S4,''	S5,''	S6,''	S7,''	S8,''	S9,''	S10,''	S11,''	S12,''	S13,''	S14,''	S15,''	S16,''	S17,''	S18,''	S19,''	S20
+		,@strCompanyName AS strCompanyName
+		,@strCompanyAddress AS strCompanyAddress
+		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+		,@strCountry AS strCompanyCountry
 		return
 	End
 
@@ -17,6 +28,14 @@ Declare @intNoofDecimalPlaces int=3
 DECLARE @intNoofBlendSheet INT    
 Declare @intPropertyId int
 Declare @intUOMCount int  
+
+SELECT TOP 1 @strCompanyName = strCompanyName
+	,@strCompanyAddress = strAddress
+	,@strCity = strCity
+	,@strState = strState
+	,@strZip = strZip
+	,@strCountry = strCountry
+FROM dbo.tblSMCompanySetup
 
 DECLARE @tblWO TABLE (
 	 intRowNo INT identity(1, 1)
@@ -110,8 +129,8 @@ FROM (
   ,i.strItemNo AS strBlendItemNo
   ,i.strDescription AS strBlendItemDesc
   ,br.strDemandNo
-  ,l.strLotAlias
-  ,i1.strItemNo AS strRawItemNo
+  ,p.strParentLotNumber AS strLotAlias
+  ,i1.strItemNo + '-' + i1.strDescription AS strRawItemNo
   ,ROUND((l.dblLastCost * 100), 2) AS dblCost    
   ,l.dblWeightPerQty
   ,wc.dblIssuedQuantity
@@ -213,8 +232,8 @@ FROM (
   ,i.strItemNo AS strBlendItemNo
   ,i.strDescription AS strBlendItemDesc
   ,br.strDemandNo
-  ,l.strLotAlias
-  ,i1.strItemNo AS strRawItemNo
+  ,l.strLotNumber AS strLotAlias
+  ,i1.strItemNo + '-' + i1.strDescription AS strRawItemNo
   ,ROUND((l.dblLastCost * 100), 2) AS dblCost    
   ,l.dblWeightPerQty
   ,wc.dblIssuedQuantity
@@ -359,7 +378,11 @@ Begin
 	Select @intUOMCount=Count(DISTINCT strUOM) from #tempOutput1
 	Update #tempOutput1 set intUOMCount=@intUOMCount      
     
-	SELECT *    
+	SELECT *
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+	,@strCountry AS strCompanyCountry	    
 	FROM #tempOutput1 t    
 	JOIN #tempOutput3 t1 ON 1 = 1
 End
@@ -370,6 +393,10 @@ Begin
 	Update #tempOutput2 set intUOMCount=@intUOMCount      
     
 	SELECT *    
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+	,@strCountry AS strCompanyCountry
 	FROM #tempOutput2 t    
 	JOIN #tempOutput3 t1 ON 1 = 1
 End
