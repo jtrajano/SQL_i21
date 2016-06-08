@@ -35,14 +35,14 @@ SELECT dtmStartDate,
 		strItemNo					=	CD.strItemNo,
 		strItemDescription			=	CD.strItemDescription,
 		strContractBasis			=	CH.strContractBasisDescription,
-		strFixationStatus			=	case CD.strPricingType when 'Outright' then 'OT' else case CD.dblUnpricedLots when CD.dblNoOfLots then 'UF' else 'FX' end end,
+		strFixationStatus			=	CASE CD.strPricingType WHEN 'Cash' THEN 'OT' WHEN 'Priced' THEN 'FX' ELSE 'UF' END,  
 		strFinalPrice				=	dbo.fnRemoveTrailingZeroes (round(dbo.fnCalculateCostBetweenUOM(CD.intPriceItemUOMId,
 													(SELECT Top (1) IU.intItemUOMId FROM tblICItemUOM IU 
 													JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 													JOIN tblLGCompanyPreference C On C.intWeightUOMId = UOM.intUnitMeasureId),
 													CD.dblCashPrice)*CASE CD.ysnSubCurrency when 1 then 1 else 100 end,2) ),
-		dblQuantity					= CH.dblHeaderQuantity,
-		strQuantityUOM				= CH.strHeaderUnitMeasure,
+		dblQuantity					=	CD.dblDetailQuantity,  
+		strQuantityUOM				=	CD.strItemUOM,  
 		dblWeight					=	dbo.fnRemoveTrailingZeroes (round(IsNull(dbo.fnCalculateQtyBetweenUOM (CD.intNetWeightUOMId,
 												(SELECT Top (1) IU.intItemUOMId FROM tblICItemUOM IU 
 													JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
@@ -53,11 +53,14 @@ SELECT dtmStartDate,
 													JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 													JOIN tblLGCompanyPreference C On C.intWeightUOMId = UOM.intUnitMeasureId),
 												LoadDetail.dblNet), 0),2) ),
-		intNoOfSequence				= (select count(intContractDetailId) from vyuCTContractDetailView where intContractHeaderId=CD.intContractHeaderId),
-		intNoOfReweigh				= (select count(intLineNo) from tblICInventoryReceiptItem where intOrderId=CD.intContractHeaderId),
+		intNoOfSequence				= 1,
+		intNoOfReweigh				= (SELECT COUNT(intLineNo) 
+									   FROM tblICInventoryReceipt R
+									   JOIN tblICInventoryReceiptItem I ON I.intInventoryReceiptId = R.intInventoryReceiptId
+									   WHERE intLineNo = CD.intContractDetailId AND R.ysnPosted = 1),
 		intNoOfApprovals			= CASE WHEN SampStatus.strStatus = 'Approved' THEN 1 ELSE 0 END,
 		intNoOfRejects				= CASE WHEN SampStatus.strStatus = 'Rejected' THEN 1 ELSE 0 END,
-		intNoOfIntegrationRequests	= CASE WHEN IsNull(ContLink.strIntegrationOrderNumber, 0) <> 0 THEN 1 ELSE 0 END,
+		intNoOfIntegrationRequests	= CASE WHEN ContLink.strIntegrationOrderNumber is not null THEN 1 ELSE 0 END,
 		dblBasis					= dbo.fnRemoveTrailingZeroes (round(CD.dblBasis,2)),
 		strInternalComment=CD.strInternalComment,
 		intContractSeq=CD.intContractSeq
@@ -70,7 +73,6 @@ LEFT JOIN tblQMSampleDetail SampDetail On SampDetail.intSampleId = Samp.intSampl
 LEFT JOIN tblQMSampleStatus SampStatus On SampStatus.intSampleStatusId = Samp.intSampleStatusId
 LEFT JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId AND SampAtt.strAttributeName = 'Approval Basis' AND SampDetail.strAttributeValue='Yes'
 INNER JOIN tblCTPosition Pos on Pos.intPositionId=CD.intPositionId and Pos.strPosition='Spot'
-where CD.intContractDetailId not in (select intLineNo from tblICInventoryReceiptItem)
 ) gc
 group by  dtmStartDate,dtmEndDate,strPosition,strContractNumber,strCustomerContract,strEntityName,strItemNo,strItemDescription,strContractBasis,
 strFixationStatus,strFinalPrice,dblQuantity,strQuantityUOM,dblWeight,dblShippedWeight,intNoOfSequence,dblBasis,strInternalComment,intContractSeq,
