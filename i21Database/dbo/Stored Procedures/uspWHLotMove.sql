@@ -161,6 +161,11 @@ BEGIN TRY
 			--	dblWeight = @dblWeightPerQty * (@dblMoveQty+@dblOldQty)
 			--WHERE intSubLocationId =@intNewSubLocationId AND intStorageLocationId=@intNewStorageLocationId AND strLotNumber=@strNewLotNumber
 
+			SELECT @intNewLotId = intLotId
+			FROM dbo.tblICLot
+			WHERE strLotNumber = @strNewLotNumber
+				AND intStorageLocationId = @intNewStorageLocationId
+
 			IF EXISTS (SELECT * FROM dbo.tblMFWorkOrderProducedLot WHERE intLotId = @intLotId AND dblPhysicalCount = @dblMoveQty)
 			BEGIN
 				UPDATE dbo.tblMFWorkOrderProducedLot
