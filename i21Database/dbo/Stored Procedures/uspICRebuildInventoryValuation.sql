@@ -191,8 +191,8 @@ END
 
 -- Delete the inventory transaction record if it falls within the date range. 
 BEGIN 
-	DELETE FROM tblICInventoryTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1
-	DELETE FROM tblICInventoryLotTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1
+	DELETE FROM tblICInventoryTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE FROM tblICInventoryLotTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
 --------------------------------------------------------------------

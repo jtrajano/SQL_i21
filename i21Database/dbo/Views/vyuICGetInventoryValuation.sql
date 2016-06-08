@@ -23,7 +23,7 @@ SELECT	intInventoryValuationKeyId  = [Transaction].intInventoryTransactionId
 		,dblRunningQtyBalance = CAST(0 AS NUMERIC(38, 20))
 		,dblCost = [Transaction].dblCost
 		,dblBeginningBalance = CAST(0 AS NUMERIC(38, 20))
-		,dblValue = ISNULL([Transaction].dblQty, 0) * ISNULL([Transaction].dblCost, 0) + ISNULL([Transaction].dblValue, 0)
+		,dblValue = ROUND(dbo.fnMultiply(ISNULL([Transaction].dblQty, 0), ISNULL([Transaction].dblCost, 0)) + ISNULL([Transaction].dblValue, 0), 2) 
 		,dblRunningBalance = CAST(0 AS NUMERIC(38, 20))
 		,strBatchId
 FROM tblICInventoryTransaction [Transaction] LEFT JOIN tblICItem Item 
