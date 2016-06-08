@@ -9,8 +9,7 @@
 	, @intImportFileHeaderId INT OUTPUT
 AS
 BEGIN
-	
-	DECLARE @XMLGatewayVersion nvarchar(100)
+    DECLARE @XMLGatewayVersion nvarchar(100)
 	SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @Register
 	SET @XMLGatewayVersion = ISNULL(@XMLGatewayVersion, '')
 	
@@ -36,7 +35,7 @@ BEGIN
 		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  )
 	AND dtmDate BETWEEN @BeginingChangeDate AND @EndingChangeDate
 	
---Insert data into Procebook staging table	
+    --Insert data into Procebook staging table	
 	INSERT INTO tblSTstgPricebookSendFile
 	SELECT 
 		ST.intStoreNo [StoreLocationID]
@@ -129,29 +128,29 @@ BEGIN
 	JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
 	JOIN tblICItemPricing Prc ON Prc.intItemId = I.intItemId
 	JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
-	JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId
-	WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation 
-	AND ','+@Category +',' like '%,'+cast(Cat.intCategoryId as varchar(100))+',%'
-	
+	JOIN @Tab_UpdatedItems tmpItem ON tmpItem.intItemId = I.intItemId 
+	WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation
+    AND ((@Category <>'whitespaces' AND Cat.intCategoryId IN(select * from dbo.fnSplitString(@Category,',')))
+    OR (@Category ='whitespaces'  AND Cat.intCategoryId = Cat.intCategoryId))
+	 
 --Select * from tblSTstgPricebookSendFile	
 	
 --Generate XML for the pricebook data availavle in staging table
+      
 	DECLARE @strRegister nvarchar(200)
 	SELECT @strRegister = strRegisterName FROM dbo.tblSTRegister Where intRegisterId = @Register
 	IF(UPPER(@strRegister) = UPPER('SAPPHIRE') or UPPER(@strRegister) = UPPER('COMMANDER'))
 	BEGIN
 		SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
 		Where strLayoutTitle = 'Pricebook Send Sapphire' AND strFileType = 'XML'
-		
 	END
 	ELSE
 	BEGIN
-		SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
-		Where strLayoutTitle = 'Pricebook File' AND strFileType = 'XML'
+		SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSTRegisterFileConfiguration 
+		Where intRegisterId = @Register AND strFilePrefix = 'ITT'
 		
 	END
---select @intImportFileHeaderId
-		
+    
 	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPricebookSendFile~intPricebookSendFile > 0', 0, @strGenerateXML OUTPUT
 
 --Once XML is generated delete the data from pricebook  staging table.
