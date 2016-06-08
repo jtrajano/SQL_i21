@@ -53,8 +53,11 @@ SELECT dtmStartDate,
 													JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 													JOIN tblLGCompanyPreference C On C.intWeightUOMId = UOM.intUnitMeasureId),
 												LoadDetail.dblNet), 0),2) ),
-		intNoOfSequence				= (select count(intContractDetailId) from vyuCTContractDetailView where intContractHeaderId=CD.intContractHeaderId),
-		intNoOfReweigh				= (select count(intLineNo) from tblICInventoryReceiptItem where intOrderId=CD.intContractHeaderId),
+		intNoOfSequence				= 1,
+		intNoOfReweigh				= (SELECT COUNT(intLineNo) 
+									   FROM tblICInventoryReceipt R
+									   JOIN tblICInventoryReceiptItem I ON I.intInventoryReceiptId = R.intInventoryReceiptId
+									   WHERE intLineNo = CD.intContractDetailId AND R.ysnPosted = 1),
 		intNoOfApprovals			= CASE WHEN SampStatus.strStatus = 'Approved' THEN 1 ELSE 0 END,
 		intNoOfRejects				= CASE WHEN SampStatus.strStatus = 'Rejected' THEN 1 ELSE 0 END,
 		intNoOfIntegrationRequests	= CASE WHEN ContLink.strIntegrationOrderNumber is not null THEN 1 ELSE 0 END,
@@ -70,7 +73,6 @@ LEFT JOIN tblQMSampleDetail SampDetail On SampDetail.intSampleId = Samp.intSampl
 LEFT JOIN tblQMSampleStatus SampStatus On SampStatus.intSampleStatusId = Samp.intSampleStatusId
 LEFT JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttributeId AND SampAtt.strAttributeName = 'Approval Basis' AND SampDetail.strAttributeValue='Yes'
 INNER JOIN tblCTPosition Pos on Pos.intPositionId=CD.intPositionId and Pos.strPosition='Spot'
-where CD.intContractDetailId not in (select intLineNo from tblICInventoryReceiptItem)
 ) gc
 group by  dtmStartDate,dtmEndDate,strPosition,strContractNumber,strCustomerContract,strEntityName,strItemNo,strItemDescription,strContractBasis,
 strFixationStatus,strFinalPrice,dblQuantity,strQuantityUOM,dblWeight,dblShippedWeight,intNoOfSequence,dblBasis,strInternalComment,intContractSeq,
