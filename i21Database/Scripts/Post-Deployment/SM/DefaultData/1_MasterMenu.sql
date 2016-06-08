@@ -4293,6 +4293,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Xm
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'EnergyTrac.view.ExportXml' WHERE strMenuName = 'Export Xml' AND strModuleName = 'Energy Trac' AND intParentMenuID = @EnergyTracParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Filter' AND strModuleName = 'Energy Trac' AND intParentMenuID = @EnergyTracParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Export Filter', N'Energy Trac', @EnergyTracParentMenuId, N'Export Filter', N'Activity', N'Screen', N'EnergyTrac.view.ExportFilter', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'EnergyTrac.view.ExportFilter' WHERE strMenuName = 'Export Filter' AND strModuleName = 'Energy Trac' AND intParentMenuID = @EnergyTracParentMenuId
+
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
