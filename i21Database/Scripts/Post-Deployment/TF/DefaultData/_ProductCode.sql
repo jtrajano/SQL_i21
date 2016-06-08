@@ -4,6 +4,9 @@ GO
 
 DECLARE @intTaxAuthorityId INT
 
+DELETE from tblICItemMotorFuelTax
+DELETE from tblTFProductCode
+
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'
 IF (@intTaxAuthorityId IS NOT NULL)
 BEGIN

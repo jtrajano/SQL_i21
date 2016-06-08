@@ -343,7 +343,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
 :r .\TF\DefaultData\_OriginDestinationState.sql
-
+:r .\TF\DefaultData\_ReportingComponent.sql
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql
