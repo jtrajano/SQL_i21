@@ -32,7 +32,7 @@ BEGIN
 		, 0 [dblTaxAmount4]
 		, 1 [intConcurrencyId]
 		from #tempCheckoutInsert Chk
-		JOIN dbo.tblICCategory Cat ON Cat.strCategoryCode = CASE WHEN LEN(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS)<=4 THEN Chk.MerchandiseCode COLLATE Latin1_General_CI_AS ELSE SUBSTRING(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS, 0, 4) END
+		JOIN dbo.tblICCategoryLocation Cat ON Cat.intRegisterDepartmentId = CASE WHEN LEN(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS)<=4 THEN Chk.MerchandiseCode COLLATE Latin1_General_CI_AS ELSE SUBSTRING(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS, 0, 4) END
 		JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
 		JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
@@ -56,7 +56,7 @@ BEGIN
 		, [dblRefundAmount] = ISNULL(CAST(Chk.RefundAmount as decimal(18,6)), 0) 
 		, [intItemsSold] = ISNULL(CAST(Chk.TransactionCount as int), 0) 
 		FROM #tempCheckoutInsert Chk
-		JOIN dbo.tblICCategory Cat ON Cat.strCategoryCode = CASE WHEN LEN(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS)<=4 THEN Chk.MerchandiseCode COLLATE Latin1_General_CI_AS ELSE SUBSTRING(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS, 0, 4) END
+		JOIN dbo.tblICCategoryLocation Cat ON Cat.intRegisterDepartmentId = CASE WHEN LEN(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS)<=4 THEN Chk.MerchandiseCode COLLATE Latin1_General_CI_AS ELSE SUBSTRING(Chk.MerchandiseCode COLLATE Latin1_General_CI_AS, 0, 4) END
 		JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
 		JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
