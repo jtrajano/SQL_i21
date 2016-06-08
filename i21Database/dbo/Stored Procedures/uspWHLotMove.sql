@@ -187,6 +187,11 @@ BEGIN TRY
 		,@intUserId
 		,@intInventoryAdjustmentId
 
+	SELECT @intNewLotId = intLotId
+	FROM dbo.tblICLot
+	WHERE strLotNumber = @strNewLotNumber
+		AND intStorageLocationId = @intNewStorageLocationId
+
 	IF EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrderProducedLot
