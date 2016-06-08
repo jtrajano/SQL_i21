@@ -4340,14 +4340,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             }
             else {
-                dblFranchise = item.data.dblFranchise;
+              /*  dblFranchise = item.data.dblFranchise;
                 dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;
                 dblNetReceivedWt = item.data.dblNet;
 
                 if (dblFranchise > 0)
                     dblNetShippedWt = (dblNetShippedWt) - (dblNetShippedWt * dblFranchise);
                 if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
-                    dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);
+                    dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
+                
+                dblNetReceivedWt = item.data.dblNet;
+                dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;              
+                dblWeightLoss = dblNetReceivedWt - dblNetShippedWt;
             }
         });
 
