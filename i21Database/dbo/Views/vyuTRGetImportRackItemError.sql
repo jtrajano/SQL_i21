@@ -1,5 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuTRGetImportRackPriceDetail]
-	AS 
+﻿CREATE VIEW [dbo].[vyuTRGetImportRackItemError]
+	AS
 
 SELECT Detail.intImportRackPriceDetailId
 	, Detail.intImportRackPriceId
@@ -21,4 +21,4 @@ SELECT Detail.intImportRackPriceDetailId
 						ELSE 'Success!' END					
 FROM tblTRImportRackPriceDetail Detail
 LEFT JOIN tblTRImportRackPriceDetailItem DetailItem ON DetailItem.intImportRackPriceDetailId = Detail.intImportRackPriceDetailId
-WHERE Detail.ysnValid = 1 AND DetailItem.ysnValid = 1
+WHERE Detail.ysnValid = 0 OR DetailItem.ysnValid = 0
