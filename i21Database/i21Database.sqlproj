@@ -3932,6 +3932,7 @@
     <Build Include="dbo\Tables\tblETExportFilterTerm.sql" />
     <Build Include="dbo\Views\vyuTRGetImportRackItemError.sql" />
     <Build Include="dbo\Views\vyuSCTicketAlertView.sql" />
+    <Build Include="dbo\Views\vyuARItemCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
