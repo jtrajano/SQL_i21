@@ -2858,7 +2858,6 @@
     <Build Include="dbo\Views\vyuICGetCategoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVoucherNextApproverEmail.sql" />
-    <Build Include="dbo\tblETCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Save.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Delete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_LoadPlan.sql" />
@@ -3924,6 +3923,13 @@
     <Build Include="dbo\Views\vyuPOForApproval.sql" />
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleMenuSubRole.sql" />
+    <Build Include="dbo\Tables\tblETCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterCategory.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterDriver.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterItem.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterLocation.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterTaxGroup.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
