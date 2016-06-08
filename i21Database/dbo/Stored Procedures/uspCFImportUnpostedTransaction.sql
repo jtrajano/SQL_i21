@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCFImportTransaction]
+﻿CREATE PROCEDURE [dbo].[uspCFImportUnpostedTransaction]
 		@TotalSuccess INT = 0 OUTPUT,
 		@TotalFailed INT = 0 OUTPUT
 
@@ -60,56 +60,56 @@
 		SET @processDate = CONVERT(VARCHAR(10), GETDATE(), 101)
 
 		--Import only those are not yet imported
-		SELECT A4GLIdentity INTO #tmpcftrxmst
-			FROM cftrxmst
+		SELECT A4GLIdentity INTO #tmpcfticmst
+			FROM cfticmst
 
-		WHILE (EXISTS(SELECT 1 FROM #tmpcftrxmst))
+		WHILE (EXISTS(SELECT 1 FROM #tmpcfticmst))
 		BEGIN
 				
 
-			SELECT @originTransaction = A4GLIdentity FROM #tmpcftrxmst
+			SELECT @originTransaction = A4GLIdentity FROM #tmpcfticmst
 
 			BEGIN TRY
 				BEGIN TRANSACTION
 				SELECT TOP 1
-				 @strSiteId							= cftrx_site
-				,@strCardId							= cftrx_card_no
-				,@strVehicleId						= cftrx_vehl_no
-				,@strProductId						= cftrx_card_itm_no
-				,@strNetworkId						= cftrx_network_id
-				,@intOdometer						= cftrx_odometer
-				,@intPumpNumber						= cftrx_pump_no
+				 @strSiteId							= cftic_site
+				,@strCardId							= cftic_card_no
+				,@strVehicleId						= cftic_vehl_no
+				,@strProductId						= cftic_card_itm_no
+				,@strNetworkId						= cftic_network_id
+				,@intOdometer						= cftic_odometer
+				,@intPumpNumber						= cftic_pump_no
 				--,@intSiteId						= null
 				--,@intNetworkId					= null
 				--,@intTransTime					= not sure 
 				--,@intContractId					= not sure 
 				--,@intSalesPersonId				= not sure 
 				,@dtmBillingDate					= (CASE
-														WHEN LEN(RTRIM(LTRIM(ISNULL(cftrx_billing_dt,0)))) = 8 
-														THEN CONVERT(DATETIME, SUBSTRING (RTRIM(LTRIM(cftrx_billing_dt)),1,4) 
-															+ '/' + SUBSTRING (RTRIM(LTRIM(cftrx_billing_dt)),5,2) + '/' 
-															+ SUBSTRING (RTRIM(LTRIM(cftrx_billing_dt)),7,2), 120)
+														WHEN LEN(RTRIM(LTRIM(ISNULL(cftic_billing_dt,0)))) = 8 
+														THEN CONVERT(DATETIME, SUBSTRING (RTRIM(LTRIM(cftic_billing_dt)),1,4) 
+															+ '/' + SUBSTRING (RTRIM(LTRIM(cftic_billing_dt)),5,2) + '/' 
+															+ SUBSTRING (RTRIM(LTRIM(cftic_billing_dt)),7,2), 120)
 														ELSE NULL
 													  END)
 				,@dtmTransactionDate				= (CASE
-														WHEN LEN(RTRIM(LTRIM(ISNULL(cftrx_billing_dt,0)))) = 8 
-														THEN CONVERT(DATETIME, SUBSTRING (RTRIM(LTRIM(cftrx_billing_dt)),1,4) 
-															+ '/' + SUBSTRING (RTRIM(LTRIM(cftrx_billing_dt)),5,2) + '/' 
-															+ SUBSTRING (RTRIM(LTRIM(cftrx_billing_dt)),7,2), 120)
+														WHEN LEN(RTRIM(LTRIM(ISNULL(cftic_billing_dt,0)))) = 8 
+														THEN CONVERT(DATETIME, SUBSTRING (RTRIM(LTRIM(cftic_billing_dt)),1,4) 
+															+ '/' + SUBSTRING (RTRIM(LTRIM(cftic_billing_dt)),5,2) + '/' 
+															+ SUBSTRING (RTRIM(LTRIM(cftic_billing_dt)),7,2), 120)
 														ELSE NULL
 													  END) 
-				,@strSequenceNumber					= cftrx_seq_no
-				,@strPONumber						= cftrx_po_no
-				,@strMiscellaneous					= cftrx_misc
+				,@strSequenceNumber					= cftic_seq_no
+				,@strPONumber						= cftic_po_no
+				,@strMiscellaneous					= cftic_misc
 				--,@strPriceMethod					= not sure 
 				--,@strPriceBasis					= not sure 
 				--,@strTransactionType				= not sure 
-				,@strDeliveryPickupInd				= cftrx_dlvry_pickup_ind
-				,@dblQuantity						= cftrx_qty
+				,@strDeliveryPickupInd				= cftic_dlvry_pickup_ind
+				,@dblQuantity						= cftic_qty
 				--,@dblTransferCost					= not sure 
 				--,@dblOriginalTotalPrice			= ot sure 
 				--,@dblCalculatedTotalPrice			= not sure 
-				,@dblOriginalGrossPrice				= cftrx_prc
+				,@dblOriginalGrossPrice				= cftic_prc
 				--,@dblCalculatedGrossPrice			= not sure 
 				--,@dblCalculatedNetPrice			= not sure 
 				--,@dblOriginalNetPrice				= not sure 
@@ -117,7 +117,7 @@
 				--,@dblOriginalPumpPrice			= not sure 
 
 
-				FROM cftrxmst
+				FROM cfticmst
 				WHERE A4GLIdentity = @originTransaction
 				
 				
@@ -156,7 +156,7 @@
 				,@dblOriginalNetPrice		= @dblOriginalNetPrice
 				,@dblCalculatedPumpPrice	= @dblCalculatedPumpPrice
 				,@dblOriginalPumpPrice		= @dblOriginalPumpPrice
-				,@ysnOriginHistory			= 1
+				,@ysnOriginHistory			= 0
 				,@strGUID					= @guid
 				,@strProcessDate			= @processDate
 
@@ -228,7 +228,7 @@
 								
 			CONTINUELOOP:
 			PRINT @originTransaction
-			DELETE FROM #tmpcftrxmst WHERE A4GLIdentity = @originTransaction
+			DELETE FROM #tmpcfticmst WHERE A4GLIdentity = @originTransaction
 		
 			SET @Counter += 1;
 

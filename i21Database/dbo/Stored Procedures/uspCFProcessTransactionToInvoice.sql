@@ -107,6 +107,7 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnVirtualMeterReading]
 	,[ysnClearDetailTaxes]					
 	,[intTempDetailIdForTaxes]
+	,[strType]
 )
 SELECT
 	 [strSourceTransaction]					= 'Card Fueling Transaction'
@@ -190,6 +191,7 @@ SELECT
 	,[ysnVirtualMeterReading]				= NULL
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @TransactionId
+	,[strType]								= 'Card Fueling'
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
 ON cfTrans.intNetworkId = cfNetwork.intNetworkId

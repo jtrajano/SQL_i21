@@ -9,7 +9,7 @@ SELECT        arInv.intTransactionId, arInv.strCustomerNumber, arInv.strShipTo, 
                          cfCardAccount.ysnPrintTimeOnReports, cfSiteItem.strSiteNumber, cfSiteItem.strSiteName, cfSiteItem.strProductNumber, cfSiteItem.strItemNo, cfSiteItem.strShortName AS strDescription, 
                          cfTransPrice.dblCalculatedAmount AS dblCalculatedTotalAmount, cfTransPrice.dblOriginalAmount AS dblOriginalTotalAmount, cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount, 
                          cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount, cfTransNetPrice.dblOriginalAmount AS dblOriginalNetAmount, 
-                         cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, cfTrans.ysnInvalid, cfTrans.ysnPosted, cfVehicle.strVehicleNumber, cfVehicle.strVehicleDescription,
+                         cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, cfTrans.ysnInvalid, cfTrans.ysnPosted, cfVehicle.strVehicleNumber, cfVehicle.strVehicleDescription,cfSiteItem.strTaxState,
                              (SELECT        SUM(dblTaxCalculatedAmount) AS EXPR1
                                FROM            dbo.tblCFTransactionTax
                                WHERE        (intTransactionId = cfTrans.intTransactionId)) AS dblTotalTax, cfTrans.intOdometer

@@ -397,7 +397,11 @@ BEGIN
 			FROM tblCFTransactionTax
 			WHERE intTransactionId = @intTransactionId
 
-			SET @TaxState = (SELECT TOP 1 strTaxState from tblCFSite where intSiteId = @intSiteId)
+			IF(@IsImporting = 0)
+			BEGIN
+				--GET TAX STATE FROM SITE
+				SET @TaxState = (SELECT TOP 1 strTaxState from tblCFSite where intSiteId = @intSiteId)
+			END
 		END	
 
 		INSERT INTO @tblTransactionTax(
@@ -793,6 +797,7 @@ BEGIN
 					 @QxT = ROUND (@dblQuantity * dblRate,2)
 					,@QxOP = @QxOP - (@dblQuantity * dblRate)
 					,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * dblRate)
+					,@dblCPTotalTax = @dblCPTotalTax + (@dblQuantity * dblRate)
 					FROM @tblTaxUnitTable
 
 					INSERT INTO @tblTransactionTaxOut
