@@ -3,7 +3,8 @@
 	[intOpportunitySourceId] [int] IDENTITY(1,1) NOT NULL,
 	[strSource] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblHDOpportunitySource] PRIMARY KEY CLUSTERED ([intOpportunitySourceId] ASC)
+	CONSTRAINT [PK_tblHDOpportunitySource] PRIMARY KEY CLUSTERED ([intOpportunitySourceId] ASC),
+	CONSTRAINT [AK_tblHDOpportunitySource_strSource] UNIQUE ([strSource])
 )
 
 GO
