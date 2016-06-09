@@ -3929,6 +3929,7 @@
     <Build Include="dbo\Stored Procedures\uspQMReportCOAGetPhysicalSample.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCOAHeaderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCOAHeader.sql" />
+    <Build Include="dbo\Functions\fnMFGetInvoiceChargesByShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
