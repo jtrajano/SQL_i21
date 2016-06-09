@@ -29,7 +29,7 @@
 	[apivc_user_id] [char](16) NULL,
 	[apivc_user_rev_dt] [int] NULL,
 	[A4GLIdentity] [numeric](9, 0) IDENTITY(1,1) NOT NULL,
-	[apchk_A4GLIdentity] INT NOT NULL,
+	[apchk_A4GLIdentity] INT NULL,
 	[intBillId] INT
  CONSTRAINT [k_tblAPapivcmst] PRIMARY KEY NONCLUSTERED 
 (
