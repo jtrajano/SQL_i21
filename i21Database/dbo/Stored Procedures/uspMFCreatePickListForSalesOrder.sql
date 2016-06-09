@@ -184,7 +184,7 @@ Begin --Existing Pick List
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Where p.intSalesOrderId=@intSalesOrderId
 	Union --Remaining Picking
-	Select 0,0,@intSalesOrderId,p.intItemId,i.strItemNo,i.strDescription,l.intLotId,l.strLotNumber,p.intStorageLocationId,sl.strName AS strStorageLocationName,
+	Select 0,@intPickListId,@intSalesOrderId,p.intItemId,i.strItemNo,i.strDescription,l.intLotId,l.strLotNumber,p.intStorageLocationId,sl.strName AS strStorageLocationName,
 	p.dblQty AS dblPickQuantity,p.intItemUOMId AS intPickUOMId,um.strUnitMeasure AS strPickUOM,
 	pl.intParentLotId,p.intSubLocationId,sbl.strSubLocationName,p.intLocationId,i.strLotTracking,p.dblItemRequiredQty
 	from @tblPickedLot p Join tblICItem i on p.intItemId=i.intItemId 
