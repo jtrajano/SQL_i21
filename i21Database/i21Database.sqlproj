@@ -3938,6 +3938,15 @@
     <Build Include="dbo\Views\vyuICEnergyTracExportItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLicense.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteDBServer.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeEMTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeSMTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeGRTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeCTTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeLGTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeICTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeQMTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeSCTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMMergeTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
