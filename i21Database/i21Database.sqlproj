@@ -3947,6 +3947,7 @@
     <Build Include="dbo\Stored Procedures\uspDMMergeQMTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeSCTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeTables.sql" />
+    <Build Include="dbo\Functions\fnMFGetInvoiceChargesByShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
