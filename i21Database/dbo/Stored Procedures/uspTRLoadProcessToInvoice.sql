@@ -83,7 +83,11 @@ BEGIN TRY
 		,[dblQtyOrdered]						= DD.dblUnits
 		,[dblQtyShipped]						= DD.dblUnits
 		,[dblDiscount]							= 0
-		,[dblPrice]								= DD.dblPrice
+		,[dblPrice]								--= DD.dblPrice
+												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
+														WHEN DD.ysnFreightInPrice = 1 AND ISNULL(DD.dblDistSurcharge,0) != 0 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0) + (ISNULL(DD.dblFreightRate,0) * (DD.dblDistSurcharge / 100))
+														WHEN DD.ysnFreightInPrice = 1 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0) 
+												END
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= ''
 		,[strFrequency]							= ''
@@ -623,10 +627,10 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= 1
-			,[dblQtyShipped]						= 1
+			,[dblQtyOrdered]						= ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000)
+			,[dblQtyShipped]						= ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000)
 			,[dblDiscount]							= 0
-			,[dblPrice]								= ISNULL(IE.dblQtyShipped, 0.000000) * (ISNULL(IE.[dblFreightRate], 0.000000) * (ISNULL(IE.dblSurcharge, 0.000000) / 100))
+			,[dblPrice]								= ISNULL(IE.dblSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= IE.strMaintenanceType
 			,[strFrequency]							= IE.strFrequency
