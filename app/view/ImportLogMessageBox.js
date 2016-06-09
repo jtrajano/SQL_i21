@@ -21,6 +21,8 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.grid.View',
+        'Ext.grid.feature.GroupingSummary',
+        'Ext.XTemplate',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button'
     ],
@@ -73,6 +75,14 @@ Ext.define('Inventory.view.ImportLogMessageBox', {
                             width: 200,
                             dataIndex: 'Status',
                             text: 'Status'
+                        }
+                    ],
+                    features: [
+                        {
+                            ftype: 'groupingsummary',
+                            groupHeaderTpl: [
+                                '{columnName}: {name}'
+                            ]
                         }
                     ]
                 }

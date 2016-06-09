@@ -21,6 +21,23 @@ namespace iRely.Inventory.BusinessLayer
             public string Value { get;set;}
         }
 
+        public const string STAT_INNER_COL_SKIP = "This optional field is left blank";
+        public const string REC_SKIP = "Record skipped";
+        public const string STAT_INNER_DEF = "Set to default value";
+
+        public const string STAT_INNER_SUCCESS = "Success";
+        public const string TYPE_INNER_WARN = "Warning";
+        public const string TYPE_INNER_EXCEPTION = "Exception";
+        public const string TYPE_INNER_ERROR = "Error";
+        public const string TYPE_INNER_INFO = "Info";
+
+        public const string INFO_WARN = "warning";
+        public const string INFO_ERROR = "error";
+        public const string INFO_SUCCESS = "success";
+
+        public const string ICON_ACTION_NEW = "small-new-plus";
+        public const string ICON_ACTION_EDIT = "small-edit";
+
         protected InventoryRepository context;
         protected byte[] data;
         protected readonly List<ImportLogItem> logs = new List<ImportLogItem>();
@@ -85,8 +102,11 @@ namespace iRely.Inventory.BusinessLayer
             MemoryStream ms = new MemoryStream(data);
             ImportDataResult dr = new ImportDataResult()
             {
-                Info = "success"
+                Info = INFO_SUCCESS
             };
+
+            var hasErrors = false;
+            var hasWarnings = false;
 
             if (!ms.CanRead)
                 throw new IOException("Please select a valid file.");
@@ -99,7 +119,7 @@ namespace iRely.Inventory.BusinessLayer
 
                 if (!ValidHeaders(headers, out missingFields))
                 {
-                    dr.Info = "error";
+                    dr.Info = INFO_ERROR;
                     dr.Description = "Invalid template format. Some fields were missing.";
                     StringBuilder sb = new StringBuilder();
                     foreach (string s in missingFields)
@@ -108,7 +128,7 @@ namespace iRely.Inventory.BusinessLayer
                     }
                     dr.Messages.Add(new ImportDataMessage()
                     {
-                        Type = "error",
+                        Type = TYPE_INNER_ERROR,
                         Status = "Import Failed",
                         Message = "Invalid template format. Some fields were missing. Missing fields: " +
                             CultureInfo.CurrentCulture.TextInfo.ToTitleCase(sb.ToString().Substring(0, sb.Length-2))
@@ -121,51 +141,76 @@ namespace iRely.Inventory.BusinessLayer
                 while (csv.ReadNextRecord())
                 {
                     row++;
-                    try
+                   
+
+                    using (var transaction = context.ContextManager.Database.BeginTransaction())
                     {
-                        LogItems.Clear();
-                        T entity = ProcessRow(row, fieldCount, headers, csv, dr);
-                        if (entity != null)
+                        try
                         {
-                            context.Save();
-                            LogTransaction(ref entity, dr);
-                            dr.Messages.Add(new ImportDataMessage()
+                            LogItems.Clear();
+                            T entity = ProcessRow(row, fieldCount, headers, csv, dr);
+                            if (entity != null)
                             {
-                                Message = "Record import successful.",
-                                Row = row,
-                                Status = "Success.",
-                                Type = "Info"
-                            });
+                                context.Save();
+                                LogTransaction(ref entity, dr);
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Message = "Record import successful.",
+                                    Row = row,
+                                    Status = STAT_INNER_SUCCESS,
+                                    Type = TYPE_INNER_INFO
+                                });
+                                if (dr.Info == INFO_ERROR)
+                                    hasErrors = true;
+                                if (dr.Info == INFO_WARN)
+                                    hasWarnings = true;
+                                transaction.Commit();
+                            }
+                            else
+                            {
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Message = "Invalid values found. Items that were created or modified will be rolled back.",
+                                    Exception = null,
+                                    Row = row,
+                                    Status = "Record import failed.",
+                                    Type = TYPE_INNER_ERROR
+                                });
+                                dr.Info = INFO_ERROR;
+                                hasErrors = true;
+                                transaction.Rollback();
+                                continue;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
+                            string message = ex.Message;
+                            if (ex.InnerException != null && ex.InnerException.InnerException != null)
+                                message = ex.InnerException.InnerException.Message;
+                            else
+                                message = ex.InnerException.Message;
                             dr.Messages.Add(new ImportDataMessage()
                             {
-                                Message = "Invalid values found.",
-                                Exception = null,
+                                Message = message + " Items that were created or modified will be rolled back.",
+                                Exception = ex,
                                 Row = row,
-                                Status = "Record import failed.",
-                                Type = "Error"
+                                Status = REC_SKIP,
+                                Type = TYPE_INNER_EXCEPTION
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_ERROR;
+                            hasErrors = true;
+                            transaction.Rollback();
                             continue;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        dr.Messages.Add(new ImportDataMessage()
-                        {
-                            Message = ex.Message,
-                            Exception = ex,
-                            Row = row,
-                            Status = "Record skipped.",
-                            Type = "Exception"
-                        });
-                        dr.Info = "error";
-                        continue;
-                    }
                 }
             }
+
+            if (hasWarnings)
+                dr.Info = INFO_WARN;
+
+            if (hasErrors)
+                dr.Info = INFO_ERROR;
 
             return dr;
         }
@@ -255,9 +300,9 @@ namespace iRely.Inventory.BusinessLayer
                 dr.Messages.Add(new ImportDataMessage()
                 {
                     Message = "Can't log to audit trail." + ex.Message,
-                    Type = "Exception"
+                    Type = TYPE_INNER_EXCEPTION
                 });
-                dr.Info = "warning";
+                dr.Info = INFO_WARN;
             }
         }
 
@@ -277,9 +322,9 @@ namespace iRely.Inventory.BusinessLayer
                 dr.Messages.Add(new ImportDataMessage()
                 {
                     Message = "Can't log to audit trail." + ex.Message,
-                    Type = "Exception"
+                    Type = TYPE_INNER_EXCEPTION
                 });
-                dr.Info = "warning";
+                dr.Info = INFO_WARN;
             }
         }
 
@@ -299,9 +344,9 @@ namespace iRely.Inventory.BusinessLayer
                 dr.Messages.Add(new ImportDataMessage()
                 {
                     Message = "Can't log to audit trail." + ex.Message,
-                    Type = "Exception"
+                    Type = TYPE_INNER_EXCEPTION
                 });
-                dr.Info = "warning";
+                dr.Info = INFO_WARN;
             }
         }
 
@@ -354,6 +399,8 @@ namespace iRely.Inventory.BusinessLayer
             {
                 if (value.Trim().ToLower() == "yes" || value.Trim().ToLower() == "no")
                     value = value.Trim().ToLower() == "yes" ? "true" : "false";
+                if (value.Trim() == "1" || value.Trim() == "0")
+                    value = value.Trim() == "1" ? "true" : "false";
                 booleanDelegate(bool.Parse(value));
             }
             catch (Exception)
@@ -378,8 +425,8 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Column = header,
                     Row = row,
-                    Type = "Error",
-                    Status = "Ignored.",
+                    Type = TYPE_INNER_ERROR,
+                    Status = STAT_INNER_COL_SKIP,
                     Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
                 });
                 return false;
@@ -401,8 +448,8 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Column = header,
                     Row = row,
-                    Type = "Error",
-                    Status = "Ignored.",
+                    Type = TYPE_INNER_ERROR,
+                    Status = STAT_INNER_COL_SKIP,
                     Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
                 });
                 return false;
@@ -424,8 +471,8 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Column = header,
                     Row = row,
-                    Type = "Error",
-                    Status = "Ignored.",
+                    Type = TYPE_INNER_ERROR,
+                    Status = STAT_INNER_COL_SKIP,
                     Message = string.Format("Error parsing date for {0}. {1}", caption, ex.Message)
                 });
                 return false;
@@ -445,8 +492,8 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Column = header,
                     Row = row,
-                    Type = required ? "Error" : "Warning",
-                    Status = required ? "Record skipped." : "Ignored",
+                    Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
+                    Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
                 });
                 return false;
@@ -476,8 +523,8 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Column = header,
                     Row = row,
-                    Type = required ? "Error" : "Warning",
-                    Status = required ? "Record skipped." : "Ignored",
+                    Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
+                    Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format("{0} is not a valid item in {1}.", value, caption)
                 });
                 return false;
@@ -488,8 +535,8 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     Column = header,
                     Row = row,
-                    Type = required ? "Error" : "Warning",
-                    Status = required ? "Record skipped." : "Ignored",
+                    Type = required ? TYPE_INNER_ERROR : TYPE_INNER_WARN,
+                    Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
                 });
                 return false;

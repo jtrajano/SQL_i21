@@ -21,8 +21,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
 
@@ -52,12 +52,12 @@ namespace iRely.Inventory.BusinessLayer
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Row = row,
-                                Status = "Success.",
-                                Message = string.Format("{0}: A new unit of measurement record has been inserted with default unit type of 'Length'.", value)
+                                Status = STAT_INNER_SUCCESS,
+                                Message = string.Format("{0}: A new unit of measurement record has been created with default unit type of 'Length'.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                             if (lu != null)
                             {
                                 LogItems.Add(new ImportLogItem()
@@ -65,7 +65,7 @@ namespace iRely.Inventory.BusinessLayer
                                     Description = "Created new Unit of Measurement item.",
                                     FromValue = "",
                                     ToValue = value,
-                                    ActionIcon = "small-new-plus"
+                                    ActionIcon = ICON_ACTION_NEW
                                 });
                             }
                         }
@@ -78,11 +78,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Unit of Measurement item: " + value + '.',
-                                Status = "Record skipped."
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                             valid = false;
                         }
                         break;

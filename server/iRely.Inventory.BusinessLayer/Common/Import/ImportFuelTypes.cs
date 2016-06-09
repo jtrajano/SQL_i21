@@ -21,8 +21,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
 
@@ -59,11 +59,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Feed Stock: " + value + '.',
-                                Status = "Record skipped."
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "batch no":
@@ -94,11 +94,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Fuel Code: " + value + '.',
-                                Status = "Record skipped."
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "production process":
@@ -120,11 +120,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Production Process: " + value + '.',
-                                Status = "Record skipped."
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "feed stock uom code":
@@ -140,11 +140,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Invalid Feed Stock UOM: " + value + '.',
-                                Status = "Record skipped."
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "feed stock factor":

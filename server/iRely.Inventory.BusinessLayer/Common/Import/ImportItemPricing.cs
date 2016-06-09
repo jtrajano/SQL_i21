@@ -31,8 +31,8 @@ namespace iRely.Inventory.BusinessLayer
             string strItemNo = null;
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
 
                 string header = headers[i];
                 string value = csv[header];
@@ -59,11 +59,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item with Item No.: " + value + '.' + strItemNo,
-                                Status = "Record skipped"
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = TYPE_INNER_WARN;
                         }
                         break;
                     case "location":
@@ -80,11 +80,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item Location: " + value + '.',
-                                Status = "Record skipped"
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = TYPE_INNER_WARN;
                         }
                         break;
                     case "last cost":
@@ -120,8 +120,8 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
-                                    Status = "Ignored.",
+                                    Type = TYPE_INNER_WARN,
+                                    Status = STAT_INNER_COL_SKIP,
                                     Message = string.Format("Invalid value for Pricing Method.")
                                 });
                                 break;

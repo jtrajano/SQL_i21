@@ -21,8 +21,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
 
@@ -58,9 +58,9 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Info",
-                                    Status = "Success",
-                                    Message = "Inserted new Manufacturer record."
+                                    Type = TYPE_INNER_INFO,
+                                    Status = STAT_INNER_SUCCESS,
+                                    Message = "Created new Manufacturer record."
                                 });
                             }
                             if (lu != null)

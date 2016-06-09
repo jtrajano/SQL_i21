@@ -32,8 +32,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
 
                 string header = headers[i];
                 string value = csv[header];
@@ -60,11 +60,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Item with Item No.: " + value + '.',
-                                Status = "Record skipped"
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "location":
@@ -82,11 +82,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "Can't find Location: " + value + '.',
-                                Status = "Record skipped"
+                                Status = REC_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "vendor id":
@@ -102,11 +102,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Vendor: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "pos description":
@@ -138,11 +138,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Sub Location: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
                         break;
@@ -161,11 +161,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Storage Location: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -190,11 +190,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Sale UOM: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -219,11 +219,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Purchase UOM: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -242,11 +242,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Family: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -265,11 +265,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Class: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -288,11 +288,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Product Code: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -340,11 +340,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Deposit PLU: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -435,11 +435,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Count Group: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;
@@ -484,11 +484,11 @@ namespace iRely.Inventory.BusinessLayer
                                     {
                                         Column = header,
                                         Row = row,
-                                        Type = "Warning",
+                                        Type = TYPE_INNER_WARN,
                                         Message = "Can't find Freight Term: " + value + '.',
-                                        Status = "Ignored"
+                                        Status = STAT_INNER_COL_SKIP
                                     });
-                                    dr.Info = "warning";
+                                    dr.Info = INFO_WARN;
                                 }
                             }
                             catch(Exception)
@@ -497,11 +497,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Freight Term: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
 
                         }
@@ -525,11 +525,11 @@ namespace iRely.Inventory.BusinessLayer
                                     {
                                         Column = header,
                                         Row = row,
-                                        Type = "Warning",
+                                        Type = TYPE_INNER_WARN,
                                         Message = "Can't find Ship Method: " + value + '.',
-                                        Status = "Ignored"
+                                        Status = STAT_INNER_COL_SKIP
                                     });
-                                    dr.Info = "warning";
+                                    dr.Info = INFO_WARN;
                                 } 
                             }
                             catch(Exception)
@@ -538,11 +538,11 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Warning",
+                                    Type = TYPE_INNER_WARN,
                                     Message = "Can't find Ship Method: " + value + '.',
-                                    Status = "Ignored"
+                                    Status = STAT_INNER_COL_SKIP
                                 });
-                                dr.Info = "warning";
+                                dr.Info = INFO_WARN;
                             }
                         }
 	                    break;

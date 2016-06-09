@@ -23,8 +23,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
 
                 string header = headers[i];
                 string value = csv[header];
@@ -49,11 +49,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
-                                Status = "Record skipped",
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
                                 Message = "Invalid Item No: " + value + ". The item does not exist"
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "account category":
@@ -72,11 +72,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
-                                Status = "Record skipped",
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
                                 Message = "The Account Category " + value + " does not exist."
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "account id":
@@ -95,11 +95,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
-                                Status = "Record skipped",
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
                                 Message = "The Account Id " + value + " does not exist."
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                 }
@@ -126,7 +126,7 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     LogItems.Add(new ImportLogItem()
                     {
-                        ActionIcon = "small-edit",
+                        ActionIcon = ICON_ACTION_EDIT,
                         Description = "Updated GL Account",
                         ToValue = string.Format("Account Category: {0}, Account Id: {1}",
                             entry.Property(e => e.strAccountCategory).CurrentValue,
@@ -139,7 +139,7 @@ namespace iRely.Inventory.BusinessLayer
                 context.AddNew<tblICItemAccount>(fc);
                 LogItems.Add(new ImportLogItem()
                 {
-                    ActionIcon = "small-new-plus",
+                    ActionIcon = ICON_ACTION_NEW,
                     Description = "Created GL Account",
                     FromValue = "",
                     ToValue = string.Format("Account Category: {0}, Account Id: {1}", fc.strAccountCategory, fc.strAccountId)

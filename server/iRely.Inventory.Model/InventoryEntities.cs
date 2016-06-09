@@ -159,6 +159,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblGRStorageTypeMap());
             modelBuilder.Configurations.Add(new tblSTPromotionSalesListMap());
 
+            modelBuilder.Configurations.Add(new tblPATPatronageCategoryMap());
+
             modelBuilder.Configurations.Add(new vyuICGetInventoryTransferMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryTransferDetailMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockMap());

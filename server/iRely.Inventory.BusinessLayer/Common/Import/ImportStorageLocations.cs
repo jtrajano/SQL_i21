@@ -21,8 +21,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
 
@@ -60,10 +60,10 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = string.Format("Invalid Location: {0}.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "sub location":
@@ -80,10 +80,10 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = string.Format("Invalid Sub Location: {0}.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "restriction type":
@@ -127,11 +127,11 @@ namespace iRely.Inventory.BusinessLayer
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Row = row,
-                                Message = string.Format("{0}: A new unit of measurement record has been inserted with default unit type of 'Length'.", value)
+                                Message = string.Format("{0}: A new unit of measurement record has been created with default unit type of 'Length'.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         if (lu != null)
                             fc.intBatchSizeUOMId = (int)lu;

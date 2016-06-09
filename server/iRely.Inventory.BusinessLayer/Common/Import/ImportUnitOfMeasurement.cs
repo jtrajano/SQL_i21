@@ -31,8 +31,8 @@ namespace iRely.Inventory.BusinessLayer
             bool valid = true;
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
                 

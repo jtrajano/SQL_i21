@@ -102,7 +102,15 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
 
             success: function(data, status, jqXHR) {
                 iRely.Msg.close();
-                i21.functions.showCustomDialog('info', 'ok', 'File imported successfully.', function() {
+                var type = 'info';
+                var msg = "File imported successfully.";
+                var json = JSON.parse(jqXHR.responseText);
+                if (json.result.Info == "warning") {
+                    type = "warning";
+                    msg = "File imported successfully with warnings.";
+                }
+
+                i21.functions.showCustomDialog(type, 'ok', msg, function() {
                     win.close();
 
                     if (data.messages != null && data.messages.length > 0) {
@@ -115,15 +123,17 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
             error: function(jqXHR, status, error) {
                 iRely.Msg.close();
                 var json = JSON.parse(jqXHR.responseText);
-                i21.functions.showCustomDialog('error', 'ok', 'The import failed! ' + json.info, function() {
-                    win.close();
+                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
+                    function() {
+                        win.close();
 
-                    if (json.messages != null && json.messages.length > 0) {
-                        iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                            data: json
-                        });
+                        if (json.messages != null && json.messages.length > 0) {
+                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                                data: json
+                            });
+                        }
                     }
-                });
+                );
             }
         });
     }

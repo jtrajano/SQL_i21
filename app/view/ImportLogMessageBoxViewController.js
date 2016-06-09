@@ -48,7 +48,8 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
             extend: 'Ext.data.ArrayStore',
             data: me.formParams.data,
             fields: ["Message", "Column", "Row", "Type", "Status"],
-            autoLoad: true
+            autoLoad: true,
+            groupField: 'Row'
         });
         grid.reconfigure(store);
         store.loadData(me.formParams.data.messages);

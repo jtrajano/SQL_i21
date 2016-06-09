@@ -31,8 +31,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
 
@@ -55,10 +55,10 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = string.Format("Invalid Location: {0}.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "category":
@@ -76,11 +76,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Category item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "count group":
@@ -98,11 +98,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Count Group item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "count date":
@@ -126,10 +126,10 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = string.Format("Invalid Sub Location: {0}.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "storage location":
@@ -148,10 +148,10 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = string.Format("Invalid Storage Location: {0}.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "description":

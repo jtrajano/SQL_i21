@@ -31,8 +31,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
 
@@ -68,8 +68,8 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Info",
-                                Message = "Inserted new Line of Business item."
+                                Type = TYPE_INNER_INFO,
+                                Message = "Created new Line of Business item."
                             });
                             if (lu != null)
                             {
@@ -78,7 +78,7 @@ namespace iRely.Inventory.BusinessLayer
                                     Description = "Created new Line of Business item.",
                                     FromValue = "",
                                     ToValue = value,
-                                    ActionIcon = "small-new-plus"
+                                    ActionIcon = ICON_ACTION_NEW
                                 });
                             }
                         }
@@ -97,8 +97,8 @@ namespace iRely.Inventory.BusinessLayer
                                 {
                                     Column = header,
                                     Row = row,
-                                    Type = "Error",
-                                    Status = "Record skipped.",
+                                    Type = TYPE_INNER_ERROR,
+                                    Status = REC_SKIP,
                                     Message = string.Format("The value for Costing Method should not be blank.")
                                 });
                                 break;

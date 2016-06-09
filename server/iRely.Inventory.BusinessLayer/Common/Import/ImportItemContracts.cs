@@ -21,8 +21,8 @@ namespace iRely.Inventory.BusinessLayer
             bool valid = true;
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
 
                 string header = headers[i];
                 string value = csv[header];
@@ -47,8 +47,8 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
-                                Status = "Record skipped.",
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
                                 Message = "Invalid Item No: " + value + ". The item does not exists"
                             });
                         }
@@ -69,8 +69,8 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
-                                Status = "Record skipped",
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
                                 Message = "The Location " + value + " does not exist."
                             });
                         }
@@ -90,7 +90,7 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Error",
+                                Type = TYPE_INNER_ERROR,
                                 Message = "The Origin " + value + " does not exist."
                             });
                         }
@@ -125,7 +125,7 @@ namespace iRely.Inventory.BusinessLayer
             context.AddNew<tblICItemContract>(fc);
             LogItems.Add(new ImportLogItem()
             {
-                ActionIcon = "small-new-plus",
+                ActionIcon = ICON_ACTION_NEW,
                 Description = "Created Contract Item",
                 FromValue = "",
                 ToValue = string.Format("Contract Name: {0}, Location: {1}", fc.strContractItemName, fc.strLocationName)

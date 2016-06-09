@@ -20,8 +20,8 @@ namespace iRely.Inventory.BusinessLayer
             bool valid = true;
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
                 string header = headers[i];
                 string value = csv[header];
 
@@ -56,11 +56,11 @@ namespace iRely.Inventory.BusinessLayer
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Row = row,
-                                Message = string.Format("{0}: A new unit of measurement record has been inserted with default unit type of 'Length'.", value)
+                                Message = string.Format("{0}: A new unit of measurement record has been created with default unit type of 'Length'.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         if (lu != null)
                             fc.intCapacityUnitMeasureId = (int)lu;
@@ -87,12 +87,12 @@ namespace iRely.Inventory.BusinessLayer
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Row = row,
                                 Message = 
-                                string.Format("{0}: A new unit of measurement record has been inserted with default unit type of 'Length'.", value)
+                                string.Format("{0}: A new unit of measurement record has been created with default unit type of 'Length'.", value)
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         if (lu != null)
                             fc.intDimensionUnitMeasureId = (int)lu;

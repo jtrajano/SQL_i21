@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "item no", "category" };
+            return new string[] { "item no", "type", "category" };
         }
 
         protected override tblICItem ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
@@ -30,8 +30,8 @@ namespace iRely.Inventory.BusinessLayer
 
             for (var i = 0; i < fieldCount; i++)
             {
-                if (!valid)
-                    break;
+                //if (!valid)
+                //    break;
 
                 string header = headers[i];
                 string value = csv[header];
@@ -45,7 +45,31 @@ namespace iRely.Inventory.BusinessLayer
                         valid = SetText(value, del => fc.strItemNo = del, "Item No", dr, header, row, true);
                         break;
                     case "type":
-                        fc.strType = value;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "bundle":
+                            case "inventory":
+                            case "kit":
+                            case "finished good":
+                            case "non-inventory":
+                            case "other charge":
+                            case "raw material":
+                            case "service":
+                            case "software":
+                                fc.strType = value;
+                                break;
+                            default:
+                                fc.strType = "Inventory";
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid item Type: " + value + ". Set default: 'Inventory'.",
+                                    Status = STAT_INNER_DEF
+                                });
+                                break;
+                        }
                         break;
                     case "short name":
                         fc.strShortName = value;
@@ -54,6 +78,8 @@ namespace iRely.Inventory.BusinessLayer
                         fc.strDescription = value;
                         break;
                     case "manufacturer":
+                        if (string.IsNullOrEmpty(value))
+                            break;
                         lu = InsertAndOrGetLookupId<tblICManufacturer>(
                             context,
                             m => m.strManufacturer == value,
@@ -68,9 +94,9 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Info",
-                                Message = "Inserted new Manufacturer item: " + value + '.',
-                                Status = "Success"
+                                Type = TYPE_INNER_INFO,
+                                Message = "Created new Manufacturer item: " + value + '.',
+                                Status = STAT_INNER_SUCCESS
                             });
                             if (lu != null)
                             {
@@ -79,7 +105,7 @@ namespace iRely.Inventory.BusinessLayer
                                     Description = "Created new Manufacturer item.",
                                     FromValue = "",
                                     ToValue = value,
-                                    ActionIcon = "small-new-plus"
+                                    ActionIcon = ICON_ACTION_NEW
                                 });
                             }
                         }
@@ -91,17 +117,36 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Manufacturer item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "status":
-                        fc.strStatus = value;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "active":
+                            case "phased out":
+                            case "discontinued":
+                                fc.strStatus = value;
+                                break;
+                            default:
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid item Status: " + value + ". Set to default: 'Active'",
+                                    Status = STAT_INNER_DEF
+                                });
+                                break;
+                        }
                         break;
                     case "commodity":
+                        if (string.IsNullOrEmpty(value))
+                            break;
                         lu = GetLookUpId<tblICCommodity>(
                             context,
                             m => m.strCommodityCode == value,
@@ -114,17 +159,48 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Commodity item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "lot tracking":
-                        fc.strLotTracking = value;
+                        if (value.Trim().ToLower().Contains("manual"))
+                            fc.strLotTracking = "Yes - Manual";
+                        else if (value.Trim().ToLower().Contains("serial"))
+                            fc.strLotTracking = "Yes - Serial Number";
+                        else
+                        {
+                            switch (value.Trim().ToLower())
+                            {
+                                case "no":
+                                case "yes - manual":
+                                case "yes - serial number":
+                                    fc.strLotTracking = value;
+                                    break;
+                                default:
+                                    fc.strLotTracking = "No";
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Column = header,
+                                        Row = row,
+                                        Type = TYPE_INNER_WARN,
+                                        Message = "Invalid value for Lot Tracking: " + value + ". Lot Tracking set to default 'No'.",
+                                        Status = STAT_INNER_DEF
+                                    });
+                                    break;
+                            }
+                        }
+                        if (value.Trim().ToLower() == "no")
+                            fc.strInventoryTracking = "Item Level";
+                        else
+                            fc.strInventoryTracking = "Lot Level";
                         break;
                     case "brand":
+                        if (string.IsNullOrEmpty(value))
+                            break;
                         lu = GetLookUpId<tblICBrand>(
                             context,
                             m => m.strBrandCode == value,
@@ -137,11 +213,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Brand item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "model no":
@@ -153,18 +229,22 @@ namespace iRely.Inventory.BusinessLayer
                             m => m.strCategoryCode == value,
                             e => e.intCategoryId);
                         if (lu != null)
+                        {
+                            valid = true;
                             fc.intCategoryId = (int)lu;
+                        }
                         else
                         {
+                            valid = false;
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Category item: " + value + '.',
-                                Status = "Ignored"
+                                Status = TYPE_INNER_ERROR
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_ERROR;
                         }
                         break;
                     case "stocked item":
@@ -174,7 +254,24 @@ namespace iRely.Inventory.BusinessLayer
                         SetBoolean(value, del => fc.ysnDyedFuel = del);
                         break;
                     case "barcode print":
-                        fc.strBarcodePrint = value;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "upc":
+                            case "item":
+                            case "none":
+                                fc.strBarcodePrint = value;
+                                break;
+                            default:
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid value for Barcode Print: " + value + ".",
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                break;
+                        }
                         break;
                     case "msds required":
                         SetBoolean(value, del => fc.ysnMSDSRequired = del);
@@ -198,12 +295,52 @@ namespace iRely.Inventory.BusinessLayer
                         SetBoolean(value, del => fc.ysnListBundleSeparately = del);
                         break;
                     case "fuel inspect fee":
-                        fc.strFuelInspectFee = value;
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "yes (fuel item)":
+                            case "no (not fuel item)":
+                            case "no (fuel item)":
+                                fc.strFuelInspectFee = value;
+                                break;
+                            default:
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid Fuel Inspect Fee: " + value + ".",
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                break;
+                        }
                         break;
                     case "rin required":
-                        fc.strRINRequired = value;
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "no rin":
+                            case "resell rin only":
+                            case "issued":
+                                fc.strRINRequired = value;
+                                break;
+                            default:
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid value for RIN Required: " + value + ".",
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                break;
+                        }
                         break;
                     case "fuel category":
+                        if (string.IsNullOrEmpty(value))
+                            break;
                         lu = GetLookUpId<tblICRinFuelCategory>(
                             context,
                             m => m.strRinFuelCategoryCode == value,
@@ -216,11 +353,11 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Fuel Category item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "denaturant percentage":
@@ -239,6 +376,8 @@ namespace iRely.Inventory.BusinessLayer
                         SetBoolean(value, del => fc.ysnHandAddIngredient = del);
                         break;
                     case "medication tag":
+                        if (string.IsNullOrEmpty(value))
+                            break;
                         lu = GetLookUpId<tblICTag>(
                             context,
                             m => m.strTagNumber == value,
@@ -251,14 +390,16 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Medication Tag item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "ingredient tag":
+                        if (string.IsNullOrEmpty(value))
+                            break;
                         lu = GetLookUpId<tblICTag>(
                             context,
                             m => m.strTagNumber == value,
@@ -271,17 +412,19 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 Column = header,
                                 Row = row,
-                                Type = "Warning",
+                                Type = TYPE_INNER_WARN,
                                 Message = "Can't find Ingredient Tag item: " + value + '.',
-                                Status = "Ignored"
+                                Status = STAT_INNER_COL_SKIP
                             });
-                            dr.Info = "warning";
+                            dr.Info = INFO_WARN;
                         }
                         break;
                     case "volume rebate group":
                         fc.strVolumeRebateGroup = value;
                         break;
                     case "physical item":
+                        if (string.IsNullOrEmpty(value))
+                            break;
                         lu = GetLookUpId<vyuICGetCompactItem>(
                             context,
                             m => m.strItemNo == value,
@@ -293,7 +436,7 @@ namespace iRely.Inventory.BusinessLayer
                         SetBoolean(value, del => fc.ysnExtendPickTicket = del);
                         break;
                     case "export edi":
-                        SetBoolean(value, del => fc.ysnExtendPickTicket = del);
+                        SetBoolean(value, del => fc.ysnExportEDI = del);
                         break;
                     case "hazard material":
                         SetBoolean(value, del => fc.ysnHazardMaterial = del);
@@ -314,7 +457,25 @@ namespace iRely.Inventory.BusinessLayer
                         SetDecimal(value, del => fc.dblOverReceiveTolerance = del, "Over Receive Tolerance Percentage", dr, header, row);
                         break;
                     case "maintenance calculation method":
-                        fc.strMaintenanceCalculationMethod = value;
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "percentage":
+                            case "fixed":
+                                fc.strMaintenanceCalculationMethod = value;
+                                break;
+                            default:
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid Maintenance Calculation Method: " + value + ".",
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                break;
+                        }
                         break;
                     case "rate":
                         SetDecimal(value, del => fc.dblMaintenanceRate = del, "Rate", dr, header, row);
@@ -323,13 +484,51 @@ namespace iRely.Inventory.BusinessLayer
                         fc.strNACSCategory = value;
                         break;
                     case "wic code":
-                        fc.strWICCode = value;
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "woman":
+                            case "infant":
+                            case "child":
+                                fc.strWICCode = value;
+                                break;
+                            default:
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid WIC Code: " + value + ".",
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                break;
+                        }
                         break;
                     case "receipt comment req":
                         SetBoolean(value, del => fc.ysnReceiptCommentRequired = del);
                         break;
                     case "count code":
-                        fc.strCountCode = value;
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        switch (value.Trim().ToLower())
+                        {
+                            case "item":
+                            case "package":
+                            case "cases":
+                                fc.strCountCode = value;
+                                break;
+                            default:
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid Count Code: " + value + ".",
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                break;
+                        }
                         break;
                     case "landed cost":
                         SetBoolean(value, del => fc.ysnLandedCost = del);
@@ -370,6 +569,50 @@ namespace iRely.Inventory.BusinessLayer
                     case "default percentage full":
                         SetDecimal(value, del => fc.dblDefaultFull = del, "Default Percentage Full", dr, header, row);
                         break;
+                    case "patronage category":
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        lu = GetLookUpId<tblPATPatronageCategory>(
+                            context,
+                            m => m.strCategoryCode == value,
+                            e => e.intPatronageCategoryId);
+                        if (lu != null)
+                            fc.intPatronageCategoryId = (int)lu;
+                        else
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Can't find Patronage Category: " + value + '.',
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                        }
+                        break;
+                    case "direct sale":
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        lu = GetLookUpId<tblPATPatronageCategory>(
+                            context,
+                            m => m.strCategoryCode == value,
+                            e => e.intPatronageCategoryId);
+                        if (lu != null)
+                            fc.intPatronageCategoryDirectId = (int)lu;
+                        else
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Can't find Direct Sale: " + value + '.',
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                        }
+                        break;
                 }
             }
 
@@ -387,6 +630,44 @@ namespace iRely.Inventory.BusinessLayer
                 entry.Property(e => e.ysnLandedCost).CurrentValue = fc.ysnLandedCost;
                 entry.Property(e => e.ysnSpecialCommission).CurrentValue = fc.ysnSpecialCommission;
                 entry.Property(e => e.ysnCommisionable).CurrentValue = fc.ysnCommisionable;
+                entry.Property(e => e.ysnStockedItem).CurrentValue = fc.ysnStockedItem;
+                entry.Property(e => e.ysnDyedFuel).CurrentValue = fc.ysnDyedFuel;
+                entry.Property(e => e.ysnMSDSRequired).CurrentValue = fc.ysnMSDSRequired;
+                entry.Property(e => e.ysnInboundTax).CurrentValue = fc.ysnInboundTax;
+                entry.Property(e => e.ysnOutboundTax).CurrentValue = fc.ysnOutboundTax;
+                entry.Property(e => e.ysnRestrictedChemical).CurrentValue = fc.ysnRestrictedChemical;
+                entry.Property(e => e.ysnFuelItem).CurrentValue = fc.ysnFuelItem;
+                entry.Property(e => e.ysnListBundleSeparately).CurrentValue = fc.ysnListBundleSeparately;
+                entry.Property(e => e.ysnTonnageTax).CurrentValue = fc.ysnTonnageTax;
+                entry.Property(e => e.ysnLoadTracking).CurrentValue = fc.ysnLoadTracking;
+                entry.Property(e => e.ysnExtendPickTicket).CurrentValue = fc.ysnExtendPickTicket;
+                entry.Property(e => e.ysnExportEDI).CurrentValue = fc.ysnExportEDI;
+                entry.Property(e => e.ysnHazardMaterial).CurrentValue = fc.ysnHazardMaterial;
+                entry.Property(e => e.ysnAutoBlend).CurrentValue = fc.ysnAutoBlend;
+                entry.Property(e => e.ysnHandAddIngredient).CurrentValue = fc.ysnHandAddIngredient;
+                entry.Property(e => e.dblMixOrder).CurrentValue = fc.dblMixOrder;
+                entry.Property(e => e.dblUserGroupFee).CurrentValue = fc.dblUserGroupFee;
+                entry.Property(e => e.dblWeightTolerance).CurrentValue = fc.dblWeightTolerance;
+                entry.Property(e => e.dblOverReceiveTolerance).CurrentValue = fc.dblOverReceiveTolerance;
+                entry.Property(e => e.dblMaintenanceRate).CurrentValue = fc.dblMaintenanceRate;
+                entry.Property(e => e.strMaintenanceCalculationMethod).CurrentValue = fc.strMaintenanceCalculationMethod;
+                entry.Property(e => e.strFuelInspectFee).CurrentValue = fc.strFuelInspectFee;
+                entry.Property(e => e.strNACSCategory).CurrentValue = fc.strNACSCategory;
+                entry.Property(e => e.strWICCode).CurrentValue = fc.strWICCode;
+                entry.Property(e => e.ysnReceiptCommentRequired).CurrentValue = fc.ysnReceiptCommentRequired;
+                entry.Property(e => e.ysnLandedCost).CurrentValue = fc.ysnLandedCost;
+                entry.Property(e => e.strKeywords).CurrentValue = fc.strKeywords;
+                entry.Property(e => e.dblCaseQty).CurrentValue = fc.dblCaseQty;
+                entry.Property(e => e.dtmDateShip).CurrentValue = fc.dtmDateShip;
+                entry.Property(e => e.dblTaxExempt).CurrentValue = fc.dblTaxExempt;
+                entry.Property(e => e.ysnTankRequired).CurrentValue = fc.ysnTankRequired;
+                entry.Property(e => e.ysnAvailableTM).CurrentValue = fc.ysnAvailableTM;
+                entry.Property(e => e.strCountCode).CurrentValue = fc.strCountCode;
+                entry.Property(e => e.strRINRequired).CurrentValue = fc.strRINRequired;
+                entry.Property(e => e.intRINFuelTypeId).CurrentValue = fc.intRINFuelTypeId;
+                entry.Property(e => e.dblDenaturantPercent).CurrentValue = fc.dblDenaturantPercent;
+                entry.Property(e => e.strEPANumber).CurrentValue = fc.strEPANumber;
+                entry.Property(e => e.strBarcodePrint).CurrentValue = fc.strBarcodePrint;
                 entry.Property(e => e.strShortName).CurrentValue = fc.strShortName;
                 entry.Property(e => e.intManufacturerId).CurrentValue = fc.intManufacturerId;
                 entry.Property(e => e.strStatus).CurrentValue = fc.strStatus;
@@ -395,6 +676,13 @@ namespace iRely.Inventory.BusinessLayer
                 entry.Property(e => e.intBrandId).CurrentValue = fc.intBrandId;
                 entry.Property(e => e.strModelNo).CurrentValue = fc.strModelNo;
                 entry.Property(e => e.intCategoryId).CurrentValue = fc.intCategoryId;
+                entry.Property(e => e.intMedicationTag).CurrentValue = fc.intMedicationTag;
+                entry.Property(e => e.intIngredientTag).CurrentValue = fc.intIngredientTag;
+                entry.Property(e => e.strVolumeRebateGroup).CurrentValue = fc.strVolumeRebateGroup;
+                entry.Property(e => e.intPhysicalItem).CurrentValue = fc.intPhysicalItem;
+                entry.Property(e => e.dblDefaultFull).CurrentValue = fc.dblDefaultFull;
+                entry.Property(e => e.intPatronageCategoryId).CurrentValue = fc.intPatronageCategoryId;
+                entry.Property(e => e.intPatronageCategoryDirectId).CurrentValue = fc.intPatronageCategoryDirectId;
                 entry.State = System.Data.Entity.EntityState.Modified;
                 entry.Property(e => e.strItemNo).IsModified = false;
             }

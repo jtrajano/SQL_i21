@@ -135,6 +135,34 @@
                             "codeClass": null,
                             "name": "MyGridView",
                             "designerId": "b9604557-9a9e-4705-b7c6-e497ce17e01f"
+                        },
+                        {
+                            "type": "Ext.grid.feature.GroupingSummary",
+                            "reference": {
+                                "name": "features",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "name": "MyGroupingSummaryFeature",
+                            "designerId": "1ac4c2ac-4e09-4bc7-adc8-9003c2e3a20e",
+                            "cn": [
+                                {
+                                    "type": "Ext.XTemplate",
+                                    "reference": {
+                                        "name": "groupHeaderTpl",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|displayName": "groupHeaderTpl",
+                                        "implHandler": [
+                                            "{columnName}: {name}"
+                                        ]
+                                    },
+                                    "name": "groupHeaderTpl",
+                                    "designerId": "bb2ed922-1a1b-4e69-ae83-317ce1d4f940"
+                                }
+                            ]
                         }
                     ]
                 }

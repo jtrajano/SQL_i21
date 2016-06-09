@@ -44,7 +44,7 @@ namespace iRely.Inventory.WebApi.Controllers
                     var response = new
                     {
                         success = false,
-                        info = output.Description,
+                        info = output.Description != null ? output.Description : "Error(s) found during import.",
                         messages = output.Messages,
                         result = output
                     };
@@ -66,7 +66,7 @@ namespace iRely.Inventory.WebApi.Controllers
                 var response = new
                 {
                     success = false,
-                    info = ex.Message,
+                    info = ex.Message != null ? ex.Message : "Error(s) found during import.",
                     exception = ex
                 };
                 return Request.CreateResponse(HttpStatusCode.BadRequest, response);
