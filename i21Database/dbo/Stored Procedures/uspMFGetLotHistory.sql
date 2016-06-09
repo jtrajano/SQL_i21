@@ -10,7 +10,11 @@ BEGIN
 	SELECT @dblPrimaryQty = 0
 		,@dblPrimaryWeight = 0
 
-	SELECT ilt.dtmDate AS dtmDateTime
+	SELECT CASE 
+			WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, dtmCreated, 101))
+				THEN dtmCreated
+			ELSE dtmDate
+			END AS dtmDateTime
 		,l.strLotNumber AS strLotNo
 		,CASE 
 			WHEN iad.intNewItemId IS NULL
@@ -25,7 +29,15 @@ BEGIN
 		,c.strCategoryCode
 		,clsl.strSubLocationName AS strSubLocation
 		,sl.strName AS strStorageLocation
-		,itt.strName AS strTransaction
+		,CASE 
+			WHEN itt.strName = 'Produce'
+				AND ilt.dblQty < 0
+				THEN 'Produce Reversal'
+			WHEN itt.strName = 'Consume'
+				AND ilt.dblQty > 0
+				THEN 'Consume Reversal'
+			ELSE itt.strName
+			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
 		,CONVERT(NUMERIC(38, 20), ilt.dblQty) AS dblTransactionWeight
 		,uwm.strUnitMeasure AS strTransactionWeightUOM
