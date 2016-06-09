@@ -265,3 +265,60 @@ GO
 		END		
 	END
 GO
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule')
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND [COLUMN_NAME] = 'ysnEnabled' AND [COLUMN_NAME] = 'intModuleId') 
+		BEGIN
+			PRINT N'ADDING tblARCustomerLicenseModule.ysnEnabled AND tblARCustomerLicenseModule.intModuleId'
+			EXEC('ALTER TABLE tblARCustomerLicenseModule ADD ysnEnabled BIT DEFAULT 0
+				  ALTER TABLE tblARCustomerLicenseModule ADD intModuleId INT NULL')
+		END
+	END
+
+GO
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND [COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId') 
+	BEGIN
+		PRINT N'TRY UPDATING tblARCustomerLicenseModule.ysnEnabled AND tblARCustomerLicenseModule.intModuleId VALUES'
+		EXEC('IF EXISTS(SELECT TOP 1 1 FROM tblARCustomerLicenseModule WHERE intModuleId IS NULL)
+			 BEGIN
+				 UPDATE T SET T.ysnEnabled = 1, T.intModuleId = module.intModuleId
+				 FROM tblARCustomerLicenseModule T
+		 		INNER JOIN tblSMModule module ON T.strModuleName = module.strModule AND module.strApplicationName = ''i21''
+			 END')
+	END
+
+GO
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND [COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId') 
+	BEGIN
+		PRINT N'ADDING NEW i21 MODULES IN tblARCustomerLicenseModule'
+		EXEC('DECLARE @currentRow INT
+			  DECLARE @totalRows INT
+	  
+			  SET @currentRow = 1
+			  SELECT @totalRows = Count(*) FROM tblARCustomerLicenseInformation
+	  
+			  WHILE (@currentRow <= @totalRows)
+			  BEGIN
+	  
+			  Declare @customerId INT
+			  SELECT @customerId = intCustomerLicenseInformationId FROM (  
+	  			SELECT ROW_NUMBER() OVER(ORDER BY intCustomerLicenseInformationId ASC) AS ''ROWID'', *
+	  			FROM tblARCustomerLicenseInformation
+			  ) a
+			  WHERE ROWID = @currentRow
+	  
+			  INSERT INTO tblARCustomerLicenseModule (intCustomerLicenseInformationId, strModuleName, intModuleId)
+			  SELECT @customerId, Module.strModule, Module.intModuleId
+			  FROM tblARCustomerLicenseModule License 
+			  RIGHT JOIN tblSMModule Module ON License.intModuleId =  Module.intModuleId AND License.intCustomerLicenseInformationId = @customerId
+			  WHERE Module.strApplicationName = ''i21'' AND Module.intModuleId NOT IN (93, 94, 95, 96) AND License.intModuleId IS NULL
+	  
+			  SET @currentRow = @currentRow + 1
+			  END')
+	END
+
+GO
+
