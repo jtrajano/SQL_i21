@@ -19,6 +19,7 @@ CREATE PROCEDURE [dbo].[uspFRDCreateRowDesign]
 	@strFontColor NVARCHAR(100),
 	@intFontSize INT,
 	@strOverrideFormatMask NVARCHAR(200),
+	@strDateOverride NVARCHAR(200),
 	@ysnForceReversedExpense BIT,
 	@ysnOverrideFormula BIT,
 	@intSort INT
@@ -43,6 +44,10 @@ IF(@strAccountsType = 'CY')
 BEGIN
 	SET @Hidden = 1
 END
+IF(@strRowType = 'Filter Accounts' or @strRowType = 'Cash Flow Activity' or @strRowType = 'Percentage')
+BEGIN
+	SET @strDateOverride = 'None'
+END
 
 
 	INSERT INTO tblFRRowDesign (intRowId,
@@ -65,6 +70,7 @@ END
 								strFontColor,
 								intFontSize,
 								strOverrideFormatMask,
+								strDateOverride,
 								ysnForceReversedExpense,
 								ysnOverrideFormula,
 								intSort)
@@ -89,6 +95,7 @@ END
 								@strFontColor,
 								@intFontSize,
 								@strOverrideFormatMask,
+								@strDateOverride,
 								@ysnForceReversedExpense,
 								@ysnOverrideFormula,
 								@intSort
