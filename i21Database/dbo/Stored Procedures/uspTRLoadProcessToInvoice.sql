@@ -23,6 +23,15 @@ BEGIN TRY
 	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId), @intUserId)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+	DECLARE @intFreightItemId	INT
+	  , @intSurchargeItemId		INT
+	  , @ysnItemizeSurcharge	BIT
+
+	SELECT TOP 1
+		   @intFreightItemId	= intItemForFreightId
+		 , @intSurchargeItemId	= intSurchargeItemId
+		 , @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
+	FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
 
@@ -85,8 +94,8 @@ BEGIN TRY
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
-														WHEN DD.ysnFreightInPrice = 1 AND ISNULL(DD.dblDistSurcharge,0) != 0 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0) + (ISNULL(DD.dblFreightRate,0) * (DD.dblDistSurcharge / 100))
-														WHEN DD.ysnFreightInPrice = 1 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0) 
+														WHEN DD.ysnFreightInPrice = 1 AND @ysnItemizeSurcharge = 0 AND ISNULL(DD.dblDistSurcharge,0) != 0 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0) + (ISNULL(DD.dblFreightRate,0) * (DD.dblDistSurcharge / 100))
+														WHEN DD.ysnFreightInPrice = 1 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0)
 												END
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= ''
@@ -301,20 +310,10 @@ BEGIN TRY
 	FROM #tmpSourceTable TR
 
 	--VALIDATE FREIGHT AND SURCHARGE ITEM
-	DECLARE @intFreightItemId	INT
-	  , @intSurchargeItemId		INT
-	  , @ysnItemizeSurcharge	BIT
-	  , @intLocationId			INT
+	DECLARE @FreightSurchargeEntries AS InvoiceIntegrationStagingTable
+	DECLARE @intLocationId		INT
 	  , @intFreightItemUOMId	INT
 	  , @intSurchargeItemUOMId	INT
-
-	DECLARE @FreightSurchargeEntries AS InvoiceIntegrationStagingTable
-
-	SELECT TOP 1
-		   @intFreightItemId	= intItemForFreightId
-		 , @intSurchargeItemId	= intSurchargeItemId
-		 , @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
-	FROM tblTRCompanyPreference
 
 	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM @EntriesForInvoice 
 
@@ -779,7 +778,7 @@ BEGIN TRY
 		,[dblQtyOrdered]						= SUM(IE.dblQtyOrdered)
 		,[dblQtyShipped]						= SUM(IE.dblQtyShipped)
 		,[dblDiscount]							= SUM(IE.dblDiscount)
-		,[dblPrice]								= SUM(dblPrice)
+		,[dblPrice]								= MIN(dblPrice)
 		,[ysnRefreshPrice]						= IE.ysnRefreshPrice
 		,[strMaintenanceType]					= IE.strMaintenanceType
 		,[strFrequency]							= IE.strFrequency
