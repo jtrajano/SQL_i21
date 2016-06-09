@@ -34,7 +34,7 @@ SELECT
 	,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
 	,intCustomerNumber = B.intCustomerNumber
 	,ysnPastDue = CAST((CASE WHEN ISNULL(I.dblHighPastDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
-	,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.dblBalance,0.0) < I.dblCreditLimit  THEN 0 ELSE 1 END)  AS BIT)
+	,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.dblBalance,0.0) <= I.dblCreditLimit  THEN 0 ELSE 1 END)  AS BIT)
 	,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(I.dblTotalDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 	,dblARBalance = ISNULL(I.dblBalance,0.0)
 	,dblPastDue = ISNULL(I.dblHighPastDue,0.0)

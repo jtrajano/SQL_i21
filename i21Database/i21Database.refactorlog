@@ -5166,4 +5166,102 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTaxCriteriaId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1c1a3368-c18d-4594-a65c-72775ee7ce09" ChangeDateTime="05/06/2016 03:14:48">
+    <Property Name="ElementName" Value="[dbo].[tblGRCompanyPreference].[intScaleUncompletedTicketDaysAlert]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketUncompletedDaysAlert" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="65ae7276-45cb-4adb-9ac6-8c8447646957" ChangeDateTime="05/09/2016 10:24:57">
+    <Property Name="ElementName" Value="[dbo].[tblMFRecipeItem].[dblPercentage]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFRecipeItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[dblCostAllocationPercentage]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="709910bb-3e08-4f3c-b1b9-66060cfd0b15" ChangeDateTime="05/16/2016 12:22:11">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[intFromCurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFromCurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="574058cb-e75b-4689-9692-b254dba18e4d" ChangeDateTime="05/16/2016 12:22:17">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[intToCurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strToCurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b3e04db5-4228-4696-9be2-172f4420a45e" ChangeDateTime="05/19/2016 07:44:23">
+    <Property Name="ElementName" Value="[dbo].[tblCCCompanyPreferenceOption].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCCCompanyPreferenceOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceOption" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1b3a523e-9ad9-446e-938b-df6502839446" ChangeDateTime="05/20/2016 05:13:45">
+    <Property Name="ElementName" Value="[dbo].[tblTRImportRackPrice].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRImportRackPrice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportRackPriceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="48ba377c-2098-4d1e-8c0a-27719226c9e3" ChangeDateTime="05/20/2016 05:18:55">
+    <Property Name="ElementName" Value="[dbo].[tblTRImportRackPriceDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRImportRackPriceDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportRackPriceDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4f2093d3-3a36-45d5-be1e-88bc564ee90a" ChangeDateTime="05/23/2016 06:47:40">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[intCompetitorEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCompetitorEntityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2e98636a-5481-4408-8f40-b152f6582d91" ChangeDateTime="05/23/2016 06:47:48">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[intCurrentSolutionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCurrentSolutionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f8236c75-445a-47e4-91ee-2edbf5cdedee" ChangeDateTime="05/24/2016 10:26:12">
+    <Property Name="ElementName" Value="[dbo].[tblTRImportRackPriceDetailItem].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTRImportRackPriceDetailItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportRackPriceDetailItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0b358eb0-fdb0-4933-9b82-a9ac49cacbce" ChangeDateTime="05/28/2016 06:01:58">
+    <Property Name="ElementName" Value="[dbo].[tblLGLoadContainer].[intItemUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGLoadContainer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intUnitMeasureId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7b6b1da2-a2bd-4dcc-b9ec-b9ca0f946b73" ChangeDateTime="05/30/2016 08:06:27">
+    <Property Name="ElementName" Value="[dbo].[tblTFValidOriginDestinationState].[intValidOriginDestinationStateId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFValidOriginDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intValidOriginStateId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c0b1dd68-09da-42ea-811f-6c0eed1bdc5f" ChangeDateTime="05/30/2016 08:06:47">
+    <Property Name="ElementName" Value="[dbo].[tblTFValidOriginDestinationState].[strOriginDestinationState]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFValidOriginDestinationState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strOriginState" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="999bf408-999f-4ea4-85ae-69397303233f" ChangeDateTime="05/30/2016 08:14:23">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxCriteria].[intTaxCategoryid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxCriteria]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxCategoryId" />
+  </Operation>
 </Operations>

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFStageKit]
+CREATE PROCEDURE [dbo].[uspMFStageKit]
 	@intPickListId int,
 	@intUserId int
 AS
@@ -38,9 +38,11 @@ Declare @dblPickQty NUMERIC(38,20)
 Declare @intInputItemId INT
 Declare @ysnHasSubstitute bit
 Declare @strInputItemNo nvarchar(50)
+DECLARE @strInActiveLots NVARCHAR(MAX) 
 Declare @dblRecipeQty NUMERIC(38,20)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
+		,@intItemUOMId int
 
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
@@ -117,6 +119,17 @@ pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
 CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId --Exclude Lots that are already in Kit Staging Location
+
+--Only Active lots are allowed to stage
+SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
+FROM @tblPickListDetail tpl Join tblICLot l on tpl.intLotId=l.intLotId 
+Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId Where ls.strPrimaryStatus<>'Active'
+
+If ISNULL(@strInActiveLots,'')<>''
+Begin
+	Set @ErrMsg='Lots ' + @strInActiveLots + ' are not active. Unable to perform stage operation.'
+	RaisError(@ErrMsg,16,1)
+End
 
 If @ysnBlendSheetRequired=0
 Begin
@@ -238,12 +251,13 @@ Select @intMinLot=Min(intRowNo) from @tblPickListDetail
 
 While(@intMinLot is not null)
 Begin
-	Set @intNewLotId=NULL
+	Select @intNewLotId=NULL,@intItemUOMId=NULL
 
 	Select @intLotId=intLotId,@strLotNumber=strLotNumber,
 	@dblMoveQty=CASE WHEN intItemUOMId = intItemIssuedUOMId THEN dblPickQuantity / dblWeightPerQty ELSE dblPickQuantity END,
 	@intItemId=intItemId,
 	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty,@dblQuantity=dblQuantity,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId 
+	,@intItemUOMId=intItemUOMId
 	From @tblPickListDetail Where intRowNo=@intMinLot
 
 	If ROUND(@dblPhysicalQty,3) < ROUND(@dblQuantity,3)
@@ -258,6 +272,12 @@ Begin
 	Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
 		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intKitStagingLocationId 
 		--And dtmExpiryDate > @dtmCurrentDateTime AND intLotStatusId = 1 AND dblQty > 0
+
+	IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+	BEGIN
+		SELECT @dblPickQuantity=@dblQuantity
+		SELECT @intPickUOMId=@intItemUOMId
+	END
 
 	If ISNULL(@intNewLotId,0) = 0
 		Begin

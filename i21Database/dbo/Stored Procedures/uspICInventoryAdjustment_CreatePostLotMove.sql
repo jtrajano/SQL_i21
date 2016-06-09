@@ -12,6 +12,7 @@
 	,@intNewStorageLocationId AS INT
 	,@strNewLotNumber AS NVARCHAR(50)
 	,@dblMoveQty AS NUMERIC(38,20)
+	,@intItemUOMId AS INT 
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT
@@ -142,6 +143,33 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- Check if the item uom id is valid. 
+IF NOT EXISTS (
+	SELECT	TOP 1 1
+	FROM	dbo.tblICItemUOM
+	WHERE	intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMId	
+)
+BEGIN 
+	-- Item UOM is invalid or missing.
+	RAISERROR(80048, 11, 1)  
+	GOTO _Exit
+END 
+
+-- Check if the item uom id is valid for the lot record. 
+IF NOT EXISTS (
+	SELECT	TOP 1 1
+	FROM	dbo.tblICLot 
+	WHERE	intItemId = @intItemId
+			AND intLotId = @intLotId
+			AND (intItemUOMId = @intItemUOMId OR intWeightUOMId = @intItemUOMId) 
+)
+BEGIN 
+	-- Item UOM is invalid or missing.
+	RAISERROR(80048, 11, 1)  
+	GOTO _Exit
+END
+
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the starting number for the inventory adjustment. 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -229,20 +257,25 @@ BEGIN
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
 			,strNewLotNumber			= ISNULL(@strNewLotNumber, Lot.strLotNumber)
-			,intItemUOMId				= Lot.intItemUOMId
-			,intNewItemUOMId			= Lot.intItemUOMId
-			,dblQuantity				= Lot.dblQty
+			,intItemUOMId				= @intItemUOMId 
+			,intNewItemUOMId			= NULL 
+			,dblQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+													ELSE 0 
+											END 
 			,dblAdjustByQuantity		= -1 * @dblMoveQty
-			,dblNewSplitLotQuantity		= @dblMoveQty
-			,dblNewQuantity				= Lot.dblQty - @dblMoveQty
+			,dblNewSplitLotQuantity		= NULL 
+			,dblNewQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+													ELSE 0 
+											END 
+											- @dblMoveQty
 			,intWeightUOMId				= Lot.intWeightUOMId
 			,intNewWeightUOMId			= NULL 
 			,dblWeight					= Lot.dblWeight
 			,dblNewWeight				= NULL 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
-			,dblNewWeightPerQty			= CASE	WHEN ABS(ISNULL(@dblMoveQty, 0)) = 0 THEN 0
-												ELSE ISNULL(Lot.dblWeight, 0) / ABS(ISNULL(@dblMoveQty, 0))
-										  END 											
+			,dblNewWeightPerQty			= NULL 											
 			,dblCost					= Lot.dblLastCost
 			,dblNewCost					= NULL 
 			,intNewLocationId			= @intNewLocationId
@@ -252,6 +285,7 @@ BEGIN
 			,intConcurrencyId			= 1
 	FROM	dbo.tblICItem Item INNER JOIN dbo.tblICLot Lot
 				ON Item.intItemId = Lot.intItemId
+
 	WHERE	Item.intItemId = @intItemId
 			AND Lot.intLotId = @intLotId
 END 

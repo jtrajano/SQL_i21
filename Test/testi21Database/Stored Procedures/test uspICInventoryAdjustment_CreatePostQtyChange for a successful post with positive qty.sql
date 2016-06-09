@@ -161,6 +161,7 @@ BEGIN
 			-- Parameters for the new values: 
 			,@dblAdjustByQuantity			= 25
 			,@dblNewUnitCost				= 12.25
+			,@intItemUOMId					= @ManualGrains_25KgBagUOM
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId					= 1 
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE

@@ -467,9 +467,26 @@ BEGIN
 		)
 	SELECT 22
 		,'Default Residue Qty'
-		,5
+		,3
 		,1
-		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+		,NULL
+END
+ELSE
+BEGIN
+	UPDATE dbo.tblMFAttribute SET intAttributeDataTypeId=3,strSQL=NULL WHERE intAttributeId = 22 
+END
+GO
+IF EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intAttributeId = 22
+			AND strAttributeValue = 'False'
+		)
+BEGIN
+	UPDATE tblMFManufacturingProcessAttribute
+	SET strAttributeValue = '0.01'
+	WHERE intAttributeId = 22
+		AND strAttributeValue = 'False'
 END
 GO
 IF NOT EXISTS (
@@ -1487,5 +1504,26 @@ BEGIN
 		,5
 		,5
 		,'Select strName As ValueMember, strName As DisplayMember From tblMFWorkOrderStatus Where intStatusId in (1,9,10)'
+END
+GO
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 71
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 71
+		,'Future Date Production Allowed'
+		,5
+		,1
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO

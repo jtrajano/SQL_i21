@@ -3,11 +3,13 @@
     [intInvoiceId]							INT												NOT NULL,
 	[strDocumentNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
     [intItemId]								INT												NULL,
+	[intPrepayTypeId]						INT												NULL DEFAULT 0,
+	[dblPrepayRate]							NUMERIC(18, 6)									NULL DEFAULT 0,
     [strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblQtyOrdered]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intOrderUOMId]							INT												NULL,    
     [dblQtyShipped]							NUMERIC(18, 6)									NULL DEFAULT 0,
-	[intItemUOMId]							INT												NULL,    
+	[intItemUOMId]							INT												NULL,
 	[dblItemWeight]							NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intItemWeightUOMId]					INT												NULL,    
 	[dblDiscount]							NUMERIC(18, 6)									NULL DEFAULT 0,
@@ -17,6 +19,7 @@
 	[dblTotalTax]							NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblTotal]								NUMERIC(18, 6)									NULL DEFAULT 0,
 	[ysnSubCurrency]						BIT												NULL DEFAULT 0,	
+	[ysnRestricted]							BIT												NULL DEFAULT 0,	
 	[intAccountId]							INT												NULL,
 	[intCOGSAccountId]						INT												NULL,
 	[intSalesAccountId]						INT												NULL,
@@ -50,6 +53,9 @@
 	[dblShipmentNetWt]						NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intTicketId]							INT												NULL, 
 	[intTicketHoursWorkedId]				INT												NULL,
+	[intCustomerStorageId]					INT												NULL,
+	[intSiteDetailId]						INT												NULL,
+	[intLoadDetailId]						INT												NULL,
 	[intOriginalInvoiceDetailId]			INT												NULL,
 	[intEntitySalespersonId]				INT												NULL,
 	[intSiteId]								INT												NULL,
@@ -81,7 +87,10 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId])
+	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [tblGRCustomerStorage]([intCustomerStorageId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblCCSiteDetail_intSiteDetailId] FOREIGN KEY ([intSiteDetailId]) REFERENCES [tblCCSiteDetail]([intSiteDetailId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId])
 );
 
 GO

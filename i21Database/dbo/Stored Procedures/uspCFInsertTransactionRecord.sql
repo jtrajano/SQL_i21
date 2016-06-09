@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
-	 @strCardId						NVARCHAR(MAX)
+	 @strGUID						NVARCHAR(MAX)
+	,@strProcessDate				NVARCHAR(MAX)
+	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
 	,@strProductId					NVARCHAR(MAX)
 	,@strNetworkId					NVARCHAR(MAX)	= NULL
@@ -8,7 +10,7 @@
 	,@intTransTime					INT				= 0
 	,@intOdometer					INT				= 0
 	,@intPumpNumber					INT				= 0
-	,@intContractId					INT				= 0
+	,@intContractId					INT				= NULL
 	,@intSalesPersonId				INT				= NULL
 	,@dtmBillingDate				DATETIME		= NULL
 	,@dtmTransactionDate			DATETIME		= NULL
@@ -39,13 +41,14 @@
 	,@intPPHostId					INT				= 0
 	,@strPPSiteType					NVARCHAR(MAX)	= NULL
 	,@strSiteType					NVARCHAR(MAX)	= NULL
+	,@strCreditCard					NVARCHAR(MAX)	= NULL
 	--------------------------------------
 
 	-------------REMOTE TAXES-------------
 	--  1. REMOTE TRANSACTION			--
 	--  2. EXT. REMOTE TRANSACTION 		--
 	--------------------------------------
-	,@TaxState							NVARCHAR(MAX)
+	,@TaxState							NVARCHAR(MAX)	= ''
 	,@FederalExciseTaxRate        		NUMERIC(18,6)	= 0.000000
 	,@StateExciseTaxRate1         		NUMERIC(18,6)	= 0.000000
 	,@StateExciseTaxRate2         		NUMERIC(18,6)	= 0.000000
@@ -55,6 +58,8 @@
 	,@CountySalesTaxPercentageRate		NUMERIC(18,6)	= 0.000000
 	,@CitySalesTaxPercentageRate  		NUMERIC(18,6)	= 0.000000
 	,@OtherSalesTaxPercentageRate 		NUMERIC(18,6)	= 0.000000
+	
+	,@ysnOriginHistory					BIT				= 0
 	--,@LC7							NUMERIC(18,6)	= 0.000000
 	--,@LC8							NUMERIC(18,6)	= 0.000000
 	--,@LC9							NUMERIC(18,6)	= 0.000000
@@ -91,9 +96,10 @@ BEGIN
 	------------------------------------------------------------
 
 	--LOGS--
-	DECLARE @ysnSiteCreated			BIT = 0
-	DECLARE @ysnSiteItemUsed		BIT = 0
-	DECLARE @ysnNetworkItemUsed		BIT = 0
+	DECLARE @ysnSiteCreated				BIT = 0
+	DECLARE @ysnSiteItemUsed			BIT = 0
+	DECLARE @ysnNetworkItemUsed			BIT = 0
+	DECLARE @ysnSiteAcceptCreditCard	BIT = 0
 	--LOGS--
 
 
@@ -110,80 +116,22 @@ BEGIN
 	DECLARE @strCity				NVARCHAR(MAX)
 	DECLARE @strState				NVARCHAR(MAX)
 	DECLARE @intCustomerId			INT = 0
-	DECLARE @tblTaxTable			TABLE
-	(
-		 [intTransactionDetailTaxId]	INT
-		,[intTransactionDetailId]		INT
-		,[intTaxGroupMasterId]			INT
-		,[intTaxGroupId]				INT
-		,[intTaxCodeId]					INT
-		,[intTaxClassId]				INT
-		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-		,[strCalculationMethod]			NVARCHAR(30)
-		,[dblRate]						NUMERIC(18,6)
-		,[dblTax]						NUMERIC(18,6)
-		,[dblAdjustedTax]				NUMERIC(18,6)
-		,[intTaxAccountId]				INT
-		,[ysnSeparateOnInvoice]			BIT
-		,[ysnCheckoffTax]				BIT
-		,[strTaxCode]					NVARCHAR(100)						
-		,[ysnTaxExempt]					BIT
-		,[strTaxGroup]					NVARCHAR(100)
-		,[ysnInvalid]					BIT
-		,[strReason]					NVARCHAR(MAX)
-		,[strNotes]						NVARCHAR(MAX)
-	)
-	DECLARE @tblTaxRateTable		TABLE
-	(
-		 [intTransactionDetailTaxId]	INT
-		,[intTransactionDetailId]		INT
-		,[intTaxGroupMasterId]			INT
-		,[intTaxGroupId]				INT
-		,[intTaxCodeId]					INT
-		,[intTaxClassId]				INT
-		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-		,[strCalculationMethod]			NVARCHAR(30)
-		,[dblRate]						NUMERIC(18,6)
-		,[dblTax]						NUMERIC(18,6)
-		,[dblAdjustedTax]				NUMERIC(18,6)
-		,[intTaxAccountId]				INT
-		,[ysnSeparateOnInvoice]			BIT
-		,[ysnCheckoffTax]				BIT
-		,[strTaxCode]					NVARCHAR(100)						
-		,[ysnTaxExempt]					BIT
-		,[strTaxGroup]					NVARCHAR(100)
-	)
-	DECLARE @tblTaxUnitTable		TABLE
-	(
-		 [intTransactionDetailTaxId]	INT
-		,[intTransactionDetailId]		INT
-		,[intTaxGroupMasterId]			INT
-		,[intTaxGroupId]				INT
-		,[intTaxCodeId]					INT
-		,[intTaxClassId]				INT
-		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-		,[strCalculationMethod]			NVARCHAR(30)
-		,[dblRate]						NUMERIC(18,6)
-		,[dblTax]						NUMERIC(18,6)
-		,[dblAdjustedTax]				NUMERIC(18,6)
-		,[intTaxAccountId]				INT
-		,[ysnSeparateOnInvoice]			BIT
-		,[ysnCheckoffTax]				BIT
-		,[strTaxCode]					NVARCHAR(100)						
-		,[ysnTaxExempt]					BIT
-		,[strTaxGroup]					NVARCHAR(100)
-	)
 	DECLARE @ysnInvalid				BIT	= 0
 	DECLARE @ysnPosted				BIT = 0
+	DECLARE @ysnCreditCardUsed		BIT	= 0
 	------------------------------------------------------------
 
 
-
-
+	SET @ysnPosted = @ysnOriginHistory
 
 	------------------------------------------------------------
 	--					SET VARIABLE VALUE					  --
 	------------------------------------------------------------
+	IF(@intContractId = 0)
+	BEGIN
+		SET @intContractId = NULL
+	END
+
 	IF(@intSalesPersonId = 0)
 		BEGIN
 			SET @intSalesPersonId = NULL
@@ -193,15 +141,30 @@ BEGIN
 			SELECT TOP 1 @intSiteId = intSiteId 
 						,@intCustomerLocationId = intARLocationId
 						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
 						FROM tblCFSite
 						WHERE strSiteNumber = @strSiteId
+
+			IF (@intSiteId = 0)
+			BEGIN 
+				SET @intSiteId = NULL
+			END
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @intCustomerLocationId = intARLocationId
+						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						FROM tblCFSite
+						WHERE intSiteId = @intSiteId
+		END
 
 	IF(@intNetworkId = 0)
 		BEGIN
 			SELECT TOP 1 @intNetworkId = intNetworkId 
 			FROM tblCFNetwork
 			WHERE strNetwork = @strNetworkId
-	END
+		END
 	
 	------------------------------------------------------------
 	--					AUTO CREATE SITE
@@ -266,16 +229,130 @@ BEGIN
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
 
+	END
+	
+	--FIND CARD--
+	
+	DECLARE @ysnLocalCard BIT
+	DECLARE @ysnMatched INT = 0
+	IF(@ysnSiteAcceptCreditCard = 1)
+	BEGIN
+		IF(@strCreditCard IS NOT NULL AND @strCreditCard != '' AND (@intSiteId IS NOT NULL OR @intSiteId > 0))
+		BEGIN
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR FULL MATCH-- 1234
+				SET @strCreditCard = @strCreditCard
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR 1 PARTIAL WILDCARD MATCH-- ex 123*
+				SET @strCreditCard = STUFF(@strCreditCard, 4, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
 			END
 			
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR 2 PARTIAL WILDCARD MATCH-- ex 12**
+				SET @strCreditCard = STUFF(@strCreditCard, 3, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR 3 PARTIAL WILDCARD MATCH-- ex 1***
+				SET @strCreditCard = STUFF(@strCreditCard, 2, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--SEARCH FOR FULL WILDCARD MATCH-- ex ****
+				SET @strCreditCard = STUFF(@strCreditCard, 1, 1, '*')
+				SELECT TOP 1 
+					@intCardId = intCardId
+				   ,@ysnMatched = intCreditCardId
+				   ,@ysnLocalCard= ysnLocalPrefix
+				FROM tblCFCreditCard 
+				WHERE strPrefix = @strCreditCard AND intSiteId = @intSiteId
+			END
+
+			IF((@intCardId = 0 OR @intCardId IS NULL) AND @ysnMatched = 0)
+			BEGIN
+				--CARD MATCHING--
+				SELECT TOP 1 
+					 @intCardId = C.intCardId
+					,@intCustomerId = A.intCustomerId
+				FROM tblCFCard C
+				INNER JOIN tblCFAccount A
+				ON C.intAccountId = A.intAccountId
+				WHERE C.strCardNumber = @strCardId
+			END
+			ELSE
+			BEGIN
+				IF(@ysnLocalCard = 1)
+				BEGIN
+					--CARD MATCHING--
+					SELECT TOP 1 
+						 @intCardId = C.intCardId
+						,@intCustomerId = A.intCustomerId
+					FROM tblCFCard C
+					INNER JOIN tblCFAccount A
+					ON C.intAccountId = A.intAccountId
+					WHERE C.strCardNumber = @strCardId
+				END
+				ELSE
+				BEGIN
+					SELECT TOP 1 
+						@intCustomerId = A.intCustomerId
+					FROM tblCFCard C
+					INNER JOIN tblCFAccount A
+					ON C.intAccountId = A.intAccountId
+					WHERE C.intCardId = @intCardId
+
+					SET @ysnCreditCardUsed = 1
+
+				END
+			END
+		END
 	END
-	SELECT TOP 1 
-		 @intCardId = C.intCardId
-		,@intCustomerId = A.intCustomerId
-	FROM tblCFCard C
-	INNER JOIN tblCFAccount A
-	ON C.intAccountId = A.intAccountId
-	WHERE C.strCardNumber = @strCardId
+	ELSE
+	BEGIN
+		SELECT TOP 1 
+			 @intCardId = C.intCardId
+			,@intCustomerId = A.intCustomerId
+		FROM tblCFCard C
+		INNER JOIN tblCFAccount A
+		ON C.intAccountId = A.intAccountId
+		WHERE C.strCardNumber = @strCardId
+	END
+
+	IF (@intCardId = 0)
+	BEGIN
+		SET @intCardId = NULL
+	END
 
 	--FIND IN SITE ITEM--
 	IF(@intProductId = 0)
@@ -346,9 +423,17 @@ BEGIN
 		DECLARE @strPrcPriceBasis			NVARCHAR(MAX)	
 		DECLARE @dblCalcQuantity			NUMERIC(18,6)
 		DECLARE @dblCalcOverfillQuantity	NUMERIC(18,6)
+		DECLARE @intPriceProfileId			INT
+		DECLARE @intPriceIndexId			INT
+		DECLARE @intSiteGroupId				INT
+		DECLARE @strPriceProfileId			NVARCHAR(MAX)
+		DECLARE @strPriceIndexId			NVARCHAR(MAX)
+		DECLARE @strSiteGroup				NVARCHAR(MAX)
+		DECLARE @dblPriceProfileRate		NUMERIC(18,6)
+		DECLARE @dblPriceIndexRate			NUMERIC(18,6)
+		DECLARE @dtmPriceIndexDate			DATETIME
+		DECLARE @dblMargin					NUMERIC(18,6)
 	------------------------------------------------------------
-
-
 
 
 
@@ -359,11 +444,7 @@ BEGIN
 						FROM tblCFCard C
 						INNER JOIN tblCFAccount A
 						ON C.intAccountId = A.intAccountId
-						WHERE strCardNumber	= @strCardId)
-
-		SET @intCardId =(SELECT TOP 1 intCardId	
-						FROM tblCFCard
-						WHERE strCardNumber	= @strCardId)
+						WHERE C.intCardId= @intCardId)
 
 		SET @intPrcItemUOMId = (SELECT TOP 1 intIssueUOMId
 								FROM tblICItemLocation
@@ -371,10 +452,7 @@ BEGIN
 								AND intItemId = @intARItemId)
 
 	
-		--IF(@dtmTransactionDate = 0 OR @dtmTransactionDate IS NULL)
-		--BEGIN
-		--	SET @ysnInvalid = 1
-		--END
+		
 		IF(@intARItemId = 0 OR @intARItemId IS NULL)
 		BEGIN
 			SET @ysnInvalid = 1
@@ -393,14 +471,17 @@ BEGIN
 		END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
+			SET @intNetworkId = NULL
 			SET @ysnInvalid = 1
 		END
 		IF(@intSiteId = 0 OR @intSiteId IS NULL)
 		BEGIN
+			SET @intSiteId = NULL
 			SET @ysnInvalid = 1
 		END
 		IF(@intCardId = 0 OR @intCardId IS NULL)
 		BEGIN
+			SET @intCardId = NULL
 			SET @ysnInvalid = 1
 		END
 		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
@@ -408,140 +489,6 @@ BEGIN
 			SET @ysnInvalid = 1
 		END
 		------------------------------------------------------------
-
-
-
-
-
-		------------------------------------------------------------
-		--				       GET ITEM PRICE					  --
-		------------------------------------------------------------
-
-		SELECT @intARItemId			AS intARItemId,
-		 @intPrcCustomerId			AS intPrcCustomerId,
-		 @intARItemLocationId		AS intARItemLocationId,
-		 @dblQuantity				AS dblQuantity,
-		 @intPrcItemUOMId			AS intPrcItemUOMId,
-		 @dtmTransactionDate		AS dtmTransactionDate,
-		 @strTransactionType		AS strTransactionType,
-		 @intNetworkId				AS intNetworkId,
-		 @intSiteId					AS intSiteId,
-		 @dblTransferCost			AS dblTransferCost,
-		 @dblPrcPriceOut			AS dblPrcPriceOut,		
-		 @strPrcPricingOut			AS strPrcPricingOut,	
-		 @intPrcAvailableQuantity	AS intPrcAvailableQuantity,
-		 @dblPrcOriginalPrice		AS dblPrcOriginalPrice,
-		 @intPrcContractHeaderId	AS intPrcContractHeaderId,
-		 @intPrcContractDetailId	AS intPrcContractDetailId,
-		 @intPrcContractNumber		AS intPrcContractNumber,
-		 @intPrcContractSeq			AS intPrcContractSeq,
-		 @strPrcPriceBasis			AS strPrcPriceBasis		
-		SET @dblPrcOriginalPrice = @dblOriginalGrossPrice
-		EXEC dbo.uspCFGetItemPrice 
-			@CFItemId					=	@intARItemId,
-			@CFCustomerId				=	@intPrcCustomerId,
-			@CFLocationId				=	@intARItemLocationId,
-			@CFQuantity					=	@dblQuantity,
-			@CFItemUOMId				=	@intPrcItemUOMId,
-			@CFTransactionDate			=	@dtmTransactionDate,
-			@CFTransactionType			=	@strTransactionType,
-			@CFNetworkId				=	@intNetworkId,
-			@CFSiteId					=	@intSiteId,
-			@CFTransferCost				=	@dblTransferCost,
-			@CFPriceOut					=	@dblPrcPriceOut				output,
-			@CFPricingOut				=	@strPrcPricingOut			output,
-			@CFAvailableQuantity		=	@intPrcAvailableQuantity	output,
-			@CFOriginalPrice			=	@dblPrcOriginalPrice		output,
-			@CFContractHeaderId			=	@intPrcContractHeaderId		output,
-			@CFContractDetailId			=	@intPrcContractDetailId		output,
-			@CFContractNumber			=	@intPrcContractNumber		output,
-			@CFContractSeq				=	@intPrcContractSeq			output,
-			@CFPriceBasis				=	@strPrcPriceBasis			output
-		--SELECT  
-		--	 @dblPrcPriceOut			AS price
-		--	,@strPrcPricingOut			AS pricing
-		--	,@intPrcAvailableQuantity	AS availableQuantity
-		--	,@dblPrcOriginalPrice		AS originalPrice
-		--	,@intPrcContractHeaderId	AS contractHeader
-		--	,@intPrcContractDetailId	AS contractDetail
-		--	,@intPrcContractNumber		AS contractNumber
-		--	,@intPrcContractSeq			AS contractSequence
-		--	,@strPrcPriceBasis			AS priceBasis
-		SET @strPriceMethod   = @strPrcPricingOut
-		SET @strPriceBasis = @strPrcPriceBasis
-		SET @intContractId	  = @intPrcContractDetailId
-		SET @dblCalcOverfillQuantity = 0;
-		SET @dblCalcQuantity = 0;
-
-		IF (@strPriceMethod = 'Inventory - Standard Pricing')
-		BEGIN
-					SET @intContractId = null
-					SET @strPrcPriceBasis = null
-					SET @dblTransferCost = 0
-					SET @strPriceMethod = 'Standard Pricing'
-		END
-		IF (@strPriceMethod = 'Import File Price')
-		BEGIN
-					SET @intContractId = null
-					SET @strPrcPriceBasis = null
-					SET @dblTransferCost = 0
-					SET @strPriceMethod = 'Import File Price'
-		END
-		ELSE IF (@strPriceMethod = 'Special Pricing')
-		BEGIN
-					SET @intContractId = null
-					SET @strPrcPriceBasis = null
-					SET @dblTransferCost = 0
-					SET @strPriceMethod = 'Special Pricing'
-		END
-		ELSE IF (@strPriceMethod = 'Price Profile')
-		BEGIN
-					SET @intContractId = null
-					SET @strPrcPriceBasis = @strPrcPriceBasis
-					SET @strPriceMethod = 'Price Profile'
-
-					IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price')
-						BEGIN
-							SET @dblTransferCost = @dblTransferCost
-						END
-					ELSE
-						BEGIN
-							SET @dblTransferCost = 0
-						END
-		END
-		ELSE IF (@strPriceMethod = 'Contracts - Customer Pricing')
-		BEGIN
-					SET @strPrcPriceBasis = null
-					SET @dblTransferCost = 0
-					SET @strPriceMethod = 'Contract Pricing'
-					
-					--print 's'
-					--print @intPrcAvailableQuantity
-					--print @dblQuantity
-					--print @dblCalcOverfillQuantity
-
-					IF(@intPrcAvailableQuantity < @dblQuantity)
-						BEGIN
-							SET @dblCalcQuantity = @intPrcAvailableQuantity
-							SET @dblCalcOverfillQuantity = @dblQuantity - @intPrcAvailableQuantity
-							SET @dblQuantity = @intPrcAvailableQuantity
-							print 'calc'
-							print @dblCalcOverfillQuantity
-						END
-					ELSE
-						BEGIN
-							SET @dblCalcQuantity = @dblQuantity
-						END
-
-					print 'e'
-					print @intPrcAvailableQuantity
-					print @dblQuantity
-					print @dblCalcOverfillQuantity
-		END
-		------------------------------------------------------------
-
-
-
 
 		------------------------------------------------------------
 		--				INSERT TRANSACTION RECORD				  --
@@ -579,7 +526,9 @@ BEGIN
 			,[dblOriginalPumpPrice]		
 			,[intSalesPersonId]
 			,[ysnPosted]
-			,[ysnInvalid]			
+			,[ysnInvalid]
+			,[ysnCreditCardUsed]			
+			,[ysnOriginHistory]
 		)
 		VALUES
 		(
@@ -615,10 +564,13 @@ BEGIN
 			,@dblOriginalPumpPrice	
 			,@intSalesPersonId
 			,@ysnPosted
-			,@ysnInvalid		
+			,@ysnInvalid
+			,@ysnCreditCardUsed		
+			,@ysnOriginHistory
 		)			
 	
 		DECLARE @Pk	INT		
+		DECLARE @test varchar(10)
 		SELECT @Pk  = SCOPE_IDENTITY();
 
 
@@ -627,476 +579,309 @@ BEGIN
 		------------------------------------------------------------
 		IF(@intARItemId = 0 OR @intARItemId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 site item list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 site item list')
 		END
 		IF(@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find customer number using card number ' + @strCardId + ' into i21 card account list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find customer number using card number ' + @strCardId + ' into i21 card account list')
 		END
 		IF(@intARItemLocationId = 0 OR @intARItemLocationId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid location for site ' + @strSiteId)
+			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid location for site ' + @strSiteId)
 		END
 		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid UOM for product number ' + @strProductId)
+			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid UOM for product number ' + @strProductId)
 		END
 		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find network ' + @strNetworkId + ' into i21 network list')
+			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find network ' + @strNetworkId + ' into i21 network list')
 		END
 		IF(@intSiteId = 0 OR @intSiteId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find site ' + @strSiteId + ' into i21 site list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find site ' + @strSiteId + ' into i21 site list')
 		END
 		IF(@ysnSiteCreated != 0)
 		BEGIN
+			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site ' + @strSiteId + ' has been automatically created')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site ' + @strSiteId + ' has been automatically created')
 		END
 		IF(@intCardId = 0 OR @intCardId IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
 		END
 		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
 		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid quantity - ' + @dblQuantity)
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid quantity - ' + @dblQuantity)
 		END
 		IF(@ysnSiteItemUsed = 0 AND @ysnNetworkItemUsed = 1)
 		BEGIN
+			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Network item ' + @strProductId + ' has been used')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Network item ' + @strProductId + ' has been used')
 		END
 		ELSE IF(@ysnSiteItemUsed = 1 AND @ysnNetworkItemUsed = 0)
 		BEGIN 
+			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site item ' + @strProductId + ' has been used')
+
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site item ' + @strProductId + ' has been used')
 		END
 
-		
-
-
 		------------------------------------------------------------
 
-
-
-
-
-
+		EXEC dbo.uspCFRecalculateTransaciton 
+		 @ProductId						=	@intProductId
+		,@CardId						=	@intCardId
+		,@SiteId						=	@intSiteId
+		,@TransactionDate				=	@dtmTransactionDate
+		,@Quantity						=	@dblQuantity
+		,@OriginalPrice					=	@dblOriginalGrossPrice
+		,@TransactionType				=	@strTransactionType
+		,@NetworkId						=	@intNetworkId
+		,@TransferCost					=	@dblTransferCost
+		,@TransactionId					=	@Pk
+		,@CreditCardUsed				=	@ysnCreditCardUsed
+		,@IsImporting					=	1
+		,@TaxState						=	@TaxState						
+		,@FederalExciseTaxRate        	=	@FederalExciseTaxRate        
+		,@StateExciseTaxRate1         	=	@StateExciseTaxRate1         
+		,@StateExciseTaxRate2         	=	@StateExciseTaxRate2         
+		,@CountyExciseTaxRate         	=	@CountyExciseTaxRate         
+		,@CityExciseTaxRate           	=	@CityExciseTaxRate           
+		,@StateSalesTaxPercentageRate 	=	@StateSalesTaxPercentageRate 
+		,@CountySalesTaxPercentageRate	=	@CountySalesTaxPercentageRate
+		,@CitySalesTaxPercentageRate  	=	@CitySalesTaxPercentageRate  
+		,@OtherSalesTaxPercentageRate	=	@OtherSalesTaxPercentageRate 
 
 		------------------------------------------------------------
-		--				UPDATE CONTRACTS QUANTITY				  --
+		--			UPDATE TRANSACTION DEPENDS ON PRICING		  --
 		------------------------------------------------------------
-		IF (@strPriceMethod = 'Contract Pricing')
+		SELECT
+		 @dblPrcPriceOut				= dblPrice
+		,@strPrcPricingOut				= strPriceMethod
+		,@intPrcAvailableQuantity		= dblAvailableQuantity
+		,@dblPrcOriginalPrice			= dblOriginalPrice
+		,@intPrcContractHeaderId		= intContractHeaderId
+		,@intPrcContractDetailId		= intContractDetailId
+		,@intPrcContractNumber			= intContractNumber
+		,@intPrcContractSeq				= intContractSeq
+		,@strPrcPriceBasis				= strPriceBasis
+		,@strPriceMethod   				= strPriceMethod
+		,@strPriceBasis 				= strPriceBasis
+		,@intContractId	 				= intContractDetailId
+		,@dblCalcOverfillQuantity 		= 0
+		,@dblCalcQuantity 				= 0
+		,@intPriceProfileId 			= intPriceProfileId 	
+		,@intPriceIndexId				= intPriceIndexId	
+		,@intSiteGroupId				= intSiteGroupId		
+		,@strPriceProfileId				= strPriceProfileId	
+		,@strPriceIndexId				= strPriceIndexId	
+		,@strSiteGroup					= strSiteGroup		
+		,@dblPriceProfileRate			= dblPriceProfileRate
+		,@dblPriceIndexRate				= dblPriceIndexRate	
+		,@dtmPriceIndexDate				= dtmPriceIndexDate	
+		FROM ##tblCFTransactionPricingType
+
+		IF (@strPriceMethod = 'Inventory - Standard Pricing')
 		BEGIN
-			EXEC uspCTUpdateScheduleQuantity 
-			 @intContractDetailId = @intContractId
-			,@dblQuantityToUpdate = @dblCalcQuantity
-			,@intUserId = 0
-			,@intExternalId = @Pk
-			,@strScreenName = 'Card Fueling Transaction Screen'
+				UPDATE tblCFTransaction 
+				SET intContractId = null 
+				,strPriceBasis = null
+				,dblTransferCost = 0
+				,strPriceMethod = 'Standard Pricing'
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
+				WHERE intTransactionId = @Pk
 		END
-		------------------------------------------------------------
-
-
-
-
-
-		
-
-		------------------------------------------------------------
-		--				       GET TAX RECORDS					  --
-		------------------------------------------------------------
-		IF (@strTransactionType = 'Local/Network')
+		IF (@strPriceMethod = 'Import File Price')
 		BEGIN
-			SELECT  
-			@strCountry = strCountry 
-			,@strCity = strCity
-			,@strState = strStateProvince
-			FROM tblSMCompanyLocation 
-			WHERE intCompanyLocationId = @intARItemLocationId
+				UPDATE tblCFTransaction 
+				SET intContractId = null 
+				,strPriceBasis = null
+				,dblTransferCost = 0
+				,strPriceMethod = 'Import File Price'
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
+				WHERE intTransactionId = @Pk
+		END
+		ELSE IF (@strPriceMethod = 'Special Pricing')
+		BEGIN
+				UPDATE tblCFTransaction 
+				SET intContractId = null 
+				,strPriceBasis = null
+				,dblTransferCost = 0
+				,strPriceMethod = 'Special Pricing'
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
+				WHERE intTransactionId = @Pk
+		END
+		ELSE IF (@strPriceMethod = 'Price Profile')
+		BEGIN
+				IF(@strPrcPriceBasis = 'Transfer Cost' OR @strPrcPriceBasis = 'Transfer Price' OR @strPrcPriceBasis = 'Discounted Price' OR @strPrcPriceBasis = 'Full Retail')
+				BEGIN
+					SET @dblTransferCost = @dblTransferCost
+				END
+				ELSE
+				BEGIN
+					SET @dblTransferCost = 0
+				END
 
-			SELECT @intTaxGroupId = @intTaxMasterId ----------HERE-------------
-
-		INSERT INTO @tblTaxTable
-		(
-			[intTransactionDetailTaxId]
-			,[intTransactionDetailId]	
-			,[intTaxGroupMasterId]		
-			,[intTaxGroupId]			
-			,[intTaxCodeId]				
-			,[intTaxClassId]			
-			,[strTaxableByOtherTaxes]	
-			,[strCalculationMethod]		
-			,[dblRate]					
-			,[dblTax]					
-			,[dblAdjustedTax]			
-			,[intTaxAccountId]			
-			,[ysnSeparateOnInvoice]		
-			,[ysnCheckoffTax]			
-			,[strTaxCode]				
-			,[ysnTaxExempt]				
-			,[strTaxGroup]			
-		)
-		SELECT
-			 [intTransactionDetailTaxId]
-			,[intTransactionDetailId]  AS [intInvoiceDetailId]
-			,NULL
-			,[intTaxGroupId]
-			,[intTaxCodeId]
-			,[intTaxClassId]
-			,[strTaxableByOtherTaxes]
-			,[strCalculationMethod]
-			,[dblRate]
-			,[dblTax]
-			,[dblAdjustedTax]
-			,[intTaxAccountId]    AS [intSalesTaxAccountId]
-			,[ysnSeparateOnInvoice]
-			,[ysnCheckoffTax]
-			,[strTaxCode]
-			,[ysnTaxExempt]
-			,[strTaxGroup]
-		FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer]
-		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId, NULL, 0,NULL)
-			
-		END 
-		ELSE IF (@strTransactionType = 'Remote'  OR @strTransactionType = 'Extended Remote')
+				UPDATE tblCFTransaction 
+				SET intContractId = null 
+				,strPriceBasis			= @strPrcPriceBasis
+				,dblTransferCost		= @dblTransferCost
+				,strPriceMethod			= 'Price Profile'
+				,intPriceProfileId 		= @intPriceProfileId 	
+				,intPriceIndexId		= @intPriceIndexId	
+				,intSiteGroupId			= @intSiteGroupId		
+				,strPriceProfileId		= @strPriceProfileId	
+				,strPriceIndexId		= @strPriceIndexId	
+				,strSiteGroup			= @strSiteGroup		
+				,dblPriceProfileRate	= @dblPriceProfileRate
+				,dblPriceIndexRate		= @dblPriceIndexRate	
+				,dtmPriceIndexDate		= @dtmPriceIndexDate	
+				WHERE intTransactionId = @Pk
+					
+		END
+		ELSE IF (@strPriceMethod = 'Contracts - Customer Pricing' OR @strPriceMethod = 'Contract Pricing')
 		BEGIN
 
-		INSERT INTO @tblTaxTable 
-		(
-			 [intTransactionDetailTaxId]
-			,[intTransactionDetailId]	
-			,[intTaxGroupMasterId]		
-			,[intTaxGroupId]			
-			,[intTaxCodeId]				
-			,[intTaxClassId]			
-			,[strTaxableByOtherTaxes]	
-			,[strCalculationMethod]		
-			,[dblRate]					
-			,[dblTax]					
-			,[dblAdjustedTax]			
-			,[intTaxAccountId]			
-			,[ysnSeparateOnInvoice]		
-			,[ysnCheckoffTax]			
-			,[strTaxCode]				
-			,[ysnTaxExempt]				
-			,[strTaxGroup]				
-			,[ysnInvalid]				
-			,[strReason]
-			,[strNotes]
-			)		
-		SELECT
-			 [intTransactionDetailTaxId]
-			,[intTransactionDetailId]  AS [intInvoiceDetailId]
-			,NULL
-			,[intTaxGroupId]
-			,[intTaxCodeId]
-			,[intTaxClassId]
-			,[strTaxableByOtherTaxes]
-			,[strCalculationMethod]
-			,[dblRate]
-			,[dblTax]
-			,[dblAdjustedTax]
-			,[intTaxAccountId]    AS [intSalesTaxAccountId]
-			,[ysnSeparateOnInvoice]
-			,[ysnCheckoffTax]
-			,[strTaxCode]
-			,[ysnTaxExempt]
-			,[strTaxGroup]
-			,[ysnInvalid]
-			,[strReason]
-			,[strNotes]
-		 FROM
-		 [dbo].[fnCFRemoteTaxes](
-			 @TaxState		
-			,''
-			,@FederalExciseTaxRate        	
-			,@StateExciseTaxRate1         	
-			,@StateExciseTaxRate2         	
-			,@CountyExciseTaxRate         	
-			,@CityExciseTaxRate           	
-			,@StateSalesTaxPercentageRate 	
-			,@CountySalesTaxPercentageRate		
-			,@CitySalesTaxPercentageRate  		
-			,@OtherSalesTaxPercentageRate 		
-			--,@LC7		
-			--,@LC8		
-			--,@LC9		
-			--,@LC10			
-			--,@LC11			
-			--,@LC12			
-			,@intNetworkId
-			,@intARItemId				
-			,@intARItemLocationId			
-			,@intCustomerId				
-			,@intCustomerLocationId		
-			,@dtmTransactionDate	)
-							
+				IF(@intPrcAvailableQuantity < @dblQuantity)
+					BEGIN
+						SET @dblCalcQuantity = @intPrcAvailableQuantity
+						SET @dblCalcOverfillQuantity = @dblQuantity - @intPrcAvailableQuantity
+						SET @dblQuantity = @intPrcAvailableQuantity
+						print 'calc'
+						print @dblCalcOverfillQuantity
+					END
+				ELSE
+					BEGIN
+						SET @dblCalcQuantity = @dblQuantity
+					END
+
+					
+				UPDATE tblCFTransaction 
+				SET strPriceBasis = null 
+				,dblTransferCost = 0 
+				,strPriceMethod = 'Contract Pricing'
+				,intContractId = @intPrcContractHeaderId
+				,intContractDetailId = @intPrcContractDetailId
+				,dblQuantity = @dblQuantity
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
+				WHERE intTransactionId = @Pk
+
+				------------------------------------------------------------
+				--				UPDATE CONTRACTS QUANTITY				  --
+				------------------------------------------------------------
+				IF (@strPriceMethod = 'Contract Pricing')
+				BEGIN
+					EXEC uspCTUpdateScheduleQuantity 
+					 @intContractDetailId = @intContractId
+					,@dblQuantityToUpdate = @dblCalcQuantity
+					,@intUserId = 0
+					,@intExternalId = @Pk
+					,@strScreenName = 'Card Fueling Transaction Screen'
+				END
+				------------------------------------------------------------
+
 		END
 
+
 		------------------------------------------------------------
-		--					NOTE FOR EXEMPTED TAX				  --
+		--						TRANSACTION TAX					  --
 		------------------------------------------------------------
-		INSERT INTO tblCFFailedImportedTransaction
+		INSERT INTO tblCFTransactionTax
 		(
-			intTransactionId
-			,strFailedReason
+			 intTransactionId
+			,dblTaxOriginalAmount
+			,dblTaxCalculatedAmount
+			,intTaxCodeId
+			,dblTaxRate
 		)
-		SELECT
-			@Pk 					 	
-			,'Tax code ' + strTaxCode + ' is checked off' 
-		FROM @tblTaxTable
-		WHERE ysnCheckoffTax = 1
-
-
-		INSERT INTO tblCFFailedImportedTransaction
-		(
-			intTransactionId
-			,strFailedReason
-		)
-		SELECT
-			@Pk 					 	
-			,strNotes
-		FROM @tblTaxTable
-		WHERE ysnTaxExempt = 1
-		
-		------------------------------------------------------------
-		--			VALIDATION FOR UNMAPPED NETWORK TAX			  --
-		------------------------------------------------------------
-		INSERT INTO tblCFFailedImportedTransaction
-		(
-			intTransactionId
-			,strFailedReason
-		)
-		SELECT
-			@Pk 					 	
-			,strReason
-		FROM @tblTaxTable
-		WHERE ysnInvalid = 1
-
-		IF((SELECT COUNT(*) FROM @tblTaxTable WHERE ysnInvalid = 1) > 0)
-		BEGIN
-			UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @Pk
-		END
-		------------------------------------------------------------
-
-
-		INSERT INTO @tblTaxRateTable
 		SELECT 
-		 [intTransactionDetailTaxId]
-		,[intTransactionDetailId]  AS [intInvoiceDetailId]
-		,[intTaxGroupMasterId]
-		,[intTaxGroupId]
-		,[intTaxCodeId]
-		,[intTaxClassId]
-		,[strTaxableByOtherTaxes]
-		,[strCalculationMethod]
-		,[dblRate]
-		,[dblTax]
-		,[dblAdjustedTax]
-		,[intTaxAccountId]    AS [intSalesTaxAccountId]
-		,[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]
-		,[strTaxCode]
-		,[ysnTaxExempt]
-		,[strTaxGroup]
-		FROM @tblTaxTable
-		WHERE LOWER(strCalculationMethod) = 'percentage'
-		INSERT INTO @tblTaxUnitTable
-		SELECT 
-		 [intTransactionDetailTaxId]
-		,[intTransactionDetailId]  AS [intInvoiceDetailId]
-		,[intTaxGroupMasterId]
-		,[intTaxGroupId]
-		,[intTaxCodeId]
-		,[intTaxClassId]
-		,[strTaxableByOtherTaxes]
-		,[strCalculationMethod]
-		,[dblRate]
-		,[dblTax]
-		,[dblAdjustedTax]
-		,[intTaxAccountId]    AS [intSalesTaxAccountId]
-		,[ysnSeparateOnInvoice]
-		,[ysnCheckoffTax]
-		,[strTaxCode]
-		,[ysnTaxExempt]
-		,[strTaxGroup]
-		FROM @tblTaxTable
-		WHERE LOWER(strCalculationMethod) = 'unit'
-		------------------------------------------------------------
-
-
-		------------------------------------------------------------
-		--					   TRANSACTION TAX					  --
-		------------------------------------------------------------
-
-		DECLARE @dblOPTotalTax		NUMERIC(18,6) = 0
-		DECLARE @dblCPTotalTax		NUMERIC(18,6) = 0
-		DECLARE @intLoopTaxGroupID	INT
-		DECLARE @intLoopTaxCodeID	INT
-		DECLARE @intLoopTaxClassID	INT
-		DECLARE	@strLoopTaxCode		NVARCHAR(MAX)
-		DECLARE @QxOP				NUMERIC(18,6) = 0
-		DECLARE @QxCP				NUMERIC(18,6) = 0
-		DECLARE @QxT				NUMERIC(18,6) = 0
-		DECLARE @OPTax				NUMERIC(18,6) = 0		
-		DECLARE @CPTax				NUMERIC(18,6) = 0	
-		DECLARE @Rate				NUMERIC(18,6)
-		DECLARE @CalculationMethod  NVARCHAR(MAX)
-		DECLARE @ysnLoopTaxExempt	BIT
-		DECLARE @ysnLoopTaxCheckOff	BIT
-
-		SET @QxOP = @dblQuantity * @dblPrcOriginalPrice
-		SET @QxCP = @dblQuantity * @dblPrcPriceOut
-		--SELECT @dblPrcOriginalPrice as 'dblPrcOriginalPrice'
-		WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxUnitTable))
-		BEGIN
-			SELECT TOP 1 
-			 @intLoopTaxGroupID = intTaxGroupId
-			,@intLoopTaxCodeID = intTaxCodeId
-			,@intLoopTaxClassID = intTaxClassId
-			,@QxT = ROUND (@dblQuantity * dblRate,2)
-			,@QxOP = ROUND (@QxOP - (@dblQuantity * dblRate),2)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * dblRate),2)
-			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  dblRate,2)
-			,@strLoopTaxCode = strTaxCode
-			,@Rate = dblRate
-			,@CalculationMethod = strCalculationMethod
-			,@ysnLoopTaxExempt = ysnCheckoffTax
-			,@ysnLoopTaxExempt = ysnTaxExempt
-			FROM @tblTaxUnitTable
-
-			INSERT INTO tblCFTransactionTax(
-				 [intTransactionId]
-				,[dblTaxOriginalAmount]
-				,[dblTaxCalculatedAmount]
-				,[dblTaxRate]
-				,[intTaxCodeId]
-			)
-			VALUES(
-				@Pk
-				,(CASE WHEN(@dblPrcOriginalPrice = 0 OR @dblPrcOriginalPrice IS NULL) 
-					THEN 0 
-					ELSE @QxT END)
-				,(CASE 
-					WHEN((@dblPrcPriceOut = 0 OR @dblPrcPriceOut IS NULL) OR (@ysnLoopTaxCheckOff = 1 OR @ysnLoopTaxExempt = 1)) 
-				  THEN 0 
-					ELSE @QxT END)
-				,@Rate
-				,@intLoopTaxCodeID
-			)
-
-			DELETE FROM @tblTaxUnitTable 
-			WHERE intTaxGroupId = @intLoopTaxGroupID
-			AND intTaxClassId = @intLoopTaxClassID
-			AND intTaxCodeId = @intLoopTaxCodeID
-
-		END
-		WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxRateTable))
-		BEGIN
-
-
-			SELECT TOP 1 
-			 @intLoopTaxGroupID = intTaxGroupId
-			,@intLoopTaxCodeID = intTaxCodeId
-			,@intLoopTaxClassID = intTaxClassId
-			,@OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
-			,@CPTax = ROUND (@QxCP * (dblRate/100),2)
-			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
-			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (dblRate/100)),2)
-			,@strLoopTaxCode = strTaxCode
-			,@Rate = dblRate
-			,@CalculationMethod = strCalculationMethod
-			FROM @tblTaxRateTable
-
-			INSERT INTO tblCFTransactionTax(
-				 [intTransactionId]
-				,[dblTaxOriginalAmount]
-				,[dblTaxCalculatedAmount]
-				,[dblTaxRate]
-				,[intTaxCodeId]
-			)
-			VALUES(
-				 @Pk
-				,@OPTax
-				,(CASE 
-					WHEN(@ysnLoopTaxCheckOff = 1 OR @ysnLoopTaxExempt = 1) 
-				  THEN 0 
-					ELSE @CPTax END)
-				,@Rate
-				,@intLoopTaxCodeID
-			)
-
-			DELETE FROM @tblTaxRateTable 
-			WHERE intTaxGroupId = @intLoopTaxGroupID
-			AND intTaxClassId = @intLoopTaxClassID
-			AND intTaxCodeId = @intLoopTaxCodeID
-
-		END
-		
-		------------------------------------------------------------
-
-
-
-
+			 @Pk
+			,dblTaxOriginalAmount
+			,dblTaxCalculatedAmount		
+			,intTaxCodeId	
+			,dblTaxRate	
+		FROM ##tblCFTransactionTaxType
+	
 
 		------------------------------------------------------------
 		--						TRANSACTION PRICE				  --
 		------------------------------------------------------------
-		INSERT INTO tblCFTransactionPrice(
-			 [intTransactionId]
-			,[strTransactionPriceId]
-			,[dblOriginalAmount]
-			,[dblCalculatedAmount]
+		INSERT INTO tblCFTransactionPrice
+		(
+			 intTransactionId
+			,strTransactionPriceId
+			,dblOriginalAmount
+			,dblCalculatedAmount
 		)
-		VALUES
-		(
+		SELECT 
 			@Pk
-			,'Gross Price'
-			,@dblPrcOriginalPrice	-- +TAX
-			--@dblPrcPriceOut + @dblCPTotalTax-- +TAX
-			,(case
-				when @strPriceMethod = 'Import File Price' 
-				then @dblPrcOriginalPrice
-				else @dblPrcPriceOut + @dblCPTotalTax
-			end)
-		),
-		(
-			@Pk
-			,'Net Price'
-			,Round(@dblPrcOriginalPrice - Round((@dblOPTotalTax/@dblQuantity),6),5)
-			,(case
-				when @strPriceMethod = 'Import File Price' 
-				then Round(@dblPrcOriginalPrice - Round((@dblOPTotalTax/@dblQuantity),6),5)
-				else @dblPrcPriceOut
-			end)
-		),
-		(
-			@Pk
-			,'Total Amount'
-			,Round(@dblPrcOriginalPrice * @dblQuantity,2)
-			,(case
-				when @strPriceMethod = 'Import File Price' 
-				then Round(@dblPrcOriginalPrice * @dblQuantity,2)
-				else Round((@dblPrcPriceOut + @dblCPTotalTax) * @dblQuantity,2)
-			end)
-		)
-		END
-
-		--IF (@ysnInvalid = 0)
-		--BEGIN
-		--	DECLARE	@ErrorMessage NVARCHAR(250)
-		--	EXEC [uspCFProcessTransactionToInvoice] 
-		--	 @TransactionId = @Pk
-		--	,@UserId = 1
-		--	,@ErrorMessage = @ErrorMessage OUTPUT
-		--	,@Post = 1
-
-		--	--IF (@ErrorMessage IS NULL)
-		--	--BEGIN
-		--	--	UPDATE tblCFTransaction SET ysnPosted = 1 WHERE intTransactionId = @Pk
-		--	--END
-		--END
+			,strTransactionPriceId
+			,dblTaxOriginalAmount
+			,dblTaxCalculatedAmount
+		FROM ##tblCFTransactionPriceType
 		
+
 		print @dblCalcOverfillQuantity
 		IF(@dblCalcOverfillQuantity > 0)
 		BEGIN
@@ -1114,5 +899,5 @@ BEGIN
 			GOTO CALCULATEPRICE
 		END
 		------------------------------------------------------------
-
 	END
+END

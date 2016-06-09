@@ -1,8 +1,8 @@
 ﻿CREATE PROC uspRKFutOptTransactionImport
 AS
-Begin Try
+BEGIN TRY
 DECLARE @tblRKFutOptTransactionHeaderId int 
-Declare @ErrMsg nvarchar(Max)
+DECLARE @ErrMsg nvarchar(Max)
 
 DECLARE @strDateTimeFormat nvarchar(50)
 DECLARE @ConvertYear int
@@ -14,21 +14,18 @@ SELECT @ConvertYear=101
 ELSE IF (@strDateTimeFormat = 'DD MM YYYY' OR @strDateTimeFormat ='YYYY DD MM')
 SELECT @ConvertYear=103
 
-
 DECLARE @strInternalTradeNo int= null
 DECLARE @intFutOptTransactionHeaderId int = null
-SELECT @strInternalTradeNo=max(convert(int,replace(strInternalTradeNo,'O-',''))) from tblRKFutOptTransaction
+declare @MaxTranNumber int = null
+select @strInternalTradeNo=intNumber-1 from tblSMStartingNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
 
 BEGIN TRAN
 IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 BEGIN
 INSERT INTO tblRKFutOptTransactionHeader values (1)
 SELECT @intFutOptTransactionHeaderId = scope_Identity()
-INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,dtmTransactionDate,intEntityId,intBrokerageAccountId,intFutureMarketId,
-									intInstrumentTypeId,intCommodityId,intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,strBrokerTradeNo,
-									strBuySell,intNoOfContract,intFutureMonthId,intOptionMonthId,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-									dtmFilledDate,intBookId,intSubBookId)
-SELECT * FROM(
+
+SELECT * INTO #temp FROM(
 SELECT DISTINCT @intFutOptTransactionHeaderId intFutOptTransactionHeaderId ,1 intConcurrencyId,
 		getdate() dtmTransactionDate,em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
 	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 2 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
@@ -47,8 +44,15 @@ Left JOIN tblRKOptionsMonth om on om.strOptionMonth=replace(ti.strOptionMonth,'-
 LEFT JOIN tblCTBook b on b.strBook=ti.strBook
 LEFT JOIN tblCTSubBook sb on sb.strSubBook=ti.strSubBook)t order by strInternalTradeNo
 
-END
+INSERT INTO tblRKFutOptTransaction (intSelectedInstrumentTypeId,intFutOptTransactionHeaderId,intConcurrencyId,dtmTransactionDate,intEntityId,intBrokerageAccountId,intFutureMarketId,
+									intInstrumentTypeId,intCommodityId,intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,strBrokerTradeNo,
+									strBuySell,intNoOfContract,intFutureMonthId,intOptionMonthId,strOptionType,dblStrike,dblPrice,strReference,strStatus,
+									dtmFilledDate,intBookId,intSubBookId)
 
+SELECT 1,* FROM #temp 
+END
+select @MaxTranNumber=max(strInternalTradeNo) +1 from #temp
+UPDATE tblSMStartingNumber SET intNumber=@MaxTranNumber where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
 COMMIT TRAN
 SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,

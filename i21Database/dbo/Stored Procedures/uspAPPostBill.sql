@@ -183,7 +183,7 @@ INSERT INTO @adjustedEntries
 SELECT
 	[intItemId]							=	B.intItemId
 	,[intItemLocationId]				=	D.intItemLocationId
-	,[intItemUOMId]						=	E2.intUnitMeasureId
+	,[intItemUOMId]						=   ISNULL(ISNULL(Lot.intWeightUOMId, Lot.intItemUOMId),E2.intUnitMeasureId)
 	,[dtmDate] 							=	A.dtmDate
 	,[dblQty] 							=	B.dblQtyReceived
 	,[dblUOMQty] 						=	B.dblQtyReceived
@@ -194,9 +194,9 @@ SELECT
 	,[intTransactionDetailId] 			=	B.intBillDetailId
 	,[strTransactionId] 				=	A.strBillId
 	,[intTransactionTypeId] 			=	25
-	,[intLotId] 						=	NULL
-	,[intSubLocationId] 				=	NULL
-	,[intStorageLocationId] 			=	NULL
+	,[intLotId] 						=	H.intLotId
+	,[intSubLocationId] 				=	E2.intSubLocationId
+	,[intStorageLocationId] 			=	E2.intStorageLocationId
 	,[ysnIsStorage] 					=	NULL
 	,[strActualCostId] 					=	E1.strActualCostId
 	,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
@@ -206,11 +206,15 @@ FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B
 	ON A.intBillId = B.intBillId
 	INNER JOIN (tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 ON E1.intInventoryReceiptId = E2.intInventoryReceiptId)
-		ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
+	ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
 	INNER JOIN tblICItem C
 	ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation D
 	ON D.intLocationId = A.intShipToId AND D.intItemId = C.intItemId
+	LEFT JOIN tblICInventoryReceiptItemLot H
+	ON B.intInventoryReceiptItemId = H.intInventoryReceiptItemId
+	LEFT JOIN dbo.tblICLot Lot
+	ON Lot.intLotId = H.intLotId
 WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost != 0 AND B.dblCost != B.dblOldCost
 
@@ -587,9 +591,9 @@ DECLARE @strDescription AS NVARCHAR(100)
 DECLARE @billCounter INT = 0;
 SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
 
-WHILE(@billCounter != (@totalRecords -1))
+WHILE(@billCounter != (@totalRecords))
 BEGIN
-	SELECT @billId = (SELECT TOP 1(@billCounter) intBillId FROM #tmpPostBillData)
+	SELECT @billId = CAST((SELECT TOP (1) intBillId FROM #tmpPostBillData) AS NVARCHAR(50))
 
 	EXEC dbo.uspSMAuditLog 
 	   @screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
@@ -601,6 +605,7 @@ BEGIN
 	  ,@toValue = ''									-- New Value
 
   SET @billCounter = @billCounter + 1
+  DELETE FROM #tmpPostBillData WHERE intBillId = @billId
 END
 
 Post_Commit:

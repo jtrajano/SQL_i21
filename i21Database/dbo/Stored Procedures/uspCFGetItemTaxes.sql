@@ -36,7 +36,7 @@ SELECT
 	,[strTaxCode]
 	,[ysnTaxExempt]
 	,[strTaxGroup]
-	,[ysnInvalid]
+	,[ysnInvalidSetup]
 	,[strReason]
 	,[strNotes]
 FROM

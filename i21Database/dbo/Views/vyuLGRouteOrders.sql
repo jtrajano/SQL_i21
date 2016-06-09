@@ -1,39 +1,114 @@
 CREATE VIEW vyuLGRouteOrders
 AS
 SELECT 
-	Route.intRouteOrderId
-	,Route.intRouteId
-	,Route.intDispatchID
-	,Route.intLoadDetailId
-	,Route.intSequence
-	,Route.dblFromLatitude
-	,Route.dblFromLongitude
-	,Route.strFromAddress
-	,Route.strFromCity
-	,Route.strFromState
-	,Route.strFromZipCode
-	,Route.strFromCountry
-	,Route.dblToLatitude
-	,Route.dblToLongitude
-	,Route.strToAddress
-	,Route.strToCity
-	,Route.strToState
-	,Route.strToZipCode
-	,Route.strToCountry
-	,strOrderNumber =			CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strOrderNumber ELSE LD.strLoadNumber END
-	,strLocationName =			CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strCompanyLocationName ELSE LD.strSLocationName END 
-	,dtmScheduledDate =			CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.dtmRequestedDate ELSE LD.dtmScheduledDate END
-	,strEntityName =			CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strCustomerName ELSE LD.strCustomer END
-	,strDestination =			CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strSiteAddress + ', ' + TMO.strSiteCity + ', ' + TMO.strSiteState + ' ' + TMO.strSiteZipCode ELSE LD.strShipToAddress + ', ' + LD.strShipToCity + ', ' + LD.strShipToState + ' ' + LD.strShipToZipCode  END
-	,strOrderStatus =			CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strOrderStatus ELSE LGL.strShipmentStatus END
-	,strDriver =				CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strDriverName ELSE LD.strDriver END
-	,strItemNo =				CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strProduct ELSE LD.strItemNo END
-	,dblQuantity =				CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.dblQuantity ELSE LD.dblQuantity END
-	,strCustomerReference =		CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN '' ELSE LD.strCustomerReference END
-	,strOrderComments =			CASE WHEN IsNull(Route.intDispatchID, 0) <> 0 THEN TMO.strComments ELSE LD.strComments END
-FROM tblLGRouteOrder Route
-LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = Route.intDispatchID
-LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = Route.intLoadDetailId
-	 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
+ Rte.intRouteOrderId
+ ,Rte.intRouteId
+ ,R.strRouteNumber
+ ,R.strDriver
+ ,R.dtmDispatchedDate
+ ,R.dblTruckCapacity
+ ,R.strComments
+ ,R.strFromLocation
+ ,R.strFromSubLocation
+ ,Rte.intDispatchID
+ ,Rte.intLoadDetailId
+ ,Rte.intSequence
+ ,Rte.dblToLatitude
+ ,Rte.dblToLongitude
+ ,Rte.strToAddress
+ ,Rte.strToCity
+ ,Rte.strToState
+ ,Rte.strToZipCode
+ ,Rte.strToCountry
+ ,Rte.dblBalance
+ ,strOrderNumber =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.strOrderNumber 
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LD.strLoadNumber 
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery'
+          THEN TMH.strOrderNumber
+         END Collate Latin1_General_CI_AS
 
+ ,dtmScheduledDate =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.dtmRequestedDate 
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LD.dtmScheduledDate
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery' 
+          THEN TMH.dtmRequestedDate
+         END 
 
+ ,strEntityName =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.strCustomerName 
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LD.strCustomer
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery'
+          THEN TMH.strCustomerName
+         END Collate Latin1_General_CI_AS
+ 
+ ,strOrderStatus =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.strOrderStatus
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LGL.strShipmentStatus
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery'
+          THEN TMH.strOrderStatus
+         END Collate Latin1_General_CI_AS
+ 
+ ,strItemNo =    CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.strProduct
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LD.strItemNo
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery'
+          THEN TMH.strProduct
+         END Collate Latin1_General_CI_AS
+ 
+ ,dblQuantity =    CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.dblQuantity
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LD.dblQuantity
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery' 
+          THEN TMH.dblQuantity
+         END
+ 
+ ,strCustomerReference =  CASE WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 THEN LD.strCustomerReference ELSE '' END
+ ,strOrderComments =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.strComments
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LD.strComments
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery'
+          THEN TMH.strComments
+         END Collate Latin1_General_CI_AS
+ 
+ ,Rte.strLocationType
+ ,strDestination =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.strSiteAddress + ', ' + TMO.strSiteCity + ', ' + TMO.strSiteState + ' ' + TMO.strSiteZipCode 
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 
+          THEN LD.strShipToAddress + ', ' + LD.strShipToCity + ', ' + LD.strShipToState + ' ' + LD.strShipToZipCode
+         WHEN IsNull(Rte.intCompanyLocationSubLocationId, 0) <> 0 
+          THEN SubCompLoc.strAddress + ', ' + SubCompLoc.strCity + ', ' + SubCompLoc.strState + ' ' + SubCompLoc.strZipCode
+         WHEN IsNull(Rte.intCompanyLocationId, 0) <> 0 
+          THEN CompLoc.strAddress + ', ' + CompLoc.strCity + ', ' + CompLoc.strStateProvince + ' ' + CompLoc.strZipPostalCode
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery' 
+          THEN TMH.strSiteAddress + ', ' + TMH.strSiteCity + ', ' + TMH.strSiteState + ' ' + TMH.strSiteZipCode 
+        END Collate Latin1_General_CI_AS
+ ,strLocationName =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0
+          THEN TMO.strCompanyLocationName
+         WHEN IsNull(Rte.intLoadDetailId, 0) <> 0 THEN
+          LD.strSLocationName
+         WHEN IsNull(Rte.intCompanyLocationId, 0) <> 0 THEN
+           CompLoc.strLocationName
+         WHEN IsNull(Rte.intDispatchID, 0) <> 0 AND Rte.strLocationType = 'Delivery'
+          THEN TMH.strCompanyLocationName
+        END Collate Latin1_General_CI_AS
+ ,strSubLocation =   CASE WHEN IsNull(Rte.intCompanyLocationSubLocationId, 0) <> 0 THEN 
+         SubCompLoc.strSubLocationName
+        ELSE 
+         ''
+        END
+FROM tblLGRouteOrder Rte
+JOIN vyuLGRoute R ON R.intRouteId = Rte.intRouteId
+LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = Rte.intDispatchID
+LEFT JOIN vyuTMDeliveryHistoryCallEntry TMH ON TMH.intDispatchId = Rte.intDispatchID
+LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = Rte.intLoadDetailId
+LEFT JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
+LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = Rte.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SubCompLoc ON SubCompLoc.intCompanyLocationSubLocationId = Rte.intCompanyLocationSubLocationId

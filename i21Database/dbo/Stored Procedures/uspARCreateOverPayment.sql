@@ -16,199 +16,290 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
-	  , @ARAccountId INT
-
 SET @ZeroDecimal = 0.000000
-SET @ARAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 
-IF @ARAccountId IS NULL OR @ARAccountId = 0
-	BEGIN
-		RAISERROR('There is no setup for AR Account in the Company Configuration.', 16, 1);
-		RETURN;
-	END
+DECLARE
+	 @NewId								INT 
+	,@EntityCustomerId				    INT
+	,@CompanyLocationId					INT
+	,@CurrencyId						INT				= NULL
+	,@SubCurrencyCents					INT				= NULL
+	,@TermId							INT				= NULL
+	,@EntityId							INT
+	,@InvoiceDate						DATETIME	
+	,@DueDate							DATETIME		= NULL
+	,@ShipDate							DATETIME		= NULL	
+	,@PostDate							DATETIME		= NULL
+	,@TransactionType					NVARCHAR(50)	= 'Invoice'
+	,@Type								NVARCHAR(200)	= 'Standard'
+	,@ErrorMessage						NVARCHAR(250)	= NULL
+	,@EntitySalespersonId				INT				= NULL				
+	,@FreightTermId						INT				= NULL
+	,@ShipViaId							INT				= NULL
+	,@PaymentMethodId					INT				= NULL
+	,@InvoiceOriginId					NVARCHAR(16)	= NULL
+	,@PONumber							NVARCHAR(50)	= ''
+	,@BOLNumber							NVARCHAR(50)	= ''
+	,@DeliverPickUp						NVARCHAR(100)	= NULL
+	,@Comment							NVARCHAR(500)	= ''			
+	,@ShipToLocationId					INT				= NULL
+	,@BillToLocationId					INT				= NULL
+	,@Template							BIT				= 0			
+	,@Forgiven							BIT				= 0			
+	,@Calculated						BIT				= 0			
+	,@Splitted							BIT				= 0			
+	,@SplitId							INT				= NULL
+	,@LoadDistributionHeaderId			INT				= NULL
+	,@ActualCostId						NVARCHAR(50)	= NULL			
+	,@ShipmentId						INT				= NULL
+	,@TransactionId						INT				= NULL
+	,@MeterReadingId					INT				= NULL
+	,@OriginalInvoiceId					INT				= NULL
+	,@PeriodsToAccrue					INT				= 1
+	,@SourceId							INT				= 0
+		
+	,@ItemId							INT				= NULL
+	,@ItemPrepayTypeId					INT				= 0
+	,@ItemPrepayRate					NUMERIC(18,6)	= 0.000000
+	,@ItemIsInventory					BIT				= 0
+	,@ItemDocumentNumber				NVARCHAR(100)	= NULL			
+	,@ItemDescription					NVARCHAR(500)	= NULL
+	,@OrderUOMId						INT				= NULL
+	,@ItemQtyOrdered					NUMERIC(18,6)	= 0.000000
+	,@ItemUOMId							INT				= NULL
+	,@ItemQtyShipped					NUMERIC(18,6)	= 0.000000
+	,@ItemDiscount						NUMERIC(18,6)	= 0.000000
+	,@ItemPrice							NUMERIC(18,6)	= 0.000000	
+	,@RefreshPrice						BIT				= 0
+	,@ItemMaintenanceType				NVARCHAR(50)	= NULL
+	,@ItemFrequency						NVARCHAR(50)	= NULL
+	,@ItemMaintenanceDate				DATETIME		= NULL
+	,@ItemMaintenanceAmount				NUMERIC(18,6)	= 0.000000
+	,@ItemLicenseAmount					NUMERIC(18,6)	= 0.000000
+	,@ItemTaxGroupId					INT				= NULL
+	,@ItemStorageLocationId				INT				= NULL
+	,@ItemCompanyLocationSubLocationId	INT				= NULL
+	,@RecomputeTax						BIT				= 0
+	,@ItemSCInvoiceId					INT				= NULL
+	,@ItemSCInvoiceNumber				NVARCHAR(50)	= NULL
+	,@ItemInventoryShipmentItemId		INT				= NULL
+	,@ItemShipmentNumber				NVARCHAR(50)	= NULL
+	,@ItemSalesOrderDetailId			INT				= NULL												
+	,@ItemSalesOrderNumber				NVARCHAR(50)	= NULL
+	,@ItemContractHeaderId				INT				= NULL
+	,@ItemContractDetailId				INT				= NULL			
+	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
+	,@ItemWeightUOMId					INT				= NULL	
+	,@ItemWeight						NUMERIC(18,6)	= 0.000000		
+	,@ItemShipmentGrossWt				NUMERIC(18,6)	= 0.000000		
+	,@ItemShipmentTareWt				NUMERIC(18,6)	= 0.000000		
+	,@ItemShipmentNetWt					NUMERIC(18,6)	= 0.000000			
+	,@ItemTicketId						INT				= NULL		
+	,@ItemTicketHoursWorkedId			INT				= NULL		
+	,@ItemOriginalInvoiceDetailId		INT				= NULL		
+	,@ItemSiteId						INT				= NULL												
+	,@ItemBillingBy						NVARCHAR(200)	= NULL
+	,@ItemPercentFull					NUMERIC(18,6)	= 0.000000
+	,@ItemNewMeterReading				NUMERIC(18,6)	= 0.000000
+	,@ItemPreviousMeterReading			NUMERIC(18,6)	= 0.000000
+	,@ItemConversionFactor				NUMERIC(18,8)	= 0.00000000
+	,@ItemPerformerId					INT				= NULL
+	,@ItemLeaseBilling					BIT				= 0
+	,@ItemVirtualMeterReading			BIT				= 0
+	,@SubCurrency						BIT				= 0
 
-INSERT INTO [tblARInvoice]
-	([strInvoiceOriginId]
-	,[intEntityCustomerId]
-	,[dtmDate]
-	,[dtmDueDate]
-	,[intCurrencyId]
-	,[intCompanyLocationId]
-	,[intEntitySalespersonId]
-	,[dtmShipDate]
-	,[intShipViaId]
-	,[strPONumber]
-	,[intTermId]
-	,[dblInvoiceSubtotal]
-	,[dblShipping]
-	,[dblTax]
-	,[dblInvoiceTotal]
-	,[dblDiscount]
-	,[dblAmountDue]
-	,[dblPayment]
-	,[strTransactionType]
-	,[intPaymentMethodId]
-	,[strComments]
-	,[intAccountId]
-	,[dtmPostDate]
-	,[ysnPosted]
-	,[ysnPaid]
-	,[strShipToLocationName]
-	,[strShipToAddress]
-	,[strShipToCity]
-	,[strShipToState]
-	,[strShipToZipCode]
-	,[strShipToCountry]
-	,[strBillToLocationName]
-	,[strBillToAddress]
-	,[strBillToCity]
-	,[strBillToState]
-	,[strBillToZipCode]
-	,[strBillToCountry]
-	,[intPaymentId]
-	,[intConcurrencyId]
-	,[intEntityId])
-SELECT
-	[strInvoiceOriginId]	= NULL
-	,[intCustomerId]		= A.[intEntityCustomerId] 
-	,[dtmDate]				= A.dtmDatePaid
-	,[dtmDueDate]			= A.dtmDatePaid
-	,[intCurrencyId]		= ISNULL(A.[intCurrencyId], 0)
-	,[intCompanyLocationId]	= ISNULL(A.[intLocationId], 0)
-	,[intSalespersonId]		= ISNULL(C.[intSalespersonId], 0) 
-	,[dtmShipDate]			= A.dtmDatePaid
-	,[intShipViaId]			= ISNULL(EL.[intShipViaId], 0)
-	,[strPONumber]			= ''
-	,[intTermId]			= ISNULL(EL.[intTermsId], 0)
-	,[dblInvoiceSubtotal]	= A.[dblOverpayment] 
-	,[dblShipping]			= @ZeroDecimal
-	,[dblTax]				= @ZeroDecimal
-	,[dblInvoiceTotal]		= A.[dblUnappliedAmount] 
-	,[dblDiscount]			= @ZeroDecimal		
-	,[dblAmountDue]			= A.[dblOverpayment] 
-	,[dblPayment]			= @ZeroDecimal
-	,[strTransactionType]	= 'Overpayment'
-	,[intPaymentMethodId]	= ISNULL(A.[intPaymentMethodId], 0)
-	,[strComments]			= A.strRecordNumber 
-	,[intAccountId]			= @ARAccountId 
-	,[dtmPostDate]			= A.dtmDatePaid
-	,[ysnPosted]			= 1
-	,[ysnPaid]				= 0
-	,[strShipToLocationName]= ISNULL(SL.[strLocationName], EL.[strLocationName])
-	,[strShipToAddress]		= ISNULL(SL.[strAddress], EL.[strAddress])
-	,[strShipToCity]		= ISNULL(SL.[strCity], EL.[strCity])
-	,[strShipToState]		= ISNULL(SL.[strState], EL.[strState])
-	,[strShipToZipCode]		= ISNULL(SL.[strZipCode], EL.[strZipCode])
-	,[strShipToCountry]		= ISNULL(SL.[strCountry], EL.[strCountry])
-	,[strBillToLocationName]= ISNULL(BL.[strLocationName], EL.[strLocationName])
-	,[strBillToAddress]		= ISNULL(BL.[strAddress], EL.[strAddress])
-	,[strBillToCity]		= ISNULL(BL.[strCity], EL.[strCity])
-	,[strBillToState]		= ISNULL(BL.[strState], EL.[strState])
-	,[strBillToZipCode]		= ISNULL(BL.[strZipCode], EL.[strZipCode])
-	,[strBillToCountry]		= ISNULL(BL.[strCountry], EL.[strCountry])
-	,[intPaymentId]			= A.intPaymentId		
-	,[intConcurrencyId]		= 1
-	,[intEntityId]			= 1
+
+
+SELECT TOP 1
+	 @EntityCustomerId					= ARC.[intEntityCustomerId]
+	,@CompanyLocationId					= ARP.[intLocationId]
+	,@CurrencyId						= ARP.[intCurrencyId]
+	,@SubCurrencyCents					= NULL
+	,@TermId							= NULL
+	,@EntityId							= @UserId
+	,@InvoiceDate						= ARP.dtmDatePaid
+	,@DueDate							= ARP.dtmDatePaid
+	,@ShipDate							= ARP.dtmDatePaid
+	,@PostDate							= ARP.dtmDatePaid
+	,@TransactionType					= 'Overpayment'
+	,@Type								= 'Standard'
+	,@EntitySalespersonId				= NULL				
+	,@FreightTermId						= NULL
+	,@ShipViaId							= NULL
+	,@PaymentMethodId					= ARP.[intPaymentMethodId]
+	,@InvoiceOriginId					= NULL
+	,@PONumber							= ''
+	,@BOLNumber							= ''
+	,@DeliverPickUp						= NULL
+	,@Comment							= ARP.strRecordNumber			
+	,@ShipToLocationId					= NULL
+	,@BillToLocationId					= NULL
+	,@Template							= 0			
+	,@Forgiven							= 0			
+	,@Calculated						= 0			
+	,@Splitted							= 0			
+	,@SplitId							= NULL
+	,@LoadDistributionHeaderId			= NULL
+	,@ActualCostId						= NULL			
+	,@ShipmentId						= NULL
+	,@TransactionId						= NULL
+	,@MeterReadingId					= NULL
+	,@OriginalInvoiceId					= NULL
+	,@PeriodsToAccrue					= 1
+	,@SourceId							= 0
+		
+	,@ItemId							= NULL
+	,@ItemPrepayTypeId					= 0
+	,@ItemPrepayRate					= @ZeroDecimal
+	,@ItemIsInventory					= 0
+	,@ItemDocumentNumber				= NULL			
+	,@ItemDescription					= 'Overpayment for '+ ARP.strRecordNumber
+	,@OrderUOMId						= NULL
+	,@ItemQtyOrdered					= @ZeroDecimal
+	,@ItemUOMId							= NULL
+	,@ItemQtyShipped					= 1.000000
+	,@ItemDiscount						= @ZeroDecimal
+	,@ItemPrice							= ARP.[dblUnappliedAmount]	
+	,@RefreshPrice						= 0
+	,@ItemMaintenanceType				= NULL
+	,@ItemFrequency						= NULL
+	,@ItemMaintenanceDate				= NULL
+	,@ItemMaintenanceAmount				= @ZeroDecimal
+	,@ItemLicenseAmount					= @ZeroDecimal
+	,@ItemTaxGroupId					= NULL
+	,@ItemStorageLocationId				= NULL
+	,@ItemCompanyLocationSubLocationId	= NULL
+	,@RecomputeTax						= 0
+	,@ItemSCInvoiceId					= NULL
+	,@ItemSCInvoiceNumber				= NULL
+	,@ItemInventoryShipmentItemId		= NULL
+	,@ItemShipmentNumber				= NULL
+	,@ItemSalesOrderDetailId			= NULL												
+	,@ItemSalesOrderNumber				= NULL
+	,@ItemContractHeaderId				= NULL
+	,@ItemContractDetailId				= NULL			
+	,@ItemShipmentPurchaseSalesContractId	= NULL	
+	,@ItemWeightUOMId					= NULL	
+	,@ItemWeight						= @ZeroDecimal		
+	,@ItemShipmentGrossWt				= @ZeroDecimal		
+	,@ItemShipmentTareWt				= @ZeroDecimal		
+	,@ItemShipmentNetWt					= @ZeroDecimal			
+	,@ItemTicketId						= NULL		
+	,@ItemTicketHoursWorkedId			= NULL		
+	,@ItemOriginalInvoiceDetailId		= NULL		
+	,@ItemSiteId						= NULL												
+	,@ItemBillingBy						= NULL
+	,@ItemPercentFull					= @ZeroDecimal
+	,@ItemNewMeterReading				= @ZeroDecimal
+	,@ItemPreviousMeterReading			= @ZeroDecimal
+	,@ItemConversionFactor				= @ZeroDecimal
+	,@ItemPerformerId					= NULL
+	,@ItemLeaseBilling					= 0
+	,@ItemVirtualMeterReading			= 0
+	,@SubCurrency						= 0	
 FROM
-	[tblARPayment] A
+	[tblARPayment] ARP
 INNER JOIN
-	[tblARCustomer] C
-		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
-INNER JOIN
-	(	SELECT
-			[intEntityLocationId]
-			,[intEntityId]
-			,[strLocationName]
-			,[strAddress]
-			,[strCity]
-			,[strState]
-			,[strZipCode]
-			,[strCountry]
-			,[intShipViaId]
-			,[intTermsId]
-		FROM 
-			[tblEMEntityLocation]
-		WHERE
-			ysnDefaultLocation = 1
-	) EL
-		ON C.[intEntityCustomerId] = EL.[intEntityId] 
-LEFT OUTER JOIN
-	[tblEMEntityLocation] SL
-		ON C.[intShipToId] = SL.[intEntityLocationId]  	
-LEFT OUTER JOIN
-	[tblEMEntityLocation] BL
-		ON C.[intBillToId] = BL.[intEntityLocationId]  			
+	[tblARCustomer] ARC
+		ON ARP.[intEntityCustomerId] = ARC.[intEntityCustomerId]
 WHERE 
-	A.[intPaymentId] = @PaymentId 
-	
-	
-DECLARE @NewId AS INT
-SET @NewId = SCOPE_IDENTITY()
-SET @NewInvoiceId = @NewId 
+	ARP.[intPaymentId] = @PaymentId
 
-INSERT INTO [tblARInvoiceDetail]
-	([intInvoiceId]
-	,[intItemId]
-	,[strItemDescription]
-	,[intItemUOMId]
-	,[dblQtyOrdered]
-	,[dblQtyShipped]
-	,[dblPrice]
-	,[dblTotal]
-	,[intAccountId]
-	,[intCOGSAccountId]
-	,[intSalesAccountId]
-	,[intInventoryAccountId]
-	,[intConcurrencyId])
-SELECT
-	intInvoiceId			= @NewId 
-	,intItemId				= NULL
-	,strItemDescription		= 'Overpayment for '+ A.strRecordNumber 
-	,intItemUOMId			= NULL
-	,dblQtyOrdered			= 1
-	,dblQtyShipped			= 1
-	,dblPrice				= A.[dblUnappliedAmount]
-	,dblTotal				= A.[dblUnappliedAmount]
-	,intAccountId			= NULL
-	,intCOGSAccountId		= NULL
-	,intSalesAccountId		= NULL
-	,intInventoryAccountId	= NULL
-	,intConcurrencyId		= 1
-FROM
-	[tblARPayment] A
-INNER JOIN
-	[tblARCustomer] C
-		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
-WHERE 
-	A.[intPaymentId] = @PaymentId 
-           
-           
---IF @Post = 1
---	BEGIN
---		DECLARE	@return_value int,
---				@successfulCount int,
---				@invalidCount int,
---				@success bit
 
---		EXEC	@return_value = [dbo].[uspARPostInvoice]
---				@batchId = @BatchId,
---				@post = 1,
---				@recap = 0,
---				@param = @NewInvoiceId,
---				@userId = @UserId,
---				@beginDate = NULL,
---				@endDate = NULL,
---				@beginTransaction = NULL,
---				@endTransaction = NULL,
---				@exclude = NULL,
---				@successfulCount = @successfulCount OUTPUT,
---				@invalidCount = @invalidCount OUTPUT,
---				@success = @success OUTPUT,
---				@batchIdUsed = NULL,
---				@recapId = NULL,
---				@transType = N'Overpayment'
---	END           
-
+EXEC [dbo].[uspARCreateCustomerInvoice]
+	 @EntityCustomerId					= @EntityCustomerId
+	,@CompanyLocationId					= @CompanyLocationId
+	,@CurrencyId						= @CurrencyId
+	,@SubCurrencyCents					= @SubCurrencyCents
+	,@TermId							= @TermId
+	,@EntityId							= @EntityId
+	,@InvoiceDate						= @InvoiceDate
+	,@DueDate							= @DueDate
+	,@ShipDate							= @ShipDate
+	,@PostDate							= @PostDate
+	,@TransactionType					= @TransactionType
+	,@Type								= @Type
+	,@NewInvoiceId						= @NewId		OUTPUT
+	,@ErrorMessage						= @ErrorMessage	OUTPUT
+	,@RaiseError						= 1
+	,@EntitySalespersonId				= @EntitySalespersonId
+	,@FreightTermId						= @FreightTermId
+	,@ShipViaId							= @ShipViaId
+	,@PaymentMethodId					= @PaymentMethodId
+	,@InvoiceOriginId					= @InvoiceOriginId
+	,@PONumber							= @PONumber
+	,@BOLNumber							= @BOLNumber
+	,@DeliverPickUp						= @DeliverPickUp
+	,@Comment							= @Comment
+	,@ShipToLocationId					= @ShipToLocationId
+	,@BillToLocationId					= @BillToLocationId
+	,@Posted							= 1		
+	,@Template							= @Template
+	,@Forgiven							= @Forgiven
+	,@Calculated						= @Calculated
+	,@Splitted							= @Splitted
+	,@PaymentId							= @PaymentId
+	,@SplitId							= @SplitId
+	,@LoadDistributionHeaderId			= @LoadDistributionHeaderId
+	,@ActualCostId						= @ActualCostId
+	,@ShipmentId						= @ShipmentId
+	,@TransactionId						= @TransactionId
+	,@MeterReadingId					= @MeterReadingId
+	,@OriginalInvoiceId					= @OriginalInvoiceId
+	,@PeriodsToAccrue					= @PeriodsToAccrue
+	,@SourceId							= @SourceId
+	,@ItemId							= @ItemId
+	,@ItemPrepayTypeId					= @ItemPrepayTypeId
+	,@ItemPrepayRate					= @ItemPrepayRate
+	,@ItemIsInventory					= @ItemIsInventory
+	,@ItemDocumentNumber				= @ItemDocumentNumber
+	,@ItemDescription					= @ItemDescription
+	,@OrderUOMId						= @OrderUOMId
+	,@ItemQtyOrdered					= @ItemQtyOrdered
+	,@ItemUOMId							= @ItemUOMId
+	,@ItemQtyShipped					= @ItemQtyShipped
+	,@ItemDiscount						= @ItemDiscount
+	,@ItemPrice							= @ItemPrice
+	,@RefreshPrice						= @RefreshPrice
+	,@ItemMaintenanceType				= @ItemMaintenanceType
+	,@ItemFrequency						= @ItemFrequency
+	,@ItemMaintenanceDate				= @ItemMaintenanceDate
+	,@ItemMaintenanceAmount				= @ItemMaintenanceAmount
+	,@ItemLicenseAmount					= @ItemLicenseAmount
+	,@ItemTaxGroupId					= @ItemTaxGroupId
+	,@ItemStorageLocationId				= @ItemStorageLocationId
+	,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
+	,@RecomputeTax						= @RecomputeTax
+	,@ItemSCInvoiceId					= @ItemSCInvoiceId
+	,@ItemSCInvoiceNumber				= @ItemSCInvoiceNumber
+	,@ItemInventoryShipmentItemId		= @ItemInventoryShipmentItemId
+	,@ItemShipmentNumber				= @ItemShipmentNumber
+	,@ItemSalesOrderDetailId			= @ItemSalesOrderDetailId
+	,@ItemSalesOrderNumber				= @ItemSalesOrderNumber
+	,@ItemContractHeaderId				= @ItemContractHeaderId
+	,@ItemContractDetailId				= @ItemContractDetailId
+	,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
+	,@ItemWeightUOMId					= @ItemWeightUOMId
+	,@ItemWeight						= @ItemWeight
+	,@ItemShipmentGrossWt				= @ItemShipmentGrossWt
+	,@ItemShipmentTareWt				= @ItemShipmentTareWt
+	,@ItemShipmentNetWt					= @ItemShipmentNetWt
+	,@ItemTicketId						= @ItemTicketId
+	,@ItemTicketHoursWorkedId			= @ItemTicketHoursWorkedId
+	,@ItemOriginalInvoiceDetailId		= @ItemOriginalInvoiceDetailId
+	,@ItemSiteId						= @ItemSiteId
+	,@ItemBillingBy						= @ItemBillingBy
+	,@ItemPercentFull					= @ItemPercentFull
+	,@ItemNewMeterReading				= @ItemNewMeterReading
+	,@ItemPreviousMeterReading			= @ItemPreviousMeterReading
+	,@ItemConversionFactor				= @ItemConversionFactor
+	,@ItemPerformerId					= @ItemPerformerId
+	,@ItemLeaseBilling					= @ItemLeaseBilling
+	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
+	,@SubCurrency						= @SubCurrency
+	      
+		  
+SET @NewInvoiceId = @NewId		                 
            
 RETURN @NewId
 

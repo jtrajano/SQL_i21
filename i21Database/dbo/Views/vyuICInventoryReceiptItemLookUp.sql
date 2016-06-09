@@ -44,7 +44,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 					SCTicket.strTicketNumber 
 
 				WHEN Receipt.intSourceType = 2 THEN -- Inbound Shipment
-					CAST(ISNULL(LogisticsView.intTrackingNumber, '')AS NVARCHAR(50))
+					ISNULL(LogisticsView.strLoadNumber, '')
 
 				WHEN Receipt.intSourceType = 3 -- Transport
 					THEN ISNULL(TransportView_New.strTransaction, TransportView_Old.strTransaction) 
@@ -127,7 +127,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 									WHEN Receipt.intSourceType = 1 THEN -- Scale
 										0
 									WHEN Receipt.intSourceType = 2 THEN -- Inbound Shipment
-										ISNULL(LogisticsView.dblReceivedQty, 0)
+										ISNULL(LogisticsView.dblDeliveredQuantity, 0)
 									WHEN Receipt.intSourceType = 3 THEN -- Transport
 										ISNULL(ISNULL(TransportView_New.dblReceivedQuantity, TransportView_Old.dblReceivedQuantity), 0) 
 									ELSE NULL
@@ -224,9 +224,9 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			AND Receipt.strReceiptType = 'Transfer Order'
 
 		-- 4. Logistics
-		LEFT JOIN vyuLGShipmentContainerReceiptContracts LogisticsView
-			ON LogisticsView.intShipmentContractQtyId = ReceiptItem.intSourceId
-			AND intShipmentBLContainerId = ReceiptItem.intContainerId
+		LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
+			ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
+			AND intLoadContainerId = ReceiptItem.intContainerId
 			AND Receipt.strReceiptType = 'Purchase Contract'
 			AND Receipt.intSourceType = 2
 

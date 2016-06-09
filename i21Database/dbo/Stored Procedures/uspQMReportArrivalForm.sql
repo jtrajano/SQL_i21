@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspQMReportArrivalForm
-    @xmlParam NVARCHAR(MAX) = NULL
+     @xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,6 +11,20 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intSampleId INT
 		,@xmlDocumentId INT
+	DECLARE @strCompanyName NVARCHAR(100)
+		,@strCompanyAddress NVARCHAR(100)
+		,@strCity NVARCHAR(25)
+		,@strState NVARCHAR(50)
+		,@strZip NVARCHAR(12)
+		,@strCountry NVARCHAR(25)
+
+	SELECT TOP 1 @strCompanyName = strCompanyName
+		,@strCompanyAddress = strAddress
+		,@strCity = strCity
+		,@strState = strState
+		,@strZip = strZip
+		,@strCountry = strCountry
+	FROM dbo.tblSMCompanySetup
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -25,7 +39,6 @@ BEGIN TRY
 			,NULL strContainerNumber
 			,NULL strVendor
 			,NULL strMarks
-			,NULL blbHeaderLogo
 			,NULL Volume
 			,NULL Moisture
 			,NULL Color
@@ -41,6 +54,10 @@ BEGIN TRY
 			,NULL [Screen size (13)]
 			,NULL [Screen size (12)]
 			,NULL [Screen size (PAN)]
+			,@strCompanyName AS strCompanyName
+			,@strCompanyAddress AS strCompanyAddress
+			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+			,@strCountry AS strCompanyCountry
 
 		RETURN
 	END
@@ -105,7 +122,11 @@ BEGIN TRY
 		strContainerNumber,
 		strVendor,
 		strMarks,
-		dbo.fnSMGetCompanyLogo(''Header'') AS blbHeaderLogo,' + @strFieldNamesWithAlias + ' FROM (
+		@strCompanyName AS strCompanyName,
+		@strCompanyAddress AS strCompanyAddress,
+		@strCity + '', '' + @strState + '', '' + @strZip + '','' AS strCityStateZip,
+		@strCountry AS strCompanyCountry,
+		' + @strFieldNamesWithAlias + ' FROM (
 		SELECT S.intSampleId
 			,S.strSampleNumber
 			,I.strShortName + '', '' + I.strDescription AS strItemShortNameDescription
@@ -121,12 +142,19 @@ BEGIN TRY
 			AND S.intSampleId = ' + CONVERT(NVARCHAR, @intSampleId) + 
 		'JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView CH ON CH.intContractDetailId = S.intContractDetailId
 		LEFT JOIN vyuCTEntity E ON E.intEntityId = S.intEntityId
 		) AS s
 	PIVOT(MAX(strPropertyValue) FOR strPropertyName IN (' + @strFieldNames + ')) AS pvt'
 
 	EXEC sp_executesql @SQL
+		,N'@strCompanyName NVARCHAR(100), @strCompanyAddress NVARCHAR(100), @strCity NVARCHAR(25), @strState NVARCHAR(50), @strZip NVARCHAR(12), @strCountry NVARCHAR(25)'
+		,@strCompanyName
+		,@strCompanyAddress
+		,@strCity
+		,@strState
+		,@strZip
+		,@strCountry
 END TRY
 
 BEGIN CATCH

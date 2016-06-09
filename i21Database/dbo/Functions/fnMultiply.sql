@@ -10,12 +10,22 @@ BEGIN
 	DECLARE @product AS NUMERIC(38, 20)
 	DECLARE @rawResult AS NVARCHAR(200)
 	DECLARE @decimalSize INT
+	DECLARE @sign AS INT 
 
 	IF @factor1 IS NULL 
 		RETURN NULL;
 
 	IF @factor2 IS NULL
 		RETURN NULL; 
+
+	-- Return same value if multiplying by 1. 
+	IF @factor1 = 1 
+		RETURN @factor2; 
+
+	IF @factor2 = 1 
+		RETURN @factor1; 
+
+	SELECT @sign = SIGN(@factor1) * SIGN(@factor2) 
 
 	-- Raw result is in string. 
 	BEGIN 
@@ -50,18 +60,25 @@ BEGIN
 		SET @rawResult = REPLACE(LTRIM(REPLACE(REPLACE(REPLACE(@rawResult, '-', ''), '.', ''), '0', ' ')), ' ', 0)		
 	END 
 
-	-- Pad zeroes to the left 
+	-- Pad zeroes to the raw value. 
 	BEGIN 
-		DECLARE @actualMultiply AS NUMERIC(38,20) = CAST(@factor1 AS FLOAT) * CAST(@factor2 AS FLOAT) 
-		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@actualMultiply, '.', ''), '-', '')) - 1) + @rawResult +  REPLICATE('0', 5) 
-	END 
+		DECLARE @stringFactor1 AS NVARCHAR(40) = CAST(@factor1 AS NVARCHAR(40)) 
+				,@stringFactor2 AS NVARCHAR(40) = CAST(@factor2 AS NVARCHAR(40)) 
+
+		DECLARE	@shortenFactor1 AS NUMERIC(38, 20) = LEFT(@stringFactor1, CHARINDEX('.', @stringFactor1) + 6)
+				,@shortenFactor2 AS NUMERIC(38, 20)	= LEFT(@stringFactor2, CHARINDEX('.', @stringFactor2) + 6)
+
+		DECLARE @shortenMultiply AS NUMERIC(38,20) = @shortenFactor1 * @shortenFactor2
+
+		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@shortenMultiply, '.', ''), '-', '')) - 1) + @rawResult +  REPLICATE('0', 5) 
+	END 	
 	
 	-- Determine where to place the decimal point. 
 	BEGIN 	
 		SET @rawResult = 
 			STUFF(
 				@rawResult
-				,CHARINDEX('.', @actualMultiply) + CASE WHEN SIGN(@actualMultiply) = -1 THEN -1 ELSE 0 END 
+				,CHARINDEX('.', @shortenMultiply) + CASE WHEN SIGN(@shortenMultiply) = -1 THEN -1 ELSE 0 END 
 				,0
 				,'.'
 			)
@@ -69,7 +86,7 @@ BEGIN
 
 	-- Determine if there is a need to append a negative sign. 
 	BEGIN 
-		SET @rawResult = CASE WHEN SIGN(@actualMultiply) = -1 THEN '-' ELSE '' END + @rawResult
+		SET @rawResult = CASE WHEN SIGN(@sign) = -1 THEN '-' ELSE '' END + @rawResult
 	END 
 
 	SET @product = ISNULL(CAST(LEFT(@rawResult, 38) AS NUMERIC(38, 20)), 0) 

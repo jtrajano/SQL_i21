@@ -69,6 +69,7 @@
     [dtmSiteLastReadingUpdate] DATETIME NULL, 
     [ysnMeterReading] BIT NOT NULL DEFAULT ((0)), 
     [intWillCallRouteId] INT NULL, 
+    [intWillCallDispatchId] INT NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDeliveryHistory_tblLGRoute] FOREIGN KEY ([intWillCallRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])
@@ -708,3 +709,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = N'intWillCallRouteId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will Call Identity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intWillCallDispatchId'

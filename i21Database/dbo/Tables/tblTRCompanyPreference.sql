@@ -16,6 +16,8 @@
 	[ysnItemizeSurcharge] BIT NULL,	
 	[intSurchargeItemId] INT NULL,
 	[intFreightCostAllocationMethod] INT NULL DEFAULT ((1)),
+	[intRackPriceImportMappingId] INT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
-	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
+	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC), 
+    CONSTRAINT [FK_tblTRCompanyPreference_tblSMImportFileHeader] FOREIGN KEY ([intRackPriceImportMappingId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )

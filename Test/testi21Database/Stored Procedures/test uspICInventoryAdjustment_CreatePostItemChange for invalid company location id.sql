@@ -153,6 +153,7 @@ BEGIN
 			,@intNewItemId					= @SerializedLotGrains
 			,@intNewSubLocationId			= NULL 
 			,@intNewStorageLocationId		= NULL 
+			,@intItemUOMId					= NULL 
 
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId					= 1 

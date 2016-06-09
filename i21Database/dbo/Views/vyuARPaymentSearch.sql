@@ -20,9 +20,10 @@ SELECT
 	,CL.strLocationName
 	,GL.dtmDate AS dtmBatchDate
 	,GL.strBatchId
-	,GL.strName strUserEntered
+	,ISNULL(GL.strName, EM.strName) strUserEntered
 FROM
 	tblARPayment P 
+LEFT OUTER JOIN (SELECT intEntityId, strName FROM tblEMEntity ) EM ON P.intEntityId = EM.intEntityId
 LEFT OUTER JOIN 
 	tblSMPaymentMethod PM 
 		ON P.intPaymentMethodId = PM.intPaymentMethodID

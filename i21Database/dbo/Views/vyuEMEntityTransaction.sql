@@ -52,4 +52,4 @@
 		intTransactionId = intQuoteHeaderId,
 		dtmDatePaid = null
 		--,* 
-	from vyuTRQuoteView
+	from vyuTRGetQuoteHeader

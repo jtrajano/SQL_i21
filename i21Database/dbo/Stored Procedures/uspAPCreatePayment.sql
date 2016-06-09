@@ -214,7 +214,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
 		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
-		[dblPayment]	= (CASE WHEN ISNULL(@payment,0) = 0 THEN 0 ELSE (A.dblTotal - A.dblDiscount - A.dblPayment) END),
+		[dblPayment]	= (CASE WHEN ISNULL(@payment,0) = 0 THEN 0 ELSE A.dblPayment END),
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A

@@ -2,9 +2,18 @@
 		@xmlParam NVARCHAR(MAX) = NULL  
 AS
 BEGIN
-	DECLARE @intReferenceNumber			INT,
-			@xmlDocumentId				INT 
-			
+	DECLARE @intLoadId			INT,
+			@xmlDocumentId		INT 
+	DECLARE @strCompanyName				NVARCHAR(100),
+			@strCompanyAddress			NVARCHAR(100),
+			@strContactName				NVARCHAR(50),
+			@strCounty					NVARCHAR(25),
+			@strCity					NVARCHAR(25),
+			@strState					NVARCHAR(50),
+			@strZip						NVARCHAR(12),
+			@strCountry					NVARCHAR(25),
+			@strPhone					NVARCHAR(50)
+						
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
@@ -36,205 +45,352 @@ BEGIN
 				[datatype]		NVARCHAR(50)  
 	)  
     
-	SELECT	@intReferenceNumber = [from]
+	SELECT	@intLoadId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intReferenceNumber' 
+	WHERE	[fieldname] = 'intLoadId' 
 
-SELECT 
-		SI.intReferenceNumber,
-		SI.dtmSIDate,
-		SI.strBookingNumber,
-		SI.dtmBookingDate,
-		SI.dtmShipmentDate,
-		Vendor.strName as strVendor,
-		Customer.strName as strCustomer,
-		SI.strOriginPort,
-		SI.strDestinationPort,
-		SLEntity.strName as strShippingLine,
-		SI.strViaCity,
-		THEntity.strName as strThrough,
-		SI.strServiceContractNumber,
-		SI.strPackingDescription,
-		SI.intNumberOfContainers,
-		ContType.strContainerType,
-		SI.strShippingMode,
-		SI.strVessel,
-		SI.strVoyageNumber,
-		ForAgent.strName as strForwardingAgent,
-		BLDraft.strName as strBLDraftToBeSent,
-		SI.strDocPresentationType,
-		CASE WHEN SI.strDocPresentationType = 'Bank' THEN Bank.strBankName WHEN SI.strDocPresentationType = 'Forwarding Agent' THEN DocPres.strName ELSE '' END as strDocPresentationVal,
-		SI.dtmETAPOL,
-		SI.dtmETAPOD,
-		SI.dtmETSPOL,
-		SI.dtmDeadlineBL,
-		SI.dtmDeadlineCargo,
-		SI.dtmISFFiledDate,
-		SI.dtmISFReceivedDate,
-		SI.strContactPerson,
-		SI.strFirstNotifyText,
-		SI.strSecondNotifyText,
-		SI.strConsigneeText,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FirstNotify.strName
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strBankName
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strCompanyName
-				END as strFirstNotify,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FirstNotify.strEmail
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strEmail
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strEmail
-				END as strFirstNotifyMail,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FirstNotify.strFax
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strFax
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strFax
-				END as strFirstNotifyFax,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FirstNotify.strMobile
-				WHEN SI.strFirstNotifyType = 'Bank' Then ''
-				WHEN SI.strFirstNotifyType = 'Company' Then ''
-				END as strFirstNotifyMobile,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FirstNotify.strPhone
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strPhone
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strPhone
-				END as strFirstNotifyPhone,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FNLocation.strAddress
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strAddress
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strAddress
-				END as strFirstNotifyAddress,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FNLocation.strCity
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strCity
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strCity
-				END as strFirstNotifyCity,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FNLocation.strCountry
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strCountry
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strCountry
-				END as strFirstNotifyCountry,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FNLocation.strState
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strState
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strState
-				END as strFirstNotifyState,
-		CASE	WHEN SI.strFirstNotifyType = 'Customer' or SI.strFirstNotifyType = 'Forwarding Agent' THEN FNLocation.strZipCode
-				WHEN SI.strFirstNotifyType = 'Bank' Then FirstNotifyBank.strZipCode
-				WHEN SI.strFirstNotifyType = 'Company' Then FirstNotifyCompany.strZip
-				END as strFirstNotifyZipCode,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SecondNotify.strName
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strBankName
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strCompanyName
-				END as strSecondNotify,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SecondNotify.strEmail
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strEmail
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strEmail
-				END as strSecondNotifyMail,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SecondNotify.strFax
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strFax
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strFax
-				END as strSecondNotifyFax,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SecondNotify.strMobile
-				WHEN SI.strSecondNotifyType = 'Bank' Then ''
-				WHEN SI.strSecondNotifyType = 'Company' Then ''
-				END as strSecondNotifyMobile,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SecondNotify.strPhone
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strPhone
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strPhone
-				END as strSecondNotifyPhone,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SNLocation.strAddress
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strAddress
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strAddress
-				END as strSecondNotifyAddress,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SNLocation.strCity
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strCity
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strCity
-				END as strSecondNotifyCity,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SNLocation.strCountry
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strCountry
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strCountry
-				END as strSecondNotifyCountry,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SNLocation.strState
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strState
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strState
-				END as strSecondNotifyState,
-		CASE	WHEN SI.strSecondNotifyType = 'Customer' or SI.strSecondNotifyType = 'Forwarding Agent' THEN SNLocation.strZipCode
-				WHEN SI.strSecondNotifyType = 'Bank' Then SecondNotifyBank.strZipCode
-				WHEN SI.strSecondNotifyType = 'Company' Then SecondNotifyCompany.strZip
-				END as strSecondNotifyZipCode,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN Consignee.strName
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strBankName
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strCompanyName
-				END as strConsignee,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN Consignee.strEmail
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strEmail
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strEmail
-				END as strConsigneeMail,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN Consignee.strFax
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strFax
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strFax
-				END as strConsigneeFax,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN Consignee.strMobile
-				WHEN SI.strConsigneeType = 'Bank' Then ''
-				WHEN SI.strConsigneeType = 'Company' Then ''
-				END as strConsigneeMobile,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN Consignee.strPhone
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strPhone
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strPhone
-				END as strConsigneePhone,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN CSLocation.strAddress
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strAddress
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strAddress
-				END as strConsigneeAddress,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN CSLocation.strCity
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strCity
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strCity
-				END as strConsigneeCity,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN CSLocation.strCountry
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strCountry
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strCountry
-				END as strConsigneeCountry,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN CSLocation.strState
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strState
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strState
-				END as strConsigneeState,
-		CASE	WHEN SI.strConsigneeType = 'Customer' or SI.strConsigneeType = 'Forwarding Agent' THEN CSLocation.strZipCode
-				WHEN SI.strConsigneeType = 'Bank' Then ConsigneeBank.strZipCode
-				WHEN SI.strConsigneeType = 'Company' Then ConsigneeCompany.strZip
-				END as strConsigneeZipCode,
-	SI.strMarks,
-	SI.strMarkingInstructions,
-	SI.strComments,
-	SI.dblDemurrage,
-	DemCurrency.strCurrency as strDemurrageCurrency,
-	SI.dblDespatch,
-	DesCurrency.strCurrency as strDespatchCurrency,
-	SI.dblLoadingRate,
-	SI.dblDischargeRate,
-	LoadUnit.strUnitMeasure as strLoadingUnit,
-	DisUnit.strUnitMeasure as strDischargeUnit,
-	SI.strLoadingPerUnit,
-	SI.strDischargePerUnit,
-	dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+	SELECT TOP 1 @strCompanyName = strCompanyName
+			,@strCompanyAddress = strAddress
+			,@strContactName = strContactName
+			,@strCounty = strCounty
+			,@strCity = strCity
+			,@strState = strState
+			,@strZip = strZip
+			,@strCountry = strCountry
+			,@strPhone = strPhone
+	FROM tblSMCompanySetup
 
-FROM		tblLGShippingInstruction SI
-LEFT JOIN	tblEMEntity Vendor	ON Vendor.intEntityId = SI.intVendorEntityId
-LEFT JOIN	tblEMEntity Customer	ON Customer.intEntityId = SI.intCustomerEntityId
-LEFT JOIN	tblEMEntity SLEntity ON SLEntity.intEntityId = SI.intShippingLineEntityId
-LEFT JOIN	tblEMEntity THEntity ON THEntity.intEntityId = SI.intThroughShippingLineEntityId
-LEFT JOIN	tblLGContainerType ContType ON ContType.intContainerTypeId = SI.intContainerTypeId
-LEFT JOIN	tblEMEntity ForAgent ON ForAgent.intEntityId = SI.intForwardingAgentEntityId
-LEFT JOIN	tblEMEntity BLDraft ON BLDraft.intEntityId = SI.intBLDraftToBeSentId
-LEFT JOIN	tblEMEntity DocPres ON DocPres.intEntityId = SI.intDocPresentationId
-LEFT JOIN	tblCMBank Bank ON Bank.intBankId = SI.intDocPresentationId
-LEFT JOIN	tblEMEntity FirstNotify ON FirstNotify.intEntityId = SI.intFirstNotifyId
-LEFT JOIN	tblCMBank FirstNotifyBank ON FirstNotifyBank.intBankId = SI.intFirstNotifyId
-LEFT JOIN	tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = SI.intFirstNotifyId
-LEFT JOIN	[tblEMEntityLocation] FNLocation ON FNLocation.intEntityLocationId = SI.intFirstNotifyLocationId
-LEFT JOIN	tblEMEntity SecondNotify ON SecondNotify.intEntityId = SI.intSecondNotifyId
-LEFT JOIN	tblCMBank SecondNotifyBank ON SecondNotifyBank.intBankId = SI.intSecondNotifyId
-LEFT JOIN	tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SI.intSecondNotifyId
-LEFT JOIN	[tblEMEntityLocation] SNLocation ON SNLocation.intEntityLocationId = SI.intSecondNotifyLocationId
-LEFT JOIN	tblEMEntity Consignee ON Consignee.intEntityId = SI.intConsigneeId
-LEFT JOIN	tblCMBank ConsigneeBank ON ConsigneeBank.intBankId = SI.intConsigneeId
-LEFT JOIN	tblSMCompanySetup ConsigneeCompany ON ConsigneeCompany.intCompanySetupID = SI.intConsigneeId
-LEFT JOIN	[tblEMEntityLocation] CSLocation ON CSLocation.intEntityLocationId = SI.intConsigneeLocationId
-LEFT JOIN	tblSMCurrency DemCurrency ON DemCurrency.intCurrencyID = SI.intDemurrageCurrencyId
-LEFT JOIN	tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = SI.intDespatchCurrencyId
-LEFT JOIN	tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = SI.intLoadingUnitMeasureId
-LEFT JOIN	tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = SI.intDischargeUnitMeasureId
-WHERE SI.intReferenceNumber = @intReferenceNumber
+SELECT TOP 1 L.intLoadId
+	,L.dtmScheduledDate
+	,L.strLoadNumber
+	,L.dtmBLDate
+	,L.dtmDeliveredDate
+	,Vendor.strName AS strVendor
+	,Customer.strName AS strCustomer
+	,L.strOriginPort
+	,L.strDestinationPort
+	,SLEntity.strName AS strShippingLine
+	,L.strServiceContractNumber
+	,L.strPackingDescription
+	,L.intNumberOfContainers
+	,ContType.strContainerType
+	,L.strShippingMode
+	,L.strMVessel
+	,L.strMVoyageNumber
+	,ForAgent.strName AS strForwardingAgent
+	,BLDraft.strName AS strBLDraftToBeSent
+	,L.strDocPresentationType
+	,CASE 
+		WHEN L.strDocPresentationType = 'Bank'
+			THEN Bank.strBankName
+		WHEN L.strDocPresentationType = 'Forwarding Agent'
+			THEN DocPres.strName
+		ELSE ''
+		END AS strDocPresentationVal
+	,L.dtmETAPOL
+	,L.dtmETAPOD
+	,L.dtmETSPOL
+	,L.dtmDeadlineBL
+	,L.dtmDeadlineCargo
+	,L.dtmISFFiledDate
+	,L.dtmISFReceivedDate
+	,FLNP.strText AS strFirstNotifyText
+	,SLNP.strText AS strSecondNotifyText
+	,CLNP.strText AS strConsigneeText
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strBankName
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strCompanyName
+		WHEN 'Vendor'
+			THEN FirstNotify.strName
+		END strFirstNotify
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strEmail
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strEmail
+		WHEN 'Vendor'
+			THEN FirstNotify.strEmail
+		END strFirstNotifyMail
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strFax
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strFax
+		WHEN 'Vendor'
+			THEN FirstNotify.strFax
+		END strFirstNotifyFax
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN ''
+		WHEN 'Company'
+			THEN ''
+		WHEN 'Vendor'
+			THEN FirstNotify.strMobile
+		END strFirstNotifyMobile
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strPhone
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strPhone
+		WHEN 'Vendor'
+			THEN FirstNotify.strPhone
+		END strFirstNotifyPhone
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strAddress
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strAddress
+		WHEN 'Vendor'
+			THEN FNLocation.strAddress
+		END strFirstNotifyAddress
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strCity
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strCity
+		WHEN 'Vendor'
+			THEN FNLocation.strCity
+		END strFirstNotifyCity
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strCountry
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strCountry
+		WHEN 'Vendor'
+			THEN FNLocation.strCountry
+		END strFirstNotifyCountry
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strState
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strState
+		WHEN 'Vendor'
+			THEN FNLocation.strState
+		END strFirstNotifyState
+	,CASE FLNP.strType
+		WHEN 'Bank'
+			THEN FirstNotifyBank.strZipCode
+		WHEN 'Company'
+			THEN FirstNotifyCompany.strZip
+		WHEN 'Vendor'
+			THEN FNLocation.strZipCode
+		END strFirstNotifyZipCode
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strBankName
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strCompanyName
+		WHEN 'Vendor'
+			THEN SecondNotify.strName
+		END strSecondNotify
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strEmail
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strEmail
+		WHEN 'Vendor'
+			THEN SecondNotify.strEmail
+		END strSecondNotifyMail
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strFax
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strFax
+		WHEN 'Vendor'
+			THEN SecondNotify.strFax
+		END strSecondNotifyFax
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN ''
+		WHEN 'Company'
+			THEN ''
+		WHEN 'Vendor'
+			THEN SecondNotify.strMobile
+		END strSecondNotifyMobile
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strPhone
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strPhone
+		WHEN 'Vendor'
+			THEN SecondNotify.strPhone
+		END strSecondNotifyPhone
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strAddress
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strAddress
+		WHEN 'Vendor'
+			THEN SNLocation.strAddress
+		END strSecondNotifyAddress
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strCity
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strCity
+		WHEN 'Vendor'
+			THEN SNLocation.strCity
+		END strSecondNotifyCity
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strCountry
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strCountry
+		WHEN 'Vendor'
+			THEN SNLocation.strCountry
+		END strSecondNotifyCountry
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strState
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strState
+		WHEN 'Vendor'
+			THEN SNLocation.strState
+		END strSecondNotifyState
+	,CASE SLNP.strType
+		WHEN 'Bank'
+			THEN SecondNotifyBank.strZipCode
+		WHEN 'Company'
+			THEN SecondNotifyCompany.strZip
+		WHEN 'Vendor'
+			THEN SNLocation.strZipCode
+		END strSecondNotifyZipCode
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strBankName
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strCompanyName
+		WHEN 'Vendor'
+			THEN ConsigneeNotify.strName
+		END strConsignee
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strEmail
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strEmail
+		WHEN 'Vendor'
+			THEN ConsigneeNotify.strEmail
+		END strConsigneeMail
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strFax
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strFax
+		WHEN 'Vendor'
+			THEN ConsigneeNotify.strFax
+		END strConsigneeFax
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ''
+		WHEN 'Company'
+			THEN ''
+		WHEN 'Vendor'
+			THEN ConsigneeNotify.strMobile
+		END strConsigneeMobile
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strPhone
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strPhone
+		WHEN 'Vendor'
+			THEN ConsigneeNotify.strPhone
+		END strConsigneePhone
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strAddress
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strAddress
+		WHEN 'Vendor'
+			THEN CNLocation.strAddress
+		END strConsigneeAddress
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strCity
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strCity
+		WHEN 'Vendor'
+			THEN CNLocation.strCity
+		END strConsigneeCity
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strCountry
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strCountry
+		WHEN 'Vendor'
+			THEN CNLocation.strCountry
+		END strConsigneeCountry
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strState
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strState
+		WHEN 'Vendor'
+			THEN CNLocation.strState
+		END strConsigneeState
+	,CASE CLNP.strType
+		WHEN 'Bank'
+			THEN ConsigneeNotifyBank.strZipCode
+		WHEN 'Company'
+			THEN ConsigneeNotifyCompany.strZip
+		WHEN 'Vendor'
+			THEN CNLocation.strZipCode
+		END strConsigneeZipCode
+	,LC.strMarks
+	,L.strMarkingInstructions
+	,L.strComments
+	,L.dblDemurrage
+	,DemCurrency.strCurrency AS strDemurrageCurrency
+	,L.dblDespatch
+	,DesCurrency.strCurrency AS strDespatchCurrency
+	,L.dblLoadingRate
+	,L.dblDischargeRate
+	,LoadUnit.strUnitMeasure AS strLoadingUnit
+	,DisUnit.strUnitMeasure AS strDischargeUnit
+	,L.strLoadingPerUnit
+	,L.strDischargePerUnit
+	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strContactName AS strCompanyContactName 
+	,@strCounty AS strCompanyCounty 
+	,@strCity AS strCompanyCity 
+	,@strState AS strCompanyState 
+	,@strZip AS strCompanyZip 
+	,@strCountry AS strCompanyCountry 
+	,@strPhone AS strCompanyPhone 
+
+FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblLGLoadContainer LC ON L.intLoadId = LC.intLoadId
+LEFT JOIN tblLGLoadNotifyParties LNP ON LNP.intLoadId = L.intLoadId
+LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
+LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
+LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity BLDraft ON BLDraft.intEntityId = L.intBLDraftToBeSentId
+LEFT JOIN tblEMEntity DocPres ON DocPres.intEntityId = L.intDocPresentationId
+LEFT JOIN tblCMBank Bank ON Bank.intBankId = L.intDocPresentationId
+LEFT JOIN tblLGLoadNotifyParties FLNP ON L.intLoadId = FLNP.intLoadId AND FLNP.strNotifyOrConsignee = 'First Notify'
+LEFT JOIN tblLGLoadNotifyParties SLNP ON L.intLoadId = SLNP.intLoadId AND SLNP.strNotifyOrConsignee = 'Second Notify'
+LEFT JOIN tblLGLoadNotifyParties CLNP ON L.intLoadId = CLNP.intLoadId AND CLNP.strNotifyOrConsignee = 'Consignee'
+LEFT JOIN tblEMEntity FirstNotify ON FirstNotify.intEntityId = FLNP.intEntityId
+LEFT JOIN tblCMBank FirstNotifyBank ON FirstNotifyBank.intBankId = FLNP.intBankId
+LEFT JOIN tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = FLNP.intCompanySetupID
+LEFT JOIN tblEMEntityLocation FNLocation ON FNLocation.intEntityLocationId = FLNP.intEntityLocationId
+LEFT JOIN tblEMEntity SecondNotify ON SecondNotify.intEntityId = SLNP.intEntityId
+LEFT JOIN tblCMBank SecondNotifyBank ON SecondNotifyBank.intBankId = SLNP.intBankId
+LEFT JOIN tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SLNP.intCompanySetupID
+LEFT JOIN tblEMEntityLocation SNLocation ON SNLocation.intEntityLocationId = SLNP.intEntityLocationId
+LEFT JOIN tblEMEntity ConsigneeNotify ON ConsigneeNotify.intEntityId = CLNP.intEntityId
+LEFT JOIN tblCMBank ConsigneeNotifyBank ON ConsigneeNotifyBank.intBankId = CLNP.intBankId
+LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
+LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId
+LEFT JOIN tblSMCurrency DemCurrency ON DemCurrency.intCurrencyID = L.intDemurrageCurrencyId
+LEFT JOIN tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = L.intDespatchCurrencyId
+LEFT JOIN tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
+LEFT JOIN tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
+WHERE L.intLoadId = @intLoadId
 END

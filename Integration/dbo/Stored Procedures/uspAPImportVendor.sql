@@ -72,7 +72,14 @@ BEGIN
 		ssvnd_1099_name					=	CAST(A.str1099Name AS VARCHAR(50)),
 		ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
 		ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2)),
-		ssvnd_our_cus_no				=	CAST(B.strVendorAccountNum AS VARCHAR(20))
+		ssvnd_our_cus_no				=	CAST(B.strVendorAccountNum AS VARCHAR(20)),
+		
+		ssvnd_terms_desc				=	H.strTerm,
+		ssvnd_terms_disc_pct			=	H.dblDiscountEP,
+		ssvnd_terms_due_day				=	H.intBalanceDue,
+		ssvnd_terms_disc_day			=	H.intDiscountDay,
+		ssvnd_terms_cutoff_day			=	H.intDayofMonthDue
+		
 		FROM ssvndmst 		
 		INNER JOIN tblAPVendor B
 			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
@@ -88,6 +95,8 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
+		LEFT JOIN tblSMTerm H
+			on C.intTermsId = H.intTermID
 		WHERE ssvndmst.ssvnd_vnd_no =  SUBSTRING(@VendorId, 1, 10)
 	END
 	ELSE
@@ -114,7 +123,12 @@ BEGIN
 		ssvnd_1099_name,
 		ssvnd_gl_pur,
 		ssvnd_tax_st,
-		ssvnd_our_cus_no
+		ssvnd_our_cus_no,
+		ssvnd_terms_desc,				
+		ssvnd_terms_disc_pct,			
+		ssvnd_terms_due_day,			
+		ssvnd_terms_disc_day,			
+		ssvnd_terms_cutoff_day			
 		)
 		SELECT 
 			ssvnd_vnd_no					=	CASE WHEN CHARINDEX(CHAR(10), B.strVendorId) > 0 THEN SUBSTRING(B.strVendorId, 0, CHARINDEX(CHAR(10),B.strVendorId)) ELSE B.strVendorId END,
@@ -141,7 +155,13 @@ BEGIN
 			ssvnd_1099_name					=	CAST(A.str1099Name AS VARCHAR(50)),
 			ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
 			ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2)),
-			ssvnd_our_cus_no				=	CAST(B.strVendorAccountNum AS VARCHAR(20))
+			ssvnd_our_cus_no				=	CAST(B.strVendorAccountNum AS VARCHAR(20)),
+		
+			ssvnd_terms_desc				=	H.strTerm,
+			ssvnd_terms_disc_pct			=	H.dblDiscountEP,
+			ssvnd_terms_due_day				=	H.intBalanceDue,
+			ssvnd_terms_disc_day			=	H.intDiscountDay,
+			ssvnd_terms_cutoff_day			=	H.intDayofMonthDue
 		FROM
 			tblEMEntity A
 		INNER JOIN tblAPVendor B
@@ -156,6 +176,8 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
+		LEFT JOIN tblSMTerm H
+			on C.intTermsId = H.intTermID
 		WHERE B.strVendorId = @VendorId
 
 		--Insert new record to tblAPImportedVendors

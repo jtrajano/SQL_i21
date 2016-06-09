@@ -41,6 +41,11 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		
 SET @dtmLog = GETDATE()
 
+CREATE TABLE #tmpOriginDepositTransaction(strLink NVARCHAR(50))
+
+	INSERT INTO #tmpOriginDepositTransaction
+	SELECT strLink FROM [dbo].[fnGetDepositEntry]()
+
 -- Log the status of the transactions to clear prior to the reconciliation. 
 INSERT INTO [dbo].[tblCMBankReconciliationAudit]
 (
@@ -70,7 +75,8 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)		
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		--AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN (SELECT strLink COLLATE Latin1_General_CI_AS  FROM #tmpOriginDepositTransaction) --This is to improved the query by not using fnIsDespositEntry
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback		
 
 -- Commented due to this jira CM-915 and created a counter part on integration project
@@ -103,7 +109,8 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		--AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN (SELECT strLink COLLATE Latin1_General_CI_AS  FROM #tmpOriginDepositTransaction) --This is to improved the query by not using fnIsDespositEntry
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
 --=====================================================================================================================================

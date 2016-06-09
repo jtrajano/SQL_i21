@@ -43,6 +43,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strEFTCompanyId
 				,i21.strEFTBankName
 				,i21.strMICRDescription
+				,i21.strMICRRoutingNo
+				,i21.strMICRBankAccountNo
 				,i21.intMICRBankAccountSpacesCount
 				,i21.intMICRBankAccountSpacesPosition
 				,i21.intMICRCheckNoSpacesCount
@@ -51,6 +53,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.intMICRCheckNoPosition
 				,i21.strMICRLeftSymbol
 				,i21.strMICRRightSymbol
+				,i21.strFractionalRoutingNumber
+				,i21.strUserDefineMessage
+				,i21.strSignatureLineCaption
+				,i21.ysnShowTwoSignatureLine
+				,i21.dblGreaterThanAmount
 				,i21.intCreatedUserId
 				,i21.dtmCreated
 				,i21.intLastModifiedUserId
@@ -204,6 +211,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId
 					,strEFTBankName
 					,strMICRDescription
+					,strMICRRoutingNo
+					,strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount
@@ -212,6 +221,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition
 					,strMICRLeftSymbol
 					,strMICRRightSymbol
+					,strFractionalRoutingNumber
+					,strUserDefineMessage	
+					,strSignatureLineCaption
+					,ysnShowTwoSignatureLine
+					,dblGreaterThanAmount
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -252,6 +266,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
+					,strMICRRoutingNo					= i.strMICRRoutingNo
+					,strMICRBankAccountNo				= i.strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -260,6 +276,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
+					,strUserDefineMessage				= i.strUserDefineMessage
+					,strSignatureLineCaption			= i.strSignatureLineCaption
+					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+					,dblGreaterThanAmount				= i.dblGreaterThanAmount
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId
@@ -410,6 +431,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
+					,strMICRRoutingNo					= i.strMICRRoutingNo
+					,strMICRBankAccountNo				= i.strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -418,6 +441,11 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
+					,strUserDefineMessage				= i.strUserDefineMessage
+					,strSignatureLineCaption			= i.strSignatureLineCaption
+					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+					,dblGreaterThanAmount				= i.dblGreaterThanAmount
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId

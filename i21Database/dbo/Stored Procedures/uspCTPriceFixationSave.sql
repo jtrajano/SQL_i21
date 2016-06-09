@@ -18,7 +18,7 @@ BEGIN TRY
 			@intUnitMeasureId			INT,
 			@strUnitMeasure				NVARCHAR(50),	
 			@strCommodityDescription	NVARCHAR(MAX),
-			@dblCashPrice				NUMERIC(6,4),
+			@dblCashPrice				NUMERIC(18,6),
 			@intTypeRef					INT,
 			@intNewFutureMonthId		INT,
 			@intNewFutureMarketId		INT,
@@ -334,6 +334,13 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+		END
+
+		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+		
+		IF 	@intPricingTypeId	IN	(1,6)
+		BEGIN	
+			EXEC uspICUpdateInventoryReceiptUnitCost @intContractDetailId,@dblCashPrice
 		END
 
 		IF	@ysnMultiplePriceFixation = 1

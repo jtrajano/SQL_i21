@@ -17,10 +17,10 @@ SELECT
 	isnull(b.strFederalTaxId,'') strFederalTaxId,
 	isnull(d.strEmail,'') strEmail,
 	isnull(d.strPhone2,'') strPhone2,
-	isnull(d.strMobile,'') strMobile,
+	isnull(mob.strPhone,'') strMobile,
 	isnull(d.strTimezone,'') strTimezone,
 	isnull(b.strWebsite,'') strWebsite,
-	isnull(d.strPhone,'') strPhone,
+	isnull(phone.strPhone,'') strPhone,
 	isnull(d.strName,'') strContactName,
 	isnull(b.strEntityNo,'') strEntityNo,
 	isnull(e.strAddress,'') strAddress,
@@ -48,4 +48,8 @@ SELECT
 	left join tblSMTaxCode h
 		on h.intTaxCodeId = a.intTaxCodeId
 	left join tblSMPaymentMethod i
-		on i.intPaymentMethodID = a.intPaymentMethodId
+		on i.intPaymentMethodID = a.intPaymentMethodId	
+	LEFT JOIN tblEMEntityPhoneNumber phone
+		ON phone.intEntityId = d.intEntityId	
+	LEFT JOIN tblEMEntityMobileNumber mob
+		ON mob.intEntityId = d.intEntityId

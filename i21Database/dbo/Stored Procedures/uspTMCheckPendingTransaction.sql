@@ -8,7 +8,11 @@ BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMCOBOLWRITE WHERE CONVERT(INT, InvoiceDate) <= CONVERT(INT,@strDate))
 		BEGIN
 			SET @hasPending = 1
-		END 
+		END
+		ELSE
+		BEGIN
+			SET @hasPending = 0
+		END
 	END
 	ELSE
 	BEGIN
@@ -22,6 +26,10 @@ BEGIN
 		BEGIN
 			SET @hasPending = 1
 		END 
+		ELSE
+		BEGIN
+			SET @hasPending = 0
+		END
 	END
 END
 GO

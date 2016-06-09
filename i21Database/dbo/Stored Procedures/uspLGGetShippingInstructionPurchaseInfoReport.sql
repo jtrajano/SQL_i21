@@ -40,18 +40,18 @@ BEGIN
 	--FROM	@temp_xml_table   
 	--WHERE	[fieldname] = 'intReferenceNumber' 
 
-SELECT 
-	SICQ.intShippingInstructionId,
-	SICQ.intContractDetailId,
-	CT.strContractNumber,
-	CT.intContractSeq,
-	SICQ.dblQuantity,
-	UOM.strUnitMeasure,
-	CT.strItemDescription
-
-FROM	tblLGShippingInstructionContractQty SICQ
-JOIN	tblLGShippingInstruction SI ON SI.intShippingInstructionId = SICQ.intShippingInstructionId
-JOIN	vyuCTContractDetailView CT ON CT.intContractDetailId = SICQ.intContractDetailId
-JOIN	tblICUnitMeasure UOM ON UOM.intUnitMeasureId = SICQ.intUnitMeasureId
-WHERE 	SI.intReferenceNumber = @xmlParam and SICQ.intPurchaseSale = 1
+SELECT L.intLoadId,
+	   LD.intPContractDetailId AS intContractDetailId,
+	   CT.strContractNumber,
+	   CT.intContractSeq,
+	   LD.dblQuantity,
+	   UM.strUnitMeasure,
+	   CT.strItemDescription,
+	   CT.strCustomerContract AS strPCustomerContract
+FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intPContractDetailId
+WHERE L.intLoadId = @xmlParam and L.intPurchaseSale IN (1,3)
 END

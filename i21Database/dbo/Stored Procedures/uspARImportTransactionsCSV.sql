@@ -279,7 +279,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[ysnSplitted]
 							,[intPaymentId]
 							,[intSplitId]
-							,[intDistributionHeaderId]
+							,[intLoadDistributionHeaderId]
 							,[strActualCostId]
 							,[intShipmentId]
 							,[intTransactionId]
@@ -354,7 +354,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[ysnSplitted]				= 0
 							,[intPaymentId]				= NULL
 							,[intSplitId]				= NULL
-							,[intDistributionHeaderId]	= NULL
+							,[intLoadDistributionHeaderId]	= NULL
 							,[strActualCostId]			= NULL
 							,[intShipmentId]			= NULL
 							,[intTransactionId]			= NULL

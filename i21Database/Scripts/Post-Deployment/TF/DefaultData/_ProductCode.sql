@@ -1,11 +1,14 @@
 ﻿GO
 PRINT 'START TF tblTFProductCode'
 GO
+
 DECLARE @intTaxAuthorityId INT
+
+DELETE from tblICItemMotorFuelTax
+DELETE from tblTFProductCode
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'
 IF (@intTaxAuthorityId IS NOT NULL)
-
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
 	BEGIN
@@ -67,6 +70,8 @@ BEGIN
 		,(@intTaxAuthorityId, N'093', N'Undefined products - SFT', N'', NULL)
 		,(@intTaxAuthorityId, N'E00', N'Ethanol (100%) Blended', N'Alcohol', NULL)
 		,(@intTaxAuthorityId, N'E11', N'Ethanol (11%) Blended', N'Alcohol', NULL)
+
+	
 	END
 END
 
@@ -138,6 +143,78 @@ BEGIN
 	END
 END
 
+SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IL'
+IF (@intTaxAuthorityId IS NOT NULL)
+
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
+	BEGIN
+		INSERT INTO [tblTFProductCode]
+		(
+			[intTaxAuthorityId],[strProductCode],[strDescription],[strProductCodeGroup],[strNote]
+		)
+		VALUES
+		 (@intTaxAuthorityId,'065','Gasoline','Gasoline Products', NULL)
+		,(@intTaxAuthorityId,'124','Gasohol','Gasoline Products', NULL)
+		,(@intTaxAuthorityId,'123','Alcohol','Gasoline Products', NULL)
+		,(@intTaxAuthorityId,'E00','Ethanol (100%)','Gasoline Products', NULL)
+		,(@intTaxAuthorityId,'E11','Ethanol (11%)','Gasoline Products', NULL)
+		,(@intTaxAuthorityId,'091','Cooking oil/fat (waste oil, etc)','Special Fuel Products -- Undyed', NULL)
+		,(@intTaxAuthorityId,'142','Kerosene - Undyed','Special Fuel Products -- Undyed', NULL)
+		,(@intTaxAuthorityId,'160','Diesel Fuel - Undyed','Special Fuel Products -- Undyed', NULL)
+		,(@intTaxAuthorityId,'285','Soy Oil','Special Fuel Products -- Undyed', NULL)
+		,(@intTaxAuthorityId,'B00','Biodiesel - Undyed (100%)','Special Fuel Products -- Undyed', NULL)
+		,(@intTaxAuthorityId,'B11','Biodiesel - Undyed (11%)','Special Fuel Products -- Undyed', NULL)
+		,(@intTaxAuthorityId,'072','Kerosene - Dyned','Special Fuel Products -- Dyed', NULL)
+		,(@intTaxAuthorityId,'228','Diesel Fuel - Dyed','Special Fuel Products -- Dyed', NULL)
+		,(@intTaxAuthorityId,'D00','Biodiesel - Dyed (100%)','Special Fuel Products -- Dyed', NULL)
+		,(@intTaxAuthorityId,'D11','Biodiesel - Dyed (11%)','Special Fuel Products -- Dyed', NULL)
+		,(@intTaxAuthorityId,'073','Dyed 1-K Reporting Only','Aviation and Other Fuel Products', NULL)
+		,(@intTaxAuthorityId,'125','Aviation Gasoline (AvGas)','Aviation and Other Fuel Products', NULL)
+		,(@intTaxAuthorityId,'130','Jet Fuel','Aviation and Other Fuel Products', NULL)
+		,(@intTaxAuthorityId,'145','Undyed 1-K Reporting Only','Aviation and Other Fuel Products', NULL)
+		,(@intTaxAuthorityId,'054','Propane (LP)','Alternative Fuels Products - For On Road Use', NULL)
+		,(@intTaxAuthorityId,'224','Compressed Natural Gas (CNG)','Alternative Fuels Products - For On Road Use', NULL)
+		,(@intTaxAuthorityId,'225','Liquid Natural Gas (LNG)','Alternative Fuels Products - For On Road Use', NULL)
+		,(@intTaxAuthorityId,'998','Motor Fuel Product - (gaseous state)','Other - Use When Your Product Is Not Listed', NULL)
+		,(@intTaxAuthorityId,'999','Motor Fuel Product - (liquid state)','Other - Use When Your Product Is Not Listed', NULL)
+	END
+END
+
+
+SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MS'
+IF (@intTaxAuthorityId IS NOT NULL)
+
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
+	BEGIN
+		INSERT INTO [tblTFProductCode]
+		(
+			[intTaxAuthorityId],[strProductCode],[strDescription],[strProductCodeGroup],[strNote]
+		)
+		VALUES
+		(@intTaxAuthorityId,'065','Automotive Gasoline','Automotive Gasoline', NULL)
+		,(@intTaxAuthorityId,'124','Gasohol','Automotive Gasoline', NULL)
+		,(@intTaxAuthorityId,'123','Alcohol','Automotive Gasoline', NULL)
+		,(@intTaxAuthorityId,'090','Additives','Automotive Gasoline', NULL)
+		,(@intTaxAuthorityId,'125','Aviation Gasoline','Aviation Gasoline', NULL)
+		,(@intTaxAuthorityId,'228','Dyed Diesel Fuel','Dyed Diesel & Kerosene', NULL)
+		,(@intTaxAuthorityId,'072','Dyed Kerosene','Dyed Diesel & Kerosene', NULL)
+		,(@intTaxAuthorityId,'142','Undyed Kerosene','Dyed Diesel & Kerosene', NULL)
+		,(@intTaxAuthorityId,'290','Dyed Biodiesel Fuel','Dyed Diesel & Kerosene', NULL)
+		,(@intTaxAuthorityId,'153','Dye Added Fuel Oil','Fuel Oil & Other Special Fuels', NULL)
+		,(@intTaxAuthorityId,'154','Undyed Fuel Oil','Fuel Oil & Other Special Fuels', NULL)
+		,(@intTaxAuthorityId,'160','Undyed Diesel Fuel','Clear Diesel', NULL)
+		,(@intTaxAuthorityId,'284','Undyed Biodiesel Fuel','Clear Diesel', NULL)
+		,(@intTaxAuthorityId,'122','Blend Stock','Clear Diesel', NULL)
+		,(@intTaxAuthorityId,'130','Jet Fuel','Jet Fuel', NULL)
+
+	END
+END
+
 GO
 PRINT 'END TF tblTFProductCode'
 GO
+
+
+

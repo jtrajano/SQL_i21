@@ -6,24 +6,24 @@ SELECT
 	ShipmentItem.intOrderId,
 	strOrderNumber = 
 		(
-			CASE WHEN Shipment.intOrderType = 1
+			CASE WHEN Shipment.intOrderType = 1 -- Sales Contract
 				THEN ContractView.strContractNumber
-			WHEN Shipment.intOrderType = 2
+			WHEN Shipment.intOrderType = 2 -- Sales Order
 				THEN SODetail.strSalesOrderNumber
-			WHEN Shipment.intOrderType = 3
+			WHEN Shipment.intOrderType = 3 -- Transfer Order
 				THEN NULL
 			ELSE NULL
 			END
 		),
 	strSourceNumber =
-		CAST (
-			CASE WHEN Shipment.intSourceType = 1 -- Scale
+		CASE WHEN Shipment.intSourceType = 1 -- Scale
 				THEN ScaleView.strTicketNumber
 			WHEN Shipment.intSourceType = 2 -- Inbound Shipment
-				THEN LogisticView.intTrackingNumber
+				THEN CONVERT(NVARCHAR(100), LogisticView.intTrackingNumber)
+			WHEN Shipment.intSourceType = 3 -- Pick Lot
+				THEN CONVERT(NVARCHAR(100), PickLot.intReferenceNumber)
 			ELSE NULL
-			END
-		AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS,
+			END,
 	strOrderUOM = 
 		(
 			CASE WHEN Shipment.intOrderType = 1
@@ -124,9 +124,10 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
 			AND Shipment.intOrderType = 2
 		LEFT JOIN vyuCTContractDetailView ContractView
-			ON ContractView.intContractDetailId = ShipmentItem.intLineNo
+			-- ON ContractView.intContractDetailId = ShipmentItem.intLineNo
+			ON ContractView.intContractHeaderId = ShipmentItem.intOrderId
 			AND Shipment.intOrderType = 1
-			AND Shipment.intSourceType IN (0, 1) 
+			-- AND Shipment.intSourceType IN (0, 1) 
 		LEFT JOIN vyuTRTransportReceipt TransportView
 			ON TransportView.intTransportReceiptId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 3
@@ -136,3 +137,6 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 		LEFT JOIN tblLGShipment LogisticView
 			ON LogisticView.intShipmentId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 2
+		LEFT JOIN tblLGPickLotHeader PickLot
+			ON PickLot.intPickLotHeaderId = ShipmentItem.intSourceId
+			 AND Shipment.intSourceType = 3

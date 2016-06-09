@@ -10,6 +10,7 @@
 	[dtmPayDate] [datetime] NULL,
 	[dblHolidayHours] [numeric](18, 6) NULL,
 	[ysnStandardHours] [bit] NOT NULL DEFAULT ((1)),
+	[ysnExcludeDeductions] [bit] NOT NULL DEFAULT ((0)),
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRPayGroup] PRIMARY KEY ([intPayGroupId]), 
@@ -126,3 +127,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPayGroup',
     @level2type = N'COLUMN',
     @level2name = N'ysnStandardHours'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Exclude Deductions',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPayGroup',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnExcludeDeductions'

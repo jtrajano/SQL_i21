@@ -145,6 +145,7 @@ BEGIN
 			,@strLotNumber					= NULL 
 			,@dblAdjustByQuantity			= NULL
 			,@dblNewUnitCost				= NULL
+			,@intItemUOMId					= NULL 
 			,@intSourceId					= NULL 
 			,@intSourceTransactionTypeId	= NULL 
 			,@intEntityUserSecurityId		= NULL

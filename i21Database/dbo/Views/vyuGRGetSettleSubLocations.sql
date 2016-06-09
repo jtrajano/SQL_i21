@@ -4,7 +4,8 @@ SELECT Distinct
   Cs.intCompanyLocationSubLocationId
  ,Cs.intItemId
 ,Sub.strSubLocationName
-,ST.ysnCustomerStorage  
+,ST.ysnCustomerStorage
+,Sub.intCompanyLocationId
 FROM tblGRCustomerStorage Cs
 JOIN tblSMCompanyLocationSubLocation Sub ON Sub.intCompanyLocationSubLocationId=Cs.intCompanyLocationSubLocationId
 JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=Cs.intStorageTypeId 

@@ -33,9 +33,11 @@ Declare @dblWeightPerUnit numeric(38,20)
 Declare @dblMoveQty numeric(38,20)
 Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
+DECLARE @strInActiveLots NVARCHAR(MAX) 
 Declare @strBulkItemXml nvarchar(max)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
+		,@intQtyItemUOMId int
  
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFManufacturingProcess Where intAttributeTypeId=2
 
@@ -107,6 +109,18 @@ Select @intPickListId=intPickListId,@intBlendItemId=intItemId From tblMFWorkOrde
 
 If (Select COUNT(1) From tblMFWorkOrder Where intPickListId=@intPickListId)=1
 Begin Try
+
+	--Only Active lots are allowed to transfer
+	SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
+	FROM tblMFPickListDetail tpl Join tblICLot l on tpl.intStageLotId=l.intLotId 
+	Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId Where tpl.intPickListId=@intPickListId AND ls.strPrimaryStatus<>'Active'
+
+	If ISNULL(@strInActiveLots,'')<>''
+	Begin
+		Set @ErrMsg='Lots ' + @strInActiveLots + ' are not active. Unable to perform transfer operation.'
+		RaisError(@ErrMsg,16,1)
+	End
+
 	Begin Tran
 
 	If @ysnBlendSheetRequired=0
@@ -129,7 +143,7 @@ Begin Try
 	--Get the child Lots attached to Pick List
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId)
-	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
+	Select l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
 	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId
@@ -138,8 +152,9 @@ Begin Try
 
 	While(@intMinChildLot is not null) --Loop Child Lot.
 	Begin
-		Select @dblPickQuantity=NULL,@intPickUOMId=NULL
+		Select @dblPickQuantity=NULL,@intPickUOMId=NULL,@intQtyItemUOMId=NULL
 		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId
+				,@intQtyItemUOMId=intItemUOMId
 		From @tblChildLot Where intRowNo=@intMinChildLot
 
 		Set @intNewLotId=NULL
@@ -147,6 +162,12 @@ Begin Try
 		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intBlendStagingLocationId --And dblQty > 0
 
 		Set @dblMoveQty=@dblReqQty/@dblWeightPerUnit
+
+		IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+		BEGIN
+			SELECT @dblPickQuantity=@dblReqQty
+			SELECT @intPickUOMId=@intQtyItemUOMId
+		END
 
 		If ISNULL(@intNewLotId,0) = 0 --Move
 			Begin
@@ -260,7 +281,7 @@ Begin
 	--Get the parent Lots for the workorder
 	Delete From @tblParentLot
 	Insert Into @tblParentLot(intWorkOrderId,intParentLotId,dblReqQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select DISTINCT wi.intWorkOrderId,wi.intParentLotId,wi.dblQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
+	Select wi.intWorkOrderId,wi.intParentLotId,wi.dblQuantity,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
 	From tblMFWorkOrderInputParentLot wi 
 	Join tblMFPickListDetail pld on wi.intParentLotId=pld.intParentLotId
 	Where wi.intWorkOrderId=@intWorkOrderId And pld.intPickListId=@intPickListId
@@ -278,7 +299,7 @@ Begin
 	--Get the child Lots for the Parent Lot
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit)
-	Select DISTINCT l.intLotId,l.strLotNumber,l.intItemId,l.dblWeight,@intItemUOMId,@intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
+	Select l.intLotId,l.strLotNumber,l.intItemId,l.dblWeight,@intItemUOMId,@intItemIssuedUOMId,--pld.intItemUOMId,pld.intItemIssuedUOMId,
 	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId AND pld.intParentLotId=@intParentLotId AND l.intStorageLocationId=@intKitStagingLocationId AND l.dblWeight>0

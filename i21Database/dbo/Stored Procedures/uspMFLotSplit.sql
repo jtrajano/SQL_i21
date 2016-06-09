@@ -42,7 +42,9 @@ BEGIN TRY
 	DECLARE @dblWeight NUMERIC(38,20)
 	DECLARE @dblLotQty NUMERIC(38,20)
 	DECLARE @dblLotAvailableQty NUMERIC(38,20)
-
+			,@dblOldDestinationWeight NUMERIC(38,20)
+			,@dblOldSourceWeight NUMERIC(38,20)
+	
 	SELECT @intNewLocationId = intCompanyLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
 	
 	SELECT @intItemId = intItemId, 
@@ -55,7 +57,8 @@ BEGIN TRY
 		   @intItemUOMId = intItemUOMId,	 
 		   @dblWeightPerQty = dblWeightPerQty,
 		   @intWeightUOMId = intWeightUOMId,
-		   @dblWeight = dblWeight
+		   @dblWeight = dblWeight,
+		   @dblOldSourceWeight=Case When intWeightUOMId is null Then dblQty Else dblWeight End
 	FROM tblICLot WHERE intLotId = @intLotId
 
 	SELECT @dblLotAvailableQty = (CASE 
@@ -70,7 +73,7 @@ BEGIN TRY
 		   @intSourceId = 1,
 		   @intSourceTransactionTypeId= 8
 	
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId,ISNULL(@intWeightUOMId,@intItemUOMId),ISNULL(dblQty,0))) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 	
 	IF (@dblLotAvailableQty + (CASE WHEN @intItemUOMId=@intSplitItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblAdjustByQuantity*@dblWeightPerQty ELSE @dblAdjustByQuantity END)) < @dblLotReservedQty
 	BEGIN
@@ -94,30 +97,21 @@ BEGIN TRY
 	BEGIN 
 		IF (@strLotTracking = 'Yes - Serial Number')
 		BEGIN
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-						,@intItemId = @intItemId
-						,@intManufacturingId = NULL
-						,@intSubLocationId = @intSubLocationId
-						,@intLocationId = @intLocationId
-						,@intOrderTypeId = NULL
-						,@intBlendRequirementId = NULL
-						,@intPatternCode = 24
-						,@ysnProposed = 0
-						,@strPatternString = @strNewLotNumber OUTPUT
+			SET @strNewLotNumber = 'Split Lot Serial Number'
 		END
 		ELSE 
 		BEGIN
 			RAISERROR('Lot tracking for the item is set as manual. Please supply the split lot number.',11,1)
 		END
 	END
-
+	
 	IF EXISTS (SELECT 1 FROM tblWHSKU WHERE intLotId = @intLotId)
 	BEGIN
 		RAISERROR(90008,11,1)
 	END
 
 	BEGIN TRANSACTION
-
+									 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId	= @intItemId,
 													 @dtmDate =	@dtmDate,
 													 @intLocationId	= @intLocationId,
@@ -148,21 +142,21 @@ BEGIN TRY
 		EXEC dbo.uspMFLotAdjustQty
 			@intLotId = @intLotId,       
 			@dblNewLotQty = @dblLotQty,
+			@intAdjustItemUOMId=@intItemUOMId,
 			@intUserId = @intUserId ,
 			@strReasonCode = 'Weight qty same',
 			@strNotes = 'Weight qty same'
 	END
 
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.00001 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.00001 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-
 		EXEC dbo.uspMFLotAdjustQty
 		 @intLotId =@intLotId,       
 		 @dblNewLotQty =0,
+		 @intAdjustItemUOMId=@intItemUOMId,
 		 @intUserId=@intUserId ,
 		 @strReasonCode ='Residue qty clean up',
 		 @strNotes ='Residue qty clean up'
-
 	END
 COMMIT TRANSACTION													 
 END TRY  

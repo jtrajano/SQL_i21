@@ -13,6 +13,8 @@
 	[strCity] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strState] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strZipCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[dblLatitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
+    [dblLongitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSMCompanyLocationSubLocation] PRIMARY KEY ([intCompanyLocationSubLocationId]), 
     CONSTRAINT [FK_tblSMCompanyLocationSubLocation_tblSMCompanyLocation] FOREIGN KEY (intCompanyLocationId) REFERENCES tblSMCompanyLocation(intCompanyLocationId) ON DELETE CASCADE 

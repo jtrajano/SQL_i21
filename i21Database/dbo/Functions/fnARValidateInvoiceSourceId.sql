@@ -46,8 +46,16 @@ BEGIN
 		RETURN 11		
 		
 	IF @SourceTransaction = 'Meter Billing'
-		RETURN 12			
+		RETURN 12	
+		
+	IF @SourceTransaction = 'Load/Shipment Schedules'
+		RETURN 13		
 
+	IF @SourceTransaction = 'Credit Card Reconciliation'
+		RETURN 14
+
+	IF @SourceTransaction = 'Sales Contract'
+		RETURN 15
 
 	RETURN @SourceIdOut
 END

@@ -15,6 +15,8 @@ SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.dblDeliveredGross
 		,LoadDetail.dblDeliveredTare
 		,LoadDetail.dblDeliveredNet
+		,PCLSL.strSubLocationName AS strPSubLocationName
+		,SCLSL.strSubLocationName AS strSSubLocationName
 		,strWeightItemUOM = WeightUOM.strUnitMeasure
 		,LoadDetail.intVendorEntityId
 		,dblItemUOMCF = ItemUOM.dblUnitQty
@@ -194,13 +196,24 @@ SELECT LoadDetail.intLoadDetailId
 		,Load.dtmDispatchMailSent
 		,Load.dtmCancelDispatchMailSent
 		,Load.intCompanyLocationId
+		,Load.intTransUsedBy
+		,strTransUsedBy = CASE 
+			WHEN Load.intTransUsedBy = 1 
+				THEN 'None'
+			WHEN Load.intTransUsedBy = 2
+				THEN 'Scale Ticket'
+			WHEN Load.intTransUsedBy = 3
+				THEN 'Transport Load'
+			END
+		,Load.intSourceType
+		,Load.ysnPosted
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
-LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
 LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
 LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
@@ -219,3 +232,5 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentType
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
 LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PDetail.intWeightId
 LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SDetail.intWeightId
+LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId

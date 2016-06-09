@@ -13,6 +13,7 @@ SELECT dtmDate				= ISNULL(SO.dtmProcessDate, SO.dtmDate)
 FROM tblSOSalesOrder SO
 INNER JOIN tblARCustomer C ON SO.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
+WHERE SO.ysnRecurring = 0
 	
 UNION	
 
@@ -30,7 +31,8 @@ FROM tblARInvoice I
 INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId 
 INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId
 WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0))
-	
+AND I.ysnRecurring = 0
+
 UNION	
 	
 SELECT dtmDate				= P.dtmDatePaid

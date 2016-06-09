@@ -169,6 +169,7 @@ BEGIN
 			,@intNewItemUOMId				= NULL 
 			,@intNewWeightUOMId				= NULL 
 			,@dblNewUnitCost				= NULL 
+			,@intItemUOMId					= @ManualGrains_25KgBagUOM
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId					= 1  
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 

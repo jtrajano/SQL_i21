@@ -78,14 +78,14 @@ If @ysnEnableParentLot=0
 	Insert into @tblReservedQty
 	Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 
 	From tblICStockReservation sr 
-	where sr.intItemId=@intItemId
+	where sr.intItemId=@intItemId AND ISNULL(sr.ysnPosted,0)=0
 	group by sr.intLotId
 
 If @ysnEnableParentLot=1
 	Insert into @tblReservedQty
 	Select sr.intParentLotId,Sum(sr.dblQty) AS dblReservedQty 
 	From tblICStockReservation sr 
-	where sr.intItemId=@intItemId
+	where sr.intItemId=@intItemId AND ISNULL(sr.ysnPosted,0)=0
 	group by sr.intParentLotId
 
 --intPhysicalItemUOMId is 

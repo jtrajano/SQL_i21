@@ -8,12 +8,11 @@
 		intEntityId = us.[intEntityUserSecurityId],
 		ysnDisabled = us.ysnDisabled
 	from
-		tblSMUserSecurity us, vyuEMEntityContact en, [tblEMEntityCredential] ec
+		tblSMUserSecurity us
+		inner join vyuEMEntityContact en on en.intEntityId = us.[intEntityUserSecurityId] and en.ysnDefaultContact = 1
+		inner join [tblEMEntityCredential] ec on ec.intEntityId = us.[intEntityUserSecurityId]
 	where
 		us.[intEntityUserSecurityId] is not null
-		and en.intEntityId = us.[intEntityUserSecurityId]
-		and ec.intEntityId = us.[intEntityUserSecurityId]
-		and en.ysnDefaultContact = 1
 
 	union all
 
@@ -31,19 +30,3 @@
 		and etc.intEntityId = us.intEntitySalespersonId
 		and en.intEntityId = etc.intEntityContactId
 		and ec.intEntityId = etc.intEntityContactId
-/*
-	select
-		strName = ec.strUserName,
-		intId = us.[intEntityUserSecurityId],
-		strFullName = en.strName,
-		strEmail = en.strEmail,
-		intEntityId = us.[intEntityUserSecurityId],
-		ysnDisabled = us.ysnDisabled
-	from
-		tblSMUserSecurity us, vyuEMEntityContact en, tblEMEntityCredential ec
-	where
-		us.[intEntityUserSecurityId] is not null
-		and en.intEntityId = us.[intEntityUserSecurityId]
-		and ec.intEntityId = us.[intEntityUserSecurityId]
-		and en.ysnDefaultContact = 1
-*/

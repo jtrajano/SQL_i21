@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblGLCOAImportLogDetail] (
     [intImportLogDetailId] INT            IDENTITY (1, 1) NOT NULL,
     [intImportLogId]       INT            NULL,
-    [strEventDescription]  NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
+    [strEventDescription]  NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strPeriod]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strSourceNumber]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strSourceSystem]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,

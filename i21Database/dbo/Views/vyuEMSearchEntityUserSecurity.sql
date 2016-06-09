@@ -5,7 +5,7 @@ SELECT
         a.intEntityId,   
         a.strEntityNo, 
         a.strName,  
-        g.strPhone,  
+        phone.strPhone,  
         e.strAddress,  
         e.strCity,  
         e.strState,  
@@ -28,3 +28,5 @@ SELECT
             on f.intEntityContactId = g.intEntityId  
 		left join tblSMUserRole h
 			on h.intUserRoleID = c.intUserRoleID
+		LEFT JOIN tblEMEntityPhoneNumber phone
+			ON phone.intEntityId = g.intEntityId

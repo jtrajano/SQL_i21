@@ -81,8 +81,7 @@ Begin
 			Insert Into tblMFRecipeItem(intRecipeId,intItemId,dblQuantity,dblCalculatedQuantity,intItemUOMId,intRecipeItemTypeId,strItemGroupName,
 			dblUpperTolerance,dblLowerTolerance,dblCalculatedUpperTolerance,dblCalculatedLowerTolerance,dblShrinkage,ysnScaled,
 			intConsumptionMethodId,intStorageLocationId,dtmValidFrom,dtmValidTo,ysnYearValidationRequired,ysnMinorIngredient,
-			intReferenceRecipeId,ysnOutputItemMandatory,dblScrap,ysnConsumptionRequired,dblLaborCostPerUnit,intLaborCostCurrencyId,
-			dblOverheadCostPerUnit,intOverheadCostCurrencyId,dblPercentage,intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
+			intReferenceRecipeId,ysnOutputItemMandatory,dblScrap,ysnConsumptionRequired,dblCostAllocationPercentage,intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
 			Select @intRecipeId,@intItemId,(ri.dblQuantity * (@dblPercent/100)) AS dblQuantity,
 			dbo.fnMFCalculateRecipeItemQuantity(@intRecipeTypeId,(ri.dblQuantity * (@dblPercent/100)),ri.dblShrinkage) AS dblCalculatedQuantity,
 			@intItemUOMId,1,ri.strItemGroupName,
@@ -90,8 +89,7 @@ Begin
 			dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId,(ri.dblQuantity * (@dblPercent/100)),ri.dblShrinkage,ri.dblUpperTolerance) AS dblCalculatedUpperTolerance,
 			dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId,(ri.dblQuantity * (@dblPercent/100)),ri.dblShrinkage,ri.dblLowerTolerance) AS dblCalculatedLowerTolerance,
 			ri.dblShrinkage,ri.ysnScaled,ri.intConsumptionMethodId,ri.intStorageLocationId,@dtmValidFrom,@dtmValidTo,@ysnYearValidationRequired,ri.ysnMinorIngredient,
-			null intReferenceRecipeId,ri.ysnOutputItemMandatory,ri.dblScrap,ri.ysnConsumptionRequired,ri.dblLaborCostPerUnit,ri.intLaborCostCurrencyId,
-			ri.dblOverheadCostPerUnit,ri.intOverheadCostCurrencyId,ri.dblPercentage,@intUserId,@dtmDate,@intUserId,@dtmDate
+			null intReferenceRecipeId,ri.ysnOutputItemMandatory,ri.dblScrap,ri.ysnConsumptionRequired,ri.dblCostAllocationPercentage,@intUserId,@dtmDate,@intUserId,@dtmDate
 			From tblMFRecipeItem ri 
 			Where ri.intRecipeItemId=@intInputRecipeItemId
 	

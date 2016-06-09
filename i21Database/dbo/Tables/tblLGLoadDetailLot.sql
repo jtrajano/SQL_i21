@@ -4,7 +4,6 @@
 	[intLoadDetailId] INT NOT NULL,
 	[intLotId] INT NULL,
 	[dblLotQuantity] NUMERIC(38, 20) NULL,
-	[dblAvailableQuantity] NUMERIC(38, 20) NULL,
 	[intItemUOMId] INT,
 	[dblGross] NUMERIC(38, 20) NULL,
 	[dblTare] NUMERIC(38, 20) NULL,

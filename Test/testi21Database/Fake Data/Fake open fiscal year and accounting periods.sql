@@ -111,14 +111,22 @@ BEGIN
 				intFiscalYearId 
 				,dtmStartDate
 				,dtmEndDate
-				,ysnOpen
+				,ysnOpen				
+				,ysnAPOpen 
+				,ysnAROpen 
 				,ysnINVOpen 
+				,ysnCMOpen 
+				,ysnPROpen
 				,intConcurrencyId
 		)
 		SELECT 	intFiscalYearId = @FYTODAY
 				,dtmStartDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) 
 				,dtmEndDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) 
 				,ysnOpen = 1
+				,ysnAPOpen = 1
+				,ysnAROpen = 1
 				,ysnINVOpen = 1
+				,ysnCMOpen = 1
+				,ysnPROpen= 1
 				,intConcurrencyId = 1 
 END

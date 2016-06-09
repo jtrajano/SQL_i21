@@ -12,7 +12,8 @@
     --CONSTRAINT [FK_tblEMEntityToContact_tblEMEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEMEntityContact] ([intEntityId]) ON DELETE CASCADE
 	CONSTRAINT [FK_tblEMEntityToContact_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,    
     CONSTRAINT [FK_tblEMEntityToContact_tblEMEntityContact] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT [FK_tblEMEntityToContact_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
+    CONSTRAINT [FK_tblEMEntityToContact_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
+    CONSTRAINT [FK_tblEMEntityToContact_tblSMUserRole] FOREIGN KEY ([intEntityRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID])
 );
 
 

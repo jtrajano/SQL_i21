@@ -21,7 +21,7 @@ SELECT TOP 100 PERCENT
 ,ISNULL(Sub.strSubLocationName,'') strSubLocationName 
  ,a.dtmDeliveryDate  
  ,ISNULL(a.strDPARecieptNumber,'')strDPARecieptNumber  
- ,a.dblOpenBalance
+ ,dbo.fnCTConvertQuantityToTargetItemUOM(a.intItemId,a.intUnitMeasureId,CU.intUnitMeasureId,a.dblOpenBalance)  dblOpenBalance
 ,b.ysnDPOwnedType
 ,SH.intContractHeaderId
 ,CD.strContractNumber   
@@ -33,6 +33,7 @@ JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageScheduleId
 JOIN tblICItem Item ON Item.intItemId = a.intItemId
+JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=a.intCommodityId AND CU.ysnStockUnit=1
 LEFT JOIN tblSMCompanyLocationSubLocation Sub ON Sub.intCompanyLocationSubLocationId=a.intCompanyLocationSubLocationId
 LEFT JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId=a.intCustomerStorageId
 LEFT JOIN tblGRStorageHistory SH1 ON SH1.intCustomerStorageId=a.intCustomerStorageId AND SH1.strType='From Scale'

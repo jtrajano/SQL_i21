@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetContractQuality]
-	@strStart NVARCHAR(10) = '0'
+     @strStart NVARCHAR(10) = '0'
 	,@strLimit NVARCHAR(10) = '1'
 	,@strFilterCriteria NVARCHAR(MAX) = ''
 	,@strSortField NVARCHAR(MAX) = 'intSampleId'
@@ -49,18 +49,26 @@ BEGIN TRY
 	SET @SQL = 'SELECT TOP ' + @strLimit + '   
   strContractNumber  
   ,strName  
+  ,strContractItemName
   ,strBundleItemNo
   ,strItemNo  
   ,strDescription  
+  ,strLoadNumber
   ,strContainerNumber  
+  ,strMarks
+  ,strShipperCode
+  ,strShipperName
+  ,strSubLocationName
   ,strSampleNumber  
   ,strSampleTypeName  
   ,strStatus  
   ,intSampleId  
+  ,dtmSampleReceivedDate
+  ,dtmSamplingEndDate
   ,' + @str + 
 		'FROM (  
   SELECT DENSE_RANK() OVER (ORDER BY S.intSampleId DESC) intRankNo  
-   ,CH.strContractNumber  
+   ,CH.strContractNumber + '' - '' + LTRIM(CD.intContractSeq) AS strContractNumber
    ,E.strName  
    ,I1.strItemNo AS strBundleItemNo
    ,I.strItemNo  
@@ -72,6 +80,14 @@ BEGIN TRY
    ,P.strPropertyName + '' - '' + T.strTestName AS strPropertyName  
    ,TR.strPropertyValue  
    ,S.intSampleId  
+   ,IC.strContractItemName
+   ,S.strMarks
+   ,(SELECT strShipperCode from dbo.fnQMGetShipperName(S.strMarks)) AS strShipperCode
+   ,(SELECT strShipperName from dbo.fnQMGetShipperName(S.strMarks)) AS strShipperName
+   ,CS.strSubLocationName
+   ,L.strLoadNumber
+   ,S.dtmSampleReceivedDate
+   ,S.dtmSamplingEndDate
   FROM dbo.tblCTContractHeader AS CH  
   JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
   JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
@@ -84,13 +100,15 @@ BEGIN TRY
   JOIN dbo.tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
   JOIN dbo.tblQMTest AS T ON TR.intTestId = T.intTestId  
   LEFT JOIN dbo.tblLGLoadContainer AS C ON C.intLoadContainerId = S.intLoadContainerId  
+  LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
+  LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+  LEFT JOIN dbo.tblLGLoad L ON L.intLoadId = S.intLoadId
   ) t  
  PIVOT(max(strPropertyValue) FOR strPropertyName IN (' 
 		+ @str + ')) pvt WHERE intRankNo > ' + @strStart
 
 	IF (LEN(@strFilterCriteria) > 0)
 		SET @SQL = @SQL + ' and ' + @strFilterCriteria
-
 	SET @SQL = @SQL + ' ORDER BY [' + @strSortField + '] ' + @strSortDirection
 
 	EXEC sp_executesql @SQL

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOUpdateOrderIntegrations] 
 	 @SalesOrderId	INT = NULL
-	,@ForDelete		BIT = 0    
+	,@ForDelete		BIT = 0
+	,@ForUnship		BIT = 0
 	,@UserId		INT = NULL     
 AS  
   
@@ -13,6 +14,11 @@ SET ANSI_WARNINGS OFF
 
 EXEC dbo.[uspSOUpdateCommitted] @SalesOrderId, @ForDelete
 EXEC dbo.[uspSOUpdateContractOnSalesOrder] @SalesOrderId, @ForDelete, @UserId
+
+IF @ForDelete = 1 OR @ForUnship = 1
+	BEGIN
+		EXEC dbo.[uspMFUnReservePickListBySalesOrder] @SalesOrderId
+	END
 
 DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @SalesOrderId AND [strTransactionType] = 'Order'
 

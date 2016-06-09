@@ -14,6 +14,7 @@ AS
 BEGIN
 	
 	DECLARE @ReceiptType AS INT
+	DECLARE @SourceType AS INT
 
 	DECLARE @ReceiptType_PurchaseContract AS INT = 1
 	DECLARE @ReceiptType_PurchaseOrder AS INT = 2
@@ -39,6 +40,11 @@ BEGIN
 				END) FROM tblICTransactionDetailLog
 			WHERE intTransactionId = @ReceiptId
 			AND strTransactionType = 'Inventory Receipt'
+			SELECT @SourceType = (
+				CASE WHEN intSourceType = 2 THEN @SourceType_InboundShipment
+					 END) FROM tblICTransactionDetailLog
+			WHERE intTransactionId = @ReceiptId
+			AND strTransactionType = 'Inventory Receipt' 
 		END
 		ELSE
 		BEGIN
@@ -49,10 +55,14 @@ BEGIN
 					WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
 				END) FROM tblICInventoryReceipt
 			WHERE intInventoryReceiptId = @ReceiptId
+			SELECT @SourceType = (
+				CASE WHEN intSourceType = 2 THEN @SourceType_InboundShipment
+				END) FROM tblICInventoryReceipt
+			WHERE intInventoryReceiptId = @ReceiptId
 		END
 	
 		-- Purchase Contracts
-		IF (@ReceiptType = @ReceiptType_PurchaseContract)
+		IF (@ReceiptType = @ReceiptType_PurchaseContract) AND (@SourceType <> @SourceType_InboundShipment)
 		BEGIN
 
 			-- Create current snapshot of Receipt Items after Save

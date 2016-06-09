@@ -37,6 +37,8 @@ SELECT	i21.intBankAccountId
 		,i21.strEFTCompanyId
 		,i21.strEFTBankName
 		,i21.strMICRDescription
+		,i21.strMICRRoutingNo
+		,i21.strMICRBankAccountNo
 		,i21.intMICRBankAccountSpacesCount
 		,i21.intMICRBankAccountSpacesPosition
 		,i21.intMICRCheckNoSpacesCount
@@ -45,6 +47,11 @@ SELECT	i21.intBankAccountId
 		,i21.intMICRCheckNoPosition
 		,i21.strMICRLeftSymbol
 		,i21.strMICRRightSymbol
+		,i21.strFractionalRoutingNumber
+		,i21.strUserDefineMessage
+		,i21.strSignatureLineCaption
+		,i21.ysnShowTwoSignatureLine
+		,i21.dblGreaterThanAmount
 		,i21.intCreatedUserId
 		,i21.dtmCreated
 		,i21.intLastModifiedUserId
@@ -114,6 +121,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEFTCompanyId
 						,strEFTBankName
 						,strMICRDescription
+						,strMICRRoutingNo
+						,strMICRBankAccountNo
 						,intMICRBankAccountSpacesCount
 						,intMICRBankAccountSpacesPosition
 						,intMICRCheckNoSpacesCount
@@ -122,6 +131,11 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intMICRCheckNoPosition
 						,strMICRLeftSymbol
 						,strMICRRightSymbol
+						,strFractionalRoutingNumber
+						,strUserDefineMessage	
+						,strSignatureLineCaption
+						,ysnShowTwoSignatureLine
+						,dblGreaterThanAmount
 						,intCreatedUserId
 						,dtmCreated
 						,intLastModifiedUserId
@@ -162,6 +176,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,strEFTCompanyId					= i.strEFTCompanyId
 						,strEFTBankName						= i.strEFTBankName
 						,strMICRDescription					= i.strMICRDescription
+						,strMICRRoutingNo					= i.strMICRRoutingNo
+						,strMICRBankAccountNo				= i.strMICRBankAccountNo
 						,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 						,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 						,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -170,6 +186,11 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 						,strMICRLeftSymbol					= i.strMICRLeftSymbol
 						,strMICRRightSymbol					= i.strMICRRightSymbol
+						,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
+						,strUserDefineMessage				= i.strUserDefineMessage
+						,strSignatureLineCaption			= i.strSignatureLineCaption
+						,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+						,dblGreaterThanAmount				= i.dblGreaterThanAmount
 						,intCreatedUserId					= i.intCreatedUserId
 						,dtmCreated							= i.dtmCreated
 						,intLastModifiedUserId				= i.intLastModifiedUserId
@@ -226,6 +247,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
+					,strMICRRoutingNo					= i.strMICRRoutingNo
+					,strMICRBankAccountNo				= i.strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -234,6 +257,11 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 					,strMICRLeftSymbol					= i.strMICRLeftSymbol
 					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,strFractionalRoutingNumber			= i.strFractionalRoutingNumber
+					,strUserDefineMessage				= i.strUserDefineMessage
+					,strSignatureLineCaption			= i.strSignatureLineCaption
+					,ysnShowTwoSignatureLine			= i.ysnShowTwoSignatureLine
+					,dblGreaterThanAmount				= i.dblGreaterThanAmount
 					,intCreatedUserId					= i.intCreatedUserId
 					,dtmCreated							= i.dtmCreated
 					,intLastModifiedUserId				= i.intLastModifiedUserId

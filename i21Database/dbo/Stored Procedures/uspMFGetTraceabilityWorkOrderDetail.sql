@@ -6,6 +6,10 @@ AS
 
 SET NOCOUNT ON;
 
+Declare @strLotNumber nvarchar(50)
+
+Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
+
 IF @intDirectionId=1
 	Begin
 	If @ysnParentLot=0
@@ -23,7 +27,7 @@ IF @intDirectionId=1
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intLotId=@intLotId) t
+		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 		group by t.strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,
 		t.intLotId,t.strProcessName,t.intAttributeTypeId
 
@@ -64,7 +68,7 @@ ELSE
 			Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 			Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-			Where wi.intLotId=@intLotId) t
+			Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 			group by t.strTransactionName,t.intWorkOrderId,t.strWorkOrderNo,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,
 			t.intLotId,t.strProcessName,t.intAttributeTypeId
 

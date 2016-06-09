@@ -7,6 +7,8 @@ BEGIN
 					l.strLotAlias LotAlias, 
 					l.dtmDateCreated CreateDate, 
 					us.strUserName CreatedBy, 
+					l.intSubLocationId,
+					l.intStorageLocationId,
 					i.strItemNo, 
 					i.strDescription AS MaterialDescription, 
 					l.dblQty,
@@ -17,7 +19,8 @@ BEGIN
 					ls.strPrimaryStatus PrimaryStatusCode, 
 					ls.strSecondaryStatus SecondaryStatusCode, 
 					ls.strSecondaryStatus AS LotStatus,
-					sl.strName AS Unit
+					sl.strName AS Unit,
+					ISNULL(i.intUnitPerLayer,1) * ISNULL(i.intLayerPerPallet,1) AS intCasesPerPallet
 	FROM tblICLot l
 	JOIN tblICItem i ON l.intItemId = i.intItemId
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId 

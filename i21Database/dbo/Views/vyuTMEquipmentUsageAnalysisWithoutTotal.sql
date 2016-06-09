@@ -1,8 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuTMEquipmentUsageAnalysisWithoutTotal]  
 AS  
 SELECT
-	strCustomerNumber = C.strName
-	,intSiteNumber = C.intSiteNumber
+	strCustomerNumber = C.strEntityNo
+	,strSiteNumber = RIGHT('0000' + CAST(ISNULL(C.intSiteNumber,0)AS NVARCHAR(4)),4) 
+	,strItemDescription = C.strItemDescription
 	,strItemNumber = C.strItemNo
 	,strSiteDescription = C.strSiteDescription
 	,strLeaseNumber = A.strLeaseNumber
@@ -25,6 +26,7 @@ LEFT JOIN ( SELECT
 				,G.strName
 				,E.intSiteNumber
 				,H.strItemNo
+				,strItemDescription = H.strDescription
 				,strSiteDescription = E.strDescription
 				,strDeviceDescription = C.strDescription
 				,C.strSerialNumber
@@ -34,6 +36,7 @@ LEFT JOIN ( SELECT
 				,H.intItemId
 				,H.intCategoryId 
 				,intRecordCount  = ROW_NUMBER() OVER(PARTITION BY A.intLeaseId ORDER BY A.intLeaseId)
+				,G.strEntityNo
 			FROM tblTMLeaseDevice A
 			INNER JOIN tblTMDevice C
 				ON A.intDeviceId = C.intDeviceId

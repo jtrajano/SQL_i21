@@ -10,7 +10,8 @@
 	,@dblAdjustByQuantity AS NUMERIC(38, 20)
 	,@intNewItemId AS INT
 	,@intNewSubLocationId AS INT	
-	,@intNewStorageLocationId AS INT	
+	,@intNewStorageLocationId AS INT
+	,@intItemUOMId AS INT 
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT
@@ -47,7 +48,9 @@ DECLARE @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
 DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@strAdjustmentNo AS NVARCHAR(40)
 		,@intLotId AS INT 
+		,@strOriginalItemNo AS NVARCHAR(50) 
 		,@strNewItemNo AS NVARCHAR(50) 
+		,@strOriginalUOMName AS NVARCHAR(50) 
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- VALIDATIONS
@@ -87,6 +90,8 @@ BEGIN
 	SELECT @strNewItemNo = strItemNo
 	FROM dbo.tblICItem 
 	WHERE intItemId = @intNewItemId
+
+	SET @strNewItemNo = ISNULL(@strNewItemNo, '(Unknown new item)')
 
 	-- 'Item %s is invalid. It must be lot tracked.'
 	RAISERROR(80075, 11, 1, @strNewItemNo); 
@@ -153,6 +158,73 @@ BEGIN
 	RAISERROR(80035, 11, 1)  
 	GOTO _Exit
 END 
+
+-- Validate the original item and lot
+BEGIN 
+	-- Get the original item name. 
+	SELECT	@strOriginalItemNo = strItemNo
+	FROM	dbo.tblICItem Item 
+	WHERE	Item.intItemId = @intItemId
+
+	SET @strOriginalItemNo = ISNULL(@strOriginalItemNo, '(Unknown original item)')
+
+	-- Get the original UOM name. 
+	SELECT	@strOriginalUOMName = UOM.strUnitMeasure
+	FROM	dbo.tblICItemUOM ItemUOM LEFT JOIN dbo.tblICUnitMeasure UOM
+				ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	WHERE	ItemUOM.intItemId = @intItemId
+			AND ItemUOM.intItemUOMId = @intItemUOMId
+
+	-- Check if the item uom id is valid. 
+	IF NOT EXISTS (
+		SELECT	TOP 1 1
+		FROM	dbo.tblICItemUOM
+		WHERE	intItemId = @intItemId
+				AND intItemUOMId = @intItemUOMId	
+	)
+	BEGIN 
+		-- Item UOM for {item} is invalid or missing.
+		RAISERROR(80079, 11, 1, @strOriginalItemNo)  
+		GOTO _Exit
+	END 
+
+	-- Check if the item uom id is valid for the lot record. 
+	IF NOT EXISTS (
+		SELECT	TOP 1 1
+		FROM	dbo.tblICLot 
+		WHERE	intItemId = @intItemId
+				AND intLotId = @intLotId
+				AND (intItemUOMId = @intItemUOMId OR intWeightUOMId = @intItemUOMId) 
+	)
+	BEGIN 
+		-- Item UOM for {lot} is invalid or missing.
+		RAISERROR(80048, 11, 1, @strLotNumber)  
+		GOTO _Exit
+	END 
+END 
+
+-- Validate the new item. 
+BEGIN 
+	-- Get the new item name. 
+	SELECT	@strNewItemNo = strItemNo
+	FROM	dbo.tblICItem Item 
+	WHERE	Item.intItemId = @intNewItemId
+
+	SET @strNewItemNo = ISNULL(@strNewItemNo, '(Unknown new item)')
+
+	-- Check if the item uom id is valid for the new item. 
+	IF NOT EXISTS (
+		SELECT	TOP 1 1
+		FROM	dbo.tblICItemUOM
+		WHERE	intItemId = @intNewItemId
+				AND intItemUOMId =  dbo.fnGetMatchingItemUOMId(@intNewItemId, @intItemUOMId)
+	)
+	BEGIN 
+		-- 'Item UOM {UOM name} for {New Item} is invalid or missing.'
+		RAISERROR(80080, 11, 1, @strOriginalUOMName, @strNewItemNo)  
+		GOTO _Exit
+	END 
+END
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the starting number for the inventory adjustment. 
@@ -241,15 +313,25 @@ BEGIN
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
 			,strNewLotNumber			= Lot.strLotNumber
-			,intItemUOMId				= Lot.intItemUOMId
+			,intItemUOMId				= @intItemUOMId
 			,intNewItemUOMId			= NULL 
-			,dblQuantity				= Lot.dblQty
+			,dblQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+													ELSE 0 
+											END 
 			,dblAdjustByQuantity		= @dblAdjustByQuantity
 			,dblNewSplitLotQuantity		= NULL 
-			,dblNewQuantity				= Lot.dblQty + @dblAdjustByQuantity
+			,dblNewQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
+													ELSE 0 
+											END 
+											+ @dblAdjustByQuantity
 			,intWeightUOMId				= Lot.intWeightUOMId
 			,intNewWeightUOMId			= NULL 
-			,dblWeight					= dbo.fnMultiply(dbo.fnMultiply(Lot.dblWeightPerQty, @dblAdjustByQuantity), -1) 
+			,dblWeight					=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN ABS(dbo.fnMultiply(@dblAdjustByQuantity, Lot.dblWeightPerQty)) 
+													WHEN Lot.intWeightUOMId = @intItemUOMId THEN ABS(@dblAdjustByQuantity) 
+													ELSE 0 
+											END 
 			,dblNewWeight				= NULL 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
 			,dblNewWeightPerQty			= NULL 

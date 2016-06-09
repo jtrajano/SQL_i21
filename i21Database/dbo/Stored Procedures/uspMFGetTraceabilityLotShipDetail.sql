@@ -2,6 +2,11 @@
 	@intLotId int,
 	@ysnParentLot bit=0
 AS
+
+Declare @strLotNumber nvarchar(50)
+
+Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
+
 	If @ysnParentLot=0
 		Select 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
 		mt.intCategoryId,mt.strCategoryCode,shl.dblQuantityShipped AS dblQuantity,
@@ -16,7 +21,7 @@ AS
 		Join tblICItemUOM iu on shi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Left Join vyuARCustomer c on sh.intEntityCustomerId=c.intEntityCustomerId
-		Where shl.intLotId=@intLotId
+		Where shl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)
 
 	If @ysnParentLot=1
 		Select 'Ship' AS strTransactionName,sh.intInventoryShipmentId,sh.strShipmentNumber,'' AS strLotAlias,i.intItemId,i.strItemNo,i.strDescription,

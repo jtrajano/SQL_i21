@@ -529,3 +529,46 @@ GO
 	SET @currentRow = @currentRow + 1
 	END
 GO
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Update Level/Sorting Order - Approval List')
+	BEGIN
+
+		DECLARE @currentRow INT
+		DECLARE @totalRows INT
+
+		SET @currentRow = 1
+		SELECT @totalRows = Count(*) FROM [dbo].[tblSMApprovalList]
+
+		WHILE (@currentRow <= @totalRows)
+		BEGIN
+
+		Declare @approvalListId INT
+		SELECT @approvalListId = intApprovalListId FROM (  
+			SELECT ROW_NUMBER() OVER(ORDER BY intApprovalListId ASC) AS 'ROWID', *
+			FROM [dbo].[tblSMApprovalList]
+		) a
+		WHERE ROWID = @currentRow
+
+		UPDATE A1 SET A1.intApproverLevel = intSortLevel, A1.intSort = intSortLevel
+		FROM
+		(
+			SELECT A.intApproverLevel, A.intSort, CAST (ROW_NUMBER() OVER (ORDER BY B.intApproverLevel, B.intApprovalListUserSecurityId ASC) AS INT) as intSortLevel
+			FROM tblSMApprovalListUserSecurity A
+			INNER JOIN tblSMApprovalListUserSecurity B ON A.intApprovalListUserSecurityId = B.intApprovalListUserSecurityId
+			WHERE B.intApprovalListId = @approvalListId
+		) A1
+
+		SET @currentRow = @currentRow + 1
+		END
+		
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Update Level/Sorting Order - Approval List', 'Update Level/Sorting Order - Approval List', GETDATE())
+
+	END
+GO
+	PRINT N'ASSIGNING DEFAULT SECURITY POLICY TO USERS'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurity WHERE intSecurityPolicyId IS NOT NULL)
+	BEGIN
+		UPDATE tblSMUserSecurity SET intSecurityPolicyId = 1 WHERE intSecurityPolicyId IS NULL
+	END
+GO

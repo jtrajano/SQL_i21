@@ -76,6 +76,7 @@ If (Select strLotTracking From tblICItem Where intItemId=@intBlendItemId)='No'
 
 Update @tblLot Set intSubLocationId=NULL Where intSubLocationId=0
 Update @tblLot Set intStorageLocationId=NULL Where intStorageLocationId=0
+Update @tblLot Set intLotId=NULL Where intLotId=0
 
 Begin Tran
 

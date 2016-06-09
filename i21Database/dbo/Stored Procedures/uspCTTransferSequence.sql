@@ -49,7 +49,7 @@ BEGIN TRY
 			END '
 	FROM		#tblRefByHeader h
 	LEFT JOIN	#tblRefByDetail d on d.TableWithForeignKey = h.TableWithForeignKey
-	WHERE d.TableWithForeignKey IS NOT NULL
+	WHERE d.TableWithForeignKey IS NOT NULL AND h.TableWithForeignKey NOT IN ('tblQMSample','tblRKAssignFuturesToContractSummary')
 
 	SELECT @SQL = 'DECLARE @ErrMsg NVARCHAR(MAX) '+ @SQL
 	exec sp_executesql @SQL
@@ -94,6 +94,18 @@ BEGIN TRY
 	JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CH.intCommodityId AND CU.intUnitMeasureId	=	QU.intUnitMeasureId
 	WHERE	CD.intContractDetailId = @intContractDetailId
+
+	UPDATE	tblQMSample
+	SET		intContractHeaderId = @intDestinationHeaderId
+	WHERE	intContractDetailId = @intContractDetailId
+
+	UPDATE	tblRKAssignFuturesToContractSummary
+	SET		intContractHeaderId = @intDestinationHeaderId
+	WHERE	intContractDetailId = @intContractDetailId
+
+	UPDATE	tblCTPriceFixation
+	SET		intContractHeaderId = @intDestinationHeaderId
+	WHERE	intContractDetailId = @intContractDetailId
 
 END TRY
 BEGIN CATCH       

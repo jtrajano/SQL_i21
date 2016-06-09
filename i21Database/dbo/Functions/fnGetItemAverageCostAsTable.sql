@@ -8,7 +8,7 @@ RETURNS TABLE
 RETURN (
 	-- Get the average cost of item per location
 	SELECT	TOP 1 
-			AverageCost = ISNULL(Pricing.dblAverageCost, 0) * ISNULL(ItemUOM.dblUnitQty, 0)
+			AverageCost = dbo.fnMultiply(ISNULL(Pricing.dblAverageCost, 0), ISNULL(ItemUOM.dblUnitQty, 0)) 
 	FROM	dbo.tblICItemPricing Pricing LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Pricing.intItemId = ItemUOM.intItemId				
 	WHERE	Pricing.intItemId = @intItemId

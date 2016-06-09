@@ -41,7 +41,6 @@ BEGIN TRY
 		,@dblPlannedQuantity NUMERIC(18, 6)
 		,@intMachineId INT
 		,@dblBlendBinSize NUMERIC(18, 6)
-		,@dtmPlannedDate datetime
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -75,12 +74,18 @@ BEGIN TRY
 			,dblPlannedQuantity NUMERIC(18, 6)
 			)
 
+	SELECT @dtmCurrentDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
+
+	IF @dtmCurrentDate IS NULL
+	BEGIN
+		SELECT @dtmCurrentDate = GetDate()
+	END
+
 	IF @intWorkOrderId > 0
 	BEGIN
 		SELECT @intStatusId = intStatusId
 			,@strWorkOrderNo = strWorkOrderNo
 			,@intManufacturingProcessId = ISNULL(intManufacturingProcessId, 0)
-			,@dtmPlannedDate=dtmExpectedDate 
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -275,8 +280,6 @@ BEGIN TRY
 
 		SELECT @intWorkOrderId = SCOPE_IDENTITY()
 
-		Select @dtmPlannedDate=@dtmCurrentDate
-
 		--Copy Recipe
 		EXEC uspMFCopyRecipe @intItemId
 			,@intLocationId
@@ -316,6 +319,7 @@ BEGIN TRY
 			,''
 			,''
 			,''
+			,@dtmCurrentDate
 	END
 	ELSE
 	BEGIN
@@ -345,7 +349,7 @@ BEGIN TRY
 		SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, @strWorkOrderNo) + '</strLotAlias>'
 		SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
 		SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
-		SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, @dtmPlannedDate) + '</dtmPlannedDate>'
+		SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, @dtmCurrentDate) + '</dtmPlannedDate>'
 		SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
 		SET @strProduceXml = @strProduceXml + '</root>'
 

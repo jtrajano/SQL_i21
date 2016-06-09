@@ -49,6 +49,7 @@ SET ANSI_WARNINGS OFF
 	LEFT JOIN tblGRDiscountId DISC ON  TIC.intDiscountId = DISC.intDiscountId
 	WHERE TIC.intTicketId = @intTicketId
 
-	SELECT TD.intTicketId as intTicketId, @strDiscountID as DiscountId, SC.strDiscountCodeDescription as DisountDescription, TD.dblGradeReading, TD.dblDiscountAmount, TD.dblShrinkPercent FROM tblSCTicketDiscount TD 
+	SELECT TD.intTicketId as intTicketId, @strDiscountID as DiscountId, Item.strItemNo as DisountDescription, TD.dblGradeReading, TD.dblDiscountAmount, TD.dblShrinkPercent FROM tblSCTicketDiscount TD 
 	LEFT JOIN tblGRDiscountScheduleCode SC ON SC.intDiscountScheduleCodeId = TD.intDiscountScheduleCodeId
+	JOIN tblICItem Item ON Item.intItemId=SC.intItemId
 	WHERE TD.intTicketId = @intTicketId

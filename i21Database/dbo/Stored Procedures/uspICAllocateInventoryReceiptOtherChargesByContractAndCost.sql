@@ -46,7 +46,7 @@ BEGIN
 	USING (
 		SELECT	CalculatedCharges.*
 				,ReceiptItem.intInventoryReceiptItemId
-				,ReceiptItem.dblOpenReceive
+				,Qty = CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 				,ReceiptItem.dblUnitCost
 				,TotalCostOfItemsPerContract.dblTotalCost 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -64,16 +64,26 @@ BEGIN
 							,ysnInventoryCost
 							,intInventoryReceiptId
 							,intInventoryReceiptChargeId
+							,ysnPrice
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge 					
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY ysnAccrue, intContractId, intContractDetailId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intContractId, intContractDetailId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId, ysnPrice
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId
 					AND CalculatedCharges.intContractDetailId = ReceiptItem.intLineNo 
 				LEFT JOIN (
-					SELECT	dblTotalCost = SUM(dbo.fnMultiply(ISNULL(ReceiptItem.dblOpenReceive, 0), ISNULL(ReceiptItem.dblUnitCost, 0)))
+					SELECT	dblTotalCost = SUM(
+									dbo.fnMultiply(
+										CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+													ISNULL(ReceiptItem.dblNet, 0) 
+												ELSE 
+													ISNULL(ReceiptItem.dblOpenReceive, 0) 
+										END
+										, ISNULL(ReceiptItem.dblUnitCost, 0)
+									)
+								)
 							,ReceiptItem.intOrderId 
 							,ReceiptItem.intLineNo
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -90,6 +100,7 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
 		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
+		AND ReceiptItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
@@ -99,7 +110,10 @@ BEGIN
 								+ (
 									dbo.fnDivide(
 										dbo.fnMultiply(
-											dbo.fnMultiply(Source_Query.dblTotalOtherCharge, Source_Query.dblOpenReceive)
+											dbo.fnMultiply(
+												Source_Query.dblTotalOtherCharge
+												,Source_Query.Qty
+											)
 											,Source_Query.dblUnitCost
 										)									
 										,Source_Query.dblTotalCost 
@@ -118,6 +132,7 @@ BEGIN
 			,[dblAmount]
 			,[ysnAccrue]
 			,[ysnInventoryCost]
+			,[ysnPrice]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
@@ -129,7 +144,7 @@ BEGIN
 					dbo.fnMultiply(
 						dbo.fnMultiply(
 							Source_Query.dblTotalOtherCharge
-							,Source_Query.dblOpenReceive 
+							,Source_Query.Qty 
 						)
 						,Source_Query.dblUnitCost
 					)
@@ -139,6 +154,7 @@ BEGIN
 			)
 			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
+			,Source_Query.ysnPrice 
 		)
 	;
 END 

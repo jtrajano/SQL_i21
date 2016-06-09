@@ -11,56 +11,56 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@intForecastItemValueId INT
 		,@strReasonCode NVARCHAR(MAX)
-		,@dblOldJan INT
-		,@dblNewJan INT
-		,@dblOldFeb INT
-		,@dblNewFeb INT
-		,@dblOldMar INT
-		,@dblNewMar INT
-		,@dblOldApr INT
-		,@dblNewApr INT
-		,@dblOldMay INT
-		,@dblNewMay INT
-		,@dblOldJun INT
-		,@dblNewJun INT
-		,@dblOldJul INT
-		,@dblNewJul INT
-		,@dblOldAug INT
-		,@dblNewAug INT
-		,@dblOldSep INT
-		,@dblNewSep INT
-		,@dblOldOct INT
-		,@dblNewOct INT
-		,@dblOldNov INT
-		,@dblNewNov INT
-		,@dblOldDec INT
-		,@dblNewDec INT
+		,@dblOldJan NUMERIC(18,6)
+		,@dblNewJan NUMERIC(18,6)
+		,@dblOldFeb NUMERIC(18,6)
+		,@dblNewFeb NUMERIC(18,6)
+		,@dblOldMar NUMERIC(18,6)
+		,@dblNewMar NUMERIC(18,6)
+		,@dblOldApr NUMERIC(18,6)
+		,@dblNewApr NUMERIC(18,6)
+		,@dblOldMay NUMERIC(18,6)
+		,@dblNewMay NUMERIC(18,6)
+		,@dblOldJun NUMERIC(18,6)
+		,@dblNewJun NUMERIC(18,6)
+		,@dblOldJul NUMERIC(18,6)
+		,@dblNewJul NUMERIC(18,6)
+		,@dblOldAug NUMERIC(18,6)
+		,@dblNewAug NUMERIC(18,6)
+		,@dblOldSep NUMERIC(18,6)
+		,@dblNewSep NUMERIC(18,6)
+		,@dblOldOct NUMERIC(18,6)
+		,@dblNewOct NUMERIC(18,6)
+		,@dblOldNov NUMERIC(18,6)
+		,@dblNewNov NUMERIC(18,6)
+		,@dblOldDec NUMERIC(18,6)
+		,@dblNewDec NUMERIC(18,6)
 	DECLARE @ForecastItemValue TABLE (
 		intForecastItemValueId INT NOT NULL
-		,dblOldJan INT
-		,dblNewJan INT
-		,dblOldFeb INT
-		,dblNewFeb INT
-		,dblOldMar INT
-		,dblNewMar INT
-		,dblOldApr INT
-		,dblNewApr INT
-		,dblOldMay INT
-		,dblNewMay INT
-		,dblOldJun INT
-		,dblNewJun INT
-		,dblOldJul INT
-		,dblNewJul INT
-		,dblOldAug INT
-		,dblNewAug INT
-		,dblOldSep INT
-		,dblNewSep INT
-		,dblOldOct INT
-		,dblNewOct INT
-		,dblOldNov INT
-		,dblNewNov INT
-		,dblOldDec INT
-		,dblNewDec INT
+		,dblOldJan NUMERIC(18,6)
+		,dblNewJan NUMERIC(18,6)
+		,dblOldFeb NUMERIC(18,6)
+		,dblNewFeb NUMERIC(18,6)
+		,dblOldMar NUMERIC(18,6)
+		,dblNewMar NUMERIC(18,6)
+		,dblOldApr NUMERIC(18,6)
+		,dblNewApr NUMERIC(18,6)
+		,dblOldMay NUMERIC(18,6)
+		,dblNewMay NUMERIC(18,6)
+		,dblOldJun NUMERIC(18,6)
+		,dblNewJun NUMERIC(18,6)
+		,dblOldJul NUMERIC(18,6)
+		,dblNewJul NUMERIC(18,6)
+		,dblOldAug NUMERIC(18,6)
+		,dblNewAug NUMERIC(18,6)
+		,dblOldSep NUMERIC(18,6)
+		,dblNewSep NUMERIC(18,6)
+		,dblOldOct NUMERIC(18,6)
+		,dblNewOct NUMERIC(18,6)
+		,dblOldNov NUMERIC(18,6)
+		,dblNewNov NUMERIC(18,6)
+		,dblOldDec NUMERIC(18,6)
+		,dblNewDec NUMERIC(18,6)
 		)
 
 	SELECT @dtmCurrentDate = GETDATE()
@@ -142,18 +142,18 @@ BEGIN TRY
 	INTO @ForecastItemValue
 	FROM OPENXML(@idoc, 'root/ForecastItemValues/ForecastItemValue', 2) WITH (
 			intForecastItemValueId INT
-			,dblJan INT
-			,dblFeb INT
-			,dblMar INT
-			,dblApr INT
-			,dblMay INT
-			,dblJun INT
-			,dblJul INT
-			,dblAug INT
-			,dblSep INT
-			,dblOct INT
-			,dblNov INT
-			,dblDec INT
+			,dblJan NUMERIC(18,6)
+			,dblFeb NUMERIC(18,6)
+			,dblMar NUMERIC(18,6)
+			,dblApr NUMERIC(18,6)
+			,dblMay NUMERIC(18,6)
+			,dblJun NUMERIC(18,6)
+			,dblJul NUMERIC(18,6)
+			,dblAug NUMERIC(18,6)
+			,dblSep NUMERIC(18,6)
+			,dblOct NUMERIC(18,6)
+			,dblNov NUMERIC(18,6)
+			,dblDec NUMERIC(18,6)
 			) x
 	WHERE x.intForecastItemValueId = tblMFForecastItemValue.intForecastItemValueId
 

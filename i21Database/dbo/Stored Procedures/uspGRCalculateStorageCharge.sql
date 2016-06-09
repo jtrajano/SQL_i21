@@ -792,7 +792,7 @@ BEGIN TRY
 					END
 				END			
 				
-				SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) + @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)
+				SELECT @dblStorageDuePerUnit = ISNULL(@dblStorageDuePerUnit, 0) - @dblStorageRate * ISNULL(@CalculatedNumberOfDays,0)
 				SET @TotalDaysApplicableForStorageCharge = @TotalDaysApplicableForStorageCharge - ISNULL(@CalculatedNumberOfDays,0)
 				SET @dtmDeliveryDate = @dtmDeliveryDate + ISNULL(@CalculatedNumberOfDays,0)
 				

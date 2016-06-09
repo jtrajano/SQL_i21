@@ -9,7 +9,7 @@ CREATE FUNCTION [dbo].[fnCalculateLotWeight](
 	,@dblCostingQty NUMERIC(38,20)
 	,@dblLotWeightPerQty NUMERIC(38,20)
 )
-RETURNS NUMERIC(38,20)
+RETURNS NUMERIC(38, 20)
 AS 
 BEGIN
 

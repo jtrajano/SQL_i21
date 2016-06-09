@@ -19,7 +19,10 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
 	@voucherDetailReceiptPO AS VoucherDetailReceipt READONLY,
 	@voucherDetailNonInvContract AS VoucherDetailNonInvContract READONLY,
+	@voucherDetaiCC AS VoucherDetailCC READONLY,
 	@shipTo INT= NULL,
+	@vendorOrderNumber NVARCHAR(50) = NULL,
+	@voucherDate DATETIME = NULL,
 	@billId INT OUTPUT
 AS
 BEGIN
@@ -48,6 +51,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	END
 	ELSE IF @type = 2
 	BEGIN
+		SET @startingRecordId = 20;
+	END
+	ELSE IF @type = 3
+	BEGIN
 		SET @startingRecordId = 18;
 	END
 
@@ -56,10 +63,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SELECT 
 		[intTermsId]			=	A.[intTermsId],
 		[dtmDueDate]			=	A.[dtmDueDate],
+		[dtmDate]				=	ISNULL(@voucherDate,A.[dtmDate]),
+		[dtmBillDate]			=	ISNULL(@voucherDate,A.[dtmDate]),
 		[intAccountId]			=	A.[intAccountId],
 		[intEntityId]			=	A.[intEntityId],
 		[intEntityVendorId]		=	A.[intEntityVendorId],
 		[intTransactionType]	=	A.[intTransactionType],
+		[strVendorOrderNumber]	=	@vendorOrderNumber,
 		[strBillId]				=	@billRecordNumber,
 		[strShipToAttention]	=	A.[strShipToAttention],
 		[strShipToAddress]		=	A.[strShipToAddress],
@@ -89,10 +99,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 	(
 		[intTermsId]			,
 		[dtmDueDate]			,
+		[dtmDate]				,
+		[dtmBillDate]			,
 		[intAccountId]			,
 		[intEntityId]			,
 		[intEntityVendorId]		,
 		[intTransactionType]	,
+		[strVendorOrderNumber]	,
 		[strBillId]				,
 		[strShipToAttention]	,
 		[strShipToAddress]		,
@@ -121,7 +134,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SET @billId = SCOPE_IDENTITY()
 
 	--Add details
-	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO, @voucherDetailNonInvContract
+	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO, @voucherDetailNonInvContract, @voucherDetaiCC
 	--EXEC uspAPUpdateVoucherTax @billId
 	--EXEC uspAPUpdateVoucherContract @billId
 

@@ -188,3 +188,80 @@ GO
 	END
 
 GO
+	PRINT N'MIGRATING PAYMENT METHOD'
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMPaymentMethod') 
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMPaymentMethod' AND [COLUMN_NAME] = 'intOriginalId') 
+		BEGIN
+
+			EXEC
+			('
+
+			ALTER TABLE tblAPPayment DROP CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId]
+			ALTER TABLE tblCCSite DROP CONSTRAINT FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId
+
+			IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ''tmpSMPaymentMethod'')
+			BEGIN
+				DROP TABLE tmpSMPaymentMethod
+			END
+
+			SELECT * INTO tmpSMPaymentMethod FROM tblSMPaymentMethod
+
+			TRUNCATE TABLE tblSMPaymentMethod
+
+			SET IDENTITY_INSERT tblSMPaymentMethod ON
+
+			INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
+			SELECT 1, ''Write Off'', NULL, 0, NULL, 1, 0
+			UNION ALL 
+			SELECT 2, ''ACH'', NULL, 0, NULL, 1, 0
+			UNION ALL 
+			SELECT 3, ''Debit memos and Payments'', NULL, 0, NULL, 1, 0
+			UNION ALL 
+			SELECT 4, ''Credit'', NULL, 0, NULL, 1, 0
+			UNION ALL 
+			SELECT 5, ''Refund'', NULL, 0, NULL, 1, 0
+			UNION ALL 
+			SELECT 6, ''eCheck'', NULL, 0, NULL, 1, 0
+			UNION ALL 
+			SELECT 7, ''Check'', NULL, 0, NULL, 1, 0
+
+			SET IDENTITY_INSERT tblSMPaymentMethod OFF
+
+			INSERT INTO tblSMPaymentMethod([strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
+			SELECT strPaymentMethod, strPaymentMethodCode, intAccountId, strPrintOption, ysnActive, intSort
+			FROM tmpSMPaymentMethod
+			WHERE strPaymentMethod NOT IN (SELECT strPaymentMethod FROM tblSMPaymentMethod)
+
+			UPDATE APPayment SET intPaymentMethodId = Orig.intPaymentMethodID
+			FROM tblAPPayment APPayment
+			INNER JOIN tmpSMPaymentMethod Temp ON APPayment.intPaymentMethodId = Temp.intPaymentMethodID
+			INNER JOIN tblSMPaymentMethod Orig ON Temp.strPaymentMethod = Orig.strPaymentMethod
+
+			UPDATE Sites SET intPaymentMethodId = Orig.intPaymentMethodID
+			FROM tblCCSite Sites
+			INNER JOIN tmpSMPaymentMethod Temp ON Sites.intPaymentMethodId = Temp.intPaymentMethodID
+			INNER JOIN tblSMPaymentMethod Orig ON Temp.strPaymentMethod = Orig.strPaymentMethod
+
+			UPDATE ARPayment SET intPaymentMethodId = Orig.intPaymentMethodID
+			FROM tblARPayment ARPayment
+			INNER JOIN tmpSMPaymentMethod Temp ON ARPayment.intPaymentMethodId = Temp.intPaymentMethodID
+			INNER JOIN tblSMPaymentMethod Orig ON Temp.strPaymentMethod = Orig.strPaymentMethod
+
+			UPDATE ARInvoice SET intPaymentMethodId = Orig.intPaymentMethodID
+			FROM tblARInvoice ARInvoice
+			INNER JOIN tmpSMPaymentMethod Temp ON ARInvoice.intPaymentMethodId = Temp.intPaymentMethodID
+			INNER JOIN tblSMPaymentMethod Orig ON Temp.strPaymentMethod = Orig.strPaymentMethod
+
+			ALTER TABLE tblSMPaymentMethod ADD intOriginalId INT NULL
+
+			UPDATE Orig SET intOriginalId = Temp.intPaymentMethodID
+			FROM tblSMPaymentMethod Orig
+			INNER JOIN tmpSMPaymentMethod Temp ON Orig.strPaymentMethod = Temp.strPaymentMethod
+
+			')
+
+		END		
+	END
+GO

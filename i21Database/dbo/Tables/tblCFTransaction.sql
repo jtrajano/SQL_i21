@@ -1,5 +1,14 @@
 ﻿CREATE TABLE [dbo].[tblCFTransaction] (
     [intTransactionId]        INT             IDENTITY (1, 1) NOT NULL,
+    [intPriceIndexId]         INT             NULL,
+    [intPriceProfileId]       INT             NULL,
+    [intSiteGroupId]          INT             NULL,
+    [strPriceProfileId]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strPriceIndexId]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strSiteGroup]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [dblPriceProfileRate]     NUMERIC (18, 6) NULL,
+    [dblPriceIndexRate]       NUMERIC (18, 6) NULL,
+    [dtmPriceIndexDate]       DATETIME        NULL,
     [intContractDetailId]     INT             NULL,
     [intContractId]           INT             NULL,
     [dblQuantity]             NUMERIC (18, 6) NULL,
@@ -33,9 +42,11 @@
     [dblOriginalPumpPrice]    NUMERIC (18, 6) NULL,
     [intSalesPersonId]        INT             NULL,
     [ysnInvalid]              BIT             NULL,
+    [ysnCreditCardUsed]       BIT             NULL,
+    [ysnOriginHistory]        BIT             NULL,
     [ysnPosted]               BIT             NULL,
     [strTransactionId]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strInvoiceReportNumber]  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceReportNumber]  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intInvoiceId]            INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
@@ -48,6 +59,12 @@
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
+
+
+
+
 
 
 

@@ -35,7 +35,7 @@ AS
 						CD.strItemUOM,
 						RI.dblOpenReceive,
 						CD.strItemUOM strReceivedUOM,
-						CD.dblCashPrice * dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) dblCashPrice,
+						CD.dblCashPrice * ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) dblCashPrice,
 						CD.strPriceUOM,
 						CC.dblAmount,
 						CC.dblAmountPer,

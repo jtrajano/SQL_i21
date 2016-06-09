@@ -9,3 +9,4 @@ node_modules/
 **/*.dbmdl
 i21.v11.suo
 *.sublime*
+TestAP/TestAP.sqlproj.user

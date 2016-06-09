@@ -56,6 +56,10 @@ SELECT
 	,strSubLocationName = NULL
 	,intLoadContainerId = -1
 	,intLoadDetailContainerLinkId = -1
+	,intPurchaseSale
+	,intTransUsedBy
+	,intSourceType
+	,ysnPosted
 FROM vyuLGLoadDetailView WHERE intLoadDetailId NOT IN (Select intLoadDetailId FROM vyuLGLoadContainerPurchaseContracts)
 
 UNION ALL
@@ -117,4 +121,8 @@ SELECT
 	,strSubLocationName
 	,intLoadContainerId
 	,intLoadDetailContainerLinkId
+	,intPurchaseSale
+	,intTransUsedBy
+	,intSourceType
+	,ysnPosted
 FROM vyuLGLoadContainerPurchaseContracts

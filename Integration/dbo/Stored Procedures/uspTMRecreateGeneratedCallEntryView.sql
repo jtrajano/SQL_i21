@@ -19,6 +19,7 @@ BEGIN
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwslsmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwlocmst') = 1 
 	)
 	BEGIN
 		EXEC('
@@ -85,6 +86,7 @@ BEGIN
 			LEFT JOIN tblSMCompanyLocation J
 				ON I.vwloc_loc_no  COLLATE Latin1_General_CI_AS = J.strLocationNumber
 			WHERE J.intCompanyLocationId IS NOT NULL
+				AND ISNULL(A.strOrderNumber,'''') <> ''''
 		')
 	END
 	ELSE
@@ -144,6 +146,7 @@ BEGIN
 				ON A.intUserID = H.intEntityUserSecurityId
 			LEFT JOIN tblSMCompanyLocation I
 				ON B.intLocationId = I.intCompanyLocationId
+			WHERE ISNULL(A.strOrderNumber,'''') <> ''''
 		')
 	END
 END

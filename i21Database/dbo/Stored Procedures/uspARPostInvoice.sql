@@ -519,7 +519,11 @@ END CATCH
 						ON SMCL.intUndepositedFundsId = GLA.intAccountId						
 				WHERE
 					(ISNULL(SMCL.intUndepositedFundsId, 0) = 0 OR GLA.intAccountId IS NULL)
-					AND ARI.strTransactionType IN ('Cash','Cash Refund')
+					AND (
+						ARI.strTransactionType IN ('Cash','Cash Refund')
+						OR
+						(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1 AND tblARPrepaidAndCredit.dblAppliedInvoiceAmount <> 0 ))
+						)
 	
 				--Service Charge Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1231,6 +1235,7 @@ END CATCH
 				INNER JOIN 
 					tblARPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
+						AND ISNULL(A.ysnPosted,0) = 1
 				INNER JOIN 
 					tblARInvoice C
 						ON B.intInvoiceId = C.intInvoiceId
@@ -1474,6 +1479,97 @@ IF @post = 1
 				,intConcurrencyId			= 1				 
 			FROM
 				tblARInvoice A
+			LEFT JOIN 
+				tblARCustomer C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+			INNER JOIN 
+				@PostInvoiceData	P
+					ON A.intInvoiceId = P.intInvoiceId
+			WHERE
+				ISNULL(A.intPeriodsToAccrue,0) <= 1
+			
+
+			UNION ALL
+
+			--Debit Payment
+			SELECT
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				,strBatchID					= @batchId
+				,intAccountId				= SMCL.intUndepositedFundsId 
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  A.dblPayment ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblPayment END
+				,dblDebitUnit				= @ZeroDecimal
+				,dblCreditUnit				= @ZeroDecimal		
+				,strDescription				= A.strComments
+				,strCode					= @CODE
+				,strReference				= C.strCustomerNumber
+				,intCurrencyId				= A.intCurrencyId 
+				,dblExchangeRate			= 1
+				,dtmDateEntered				= @PostDate
+				,dtmTransactionDate			= A.dtmDate
+				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,intJournalLineNo			= A.intInvoiceId
+				,ysnIsUnposted				= 0
+				,intUserId					= @userId
+				,intEntityId				= @UserEntityID				
+				,strTransactionId			= A.strInvoiceNumber
+				,intTransactionId			= A.intInvoiceId
+				,strTransactionType			= A.strTransactionType
+				,strTransactionForm			= @SCREEN_NAME
+				,strModuleName				= @MODULE_NAME
+				,intConcurrencyId			= 1				 
+			FROM
+				tblARInvoice A
+			LEFT JOIN 
+				tblARCustomer C
+					ON A.[intEntityCustomerId] = C.intEntityCustomerId
+			INNER JOIN 
+				@PostInvoiceData	P
+					ON A.intInvoiceId = P.intInvoiceId
+			INNER JOIN
+				tblSMCompanyLocation SMCL
+					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
+			WHERE
+				ISNULL(A.intPeriodsToAccrue,0) <= 1
+			
+			UNION ALL
+			--Credit Prepaids
+			SELECT
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				,strBatchID					= @batchId
+				,intAccountId				= ARI1.intAccountId
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceAmount] END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceAmount] ELSE @ZeroDecimal END
+				,dblDebitUnit				= @ZeroDecimal 
+				,dblCreditUnit				= @ZeroDecimal
+				,strDescription				= A.strComments
+				,strCode					= @CODE
+				,strReference				= C.strCustomerNumber
+				,intCurrencyId				= A.intCurrencyId 
+				,dblExchangeRate			= 1
+				,dtmDateEntered				= @PostDate
+				,dtmTransactionDate			= A.dtmDate
+				,strJournalLineDescription	= 'Applied Prepaid - ' + ARI1.[strInvoiceNumber] 
+				,intJournalLineNo			= ARPAC.[intPrepaidAndCreditId]
+				,ysnIsUnposted				= 0
+				,intUserId					= @userId
+				,intEntityId				= @UserEntityID				
+				,strTransactionId			= A.strInvoiceNumber
+				,intTransactionId			= A.intInvoiceId
+				,strTransactionType			= A.strTransactionType
+				,strTransactionForm			= @SCREEN_NAME
+				,strModuleName				= @MODULE_NAME
+				,intConcurrencyId			= 1				 
+			FROM
+				tblARPrepaidAndCredit ARPAC
+			INNER JOIN
+				tblARInvoice A
+					ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
+					AND ISNULL(ARPAC.[ysnApplied],0) = 1
+					AND ARPAC.[dblAppliedInvoiceAmount] <> @ZeroDecimal
+			INNER JOIN
+				tblARInvoice ARI1
+					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
 			LEFT JOIN 
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId
@@ -2109,7 +2205,7 @@ IF @post = 1
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
 				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId) 
+																					dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
 																				ELSE 
 																					IST.dblLastCost  
 																		END 
@@ -2170,7 +2266,7 @@ IF @post = 1
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
 				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.intItemLocationId) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId) 
+																					dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.intItemLocationId, ARIC.[intItemUnitMeasureId]) 
 																				ELSE 
 																					IST.dblLastCost  
 																		END 
@@ -2558,13 +2654,15 @@ IF @recap = 0
 					UPDATE 
 						tblARInvoice
 					SET
-						ysnPosted = 0
-						,ysnPaid = 0
-						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
-						,dblDiscount = ISNULL(dblDiscount, 0.000000)
-						,dblPayment = 0.000000
-						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
-						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+						ysnPosted				= 0
+						,ysnPaid				= 0
+						,dblAmountDue			= ISNULL(dblInvoiceTotal, @ZeroDecimal) - ISNULL(dblPayment, @ZeroDecimal)
+						,dblDiscount			= @ZeroDecimal
+						,dblDiscountAvailable	= @ZeroDecimal
+						,dblInterest			= @ZeroDecimal
+						,dblPayment				= ISNULL(dblPayment, @ZeroDecimal)
+						,dtmPostDate			= CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
+						,intConcurrencyId		= ISNULL(intConcurrencyId,0) + 1
 					FROM
 						tblARInvoice 
 					WHERE 
@@ -2656,16 +2754,31 @@ IF @recap = 0
 					UPDATE 
 						tblARInvoice
 					SET
-						ysnPosted = 1
-						,ysnPaid = (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 OR tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
-						,dblInvoiceTotal = dblInvoiceTotal
-						,dblAmountDue = (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 0.000000 ELSE ISNULL(dblInvoiceTotal, 0.000000) END)
-						,dblDiscount = ISNULL(dblDiscount, 0.000000)
-						,dblPayment = (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, 0.000000) ELSE 0.000000 END)
-						,dtmPostDate = CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
-						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1						
+						ysnPosted				= 1
+						,ysnPaid				= (CASE WHEN tblARInvoice.dblInvoiceTotal = 0.00 OR tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
+						,dblInvoiceTotal		= dblInvoiceTotal
+						,dblAmountDue			= (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(dblInvoiceTotal, @ZeroDecimal) END) - (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(dblPayment, @ZeroDecimal) END)
+						,dblDiscount			= @ZeroDecimal
+						,dblDiscountAvailable	= @ZeroDecimal
+						,dblInterest			= @ZeroDecimal
+						,dblPayment				= (CASE WHEN tblARInvoice.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(dblPayment, @ZeroDecimal) END)
+						,dtmPostDate			= CAST(ISNULL(dtmPostDate, dtmDate) AS DATE)
+						,intConcurrencyId		= ISNULL(intConcurrencyId,0) + 1						
 					WHERE
 						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+					UPDATE
+						tblARPaymentDetail
+					SET
+						tblARPaymentDetail.dblInvoiceTotal = ARI.dblInvoiceTotal 
+						,tblARPaymentDetail.dblAmountDue = (ARI.dblInvoiceTotal + ISNULL(tblARPaymentDetail.dblInterest, @ZeroDecimal))  - (ISNULL(tblARPaymentDetail.dblPayment, @ZeroDecimal) + ISNULL(tblARPaymentDetail.dblDiscount, @ZeroDecimal))
+					FROM
+						tblARInvoice ARI
+					INNER JOIN
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					WHERE
+						tblARPaymentDetail.intInvoiceId = ARI.intInvoiceId 
 
 					--Insert Successfully posted transactions.
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

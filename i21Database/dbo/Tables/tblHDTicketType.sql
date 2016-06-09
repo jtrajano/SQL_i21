@@ -8,6 +8,7 @@
 	[ysnTicket] [bit] NULL,
 	[ysnActivity] [bit] NULL,
 	[ysnOpportunity] [bit] NULL,
+	[ysnProject] [bit] NULL,
 	[ysnCampaign] [bit] NULL,
 	[ysnSupported] [bit] NOT NULL DEFAULT 1,
 	[intSort] [int] NULL,

@@ -927,7 +927,7 @@ BEGIN
 			SET @dtmDate = 'April 7, 2014'
 			SET @dblQty = -60
 			SET @dblUOMQty = 1 
-			SET @dblCost = dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
+			SET @dblCost = dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)
 			SET @dblSalesPrice = 55.75
 			SET @intCurrencyId = @USD
 			SET @dblExchangeRate = 1

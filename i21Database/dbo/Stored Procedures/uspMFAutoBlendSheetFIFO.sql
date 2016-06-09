@@ -650,7 +650,7 @@ BEGIN TRY
 				AND LS.strPrimaryStatus IN (
 					Select strStatusName From @tblLotStatus
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
@@ -829,7 +829,7 @@ BEGIN TRY
 								SELECT ISNULL(SUM(SR.dblQty), 0)
 								FROM tblICStockReservation SR
 								WHERE SR.intParentLotId = PL.intParentLotId --Review when Parent Lot Reservation Done
-									AND SR.intStorageLocationId = PL.intStorageLocationId
+									AND SR.intStorageLocationId = PL.intStorageLocationId AND ISNULL(SR.ysnPosted,0)=0
 								) + (
 								SELECT ISNULL(SUM(BS.dblQuantity), 0)
 								FROM #tblBlendSheetLot BS
@@ -869,7 +869,7 @@ BEGIN TRY
 							(
 								SELECT ISNULL(SUM(SR.dblQty), 0)
 								FROM tblICStockReservation SR
-								WHERE SR.intParentLotId = PL.intParentLotId
+								WHERE SR.intParentLotId = PL.intParentLotId AND ISNULL(SR.ysnPosted,0)=0
 								) + (
 								SELECT ISNULL(SUM(BS.dblQuantity), 0)
 								FROM #tblBlendSheetLot BS
@@ -909,7 +909,7 @@ BEGIN TRY
 							(
 								SELECT ISNULL(SUM(SR.dblQty), 0)
 								FROM tblICStockReservation SR
-								WHERE SR.intLotId = PL.intParentLotId
+								WHERE SR.intLotId = PL.intParentLotId AND ISNULL(SR.ysnPosted,0)=0
 								) + (
 								SELECT ISNULL(SUM(BS.dblQuantity), 0)
 								FROM #tblBlendSheetLot BS
@@ -946,7 +946,7 @@ BEGIN TRY
 				AND LS.strPrimaryStatus IN (
 					Select strStatusName From @tblLotStatus
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight >= .01
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
@@ -954,7 +954,7 @@ BEGIN TRY
 					) --Exclude Kit Staging,Blend Staging
 				AND ISNULL(SL.ysnAllowConsume,0)=1
 				AND L.intLotId NOT IN (Select intLotId From @tblExcludedLot Where intItemId=@intRawItemId))
-				- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=@intRawItemId AND intLocationId = @intLocationId)
+				- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=@intRawItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0)
 				- (SELECT ISNULL(SUM(BS.dblQuantity), 0) FROM #tblBlendSheetLot BS WHERE BS.intItemId = @intRawItemId)
 				
 				Delete From #tblInputLot

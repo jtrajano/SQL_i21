@@ -53,7 +53,7 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnSplitted]
 	,[intPaymentId]
 	,[intSplitId]
-	,[intDistributionHeaderId]
+	,[intLoadDistributionHeaderId]
 	,[strActualCostId]
 	,[intShipmentId]
 	,[intTransactionId]
@@ -127,7 +127,7 @@ SELECT
 	,[ysnSplitted]						= 0
 	,[intPaymentId]						= NULL
 	,[intSplitId]						= NULL
-	,[intDistributionHeaderId]			= NULL
+	,[intLoadDistributionHeaderId]			= NULL
 	,[strActualCostId]					= NULL
 	,[intShipmentId]					= D.intShipmentId
 	,[intTransactionId]					= NULL

@@ -2,10 +2,12 @@
 (
 	[intPickListDetailId] INT NOT NULL IDENTITY,
 	[intPickListId] INT NOT NULL, 
-    [intLotId] INT NOT NULL,
+    [intLotId] INT NULL,
 	[intParentLotId] INT NULL,  
 	[intItemId] INT NOT NULL,
 	[intStorageLocationId] INT,
+	[intSubLocationId] INT,
+	[intLocationId] INT,
 	[dblQuantity] NUMERIC(18, 6) NOT NULL, 
     [intItemUOMId] INT NOT NULL, 
     [dblIssuedQuantity] NUMERIC(18, 6) NULL, 
@@ -24,5 +26,7 @@
 	CONSTRAINT [FK_tblMFPickListDetail_tblICParentLot_inParentLotId] FOREIGN KEY ([intParentLotId]) REFERENCES [tblICParentLot]([intParentLotId]), 
 	CONSTRAINT [FK_tblMFPickListDetail_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFPickListDetail_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
+	CONSTRAINT [FK_tblMFPickListDetail_tblSMCompanyLocationSubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
+	CONSTRAINT [FK_tblMFPickListDetail_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 	CONSTRAINT [FK_tblMFPickListDetail_tblICLot_intStageLotId] FOREIGN KEY ([intStageLotId]) REFERENCES [tblICLot]([intLotId]),
 )

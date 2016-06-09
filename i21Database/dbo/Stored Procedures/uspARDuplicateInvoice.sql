@@ -60,7 +60,6 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@Splitted					BIT
 		,@PaymentId					INT
 		,@SplitId					INT
-		,@DistributionHeaderId		INT
 		,@LoadDistributionHeaderId	INT
 		,@ActualCostId				NVARCHAR(50)
 		,@ShipmentId				INT
@@ -78,7 +77,7 @@ SELECT
 	,@TermId						= [intTermId]
 	,@Date							= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
 	,@DueDate						= NULL	--[dtmDueDate]
-	,@ShipDate						= NULL	--[dtmShipDate]
+	,@ShipDate						= CAST(GETDATE() AS DATE)
 	,@PostDate						= NULL	--[dtmPostDate]
 	,@PeriodsToAccrue				= [intPeriodsToAccrue]
 	,@EntitySalespersonId			= [intEntitySalespersonId]
@@ -89,7 +88,10 @@ SELECT
 	,@PONumber						= [strPONumber]
 	,@BOLNumber						= [strBOLNumber]
 	,@DeliverPickup					= [strDeliverPickup]
-	,@Comments						= [strComments] + (CASE WHEN ISNULL(@ForRecurring,0) = 0 THEN ' DUP: ' + [strInvoiceNumber] ELSE '' END)
+	,@Comments						= CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
+										THEN [strComments]
+										ELSE [strComments] + ' DUP: ' + [strInvoiceNumber] 
+									  END
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
 	,@Template						= 0		--[ysnTemplate]
@@ -97,14 +99,14 @@ SELECT
 	,@Calculated					= 0		--[ysnCalculated]
 	,@Splitted						= 0		--[ysnSplitted]
 	,@PaymentId						= NULL	--[intPaymentId]
-	,@SplitId						= NULL	--[intSplitId]
-	,@DistributionHeaderId			= NULL	--[intDistributionHeaderId]
+	,@SplitId						= [intSplitId]
 	,@LoadDistributionHeaderId		= NULL	--[intLoadDistributionHeaderId]
 	,@ActualCostId					= NULL	--[strActualCostId]
 	,@ShipmentId					= NULL	--[intShipmentId]
 	,@TransactionId					= NULL	--[intTransactionId]
 	,@OriginalInvoiceId				= NULL	--[intOriginalInvoiceId]
 	,@EntityId						= @UserId
+	,@ForRecurring					=  [ysnRecurring]
 FROM
 	tblARInvoice
 WHERE
@@ -122,7 +124,7 @@ IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standar
 		RETURN 0;
 	END
 
-IF ISNULL(@DistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
+IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 	BEGIN	
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION
@@ -148,15 +150,42 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 		RETURN 0;
 	END
 
---VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY
-IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
-			INNER JOIN tblICInventoryShipmentItem ISHI ON ID.intInventoryShipmentItemId = ISHI.intInventoryShipmentItemId AND ID.intSalesOrderDetailId = ISHI.intLineNo
-			WHERE ID.intInvoiceId = @InvoiceId
-			  AND ((ID.dblQtyShipped + ID.dblQtyShipped)) > ISNULL(ISHI.dblQuantity, @ZeroDecimal))
+--VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Inventory Shipment
+IF EXISTS(	SELECT 
+				NULL
+			FROM
+				tblARInvoiceDetail ARID
+			INNER JOIN
+				tblICInventoryShipmentItem ICISI 
+					ON ARID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
+			WHERE 
+				ARID.intInvoiceId = @InvoiceId
+				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(ICISI.dblQuantity, @ZeroDecimal))
 	BEGIN
 		IF ISNULL(@RaiseError,0) = 0
 			ROLLBACK TRANSACTION
 		SET @ErrorMessage = 'There are items that will exceed the shipped quantity.'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1)
+		RETURN 0;
+	END
+
+--VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Sales Order
+IF EXISTS(	SELECT
+				NULL 
+			FROM
+				tblARInvoiceDetail ARID
+			INNER JOIN
+				tblSOSalesOrderDetail SOSOD 
+					ON ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId
+					AND ARID.intInventoryShipmentItemId IS NULL
+			WHERE
+				ARID.intInvoiceId = @InvoiceId
+				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(SOSOD.dblQtyOrdered - SOSOD.dblQtyShipped, @ZeroDecimal))
+	BEGIN
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = 'There are items that will exceed the ordered quantity.'
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1)
 		RETURN 0;
@@ -197,7 +226,7 @@ BEGIN TRY
 		,@Splitted								= @Splitted	
 		,@PaymentId								= @PaymentId
 		,@SplitId								= @SplitId
-		,@DistributionHeaderId					= @LoadDistributionHeaderId
+		,@LoadDistributionHeaderId				= @LoadDistributionHeaderId
 		,@ActualCostId							= @ActualCostId		
 		,@ShipmentId							= @ShipmentId
 		,@TransactionId							= @TransactionId
@@ -269,9 +298,10 @@ BEGIN TRY
 		([intInvoiceId]
 		,[strDocumentNumber]
 		,[intItemId]
-		,[strItemDescription]
-		,[intItemUOMId]
+		,[strItemDescription]		
+		,[intOrderUOMId]
 		,[dblQtyOrdered]
+		,[intItemUOMId]
 		,[dblQtyShipped]
 		,[dblDiscount]
 		,[dblItemTermDiscount]
@@ -326,51 +356,59 @@ BEGIN TRY
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
-		,[intItemId]					= [intItemId]
-		,[strItemDescription]			= CONVERT(NVARCHAR(100), [intInvoiceDetailId])
-		,[intItemUOMId]					= [intItemUOMId]
-		,[dblQtyOrdered]				= @ZeroDecimal
-		,[dblQtyShipped]				= [dblQtyShipped]
-		,[dblDiscount]					= [dblDiscount]
-		,[dblItemTermDiscount]			= [dblItemTermDiscount]
-		,[dblPrice]						= [dblPrice]
-		,[strPricing]					= [strPricing]
-		,[dblTotalTax]					= [dblTotalTax]
-		,[dblTotal]						= [dblTotal]
-		,[ysnSubCurrency]				= [ysnSubCurrency]
-		,[intAccountId]					= [intAccountId]
-		,[intCOGSAccountId]				= [intCOGSAccountId]
-		,[intSalesAccountId]			= [intSalesAccountId]
-		,[intInventoryAccountId]		= [intInventoryAccountId]
-		,[intServiceChargeAccountId]	= [intServiceChargeAccountId]
-		,[strMaintenanceType]			= [strMaintenanceType]
-		,[strFrequency]					= [strFrequency]
-		,[dtmMaintenanceDate]			= [dtmMaintenanceDate]
-		,[dblMaintenanceAmount]			= [dblMaintenanceAmount]
-		,[dblLicenseAmount]				= [dblLicenseAmount]
-		,[intTaxGroupId]				= [intTaxGroupId]
+		,[intItemId]					= ARID.[intItemId]
+		,[strItemDescription]			= CONVERT(NVARCHAR(100), ARID.[intInvoiceDetailId])		
+		,[intOrderUOMId]				= ARID.[intOrderUOMId]																								
+		,[dblQtyOrdered]				= ARID.[dblQtyOrdered]
+		,[intItemUOMId]					= ARID.[intItemUOMId]
+		,[dblQtyShipped]				= CASE	WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) = 0 AND ISNULL(ICISI.intInventoryShipmentItemId,0) = 0
+													THEN ARID.[dblQtyShipped]
+												WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) <> 0
+													THEN dbo.fnCalculateQtyBetweenUOM(SOSOD.intItemUOMId, ARID.intItemUOMId, (dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped) - SOSOD.dblQtyShipped))
+												WHEN ISNULL(ICISI.intInventoryShipmentItemId,0) <> 0
+													THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ARID.intItemUOMId, (dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped) - ICISI.dblQuantity))
+												ELSE ARID.[dblQtyShipped]
+										  END
+		,[dblDiscount]					= ARID.[dblDiscount]
+		,[dblItemTermDiscount]			= ARID.[dblItemTermDiscount]
+		,[dblPrice]						= ARID.[dblPrice]
+		,[strPricing]					= ARID.[strPricing]
+		,[dblTotalTax]					= ARID.[dblTotalTax]
+		,[dblTotal]						= ARID.[dblTotal]
+		,[ysnSubCurrency]				= ARID.[ysnSubCurrency]
+		,[intAccountId]					= ARID.[intAccountId]
+		,[intCOGSAccountId]				= ARID.[intCOGSAccountId]
+		,[intSalesAccountId]			= ARID.[intSalesAccountId]
+		,[intInventoryAccountId]		= ARID.[intInventoryAccountId]
+		,[intServiceChargeAccountId]	= ARID.[intServiceChargeAccountId]
+		,[strMaintenanceType]			= ARID.[strMaintenanceType]
+		,[strFrequency]					= ARID.[strFrequency]
+		,[dtmMaintenanceDate]			= ARID.[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]			= ARID.[dblMaintenanceAmount]
+		,[dblLicenseAmount]				= ARID.[dblLicenseAmount]
+		,[intTaxGroupId]				= ARID.[intTaxGroupId]
 		,[intSCInvoiceId]				= NULL
 		,[intSCBudgetId]				= NULL
 		,[strSCInvoiceNumber]			= ''
 		,[strSCBudgetDescription]		= ''
-		,[intInventoryShipmentItemId]	= NULL
+		,[intInventoryShipmentItemId]	= ARID.[intInventoryShipmentItemId]
 		,[intInventoryShipmentChargeId]	= NULL
 		,[strShipmentNumber]			= ''
-		,[intSalesOrderDetailId]		= NULL
-		,[strSalesOrderNumber]			= ''
-		,[intContractHeaderId]			= [intContractHeaderId]
-		,[intContractDetailId]			= [intContractDetailId]
+		,[intSalesOrderDetailId]		= ARID.[intSalesOrderDetailId]
+		,[strSalesOrderNumber]			= ARID.[strSalesOrderNumber]
+		,[intContractHeaderId]			= ARID.[intContractHeaderId]
+		,[intContractDetailId]			= ARID.[intContractDetailId]
 		,[intShipmentId]				= NULL
 		,[intShipmentPurchaseSalesContractId] = NULL
-		,[intItemWeightUOMId]			= [intItemWeightUOMId]
-		,[dblItemWeight]		= [dblItemWeight]
-		,[dblShipmentGrossWt]			= [dblShipmentGrossWt]
-		,[dblShipmentTareWt]			= [dblShipmentTareWt]
-		,[dblShipmentNetWt]				= [dblShipmentNetWt]
+		,[intItemWeightUOMId]			= ARID.[intItemWeightUOMId]
+		,[dblItemWeight]				= ARID.[dblItemWeight]
+		,[dblShipmentGrossWt]			= ARID.[dblShipmentGrossWt]
+		,[dblShipmentTareWt]			= ARID.[dblShipmentTareWt]
+		,[dblShipmentNetWt]				= ARID.[dblShipmentNetWt]
 		,[intTicketId]					= NULL
 		,[intTicketHoursWorkedId]		= NULL
 		,[intOriginalInvoiceDetailId]	= NULL
-		,[intEntitySalespersonId]		= [intEntitySalespersonId]
+		,[intEntitySalespersonId]		= ARID.[intEntitySalespersonId]
 		,[intSiteId]					= NULL
 		,[strBillingBy]					= ''
 		,[dblPercentFull]				= @ZeroDecimal
@@ -382,7 +420,14 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]		= 0
 		,[intConcurrencyId]				= 1
 	FROM
-		tblARInvoiceDetail
+		tblARInvoiceDetail ARID
+	LEFT OUTER JOIN
+		tblICInventoryShipmentItem ICISI 
+			ON ARID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
+	LEFT OUTER JOIN
+		tblSOSalesOrderDetail SOSOD 
+			ON ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId
+			AND ARID.intInventoryShipmentItemId IS NULL		
 	WHERE
 		[intInvoiceId] = @InvoiceId
 END TRY
@@ -460,6 +505,11 @@ BEGIN TRY
 		
 	EXEC [dbo].[uspARReComputeInvoiceAmounts]
 		@InvoiceId = @CreatedInvoiceId
+		
+	EXEC [dbo].uspARUpdateInvoiceIntegrations 
+		@InvoiceId	= @CreatedInvoiceId
+		,@ForDelete	= 0
+		,@UserId	= @UserId
 				
 END TRY
 BEGIN CATCH
@@ -471,7 +521,17 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
-
+BEGIN TRY
+ UPDATE tblARInvoice SET ysnRecurring = @ForRecurring WHERE intInvoiceId = @NewInvoiceId
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = @CurrentErrorMessage
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION 

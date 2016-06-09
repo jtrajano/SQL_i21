@@ -727,14 +727,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByCost calculation for test case 4.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByUnits for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByUnits calculation for test case 5.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByWeights calculation for test case 6.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByWeights for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndCost for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndCost calculation for test case 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndUnits calculation for test case 2.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndUnits for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndStockUnit calculation for test case 3.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 2.sql" />
@@ -962,6 +959,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Cost Adjust.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Ship Stocks.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnActualCosting, Receive Stocks, Ship Stocks, Cost Adjust, Unpost Receive Stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnMultiply.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDivide.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for a successful post.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid company location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid lot id.sql" />
@@ -969,6 +968,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid storage location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostItemChange for invalid sub location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add multiple line items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotMove for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotMerge for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentItemChange for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post on non-lotted item.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">

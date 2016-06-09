@@ -44,7 +44,7 @@ SELECT
 			CASE WHEN Receipt.intSourceType = 1 -- Scale
 				THEN (SELECT strTicketNumber FROM tblSCTicket WHERE intTicketId = ReceiptItem.intSourceId)
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
-				THEN CAST(ISNULL(LogisticsView.intTrackingNumber, '')AS NVARCHAR(50))
+				THEN ISNULL(LogisticsView.strLoadNumber, '')
 			WHEN Receipt.intSourceType = 3 -- Transport
 				THEN ISNULL(TransportView_New.strTransaction, TransportView_Old.strTransaction) 
 			ELSE NULL
@@ -138,7 +138,7 @@ SELECT
 					WHEN Receipt.intSourceType = 1 -- Scale
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
-						THEN ISNULL(LogisticsView.dblReceivedQty, 0)
+						THEN ISNULL(LogisticsView.dblDeliveredQuantity, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
 						THEN ISNULL(ISNULL(TransportView_New.dblReceivedQuantity, TransportView_Old.dblReceivedQuantity), 0) 
 					ELSE NULL
@@ -200,19 +200,19 @@ LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitM
 LEFT JOIN vyuCTContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 		AND strReceiptType = 'Purchase Contract'
-LEFT JOIN vyuLGShipmentContainerReceiptContracts LogisticsView
-	ON LogisticsView.intShipmentContractQtyId = ReceiptItem.intSourceId
-		AND intShipmentBLContainerId = ReceiptItem.intContainerId
+LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
+	ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
+		AND intLoadContainerId = ReceiptItem.intContainerId
 		AND strReceiptType = 'Purchase Contract'
-		AND intSourceType = 2
+		AND Receipt.intSourceType = 2
 
 LEFT JOIN vyuTRTransportReceipt_New TransportView_New
 	ON TransportView_New.intTransportReceiptId = ReceiptItem.intSourceId
-		AND intSourceType = 3
+		AND Receipt.intSourceType = 3
 
 LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
 	ON TransportView_Old.intTransportReceiptId = ReceiptItem.intSourceId
-	AND intSourceType = 3
+	AND Receipt.intSourceType = 3
 
 LEFT JOIN vyuPODetails POView
 	ON POView.intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo

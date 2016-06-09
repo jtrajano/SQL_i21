@@ -51,9 +51,9 @@ SELECT	Ref.intRefundId,
 		Ref.dblFedWithholdingPercentage, 
 		Total.dblPurchaseVolume, 
 		Total.dblSaleVolume, 
-		dblLessFWT = Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100), 
+		dblLessFWT = CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) END, 
 		dblLessService = Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100),
-		dblCheckAmount = (Total.dblVolume * (Total.dblCashPayout/100)) - (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) -  (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100)),
+		dblCheckAmount = (Total.dblVolume * (Total.dblCashPayout/100)) - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblFedWithholdingPercentage/100)) END) -  (Total.dblVolume * (Total.dblCashPayout/100) * (Ref.dblServiceFee/100)),
 		dblNoRefund = (CASE WHEN Total.dblVolume > Ref.dblMinimumRefund THEN 0 ELSE Total.dblVolume END),
 		Ref.ysnPosted,
 		RCus.intRefundCustomerId,
@@ -77,6 +77,8 @@ LEFT JOIN tblPATRefundCategory RCat
 ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
 INNER JOIN tblPATCustomerVolume CVol
 ON CVol.intCustomerPatronId = RCus.intCustomerId
+INNER JOIN tblARCustomer ARC
+ON RCus.intCustomerId = ARC.intEntityCustomerId
 INNER JOIN
 (
 	select
@@ -146,9 +148,50 @@ GROUP BY
 		RCat.dblRefundRate, 
 		Total.dblVolume,
 		Total.dblCashPayout,
-		Ref.dblCashRefund
+		Ref.dblCashRefund,
+		ARC.ysnSubjectToFWT
 
-SELECT @totalRecords = COUNT(*) FROM #tmpRefundData	
+SELECT	intRefundId, 
+		intFiscalYearId, 
+		dtmRefundDate, 
+		strRefund,
+		dblMinimumRefund, 
+		dblServiceFee,		   
+		dblCashCutoffAmount, 
+		dblFedWithholdingPercentage, 
+		dblPurchaseVolume = SUM(dblPurchaseVolume), 
+		dblSaleVolume = SUM(dblSaleVolume), 
+		dblLessFWT = SUM(dblLessFWT), 
+		dblLessService = SUM(dblLessService),
+		dblCheckAmount = SUM(dblCheckAmount),
+		dblNoRefund = SUM(dblNoRefund),
+		ysnPosted,
+		intCustomerId,
+		strStockStatus,
+		ysnEligibleRefund,
+		ysnQualified, 
+		dblRefundAmount = SUM(dblRefundAmount),
+		dblCashRefund = SUM(dblCashRefund),
+		dblEquityRefund = SUM(dblEquityRefund),
+		dblRefundRate = SUM(dblRefundRate), 
+		dblVolume = SUM(dblVolume)
+INTO #tmpRefundDataCombined
+FROM #tmpRefundData
+GROUP BY	intCustomerId,
+			intRefundId,
+			intFiscalYearId,
+			dtmRefundDate,
+			strRefund,
+			dblMinimumRefund, 
+			dblServiceFee,		   
+			dblCashCutoffAmount, 
+			dblFedWithholdingPercentage,
+			ysnPosted,
+			strStockStatus,
+			ysnEligibleRefund,
+			ysnQualified
+
+SELECT @totalRecords = COUNT(*) FROM #tmpRefundDataCombined	
 
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
@@ -179,7 +222,7 @@ DECLARE @validRefundIds NVARCHAR(MAX)
 
 -- CREATE TEMP GL ENTRIES
 SELECT DISTINCT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT(VARCHAR(12),intRefundId)
-FROM #tmpRefundData
+FROM #tmpRefundDataCombined
 ORDER BY 1
 
 IF ISNULL(@ysnPosted,0) = 1
@@ -217,18 +260,10 @@ BEGIN TRY
 		WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
 			THEN DELETE
 		WHEN MATCHED
-			THEN UPDATE SET EQ.dblEquity = CASE WHEN B.ysnPosted = 1 THEN 
-													(EQ.dblEquity + (CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
-																		(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																	B.dblRefundAmount - (B.dblRefundAmount * .25) END)) 
-										   ELSE (EQ.dblEquity - (CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
-																		(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																	B.dblRefundAmount - (B.dblRefundAmount * .25) END)) END
+			THEN UPDATE SET EQ.dblEquity = CASE WHEN B.ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END
 		WHEN NOT MATCHED BY TARGET
 			THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dtmLastActivityDate, intConcurrencyId)
-				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, CASE WHEN B.dblRefundAmount < B.dblCashCutoffAmount THEN 
-																		(CASE WHEN @strCutoffTo = 'Cash' THEN 0 ELSE B.dblRefundAmount END) ELSE 
-																	B.dblRefundAmount - (B.dblRefundAmount * .25) END, GETDATE(), 1);
+				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, B.dblEquityRefund, GETDATE(), 1);
 
 
 --=====================================================================================================================================
@@ -356,6 +391,7 @@ Post_Cleanup:
 	--INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundData')) DROP TABLE #tmpRefundDataCombined
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRefundPostData')) DROP TABLE #tmpRefundPostData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCurrentData')) DROP TABLE #tmpCurrentData
 END

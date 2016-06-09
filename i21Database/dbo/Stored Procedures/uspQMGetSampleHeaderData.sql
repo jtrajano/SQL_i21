@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetSampleHeaderData]
-	@intProductTypeId INT
+     @intProductTypeId INT
 	,@intProductValueId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -25,8 +25,9 @@ ELSE IF @intProductTypeId = 8 -- Contract Line Item
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
-		,C.intContractHeaderId
+		--,C.intContractHeaderId
 		,C.intContractDetailId
+		,C.intItemContractId
 		--,C.intItemId
 		--,C.strItemDescription AS strDescription
 		,CAST(CASE 
@@ -69,8 +70,9 @@ BEGIN
 		,S.intLoadDetailContainerLinkId
 		,S.strContainerNumber
 		,S.dblQuantity AS dblRepresentingQty
-		,C.intContractHeaderId
+		--,C.intContractHeaderId
 		,C.intContractDetailId
+		,C.intItemContractId
 		--,C.intItemId
 		--,C.strItemDescription AS strDescription
 		,S.intItemId
@@ -79,6 +81,7 @@ BEGIN
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
+		,S.strMarks
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentBLContainerContractId = @intProductValueId
@@ -96,8 +99,9 @@ BEGIN
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.dblQuantity AS dblRepresentingQty
-		,C.intContractHeaderId
+		--,C.intContractHeaderId
 		,C.intContractDetailId
+		,C.intItemContractId
 		--,C.intItemId
 		--,C.strItemDescription AS strDescription
 		,S.intItemId
@@ -106,6 +110,7 @@ BEGIN
 		,C.intEntityId
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
+		,S.strMarks
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentContractQtyId = @intProductValueId

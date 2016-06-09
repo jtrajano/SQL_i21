@@ -12,7 +12,7 @@ BEGIN TRY
 	DECLARE @dblLotWeight NUMERIC(18, 6)
 
 	IF NOT EXISTS (
-			SELECT *
+			SELECT 1
 			FROM tblWHPickForShipment
 			WHERE strShipmentNo = @strShipmentNo
 			)
@@ -53,9 +53,8 @@ BEGIN TRY
 		DELETE FROM tblWHPickForShipment WHERE id = @intMinId
 												 
 		SELECT @intMinId = MIN(id)
-		FROM tblWHPickForShipment WHERE id > @intMinId
+		FROM tblWHPickForShipment WHERE strShipmentNo = @strShipmentNo AND id > @intMinId
 	END
-	
 END TRY
 
 BEGIN CATCH

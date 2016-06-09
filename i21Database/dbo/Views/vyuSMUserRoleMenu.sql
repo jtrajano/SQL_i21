@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].vyuSMUserRoleMenu
-AS 
-
+AS
 SELECT 
 intUserRoleMenuId,
 intUserRoleId,

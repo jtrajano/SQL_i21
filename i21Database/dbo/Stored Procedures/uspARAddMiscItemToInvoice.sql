@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddMiscItemToInvoice]
-	 @InvoiceId						INT	
+	 @InvoiceId						INT
+	,@ItemPrepayTypeId				INT				= 0
+	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0			
@@ -71,6 +73,8 @@ BEGIN TRY
 	INSERT INTO [tblARInvoiceDetail]
 		([intInvoiceId]
 		,[intItemId]
+		,[intPrepayTypeId]
+		,[dblPrepayRate]
 		,[strItemDescription]
 		,[strDocumentNumber]
 		,[intItemUOMId]
@@ -117,7 +121,9 @@ BEGIN TRY
 		,[intConcurrencyId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
-		,[intItemId]						= NULL 
+		,[intItemId]						= NULL
+		,[intPrepayTypeId]					= @ItemPrepayTypeId 
+		,[dblPrepayRate]					= @ItemPrepayRate 
 		,[strItemDescription]				= ISNULL(@ItemDescription, '')
 		,[strDocumentNumber]				= @ItemDocumentNumber
 		,[intItemUOMId]						= NULL

@@ -571,6 +571,7 @@ BEGIN
 					,@TransactionType
 					,@EntityId
 					,@TaxGroupId
+					,@ShipFromId
 
 				DECLARE	@Amount	NUMERIC(38,20) 
 						,@Qty	NUMERIC(38,20)
@@ -582,8 +583,8 @@ BEGIN
 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-						INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
-							ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+						--INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
+						--	ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 				WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 						AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 
@@ -673,13 +674,48 @@ BEGIN
 						,ysnCheckoffTax				= ItemTax.ysnCheckoffTax
 
 						-- Fields used in the calculation of the taxes
-						,dblAmount					= ReceiptItem.dblUnitCost
-						,dblQty						= ReceiptItem.dblOpenReceive 
+						,dblAmount					=	-- ReceiptItem.dblUnitCost
+														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																	dbo.fnMultiply(
+																		dbo.fnDivide(
+																			ISNULL(dblUnitCost, 0) 
+																			,ISNULL(Receipt.intSubCurrencyCents, 1) 
+																		)
+																		,dbo.fnDivide(
+																			GrossNetUOM.dblUnitQty
+																			,CostUOM.dblUnitQty 
+																		)
+																	)
+																ELSE 
+																	dbo.fnMultiply(
+																		dbo.fnDivide(
+																			ISNULL(dblUnitCost, 0) 
+																			,ISNULL(Receipt.intSubCurrencyCents, 1) 
+																		)
+																		,dbo.fnDivide(
+																			ReceiveUOM.dblUnitQty
+																			,CostUOM.dblUnitQty 
+																		)
+																	)																	
+														END 
+
+						,dblQty						=	CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																	ReceiptItem.dblNet 
+																ELSE 
+																	ReceiptItem.dblOpenReceive 
+														END 
 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 							INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
 								ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+							LEFT JOIN dbo.tblICItemUOM ReceiveUOM 
+								ON ReceiveUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+							LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
+								ON GrossNetUOM.intItemUOMId = ReceiptItem.intWeightUOMId
+							LEFT JOIN dbo.tblICItemUOM CostUOM
+								ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 					
+
 					WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 					
@@ -750,7 +786,7 @@ BEGIN
 		UPDATE	ReceiptItem 
 		SET		dblLineTotal = 
 					ROUND(
-						ISNULL(dblTax, 0) + 
+						--ISNULL(dblTax, 0) + 
 						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 									dbo.fnMultiply(
 										ISNULL(ReceiptItem.dblNet, 0)

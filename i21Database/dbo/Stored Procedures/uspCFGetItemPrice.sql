@@ -20,6 +20,10 @@
 ,@CFAvailableQuantity	NUMERIC(18,6)   = NULL OUTPUT 
 ,@CFTransferCost		NUMERIC(18,6)   = NULL
 ,@CFOriginalPrice		NUMERIC(18,6)   = NULL OUTPUT
+,@CFCreditCard			BIT				= 0
+,@CFPriceProfileId		INT				= NULL OUTPUT
+,@CFPriceIndexId		INT				= NULL OUTPUT
+,@CFSiteGroupId			INT				= NULL OUTPUT
 
 AS
 
@@ -84,6 +88,14 @@ IF(@CFPriceOut IS NOT NULL)
 				BEGIN 
 					SET @CFStandardPrice = @CFOriginalPrice  
 					SET @CFPricingOut = 'Import File Price'
+
+					IF (@CFCreditCard = 1)
+					BEGIN -- ALWAYS USE IMPORT FILE PRICE ON CREDIT CARD TRANSACTION
+						SET @CFPriceOut = @CFStandardPrice
+						RETURN
+					END
+
+					
 				END 
 			ELSE
 				BEGIN
@@ -1066,11 +1078,18 @@ BEGIN
 	-- Price Profile Computation --
 	-------------------------------
 
-	select dblOriginalGrossPrice from tblCFTransaction
+	--select dblOriginalGrossPrice from tblCFTransaction
 	
-	SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
-	print 'rate'
-	print @Rate
+	--SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
+
+	SELECT TOP 1
+	 @Rate = dblRate
+	,@CFPriceProfileId = intPriceProfileHeaderId
+	,@CFPriceIndexId = intLocalPricingIndex
+	,@CFSiteGroupId = intSiteGroupId
+	FROM @cfMatchPriceProfile
+
+	
 	SET @CFPriceBasis = (SELECT TOP 1 strBasis FROM @cfMatchPriceProfile)
 	
 	IF(@CFTransactionType = 'Local/Network')

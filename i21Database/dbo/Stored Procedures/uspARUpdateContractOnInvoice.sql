@@ -119,7 +119,7 @@ BEGIN TRY
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.[intItemId] = TD.[intItemId]
 		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
-		AND ISNULL(H.intDistributionHeaderId, 0) = 0
+		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		
 	UNION ALL
 
@@ -152,7 +152,7 @@ BEGIN TRY
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
-		AND ISNULL(H.intDistributionHeaderId, 0) = 0	
+		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		
 	UNION ALL
 
@@ -185,7 +185,7 @@ BEGIN TRY
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
-		AND ISNULL(H.intDistributionHeaderId, 0) = 0
+		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		
 	UNION ALL
 		
@@ -217,7 +217,7 @@ BEGIN TRY
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
-		AND ISNULL(H.intDistributionHeaderId, 0) = 0	
+		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		
 	UNION ALL	
 
@@ -243,7 +243,7 @@ BEGIN TRY
 		AND TD.[intSalesOrderDetailId] IS NULL
 		AND TD.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
-		AND ISNULL(H.intDistributionHeaderId, 0) = 0
+		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
 		
 	UNION ALL
 		
@@ -269,7 +269,7 @@ BEGIN TRY
 		AND Detail.[intSalesOrderDetailId] IS NULL
 		AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
-		AND ISNULL(Header.intDistributionHeaderId, 0) = 0
+		AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess

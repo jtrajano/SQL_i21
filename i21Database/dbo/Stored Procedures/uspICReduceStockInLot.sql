@@ -57,22 +57,27 @@ USING (
 	AND Lot_bucket.intLotId = Source_Query.intLotId	
 	AND ISNULL(Lot_bucket.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
 	AND ISNULL(Lot_bucket.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
-	AND (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) > 0 
+	AND ROUND((Lot_bucket.dblStockIn - Lot_bucket.dblStockOut), 6) > 0  -- Round out the remaining stock. If it becomes zero, then stock bucket is considered fully consumed already. 
 	AND dbo.fnDateGreaterThanEquals(@dtmDate, Lot_bucket.dtmDate) = 1
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 
 	UPDATE 
-	SET	Lot_bucket.dblStockOut = ISNULL(Lot_bucket.dblStockOut, 0) 
-					+ CASE	WHEN (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) >= @dblQty THEN @dblQty
-							ELSE (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) 
+	SET	Lot_bucket.dblStockOut =	
+					ISNULL(Lot_bucket.dblStockOut, 0) +
+					CASE	WHEN (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) >= @dblQty THEN 
+								 @dblQty
+							ELSE 
+								Lot_bucket.dblStockIn - Lot_bucket.dblStockOut
 					END 
 
 		,Lot_bucket.intConcurrencyId = ISNULL(Lot_bucket.intConcurrencyId, 0) + 1
 
 		-- update the remaining qty
 		,@RemainingQty = 
-					CASE	WHEN (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) >= @dblQty THEN 0
+					CASE	--WHEN (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) >= @dblQty THEN 0
+							WHEN ROUND((Lot_bucket.dblStockIn - Lot_bucket.dblStockOut), 6) >= ROUND(@dblQty, 6) THEN 0
+							WHEN ROUND((Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) - @dblQty, 6) = 0 THEN 0 
 							ELSE (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) - @dblQty
 					END
 

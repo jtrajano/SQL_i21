@@ -10,9 +10,9 @@ select
 	b.dtmBirthDate,
 	b.strGender,
 	b.intTerritoryId,
-	d.strPhone,
+	strPhone = phone.strPhone,
 	d.strPhone2,
-	d.strMobile,
+	strMobile = mob.strPhone,
 	d.strEmail,
 	d.strEmail2,
 	d.strFax,
@@ -40,5 +40,8 @@ from tblEMEntity a
 	left join [tblEMEntityLocation] e
 		on a.intEntityId = e.intEntityId 
 			and e.ysnDefaultLocation = 1
-
+	LEFT JOIN tblEMEntityPhoneNumber phone
+		ON phone.intEntityId = d.intEntityId
+	LEFT JOIN tblEMEntityMobileNumber mob
+		ON mob.intEntityId = d.intEntityId
 GO		

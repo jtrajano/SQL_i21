@@ -18,7 +18,7 @@ SELECT
 	,Shipment.strVendor
 	,Shipment.strItemNo
 	,Shipment.strItemDescription
-	,'' intTrackingNumber
+	,'' strTrackingNumber
 	,Shipment.strBLNumber
 	,Shipment.strContainerNumber
 	,Shipment.strMarks
@@ -48,7 +48,7 @@ SELECT
 	,Spot.strVendor
 	,Spot.strItemNo
 	,Spot.strItemDescription
-	,Spot.strLoadNumber
+	,Spot.strLoadNumber AS strTrackingNumber
 	,Spot.strBLNumber
 	,Spot.strContainerNumber
 	,Spot.strMarkings as strMarks

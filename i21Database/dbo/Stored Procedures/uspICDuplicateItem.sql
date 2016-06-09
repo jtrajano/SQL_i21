@@ -137,7 +137,30 @@ BEGIN
 		intOnCostTypeId,
 		dblAmount,
 		intCostUOMId,
-		ysnHasMFTImplication)
+		ysnHasMFTImplication,
+		intPackTypeId,
+		strWeightControlCode,
+		dblBlendWeight,
+		dblNetWeight,
+		dblUnitPerCase,
+		dblQuarantineDuration,
+		intOwnerId,
+		intCustomerId,
+		dblCaseWeight,
+		strWarehouseStatus,
+		ysnKosherCertified,
+		ysnFairTradeCompliant,
+		ysnOrganic,
+		ysnRainForestCertified,
+		dblRiskScore,
+		dblDensity,
+		dtmDateAvailable,
+		ysnMinorIngredient,
+		ysnExternalItem,
+		strExternalGroup,
+		ysnSellableItem,
+		dblMinStockWeeks,
+		dblFullContainerSize)
 	SELECT @NewItemNo,
 		strType,
 		strDescription,
@@ -244,7 +267,30 @@ BEGIN
 		intOnCostTypeId,
 		dblAmount,
 		intCostUOMId,
-		ysnHasMFTImplication
+		ysnHasMFTImplication,
+		intPackTypeId,
+		strWeightControlCode,
+		dblBlendWeight,
+		dblNetWeight,
+		dblUnitPerCase,
+		dblQuarantineDuration,
+		intOwnerId,
+		intCustomerId,
+		dblCaseWeight,
+		strWarehouseStatus,
+		ysnKosherCertified,
+		ysnFairTradeCompliant,
+		ysnOrganic,
+		ysnRainForestCertified,
+		dblRiskScore,
+		dblDensity,
+		dtmDateAvailable,
+		ysnMinorIngredient,
+		ysnExternalItem,
+		strExternalGroup,
+		ysnSellableItem,
+		dblMinStockWeeks,
+		dblFullContainerSize
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
@@ -662,6 +708,21 @@ BEGIN
 	-------------------------------------------
 	-- End duplication of Item POS SLA table --
 	-------------------------------------------
+
+	---------------------------------------------------
+	-- Duplicate Motor Fuel Tax --
+	---------------------------------------------------
+	INSERT INTO tblICItemMotorFuelTax(intItemId,
+		intTaxAuthorityId,
+		intProductCodeId)
+	SELECT @NewItemId,
+		intTaxAuthorityId,
+		intProductCodeId
+	FROM tblICItemMotorFuelTax
+	WHERE intItemId = @ItemId
+	------------------------------------------------------------
+	-- End duplication of Motor Fuel Tax  --
+	------------------------------------------------------------
 
 	---------------------------------------------------
 	-- Duplicate Item Customer Cross Reference table --

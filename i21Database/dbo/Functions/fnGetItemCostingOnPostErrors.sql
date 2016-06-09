@@ -164,7 +164,7 @@ RETURN (
 										FROM	dbo.tblICStorageLocation
 										WHERE	intStorageLocationId = @intStorageLocationId
 									)
-									, '(Blank Storage Location)'
+									, '(Blank Storage Location)' 
 								)
 							)
 				,intErrorCode = 80003
@@ -229,7 +229,7 @@ RETURN (
 								AND Lot.intWeightUOMId = @intItemUOMId
 					WHERE	Item.intItemId = @intItemId
 							AND Lot.intLotId IS NOT NULL
-							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
+							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblWeight, 0) < 0
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'

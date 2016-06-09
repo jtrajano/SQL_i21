@@ -2,11 +2,9 @@
     [intCountryID]				INT				IDENTITY (1, 1) NOT NULL,
     [strCountry]				NVARCHAR (100)	COLLATE Latin1_General_CI_AS NOT NULL,
     [strCountryCode]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
-	[intCityAreaDigit]			INT				NULL,
-	[strCityAreaMask]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
-	[intLocalDigit]				INT				NULL,
-	[strLocalMask]				NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
-	[ysnDisplayCountryCode]		NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+	[strCountryFormat]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+	[strAreaCityFormat]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+	[strLocalNumberFormat]		NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
     [intSort]					INT				NULL,
     [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC), 
@@ -49,7 +47,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMCountry',
     @level2type = N'COLUMN',
-    @level2name = N'intCityAreaDigit'
+    @level2name = N'strCountryFormat'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Country',
@@ -58,7 +56,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMCountry',
     @level2type = N'COLUMN',
-    @level2name = N'strCityAreaMask'
+    @level2name = N'strAreaCityFormat'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Country',
@@ -67,25 +65,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMCountry',
     @level2type = N'COLUMN',
-    @level2name = N'intLocalDigit'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Country',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSMCountry',
-    @level2type = N'COLUMN',
-    @level2name = N'strLocalMask'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Country',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSMCountry',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnDisplayCountryCode'
+    @level2name = N'strLocalNumberFormat'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Country',

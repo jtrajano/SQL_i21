@@ -5,13 +5,13 @@ AS
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId ASC) AS INT) intUniqueId,*
 	FROM
 	(			
-			SELECT	CQ.intContractDetailId,
-					SH.intTrackingNumber,
+			SELECT	CQ.intSContractDetailId intContractDetailId,
+					SH.strLoadNumber,
 					IU.intItemUOMId,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNetWt)	AS dblNetWeight,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNet)	AS dblNetWeight,
 					IM.strUnitMeasure
-			FROM	tblLGShipmentContractQty	CQ
-			JOIN	tblLGShipment				SH	ON	SH.intShipmentId		=	CQ.intShipmentId 
+			FROM	tblLGLoadDetail	CQ
+			JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
 			JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CQ.intItemId	
 													AND IU.intUnitMeasureId		=	SH.intWeightUnitMeasureId
 			JOIN	tblICUnitMeasure			IM	ON	IM.intUnitMeasureId		=	IU.intUnitMeasureId		CROSS	
@@ -20,13 +20,13 @@ AS
 			UNION ALL
 
 			SELECT	AD.intSContractDetailId,
-					SH.intTrackingNumber,
+					SH.strLoadNumber,
 					IU.intItemUOMId,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNetWt),
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNet),
 					IM.strUnitMeasure
-			FROM	tblLGShipmentContractQty	CQ
-			JOIN	tblLGShipment				SH	ON	SH.intShipmentId		=	CQ.intShipmentId 
-			JOIN	tblLGAllocationDetail		AD	ON	AD.intPContractDetailId =	CQ.intContractDetailId
+			FROM	tblLGLoadDetail	CQ
+			JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
+			JOIN	tblLGAllocationDetail		AD	ON	AD.intPContractDetailId =	CQ.intPContractDetailId
 			JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CQ.intItemId	
 													AND IU.intUnitMeasureId		=	SH.intWeightUnitMeasureId
 			JOIN	tblICUnitMeasure			IM	ON	IM.intUnitMeasureId		=	IU.intUnitMeasureId		CROSS	

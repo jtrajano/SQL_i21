@@ -7,78 +7,192 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @SQL					NVARCHAR(MAX) = '',
-			@ErrMsg					NVARCHAR(MAX),
-			@intContractDetailId	INT,
-			@dblNewQuantity			NUMERIC(18,6),
-			@intNewItemUOMId		INT,
-			@dblOldQuantity			NUMERIC(18,6),
-			@intOldItemUOMId		INT,
-			@dblNewQuantityInOldUOM	NUMERIC(18,6),
-			@dblQuantityUsed		NUMERIC(18,6),
-			@idoc					INT,
-			@strNumber				NVARCHAR(100),
-			@intContractSeq			INT,
-			@intContractHeaderId	INT,
-			@intNewStatusId			INT,
-			@intOldStatusId			INT,
-			@intContractTypeId		INT,
-			@intOldItemId			INT,
-			@intOldQtyUnitMeasureId	INT
+	DECLARE @SQL						NVARCHAR(MAX) = '',
+			@ErrMsg						NVARCHAR(MAX),
+			@intContractDetailId		INT,
+			@dblNewQuantity				NUMERIC(18,6),
+			@intNewItemUOMId			INT,
+			@dblOldQuantity				NUMERIC(18,6),
+			@intOldItemUOMId			INT,
+			@dblNewQuantityInOldUOM		NUMERIC(18,6),
+			@dblQuantityUsed			NUMERIC(18,6),
+			@idoc						INT,
+			@strNumber					NVARCHAR(100),
+			@intContractSeq				INT,
+			@intContractHeaderId		INT,
+			@intNewStatusId				INT,
+			@intOldStatusId				INT,
+			@intContractTypeId			INT,
+			@intOldItemId				INT,
+			@intOldQtyUnitMeasureId		INT,
+
+			@intNewCompanyLocationId	INT,
+			@dtmNewStartDate			DATETIME,
+			@dtmNewEndDate				DATETIME,
+			@intCreatedById				INT,
+			@dtmCreated					DATETIME,
+			@intConcurrencyId			INT,
+			@intNewItemId				INT,
+			@intNewPricingTypeId		INT,
+			@intNewScheduleRuleId		INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
-	SELECT	@intContractDetailId	=	intContractDetailId,
-			@dblNewQuantity			=	dblQuantity,
-			@intNewItemUOMId		=	intItemUOMId,
-			@intContractHeaderId	=	intContractHeaderId,
-			@intNewStatusId			=	intContractStatusId
+	SELECT	@intContractHeaderId		=	intContractHeaderId,
+			@intContractDetailId		=	intContractDetailId,
+			@intContractSeq				=	intContractSeq,
+
+			@dblNewQuantity				=	dblQuantity,
+			@intNewItemId				=	intItemId,
+			@intNewItemUOMId			=	intItemUOMId,
+			@intNewStatusId				=	intContractStatusId,
+			@intNewCompanyLocationId	=	intCompanyLocationId,
+			@dtmNewStartDate			=	dtmStartDate,
+			@dtmNewEndDate				=	dtmEndDate,
+			@intCreatedById				=	intCreatedById,
+			@dtmCreated					=	dtmCreated,
+			@intConcurrencyId			=	intConcurrencyId,
+			@intNewPricingTypeId		=	intPricingTypeId,
+			@intNewScheduleRuleId		=	intStorageScheduleRuleId
 
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
 	(
-			intContractDetailId		INT,
-			dblQuantity				NUMERIC(18,6),
-			intItemUOMId			INT,
-			intContractHeaderId		INT,
-			intContractStatusId		INT
+			intContractDetailId			INT,
+			dblQuantity					NUMERIC(18,6),
+			intItemUOMId				INT,
+			intContractHeaderId			INT,
+			intContractStatusId			INT,
+
+			intContractSeq				INT,
+			intCompanyLocationId		INT,
+			dtmStartDate				DATETIME,
+			dtmEndDate					DATETIME,
+			intCreatedById				INT,
+			dtmCreated					DATETIME,
+			intConcurrencyId			INT,
+			intItemId					INT,
+			intPricingTypeId			INT,
+			intStorageScheduleRuleId	INT
 	)  
 
-	SELECT	@dblOldQuantity			=	CD.dblQuantity,
-			@intOldItemUOMId		=	CD.intItemUOMId,
-			@intContractSeq			=	CD.intContractSeq,
-			@intOldStatusId			=	CD.intContractStatusId,
-			@intContractTypeId		=	CH.intContractTypeId,
-			@intOldItemId			=	CD.intItemId,
-			@intOldQtyUnitMeasureId	=	IU.intUnitMeasureId,
+	IF @RowState  <> 'Added'
+	BEGIN
+		SELECT	@dblOldQuantity			=	CD.dblQuantity,
+				@intOldItemUOMId		=	CD.intItemUOMId,
+				@intContractSeq			=	CD.intContractSeq,
+				@intOldStatusId			=	CD.intContractStatusId,
+				@intContractTypeId		=	CH.intContractTypeId,
+				@intOldItemId			=	CD.intItemId,
+				@intOldQtyUnitMeasureId	=	IU.intUnitMeasureId,
 
-			@dblNewQuantity			=	ISNULL(@dblNewQuantity,CD.dblQuantity),
-			@intNewItemUOMId		=	ISNULL(@intNewItemUOMId,CD.intItemUOMId),
-			@intContractHeaderId	=	ISNULL(@intContractHeaderId,CD.intContractHeaderId),
-			@intNewStatusId			=	ISNULL(@intNewStatusId,CD.intContractStatusId)
+				@dblNewQuantity			=	ISNULL(@dblNewQuantity,CD.dblQuantity),
+				@intNewItemUOMId		=	ISNULL(@intNewItemUOMId,CD.intItemUOMId),
+				@intContractHeaderId	=	ISNULL(@intContractHeaderId,CD.intContractHeaderId),
+				@intNewStatusId			=	ISNULL(@intNewStatusId,CD.intContractStatusId)
 
-	FROM	tblCTContractDetail	CD
-	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
-	JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CD.intItemUOMId
-	WHERE	intContractDetailId	=	@intContractDetailId
+		FROM	tblCTContractDetail	CD
+		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	LEFT
+		JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CD.intItemUOMId
+		WHERE	intContractDetailId	=	ISNULL(@intContractDetailId,0)
+	END
 
 	SELECT @dblNewQuantityInOldUOM = dbo.fnCTConvertQtyToTargetItemUOM(@intNewItemUOMId,@intOldItemUOMId,@dblNewQuantity)
 
+	IF @RowState  = 'Added'
+	BEGIN
+		--IF NOT EXISTS(SELECT * FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId)
+		--BEGIN
+		--	SET @ErrMsg = 'Concurrency Id is missing while creating contract.'
+		--	RAISERROR(@ErrMsg,16,1)
+		--END
+		IF	@intConcurrencyId IS NULL
+		BEGIN
+			SET @ErrMsg = 'Concurrency Id is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intNewStatusId IS NULL
+		BEGIN
+			SET @ErrMsg = 'Contract status is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intContractSeq IS NULL
+		BEGIN
+			SET @ErrMsg = 'Sequence number is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intNewCompanyLocationId IS NULL
+		BEGIN
+			SET @ErrMsg = 'Location is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@dtmNewStartDate IS NULL
+		BEGIN
+			SET @ErrMsg = 'Start date is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@dtmNewEndDate IS NULL
+		BEGIN
+			SET @ErrMsg = 'End date is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intNewItemId IS NULL
+		BEGIN
+			SET @ErrMsg = 'Item is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intNewItemUOMId IS NULL
+		BEGIN
+			SET @ErrMsg = 'UOM is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intItemUOMId = @intNewItemUOMId)
+		BEGIN
+			SET @ErrMsg = 'Combination of item id and UOM id is not matching.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@dblNewQuantity IS NULL
+		BEGIN
+			SET @ErrMsg = 'Quantity is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intNewPricingTypeId IS NULL
+		BEGIN
+			SET @ErrMsg = 'Pricing type is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intNewPricingTypeId = 5 AND @intNewScheduleRuleId IS NULL
+		BEGIN
+			SET @ErrMsg = 'Storage Schedule is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@intCreatedById IS NULL
+		BEGIN
+			SET @ErrMsg = 'Created by is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+		IF	@dtmCreated IS NULL
+		BEGIN
+			SET @ErrMsg = 'Created date is missing while creating contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+	END
+
 	IF @RowState  = 'Modified'
 	BEGIN
-		SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShippingInstructionContractQty WHERE intContractDetailId = @intContractDetailId
-		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
-		BEGIN
-			SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in shipping instruction.'
-			RAISERROR(@ErrMsg,16,1) 
-		END
+		--SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShippingInstructionContractQty WHERE intContractDetailId = @intContractDetailId
+		--IF @dblQuantityUsed > @dblNewQuantityInOldUOM
+		--BEGIN
+		--	SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in shipping instruction.'
+		--	RAISERROR(@ErrMsg,16,1) 
+		--END
 
-		SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShipmentContractQty WHERE intContractDetailId = @intContractDetailId
-		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
-		BEGIN
-			SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Inbound shipments.'
-			RAISERROR(@ErrMsg,16,1) 
-		END
+		--SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShipmentContractQty WHERE intContractDetailId = @intContractDetailId
+		--IF @dblQuantityUsed > @dblNewQuantityInOldUOM
+		--BEGIN
+		--	SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Inbound shipments.'
+		--	RAISERROR(@ErrMsg,16,1) 
+		--END
 
 		IF @intContractTypeId = 1
 		BEGIN

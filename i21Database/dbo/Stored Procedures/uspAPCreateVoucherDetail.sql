@@ -3,7 +3,8 @@
 	@voucherPODetails AS VoucherPODetail READONLY,
 	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
 	@voucherDetailReceiptPO AS [VoucherDetailReceipt] READONLY,
-	@voucherNonInvDetailContracts AS VoucherDetailNonInvContract READONLY
+	@voucherNonInvDetailContracts AS VoucherDetailNonInvContract READONLY,
+	@voucherDetailCC AS VoucherDetailCC READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -35,6 +36,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 	IF EXISTS(SELECT 1 FROM @voucherNonInvDetailContracts)
 	BEGIN
 		EXEC uspAPCreateVoucherDetailNonInvContract @billId, @voucherNonInvDetailContracts
+	END 
+
+	IF EXISTS(SELECT 1 FROM @voucherDetailCC)
+	BEGIN
+		EXEC uspAPCreateVoucherDetailCC @billId, @voucherDetailCC
 	END 
 
 IF @transCount = 0 COMMIT TRANSACTION

@@ -57,8 +57,8 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
 		[strBatchID]					=	'',
 		[intAccountId]					=	D.intUndistributedEquityId,
-		[dblDebit]						=	A.dblEquityRefund,
-		[dblCredit]						=	A.dblEquityRefund,
+		[dblDebit]						=	0,
+		[dblCredit]						=	B.dblEquityRefund,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strRefund,
@@ -99,8 +99,8 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
 		[strBatchID]					=	'',
 		[intAccountId]					=	@apClearing, 
-		[dblDebit]						=	A.dblCashCutoffAmount,
-		[dblCredit]						=	A.dblCashCutoffAmount,
+		[dblDebit]						=	0,
+		[dblCredit]						=	B.dblCashRefund - (B.dblCashRefund * (A.dblServiceFee/100)) - (B.dblCashRefund * (A.dblFedWithholdingPercentage/100)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strRefund,
@@ -141,8 +141,8 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
 		[strBatchID]					=	'',
 		[intAccountId]					=	D.intGeneralReserveId,
-		[dblDebit]						=	SUM(B.dblRefundAmount),
-		[dblCredit]						=	SUM(B.dblRefundAmount),
+		[dblDebit]						=	B.dblRefundAmount,
+		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strRefund,
@@ -177,15 +177,14 @@ BEGIN
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
-	GROUP BY A.dtmRefundDate, D.intGeneralReserveId, A.strRefund, A.intRefundId
 	UNION ALL
 	--Service Fee Income
 	SELECT	
 	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
 	[strBatchID]					=	'',
 	[intAccountId]					=	(SELECT DISTINCT intServiceFeeIncomeId FROM tblPATCompanyPreference),
-	[dblDebit]						=	A.dblServiceFee,
-	[dblCredit]						=	A.dblServiceFee, 
+	[dblDebit]						=	0,
+	[dblCredit]						=	B.dblCashRefund * (A.dblServiceFee/100), 
 	[dblDebitUnit]					=	0,
 	[dblCreditUnit]					=	0,
 	[strDescription]				=	A.strRefund,
@@ -226,8 +225,8 @@ WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
 	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmRefundDate), 0),
 	[strBatchID]					=	'',
 	[intAccountId]					=	(SELECT DISTINCT intFWTLiabilityAccountId FROM tblPATCompanyPreference), -- change this
-	[dblDebit]						=	A.dblLessFWT,
-	[dblCredit]						=	A.dblLessFWT, 
+	[dblDebit]						=	0,
+	[dblCredit]						=	B.dblCashRefund * (A.dblFedWithholdingPercentage/100), 
 	[dblDebitUnit]					=	0,
 	[dblCreditUnit]					=	0,
 	[strDescription]				=	A.strRefund,
@@ -262,7 +261,6 @@ FROM	[dbo].tblPATRefund A
 		INNER JOIN tblPATRefundRate D
 			ON B.intRefundTypeId = D.intRefundTypeId
 WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
-GROUP BY A.dtmRefundDate, A.dblLessFWT, A.strRefund, A.intRefundId
 	RETURN
 END
 

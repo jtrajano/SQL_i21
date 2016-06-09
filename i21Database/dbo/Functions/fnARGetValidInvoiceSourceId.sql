@@ -41,6 +41,9 @@ IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND IS
 -- 8. "Sale OffSite"
 -- 9. "Settle Storage"
 -- 10. "Process Grain Storage"
+-- 11. "Consumption Site"
+IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intCustomerStorageId], 0) <> 0)
+	RETURN 7	
 
 -- 11. "Consumption Site"
 IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intSiteId], 0) <> 0)
@@ -48,7 +51,20 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId 
 	
 -- 12. "Meter Billing"
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intMeterReadingId], 0) <> 0)
-	RETURN 12				
+	RETURN 12		
+	
+-- 13. "Load/Shipment Schedules"
+IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intLoadDetailId], 0) <> 0)
+	RETURN 13
+	
+-- 14. "Credit Card Reconciliation"
+IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intSiteDetailId], 0) <> 0)
+	RETURN 14
+
+-- 15. "Sales Contract"
+IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intContractHeaderId], 0) <> 0)
+	RETURN 15
+						
 	
 
 	RETURN @SourceId

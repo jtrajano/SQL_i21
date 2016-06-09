@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPostConsumptionProduction] @intWorkOrderId INT
 	,@intItemId INT
 	,@strLotNumber NVARCHAR(50)
-	,@dblWeight NUMERIC(38,20)
+	,@dblWeight NUMERIC(38, 20)
 	,@intWeightUOMId INT
-	,@dblUnitQty NUMERIC(38,20) = NULL
-	,@dblQty NUMERIC(38,20)
+	,@dblUnitQty NUMERIC(38, 20) = NULL
+	,@dblQty NUMERIC(38, 20)
 	,@intItemUOMId INT
 	,@intUserId INT = NULL
 	,@intBatchId INT
@@ -13,6 +13,8 @@
 	,@strVendorLotNo NVARCHAR(50) = NULL
 	,@strParentLotNumber NVARCHAR(50)
 	,@intStorageLocationId INT
+	,@dtmProductionDate DATETIME = NULL
+	,@intTransactionDetailId INT = NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -32,26 +34,51 @@ BEGIN
 		,@strItemNo AS NVARCHAR(50)
 		,@intLocationId INT
 		,@intSubLocationId INT
-		,@dblNewCost NUMERIC(38,20)
-		,@dblNewUnitCost NUMERIC(38,20)
+		,@dblNewCost NUMERIC(38, 20)
+		,@dblNewUnitCost NUMERIC(38, 20)
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
 		,@dtmExpiryDate DATETIME
-		,@dtmPlannedDate DATETIME
 		,@intItemStockUOMId INT
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmDate DATETIME
+		,@intRecordId INT
+		,@intLotId1 INT
+		,@dblDefaultResidueQty NUMERIC(18, 6)
+		,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
+		,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
+		,@OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
+		,@intItemId1 INT
+		,@strItemNo1 AS NVARCHAR(50)
+
+	DECLARE @tblMFLot TABLE (
+		intRecordId INT Identity(1, 1)
+		,intLotId INT
+		,intItemUOMId INT
+		)
+	DECLARE @GLEntriesForOtherCost TABLE (
+		dtmDate DATETIME
+		,intItemId INT
+		,intChargeId INT
+		,intItemLocationId INT
+		,intChargeItemLocation INT
+		,intTransactionId INT
+		,strTransactionId NVARCHAR(50)
+		,dblCost NUMERIC(18, 6)
+		,intTransactionTypeId INT
+		,intCurrencyId INT
+		,dblExchangeRate NUMERIC(18, 6)
+		,intTransactionDetailId INT
+		,strInventoryTransactionTypeName NVARCHAR(50)
+		,strTransactionForm NVARCHAR(50)
+		,ysnAccrue BIT
+		,ysnPrice BIT
+		,ysnInventoryCost BIT
+		)
 
 	SELECT @dtmDate = GETDATE()
 
 	SELECT TOP 1 @intLocationId = W.intLocationId
-		,@dtmPlannedDate = (
-			CASE 
-				WHEN dtmPlannedDate > @dtmDate
-					THEN @dtmDate
-				ELSE dtmPlannedDate
-				END
-			)
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder W
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -62,6 +89,62 @@ BEGIN
 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 		,@strBatchId OUTPUT
+
+	--Non Lot Tracking
+	INSERT INTO @ItemsForPost (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,intTransactionTypeId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
+		)
+	SELECT intItemId = cl.intItemId
+		,intItemLocationId = il.intItemLocationId
+		,intItemUOMId = cl.intItemIssuedUOMId
+		,dtmDate = GetDate()
+		,dblQty = (- cl.dblIssuedQuantity)
+		,dblUOMQty = ItemUOM.dblUnitQty
+		,dblCost = 0 --l.dblLastCost
+		,dblSalesPrice = 0
+		,intCurrencyId = NULL
+		,dblExchangeRate = 1
+		,intTransactionId = @intBatchId
+		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
+		,strTransactionId = @strWorkOrderNo
+		,intTransactionTypeId = @INVENTORY_CONSUME
+		,intLotId = NULL
+		,intSubLocationId = cl.intSubLocationId
+		,intStorageLocationId = cl.intStorageLocationId
+		,intSourceTransactionId = @INVENTORY_CONSUME
+		,strSourceTransactionId = @strWorkOrderNo
+	FROM tblMFWorkOrderConsumedLot cl
+	INNER JOIN tblICItem i ON cl.intItemId = i.intItemId
+	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
+	INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId
+		AND il.intLocationId = @intLocationId
+	WHERE cl.intWorkOrderId = @intWorkOrderId
+		AND cl.intBatchId = @intBatchId
+		AND ISNULL(cl.intLotId, 0) = 0
+
+	IF @dtmProductionDate > @dtmDate
+		OR @dtmProductionDate IS NULL
+	BEGIN
+		SELECT @dtmProductionDate = @dtmDate
+	END
 
 	INSERT INTO @ItemsForPost (
 		intItemId
@@ -81,11 +164,13 @@ BEGIN
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
 		)
 	SELECT intItemId = l.intItemId
 		,intItemLocationId = l.intItemLocationId
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-		,dtmDate = @dtmPlannedDate
+		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
 		,dblCost = l.dblLastCost
@@ -94,18 +179,13 @@ BEGIN
 		,dblExchangeRate = 1
 		,intTransactionId = @intBatchId
 		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-		,strTransactionId = (
-			CASE 
-				WHEN @strLotNumber IS NULL
-					OR @strLotNumber = ''
-					THEN @strWorkOrderNo
-				ELSE @strLotNumber
-				END
-			)
+		,strTransactionId = @strWorkOrderNo
 		,intTransactionTypeId = @INVENTORY_CONSUME
 		,intLotId = l.intLotId
 		,intSubLocationId = l.intSubLocationId
 		,intStorageLocationId = l.intStorageLocationId
+		,intSourceTransactionId = @INVENTORY_CONSUME
+		,strSourceTransactionId = @strWorkOrderNo
 	FROM tblMFWorkOrderConsumedLot cl
 	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
@@ -133,7 +213,56 @@ BEGIN
 	SET @dblNewCost = ABS(@dblNewCost)
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
 
-	DECLARE @dblCostPerStockUOM NUMERIC(38,20)
+	DECLARE @dblOtherCharges NUMERIC(18, 6)
+		,@dblPercentage NUMERIC(18, 6)
+		,@dblStandardCost NUMERIC(18, 6)
+
+	SELECT @dblStandardCost = SUM(IP.dblStandardCost)
+	FROM dbo.tblMFWorkOrderRecipeItem RI
+	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
+		AND RI.ysnCostAppliedAtInvoice = 0
+		AND I.strType = 'Other Charge'
+	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
+		AND IL.intLocationId = @intLocationId
+	JOIN dbo.tblICItemPricing IP ON IP.intItemId = I.intItemId
+		AND IP.intItemLocationId = IL.intItemLocationId
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND RI.intRecipeItemTypeId = 1
+
+	SELECT @dblPercentage = dblPercentage
+	FROM tblMFWorkOrderRecipeItem RI
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND RI.intRecipeItemTypeId = 2
+		AND RI.intItemId = @intItemId
+
+	IF @dblPercentage IS NULL
+	BEGIN
+		SELECT @dblPercentage = 100
+	END
+
+	SELECT @dblOtherCharges = SUM((
+				CASE 
+					WHEN intMarginById = 2
+						THEN P.dblStandardCost + RI.dblMargin
+					ELSE P.dblStandardCost + (@dblStandardCost * RI.dblMargin / 100)
+					END
+				) / R.dblQuantity)
+	FROM dbo.tblMFWorkOrderRecipeItem RI
+	JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
+		AND R.intRecipeId = RI.intRecipeId
+	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
+		AND RI.intRecipeItemTypeId = 1
+		AND RI.ysnCostAppliedAtInvoice = 0
+		AND I.strType = 'Other Charge'
+	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
+		AND IL.intLocationId = @intLocationId
+	JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
+		AND P.intItemLocationId = IL.intItemLocationId
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+
+	SELECT @dblOtherCharges = @dblOtherCharges * @dblPercentage / 100
+
+	DECLARE @dblCostPerStockUOM NUMERIC(38, 20)
 
 	IF @intItemStockUOMId = @intItemUOMId
 	BEGIN
@@ -142,6 +271,12 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT @dblCostPerStockUOM = dbo.fnCalculateUnitCost(@dblNewUnitCost, @dblUnitQty)
+	END
+
+	IF @dblOtherCharges IS NOT NULL
+		AND @dblOtherCharges > 0
+	BEGIN
+		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblOtherCharges
 	END
 
 	CREATE TABLE #GeneratedLotItems (
@@ -196,6 +331,9 @@ BEGIN
 		,strGarden
 		,intDetailId
 		,ysnProduced
+		,strTransactionId
+		,strSourceTransactionId
+		,intSourceTransactionTypeId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -209,7 +347,7 @@ BEGIN
 		,dblWeight = @dblWeight
 		,intWeightUOMId = @intWeightUOMId
 		,dtmExpiryDate = @dtmExpiryDate
-		,dtmManufacturedDate = @dtmPlannedDate
+		,dtmManufacturedDate = @dtmProductionDate
 		,intOriginId = NULL
 		,intGradeId = NULL
 		,strBOLNo = NULL
@@ -220,17 +358,18 @@ BEGIN
 		,intEntityVendorId = NULL
 		,strVendorLotNo = @strVendorLotNo
 		,strGarden = NULL
-		,intDetailId = @intWorkOrderId
+		,intDetailId = @intBatchId
 		,ysnProduced = 1
+		,strTransactionId = @strWorkOrderNo
+		,strSourceTransactionId = @strWorkOrderNo
+		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
 
 	SELECT TOP 1 @intLotId = intLotId
 	FROM #GeneratedLotItems
-	WHERE intDetailId = @intWorkOrderId
-
-	SELECT @dtmDate = GETDATE()
+	WHERE intDetailId = @intBatchId
 
 	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber = @strParentLotNumber
 		,@strParentLotAlias = ''
@@ -239,8 +378,8 @@ BEGIN
 		,@intLotStatusId = 1
 		,@intEntityUserSecurityId = @intUserId
 		,@intLotId = @intLotId
-		,@intSubLocationId=@intSubLocationId
-		,@intLocationId=@intLocationId
+		,@intSubLocationId = @intSubLocationId
+		,@intLocationId = @intLocationId
 
 	DELETE
 	FROM @ItemsForPost
@@ -262,6 +401,9 @@ BEGIN
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,intSourceTransactionId
+		,strSourceTransactionId
+		,intTransactionDetailId
 		)
 	SELECT intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
@@ -272,7 +414,7 @@ BEGIN
 				ELSE @intWeightUOMId
 				END
 			)
-		,dtmDate = @dtmPlannedDate
+		,dtmDate = @dtmProductionDate
 		,dblQty = (
 			CASE 
 				WHEN @intItemStockUOMId = @intItemUOMId
@@ -286,60 +428,189 @@ BEGIN
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
 		,intTransactionId = @intBatchId
-		,strTransactionId = (
-			CASE 
-				WHEN @strLotNumber IS NULL
-					OR @strLotNumber = ''
-					THEN @strWorkOrderNo
-				ELSE @strLotNumber
-				END
-			)
+		,strTransactionId = @strWorkOrderNo
 		,intTransactionTypeId = @INVENTORY_PRODUCE
 		,intLotId = @intLotId
 		,intSubLocationId = @intSubLocationId
 		,intStorageLocationId = @intStorageLocationId
+		,intSourceTransactionId = @INVENTORY_PRODUCE
+		,strSourceTransactionId = @strWorkOrderNo
+		,intTransactionDetailId = @intTransactionDetailId
 
 	EXEC dbo.uspICPostCosting @ItemsForPost
 		,@strBatchId
 		,NULL
 		,@intUserId
 
-	INSERT INTO @GLEntries (
-		[dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[strCode]
-		,[strReference]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[dtmTransactionDate]
-		,[strJournalLineDescription]
-		,[intJournalLineNo]
-		,[ysnIsUnposted]
-		,[intUserId]
-		,[intEntityId]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblDebitForeign]
-		,[dblDebitReport]
-		,[dblCreditForeign]
-		,[dblCreditReport]
-		,[dblReportingRate]
-		,[dblForeignRate]
-		)
-	EXEC dbo.uspICCreateGLEntries @strBatchId
-		,NULL
-		,@intUserId
+	IF @dblOtherCharges IS NOT NULL
+		AND @dblOtherCharges > 0
+	BEGIN
+		INSERT INTO @OtherChargesGLAccounts (
+			intChargeId
+			,intItemLocationId
+			,intOtherChargeExpense
+			,intOtherChargeIncome
+			,intTransactionTypeId
+			)
+		SELECT intChargeId = @intItemId
+			,intItemLocationId = @intItemLocationId
+			,intOtherChargeExpense = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)
+			,intOtherChargeIncome = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome)
+			,intTransactionTypeId = @INVENTORY_PRODUCE
+
+		SELECT TOP 1 @intItemId1 = Item.intItemId
+			,@strItemNo1 = Item.strItemNo
+		FROM dbo.tblICItem Item
+		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
+		WHERE ChargesGLAccounts.intOtherChargeIncome IS NULL
+
+		IF @intItemId1 IS NOT NULL
+		BEGIN
+			-- {Item} is missing a GL account setup for {Account Category} account category.
+			RAISERROR (
+					80008
+					,11
+					,1
+					,@strItemNo1
+					,@ACCOUNT_CATEGORY_OtherChargeIncome
+					)
+
+			RETURN;
+		END
+
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			)
+		EXEC dbo.uspICCreateGLEntries @strBatchId
+			,NULL
+			,@intUserId
+
+		INSERT INTO @GLEntriesForOtherCost
+		SELECT dtmDate = @dtmDate
+			,intItemId = @intItemId
+			,intChargeId = @intItemId
+			,intItemLocationId = @intItemLocationId
+			,intChargeItemLocation = @intItemLocationId
+			,intTransactionId = @intBatchId
+			,strTransactionId = @strWorkOrderNo
+			,dblCost = @dblOtherCharges
+			,intTransactionTypeId = @INVENTORY_PRODUCE
+			,intCurrencyId = (
+				SELECT TOP 1 intCurrencyId
+				FROM @GLEntries
+				)
+			,dblExchangeRate = 1
+			,intTransactionDetailId = @intTransactionDetailId
+			,strInventoryTransactionTypeName = 'Consume'
+			,strTransactionForm = 'Consume'
+			,ysnAccrue = 0
+			,ysnPrice = 0
+			,ysnInventoryCost = 0
+
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			)
+		SELECT dtmDate = GLEntriesForOtherCost.dtmDate
+			,strBatchId = @strBatchId
+			,intAccountId = GLAccount.intAccountId
+			,dblDebit = Credit.Value
+			,dblCredit = Debit.Value
+			,dblDebitUnit = 0
+			,dblCreditUnit = 0
+			,strDescription = GLAccount.strDescription
+			,strCode = 'IC'
+			,strReference = ''
+			,intCurrencyId = GLEntriesForOtherCost.intCurrencyId
+			,dblExchangeRate = GLEntriesForOtherCost.dblExchangeRate
+			,dtmDateEntered = GETDATE()
+			,dtmTransactionDate = GLEntriesForOtherCost.dtmDate
+			,strJournalLineDescription = ''
+			,intJournalLineNo = GLEntriesForOtherCost.intTransactionDetailId
+			,ysnIsUnposted = 0
+			,intUserId = NULL
+			,intEntityId = @intUserId
+			,strTransactionId = GLEntriesForOtherCost.strTransactionId
+			,intTransactionId = GLEntriesForOtherCost.intTransactionId
+			,strTransactionType = GLEntriesForOtherCost.strInventoryTransactionTypeName
+			,strTransactionForm = GLEntriesForOtherCost.strTransactionForm
+			,strModuleName = 'Inventory'
+			,intConcurrencyId = 1
+			,dblDebitForeign = NULL
+			,dblDebitReport = NULL
+			,dblCreditForeign = NULL
+			,dblCreditReport = NULL
+			,dblReportingRate = NULL
+			,dblForeignRate = NULL
+		FROM @GLEntriesForOtherCost GLEntriesForOtherCost
+		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON GLEntriesForOtherCost.intChargeId = OtherChargesGLAccounts.intChargeId
+			AND GLEntriesForOtherCost.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
+		CROSS APPLY dbo.fnGetDebit(GLEntriesForOtherCost.dblCost) Debit
+		CROSS APPLY dbo.fnGetCredit(GLEntriesForOtherCost.dblCost) Credit
+		WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
+			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
+			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
+	END
 
 	UPDATE @GLEntries
 	SET dblDebit = (
@@ -352,15 +623,22 @@ BEGIN
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,1
 
-	DECLARE @intRecordId INT
-	,@intLotId1 INT
-	DECLARE @tblMFLot TABLE (
-		intRecordId INT Identity(1, 1)
-		,intLotId INT
-		)
+	UPDATE dbo.tblMFWorkOrderConsumedLot
+	SET strBatchId = @strBatchId
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intBatchId = @intBatchId
 
-	INSERT INTO @tblMFLot (intLotId)
+	UPDATE dbo.tblMFWorkOrderProducedLot
+	SET strBatchId = @strBatchId
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND intBatchId = @intBatchId
+
+	INSERT INTO @tblMFLot (
+		intLotId
+		,intItemUOMId
+		)
 	SELECT intLotId
+		,intItemUOMId
 	FROM dbo.tblMFWorkOrderConsumedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -370,8 +648,10 @@ BEGIN
 	WHILE @intRecordId IS NOT NULL
 	BEGIN
 		SELECT @intLotId1 = NULL
+			,@intItemUOMId = NULL
 
 		SELECT @intLotId1 = intLotId
+			,@intItemUOMId = intItemUOMId
 		FROM @tblMFLot
 		WHERE intRecordId = @intRecordId
 
@@ -380,32 +660,23 @@ BEGIN
 					SELECT dblWeight
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId1
-					) < 0.01
+					) < 0.00001
 				)
 			AND (
 				(
 					SELECT dblQty
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId1
-					) < 0.01
+					) < 0.00001
 				)
 		BEGIN
-			--EXEC dbo.uspMFLotAdjustQty
-			-- @intLotId =@intLotId,       
-			-- @dblNewLotQty =0,
-			-- @intUserId=@intUserId ,
-			-- @strReasonCode ='Residue qty clean up',
-			-- @strNotes ='Residue qty clean up'
-			UPDATE tblICLot
-			SET dblWeight = 0
-				,dblQty = 0
-			WHERE intLotId = @intLotId1
+			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId1
+				,@dblNewLotQty = 0
+				,@intAdjustItemUOMId = @intItemUOMId
+				,@intUserId = @intUserId
+				,@strReasonCode = 'Residue qty clean up'
+				,@strNotes = 'Residue qty clean up'
 		END
-			UPDATE tblICLot
-			SET dblWeight = dblQty
-			WHERE dblQty <> dblWeight
-				AND intItemUOMId = intWeightUOMId
-			and intLotId=@intLotId1
 
 		SELECT @intRecordId = Min(intRecordId)
 		FROM @tblMFLot

@@ -10,7 +10,7 @@ SET ANSI_WARNINGS OFF
 If @intWorkOrderId=0
 	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,(a.dblQuantity - ISNULL(a.dblIssuedQty,0)) dblQuantity,
 	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,
-	Case When a.intManufacturingCellId is null then e.intManufacturingCellId else a.intManufacturingCellId End AS intManufacturingCellId,
+	a.intManufacturingCellId AS intManufacturingCellId,
 	a.intMachineId,a.dblBlenderSize,g.dblStandardCost 
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
@@ -25,7 +25,7 @@ If @intWorkOrderId=0
 If @intWorkOrderId>0
 	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,
 	Case When (a.dblQuantity - ISNULL(a.dblIssuedQty,0))<=0 then 0 Else (a.dblQuantity - ISNULL(a.dblIssuedQty,0)) End AS dblQuantity,
-	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,e.intManufacturingCellId,
+	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,a.intManufacturingCellId,
 	h.dblStandardCost  
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
@@ -41,7 +41,7 @@ If @intWorkOrderId>0
 If @intWorkOrderId<0
 	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,
 	Case When (a.dblQuantity - ISNULL(a.dblIssuedQty,0))<=0 then 0 Else (a.dblQuantity - ISNULL(a.dblIssuedQty,0)) End AS dblQuantity,
-	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,e.intManufacturingCellId,
+	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,a.intManufacturingCellId,
 	h.dblStandardCost  
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 

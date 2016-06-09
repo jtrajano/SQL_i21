@@ -1,4 +1,22 @@
 ﻿GO
+	PRINT N'BEGIN RENAME OF TRANSACTION'
+
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Delivery Notice'
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Weight Claims'
+
+GO
+	PRINT N'BEGIN DELETE OF TRANSACTION'
+
+	DELETE FROM tblSMStartingNumber
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Shipping Instructions'
+
+	DELETE FROM tblSMStartingNumber
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Inbound Shipments'
+
+	DELETE FROM tblSMStartingNumber
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Delivery Orders'
+
+GO
 	PRINT N'BEGIN CLEAN UP AND INSERT DEFAULT DATA'
 GO
 	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tmpSMStartingNumber')
@@ -336,15 +354,6 @@ GO
            ,[intConcurrencyId]		= 1
     WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ContractAdjNo')
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 37
-			,[strTransactionType]	= N'Shipping Instructions'
-			,[strPrefix]			= N'SI-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Logistics'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Shipping Instructions')
-	UNION ALL
 	SELECT	[intStartingNumberId]	= 38
 			,[strTransactionType]	= N'Allocations'
 			,[strPrefix]			= N'AL-'
@@ -426,15 +435,6 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Demand Number')
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 47
-			,[strTransactionType]	= N'Inbound Shipments'
-			,[strPrefix]			= N'IS-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Logistics'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inbound Shipments')
-	UNION ALL
 	SELECT	[intStartingNumberId]	= 48
 			,[strTransactionType]	= N'Site Number'
 			,[strPrefix]			= N''
@@ -452,15 +452,6 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Lots')
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 50
-			,[strTransactionType]	= N'Delivery Orders'
-			,[strPrefix]			= N'DO-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Logistics'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Orders')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 51
 			,[strTransactionType]	= N'Quote'
@@ -795,13 +786,13 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 86
-			,[strTransactionType]	= N'Weight Claims'
+			,[strTransactionType]	= N'Delivery Notice'
 			,[strPrefix]			= N'WC-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Weight Claims')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Notice')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 87
@@ -945,6 +936,13 @@ GO
 		SET [strPrefix] = 'D-'
 		WHERE strTransactionType = N'Dividend Number'
 	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Notice')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET [strPrefix] = 'DN-'
+		WHERE strTransactionType = N'Delivery Notice'
+	END
 GO
 	PRINT N'BEGIN RENAME S'
 
@@ -966,4 +964,5 @@ GO
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR GENERAL LEDGER'
 GO
+
 

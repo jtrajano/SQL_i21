@@ -6,7 +6,7 @@ SELECT
 	A.strBillId,
 	A.intSubCurrencyCents,
 	CASE WHEN (A.intTransactionType IN (3,8)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblTotal * -1 ELSE A.dblTotal END AS dblTotal,
-	CASE WHEN (A.intTransactionType IN (33,8)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
+	CASE WHEN (A.intTransactionType IN (3,8)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue,
 	A.ysnPosted,
 	A.ysnPaid,
 	A.ysnReadyForPayment,
@@ -42,14 +42,17 @@ SELECT
 	--					INNER JOIN dbo.tblSMUserSecurity G ON F.intUserSecurityId = G.intUserSecurityID WHERE B.intApprovalListId = F.intApprovalListId),
 	CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover,
 	dtmApprovalDate,
-	GL.strBatchId
+	GL.strBatchId,
+	EL.strLocationName AS strVendorLocation
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
 		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
-	ON A.[intEntityVendorId] = B.[intEntityVendorId]
+		ON A.[intEntityVendorId] = B.[intEntityVendorId]
 	INNER JOIN dbo.tblGLAccount C
 		ON A.intAccountId = C.intAccountId
+	INNER JOIN dbo.tblEMEntityLocation EL
+		ON EL.intEntityLocationId = A.intShipFromId
 	OUTER APPLY
 	(
 		SELECT TOP 1

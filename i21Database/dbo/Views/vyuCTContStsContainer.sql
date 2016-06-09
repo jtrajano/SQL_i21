@@ -4,42 +4,40 @@ AS
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId ASC) AS INT) intUniqueId,*
 	FROM
 	(	
-			SELECT	CQ.intContractDetailId,
-					BL.strBLNumber,
+			SELECT	CQ.intSContractDetailId intContractDetailId,
+					SH.strBLNumber,
 					BC.strContainerNumber,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,CC.intUnitMeasureId,LP.intWeightUOMId,(BC.dblNetWt / BC.dblQuantity) * CC.dblQuantity) dblShippedWeight,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,BC.intWeightUnitMeasureId,LP.intWeightUOMId,BC.dblNetWt) dblShippedWeight,
 					IU.intItemUOMId,
 					IM.strUnitMeasure,
-					SH.ysnDirectShipment
+					CAST(CASE WHEN  SH.intPurchaseSale = 3 THEN 1 ELSE 0 END AS BIT) ysnDirectShipment
 					
-			FROM	tblLGShipmentBLContainerContract	CC  
-			JOIN	tblLGShipmentContractQty			CQ	ON	CQ.intShipmentContractQtyId		=	CC.intShipmentContractQtyId  
-			JOIN	tblLGShipment						SH	ON	SH.intShipmentId				=	CC.intShipmentId  
-			JOIN	tblLGShipmentBL						BL	ON	BL.intShipmentBLId				=	CC.intShipmentBLId  
+			FROM	tblLGLoadDetailContainerLink		CC  
+			JOIN	tblLGLoadDetail						CQ	ON	CQ.intLoadDetailId				=	CC.intLoadDetailId  
+			JOIN	tblLGLoad							SH	ON	SH.intLoadId					=	CC.intLoadId  
 			JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CQ.intItemId	 
 															AND	IU.intUnitMeasureId				=	SH.intWeightUnitMeasureId 
 			JOIN	tblICUnitMeasure					IM	ON	IM.intUnitMeasureId				=	IU.intUnitMeasureId				LEFT
-			JOIN	tblLGShipmentBLContainer			BC	ON	BC.intShipmentBLContainerId		=	CC.intShipmentBLContainerId		CROSS	
+			JOIN	tblLGLoadContainer					BC	ON	BC.intLoadContainerId			=	CC.intLoadContainerId		CROSS	
 			APPLY	tblLGCompanyPreference	LP 	
 
 			UNION ALL
 
 			SELECT	AD.intSContractDetailId,
-					BL.strBLNumber,
+					SH.strBLNumber,
 					BC.strContainerNumber,
-					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,CC.intUnitMeasureId,LP.intWeightUOMId,(BC.dblNetWt / BC.dblQuantity) * CC.dblQuantity) dblShippedWeight,
+					dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,BC.intWeightUnitMeasureId,LP.intWeightUOMId,BC.dblNetWt) dblShippedWeight,
 					IU.intItemUOMId,
 					IM.strUnitMeasure,
-					SH.ysnDirectShipment
+					CAST(CASE WHEN  SH.intPurchaseSale = 3 THEN 1 ELSE 0 END AS BIT) ysnDirectShipment
 					
-			FROM	tblLGShipmentBLContainerContract	CC  
-			JOIN	tblLGShipmentContractQty			CQ	ON	CQ.intShipmentContractQtyId		=	CC.intShipmentContractQtyId 
-			JOIN	tblLGAllocationDetail				AD	ON	AD.intPContractDetailId			=	CQ.intContractDetailId 
-			JOIN	tblLGShipment						SH	ON	SH.intShipmentId				=	CC.intShipmentId  
-			JOIN	tblLGShipmentBL						BL	ON	BL.intShipmentBLId				=	CC.intShipmentBLId  
+			FROM	tblLGLoadDetailContainerLink		CC  
+			JOIN	tblLGLoadDetail						CQ	ON	CQ.intLoadDetailId				=	CC.intLoadDetailId 
+			JOIN	tblLGAllocationDetail				AD	ON	AD.intPContractDetailId			=	CQ.intPContractDetailId 
+			JOIN	tblLGLoad							SH	ON	SH.intLoadId					=	CC.intLoadId  
 			JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CQ.intItemId	 
 															AND	IU.intUnitMeasureId				=	SH.intWeightUnitMeasureId 
 			JOIN	tblICUnitMeasure					IM	ON	IM.intUnitMeasureId				=	IU.intUnitMeasureId				LEFT
-			JOIN	tblLGShipmentBLContainer			BC	ON	BC.intShipmentBLContainerId		=	CC.intShipmentBLContainerId		CROSS	
+			JOIN	tblLGLoadContainer					BC	ON	BC.intLoadContainerId			=	CC.intLoadContainerId		CROSS	
 			APPLY	tblLGCompanyPreference	LP 	  
 	)t

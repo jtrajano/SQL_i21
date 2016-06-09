@@ -1254,7 +1254,7 @@ BEGIN
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ManualGrains_PoundUOM
 				,dblUnitCost			= 7.00
-				,dblLineTotal			= 70.00
+				,dblLineTotal			= 140.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
 				,intOwnershipType		= @OWNERSHIP_TYPE_Own

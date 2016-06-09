@@ -41,14 +41,13 @@ BEGIN
 	--WHERE	[fieldname] = 'intReferenceNumber' 
 
 SELECT 
-	SIC.intShippingInstructionId,
+	L.intLoadId,
 	DOC.strDocumentName,
-	SIC.strDocumentType,
-	SIC.intOriginal,
-	SIC.intCopies
-
-FROM	tblLGShippingInstructionCertificates SIC
-JOIN	tblLGShippingInstruction SI ON SI.intShippingInstructionId = SIC.intShippingInstructionId
-JOIN	tblICDocument DOC ON DOC.intDocumentId = SIC.intDocumentId
-WHERE 	SI.intReferenceNumber = @xmlParam	
+	LDOC.strDocumentType,
+	LDOC.intOriginal,
+	LDOC.intCopies
+FROM	tblLGLoadDocuments LDOC
+JOIN	tblLGLoad L ON L.intLoadId= LDOC.intLoadId
+JOIN	tblICDocument DOC ON DOC.intDocumentId = LDOC.intDocumentId
+WHERE 	L.intLoadId = @xmlParam	
 END

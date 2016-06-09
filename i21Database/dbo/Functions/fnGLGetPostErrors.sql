@@ -18,8 +18,8 @@ RETURN (
 					'Unable to find an open accounting period to match the transaction date.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
-				AND A.strSourceType <> 'AA'
-				AND A.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
+				AND ISNULL(A.strSourceType,'') <> 'AA'
+				AND ISNULL(A.strJournalType,'') NOT IN('Origin Journal','Adjusted Origin Journal')
 				UNION 
 				SELECT DISTINCT A.intJournalId,'Unable to post. Account id:' + B.strAccountId + ' is under the ' + C.strAccountCategory + ' category. Please remove it from the transaction detail.' AS strMessage
 					FROM tblGLJournalDetail A JOIN vyuGLAccountDetail B
@@ -29,7 +29,7 @@ RETURN (
 					JOIN tblGLAccountCategory C
 					ON B.intAccountCategoryId = C.intAccountCategoryId
 					WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds)	
-					AND C.strAccountCategory in ('AR Account','Cash Account','AP Account')  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
+					AND ISNULL(C.strAccountCategory,'') in ('AR Account','Cash Account','AP Account')  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 					GROUP BY A.intJournalId	,B.strAccountId,C.strAccountCategory
 				--REGION @ysnPost = 1
 				UNION
@@ -63,7 +63,7 @@ RETURN (
 				FROM tblGLJournalDetail A JOIN tblGLJournal J ON A.intJournalId = J.intJournalId
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND @ysnPost = 1 
-				AND J.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal', 'Historical Journal')
+				AND ISNULL(J.strJournalType,'') NOT IN('Origin Journal','Adjusted Origin Journal', 'Historical Journal')
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage

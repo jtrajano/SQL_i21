@@ -44,6 +44,15 @@ SELECT -- Load Header
 		WHEN intTransportationMode = 2
 			THEN 'Ocean Vessel'
 		END
+	,LOAD.intTransUsedBy
+	,strTransUsedBy = CASE 
+		WHEN LOAD.intTransUsedBy = 1 
+			THEN 'None'
+		WHEN LOAD.intTransUsedBy = 2
+			THEN 'Scale Ticket'
+		WHEN LOAD.intTransUsedBy = 3
+			THEN 'Transport Load'
+		END
 	,strPosition = P.strPosition
 	,intGenerateReferenceNumber = GLoad.intReferenceNumber
 	,intGenerateSequence = LOAD.intGenerateSequence
@@ -122,15 +131,17 @@ SELECT -- Load Header
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS,
 		LOAD.intPositionId,
-		[intWeightUnitMeasureId],
+		LOAD.[intWeightUnitMeasureId],
 		strWeightUnitMeasure = [strUnitMeasure],
-		[strBLNumber],
+		ISNULL([strBLNumber],'') AS [strBLNumber],
 		[dtmBLDate],
 		[strOriginPort],
 		[strDestinationPort],
 		[strDestinationCity],
 		[intTerminalEntityId],
+		[strTerminal] =  Terminal.strName,
 		[intShippingLineEntityId],
+		[strShippingLine] =  ShippingLine.strName,
 		[strServiceContractNumber],
 		[strPackingDescription],
 		[strMVessel],
@@ -138,19 +149,25 @@ SELECT -- Load Header
 		[strFVessel],
 		[strFVoyageNumber],
 		[intForwardingAgentEntityId],
+		[strForwardingAgent] = ForwardingAgent.strName,
 		[strForwardingAgentRef],
 		[intInsurerEntityId],
+		[strInsurer] = Insurer.strName,
 		[dblInsuranceValue],
 		[intInsuranceCurrencyId],
+		[strInsuranceCurrency] = Currency.strCurrency,
 		[dtmDocsToBroker],
 		[strMarks],
 		[strMarkingInstructions],
 		[strShippingMode],
 		[intNumberOfContainers],
-		[intContainerTypeId],
+		LOAD.[intContainerTypeId],
+		[strContainerType] = CT.strContainerType,
 		[intBLDraftToBeSentId],
 		[strBLDraftToBeSentType],
+		[strBLDraftToBeSent] = BLDraftToBeSent.strName,
 		[strDocPresentationType],
+		[strDocPresentationVal] = NP.strName,
 		[intDocPresentationId],
 		LOAD.[ysnPosted],
 		LOAD.[dtmPostedDate],
@@ -179,6 +196,14 @@ LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LOAD.intWeightUnitMeasure
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = LOAD.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = LOAD.intDriverEntityId
+LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = LOAD.intTerminalEntityId
+LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = LOAD.intShippingLineEntityId
+LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = LOAD.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = LOAD.intInsurerEntityId
+LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = LOAD.intBLDraftToBeSentId
+LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = LOAD.intDocPresentationId AND NP.strEntity = LOAD.strDocPresentationType
+LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = LOAD.intInsuranceCurrencyId
+LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = LOAD.intContainerTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = LOAD.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = LOAD.intTransportLoadId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = LOAD.intLoadHeaderId

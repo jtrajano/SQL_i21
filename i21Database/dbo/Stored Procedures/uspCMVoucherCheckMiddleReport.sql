@@ -143,12 +143,16 @@ SELECT	CHK.dtmDate
 					END
 		,strBankAddress =  CASE	
 									WHEN ISNULL(dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
-										dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode) + CHAR(13) + BNK.strRTN
+										dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode) + CHAR(13) + BNKACCNT.strFractionalRoutingNumber
 									ELSE 
 										NULL
 							END
 							
+		--MICR setup					
 		,strMICR = [dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo)
+		,BNKACCNT.strUserDefineMessage
+		,BNKACCNT.strSignatureLineCaption
+		,ysnShowTwoSignatureLine = CONVERT(bit,CASE WHEN BNKACCNT.ysnShowTwoSignatureLine = 1 AND CHK.dblAmount >  BNKACCNT.dblGreaterThanAmount THEN 1 ELSE 0 END)
 		
 		-- A/P Related fields: 
 		,strVendorId = ISNULL(VENDOR.strVendorId, '--')

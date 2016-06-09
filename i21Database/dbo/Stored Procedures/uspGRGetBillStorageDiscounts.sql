@@ -111,7 +111,7 @@ BEGIN TRY
 	 ,a.dtmLastStorageAccrueDate
 	 ,a.dblStorageDue dblOldStorageDue
 	 ,bill.dblAdditionalCharge
-	 ,a.dblStorageDue+bill.dblAdditionalCharge AS dblNewStorageDue
+	 ,(a.dblStorageDue-a.dblStoragePaid)+bill.dblAdditionalCharge AS dblNewStorageDue
 	 ,a.dblStoragePaid dblOldStorageBilled
 	 ,CASE WHEN @PostType='Bill Storage' THEN (a.dblStoragePaid+bill.dblAdditionalCharge) ELSE a.dblStoragePaid END  AS dblNewStorageBilled
 	 ,a.dblOpenBalance* CASE WHEN @PostType='Bill Storage' THEN bill.dblAdditionalCharge ELSE 0 END  AS dblStorageDueAmount
@@ -123,6 +123,7 @@ BEGIN TRY
 	JOIN tblICItem Item ON Item.intItemId = a.intItemId
 	JOIN @BillStorageDiscounts bill ON bill.intCustomerStorageId=a.intCustomerStorageId
 	WHERE a.intEntityId= CASE WHEN @PortalEntityId>0 THEN @PortalEntityId ELSE a.intEntityId END
+	ORDER BY E.strName,c.strLocationName
 	
 END TRY
 

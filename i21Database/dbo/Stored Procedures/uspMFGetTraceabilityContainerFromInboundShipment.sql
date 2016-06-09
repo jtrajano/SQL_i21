@@ -3,9 +3,9 @@
 AS
 SET NOCOUNT ON;
 
-Select DISTINCT 'Container' AS strTransactionName,s.intShipmentBLContainerId,s.strContainerNumber,'' AS strLotAlias,s.intItemId,s.strItemNo,s.strItemDescription,
+Select DISTINCT 'Container' AS strTransactionName,s.intLoadContainerId,s.strContainerNumber,'' AS strLotAlias,s.intItemId,s.strItemNo,s.strItemDescription,
 0 intCategoryId,'' strCategoryCode,s.dblQuantity,
 s.strUnitMeasure strUOM,
-NULL AS dtmTransactionDate,s.intShipmentId AS intParentLotId,s.strVendor,'CN' AS strType
-from vyuLGShipmentContainerReceiptContracts s
-Where s.intShipmentId=@intShipmentId
+NULL AS dtmTransactionDate,s.intLoadId AS intParentLotId,s.strVendor,'CN' AS strType
+from vyuLGLoadContainerReceiptContracts s
+Where s.intLoadId=@intShipmentId

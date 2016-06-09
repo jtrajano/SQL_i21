@@ -110,6 +110,34 @@ BEGIN
 		END
 	END 
 
+	---------------------------------------------------------
+	-- Validate if the new item location is valid
+	---------------------------------------------------------
+	BEGIN 
+		SET @intItemId = NULL 
+		SET @strItemNo = NULL 
+
+		SELECT	TOP 1 
+				@intItemId = Item.intItemId
+				,@strItemNo = Item.strItemNo
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = Detail.intItemId
+				LEFT JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intItemId = Item.intItemId
+					AND ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId) 
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND ItemLocation.intItemLocationId IS NULL 
+				
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			-- --'The new Item Location is invalid or missing for %s.'
+			RAISERROR(80083, 11, 1, @strItemNo)  
+			RETURN -1
+		END		
+	END 
+
 END 
 
 --------------------------------------------------------------------------------
@@ -507,27 +535,27 @@ BEGIN
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMove
 			,intLotId				= Detail.intNewLotId
-			,intSubLocationId		= Detail.intSubLocationId
-			,intStorageLocationId	= Detail.intStorageLocationId
+			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
+			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId			
 			INNER JOIN dbo.tblICInventoryTransaction FromStock
 				ON Detail.intInventoryAdjustmentDetailId = FromStock.intTransactionDetailId
 				AND Detail.intInventoryAdjustmentId = FromStock.intTransactionId
 				AND FromStock.intItemId = Detail.intItemId
+			-- Source Lot
 			INNER JOIN dbo.tblICLot SourceLot
 				ON SourceLot.intLotId = FromStock.intLotId
 			INNER JOIN dbo.tblICItemLocation SourceLotItemLocation 
 				ON SourceLotItemLocation.intLocationId = Header.intLocationId 
 				AND SourceLotItemLocation.intItemId = SourceLot.intItemId
-
 			LEFT JOIN dbo.tblICItemUOM SourceLotItemUOM
 				ON SourceLotItemUOM.intItemUOMId = SourceLot.intItemUOMId
 				AND SourceLotItemUOM.intItemId = SourceLot.intItemId
 			LEFT JOIN dbo.tblICItemUOM SourceLotWeightUOM 
 				ON SourceLotWeightUOM.intItemUOMId = SourceLot.intWeightUOMId
 				AND SourceLotWeightUOM.intItemId = SourceLot.intItemId
-
+			-- New Lot 
 			LEFT JOIN dbo.tblICLot NewLot
 				ON NewLot.intLotId = Detail.intNewLotId
 			LEFT JOIN dbo.tblICItemLocation NewLotItemLocation 

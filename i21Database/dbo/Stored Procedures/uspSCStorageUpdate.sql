@@ -268,10 +268,7 @@ BEGIN TRY
 			IF @dblRunningBalance > @dblUnits
 				BEGIN
 				UPDATE tblGRCustomerStorage 
-				SET dblOpenBalance = CASE 
-				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance - @dblUnits)
-				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance - @dblUnits
-				END 
+				SET dblOpenBalance = @dblRunningBalance - @dblUnits
 				WHERE intCustomerStorageId = @intStorageTicketId
 				INSERT INTO [dbo].[tblGRStorageHistory]
 				   ([intConcurrencyId]
@@ -294,11 +291,7 @@ BEGIN TRY
 				   ,NULL
 				   ,NULL
 				   ,NULL
-				   --,@dblUnits
-				   ,CASE 
-						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits)
-						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits
-					END 
+				   ,@dblUnits
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
 				   ,'TakeOut From Scale'
@@ -359,10 +352,7 @@ BEGIN TRY
 				SET dblOpenBalance = 0
 				WHERE intCustomerStorageId = @intStorageTicketId
 				SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
-				SET @dblUnits = CASE 
-									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblUnits - @dblRunningBalance)
-									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblUnits - @dblRunningBalance
-								END 
+				SET @dblUnits = @dblUnits - @dblRunningBalance
 				INSERT INTO [dbo].[tblGRStorageHistory]
 				   ([intConcurrencyId]
 				   ,[intCustomerStorageId]
@@ -384,11 +374,7 @@ BEGIN TRY
 				   ,NULL
 				   ,NULL
 				   ,NULL
-				   --,@dblRunningBalance
-				   ,CASE 
-						WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblRunningBalance)
-						WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblRunningBalance
-					END 
+				   ,@dblRunningBalance
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
 				   ,'TakeOut From Scale'
@@ -445,6 +431,7 @@ BEGIN TRY
 		END
 		GOTO CONTINUEISH
 	END
+
 	BEGIN 
 		SELECT @intScaleStationId = SC.intScaleSetupId, @intItemId = SC.intItemId
 		FROM	dbo.tblSCTicket SC	        
@@ -467,14 +454,14 @@ BEGIN TRY
 	IF @intGRStorageId IS NULL 
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Invalid Default Storage Setup - uspSCStorageUpdate', 16, 1);
+		--RAISERROR('Invalid Default Storage Setup - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
 
 	IF @intDefaultStorageSchedule IS NULL 
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Invalid Default Schedule Storage in Commodity - uspSCStorageUpdate', 16, 1);
+		--RAISERROR('Invalid Default Schedule Storage in Inventory Commodity - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
 
@@ -486,9 +473,10 @@ BEGIN TRY
 	IF @matchStorageType !=  @intGRStorageId
 	BEGIN 
 		-- Raise the error:
-		RAISERROR('Storage type / Storage Schedule Mismatch - uspSCStorageUpdate', 16, 1);
+		--RAISERROR('Storage type / Storage Schedule Mismatch - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
+
 	BEGIN 
 		SELECT	@intCommodityUnitMeasureId = CommodityUOM.intUnitMeasureId
 		FROM	dbo.tblSCTicket SC	        
@@ -546,7 +534,8 @@ BEGIN TRY
 			   ,[strStorageTicketNumber]
 			   ,[intItemId]
 			   ,[intCompanyLocationSubLocationId]
-			   ,[intStorageLocationId])
+			   ,[intStorageLocationId]
+			   ,[intUnitMeasureId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -557,14 +546,8 @@ BEGIN TRY
 			,[intDiscountScheduleId]= SC.intDiscountId
 			,[dblTotalPriceShrink]= 0
 			,[dblTotalWeightShrink]= 0 
-			,[dblOriginalBalance]= CASE 
-									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
-									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
-								END  
-			,[dblOpenBalance]= CASE 
-									WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
-									WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
-								END 
+			,[dblOriginalBalance]= @dblNetUnits
+			,[dblOpenBalance]= @dblNetUnits
 			,[dtmDeliveryDate]= GETDATE()
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
@@ -584,6 +567,7 @@ BEGIN TRY
 			,SC.[intItemId]
 			,SC.[intSubLocationId]
 			,SC.[intStorageLocationId]
+			,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
@@ -619,11 +603,7 @@ BEGIN TRY
 		   ,NULL
 		   ,NULL
 		   ,@intContractHeaderId
-		   --,@dblNetUnits
-		   ,CASE 
-				WHEN @intCommodityUOMId != @intTicketItemUOMId THEN dbo.fnCalculateQtyBetweenUOM (@intTicketItemUOMId, @intCommodityUOMId, @dblNetUnits)
-				WHEN @intCommodityUOMId = @intTicketItemUOMId THEN @dblNetUnits
-			END 
+		   ,@dblNetUnits
 		   ,dbo.fnRemoveTimeOnDate(GETDATE())
 		   ,0
 		   ,'Generated From Scale'
@@ -641,9 +621,7 @@ BEGIN TRY
 	if @intHoldCustomerStorageId is NULL
 	BEGIN
 		INSERT INTO [dbo].[tblQMTicketDiscount]
-           ([intConcurrencyId]
-           ,[strDiscountCode]
-           ,[strDiscountCodeDescription]
+           ([intConcurrencyId]         
            ,[dblGradeReading]
            ,[strCalcMethod]
            ,[strShrinkWhat]
@@ -659,9 +637,8 @@ BEGIN TRY
            ,[strSourceType]
 		   ,[intSort]
 		   ,[strDiscountChargeType])
-		SELECT	 [intConcurrencyId]= 1
-           ,[strDiscountCode] = SD.[strDiscountCode]
-           ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
+		SELECT	 
+			[intConcurrencyId]= 1       
            ,[dblGradeReading]= SD.[dblGradeReading]
            ,[strCalcMethod]= SD.[strCalcMethod]
            ,[strShrinkWhat]= 
@@ -692,6 +669,11 @@ BEGIN TRY
 	END
 	
 	BEGIN
+			IF @intGRStorageId > 0
+			BEGIN
+				SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
+			END
+
 			SELECT intItemId = ScaleTicket.intItemId
 					,intLocationId = ItemLocation.intItemLocationId 
 					,intItemUOMId = ItemUOM.intItemUOMId
@@ -714,6 +696,7 @@ BEGIN TRY
 						WHEN ISNULL(@intDPContractId,0) > 0 THEN 0
 						WHEN ISNULL(@intDPContractId,0) = 0 THEN 1
 					END
+					,strSourceTransactionId  = @strDistributionOption
 			FROM	dbo.tblSCTicket ScaleTicket
 					INNER JOIN dbo.tblICItemUOM ItemUOM
 						ON ScaleTicket.intItemId = ItemUOM.intItemId

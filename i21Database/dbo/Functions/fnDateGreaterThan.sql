@@ -1,11 +1,11 @@
 ﻿CREATE FUNCTION [dbo].[fnDateGreaterThan](
-	@expected AS DATETIME
-	,@actual AS DATETIME
+	@actual AS DATETIME
+	,@expected AS DATETIME
 )
 RETURNS BIT
 AS
 BEGIN 
-	IF FLOOR(CAST(@expected AS FLOAT)) > FLOOR(CAST(@actual AS FLOAT))
+	IF FLOOR(CAST(@actual AS FLOAT)) > FLOOR(CAST(@expected AS FLOAT))
 		RETURN 1;
 
 	RETURN 0;

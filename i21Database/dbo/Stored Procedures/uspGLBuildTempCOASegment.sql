@@ -41,15 +41,25 @@ BEGIN
 		END
 	END
 	PRINT 'End updating of Account Structure to Location'		
+	DECLARE @InsertString NVARCHAR(100)
+	DECLARE @tblGLTempCOAExist BIT = 0
+	SELECT @tblGLTempCOAExist = ISNULL(1,0)  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment'
 
-
+	IF (@tblGLTempCOAExist=1)
+	BEGIN
+		SELECT @InsertString = 'insert into tblGLTempCOASegment SELECT A.intAccountId, DAS.* FROM tblGLAccount A '
+	END
+	ELSE
+	BEGIN
+		SELECT @InsertString = 'SELECT A.intAccountId, DAS.* into tblGLTempCOASegment  FROM tblGLAccount A '
+		
+	END
 
 			DECLARE @Segments NVARCHAR(MAX)
 			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']','[Primary Account]')
 			DECLARE @Query NVARCHAR(MAX)
-			SET @Query = 
-			'SELECT A.intAccountId, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
-			INNER JOIN (
+			SET @Query = @InsertString +
+			'INNER JOIN (
 			 SELECT *  FROM (
 			   SELECT DISTINCT
 			   A.strAccountId 
@@ -69,9 +79,10 @@ BEGIN
 			 ) AS DAS
 			ON A.strAccountId = DAS.strAccountId
 			'
-			
 			EXEC sp_executesql @Query
 	END
+	IF (@tblGLTempCOAExist=0)
+		ALTER TABLE dbo.[tblGLTempCOASegment] ADD CONSTRAINT [PK_tblGLTempCOASegment] PRIMARY KEY ([intAccountId])
 			
 			
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLDetailView') 

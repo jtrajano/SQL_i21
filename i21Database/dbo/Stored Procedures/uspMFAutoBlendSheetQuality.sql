@@ -537,7 +537,7 @@ BEGIN TRY
 					'Active'
 					,'Quarantine'
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight > 0
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId
@@ -692,7 +692,7 @@ BEGIN TRY
 					SET @strSQL = @strSQL + ' 
 											SELECT sum(dblQty)
 											FROM tblICStockReservation
-											WHERE intLotId = pl.intParentLotId
+											WHERE intLotId = pl.intParentLotId AND ISNULL(ysnPosted,0)=0
 											), 0) + (
 										SELECT isnull(sum(dblQuantity), 0)
 										FROM #tblBlendSheetLot
@@ -705,7 +705,7 @@ BEGIN TRY
 							SELECT sum(dblQty)
 							FROM tblICStockReservation
 							WHERE intParentLotId = pl.intParentLotId
-							AND intStorageLocationId = pl.intStorageLocationId
+							AND intStorageLocationId = pl.intStorageLocationId AND ISNULL(ysnPosted,0)=0
 							), 0) + (
 						SELECT isnull(sum(dblQuantity), 0)
 						FROM #tblBlendSheetLot
@@ -714,7 +714,7 @@ BEGIN TRY
 						SET @strSQL = @strSQL + ' 
 								SELECT sum(dblQty)
 								FROM tblICStockReservation
-								WHERE intParentLotId = pl.intParentLotId
+								WHERE intParentLotId = pl.intParentLotId AND ISNULL(ysnPosted,0)=0
 								), 0) + (
 							SELECT isnull(sum(dblQuantity), 0)
 							FROM #tblBlendSheetLot
@@ -732,7 +732,7 @@ BEGIN TRY
 							AND ISNUMERIC(r.strPropertyValue) = 1
 						INNER JOIN #tblParentLot pl ON r.intProductValueId=pl.intParentLotId
 							AND r.intProductTypeId = ' + CONVERT(varchar,@intProductTypeId) + '
-							AND pl.dtmExpiryDate >= getdate()
+							AND (pl.dtmExpiryDate IS NULL OR pl.dtmExpiryDate >= getdate())
 							AND r.intSampleId = (
 								SELECT MAX(intSampleId)
 								FROM tblQMTestResult
@@ -1176,7 +1176,7 @@ BEGIN TRY
 					'Active'
 					,'Quarantine'
 					)
-				AND L.dtmExpiryDate >= GETDATE()
+				AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 				AND L.dblWeight > 0
 				AND L.intStorageLocationId NOT IN (
 					@intKitStagingLocationId

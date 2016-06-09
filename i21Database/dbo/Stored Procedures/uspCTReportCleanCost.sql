@@ -60,14 +60,14 @@ BEGIN TRY
 				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)  AS	strSequenceNumber,
 				EY.strName,
 				IR.strReceiptNumber,
-				LG.intTrackingNumber,
+				LG.strLoadNumber,
 				@blbFile blbFile
 	FROM		tblCTCleanCost CC
 	LEFT JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	CC.intContractDetailId
 	LEFT JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
 	LEFT JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CC.intEntityId
 	LEFT JOIN	tblICInventoryReceipt	IR	ON	IR.intInventoryReceiptId	=	CC.intInventoryReceiptId
-	LEFT JOIN	tblLGShipment			LG	ON	LG.intShipmentId			=	CC.intShipmentId
+	LEFT JOIN	tblLGLoad				LG	ON	LG.intLoadId				=	CC.intShipmentId
 	WHERE		CC.intCleanCostId	=	@intCleanCostId
 	
 END TRY

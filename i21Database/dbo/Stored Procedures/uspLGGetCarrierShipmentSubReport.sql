@@ -94,7 +94,7 @@ BEGIN
 			L.ysnPrintScheduleInfo,
 			L.strLoadDirectionMsg,
 			L.ysnPrintLoadDirections,
-			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) as strQuantity,
+			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) + ' - ' + L.strItemUOM as strQuantity,
 			L.strItemNo,
 			L.strItemUOM,
 			'' as strOrignFullAddress,

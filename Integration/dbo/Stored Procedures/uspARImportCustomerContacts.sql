@@ -32,7 +32,7 @@ DECLARE @Contacts TABLE
 	, sscon_fax_ext nvarchar(max)
 )
 
-	
+	declare @sscon_cus_no nvarchar(200)
 	BEGIN -- Get Customers to be imported to #tmpContacts
 		INSERT INTO @Contacts
 		(
@@ -69,16 +69,24 @@ DECLARE @Contacts TABLE
 				(
 					sscon_email not in 
 					(
-						select isnull(strEmail, '') COLLATE SQL_Latin1_General_CP1_CS_AS 
-						from tblEMEntity E inner join tblEMEntityContact EC on E.intEntityId = EC.intEntityContactId
-						WHERE isnull(strEmail, '') like '%[a-z0-9]%' 
+						select isnull(G.strEmail, '') COLLATE SQL_Latin1_General_CP1_CS_AS 
+						from tblEMEntity E
+							join tblEMEntityToContact F
+								on E.intEntityId = F.intEntityId
+							join tblEMEntity G
+								on F.intEntityContactId = G.intEntityId
+						WHERE isnull(G.strEmail, '') like '%[a-z0-9]%' 
 					) 
 					OR isnull(sscon_email, '') = ''
 				)
 			AND sscon_cus_no in (select strCustomerNumber collate SQL_Latin1_General_CP1_CS_AS from tblARCustomer)
 			AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
 			not in (
-				select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E inner join tblEMEntityContact EC on E.intEntityId = EC.intEntityContactId
+				select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E
+					join tblEMEntityToContact F
+						on E.intEntityId = F.intEntityId
+					join tblEMEntity G
+						on F.intEntityContactId = G.intEntityId
 			)
 
 	END
@@ -86,41 +94,74 @@ DECLARE @Contacts TABLE
 		WHILE exists (select top 1 1 from @Contacts)
 		BEGIN
 			DECLARE @id int
-			select top 1 @id = id from @Contacts
+			select top 1 @id = id, @sscon_cus_no = sscon_cus_no from @Contacts
+			declare @intEntityId int
+			declare @Name		nvarchar(200)
+			declare @Email		nvarchar(200)
 
 			BEGIN -- Create entity record for Contacts
 
-				declare @Entity as Entity
-
-				insert @Entity
-				select top 1 
-					rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)), rtrim(ltrim(sscon_email)), '', '' , 0, '', '', '', '', null, null
-				from @Contacts where id = @id
-				--select * from @Entity
-					declare @intEntityId int
-					exec uspEntityCreateEntity @Entity , @intEntityId OUT
+				select @intEntityId = intEntityCustomerId from tblARCustomer where strCustomerNumber = @sscon_cus_no				
 			
 			END
 
 			BEGIN -- Create Contact record
 				declare @EntityContact as EntityContact
-				insert @EntityContact
-				select top 1
-					@intEntityId
-					, rtrim(ltrim(sscon_contact_id))
-					, substring((rtrim(ltrim(sscon_contact_title))), 1,35)
-					, ''
-					, isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))))), 'x'), '')
-					, isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))))), 'x'), '')
-					, '' , ''
-					, isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_fax_no)) + ' x' + rtrim(ltrim(sscon_fax_ext))))), 'x'), '')
-					, '', '', ''
-				from @Contacts where id = @id
-				--select * from @EntityContact
-					declare @intContactId int
-					exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
-			END
+				declare @ContactNumber	nvarchar(200)
+				declare @Title			nvarchar(200)
+				declare @CP				nvarchar(200)
+				declare @WorkPhone		nvarchar(200)
+				declare @Fax			nvarchar(200)
 
+				
+				select top 1
+					@Name			= rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)),
+					@ContactNumber	= rtrim(ltrim(sscon_contact_id)),
+					@Title			= substring((rtrim(ltrim(sscon_contact_title))), 1,35),
+					@CP				= isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))))), 'x'), ''),
+					@WorkPhone		= isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))))), 'x'), ''),
+					@Fax			= isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_fax_no)) + ' x' + rtrim(ltrim(sscon_fax_ext))))), 'x'), '')
+				from @Contacts where id = @id
+				
+				insert into tblEMEntity(strName, strContactNumber, strTitle)
+				select @Name, @ContactNumber, @Title
+
+				declare @intContactId int
+				
+				set @intContactId = @@IDENTITY
+				if @CP <> ''
+				begin
+					if exists(select top 1 1 from tblEMContactDetailType where strType = 'Phone' and strField = 'Home')
+					begin
+						insert into tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
+						select top 1 @intContactId, @CP, intContactDetailTypeId from tblEMContactDetailType where strType = 'Phone' and strField = 'Home' 
+					end
+				end
+
+				if @WorkPhone <> ''
+				begin
+					if exists(select top 1 1 from tblEMContactDetailType where strType = 'Phone' and strField = 'Work')
+					begin
+						insert into tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
+						select top 1 @intContactId, @WorkPhone, intContactDetailTypeId from tblEMContactDetailType where strType = 'Phone' and strField = 'Work' 
+					end
+				end
+
+				if @Fax <> ''
+				begin
+					if exists(select top 1 1 from tblEMContactDetailType where strType = 'Phone' and strField = 'Fax')
+					begin
+						insert into tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
+						select top 1 @intContactId, @Fax, intContactDetailTypeId from tblEMContactDetailType where strType = 'Phone' and strField = 'Fax' 
+					end
+				end
+					
+					--exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
+			END
+			BEGIN --LOCATION
+				insert into tblEMEntityLocation(intEntityId, strLocationName, ysnDefaultLocation)
+				select @intEntityId, @Name + 'Loc', 0
+			END
 			BEGIN -- Create Customer to Contact
 
 				declare @CustomerNo nvarchar(max), @intEntityCustomerId int
@@ -128,20 +169,9 @@ DECLARE @Contacts TABLE
 				select top 1 @CustomerNo = sscon_cus_no from @Contacts where id = @id
 				select top 1 @intEntityCustomerId = intEntityCustomerId from tblARCustomer where strCustomerNumber = @CustomerNo 
 
-				insert into tblARCustomerToContact
-				(
-					 intEntityCustomerId
-					, intEntityContactId
-					, intEntityLocationId
-					, strUserType
-					, ysnPortalAccess
-				)
-				select
-					@intEntityCustomerId
-					, @intContactId
-					, null
-					, 'User'
-					, 0
+				insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
+				select @intEntityId, @intContactId, 0, 0
+
 
 			END
 			
@@ -151,10 +181,8 @@ DECLARE @Contacts TABLE
 				
 			--	delete from tblEMEntityContact where intContactId = @intContactId 
 			--	delete from tblEMEntity where intEntityId = @intEntityId
-			---- End of TODO1
-			
-				delete from @Entity
-				delete from @EntityContact 
+			---- End of TODO1		
+				
 				delete from @Contacts where id = @id
 
 		END
@@ -164,10 +192,16 @@ IF(@Checking = 1)
 BEGIN
 	SELECT @Total =  count(sscon_contact_id) 
 	FROM ssconmst
-	LEFT JOIN tblEMEntityContact Con ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Con.strContactNumber COLLATE Latin1_General_CI_AS
+	LEFT JOIN tblEMEntity Con 
+		ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Con.strContactNumber COLLATE Latin1_General_CI_AS
 	WHERE Con.strContactNumber IS NULL AND ssconmst.sscon_contact_id  = UPPER(ssconmst.sscon_contact_id ) COLLATE Latin1_General_CS_AS
 	AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
-	NOT IN (select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEMEntity E inner join tblEMEntityContact EC on E.intEntityId = EC.intEntityContactId)
+	NOT IN (select G.strName COLLATE SQL_Latin1_General_CP1_CS_AS 
+				from tblEMEntity E 
+				join tblEMEntityToContact F
+					on E.intEntityId = F.intEntityId
+				join tblEMEntity G
+					on F.intEntityContactId = G.intEntityId)
 	
 END
 END

@@ -17,6 +17,8 @@ DECLARE @intMinWO int
 DECLARE @intWorkOrderId int
 DECLARE @ysnEnableParentLot BIT = 0
 		,@intPickUOMId int
+		,@dblQuantity numeric(38,20)
+		,@intItemUOMId int
 
 SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference
 
@@ -41,7 +43,9 @@ End
 		intStageLotId int,
 		intStorageLocationId int,
 		dblPickQuantity numeric(18,6),
-		intPickUOMId int
+		intPickUOMId int,
+		dblQuantity numeric(38,20),
+		intItemUOMId int
 	)
 
 Begin Tran
@@ -49,10 +53,9 @@ Begin Tran
 	If @intKitStatusId = 7
 	Begin
 		--Move the Staged (Kitting Area) Lots back to Storage Location
-		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId)
+		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId,dblQuantity,intItemUOMId)
 		Select PL.intPickListDetailId,PL.intStageLotId,PL.intStorageLocationId,
-		--CASE WHEN PL.intItemUOMId = PL.intItemIssuedUOMId THEN PL.dblPickQuantity / L.dblWeightPerQty ELSE PL.dblPickQuantity END 
-		PL.dblPickQuantity,PL.intPickUOMId
+		PL.dblPickQuantity,PL.intPickUOMId,PL.dblQuantity,PL.intItemUOMId
 		From tblMFPickListDetail PL
 		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
 		Where intPickListId=@intPickListId AND PL.intLotId <> PL.intStageLotId
@@ -61,12 +64,21 @@ Begin Tran
 
 		While(@intMinPickDetail is not null) --Pick List Detail Loop
 		Begin
+
+			SELECT @dblPickQuantity=NULL,@intPickUOMId=NULL,@dblQuantity=NULL,@intItemUOMId=NULL
+
 			Select @intPickListDetailId = pld.intPickListDetailId, @intStageLotId=pld.intStageLotId,
-			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId 
+			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId,@dblQuantity=pld.dblQuantity,@intItemUOMId=pld.intItemUOMId  
 			From @tblPickListDetail pld
 			where intRowNo=@intMinPickDetail
 
 			Select @intNewSubLocationId=intSubLocationId from tblICStorageLocation Where intStorageLocationId=@intStorageLocationId
+
+			IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intStageLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+			BEGIN
+				SELECT @dblPickQuantity=@dblQuantity
+				SELECT @intPickUOMId=@intItemUOMId
+			END
 
 			Exec [uspMFLotMove] @intLotId=@intStageLotId,
 					@intNewSubLocationId=@intNewSubLocationId,
@@ -103,10 +115,9 @@ Begin Tran
 	Begin
 
 		--Move the Staged (Kitting Area) Lots back to Storage Location
-		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId)
+		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId,dblQuantity,intItemUOMId)
 		Select PL.intPickListDetailId,PL.intStageLotId,PL.intStorageLocationId,
-		--CASE WHEN PL.intItemUOMId = PL.intItemIssuedUOMId THEN PL.dblPickQuantity / L.dblWeightPerQty ELSE PL.dblPickQuantity END 
-		PL.dblPickQuantity,PL.intPickUOMId
+		PL.dblPickQuantity,PL.intPickUOMId,PL.dblQuantity,PL.intItemUOMId
 		From tblMFPickListDetail PL
 		JOIN dbo.tblICLot L on L.intLotId=PL.intStageLotId
 		Where intPickListId=@intPickListId
@@ -115,12 +126,20 @@ Begin Tran
 
 		While(@intMinPickDetail is not null) --Pick List Detail Loop
 		Begin
+			SELECT @dblPickQuantity=NULL,@intPickUOMId=NULL,@dblQuantity=NULL,@intItemUOMId=NULL
+
 			Select @intPickListDetailId = pld.intPickListDetailId, @intStageLotId=pld.intStageLotId,
-			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId 
+			@intStorageLocationId=pld.intStorageLocationId,@dblPickQuantity=pld.dblPickQuantity,@intPickUOMId=intPickUOMId,@dblQuantity=pld.dblQuantity,@intItemUOMId=pld.intItemUOMId   
 			From @tblPickListDetail pld
 			where intRowNo=@intMinPickDetail
 
 			Select @intNewSubLocationId=intSubLocationId from tblICStorageLocation Where intStorageLocationId=@intStorageLocationId
+
+			IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intStageLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+			BEGIN
+				SELECT @dblPickQuantity=@dblQuantity
+				SELECT @intPickUOMId=@intItemUOMId
+			END
 
 			Exec [uspMFLotMove] @intLotId=@intStageLotId,
 					@intNewSubLocationId=@intNewSubLocationId,

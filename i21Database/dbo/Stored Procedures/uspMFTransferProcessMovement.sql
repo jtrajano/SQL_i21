@@ -72,7 +72,7 @@ BEGIN TRY
 		,@dblReadingQuantity = dblReadingQuantity
 		,@intInputWeightUOMId = intInputWeightUOMId
 		,@intDestinationSubLocationId = intDestinationSubLocationId
-		,@intDestinationStorageLocationId = intDestStorageLocationId
+		,@intDestinationStorageLocationId = intDestinationStorageLocationId
 		,@intUserId = intUserId
 		,@ysnEmptyOut = ysnEmptyOut
 		,@ysnNegativeQuantityAllowed = ysnNegativeQuantityAllowed
@@ -94,7 +94,7 @@ BEGIN TRY
 			,dblReadingQuantity NUMERIC(18, 6)
 			,intInputWeightUOMId INT
 			,intDestinationSubLocationId INT
-			,intDestStorageLocationId INT
+			,intDestinationStorageLocationId INT
 			,intUserId INT
 			,ysnEmptyOut BIT
 			,ysnNegativeQuantityAllowed BIT
@@ -209,6 +209,7 @@ BEGIN TRY
 			-- Parameters for the new values: 
 			,@dblAdjustByQuantity = @dblAdjustByQuantity
 			,@dblNewUnitCost = NULL
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -246,7 +247,7 @@ BEGIN TRY
 		PRINT 'Call Lot Adjust routine.'
 	END
 
-	IF @dblWeight > @dblNewWeight
+	IF @ysnItemChanged = 1
 	BEGIN
 		SELECT @intCategoryId = intCategoryId
 		FROM dbo.tblICItem
@@ -273,6 +274,9 @@ BEGIN TRY
 				,@intSplitSubLocationId = intSubLocationId
 			FROM dbo.tblICStorageLocation
 			WHERE strName = @strTransferStorageLocationForNewLot
+				AND intLocationId = @intLocationId
+				--SELECT @intSourceStorageLocationId = @intSplitStorageLocationId
+				--SELECT @intSourceSubLocationId = @intSplitSubLocationId
 		END
 		ELSE
 		BEGIN
@@ -280,10 +284,21 @@ BEGIN TRY
 				,@intSplitSubLocationId = @intSourceSubLocationId
 		END
 
+		DECLARE @intSplitItemUOMId INT
+
+		SELECT @intSplitItemUOMId = (
+				CASE 
+					WHEN @intWeightUOMId IS NULL
+						THEN @intNewItemUOMId
+					ELSE @intWeightUOMId
+					END
+				)
+
 		EXEC dbo.uspMFLotSplit @intLotId = @intInputLotId
 			,@intSplitSubLocationId = @intSplitSubLocationId
 			,@intSplitStorageLocationId = @intSplitStorageLocationId
 			,@dblSplitQty = @dblNewWeight
+			,@intSplitItemUOMId = @intSplitItemUOMId
 			,@intUserId = @intUserId
 			,@strSplitLotNumber = @strSplitLotNumber OUTPUT
 			,@strNewLotNumber = @strNewLotNumber
@@ -291,10 +306,7 @@ BEGIN TRY
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 		SELECT @strLotNumber = @strSplitLotNumber
-	END
 
-	IF @ysnItemChanged = 1
-	BEGIN
 		EXEC [dbo].[uspICInventoryAdjustment_CreatePostItemChange]
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
@@ -308,6 +320,7 @@ BEGIN TRY
 			,@intNewItemId = @intNewItemId
 			,@intNewSubLocationId = @intSourceSubLocationId
 			,@intNewStorageLocationId = @intSourceStorageLocationId
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -323,6 +336,12 @@ BEGIN TRY
 	WHERE intStorageLocationId = @intDestinationStorageLocationId
 
 	IF @strInternalCode = 'PROD_STAGING'
+		OR EXISTS (
+			SELECT *
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = @intDestinationStorageLocationId
+			)
 	BEGIN
 		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
 				CASE 
@@ -344,13 +363,14 @@ BEGIN TRY
 			,@intNewLocationId = @intLocationId
 			,@intNewSubLocationId = @intDestinationSubLocationId
 			,@intNewStorageLocationId = @intDestinationStorageLocationId
-			,@strNewLotNumber = @strDestinationLotNumber
+			,@strNewLotNumber = @strLotNumber
 			,@dblAdjustByQuantity = @dblAdjustByQuantity
 			,@dblNewSplitLotQuantity = NULL
 			,@dblNewWeight = NULL
 			,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
 			,@intNewWeightUOMId = NULL
 			,@dblNewUnitCost = NULL
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
@@ -359,7 +379,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT @dblAdjustByQuantity =  @dblNewWeight / (
+		SELECT @dblAdjustByQuantity = @dblNewWeight / (
 				CASE 
 					WHEN @intWeightUOMId IS NULL
 						THEN 1
@@ -367,8 +387,6 @@ BEGIN TRY
 					END
 				)
 
-		--SELECT @intInputItemId,@dtmCurrentDateTime,@intLocationId,@intSourceSubLocationId,@intSourceStorageLocationId,@strLotNumber,@intDestinationSubLocationId,@intDestinationStorageLocationId,@dblAdjustByQuantity
-		--Select 'Begin'
 		EXEC uspICInventoryAdjustment_CreatePostLotMove
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
@@ -383,12 +401,12 @@ BEGIN TRY
 			,@intNewStorageLocationId = @intDestinationStorageLocationId
 			,@strNewLotNumber = @strLotNumber
 			,@dblMoveQty = @dblAdjustByQuantity
+			,@intItemUOMId = @intNewItemUOMId
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
 			,@intEntityUserSecurityId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			--Select 'End'
 	END
 
 	IF @intTransactionCount = 0
@@ -415,6 +433,5 @@ BEGIN CATCH
 			)
 END CATCH
 GO
-
 
 

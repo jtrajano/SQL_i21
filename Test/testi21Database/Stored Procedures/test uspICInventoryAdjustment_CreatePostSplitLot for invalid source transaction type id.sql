@@ -162,7 +162,8 @@ BEGIN
 			,@dblNewWeight					= NULL 
 			,@intNewItemUOMId				= NULL 
 			,@intNewWeightUOMId				= NULL 
-			,@dblNewUnitCost				= NULL 
+			,@dblNewUnitCost				= NULL
+			,@intItemUOMId					= @ManualGrains_25KgBagUOM
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId					= 1  
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_INVALID -- Invalid source transaction type id

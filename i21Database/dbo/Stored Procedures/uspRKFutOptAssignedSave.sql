@@ -57,7 +57,7 @@ INSERT INTO tblRKAssignFuturesToContractSummary
 	@intContractDetailId,
 	@dtmMatchDate,
 	@intFutOptTransactionId,
-	@BalanceLot,
+	@intAssignedLots,
 	0,
 	0,
 	@intFutOptTransactionId  

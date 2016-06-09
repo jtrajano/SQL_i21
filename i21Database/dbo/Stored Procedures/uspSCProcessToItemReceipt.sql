@@ -30,6 +30,7 @@ DECLARE @strDummyDistributionOption AS NVARCHAR(3) = NULL
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @intTicketId AS INT = @intSourceTransactionId
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
+DECLARE @dblRemainingQuantity AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @intDirectType AS INT = 3
 DECLARE @intTicketUOM INT
@@ -235,9 +236,45 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage 
+				,ysnIsStorage
+				,strSourceTransactionId  
 			)
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
+			SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
+			IF(@dblRemainingUnits > ISNULL(@dblRemainingQuantity,0))
+				BEGIN
+					INSERT INTO @ItemsForItemReceipt (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+					,ysnIsStorage 
+					,strSourceTransactionId 
+				)
+				EXEC dbo.uspSCGetScaleItemForItemReceipt 
+					 @intTicketId
+					,@strSourceType
+					,@intUserId
+					,@dblRemainingUnits
+					,@dblCost
+					,@intEntityId
+					,@intContractId
+					,'SPT'
+					,@LineItems
+				END
 			--IF (@dblRemainingUnits = @dblNetUnits)
 			--RETURN
 		END
@@ -262,7 +299,8 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage 
+				,ysnIsStorage
+				,strSourceTransactionId  
 			)
 			EXEC dbo.uspSCGetScaleItemForItemReceipt 
 				 @intTicketId
@@ -307,7 +345,8 @@ BEGIN TRY
 					,intLotId
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-					,ysnIsStorage 
+					,ysnIsStorage
+					,strSourceTransactionId 
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
@@ -377,7 +416,8 @@ BEGIN TRY
 							,intLotId
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage 
+							,ysnIsStorage
+							,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId
 						--EXEC dbo.uspCTUpdationFromTicketDistribution @intTicketId, @intEntityId, @dblNetUnits, @intDPContractId, @intUserId, 1
@@ -409,7 +449,8 @@ BEGIN TRY
 							,intLotId
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage 
+							,ysnIsStorage
+							,strSourceTransactionId 
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL
 				END
@@ -429,7 +470,7 @@ BEGIN TRY
 	END
 
 	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	if @strLotTracking = 'No'
+	IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 		END

@@ -133,6 +133,34 @@ BEGIN
 			RETURN -1
 		END
 	END 
+
+	---------------------------------------------------------
+	-- Validate if the new item location is valid
+	---------------------------------------------------------
+	BEGIN 
+		SET @intItemId = NULL 
+		SET @strItemNo = NULL 
+
+		SELECT	TOP 1 
+				@intItemId = Item.intItemId
+				,@strItemNo = Item.strItemNo
+		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = Detail.intItemId
+				LEFT JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intItemId = Item.intItemId
+					AND ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId) 
+		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+				AND ItemLocation.intItemLocationId IS NULL 
+				
+		IF @intItemId IS NOT NULL 
+		BEGIN
+			-- --'The new Item Location is invalid or missing for %s.'
+			RAISERROR(80083, 11, 1, @strItemNo)  
+			RETURN -1
+		END		
+	END 
 END 
 
 --------------------------------------------------------------------------------
@@ -173,7 +201,7 @@ BEGIN
 	)
 	SELECT 	intItemId				= Lot.intItemId
 			,intItemLocationId		= Lot.intItemLocationId
-			,intItemUOMId			= Lot.intItemUOMId
+			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty

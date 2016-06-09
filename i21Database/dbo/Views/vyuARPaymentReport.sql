@@ -15,14 +15,16 @@ SELECT
 	,[intEntityCustomerId]	= ARP.[intEntityCustomerId]
 	,[strCustomerNumber]	= ARC.[strCustomerNumber]
 	,[strCustomerName]		= EME.[strName]
-	,[strCustomerAddress]	= CASE WHEN ISNULL(EMEL.[intEntityLocationId],0) <> 0
-									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL.[strLocationName], EMEL.[strAddress], EMEL.[strCity], EMEL.[strState], EMEL.[strZipCode], EMEL.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
-								WHEN ISNULL(EMEL1.[intEntityLocationId],0) <> 0
+	,[strCustomerAddress]	= CASE WHEN ISNULL(EMEL1.[intEntityLocationId],0) <> 0
 									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL1.[strLocationName], EMEL1.[strAddress], EMEL1.[strCity], EMEL1.[strState], EMEL1.[strZipCode], EMEL1.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
+								WHEN ISNULL(EMEL.[intEntityLocationId],0) <> 0
+									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL.[strLocationName], EMEL.[strAddress], EMEL.[strCity], EMEL.[strState], EMEL.[strZipCode], EMEL.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
 							  ELSE 
 								''
 							  END
 	,[dblCustomerARBalance]	= ARC.[dblARBalance]
+	,[dblPendingInvoice]	= ISNULL((SELECT SUM(ISNULL(tblARInvoice.[dblInvoiceTotal], 0.00)) FROM tblARInvoice WHERE tblARInvoice.[intEntityCustomerId] = ARP.[intEntityCustomerId] AND tblARInvoice.[ysnPosted] = 0), 0.00)
+	,[dblPendingPayment]	= ISNULL((SELECT SUM(ISNULL(tblARPayment.[dblAmountPaid], 0.00)) FROM tblARPayment WHERE tblARPayment.[intEntityCustomerId] = ARP.[intEntityCustomerId] AND tblARPayment.[ysnPosted] = 0), 0.00)
 	,[intInvoiceId]			= ARI.[intInvoiceId]
 	,[strInvoiceNumber]		= ARI.[strInvoiceNumber]
 	,[strInvoiceType]		= ARI.[strTransactionType]
@@ -102,7 +104,9 @@ LEFT OUTER JOIN
 		ON ARP.[intPaymentId] = ARPD.[intPaymentId]
 INNER JOIN
 	tblARInvoice ARI
-		ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]	
+		ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
+WHERE
+	ISNULL(ARPD.[dblPayment], 0.00) <> 0
 	
 UNION ALL
 
@@ -120,23 +124,25 @@ SELECT
 	,[intEntityCustomerId]	= ARP.[intEntityCustomerId]
 	,[strCustomerNumber]	= ARC.[strCustomerNumber]
 	,[strCustomerName]		= EME.[strName]
-	,[strCustomerAddress]	= CASE WHEN ISNULL(EMEL.[intEntityLocationId],0) <> 0
-									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL.[strLocationName], EMEL.[strAddress], EMEL.[strCity], EMEL.[strState], EMEL.[strZipCode], EMEL.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
-								WHEN ISNULL(EMEL1.[intEntityLocationId],0) <> 0
+	,[strCustomerAddress]	= CASE WHEN ISNULL(EMEL1.[intEntityLocationId],0) <> 0
 									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL1.[strLocationName], EMEL1.[strAddress], EMEL1.[strCity], EMEL1.[strState], EMEL1.[strZipCode], EMEL1.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
+								WHEN ISNULL(EMEL.[intEntityLocationId],0) <> 0
+									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, EMEL.[strLocationName], EMEL.[strAddress], EMEL.[strCity], EMEL.[strState], EMEL.[strZipCode], EMEL.[strCountry], EME.[strName], ARC.[ysnIncludeEntityName])
 							  ELSE
 								''
 							  END
 	,[dblCustomerARBalance]	= ARC.[dblARBalance]
+	,[dblPendingInvoice]	= ISNULL((SELECT SUM(ISNULL(tblARInvoice.[dblInvoiceTotal], 0.00)) FROM tblARInvoice WHERE tblARInvoice.[intEntityCustomerId] = ARP.[intEntityCustomerId] AND tblARInvoice.[ysnPosted] = 0), 0.00)
+	,[dblPendingPayment]	= ISNULL((SELECT SUM(ISNULL(tblARPayment.[dblAmountPaid], 0.00)) FROM tblARPayment WHERE tblARPayment.[intEntityCustomerId] = ARP.[intEntityCustomerId] AND tblARPayment.[ysnPosted] = 0), 0.00)
 	,[intInvoiceId]			= ARI.[intInvoiceId]
 	,[strInvoiceNumber]		= ARI.[strInvoiceNumber]
 	,[strInvoiceType]		= ARI.[strTransactionType]
 	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN 1 ELSE 0 END
-	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
+	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00)
 	,[dtmDueDate]			= ARI.[dtmDueDate]
-	,[dblInterest]			= ISNULL(ARI.[dblInterest], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
-	,[dblDiscount]			= ISNULL(ARI.[dblDiscount], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
-	,[dblPayment]			= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
+	,[dblInterest]			= ISNULL(ARI.[dblInterest], 0.00)
+	,[dblDiscount]			= ISNULL(ARI.[dblDiscount], 0.00)
+	,[dblPayment]			= ISNULL(ARI.[dblInvoiceTotal], 0.00)
 	,[strCompanyName]		= CASE WHEN SMCL.[strUseLocationAddress] = 'Letterhead'
 								THEN ''
 							  ELSE

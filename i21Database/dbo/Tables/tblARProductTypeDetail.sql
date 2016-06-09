@@ -6,5 +6,6 @@
     [intConcurrencyId]		 INT NOT NULL, 
 	CONSTRAINT [PK_tblARProductTypeDetail_intProductTypeDetailId] PRIMARY KEY CLUSTERED ([intProductTypeDetailId] ASC),
 	CONSTRAINT [FK_tblARProductTypeDetail_tblARProductType] FOREIGN KEY ([intProductTypeId]) REFERENCES [dbo].[tblARProductType]([intProductTypeId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblARProductTypeDetail_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory]([intCategoryId])
+    CONSTRAINT [FK_tblARProductTypeDetail_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory]([intCategoryId]),
+	CONSTRAINT [UK_tblARProductTypeDetail_intCategoryId] UNIQUE (intCategoryId)
 )

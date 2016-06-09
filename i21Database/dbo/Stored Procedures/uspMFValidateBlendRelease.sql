@@ -259,7 +259,7 @@ If @ysnEnableParentLot=0
 	Insert into @tblReservedQty
 	Select tl.intLotId,Sum(sr.dblQty) AS dblReservedQty 
 	From tblICStockReservation sr 
-	Join @tblLot tl on sr.intLotId=tl.intLotId
+	Join @tblLot tl on sr.intLotId=tl.intLotId Where ISNULL(sr.ysnPosted,0)=0
 	group by tl.intLotId
 
 If @ysnEnableParentLot=0

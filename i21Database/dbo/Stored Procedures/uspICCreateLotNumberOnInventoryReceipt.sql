@@ -15,6 +15,8 @@ DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
+		,@InventoryTransactionType_InventoryReceipt AS INT = 4
+
 -- Create the temp table 
 CREATE TABLE #GeneratedLotItems (
 	intLotId INT
@@ -160,6 +162,9 @@ BEGIN
 			,dblGrossWeight	
 			,strParentLotNumber
 			,strParentLotAlias
+			,strTransactionId
+			,strSourceTransactionId
+			,intSourceTransactionTypeId
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -196,6 +201,9 @@ BEGIN
 			,dblGrossWeight			= ItemLot.dblGrossWeight
 			,strParentLotNumber		= ItemLot.strParentLotNumber
 			,strParentLotAlias		= ItemLot.strParentLotAlias
+			,strTransactionId			= Receipt.strReceiptNumber
+			,strSourceTransactionId		= Receipt.strReceiptNumber
+			,intSourceTransactionTypeId = @InventoryTransactionType_InventoryReceipt
 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

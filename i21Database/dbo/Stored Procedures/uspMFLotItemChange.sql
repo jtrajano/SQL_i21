@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE uspMFLotItemChange
  @intLotId INT,
  @intNewItemId INT,
- @intUserId INT
+ @intUserId INT,
+ @strNewLotNumber NVARCHAR(100) = NULL OUTPUT
 
 AS
 
@@ -28,6 +29,7 @@ BEGIN TRY
 			,@strItemNo nvarchar(50)
 
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
+	DECLARE @dblLotReservedQty NUMERIC(16,8)
 		
 	SELECT @intItemId = intItemId, 
 		   @intLocationId = intLocationId,
@@ -39,6 +41,12 @@ BEGIN TRY
 		   @intAdjustItemUOMId= intItemUOMId  
 	FROM tblICLot WHERE intLotId = @intLotId
 
+	SELECT @dblLotReservedQty = dblQty  FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
+	IF (ISNULL(@dblLotReservedQty,0) > 0)
+	BEGIN
+		RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
+	END
+	
 	SELECT @intUnitMeasureId=intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId=@intItemUOMId
 
 	IF NOT EXISTS(SELECT *FROM dbo.tblICItemUOM WHERE intItemId=@intNewItemId AND intUnitMeasureId=@intUnitMeasureId)
@@ -77,6 +85,13 @@ BEGIN TRY
 													   ,@intSourceTransactionTypeId = @intSourceTransactionTypeId
 													   ,@intEntityUserSecurityId  = @intUserId
 													   ,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+	SELECT TOP 1 @strNewLotNumber = strLotNumber
+	FROM tblICLot
+	WHERE intSplitFromLotId = @intLotId
+	ORDER BY intLotId DESC
+
+	SELECT @strNewLotNumber AS strNewLotNumber
 													 
 END TRY  
   

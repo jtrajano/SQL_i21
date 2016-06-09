@@ -9,10 +9,10 @@ CREATE FUNCTION [dbo].[fnCalculateLotQty](
 	,@dblCostingQty NUMERIC(38,20)
 	,@dblLotWeightPerQty NUMERIC(38,20)
 )
-RETURNS NUMERIC(38,20)
+RETURNS NUMERIC(38, 20)
 AS 
 BEGIN
-	DECLARE @calculatedValue AS NUMERIC(38,20)
+	DECLARE @calculatedValue AS NUMERIC(38, 20)
 
 	SET @calculatedValue = 
 			CASE	WHEN @intLotItemUOMId = @intCostingItemUOMId THEN 

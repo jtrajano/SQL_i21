@@ -186,6 +186,8 @@ JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
 WHERE A.Credit > 0
 
 	--GL-2040 For Journal entries - if there is a negative credit break into two entries on import
+
+ALTER TABLE #iRelyImptblGLJournalDetail ALTER COLUMN strDescription CHAR(50) NULL
 IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUnits = 1)
 	BEGIN
 		insert INTO #iRelyImptblGLJournalDetail

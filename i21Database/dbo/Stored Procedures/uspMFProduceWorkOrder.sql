@@ -34,60 +34,13 @@ BEGIN
 	DECLARE @dtmCreated DATETIME
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
+		,@intWorkOrderProducedLotId INT
 
 	SELECT @dtmCreated = Getdate()
 
 	IF @intStatusId = 0
 		OR @intStatusId IS NULL
 		SELECT @intStatusId = 13 --Complete Work Order
-
-	IF EXISTS (
-			SELECT *
-			FROM tblMFWorkOrder
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND intBlendRequirementId IS NOT NULL
-			)
-		OR @ysnPostProduction = 1
-	BEGIN
-		EXEC uspMFPostProduction 1
-			,0
-			,@intWorkOrderId
-			,@intItemId
-			,@intUserId
-			,NULL
-			,@intStorageLocationId
-			,@dblProduceQty
-			,@intProduceUOMKey
-			,@dblUnitQty
-			,@dblPhysicalCount
-			,@intPhysicalItemUOMId
-			,@strBatchId
-			,@strLotNumber
-			,@intBatchId
-			,@intLotId OUT
-			,@strLotAlias
-			,@strVendorLotNo
-			,@strParentLotNumber
-			,@strVesselNo
-	END
-	ELSE
-	BEGIN
-		EXEC uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
-			,@intItemId = @intItemId
-			,@strLotNumber = @strLotNumber
-			,@dblWeight = @dblProduceQty
-			,@intWeightUOMId = @intProduceUOMKey
-			,@dblUnitQty = @dblUnitQty
-			,@dblQty = @dblPhysicalCount
-			,@intItemUOMId = @intPhysicalItemUOMId
-			,@intUserId = @intUserId
-			,@intBatchId = @intBatchId
-			,@intLotId = @intLotId OUT
-			,@strLotAlias = @strLotAlias
-			,@strVendorLotNo = @strVendorLotNo
-			,@strParentLotNumber = @strParentLotNumber
-			,@intStorageLocationId = @intStorageLocationId
-	END
 
 	IF EXISTS (
 			SELECT *
@@ -111,8 +64,8 @@ BEGIN
 		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	IF @intShiftId =0 
-	SELECT @intShiftId=NULL
+	IF @intShiftId = 0
+		SELECT @intShiftId = NULL
 
 	INSERT INTO dbo.tblMFWorkOrderProducedLot (
 		intWorkOrderId
@@ -183,9 +136,10 @@ BEGIN
 		,@intInputLotId
 		,@intInputStorageLocationId
 
+	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
+
 	UPDATE tblMFWorkOrder
-	SET intBatchID = @intWorkOrderId
-		,dblProducedQuantity = isnull(dblProducedQuantity, 0) + (
+	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) + (
 			CASE 
 				WHEN intItemId = @intItemId
 					THEN (
@@ -251,4 +205,60 @@ BEGIN
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intItemId
 	END
+
+	IF EXISTS (
+			SELECT *
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intBlendRequirementId IS NOT NULL
+			)
+		OR @ysnPostProduction = 1
+	BEGIN
+		EXEC uspMFPostProduction 1
+			,0
+			,@intWorkOrderId
+			,@intItemId
+			,@intUserId
+			,NULL
+			,@intStorageLocationId
+			,@dblProduceQty
+			,@intProduceUOMKey
+			,@dblUnitQty
+			,@dblPhysicalCount
+			,@intPhysicalItemUOMId
+			,@strBatchId
+			,@strLotNumber
+			,@intBatchId
+			,@intLotId OUT
+			,@strLotAlias
+			,@strVendorLotNo
+			,@strParentLotNumber
+			,@strVesselNo
+			,@dtmProductionDate
+			,@intWorkOrderProducedLotId
+	END
+	ELSE
+	BEGIN
+		EXEC uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
+			,@intItemId = @intItemId
+			,@strLotNumber = @strLotNumber
+			,@dblWeight = @dblProduceQty
+			,@intWeightUOMId = @intProduceUOMKey
+			,@dblUnitQty = @dblUnitQty
+			,@dblQty = @dblPhysicalCount
+			,@intItemUOMId = @intPhysicalItemUOMId
+			,@intUserId = @intUserId
+			,@intBatchId = @intBatchId
+			,@intLotId = @intLotId OUT
+			,@strLotAlias = @strLotAlias
+			,@strVendorLotNo = @strVendorLotNo
+			,@strParentLotNumber = @strParentLotNumber
+			,@intStorageLocationId = @intStorageLocationId
+			,@dtmProductionDate = @dtmProductionDate
+			,@intTransactionDetailId = @intWorkOrderProducedLotId
+	END
+
+	UPDATE tblMFWorkOrderProducedLot
+	SET intLotId = @intLotId
+	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 END

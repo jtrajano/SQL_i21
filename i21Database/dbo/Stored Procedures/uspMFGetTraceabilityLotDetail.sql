@@ -6,9 +6,13 @@ AS
 
 SET NOCOUNT ON;
 
+Declare @strLotNumber nvarchar(50)
+
+Select @strLotNumber=strLotNumber From tblICLot Where intLotId=@intLotId
+
 if @intDirectionId=1
 Begin
-	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId=@intLotId) AND @ysnParentLot=0
+	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) AND @ysnParentLot=0
 		Select 'Receipt' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,2 AS intImageTypeId
@@ -24,7 +28,7 @@ Begin
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intLotId=@intLotId) t
+		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
 	If Exists(Select 1 from tblMFWorkOrderConsumedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1
@@ -65,7 +69,7 @@ End
 
 if @intDirectionId=2
 Begin
-	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId=@intLotId) AND @ysnParentLot=0
+	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) AND @ysnParentLot=0
 		Select 'Ship' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
 		t.intCategoryId,t.strCategoryCode,SUM(t.dblQuantity) AS dblQuantity,MAX(t.strUOM) AS strUOM,
 		MAX(t.dtmTransactionDate) AS dtmTransactionDate,t.intParentLotId,6 AS intImageTypeId
@@ -81,7 +85,7 @@ Begin
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intLotId=@intLotId) t
+		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
 	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId)) AND @ysnParentLot=1

@@ -102,14 +102,17 @@ SELECT
 	,LW.dtmStrippingReportReceivedDate
 	,LW.dtmSampleAuthorizedDate
 	,LWC.intLoadContainerId intWarehouseContainerId
+	,L.intSourceType
+	,L.intTransUsedBy
+	,L.ysnPosted
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intPContractDetailId
 JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = LDCL.intItemUOMId
-JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
-JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = L.intWeightUnitMeasureId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CT.intWeightId
 LEFT JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId 
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId

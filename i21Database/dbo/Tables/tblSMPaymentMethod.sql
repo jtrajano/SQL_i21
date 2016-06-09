@@ -6,6 +6,7 @@
     [strPrintOption] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive]          BIT            DEFAULT ((1)) NOT NULL,
     [intSort]            INT            NOT NULL DEFAULT 0,
+	[intOriginalId]      INT            NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMPaymentMethod] PRIMARY KEY CLUSTERED ([intPaymentMethodID] ASC), 
     CONSTRAINT [AK_tblSMPaymentMethod_PaymentMethod] UNIQUE (strPaymentMethod)

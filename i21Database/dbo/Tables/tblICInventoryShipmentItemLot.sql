@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[dblQuantityShipped] NUMERIC(38, 20) NULL, 
 		[dblGrossWeight] NUMERIC(38, 20) NULL DEFAULT((0)),
 		[dblTareWeight] NUMERIC(38, 20) NULL DEFAULT((0)),
+		[dblWeightPerQty] NUMERIC(38, 20) NULL DEFAULT((0)),
 		[strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 

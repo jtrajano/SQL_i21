@@ -21,6 +21,7 @@ BEGIN TRY
 		,@intDayOfYear INT
 		,@intShiftId INT
 		,@intManufacturingCellId INT
+		,@strWorkOrderNo NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -45,6 +46,7 @@ BEGIN TRY
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
 		,@intManufacturingCellId = intManufacturingCellId
+		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -235,6 +237,7 @@ BEGIN TRY
 		,@intWeightUOMId INT
 		,@dblWeightPerQty NUMERIC(18, 6)
 		,@intSubLocationId INT
+		,@strInventoryTracking NVARCHAR(50)
 
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM tblMFProductionSummary F
@@ -250,176 +253,204 @@ BEGIN TRY
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
 		WHERE F.intProductionSummaryId = @intProductionSummaryId
 
-		IF @dblYieldQuantity > 0
-			AND NOT EXISTS (
-				SELECT *
-				FROM dbo.tblICLot
-				WHERE intStorageLocationId = @intStorageLocationId
-					AND intItemId = @intItemId
-					AND intLotStatusId = 1
-					AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
-				)
+		SELECT @strInventoryTracking = strInventoryTracking
+		FROM tblICItem
+		WHERE intItemId = @intItemId
+
+		SELECT @intItemUOMId = intItemUOMId
+		FROM tblICItemUOM
+		WHERE intItemId = @intItemId
+			AND ysnStockUnit = 1
+
+		SELECT TOP 1 @intSubLocationId = intSubLocationId
+			,@intStorageLocationId = intStorageLocationId
+		FROM tblICItemStockUOM
+		WHERE intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMId
+
+		IF @strInventoryTracking = 'Item Level'
 		BEGIN
-			PRINT 'CREATE STAGING LOT'
-
-			--*****************************************************
-			--Create staging lot
-			--*****************************************************
-			DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
-
-			CREATE TABLE #GeneratedLotItems (
-				intLotId INT
-				,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-				,intDetailId INT
-				,intParentLotId INT
-				,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				)
-
-			-- Create and validate the lot numbers
+			IF @dblYieldQuantity > 0
 			BEGIN
-				DECLARE @strLifeTimeType NVARCHAR(50)
-					,@intLifeTime INT
-					,@dtmExpiryDate DATETIME
-					,@strLotTracking NVARCHAR(50)
-					,@intItemLocationId INT
-					,@intCategoryId INT
-
-				SELECT @strLifeTimeType = strLifeTimeType
-					,@intLifeTime = intLifeTime
-					,@strLotTracking = strLotTracking
-					,@intCategoryId = intCategoryId
-				FROM dbo.tblICItem
-				WHERE intItemId = @intItemId
-
-				IF @strLifeTimeType = 'Years'
-					SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
-				ELSE IF @strLifeTimeType = 'Months'
-					SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
-				ELSE IF @strLifeTimeType = 'Days'
-					SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
-				ELSE IF @strLifeTimeType = 'Hours'
-					SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, @dtmCurrentDateTime)
-				ELSE IF @strLifeTimeType = 'Minutes'
-					SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
-				ELSE
-					SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
-
-				SELECT @intItemLocationId = intItemLocationId
-				FROM dbo.tblICItemLocation
-				WHERE intItemId = @intItemId
-
-				IF @strLotTracking <> 'Yes - Serial Number'
-				BEGIN
-					--EXEC dbo.uspSMGetStartingNumber 55
-					--	,@strLotNumber OUTPUT
-					SELECT @intSubLocationId = @intSubLocationId
-					FROM dbo.tblICStorageLocation
-					WHERE intStorageLocationId = @intStorageLocationId
-
-					EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-						,@intItemId = @intItemId
-						,@intManufacturingId = @intManufacturingCellId
-						,@intSubLocationId = @intSubLocationId
-						,@intLocationId = @intLocationId
-						,@intOrderTypeId = NULL
-						,@intBlendRequirementId = NULL
-						,@intPatternCode = 55
-						,@ysnProposed = 0
-						,@strPatternString = @strLotNumber OUTPUT
-				END
-
-				SELECT @intItemUOMId = intItemUOMId
-				FROM dbo.tblICItemUOM
-				WHERE intItemId = @intItemId
-					AND ysnStockUnit = 1
-
-				INSERT INTO @ItemsThatNeedLotId (
-					intLotId
-					,strLotNumber
-					,strLotAlias
-					,intItemId
-					,intItemLocationId
-					,intSubLocationId
-					,intStorageLocationId
-					,dblQty
-					,intItemUOMId
-					,dblWeight
-					,intWeightUOMId
-					,dtmExpiryDate
-					,dtmManufacturedDate
-					,intOriginId
-					,intGradeId
-					,strBOLNo
-					,strVessel
-					,strReceiptNumber
-					,strMarkings
-					,strNotes
-					,intEntityVendorId
-					,strVendorLotNo
-					,strGarden
-					,intDetailId
-					,ysnProduced
-					)
-				SELECT intLotId = NULL
-					,strLotNumber = @strLotNumber
-					,strLotAlias = NULL
-					,intItemId = @intItemId
-					,intItemLocationId = @intItemLocationId
-					,intSubLocationId = @intSubLocationId
-					,intStorageLocationId = @intStorageLocationId
-					,dblQty = @dblYieldQuantity
-					,intItemUOMId = @intItemUOMId
-					,dblWeight = NULL
-					,intWeightUOMId = NULL
-					,dtmExpiryDate = @dtmExpiryDate
-					,dtmManufacturedDate = @dtmCurrentDateTime
-					,intOriginId = NULL
-					,intGradeId = NULL
-					,strBOLNo = NULL
-					,strVessel = NULL
-					,strReceiptNumber = NULL
-					,strMarkings = NULL
-					,strNotes = NULL
-					,intEntityVendorId = NULL
-					,strVendorLotNo = NULL
-					,strGarden = NULL
-					,intDetailId = @intWorkOrderId
-					,ysnProduced = 1
-
-				EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
-					,@intUserId
+				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+					-- Parameters for filtering:
+					@intItemId = @intItemId
+					,@dtmDate = @dtmCurrentDateTime
+					,@intLocationId = @intLocationId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = NULL
+					-- Parameters for the new values: 
+					,@dblAdjustByQuantity = @dblYieldQuantity
+					,@dblNewUnitCost = NULL
+					,@intItemUOMId = @intItemUOMId
+					-- Parameters used for linking or FK (foreign key) relationships
+					,@intSourceId = 1
+					,@intSourceTransactionTypeId = 8
+					,@intEntityUserSecurityId = @intUserId
+					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 			END
-				--*****************************************************
-				--End of create staging lot
-				--*****************************************************
 		END
-
-		SELECT TOP 1 @strLotNumber = NULL
-			,@intLotId = NULL
-			,@dblQty = NULL
-			,@intItemUOMId = NULL
-			,@intSubLocationId = NULL
-			,@intWeightUOMId = NULL
-			,@dblWeightPerQty = NULL
-
-		SELECT TOP 1 @strLotNumber = strLotNumber
-			,@intLotId = intLotId
-			,@dblQty = dblQty
-			,@intItemUOMId = intItemUOMId
-			,@intSubLocationId = intSubLocationId
-			,@intWeightUOMId = intWeightUOMId
-			,@dblWeightPerQty = dblWeightPerQty
-		FROM dbo.tblICLot
-		WHERE intStorageLocationId = @intStorageLocationId
-			AND intItemId = @intItemId
-			AND intLotStatusId = 1
-			AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
-			AND dblQty > 0
-		ORDER BY dtmDateCreated DESC
-
-		IF @intLotId IS NULL
-			--AND @dblYieldQuantity > 0
+		ELSE
 		BEGIN
+			IF @dblYieldQuantity > 0
+				AND NOT EXISTS (
+					SELECT *
+					FROM dbo.tblICLot
+					WHERE intStorageLocationId = @intStorageLocationId
+						AND intItemId = @intItemId
+						AND intLotStatusId = 1
+						AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					)
+			BEGIN
+				PRINT 'CREATE STAGING LOT'
+
+				--*****************************************************
+				--Create staging lot
+				--*****************************************************
+				DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
+
+				CREATE TABLE #GeneratedLotItems (
+					intLotId INT
+					,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+					,intDetailId INT
+					,intParentLotId INT
+					,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+					)
+
+				-- Create and validate the lot numbers
+				BEGIN
+					DECLARE @strLifeTimeType NVARCHAR(50)
+						,@intLifeTime INT
+						,@dtmExpiryDate DATETIME
+						,@strLotTracking NVARCHAR(50)
+						,@intItemLocationId INT
+						,@intCategoryId INT
+
+					SELECT @strLifeTimeType = strLifeTimeType
+						,@intLifeTime = intLifeTime
+						,@strLotTracking = strLotTracking
+						,@intCategoryId = intCategoryId
+					FROM dbo.tblICItem
+					WHERE intItemId = @intItemId
+
+					IF @strLifeTimeType = 'Years'
+						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Months'
+						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Days'
+						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Hours'
+						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Minutes'
+						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
+					ELSE
+						SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
+
+					SELECT @intItemLocationId = intItemLocationId
+					FROM dbo.tblICItemLocation
+					WHERE intItemId = @intItemId
+
+					IF @strLotTracking <> 'Yes - Serial Number'
+					BEGIN
+						--EXEC dbo.uspSMGetStartingNumber 55
+						--	,@strLotNumber OUTPUT
+						SELECT @intSubLocationId = @intSubLocationId
+						FROM dbo.tblICStorageLocation
+						WHERE intStorageLocationId = @intStorageLocationId
+
+						EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+							,@intItemId = @intItemId
+							,@intManufacturingId = @intManufacturingCellId
+							,@intSubLocationId = @intSubLocationId
+							,@intLocationId = @intLocationId
+							,@intOrderTypeId = NULL
+							,@intBlendRequirementId = NULL
+							,@intPatternCode = 55
+							,@ysnProposed = 0
+							,@strPatternString = @strLotNumber OUTPUT
+					END
+
+					SELECT @intItemUOMId = intItemUOMId
+					FROM dbo.tblICItemUOM
+					WHERE intItemId = @intItemId
+						AND ysnStockUnit = 1
+
+					INSERT INTO @ItemsThatNeedLotId (
+						intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,intItemLocationId
+						,intSubLocationId
+						,intStorageLocationId
+						,dblQty
+						,intItemUOMId
+						,dblWeight
+						,intWeightUOMId
+						,dtmExpiryDate
+						,dtmManufacturedDate
+						,intOriginId
+						,intGradeId
+						,strBOLNo
+						,strVessel
+						,strReceiptNumber
+						,strMarkings
+						,strNotes
+						,intEntityVendorId
+						,strVendorLotNo
+						,strGarden
+						,intDetailId
+						,ysnProduced
+						,strTransactionId
+						,strSourceTransactionId
+						,intSourceTransactionTypeId
+						)
+					SELECT intLotId = NULL
+						,strLotNumber = @strLotNumber
+						,strLotAlias = NULL
+						,intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intSubLocationId = @intSubLocationId
+						,intStorageLocationId = @intStorageLocationId
+						,dblQty = @dblYieldQuantity
+						,intItemUOMId = @intItemUOMId
+						,dblWeight = NULL
+						,intWeightUOMId = NULL
+						,dtmExpiryDate = @dtmExpiryDate
+						,dtmManufacturedDate = @dtmCurrentDateTime
+						,intOriginId = NULL
+						,intGradeId = NULL
+						,strBOLNo = NULL
+						,strVessel = NULL
+						,strReceiptNumber = NULL
+						,strMarkings = NULL
+						,strNotes = NULL
+						,intEntityVendorId = NULL
+						,strVendorLotNo = NULL
+						,strGarden = NULL
+						,intDetailId = @intWorkOrderId
+						,ysnProduced = 1
+						,strTransactionId = @strWorkOrderNo
+						,strSourceTransactionId = @strWorkOrderNo
+						,intSourceTransactionTypeId = 8
+
+					EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
+						,@intUserId
+				END
+					--*****************************************************
+					--End of create staging lot
+					--*****************************************************
+			END
+
+			SELECT TOP 1 @strLotNumber = NULL
+				,@intLotId = NULL
+				,@dblQty = NULL
+				,@intItemUOMId = NULL
+				,@intSubLocationId = NULL
+				,@intWeightUOMId = NULL
+				,@dblWeightPerQty = NULL
+
 			SELECT TOP 1 @strLotNumber = strLotNumber
 				,@intLotId = intLotId
 				,@dblQty = dblQty
@@ -431,101 +462,123 @@ BEGIN TRY
 			WHERE intStorageLocationId = @intStorageLocationId
 				AND intItemId = @intItemId
 				AND intLotStatusId = 1
-				AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND dblQty > 0
 			ORDER BY dtmDateCreated DESC
-		END
 
-		IF @intLotId IS NOT NULL
-		BEGIN
-			SET @dblNewQty = @dblYieldQuantity
-
-			UPDATE dbo.tblMFProcessCycleCount
-			SET intLotId = @intLotId
-			FROM dbo.tblMFProcessCycleCount CC
-			JOIN dbo.tblMFProcessCycleCountSession CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
-			WHERE CS.intWorkOrderId = @intWorkOrderId
-				AND intItemId = @intItemId
-				AND (
-					dblQuantity > 0
-					OR dblSystemQty > 0
-					)
-
-			IF @ysnYieldAdjustmentAllowed = 1
-				AND @dblYieldQuantity <> 0
+			IF @intLotId IS NULL
+				--AND @dblYieldQuantity > 0
 			BEGIN
-				SELECT @dblAdjustByQuantity = @dblNewQty / (
-						CASE 
-							WHEN @intWeightUOMId IS NULL
-								THEN 1
-							ELSE @dblWeightPerQty
-							END
-						)
-
-				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
-					-- Parameters for filtering:
-					@intItemId = @intItemId
-					,@dtmDate = @dtmCurrentDateTime
-					,@intLocationId = @intLocationId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = @strLotNumber
-					-- Parameters for the new values: 
-					,@dblAdjustByQuantity = @dblAdjustByQuantity
-					,@dblNewUnitCost = NULL
-					-- Parameters used for linking or FK (foreign key) relationships
-					,@intSourceId = 1
-					,@intSourceTransactionTypeId = 8
-					,@intEntityUserSecurityId = @intUserId
-					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-
-				SELECT @intShiftId = intShiftId
-				FROM dbo.tblMFShift
-				WHERE intLocationId = @intLocationId
-					AND Convert(CHAR, GetDate(), 108) BETWEEN dtmShiftStartTime
-						AND dtmShiftEndTime + intEndOffset
-
-				INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
-					intWorkOrderId
-					,intLotId
-					,dblQuantity
-					,intItemUOMId
-					,intItemId
-					,intTransactionId
-					,intTransactionTypeId
-					,strTransactionType
-					,dtmTransactionDate
-					,intProcessId
-					,intShiftId
-					)
-				SELECT TOP 1 WP.intWorkOrderId
-					,WP.intLotId
-					,@dblNewQty - @dblQty
-					,@intItemUOMId
-					,WP.intItemId
-					,@intInventoryAdjustmentId
-					,25
-					,'Cycle Count Adj'
-					,GetDate()
-					,intManufacturingProcessId
-					,@intShiftId
-				FROM dbo.tblMFWorkOrderProducedLot WP
-				JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
-				WHERE intLotId = @intLotId
-
-				PRINT 'Call Adjust Qty procedure'
+				SELECT TOP 1 @strLotNumber = strLotNumber
+					,@intLotId = intLotId
+					,@dblQty = dblQty
+					,@intItemUOMId = intItemUOMId
+					,@intSubLocationId = intSubLocationId
+					,@intWeightUOMId = intWeightUOMId
+					,@dblWeightPerQty = dblWeightPerQty
+				FROM dbo.tblICLot
+				WHERE intStorageLocationId = @intStorageLocationId
+					AND intItemId = @intItemId
+					AND intLotStatusId = 1
+					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				ORDER BY dtmDateCreated DESC
 			END
 
-			IF EXISTS (
-					SELECT *
-					FROM tblICLot
-					WHERE intLotId = @intLotId
-						AND dblQty = 0
-					)
+			IF @intLotId IS NOT NULL
 			BEGIN
-				--UPDATE dbo.tblICLot
-				--SET intLotStatusId = 3
-				--WHERE intLotId = @intLotId
-				EXEC uspMFSetLotStatus @intLotId,3,@intUserId
+				SET @dblNewQty = @dblYieldQuantity
+
+				UPDATE dbo.tblMFProcessCycleCount
+				SET intLotId = @intLotId
+				FROM dbo.tblMFProcessCycleCount CC
+				JOIN dbo.tblMFProcessCycleCountSession CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
+				WHERE CS.intWorkOrderId = @intWorkOrderId
+					AND intItemId = @intItemId
+					AND (
+						dblQuantity > 0
+						OR dblSystemQty > 0
+						)
+
+				IF @ysnYieldAdjustmentAllowed = 1
+					AND @dblYieldQuantity <> 0
+				BEGIN
+					SELECT @dblAdjustByQuantity = @dblNewQty / (
+							CASE 
+								WHEN @intWeightUOMId IS NULL
+									THEN 1
+								ELSE @dblWeightPerQty
+								END
+							)
+
+					EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+						-- Parameters for filtering:
+						@intItemId = @intItemId
+						,@dtmDate = @dtmCurrentDateTime
+						,@intLocationId = @intLocationId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@strLotNumber = @strLotNumber
+						-- Parameters for the new values: 
+						,@dblAdjustByQuantity = @dblAdjustByQuantity
+						,@dblNewUnitCost = NULL
+						,@intItemUOMId = @intItemUOMId
+						-- Parameters used for linking or FK (foreign key) relationships
+						,@intSourceId = 1
+						,@intSourceTransactionTypeId = 8
+						,@intEntityUserSecurityId = @intUserId
+						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+					SELECT @intShiftId = intShiftId
+					FROM dbo.tblMFShift
+					WHERE intLocationId = @intLocationId
+						AND Convert(CHAR, GetDate(), 108) BETWEEN dtmShiftStartTime
+							AND dtmShiftEndTime + intEndOffset
+
+					INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
+						intWorkOrderId
+						,intLotId
+						,dblQuantity
+						,intItemUOMId
+						,intItemId
+						,intTransactionId
+						,intTransactionTypeId
+						,strTransactionType
+						,dtmTransactionDate
+						,intProcessId
+						,intShiftId
+						)
+					SELECT TOP 1 WP.intWorkOrderId
+						,WP.intLotId
+						,@dblNewQty - @dblQty
+						,@intItemUOMId
+						,WP.intItemId
+						,@intInventoryAdjustmentId
+						,25
+						,'Cycle Count Adj'
+						,GetDate()
+						,intManufacturingProcessId
+						,@intShiftId
+					FROM dbo.tblMFWorkOrderProducedLot WP
+					JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
+					WHERE intLotId = @intLotId
+
+					PRINT 'Call Adjust Qty procedure'
+				END
+
+				IF EXISTS (
+						SELECT *
+						FROM tblICLot
+						WHERE intLotId = @intLotId
+							AND dblQty = 0
+						)
+				BEGIN
+					--UPDATE dbo.tblICLot
+					--SET intLotStatusId = 3
+					--WHERE intLotId = @intLotId
+					EXEC uspMFSetLotStatus @intLotId
+						,3
+						,@intUserId
+				END
 			END
 		END
 

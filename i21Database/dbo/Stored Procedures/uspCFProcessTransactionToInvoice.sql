@@ -61,7 +61,7 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnSplitted]
 	,[intPaymentId]
 	,[intSplitId]
-	,[intDistributionHeaderId]
+	,[intLoadDistributionHeaderId]
 	,[strActualCostId]
 	,[intShipmentId]
 	,[intTransactionId]
@@ -107,6 +107,7 @@ INSERT INTO @EntriesForInvoice(
 	,[ysnVirtualMeterReading]
 	,[ysnClearDetailTaxes]					
 	,[intTempDetailIdForTaxes]
+	,[strType]
 )
 SELECT
 	 [strSourceTransaction]					= 'Card Fueling Transaction'
@@ -137,7 +138,7 @@ SELECT
 	,[ysnSplitted]							= 0
 	,[intPaymentId]							= NULL
 	,[intSplitId]							= NULL
-	,[intDistributionHeaderId]				= NULL
+	,[intLoadDistributionHeaderId]			= NULL
 	,[strActualCostId]						= ''
 	,[intShipmentId]						= NULL
 	,[intTransactionId]						= cfTrans.intTransactionId
@@ -190,6 +191,7 @@ SELECT
 	,[ysnVirtualMeterReading]				= NULL
 	,[ysnClearDetailTaxes]					= 1
 	,[intTempDetailIdForTaxes]				= @TransactionId
+	,[strType]								= 'Card Fueling'
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
 ON cfTrans.intNetworkId = cfNetwork.intNetworkId

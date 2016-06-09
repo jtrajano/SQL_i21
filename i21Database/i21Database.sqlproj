@@ -2858,7 +2858,6 @@
     <Build Include="dbo\Views\vyuICGetCategoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVoucherNextApproverEmail.sql" />
-    <Build Include="dbo\tblETCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Save.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_Delete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_LoadPlan.sql" />
@@ -3597,7 +3596,7 @@
     <Build Include="dbo\Tables\tblHDActivityRecipient.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateStatus.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFRunPrecompile.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetInventoryTax.sql" />
     <Build Include="dbo\Views\vyuSMEntityRole.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\13_GlobalJulianCalendar.sql" />
     <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
@@ -3658,7 +3657,6 @@
     <None Include="Scripts\Post-Deployment\IP\1_MasterTables.sql" />
     <Build Include="dbo\Tables\tblGLTempCOASegment.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
-    <Build Include="dbo\Tables\tblTFValidOriginDestinationState.sql" />
     <Build Include="dbo\Tables\tblTFOriginDestinationState.sql" />
     <Build Include="dbo\Tables\tblTFValidDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
@@ -3850,6 +3848,97 @@
     <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetAPGLBalance.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGrid.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridField.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridTab.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridRow.sql" />
+    <Build Include="dbo\Tables\tblSMCustomGridCell.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionMargin.sql" />
+    <Build Include="dbo\Functions\fnCFGetTransactionMargin.sql" />
+    <Build Include="dbo\Tables\tblEMEntityMobileNumber.sql" />
+    <Build Include="dbo\Tables\tblEMEntityContactNumber.sql" />
+    <Build Include="dbo\Tables\tblSMUserSecurityFilterType.sql" />
+    <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
+    <Build Include="dbo\Views\vyuCCNotification.sql" />
+    <Build Include="dbo\Views\vyuSMTerm.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATRefundVoucherToAPBill.sql" />
+    <Build Include="dbo\Functions\fnPATGetCustomerRequiredDetailsForVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATProcessRefundsToVoucher.sql" />
+    <Build Include="dbo\Tables\tblCTContractImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportFromXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\4_DataFix.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultCurreny.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
+    <Build Include="dbo\Tables\tblSMSecurityPolicy.sql" />
+    <Build Include="dbo\Tables\tblSMUserSecurityPasswordHistory.sql" />
+    <None Include="Scripts\Post-Deployment\EM\029_FillInPhoneAndMobile.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessImportRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateImportRackPriceId.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptDetail.sql" />
+    <Build Include="dbo\Views\vyuARCustomerBalancesForET.sql" />
+    <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
+    <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
+    <Build Include="dbo\Tables\tblTFValidOriginState.sql" />
+    <Build Include="dbo\Tables\tblTFValidVendor.sql" />
+    <Build Include="dbo\Tables\tblARPrepaidAndCredit.sql" />
+    <Build Include="dbo\Views\vyuARPrepaidAndCredit.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePrepaidForInvoice.sql" />
+    <Build Include="dbo\Views\vyuAPClearables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearing.sql" />
+    <Build Include="dbo\Views\vyuSMImportFieldMapping.sql" />
+    <Build Include="dbo\Views\vyuGRGetUnpaidStorageDiscount.sql" />
+    <Build Include="dbo\Views\vyuLGContainerReceiptView.sql" />
+    <Build Include="dbo\Views\vyuLGContainerPositionView.sql" />
+    <Build Include="dbo\Tables\tblPRPayGroupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRGeneratePayGroupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRProcessTimecardToPayGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUnReservePickListBySalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUnReservePickListByShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRecallReport.sql" />
+    <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
+    <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
+    <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
+    <None Include="Scripts\Post-Deployment\SM\CreateEncryptionCertificateAndSymmetricKey.sql" />
+    <Build Include="dbo\Tables\tblSMUserRoleSubRole.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
+    <Build Include="dbo\Views\vyuCCSiteDetail.sql" />
+    <Build Include="dbo\Views\vyuCCSiteHeader.sql" />
+    <Build Include="dbo\Views\vyuCCSiteBatchDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUnreconcileBankRecords.sql" />
+    <Build Include="dbo\Views\vyuSMUserLocationSubRolePermission.sql" />
+    <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
+    <Build Include="dbo\Views\vyuTRGetImportRackPriceDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
+    <Build Include="dbo\Tables\tblSMOfflineConfiguration.sql" />
+    <Build Include="dbo\Views\vyuEMEntityContact2.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToAPBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToARInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToCMBankTransaction.sql" />
+    <Build Include="dbo\Views\vyuPOForApproval.sql" />
+    <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleMenuSubRole.sql" />
+    <Build Include="dbo\Tables\tblETCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterCategory.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterDriver.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterItem.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterLocation.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterTaxGroup.sql" />
+    <Build Include="dbo\Tables\tblETExportFilterTerm.sql" />
+    <Build Include="dbo\Views\vyuTRGetImportRackItemError.sql" />
+    <Build Include="dbo\Views\vyuSCTicketAlertView.sql" />
+    <Build Include="dbo\Views\vyuARItemCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMTransferContractSample.sql" />
+    <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -3996,5 +4085,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\9_AlterTable.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\18_SecurityPolicy.sql" />
   </ItemGroup>
 </Project>

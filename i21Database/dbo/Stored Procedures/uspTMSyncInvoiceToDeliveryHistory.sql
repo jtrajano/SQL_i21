@@ -37,6 +37,8 @@ BEGIN
 	DECLARE @intNewDeliveryHistoryId INT
 	DECLARE @intTopInvoiceDetailId INT
 	DECLARE @strBillingBy NVARCHAR(15)
+	DECLARE @intSeasonResetId INT
+	DECLARE @dblLastAccumulatedDDOnSeasonReset NUMERIC(18,6)
 	
 
 
@@ -147,8 +149,17 @@ BEGIN
 					@intLastDegreeDays = intDegreeDays
 					,@dblLastAccumulatedDegreeDay = dblAccumulatedDD
 					,@intLastClockReadingId = intDDReadingID
+					,@intSeasonResetId = intSeasonResetArchiveID
 				FROM tblTMDDReadingSeasonResetArchive
 				WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmLastDeliveryDate), 0) 
+
+				SELECT TOP 1
+					@dblLastAccumulatedDDOnSeasonReset = ISNULL(dblAccumulatedDD,0.0)
+				FROM tblTMDDReadingSeasonResetArchive
+				WHERE intClockID = @intClockId AND intSeasonResetArchiveID = @intSeasonResetId
+				ORDER BY dtmDate DESC
+
+				SET @dblLastAccumulatedDegreeDay = @dblLastAccumulatedDegreeDay - ISNULL(@dblLastAccumulatedDDOnSeasonReset,0.0)
 			END
 		END
 		
@@ -502,6 +513,7 @@ BEGIN
 							,strWillCallOrderNumber
 							,intWillCallContractId
 							,intWillCallRouteId
+							,intWillCallDispatchId
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -550,6 +562,7 @@ BEGIN
 							,strWillCallOrderNumber = NULL
 							,intWillCallContractId = NULL
 							,intWillCallRouteId = G.intRouteId
+							,intWillCallDispatchId = G.intDispatchID
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -682,6 +695,7 @@ BEGIN
 						,dblSiteEstimatedPercentLeft
 						,dtmSiteLastReadingUpdate
 						,intWillCallRouteId
+						,intWillCallDispatchId
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -744,6 +758,7 @@ BEGIN
 						,dblSiteEstimatedPercentLeft = A.dblEstimatedPercentLeft
 						,dtmSiteLastReadingUpdate = ISNULL(A.dtmLastReadingUpdate,DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))
 						,intWillCallRouteId = G.intRouteId
+						,intWillCallDispatchId = G.intDispatchID
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -933,6 +948,7 @@ BEGIN
 			,intInvoiceId
 			,intInvoiceDetailId
 			,intWillCallRouteId
+			,intWillCallDispatchId
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -984,6 +1000,7 @@ BEGIN
 			,intInvoiceId = C.intInvoiceId
 			,intInvoiceDetailId = B.intInvoiceDetailId
 			,intWillCallRouteId = G.intRouteId
+			,intWillCallDispatchId = G.intDispatchID
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId

@@ -5,12 +5,13 @@
 	@UserId				INT = 0,
 	@SalesOrderDate     DATETIME = NULL,
 	@NewSalesOrderId	INT = NULL OUTPUT,
-	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT
+	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT,
+	@ForRecurring		BIT	= 0
 AS
 
 BEGIN
 	SET @SalesOrderDate = CASE WHEN @SalesOrderDate IS NULL THEN GETDATE() ELSE @SalesOrderDate END
-
+		
 	INSERT INTO tblSOSalesOrder
 		(   [intEntityCustomerId]
            ,[dtmDate]
@@ -92,9 +93,12 @@ BEGIN
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
-		   ,0 --Recurring
-           ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
-		   ,[strFooterComments]s
+		   ,[ysnRecurring]      
+		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
+				THEN [strComments]
+				ELSE [strComments] + ' DUP: ' + [strSalesOrderNumber] 
+			END
+		   ,[strFooterComments]
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
@@ -248,6 +252,6 @@ BEGIN
 			DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 		END	
 
-	EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, @UserId
+	EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, 0, @UserId
 	
 END

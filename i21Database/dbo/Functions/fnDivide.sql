@@ -10,6 +10,7 @@ BEGIN
 	DECLARE @quotient AS NUMERIC(38, 20)
 	DECLARE @rawResult AS NVARCHAR(200) 
 	DECLARE @valueSign AS INT
+	DECLARE @sign AS INT 
 
 	-- Avoid 'divide by zero' error. Return NULL value. 
 	IF ISNULL(@divisor, 0) = 0 
@@ -20,6 +21,12 @@ BEGIN
 
 	IF @divisor IS NULL
 		RETURN NULL; 
+
+	-- Return same dividend value if divisor is 1. 
+	IF @divisor = 1 
+		RETURN @dividend; 
+
+	SELECT @sign = SIGN(@dividend) * SIGN(@divisor) 
 
 	-- Divide it and process the raw result as a string. 
 	-- Avoid the arithmetic overflow by ensuring the numbers are truncated at the 17th digit from the left. 
@@ -57,18 +64,25 @@ BEGIN
 		SET @rawResult = REPLACE(LTRIM(REPLACE(REPLACE(REPLACE(@rawResult, '-', ''), '.', ''), '0', ' ')), ' ', 0)		
 	END 
 
-	-- Pad zeroes to the left 
+	-- Pad zeroes to the raw value. 
 	BEGIN 
-		DECLARE @actualDivide AS NUMERIC(38,20) = CAST(@dividend AS NUMERIC(18, 6)) / CAST(@divisor AS NUMERIC(18, 6)) 
-		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@actualDivide, '.', ''), '-', '')) - 1) + @rawResult
-	END 
+		DECLARE @stringFactor1 AS NVARCHAR(40) = CAST(@dividend AS NVARCHAR(40)) 
+				,@stringFactor2 AS NVARCHAR(40) = CAST(@divisor AS NVARCHAR(40)) 
+
+		DECLARE	@shortenFactor1 AS NUMERIC(38, 20) = LEFT(@stringFactor1, CHARINDEX('.', @stringFactor1) + 6)
+				,@shortenFactor2 AS NUMERIC(38, 20)	= LEFT(@stringFactor2, CHARINDEX('.', @stringFactor2) + 6)
+
+		DECLARE @shortenDivide AS NUMERIC(38,20) = @dividend / @divisor
+
+		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@shortenDivide, '.', ''), '-', '')) - 1) + @rawResult 
+	END 	
 
 	-- Determine where to place the decimal point. 
 	BEGIN 
 		SET @rawResult = 
 			STUFF(
 				@rawResult
-				,CHARINDEX('.', @actualDivide) + CASE WHEN SIGN(@actualDivide) = -1 THEN -1 ELSE 0 END 
+				,CHARINDEX('.', @shortenDivide) + CASE WHEN SIGN(@shortenDivide) = -1 THEN -1 ELSE 0 END 
 				,0
 				,'.' 
 			)
@@ -76,7 +90,7 @@ BEGIN
 
 	-- Determine if there is a need to append a negative sign. 
 	BEGIN 
-		SET @rawResult = CASE WHEN SIGN(@actualDivide) = -1 THEN '-' ELSE '' END + @rawResult
+		SET @rawResult = CASE WHEN SIGN(@sign) = -1 THEN '-' ELSE '' END + @rawResult
 	END 
 
 	-- Finalize the return value by converting the string to numeric. 

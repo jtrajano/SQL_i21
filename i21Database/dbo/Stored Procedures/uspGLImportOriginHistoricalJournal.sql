@@ -176,7 +176,8 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 	#iRelyImptblGLJournalDetail A
 	JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
 	WHERE A.Credit > 0
-
+	
+	ALTER TABLE #iRelyImptblGLJournalDetail ALTER COLUMN strDescription CHAR(50) NULL
 	--GL-2040 For Journal entries - if there is a negative credit break into two entries on import
 	IF EXISTS(SELECT TOP 1 1 FROM #iRelyImptblGLJournalDetail WHERE NegativeCreditUnits = 1)
 	BEGIN
@@ -387,3 +388,4 @@ ROLLBACK_INSERT:
 IMPORT_EXIT:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
+	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans

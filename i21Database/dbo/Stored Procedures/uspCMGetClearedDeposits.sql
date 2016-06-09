@@ -31,6 +31,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@LastReconDate AS DATETIME
+
+		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
@@ -52,4 +55,11 @@ WHERE	ysnPosted = 1
 			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT, @VOID_CHECK)
 			OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		--AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
+					SELECT strLink FROM [dbo].[fnGetDepositEntry]()
+			)
+		AND 1 = CASE 
+			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
+			ELSE 1 
+			END --CM-1143

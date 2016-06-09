@@ -105,39 +105,63 @@ BEGIN
 			,[intOwnershipType]
 			,[intGradeId]
 			,[intDetailId]
+			,[dblWeightPerQty]
+			,[strTransactionId]
+			,[strSourceTransactionId]
+			,[intSourceTransactionTypeId]
 	)
-	SELECT	[intLotId]					= NewLot.intLotId 
+	SELECT	[intLotId]					= TargetLot.intLotId 
 			,[intItemId]				= Detail.intItemId
 			,[intItemLocationId]		= ItemLocation.intItemLocationId
-			,[intItemUOMId]				= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
+			,[intItemUOMId]				= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) --ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
 			,[strLotNumber]				= Detail.strNewLotNumber
-			,[intSubLocationId]			= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
-			,[intStorageLocationId]		= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
+			,[intSubLocationId]			= ISNULL(Detail.intNewSubLocationId, SourceLot.intSubLocationId)
+			,[intStorageLocationId]		= ISNULL(Detail.intNewStorageLocationId, SourceLot.intStorageLocationId)
 			,[dblQty]					= CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN 
 												Detail.dblNewSplitLotQuantity
 											ELSE  
-												-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
-										END 
+												1 
+										  END 
 			,[dtmExpiryDate]			= SourceLot.dtmExpiryDate
 			,[strLotAlias]				= SourceLot.strLotAlias
 			,[intLotStatusId]			= SourceLot.intLotStatusId
-			,[intParentLotId]			= SourceLot.intParentLotId
-			,[strParentLotNumber]		= ParentLotSourceLot.strParentLotNumber
-			,[strParentLotAlias]		= ParentLotSourceLot.strParentLotAlias
+										-- If target lot exists, do not overwrite the parent lot info. 
+			,[intParentLotId]			= ISNULL(TargetLot.intParentLotId, SourceLot.intParentLotId)
+			,[strParentLotNumber]		= ISNULL(ParentLotTargetLot.strParentLotNumber, ParentLotSourceLot.strParentLotNumber)
+			,[strParentLotAlias]		= ISNULL(ParentLotTargetLot.strParentLotAlias, ParentLotSourceLot.strParentLotNumber) 
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
-			,[dblWeight]				= CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+			,[dblWeight]				=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+													-- when a new wgt is supplied, then use it. 
 													Detail.dblNewWeight
 												WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
-													-- Convert the weight into the new Weight UOM.
+													-- when there is a new wgt uom, convert the exising wgt to the new Wgt UOM.
 													dbo.fnCalculateQtyBetweenUOM(
 														Detail.intWeightUOMId
 														, Detail.intNewWeightUOMId
-														, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+														, dbo.fnMultiply(																	
+															SourceLot.dblWeightPerQty
+															,dbo.fnMultiply(-1, (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
+														) 
 													)
+												WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN
+													-- when there is a new split lot qty, compute the original weight. 
+													CASE	WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
+																-- if new split lot qty is using the weight uom, then use it. 
+																Detail.dblNewSplitLotQuantity
+															ELSE
+																-- if new split lot qty is not using the wgt uom, then compute the original wgt. 
+																dbo.fnMultiply(																	
+																	SourceLot.dblWeightPerQty
+																	,dbo.fnMultiply(-1, (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
+																) 
+													END 
+												WHEN ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) = SourceLot.intWeightUOMId THEN 
+													-- When cutting a bag into weights, then qty becomes wgt. 
+													1 
 												ELSE 
+													-- Lot will still use the same qty, then use the same wgt-per-qty. 
 													ISNULL(Detail.dblWeightPerQty, 0) 
-													* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
 											END
 			,[intWeightUOMId]			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
 			,[intOriginId]				= SourceLot.intOriginId
@@ -157,6 +181,32 @@ BEGIN
 			,[intOwnershipType]			= SourceLot.intOwnershipType
 			,[intGradeId]				= SourceLot.intGradeId
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
+			,[dblWeightPerQty]			=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+													-- Calculate a new weight per qty if the new wgt is supplied. 
+													dbo.fnCalculateWeightUnitQty(ISNULL(Detail.dblNewSplitLotQuantity, 0), Detail.dblNewWeight) 
+												WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
+													-- Calculate a new weight per qty if there is a new wgt-per-uom. 
+													dbo.fnCalculateWeightUnitQty(
+														ISNULL(
+															Detail.dblNewSplitLotQuantity
+															, ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
+														)
+														,dbo.fnCalculateQtyBetweenUOM(
+															Detail.intWeightUOMId
+															, Detail.intNewWeightUOMId
+															, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+														)
+													)
+												WHEN ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) = SourceLot.intWeightUOMId THEN 
+													-- When cutting a bag into wgt, then qty becomes wgt. 
+													1 
+												ELSE 
+													-- lot will still use the same qty. the use the same wgt-per-qty. 
+													SourceLot.dblWeightPerQty
+											END
+			,[strTransactionId]			= Header.strAdjustmentNo
+			,[strSourceTransactionId]	= SourceLot.strTransactionId
+			,[intSourceTransactionTypeId] = SourceLot.intSourceTransactionTypeId
 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
@@ -167,14 +217,16 @@ BEGIN
 				ON SourceLot.intLotId = Detail.intLotId
 			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
-			LEFT JOIN dbo.tblICLot NewLot
-				ON NewLot.strLotNumber = Detail.strNewLotNumber
-				AND NewLot.intItemId = Detail.intItemId
-				AND NewLot.intItemLocationId = ItemLocation.intItemLocationId
-				AND ISNULL(NewLot.intSubLocationId, 0) = ISNULL(Detail.intNewSubLocationId, 0)
-				AND ISNULL(NewLot.intStorageLocationId, 0) = ISNULL(Detail.intNewStorageLocationId, 0)				
+			LEFT JOIN dbo.tblICLot TargetLot
+				ON TargetLot.strLotNumber = Detail.strNewLotNumber
+				AND TargetLot.intItemId = Detail.intItemId
+				AND TargetLot.intItemLocationId = ItemLocation.intItemLocationId
+				AND ISNULL(TargetLot.intSubLocationId, 0) = ISNULL(Detail.intNewSubLocationId, 0)
+				AND ISNULL(TargetLot.intStorageLocationId, 0) = ISNULL(Detail.intNewStorageLocationId, 0)				
 			LEFT JOIN dbo.tblICParentLot ParentLotSourceLot
 				ON ParentLotSourceLot.intParentLotId = SourceLot.intParentLotId
+			LEFT JOIN dbo.tblICParentLot ParentLotTargetLot
+				ON ParentLotTargetLot.intParentLotId = TargetLot.intParentLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 END 
 

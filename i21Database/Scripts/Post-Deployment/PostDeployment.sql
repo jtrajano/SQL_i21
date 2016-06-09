@@ -34,6 +34,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\15_Module.sql
 :r .\SM\DefaultData\16_PaymentMethod.sql
 :r .\SM\DefaultData\17_Notification.sql
+:r .\SM\DefaultData\18_SecurityPolicy.sql
+:r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
@@ -150,6 +152,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql
 :r .\GL\DefaultData\7_FiscalYearPeriod.sql
 :r .\GL\DefaultData\8_AccountCurrency.sql
+:r .\GL\DefaultData\9_AlterTable.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
@@ -164,6 +167,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\1_BankTransactionTypes.sql
 :r .\CM\2_DataImportStatus.sql
 :r .\CM\3_PopulateSourceSystemData.sql
+:r .\CM\4_DataFix.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql
@@ -193,6 +197,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\17_FixInvoiceBillToInfo.sql
 :r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
 :r .\AR\DefaultData\19_UpdateUsedCustomerBudget.sql
+:r .\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -212,7 +217,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\RemoveBillTemplate.sql
 :r .\AP\UpdateVoucherForApproval.sql
 :r .\AP\UpdateBillPayToAddress.sql
-:r .\AP\UpdateBillGLEntriesRecords.sql
+:r .\AP\UpdateBillGLEntriesRecords.SQL
+:r .\AP\UpdateBillDetailCurrencies.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
@@ -305,7 +311,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\023_RenameEntityContactEmailDistribution.sql
 :r .\EM\024_delete_old_entity_table.sql
 :r .\EM\025_UpdatePhoneNumberAndCreateBackup.sql
+:r .\EM\028_MassCountryFormat.sql
 :r .\EM\026_ImportPhoneNumbersToNewTable.sql
+:r .\EM\027_MassUpdatePhoneNumber.sql
+:r .\EM\029_FillInPhoneAndMobile.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

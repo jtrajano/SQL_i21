@@ -33,7 +33,7 @@ SELECT DISTINCT
 								ELSE     RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_name_suffix) + '', '' + RTRIM(B.vwcus_first_name) + RTRIM(B.vwcus_mid_init)    
 								END   
 				     END
- ) as CustomerName, 
+ ) collate Latin1_General_CI_AS  as CustomerName, 
  C.intSiteNumber,
  REPLACE( C.strSiteAddress,CHAR(13),'' '') as strSiteAddress, 
  (

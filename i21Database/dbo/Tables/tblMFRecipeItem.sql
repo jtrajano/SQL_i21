@@ -24,11 +24,10 @@
 	[ysnOutputItemMandatory] BIT NOT NULL CONSTRAINT [DF_tblMFRecipeItem_ysnOutputItemMandatory] DEFAULT 0,
     [dblScrap] NUMERIC(18, 6) NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dblScrap] DEFAULT 0, 
     [ysnConsumptionRequired] BIT NOT NULL CONSTRAINT [DF_tblMFRecipeItem_ysnConsumptionRequired] DEFAULT 0,
-	[dblLaborCostPerUnit] NUMERIC(18,6) NULL,
-	[intLaborCostCurrencyId] INT NULL,
-	[dblOverheadCostPerUnit] NUMERIC(18,6) NULL,
-	[intOverheadCostCurrencyId] INT NULL,
-	[dblPercentage] NUMERIC(18,6) NULL,
+	[dblCostAllocationPercentage] NUMERIC(18,6) NULL,
+	[intMarginById] [int] NULL,
+	[dblMargin] NUMERIC(18,6) NULL,
+	[ysnCostAppliedAtInvoice] BIT,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
@@ -41,9 +40,8 @@
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFRecipeItemType_intRecipeItemTypeId] FOREIGN KEY ([intRecipeItemTypeId]) REFERENCES [tblMFRecipeItemType]([intRecipeItemTypeId]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFConsumptionMethod_intConsumptionMethodId] FOREIGN KEY ([intConsumptionMethodId]) REFERENCES [tblMFConsumptionMethod]([intConsumptionMethodId]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
-	CONSTRAINT [FK_tblMFRecipeItem_tblMFRecipe_intRecipeId_intReferenceRecipeId] FOREIGN KEY ([intReferenceRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 
-	CONSTRAINT [FK_tblMFRecipeItem_tblSMCurrency_intCurrencyId_intLaborCostCurrencyId] FOREIGN KEY ([intLaborCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
-	CONSTRAINT [FK_tblMFRecipeItem_tblSMCurrency_intCurrencyId_intOverheadCostCurrencyId] FOREIGN KEY ([intOverheadCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+	CONSTRAINT [FK_tblMFRecipeItem_tblMFRecipe_intRecipeId_intReferenceRecipeId] FOREIGN KEY ([intReferenceRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]),
+	CONSTRAINT [FK_tblMFRecipeItem_tblMFMarginBy_intMarginById] FOREIGN KEY ([intMarginById]) REFERENCES [tblMFMarginBy]([intMarginById]), 
 )
 
 GO

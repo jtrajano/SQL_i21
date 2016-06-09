@@ -107,7 +107,7 @@ AS
 					FROM tblARInvoice I
 						INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
 						INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
-						LEFT JOIN (SELECT intInvoiceId
+						LEFT JOIN (SELECT PD.intInvoiceId
 										, dblAmountPaid = SUM(ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblInterest, @zeroDecimal))
 										, dtmDatePaid   = MAX(dtmDatePaid)
 								   FROM tblARPaymentDetail PD INNER JOIN tblARPayment P 

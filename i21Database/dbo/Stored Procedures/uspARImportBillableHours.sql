@@ -83,7 +83,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		DECLARE @EntityCustomerId AS INT
 				,@ComLocationId AS INT
 				,@NewInvoiceId AS INT
-				,@ErrorMessage nvarchar(50)
+				,@ErrorMessage nvarchar(250)
 				
 		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId, @ComLocationId = intCompanyLocationId FROM @NewInvoices
 				

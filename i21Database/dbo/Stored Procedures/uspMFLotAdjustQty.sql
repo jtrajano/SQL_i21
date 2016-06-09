@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [uspMFLotAdjustQty]
  @intLotId INT,       
  @dblNewLotQty numeric(38,20),
+ @intAdjustItemUOMId int,
  @intUserId INT ,
- @strReasonCode NVARCHAR(1000),
+ @strReasonCode NVARCHAR(1000), 
  @blnValidateLotReservation BIT = 0,
  @strNotes NVARCHAR(MAX)=NULL
 
@@ -39,7 +40,8 @@ BEGIN TRY
 		   @dblLotQty = dblQty,
 		   @dblWeight=dblWeight,
 		   @dblWeightPerQty = dblWeightPerQty,
-		   @intWeightUOMId = intWeightUOMId
+		   @intWeightUOMId =intWeightUOMId,
+		   @intItemUOMId=intItemUOMId
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dblLotAvailableQty = (CASE 
@@ -47,33 +49,43 @@ BEGIN TRY
 			THEN ISNULL(@dblLotQty, 0)
 		ELSE ISNULL(@dblWeight, 0)
 		END)
-
-	SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotAvailableQty
+	IF @intItemUOMId=@intAdjustItemUOMId AND @intWeightUOMId IS NOT NULL
+	BEGIN
+		SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotQty
+	END
+	ELSE
+	BEGIN
+		SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotAvailableQty
+	END
 
 	SELECT @intItemStockUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
 
-	SELECT @dblLotReservedQty = ISNULL(SUM(dblQty),0) FROM tblICStockReservation WHERE intLotId = @intLotId 
+	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId,ISNULL(@intWeightUOMId,@intItemUOMId),ISNULL(dblQty,0))) FROM tblICStockReservation WHERE intLotId = @intLotId AND ISNULL(ysnPosted,0)=0
 
 	IF @blnValidateLotReservation = 1 
 	BEGIN
-		IF (@dblLotAvailableQty + @dblAdjustByQuantity) < @dblLotReservedQty
+		IF (@dblLotAvailableQty + (CASE WHEN @intItemUOMId=@intAdjustItemUOMId AND @intWeightUOMId IS NOT NULL THEN @dblAdjustByQuantity*@dblWeightPerQty ELSE @dblAdjustByQuantity END)) < @dblLotReservedQty
 		BEGIN
 			RAISERROR('There is reservation against this lot. Cannot proceed.',16,1)
 		END
 	END
 
 	--IF @intItemStockUOMId = @intWeightUOMId
-	IF @dblWeightPerQty > 0 
-	BEGIN
-		SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
-	END
+	--IF @dblWeightPerQty > 0 
+	--BEGIN
+	--	SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	--END
+	--BEGIN
+	--	SELECT @dblAdjustByQuantity = dbo.fnDivide(@dblAdjustByQuantity, @dblWeightPerQty)
+	--END
 
 	IF @dblNewLotQty=0
 	BEGIN
 		Select @dblAdjustByQuantity=-@dblLotQty
+		Select @intAdjustItemUOMId =@intItemUOMId 
 	END
 
 	SELECT @dtmDate = GETDATE()
@@ -88,6 +100,11 @@ BEGIN TRY
 				,11
 				,1
 				)
+	END
+
+	IF @dblLotQty = @dblNewLotQty AND @blnValidateLotReservation=0
+	BEGIN
+		RETURN
 	END
 
 	IF @dblLotQty = @dblNewLotQty
@@ -132,11 +149,12 @@ BEGIN TRY
 													  @strLotNumber,
 													  @dblAdjustByQuantity,
 													  @dblNewUnitCost,
-  												      @intWeightUOMId,
+  												      @intAdjustItemUOMId,
 													  @intSourceId,
 													  @intSourceTransactionTypeId,
 													  @intUserId,
 													  @intInventoryAdjustmentId OUTPUT
+
 	IF EXISTS (
 			SELECT TOP 1 *
 			FROM tblMFWorkOrderProducedLot
@@ -185,18 +203,29 @@ BEGIN TRY
 		AND intItemUOMId = intWeightUOMId
 	and intLotId=@intLotId
 
-	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.01 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
+	IF ((SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.00001 AND (SELECT dblWeight FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0) OR ((SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) < 0.00001 AND (SELECT dblQty FROM dbo.tblICLot WHERE intLotId = @intLotId) > 0)
 	BEGIN
-		--EXEC dbo.uspMFLotAdjustQty
-		-- @intLotId =@intLotId,       
-		-- @dblNewLotQty =0,
-		-- @intUserId=@intUserId ,
-		-- @strReasonCode ='Residue qty clean up',
-		-- @strNotes ='Residue qty clean up'
-		UPDATE tblICLot
-		SET dblWeight = 0
-			,dblQty = 0
-		WHERE intLotId = @intLotId
+			DECLARE @dblResidueWeight NUMERIC(38,20)
+			SELECT @dblResidueWeight = CASE WHEN intWeightUOMId IS NULL THEN dblQty ELSE dblWeight END,@intAdjustItemUOMId= CASE WHEN intWeightUOMId IS NULL THEN intItemUOMId ELSE intWeightUOMId End FROM tblICLot WHERE intLotId = @intLotId
+			select @dblAdjustByQuantity=-@dblResidueWeight
+
+			EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId,
+								@dtmDate,
+								@intLocationId,
+								@intSubLocationId,
+								@intStorageLocationId,
+								@strLotNumber,
+								@dblAdjustByQuantity,
+								@dblNewUnitCost,
+  								@intAdjustItemUOMId,
+								@intSourceId,
+								@intSourceTransactionTypeId,
+								@intUserId,
+								@intInventoryAdjustmentId OUTPUT
+		--UPDATE tblICLot
+		--SET dblWeight = 0
+		--	,dblQty = 0
+		--WHERE intLotId = @intLotId
 	END
 	COMMIT TRANSACTION
 END TRY

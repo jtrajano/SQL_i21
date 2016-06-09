@@ -9,6 +9,8 @@ AS
 		,[strScheduleType]
 		,[dtmStartDate]
 		,[dtmEndDate]
+		,[strEntityIds]
+		,[intCommissionPlanId]
 		,[ysnActive]
 		,[ysnPayables]
 		,[ysnPayroll]
@@ -21,6 +23,8 @@ AS
 		,[strScheduleType]
 		,[dtmStartDate]
 		,[dtmEndDate]
+		,[strEntityIds]
+		,[intCommissionPlanId]
 		,[ysnActive]
 		,[ysnPayables]
 		,[ysnPayroll]
@@ -54,12 +58,14 @@ AS
 			([intCommissionScheduleId]
 			,[intEntityId]
 			,[intCommissionPlanId]
+			,[intSort]
 			,[dblPercentage]
 			,[intConcurrencyId])
 		SELECT 
 			@NewCommissionScheduleId
 			,[intEntityId]
 			,[intCommissionPlanId]
+			,[intSort]
 			,[dblPercentage]
 			,1
 		FROM
