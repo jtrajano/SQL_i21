@@ -3934,6 +3934,7 @@
     <Build Include="dbo\Views\vyuSCTicketAlertView.sql" />
     <Build Include="dbo\Views\vyuARItemCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspQMTransferContractSample.sql" />
+    <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
