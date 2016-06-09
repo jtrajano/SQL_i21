@@ -3936,6 +3936,7 @@
     <Build Include="dbo\Stored Procedures\uspQMTransferContractSample.sql" />
     <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
     <Build Include="dbo\Views\vyuICEnergyTracExportItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateLicense.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
