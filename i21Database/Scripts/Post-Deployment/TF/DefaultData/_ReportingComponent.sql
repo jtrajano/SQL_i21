@@ -59,8 +59,8 @@ DROP CONSTRAINT FK_tblTFValidDestinationState_tblTFReportingComponentDetail
 ALTER TABLE tblTFTaxCriteria
 DROP CONSTRAINT FK_tblTFTaxCriteria_tblTFReportingComponentDetail
 
-ALTER TABLE tblTFValidOriginDestinationState
-DROP CONSTRAINT FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail
+--ALTER TABLE tblTFValidOriginDestinationState
+--DROP CONSTRAINT FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail
 
 TRUNCATE TABLE tblTFReportingComponentDetail
 
@@ -107,11 +107,11 @@ FK_tblTFTaxCriteria_tblTFReportingComponentDetail FOREIGN KEY
 REFERENCES tblTFReportingComponentDetail
 ( intReportingComponentDetailId )
 
-ALTER TABLE tblTFValidOriginDestinationState ADD CONSTRAINT
-FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
+--ALTER TABLE tblTFValidOriginDestinationState ADD CONSTRAINT
+--FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail FOREIGN KEY
+--( intReportingComponentDetailId )
+--REFERENCES tblTFReportingComponentDetail
+--( intReportingComponentDetailId )
 
 
 
