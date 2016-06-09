@@ -535,11 +535,11 @@ FROM
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
-															 ELSE  ISNULL(CC.intCurrencyId,CD.intMainCurrencyId)
+															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))
 														END			
 		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
-															 ELSE  ISNULL(CC.strCurrency, (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = CD.intMainCurrencyId))
+															 ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))))
 														END	
 		,[strVendorLocation]						=	NULL
 	FROM		vyuCTContractCostView		CC
