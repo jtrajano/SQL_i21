@@ -370,6 +370,7 @@ BEGIN
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'R'
+			AND intItemId = @ItemId
 			AND (ISNULL(intCustomerLocationId,0) = 0 OR (intCustomerLocationId = @ShipToLocationId AND ISNULL(@ShipToLocationId,0) <> 0))
 					
 		
