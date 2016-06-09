@@ -169,7 +169,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	ISNULL(ISHI.dblQuantity,(Detail.dblQtyOrdered - Detail.dblQtyShipped))
+		,[dblQty]					=	ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),(Detail.dblQtyOrdered - Detail.dblQtyShipped))
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
