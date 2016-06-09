@@ -224,6 +224,8 @@ BEGIN
 				ON StocksPerUOM.intItemId = Item.intItemId
 				AND StocksPerUOM.intItemLocationId = ItemLocation.intItemLocationId	
 				AND StocksPerUOM.intItemUOMId = @intItemUOMId
+				AND StocksPerUOM.intSubLocationId = ItemLocation.intSubLocationId
+				AND StocksPerUOM.intStorageLocationId = ItemLocation.intStorageLocationId
 			LEFT JOIN dbo.tblICItemUOM StockUnit
 				ON StockUnit.intItemId = Item.intItemId
 				AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
