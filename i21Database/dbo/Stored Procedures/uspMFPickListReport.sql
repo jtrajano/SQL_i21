@@ -115,7 +115,7 @@ Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickL
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = @intWorkOrderId
-		AND ri.intConsumptionMethodId <> 1
+		AND ri.intConsumptionMethodId IN (2,3)
 
 	UNION
 	
@@ -132,7 +132,7 @@ Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickL
 	WHERE r.intRecipeId = @intRecipeId
 		AND rs.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = @intWorkOrderId
-		AND ri.intConsumptionMethodId <> 1
+		AND ri.intConsumptionMethodId IN (2,3)
 
 If @intSalesOrderId=0 --Kit Pick List
 Begin
@@ -188,8 +188,19 @@ Begin
 End
 Else
 Begin --Sales Order Pick List
-	Select @dblTotalCost= SUM(pl.dblQuantity * ISNULL(l.dblLastCost,0)) From tblMFPickListDetail pl Join tblICLot l on pl.intLotId=l.intLotId 
+	Select @dblTotalCost= SUM(t.dblQuantity * t.dblCost)
+	From
+	(Select pl.dblQuantity,
+		CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
+			ISNULL(l.dblLastCost,0) 
+		ELSE
+			(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il 
+			Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId 
+			AND il.intItemId=pl.intItemId)
+		END	AS dblCost
+	From tblMFPickListDetail pl Join tblICLot l on pl.intLotId=l.intLotId 
 	Where intPickListId=@intPickListId AND ISNULL(pl.intLotId,0)>0
+	) t
 
 	Select @dblTotalCost=ISNULL(@dblTotalCost,0) + ISNULL(SUM(pl.dblQuantity * ISNULL(ip.dblStandardCost,0)),0) 
 	From tblMFPickListDetail pl Join tblICItem i on pl.intItemId=i.intItemId
@@ -214,7 +225,13 @@ Begin --Sales Order Pick List
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblTotalPickQty,
 			pld.dblQuantity AS dblQuantity,
 			pld.dblQuantity * (
-			CASE WHEN ISNULL(pld.intLotId,0) > 0 THEN ISNULL(l.dblLastCost,0) ELSE 
+			CASE WHEN ISNULL(pld.intLotId,0) > 0 THEN 
+				CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
+					ISNULL(l.dblLastCost,0) 
+				ELSE
+					(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId)
+				END		
+			ELSE 
 			(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId)
 			End ) AS dblCost,
 			@dblTotalCost AS dblTotalCost
