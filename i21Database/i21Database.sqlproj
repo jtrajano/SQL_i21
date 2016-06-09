@@ -3937,6 +3937,7 @@
     <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
     <Build Include="dbo\Views\vyuICEnergyTracExportItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLicense.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMValidateRemoteDBServer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
