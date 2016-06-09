@@ -3924,6 +3924,11 @@
     <Build Include="dbo\Stored Procedures\uspQMTransferContractSample.sql" />
     <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLicense.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCOAGetMicrobiologicalSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCOAGetChemicalSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCOAGetPhysicalSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCOAHeaderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportCOAHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
