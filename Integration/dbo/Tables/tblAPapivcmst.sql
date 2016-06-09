@@ -34,9 +34,7 @@
  CONSTRAINT [k_tblAPapivcmst] PRIMARY KEY NONCLUSTERED 
 (
 	[apivc_vnd_no] ASC,
-	[apivc_ivc_no] ASC,
-	[intBillId] ASC,
-	[apchk_A4GLIdentity] ASC
+	[apivc_ivc_no] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
     [dtmDateImported] DATETIME NULL DEFAULT GETDATE()
 ) ON [PRIMARY]
