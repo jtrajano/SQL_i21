@@ -10,111 +10,6 @@ SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE
 IF (@intTaxAuthorityId IS NOT NULL)
 BEGIN
 
-TRUNCATE TABLE tblTFScheduleFieldTemplate
-TRUNCATE TABLE tblTFScheduleFields
-TRUNCATE TABLE tblTFTaxReportTemplate
-TRUNCATE TABLE tblTFTransactions
--- CONFIGS
-TRUNCATE TABLE tblTFValidAccountStatusCode
-TRUNCATE TABLE tblTFValidLocalTax
-TRUNCATE TABLE tblTFValidOriginState
-TRUNCATE TABLE tblTFValidDestinationState
-TRUNCATE TABLE tblTFValidProductCode
-TRUNCATE TABLE tblTFValidVendor
-
--- DROP CONSTRAINTS TO TRUNCATE tblTFReportingComponent
-ALTER TABLE tblTFFilingPacket
-DROP CONSTRAINT FK_tblTFFilingPacket_tblTFReportingComponent
-
-TRUNCATE TABLE tblTFFilingPacket
-TRUNCATE TABLE tblTFReportingComponent
-
---ADD FOREIGN KEY BACK
-ALTER TABLE tblTFFilingPacket ADD CONSTRAINT
-FK_tblTFFilingPacket_tblTFReportingComponent FOREIGN KEY
-( intReportingComponentId )
-REFERENCES tblTFReportingComponent
-( intReportingComponentId )
-
---- DROP CONSTRAINTS TO TRUNCATE tblTFReportingComponentDetail
-
-ALTER TABLE tblTFValidAccountStatusCode
-DROP CONSTRAINT FK_tblTFValidAccountStatusCode_tblTFReportingComponentDetail
-
-ALTER TABLE tblTFValidLocalTax
-DROP CONSTRAINT FK_tblTFValidLocalTax_tblTFReportingComponentDetail
-
-ALTER TABLE tblTFValidOriginState
-DROP CONSTRAINT FK_tblTFValidOriginState_tblTFReportingComponentDetail
-
-ALTER TABLE tblTFValidProductCode
-DROP CONSTRAINT FK_tblTFValidProductCode_tblTFReportingComponentDetail
-
-ALTER TABLE tblTFValidVendor
-DROP CONSTRAINT FK_tblTFValidVendor_tblTFReportingComponentDetail
-
-ALTER TABLE tblTFValidDestinationState
-DROP CONSTRAINT FK_tblTFValidDestinationState_tblTFReportingComponentDetail
-
-ALTER TABLE tblTFTaxCriteria
-DROP CONSTRAINT FK_tblTFTaxCriteria_tblTFReportingComponentDetail
-
-ALTER TABLE tblTFValidOriginDestinationState
-DROP CONSTRAINT FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail
-
-TRUNCATE TABLE tblTFReportingComponentDetail
-
---ADD FOREIGN KEY BACK
-ALTER TABLE tblTFValidAccountStatusCode ADD CONSTRAINT
-FK_tblTFValidAccountStatusCode_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-ALTER TABLE tblTFValidLocalTax ADD CONSTRAINT
-FK_tblTFValidLocalTax_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-ALTER TABLE tblTFValidOriginState ADD CONSTRAINT
-FK_tblTFValidOriginState_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-ALTER TABLE tblTFValidProductCode ADD CONSTRAINT
-FK_tblTFValidProductCode_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-ALTER TABLE tblTFValidVendor ADD CONSTRAINT
-FK_tblTFValidVendor_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-ALTER TABLE tblTFValidDestinationState ADD CONSTRAINT
-FK_tblTFValidDestinationState_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-ALTER TABLE tblTFTaxCriteria ADD CONSTRAINT
-FK_tblTFTaxCriteria_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-ALTER TABLE tblTFValidOriginDestinationState ADD CONSTRAINT
-FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
-
-
-
 	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFReportingComponent] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
 	BEGIN
 		
@@ -7127,7 +7022,8 @@ REFERENCES tblTFReportingComponentDetail
 		--END
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType])
-		VALUES(@intTaxAuthorityId, 'GT-103',	'Recap of Gasoline Use Tax by Distributors', 'DR','Recap of Gasoline Use Tax by Distributors','', 550, '')
+		VALUES(@intTaxAuthorityId, 'GT-103',	'Recap of Gasoline Use Tax by Distributors', '','Main Form','Form GT-103', 550, '')
+
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 		INSERT INTO [tblTFFilingPacket]([intTaxAuthorityId],[intReportingComponentId],[ysnStatus],[intFrequency])
 		VALUES(@intTaxAuthorityId, @MasterPk,1,2)
