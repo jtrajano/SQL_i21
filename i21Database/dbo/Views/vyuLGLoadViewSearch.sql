@@ -36,6 +36,7 @@ SELECT L.intLoadId
 	,LD.dblQuantity
 	,strHauler = Hauler.strName
 	,strDriver = Driver.strName
+	,L.strComments
 	,ysnDispatched = CASE 
 		WHEN L.ysnDispatched = 1
 			THEN CAST(1 AS BIT)
