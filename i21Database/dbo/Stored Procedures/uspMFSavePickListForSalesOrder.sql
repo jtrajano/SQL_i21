@@ -106,7 +106,7 @@ Select @intPickListId=intPickListId From tblMFPickList Where intSalesOrderId=ISN
 
 If Exists (Select 1 From tblICInventoryShipment sh Join tblICInventoryShipmentItem sd on sh.intInventoryShipmentId=sd.intInventoryShipmentId 
 	Where sh.intOrderType=2 AND sd.intOrderId=@intSalesOrderId)
-	RaisError('Shipmnet is alredy created for the sales order.',16,1)
+	RaisError('Shipment is alredy created for the sales order.',16,1)
 
 Update @tblPickListDetail set intLotId=NULL Where ISNULL(intLotId,0)=0
 Update @tblPickListDetail set intSubLocationId=NULL Where ISNULL(intSubLocationId,0)=0

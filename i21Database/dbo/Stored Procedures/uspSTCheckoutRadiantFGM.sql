@@ -11,6 +11,7 @@ BEGIN
 		INSERT INTO dbo.tblSTCheckoutPumpTotals
 		SELECT @intCheckoutId 
 		, UOM.intItemUOMId [intPumpCardCouponId]
+		,I.intCategoryId
 		, I.strDescription
 		, (ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0)/ ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) [dblPrice]
 		, ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0) [dblQuantity]

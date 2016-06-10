@@ -13,6 +13,7 @@
 	[dblFees] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblNet] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[ysnPosted]  BIT  DEFAULT ((0)) NOT NULL,
+	[intCMBankTransactionId] INT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblCCSiteHeader] PRIMARY KEY ([intSiteHeaderId]),

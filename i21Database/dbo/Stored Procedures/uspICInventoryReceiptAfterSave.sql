@@ -62,7 +62,7 @@ BEGIN
 		END
 	
 		-- Purchase Contracts
-		IF (@ReceiptType = @ReceiptType_PurchaseContract) AND (@SourceType <> @SourceType_InboundShipment)
+		IF (@ReceiptType = @ReceiptType_PurchaseContract) AND (ISNULL(@SourceType,0) <> @SourceType_InboundShipment)
 		BEGIN
 
 			-- Create current snapshot of Receipt Items after Save

@@ -35,7 +35,7 @@ IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 UPDATE tblCMUndepositedFund
 set intBankAccountId = @intBankAccountId
 WHERE strSourceSystem = 'AR'
-	AND intSourceTransactionId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1 AND intBankAccountId IS NULL)
+	AND (intSourceTransactionId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1 AND intBankAccountId IS NULL) OR intSourceTransactionId IN (SELECT intInvoiceId FROM tblARInvoice WHERE ysnPosted = 1 ))
 	AND intBankDepositId IS NULL
 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback

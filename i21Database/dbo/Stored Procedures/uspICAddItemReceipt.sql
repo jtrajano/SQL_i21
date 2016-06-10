@@ -492,8 +492,10 @@ BEGIN
 					,@TaxGroupId		INT
 
 			DECLARE @Taxes AS TABLE (
-				id						INT
-				,intInvoiceDetailId		INT
+				--id						INT
+				--,intInvoiceDetailId		INT
+				intTransactionDetailTaxId	INT
+				,intTransactionDetailId	INT
 				,intTaxGroupId			INT 
 				,intTaxCodeId			INT
 				,intTaxClassId			INT
@@ -545,8 +547,10 @@ BEGIN
 
 				-- Get the taxes from uspSMGetItemTaxes
 				INSERT INTO @Taxes (
-					id
-					,intInvoiceDetailId
+					--id
+					--,intInvoiceDetailId
+					intTransactionDetailTaxId
+					,intTransactionDetailId
 					,intTaxGroupId
 					,intTaxCodeId
 					,intTaxClassId

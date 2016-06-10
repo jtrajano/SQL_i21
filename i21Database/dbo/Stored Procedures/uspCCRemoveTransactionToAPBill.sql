@@ -20,16 +20,11 @@ BEGIN TRY
 	BEGIN
 		-- Unposting
 		EXEC [dbo].[uspAPPostBill]
-				@batchId = @billId,
-				@billBatchId = NULL,
-				@transactionType = NULL,
 				@post = 0,
 				@recap = 0,
 				@isBatch = 0,
-				@param = NULL,
+				@param = @billId,
 				@userId = @userId,
-				@beginTransaction = @billId,
-				@endTransaction = @billId,
 				@success = @success OUTPUT
 
 		-- Delete AP Bill data

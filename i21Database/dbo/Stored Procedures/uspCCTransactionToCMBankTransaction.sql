@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCCTransactionToCMBankTransaction]
 	@intSiteHeaderId	INT
 	,@userId			INT	
-	,@post				BIT	= NULL
-	,@recap				BIT	= NULL
+	,@post				BIT
+	,@recap				BIT
 	,@success			BIT = NULL OUTPUT
 	,@errorMessage NVARCHAR(MAX) = NULL OUTPUT
 	,@createdBankTransactionId INT = NULL OUTPUT
@@ -22,7 +22,7 @@ BEGIN TRY
 
 	DECLARE @BankTransaction BankTransactionTable
 	DECLARE @BankTransactionDetail BankTransactionDetailTable
-	DECLARE @strTransactionId NVARCHAR(40)
+	DECLARE @strTransactionId NVARCHAR(40) = NULL
 	DECLARE @dblSumAmount DECIMAL(18, 6)
 	DECLARE @transCount INT = 0
 	DECLARE @CCRItemToCMItem TABLE
@@ -99,46 +99,51 @@ BEGIN TRY
 		
 	IF(@transCount > 0)
 		BEGIN
+			IF(@post = 1)
+				BEGIN
+					DECLARE @dblSumDebit DECIMAL(18,6)
+					DECLARE @dblSumCredit DECIMAL(18,6)
 
-		DECLARE @dblSumDebit DECIMAL(18,6)
-		DECLARE @dblSumCredit DECIMAL(18,6)
+					SELECT @dblSumDebit = SUM(ISNULL(dblDebit,0)), @dblSumCredit =SUM(ISNULL(dblCredit,0)) FROM @BankTransactionDetail
+					SET @dblSumAmount = @dblSumCredit - @dblSumDebit
 
-		SELECT @dblSumDebit = SUM(ISNULL(dblDebit,0)), @dblSumCredit =SUM(ISNULL(dblCredit,0)) FROM @BankTransactionDetail
-		SET @dblSumAmount = @dblSumCredit - @dblSumDebit
+					UPDATE @BankTransaction SET dblAmount = @dblSumAmount
 
-		UPDATE @BankTransaction SET dblAmount = @dblSumAmount
+					EXEC [dbo].[uspCMCreateBankTransactionEntries]
+						 @BankTransactionEntries = @BankTransaction
+						,@BankTransactionDetailEntries = @BankTransactionDetail
+						,@intTransactionId = @createdBankTransactionId OUTPUT
 
-		EXEC [dbo].[uspCMCreateBankTransactionEntries]
-			 @BankTransactionEntries = @BankTransaction
-			,@BankTransactionDetailEntries = @BankTransactionDetail
-			,@intTransactionId = @createdBankTransactionId OUTPUT
+					EXEC [dbo].[uspCMPostBankTransaction]
+						@ysnPost = @post
+						,@ysnRecap = @recap
+						,@strTransactionId = @strTransactionId
+						,@intUserId = @userId
+						,@intEntityId = @userId
+						,@isSuccessful = @success OUTPUT
 
-			BEGIN TRY
-				EXEC [dbo].[uspCMPostBankTransaction]
-					@ysnPost = 1
-					,@ysnRecap = 0
-					,@strTransactionId = @strTransactionId
-					,@intUserId = @userId
-					,@intEntityId = @userId
-					,@isSuccessful = @success OUTPUT
-
-				IF ISNULL(@success, 0) = 0
-					SET @success = 0
-
-			END TRY
-			BEGIN CATCH
-				SET @ErrorSeverity = ERROR_SEVERITY()
-				SET @ErrorNumber   = ERROR_NUMBER()
-				SET @errorMessage  = ERROR_MESSAGE()
-				SET @ErrorState    = ERROR_STATE()
-				SET	@success = 0
-
-				IF(@strTransactionId IS NOT NULL)
-					DELETE tblAPBill WHERE intBillId = @strTransactionId
-
-				RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-
-			END CATCH
+					IF ISNULL(@success, 0) = 0
+						SET @success = 0
+				END
+			ELSE IF (@post = 0)
+				BEGIN
+					SELECT @strTransactionId = cmBankTrans.strTransactionId 
+						FROM tblCCSiteHeader ccSiteHeader 
+						INNER JOIN tblCMBankTransaction cmBankTrans ON cmBankTrans.intTransactionId = ccSiteHeader.intCMBankTransactionId
+						WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
+					IF (@strTransactionId IS NOT NULL)
+					BEGIN
+						EXEC [dbo].[uspCMPostBankTransaction]
+							@ysnPost = @post
+							,@ysnRecap = @recap
+							,@strTransactionId = @strTransactionId
+							,@intUserId = @userId
+							,@intEntityId = @userId
+							,@isSuccessful = @success OUTPUT
+					END
+					ELSE
+						RAISERROR('Bank Transaction ID is null',0,1)
+				END
 		END
 	ELSE
 		BEGIN

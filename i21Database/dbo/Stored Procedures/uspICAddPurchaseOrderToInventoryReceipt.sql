@@ -194,8 +194,10 @@ BEGIN
 			,@TaxGroupId		INT
 
 	DECLARE @Taxes AS TABLE (
-		id						INT
-		,intInvoiceDetailId		INT
+		--id						INT
+		--,intInvoiceDetailId		INT
+		intTransactionDetailTaxId	INT
+		,intTransactionDetailId	INT
 		,intTaxGroupId			INT 
 		,intTaxCodeId			INT
 		,intTaxClassId			INT
@@ -209,6 +211,7 @@ BEGIN
 		,ysnCheckoffTax			BIT
 		,strTaxCode				NVARCHAR(50)
 		,ysnTaxExempt			BIT
+		,ysnInvalidSetup		BIT
 		,[strTaxGroup]			NVARCHAR(100)
 		,[strNotes]				NVARCHAR(500)
 	)
@@ -246,8 +249,10 @@ BEGIN
 
 		-- Get the taxes from uspSMGetItemTaxes
 		INSERT INTO @Taxes (
-			id
-			,intInvoiceDetailId
+			--id
+			--,intInvoiceDetailId
+			intTransactionDetailTaxId
+			,intTransactionDetailId
 			,intTaxGroupId
 			,intTaxCodeId
 			,intTaxClassId
@@ -261,6 +266,7 @@ BEGIN
 			,ysnCheckoffTax
 			,strTaxCode
 			,ysnTaxExempt
+			,ysnInvalidSetup
 			,[strTaxGroup]
 			,[strNotes]
 		)

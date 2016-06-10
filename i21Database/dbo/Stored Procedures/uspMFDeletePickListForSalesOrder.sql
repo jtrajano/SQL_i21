@@ -13,7 +13,7 @@ End
 
 If Exists (Select 1 From tblICInventoryShipment sh Join tblICInventoryShipmentItem sd on sh.intInventoryShipmentId=sd.intInventoryShipmentId 
 	Where sh.intOrderType=2 AND sd.intOrderId=@intSalesOrderId)
-	RaisError('Shipmnet is alredy created for the sales order.',16,1)
+	RaisError('Shipment is alredy created for the sales order.',16,1)
 
 Select @intPickListId=intPickListId From tblMFPickList Where intSalesOrderId=@intSalesOrderId
 
