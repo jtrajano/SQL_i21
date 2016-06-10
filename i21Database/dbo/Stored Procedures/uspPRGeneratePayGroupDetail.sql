@@ -50,7 +50,7 @@ BEGIN
 			,intEntityEmployeeId
 			,intEmployeeEarningId
 			,intTypeEarningId
-			,NULL
+			,(SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
 			,strCalculationType
 			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblDefaultHours END					
 			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END

@@ -265,10 +265,9 @@ GO
 		END		
 	END
 GO
-
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule')
 	BEGIN
-		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND [COLUMN_NAME] = 'ysnEnabled' AND [COLUMN_NAME] = 'intModuleId') 
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND ([COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId')) 
 		BEGIN
 			PRINT N'ADDING tblARCustomerLicenseModule.ysnEnabled AND tblARCustomerLicenseModule.intModuleId'
 			EXEC('ALTER TABLE tblARCustomerLicenseModule ADD ysnEnabled BIT DEFAULT 0
@@ -278,7 +277,7 @@ GO
 
 GO
 
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND [COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId') 
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND ([COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId')) 
 	BEGIN
 		PRINT N'TRY UPDATING tblARCustomerLicenseModule.ysnEnabled AND tblARCustomerLicenseModule.intModuleId VALUES'
 		EXEC('IF EXISTS(SELECT TOP 1 1 FROM tblARCustomerLicenseModule WHERE intModuleId IS NULL)
@@ -291,7 +290,7 @@ GO
 
 GO
 
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND [COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId') 
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND ([COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId')) 
 	BEGIN
 		PRINT N'ADDING NEW i21 MODULES IN tblARCustomerLicenseModule'
 		EXEC('DECLARE @currentRow INT
@@ -321,4 +320,3 @@ GO
 	END
 
 GO
-

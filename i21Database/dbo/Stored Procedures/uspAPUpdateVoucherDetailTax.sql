@@ -92,7 +92,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	WHERE TaxAmount.dblTax IS NOT NULL
 
 	INSERT INTO @voucherIds
-	SELECT 
+	SELECT DISTINCT
 		A.intBillId 
 	FROM tblAPBill A 
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId 

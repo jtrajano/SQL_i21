@@ -5,4 +5,4 @@
 CONSTRAINT [PK_tblETExportFilterLocation] PRIMARY KEY CLUSTERED
 (
 	[intExportFilterLocationId] ASC
-))
+), CONSTRAINT [FK_tblETExportFilterLocation_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) ON DELETE CASCADE)

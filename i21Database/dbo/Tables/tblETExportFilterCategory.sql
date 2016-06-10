@@ -5,4 +5,4 @@
 CONSTRAINT [PK_tblETExportFilterCategory] PRIMARY KEY CLUSTERED 
 (
 	[intExportFilterCategoryId] ASC
-))
+),CONSTRAINT [FK_tblETExportFilterCategory_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE)
