@@ -219,7 +219,7 @@ BEGIN TRY
 			
 			IF @intStorageChargeItemId IS NULL 
 			BEGIN
-				SET @ErrMsg = 'Invoice cannot be created because of Item '''+ @TicketItemNo +''' there is no Other Charge Item having Storage Charge as CostType.'
+				SET @ErrMsg = 'Invoice cannot be created because of Item '''+ @TicketItemNo +''' has no Storage Charge CostType item.'
 				RAISERROR(@ErrMsg,16, 1);
 			END	
 			
