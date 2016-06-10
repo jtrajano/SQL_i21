@@ -51,6 +51,7 @@ IF EXISTS(SELECT 1 FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Pr
 BEGIN
 	UPDATE tblGRShrinkCalculationOption SET strDisplayField = 'Gross Weight' WHERE strDisplayField = 'Price Shrink'	
 END
+GO
 IF EXISTS(SELECT intUnitMeasureId FROM tblSCScaleSetup)
 BEGIN
 	declare @intUnitMeasureId int
