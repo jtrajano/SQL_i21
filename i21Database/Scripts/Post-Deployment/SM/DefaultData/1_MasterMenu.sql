@@ -3831,14 +3831,14 @@ DECLARE @CreditCardReconParentMenuId INT
 SELECT @CreditCardReconParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Reconciliation' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
 
 /* Rename from Credit Card Reconciliation Entry to Credit Card Reconciliation */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Reconciliation Entry' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId)
-UPDATE tblSMMasterMenu SET strMenuName = 'Credit Card Reconciliations', strDescription = 'Credit Card Reconciliations' WHERE strMenuName = 'Credit Card Reconciliation Entry' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE (strMenuName = 'Credit Card Reconciliation Entry' OR strMenuName = 'Credit Card Reconciliations') AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = 'Dealer Credit Cards', strDescription = 'Dealer Credit Cards' WHERE (strMenuName = 'Credit Card Reconciliation Entry' OR strMenuName = 'Credit Card Reconciliations') AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Reconciliations' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Credit Cards' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Credit Card Reconciliations', N'Credit Card Recon', @CreditCardReconParentMenuId, N'Credit Card Reconciliations', N'Activity', N'Screen', N'CreditCardRecon.view.CreditCardReconciliation', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Dealer Credit Cards', N'Credit Card Recon', @CreditCardReconParentMenuId, N'Dealer Credit Cards', N'Activity', N'Screen', N'CreditCardRecon.view.CreditCardReconciliation', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.CreditCardReconciliation' WHERE strMenuName = 'Credit Card Reconciliations' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.CreditCardReconciliation' WHERE strMenuName = 'Dealer Credit Cards' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import File Mapper' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = 'File Field Mapping', strDescription = 'File Field Mapping', strCommand = 'CreditCardRecon.view.FileFieldMapping' WHERE strMenuName = 'Import File Mapper' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @CreditCardReconParentMenuId
