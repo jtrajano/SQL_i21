@@ -3581,6 +3581,7 @@
     <Build Include="dbo\Tables\tblLGLoadContainerCost.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTTransferSequence.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTTransferSequenceAttribute.sql" />
     <Build Include="dbo\Tables\tblHDOpportunitySource.sql" />
     <Build Include="dbo\Views\vyuTMEquipmentUsageAnalysisWithoutTotal.sql" />
     <Build Include="dbo\Views\vyuTMSalesAnalysisReport.sql" />
