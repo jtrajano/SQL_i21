@@ -18,10 +18,6 @@ BEGIN TRY
 	DECLARE @ItemContractBalance DECIMAL(24,10)
 	DECLARE @TicketNo Nvarchar(20)
 	DECLARE @TransferTicketNumber Nvarchar(20)
-	DECLARE @intBillBeforeTransfer INT
-	DECLARE @strProcessType Nvarchar(30)
-	DECLARE @strUpdateType NVARCHAR(30)
-
 	DECLARE @ActionCustomer INT
 		,@Percent DECIMAL(24,10)
 		,@ActionOpenBalance DECIMAL(24,10)
@@ -89,8 +85,7 @@ BEGIN TRY
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
 		,dblOpenBalance DECIMAL(24,10)
-		,intContractHeaderId INT
-		,dblNewStorageDue DECIMAL(24,10)
+		,intContractHeaderId INT		
 		,intOriginalUnitMeasureId INT
 	)
 		
@@ -110,8 +105,7 @@ BEGIN TRY
 		,@ItemEntityid = intItemCustomerId
 		,@ItemCompanyLocationId = intItemLocation
 		,@ActionCompanyLocationId = intActionLocation	
-		,@TransferTicketNumber=strTransferTicketNumber
-		,@intBillBeforeTransfer=intBillBeforeTransfer
+		,@TransferTicketNumber=strTransferTicketNumber		
 	FROM OPENXML(@idoc, 'root', 2) WITH 
 	(
 			 intCreatedUserId INT			
@@ -120,13 +114,8 @@ BEGIN TRY
 			,intActionLocation INT
 			,strTransferTicketNumber NVARCHAR(20)
 			,intBillBeforeTransfer INT
-	)	
-	IF @intBillBeforeTransfer=1	
-	BEGIN
-		SET @strProcessType='calculate'
-		SET @strUpdateType='Bill'
-    END
-												
+	)
+	
 	SELECT @ItemCustomerName = strName	FROM tblEMEntity	WHERE intEntityId = @ItemEntityid
 
 	SELECT @ItemLocationName = strLocationName	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @ItemCompanyLocationId
@@ -273,30 +262,6 @@ BEGIN TRY
 		 RAISERROR(@ErrMsg,16,1)		 
 		END
 		
-		IF @intBillBeforeTransfer=1	
-		BEGIN
-			--Storage Charge Update
-			EXEC uspGRCalculateStorageCharge
-			  @strProcessType
-			 ,@strUpdateType
-			 ,@intCustomerStorageId
-			 ,NULL
-			 ,NULL
-			 ,NULL
-			 ,NULL
-			 ,@UserKey
-			 ,'Transfer Storage'
-			 ,@dblStorageDuePerUnit OUTPUT
-			 ,@dblStorageDueAmount OUTPUT
-			 ,@dblStorageDueTotalPerUnit OUTPUT
-			 ,@dblStorageDueTotalAmount OUTPUT
-			 ,@dblStorageBilledPerUnit OUTPUT
-			 ,@dblStorageBilledAmount OUTPUT
-			 
-			 UPDATE @ItemsToMove SET dblNewStorageDue = @dblStorageDuePerUnit WHERE intCustomerStorageId = @intCustomerStorageId
-
-		END
-		
 		IF ISNULL(@ItemContractHeaderId,0)>0
 		BEGIN
 		SELECT @ItemContractDetailId=intContractDetailId FROM vyuCTContractDetailView WHERE intContractHeaderId=@ItemContractHeaderId
@@ -436,19 +401,19 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]							
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END				
-					,0--[dblInsuranceRate]
+					,[dblStorageDue]
+					,[dblStoragePaid]		
+					,[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,0--[dblFeesDue]
-					,0--[dblFeesPaid]
+					,[dblFeesDue]
+					,[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,0--[dblDiscountsDue]
-					,0--[dblDiscountsPaid]
+					,[dblDiscountsDue]
+					,[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
@@ -605,19 +570,19 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]							
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-					,0--[dblInsuranceRate]
+					,[dblStorageDue]
+					,[dblStoragePaid]
+					,[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,0--[dblFeesDue]
-					,0--[dblFeesPaid]
+					,[dblFeesDue]
+					,[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,0--[dblDiscountsDue]
-					,0--[dblDiscountsPaid]
+					,[dblDiscountsDue]
+					,[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
@@ -773,19 +738,19 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]			
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-					,0--[dblInsuranceRate]
+					,[dblStorageDue]
+					,[dblStoragePaid]
+					,[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,0--[dblFeesDue]
-					,0--[dblFeesPaid]
+					,[dblFeesDue]
+					,[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,0--[dblDiscountsDue]
-					,0--[dblDiscountsPaid]
+					,[dblDiscountsDue]
+					,[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
@@ -942,19 +907,19 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]		
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-					,0--[dblInsuranceRate]
+					,[dblStorageDue]
+					,[dblStoragePaid]
+					,[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,0--[dblFeesDue]
-					,0--[dblFeesPaid]
+					,[dblFeesDue]
+					,[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,0--[dblDiscountsDue]
-					,0--[dblDiscountsPaid]
+					,[dblDiscountsDue]
+					,[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
@@ -1111,19 +1076,19 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]		
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-					,0--[dblInsuranceRate]
+					,[dblStorageDue]
+					,[dblStoragePaid]
+					,[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,0--[dblFeesDue]
-					,0--[dblFeesPaid]
+					,[dblFeesDue]
+					,[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,0--[dblDiscountsDue]
-					,0--[dblDiscountsPaid]
+					,[dblDiscountsDue]
+					,[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
@@ -1279,19 +1244,19 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]		
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-					,0--[dblInsuranceRate]
+					,[dblStorageDue]
+					,[dblStoragePaid]
+					,[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,0--[dblFeesDue]
-					,0--[dblFeesPaid]
+					,[dblFeesDue]
+					,[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,0--[dblDiscountsDue]
-					,0--[dblDiscountsPaid]
+					,[dblDiscountsDue]
+					,[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
@@ -1450,19 +1415,19 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]		
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStorageDue] END
-					,CASE WHEN @strProcessType='Bill' THEN 0 ELSE [dblStoragePaid] END
-					,0--[dblInsuranceRate]
+					,[dblStorageDue]
+					,[dblStoragePaid]
+					,[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,0--[dblFeesDue]
-					,0--[dblFeesPaid]
+					,[dblFeesDue]
+					,[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,0--[dblDiscountsDue]
-					,0--[dblDiscountsPaid]
+					,[dblDiscountsDue]
+					,[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
@@ -1526,6 +1491,47 @@ BEGIN TRY
 					 ,@strScreenName='Transfer Storage'
 					 ,@intSourceItemUOMId=@intSourceItemUOMId			
 			END
+			
+			---Discount Information
+			INSERT INTO [dbo].[tblQMTicketDiscount]
+			   (
+					[intConcurrencyId]         
+				   ,[dblGradeReading]
+				   ,[strCalcMethod]
+				   ,[strShrinkWhat]
+				   ,[dblShrinkPercent]
+				   ,[dblDiscountAmount]
+				   ,[dblDiscountDue]
+				   ,[dblDiscountPaid]
+				   ,[ysnGraderAutoEntry]
+				   ,[intDiscountScheduleCodeId]
+				   ,[dtmDiscountPaidDate]
+				   ,[intTicketId]
+				   ,[intTicketFileId]
+				   ,[strSourceType]
+				   ,[intSort]
+				   ,[strDiscountChargeType]
+			   )
+				 SELECT 
+				 [intConcurrencyId] = 1
+				,[dblGradeReading] = [dblGradeReading]
+				,[strCalcMethod] = [strCalcMethod]
+				,[strShrinkWhat] = [strShrinkWhat]
+				,[dblShrinkPercent] = [dblShrinkPercent]
+				,[dblDiscountAmount] = [dblDiscountAmount]
+				,[dblDiscountDue] = [dblDiscountDue]
+				,[dblDiscountPaid] = [dblDiscountPaid]
+				,[ysnGraderAutoEntry] = [ysnGraderAutoEntry]
+				,[intDiscountScheduleCodeId] = [intDiscountScheduleCodeId]
+				,[dtmDiscountPaidDate] = [dtmDiscountPaidDate]
+				,[intTicketId] = NULL
+				,[intTicketFileId] = @NewCustomerStorageId
+				,[strSourceType] = 'Storage'
+				,[intSort] = [intSort]
+				,[strDiscountChargeType] = [strDiscountChargeType]
+			FROM dbo.[tblQMTicketDiscount]
+			WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
+
 
 			SELECT @ActionKey = MIN(intActionKey)
 			FROM @Action
@@ -1536,247 +1542,7 @@ BEGIN TRY
 		FROM @ItemsToMove
 		WHERE intItemsToMoveKey > @ItemsToMoveKey	
 		
-	END	
-	
-	---CREATING INVOICE
-	
-		SELECT @IntCommodityId=intCommodityId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
-				
-		SELECT TOP 1 @intStorageChargeItemId=intItemId FROM tblICItem 
-		WHERE strType='Other Charge' AND strCostType='Storage Charge' AND intCommodityId = @IntCommodityId
-		
-		IF @intStorageChargeItemId IS NULL
-		BEGIN
-			SELECT TOP 1 @intStorageChargeItemId=intItemId FROM tblICItem 
-			WHERE strType='Other Charge' AND strCostType='Storage Charge'
-		END
-		
-		IF @intStorageChargeItemId IS NULL 
-		BEGIN
-			RAISERROR('Invoice cannot be created because there is no Other Charge Item having Storage Charge as CostType.', 16, 1);
-		END	
-		
-		SELECT @ItemDescription=strDescription FROM tblICItem Where intItemId=@intStorageChargeItemId
-		
-		SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey), @UserKey)
-		
-		SET @intCurrencyId = ISNULL((SELECT intCurrencyId FROM tblAPVendor WHERE intEntityVendorId = @ItemEntityid), @intDefaultCurrencyId)
-
-		SELECT @intTermId = intTermsId FROM tblEMEntityLocation WHERE intEntityId = @ItemEntityid
-		
-		SELECT @intItemUOMId=intItemUOMId FROM tblICItemUOM WHERE intItemId=@ItemId AND intUnitMeasureId=@intUnitMeasureId
-		
-		UPDATE BD 
-		SET BD.intOriginalUnitMeasureId=CS.intUnitMeasureId 
-		FROM @ItemsToMove BD 
-		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=BD.intCustomerStorageId
-		
-		UPDATE @ItemsToMove
-		SET dblOpenBalance=dbo.fnCTConvertQuantityToTargetItemUOM(@ItemId,intOriginalUnitMeasureId,@intUnitMeasureId,dblOpenBalance)
-		
-		BEGIN TRANSACTION
-					
-		DELETE FROM @EntriesForInvoice
-		
-		INSERT INTO @EntriesForInvoice 
-		(
-			 [strTransactionType]
-			,[strType]
-			,[strSourceTransaction]
-			,[intSourceId]
-			,[strSourceId]
-			,[intInvoiceId]
-			,[intEntityCustomerId]
-			,[intCompanyLocationId]
-			,[intCurrencyId]
-			,[intTermId]
-			,[dtmDate]
-			,[dtmDueDate]
-			,[dtmShipDate]
-			,[intEntitySalespersonId]
-			,[intFreightTermId]
-			,[intShipViaId]
-			,[intPaymentMethodId]
-			,[strInvoiceOriginId]
-			,[strPONumber]
-			,[strBOLNumber]
-			,[strDeliverPickup]
-			,[strComments]
-			,[intShipToLocationId]
-			,[intBillToLocationId]
-			,[ysnTemplate]
-			,[ysnForgiven]
-			,[ysnCalculated]
-			,[ysnSplitted]
-			,[intPaymentId]
-			,[intSplitId]					
-			,[strActualCostId]
-			,[intEntityId]
-			,[ysnResetDetails]
-			,[ysnPost]
-			,[intInvoiceDetailId]
-			,[intItemId]
-			,[ysnInventory]
-			,[strItemDescription]
-			,[intOrderUOMId]
-			,[intItemUOMId]
-			,[dblQtyOrdered]
-			,[dblQtyShipped]
-			,[dblDiscount]
-			,[dblPrice]
-			,[ysnRefreshPrice]
-			,[strMaintenanceType]
-			,[strFrequency]
-			,[dtmMaintenanceDate]
-			,[dblMaintenanceAmount]
-			,[dblLicenseAmount]
-			,[intTaxGroupId]
-			,[ysnRecomputeTax]
-			,[intSCInvoiceId]
-			,[strSCInvoiceNumber]
-			,[intInventoryShipmentItemId]
-			,[strShipmentNumber]
-			,[intSalesOrderDetailId]
-			,[strSalesOrderNumber]
-			,[intContractHeaderId]
-			,[intContractDetailId]
-			,[intShipmentPurchaseSalesContractId]
-			,[intTicketId]
-			,[intTicketHoursWorkedId]
-			,[intSiteId]
-			,[strBillingBy]
-			,[dblPercentFull]
-			,[dblNewMeterReading]
-			,[dblPreviousMeterReading]
-			,[dblConversionFactor]
-			,[intPerformerId]
-			,[ysnLeaseBilling]
-			,[ysnVirtualMeterReading]
-			,[intCustomerStorageId]
-		)
-				SELECT 
-					 [strTransactionType] = 'Invoice'
-					,[strType] = 'Standard'
-					,[strSourceTransaction] = 'Process Grain Storage'
-					,[intSourceId] = NULL
-					,[strSourceId] = ''
-					,[intInvoiceId] = @InvoiceId --NULL Value will create new invoice
-					,[intEntityCustomerId] = @ItemEntityid
-					,[intCompanyLocationId] = @ItemCompanyLocationId
-					,[intCurrencyId] = @intCurrencyId
-					,[intTermId] = @intTermId
-					,[dtmDate] = GETDATE()
-					,[dtmDueDate] = NULL
-					,[dtmShipDate] = NULL
-					,[intEntitySalespersonId] = NULL
-					,[intFreightTermId] = NULL
-					,[intShipViaId] = NULL
-					,[intPaymentMethodId] = NULL
-					,[strInvoiceOriginId] = NULL --''
-					,[strPONumber] = NULL --''
-					,[strBOLNumber] = NULL --''
-					,[strDeliverPickup] = NULL --''
-					,[strComments] = NULL --''
-					,[intShipToLocationId] = NULL
-					,[intBillToLocationId] = NULL
-					,[ysnTemplate] = 0
-					,[ysnForgiven] = 0
-					,[ysnCalculated] = 0
-					,[ysnSplitted] = 0
-					,[intPaymentId] = NULL
-					,[intSplitId] = NULL					
-					,[strActualCostId] = NULL --''
-					,[intEntityId] = @UserEntityId
-					,[ysnResetDetails] = 0
-					,[ysnPost] = NULL
-					,[intInvoiceDetailId] = NULL
-					,[intItemId] = @intStorageChargeItemId
-					,[ysnInventory] = 1
-					,[strItemDescription] = @ItemDescription
-					,[intOrderUOMId]= @intItemUOMId
-					,[intItemUOMId] = @intItemUOMId
-					,[dblQtyOrdered] = dblOpenBalance
-					,[dblQtyShipped] = dblOpenBalance
-					,[dblDiscount] = 0
-					,[dblPrice] = dblNewStorageDue
-					,[ysnRefreshPrice] = 0
-					,[strMaintenanceType] = ''
-					,[strFrequency] = ''
-					,[dtmMaintenanceDate] = NULL
-					,[dblMaintenanceAmount] = NULL
-					,[dblLicenseAmount] = NULL
-					,[intTaxGroupId] = NULL
-					,[ysnRecomputeTax] = 1
-					,[intSCInvoiceId] = NULL
-					,[strSCInvoiceNumber] = ''
-					,[intInventoryShipmentItemId] = NULL
-					,[strShipmentNumber] = ''
-					,[intSalesOrderDetailId] = NULL
-					,[strSalesOrderNumber] = ''
-					,[intContractHeaderId] = NULL
-					,[intContractDetailId] = NULL
-					,[intShipmentPurchaseSalesContractId] = NULL
-					,[intTicketId] = NULL
-					,[intTicketHoursWorkedId] = NULL
-					,[intSiteId] = NULL
-					,[strBillingBy] = ''
-					,[dblPercentFull] = NULL
-					,[dblNewMeterReading] = NULL
-					,[dblPreviousMeterReading] = NULL
-					,[dblConversionFactor] = NULL
-					,[intPerformerId] = NULL
-					,[ysnLeaseBilling] = NULL
-					,[ysnVirtualMeterReading] = NULL
-					,[intCustomerStorageId]=intCustomerStorageId
-					FROM @ItemsToMove				
-					
-		EXEC [dbo].[uspARProcessInvoices] 
-			 @InvoiceEntries = @EntriesForInvoice
-			,@LineItemTaxEntries = @TaxDetails
-			,@UserId = @UserKey
-			,@GroupingOption = 11
-			,@RaiseError = 1
-			,@ErrorMessage = @ErrorMessage OUTPUT
-			,@CreatedIvoices = @CreatedIvoices OUTPUT
-			,@UpdatedIvoices = @UpdatedIvoices OUTPUT
-
-		IF (@ErrorMessage IS NULL)
-		BEGIN					
-			COMMIT TRANSACTION
-			
-				INSERT INTO [dbo].[tblGRStorageHistory] 
-				(
-					 [intConcurrencyId]
-					,[intCustomerStorageId]							
-					,[intInvoiceId]							
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]							
-					,[strType]
-					,[strUserName]							
-				)
-				SELECT 
-					 [intConcurrencyId] = 1
-					,[intCustomerStorageId] = ARD.intCustomerStorageId														
-					,[intInvoiceId] = AR.intInvoiceId							
-					,[dblUnits] = ARD.dblQtyOrdered
-					,[dtmHistoryDate]=GetDATE()
-					,[dblPaidAmount]=ARD.dblPrice							
-					,[strType]='Generated Invoice'
-					,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey)
-					 FROM tblARInvoice AR
-					 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
-					 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
-								   
-				
-		END
-		ELSE
-		BEGIN
-			RAISERROR(@ErrorMessage, 16, 1);
-			ROLLBACK TRANSACTION
-		END
-	
-	--END CREATING INVOICE--
+	END
 	
 	EXEC sp_xml_removedocument @idoc
 	
