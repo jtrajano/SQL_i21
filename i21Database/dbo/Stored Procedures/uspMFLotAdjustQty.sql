@@ -115,13 +115,15 @@ BEGIN TRY
 				)
 	END
 
-	IF @dblLotQty = @dblNewLotQty
+	IF (Case When @intItemUOMId = @intAdjustItemUOMId
+		AND @intWeightUOMId IS NOT NULL Then  @dblLotQty Else @dblLotAvailableQty End) = @dblNewLotQty
 		AND @blnValidateLotReservation = 0
 	BEGIN
 		RETURN
 	END
 
-	IF @dblLotQty = @dblNewLotQty
+	IF (Case When @intItemUOMId = @intAdjustItemUOMId
+		AND @intWeightUOMId IS NOT NULL Then  @dblLotQty Else @dblLotAvailableQty End) = @dblNewLotQty
 	BEGIN
 		RAISERROR (
 				51190
