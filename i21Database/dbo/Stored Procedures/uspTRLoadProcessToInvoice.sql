@@ -136,7 +136,7 @@ BEGIN TRY
 	FROM tblTRLoadHeader TL
 			LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 			LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = DH.intEntityCustomerId
-			LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 			LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
 			LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
