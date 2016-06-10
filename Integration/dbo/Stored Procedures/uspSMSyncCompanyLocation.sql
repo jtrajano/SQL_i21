@@ -235,7 +235,7 @@ BEGIN
       ,SUBSTRING(CL.[strAddress],1,30)--[agloc_addr] 
 	  ,CASE WHEN LEN(CL.[strAddress]) > 30 		--[agloc_addr2]  
 			THEN SUBSTRING(CL.[strAddress],31,30)
-			ELSE ''
+			ELSE ''''
 		END
   --    ,SUBSTRING(LTRIM(RTRIM(SUBSTRING(strAddress, 0, CHARINDEX(CHAR(10), strAddress)))), 1, 30)      --[agloc_addr]  
   --    ,(CASE WHEN CHARINDEX(CHAR(10), strAddress) > 0
@@ -553,7 +553,7 @@ BEGIN
 	  ,[agloc_addr] = SUBSTRING(CL.[strAddress],1,30) --[agloc_addr] 
 	  ,[agloc_addr2] = CASE WHEN LEN(CL.[strAddress]) > 30 --[agloc_addr2]  
 		THEN SUBSTRING(CL.[strAddress],31,30)
-		ELSE ''
+		ELSE ''''
 		END        
       ,[agloc_city] = CL.[strCity]   
       ,[agloc_state] = CL.[strStateProvince]  
@@ -1006,7 +1006,7 @@ BEGIN
       -- ELSE  
       --  RTRIM(LTRIM(AG.[agloc_addr])) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(AG.[agloc_addr2]))  
       --  END)
-	  ,ISNULL(AG.[agloc_addr]+AG.[agloc_addr2],'')         --<strAddress, nvarchar(max),>  
+	  ,ISNULL(AG.[agloc_addr],'''') + ISNULL(AG.[agloc_addr2],'''')         --<strAddress, nvarchar(max),>  
       ,[agloc_zip]      --<strZipPostalCode, nvarchar(50),>  
       ,[agloc_city]      --<strCity, nvarchar(50),>  
       ,[agloc_state]      --<strStateProvince, nvarchar(50),>  
@@ -1330,7 +1330,7 @@ BEGIN
          RTRIM(LTRIM(AG.[agloc_name]))  
        END)  
       ,[strLocationType] = [strLocationType]  
-      ,[strAddress] = ISNULL(AG.[agloc_addr]+AG.[agloc_addr2],'')
+      ,[strAddress] = ISNULL(AG.[agloc_addr],'''') + ISNULL(AG.[agloc_addr2],'''')
         --(CASE   
         -- WHEN RTRIM(LTRIM(AG.[agloc_addr])) = ''   
         --  THEN AG.[agloc_addr2]  
