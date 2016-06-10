@@ -84,3 +84,15 @@ EXEC sp_addmessage 90016,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90017) EXEC sp_dropmessage 90017, 'us_english'	
 SET @strmessage = 'Production reversal is not allowed for lots having zero qty.'
 EXEC sp_addmessage 90017,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90018) EXEC sp_dropmessage 90018, 'us_english'	
+SET @strmessage = 'The destination storage location is already used by other lot.'
+EXEC sp_addmessage 90018,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90019) EXEC sp_dropmessage 90019, 'us_english'	
+SET @strmessage = 'The destination storage location is already used by other lot for same item.'
+EXEC sp_addmessage 90019,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90020) EXEC sp_dropmessage 90020, 'us_english'	
+SET @strmessage = 'The destination storage location is already used by other item'
+EXEC sp_addmessage 90020,11,@strmessage,'us_english','False'

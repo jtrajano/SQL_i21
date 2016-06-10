@@ -52,6 +52,8 @@ BEGIN TRY
 		,@ysnAllowMultipleLot BIT
 		,@intSplitStorageLocationId INT
 		,@intSplitSubLocationId INT
+		,@ysnMergeOnMove BIT
+		,@ysnAllowMultipleItem BIT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -331,9 +333,26 @@ BEGIN TRY
 	END
 
 	SELECT TOP 1 @strInternalCode = strInternalCode
+		,@ysnMergeOnMove = ysnMergeOnMove
+		,@ysnAllowMultipleLot=ysnAllowMultipleLot
+		,@ysnAllowMultipleItem=ysnAllowMultipleItem
 	FROM dbo.tblICStorageLocation SL
 	JOIN dbo.tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 	WHERE intStorageLocationId = @intDestinationStorageLocationId
+
+	SELECT @strDestinationLotNumber = @strLotNumber
+
+	IF @ysnMergeOnMove IS NULL
+		SELECT @ysnMergeOnMove = 0
+
+	IF @ysnMergeOnMove = 1
+	BEGIN
+		SELECT TOP 1 @strDestinationLotNumber = strLotNumber
+		FROM tblICLot
+		WHERE intStorageLocationId = @intDestinationStorageLocationId
+			AND intItemId = @intInputItemId
+		ORDER BY dtmDateCreated DESC
+	END
 
 	IF @strInternalCode = 'PROD_STAGING'
 		OR EXISTS (
@@ -358,7 +377,7 @@ BEGIN TRY
 			,@intLocationId = @intLocationId
 			,@intSubLocationId = @intSourceSubLocationId
 			,@intStorageLocationId = @intSourceStorageLocationId
-			,@strLotNumber = @strLotNumber
+			,@strLotNumber = @strDestinationLotNumber
 			-- Parameters for the new values: 
 			,@intNewLocationId = @intLocationId
 			,@intNewSubLocationId = @intDestinationSubLocationId
@@ -379,6 +398,72 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		IF @ysnAllowMultipleLot = 0
+			AND @ysnAllowMultipleItem = 0
+		BEGIN
+			IF (
+					(
+						SELECT COUNT(intLotId)
+						FROM dbo.tblICLot
+						WHERE intStorageLocationId = @intDestinationStorageLocationId
+							AND dblQty > 0
+						) >= 1
+					)
+			BEGIN
+				RAISERROR (
+						90018
+						,11
+						,1
+						)
+
+				RETURN
+			END
+		END
+		ELSE IF @ysnAllowMultipleLot = 0
+			AND @ysnAllowMultipleItem = 1
+		BEGIN
+			IF (
+					(
+						SELECT COUNT(intLotId)
+						FROM tblICLot
+						WHERE intStorageLocationId = @intDestinationStorageLocationId
+							AND intItemId = @intInputItemId
+							AND dblQty > 0
+						) >= 1
+					)
+			BEGIN
+				RAISERROR (
+						90019
+						,11
+						,1
+						)
+
+				RETURN
+			END
+		END
+		ELSE IF @ysnAllowMultipleLot = 1
+			AND @ysnAllowMultipleItem = 0
+		BEGIN
+			IF (
+					(
+						SELECT COUNT(intLotId)
+						FROM tblICLot
+						WHERE intStorageLocationId = @intDestinationStorageLocationId
+							AND intItemId <> @intInputItemId
+							AND dblQty > 0
+						) >= 1
+					)
+			BEGIN
+				RAISERROR (
+						90020
+						,11
+						,1
+						)
+
+				RETURN
+			END
+		END
+
 		SELECT @dblAdjustByQuantity = @dblNewWeight / (
 				CASE 
 					WHEN @intWeightUOMId IS NULL
