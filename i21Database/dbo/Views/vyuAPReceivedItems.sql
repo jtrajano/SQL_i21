@@ -61,6 +61,8 @@ FROM
 		,[intCurrencyId]			=	tblReceived.intCurrencyId
 		,[strCurrency]				=	tblReceived.strCurrency
 		,[strVendorLocation]		=	tblReceived.strVendorLocation
+		,[str1099Form]				=	D2.str1099Form			 
+		,[str1099Type]				=	D2.str1099Type
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -214,6 +216,8 @@ FROM
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,0)
 	,[strCurrency]				=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 	,[strVendorLocation]		=	EL.strLocationName
+	,[str1099Form]				=	D2.str1099Form			 
+	,[str1099Type]				=	D2.str1099Type
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -287,13 +291,17 @@ FROM
 	,[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,1)
 	,[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1)
 	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
-	,[intCurrencyId]			=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
+	,[intCurrencyId]			=	A.intCurrencyId
+									/*CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 										 ELSE ISNULL(A.intCurrencyId,0) 
-									END	
-	,[strCurrency]				=   CASE WHEN B.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
+									END*/	
+	,[strCurrency]				=   H1.strCurrency
+									/*CASE WHEN B.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
 									ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
-									END
+									END*/
 	,[strVendorLocation]		=	EL.strLocationName
+	,[str1099Form]				=	D2.str1099Form			 
+	,[str1099Type]				=	D2.str1099Type
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -393,6 +401,8 @@ FROM
 															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 														END	
 		,[strVendorLocation]						=	NULL
+		,[str1099Form]				=	D2.str1099Form			 
+		,[str1099Type]				=	D2.str1099Type      
 	FROM [vyuAPChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
 																																						   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
@@ -400,6 +410,7 @@ FROM
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	OUTER APPLY 
 	(
 		SELECT intEntityVendorId FROM tblAPBillDetail BD
@@ -472,6 +483,8 @@ FROM
 		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)
 		,[strCurrency]								=	A.strCurrency
 		,[strVendorLocation]						=	NULL
+		,[str1099Form]								=	D2.str1099Form			 
+		,[str1099Type]								=	D2.str1099Type 
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -480,6 +493,7 @@ FROM
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	WHERE A.ysnDirectShipment = 1 AND A.dtmInventorizedDate IS NOT NULL AND A.intShipmentContractQtyId NOT IN (SELECT IsNull(intShipmentContractQtyId, 0) FROM tblAPBillDetail)
 	UNION ALL
 	SELECT
@@ -542,6 +556,8 @@ FROM
 															 ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))))
 														END	
 		,[strVendorLocation]						=	NULL
+		,[str1099Form]								=	D2.str1099Form			 
+		,[str1099Type]								=	D2.str1099Type 
 	FROM		vyuCTContractCostView		CC
 	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
@@ -555,5 +571,6 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CD.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON CC.intVendorId = D1.intEntityVendorId  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
 ) Items
