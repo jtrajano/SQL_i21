@@ -39,6 +39,7 @@
 	[strSCBudgetDescription]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
 	[intInventoryShipmentItemId]			INT												NULL,
 	[intInventoryShipmentChargeId]			INT												NULL,
+	[intRecipeItemId]						INT												NULL,
 	[strShipmentNumber]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[intSalesOrderDetailId]					INT												NULL,
 	[strSalesOrderNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
@@ -90,7 +91,8 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [tblGRCustomerStorage]([intCustomerStorageId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblCCSiteDetail_intSiteDetailId] FOREIGN KEY ([intSiteDetailId]) REFERENCES [tblCCSiteDetail]([intSiteDetailId]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId])
+	CONSTRAINT [FK_tblARInvoiceDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblMFRecipeItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId])
 );
 
 GO
