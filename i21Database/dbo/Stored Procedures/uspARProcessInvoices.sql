@@ -202,6 +202,7 @@ DECLARE  @Id									INT
 		,@ItemSCInvoiceNumber					NVARCHAR(25)
 		,@ItemInventoryShipmentItemId			INT
 		,@ItemShipmentNumber					NVARCHAR(50)
+		,@ItemRecipeItemId						INT
 		,@ItemSalesOrderDetailId				INT
 		,@ItemSalesOrderNumber					NVARCHAR(25)		
 		,@ItemContractDetailId					INT
@@ -332,6 +333,7 @@ BEGIN
 		,@ItemSCInvoiceNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSCInvoiceNumber] ELSE NULL END)
 		,@ItemInventoryShipmentItemId	= (CASE WHEN @GroupingOption = 0 THEN [intInventoryShipmentItemId] ELSE NULL END)
 		,@ItemShipmentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strShipmentNumber] ELSE NULL END)
+		,@ItemRecipeItemId				= (CASE WHEN @GroupingOption = 0 THEN [intRecipeItemId] ELSE NULL END)		
 		,@ItemSalesOrderDetailId		= (CASE WHEN @GroupingOption = 0 THEN [intSalesOrderDetailId] ELSE NULL END)
 		,@ItemSalesOrderNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSalesOrderNumber] ELSE NULL END)		
 		,@ItemContractDetailId			= (CASE WHEN @GroupingOption = 0 THEN [intContractDetailId] ELSE NULL END)
@@ -515,6 +517,7 @@ BEGIN
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 			,@ItemShipmentNumber			= @ItemShipmentNumber
+			,@ItemRecipeItemId				= @ItemRecipeItemId			
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 			,@ItemContractHeaderId			= @ContractHeaderId
@@ -635,6 +638,7 @@ BEGIN
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
+					,@ItemRecipeItemId				= [intRecipeItemId]
 					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 					,@ContractHeaderId				= [intContractHeaderId]
@@ -699,6 +703,7 @@ BEGIN
 						,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 						,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 						,@ItemShipmentNumber			= @ItemShipmentNumber
+						,@ItemRecipeItemId				= @ItemRecipeItemId						
 						,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 						,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 						,@ItemContractHeaderId			= @ContractHeaderId
@@ -1198,7 +1203,8 @@ BEGIN TRY
 						,@ItemSCInvoiceId				= [intSCInvoiceId]
 						,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
 						,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
-						,@ItemShipmentNumber			= [strShipmentNumber]
+						,@ItemShipmentNumber			= [strShipmentNumber]						
+						,@ItemRecipeItemId				= [intRecipeItemId]
 						,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 						,@ContractHeaderId				= [intContractHeaderId]
@@ -1262,6 +1268,7 @@ BEGIN TRY
 							,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 							,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 							,@ItemShipmentNumber			= @ItemShipmentNumber
+							,@ItemRecipeItemId				= @ItemRecipeItemId							
 							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 							,@ItemContractHeaderId			= @ContractHeaderId
@@ -1424,6 +1431,7 @@ BEGIN TRY
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
+					,@ItemRecipeItemId				= [intRecipeItemId]					
 					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 					,@ContractHeaderId				= [intContractHeaderId]
@@ -1528,6 +1536,7 @@ BEGIN TRY
 						,[strSCInvoiceNumber]					= @ItemSCInvoiceNumber				
 						,[intInventoryShipmentItemId]			= @ItemInventoryShipmentItemId			
 						,[strShipmentNumber]					= @ItemShipmentNumber	
+						,[intRecipeItemId]						= @ItemRecipeItemId									
 						,[intSalesOrderDetailId]				= @ItemSalesOrderDetailId			
 						,[strSalesOrderNumber]					= @ItemSalesOrderNumber		
 						,[intContractHeaderId]					= @ContractHeaderId			

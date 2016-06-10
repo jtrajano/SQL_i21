@@ -30,6 +30,7 @@
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemRecipeItemId				INT				= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
@@ -111,6 +112,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemSCInvoiceId				= @ItemSCInvoiceId
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
+			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemShipmentNumber			= @ItemShipmentNumber
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
