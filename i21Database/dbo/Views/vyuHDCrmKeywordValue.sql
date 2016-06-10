@@ -7,9 +7,9 @@
 			,strCompanyName = tblSMCompanySetup.strCompanyName
 			,strEnterpriseSoftwareSimplified = 'Enterprise Software Simplified'
 			
-			,intMobileNumberContactEntityId = mob.intEntityId
-			,strMobileNumber = tblEMEntityMobileNumber.strPhone
-			,strMobileNumberContact = mob.strPhone
+			,intMobileNumberContactEntityId = 0--mob.intEntityId
+			,strMobileNumber = ''--tblEMEntityMobileNumber.strPhone
+			,strMobileNumberContact = ''--mob.strPhone
 			
 			,intPhoneNumberContactEntityId = pho.intEntityId
 			,strPhoneNumber = tblEMEntityPhoneNumber.strPhone
@@ -30,9 +30,9 @@
 			
 			left outer join tblSMCompanySetup on 1 = 1
 
-			left outer join tblEMEntityMobileNumber on tblEMEntityMobileNumber.intEntityId = tblEMEntity.intEntityId
+			--left outer join tblEMEntityMobileNumber on tblEMEntityMobileNumber.intEntityId = tblEMEntity.intEntityId
 			left outer join tblEMEntityToContact on tblEMEntityToContact.intEntityId = tblEMEntity.intEntityId
-			left outer join tblEMEntityMobileNumber  mob on mob.intEntityId = tblEMEntityToContact.intEntityContactId
+			--left outer join tblEMEntityMobileNumber  mob on mob.intEntityId = tblEMEntityToContact.intEntityContactId
 
 			left outer join tblEMEntityPhoneNumber on tblEMEntityPhoneNumber.intEntityId = tblEMEntity.intEntityId
 			left outer join tblEMEntityPhoneNumber  pho on pho.intEntityId = tblEMEntityToContact.intEntityContactId
