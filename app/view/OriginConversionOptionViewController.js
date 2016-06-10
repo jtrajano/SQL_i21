@@ -243,9 +243,9 @@ function getTemplateColumns(name) {
         case "Manufacturers":
             return ["Manufacturer"];
         case "Commodities":
-            return ["Commodity Code", "Description", "Exchange Traded", "Consolidate Factor", "FX Exposure", "Price Checks Min",
+            return ["Commodity Code", "Description", "Exchange Traded", "Decimals on DPR", "Default Future Market", "Consolidate Factor", "FX Exposure", "Price Checks Min",
                 "Price Checks Max", "Checkoff Tax Desc", "Checkoff All States", "Insurance Tax Desc", "Insurance All States",
-                "Crop End Date Current", "Crop End Date New", "EDI Code"];
+                "Crop End Date Current", "Crop End Date New", "EDI Code", "Default Schedule Store", "Discount", "Scale Auto Dist Default"];
         case "Items":
             return ["Item No","Type","Short Name","Description","Manufacturer","Status","Commodity","Lot Tracking","Brand","Model No","Category","Stocked Item","Dyed Fuel","Barcode Print","MSDS Required","EPA Number","Inbound Tax","Outbound Tax","Restricted Chemical","Fuel Item","List Bundle Items Separately","Fuel Inspect Fee","RIN Required","Fuel Category","Denaturant Percentage","Tonnage Tax","Load Tracking","Mix Order","Hand Add Ingredients","Medication Tag","Ingredient Tag","Volume Rebate Group","Physical Item","Extend Pick Ticket","Export EDI","Hazard Material","Material Fee","Auto Blend","User Group Fee Percentage","Wgt Tolerance Percentage","Over Receive Tolerance Percentage","Maintenance Calculation Method","Rate","NACS Category","WIC Code","Receipt Comment Req","Count Code","Landed Cost","Lead Time","Taxable","Keywords","Case Qty","Date Ship","Tax Exempt","Drop Ship","Commissionable","Special Commission","Tank Required","Available for TM","Default Percentage Full","Patronage Category","Direct Sale"];
         case "Item GL Accounts":
