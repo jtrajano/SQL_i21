@@ -3948,6 +3948,12 @@
     <Build Include="dbo\Views\vyuETSalespersonDriver.sql" />
     <Build Include="dbo\Tables\tblEMEntityPasswordHistory.sql" />
     <Build Include="dbo\Views\vyuETCustomerSpecialPricing_1.sql" />
+    <Build Include="dbo\Tables\tblARPOSPayment.sql" />
+    <Build Include="dbo\Tables\tblARPOSLog.sql" />
+    <Build Include="dbo\Tables\tblARPOSDetail.sql" />
+    <Build Include="dbo\Tables\tblARPOS.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessPOSToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetReceiptNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
