@@ -3917,9 +3917,6 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
     <Build Include="dbo\Tables\tblSMOfflineConfiguration.sql" />
     <Build Include="dbo\Views\vyuEMEntityContact2.sql" />
-    <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToAPBill.sql" />
-    <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToARInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspCCRemoveTransactionToCMBankTransaction.sql" />
     <Build Include="dbo\Views\vyuPOForApproval.sql" />
     <Build Include="dbo\Functions\fnPOGetNextApprover.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleMenuSubRole.sql" />
