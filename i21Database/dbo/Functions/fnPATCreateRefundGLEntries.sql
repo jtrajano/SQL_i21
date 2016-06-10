@@ -100,7 +100,7 @@ BEGIN
 		[strBatchID]					=	'',
 		[intAccountId]					=	@apClearing, 
 		[dblDebit]						=	0,
-		[dblCredit]						=	B.dblCashRefund - (B.dblCashRefund * (A.dblServiceFee/100)) - A.dblLessFWT,
+		[dblCredit]						=	B.dblCashRefund - (B.dblCashRefund * (A.dblServiceFee/100)) - (CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strRefund,
@@ -134,6 +134,8 @@ BEGIN
 				ON B.intRefundCustomerId = C.intRefundCustomerId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
+			INNER JOIN tblARCustomer ARC
+				ON B.intCustomerId = ARC.intEntityCustomerId
 	WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
 	--GENERAL RESERVE
@@ -226,7 +228,7 @@ WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
 	[strBatchID]					=	'',
 	[intAccountId]					=	(SELECT DISTINCT intFWTLiabilityAccountId FROM tblPATCompanyPreference), -- change this
 	[dblDebit]						=	0,
-	[dblCredit]						=	A.dblLessFWT, 
+	[dblCredit]						=	(CASE WHEN ARC.ysnSubjectToFWT = 0 THEN 0 ELSE (B.dblCashRefund * (A.dblFedWithholdingPercentage/100))END), 
 	[dblDebitUnit]					=	0,
 	[dblCreditUnit]					=	0,
 	[strDescription]				=	A.strRefund,
@@ -260,6 +262,8 @@ FROM	[dbo].tblPATRefund A
 			ON B.intRefundCustomerId = C.intRefundCustomerId
 		INNER JOIN tblPATRefundRate D
 			ON B.intRefundTypeId = D.intRefundTypeId
+		INNER JOIN tblARCustomer ARC
+				ON B.intCustomerId = ARC.intEntityCustomerId
 WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
 	RETURN
 END
