@@ -5,4 +5,4 @@
 CONSTRAINT [PK_tblETExportFilterTaxGroup] PRIMARY KEY CLUSTERED
 (
 	[intExportFilterTaxGroupId] ASC
-))
+), CONSTRAINT [FK_tblETExportFilterTaxGroup_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]) ON DELETE CASCADE)

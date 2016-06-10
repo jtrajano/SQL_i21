@@ -5,4 +5,4 @@
 CONSTRAINT [PK_tblETExportFilterTerm] PRIMARY KEY CLUSTERED
 (
 	[intExportFilterTermId] ASC
-))
+), CONSTRAINT [FK_tblETExportFilterTerm_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES tblSMTerm([intTermID]) ON DELETE CASCADE)
