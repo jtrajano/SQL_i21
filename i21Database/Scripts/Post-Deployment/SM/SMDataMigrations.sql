@@ -310,18 +310,24 @@ GO
 			) a
 			WHERE ROWID = @currentRow1
 
-			INSERT INTO tblSMEntityMenuFavorite(intMenuId, intEntityId, intCompanyLocationId, intSort)
-			SELECT intMenuId, intEntityUserSecurityId, intCompanyLocationId, ROW_NUMBER() OVER (ORDER BY intUserSecurityMenuFavoriteId) AS 'intSort' 
-			FROM tblSMUserSecurityMenuFavorite SecurityFavorite
-			WHERE NOT EXISTS 
-			(
-				SELECT 1 FROM tblSMEntityMenuFavorite EntityFavorite WHERE SecurityFavorite.intMenuId = EntityFavorite.intMenuId AND SecurityFavorite.intEntityUserSecurityId = EntityFavorite.intEntityId AND ISNULL(SecurityFavorite.intCompanyLocationId,0) = ISNULL(EntityFavorite.intCompanyLocationId, 0)
-			)
-			AND intEntityUserSecurityId = @entityId AND ISNULL(intCompanyLocationId, 0) = ISNULL(@companyLocationId, 0)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEntityMenuFavorite WHERE intEntityId = @entityId)
+			BEGIN
+				INSERT INTO tblSMEntityMenuFavorite(intMenuId, intEntityId, intCompanyLocationId, intSort)
+				SELECT intMenuId, intEntityUserSecurityId, intCompanyLocationId, ROW_NUMBER() OVER (ORDER BY intUserSecurityMenuFavoriteId) AS 'intSort' 
+				FROM tblSMUserSecurityMenuFavorite SecurityFavorite
+				WHERE NOT EXISTS 
+				(
+					SELECT 1 FROM tblSMEntityMenuFavorite EntityFavorite WHERE SecurityFavorite.intMenuId = EntityFavorite.intMenuId AND SecurityFavorite.intEntityUserSecurityId = EntityFavorite.intEntityId AND ISNULL(SecurityFavorite.intCompanyLocationId,0) = ISNULL(EntityFavorite.intCompanyLocationId, 0)
+				)
+				AND intEntityUserSecurityId = @entityId AND ISNULL(intCompanyLocationId, 0) = ISNULL(@companyLocationId, 0)
+			END
+
+			DELETE FROM tblSMUserSecurityMenuFavorite WHERE intEntityUserSecurityId = @entityId AND ISNULL(intCompanyLocationId, 0) = ISNULL(@companyLocationId, 0)
 		
-		SET @currentRow1 = @currentRow1 + 1
+			SET @currentRow1 = @currentRow1 + 1
 		END
-	SET @currentRow = @currentRow + 1
+
+		SET @currentRow = @currentRow + 1
 	END
 	
 GO
