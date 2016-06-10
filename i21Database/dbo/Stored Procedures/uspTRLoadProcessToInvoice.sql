@@ -23,11 +23,22 @@ BEGIN TRY
 	SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId), @intUserId)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+	DECLARE @intFreightItemId	INT
+	  , @intSurchargeItemId		INT
+	  , @ysnItemizeSurcharge	BIT
+
+	SELECT TOP 1
+		   @intFreightItemId	= intItemForFreightId
+		 , @intSurchargeItemId	= intSurchargeItemId
+		 , @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
+	FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
 
 	SELECT
-		 [strSourceTransaction]					= 'Transport Load'
+		ROW_NUMBER() OVER(ORDER BY DH.intLoadDistributionHeaderId, DD.intLoadDistributionDetailId DESC) AS intId
+		,[strSourceTransaction]					= 'Transport Load'
+		,[intLoadDistributionDetailId]		= DD.intLoadDistributionDetailId
 		,[intSourceId]							= DH.intLoadDistributionHeaderId
 		,[strSourceId]							= TL.strTransaction
 		,[intInvoiceId]							= DH.intInvoiceId --NULL Value will create new invoice
@@ -59,7 +70,7 @@ BEGIN TRY
 		,[ysnSplitted]							= 0
 		,[intPaymentId]							= NULL
 		,[intSplitId]							= NULL
-		,[intLoadDistributionHeaderId]			= DH.intLoadDistributionHeaderId
+		,[intDistributionHeaderId]				= DH.intLoadDistributionHeaderId
 		,[strActualCostId]						= (CASE WHEN (TR.strOrigin) = 'Terminal' AND (DH.strDestination) = 'Customer'
 														THEN (TL.strTransaction)
 													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Customer' AND (TR.intCompanyLocationId) = (DH.intCompanyLocationId)
@@ -83,7 +94,11 @@ BEGIN TRY
 		,[dblQtyOrdered]						= DD.dblUnits
 		,[dblQtyShipped]						= DD.dblUnits
 		,[dblDiscount]							= 0
-		,[dblPrice]								= DD.dblPrice
+		,[dblPrice]								--= DD.dblPrice
+												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
+														WHEN DD.ysnFreightInPrice = 1 AND @ysnItemizeSurcharge = 0 AND ISNULL(DD.dblDistSurcharge,0) != 0 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0) + (ISNULL(DD.dblFreightRate,0) * (DD.dblDistSurcharge / 100))
+														WHEN DD.ysnFreightInPrice = 1 THEN DD.dblPrice + ISNULL(DD.dblFreightRate,0)
+												END
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= ''
 		,[strFrequency]							= ''
@@ -121,7 +136,7 @@ BEGIN TRY
 	FROM tblTRLoadHeader TL
 			LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 			LEFT JOIN tblARCustomer Customer ON Customer.intEntityCustomerId = DH.intEntityCustomerId
-			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
+			LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 			LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
 			LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
@@ -140,6 +155,206 @@ BEGIN TRY
 						ON ee.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 		WHERE TL.intLoadHeaderId = @intLoadHeaderId
 			AND DH.strDestination = 'Customer'
+
+	--VALIDATE FREIGHT AND SURCHARGE ITEM
+	DECLARE @intLocationId		INT
+	  , @intFreightItemUOMId	INT
+	  , @intSurchargeItemUOMId	INT
+
+	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM @EntriesForInvoice 
+
+	IF ISNULL(@intFreightItemId, 0) > 0
+	BEGIN		
+		SELECT TOP 1 @intFreightItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intLocationId = @intLocationId
+
+		IF ISNULL(@intFreightItemUOMId, 0) = 0
+		BEGIN
+			SELECT TOP 1 @intFreightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId ORDER BY ysnStockUnit DESC
+		END
+		IF ISNULL(@intFreightItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM #tmpSourceTable WHERE ISNULL(dblFreightRate, 0.000000) > 0.000000)
+		BEGIN
+			RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+			RETURN 0
+		END
+	END
+
+	IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
+	BEGIN
+		SELECT TOP 1 @intSurchargeItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intSurchargeItemId AND intLocationId = @intLocationId
+
+		IF ISNULL(@intSurchargeItemUOMId, 0) = 0
+		BEGIN
+			SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId ORDER BY ysnStockUnit DESC
+		END
+		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM #tmpSourceTable WHERE ISNULL(dblSurcharge, 0.000000) > 0.000000)
+		BEGIN
+			RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+			RETURN 0
+		END
+	END
+	
+	--Freight Items
+	INSERT INTO #tmpSourceTable(
+		[intId] 
+		,[strSourceTransaction]
+		,[intLoadDistributionDetailId]
+		,[intSourceId]
+		,[strSourceId]
+		,[intInvoiceId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intCurrencyId]
+		,[intTermId]
+		,[dtmDate]
+		,[dtmDueDate]
+		,[dtmShipDate]
+		,[intEntitySalespersonId]
+		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[strPONumber]
+		,[strBOLNumber]
+		,[strDeliverPickup]
+		,[strComments]
+		,[intShipToLocationId]
+		,[intBillToLocationId]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[intPaymentId]
+		,[intSplitId]
+		,[intDistributionHeaderId]
+		,[strActualCostId]
+		,[intShipmentId]
+		,[intTransactionId]
+		,[intEntityId]
+		,[ysnResetDetails]
+		,[ysnPost]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[ysnInventory]
+		,[strItemDescription]
+		,[intOrderUOMId]
+		,[intItemUOMId]
+		,[dblQtyOrdered]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblPrice]
+		,[ysnRefreshPrice]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[intTaxGroupId]
+		,[ysnRecomputeTax]
+		,[intSCInvoiceId]
+		,[strSCInvoiceNumber]
+		,[intInventoryShipmentItemId]
+		,[strShipmentNumber]
+		,[intSalesOrderDetailId]
+		,[strSalesOrderNumber]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intShipmentPurchaseSalesContractId]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]
+		,[ysnClearDetailTaxes]					
+		,[intTempDetailIdForTaxes]
+	)
+	SELECT 
+		0 AS intId
+		,[strSourceTransaction]					= IE.strSourceTransaction
+		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
+		,[intSourceId]							= IE.intSourceId
+		,[strSourceId]							= IE.strSourceId
+		,[intInvoiceId]							= IE.intInvoiceId --NULL Value will create new invoice
+		,[intEntityCustomerId]					= IE.intEntityCustomerId
+		,[intCompanyLocationId]					= IE.intCompanyLocationId
+		,[intCurrencyId]						= IE.intCurrencyId
+		,[intTermId]							= IE.intTermId
+		,[dtmDate]								= IE.dtmDate
+		,[dtmDueDate]							= IE.dtmDueDate
+		,[dtmShipDate]							= IE.dtmShipDate
+		,[intEntitySalespersonId]				= IE.intEntitySalespersonId
+		,[intFreightTermId]						= IE.intFreightTermId
+		,[intShipViaId]							= IE.intShipViaId
+		,[intPaymentMethodId]					= IE.intPaymentMethodId
+		,[strInvoiceOriginId]					= IE.strInvoiceOriginId
+		,[strPONumber]							= IE.strPONumber
+		,[strBOLNumber]							= IE.strBOLNumber
+		,[strDeliverPickup]						= IE.strDeliverPickup
+		,[strComments]							= IE.strComments
+		,[intShipToLocationId]					= IE.intShipToLocationId
+		,[intBillToLocationId]					= IE.intBillToLocationId
+		,[ysnTemplate]							= IE.ysnTemplate
+		,[ysnForgiven]							= IE.ysnForgiven
+		,[ysnCalculated]						= IE.ysnCalculated
+		,[ysnSplitted]							= IE.ysnSplitted
+		,[intPaymentId]							= IE.intPaymentId
+		,[intSplitId]							= IE.intSplitId
+		,[intDistributionHeaderId]				= IE.intDistributionHeaderId
+		,[strActualCostId]						= IE.strActualCostId
+		,[intShipmentId]						= IE.intShipmentId
+		,[intTransactionId]						= IE.intTransactionId
+		,[intEntityId]							= IE.intEntityCustomerId
+		,[ysnResetDetails]						= IE.ysnResetDetails
+		,[ysnPost]								= IE.ysnPost
+		,[intInvoiceDetailId]					= IE.intInvoiceDetailId
+		,[intItemId]							= @intFreightItemId
+		,[ysnInventory]							= [dbo].[fnIsStockTrackingItem](@intFreightItemId)
+		,[strItemDescription]					= Item.strDescription
+		,[intOrderUOMId]						= @intFreightItemUOMId
+		,[intItemUOMId]							= @intFreightItemUOMId
+		,[dblQtyOrdered]						= IE.dblQtyOrdered
+		,[dblQtyShipped]						= IE.dblQtyShipped
+		,[dblDiscount]							= 0
+		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
+													WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1  THEN ISNULL(IE.[dblFreightRate],0) END 
+		,[ysnRefreshPrice]						= 0
+		,[strMaintenanceType]					= IE.strMaintenanceType
+		,[strFrequency]							= IE.strFrequency
+		,[dtmMaintenanceDate]					= IE.dtmMaintenanceDate
+		,[dblMaintenanceAmount]					= IE.dblMaintenanceAmount
+		,[dblLicenseAmount]						= IE.dblLicenseAmount
+		,[intTaxGroupId]						= NULL
+		,[ysnRecomputeTax]						= 0
+		,[intSCInvoiceId]						= IE.intSCInvoiceId
+		,[strSCInvoiceNumber]					= IE.strSCInvoiceNumber
+		,[intInventoryShipmentItemId]			= IE.intInventoryShipmentItemId
+		,[strShipmentNumber]					= IE.strShipmentNumber
+		,[intSalesOrderDetailId]				= IE.intSalesOrderDetailId
+		,[strSalesOrderNumber]					= IE.strSalesOrderNumber
+		,[intContractHeaderId]					= NULL
+		,[intContractDetailId]					= NULL
+		,[intShipmentPurchaseSalesContractId]	= NULL
+		,[intTicketId]							= NULL
+		,[intTicketHoursWorkedId]				= NULL
+		,[intSiteId]							= IE.intSiteId
+		,[strBillingBy]							= IE.strBillingBy
+		,[dblPercentFull]						= IE.dblPercentFull
+		,[dblNewMeterReading]					= NULL
+		,[dblPreviousMeterReading]				= NULL
+		,[dblConversionFactor]					= IE.dblConversionFactor
+		,[intPerformerId]						= IE.intPerformerId
+		,[ysnLeaseBilling]						= IE.ysnLeaseBilling
+		,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
+		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
+		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
+	FROM #tmpSourceTable IE
+	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
+	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
 
 	INSERT INTO @EntriesForInvoice(
 		 [strSourceTransaction]
@@ -170,7 +385,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intLoadDistributionHeaderId]
+		,[intDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -247,7 +462,7 @@ BEGIN TRY
 		,[ysnSplitted]							= TR.ysnSplitted
 		,[intPaymentId]							= TR.intPaymentId
 		,[intSplitId]							= TR.intSplitId
-		,[intLoadDistributionHeaderId]			= TR.[intLoadDistributionHeaderId]
+		,[intDistributionHeaderId]				= TR.intDistributionHeaderId
 		,[strActualCostId]						= TR.strActualCostId
 		,[intShipmentId]						= TR.intShipmentId
 		,[intTransactionId]						= TR.intTransactionId
@@ -295,213 +510,9 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= TR.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= TR.intTempDetailIdForTaxes
 	FROM #tmpSourceTable TR
-
-	--VALIDATE FREIGHT AND SURCHARGE ITEM
-	DECLARE @intFreightItemId	INT
-	  , @intSurchargeItemId		INT
-	  , @ysnItemizeSurcharge	BIT
-	  , @intLocationId			INT
-	  , @intFreightItemUOMId	INT
-	  , @intSurchargeItemUOMId	INT
+	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
 	DECLARE @FreightSurchargeEntries AS InvoiceIntegrationStagingTable
-
-	SELECT TOP 1
-		   @intFreightItemId	= intItemForFreightId
-		 , @intSurchargeItemId	= intSurchargeItemId
-		 , @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
-	FROM tblTRCompanyPreference
-
-	SELECT TOP 1 @intLocationId = intCompanyLocationId FROM @EntriesForInvoice 
-
-	IF ISNULL(@intFreightItemId, 0) > 0
-	BEGIN		
-		SELECT TOP 1 @intFreightItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intFreightItemId AND intLocationId = @intLocationId
-
-		IF ISNULL(@intFreightItemUOMId, 0) = 0
-		BEGIN
-			SELECT TOP 1 @intFreightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId ORDER BY ysnStockUnit DESC
-		END
-		IF ISNULL(@intFreightItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM #tmpSourceTable WHERE ISNULL(dblFreightRate, 0.000000) > 0.000000)
-		BEGIN
-			RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
-			RETURN 0
-		END
-	END
-
-	IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
-	BEGIN
-		SELECT TOP 1 @intSurchargeItemUOMId = intIssueUOMId FROM tblICItemLocation WHERE intItemId = @intSurchargeItemId AND intLocationId = @intLocationId
-
-		IF ISNULL(@intSurchargeItemUOMId, 0) = 0
-		BEGIN
-			SELECT TOP 1 @intSurchargeItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId ORDER BY ysnStockUnit DESC
-		END
-		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM #tmpSourceTable WHERE ISNULL(dblSurcharge, 0.000000) > 0.000000)
-		BEGIN
-			RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 11, 1) 
-			RETURN 0
-		END
-	END
-	
-	--Freight Items
-	INSERT INTO @FreightSurchargeEntries
-		([strSourceTransaction]
-		,[intSourceId]
-		,[strSourceId]
-		,[intInvoiceId]
-		,[intEntityCustomerId]
-		,[intCompanyLocationId]
-		,[intCurrencyId]
-		,[intTermId]
-		,[dtmDate]
-		,[dtmDueDate]
-		,[dtmShipDate]
-		,[intEntitySalespersonId]
-		,[intFreightTermId]
-		,[intShipViaId]
-		,[intPaymentMethodId]
-		,[strInvoiceOriginId]
-		,[strPONumber]
-		,[strBOLNumber]
-		,[strDeliverPickup]
-		,[strComments]
-		,[intShipToLocationId]
-		,[intBillToLocationId]
-		,[ysnTemplate]
-		,[ysnForgiven]
-		,[ysnCalculated]
-		,[ysnSplitted]
-		,[intPaymentId]
-		,[intSplitId]
-		,[intLoadDistributionHeaderId]
-		,[strActualCostId]
-		,[intShipmentId]
-		,[intTransactionId]
-		,[intEntityId]
-		,[ysnResetDetails]
-		,[ysnPost]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[ysnInventory]
-		,[strItemDescription]
-		,[intOrderUOMId]
-		,[intItemUOMId]
-		,[dblQtyOrdered]
-		,[dblQtyShipped]
-		,[dblDiscount]
-		,[dblPrice]
-		,[ysnRefreshPrice]
-		,[strMaintenanceType]
-		,[strFrequency]
-		,[dtmMaintenanceDate]
-		,[dblMaintenanceAmount]
-		,[dblLicenseAmount]
-		,[intTaxGroupId]
-		,[ysnRecomputeTax]
-		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
-		,[intInventoryShipmentItemId]
-		,[strShipmentNumber]
-		,[intSalesOrderDetailId]
-		,[strSalesOrderNumber]
-		,[intContractHeaderId]
-		,[intContractDetailId]
-		,[intShipmentPurchaseSalesContractId]
-		,[intTicketId]
-		,[intTicketHoursWorkedId]
-		,[intSiteId]
-		,[strBillingBy]
-		,[dblPercentFull]
-		,[dblNewMeterReading]
-		,[dblPreviousMeterReading]
-		,[dblConversionFactor]
-		,[intPerformerId]
-		,[ysnLeaseBilling]
-		,[ysnVirtualMeterReading]
-		,[ysnClearDetailTaxes]					
-		,[intTempDetailIdForTaxes])
-	SELECT 
-		[strSourceTransaction]					= IE.strSourceTransaction
-		,[intSourceId]							= IE.intSourceId
-		,[strSourceId]							= IE.strSourceId
-		,[intInvoiceId]							= IE.intInvoiceId --NULL Value will create new invoice
-		,[intEntityCustomerId]					= IE.intEntityCustomerId
-		,[intCompanyLocationId]					= IE.intCompanyLocationId
-		,[intCurrencyId]						= IE.intCurrencyId
-		,[intTermId]							= IE.intTermId
-		,[dtmDate]								= IE.dtmDate
-		,[dtmDueDate]							= IE.dtmDueDate
-		,[dtmShipDate]							= IE.dtmShipDate
-		,[intEntitySalespersonId]				= IE.intEntitySalespersonId
-		,[intFreightTermId]						= IE.intFreightTermId
-		,[intShipViaId]							= IE.intShipViaId
-		,[intPaymentMethodId]					= IE.intPaymentMethodId
-		,[strInvoiceOriginId]					= IE.strInvoiceOriginId
-		,[strPONumber]							= IE.strPONumber
-		,[strBOLNumber]							= IE.strBOLNumber
-		,[strDeliverPickup]						= IE.strDeliverPickup
-		,[strComments]							= IE.strComments
-		,[intShipToLocationId]					= IE.intShipToLocationId
-		,[intBillToLocationId]					= IE.intBillToLocationId
-		,[ysnTemplate]							= IE.ysnTemplate
-		,[ysnForgiven]							= IE.ysnForgiven
-		,[ysnCalculated]						= IE.ysnCalculated
-		,[ysnSplitted]							= IE.ysnSplitted
-		,[intPaymentId]							= IE.intPaymentId
-		,[intSplitId]							= IE.intSplitId
-		,[intLoadDistributionHeaderId]			= IE.[intLoadDistributionHeaderId]
-		,[strActualCostId]						= IE.strActualCostId
-		,[intShipmentId]						= IE.intShipmentId
-		,[intTransactionId]						= IE.intTransactionId
-		,[intEntityId]							= IE.intEntityCustomerId
-		,[ysnResetDetails]						= IE.ysnResetDetails
-		,[ysnPost]								= IE.ysnPost
-		,[intInvoiceDetailId]					= IE.intInvoiceDetailId
-		,[intItemId]							= @intFreightItemId
-		,[ysnInventory]							= [dbo].[fnIsStockTrackingItem](@intFreightItemId)
-		,[strItemDescription]					= Item.strDescription
-		,[intOrderUOMId]						= @intFreightItemUOMId
-		,[intItemUOMId]							= @intFreightItemUOMId
-		,[dblQtyOrdered]						= IE.dblQtyOrdered
-		,[dblQtyShipped]						= IE.dblQtyShipped
-		,[dblDiscount]							= 0
-		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
-													WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1  THEN ISNULL(IE.[dblFreightRate],0) END 
-		,[ysnRefreshPrice]						= 0
-		,[strMaintenanceType]					= IE.strMaintenanceType
-		,[strFrequency]							= IE.strFrequency
-		,[dtmMaintenanceDate]					= IE.dtmMaintenanceDate
-		,[dblMaintenanceAmount]					= IE.dblMaintenanceAmount
-		,[dblLicenseAmount]						= IE.dblLicenseAmount
-		,[intTaxGroupId]						= NULL
-		,[ysnRecomputeTax]						= 0
-		,[intSCInvoiceId]						= IE.intSCInvoiceId
-		,[strSCInvoiceNumber]					= IE.strSCInvoiceNumber
-		,[intInventoryShipmentItemId]			= IE.intInventoryShipmentItemId
-		,[strShipmentNumber]					= IE.strShipmentNumber
-		,[intSalesOrderDetailId]				= IE.intSalesOrderDetailId
-		,[strSalesOrderNumber]					= IE.strSalesOrderNumber
-		,[intContractHeaderId]					= NULL
-		,[intContractDetailId]					= NULL
-		,[intShipmentPurchaseSalesContractId]	= NULL
-		,[intTicketId]							= NULL
-		,[intTicketHoursWorkedId]				= NULL
-		,[intSiteId]							= IE.intSiteId
-		,[strBillingBy]							= IE.strBillingBy
-		,[dblPercentFull]						= IE.dblPercentFull
-		,[dblNewMeterReading]					= NULL
-		,[dblPreviousMeterReading]				= NULL
-		,[dblConversionFactor]					= IE.dblConversionFactor
-		,[intPerformerId]						= IE.intPerformerId
-		,[ysnLeaseBilling]						= IE.ysnLeaseBilling
-		,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
-		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
-		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
-	FROM #tmpSourceTable IE
-	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
-	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
-
 	--Surcharge Item
 	IF @ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0
 	BEGIN
@@ -534,7 +545,7 @@ BEGIN TRY
 			,[ysnSplitted]
 			,[intPaymentId]
 			,[intSplitId]
-			,[intLoadDistributionHeaderId]
+			,[intDistributionHeaderId]
 			,[strActualCostId]
 			,[intShipmentId]
 			,[intTransactionId]
@@ -610,7 +621,7 @@ BEGIN TRY
 			,[ysnSplitted]							= IE.ysnSplitted
 			,[intPaymentId]							= IE.intPaymentId
 			,[intSplitId]							= IE.intSplitId
-			,[intLoadDistributionHeaderId]			= IE.[intLoadDistributionHeaderId]
+			,[intDistributionHeaderId]				= IE.intDistributionHeaderId
 			,[strActualCostId]						= IE.strActualCostId
 			,[intShipmentId]						= IE.intShipmentId
 			,[intTransactionId]						= IE.intTransactionId
@@ -623,10 +634,10 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= 1
-			,[dblQtyShipped]						= 1
+			,[dblQtyOrdered]						= ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000)
+			,[dblQtyShipped]						= ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000)
 			,[dblDiscount]							= 0
-			,[dblPrice]								= ISNULL(IE.dblQtyShipped, 0.000000) * (ISNULL(IE.[dblFreightRate], 0.000000) * (ISNULL(IE.dblSurcharge, 0.000000) / 100))
+			,[dblPrice]								= ISNULL(IE.dblSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= IE.strMaintenanceType
 			,[strFrequency]							= IE.strFrequency
@@ -775,7 +786,7 @@ BEGIN TRY
 		,[dblQtyOrdered]						= SUM(IE.dblQtyOrdered)
 		,[dblQtyShipped]						= SUM(IE.dblQtyShipped)
 		,[dblDiscount]							= SUM(IE.dblDiscount)
-		,[dblPrice]								= SUM(dblPrice)
+		,[dblPrice]								= MIN(dblPrice)
 		,[ysnRefreshPrice]						= IE.ysnRefreshPrice
 		,[strMaintenanceType]					= IE.strMaintenanceType
 		,[strFrequency]							= IE.strFrequency
@@ -895,6 +906,10 @@ BEGIN TRY
 			SET intInvoiceId = @InvoiceId
 			WHERE intLoadHeaderId = @intLoadHeaderId
 				AND strDestination = 'Customer'
+				AND intLoadDistributionHeaderId = (
+					SELECT intLoadDistributionHeaderId FROM tblARInvoice
+					WHERE intInvoiceId = @InvoiceId
+				)
 
 			UPDATE tblTRLoadHeader 
 			SET ysnPosted = @ysnPostOrUnPost
