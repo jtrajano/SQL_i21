@@ -3954,6 +3954,9 @@
     <Build Include="dbo\Tables\tblARPOS.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessPOSToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetReceiptNumber.sql" />
+    <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailViewSearch.sql" />
+    <Build Include="dbo\Views\vyuLGLoadVesselViewSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
