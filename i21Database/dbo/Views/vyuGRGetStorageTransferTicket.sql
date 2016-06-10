@@ -26,6 +26,8 @@ SELECT TOP 100 PERCENT
 ,SH.intContractHeaderId
 ,CD.strContractNumber   
  ,ISNULL(SH1.intTicketId,0) AS intTicketId
+ ,ISNULL(dblDiscountsDue,0)-ISNULL(dblDiscountsPaid,0) AS dblDiscountUnPaid
+ ,ISNULL(dblStorageDue,0)-ISNULL(dblStoragePaid,0) AS dblStorageUnPaid
 FROM tblGRCustomerStorage a  
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId  
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId  
