@@ -172,7 +172,8 @@ OPEN intListCursor;
 								,intLotId
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-								,ysnIsStorage 
+								,ysnIsStorage
+								,strSourceTransactionId  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -192,6 +193,7 @@ OPEN intListCursor;
 								,intSubLocationId
 								,intStorageLocationId
 								,ysnIsStorage
+								,strDistributionOption 
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -215,7 +217,8 @@ OPEN intListCursor;
 								,intLotId
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-								,ysnIsStorage 
+								,ysnIsStorage
+								,strSourceTransactionId  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -235,6 +238,7 @@ OPEN intListCursor;
 								,intSubLocationId
 								,intStorageLocationId
 								,ysnIsStorage
+								,strDistributionOption 
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -260,7 +264,8 @@ OPEN intListCursor;
 						,intLotId
 						,intSubLocationId
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-						,ysnIsStorage 
+						,ysnIsStorage
+						,strSourceTransactionId
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL
 			END		   

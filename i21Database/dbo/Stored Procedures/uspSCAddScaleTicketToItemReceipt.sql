@@ -209,14 +209,14 @@ WHERE intTicketId = @intTicketId
 		,[ysnInventoryCost]					= 0
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
-												WHEN IC.strCostMethod = 'Per Unit' THEN IC.dblAmount
+												WHEN IC.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
 		,[intCostUOMId]						= IC.intCostUOMId
 		,[intOtherChargeEntityVendorId]		= NULL
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
-												WHEN IC.strCostMethod = 'Amount' THEN IC.dblAmount
+												WHEN IC.strCostMethod = 'Amount' THEN QM.dblDiscountAmount
 											END
 		,[strAllocateCostBy]				= NULL
 		,[intContractHeaderId]				= NULL
@@ -227,7 +227,7 @@ WHERE intTicketId = @intTicketId
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount > 0
+		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
 
 IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 	BEGIN
