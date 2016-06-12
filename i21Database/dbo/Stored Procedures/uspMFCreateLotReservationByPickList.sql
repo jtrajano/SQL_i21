@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFCreateLotReservationByPickList]
 	@intPickListId int,
-	@strBulkItemXml nvarchar(max)=''
+	@strBulkItemXml nvarchar(max)='',
+	@ysnStage bit=0,
+	@intKitStagingLocationId int=0
 AS
 
 DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
@@ -12,6 +14,9 @@ DECLARE @intWorkOrderId int
 DECLARE @idoc int 
 DECLARE @intLocationId int
 DECLARE @strPickListNo NVARCHAR(50)
+Declare @intKitStagingSubLocationId int
+
+Select @intKitStagingSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId=@intKitStagingLocationId
 
 DECLARE @tblBulkItem AS TABLE
 (
@@ -108,8 +113,8 @@ Select @intLocationId=intLocationId,@strPickListNo=strPickListNo From tblMFPickL
 			,intItemLocationId = il.intItemLocationId
 			,intItemUOMId = pld.intItemUOMId
 			,intLotId = NULL
-			,intSubLocationId = pld.intSubLocationId
-			,intStorageLocationId = pld.intStorageLocationId
+			,intSubLocationId = CASE WHEN @ysnStage=0 THEN pld.intSubLocationId Else @intKitStagingSubLocationId End
+			,intStorageLocationId = CASE WHEN @ysnStage=0 THEN pld.intStorageLocationId Else @intKitStagingLocationId End
 			,dblQty = pld.dblQuantity
 			,intTransactionId = pld.intPickListId
 			,strTransactionId = pl.strPickListNo

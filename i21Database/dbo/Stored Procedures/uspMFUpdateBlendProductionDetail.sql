@@ -71,8 +71,6 @@ INSERT INTO @tblLot(
 	intStorageLocationId int
 	)
 
-If (Select strLotTracking From tblICItem Where intItemId=@intBlendItemId)='No'
-	Update @tblLot Set intLotId=NULL
 
 Update @tblLot Set intSubLocationId=NULL Where intSubLocationId=0
 Update @tblLot Set intStorageLocationId=NULL Where intStorageLocationId=0

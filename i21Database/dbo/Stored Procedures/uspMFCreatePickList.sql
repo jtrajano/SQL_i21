@@ -114,15 +114,15 @@ Declare @tblPickedLots AS table
 ( 
 	intWorkOrderInputLotId int,
 	intLotId int,
-	strLotNumber nvarchar(50),
-	strItemNo nvarchar(50),
-	strDescription nvarchar(200),
+	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
 	dblQuantity numeric(38,20),
 	intItemUOMId int,
-	strUOM nvarchar(50),
+	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
-	strIssuedUOM nvarchar(50),
+	strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intItemId int,
 	intRecipeItemId int,
 	dblUnitCost numeric(38,20),
@@ -131,13 +131,13 @@ Declare @tblPickedLots AS table
 	dblWeightPerUnit numeric(38,20),
 	dblRiskScore numeric(38,20),
 	intStorageLocationId int,
-	strStorageLocationName nvarchar(50),
-	strLocationName nvarchar(50),
+	strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
-	strSubLocationName nvarchar(50),
-	strLotAlias nvarchar(50),
+	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
-	strRowState nvarchar(50)
+	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
 )
 
 --to hold not available and less qty lots
@@ -145,15 +145,15 @@ Declare @tblRemainingPickedLots AS table
 ( 
 	intWorkOrderInputLotId int,
 	intLotId int,
-	strLotNumber nvarchar(50),
-	strItemNo nvarchar(50),
-	strDescription nvarchar(200),
+	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
 	dblQuantity numeric(38,20),
 	intItemUOMId int,
-	strUOM nvarchar(50),
+	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	dblIssuedQuantity numeric(38,20),
 	intItemIssuedUOMId int,
-	strIssuedUOM nvarchar(50),
+	strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intItemId int,
 	intRecipeItemId int,
 	dblUnitCost numeric(38,20),
@@ -162,13 +162,13 @@ Declare @tblRemainingPickedLots AS table
 	dblWeightPerUnit numeric(38,20),
 	dblRiskScore numeric(38,20),
 	intStorageLocationId int,
-	strStorageLocationName nvarchar(50),
-	strLocationName nvarchar(50),
+	strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
-	strSubLocationName nvarchar(50),
-	strLotAlias nvarchar(50),
+	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
-	strRowState nvarchar(50)
+	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
 )
 
 --Bulk Item Picking if WO is created from Blend Management
@@ -409,6 +409,11 @@ Begin
 	Select rpl.*,0.0 AS dblAvailableQty,0.0 AS dblReservedQty,0.0 AS dblAvailableUnit,'' AS strAvailableUnitUOM, 
 	0.0 AS dblPickQuantity,0 AS intPickUOMId,'' AS strPickUOM,0 AS intParentLotId,'' AS strParentLotNumber
 	From @tblRemainingPickedLots rpl
+	UNION --Non Lot Tracked Items
+	Select pl.*,sd.dblAvailableQty AS dblAvailableQty,sd.dblReservedQty AS dblReservedQty,sd.dblAvailableQty AS dblAvailableUnit,pl.strUOM AS strAvailableUnitUOM, 
+	pl.dblQuantity AS dblPickQuantity,pl.intItemUOMId AS intPickUOMId,pl.strUOM AS strPickUOM,0 AS intParentLotId,'' AS strParentLotNumber
+	From @tblPickedLots pl Join vyuMFGetItemStockDetail sd on pl.intWorkOrderInputLotId=sd.intItemStockUOMId
+	Where pl.intLotId=-1
 	ORDER BY tpl.strItemNo,tpl.intStorageLocationId
 
 	return
