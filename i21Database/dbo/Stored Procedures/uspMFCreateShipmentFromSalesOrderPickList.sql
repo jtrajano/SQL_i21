@@ -41,7 +41,7 @@ DECLARE @tblInputItem TABLE (
 
 	If Exists (Select 1 From tblICInventoryShipment sh Join tblICInventoryShipmentItem sd on sh.intInventoryShipmentId=sd.intInventoryShipmentId 
 		Where sh.intOrderType=2 AND sd.intOrderId=@intSalesOrderId)
-		RaisError('Shipmnet is alredy created for the sales order.',16,1)
+		RaisError('Shipment is alredy created for the sales order.',16,1)
 
 	If (Select ISNULL(strBOLNumber,'') From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)=''
 		RaisError('Please enter BOL number in Sales Order before shipping.',16,1)

@@ -187,6 +187,9 @@ If @ysnBlendSheetRequired = 0
 Begin
 Delete From @tblPickListDetail Where intLotId=0
 Delete From @tblPickListDetail Where dblPickQuantity<=0
+
+Update pld Set pld.intLotId=NULL,pld.intParentLotId=NULL,pld.intStorageLocationId = CASE WHEN pld.intStorageLocationId=0 THEN NULL ELSE pld.intStorageLocationId END
+From @tblPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId AND i.strLotTracking='No'
 End
 
 If ISNULL(@strPickListNo,'') = ''
@@ -221,7 +224,7 @@ Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' +
 From @tblPickListDetail tpl 
 Join tblMFWorkOrderRecipeItem ri on tpl.intItemId=ri.intItemId 
 Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
-Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId IN (2,3) 
 AND r.intWorkOrderId = @intWorkOrderId
 
 --Sub Item
@@ -233,7 +236,7 @@ From @tblPickListDetail tpl
 Join tblMFWorkOrderRecipeSubstituteItem rs on tpl.intItemId=rs.intSubstituteItemId
 Join tblMFWorkOrderRecipeItem ri on rs.intItemId=ri.intItemId 
 Join tblMFWorkOrderRecipe r on ri.intWorkOrderId=r.intWorkOrderId 
-Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId <> 1 
+Where r.intItemId=@intBlendItemId AND r.intLocationId=@intLocationId AND r.ysnActive=1 AND ri.intConsumptionMethodId IN (2,3) 
 AND r.intWorkOrderId = @intWorkOrderId
 
 Set @strBulkItemXml=@strBulkItemXml+'</root>'
@@ -275,10 +278,10 @@ Begin
 
 	SET @intPickListId=SCOPE_IDENTITY()
 
-	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
+	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intLocationId,intStorageLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intStageLotId,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
-	Select @intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
+	Select @intPickListId,intLotId,intParentLotId,intItemId,@intLocationId,intStorageLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intLotId,
 	@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1
 	from @tblPickListDetail
@@ -309,10 +312,10 @@ Begin
 	intPickListDetailId NOT IN (Select intPickListDetailId From @tblPickListDetail) AND intLotId=intStageLotId
 
 	--insert new picked lots
-	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
+	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intLocationId,intStorageLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intStageLotId,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
-	Select @intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
+	Select @intPickListId,intLotId,intParentLotId,intItemId,@intLocationId,intStorageLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intLotId,
 	@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1
 	from @tblPickListDetail Where intPickListDetailId=0

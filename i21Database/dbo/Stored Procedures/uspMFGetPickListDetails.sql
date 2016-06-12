@@ -11,6 +11,7 @@ Declare @intBlendRequirementId int
 Declare @strXml nvarchar(max)
 Declare @strWorkOrderIds nvarchar(max)
 Declare @intKitStagingLocationId int
+Declare @strKitStagingLocationName nvarchar(50)
 DECLARE @intBlendStagingLocationId INT
 Declare @intManufacturingProcessId int
 Declare @intWorkOrderId int
@@ -38,6 +39,8 @@ Select @intKitStagingLocationId=pa.strAttributeValue
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 and at.strAttributeName='Kit Staging Location'
+
+Select @strKitStagingLocationName=strName From tblICStorageLocation Where intStorageLocationId=@intKitStagingLocationId
 
 Select @intBlendStagingLocationId=ISNULL(intBlendProductionStagingUnitId,0) From tblSMCompanyLocation Where intCompanyLocationId=@intLocationId
 
@@ -232,7 +235,7 @@ Declare @tblPickedLotsFinal AS table
 	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
-		AND r.intWorkOrderId = @intWorkOrderId
+		AND r.intWorkOrderId = @intWorkOrderId AND ri.intConsumptionMethodId IN (1,2,3)
 	
 	UNION
 	
@@ -275,7 +278,7 @@ Begin
 	FROM tblMFRecipeItem ri
 	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 	WHERE r.intRecipeId = @intRecipeId
-		AND ri.intRecipeItemTypeId = 1
+		AND ri.intRecipeItemTypeId = 1  AND ri.intConsumptionMethodId IN (1,2,3)
 	
 	UNION
 	
@@ -524,8 +527,31 @@ Begin
 	from @tblPickedLotsFinal tpl Join @tblInputItem ti on tpl.intItemId=ti.intItemId 
 	Where ti.intConsumptionMethodId IN (2,3)
 
-	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId ORDER BY a.strItemNo,a.strLotNumber DESC
-
+	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId 
+	UNION --Non Lot Tracked Items
+	Select pld.intPickListDetailId,pld.intPickListId,-1,'','',0,'',pld.intItemId,i.strItemNo,i.strDescription,pld.intStorageLocationId,sl.strName,
+	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
+	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	ISNULL(sd.intSubLocationId,0)=ISNULL(pld.intSubLocationId,0) AND ISNULL(sd.intStorageLocationId,0)=ISNULL(pld.intStorageLocationId,0) 
+	AND sd.intItemId=pld.intItemId) AS dblAvailableQty,
+	(Select TOP 1 sd.dblReservedQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	ISNULL(sd.intSubLocationId,0)=ISNULL(pld.intSubLocationId,0) AND ISNULL(sd.intStorageLocationId,0)=ISNULL(pld.intStorageLocationId,0) 
+	AND sd.intItemId=pld.intItemId) AS dblReservedQty,
+	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
+	-1,
+	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	ISNULL(sd.intSubLocationId,0)=ISNULL(pld.intSubLocationId,0) AND ISNULL(sd.intStorageLocationId,0)=ISNULL(pld.intStorageLocationId,0) 
+	AND sd.intItemId=pld.intItemId) As dblAvailableUnit,
+	um.strUnitMeasure,1,'Picking',
+	ti.intConsumptionMethodId
+	From tblMFPickListDetail pld 
+	Join tblICItem i on pld.intItemId=i.intItemId
+	Left Join tblICStorageLocation sl on pld.intStorageLocationId=sl.intStorageLocationId
+	Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Left Join @tblInputItem ti on pld.intItemId=ti.intItemId
+	Where pld.intPickListId=@intPickListId AND ISNULL(pld.intLotId,0)=0
+	ORDER BY a.strItemNo,a.strLotNumber DESC
 End
 
 If @intKitStatusId=12
@@ -702,5 +728,28 @@ Begin
 	Where ti.intConsumptionMethodId in (2,3) AND sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=@intInventoryTransactionType 
 	AND ISNULL(sr.ysnPosted,0)=0
 
-	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId ORDER BY a.strItemNo,a.strLotNumber DESC
+	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId 
+	UNION --Non Lot Tracked Items
+	Select pld.intPickListDetailId,pld.intPickListId,-1,'','',0,'',pld.intItemId,i.strItemNo,i.strDescription,@intKitStagingLocationId,@strKitStagingLocationName,
+	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
+	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	ISNULL(sd.intStorageLocationId,0)=ISNULL(@intKitStagingLocationId,0) 
+	AND sd.intItemId=pld.intItemId) AS dblAvailableQty,
+	(Select TOP 1 sd.dblReservedQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	ISNULL(sd.intStorageLocationId,0)=ISNULL(@intKitStagingLocationId,0) 
+	AND sd.intItemId=pld.intItemId) AS dblReservedQty,
+	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
+	-1,
+	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	ISNULL(sd.intStorageLocationId,0)=ISNULL(@intKitStagingLocationId,0) 
+	AND sd.intItemId=pld.intItemId) As dblAvailableUnit,
+	um.strUnitMeasure,1,'Staged',
+	ti.intConsumptionMethodId
+	From tblMFPickListDetail pld 
+	Join tblICItem i on pld.intItemId=i.intItemId
+	Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Left Join @tblInputItem ti on pld.intItemId=ti.intItemId
+	Where pld.intPickListId=@intPickListId AND ISNULL(pld.intLotId,0)=0
+	ORDER BY a.strItemNo,a.strLotNumber DESC	
 End

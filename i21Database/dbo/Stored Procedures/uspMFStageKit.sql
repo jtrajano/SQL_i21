@@ -44,7 +44,7 @@ Declare @dblRecipeQty NUMERIC(38,20)
 		,@intPickUOMId int
 		,@intItemUOMId int
 
-Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
+Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
 Select @intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
 
@@ -119,6 +119,11 @@ pld.dblPickQuantity,pld.intPickUOMId,dblWeight,
 CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.intItemUOMId,pld.intItemIssuedUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICLot l on pld.intLotId=l.intLotId
 Where intPickListId=@intPickListId AND pld.intLotId = pld.intStageLotId --Exclude Lots that are already in Kit Staging Location
+UNION --Non Lot Tracked
+Select pld.intPickListId,pld.intPickListDetailId,0,'',0,pld.intItemId,0,
+pld.dblQuantity,pld.intItemUOMId,0,1,pld.intItemUOMId,pld.intItemUOMId,pld.dblQuantity
+From tblMFPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId 
+Where i.strLotTracking='No'
 
 --Only Active lots are allowed to stage
 SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
@@ -165,7 +170,8 @@ Begin
 	WHERE r.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
-	
+		AND ri.intConsumptionMethodId IN (1,2,3)
+
 	UNION
 	
 	SELECT 
@@ -260,6 +266,14 @@ Begin
 	,@intItemUOMId=intItemUOMId
 	From @tblPickListDetail Where intRowNo=@intMinLot
 
+	--Non Lot Tracked Item
+	If ISNULL(@intLotId,0)=0
+	Begin
+		Exec uspMFKitItemMove @intPickListDetailId,@intKitStagingLocationId,@intUserId
+
+		GOTO NEXT_RECORD
+	End
+
 	If ROUND(@dblPhysicalQty,3) < ROUND(@dblQuantity,3)
 	Begin
 		Select @strUOM=um.strUnitMeasure From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
@@ -299,9 +313,10 @@ Begin
 					@intMergeItemUOMId=@intPickUOMId,
 					@intUserId=@intUserId
 
+	NEXT_RECORD:
 	Update tblMFPickListDetail Set intStageLotId=@intNewLotId,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime
 	Where intPickListDetailId=@intPickListDetailId
-
+	
 	Select @intMinLot=Min(intRowNo) from @tblPickListDetail where intRowNo>@intMinLot
 End
 
@@ -314,15 +329,15 @@ Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' +
 '<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
 '<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
 '<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
-From tblICStockReservation sr 
-Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+From tblICStockReservation sr Join tblICItem i on sr.intItemId=i.intItemId
+Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0 AND i.strLotTracking <> 'No'
 
 Set @strBulkItemXml=@strBulkItemXml+'</root>'
 
 If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
 	Set @strBulkItemXml=''
 
-Exec [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml
+Exec [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml,1,@intKitStagingLocationId
 
 Update tblMFWorkOrder Set intKitStatusId=12,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime Where intPickListId=@intPickListId
 

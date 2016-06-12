@@ -249,6 +249,7 @@ Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId
 where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 and
 ((ri.ysnYearValidationRequired = 1 AND @dtmRecipeValidDate BETWEEN ri.dtmValidFrom AND ri.dtmValidTo)
 OR (ri.ysnYearValidationRequired = 0 AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom) AND DATEPART(dy, ri.dtmValidTo)))
+AND ri.intConsumptionMethodId IN (1,2,3)
 UNION
 Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblQtyToProduce/r.dblQuantity)) AS RequiredQty,1,rs.intItemId
 From tblMFRecipeSubstituteItem rs  

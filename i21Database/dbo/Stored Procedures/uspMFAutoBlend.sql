@@ -238,7 +238,8 @@ WHERE r.intRecipeId = @intRecipeId
 				AND DATEPART(dy, ri.dtmValidTo)
 			)
 		)
-	
+ AND ri.intConsumptionMethodId IN (1,2,3)
+ 	
 UNION
 	
 SELECT @intRecipeId

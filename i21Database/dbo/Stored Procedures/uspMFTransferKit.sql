@@ -34,6 +34,7 @@ Declare @dblMoveQty numeric(38,20)
 Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
 DECLARE @strInActiveLots NVARCHAR(MAX) 
+Declare @intPickListDetailId int
 Declare @strBulkItemXml nvarchar(max)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
@@ -84,7 +85,8 @@ Declare @tblChildLot table
 	intItemIssuedUOMId int,
 	dblWeightPerUnit numeric(38,20),
 	dblPickQuantity numeric(38,20),
-	intPickUOMId int
+	intPickUOMId int,
+	intPickListDetailId int
 )
 
 --Get the Comma Separated Work Order Ids into a table
@@ -134,7 +136,7 @@ Begin Try
 		@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null AS intRecipeItemId,
 		(Select TOP 1 dblWeightPerQty From tblICLot Where intParentLotId=pl.intParentLotId) AS dblWeightPerUnit,@intBlendLocationId,null intStorageLocationId
 		From tblMFPickListDetail pl 
-		Where intPickListId=@intPickListId Group By intParentLotId,intItemId,intItemUOMId,intItemIssuedUOMId
+		Where intPickListId=@intPickListId AND ISNULL(pl.intLotId,0)>0 Group By intParentLotId,intItemId,intItemUOMId,intItemIssuedUOMId
 
 		--Copy Recipe
 		Exec uspMFCopyRecipe @intBlendItemId,@intBlendLocationId,@intUserId,@intWorkOrderId
@@ -142,11 +144,16 @@ Begin Try
 
 	--Get the child Lots attached to Pick List
 	Delete From @tblChildLot
-	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId)
+	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId,intPickListDetailId)
 	Select l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
-	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId
+	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId,pld.intPickListDetailId
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
 	Where pld.intPickListId=@intPickListId
+	UNION --Non Lot Tracked
+	Select 0,'',pld.intItemId,0,pld.intItemUOMId,pld.intItemIssuedUOMId,1,
+	pld.dblQuantity,pld.intPickUOMId,pld.intPickListDetailId
+	From tblMFPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId 
+	Where pld.intPickListId=@intPickListId AND i.strLotTracking='No'
 
 	Select @intMinChildLot=Min(intRowNo) from @tblChildLot
 
@@ -154,8 +161,22 @@ Begin Try
 	Begin
 		Select @dblPickQuantity=NULL,@intPickUOMId=NULL,@intQtyItemUOMId=NULL
 		Select @intLotId=intStageLotId,@strLotNumber=strStageLotNumber,@dblReqQty=dblAvailableQty,@intItemId=intItemId,@dblWeightPerUnit=dblWeightPerUnit,@dblPickQuantity=dblPickQuantity,@intPickUOMId=intPickUOMId
-				,@intQtyItemUOMId=intItemUOMId
+				,@intQtyItemUOMId=intItemUOMId,@intPickListDetailId=intPickListDetailId
 		From @tblChildLot Where intRowNo=@intMinChildLot
+
+		--Non Lot Tracked Item
+		If ISNULL(@intLotId,0)=0
+		Begin
+			Exec uspMFKitItemMove @intPickListDetailId,@intBlendStagingLocationId,@intUserId
+
+			Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,intSubLocationId,intStorageLocationId)
+			Select @intWorkOrderId,NULL,@intItemId,@dblPickQuantity,@intPickUOMId,
+			@dblPickQuantity,@intPickUOMId,null,
+			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null,@intNewSubLocationId,@intBlendStagingLocationId
+
+			GOTO NEXT_RECORD
+		End
 
 		Set @intNewLotId=NULL
 		Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
@@ -196,6 +217,7 @@ Begin Try
 			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
 			From @tblChildLot where intRowNo = @intMinChildLot
 
+		NEXT_RECORD:
 		Select @intMinChildLot=Min(intRowNo) from @tblChildLot where intRowNo>@intMinChildLot
 	End --End Loop Child Lots
 
@@ -208,8 +230,8 @@ Begin Try
 	'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
 	'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
 	'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
-	From tblICStockReservation sr 
-	Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+	From tblICStockReservation sr Join tblICItem i on sr.intItemId=i.intItemId
+	Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0 AND i.strLotTracking <> 'No'
 
 	Set @strBulkItemXml=@strBulkItemXml+'</root>'
 
