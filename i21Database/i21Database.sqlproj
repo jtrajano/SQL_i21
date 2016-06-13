@@ -1987,7 +1987,7 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
     <Build Include="dbo\Tables\tblPRCompanyPreference.sql" />
-    <Build Include="dbo\Views\vyuTRDispacthedLoad.sql" />
+    <Build Include="dbo\Views\vyuTRDispatchedLoad.sql" />
     <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceServiceCharge.sql" />
