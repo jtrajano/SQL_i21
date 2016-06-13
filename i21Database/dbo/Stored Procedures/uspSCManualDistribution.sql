@@ -38,6 +38,7 @@ DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
+DECLARE @intStorageScheduleId AS INT
 
 BEGIN
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
@@ -66,13 +67,13 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(12,4);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId
 FROM @LineItem;
 
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -267,10 +268,10 @@ OPEN intListCursor;
 						,ysnIsStorage
 						,strSourceTransactionId
 				)
-				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL
+				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 			END		   
 			-- Attempt to fetch next row from cursor
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption;
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
 		END;
 
 CLOSE intListCursor;
@@ -290,7 +291,7 @@ WHERE	IR.intInventoryReceiptId = @InventoryReceiptId
 END
 
 	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	IF @strLotTracking = 'No'
+	IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 		END
