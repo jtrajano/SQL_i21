@@ -429,6 +429,7 @@ namespace iRely.Inventory.BusinessLayer
                     Status = STAT_INNER_COL_SKIP,
                     Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
                 });
+                dr.Info = INFO_WARN;
                 return false;
             }
         }
@@ -452,6 +453,7 @@ namespace iRely.Inventory.BusinessLayer
                     Status = STAT_INNER_COL_SKIP,
                     Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
                 });
+                dr.Info = INFO_WARN;
                 return false;
             }
         }
@@ -475,6 +477,7 @@ namespace iRely.Inventory.BusinessLayer
                     Status = STAT_INNER_COL_SKIP,
                     Message = string.Format("Error parsing date for {0}. {1}", caption, ex.Message)
                 });
+                dr.Info = INFO_WARN;
                 return false;
             }
         }
@@ -496,6 +499,7 @@ namespace iRely.Inventory.BusinessLayer
                     Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
                 });
+                dr.Info = required ? INFO_ERROR : INFO_WARN;
                 return false;
             }
         }
@@ -527,6 +531,7 @@ namespace iRely.Inventory.BusinessLayer
                     Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format("{0} is not a valid item in {1}.", value, caption)
                 });
+                dr.Info = required ? INFO_ERROR : INFO_WARN;
                 return false;
             }
             else
@@ -539,6 +544,7 @@ namespace iRely.Inventory.BusinessLayer
                     Status = required ? REC_SKIP : STAT_INNER_COL_SKIP,
                     Message = string.Format(required ? "The value for {0} should not be blank." : "The value for {0} is blank.", caption)
                 });
+                dr.Info = required ? INFO_ERROR : INFO_WARN;
                 return false;
             }
         }

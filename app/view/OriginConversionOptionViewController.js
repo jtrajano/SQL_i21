@@ -230,7 +230,7 @@ function getTemplateColumns(name) {
                 "Height", "Depth", "Width", "Pallet Stack", "Pallet Columns", "Pallet Rows"];
         case "Storage Locations":
             return ["Name", "Description", "Storage Unit Type", "Location", "Sub Location", "Parent Unit", "Restriction Type",
-                "Aisle", "Min Batch Size", "Batch Size UOM", "Commodity", "Pack Factor", "Effective Depth", "Units Per Foot", "Residual Units",
+                "Aisle", "Min Batch Size", "Batch Size", "Batch Size UOM", "Commodity", "Pack Factor", "Effective Depth", "Units Per Foot", "Residual Units",
                 "Sequence", "Active", "X Position", "Y Position", "Z Position", "Allow Consume", "Allow Multiple Items",
                 "Allow Multiple Lots", "Merge on Move", "Cycle Counted", "Default Warehouse Staging Unit"];
         case "Line of Business":

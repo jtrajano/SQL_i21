@@ -109,6 +109,10 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                     type = "warning";
                     msg = "File imported successfully with warnings.";
                 }
+                if(json.result.Info == "error") {
+                    type = "warning";
+                    msg = "File imported successfully with errors.";
+                }
 
                 i21.functions.showCustomDialog(type, 'ok', msg, function() {
                     win.close();
