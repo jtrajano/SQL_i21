@@ -285,6 +285,9 @@ namespace iRely.Inventory.BusinessLayer
                                 dr.Info = INFO_WARN;
                             }
                         break;
+                    case "decimals on dpr":
+                        SetInteger(value, del => fc.intDecimalDPR = del, "Decimals on DPR", dr, header, row);
+                        break;
                 }
             }
 
