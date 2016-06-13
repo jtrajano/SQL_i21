@@ -9,6 +9,7 @@ BEGIN
     Update dbo.tblSTCheckoutPaymentOptions
     SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
     , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
+	, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
     FROM #tempCheckoutInsert chk
     JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
     JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
@@ -17,18 +18,16 @@ BEGIN
     Update dbo.tblSTCheckoutPaymentOptions
     SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
     , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
+	, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
     FROM #tempCheckoutInsert chk
-    --JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
-    --JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
     WHERE intCheckoutId = @intCheckoutId AND chk.MiscellaneousSummaryCode = 4 AND chk.MiscellaneousSummarySubCode IN (5,6)
     AND intPaymentOptionId IN (SELECT intLotteryWinnersMopId FROM dbo.tblSTRegister Where intStoreId = @intStoreId)
        
     Update dbo.tblSTCheckoutPaymentOptions
     SET dblRegisterAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
     , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
+	, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
     FROM #tempCheckoutInsert chk
-    --JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
-    --JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
     WHERE intCheckoutId = @intCheckoutId AND chk.MiscellaneousSummaryCode = 19 AND chk.MiscellaneousSummarySubCodeModifier = 1550
     AND intPaymentOptionId IN (SELECT intPaymentOptionId FROM dbo.tblSTPaymentOption Where intRegisterMop = MiscellaneousSummarySubCodeModifier )
 
