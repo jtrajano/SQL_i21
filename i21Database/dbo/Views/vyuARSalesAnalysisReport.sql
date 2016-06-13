@@ -274,35 +274,6 @@ FROM
 				ON  ARID.intInventoryShipmentItemId = ICIC.intTransactionDetailId 
 				AND ARID.intItemId = ICIC.intItemId 
 				AND ARID.intItemUOMId = ICIC.intItemUOMId
-		--LEFT OUTER JOIN
-		--	(
-		--		SELECT
-		--			 ICIT.dblCost
-		--			,ICIT.intTransactionDetailId
-		--			,ICISI.intItemId
-		--			,ICISI.intItemUOMId
-		--			,SOSOD.intSalesOrderDetailId 
-		--		FROM
-		--			tblSOSalesOrderDetail SOSOD
-		--		INNER JOIN 
-		--			tblICInventoryShipmentItem ICISI
-		--				ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
-		--		INNER JOIN
-		--			tblICInventoryShipment ICIS
-		--				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-		--				AND ICIS.intOrderType = 2
-		--		INNER JOIN
-		--			tblICInventoryTransaction ICIT
-		--				ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-		--				AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-		--				AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-		--				AND ICISI.intItemId = ICIT.intItemId 
-		--				AND ICISI.intItemUOMId = ICIT.intItemUOMId
-		--				AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
-		--	) SOIC
-		--		ON  ARID.intSalesOrderDetailId = SOIC.intSalesOrderDetailId 
-		--		AND ARID.intItemId = SOIC.intItemId 
-		--		AND ARID.intItemUOMId = SOIC.intItemUOMId		
 		WHERE ARI.ysnPosted = 1 
 		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo')							
 
@@ -329,7 +300,13 @@ FROM
 									 END)
 		,dblQtyOrdered				= SOD.dblQtyOrdered
 		,dblQtyShipped				= SOD.dblQtyShipped
-		,dblStandardCost			= ICP.dblStandardCost
+		,dblStandardCost			= (CASE WHEN ISNULL(LOTTEDITEMS.intLineNo, 0) <> 0 
+												THEN LOTTEDITEMS.dblCost
+											WHEN ISNULL(NONLOTTEDITEMS.intLineNo, 0) <> 0 
+												THEN NONLOTTEDITEMS.dblCost
+											ELSE
+												ICP.dblStandardCost
+										END)
 		,dblPrice					= dblPrice
 		,dblTax						= SOD.dblTotalTax
 		,dblLineTotal				= SOD.dblTotal
@@ -352,6 +329,49 @@ FROM
 				tblICItemPricing ICP 
 			ON ICL.intItemLocationId = ICP.intItemLocationId
 		) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
+	LEFT JOIN
+		(
+			SELECT ICISI.intLineNo
+				 , ICISI.intOrderId
+				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ICL.intWeightUOMId, ICIT.intItemUOMId), AVG(dblCost))
+			FROM
+				tblICInventoryShipmentItem ICISI
+			INNER JOIN 
+				tblICInventoryShipment ICIS
+					ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+			INNER JOIN
+				tblICInventoryTransaction ICIT
+					ON ICISI.intInventoryShipmentId			= ICIT.intTransactionId
+					AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
+					AND ICISI.intItemId						= ICIT.intItemId 
+					AND ICIS.strShipmentNumber				= ICIT.strTransactionId
+					AND ICIT.ysnIsUnposted					= 0
+			INNER JOIN
+				tblICLot ICL
+					ON ICIT.intLotId = ICL.intLotId
+					AND ICISI.intItemUOMId = ICL.intItemUOMId		
+			GROUP BY ICISI.intLineNo, ICISI.intOrderId, ICISI.intItemUOMId, ICIT.intItemUOMId, ICL.intWeightUOMId
+		) AS LOTTEDITEMS ON LOTTEDITEMS.intLineNo = SOD.intSalesOrderDetailId AND SOD.intSalesOrderId = LOTTEDITEMS.intOrderId
+	LEFT JOIN
+		(
+			SELECT ICISI.intLineNo
+				 , ICISI.intOrderId
+				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(dblCost))
+			FROM
+				tblICInventoryShipmentItem ICISI
+			INNER JOIN 
+				tblICInventoryShipment ICIS
+					ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+			INNER JOIN
+				tblICInventoryTransaction ICIT
+					ON ICISI.intInventoryShipmentId			= ICIT.intTransactionId
+					AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
+					AND ICISI.intItemId						= ICIT.intItemId
+					AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+					AND ICIS.strShipmentNumber				= ICIT.strTransactionId					
+					AND ICIT.ysnIsUnposted					= 0	
+			GROUP BY ICISI.intLineNo, ICISI.intOrderId, ICISI.intItemUOMId, ICIT.intItemUOMId
+		) AS NONLOTTEDITEMS ON NONLOTTEDITEMS.intLineNo = SOD.intSalesOrderDetailId AND SOD.intSalesOrderId = NONLOTTEDITEMS.intOrderId
 	LEFT JOIN 
 		vyuARGetItemAccount IA 
 			ON SOD.intItemId = IA.intItemId AND SO.intCompanyLocationId = IA.intLocationId
