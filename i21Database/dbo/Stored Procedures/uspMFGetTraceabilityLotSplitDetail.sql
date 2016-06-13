@@ -48,7 +48,7 @@ Begin
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where l.intLotId = (Select intSplitFromLotId From tblICLot Where intLotId=@intLotId)
+		Where l.intLotId = (Select intSplitFromLotId From tblICLot Where intLotId=@intLotId) AND l.strLotNumber <> @strLotNumber
 
 	If @ysnParentLot=1
 		Select 'Split' AS strTransactionName,pl.intParentLotId,pl.strParentLotNumber,pl.strParentLotAlias,l.intItemId,i.strItemNo,i.strDescription,
@@ -61,5 +61,5 @@ Begin
 		Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
-		Where l.intLotId = (Select intSplitFromLotId From tblICLot Where intLotId=@intLotId)
+		Where l.intLotId = (Select intSplitFromLotId From tblICLot Where intLotId=@intLotId) AND l.strLotNumber <> @strLotNumber
 End
