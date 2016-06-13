@@ -65,11 +65,15 @@ SELECT   L.intLoadId
 								     FROM tblQMSample S
 									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 									 AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
+		,LCWU.strUnitMeasure AS strWeightUnitMeasure
+		,LCIU.strUnitMeasure AS strUnitMeasure
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
+LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = LC.intWeightUnitMeasureId
+LEFT JOIN tblICUnitMeasure LCIU ON LCIU.intUnitMeasureId = LC.intUnitMeasureId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
