@@ -60,9 +60,12 @@ FROM
 		,[dblUnitQty]				=	tblReceived.itemUnitQty
 		,[intCurrencyId]			=	tblReceived.intCurrencyId
 		,[strCurrency]				=	tblReceived.strCurrency
+		,[intCostCurrencyId]		=	tblReceived.intCostCurrencyId		 
+		,[strCostCurrency]			=	tblReceived.strCostCurrency
 		,[strVendorLocation]		=	tblReceived.strVendorLocation
 		,[str1099Form]				=	D2.str1099Form			 
 		,[str1099Type]				=	D2.str1099Type
+	
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -95,10 +98,16 @@ FROM
 				,ISNULL(ItemWeightUOM.dblUnitQty,1) AS weightUnitQty
 				,ISNULL(ItemCostUOM.dblUnitQty,1) AS costUnitQty
 				,ISNULL(ItemUOM.dblUnitQty,1) AS itemUnitQty
-				,CASE WHEN B1.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
-					  ELSE ISNULL(A1.intCurrencyId,0) END AS intCurrencyId
-				,CASE WHEN B1.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
-					  ELSE H.strCurrency END AS strCurrency 
+				,ISNULL(A1.intCurrencyId,0) AS intCurrencyId
+				,H.strCurrency AS strCurrency
+				,CASE WHEN B1.ysnSubCurrency > 0 
+				      THEN ISNULL(SubCurrency.intCurrencyID,0)
+					  ELSE ISNULL(A1.intCurrencyId,0) 
+				 END AS intCostCurrencyId 
+				,CASE WHEN B1.ysnSubCurrency > 0 
+					  THEN SubCurrency.strCurrency
+					  ELSE H.strCurrency 
+				 END AS strCostCurrency					   
 				,EL.strLocationName AS strVendorLocation
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
@@ -215,6 +224,8 @@ FROM
 	,[dblUnitQty]				=	1
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,0)
 	,[strCurrency]				=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+	,[intCostCurrencyId]		=	ISNULL(A.intCurrencyId,0)
+	,[strCostCurrency]			=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 	,[strVendorLocation]		=	EL.strLocationName
 	,[str1099Form]				=	D2.str1099Form			 
 	,[str1099Type]				=	D2.str1099Type
@@ -291,14 +302,14 @@ FROM
 	,[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,1)
 	,[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1)
 	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
-	,[intCurrencyId]			=	A.intCurrencyId
-									/*CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
-										 ELSE ISNULL(A.intCurrencyId,0) 
-									END*/	
+	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))
 	,[strCurrency]				=   H1.strCurrency
-									/*CASE WHEN B.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
+	,[intCostCurrencyId]		=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
+										 ELSE ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) 
+									END	
+	,[strCostCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
 									ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
-									END*/
+									END
 	,[strVendorLocation]		=	EL.strLocationName
 	,[str1099Form]				=	D2.str1099Form			 
 	,[str1099Type]				=	D2.str1099Type
@@ -392,12 +403,14 @@ FROM
 		,[dblWeightUnitQty]							=	1
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
-		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
-															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
+		,[intCurrencyId]							=	ISNULL(A.intCurrencyId,0)
+		,[strCurrency]								=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+		,[intCostCurrencyId]						=	CASE WHEN A.ysnSubCurrency > 0 
+															 THEN (SELECT ISNULL(intMainCurrencyId,A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
 															 ELSE  ISNULL(A.intCurrencyId,0)
 														END			
-		,[strCurrency]								=	CASE WHEN A.ysnSubCurrency > 0 
-															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
+		,[strCostCurrency]							=	CASE WHEN A.ysnSubCurrency > 0 
+															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT ISNULL(intMainCurrencyId, A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
 															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 														END	
 		,[strVendorLocation]						=	NULL
@@ -482,6 +495,8 @@ FROM
 		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
 		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)
 		,[strCurrency]								=	A.strCurrency
+		,[intCostCurrencyId]						=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)		
+		,[strCostCurrency]							=	A.strCurrency
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
@@ -550,11 +565,13 @@ FROM
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))
-														END			
+														END		
 		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
 															 ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))))
 														END	
+		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))	
+		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))))
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
