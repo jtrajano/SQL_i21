@@ -236,6 +236,7 @@ INSERT INTO @EntriesForInvoice
 	,[strSCBudgetDescription]
 	,[intInventoryShipmentItemId]
 	,[strShipmentNumber]
+	,[intRecipeItemId] 
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[intContractHeaderId]
@@ -331,6 +332,7 @@ SELECT
 	,[strSCBudgetDescription]				= NULL
 	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId] 
 	,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
+	,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
 	,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 
 	,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
 	,[intContractHeaderId]					= ARSI.[intContractHeaderId] 

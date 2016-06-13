@@ -93,11 +93,6 @@ End
 
 	Exec uspMFUpdateBlendProductionDetail @strXml=@strXml
 
-	If (Select strLotTracking From tblICItem Where intItemId=@intItemId)='No' 
-	Begin
-		Exec [uspMFPostConsumption] 1,1,@intWorkOrderId,@intUserId,NULL,@strRetBatchId OUT
-	End
-	Else
 	Begin
 		Set @strConsumeXml='<root>'
 		Set @strConsumeXml=@strConsumeXml + '<intWorkOrderId>' + convert(varchar,@intWorkOrderId) + '</intWorkOrderId>'

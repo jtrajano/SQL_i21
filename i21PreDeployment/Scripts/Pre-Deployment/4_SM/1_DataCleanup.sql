@@ -54,7 +54,7 @@ GO
 			ELSE CASE parent.strMenuName WHEN ''Maintenance'' THEN ''small-menu-maintenance'' ELSE ''small-menu-report'' END END END
 			FROM tblSMMasterMenu child
 			JOIN tblSMMasterMenu parent ON child.intParentMenuID = parent.intMenuID
-			WHERE parent.strMenuName IN (''Activity'', ''Activities'', ''Maintenance'', ''Reports'')
+			WHERE parent.strMenuName IN (''Activity'', ''Activities'', ''Maintenance'')--, ''Reports'')
 
 			PRINT N''DELETE ALL ACTIVITIES, MAINTENANCE AND REPORTS FOLDER''
 	

@@ -44,6 +44,7 @@ End
 If @ysnReservationByParentLot=0
 Begin
 If (Select COUNT(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)>0
+Begin
 	INSERT INTO @ItemsToReserve (
 			intItemId
 			,intItemLocationId
@@ -70,6 +71,34 @@ If (Select COUNT(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWork
 			JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
 			JOIN tblICLot l ON l.intLotId = wcl.intLotId
 	WHERE	wcl.intWorkOrderId = @intWorkOrderId
+
+	--Non Lot Tracked Item
+	INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+	)
+	SELECT	intItemId = wcl.intItemId
+			,intItemLocationId = (Select TOP 1 intItemLocationId From tblICItemLocation Where intItemId=wcl.intItemId AND intLocationId=@intLocationId)
+			,intItemUOMId = wcl.intItemUOMId
+			,intLotId = wcl.intLotId
+			,intSubLocationId = wcl.intSubLocationId
+			,intStorageLocationId = wcl.intStorageLocationId
+			,dblQty = wcl.dblQuantity
+			,intTransactionId = wcl.intWorkOrderId
+			,strTransactionId = w.strWorkOrderNo
+			,intTransactionTypeId = @intInventoryTransactionType
+	FROM	tblMFWorkOrderConsumedLot wcl
+			JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
+	WHERE	wcl.intWorkOrderId = @intWorkOrderId AND ISNULL(wcl.intLotId,0)=0
+End
 Else
 	INSERT INTO @ItemsToReserve (
 			intItemId

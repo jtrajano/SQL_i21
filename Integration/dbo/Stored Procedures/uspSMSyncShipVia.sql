@@ -106,20 +106,20 @@ IF(@ToOrigin = 1)
 			--,[sscar_user_id]
 			,[sscar_user_rev_dt])
 		SELECT
-			 P.[strShipViaOriginKey]						AS [sscar_key]
-			,SUBSTRING(P.[strShipVia], 1, 20)				AS [sscar_name]
-			,SUBSTRING(P.[strAddress], 1, 30)				AS [sscar_addr]
-			,SUBSTRING(P.[strCity], 1, 20)					AS [sscar_city]
-			,SUBSTRING(P.[strState], 1, 2)					AS [sscar_state]
-			,SUBSTRING(P.[strZipCode], 1, 9)				AS [sscar_zip]
-			,SUBSTRING(P.[strFederalId], 1, 15)				AS [sscar_fed_id]
-			--,P.[strTransportationMode]					AS [sscar_trans_mode]
-			,''N''											AS [sscar_in_sf401_yn]
-			,SUBSTRING(P.[strTransporterLicense], 1, 15)	AS [sscar_trans_lic_no]
-			,SUBSTRING(P.[strMotorCarrierIFTA], 1, 15)		AS [sscar_ifta_no]
-			,''N''											AS [sscar_mi_c3859_yn]
-			,''N''											AS [sscar_il_rpt_yn]
-			,''N''											AS [sscar_oh_cc22_yn]
+			 P.[strShipViaOriginKey]								AS [sscar_key]
+			,SUBSTRING(P.[strShipVia], 1, 20)						AS [sscar_name]
+			,SUBSTRING(EntityLocation.[strAddress], 1, 30)			AS [sscar_addr]
+			,SUBSTRING(EntityLocation.[strCity], 1, 20)				AS [sscar_city]
+			,SUBSTRING(EntityLocation.[strState], 1, 2)				AS [sscar_state]
+			,SUBSTRING(EntityLocation.[strZipCode], 1, 9)			AS [sscar_zip]
+			,SUBSTRING(P.strFederalId, 1, 15)				AS [sscar_fed_id]
+			--,P.[strTransportationMode]							AS [sscar_trans_mode]
+			,''N''													AS [sscar_in_sf401_yn]
+			,SUBSTRING(P.[strTransporterLicense], 1, 15)			AS [sscar_trans_lic_no]
+			,SUBSTRING(P.[strMotorCarrierIFTA], 1, 15)				AS [sscar_ifta_no]
+			,''N''													AS [sscar_mi_c3859_yn]
+			,''N''													AS [sscar_il_rpt_yn]
+			,''N''													AS [sscar_oh_cc22_yn]
 			,(CASE WHEN P.[ysnCompanyOwnedCarrier] = 1
 				THEN ''Y''
 				ELSE ''N''
@@ -128,6 +128,8 @@ IF(@ToOrigin = 1)
 			,P.[intSort]					AS [sscar_user_rev_dt]
 		FROM
 			tblSMShipVia P
+		Join tblEMEntityLocation EntityLocation
+			on P.intEntityShipViaId = EntityLocation.intEntityId and ysnDefaultLocation = 1
 		INNER JOIN
 			@RecordsToAdd A
 				ON P.[strShipViaOriginKey] = A.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS 			
@@ -145,10 +147,10 @@ IF(@ToOrigin = 1)
 		SET 
 			[sscar_key]				= P.[strShipViaOriginKey]
 			,[sscar_name]			= SUBSTRING(P.[strShipVia], 1, 20)
-			,[sscar_addr]			= SUBSTRING(P.[strAddress], 1, 30)
-			,[sscar_city]			= SUBSTRING(P.[strCity], 1, 20)
-			,[sscar_state]			= SUBSTRING(P.[strState], 1, 2)
-			,[sscar_zip]			= SUBSTRING(P.[strZipCode], 1, 9)
+			,[sscar_addr]			= SUBSTRING(EntityLocation.[strAddress], 1, 30)
+			,[sscar_city]			= SUBSTRING(EntityLocation.[strCity], 1, 20)
+			,[sscar_state]			= SUBSTRING(EntityLocation.[strState], 1, 2)
+			,[sscar_zip]			= SUBSTRING(EntityLocation.[strZipCode], 1, 9)
 			,[sscar_fed_id]			= SUBSTRING(P.[strFederalId], 1, 15)
 			,[sscar_trans_mode]		= [sscar_trans_mode]
 			,[sscar_in_sf401_yn]	= [sscar_in_sf401_yn]
@@ -166,6 +168,8 @@ IF(@ToOrigin = 1)
 			,[sscar_user_rev_dt]	= [sscar_user_rev_dt]		
 		FROM
 			tblSMShipVia P
+			Join tblEMEntityLocation EntityLocation
+				on P.intEntityShipViaId = EntityLocation.intEntityId  and ysnDefaultLocation = 1
 		INNER JOIN
 			@RecordsToUpdate A
 				ON P.[strShipViaOriginKey] = A.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS 				
@@ -176,12 +180,16 @@ IF(@ToOrigin = 1)
 	END
 ELSE
 	BEGIN
-	
+		DECLARE @EntityId			int
+		Declare @EntityContactId	int
+		DECLARE @EntityLocationId	int
+		
+
 		DECLARE @MaxIntSort int
 		SELECT @MaxIntSort = MAX([intSort]) FROM [tblSMShipVia]
 		IF @MaxIntSort IS NULL
 			SET @MaxIntSort = 0
-
+	
 		INSERT INTO [tblSMShipVia]
 			([strShipViaOriginKey]
 			,[strShipVia]
@@ -269,6 +277,101 @@ ELSE
 		SET @UpdatedCount = @@ROWCOUNT			 
 
 
+
+
+
+		DECLARE @CurKey nvarchar(10)
+		WHILE EXISTS (SELECT TOP 1 1 FROM @RecordsToAdd)
+		BEGIN 
+			SELECT TOP 1 @CurKey = strShipViaOriginKey FROM @RecordsToAdd
+
+
+			if not exists(select top 1 1 from tblEMEntity where strEntityNo = @CurKey)
+			begin
+				INSERT INTO tblEMEntity(strName,strEntityNo, strContactNumber)
+				SELECT TOP 1  
+					strName,
+					@CurKey,
+					''''
+					from tblSMShipVia where strShipViaOriginKey = @CurKey
+				set @EntityId = @@IDENTITY
+
+				INSERT INTO tblEMEntity(strName, strContactNumber)
+				SELECT TOP 1 
+					strName,
+					''''
+					from tblSMShipVia where strShipViaOriginKey = @CurKey
+				set @EntityContactId = @@IDENTITY
+
+
+				INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, ysnDefaultLocation)
+				SELECT TOP 1  
+					@EntityId,
+					strName + ''Loc'',
+					strAddress,
+					strZipCode,
+					strCity,
+					strState,
+					1
+					from tblSMShipVia where strShipViaOriginKey = @CurKey
+				set @EntityLocationId = @@IDENTITY
+			
+				insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
+				select @EntityId, @EntityContactId, 0, 1, 1
+
+				insert into tblEMEntityType(intEntityId, intConcurrencyId, strType)
+				select @EntityId, 1, ''Ship Via''
+			end
+			
+
+
+			DELETE FROM @RecordsToAdd where strShipViaOriginKey = @CurKey
+		END
+
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM @RecordsToUpdate)
+		BEGIN
+
+			SELECT TOP 1 @CurKey = strShipViaOriginKey FROM @RecordsToUpdate
+			if not exists(select top 1 1 from tblEMEntity where strEntityNo = @CurKey)
+			begin
+				INSERT INTO tblEMEntity(strName,strEntityNo, strContactNumber)
+				SELECT TOP 1  
+					strName,
+					@CurKey,
+					''''
+					from tblSMShipVia where strShipViaOriginKey = @CurKey
+				set @EntityId = @@IDENTITY
+
+				INSERT INTO tblEMEntity(strName, strContactNumber)
+				SELECT TOP 1 
+					strName,
+					''''
+					from tblSMShipVia where strShipViaOriginKey = @CurKey
+				set @EntityContactId = @@IDENTITY
+
+
+				INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, strAddress, strZipCode, strCity, strState, ysnDefaultLocation)
+				SELECT TOP 1  
+					@EntityId,
+					strName + ''Loc'',
+					strAddress,
+					strZipCode,
+					strCity,
+					strState,
+					1
+					from tblSMShipVia where strShipViaOriginKey = @CurKey
+				set @EntityLocationId = @@IDENTITY
+			
+				insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
+				select @EntityId, @EntityContactId, 0, 1, 1
+
+				insert into tblEMEntityType(intEntityId, intConcurrencyId, strType)
+				select @EntityId, 1, ''Ship Via''
+			end
+
+			DELETE FROM @RecordsToUpdate where strShipViaOriginKey = @CurKey
+		END
 	END
 
 

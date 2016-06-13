@@ -39,15 +39,17 @@ BEGIN
 	SELECT 2,'Wet Weight',1	
 END
 GO
-
-GO
-IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink')
+IF EXISTS(SELECT 1 FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink')
 BEGIN
-	INSERT INTO tblGRShrinkCalculationOption
-	SELECT 3,'Price Shrink',1	
+	DELETE tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink'	
 END
 GO
-
+IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Gross Weight')
+BEGIN
+	INSERT INTO tblGRShrinkCalculationOption
+	SELECT 3,'Gross Weight',1	
+END
+GO
 IF EXISTS(SELECT intUnitMeasureId FROM tblSCScaleSetup)
 BEGIN
 	declare @intUnitMeasureId int

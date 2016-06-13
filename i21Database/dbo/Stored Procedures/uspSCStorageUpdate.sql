@@ -641,16 +641,11 @@ BEGIN TRY
 			[intConcurrencyId]= 1       
            ,[dblGradeReading]= SD.[dblGradeReading]
            ,[strCalcMethod]= SD.[strCalcMethod]
-           ,[strShrinkWhat]= 
-			CASE 
-			 WHEN SD.[strShrinkWhat]='N' THEN 'Net Weight' 
-			 WHEN SD.[strShrinkWhat]='W' THEN 'Wet Weight' 
-			 WHEN SD.[strShrinkWhat]='G' THEN 'Gross Weight' 
-			END
+           ,[strShrinkWhat]= SD.[strShrinkWhat]			
            ,[dblShrinkPercent]= SD.[dblShrinkPercent]
            ,[dblDiscountAmount]= SD.[dblDiscountAmount]
            ,[dblDiscountDue]= SD.[dblDiscountAmount]
-           ,[dblDiscountPaid]= SD.[dblDiscountPaid]
+           ,[dblDiscountPaid]= ISNULL(SD.[dblDiscountPaid],0)
            ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
            ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
            ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
@@ -662,9 +657,13 @@ BEGIN TRY
 		FROM	dbo.[tblQMTicketDiscount] SD
 		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
 		
-		Update tblGRCustomerStorage 
-		SET  dblDiscountsDue=(SELECT SUM(dblDiscountDue)FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage')
-		WHERE intCustomerStorageId=@intCustomerStorageId
+		UPDATE CS
+		SET  CS.dblDiscountsDue=QM.dblDiscountsDue
+			,CS.dblDiscountsPaid=QM.dblDiscountsPaid
+		FROM tblGRCustomerStorage CS
+		JOIN (SELECT intTicketFileId,SUM(dblDiscountDue) dblDiscountsDue ,SUM(dblDiscountPaid)dblDiscountsPaid FROM dbo.[tblQMTicketDiscount] WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage' GROUP BY intTicketFileId)QM
+		ON CS.intCustomerStorageId=QM.intTicketFileId     
+
 
 	END
 	

@@ -8,13 +8,10 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @intLocationId INT
 DECLARE @intItemId INT
-Declare @strLotTracking nvarchar(50)
 
 SELECT @intLocationId = intLocationId, @intItemId=intItemId
 FROM tblMFWorkOrder
 WHERE intWorkOrderId = @intWorkOrderId
-
-Select @strLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
 DECLARE @tblReservedQty TABLE (
 	intLotId INT
@@ -85,7 +82,6 @@ LEFT JOIN dbo.tblWHSKU S ON S.intContainerId = C.intContainerId
 WHERE WC.intWorkOrderId = @intWorkOrderId
 GROUP BY WC.intLotId
 
-If @strLotTracking = 'No'
 SELECT wcl.intWorkOrderConsumedLotId
 	,wcl.intWorkOrderId
 	,0 AS intLotId
@@ -114,8 +110,10 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,0 AS intParentLotId
 	,'' strParentLotNumber
 	,0.0 AS dblStagedQty
+	,'' AS strLotStatus
 	,CSL.strSubLocationName
 	,CL.strLocationName
+	,i.strLotTracking
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICItem i ON wcl.intItemId = i.intItemId
@@ -128,8 +126,8 @@ LEFT JOIN tblICStorageLocation sl ON wcl.intStorageLocationId = sl.intStorageLoc
 LEFT JOIN tblSMCompanyLocationSubLocation CSL ON wcl.intSubLocationId=CSL.intCompanyLocationSubLocationId
 JOIN tblSMCompanyLocation CL ON W.intLocationId=CL.intCompanyLocationId
 --LEFT JOIN @tblReservedQty rq ON l.intLotId = rq.intLotId
-WHERE wcl.intWorkOrderId = @intWorkOrderId
-Else
+WHERE wcl.intWorkOrderId = @intWorkOrderId AND i.strLotTracking='No'
+UNION
 SELECT wcl.intWorkOrderConsumedLotId
 	,wcl.intWorkOrderId
 	,l.intLotId
@@ -206,6 +204,9 @@ SELECT wcl.intWorkOrderConsumedLotId
 			END
 		) dblStagedQty,
 		ls.strSecondaryStatus AS strLotStatus
+		,CSL.strSubLocationName
+		,CL.strLocationName
+		,i.strLotTracking
 FROM tblMFWorkOrderConsumedLot wcl
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = wcl.intWorkOrderId
 JOIN tblICLot l ON wcl.intLotId = l.intLotId
@@ -219,4 +220,6 @@ LEFT JOIN tblICStorageLocation sl ON l.intStorageLocationId = sl.intStorageLocat
 LEFT JOIN tblICParentLot pl ON l.intParentLotId = pl.intParentLotId
 LEFT JOIN @tblReservedQty rq ON l.intLotId = rq.intLotId
 LEFT JOIN tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
+LEFT JOIN tblSMCompanyLocationSubLocation CSL ON wcl.intSubLocationId=CSL.intCompanyLocationSubLocationId
+JOIN tblSMCompanyLocation CL ON W.intLocationId=CL.intCompanyLocationId
 WHERE wcl.intWorkOrderId = @intWorkOrderId

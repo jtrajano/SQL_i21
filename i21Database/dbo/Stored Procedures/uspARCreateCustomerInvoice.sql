@@ -68,6 +68,7 @@
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemRecipeItemId				INT				= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
@@ -519,6 +520,7 @@ BEGIN TRY
 		,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 		,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 		,@ItemShipmentNumber			= @ItemShipmentNumber
+		,@ItemRecipeItemId				= @ItemRecipeItemId		
 		,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 		,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 		,@ItemContractHeaderId			= @ItemContractHeaderId

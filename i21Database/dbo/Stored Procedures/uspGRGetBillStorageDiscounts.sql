@@ -102,17 +102,17 @@ BEGIN TRY
 	 ,c.strLocationName 
 	 ,a.strStorageTicketNumber  
 	 ,a.dblOpenBalance
-	 ,(a.dblStorageDue-a.dblStoragePaid) dblUnpaid   
+	 ,(ISNULL(a.dblStorageDue,0)-ISNULL(a.dblStoragePaid,0)) dblUnpaid   
 	 ,a.intStorageTypeId  
 	 ,b.strStorageTypeDescription
 	 ,a.intStorageScheduleId
 	 ,SR.strScheduleId
 	 ,a.dtmDeliveryDate
 	 ,a.dtmLastStorageAccrueDate
-	 ,a.dblStorageDue dblOldStorageDue
-	 ,bill.dblAdditionalCharge
-	 ,(a.dblStorageDue-a.dblStoragePaid)+bill.dblAdditionalCharge AS dblNewStorageDue
-	 ,a.dblStoragePaid dblOldStorageBilled
+	 ,ISNULL(a.dblStorageDue,0) dblOldStorageDue
+	 ,ISNULL(bill.dblAdditionalCharge,0) dblAdditionalCharge
+	 ,(ISNULL(a.dblStorageDue,0)-ISNULL(a.dblStoragePaid,0))+ISNULL(bill.dblAdditionalCharge,0) AS dblNewStorageDue
+	 ,ISNULL(a.dblStoragePaid,0) dblOldStorageBilled
 	 ,CASE WHEN @PostType='Bill Storage' THEN (a.dblStoragePaid+bill.dblAdditionalCharge) ELSE a.dblStoragePaid END  AS dblNewStorageBilled
 	 ,a.dblOpenBalance* CASE WHEN @PostType='Bill Storage' THEN bill.dblAdditionalCharge ELSE 0 END  AS dblStorageDueAmount
 	FROM tblGRCustomerStorage a  
@@ -123,6 +123,7 @@ BEGIN TRY
 	JOIN tblICItem Item ON Item.intItemId = a.intItemId
 	JOIN @BillStorageDiscounts bill ON bill.intCustomerStorageId=a.intCustomerStorageId
 	WHERE a.intEntityId= CASE WHEN @PortalEntityId>0 THEN @PortalEntityId ELSE a.intEntityId END
+	AND (ISNULL(a.dblStorageDue,0)-ISNULL(a.dblStoragePaid,0))+ISNULL(bill.dblAdditionalCharge,0) > 0
 	ORDER BY E.strName,c.strLocationName
 	
 END TRY

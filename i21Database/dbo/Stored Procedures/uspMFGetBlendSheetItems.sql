@@ -66,6 +66,7 @@ Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId
 Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure u on iu.intUnitMeasureId=u.intUnitMeasureId
 Left Join tblICStorageLocation sl on ri.intStorageLocationId=sl.intStorageLocationId
+Join tblICItem i on ri.intItemId=i.intItemId AND i.strType <> 'Other Charge'
 where r.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 and
 ((ri.ysnYearValidationRequired = 1 AND @dtmDate BETWEEN ri.dtmValidFrom AND ri.dtmValidTo)
 OR (ri.ysnYearValidationRequired = 0 AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom) AND DATEPART(dy, ri.dtmValidTo)))
@@ -96,6 +97,7 @@ Select ri.intItemId,Sum(l.dblWeight) AS dblPhysicalQty,
 CASE When  ISNULL(MAX(l.dblWeightPerQty),1)=0 then 1 Else  ISNULL(MAX(l.dblWeightPerQty),1) End AS dblWeightPerUnit
 From tblICLot l 
 Join tblMFRecipeItem ri on ri.intItemId=l.intItemId 
+Join tblICItem i on ri.intItemId=i.intItemId AND i.strType <> 'Other Charge'
 where ri.intRecipeId=@intRecipeId and l.intLocationId=@intLocationId
 group by ri.intItemId
 
@@ -118,6 +120,7 @@ Insert into @tblReservedQty
 Select ri.intItemId,Sum(sr.dblQty) AS dblReservedQty 
 From tblICStockReservation sr 
 Join tblMFRecipeItem ri on ri.intItemId=sr.intItemId 
+Join tblICItem i on ri.intItemId=i.intItemId AND i.strType <> 'Other Charge'
 where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 AND ISNULL(sr.ysnPosted,0)=0
 group by ri.intItemId
 

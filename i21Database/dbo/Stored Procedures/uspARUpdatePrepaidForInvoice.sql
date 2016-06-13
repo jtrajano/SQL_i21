@@ -35,9 +35,15 @@ BEGIN TRY
 		tblARPrepaidAndCredit
 	WHERE
 		tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId
-		AND (NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intPrepaymentId] = tblARPrepaidAndCredit.[intPrepaymentId])
-			OR
-			NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intPrepaymentDetailId] = tblARPrepaidAndCredit.[intPrepaymentDetailId]))
+		
+	UPDATE
+		tblARInvoice
+	SET
+		[dblPayment] = @ZeroDecimal
+	WHERE
+		[intInvoiceId] = @InvoiceId 
+		
+	EXEC [dbo].uspARReComputeInvoiceAmounts @InvoiceId = @InvoiceId
 END TRY
 BEGIN CATCH	
 	SET @ErrorSeverity = ERROR_SEVERITY()
@@ -47,38 +53,38 @@ BEGIN CATCH
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
 END CATCH		
 		
-BEGIN TRY	
-	UPDATE
-		tblARPrepaidAndCredit
-	SET
-		 tblARPrepaidAndCredit.[intInvoiceId]					= ARPAC.[intInvoiceId]
-		,tblARPrepaidAndCredit.[intInvoiceDetailId]				= ARPAC.[intInvoiceDetailId]
-		,tblARPrepaidAndCredit.[intPrepaymentId]				= ARPAC.[intPrepaymentId]
-		,tblARPrepaidAndCredit.[intPrepaymentDetailId]			= ARPAC.[intPrepaymentDetailId]
-		,tblARPrepaidAndCredit.[dblPostedAmount]				= @ZeroDecimal
-		,tblARPrepaidAndCredit.[dblPostedDetailAmount]			= @ZeroDecimal
-		,tblARPrepaidAndCredit.[dblAppliedInvoiceAmount]		= @ZeroDecimal
-		,tblARPrepaidAndCredit.[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
-		,tblARPrepaidAndCredit.[ysnApplied]						= 0
-		,tblARPrepaidAndCredit.[ysnPosted]						= 0
-		,tblARPrepaidAndCredit.[intConcurrencyId]				= tblARPrepaidAndCredit.[intConcurrencyId] + 1
-	FROM
-		vyuARPrepaidAndCredit ARPAC
-	INNER JOIN
-		tblARInvoice ARI
-		ON ARPAC.[intInvoiceId] = ARI.[intInvoiceId] 
-		AND ARI.ysnPosted = 0
-	WHERE
-		tblARPrepaidAndCredit.[intPrepaidAndCreditId] = ARPAC.[intPrepaidAndCreditId]
-		AND tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId
-END TRY
-BEGIN CATCH	
-	SET @ErrorSeverity = ERROR_SEVERITY()
-	SET @ErrorNumber   = ERROR_NUMBER()
-	SET @ErrorMessage  = ERROR_MESSAGE()
-	SET @ErrorState    = ERROR_STATE()	
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
-END CATCH
+--BEGIN TRY	
+--	UPDATE
+--		tblARPrepaidAndCredit
+--	SET
+--		 tblARPrepaidAndCredit.[intInvoiceId]					= ARPAC.[intInvoiceId]
+--		,tblARPrepaidAndCredit.[intInvoiceDetailId]				= ARPAC.[intInvoiceDetailId]
+--		,tblARPrepaidAndCredit.[intPrepaymentId]				= ARPAC.[intPrepaymentId]
+--		,tblARPrepaidAndCredit.[intPrepaymentDetailId]			= ARPAC.[intPrepaymentDetailId]
+--		,tblARPrepaidAndCredit.[dblPostedAmount]				= @ZeroDecimal
+--		,tblARPrepaidAndCredit.[dblPostedDetailAmount]			= @ZeroDecimal
+--		,tblARPrepaidAndCredit.[dblAppliedInvoiceAmount]		= @ZeroDecimal
+--		,tblARPrepaidAndCredit.[dblAppliedInvoiceDetailAmount]	= @ZeroDecimal
+--		,tblARPrepaidAndCredit.[ysnApplied]						= 0
+--		,tblARPrepaidAndCredit.[ysnPosted]						= 0
+--		,tblARPrepaidAndCredit.[intConcurrencyId]				= tblARPrepaidAndCredit.[intConcurrencyId] + 1
+--	FROM
+--		vyuARPrepaidAndCredit ARPAC
+--	INNER JOIN
+--		tblARInvoice ARI
+--		ON ARPAC.[intInvoiceId] = ARI.[intInvoiceId] 
+--		AND ARI.ysnPosted = 0
+--	WHERE
+--		tblARPrepaidAndCredit.[intPrepaidAndCreditId] = ARPAC.[intPrepaidAndCreditId]
+--		AND tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId
+--END TRY
+--BEGIN CATCH	
+--	SET @ErrorSeverity = ERROR_SEVERITY()
+--	SET @ErrorNumber   = ERROR_NUMBER()
+--	SET @ErrorMessage  = ERROR_MESSAGE()
+--	SET @ErrorState    = ERROR_STATE()	
+--	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
+--END CATCH
 
 
 

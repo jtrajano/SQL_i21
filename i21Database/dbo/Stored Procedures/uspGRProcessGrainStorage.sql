@@ -29,6 +29,7 @@ BEGIN TRY
 	DECLARE @EntityId INT
 	DECLARE @LocationId INT
 	DECLARE @ItemId INT
+	DECLARE @TicketItemNo NVARCHAR(100)
 	DECLARE @dblOpenBalance DECIMAL(24, 10)
 	DECLARE @dblNewStorageDue DECIMAL(24, 10)
 		
@@ -37,7 +38,7 @@ BEGIN TRY
 	DECLARE @intCurrencyId INT
 	DECLARE @intDefaultCurrencyId INT
 	DECLARE @intTermId INT
-	DECLARE @ItemDescription NVARCHAR(100)
+	DECLARE @StorageChargeItemDescription NVARCHAR(100)
 	DECLARE @intCommodityStockUOMId INT
 	DECLARE @intItemUOMId INT
 	DECLARE @IntCommodityId INT
@@ -186,6 +187,7 @@ BEGIN TRY
 			SET @EntityId = NULL
 			SET @LocationId = NULL
 			SET @ItemId = NULL
+			SET @TicketItemNo = NULL
 			SET @dblOpenBalance = NULL
 			SET @dblNewStorageDue = NULL
 			SET @IntCommodityId=NULL
@@ -203,22 +205,25 @@ BEGIN TRY
 			WHERE intBillDiscountKey = @BillInvoiceKey
 			
 			SELECT @IntCommodityId=intCommodityId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
-			
+
+			SELECT @TicketItemNo=strItemNo FROM tblICItem WHERE intItemId=@ItemId
+
 			SELECT TOP 1 @intStorageChargeItemId=intItemId FROM tblICItem 
 			WHERE strType='Other Charge' AND strCostType='Storage Charge' AND intCommodityId = @IntCommodityId
 			
 			IF @intStorageChargeItemId IS NULL
 			BEGIN
 				SELECT TOP 1 @intStorageChargeItemId=intItemId FROM tblICItem 
-				WHERE strType='Other Charge' AND strCostType='Storage Charge'
+				WHERE strType='Other Charge' AND strCostType='Storage Charge' AND intCommodityId IS NULL
 			END
 			
 			IF @intStorageChargeItemId IS NULL 
 			BEGIN
-				RAISERROR('Invoice cannot be created because there is no Other Charge Item having Storage Charge as CostType.', 16, 1);
+				SET @ErrMsg = 'Invoice cannot be created because of Item '''+ @TicketItemNo +''' has no Storage Charge CostType item.'
+				RAISERROR(@ErrMsg,16, 1);
 			END	
 			
-			SELECT @ItemDescription=strDescription FROM tblICItem Where intItemId=@intStorageChargeItemId
+			SELECT @StorageChargeItemDescription=strDescription FROM tblICItem Where intItemId=@intStorageChargeItemId
 			
 			SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey), @UserKey)
 			
@@ -361,7 +366,7 @@ BEGIN TRY
 					,[intInvoiceDetailId] = NULL
 					,[intItemId] = @intStorageChargeItemId
 					,[ysnInventory] = 1
-					,[strItemDescription] = @ItemDescription
+					,[strItemDescription] = @StorageChargeItemDescription
 					,[intOrderUOMId]= @intItemUOMId
 					,[intItemUOMId] = @intItemUOMId
 					,[dblQtyOrdered] = BD.dblOpenBalance
@@ -442,8 +447,8 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					RAISERROR(@ErrorMessage, 16, 1);
 					ROLLBACK TRANSACTION
+					RAISERROR(@ErrorMessage, 16, 1);					
 				END			
 			
 				Update @BillDiscounts 

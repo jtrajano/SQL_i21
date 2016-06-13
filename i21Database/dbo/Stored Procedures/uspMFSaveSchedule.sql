@@ -1,4 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspMFSaveSchedule] (@strXML NVARCHAR(MAX),@intScheduleId INT OUTPUT,@intConcurrencyId int OUTPUT)
+﻿CREATE PROCEDURE [dbo].[uspMFSaveSchedule] (
+	@strXML NVARCHAR(MAX)
+	,@intScheduleId INT OUTPUT
+	,@intConcurrencyId INT OUTPUT
+	)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -53,19 +57,22 @@ BEGIN TRY
 		IF @strScheduleNo IS NULL
 			--EXEC dbo.uspSMGetStartingNumber 63
 			--	,@strScheduleNo OUTPUT
-			Declare @intSubLocationId int
-			Select @intSubLocationId=intSubLocationId from dbo.tblMFManufacturingCell  Where intManufacturingCellId = @intManufacturingCellId
+			DECLARE @intSubLocationId INT
 
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-							,@intItemId = NULL
-							,@intManufacturingId = @intManufacturingCellId
-							,@intSubLocationId = @intSubLocationId
-							,@intLocationId = @intLocationId
-							,@intOrderTypeId = NULL
-							,@intBlendRequirementId = NULL
-							,@intPatternCode = 63
-							,@ysnProposed = 0
-							,@strPatternString = @strScheduleNo OUTPUT
+		SELECT @intSubLocationId = intSubLocationId
+		FROM dbo.tblMFManufacturingCell
+		WHERE intManufacturingCellId = @intManufacturingCellId
+
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+			,@intItemId = NULL
+			,@intManufacturingId = @intManufacturingCellId
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 63
+			,@ysnProposed = 0
+			,@strPatternString = @strScheduleNo OUTPUT
 
 		INSERT INTO dbo.tblMFSchedule (
 			strScheduleNo
@@ -98,10 +105,18 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-
-		IF (SELECT intConcurrencyId FROM dbo.tblMFSchedule WHERE intScheduleId = @intScheduleId) <> @intConcurrencyId
+		IF (
+				SELECT intConcurrencyId
+				FROM dbo.tblMFSchedule
+				WHERE intScheduleId = @intScheduleId
+				) <> @intConcurrencyId
 		BEGIN
-			RAISERROR(51194,11,1)
+			RAISERROR (
+					51194
+					,11
+					,1
+					)
+
 			RETURN
 		END
 
@@ -113,9 +128,13 @@ BEGIN TRY
 		WHERE intScheduleId = @intScheduleId
 	END
 
-	SELECT @intConcurrencyId=intConcurrencyId from dbo.tblMFSchedule Where intScheduleId = @intScheduleId
+	SELECT @intConcurrencyId = intConcurrencyId
+	FROM dbo.tblMFSchedule
+	WHERE intScheduleId = @intScheduleId
 
-	DELETE FROM dbo.tblMFScheduleWorkOrder WHERE intScheduleId =@intScheduleId 
+	DELETE
+	FROM dbo.tblMFScheduleWorkOrder
+	WHERE intScheduleId = @intScheduleId
 
 	INSERT INTO dbo.tblMFScheduleWorkOrder (
 		intScheduleId
@@ -147,7 +166,9 @@ BEGIN TRY
 		,x.intWorkOrderId
 		,x.intStatusId
 		,x.intDuration
-		,ROW_NUMBER() OVER (ORDER BY x.intExecutionOrder) as intExecutionOrder
+		,ROW_NUMBER() OVER (
+			ORDER BY x.intExecutionOrder
+			) AS intExecutionOrder
 		,x.intChangeoverDuration
 		,x.intSetupDuration
 		,x.dtmChangeoverStartDate
@@ -172,7 +193,7 @@ BEGIN TRY
 			,intWorkOrderId INT
 			,intDuration INT
 			,intExecutionOrder INT
-			,intStatusId int
+			,intStatusId INT
 			,intChangeoverDuration INT
 			,intSetupDuration INT
 			,dtmChangeoverStartDate DATETIME
@@ -193,34 +214,50 @@ BEGIN TRY
 			,dtmLastModified DATETIME
 			,intLastModifiedUserId INT
 			) x
-	Where x.intStatusId<>1
+	WHERE x.intStatusId <> 1
 
-	IF @ysnStandard=1
+	IF @ysnStandard = 1
 	BEGIN
-		UPDATE dbo.tblMFWorkOrder 
-		SET intStatusId =(CASE WHEN @intManufacturingCellId =x.intManufacturingCellId THEN (Case When tblMFWorkOrder.intStatusId in (10,13) Then tblMFWorkOrder.intStatusId Else x.intStatusId End) ELSE 1 END)
-			,dblQuantity =x.dblQuantity
-			,intManufacturingCellId =x.intManufacturingCellId
-			,intPlannedShiftId =x.intPlannedShiftId
-			,dtmPlannedDate =x.dtmPlannedStartDate
-			,intExecutionOrder =x.intExecutionOrder 
-			,dtmEarliestDate=x.dtmEarliestDate
-			,dtmLatestDate=x.dtmLatestDate
-			,dtmExpectedDate =x.dtmExpectedDate
+		UPDATE dbo.tblMFWorkOrder
+		SET intStatusId = (
+				CASE 
+					WHEN @intManufacturingCellId = x.intManufacturingCellId
+						THEN (
+								CASE 
+									WHEN tblMFWorkOrder.intStatusId IN (
+											10
+											,13
+											)
+										THEN tblMFWorkOrder.intStatusId
+									ELSE x.intStatusId
+									END
+								)
+					ELSE 1
+					END
+				)
+			,dblQuantity = x.dblQuantity
+			,intManufacturingCellId = x.intManufacturingCellId
+			,intPlannedShiftId = x.intPlannedShiftId
+			,dtmPlannedDate = x.dtmPlannedStartDate
+			,intExecutionOrder = x.intExecutionOrder
+			,dtmEarliestDate = x.dtmEarliestDate
+			,dtmLatestDate = x.dtmLatestDate
+			,dtmExpectedDate = x.dtmExpectedDate
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 				intWorkOrderId INT
-				,intStatusId int
-				,dblQuantity numeric(18,6)
-				,intManufacturingCellId int
-				,intPlannedShiftId int
-				,dtmPlannedStartDate datetime
-				,intExecutionOrder int
-				,dtmEarliestDate datetime
-				,dtmLatestDate datetime
-				,dtmExpectedDate datetime
-				) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
+				,intStatusId INT
+				,dblQuantity NUMERIC(18, 6)
+				,intManufacturingCellId INT
+				,intPlannedShiftId INT
+				,dtmPlannedStartDate DATETIME
+				,intExecutionOrder INT
+				,dtmEarliestDate DATETIME
+				,dtmLatestDate DATETIME
+				,dtmExpectedDate DATETIME
+				) x
+		WHERE x.intWorkOrderId = tblMFWorkOrder.intWorkOrderId
 	END
-	
+
 	INSERT INTO dbo.tblMFScheduleWorkOrderDetail (
 		intScheduleWorkOrderId
 		,intWorkOrderId
@@ -259,8 +296,8 @@ BEGIN TRY
 			,dblPlannedQty NUMERIC(18, 6)
 			,intSequenceNo INT
 			,intCalendarDetailId INT
-			) x 
-	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId 
+			) x
+	JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
 	WHERE W.intScheduleId = @intScheduleId
 
 	INSERT INTO dbo.tblMFScheduleMachineDetail (
@@ -288,8 +325,8 @@ BEGIN TRY
 			intWorkOrderId INT
 			,intCalendarMachineId INT
 			,intCalendarDetailId INT
-			) x 
-	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+			) x
+	JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
 	WHERE W.intScheduleId = @intScheduleId
 
 	INSERT INTO dbo.tblMFScheduleConstraintDetail (
@@ -321,17 +358,25 @@ BEGIN TRY
 			,dtmChangeoverStartDate DATETIME
 			,dtmChangeoverEndDate DATETIME
 			,intDuration INT
-			) x 
-	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+			) x
+	JOIN dbo.tblMFScheduleWorkOrder W ON x.intWorkOrderId = W.intWorkOrderId
 	WHERE W.intScheduleId = @intScheduleId
 
-	INSERT INTO dbo.tblMFScheduleConstraint(intScheduleId,intScheduleRuleId)
-	SELECT @intScheduleId,intScheduleRuleId
+	DELETE
+	FROM tblMFScheduleConstraint
+	WHERE intScheduleId = @intScheduleId
+
+	INSERT INTO dbo.tblMFScheduleConstraint (
+		intScheduleId
+		,intScheduleRuleId
+		)
+	SELECT @intScheduleId
+		,intScheduleRuleId
 	FROM OPENXML(@idoc, 'root/ScheduleRules/ScheduleRule', 2) WITH (
 			intScheduleRuleId INT
-			,ysnSelect bit
+			,ysnSelect BIT
 			)
-	WHERE ysnSelect=1
+	WHERE ysnSelect = 1
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

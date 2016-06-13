@@ -36,7 +36,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	OUTPUT inserted.intBillDetailId INTO @detailCreated
 	SELECT
 		[intBillId]						=	@billId							,
-		[intAccountId]					=	ISNULL(C2.intAccountId,D.intGLAccountExpenseId),
+		[intAccountId]					=	ISNULL(A.intAccountId ,ISNULL(C2.intAccountId,D.intGLAccountExpenseId)),
 		[intItemId]						=	C.[intItemId]					,
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
 		[dblTotal]						=	(ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) 

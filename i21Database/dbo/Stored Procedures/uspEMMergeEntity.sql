@@ -42,6 +42,10 @@ BEGIN
 	declare @avoidtable table(
 		strTable nvarchar(100)
 	)
+	declare @getAllColumn bit
+	declare @avoidColumn table(
+		strColumn nvarchar(100)
+	)
 	declare @parentAvoidTable table(
 		strTable nvarchar(100)
 	)
@@ -76,6 +80,8 @@ BEGIN
 			--delete from @avoidtable
 			--set @getAll = 1
 
+			delete from @avoidColumn
+			set @getAllColumn = 1
 			if @curtype = 'Customer' or @curtype = 'Prospect'
 			begin
 				set @CurTableName = 'tblARCustomer'
@@ -91,6 +97,16 @@ BEGIN
 				select 'tblARCustomerRackQuoteHeader'
 				set @getAll = 0
 
+				if @PrimaryType = 'Vendor'
+				begin
+					INSERT INTO @EntityRelationShips(stment)
+					VALUES('update tblARCustomer set strCustomerNumber = (select top 1 strVendorId from tblAPVendor where intEntityVendorId = ' + @PrimaryKeyString + ' ) where intEntityCustomerId = ' + @PrimaryKeyString )
+
+					insert into @avoidColumn(strColumn)
+					values('strCustomerNumber')
+					set @getAllColumn = 0
+				end
+				
 			end
 			else if @curtype = 'Vendor'
 			begin
@@ -99,6 +115,16 @@ BEGIN
 
 				INSERT INTO @EntityRelationShips(stment)
 				VALUES('DELETE FROM tblAPImportedVendors where strVendorId in (select strVendorId from tblAPVendor where intEntityVendorId = ' + @CurMergeId + ' )')
+
+				
+				if @PrimaryType = 'Customer'
+				begin
+					INSERT INTO @EntityRelationShips(stment)
+					VALUES('update tblAPVendor set strVendorId = (select top 1 strCustomerNumber from tblARCustomer where intEntityCustomerId = ' + @PrimaryKeyString + ' ) where intEntityVendorId = ' + @PrimaryKeyString )
+					insert into @avoidColumn(strColumn)
+					values('strVendorId')
+					set @getAllColumn = 0
+				end
 			end
 			else if @curtype = 'Salesperson'
 			begin
@@ -203,7 +229,7 @@ BEGIN
 				JOIN sys.types y ON y.user_type_id = c.user_type_id 		
 				where c.object_id = object_id(@CurTableName) and c.name <> @CurTableKey
 				AND y.name in ('numeric', 'nvarchar', 'varchar', 'int')
-
+				AND (@getAllColumn = 1 or c.name not in (select strColumn from @avoidColumn)) 
 		--
 		insert into @EntityRelationShips
 		SELECT
@@ -296,3 +322,4 @@ GoHere:
 
 	drop table #tmpMerge
 END
+

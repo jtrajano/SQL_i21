@@ -63,7 +63,7 @@ SET ANSI_WARNINGS OFF
 		END
 		
 		SELECT @dblContractQty = ISNULL(dblDeliveredQuantity,0) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
-		SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) FROM tblLGLoadDetailContainerLink
+		SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) FROM tblLGLoadDetailContainerLink WHERE intLoadContainerId = @intContainerId
 
 		IF (@dblContractQty + @dblQty) < 0
 		BEGIN		

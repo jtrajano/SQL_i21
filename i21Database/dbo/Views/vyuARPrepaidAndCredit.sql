@@ -59,12 +59,7 @@ SELECT
 										  ), 0.000000)
 	,[dblAppliedInvoiceAmount]			= 0.000000
 	,[dblAppliedInvoiceDetailAmount]	= 0.000000
-	,[dblInvoiceBalance]				= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
-														ELSE 0.000000
-													END
-										  ), 0.000000)
+	,[dblInvoiceBalance]				= ARI.[dblInvoiceTotal]
 										  -
 										  ISNULL((
 												SELECT
@@ -78,12 +73,7 @@ SELECT
 												WHERE
 													PAC.[intPrepaymentId] = ARI.[intInvoiceId]
 										  ), 0.000000)
-	,[dblInvoiceDetailBalance]			= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
-														ELSE 0.000000
-													END
-										  ), 0.000000)
+	,[dblInvoiceDetailBalance]			= ARID.[dblTotal]
 										  -
 										  ISNULL((
 												SELECT
@@ -183,12 +173,7 @@ SELECT
 										  ), 0.000000)
 	,[dblAppliedInvoiceAmount]			= ARPAC.[dblAppliedInvoiceAmount]
 	,[dblAppliedInvoiceDetailAmount]	= ARPAC.[dblAppliedInvoiceDetailAmount]
-	,[dblInvoiceBalance]				= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
-														ELSE 0.000000
-													END
-										  ), 0.000000)
+	,[dblInvoiceBalance]				= ARI.[dblInvoiceTotal]
 										  -
 										  ISNULL((
 												SELECT
@@ -202,12 +187,7 @@ SELECT
 												WHERE
 													PAC.[intPrepaymentId] = ARPAC.[intPrepaymentId]
 										  ), 0.000000)
-	,[dblInvoiceDetailBalance]			= ISNULL((	CASE WHEN ARID.[intPrepayTypeId] = 1 THEN ARI.[dblInvoiceTotal]
-														WHEN ARID.[intPrepayTypeId] =  2 THEN ARID.[dblTotal]
-														WHEN ARID.[intPrepayTypeId] =  3 THEN ARID.[dblTotal] * (ISNULL(ARID.[dblPrepayRate],1.000000)/100.000000)
-														ELSE 0.000000
-													END
-										  ), 0.000000)
+	,[dblInvoiceDetailBalance]			= ARID.[dblTotal]
 										  -
 										  ISNULL((
 												SELECT

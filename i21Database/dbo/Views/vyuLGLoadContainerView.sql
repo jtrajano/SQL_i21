@@ -1,28 +1,15 @@
-﻿CREATE VIEW [dbo].[vyuLGLoadContainerView]
+﻿CREATE VIEW [dbo].vyuLGLoadContainerView
 AS
-SELECT  L.intLoadId
-		,LDV.intLoadDetailId
-		,LC.intLoadContainerId
-		,LDCL.intLoadDetailContainerLinkId
+SELECT   L.intLoadId
 		,L.strLoadNumber
 		,L.strBLNumber
 		,L.dtmBLDate
 		,L.dtmScheduledDate
-		,LDV.strCustomerFax
-		,LDV.strCustomerMobile
-		,LDV.strCustomerNo
-		,LDV.strCustomerPhone
-		,LDV.strCustomerReference
-		,LDV.strDispatcher
-		,LDV.strDriver
-		,LDV.strEquipmentType
-		,LDV.strExternalLoadNumber
-		,LDV.strHauler
-		,LDV.strItemDescription
-		,LDV.strItemNo
-		,LDV.strItemUOM
-		,LDV.strLoadDirectionMsg
-		,LDV.strLotTracking
+		,L.strExternalLoadNumber
+		,LD.intLoadDetailId
+		,LD.strCustomerReference
+		,LD.strLoadDirectionMsg
+		,LC.intLoadContainerId
 		,LC.strComments
 		,LC.strContainerNumber
 		,LC.strCustomsComments
@@ -48,14 +35,8 @@ SELECT  L.intLoadId
 		,LC.ysnFDAHold
 		,CONVERT(BIT,ISNULL(LC.ysnRejected,0)) AS ysnRejected
 		,LC.ysnUSDAHold
-		,PCDV.strContractNumber AS strPContractNumber
-		,PCDV.intContractSeq AS intPContractSeq
-		,SCDV.strContractNumber AS strSContractNumber
-		,SCDV.intContractSeq AS	intSContractSeq
-		,strSampleStatus = (SELECT TOP 1 SS.strStatus
-								     FROM tblQMSample S
-									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-									 AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
+
+		,LDCL.intLoadDetailContainerLinkId
 		,LDCL.strIntegrationNumber
 		,LDCL.dtmIntegrationRequested
 		,LDCL.strIntegrationOrderNumber
@@ -63,9 +44,42 @@ SELECT  L.intLoadId
 		,LDCL.dblIntegrationOrderPrice
 		,CONVERT(BIT,ISNULL(LDCL.ysnExported,0)) AS ysnExported
 
-FROM vyuLGLoadView L
-JOIN vyuLGLoadDetailView LDV ON L.intLoadId = LDV.intLoadId
-JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
+		,Item.strDescription AS strItemDescription
+		,Item.strItemNo
+		,Item.strLotTracking
+
+		,strCustomerFax = CEN.strFax
+		,strCustomerMobile = CEN.strMobile
+		,strCustomerNo = CEN.strEntityNo
+		,strCustomerPhone = CEN.strPhone
+		,strDispatcher = US.strUserName 
+        ,strDriver = Driver.strName
+        ,strEquipmentType = EQ.strEquipmentType
+        ,strHauler = Hauler.strName
+		,strItemUOM = UOM.strUnitMeasure
+		,PHeader.strContractNumber AS strPContractNumber
+		,PDetail.intContractSeq AS intPContractSeq
+		,SHeader.strContractNumber AS strSContractNumber
+		,SDetail.intContractSeq AS	intSContractSeq
+		,strSampleStatus = (SELECT TOP 1 SS.strStatus
+								     FROM tblQMSample S
+									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+									 AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
+
+FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
-LEFT JOIN vyuCTContractDetailView PCDV ON PCDV.intContractDetailId = LDV.intPContractDetailId
-LEFT JOIN vyuCTContractDetailView SCDV ON SCDV.intContractDetailId = LDV.intSContractDetailId
+LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPContractDetailId
+LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
+LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId
+LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
+LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
+LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
+LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
+LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= L.intDispatcherId

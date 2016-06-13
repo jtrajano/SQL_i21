@@ -58,6 +58,8 @@ BEGIN TRY
 	DECLARE @intWorkOrderId INT
 	DECLARE @dblBulkItemAvailableQty NUMERIC(38,20)
 	DECLARE @dblRecipeQty NUMERIC(38,20)
+	DECLARE @strLotTracking NVARCHAR(50)
+	DECLARE @intItemUOMId INT
 
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
@@ -166,6 +168,8 @@ BEGIN TRY
 		,intConsumptionMethodId INT
 		,intConsumptionStoragelocationId INT
 		,intParentItemId int
+		,strLotTracking NVARCHAR(50)
+		,intItemUOMId int
 		)
 
 	IF OBJECT_ID('tempdb..#tblBlendSheetLot') IS NOT NULL
@@ -229,6 +233,17 @@ BEGIN TRY
 		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
 	)
 
+	DECLARE @tblPickedItem TABLE(
+		 intRowNo INT IDENTITY
+		,intItemStockUOMId INT
+		,intItemId INT
+		,dblQty NUMERIC(38,20)
+		,intItemUOMId INT
+		,intLocationId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
+	)
+
 	Declare @tblLotStatus AS Table
 	(
 		strStatusName nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -263,6 +278,8 @@ BEGIN TRY
 				,intConsumptionMethodId
 				,intConsumptionStoragelocationId
 				,intParentItemId
+				,strLotTracking
+				,intItemUOMId
 				)
 			SELECT r.intRecipeId
 				,ri.intRecipeItemId
@@ -273,10 +290,13 @@ BEGIN TRY
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
+				,i.strLotTracking
+				,ri.intItemUOMId
 			FROM tblMFWorkOrderRecipeItem ri
 			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
+			JOIN tblICItem i on ri.intItemId=i.intItemId
 			WHERE r.intWorkOrderId=@intWorkOrderId
-				AND ri.intRecipeItemTypeId = 1
+				AND ri.intRecipeItemTypeId = 1 AND ri.intConsumptionMethodId IN (1,2,3)
 	
 			UNION
 	
@@ -289,9 +309,12 @@ BEGIN TRY
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,ri.intItemId
+				,i.strLotTracking
+				,ri.intItemUOMId
 			FROM tblMFWorkOrderRecipeSubstituteItem rs
 			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
 			JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+			JOIN tblICItem i on rs.intSubstituteItemId=i.intItemId
 			WHERE r.intWorkOrderId = @intWorkOrderId
 				AND rs.intRecipeItemTypeId = 1
 			ORDER BY ysnIsSubstitute, ysnMinorIngredient
@@ -310,6 +333,8 @@ BEGIN TRY
 				,intConsumptionMethodId
 				,intConsumptionStoragelocationId
 				,intParentItemId
+				,strLotTracking
+				,intItemUOMId
 				)
 			SELECT @intRecipeId
 				,ri.intRecipeItemId
@@ -320,8 +345,11 @@ BEGIN TRY
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
+				,i.strLotTracking
+				,ri.intItemUOMId
 			FROM tblMFRecipeItem ri
 			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			JOIN tblICItem i on ri.intItemId=i.intItemId
 			WHERE r.intRecipeId = @intRecipeId
 				AND ri.intRecipeItemTypeId = 1
 				AND (
@@ -336,6 +364,7 @@ BEGIN TRY
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
+				AND ri.intConsumptionMethodId IN (1,2,3)
 	
 			UNION
 	
@@ -348,9 +377,12 @@ BEGIN TRY
 				,1
 				,0
 				,ri.intItemId
+				,i.strLotTracking
+				,ri.intItemUOMId
 			FROM tblMFRecipeSubstituteItem rs
 			JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
 			JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+			JOIN tblICItem i on ri.intItemId=i.intItemId
 			WHERE r.intRecipeId = @intRecipeId
 				AND rs.intRecipeItemTypeId = 1
 			ORDER BY ysnIsSubstitute,ysnMinorIngredient
@@ -478,6 +510,8 @@ BEGIN TRY
 				,@intConsumptionMethodId = intConsumptionMethodId
 				,@intConsumptionStoragelocationId = intConsumptionStoragelocationId
 				,@ysnIsSubstitute=ysnIsSubstitute
+				,@strLotTracking=strLotTracking
+				,@intItemUOMId=intItemUOMId
 			FROM @tblInputItem
 			WHERE intRowNo = @intMinRowNo
 
@@ -512,7 +546,8 @@ BEGIN TRY
 				DROP TABLE #tblLot
 
 			CREATE TABLE #tblLot (
-				intLotId INT
+				 intRowNo INT IDENTITY
+				,intLotId INT
 				,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intItemId INT
 				,dblQty NUMERIC(38,20)
@@ -607,6 +642,64 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				)
+
+			--Non Lot Tracked
+			If @strLotTracking='No'
+			Begin
+				INSERT INTO #tblLot (
+					 intLotId
+					,strLotNumber
+					,intItemId
+					,dblQty
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,dtmCreateDate
+					,dtmExpiryDate
+					,dblUnitCost
+					,dblWeightPerQty
+					,strCreatedBy
+					,intParentLotId
+					,intItemUOMId
+					,intItemIssuedUOMId
+					)
+					Select sd.intItemStockUOMId,'',sd.intItemId,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intItemUOMId,sd.dblAvailableQty),
+					sd.intLocationId,sd.intSubLocationId,sd.intStorageLocationId,NULL,NULL,0,sd.dblUnitQty,'',0,sd.intItemUOMId,sd.intItemUOMId 
+					From vyuMFGetItemStockDetail sd 
+					Where sd.intItemId=@intRawItemId AND sd.dblAvailableQty > .01 AND sd.intLocationId=@intLocationId 
+					AND ISNULL(sd.intStorageLocationId,0) NOT IN (@intKitStagingLocationId,@intBlendStagingLocationId)
+					AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId
+
+					Declare @intMinItem INT
+					Select @intMinItem=MIN(intRowNo) From #tblLot
+					While @intMinItem is not null
+					Begin
+						Select @dblAvailableQty=dblQty From #tblLot Where intRowNo=@intMinItem
+
+						If @dblAvailableQty >= @dblRequiredQty 
+						Begin
+							INSERT INTO @tblPickedItem(intItemStockUOMId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId)
+							Select intLotId,@intRawItemId,@dblRequiredQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId From #tblLot Where intRowNo=@intMinItem
+
+							GOTO NEXT_ITEM
+						End
+						Else
+						Begin
+							INSERT INTO @tblPickedItem(intItemStockUOMId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId)
+							Select intLotId,@intRawItemId,@dblAvailableQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId From #tblLot Where intRowNo=@intMinItem
+
+							Set @dblRequiredQty = @dblRequiredQty - @dblAvailableQty
+						End
+
+						Select @intMinItem = MIN(intRowNo) From #tblLot Where intRowNo>@intMinItem
+					End
+
+					If ISNULL(@dblRequiredQty,0)>0
+						INSERT INTO @tblPickedItem(intItemStockUOMId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId)
+						Select -1,@intRawItemId,0,@intItemUOMId,@intLocationId,null,null
+
+					GOTO NEXT_ITEM
+			End
 
 			--Get the Lots
 			INSERT INTO #tblLot (
@@ -1340,6 +1433,8 @@ BEGIN TRY
 			IF (@intIssuedUOMTypeId <> @intOriginalIssuedUOMTypeId)
 				SET @intIssuedUOMTypeId = @intOriginalIssuedUOMTypeId
 
+			NEXT_ITEM:
+
 			SELECT @intMinRowNo = MIN(intRowNo)
 			FROM @tblInputItem
 			WHERE intRowNo > @intMinRowNo
@@ -1437,6 +1532,16 @@ BEGIN TRY
 		WHERE BS.dblQuantity > 0
 		UNION
 		Select * From @tblRemainingPickedLots
+		UNION
+		Select pl.intItemStockUOMId,-1,'',i.strItemNo,i.strDescription,pl.dblQty,pl.intItemUOMId,um.strUnitMeasure,
+		pl.dblQty,pl.intItemUOMId,um.strUnitMeasure,i.intItemId,@intRecipeItemId,0,0,0,1,0,pl.intStorageLocationId,sl.strName,
+		cl.strLocationName,pl.intLocationId,csl.strSubLocationName,'',0,'Added'
+		From @tblPickedItem pl Join tblICItem i on pl.intItemId=i.intItemId
+		Join tblICItemUOM iu on pl.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Left Join tblICStorageLocation sl on pl.intStorageLocationId=sl.intStorageLocationId
+		Left Join tblSMCompanyLocationSubLocation csl on csl.intCompanyLocationSubLocationId=pl.intSubLocationId
+		Join tblSMCompanyLocation cl on pl.intLocationId=cl.intCompanyLocationId 
 	ELSE IF @ysnShowAvailableLotsByStorageLocation = 1
 		SELECT PL.intParentLotId AS intWorkOrderInputLotId
 			,PL.intParentLotId AS intLotId

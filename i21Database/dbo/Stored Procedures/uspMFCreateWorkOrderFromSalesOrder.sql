@@ -42,7 +42,6 @@ Declare @intNoOfSheetCounter int=0
 Declare @intNoOfSheetOrig int
 Declare @strWorkOrderNoOrig nVarchar(50)
 Declare @ysnRequireCustomerApproval bit
-Declare @strLotTracking nvarchar(50)
 Declare @intMinWO int
 Declare @intCategoryId int
 Declare @strItemNo nvarchar(50)
@@ -122,25 +121,19 @@ Begin
 	End
 
 	Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
-	Select @strLotTracking=strLotTracking,@intCategoryId=intCategoryId From tblICItem Where intItemId=@intItemId
 
 	Select @ysnRequireCustomerApproval=ysnRequireCustomerApproval 
 	From tblICItem Where intItemId=@intItemId
 
-	if @strLotTracking='No'
-		Set @intWorkOrderStatusId=9 --Released
+	If @ysnBlendSheetRequired=1
+		Set @intWorkOrderStatusId=2 --Not Released
 	Else
-	Begin
-		If @ysnBlendSheetRequired=1
-			Set @intWorkOrderStatusId=2 --Not Released
-		Else
-			Begin
-				If @ysnRequireCustomerApproval = 1
-					Set @intWorkOrderStatusId=5 --Hold
-				Else
-					Set @intWorkOrderStatusId=9 --Released
-			End
-	End
+		Begin
+			If @ysnRequireCustomerApproval = 1
+				Set @intWorkOrderStatusId=5 --Hold
+			Else
+				Set @intWorkOrderStatusId=9 --Released
+		End
 
 	Select @intUOMId=intUnitMeasureId From tblICItemUOM Where intItemUOMId=@intItemUOMId And intItemId=@intItemId
 
@@ -149,22 +142,10 @@ Begin
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 	and at.strAttributeName='Enable Kitting'
 
-	if @strLotTracking='No'
-	Begin
-		Set @intKitStatusId=null
-		Set @ysnKittingEnabled=0
-	End
+	If @ysnKittingEnabled=1
+		Set @intKitStatusId=6
 	Else
-	Begin
-		If @ysnKittingEnabled=1
-			Set @intKitStatusId=6
-		Else
-			Set @intKitStatusId=null
-	End
-
-	--Get Demand No
-	--EXEC dbo.uspSMGetStartingNumber 46
-	--	,@strDemandNo OUTPUT
+		Set @intKitStatusId=null
 
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 				,@intItemId = @intItemId

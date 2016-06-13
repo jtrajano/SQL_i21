@@ -3581,6 +3581,7 @@
     <Build Include="dbo\Tables\tblLGLoadContainerCost.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTTransferSequence.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTTransferSequenceAttribute.sql" />
     <Build Include="dbo\Tables\tblHDOpportunitySource.sql" />
     <Build Include="dbo\Views\vyuTMEquipmentUsageAnalysisWithoutTotal.sql" />
     <Build Include="dbo\Views\vyuTMSalesAnalysisReport.sql" />
@@ -3949,6 +3950,20 @@
     <Build Include="dbo\Stored Procedures\uspDMMergeSCTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeTables.sql" />
     <Build Include="dbo\Functions\fnMFGetInvoiceChargesByShipment.sql" />
+    <Build Include="dbo\Views\vyuETSalespersonDriver.sql" />
+    <Build Include="dbo\Tables\tblEMEntityPasswordHistory.sql" />
+    <Build Include="dbo\Views\vyuETCustomerSpecialPricing_1.sql" />
+    <Build Include="dbo\Tables\tblARPOSPayment.sql" />
+    <Build Include="dbo\Tables\tblARPOSLog.sql" />
+    <Build Include="dbo\Tables\tblARPOSDetail.sql" />
+    <Build Include="dbo\Tables\tblARPOS.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessPOSToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetReceiptNumber.sql" />
+    <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailViewSearch.sql" />
+    <Build Include="dbo\Views\vyuLGLoadVesselViewSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGTransferContractLoads.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFKitItemMove.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4058,6 +4073,7 @@
     <None Include="Scripts\Post-Deployment\EM\025_UpdatePhoneNumberAndCreateBackup.sql" />
     <None Include="Scripts\Post-Deployment\EM\026_ImportPhoneNumbersToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
+    <None Include="Scripts\Post-Deployment\EM\030-FixSalesperson.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

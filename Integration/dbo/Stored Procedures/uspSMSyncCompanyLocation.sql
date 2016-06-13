@@ -232,15 +232,20 @@ BEGIN
      SELECT   
       CL.[strLocationNumber]   --[agloc_loc_no] 
       ,CL.[strLocationName]   --[agloc_name]  
-      ,SUBSTRING(LTRIM(RTRIM(SUBSTRING(strAddress, 0, CHARINDEX(CHAR(10), strAddress)))), 1, 30)      --[agloc_addr]  
-      ,(CASE WHEN CHARINDEX(CHAR(10), strAddress) > 0
-		THEN SUBSTRING(LTRIM(RTRIM(strAddress)), CHARINDEX(CHAR(10), strAddress), 30) 
-        ELSE ''''  
-       END)      --[agloc_addr2]  
+      ,SUBSTRING(CL.[strAddress],1,30)--[agloc_addr] 
+	  ,CASE WHEN LEN(CL.[strAddress]) > 30 		--[agloc_addr2]  
+			THEN SUBSTRING(CL.[strAddress],31,30)
+			ELSE ''''
+		END
+  --    ,SUBSTRING(LTRIM(RTRIM(SUBSTRING(strAddress, 0, CHARINDEX(CHAR(10), strAddress)))), 1, 30)      --[agloc_addr]  
+  --    ,(CASE WHEN CHARINDEX(CHAR(10), strAddress) > 0
+		--THEN SUBSTRING(LTRIM(RTRIM(strAddress)), CHARINDEX(CHAR(10), strAddress), 30) 
+  --      ELSE ''''  
+  --     END)      --[agloc_addr2]  
       ,CL.[strCity]     --[agloc_city]  
       ,CL.[strStateProvince]   --[agloc_state]  
       ,CL.[strZipPostalCode]   --[agloc_zip]  
-      ,SUBSTRING(C.[strCountryCode], 0, 4)    --[agloc_country]  
+      ,CAST(C.[intCountryID] AS CHAR)    --[agloc_country]  
       ,CL.[strPhone]     --[agloc_phone]  
       ,''N''       --[agloc_inv_by_loc_ynd]  
       ,(CASE CL.[strSalesTaxByLocation]  
@@ -539,17 +544,21 @@ BEGIN
      UPDATE [aglocmst]  
      SET   
       [agloc_name] = CL.[strLocationName]  
-      ,[agloc_addr] = SUBSTRING(LTRIM(RTRIM(SUBSTRING(strAddress, 0, CHARINDEX(CHAR(10), strAddress)))), 1, 30)      
-      ,[agloc_addr2] =   
-       (CASE WHEN CHARINDEX(CHAR(10), strAddress) > 0
-		THEN SUBSTRING(LTRIM(RTRIM(strAddress)), CHARINDEX(CHAR(10), strAddress), 30) 
-        ELSE ''''  
-       END)      
+  --    ,[agloc_addr] = SUBSTRING(LTRIM(RTRIM(SUBSTRING(strAddress, 0, CHARINDEX(CHAR(10), strAddress)))), 1, 30)      
+  --    ,[agloc_addr2] =   
+  --     (CASE WHEN CHARINDEX(CHAR(10), strAddress) > 0
+		--THEN SUBSTRING(LTRIM(RTRIM(strAddress)), CHARINDEX(CHAR(10), strAddress), 30) 
+  --      ELSE ''''  
+  --     END)
+	  ,[agloc_addr] = SUBSTRING(CL.[strAddress],1,30) --[agloc_addr] 
+	  ,[agloc_addr2] = CASE WHEN LEN(CL.[strAddress]) > 30 --[agloc_addr2]  
+		THEN SUBSTRING(CL.[strAddress],31,30)
+		ELSE ''''
+		END   
       ,[agloc_city] = CL.[strCity]   
       ,[agloc_state] = CL.[strStateProvince]  
       ,[agloc_zip] = CL.[strZipPostalCode]  
-      ,[agloc_country] = SUBSTRING(C.[strCountryCode], 0, 4)
-      ,[agloc_phone] = CL.[strPhone]  
+      ,[agloc_country] = CAST(C.[intCountryID] AS CHAR)--SUBSTRING(C.[strCountryCode], 0, 4)  
       ,[agloc_inv_by_loc_ynd] = [agloc_inv_by_loc_ynd]  
       ,[agloc_tax_by_loc_only_ynv] =   
         (CASE CL.[strSalesTaxByLocation]  
@@ -990,16 +999,17 @@ BEGIN
         RTRIM(LTRIM(AG.[agloc_name]))  
         END)        --<strLocationName, nvarchar(50),>  
       ,''Office''       --<strLocationType, nvarchar(50),>  
-      ,(CASE   
-       WHEN RTRIM(LTRIM(AG.[agloc_addr])) = ''''   
-        THEN AG.[agloc_addr2]  
-       ELSE  
-        RTRIM(LTRIM(AG.[agloc_addr])) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(AG.[agloc_addr2]))  
-        END)        --<strAddress, nvarchar(max),>  
+	  --,(CASE   
+      -- WHEN RTRIM(LTRIM(AG.[agloc_addr])) = ''   
+      --  THEN AG.[agloc_addr2]  
+      -- ELSE  
+      --  RTRIM(LTRIM(AG.[agloc_addr])) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(AG.[agloc_addr2]))  
+      --  END)
+	  ,ISNULL(AG.[agloc_addr],'''') + ISNULL(AG.[agloc_addr2],'''')        --<strAddress, nvarchar(max),>  
       ,[agloc_zip]      --<strZipPostalCode, nvarchar(50),>  
       ,[agloc_city]      --<strCity, nvarchar(50),>  
       ,[agloc_state]      --<strStateProvince, nvarchar(50),>  
-      ,[agloc_country]     --<strCountry, nvarchar(50),>  
+      ,C.[strCountry] --[agloc_country]     --<strCountry, nvarchar(50),>  
       ,(CASE   
        WHEN CHARINDEX(''x'', AG.[agloc_phone]) > 0   
         THEN SUBSTRING(SUBSTRING(AG.[agloc_phone],1,15), 0, CHARINDEX(''x'',AG.[agloc_phone]))   
@@ -1291,6 +1301,9 @@ BEGIN
      LEFT JOIN  
       tblGLCOACrossReference CF  
        ON AG.[agloc_ccfee_percent] = CF.[strExternalId]  
+	 LEFT JOIN
+	  tblSMCountry C
+	   ON AG.[agloc_country] = C.[intCountryID] 
      LEFT OUTER JOIN  
       tblSMCompanyLocation CL  
        ON RTRIM(LTRIM(AG.[agloc_name] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationName] COLLATE Latin1_General_CI_AS))   
@@ -1316,17 +1329,17 @@ BEGIN
          RTRIM(LTRIM(AG.[agloc_name]))  
        END)  
       ,[strLocationType] = [strLocationType]  
-      ,[strAddress] =   
-        (CASE   
-         WHEN RTRIM(LTRIM(AG.[agloc_addr])) = ''''   
-          THEN AG.[agloc_addr2]  
-         ELSE  
-          RTRIM(LTRIM(AG.[agloc_addr])) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(AG.[agloc_addr2]))  
-          END)  
+      ,[strAddress] = ISNULL(AG.[agloc_addr], '''') + ISNULL(AG.[agloc_addr2],'''')
+        --(CASE   
+        -- WHEN RTRIM(LTRIM(AG.[agloc_addr])) = ''''   
+        --  THEN AG.[agloc_addr2]  
+        -- ELSE  
+        --  RTRIM(LTRIM(AG.[agloc_addr])) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(AG.[agloc_addr2]))  
+        --  END)  
       ,[strZipPostalCode] = AG.[agloc_zip]  
       ,[strCity] = AG.[agloc_city]  
       ,[strStateProvince] = AG.[agloc_state]  
-      ,[strCountry] = AG.[agloc_country]  
+      ,[strCountry] = C.strCountry  
       ,[strPhone] =   
         (CASE   
          WHEN CHARINDEX(''x'', AG.[agloc_phone]) > 0   
@@ -1654,6 +1667,9 @@ BEGIN
       LEFT JOIN  
        tblGLCOACrossReference CF  
         ON AG.[agloc_ccfee_percent] = CF.[strExternalId]  
+	  LEFT JOIN  
+		tblSMCountry C
+		ON AG.[agloc_country] = C.[intCountryID]  
       WHERE          
       RTRIM(LTRIM([strLocationNumber])) COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(AG.[agloc_loc_no])) COLLATE Latin1_General_CI_AS  
         

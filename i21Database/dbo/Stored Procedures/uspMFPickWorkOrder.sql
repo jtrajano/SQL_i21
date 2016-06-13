@@ -61,7 +61,8 @@ BEGIN TRY
 		,@intItemUOMId INT
 		,@intSubLocationId INT
 		,@intCategoryId INT
-		,@intItemIssuedUOMId int
+		,@intItemIssuedUOMId INT
+		,@intStorageLocationId1 NUMERIC(18, 6)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -138,7 +139,7 @@ BEGIN TRY
 		,dblSubstituteRatio NUMERIC(18, 6)
 		,dblMaxSubstituteRatio NUMERIC(18, 6)
 		,intStorageLocationId INT
-		,intSubLocationId int
+		,intSubLocationId INT
 		)
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
@@ -219,10 +220,7 @@ BEGIN TRY
 			WHEN C.strCategoryCode = @strPackagingCategory
 				AND @ysnProducedQtyByWeight = 1
 				AND P.dblMaxWeightPerPack > 0
-				THEN (
-						
-						CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20))
-						)
+				THEN (CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
 			WHEN C.strCategoryCode = @strPackagingCategory
 				THEN CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS NUMERIC(38, 20))
 			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
@@ -272,10 +270,7 @@ BEGIN TRY
 				WHEN C.strCategoryCode = @strPackagingCategory
 					AND @ysnProducedQtyByWeight = 1
 					AND P.dblMaxWeightPerPack > 0
-					THEN (
-							
-							CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20))
-							)
+					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
 				WHEN C.strCategoryCode = @strPackagingCategory
 					THEN CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS NUMERIC(38, 20))
 				ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
@@ -449,10 +444,11 @@ BEGIN TRY
 							ELSE dblQty
 							END
 						) - ISNULL((
-							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 							FROM tblICStockReservation SR
-							JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
-							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
+							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+							WHERE SR.intLotId = L.intLotId
+								AND ISNULL(ysnPosted, 0) = 0
 							), 0)
 					,(
 						CASE 
@@ -468,10 +464,11 @@ BEGIN TRY
 									)
 							END
 						) - ISNULL((
-							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 							FROM tblICStockReservation SR
-							JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
-							WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
+							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+							WHERE SR.intLotId = L.intLotId
+								AND ISNULL(ysnPosted, 0) = 0
 							), 0) / (
 						CASE 
 							WHEN L.dblWeightPerQty = 0
@@ -516,7 +513,7 @@ BEGIN TRY
 											THEN @intStorageLocationId
 										ELSE L.intStorageLocationId
 										END
-									) 
+									)
 							END
 						)
 					AND L.dblQty > 0
@@ -546,10 +543,11 @@ BEGIN TRY
 						ELSE dblQty
 						END
 					) - ISNULL((
-						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
+						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 						FROM tblICStockReservation SR
-						JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
-						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
+						JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+						WHERE SR.intLotId = L.intLotId
+							AND ISNULL(ysnPosted, 0) = 0
 						), 0)
 				,(
 					CASE 
@@ -565,10 +563,11 @@ BEGIN TRY
 								)
 						END
 					) - ISNULL((
-						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,ISNULL(L1.intWeightUOMId,L1.intItemUOMId),ISNULL(SR.dblQty,0)))
+						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
 						FROM tblICStockReservation SR
-						JOIN dbo.tblICLot L1 on SR.intLotId=L1.intLotId
-						WHERE SR.intLotId = L.intLotId AND ISNULL(ysnPosted,0)=0
+						JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+						WHERE SR.intLotId = L.intLotId
+							AND ISNULL(ysnPosted, 0) = 0
 						), 0) / (
 					CASE 
 						WHEN L.dblWeightPerQty = 0
@@ -610,17 +609,182 @@ BEGIN TRY
 										THEN @intStorageLocationId
 									ELSE L.intStorageLocationId
 									END
-								) 
+								)
 						END
 					)
 				AND L.dblQty > 0
 			ORDER BY L.dtmDateCreated ASC
 
-			 IF NOT EXISTS (
-                    SELECT *
-                    FROM @tblLot
-                    )
-                AND @ysnExcessConsumptionAllowed = 1
+			IF NOT EXISTS (
+					SELECT *
+					FROM @tblLot
+					)
+				AND @ysnExcessConsumptionAllowed = 1
+			BEGIN
+				INSERT INTO @tblLot (
+					strLotNumber
+					,intLotId
+					,intItemId
+					,dblQty
+					,dblIssuedQuantity
+					,dblWeightPerUnit
+					,intItemUOMId
+					,intItemIssuedUOMId
+					,ysnSubstituteItem
+					,intStorageLocationId
+					,intSubLocationId
+					)
+				SELECT TOP 1 L.strLotNumber
+					,L.intLotId
+					,L.intItemId
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN dblWeight
+							ELSE dblQty
+							END
+						) - ISNULL((
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+							FROM tblICStockReservation SR
+							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+							WHERE SR.intLotId = L.intLotId
+								AND ISNULL(ysnPosted, 0) = 0
+							), 0)
+					,(
+						CASE 
+							WHEN intWeightUOMId IS NOT NULL
+								THEN L.dblQty
+							ELSE dblQty / (
+									CASE 
+										WHEN L.dblWeightPerQty = 0
+											OR L.dblWeightPerQty IS NULL
+											THEN 1
+										ELSE L.dblWeightPerQty
+										END
+									)
+							END
+						) - ISNULL((
+							SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+							FROM tblICStockReservation SR
+							JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+							WHERE SR.intLotId = L.intLotId
+								AND ISNULL(ysnPosted, 0) = 0
+							), 0) / (
+						CASE 
+							WHEN L.dblWeightPerQty = 0
+								OR L.dblWeightPerQty IS NULL
+								THEN 1
+							ELSE L.dblWeightPerQty
+							END
+						)
+					,CASE 
+						WHEN L.dblWeightPerQty IS NULL
+							OR L.dblWeightPerQty = 0
+							THEN 1
+						ELSE L.dblWeightPerQty
+						END
+					,CASE 
+						WHEN L.intWeightUOMId IS NULL
+							OR L.intWeightUOMId = 0
+							THEN L.intItemUOMId
+						ELSE L.intWeightUOMId
+						END
+					,L.intItemUOMId
+					,0 AS ysnSubstituteItem
+					,L.intStorageLocationId
+					,L.intSubLocationId
+				FROM dbo.tblICLot L
+				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+					AND SL.ysnAllowConsume = 1
+				WHERE L.intItemId = @intItemId
+					AND L.intLocationId = @intLocationId
+					AND L.intLotStatusId = 1
+					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND L.intStorageLocationId = (
+						CASE 
+							WHEN @intStorageLocationId IS NULL
+								THEN L.intStorageLocationId
+							ELSE (
+									CASE 
+										WHEN @intConsumptionMethodId = 2
+											THEN @intStorageLocationId
+										ELSE L.intStorageLocationId
+										END
+									)
+							END
+						)
+					AND L.dblQty = 0
+				ORDER BY L.dtmDateCreated DESC
+
+				SELECT @dblAdjustByQuantity = @dblReqQty
+
+				SELECT @strLotNumber = strLotNumber
+					,@intWeightUOMId = intItemUOMId
+					,@dblWeightPerQty = dblWeightPerUnit
+					,@intStorageLocationId1 = intStorageLocationId
+					,@intItemIssuedUOMId = intItemIssuedUOMId
+				FROM @tblLot
+
+				IF @intConsumptionMethodId = 2
+				BEGIN
+					SELECT @intSubLocationId = intSubLocationId
+					FROM tblICStorageLocation
+					WHERE intStorageLocationId = @intStorageLocationId
+				END
+				ELSE
+				BEGIN
+					SELECT @intStorageLocationId = intStorageLocationId
+						,@intSubLocationId = intSubLocationId
+					FROM tblICLot
+					WHERE strLotNumber = @strLotNumber
+						AND intStorageLocationId = @intStorageLocationId1
+				END
+
+				SELECT @dblAdjustByQuantity = @dblAdjustByQuantity / (
+						CASE 
+							WHEN @intWeightUOMId IS NULL
+								THEN 1
+							ELSE @dblWeightPerQty
+							END
+						)
+
+				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+					-- Parameters for filtering:
+					@intItemId = @intItemId
+					,@dtmDate = @dtmCurrentDateTime
+					,@intLocationId = @intLocationId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = @strLotNumber
+					-- Parameters for the new values: 
+					,@dblAdjustByQuantity = @dblAdjustByQuantity
+					,@dblNewUnitCost = NULL
+					,@intItemUOMId = @intItemIssuedUOMId
+					-- Parameters used for linking or FK (foreign key) relationships
+					,@intSourceId = 1
+					,@intSourceTransactionTypeId = 8
+					,@intEntityUserSecurityId = @intUserId
+					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+				UPDATE @tblLot
+				SET dblQty = dblQty + (
+						@dblAdjustByQuantity * (
+							CASE 
+								WHEN @dblWeightPerQty IS NULL
+									OR @dblWeightPerQty = 0
+									THEN 1
+								ELSE @dblWeightPerQty
+								END
+							)
+						)
+					,dblIssuedQuantity = dblIssuedQuantity + @dblAdjustByQuantity
+			END
+
+			IF NOT EXISTS (
+					SELECT *
+					FROM @tblLot
+					)
+				AND @ysnExcessConsumptionAllowed = 1
 			BEGIN
 				--*****************************************************
 				--Create staging lot
@@ -765,6 +929,10 @@ BEGIN TRY
 				EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 					,@intUserId
 
+				SELECT TOP 1 @intLotId = intLotId
+				FROM #GeneratedLotItems
+				WHERE intDetailId = @intWorkOrderId
+
 				--*****************************************************
 				--End of create staging lot
 				--*****************************************************
@@ -838,7 +1006,7 @@ BEGIN TRY
 											THEN @intStorageLocationId
 										ELSE L.intStorageLocationId
 										END
-									) 
+									)
 							END
 						)
 					AND L.dblQty > 0
@@ -857,8 +1025,8 @@ BEGIN TRY
 				,@ysnSubstituteItem = ysnSubstituteItem
 				,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 				,@dblSubstituteRatio = dblSubstituteRatio
-				,@intItemUOMId=intItemUOMId
-				,@intItemIssuedUOMId=intItemIssuedUOMId
+				,@intItemUOMId = intItemUOMId
+				,@intItemIssuedUOMId = intItemIssuedUOMId
 			FROM @tblLot
 			WHERE intLotRecordId = @intLotRecordId
 
@@ -949,12 +1117,21 @@ BEGIN TRY
 						-- Parameters for the new values: 
 						,@dblAdjustByQuantity = @dblAdjustByQuantity
 						,@dblNewUnitCost = NULL
-						,@intItemUOMId=@intItemIssuedUOMId
+						,@intItemUOMId = @intItemIssuedUOMId
 						-- Parameters used for linking or FK (foreign key) relationships
 						,@intSourceId = 1
 						,@intSourceTransactionTypeId = 8
 						,@intEntityUserSecurityId = @intUserId
 						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
+					SELECT @dblQty = @dblQty + @dblAdjustByQuantity * (
+							CASE 
+								WHEN @dblWeightPerQty IS NULL
+									OR @dblWeightPerQty = 0
+									THEN 1
+								ELSE @dblWeightPerQty
+								END
+							)
 				END
 			END
 

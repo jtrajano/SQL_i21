@@ -28,6 +28,7 @@
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
+	,@ItemRecipeItemId				INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
@@ -219,6 +220,7 @@ BEGIN TRY
 				,[strSCInvoiceNumber]
 				,[intInventoryShipmentItemId]
 				,[strShipmentNumber]
+				,[intRecipeItemId] 
 				,[intSalesOrderDetailId]
 				,[strSalesOrderNumber]
 				,[intContractHeaderId]
@@ -282,6 +284,7 @@ BEGIN TRY
 				,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
 				,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 
 				,[strShipmentNumber]				= @ItemShipmentNumber 
+				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intSalesOrderDetailId]			= @ItemSalesOrderDetailId 
 				,[strSalesOrderNumber]				= @ItemSalesOrderNumber 
 				,[intContractHeaderId]				= @ItemContractHeaderId
