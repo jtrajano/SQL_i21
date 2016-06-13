@@ -1,12 +1,7 @@
 ﻿CREATE VIEW vyuLGLoadViewSearch
 AS
 SELECT L.intLoadId
-	,LD.intLoadDetailId
 	,L.intGenerateLoadId
-	,LD.intVendorEntityId
-	,LD.intCustomerEntityId
-	,LD.intPContractDetailId
-	,LD.intSContractDetailId
 	,L.intHaulerEntityId
 	,L.strLoadNumber
 	,L.strExternalLoadNumber
@@ -43,19 +38,7 @@ SELECT L.intLoadId
 	,intGenerateReferenceNumber = GL.intReferenceNumber
 	,L.intGenerateSequence
 	,intNumberOfLoads = GL.intNumberOfLoads
-	,strPLocationName = PCL.strLocationName
-	,strVendor = VEN.strName
-	,strShipFrom = VEL.strLocationName
-	,strPContractNumber = PCH.strContractNumber
-	,intPContractSeq = PCD.intContractSeq
-	,strCustomer = CEN.strName
-	,strShipTo = CEL.strLocationName
-	,strSContractNumber = SCH.strContractNumber
-	,intSContractSeq = SCD.intContractSeq
-	,strSLocationName = SCL.strLocationName
-	,strItemNo = I.strDescription
 	,L.dtmScheduledDate
-	,LD.dblQuantity
 	,strHauler = Hauler.strName
 	,strDriver = Driver.strName
 	,ysnDispatched = CASE 
@@ -109,23 +92,7 @@ SELECT L.intLoadId
 	,L.dtmDispatchMailSent
 	,L.dtmCancelDispatchMailSent
 FROM tblLGLoad L
-JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
-LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
-LEFT JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IU.intUnitMeasureId
-LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
-LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WU.intUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
-LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LD.intPCompanyLocationId
-LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LD.intSCompanyLocationId
-LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LD.intVendorEntityId
-LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
-LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
-LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
-LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
-LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
-LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
-LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
