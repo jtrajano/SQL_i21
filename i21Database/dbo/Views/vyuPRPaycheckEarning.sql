@@ -43,28 +43,9 @@ SELECT
 	,tblPRPaycheckEarning.intConcurrencyId
 	,tblPRPaycheck.dblGross
 FROM
-	tblPRPaycheck 
-	INNER JOIN tblPRPaycheckEarning ON tblPRPaycheck.intPaycheckId = tblPRPaycheckEarning.intPaycheckId
-	INNER JOIN tblPRTypeEarning ON tblPRPaycheckEarning.intTypeEarningId = tblPRPaycheckEarning.intTypeEarningId
+	tblPRPaycheckEarning
+	INNER JOIN tblPRPaycheck  ON tblPRPaycheck.intPaycheckId = tblPRPaycheckEarning.intPaycheckId
+	INNER JOIN tblPRTypeEarning ON tblPRPaycheckEarning.intTypeEarningId = tblPRTypeEarning.intTypeEarningId
 	LEFT JOIN tblPRDepartment ON tblPRPaycheckEarning.intEmployeeDepartmentId = tblPRDepartment.intDepartmentId
 WHERE
 	tblPRPaycheck.ysnPosted = 1 AND tblPRPaycheck.ysnVoid = 0
-GROUP BY
-	tblPRPaycheckEarning.intPaycheckEarningId
-	,tblPRPaycheck.intPaycheckId
-	,tblPRPaycheck.intEntityEmployeeId
-	,tblPRPaycheck.dtmPayDate
-	,tblPRTypeEarning.intTypeEarningId
-	,tblPRTypeEarning.strEarning
-	,tblPRPaycheckEarning.intEmployeeEarningId
-	,tblPRPaycheckEarning.intTypeEarningId
-	,tblPRPaycheckEarning.strCalculationType
-	,tblPRPaycheckEarning.intEmployeeDepartmentId
-	,tblPRDepartment.strDepartment
-	,tblPRPaycheckEarning.dblAmount
-	,tblPRPaycheckEarning.dblHours
-	,tblPRPaycheckEarning.dblTotal
-	,tblPRPaycheckEarning.intAccountId
-	,tblPRPaycheckEarning.intSort
-	,tblPRPaycheckEarning.intConcurrencyId
-	,tblPRPaycheck.dblGross
