@@ -49,7 +49,7 @@ BEGIN TRY
 	EXEC sp_executesql @SQL
 
 	SELECT DISTINCT 'Composite Sample - ' + LTRIM(DENSE_RANK() OVER (
-				ORDER BY S.intSampleId
+				ORDER BY S.intSampleId DESC
 				)) AS strCompositeSample
 		,S.intSampleId
 		,P.strPropertyName
@@ -97,7 +97,7 @@ BEGIN TRY
 		,TR.strComment
 		,TR.strPropertyValue
 		,S.intSampleId
-	ORDER BY S.intSampleId
+	ORDER BY S.intSampleId DESC
 END TRY
 
 BEGIN CATCH

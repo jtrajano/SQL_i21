@@ -55,6 +55,7 @@ BEGIN TRY
 			END AS strUnitMeasure
 		,CMD.strSpecification
 		,CM.strCommentCOA
+		,CM.strDisclaimer
 	FROM dbo.tblQMTestResult TR
 	JOIN dbo.tblQMSample S ON S.intSampleId = TR.intSampleId
 		AND S.intSampleId = @intSampleId
@@ -79,6 +80,7 @@ BEGIN TRY
 		,CMD.strSpecification
 		,TR.strComment
 		,CM.strCommentCOA
+		,CM.strDisclaimer
 END TRY
 
 BEGIN CATCH

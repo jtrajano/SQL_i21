@@ -1,7 +1,8 @@
-﻿--EXEC uspQMReportCOAHeaderDetail @intInventoryShipmentItemLotId = 1231,@intLotId=2588;
+﻿--EXEC uspQMReportCOAHeaderDetail @intInventoryShipmentItemLotId = 1231,@intLotId=2588,@ysnTestReport=0;
 CREATE PROCEDURE uspQMReportCOAHeaderDetail
      @intInventoryShipmentItemLotId INT
 	,@intLotId INT
+	,@ysnTestReport BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -78,7 +79,6 @@ BEGIN TRY
 		,CM.strRevisionNo
 		,CM.strCommentTR
 		,CM.strCommentCOA
-		,CM.strSamplingMethod AS strSamplingMethodTR
 		,CM.strDisclaimer
 		,S.strBOLNumber AS strContractNo
 		,S.strReferenceNumber AS strContainerNo
@@ -109,7 +109,11 @@ BEGIN TRY
 			) AS strWeightUOM
 		,ISNULL(@strComment, '') AS strWOComment
 		,@strSampleNumber AS strCertificateNo
-		,@strSamplingMethod AS strSamplingMethod
+		,CASE 
+			WHEN @ysnTestReport = 0
+				THEN @strSamplingMethod
+			ELSE CM.strSamplingMethod
+			END AS strSamplingMethod
 		,CONVERT(NVARCHAR(20), @dtmSampleReceivedDate, 101) + ' - ' + CONVERT(NVARCHAR(20), @dtmSamplingEndDate, 101) AS dtmSamplingDuration
 		,CONVERT(NVARCHAR(20), @dtmTestingStartDate, 101) + ' - ' + CONVERT(NVARCHAR(20), @dtmTestingEndDate, 101) AS dtmTestingDuration
 	FROM dbo.tblICInventoryShipmentItemLot SIL
