@@ -20,7 +20,7 @@ FROM dbo.tblAPBill APB
 INNER JOIN dbo.tblSMUserSecurity US ON APB.intEntityId = US.[intEntityUserSecurityId]
 WHERE 
 	ISNULL(ysnPosted, 0) = 0 AND 
-	APB.intTransactionType != 6 AND							   --Will not show BillTemplate
+	APB.intTransactionType NOT IN (6,8) AND					   --Will not show BillTemplate and Voucher Over Payment
 	APB.ysnForApproval != 1	AND								   --Will not show For Approval Bills
     (APB.ysnApproved = 0)									   --Will not show Rejected approval bills
 
