@@ -108,7 +108,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		
 	UNION ALL 
 
-	SELECT 	
+	SELECT DISTINCT
 		strOrderType = 'Sales Contract'
 		, strSourceType = 'Pick Lot'
 		, intLocationId = PickLot.intCompanyLocationId
