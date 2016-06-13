@@ -135,6 +135,7 @@ Declare @tblPickedLots AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -166,6 +167,7 @@ Declare @tblRemainingPickedLots AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -268,7 +270,7 @@ Begin
 			Insert Into @tblPickedLots
 			Select 0,l.intLotId,l.strLotNumber,i.strItemNo,i.strDescription,SUM(wi.dblQuantity),wi.intItemUOMId,um.strUnitMeasure,
 			SUM(wi.dblIssuedQuantity),wi.intItemIssuedUOMId,um1.strUnitMeasure,i.intItemId,
-			0,0.0,0.0,0.0,AVG(l.dblWeightPerQty),0.0,l.intStorageLocationId,sl.strName,'',@intLocationId,'',l.strLotAlias,0,'Added'
+			0,0.0,0.0,0.0,AVG(l.dblWeightPerQty),0.0,l.intStorageLocationId,sl.strName,'',@intLocationId,'',0,l.strLotAlias,0,'Added'
 			From tblMFWorkOrderInputLot wi join tblICLot l on wi.intLotId=l.intLotId 
 			Join tblICItem i on l.intItemId=i.intItemId
 			Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
@@ -357,7 +359,7 @@ Begin
 	tpl.strItemNo,tpl.strDescription,tpl.dblQuantity,tpl.intItemUOMId,tpl.strUOM,tpl.dblIssuedQuantity,
 	tpl.intItemIssuedUOMId,tpl.strIssuedUOM,tpl.intItemId,tpl.intRecipeItemId,tpl.dblUnitCost,tpl.dblDensity,tpl.dblRequiredQtyPerSheet,tpl.dblWeightPerUnit,tpl.dblRiskScore,
 	tpl.intStorageLocationId,
-	CASE When ri.intConsumptionMethodId=1 Then tpl.strStorageLocationName Else '' End AS strStorageLocationName,tpl.strLocationName,tpl.intLocationId,tpl.strSubLocationName,
+	CASE When ri.intConsumptionMethodId=1 Then tpl.strStorageLocationName Else '' End AS strStorageLocationName,tpl.strLocationName,tpl.intLocationId,tpl.strSubLocationName,tpl.intSubLocationId,
 	CASE When ri.intConsumptionMethodId=1 Then tpl.strLotAlias Else '' End AS strLotAlias,tpl.ysnParentLot,tpl.strRowState,
 	CASE When ri.intConsumptionMethodId=1 Then cl.dblQuantity 
 	Else 
@@ -410,7 +412,10 @@ Begin
 	0.0 AS dblPickQuantity,0 AS intPickUOMId,'' AS strPickUOM,0 AS intParentLotId,'' AS strParentLotNumber
 	From @tblRemainingPickedLots rpl
 	UNION --Non Lot Tracked Items
-	Select pl.*,sd.dblAvailableQty AS dblAvailableQty,sd.dblReservedQty AS dblReservedQty,sd.dblAvailableQty AS dblAvailableUnit,pl.strUOM AS strAvailableUnitUOM, 
+	Select pl.*,
+	dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pl.intItemUOMId,sd.dblAvailableQty) AS dblAvailableQty,
+	dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pl.intItemUOMId,sd.dblReservedQty) AS dblReservedQty,
+	dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pl.intItemUOMId,sd.dblAvailableQty) AS dblAvailableUnit,pl.strUOM AS strAvailableUnitUOM, 
 	pl.dblQuantity AS dblPickQuantity,pl.intItemUOMId AS intPickUOMId,pl.strUOM AS strPickUOM,0 AS intParentLotId,'' AS strParentLotNumber
 	From @tblPickedLots pl Join vyuMFGetItemStockDetail sd on pl.intWorkOrderInputLotId=sd.intItemStockUOMId
 	Where pl.intLotId=-1

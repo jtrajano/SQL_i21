@@ -119,6 +119,7 @@ Declare @tblRemainingPickedLots AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -151,6 +152,7 @@ Declare @tblPickedLots AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -181,6 +183,7 @@ Declare @tblPickedLotsFinal AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS,

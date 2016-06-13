@@ -61,6 +61,7 @@ Declare @tblPickListDetail table
 	intParentLotId int,
 	intItemId int,
 	intStorageLocationId int,
+	intSubLocationId int,
 	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	dblIssuedQuantity  numeric(38,20),
@@ -190,6 +191,10 @@ Delete From @tblPickListDetail Where dblPickQuantity<=0
 
 Update pld Set pld.intLotId=NULL,pld.intParentLotId=NULL,pld.intStorageLocationId = CASE WHEN pld.intStorageLocationId=0 THEN NULL ELSE pld.intStorageLocationId END
 From @tblPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId AND i.strLotTracking='No'
+
+Update pld Set pld.intSubLocationId=CASE WHEN sl.intSubLocationId=0 THEN NULL ELSE sl.intSubLocationId End
+From @tblPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId AND i.strLotTracking='No'
+Join tblICStorageLocation sl on pld.intStorageLocationId=sl.intStorageLocationId
 End
 
 If ISNULL(@strPickListNo,'') = ''
@@ -278,10 +283,10 @@ Begin
 
 	SET @intPickListId=SCOPE_IDENTITY()
 
-	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intLocationId,intStorageLocationId,
+	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intLocationId,intStorageLocationId,intSubLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intStageLotId,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
-	Select @intPickListId,intLotId,intParentLotId,intItemId,@intLocationId,intStorageLocationId,
+	Select @intPickListId,intLotId,intParentLotId,intItemId,@intLocationId,intStorageLocationId,intSubLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intLotId,
 	@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1
 	from @tblPickListDetail
@@ -300,7 +305,7 @@ Begin
 	From tblMFPickList pl Join @tblPickList tpl on pl.intPickListId=tpl.intPickListId
 
 	Update pld Set pld.dblPickQuantity=tpld.dblPickQuantity,pld.dblQuantity=tpld.dblQuantity,pld.dblIssuedQuantity=tpld.dblIssuedQuantity,
-	pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,pld.intParentLotId=tpld.intParentLotId,pld.intStorageLocationId=tpld.intStorageLocationId,
+	pld.intLotId=tpld.intLotId,pld.intStageLotId=tpld.intLotId,pld.intParentLotId=tpld.intParentLotId,pld.intStorageLocationId=tpld.intStorageLocationId,pld.intSubLocationId=tpld.intSubLocationId,
 	pld.intItemUOMId=tpld.intItemUOMId,pld.intItemIssuedUOMId=tpld.intItemIssuedUOMId,pld.intPickUOMId=tpld.intPickUOMId,
 	pld.intLastModifiedUserId=tpld.intUserId,pld.dtmLastModified=@dtmCurrentDate,pld.intConcurrencyId=@intConCurrencyId,
 	pld.intItemId=tpld.intItemId
@@ -312,10 +317,10 @@ Begin
 	intPickListDetailId NOT IN (Select intPickListDetailId From @tblPickListDetail) AND intLotId=intStageLotId
 
 	--insert new picked lots
-	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intLocationId,intStorageLocationId,
+	Insert Into tblMFPickListDetail(intPickListId,intLotId,intParentLotId,intItemId,intLocationId,intStorageLocationId,intSubLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intStageLotId,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
-	Select @intPickListId,intLotId,intParentLotId,intItemId,@intLocationId,intStorageLocationId,
+	Select @intPickListId,intLotId,intParentLotId,intItemId,@intLocationId,intStorageLocationId,intSubLocationId,
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intLotId,
 	@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1
 	from @tblPickListDetail Where intPickListDetailId=0

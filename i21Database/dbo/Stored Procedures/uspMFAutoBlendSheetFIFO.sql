@@ -228,6 +228,7 @@ BEGIN TRY
 		strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 		intLocationId int,
 		strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+		intSubLocationId int,
 		strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 		ysnParentLot bit,
 		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -664,7 +665,7 @@ BEGIN TRY
 					,intItemIssuedUOMId
 					)
 					Select sd.intItemStockUOMId,'',sd.intItemId,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intItemUOMId,sd.dblAvailableQty),
-					sd.intLocationId,sd.intSubLocationId,sd.intStorageLocationId,NULL,NULL,0,sd.dblUnitQty,'',0,sd.intItemUOMId,sd.intItemUOMId 
+					sd.intLocationId,sd.intSubLocationId,sd.intStorageLocationId,NULL,NULL,0,sd.dblUnitQty,'',0,@intItemUOMId AS intItemUOMId,@intItemUOMId AS intItemUOMId 
 					From vyuMFGetItemStockDetail sd 
 					Where sd.intItemId=@intRawItemId AND sd.dblAvailableQty > .01 AND sd.intLocationId=@intLocationId 
 					AND ISNULL(sd.intStorageLocationId,0) NOT IN (@intKitStagingLocationId,@intBlendStagingLocationId)
@@ -1391,9 +1392,9 @@ BEGIN TRY
 							INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
 							intItemUOMId,	strUOM,	dblIssuedQuantity,	intItemIssuedUOMId,	strIssuedUOM,	intItemId,	intRecipeItemId,	
 							dblUnitCost,	dblDensity,	dblRequiredQtyPerSheet,	dblWeightPerUnit,	dblRiskScore,	intStorageLocationId,	
-							strStorageLocationName,	strLocationName,	intLocationId,	strSubLocationName,	strLotAlias,	ysnParentLot,	strRowState)
+							strStorageLocationName,	strLocationName,	intLocationId,	strSubLocationName,intSubLocationId,	strLotAlias,	ysnParentLot,	strRowState)
 							Select TOP 1 0,0,'',i.strItemNo,i.strDescription,@dblRemainingRequiredQty,l.intWeightUOMId,um.strUnitMeasure,@dblRemainingRequiredQty, l.intWeightUOMId,um.strUnitMeasure,--l.intItemUOMId,um1.strUnitMeasure, 
-							@intRawItemId,0,0.0,0.0,0.0,l.dblWeightPerQty,0.0,0,'','',@intLocationId,'','',0,'Added'
+							@intRawItemId,0,0.0,0.0,0.0,l.dblWeightPerQty,0.0,0,'','',@intLocationId,'',0,'',0,'Added'
 							From tblICLot l Join tblICItem i on l.intItemId=i.intItemId 
 							Join tblICItemUOM iu on l.intWeightUOMId=iu.intItemUOMId
 							Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -1418,9 +1419,9 @@ BEGIN TRY
 					INSERT INTO @tblRemainingPickedLots(intWorkOrderInputLotId,	intLotId,	strLotNumber,	strItemNo,	strDescription,	dblQuantity,	
 					intItemUOMId,	strUOM,	dblIssuedQuantity,	intItemIssuedUOMId,	strIssuedUOM,	intItemId,	intRecipeItemId,	
 					dblUnitCost,	dblDensity,	dblRequiredQtyPerSheet,	dblWeightPerUnit,	dblRiskScore,	intStorageLocationId,	
-					strStorageLocationName,	strLocationName,	intLocationId,	strSubLocationName,	strLotAlias,	ysnParentLot,	strRowState)
+					strStorageLocationName,	strLocationName,	intLocationId,	strSubLocationName,intSubLocationId,	strLotAlias,	ysnParentLot,	strRowState)
 					Select TOP 1 0,0,'',i.strItemNo,i.strDescription,@dblRemainingRequiredQty,l.intWeightUOMId,um.strUnitMeasure,@dblRemainingRequiredQty, l.intWeightUOMId,um.strUnitMeasure,--l.intItemUOMId,um1.strUnitMeasure, 
-					@intRawItemId,0,0.0,0.0,0.0,l.dblWeightPerQty,0.0,0,'','',@intLocationId,'','',0,'Added'
+					@intRawItemId,0,0.0,0.0,0.0,l.dblWeightPerQty,0.0,0,'','',@intLocationId,'',0,'',0,'Added'
 					From tblICLot l Join tblICItem i on l.intItemId=i.intItemId 
 					Join tblICItemUOM iu on l.intWeightUOMId=iu.intItemUOMId
 					Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -1515,6 +1516,7 @@ BEGIN TRY
 			,CL.strLocationName
 			,@intLocationId AS intLocationId
 			,CSL.strSubLocationName
+			,CSL.intCompanyLocationSubLocationId AS intSubLocationId
 			,L.strLotAlias
 			,CAST(0 AS BIT) ysnParentLot
 			,'Added' AS strRowState
@@ -1532,10 +1534,10 @@ BEGIN TRY
 		WHERE BS.dblQuantity > 0
 		UNION
 		Select * From @tblRemainingPickedLots
-		UNION
+		UNION --Non Lot Tracked
 		Select pl.intItemStockUOMId,-1,'',i.strItemNo,i.strDescription,pl.dblQty,pl.intItemUOMId,um.strUnitMeasure,
 		pl.dblQty,pl.intItemUOMId,um.strUnitMeasure,i.intItemId,@intRecipeItemId,0,0,0,1,0,pl.intStorageLocationId,sl.strName,
-		cl.strLocationName,pl.intLocationId,csl.strSubLocationName,'',0,'Added'
+		cl.strLocationName,pl.intLocationId,csl.strSubLocationName,csl.intCompanyLocationSubLocationId AS intSubLocationId,'',0,'Added'
 		From @tblPickedItem pl Join tblICItem i on pl.intItemId=i.intItemId
 		Join tblICItemUOM iu on pl.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -1583,6 +1585,7 @@ BEGIN TRY
 			,CL.strLocationName
 			,@intLocationId AS intLocationId
 			,'' AS strSubLocationName
+			,0 AS intSubLocationId
 			,PL.strParentLotAlias AS strLotAlias
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
@@ -1636,6 +1639,7 @@ BEGIN TRY
 			,CL.strLocationName
 			,@intLocationId AS intLocationId
 			,'' AS strSubLocationName
+			,0 AS intSubLocationId
 			,PL.strParentLotAlias AS strLotAlias
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState

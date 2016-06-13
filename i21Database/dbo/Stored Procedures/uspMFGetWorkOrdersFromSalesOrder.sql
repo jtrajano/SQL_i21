@@ -50,9 +50,10 @@ And mc.intManufacturingCellId=@intCellId
 --Existing WOs
 If Exists(Select 1 From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId And intItemId=@intItemId And intManufacturingProcessId=@intManufacturingProcessId)
 	Begin
-		Select w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName 
+		Select w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName,br.strDemandNo 
 		From tblMFWorkOrder w Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
-		Where intSalesOrderLineItemId=@intSalesOrderDetailId And intItemId=@intItemId And w.intManufacturingProcessId=@intManufacturingProcessId
+		Left Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId
+		Where intSalesOrderLineItemId=@intSalesOrderDetailId And w.intItemId=@intItemId And w.intManufacturingProcessId=@intManufacturingProcessId
 	End
 Else
 Begin --New WOs
