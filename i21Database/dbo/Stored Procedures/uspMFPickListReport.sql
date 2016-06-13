@@ -183,7 +183,22 @@ Begin
 	Join tblICItemUOM iu on sr.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Left Join tblICStorageLocation sl on ti.intStorageLocationId=sl.intStorageLocationId
-	Where sr.intTransactionId=@intPickListId AND intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+	Where sr.intTransactionId=@intPickListId AND intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0 AND i.strLotTracking <> 'No'
+	UNION --Non Lot Tracked Items
+	Select @strPickListNo,@strBlendItemNoDesc,@strWorkOrderNo,'' strLotNumber,'' strLotAlias,sl.strName AS strStorageLocationName,
+	i.strItemNo,i.strDescription,dbo.fnRemoveTrailingZeroes(pld.dblQuantity) AS dblPickQuantity,um.strUnitMeasure AS strUOM,'',
+	@intWorkOrderCount,'' strParentLotNumber,dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) AS dblReqQty,dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblTotalPickQty,
+	pld.dblQuantity AS dblQuantity,0 AS dblCost,0 AS dblTotalCost
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+	,@strCountry AS strCompanyCountry
+	From tblMFPickListDetail pld
+	Join tblICItem i on pld.intItemId=i.intItemId
+	Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Left Join tblICStorageLocation sl on pld.intStorageLocationId=sl.intStorageLocationId
+	Where pld.intPickListId=@intPickListId AND ISNULL(pld.intLotId,0)=0
 	ORDER BY dblQuantity--strPickUOM
 End
 Else

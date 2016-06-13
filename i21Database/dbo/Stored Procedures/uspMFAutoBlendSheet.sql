@@ -46,6 +46,7 @@ Declare @tblPickedLots AS table
 	strLocationName nvarchar(50),
 	intLocationId int,
 	strSubLocationName nvarchar(50),
+	intSubLocationId int,
 	strLotAlias nvarchar(50),
 	ysnParentLot bit,
 	strRowState nvarchar(50)

@@ -135,6 +135,7 @@ Declare @tblRemainingPickedLots AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -167,6 +168,7 @@ Declare @tblPickedLots AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
@@ -197,6 +199,7 @@ Declare @tblPickedLotsFinal AS table
 	strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intLocationId int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intSubLocationId int,
 	strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 	ysnParentLot bit,
 	strRowState nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -531,15 +534,18 @@ Begin
 	UNION --Non Lot Tracked Items
 	Select pld.intPickListDetailId,pld.intPickListId,-1,'','',0,'',pld.intItemId,i.strItemNo,i.strDescription,pld.intStorageLocationId,sl.strName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
-	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	(Select TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pld.intItemUOMId,sd.dblAvailableQty) 
+	From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
 	ISNULL(sd.intSubLocationId,0)=ISNULL(pld.intSubLocationId,0) AND ISNULL(sd.intStorageLocationId,0)=ISNULL(pld.intStorageLocationId,0) 
 	AND sd.intItemId=pld.intItemId) AS dblAvailableQty,
-	(Select TOP 1 sd.dblReservedQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	(Select TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pld.intItemUOMId,sd.dblReservedQty) 
+	From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
 	ISNULL(sd.intSubLocationId,0)=ISNULL(pld.intSubLocationId,0) AND ISNULL(sd.intStorageLocationId,0)=ISNULL(pld.intStorageLocationId,0) 
 	AND sd.intItemId=pld.intItemId) AS dblReservedQty,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
 	-1,
-	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	(Select TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pld.intItemUOMId,sd.dblAvailableQty) 
+	From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
 	ISNULL(sd.intSubLocationId,0)=ISNULL(pld.intSubLocationId,0) AND ISNULL(sd.intStorageLocationId,0)=ISNULL(pld.intStorageLocationId,0) 
 	AND sd.intItemId=pld.intItemId) As dblAvailableUnit,
 	um.strUnitMeasure,1,'Picking',
@@ -732,15 +738,18 @@ Begin
 	UNION --Non Lot Tracked Items
 	Select pld.intPickListDetailId,pld.intPickListId,-1,'','',0,'',pld.intItemId,i.strItemNo,i.strDescription,@intKitStagingLocationId,@strKitStagingLocationName,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
-	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	(Select TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pld.intItemUOMId,sd.dblAvailableQty) 
+	From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
 	ISNULL(sd.intStorageLocationId,0)=ISNULL(@intKitStagingLocationId,0) 
 	AND sd.intItemId=pld.intItemId) AS dblAvailableQty,
-	(Select TOP 1 sd.dblReservedQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	(Select TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pld.intItemUOMId,sd.dblReservedQty) 
+	From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
 	ISNULL(sd.intStorageLocationId,0)=ISNULL(@intKitStagingLocationId,0) 
 	AND sd.intItemId=pld.intItemId) AS dblReservedQty,
 	pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure,
 	-1,
-	(Select TOP 1 sd.dblAvailableQty From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
+	(Select TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,pld.intItemUOMId,sd.dblAvailableQty) 
+	From vyuMFGetItemStockDetail sd Where ISNULL(sd.ysnStockUnit,0)=1 AND sd.intLocationId=@intLocationId AND 
 	ISNULL(sd.intStorageLocationId,0)=ISNULL(@intKitStagingLocationId,0) 
 	AND sd.intItemId=pld.intItemId) As dblAvailableUnit,
 	um.strUnitMeasure,1,'Staged',
