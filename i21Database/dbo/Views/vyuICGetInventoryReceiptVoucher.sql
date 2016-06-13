@@ -16,7 +16,12 @@ SELECT
 	, ReceiptItem.dblQtyToReceive
 	, ReceiptItem.dblLineTotal
 	, ISNULL(ReceiptItem.dblBillQty,0) dblQtyVouchered
-	, ISNULL(ReceiptItem.dblBillQty,0) dblVoucherAmount
+	, dblVoucherAmount = 
+	  CASE
+		WHEN ReceiptItem.dblQtyToReceive = 0
+		THEN 0
+		ELSE (ReceiptItem.dblLineTotal/ReceiptItem.dblQtyToReceive)* ISNULL(ReceiptItem.dblBillQty,0)
+	  END
 	, (ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0)) dblQtyToVoucher
 	, dblAmountToVoucher =
 	  CASE
