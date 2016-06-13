@@ -4314,7 +4314,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         iRely.Functions.openScreen('i21.view.Currency', {viewConfig: { modal: true }});
     },
 
-    getWeightLoss: function(ReceiptItems, action)
+    getWeightLoss: function(ReceiptItems, sourceType, action)
     {
         var dblWeightLoss = 0;
         var dblNetShippedWt = 0;
@@ -4336,9 +4336,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if ((dblNetReceivedWt - dblNetShippedWt) !== 0)
                     dblWeightLoss = dblWeightLoss + (dblNetReceivedWt - dblNetShippedWt);*/
                 
-                dblNetReceivedWt = item.data.dblNet;
-                dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;              
-                dblWeightLoss = dblNetReceivedWt - dblNetShippedWt;
+                
+                // Check if item is Inbound Shipment
+                if(sourceType === 2)
+                    {
+                        dblNetReceivedWt = item.data.dblNet;
+                        dblNetShippedWt = item.data.dblOrderQty * item.data.dblContainerWeightPerQty;              
+                        dblWeightLoss = dblNetReceivedWt - dblNetShippedWt;
+                    }
+                else
+                    {
+                        dblWeightLoss = 0;
+                    }
+                
             }
         });
 
@@ -4352,9 +4362,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
-
+        
+        var current = win.viewModel.data.current;
+        var sourceType = current.get('intSourceType');
+            
         if (ReceiptItems) {
-            this.getWeightLoss(ReceiptItems.data.items, action);
+            this.getWeightLoss(ReceiptItems.data.items, sourceType, action);
         }
 
     },
