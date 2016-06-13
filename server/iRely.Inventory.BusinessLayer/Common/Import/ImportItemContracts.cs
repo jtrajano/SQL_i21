@@ -19,6 +19,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             tblICItemContract fc = new tblICItemContract();
             bool valid = true;
+            int itemId = 0;
             for (var i = 0; i < fieldCount; i++)
             {
                 //if (!valid)
@@ -28,7 +29,7 @@ namespace iRely.Inventory.BusinessLayer
                 string value = csv[header];
                 string h = header.ToLower().Trim();
                 int? lu = null;
-                int itemId = 0;
+                
                 switch (h)
                 {
                     case "item no":
@@ -39,6 +40,7 @@ namespace iRely.Inventory.BusinessLayer
                         if (lu != null)
                         {
                             fc.intItemId = (int)lu;
+                            itemId = fc.intItemId;
                         }
                         else
                         {
@@ -54,26 +56,53 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         break;
                     case "location":
-                        lu = GetLookUpId<vyuICGetItemLocation>(
-                            context,
-                            m => m.strLocationName == value && m.intItemId == itemId,
-                            e => (int)e.intLocationId);
-                        if (lu != null)
-                        {
-                            fc.intItemLocationId = (int)lu;
-                        }
-                        else
-                        {
-                            valid = false;
-                            dr.Messages.Add(new ImportDataMessage()
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        var param = new System.Data.SqlClient.SqlParameter("@intItemId", itemId);
+                        var param2 = new System.Data.SqlClient.SqlParameter("@strLocationName", value);
+                        param.DbType = System.Data.DbType.Int32;
+                        param2.DbType = System.Data.DbType.String;
+                        var query = @"SELECT intItemId, intItemLocationId, intLocationId, strItemNo, strItemDescription, strLocationName
+                            FROM vyuICGetItemLocation
+                            WHERE intItemId = @intItemId
+	                            AND strLocationName = @strLocationName";
+
+                        IEnumerable<ItemLocation> itemLocations = context.ContextManager.Database.SqlQuery<ItemLocation>(query, param, param2);
+                            try
                             {
-                                Column = header,
-                                Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Status = REC_SKIP,
-                                Message = "The Location " + value + " does not exist."
-                            });
-                        }
+                                ItemLocation store = itemLocations.First();
+
+                                if (store != null)
+                                {
+                                    fc.intItemLocationId = store.intItemLocationId;
+                                }
+                                else
+                                {
+                                    valid = false;
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Column = header,
+                                        Row = row,
+                                        Type = TYPE_INNER_ERROR,
+                                        Status = REC_SKIP,
+                                        Message = "The Location " + value + " does not exist."
+                                    });
+                                    dr.Info = INFO_WARN;
+                                }
+                            }
+                            catch(Exception)
+                            {
+                                valid = false;
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_ERROR,
+                                    Status = REC_SKIP,
+                                    Message = "The Location " + value + " does not exist."
+                                });
+                                dr.Info = INFO_WARN;
+                            }
                         break;
                     case "origin":
                         lu = GetLookUpId<tblSMCountry>(
@@ -131,6 +160,16 @@ namespace iRely.Inventory.BusinessLayer
                 ToValue = string.Format("Contract Name: {0}, Location: {1}", fc.strContractItemName, fc.strLocationName)
             });
             return fc;
+        }
+
+        private class ItemLocation
+        {
+            public int intItemLocationId { get; set; }
+            public int intLocationId { get; set; }
+            public int intItemId { get; set; }
+            public string strLocationName { get; set; }
+            public string strItemNo { get; set; }
+            public string strItemDescription { get; set; }
         }
 
         protected override int GetPrimaryKeyId(ref tblICItemContract entity)
