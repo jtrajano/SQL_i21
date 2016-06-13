@@ -6,9 +6,11 @@ SELECT
 	,tblPRPaycheck.intEntityEmployeeId
 	,tblPRPaycheck.dtmPayDate
 	,tblPRPaycheckEarning.intEmployeeEarningId
-	,strEarning = (SELECT TOP 1 strEarning FROM tblPRTypeEarning WHERE intTypeEarningId = tblPRPaycheckEarning.intTypeEarningId)
+	,tblPRTypeEarning.strEarning
 	,tblPRPaycheckEarning.intTypeEarningId
 	,tblPRPaycheckEarning.strCalculationType
+	,tblPRPaycheckEarning.intEmployeeDepartmentId
+	,tblPRDepartment.strDepartment
 	,tblPRPaycheckEarning.dblHours
 	,tblPRPaycheckEarning.dblAmount
 	,tblPRPaycheckEarning.dblTotal
@@ -43,20 +45,26 @@ SELECT
 FROM
 	tblPRPaycheck 
 	INNER JOIN tblPRPaycheckEarning ON tblPRPaycheck.intPaycheckId = tblPRPaycheckEarning.intPaycheckId
+	INNER JOIN tblPRTypeEarning ON tblPRPaycheckEarning.intTypeEarningId = tblPRPaycheckEarning.intTypeEarningId
+	LEFT JOIN tblPRDepartment ON tblPRPaycheckEarning.intEmployeeDepartmentId = tblPRDepartment.intDepartmentId
 WHERE
 	tblPRPaycheck.ysnPosted = 1 AND tblPRPaycheck.ysnVoid = 0
 GROUP BY
-	tblPRPaycheckEarning.intPaycheckEarningId,
-	tblPRPaycheck.intPaycheckId,
-	tblPRPaycheck.intEntityEmployeeId,
-	tblPRPaycheck.dtmPayDate,
-	tblPRPaycheckEarning.intEmployeeEarningId,
-	tblPRPaycheckEarning.intTypeEarningId,
-	tblPRPaycheckEarning.strCalculationType,
-	tblPRPaycheckEarning.dblAmount,
-	tblPRPaycheckEarning.dblHours,
-	tblPRPaycheckEarning.dblTotal,
-	tblPRPaycheckEarning.intAccountId,
-	tblPRPaycheckEarning.intSort,
-	tblPRPaycheckEarning.intConcurrencyId,
-	tblPRPaycheck.dblGross
+	tblPRPaycheckEarning.intPaycheckEarningId
+	,tblPRPaycheck.intPaycheckId
+	,tblPRPaycheck.intEntityEmployeeId
+	,tblPRPaycheck.dtmPayDate
+	,tblPRTypeEarning.intTypeEarningId
+	,tblPRTypeEarning.strEarning
+	,tblPRPaycheckEarning.intEmployeeEarningId
+	,tblPRPaycheckEarning.intTypeEarningId
+	,tblPRPaycheckEarning.strCalculationType
+	,tblPRPaycheckEarning.intEmployeeDepartmentId
+	,tblPRDepartment.strDepartment
+	,tblPRPaycheckEarning.dblAmount
+	,tblPRPaycheckEarning.dblHours
+	,tblPRPaycheckEarning.dblTotal
+	,tblPRPaycheckEarning.intAccountId
+	,tblPRPaycheckEarning.intSort
+	,tblPRPaycheckEarning.intConcurrencyId
+	,tblPRPaycheck.dblGross
