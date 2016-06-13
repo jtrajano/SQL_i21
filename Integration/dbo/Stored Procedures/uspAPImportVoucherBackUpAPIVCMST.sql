@@ -240,6 +240,7 @@ BEGIN
 	) PaymentInfo
 	WHERE A.apivc_orig_amt != 0
 	AND 1 = CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+	AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U'
 END
 
 IF OBJECT_ID('tempdb..#tmpPostedBackupId') IS NOT NULL DROP TABLE #tmpPostedBackupId

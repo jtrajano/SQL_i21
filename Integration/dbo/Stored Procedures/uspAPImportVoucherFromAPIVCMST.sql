@@ -114,6 +114,8 @@ SELECT
 	[strReference] 			=	A.apivc_comment,
 	[strPONumber]			=	A.apivc_pur_ord_no,
 	[dbl1099]				=	A.apivc_1099_amt,
+	[dblSubtotal]			=	CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
+									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
 	[dblTotal] 				=	CASE WHEN A.apivc_trans_type = 'C' OR A.apivc_trans_type = 'A' THEN A.apivc_orig_amt
 									ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
 	[dblPayment]			=	CASE WHEN A.apivc_status_ind = 'P' THEN
@@ -174,6 +176,7 @@ INSERT
 	[intAccountId], 
 	[strReference], 
 	[strPONumber],
+	[dblSubtotal],
 	[dblTotal], 
 	[dbl1099],
 	[dblPayment], 
@@ -214,6 +217,7 @@ VALUES
 	[intAccountId], 
 	[strReference], 
 	[strPONumber],
+	[dblSubtotal],
 	[dblTotal], 
 	[dbl1099],
 	[dblPayment], 

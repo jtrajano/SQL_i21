@@ -103,6 +103,8 @@ SELECT
 	[intAccountId] 				=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
 	[strReference] 				=	A.aptrx_comment,
 	[strPONumber]				=	A.aptrx_pur_ord_no,
+	[dblSubtotal] 				=	CASE WHEN A.aptrx_trans_type = 'C' OR A.aptrx_trans_type = 'A' THEN A.aptrx_orig_amt 
+										ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
 	[dblTotal] 					=	CASE WHEN A.aptrx_trans_type = 'C' OR A.aptrx_trans_type = 'A' THEN A.aptrx_orig_amt 
 										ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
 	[dblAmountDue]				=	CASE WHEN A.aptrx_trans_type = 'C' OR A.aptrx_trans_type = 'A' THEN A.aptrx_orig_amt 
@@ -157,6 +159,7 @@ INSERT
 	[intAccountId], 
 	[strReference], 
 	[strPONumber],
+	[dblSubtotal],
 	[dblTotal], 
 	[dblAmountDue],
 	[intEntityId],
@@ -195,6 +198,7 @@ VALUES
 	[intAccountId], 
 	[strReference], 
 	[strPONumber],
+	[dblSubtotal],
 	[dblTotal], 
 	[dblAmountDue],
 	[intEntityId],

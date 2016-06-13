@@ -470,6 +470,11 @@ FROM tmp_apeglmstImport A
 
 SET @totalAPHGLMST = @@ROWCOUNT
 
+DELETE A
+FROM aptrxmst A
+INNER JOIN tmp_aptrxmstImport B 
+ON A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no AND A.A4GLIdentity = B.A4GLIdentity
+
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
