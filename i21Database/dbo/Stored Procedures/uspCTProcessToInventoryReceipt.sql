@@ -118,7 +118,8 @@ AS
 				[intShipFromId],
 				[intLocationId],
 				[ysnPrice],
-				[ysnSubCurrency]
+				[ysnSubCurrency],
+				[intCostCurrencyId]
 		) 
 		
 		SELECT	CC.intVendorId,
@@ -137,12 +138,14 @@ AS
 				EL.intEntityLocationId,
 				CD.intCompanyLocationId,
 				CC.ysnPrice,
-				SubCurrency.ysnSubCurrency				
-		FROM		vyuCTContractCostView	CC
-		JOIN		vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
-		JOIN		tblEMEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
-												EL.ysnDefaultLocation	=	1
-		LEFT JOIN tblSMCurrency				SubCurrency  ON SubCurrency.intCurrencyID = CASE WHEN CD.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
+				CY.ysnSubCurrency,
+				CY.intCurrencyID
+								
+		FROM	vyuCTContractCostView	CC
+		JOIN	vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+		JOIN	tblEMEntityLocation		EL	ON	EL.intEntityId			=	CD.intEntityId			AND
+												EL.ysnDefaultLocation	=	1						LEFT
+		JOIN	tblSMCurrency			CY  ON	CY.intCurrencyID		=	CC.intCurrencyId
 
 		WHERE	CC.intContractDetailId	=	@intContractDetailId
 
