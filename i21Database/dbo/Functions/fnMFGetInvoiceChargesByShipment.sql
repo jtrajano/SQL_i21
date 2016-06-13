@@ -67,13 +67,13 @@ BEGIN
 
 			INSERT INTO @tblInputItem(intRecipeItemId,intItemId,intItemUOMId,dblPrice,dblLineTotal,dblQuantity)
 			Select t.intRecipeItemId,t.intItemId, t.intItemUOMId, t.dblPrice,(t.dblPrice * @dblShipQty) AS dblLineTotal, @dblShipQty From
-			(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ri.dblMargin + (ri.dblMargin * ISNULL(ip.dblStandardCost,0))/100 
-			ELSE ISNULL(ip.dblStandardCost,0) + ri.dblMargin End)/@dblRecipeQty AS dblPrice
+			(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblStandardCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost,0))/100 
+			ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End)/@dblRecipeQty AS dblPrice
 			From tblMFRecipeItem ri 
 			Join tblICItem i on ri.intItemId=i.intItemId
 			Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
 			Left Join tblICItemPricing ip on i.intItemId=ip.intItemId AND il.intItemLocationId=ip.intItemLocationId
-			where ri.intRecipeId=@intRecipeId AND i.strType='Other Charge' AND ISNULL(ri.dblMargin,0)>0 
+			where ri.intRecipeId=@intRecipeId AND i.strType='Other Charge'
 			AND ISNULL(ri.ysnCostAppliedAtInvoice,0)=1) t
 	End
 	Else
@@ -97,15 +97,15 @@ BEGIN
 		--Get Other Charges
 		INSERT INTO @tblInputItem(intRecipeItemId,intItemId,intItemUOMId,dblPrice,dblLineTotal,dblQuantity)
 		Select t.intRecipeItemId,t.intItemId,t.intItemUOMId,t.dblPrice,(t.dblPrice * t.dblShipQty) AS dblLineTotal, t.dblShipQty From
-		(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ri.dblMargin + (ri.dblMargin * ISNULL(ip.dblStandardCost,0))/100 
-		ELSE ISNULL(ip.dblStandardCost,0) + ri.dblMargin End)/r.dblQuantity AS dblPrice,tr.dblShipQty
+		(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblStandardCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost,0))/100 
+		ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End)/r.dblQuantity AS dblPrice,tr.dblShipQty
 		From tblMFRecipeItem ri 
 		Join tblICItem i on ri.intItemId=i.intItemId
 		Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
 		Left Join tblICItemPricing ip on i.intItemId=ip.intItemId AND il.intItemLocationId=ip.intItemLocationId
 		Join @tblRecipe tr on ri.intRecipeId=tr.intRecipeId
 		Join tblMFRecipe r on tr.intRecipeId=r.intRecipeId
-		where i.strType='Other Charge' AND ISNULL(ri.dblMargin,0)>0 
+		where i.strType='Other Charge' 
 		AND ISNULL(ri.ysnCostAppliedAtInvoice,0)=1) t
 	End
 
