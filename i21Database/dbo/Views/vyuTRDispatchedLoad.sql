@@ -47,14 +47,14 @@ SELECT LG.intLoadId
 	, strOutboundContractNumber = LG.strSContractNumber
 	, LG.dtmScheduledDate
 	, LG.dtmDispatchedDate
+	, dtmDeliveredDate = ISNULL(LG.dtmDeliveredDate, LG.dtmScheduledDate)
 	, intShipViaId = LG.intHaulerEntityId
-	, (select top 1 intSellerId from tblTRCompanyPreference) as intSellerId
+	, Config.intSellerId
 	, intDriverId = LG.intDriverEntityId
 	, strTractor = LG.strTruckNo
 	, strTrailer = LG.strTrailerNo1
 	, strShipVia = LG.strHauler
-	, (select top 1 EM.strName from tblTRCompanyPreference CP 
-								   join tblEMEntity EM on CP.intSellerId = EM.intEntityId) as strSeller
+	, strSeller = Seller.strName
 	, strSalespersonId = LG.strDriver
 	, intOutboundContractDetailId = LG.intSContractDetailId
 	, ysnDirectShip = CASE WHEN LG.intPurchaseSale = 3
@@ -72,7 +72,7 @@ SELECT LG.intLoadId
 	, strZipCode = VendorLocation.strZipCode
 	, intRackPriceSupplyPointId = CASE WHEN (LG.strType != 'Outbound') THEN SP.intRackPriceSupplyPointId
 										ELSE NULL END
-	, (select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId
+	, intItemUOMId = ItemUOM.intItemUOMId
 	, strInboundIndexType = CASE WHEN (LG.strType != 'Outbound') THEN PurchaseContract.strIndexType
 									ELSE NULL END
 	, strOutboundIndexType = SalesContract.strIndexType
@@ -95,7 +95,10 @@ SELECT LG.intLoadId
 	, strOutboundTaxGroup = CustomerTax.strTaxGroup
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ISNULL(LG.intSCompanyLocationId, LG.intPCompanyLocationId)
+LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
+LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId
 LEFT JOIN tblICItem Item ON Item.intItemId = LG.intItemId
+CROSS APPLY (SELECT TOP 1 * FROM tblICItemUOM WHERE tblICItemUOM.intItemId = LG.intItemId ORDER BY tblICItemUOM.ysnStockUnit DESC) ItemUOM
 LEFT JOIN vyuCTContractDetailView PurchaseContract ON PurchaseContract.intContractDetailId = LG.intPContractDetailId
 LEFT JOIN vyuCTContractDetailView SalesContract ON SalesContract.intContractDetailId = LG.intSContractDetailId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLocationId AND SP.intEntityVendorId = LG.intVendorEntityId
