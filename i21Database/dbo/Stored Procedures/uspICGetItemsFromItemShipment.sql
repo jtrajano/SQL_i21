@@ -29,7 +29,7 @@ SELECT
 		,[intStorageLocationId]			= NULL 
 		,[intItemUOMId]					= ShipmentItem.intItemUOMId
 		,[intWeightUOMId]				= ShipmentItem.intWeightUOMId
-		,[dblQty]						= ISNULL(ShipmentItemLot.dblQuantityShipped, ShipmentItem.dblQuantity)
+		,[dblQty]						= ShipmentItem.dblQuantity
 		,[dblUOMQty]					= ItemUOM.dblUnitQty
 		,[dblNetWeight]					= ShipmentItemLot.dblGrossWeight - ShipmentItemLot.dblTareWeight
 		,[dblSalesPrice]				= ShipmentItem.dblUnitPrice
