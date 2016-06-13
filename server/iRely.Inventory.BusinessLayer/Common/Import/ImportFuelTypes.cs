@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "fuel category", "feed stock" };
+            return new string[] { "fuel category", "feed stock", "fuel code", "production process", "feed stock uom" };
         }
 
         protected override tblICFuelType ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
@@ -32,15 +32,55 @@ namespace iRely.Inventory.BusinessLayer
                 switch (h)
                 {
                     case "fuel category":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Fuel Category should not be blank.",
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = GetLookUpId<tblICRinFuelCategory>(context,
                             m => m.strRinFuelCategoryCode == value,
                             e => e.intRinFuelCategoryId);
                         if (lu != null)
                             fc.intRinFuelCategoryId = (int)lu;
                         else
+                        {
+
                             valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Message = "Invalid Fuel Category: " + value + '.',
+                                Status = REC_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                        }
                         break;
                     case "feed stock":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Feed Stock should not be blank.",
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = InsertAndOrGetLookupId<tblICRinFeedStock>(
                             context,
                             m => m.strRinFeedStockCode == value,
@@ -50,6 +90,17 @@ namespace iRely.Inventory.BusinessLayer
                                 strRinFeedStockCode = value,
                                 strDescription = value
                             }, out inserted);
+                        if (inserted)
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_INFO,
+                                Status = STAT_INNER_SUCCESS,
+                                Message = "Created new Feed Stock record."
+                            });
+                        }
                         if (lu != null)
                             fc.intRinFeedStockId = (int)lu;
                         else
@@ -76,6 +127,20 @@ namespace iRely.Inventory.BusinessLayer
                         fc.strEquivalenceValue = value;
                         break;
                     case "fuel code":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Fuel Code should not be blank.",
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = InsertAndOrGetLookupId<tblICRinFuel>(
                             context,
                             m => m.strRinFuelCode == value,
@@ -85,6 +150,17 @@ namespace iRely.Inventory.BusinessLayer
                                 strRinFuelCode = value,
                                 strDescription = value
                             }, out inserted);
+                        if (inserted)
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_INFO,
+                                Status = STAT_INNER_SUCCESS,
+                                Message = "Created new Fuel Code record."
+                            });
+                        }
                         if (lu != null)
                             fc.intRinFuelId = (int)lu;
                         else
@@ -102,6 +178,20 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         break;
                     case "production process":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Production Process should not be blank.",
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = InsertAndOrGetLookupId<tblICRinProcess>(
                             context,
                             m => m.strRinProcessCode == value,
@@ -111,8 +201,21 @@ namespace iRely.Inventory.BusinessLayer
                                 strRinProcessCode = value,
                                 strDescription = value
                             }, out inserted);
+                        if (inserted)
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_INFO,
+                                Status = STAT_INNER_SUCCESS,
+                                Message = "Created new Production Process record."
+                            });
+                        }
                         if (lu != null)
+                        {
                             fc.intRinProcessId = (int)lu;
+                        }
                         else
                         {
                             valid = false;
@@ -127,25 +230,62 @@ namespace iRely.Inventory.BusinessLayer
                             dr.Info = INFO_WARN;
                         }
                         break;
-                    case "feed stock uom code":
-                        lu = GetLookUpId<tblICRinFeedStockUOM>(context,
-                            m => m.strRinFeedStockUOMCode == value,
-                            e => e.intRinFeedStockUOMId);
-                        if (lu != null)
-                            fc.intRinFeedStockUOMId = (int)lu;
-                        else
+                    case "feed stock uom":
+                        if (string.IsNullOrEmpty(value))
                         {
                             valid = false;
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
                                 Row = row,
-                                Type = TYPE_INNER_ERROR,
-                                Message = "Invalid Feed Stock UOM: " + value + '.',
-                                Status = REC_SKIP
+                                Type = TYPE_INNER_WARN,
+                                Message = "Feed Stock UOM should not be blank.",
+                                Status = STAT_INNER_COL_SKIP
                             });
                             dr.Info = INFO_WARN;
+                            break;
                         }
+                        var param = new System.Data.SqlClient.SqlParameter("@strUnitMeasure", value);
+                        param.DbType = System.Data.DbType.String;
+                        var query = @"SELECT u.intRinFeedStockUOMId, u.intUnitMeasureId, m.strUnitMeasure, m.strSymbol, u.strRinFeedStockUOMCode
+                            FROM tblICRinFeedStockUOM u
+	                            LEFT OUTER JOIN tblICUnitMeasure m ON u.intUnitMeasureId = m.intUnitMeasureId
+                            WHERE m.strUnitMeasure = @strUnitMeasure";
+
+                        IEnumerable<FuelType> storageStores = context.ContextManager.Database.SqlQuery<FuelType>(query, param);
+                            try
+                            {
+                                FuelType store = storageStores.First();
+
+                                if (store != null)
+                                    fc.intRinFeedStockUOMId = store.intRinFeedStockUOMId;
+                                else
+                                {
+                                    valid = false;
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Column = header,
+                                        Row = row,
+                                        Type = TYPE_INNER_WARN,
+                                        Message = "Invalid Feed Stock UOM: " + value + '.',
+                                        Status = STAT_INNER_COL_SKIP
+                                    });
+                                    dr.Info = INFO_WARN;
+                                }
+                            }
+                            catch(Exception)
+                            {
+                                valid = false;
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid Feed Stock UOM: " + value + '.',
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                dr.Info = INFO_WARN;
+                            }
                         break;
                     case "feed stock factor":
                         SetDecimal(value, del => fc.dblFeedStockFactor = del, "Feed Stock Factor", dr, header, row);
@@ -167,6 +307,15 @@ namespace iRely.Inventory.BusinessLayer
 
             context.AddNew<tblICFuelType>(fc);
             return fc;
+        }
+
+        private class FuelType
+        {
+            public int intRinFeedStockUOMId { get; set; }
+            public int intUnitMeasureId { get; set; }
+            public string strUnitMeasure { get; set; }
+            public string strSymbol { get; set; }
+            public string strRinFeedStockUOMCode { get; set; }
         }
 
         protected override int GetPrimaryKeyId(ref tblICFuelType entity)

@@ -224,7 +224,7 @@ function getTemplateColumns(name) {
             return ["Unit of Measure", "Code"];
         case "Fuel Types":
             return ["Fuel Category", "Feed Stock", "Batch No", "Ending Rin Gallons", "Equivalence Value", "Fuel Code",
-                "Production Process", "Feed Stock UOM Code", "Feed Stock Factor", "Renewable Biomass", "Percent of Denaturant", "Deduct Denaturant"];
+                "Production Process", "Feed Stock UOM", "Feed Stock Factor", "Renewable Biomass", "Percent of Denaturant", "Deduct Denaturant"];
         case "Storage Unit Types":
             return ["Name", "Description", "Internal Code", "Capacity UOM", "Max Weight", "Allows Picking", "Dimension UOM",
                 "Height", "Depth", "Width", "Pallet Stack", "Pallet Columns", "Pallet Rows"];
