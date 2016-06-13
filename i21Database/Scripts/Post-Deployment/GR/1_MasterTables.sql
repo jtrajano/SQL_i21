@@ -39,14 +39,6 @@ BEGIN
 	SELECT 2,'Wet Weight',1	
 END
 GO
-
-GO
-IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink')
-BEGIN
-	INSERT INTO tblGRShrinkCalculationOption
-	SELECT 3,'Price Shrink',1	
-END
-GO
 IF EXISTS(SELECT 1 FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink')
 BEGIN
 	DELETE tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink'	
