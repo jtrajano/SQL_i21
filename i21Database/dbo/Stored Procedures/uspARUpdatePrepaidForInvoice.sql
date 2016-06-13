@@ -116,11 +116,15 @@ BEGIN TRY
 	FROM
 		vyuARPrepaidAndCredit ARPAC
 	WHERE
-		ARPAC.[dblInvoiceBalance] <> 0
+		ARPAC.[dblInvoiceDetailBalance] <> 0
 		AND ISNULL(ARPAC.[intInvoiceId],0) <> @InvoiceId
 		AND ARPAC.[intEntityCustomerId] = @EntityCustomerId
 		AND ARPAC.[dblInvoiceBalance] <> 0
 		AND NOT EXISTS(SELECT NULL FROM vyuARPrepaidAndCredit WHERE vyuARPrepaidAndCredit.[intEntityCustomerId] =  ARPAC.[intEntityCustomerId] AND vyuARPrepaidAndCredit.[intPrepaymentId] =  ARPAC.[intPrepaymentId] AND vyuARPrepaidAndCredit.[intInvoiceId] = @InvoiceId)
+		AND (ISNULL(ARPAC.[ysnRestricted],0) = 0
+			OR
+			(ISNULL(ARPAC.[ysnRestricted],0) = 1 AND EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intContractDetailId] = ARPAC.[intContractDetailId] AND ARID.[intInvoiceId] = @InvoiceId))
+			)
 		
 
 END TRY

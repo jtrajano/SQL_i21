@@ -522,7 +522,7 @@ END CATCH
 					AND (
 						ARI.strTransactionType IN ('Cash','Cash Refund')
 						OR
-						(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1 AND tblARPrepaidAndCredit.dblAppliedInvoiceAmount <> 0 ))
+						(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1 AND tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount <> 0 ))
 						)
 	
 				--Service Charge Account
@@ -1538,8 +1538,8 @@ IF @post = 1
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
 				,intAccountId				= ARI1.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceAmount] END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceAmount] ELSE @ZeroDecimal END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
 				,dblDebitUnit				= @ZeroDecimal 
 				,dblCreditUnit				= @ZeroDecimal
 				,strDescription				= A.strComments
@@ -1566,7 +1566,7 @@ IF @post = 1
 				tblARInvoice A
 					ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 
 					AND ISNULL(ARPAC.[ysnApplied],0) = 1
-					AND ARPAC.[dblAppliedInvoiceAmount] <> @ZeroDecimal
+					AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
 			INNER JOIN
 				tblARInvoice ARI1
 					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
@@ -2881,7 +2881,15 @@ IF @recap = 0
 									
 					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 
 												
-				END 
+				END
+
+
+		DELETE tblARPrepaidAndCredit  
+		FROM 
+			tblARPrepaidAndCredit A 
+		INNER JOIN @PostInvoiceData B  
+		   ON A.intInvoiceId = B.intInvoiceId
+		   AND  ISNULL(A.ysnApplied,0) = 0
 																
 		END TRY
 		BEGIN CATCH	
