@@ -3964,6 +3964,8 @@
     <Build Include="dbo\Views\vyuLGLoadVesselViewSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspLGTransferContractLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitItemMove.sql" />
+    <Build Include="dbo\Views\vyuLGLoadWarehouseView.sql" />
+    <Build Include="dbo\Views\vyuLGLoadCostView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
