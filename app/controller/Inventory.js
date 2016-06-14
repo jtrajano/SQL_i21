@@ -379,7 +379,7 @@ Ext.define('Inventory.controller.Inventory', {
                 columnName = 'strRegProdCode';
                 break;
             case 'PromotionalItem':
-                screenName = 'Store.view.PromotionItemList';
+                screenName = 'Store.view.PromotionSales';
                 columnName = 'strPromoItemListId';
                 break;
             case 'DepositPLU':

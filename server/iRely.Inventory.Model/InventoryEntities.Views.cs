@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets34df0c9023fc55f7d4bbe9fc1e4b15a43694acdd520927d13677ffd755bf4a4f))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8fc76f1dcc60c4a155bc55c1a460da1015a9473c4b7117260027fce06e811bdd))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets34df0c9023fc55f7d4bbe9fc1e4b15a43694acdd520927d13677ffd755bf4a4f : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets8fc76f1dcc60c4a155bc55c1a460da1015a9473c4b7117260027fce06e811bdd : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "34df0c9023fc55f7d4bbe9fc1e4b15a43694acdd520927d13677ffd755bf4a4f"; }
+            get { return "8fc76f1dcc60c4a155bc55c1a460da1015a9473c4b7117260027fce06e811bdd"; }
         }
 
         /// <summary>
@@ -10143,13 +10143,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTPromotionSalesList
-        [CodeFirstDatabaseSchema.tblSTPromotionSalesList](T1.tblSTPromotionSalesList_intPromoSalesListId, T1.tblSTPromotionSalesList_strPromoType, T1.tblSTPromotionSalesList_strDescription, T1.tblSTPromotionSalesList_intPromoCode, T1.tblSTPromotionSalesList_intPromoUnits, T1.tblSTPromotionSalesList_dblPromoPrice, T1.tblSTPromotionSalesList_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblSTPromotionSalesList](T1.tblSTPromotionSalesList_intPromoSalesListId, T1.tblSTPromotionSalesList_strPromoType, T1.tblSTPromotionSalesList_strPromoSalesDescription, T1.tblSTPromotionSalesList_intPromoSalesId, T1.tblSTPromotionSalesList_intPromoUnits, T1.tblSTPromotionSalesList_dblPromoPrice, T1.tblSTPromotionSalesList_intConcurrencyId)
     FROM (
         SELECT 
             T.intPromoSalesListId AS tblSTPromotionSalesList_intPromoSalesListId, 
             T.strPromoType AS tblSTPromotionSalesList_strPromoType, 
-            T.strDescription AS tblSTPromotionSalesList_strDescription, 
-            T.intPromoCode AS tblSTPromotionSalesList_intPromoCode, 
+            T.strDescription AS tblSTPromotionSalesList_strPromoSalesDescription, 
+            T.intPromoCode AS tblSTPromotionSalesList_intPromoSalesId, 
             T.intPromoUnits AS tblSTPromotionSalesList_intPromoUnits, 
             T.dblPromoPrice AS tblSTPromotionSalesList_dblPromoPrice, 
             T.intConcurrencyId AS tblSTPromotionSalesList_intConcurrencyId, 
@@ -10171,8 +10171,8 @@ namespace Edm_EntityMappingGeneratedViews
         SELECT 
             T.intPromoSalesListId AS tblSTPromotionSalesList_intPromoSalesListId, 
             T.strPromoType AS tblSTPromotionSalesList_strPromoType, 
-            T.strDescription AS tblSTPromotionSalesList_strDescription, 
-            T.intPromoCode AS tblSTPromotionSalesList_intPromoCode, 
+            T.strPromoSalesDescription AS tblSTPromotionSalesList_strDescription, 
+            T.intPromoSalesId AS tblSTPromotionSalesList_intPromoCode, 
             T.intPromoUnits AS tblSTPromotionSalesList_intPromoUnits, 
             T.dblPromoPrice AS tblSTPromotionSalesList_dblPromoPrice, 
             T.intConcurrencyId AS tblSTPromotionSalesList_intConcurrencyId, 

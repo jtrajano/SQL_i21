@@ -230,8 +230,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblPromoPrice).HasColumnName("dblPromoPrice");
             this.Property(t => t.intPromoSalesListId).HasColumnName("intPromoSalesListId");
             this.Property(t => t.intPromoUnits).HasColumnName("intPromoUnits");
-            this.Property(t => t.intPromoCode).HasColumnName("intPromoCode");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.intPromoCode).HasColumnName("intPromoSalesId");
+            this.Property(t => t.strDescription).HasColumnName("strPromoSalesDescription");
             this.Property(t => t.strPromoType).HasColumnName("strPromoType");
         }
     }

@@ -321,20 +321,79 @@ namespace iRely.Inventory.BusinessLayer
                         SetBoolean(value, del => fc.ysnPromotionalItem = del);
 	                    break;
                     case "promotion item":
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        int val;
+                        try
+                        {
+                            val = int.Parse(value);
+                        }
+                        catch (Exception ex)
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Message = string.Format("Invalid Promotion Item: {0}.", value),
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
+                        lu = GetLookUpId<tblSTPromotionSalesList>(
+                            context,
+                            m => m.intPromoCode == val,
+                            e => e.intPromoSalesListId);
+                        if (lu != null)
+                            fc.intMixMatchId = (int)lu;
+                        else
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Message = string.Format("Can't find Promotion Item: {0}.", value),
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                        }
 	                    break;
                     case "deposit required":
                         SetBoolean(value, del => fc.ysnDepositRequired = del);
 	                    break;
                     case "deposit plu":
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            lu = GetLookUpId<tblICItemUOM>(
-                                context,
-                                m => m.strUnitMeasure == value && m.intItemId == intItemId && !string.IsNullOrEmpty(m.strUpcCode),
-                                e => (int)e.intItemUOMId);
-                            if (lu != null)
-                                fc.intDepositPLUId = (int)lu;
-                            else
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        var param = new System.Data.SqlClient.SqlParameter("@strDepositPLU", value);
+                        param.DbType = System.Data.DbType.String;
+                        var query = @"SELECT u.intItemUOMId, u.intItemId, u.intUnitMeasureId, m.strUnitMeasure, u.strUpcCode
+		                    FROM tblICItemUOM u
+			                    INNER JOIN tblICUnitMeasure m ON m.intUnitMeasureId = u.intUnitMeasureId
+		                    WHERE NULLIF(u.strUpcCode, '') IS NOT NULL AND m.strUnitMeasure = @strDepositPLU";
+
+                        IEnumerable<DepositPLU> storageStores = context.ContextManager.Database.SqlQuery<DepositPLU>(query, param);
+                            try
+                            {
+                                DepositPLU store = storageStores.First();
+
+                                if (store != null)
+                                    fc.intDepositPLUId = store.intItemUOMId;
+                                else
+                                {
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Column = header,
+                                        Row = row,
+                                        Type = TYPE_INNER_WARN,
+                                        Message = "Can't find Deposit PLU: " + value + '.',
+                                        Status = STAT_INNER_COL_SKIP
+                                    });
+                                    dr.Info = INFO_WARN;
+                                }
+                            }
+                            catch(Exception)
                             {
                                 dr.Messages.Add(new ImportDataMessage()
                                 {
@@ -346,7 +405,6 @@ namespace iRely.Inventory.BusinessLayer
                                 });
                                 dr.Info = INFO_WARN;
                             }
-                        }
 	                    break;
                     case "bottle deposit no:":
                         SetInteger(value, del => fc.intBottleDepositNo = del, "Bottle Deposit No", dr, header, row);
@@ -399,6 +457,67 @@ namespace iRely.Inventory.BusinessLayer
                     case "item type subcode":
                         SetInteger(value, del => fc.intItemTypeSubCode = del, "Item Type Subcode", dr, header, row);
 	                    break;
+                    case "item type code":
+                        query = "";
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            try
+                            {
+                                val = int.Parse(value);
+                            }
+                            catch (Exception ex)
+                            {
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Invalid Item Type Code: " + value + '.',
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                dr.Info = INFO_WARN;
+                                break;
+                            }
+                            param = new System.Data.SqlClient.SqlParameter("@intRadiantItemTypeCode", val);
+                            param.DbType = System.Data.DbType.Int32;
+                            query = @"SELECT intRadiantItemTypeCodeId, 
+                                        intRadiantItemTypeCode, strDescription FROM tblSTRadiantItemTypeCode
+                                      WHERE intRadiantItemTypeCode = @intRadiantItemTypeCode";
+                            IEnumerable<RadiantItemTypeCode> itemTypes = context.ContextManager.Database.SqlQuery<RadiantItemTypeCode>(query, param);
+                            try
+                            {
+                                RadiantItemTypeCode itemType = itemTypes.First();
+
+                                if (itemType != null)
+                                    fc.intItemTypeCode = itemType.intRadiantItemTypeCodeId;
+                                else
+                                {
+                                    dr.Messages.Add(new ImportDataMessage()
+                                    {
+                                        Column = header,
+                                        Row = row,
+                                        Type = TYPE_INNER_WARN,
+                                        Message = "Can't find Item Type Code: " + value + '.',
+                                        Status = STAT_INNER_COL_SKIP
+                                    });
+                                    dr.Info = INFO_WARN;
+                                }
+                            }
+                            catch(Exception)
+                            {
+                                dr.Messages.Add(new ImportDataMessage()
+                                {
+                                    Column = header,
+                                    Row = row,
+                                    Type = TYPE_INNER_WARN,
+                                    Message = "Can't find Item Type Code: " + value + '.',
+                                    Status = STAT_INNER_COL_SKIP
+                                });
+                                dr.Info = INFO_WARN;
+                            }
+
+                        }
+                        break;
                     case "allow negative inventory":
                         switch (value.ToUpper().Trim())
                         {
@@ -465,10 +584,10 @@ namespace iRely.Inventory.BusinessLayer
                         SetDecimal(value, del => fc.dblFreightRate = del, "Freight Rate", dr, header, row);
 	                    break;
                     case "freight term":
-                        string query = "";
+                        query = "";
                         if (!string.IsNullOrEmpty(value))
                         {
-                            var param = new System.Data.SqlClient.SqlParameter("@strFreightTerm", value);
+                            param = new System.Data.SqlClient.SqlParameter("@strFreightTerm", value);
                             param.DbType = System.Data.DbType.String;
                             query = "SELECT intFreightTermId, strFreightTerm, strFobPoint FROM tblSMFreightTerms WHERE strFreightTerm = @strFreightTerm";
                             IEnumerable<tblSMFreightTerms> terms = context.ContextManager.Database.SqlQuery<tblSMFreightTerms>(query, param);
@@ -509,7 +628,7 @@ namespace iRely.Inventory.BusinessLayer
                     case "ship via":
                         if (!string.IsNullOrEmpty(value))
                         {
-                            var param = new System.Data.SqlClient.SqlParameter("@strShipVia", value);
+                            param = new System.Data.SqlClient.SqlParameter("@strShipVia", value);
                             param.DbType = System.Data.DbType.String;
                             query = "SELECT intEntityShipViaId, strShipVia, strShippingService, strName FROM vyuEMSearchShipVia WHERE strShipVia = @strShipVia";
                             IEnumerable<vyuEMSearchShipVia> ships = context.ContextManager.Database.SqlQuery<vyuEMSearchShipVia>(query, param );
@@ -573,6 +692,7 @@ namespace iRely.Inventory.BusinessLayer
                 entry.Property(e => e.ysnTaxFlag3).CurrentValue = fc.ysnTaxFlag3;
                 entry.Property(e => e.ysnTaxFlag4).CurrentValue = fc.ysnTaxFlag4;
                 entry.Property(e => e.ysnPromotionalItem).CurrentValue = fc.ysnPromotionalItem;
+                entry.Property(e => e.intMixMatchId).CurrentValue = fc.intMixMatchId;
                 entry.Property(e => e.ysnDepositRequired).CurrentValue = fc.ysnDepositRequired;
                 entry.Property(e => e.intDepositPLUId).CurrentValue = fc.intDepositPLUId;
                 entry.Property(e => e.intBottleDepositNo).CurrentValue = fc.intBottleDepositNo;
@@ -593,6 +713,7 @@ namespace iRely.Inventory.BusinessLayer
                 entry.Property(e => e.ysnTaxFlag4).CurrentValue = fc.ysnTaxFlag4;
                 entry.Property(e => e.ysnCarWash).CurrentValue = fc.ysnCarWash;
                 entry.Property(e => e.intItemTypeSubCode).CurrentValue = fc.intItemTypeSubCode;
+                entry.Property(e => e.intItemTypeCode).CurrentValue = fc.intItemTypeCode;
                 entry.Property(e => e.intAllowNegativeInventory).CurrentValue = fc.intAllowNegativeInventory;
                 entry.Property(e => e.dblReorderPoint).CurrentValue = fc.dblReorderPoint;
                 entry.Property(e => e.dblMinOrder).CurrentValue = fc.dblMinOrder;
@@ -619,6 +740,22 @@ namespace iRely.Inventory.BusinessLayer
             }
 
             return fc;
+        }
+
+        private class RadiantItemTypeCode
+        {
+            public int intRadiantItemTypeCodeId { get; set; }
+            public int intRadiantItemTypeCode { get; set; }
+            public string strDescription { get; set; }
+        }
+
+        private class DepositPLU
+        {
+            public int intItemUOMId { get; set; }
+            public int intItemId { get; set; }
+            public int intUnitMeasureId { get; set; }
+            public string strUnitMeasure { get; set; }
+            public string strUpcCode { get; set; }
         }
 
         public class tblSMFreightTerms
