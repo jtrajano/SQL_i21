@@ -34,6 +34,20 @@ namespace iRely.Inventory.BusinessLayer
                 switch (h)
                 {
                     case "item no":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
+                                Message = "Item No should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = GetLookUpId<tblICItem>(
                             context,
                             m => m.strItemNo == value,
@@ -57,6 +71,20 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         break;
                     case "account category":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
+                                Message = "Account Category should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = GetLookUpId<tblGLAccountCategory>(
                             context,
                             m => m.strAccountCategory == value,
@@ -80,6 +108,20 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         break;
                     case "account id":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
+                                Message = "Account Id should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = GetLookUpId<tblGLAccount>(
                             context,
                             m => m.strAccountId == value,
@@ -109,11 +151,11 @@ namespace iRely.Inventory.BusinessLayer
                 return null;
 
             if (context.GetQuery<tblICItemAccount>().Any(t => t.intItemId == fc.intItemId 
-                && (t.intItemAccountId != fc.intItemAccountId || t.intAccountCategoryId != fc.intAccountCategoryId)))
+                && (t.intItemAccountId == fc.intItemAccountId || t.intAccountCategoryId == fc.intAccountCategoryId)))
             {
                 var entry = context.ContextManager.Entry<tblICItemAccount>(context.GetQuery<tblICItemAccount>().First(
                     t => t.intItemId == fc.intItemId
-                && (t.intItemAccountId != fc.intItemAccountId || t.intAccountCategoryId != fc.intAccountCategoryId)));
+                && (t.intItemAccountId == fc.intItemAccountId || t.intAccountCategoryId == fc.intAccountCategoryId)));
                 entry.Property(e => e.intAccountId).CurrentValue = fc.intAccountId;
                 entry.Property(e => e.intAccountCategoryId).CurrentValue = fc.intAccountCategoryId;
                 entry.State = System.Data.Entity.EntityState.Modified;
