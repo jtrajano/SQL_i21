@@ -40,6 +40,15 @@ WHERE A.intTransactionType IN (2,3,8)
 AND 1 = CASE WHEN A.intTransactionType= 3 AND A.ysnPosted != 1 --DEBIT MEMO should be posted
 			 THEN 0 ELSE 1 END
 
+--DELETE THE RECORDS THAT HAS NOT BEEN USED IF POSTING
+IF @post = 1
+BEGIN
+	DELETE A
+	FROM tblAPAppliedPrepaidAndDebit A
+	INNER JOIN #tmpBillsId B ON A.intBillId = B.intBillId
+	WHERE A.dblAmountApplied = 0
+END
+
 --VALIDATIONS
 --MAKE SURE PAYMENT IS CORRECT FOR CURRENT TRANSACTION
 DECLARE @error NVARCHAR(200);
