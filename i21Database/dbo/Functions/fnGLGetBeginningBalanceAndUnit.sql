@@ -11,30 +11,6 @@ beginBalanceUnit NUMERIC(18,6)
 
 AS
 BEGIN
-	-- *BOY = BEGINNING OF FISCAL YEAR
-	-- *BOT = BEGINNING OF TIME
-	--  NOTE : EXPENSE AND REVENUE BEGINNING BALANCE IS COMPUTED VIA *BOY WHILE OTHER ARE COMPUTE VIA *BOT
-	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccount A JOIN tblGLFiscalYear B ON A.intAccountId = B.intRetainAccount WHERE A.strAccountId = @strAccountId)
-	BEGIN
-		;WITH cte as(
-		SELECT  
-				 @strAccountId AS strAccountId,
-				(dblCredit - dblDebit) as beginbalance,
-				(dblCreditUnit - dblDebitUnit) as beginbalanceunit
-		  
-		FROM tblGLAccount A
-			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
-			LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
-			CROSS APPLY (SELECT dtmDateFrom,dtmDateTo from tblGLFiscalYear where @dtmDate >= dtmDateFrom AND @dtmDate <= dtmDateTo) D
-		WHERE
-		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < @dtmDate)
-		OR (strAccountId =@strAccountId AND C.dtmDate >= D.dtmDateFrom AND C.dtmDate <@dtmDate) and strCode <> '' AND ysnIsUnposted = 0)  
-		insert into @tbl
-		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
-		
-		RETURN 
-	END
-
 	DECLARE @accountType NVARCHAR(30)
 	SELECT @accountType= B.strAccountType  FROM tblGLAccount A JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId WHERE
 	A.strAccountId = @strAccountId and B.strAccountType IN ('Expense','Revenue','Cost of Goods Sold')

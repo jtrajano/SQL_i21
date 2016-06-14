@@ -1,25 +1,44 @@
-﻿CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAndUnitRE] 
+﻿CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAndUnitRE]
 (	
-	-- Add the parameters for the function here
 	@strAccountId NVARCHAR(100),
-	@dtmDate NVARCHAR(20) = ''
+	@dtmDate DATETIME,
+	@dtmDate1 DATETIME = NULL,
+	@multiFiscal BIT = 0
 )
-RETURNS TABLE 
+RETURNS @tbl TABLE (
+strAccountId NVARCHAR(100),
+beginBalance NUMERIC (18,6),
+beginBalanceUnit NUMERIC(18,6)
+)
+
 AS
-RETURN 
-(
-	-- Add the SELECT statement with parameter references here
-	
-	WITH cte as(
-	SELECT  
-			 @strAccountId AS strAccountId,
-			(dblCredit - dblDebit) as beginbalance,
-			(dblCreditUnit - dblDebitUnit) as beginbalanceunit
+BEGIN
+	-- *BOY = BEGINNING OF FISCAL YEAR
+	-- *BOT = BEGINNING OF TIME
+	--  NOTE : EXPENSE AND REVENUE BEGINNING BALANCE IS COMPUTED VIA *BOY WHILE OTHER ARE COMPUTE VIA *BOT
+	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccount A JOIN tblGLFiscalYear B ON A.intAccountId = B.intRetainAccount WHERE A.strAccountId = @strAccountId)
+	BEGIN
+		;WITH cte as(
+		SELECT  
+				 @strAccountId AS strAccountId,
+				 CASE WHEN B.strAccountType IN ('Asset', 'Expense','Cost of Goods Sold') 
+				THEN (dblDebit - dblCredit) 
+				ELSE (dblCredit - dblDebit) *-1 END
+				as beginbalance,
+				(dblCreditUnit - dblDebitUnit) as beginbalanceunit
 		  
-	FROM tblGLAccount A
-		LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
-		LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
-	WHERE B.strAccountType in ('Expense','Revenue') and C.dtmDate < (CASE WHEN @dtmDate= '' THEN '2100-01-01' ELSE @dtmDate END) and strCode <> ''
-	)
-	select sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
-)
+		FROM tblGLAccount A
+			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
+			LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
+		WHERE
+		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < CASE WHEN @multiFiscal= 1 THEN @dtmDate ELSE @dtmDate1 end
+		OR (strAccountId =@strAccountId AND C.dtmDate >=  @dtmDate1 AND C.dtmDate < @dtmDate) and isnull(strCode,'') <> '' 
+		AND ysnIsUnposted = 0))  
+		insert into @tbl
+		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
+		
+		
+	END
+	RETURN
+	
+END
