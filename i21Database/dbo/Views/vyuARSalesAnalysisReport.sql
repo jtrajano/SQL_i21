@@ -81,159 +81,14 @@ FROM
 												 END)
 			,dblQtyOrdered					= ARID.dblQtyOrdered
 			,dblQtyShipped					= ARID.dblQtyShipped
-			,dblStandardCost				= (CASE WHEN ISNULL(ICIC.intTransactionDetailId,0) <> 0 THEN ICIC.dblCost
-													--WHEN ISNULL(SOIC.intTransactionDetailId,0) <> 0 THEN SOIC.dblCost
-													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) = 0 AND ISNULL(ARID.intSalesOrderDetailId,0) = 0 )
-														AND EXISTS
-														(
-															SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
-															AND intTransactionId = ARI.intInvoiceId
-															AND strTransactionId = ARI.strInvoiceNumber
-															AND intItemId		 = ARID.intItemId
-															AND intItemUOMId	 = ARID.intItemUOMId
-														)
-														THEN
-														(
-															SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
-															AND intTransactionId = ARI.intInvoiceId
-															AND strTransactionId = ARI.strInvoiceNumber
-															AND intItemId		 = ARID.intItemId
-															AND intItemUOMId	 = ARID.intItemUOMId
-														)
-													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId,0) <> 0 AND ISNULL(ICIC.dblCost,0) = 0)
-														AND NOT EXISTS
-														(
-															SELECT TOP 1 dblCost FROM tblICInventoryTransaction WHERE ISNULL(ysnIsUnposted,0) = 0
-															AND intTransactionId = ARI.intInvoiceId
-															AND strTransactionId = ARI.strInvoiceNumber
-															AND intItemId		 = ARID.intItemId
-															AND intItemUOMId	 = ARID.intItemUOMId
-														)
-														THEN
-														(
-															SELECT TOP 1
-																 dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, ICIT.dblCost) dblCost
-															FROM 
-																tblICInventoryShipmentItem ICISI
-															INNER JOIN
-																tblICInventoryShipment ICIS
-																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-															INNER JOIN
-																tblICInventoryTransaction ICIT
-																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-																	AND ICISI.intItemId = ICIT.intItemId
-																	AND ICISI.intInventoryShipmentItemId = ICIT.intTransactionDetailId 
-																	AND ICISI.intItemUOMId <> ICIT.intItemUOMId
-															WHERE ARID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId 
-																	AND ARID.intItemId = ICISI.intItemId 
-														)
-													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) = 0 AND ISNULL(ARID.intSalesOrderDetailId,0) <> 0 AND ISNULL(ICIC.dblCost,0) = 0)
-														AND EXISTS
-														(
-															SELECT
-																 NULL 
-															FROM
-																tblSOSalesOrderDetail SOSOD
-															INNER JOIN 
-																tblICInventoryShipmentItem ICISI
-																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
-															INNER JOIN
-																tblICInventoryShipment ICIS
-																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-																	AND ICIS.intOrderType = 2
-															INNER JOIN
-																tblICInventoryTransaction ICIT
-																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-																	AND ICISI.intItemId = ICIT.intItemId 
-																	AND ICISI.intItemUOMId = ICIT.intItemUOMId
-																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
-															WHERE
-																ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId 
-																AND ARID.intItemId = ICISI.intItemId
-																AND ARID.intItemUOMId = ICISI.intItemUOMId
-														)
-														THEN
-														(
-															SELECT TOP 1
-																 ICIT.dblCost 
-															FROM
-																tblSOSalesOrderDetail SOSOD
-															INNER JOIN 
-																tblICInventoryShipmentItem ICISI
-																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
-															INNER JOIN
-																tblICInventoryShipment ICIS
-																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-																	AND ICIS.intOrderType = 2
-															INNER JOIN
-																tblICInventoryTransaction ICIT
-																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-																	AND ICISI.intItemId = ICIT.intItemId 
-																	AND ICISI.intItemUOMId = ICIT.intItemUOMId
-																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
-															WHERE
-																ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId 
-																AND ARID.intItemId = SOSOD.intItemId
-																AND ARID.intItemUOMId = SOSOD.intItemUOMId														
-														)
-													WHEN (ISNULL(ARID.intInventoryShipmentItemId,0) = 0 AND ISNULL(ARID.intSalesOrderDetailId,0) <> 0 AND ISNULL(ICIC.dblCost,0) = 0)
-														AND NOT EXISTS
-														(
-															SELECT
-																 NULL 
-															FROM
-																tblSOSalesOrderDetail SOSOD
-															INNER JOIN 
-																tblICInventoryShipmentItem ICISI
-																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
-															INNER JOIN
-																tblICInventoryShipment ICIS
-																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-																	AND ICIS.intOrderType = 2
-															INNER JOIN
-																tblICInventoryTransaction ICIT
-																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-																	AND ICISI.intItemId = ICIT.intItemId 
-																	AND ICISI.intItemUOMId = ICIT.intItemUOMId
-																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
-															WHERE
-																ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId 
-																AND ARID.intItemId = ICISI.intItemId
-																AND ARID.intItemUOMId = ICISI.intItemUOMId
-														)
-														THEN
-														(
-															SELECT TOP 1
-																 dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, ICIT.dblCost) dblCost
-															FROM 
-																tblSOSalesOrderDetail SOSOD
-															INNER JOIN 
-																tblICInventoryShipmentItem ICISI
-																	ON SOSOD.intSalesOrderDetailId = ICISI.intLineNo 
-															INNER JOIN
-																tblICInventoryShipment ICIS
-																	ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-																	AND ICIS.intOrderType = 2
-															INNER JOIN
-																tblICInventoryTransaction ICIT
-																	ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-																	AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-																	AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-																	AND ICISI.intItemId = ICIT.intItemId 
-																	AND ICISI.intItemUOMId <> ICIT.intItemUOMId
-																	AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
-															WHERE
-																SOSOD.intSalesOrderDetailId = ARID.intSalesOrderDetailId  
-																AND ARID.intItemId = ICISI.intItemId																
-														)
+			,dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
+														THEN ISNULL(NONSO.dblCost, 0)
+													WHEN dbo.fnIsStockTrackingItem(ARID.intItemId) = 0 AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+														THEN NONLOTTED.dblCost
+													WHEN dbo.fnIsStockTrackingItem(ARID.intItemId) <> 0 AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+														THEN LOTTED.dblCost
+													ELSE
+														0.000000
 												END)
 			,dblPrice						= ARID.dblPrice
 			,dblTax							= ARID.dblTotalTax
@@ -250,30 +105,61 @@ FROM
 		LEFT JOIN 
 			vyuARGetItemAccount ARGIA 
 				ON ARID.intItemId = ARGIA.intItemId AND ARI.intCompanyLocationId = ARGIA.intLocationId
-		LEFT OUTER JOIN
-			(
-				SELECT
-					 ICIT.dblCost
-					,ICIT.intTransactionDetailId
-					,ICISI.intItemId
-					,ICISI.intItemUOMId
-				FROM 
-					tblICInventoryShipmentItem ICISI
-				INNER JOIN
-					tblICInventoryShipment ICIS
-						ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-				INNER JOIN
-					tblICInventoryTransaction ICIT
-						ON  ISNULL(ICIT.ysnIsUnposted,0) = 0
-						AND ICIS.intInventoryShipmentId = ICIT.intTransactionId 
-						AND ICIS.strShipmentNumber = ICIT.strTransactionId 
-						AND ICISI.intItemId = ICIT.intItemId 
-						AND ICISI.intItemUOMId = ICIT.intItemUOMId
-						AND ICIT.intTransactionDetailId = ICISI.intInventoryShipmentItemId 
-			) ICIC
-				ON  ARID.intInventoryShipmentItemId = ICIC.intTransactionDetailId 
-				AND ARID.intItemId = ICIC.intItemId 
-				AND ARID.intItemUOMId = ICIC.intItemUOMId
+		LEFT OUTER JOIN tblICInventoryTransaction NONSO
+			ON NONSO.ysnIsUnposted		= 0
+			AND ARI.intInvoiceId		= NONSO.intTransactionId
+			AND ARI.strInvoiceNumber	= NONSO.strTransactionId
+			AND ARID.intItemId			= NONSO.intItemId
+			AND ARID.intItemUOMId		= NONSO.intItemUOMId
+		LEFT OUTER JOIN (
+			SELECT ICISI.intInventoryShipmentItemId
+				 , ICISI.intLineNo
+				 , ICISI.intItemId
+				 , ICISI.intItemUOMId
+				 , ICIT.dblCost		 
+			FROM
+				tblICInventoryShipmentItem ICISI	
+			INNER JOIN tblICInventoryShipment ICIS
+				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+			INNER JOIN tblICInventoryTransaction ICIT
+				ON ICIT.ysnIsUnposted							= 0
+				AND ISNULL(ICIT.intLotId, 0)					= 0
+				AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
+				AND ICIS.strShipmentNumber						= ICIT.strTransactionId
+				AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
+				AND ICISI.intItemId								= ICIT.intItemId
+				AND ICISI.intItemUOMId							= ICIT.intItemUOMId
+				AND dbo.fnIsStockTrackingItem(ICISI.intItemId) = 0) AS NONLOTTED
+					ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
+					AND ARID.intItemId					= NONLOTTED.intItemId
+					AND ARID.intItemUOMId				= NONLOTTED.intItemUOMId
+					AND ARID.intSalesOrderDetailId		= NONLOTTED.intLineNo
+		LEFT OUTER JOIN (
+			SELECT ICISI.intInventoryShipmentItemId
+				 , ICISI.intLineNo
+				 , ICISI.intItemId
+				 , ICISI.intItemUOMId
+				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(ICIT.dblCost))
+			FROM
+				tblICInventoryShipmentItem ICISI
+			INNER JOIN tblICInventoryShipment ICIS
+				ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+			INNER JOIN tblICInventoryTransaction ICIT
+				ON ICIT.ysnIsUnposted							= 0
+				AND ISNULL(ICIT.intLotId, 0)					<> 0
+				AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
+				AND ICIS.strShipmentNumber						= ICIT.strTransactionId
+				AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
+				AND ICISI.intItemId								= ICIT.intItemId		
+				AND dbo.fnIsStockTrackingItem(ICISI.intItemId)	= 1
+			INNER JOIN tblICLot ICL
+				ON ICIT.intLotId = ICL.intLotId
+				AND ICISI.intItemUOMId = ICL.intItemUOMId
+			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId, ICIT.intItemUOMId) AS LOTTED
+					ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
+					AND ARID.intItemId					= LOTTED.intItemId
+					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
+					AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 		WHERE ARI.ysnPosted = 1 
 		  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo')							
 
@@ -300,12 +186,12 @@ FROM
 									 END)
 		,dblQtyOrdered				= SOD.dblQtyOrdered
 		,dblQtyShipped				= SOD.dblQtyShipped
-		,dblStandardCost			= (CASE WHEN ISNULL(LOTTEDITEMS.intLineNo, 0) <> 0 
-												THEN LOTTEDITEMS.dblCost
-											WHEN ISNULL(NONLOTTEDITEMS.intLineNo, 0) <> 0 
-												THEN NONLOTTEDITEMS.dblCost
+		,dblStandardCost			= (CASE WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) = 0 AND ISNULL(NONLOTTED.intInventoryShipmentItemId, 0) <> 0
+												THEN NONLOTTED.dblCost
+											WHEN dbo.fnIsStockTrackingItem(SOD.intItemId) <> 0 AND ISNULL(LOTTED.intInventoryShipmentItemId, 0) <> 0
+												THEN LOTTED.dblCost
 											ELSE
-												ICP.dblStandardCost
+												0.000000
 										END)
 		,dblPrice					= dblPrice
 		,dblTax						= SOD.dblTotalTax
@@ -329,49 +215,53 @@ FROM
 				tblICItemPricing ICP 
 			ON ICL.intItemLocationId = ICP.intItemLocationId
 		) ON SO.intCompanyLocationId = ICL.intLocationId AND SOD.intItemId = ICL.intItemId AND SOD.intItemId = ICP.intItemId	
-	LEFT JOIN
-		(
-			SELECT ICISI.intLineNo
-				 , ICISI.intOrderId
-				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ICL.intWeightUOMId, ICIT.intItemUOMId), AVG(dblCost))
-			FROM
-				tblICInventoryShipmentItem ICISI
-			INNER JOIN 
-				tblICInventoryShipment ICIS
-					ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-			INNER JOIN
-				tblICInventoryTransaction ICIT
-					ON ICISI.intInventoryShipmentId			= ICIT.intTransactionId
-					AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
-					AND ICISI.intItemId						= ICIT.intItemId 
-					AND ICIS.strShipmentNumber				= ICIT.strTransactionId
-					AND ICIT.ysnIsUnposted					= 0
-			INNER JOIN
-				tblICLot ICL
-					ON ICIT.intLotId = ICL.intLotId
-					AND ICISI.intItemUOMId = ICL.intItemUOMId		
-			GROUP BY ICISI.intLineNo, ICISI.intOrderId, ICISI.intItemUOMId, ICIT.intItemUOMId, ICL.intWeightUOMId
-		) AS LOTTEDITEMS ON LOTTEDITEMS.intLineNo = SOD.intSalesOrderDetailId AND SOD.intSalesOrderId = LOTTEDITEMS.intOrderId
-	LEFT JOIN
-		(
-			SELECT ICISI.intLineNo
-				 , ICISI.intOrderId
-				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(dblCost))
-			FROM
-				tblICInventoryShipmentItem ICISI
-			INNER JOIN 
-				tblICInventoryShipment ICIS
-					ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
-			INNER JOIN
-				tblICInventoryTransaction ICIT
-					ON ICISI.intInventoryShipmentId			= ICIT.intTransactionId
-					AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
-					AND ICISI.intItemId						= ICIT.intItemId
-					AND ICISI.intItemUOMId					= ICIT.intItemUOMId
-					AND ICIS.strShipmentNumber				= ICIT.strTransactionId					
-					AND ICIT.ysnIsUnposted					= 0	
-			GROUP BY ICISI.intLineNo, ICISI.intOrderId, ICISI.intItemUOMId, ICIT.intItemUOMId
-		) AS NONLOTTEDITEMS ON NONLOTTEDITEMS.intLineNo = SOD.intSalesOrderDetailId AND SOD.intSalesOrderId = NONLOTTEDITEMS.intOrderId
+	LEFT OUTER JOIN (
+	SELECT ICISI.intInventoryShipmentItemId
+		 , ICISI.intLineNo
+		 , ICISI.intItemId
+		 , ICISI.intItemUOMId
+		 , ICIT.dblCost		 
+	FROM
+		tblICInventoryShipmentItem ICISI	
+	INNER JOIN tblICInventoryShipment ICIS
+		ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	INNER JOIN tblICInventoryTransaction ICIT
+		ON ICIT.ysnIsUnposted							= 0
+		AND ISNULL(ICIT.intLotId, 0)					= 0
+		AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
+		AND ICIS.strShipmentNumber						= ICIT.strTransactionId
+		AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
+		AND ICISI.intItemId								= ICIT.intItemId
+		AND ICISI.intItemUOMId							= ICIT.intItemUOMId
+		AND dbo.fnIsStockTrackingItem(ICISI.intItemId) = 0) AS NONLOTTED
+			ON SOD.intItemId					= NONLOTTED.intItemId
+			AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
+			AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
+	LEFT OUTER JOIN (
+		SELECT ICISI.intInventoryShipmentItemId
+			 , ICISI.intLineNo
+			 , ICISI.intItemId
+			 , ICISI.intItemUOMId
+			 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(ICIT.dblCost))
+		FROM
+			tblICInventoryShipmentItem ICISI
+		INNER JOIN tblICInventoryShipment ICIS
+			ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+		INNER JOIN tblICInventoryTransaction ICIT
+			ON ICIT.ysnIsUnposted							= 0
+			AND ISNULL(ICIT.intLotId, 0)					<> 0
+			AND ICIS.intInventoryShipmentId					= ICIT.intTransactionId
+			AND ICIS.strShipmentNumber						= ICIT.strTransactionId
+			AND ICISI.intInventoryShipmentItemId			= ICIT.intTransactionDetailId
+			AND ICISI.intItemId								= ICIT.intItemId		
+			AND dbo.fnIsStockTrackingItem(ICISI.intItemId)	= 1
+		INNER JOIN tblICLot ICL
+			ON ICIT.intLotId = ICL.intLotId
+			AND ICISI.intItemUOMId = ICL.intItemUOMId
+		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId, ICIT.intItemUOMId) AS LOTTED
+				ON SOD.intItemId					= LOTTED.intItemId
+				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
+				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT JOIN 
 		vyuARGetItemAccount IA 
 			ON SOD.intItemId = IA.intItemId AND SO.intCompanyLocationId = IA.intLocationId
