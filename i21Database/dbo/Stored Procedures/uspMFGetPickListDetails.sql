@@ -368,7 +368,7 @@ Begin
 	Join tblICItemUOM iu on sr.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Where ti.intConsumptionMethodId in (2,3) AND sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=@intInventoryTransactionType 
-	AND ISNULL(sr.ysnPosted,0)=0
+	AND ISNULL(sr.ysnPosted,0)=0 AND i.strLotTracking <> 'No'
 
 	Insert Into @tblRemainingPickedItems(intItemId,dblRemainingQuantity,intConsumptionMethodId,ysnIsSubstitute,intParentItemId)
 	Select ti.intItemId,(ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) AS dblRemainingQuantity,ti.intConsumptionMethodId,ti.ysnIsSubstitute,ti.intParentItemId 
@@ -396,6 +396,9 @@ Begin
 
 	--Remove sub item if main is selected
 	Delete a From @tblRemainingPickedItems a join @tblPickList b on a.intParentItemId=b.intItemId Where a.ysnIsSubstitute=1
+
+	--Remove Non Lot Tracked Items
+	Delete ti From @tblRemainingPickedItems ti Join tblICItem i on ti.intItemId=i.intItemId Where i.strLotTracking = 'No'
 
 	--Find the Remaining Lots
 	If (Select COUNT(1) From @tblRemainingPickedItems) > 0
@@ -576,6 +579,9 @@ Begin
 	From tblICStockReservation Where intTransactionId=@intPickListId AND intInventoryTransactionType=@intInventoryTransactionType AND ISNULL(ysnPosted,0)=0 Group by intItemId) tpl on  ti.intItemId=tpl.intItemId
 	WHERE (ti.dblRequiredQty - ISNULL(tpl.dblQuantity,0)) > 0 AND ti.intConsumptionMethodId in (2,3)
 
+	--Remove Non Lot Tracked Items
+	Delete ti From @tblRemainingPickedItems ti Join tblICItem i on ti.intItemId=i.intItemId Where i.strLotTracking = 'No'
+
 	--Find the Remaining Lots
 	If (Select COUNT(1) From @tblRemainingPickedItems) > 0
 	Begin
@@ -732,7 +738,7 @@ Begin
 	Join tblICItemUOM iu on sr.intItemUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Where ti.intConsumptionMethodId in (2,3) AND sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=@intInventoryTransactionType 
-	AND ISNULL(sr.ysnPosted,0)=0
+	AND ISNULL(sr.ysnPosted,0)=0 AND i.strLotTracking <> 'No'
 
 	Select a.*,b.intConsumptionMethodId From @tblPickList a Left Join @tblInputItem b on a.intItemId=b.intItemId 
 	UNION --Non Lot Tracked Items
