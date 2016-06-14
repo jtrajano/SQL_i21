@@ -106,13 +106,17 @@ SELECT   Load.intLoadId
 
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
-
+		,ysnPLoad = PHeader.ysnLoad
+		,ysnBundle = CONVERT(BIT,CASE Item.strType 
+					 WHEN 'Bundle' THEN 1
+					 ELSE 0 END)
 		,strCustomer = CEN.strName
         ,strShipTo = CEL.strLocationName
 
 		,intSContractHeaderId = SHeader.intContractHeaderId
         ,strSContractNumber = SHeader.strContractNumber
         ,intSContractSeq = SDetail.intContractSeq
+		,ysnSLoad = SHeader.ysnLoad
 
         ,strSLocationName = SCL.strLocationName
 		,strSLocationAddress = SCL.strAddress
@@ -126,6 +130,9 @@ SELECT   Load.intLoadId
 
 		,Item.strItemNo
 		,Item.strDescription AS strItemDescription
+		,UOM.strUnitMeasure AS strItemUOM
+		,UOM.intUnitMeasureId AS intItemUnitMeasureId
+		,WeightUOM.strUnitMeasure AS strWeightItemUOM
         ,strEquipmentType = EQ.strEquipmentType
         ,strHauler = Hauler.strName
         ,strDriver = Driver.strName
@@ -166,6 +173,7 @@ LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
+LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId

@@ -3969,6 +3969,7 @@
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInsertModule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCascadeModule.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailLotsView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
