@@ -115,7 +115,7 @@ BEGIN
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSS,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType = 'Tip' AND ysnSSTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSSTIPS,
-			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnMedTaxable = 1
+			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnMedTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLMED,
 			 (SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 					 dblGrossSum = SUM(dblGross) 
@@ -153,7 +153,7 @@ BEGIN
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSS,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType = 'Tip' AND ysnSSTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSSTIPS,
-			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnMedTaxable = 1
+			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnMedTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLMED,
 			 (SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 					 dblGrossSum = SUM(dblGross) 
