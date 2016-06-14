@@ -11,6 +11,8 @@
 ,@TransferCost			NUMERIC(18,6)   
 ,@TransactionId			INT				=   NULL
 ,@CreditCardUsed		BIT				=	0
+,@PostedOrigin			BIT				=	0
+,@PostedCSV				BIT				=	0
 ,@IsImporting			BIT				=	0
 -------------REMOTE TAXES-------------
 --  1. REMOTE TRANSACTION			--
@@ -57,6 +59,8 @@ BEGIN
 
 	DECLARE @intTransactionId				INT
 	DECLARE @ysnCreditCardUsed				BIT
+	DECLARE @ysnPostedOrigin				BIT
+	DECLARE @ysnPostedCSV					BIT
 	DECLARE @guid							NVARCHAR(MAX)
 	DECLARE	@runDate						DATETIME
 
@@ -141,6 +145,9 @@ BEGIN
 	SET @guid		= NEWID()
 	SET	@runDate	= GETDATE()
 
+	 
+	SET @ysnPostedOrigin	= @PostedOrigin
+	SET @ysnPostedCSV		= @PostedCSV	
 	SET @ysnCreditCardUsed = @CreditCardUsed
 	SET @intCardId = @CardId
 	SET @dblQuantity = @Quantity
@@ -229,6 +236,8 @@ BEGIN
 	@CFContractSeq				=	@intContractSeq			output,
 	@CFPriceBasis				=	@strPriceBasis			output,
 	@CFCreditCard				=	@ysnCreditCardUsed,      
+	@CFPostedOrigin				=	@ysnPostedOrigin,      
+	@CFPostedCSV				=	@ysnPostedCSV,      
 	@CFPriceProfileId			=	@intPriceProfileId		output,
 	@CFPriceIndexId				=	@intPriceIndexId 		output,
 	@CFSiteGroupId				= 	@intSiteGroupId 		output
@@ -387,6 +396,17 @@ BEGIN
 	DECLARE @CalculationMethod  NVARCHAR(MAX)
 	DECLARE @ysnLoopTaxExempt	BIT
 	DECLARE @ysnLoopTaxCheckOff	BIT
+
+	DECLARE @strTaxExemptReason		NVARCHAR(MAX)
+	DECLARE @strNote				NVARCHAR(MAX)
+	DECLARE @strReason				NVARCHAR(MAX)
+	DECLARE @ysnCheckoffTax			BIT
+	DECLARE @ysnTaxExempt			NVARCHAR(MAX)
+	DECLARE @ysnInvalidSetup		NVARCHAR(MAX)
+	DECLARE @strTaxCode				NVARCHAR(MAX)
+
+	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
+	BEGIN
 
 	IF (LOWER(@strTransactionType) like '%remote%')
 	BEGIN
@@ -590,14 +610,6 @@ BEGIN
 	
 	SET @QxOP = @dblQuantity * @dblOriginalPrice
 	SET @QxCP = @dblQuantity * @dblPrice
-	
-	DECLARE @strTaxExemptReason		NVARCHAR(MAX)
-	DECLARE @strNote				NVARCHAR(MAX)
-	DECLARE @strReason				NVARCHAR(MAX)
-	DECLARE @ysnCheckoffTax			BIT
-	DECLARE @ysnTaxExempt			NVARCHAR(MAX)
-	DECLARE @ysnInvalidSetup		NVARCHAR(MAX)
-	DECLARE @strTaxCode				NVARCHAR(MAX)
 
 	WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxUnitTable))
 	BEGIN
@@ -797,7 +809,6 @@ BEGIN
 					 @QxT = ROUND (@dblQuantity * dblRate,2)
 					,@QxOP = @QxOP - (@dblQuantity * dblRate)
 					,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * dblRate)
-					,@dblCPTotalTax = @dblCPTotalTax + (@dblQuantity * dblRate)
 					FROM @tblTaxUnitTable
 
 					INSERT INTO @tblTransactionTaxOut
@@ -1183,6 +1194,8 @@ BEGIN
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
+	END
+
 
 	DECLARE @tblTransactionPrice TABLE(
 		 strTransactionPriceId		NVARCHAR(MAX)
@@ -1190,7 +1203,11 @@ BEGIN
 		,dblCalculatedAmount		NUMERIC(18,6)
 	)
 	
-	IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 OR @strPriceMethod = 'Import File Price')
+	IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+	OR @strPriceMethod = 'Import File Price' 
+	OR @strPriceMethod = 'Credit Card' 
+	OR @strPriceMethod = 'Posted Trans from CSV'
+	OR @strPriceMethod = 'Origin History')
 		BEGIN
 			INSERT INTO @tblTransactionPrice (
 		 strTransactionPriceId	

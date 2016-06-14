@@ -3967,6 +3967,9 @@
     <Build Include="dbo\Views\vyuLGLoadWarehouseView.sql" />
     <Build Include="dbo\Views\vyuLGLoadCostView.sql" />
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction_1.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportPricingBySiteGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -21,6 +21,8 @@
 ,@CFTransferCost		NUMERIC(18,6)   = NULL
 ,@CFOriginalPrice		NUMERIC(18,6)   = NULL OUTPUT
 ,@CFCreditCard			BIT				= 0
+,@CFPostedOrigin		BIT				= 0
+,@CFPostedCSV			BIT				= 0
 ,@CFPriceProfileId		INT				= NULL OUTPUT
 ,@CFPriceIndexId		INT				= NULL OUTPUT
 ,@CFSiteGroupId			INT				= NULL OUTPUT
@@ -55,8 +57,33 @@ AS
 --2. Item Special Pricing, 
 --3. Pricing Level, 
 --4. Standard Pricing
-print 'op'
-print @CFOriginalPrice
+
+IF (@CFCreditCard = 1)
+BEGIN
+	IF (@CFOriginalPrice IS NOT NULL)
+	BEGIN
+		SET @CFStandardPrice = @CFOriginalPrice
+		SET @CFPricingOut = 'Credit Card'
+	END
+END
+ELSE IF(@CFPostedOrigin = 1)
+BEGIN
+	IF (@CFOriginalPrice IS NOT NULL)
+	BEGIN
+		SET @CFStandardPrice = @CFOriginalPrice
+		SET @CFPricingOut = 'Origin History'
+	END
+END
+ELSE IF(@CFPostedCSV = 1)
+BEGIN
+	IF (@CFOriginalPrice IS NOT NULL)
+	BEGIN
+		SET @CFStandardPrice = @CFOriginalPrice
+		SET @CFPricingOut = 'Posted Trans from CSV'
+	END
+END
+ELSE
+BEGIN
 EXEC [uspARGetItemPrice] 
  @ItemUOMId = @CFItemUOMId
 ,@TransactionDate = @CFTransactionDate
@@ -72,10 +99,6 @@ EXEC [uspARGetItemPrice]
 ,@ContractSeq = @CFContractSeq OUTPUT  
 ,@AvailableQuantity = @CFAvailableQuantity OUTPUT
 ,@AllowQtyToExceedContract = 1
-
-print @CFPriceOut 
-
-print  @CFPricingOut
 
 IF(@CFPriceOut IS NOT NULL) 
 
@@ -121,7 +144,6 @@ IF(@CFPriceOut IS NOT NULL)
 ---***PRICE PROFILE***---
 
 --SITE ITEMS WHERE @CFNETWORKID AND @CFSiteId AND @CFItem
-
 DECLARE @cfSiteItem TABLE 
 
 (
@@ -229,7 +251,6 @@ WHERE
 	intARItemId = @CFItemId
 
 
-
 --PRICE PROFILE WHERE @CFNETWORKID AND @CFSiteId
 
 DECLARE @cfPriceProfile TABLE 
@@ -267,8 +288,6 @@ DECLARE @cfPriceProfile TABLE
 	strType					NVARCHAR(MAX)
 
 )
-
-
 
 IF(@CFTransactionType = 'Local/Network')
 
@@ -542,7 +561,7 @@ ELSE IF (@CFTransactionType = 'Extended Remote')
 
 	END
 
-	BEGIN
+BEGIN
 
 		INSERT INTO @cfPriceProfile 
 
@@ -1239,7 +1258,7 @@ END
 
 ---***PRICE PROFILE***---
 
-
+END
 
 ---***ITEM PRICING***---
 SET @CFPricingOut = @CFPricingOut 

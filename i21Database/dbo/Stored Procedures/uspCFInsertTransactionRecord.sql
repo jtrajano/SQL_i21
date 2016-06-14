@@ -60,6 +60,7 @@
 	,@OtherSalesTaxPercentageRate 		NUMERIC(18,6)	= 0.000000
 	
 	,@ysnOriginHistory					BIT				= 0
+	,@ysnPostedCSV						BIT				= 0
 	--,@LC7							NUMERIC(18,6)	= 0.000000
 	--,@LC8							NUMERIC(18,6)	= 0.000000
 	--,@LC9							NUMERIC(18,6)	= 0.000000
@@ -119,10 +120,18 @@ BEGIN
 	DECLARE @ysnInvalid				BIT	= 0
 	DECLARE @ysnPosted				BIT = 0
 	DECLARE @ysnCreditCardUsed		BIT	= 0
+	  
 	------------------------------------------------------------
 
-
+	IF (@ysnPosted != 1 OR @ysnPosted IS NULL)
+	BEGIN
 	SET @ysnPosted = @ysnOriginHistory
+	END
+	
+	IF (@ysnPosted != 1 OR @ysnPosted IS NULL)
+	BEGIN
+	SET @ysnPosted = @ysnPostedCSV
+	END
 
 	------------------------------------------------------------
 	--					SET VARIABLE VALUE					  --
@@ -529,6 +538,7 @@ BEGIN
 			,[ysnInvalid]
 			,[ysnCreditCardUsed]			
 			,[ysnOriginHistory]
+			,[ysnPostedCSV]
 		)
 		VALUES
 		(
@@ -567,6 +577,7 @@ BEGIN
 			,@ysnInvalid
 			,@ysnCreditCardUsed		
 			,@ysnOriginHistory
+			,@ysnPostedCSV  
 		)			
 	
 		DECLARE @Pk	INT		
@@ -669,6 +680,8 @@ BEGIN
 		,@TransferCost					=	@dblTransferCost
 		,@TransactionId					=	@Pk
 		,@CreditCardUsed				=	@ysnCreditCardUsed
+		,@PostedOrigin					=	@ysnOriginHistory  
+		,@PostedCSV						=	@ysnPostedCSV  
 		,@IsImporting					=	1
 		,@TaxState						=	@TaxState						
 		,@FederalExciseTaxRate        	=	@FederalExciseTaxRate        
@@ -841,6 +854,24 @@ BEGIN
 				END
 				------------------------------------------------------------
 
+		END
+		ELSE
+		BEGIN
+				UPDATE tblCFTransaction 
+				SET intContractId = null 
+				,strPriceBasis = null
+				,dblTransferCost = 0
+				,strPriceMethod = @strPriceMethod
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
+				WHERE intTransactionId = @Pk
 		END
 
 
