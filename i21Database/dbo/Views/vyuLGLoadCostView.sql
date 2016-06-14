@@ -3,7 +3,7 @@ AS
 SELECT LC.intLoadCostId
 	  ,LC.intLoadId
 	  ,LC.intItemId
-	  ,LC.intVendorId
+	  ,LC.intVendorId AS intEntityId
 	  ,LC.strCostMethod
 	  ,LC.dblRate
 	  ,LC.intItemUOMId

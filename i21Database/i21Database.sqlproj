@@ -3974,6 +3974,7 @@
     <Build Include="dbo\Stored Procedures\uspSMCascadeModule.sql" />
     <Build Include="dbo\Stored Procedures\uspETTranslateSDToInvoice.sql" />
     <Build Include="dbo\User Defined Types\ETTranslateSDToInvoiceTable.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailLotsView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
