@@ -1,5 +1,5 @@
 ﻿CREATE TYPE [dbo].[BankTransactionDetailTable] AS TABLE (
-	[intTransactionDetailId] INT             IDENTITY (1, 1) NOT NULL,
+	[intTransactionDetailId] INT             NULL,
     [intTransactionId]       INT             NOT NULL,
     [dtmDate]                DATETIME        NULL,
     [intGLAccountId]         INT             NOT NULL,
