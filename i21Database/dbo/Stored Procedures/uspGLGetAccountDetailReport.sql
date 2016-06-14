@@ -130,8 +130,8 @@ SELECT
 ,strDocument = ISNULL(detail.strDocument,'''')
 
 ,dblTotal = ( 
-				CASE	WHEN Grp.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN ISNULL(ROUND(A.dblDebit,2), 0 ) - ISNULL(ROUND(A.dblCredit,2),0) 
-						ELSE (ISNULL(ROUND(A.dblCredit,2), 0 ) - ISNULL(ROUND(A.dblDebit,2),0)) * -1
+				CASE	WHEN Grp.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN (ISNULL(ROUND(A.dblDebit,2), 0 ) - ISNULL(ROUND(A.dblCredit,2),0)) 
+						ELSE ((ISNULL(ROUND(A.dblCredit,2), 0 ) - ISNULL(ROUND(A.dblDebit,2),0) ))  
 				END
 				)  
 
@@ -160,16 +160,29 @@ WHERE ISNULL(A.ysnIsUnposted ,0) = 0
 DELETE FROM @filterTable WHERE fieldname = 'dtmDate'
 DECLARE @Where1 NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filterTable)
 
-DECLARE @sqlRetain NVARCHAR(MAX) = dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,@dtmDateTo,'cteRetain2',@Where1)
+DECLARE @dtmFromDateRetain NVARCHAR(10), @dtmToDateRetain NVARCHAR(10), @strRetainAccount NVARCHAR(10), @multiFiscal BIT=0
+DECLARE @sqlRetain NVARCHAR(MAX) 
 
-IF @sqlRetain <> 'Retained Earnings Activity Not Displayed'
-	SELECT @sqlCte += @sqlRetain
+SELECT @sqlRetain = QueryString, @dtmFromDateRetain = DateTo, @multiFiscal = MultiFiscal FROM dbo.fnGLGetRetainedEarningSQLString(@dtmDateFrom,@dtmDateTo,'cteRetain2',@Where1)
 
-SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  CASE WHEN @Where <> 'Where' THEN  @Where ELSE '' END +' )'-- UNION ALL SELECT ' + @cols + ' from cteRetain2 )'
+IF @multiFiscal <> 0 SELECT @sqlCte += @sqlRetain
+
+SELECT TOP 1  @strRetainAccount  = CONVERT(NVARCHAR(10), ISNULL(intRetainAccount,'')) FROM dbo.tblGLFiscalYear tgy
+
+DECLARE @WhereExcludeRetain NVARCHAR(MAX) = @Where
+SELECT @WhereExcludeRetain += CASE WHEN @WhereExcludeRetain <>  'Where' THEN ' AND ' ELSE ' ' END 
+SELECT @WhereExcludeRetain += 'intAccountId <>'
+SELECT @WhereExcludeRetain += @strRetainAccount
+SELECT @sqlCte += ',cteBase1 as(SELECT * from RAWREPORT ' +  @WhereExcludeRetain + ')'
+
+select @dtmToDateRetain = CASE WHEN @dtmDateTo = '' THEN '2100/01/01' ELSE @dtmDateTo END
+SELECT @sqlCte += ',cteRetainAccount as ( SELECT * FROM (SELECT * from RAWREPORT '  + CASE WHEN @Where <> 'Where' THEN @Where ELSE ' ' END + ') A
+Where A.dtmDate BETWEEN  ''' + isnull(@dtmFromDateRetain,'1900/01/01') + ''' AND ''' + @dtmToDateRetain + ''' AND intAccountId = ' + @strRetainAccount + ')'
 
 DECLARE @colsWithoutBalance NVARCHAR(MAX)
 
 SELECT @colsWithoutBalance = REPLACE(@cols,',strUOMCode,dblBeginBalance,dblBeginBalanceUnit','')
+
 
 SELECT @sqlCte+= '
 ,cteBase as (SELECT '+ @colsWithoutBalance +'
@@ -183,9 +196,22 @@ OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM Units WHERE [intAccountId] =
 OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnit( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''))) B
 
 
-' +  CASE WHEN  @sqlRetain <> 'Retained Earnings Activity Not Displayed' THEN ' UNION ALL SELECT ' + @cols + ' FROM  cteRetain2)' ELSE ')' END
+' +  CASE WHEN  @multiFiscal <> 0 THEN ' UNION ALL SELECT ' + @cols + ' FROM  cteRetain2 ' ELSE ' ' END +
 
-IF @dtmDateFrom = ''
+
+'UNION ALL SELECT ' + @colsWithoutBalance + ' 
+,ISNULL(U.strUOMCode,'''') AS strUOMCode
+,ISNULL(ROUND(B.beginBalance,2),0) AS dblBeginBalance
+,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.beginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
+					ELSE CAST(ISNULL(ISNULL(B.beginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
+
+FROM cteRetainAccount A
+OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) U
+OUTER APPLY (SELECT TOP 1 convert(varchar(10), dtmDateFrom,111) dtmDateFrom from tblGLFiscalYear where ''' + @dtmFromDateRetain + ''' BETWEEN dtmDateFrom and dtmDateTo) F
+OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''),F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) B
+)' 
+
+IF @dtmDateFrom = '' OR @dtmDateFrom IS NULL
 	SELECT @sqlCte +=	' select * from cteBase '
 ELSE
 BEGIN
@@ -208,15 +234,19 @@ BEGIN
 
 	SELECT @cols1 =  REPLACE(@cols1,',dblBeginBalance,dblBeginBalanceUnit','')
 
-	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1)'
+	
+
+	IF @strAccountIdFrom <> '' or @strPrimaryCodeFrom <> '' SELECT @Where1 += CASE WHEN @Where1 <> 'Where' then  'AND ' ELSE ''  END + ' strAccountId NOT IN(SELECT strAccountId FROM cteBase1 UNION ALL SELECT strAccountId FROM cteRetainAccount)'
 	SET @sqlCte +=',cteInactive (accountId,id) AS ( SELECT  strAccountId, MIN(intGLDetailId) FROM RAWREPORT ' + CASE WHEN @Where1 <> 'Where' THEN  @Where1 ELSE '' END + ' GROUP BY strAccountId),
 		cte1  AS( SELECT * FROM RAWREPORT	A join cteInactive B ON B.accountId = A.strAccountId AND B.id = A.intGLDetailId)'
 	SELECT @sqlCte +=	' select ' + @cols1  + '
-	,ISNULL(ROUND(B.beginBalance,2),0) AS dblBeginBalance
-	,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.beginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
-					ELSE CAST(ISNULL(ISNULL(B.beginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
+	,ISNULL(ROUND( CASE WHEN ' + @strRetainAccount + '= A.intAccountId  THEN C.beginBalance ELSE B.beginBalance END,2),0) AS dblBeginBalance
+	,[dblBeginBalanceUnit] = CASE WHEN (ISNULL( CASE WHEN ' + @strRetainAccount + '= A.intAccountId  THEN C.beginBalanceUnit ELSE B.beginBalanceUnit END, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
+					ELSE CAST(ISNULL(ISNULL(CASE WHEN ' + @strRetainAccount + '= A.intAccountId  THEN C.beginBalanceUnit ELSE B.beginBalanceUnit END, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
 	 FROM cte1 A
 	 OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnit( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''))) B
+	 OUTER APPLY (SELECT TOP 1 convert(varchar(10), dtmDateFrom,111) dtmDateFrom from tblGLFiscalYear where ''' + @dtmFromDateRetain + ''' BETWEEN dtmDateFrom and dtmDateTo) F
+	 OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''),F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) C
 	 OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) U
 	 UNION ALL SELECT ' + @cols + ' from cteBase '
 	END
