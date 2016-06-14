@@ -3861,7 +3861,7 @@
     <Build Include="dbo\Tables\tblSMUserSecurityFilterType.sql" />
     <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCCNotification.sql" />
-    <Build Include="dbo\Views\vyuSMTerm.sql" />
+    <Build Include="dbo\Views\vyuSMETExportTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspPATRefundVoucherToAPBill.sql" />
     <Build Include="dbo\Functions\fnPATGetCustomerRequiredDetailsForVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspPATProcessRefundsToVoucher.sql" />
@@ -3937,7 +3937,7 @@
     <Build Include="dbo\Views\vyuARItemCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspQMTransferContractSample.sql" />
     <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
-    <Build Include="dbo\Views\vyuICEnergyTracExportItem.sql" />
+    <Build Include="dbo\Views\vyuICETExportItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLicense.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteDBServer.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeEMTables.sql" />
@@ -3950,7 +3950,7 @@
     <Build Include="dbo\Stored Procedures\uspDMMergeSCTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeTables.sql" />
     <Build Include="dbo\Functions\fnMFGetInvoiceChargesByShipment.sql" />
-    <Build Include="dbo\Views\vyuETSalespersonDriver.sql" />
+    <Build Include="dbo\Views\vyuEMETExportSalespersonDriver.sql" />
     <Build Include="dbo\Tables\tblEMEntityPasswordHistory.sql" />
     <Build Include="dbo\Views\vyuETCustomerSpecialPricing_1.sql" />
     <Build Include="dbo\Tables\tblARPOSPayment.sql" />
