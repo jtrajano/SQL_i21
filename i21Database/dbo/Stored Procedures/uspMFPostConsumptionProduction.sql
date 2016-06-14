@@ -50,6 +50,8 @@ BEGIN
 		,@OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
 		,@intItemId1 INT
 		,@strItemNo1 AS NVARCHAR(50)
+		,@intRecipeItemUOMId INT
+
 	DECLARE @tblMFLot TABLE (
 		intRecordId INT Identity(1, 1)
 		,intLotId INT
@@ -514,6 +516,10 @@ BEGIN
 			,NULL
 			,@intUserId
 
+		SELECT @intRecipeItemUOMId = intItemUOMId
+		FROM tblMFWorkOrderRecipe
+		WHERE intWorkOrderId = @intWorkOrderId
+
 		INSERT INTO @GLEntriesForOtherCost
 		SELECT dtmDate = @dtmDate
 			,intItemId = @intItemId
@@ -522,7 +528,13 @@ BEGIN
 			,intChargeItemLocation = @intItemLocationId
 			,intTransactionId = @intBatchId
 			,strTransactionId = @strWorkOrderNo
-			,dblCost = @dblOtherCharges
+			,dblCost = (
+				CASE 
+					WHEN @intRecipeItemUOMId = @intItemUOMId
+						THEN @dblOtherCharges * @dblQty
+					ELSE @dblOtherCharges * @dblWeight
+					END
+				)
 			,intTransactionTypeId = @INVENTORY_PRODUCE
 			,intCurrencyId = (
 				SELECT TOP 1 intCurrencyId
