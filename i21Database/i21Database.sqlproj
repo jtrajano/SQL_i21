@@ -3972,6 +3972,8 @@
     <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInsertModule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCascadeModule.sql" />
+    <Build Include="dbo\Stored Procedures\uspETTranslateSDToInvoice.sql" />
+    <Build Include="dbo\User Defined Types\ETTranslateSDToInvoiceTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
