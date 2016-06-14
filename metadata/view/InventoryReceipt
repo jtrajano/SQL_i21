@@ -402,7 +402,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strDescription",
-                                                "fieldLabel": "Receipt Type",
+                                                "fieldLabel": "Order Type",
                                                 "itemId": "cboReceiptType",
                                                 "labelAlign": "top",
                                                 "labelWidth": 80,
@@ -1596,14 +1596,34 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "itemId": "lblWeightLossMsg",
-                                                                                        "style": "{ color: red }",
-                                                                                        "text": "My Label"
+                                                                                        "style": null,
+                                                                                        "text": "Wgt or Vol Gain/Loss: "
                                                                                     },
                                                                                     "name": "MyLabel8",
                                                                                     "configAlternates": {
                                                                                         "style": "string"
                                                                                     },
                                                                                     "designerId": "ab69e307-c7ba-4fe7-8807-5c496262f7dd"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.Label",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "hidden": true,
+                                                                                        "id": null,
+                                                                                        "itemId": "lblWeightLossMsgValue",
+                                                                                        "style": "color: red; padding-left: 5px",
+                                                                                        "text": "0.00"
+                                                                                    },
+                                                                                    "name": "MyLabel9",
+                                                                                    "configAlternates": {
+                                                                                        "style": "string"
+                                                                                    },
+                                                                                    "designerId": "c120a302-36f3-4abf-b4ab-222fcbf7402b"
                                                                                 }
                                                                             ]
                                                                         }
@@ -2404,22 +2424,6 @@
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Number",
-                                                                    "reference": {
-                                                                        "name": "columns",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "dataIndex": "strTax",
-                                                                        "itemId": "colTax",
-                                                                        "text": "Tax",
-                                                                        "width": 85
-                                                                    },
-                                                                    "name": "MyNumberColumn56",
-                                                                    "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e"
-                                                                },
-                                                                {
                                                                     "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
@@ -2613,6 +2617,22 @@
                                                                             "type": "string"
                                                                         }
                                                                     ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Number",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strTax",
+                                                                        "itemId": "colTax",
+                                                                        "text": "Tax",
+                                                                        "width": 85
+                                                                    },
+                                                                    "name": "MyNumberColumn56",
+                                                                    "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e"
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",

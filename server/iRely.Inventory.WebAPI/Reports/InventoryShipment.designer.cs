@@ -205,7 +205,7 @@
             this.xrTableCell5.BorderColor = System.Drawing.Color.Black;
             this.xrTableCell5.Borders = DevExpress.XtraPrinting.BorderSide.None;
             this.xrTableCell5.DataBindings.AddRange(new DevExpress.XtraReports.UI.XRBinding[] {
-            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.Quantity", "{0:#.####}")});
+            new DevExpress.XtraReports.UI.XRBinding("Text", null, "uspICReportInventoryShipment.Quantity", "{0:n3}")});
             this.xrTableCell5.Font = new System.Drawing.Font("Arial", 9F);
             this.xrTableCell5.ForeColor = System.Drawing.Color.Black;
             this.xrTableCell5.Name = "xrTableCell5";

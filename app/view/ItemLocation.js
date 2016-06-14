@@ -177,8 +177,8 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                             flex: 1
                                                                         }
                                                                     ],
-                                                                    flex: 1.4,
                                                                     enableDrillDown: true,
+                                                                    flex: 1.4,
                                                                     itemId: 'cboLocation',
                                                                     fieldLabel: 'Location',
                                                                     labelWidth: 105,
@@ -206,8 +206,8 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                             flex: 1
                                                                         }
                                                                     ],
-                                                                    flex: 1,
                                                                     enableDrillDown: true,
+                                                                    flex: 1,
                                                                     itemId: 'cboDefaultVendor',
                                                                     margin: '0 5',
                                                                     fieldLabel: 'Vendor',
@@ -588,7 +588,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'intPromoCode',
+                                                                                    dataIndex: 'intPromoSalesId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Promo Code',
                                                                                     flex: 1
@@ -600,7 +600,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strDescription',
+                                                                                    dataIndex: 'strPromoSalesDescription',
                                                                                     dataType: 'string',
                                                                                     text: 'Description',
                                                                                     flex: 1
@@ -610,7 +610,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                             itemId: 'cboMixMatchCode',
                                                                             fieldLabel: 'Promotion Item',
                                                                             labelWidth: 105,
-                                                                            displayField: 'intPromoCode',
+                                                                            displayField: 'intPromoSalesId',
                                                                             valueField: 'intPromoSalesListId'
                                                                         },
                                                                         {
@@ -898,7 +898,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                             fieldLabel: 'Ship Via',
                                                                             labelWidth: 140,
                                                                             displayField: 'strShipVia',
-                                                                            valueField: 'intShipViaID'
+                                                                            valueField: 'intEntityShipViaId'
                                                                         }
                                                                     ]
                                                                 }

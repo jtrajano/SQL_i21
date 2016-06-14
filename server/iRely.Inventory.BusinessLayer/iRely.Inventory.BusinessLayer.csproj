@@ -57,6 +57,10 @@
     <Reference Include="iRely.GlobalComponentEngine.Model">
       <HintPath>..\..\..\Resources\references\iRely.GlobalComponentEngine.Model.dll</HintPath>
     </Reference>
+    <Reference Include="LumenWorks.Framework.IO, Version=3.8.0.0, Culture=neutral, PublicKeyToken=5ad3ea2f85776344, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\resources\references\LumenWorks.Framework.IO.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\Resources\references\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -71,6 +75,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\Common.cs" />
+    <Compile Include="Common\Import\ImportData.cs" />
+    <Compile Include="Common\Import\IImportLogic.cs" />
+    <Compile Include="Common\Import\ImportBrands.cs" />
+    <Compile Include="Common\Import\ImportCategories.cs" />
+    <Compile Include="Common\Import\ImportCommodities.cs" />
+    <Compile Include="Common\Import\ImportDataLogic.cs" />
+    <Compile Include="Common\Import\ImportDataResult.cs" />
+    <Compile Include="Common\Import\ImportDataMessage.cs" />
+    <Compile Include="Common\Import\ImportFeedStocks.cs" />
+    <Compile Include="Common\Import\ImportFeedStockUOM.cs" />
+    <Compile Include="Common\Import\ImportFuelCategories.cs" />
+    <Compile Include="Common\Import\ImportFuelCodes.cs" />
+    <Compile Include="Common\Import\ImportFuelTypes.cs" />
+    <Compile Include="Common\Import\ImportInventoryCount.cs" />
+    <Compile Include="Common\Import\ImportItemAccounts.cs" />
+    <Compile Include="Common\Import\ImportItemContracts.cs" />
+    <Compile Include="Common\Import\ImportItemLocation.cs" />
+    <Compile Include="Common\Import\ImportItemPricing.cs" />
+    <Compile Include="Common\Import\ImportItems.cs" />
+    <Compile Include="Common\Import\ImportLineOfBusiness.cs" />
+    <Compile Include="Common\Import\ImportLogItem.cs" />
+    <Compile Include="Common\Import\ImportManufacturers.cs" />
+    <Compile Include="Common\Import\ImportProcessCodes.cs" />
+    <Compile Include="Common\Import\ImportStorageLocations.cs" />
+    <Compile Include="Common\Import\ImportStorageUnitTypes.cs" />
+    <Compile Include="Common\Import\ImportUnitOfMeasurement.cs" />
     <Compile Include="Implementation\BrandBl.cs" />
     <Compile Include="Implementation\BuildAssemblyBl.cs" />
     <Compile Include="Implementation\CategoryAccountBl.cs" />

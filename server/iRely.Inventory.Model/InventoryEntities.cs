@@ -74,7 +74,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             
-            modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());
+            modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());    
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeWorkCenterMap());
             modelBuilder.Configurations.Add(new tblICRinFeedStockMap());
@@ -159,6 +159,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblGRStorageTypeMap());
             modelBuilder.Configurations.Add(new tblSTPromotionSalesListMap());
 
+            modelBuilder.Configurations.Add(new tblPATPatronageCategoryMap());
+
             modelBuilder.Configurations.Add(new vyuICGetInventoryTransferMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryTransferDetailMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockMap());
@@ -170,6 +172,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemAccountMap());
             modelBuilder.Configurations.Add(new vyuICGetItemPricingMap());
             modelBuilder.Configurations.Add(new vyuICGetItemLocationMap());
+            modelBuilder.Configurations.Add(new vyuSMGetCompanyLocationSearchListMap());
 
             modelBuilder.Configurations.Add(new tblICCompanyPreferenceMap());
             modelBuilder.Configurations.Add(new tblSMStartingNumberMap());
@@ -203,6 +206,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageBinsMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageBinDetailsMap());
+            modelBuilder.Configurations.Add(new vyuICGetStorageBinMeasurementReadingMap());
 
             modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
             modelBuilder.Configurations.Add(new vyuICGetItemFactoryManufacturingCellMap());

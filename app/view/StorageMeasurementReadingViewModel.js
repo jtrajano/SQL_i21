@@ -23,5 +23,4 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewModel', {
             type: 'icbufferedstoragelocation'
         }
     }
-
 });

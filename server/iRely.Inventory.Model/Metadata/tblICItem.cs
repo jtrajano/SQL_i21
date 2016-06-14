@@ -711,4 +711,12 @@ namespace iRely.Inventory.Model
         public decimal? dblStandardCost { get; set; }
         public decimal? dblAverageCost { get; set; }
     }
+
+    public class vyuSMGetCompanyLocationSearchList
+    {
+        public int intCompanyLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public string strLocationNumber { get; set; }
+        public string strLocationType { get; set; }
+    }
 }

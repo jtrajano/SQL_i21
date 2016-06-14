@@ -1,0 +1,1815 @@
+{
+    "type": "Ext.container.Container",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "autoScroll": true,
+        "designer|userAlias": "icoriginconversionoption",
+        "designer|userClassName": "OriginConversionOption",
+        "height": 1211,
+        "layout": null,
+        "width": 628
+    },
+    "name": "MyContainer12",
+    "designerId": "467f343c-c005-4700-bed6-351559b316d7",
+    "viewControllerInstanceId": "69d4d15d-2825-4cbb-a38c-7c7b8abf7553",
+    "viewModelInstanceId": "166e0a8c-bc21-40a5-b2f5-526ea2ed4ade",
+    "cn": [
+        {
+            "type": "Ext.toolbar.Toolbar",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|uiInterfaceName": "i21-toolbar",
+                "ui": "i21-toolbar"
+            },
+            "name": "MyToolbar1",
+            "designerId": "f22d4ac3-c2b1-4a64-9e2a-18be8458da2c",
+            "cn": [
+                {
+                    "type": "Ext.button.Button",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|uiInterfaceName": "i21-button-toolbar-small",
+                        "itemId": "btnDowloadCSVTemplate",
+                        "layout|flex": null,
+                        "text": "Download CSV Template",
+                        "ui": "i21-button-toolbar-small"
+                    },
+                    "name": "MyButton27",
+                    "designerId": "b574f73a-6d5a-4ec9-b042-7f179b8cec47",
+                    "cn": [
+                        {
+                            "type": "Ext.menu.Menu",
+                            "reference": {
+                                "name": "menu",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "name": "MyMenu",
+                            "designerId": "1a8cf677-bac0-4b17-afde-84145b37048c",
+                            "cn": [
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuUnitsOfMeasurement",
+                                        "text": "Units of Measurement"
+                                    },
+                                    "name": "MyMenuItem",
+                                    "designerId": "3e1203bc-e8db-4bf5-b486-87d35d30576a"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuFuelCategories",
+                                        "text": "Fuel Categories"
+                                    },
+                                    "name": "MyMenuItem1",
+                                    "designerId": "e864a23c-37cf-467b-85eb-e10d65bbb4c0"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuFeedStocks",
+                                        "text": "Feed Stocks"
+                                    },
+                                    "name": "MyMenuItem2",
+                                    "designerId": "c2dd4fc1-2123-470c-948b-26d7cbb1b2bd"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuFuelCodes",
+                                        "text": "Fuel Codes"
+                                    },
+                                    "name": "MyMenuItem3",
+                                    "designerId": "a27887da-f81b-4394-b8d1-23a52386c6da"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuProcessCodes",
+                                        "text": "Process Codes"
+                                    },
+                                    "name": "MyMenuItem4",
+                                    "designerId": "3ee2d5b9-d167-40c6-a473-238f0fe632ef"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuFeedStockUOMs",
+                                        "text": "Feed Stock UOMs"
+                                    },
+                                    "name": "MyMenuItem5",
+                                    "designerId": "49706a00-5793-4348-8951-eb1cef94359c"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuFuelTypes",
+                                        "text": "Fuel Types"
+                                    },
+                                    "name": "MyMenuItem6",
+                                    "designerId": "3ab55f43-7441-431d-a900-4f4bc9e17724"
+                                },
+                                {
+                                    "type": "Ext.menu.Separator",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MySeparator1",
+                                    "designerId": "708fbd1b-1f59-487e-b991-5b880fe8b3b7"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuStorageLocations",
+                                        "text": "Storage Locations"
+                                    },
+                                    "name": "MyMenuItem7",
+                                    "designerId": "e1076e47-e2b4-4e09-b283-a972c2b98a17"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuStorageUnitTypes",
+                                        "text": "Storage Unit Types"
+                                    },
+                                    "name": "MyMenuItem8",
+                                    "designerId": "0f1c0200-ec13-410d-a427-0e679fb65e1c"
+                                },
+                                {
+                                    "type": "Ext.menu.Separator",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MySeparator2",
+                                    "designerId": "a0cc740d-b227-4c3d-83e2-5d9ac8c4d79d"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuLineOfBusiness",
+                                        "text": "Line of Business"
+                                    },
+                                    "name": "MyMenuItem9",
+                                    "designerId": "24830f2d-3159-42f1-8175-71672a98489a"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuCategories",
+                                        "text": "Categories"
+                                    },
+                                    "name": "MyMenuItem10",
+                                    "designerId": "6b41c896-1ae1-4db6-8646-c6a2b8fabef1"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuManufacturers",
+                                        "text": "Manufacturers"
+                                    },
+                                    "name": "MyMenuItem12",
+                                    "designerId": "af77b277-ee30-4c62-96bc-9e4ef57a266c"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuBrands",
+                                        "text": "Brands"
+                                    },
+                                    "name": "MyMenuItem13",
+                                    "designerId": "325f8c1b-3dc4-487f-951d-f8dad2ed003a"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuCommodities",
+                                        "text": "Commodities"
+                                    },
+                                    "name": "MyMenuItem15",
+                                    "designerId": "77bdb0be-7d99-44fe-bde4-b6e71d14a4bb"
+                                },
+                                {
+                                    "type": "Ext.menu.Separator",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MySeparator",
+                                    "designerId": "4004c4de-9a4a-4940-adc0-5872bbb1e1a6"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuItems",
+                                        "text": "Items"
+                                    },
+                                    "name": "MyMenuItem14",
+                                    "designerId": "a47839ad-447f-4d7e-90ca-e19d09f02f42"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuAccounts",
+                                        "text": "Item GL Accounts"
+                                    },
+                                    "name": "MyMenuItem11",
+                                    "designerId": "088305e3-c9b9-401a-8caf-ba56f5cd2ed3"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuContractItems",
+                                        "text": "Contract Items"
+                                    },
+                                    "name": "MyMenuItem16",
+                                    "designerId": "f259da06-1e33-466e-be3f-815256baffea"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuImportItemLocation",
+                                        "text": "Item Location"
+                                    },
+                                    "name": "MyMenuItem19",
+                                    "designerId": "86f4f7f5-63df-429e-8cf7-c7bba04e68aa"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuImportItemPricing",
+                                        "text": "Item Pricing"
+                                    },
+                                    "name": "MyMenuItem18",
+                                    "designerId": "c56fa32a-3f37-46f1-a8f2-8cadfe9a703f"
+                                },
+                                {
+                                    "type": "Ext.menu.Separator",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MySeparator3",
+                                    "designerId": "54f61811-b580-40f5-824e-7b9e3f08091a"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuImportInventoryCount",
+                                        "text": "Inventory Count"
+                                    },
+                                    "name": "MyMenuItem17",
+                                    "designerId": "d8119535-9386-4eed-912e-82c296d71f4f"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Ext.panel.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "bodyPadding": 10,
+                "border": false,
+                "height": 1128,
+                "itemId": "pnlImportOrigin",
+                "margin": "0 0 5 0",
+                "title": "Inventory Data Import"
+            },
+            "name": "MyPanel3",
+            "designerId": "931dbf4b-346b-40eb-9ad5-e67bb4efb00b",
+            "cn": [
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntUnitOfMeasurement",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer4",
+                    "designerId": "2d9b6102-32d2-4723-a1ed-5bff15d56ce2",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportUnitOfMeasurement",
+                                "layout|flex": 1,
+                                "text": "Import Units of Measurement",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "b210c306-58b5-4bd1-aba6-88c4563c75ff"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "b2500cf3-d383-4ccd-8e9f-848b67d1ec91",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Units of Measurement from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "4fdddcdb-1df6-4bc3-826b-e1a62a2ddd65"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "container|padding": null,
+                        "itemId": "cntFuelCategories",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer12",
+                    "designerId": "175757c3-b5d2-42d8-9603-6c3848b1a52f",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportFuelCategories",
+                                "layout|flex": 1,
+                                "text": "Import Fuel Categories",
+                                "width": null
+                            },
+                            "name": "MyButton9",
+                            "designerId": "644dc5e6-e823-4975-8e64-71f65023155e"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "ca4cda4d-ff6b-433a-a77f-4f5deaf41b7c",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Fuel Categories from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "d7aed43d-4d40-42a5-bfa0-26d05293bbc1"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntFeedStocks",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer1",
+                    "designerId": "f6b8ba29-1eb2-41df-b601-676948cc77b1",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportFeedStocks",
+                                "layout|flex": 1,
+                                "text": "Import Feed Stocks",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "49ffd4fb-916d-46f9-874f-bde6be1552ad"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "dc4424a5-6b36-4ef4-be51-cc10c43d9abe",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Feed Stocks from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "df6f3bce-4bc4-4291-83e0-ac7f81e8c051"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntFuelCodes",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer2",
+                    "designerId": "87e178b2-e934-4e7b-80c7-9b1324df0bc3",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportFuelCodes",
+                                "layout|flex": 1,
+                                "text": "Import Fuel Codes",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "3e522c06-f489-49c3-8d92-962771bff7c3"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "c867cd6a-ec56-4dd4-964d-999c6158b699",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Fuel Codes from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "91e574a6-f0e1-4f37-94d4-71c2ba87561d"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntProcessCodes",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer3",
+                    "designerId": "b0c88c21-5c32-4b7c-8407-6b0dbf7c6f70",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportProcessCodes",
+                                "layout|flex": 1,
+                                "text": "Import Process Codes",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "1c293200-8300-4296-8ee5-8067b2a02f5d"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "70639d50-b5c9-4828-bee4-00ddbb282436",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Process Codes from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "26b2281b-262b-4d9a-be34-67156b8edda0"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntFeedStockUOM",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer5",
+                    "designerId": "a5e779df-0765-4426-87c1-9a2d2de0ad90",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportFeedStockUOM",
+                                "layout|flex": 1,
+                                "text": "Import Feed Stock UOMs",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "19685d4e-358b-4a02-b809-af1e28553bb0"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "16d384ac-3d2f-4ba1-8aa8-a69ce2cae834",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Feed Stock UOMs"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "f9105417-5cea-4a86-9dac-3f38ae324ecb"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntFuelTypes",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer14",
+                    "designerId": "984aa125-243f-4266-aa37-8e91da468c48",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportFuelTypes",
+                                "layout|flex": 1,
+                                "text": "Import Fuel Types",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "59cde9aa-bab1-4509-87c9-0b31c1e2d6b7"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "87b5289e-d3e1-4977-926e-8c30f23731aa",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Fuel Types from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "16193c96-6db4-4113-a81e-7d079a7e2ce2"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "container|padding": null,
+                        "itemId": "cntStorageLocations",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer6",
+                    "designerId": "6590b4c5-ca9b-4fa0-bfa7-3c98c1420ba8",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportStorageLocations",
+                                "layout|flex": 1,
+                                "text": "Import Storage Locations",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "443d8e72-113b-4b3a-9bcd-a61667278390"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "032abd9a-81d1-4e6c-867f-5b2b54a4be87",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Storage Locations from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "d277ab54-d8eb-469c-94f6-af50078e4739"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntStorageUnitTypes",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer7",
+                    "designerId": "0a4814b9-15b7-4e0c-9a0b-0fb741be3bb5",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportStorageUnitTypes",
+                                "layout|flex": 1,
+                                "text": "Import Storage Unit Types",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "6f8c9339-bc48-4d3c-8265-0bf438fb0300"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "3b2f344d-cdb4-4465-a3e4-531b5b0aef5a",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Storage Unit Types from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "c81d5363-f3b0-4bc1-9719-1b6c18e0f1c7"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "container|padding": null,
+                        "itemId": "cntLineOfBusiness",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer8",
+                    "designerId": "dcbec1eb-3b1c-4980-9e56-f80a667a963b",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportLineOfBusiness",
+                                "layout|flex": 1,
+                                "text": "Import Line of Business",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "9b559aa7-3362-4f90-a601-cbd04ff095b1"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "b70c4f71-39fe-4d33-ba5a-7abcab739926",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Line of Business from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "14712e79-dc66-4256-b8b4-101f5fc5988f"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntImportManufacturers",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer",
+                    "designerId": "e76d7f77-5e64-4d3f-b0d7-ca527dce10b6",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportManufacturers",
+                                "layout|flex": 1,
+                                "text": "Import Manufacturers",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "21aafd46-9493-45c5-a24c-6dad21ed2535"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "170aae91-bee5-467a-889c-5ea18f910f6c",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Manufacturers from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "144c4eaa-347c-474c-b9e2-3fdee19aef23"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "middle",
+                        "itemId": "cntImportBrands",
+                        "layout": "hbox",
+                        "margin": "0 0 5 0"
+                    },
+                    "name": "MyContainer10",
+                    "designerId": "0cdd0957-28ee-41fd-b081-f5767df5f0fa",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "height": 40,
+                                "itemId": "btnImportBrands",
+                                "layout|flex": 1,
+                                "text": "Import Brands",
+                                "width": 150
+                            },
+                            "name": "MyButton9",
+                            "designerId": "9852b76c-3680-4a97-8a97-e2e47bcffed7"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "height": 40,
+                                "layout": "hbox",
+                                "layout|flex": 1,
+                                "padding": 10
+                            },
+                            "name": "MyContainer13",
+                            "designerId": "4d606007-25c8-475c-a8f0-46545949e33a",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.Label",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": null,
+                                        "text": "Import Brands from CSV"
+                                    },
+                                    "name": "MyLabel9",
+                                    "designerId": "8f1f0881-16e7-403e-bd69-4c4246d58d6c"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.panel.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "animCollapse": true,
+                        "bodyPadding": 10,
+                        "collapsed": false,
+                        "collapsible": true,
+                        "height": 398,
+                        "layout": null,
+                        "margin": null,
+                        "padding": "15 0 0 0",
+                        "title": "Items",
+                        "titleCollapse": true
+                    },
+                    "name": "MyPanel6",
+                    "designerId": "ac196473-b139-444b-b2cd-380873eef1d9",
+                    "cn": [
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "itemId": "cntImportCategories",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer9",
+                            "designerId": "b60eb212-a24f-44c8-acee-38a4c06d3e87",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportCategories",
+                                        "layout|flex": 1,
+                                        "text": "Import Categories",
+                                        "width": 150
+                                    },
+                                    "name": "MyButton9",
+                                    "designerId": "d558c652-6c02-4a4f-ab0f-803b94e5f196"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "a28fcb53-2449-4585-a540-3277876d4617",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Categories from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "ee59f8ef-cfe1-4dc3-b960-e198de1386e0"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "itemId": "cntImportCommodities",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer11",
+                            "designerId": "92dc268c-19f6-46e9-b4f2-d836de658c82",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportCommodities",
+                                        "layout|flex": 1,
+                                        "text": "Import Commodities",
+                                        "width": 150
+                                    },
+                                    "name": "MyButton9",
+                                    "designerId": "23003c72-aa46-44d0-9392-435e87d3aa2e"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "242df603-7205-49bc-b2b7-16668a836b34",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Commodities from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "b2ba07d7-8c45-4638-9420-a86af27f1979"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": null,
+                                "itemId": "cntImportItems",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0",
+                                "padding": ""
+                            },
+                            "name": "MyContainer15",
+                            "designerId": "1b4d252d-63cb-4c31-a461-513ab082110d",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItems",
+                                        "layout|flex": 1,
+                                        "text": "Import Items"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "83b1d34e-f882-4739-9047-67419617641e"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "6095d493-559a-4658-9975-232601e6f12c",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Items from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "4e26cb31-15ec-413c-8de7-5e1021fd96cd"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportItemAccounts",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer17",
+                            "designerId": "1c761a48-ad36-4571-b101-a7e71f6e6316",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItemAccounts",
+                                        "layout|flex": 1,
+                                        "text": "Import Item GL Accounts"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "43a0e272-6030-4363-90eb-6139b1d180ad"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "26af7c5e-1f33-4cbf-9a32-4b5c6b898d9a",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Item GL Accounts from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "fa3b85ae-556a-4d78-bb2a-311b51cdf601"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportItemContracts",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer18",
+                            "designerId": "61ea3729-a208-481c-926c-2a0b98261807",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItemContracts",
+                                        "layout|flex": 1,
+                                        "text": "Import Contract Items"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "4004805d-aced-47a9-9c9b-72fc7f03a76c"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "ba23fa08-50da-44d1-bce7-0afc81b49e68",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Item Contracts from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "3e385d2e-a02c-4ee8-87ba-9e13273517e2"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportItemLocation",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer20",
+                            "designerId": "50e32826-cdf1-44b5-bc70-b66cb9cadf36",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItemLocation",
+                                        "layout|flex": 1,
+                                        "text": "Import Item Location"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "560ab10a-1f97-4179-a065-c6f7bb3c12ee"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "35fc4ef1-6844-4e60-8e66-db37961bbe7f",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Item Location from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "3e382da7-39d3-410c-ace3-e2b34e179d23"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportItemPricing",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer21",
+                            "designerId": "c4399d39-48c3-4cc5-886d-576396a105aa",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItemPricing",
+                                        "layout|flex": 1,
+                                        "text": "Import Item Pricing"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "3cc0e615-d2ea-4a0f-bd2e-aaa2608eabb3"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "0166b7ea-3cd5-41fb-9f22-508ba5a41302",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Item Pricing from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "f8e9b924-dc8f-42d6-815d-968d15e1753c"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.panel.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "bodyPadding": 10,
+                        "height": 100,
+                        "padding": "15 0 0 0",
+                        "title": "Inventory"
+                    },
+                    "name": "MyPanel9",
+                    "designerId": "13eec293-9f56-43c5-93d2-3c2e9aae62f7",
+                    "cn": [
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportInventoryCount",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer19",
+                            "designerId": "dbeb917d-8804-4050-9780-eee0e3a8beb3",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportInventoryCount",
+                                        "layout|flex": 1,
+                                        "text": "Import Inventory Count"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "46f39d9c-fb48-4081-8f51-6155ba080aad"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "a90b11aa-579d-4b2c-bd36-0e806c79c716",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Inventory Count from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "2d655a67-b72f-4189-9d0b-631a3b794225"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

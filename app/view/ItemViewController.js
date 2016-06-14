@@ -146,74 +146,6 @@ Ext.define('Inventory.view.ItemViewController', {
                         {dataIndex: 'dblEndMonthCost', text: 'End Month Cost', width: 100, dataType: 'float', xtype: 'numbercolumn', hidden: true },
                         {dataIndex: 'intSort', text: 'Sort', width: 100, dataType: 'numeric', hidden: true }
                     ]
-                },
-                {
-                    title: 'Storage Bins',
-                    api: {
-                        read: '../Inventory/api/StorageLocation/GetStorageBinDetails'
-                    },
-                    columns: [
-                        { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
-                        { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, flex: 1, hidden: true },
-                        { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1 },
-                        { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
-                        { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1 },
-                        { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1 },
-                        { dataIndex: 'strStorageLocation', text: 'Storage Location', width: 100, flex: 1 },
-                        { dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },
-                        { dataIndex: 'dblStock', text: 'Stock', width: 100, flex: 1 },
-                        { dataIndex: 'dblAvailable', text: 'Available', width: 100, flex: 1 }
-                    ],
-                    chart: {
-                        url: '../Inventory/api/StorageLocation/GetStorageBins',
-                        valueAxes: [
-                            {
-                                id: 'axis',
-                                position: 'left',
-                                title: 'Stock',
-                                stackType: "regular"
-                            }
-                        ],
-                        graphs: [
-                            {
-                                balloonText: "[[title]] of [[category]]:[[value]]",
-                                type: 'column',
-                                title: 'Stock',
-                                valueField: 'dblStock',
-                                valueAxis: 'axis',
-                                topRadius: 1,
-                                fillAlphas: 0.8,
-                                fillColors: "#FCD202",
-                                lineAlpha: 0.5,
-                                lineColor: "#FFFFFF",
-                                lineThickness: 1
-                            },
-                            {
-                                balloonText: "[[title]] storage for [[category]]:[[value]]",
-                                type: 'column',
-                                title: 'Available',
-                                valueField: 'dblAvailable',
-                                valueAxis: 'axis',
-                                topRadius: 1,
-                                fillAlphas: 0.7,
-                                fillColors: "#cdcdcd",
-                                lineAlpha: 0.5,
-                                lineColor: "#cdcdcd",
-                                lineThickness: 1
-                            }
-                        ],
-                        legend: {
-                            enabled: true,
-                            useGraphSettings: true
-                        },
-                        angle: 30,
-                        depth3D: 30,
-                        categoryAxis: {
-                            title: 'Storage Location',
-                            labelRotation: 45
-                        },
-                        categoryField: 'strStorageLocation'
-                    }
                 }
             ],
             buttons: [
@@ -1846,17 +1778,17 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
     beforeUOMStockUnitCheckChange:function(obj, rowIndex, checked, eOpts ){
-      /*  var win = obj.up('window');
-        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
-        var origStockUnitUOMId
-
-            if (grdUnitOfMeasure.store){
-                var record = grdUnitOfMeasure.store.findRecord('ysnStockUnit', true);
-                if (record){
-					origStockUnitUOMId = record.get('intItemUOMId');
-					Inventory.view.ItemViewController.origStockUnitUOMId = origStockUnitUOMId;
+        if (obj.dataIndex === 'ysnStockUnit'){
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = win.viewModel.data.current;
+            
+            if (checked === false && current.get('intPatronageCategoryId') > 0)
+                {
+                   iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
+                   return false;
                 }
-            }*/
+        }  
     },
     
     onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
@@ -3406,6 +3338,33 @@ Ext.define('Inventory.view.ItemViewController', {
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityCustomer', grid, 'intOwnerId');
     },
 
+    onPatronageBeforeSelect: function(combo, record) {
+        if (record.length <= 0)
+            return;
+		
+		var stockUnitExist = false;
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+                if (current.tblICItemUOMs()) {
+                    Ext.Array.each(current.tblICItemUOMs().data.items, function (itemStock) {
+                        if (!itemStock.dummy) {
+                            if(itemStock.get('ysnStockUnit') == '1')
+								stockUnitExist = true;
+                        }
+                    });
+                }
+            
+        }
+		
+		if (stockUnitExist == false)
+		{
+			iRely.Functions.showErrorDialog("Stock Unit is required for Patronage Category.");
+            return false;
+		}
+    },
+    
     //</editor-fold>
 
     init: function(application) {
@@ -3589,7 +3548,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 drilldown: this.onFuelCategoryDrilldown
             },
             "#cboPatronage": {
-                drilldown: this.onPatronageDrilldown
+                drilldown: this.onPatronageDrilldown,
+                beforeselect: this.onPatronageBeforeSelect
             },
             "#cboPatronageDirect": {
                 drilldown: this.onPatronageDirectDrilldown

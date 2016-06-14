@@ -1,3 +1,5 @@
+var parameters = null;
+
 Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icstoragemeasurementreading',
@@ -145,6 +147,10 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         var me = this,
             win = this.getView();
 
+        if (config.param.mustLoadRecordParams == true) {
+            parameters = config.param;
+        }
+
         if (config) {
             win.show();
 
@@ -167,9 +173,60 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
     },
 
     createRecord: function(config, action) {
+        "use strict";
         var today = new i21.ModuleMgr.Inventory.getTodayDate();
         var record = Ext.create('Inventory.model.StorageMeasurementReading');
         record.set('dtmDate', today);
+
+        if (parameters != null && parameters != 'undefined') {
+            var locationId = parameters.record.data.intLocationId;
+            var storageLocationId = parameters.intStorageLocationId;
+            //var details = parameters.details;
+            iRely.Msg.showWait('Loading storage measurement conversions...');
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/StorageLocation/GetStorageBinMeasurementReading',
+                method: 'Get',
+                params: {
+                    intStorageLocationId: storageLocationId
+                },
+                success: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    record.set('intLocationId', locationId);
+                    var data = [];
+                    Ext.Array.each(jsonData.data, function(item){
+                        var i = {
+                            intStorageMeasurementReadingId: parameters.record.data.intStorageMeasurementReadingId,
+                            intCompanyLocationId: locationId,
+                            intCommodityId: item.intCommodityId,
+                            intItemId: item.intItemId,
+                            intStorageLocationId: item.intStorageLocationId,
+                            intSubLocationId: item.intCompanyLocationSubLocationId,
+                            dblAirSpaceReading: item.dblAirSpaceReading,
+                            dblCashPrice: item.dblCashPrice,
+                            dblEffectiveDepth: item.dblEffectiveDepth,
+                            strStorageLocationName: item.strStorageLocation,
+                            strSubLocationName: item.strSubLocation,
+                            strItemNo: item.strItemNo,
+                            strCommodity: item.strCommodityCode
+                        };
+                        data.push(i);
+                    });
+                    record.tblICStorageMeasurementReadingConversions().add(data);
+
+                    var viewModel = config.viewModel;
+                    viewModel.setData({ current: record });
+                    iRely.Msg.close();
+                },
+                failure: function (response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    iRely.Msg.close();
+                }
+            });
+
+            //var grid = Ext.ComponentQuery.query("#grdStorageMeasurementReading")[0];
+        }
         action(record);
     },
 

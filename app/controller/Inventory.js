@@ -37,6 +37,14 @@ Ext.define('Inventory.controller.Inventory', {
         this.superclass.constructor.call(this);
     },
 
+    /**
+     * Creates the panel that is shown in the System Manager -> Origin Conversions
+     */
+    createUtilityUI: function(callback) {
+        "use strict";
+        iRely.Functions.createScreen('Inventory.view.OriginConversionOption', callback, { title: 'Inventory' });
+    },
+
     ICTransactionDrillDown: function(params) {
         var me = this,
             form = params[0].strTransactionForm,
@@ -95,6 +103,12 @@ Ext.define('Inventory.controller.Inventory', {
             record = me.companyPreferenceStore.getAt(0);
 
         return record.get(field);
+    },
+
+    createPreferenceUI: function() {
+        // If Cash Management will have a company preference, it must be implemented here.
+        // Removed Ext.require here. It is not working very well on modem speeds.
+        // Transferred it to the init functions of the screen controllers (e.g. BankAccountRegister, BankAccounts, and etc.)
     },
 
     createNumberFormat: function (precision) {
@@ -352,7 +366,10 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'Inventory.view.InventoryCountGroup';
                 columnName = 'strCountGroup';
                 break;
-
+            case 'Commodity':
+                screenName = 'Store.view.Commodity';
+                columnName = 'strCommodityCode';
+                break;
             case 'SubCategory':
                 screenName = 'Store.view.SubCategory';
                 columnName = 'strSubcategoryType';
@@ -362,7 +379,7 @@ Ext.define('Inventory.controller.Inventory', {
                 columnName = 'strRegProdCode';
                 break;
             case 'PromotionalItem':
-                screenName = 'Store.view.PromotionItemList';
+                screenName = 'Store.view.PromotionSales';
                 columnName = 'strPromoItemListId';
                 break;
             case 'DepositPLU':

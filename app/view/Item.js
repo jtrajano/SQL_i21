@@ -3777,25 +3777,27 @@ Ext.define('Inventory.view.Item', {
                                                                         title: 'Tank Management',
                                                                         layout: {
                                                                             type: 'vbox',
-                                                                            align: 'stretch',
-                                                                            padding: 5
+                                                                            align: 'stretch'
                                                                         },
                                                                         items: [
                                                                             {
                                                                                 xtype: 'checkboxfield',
                                                                                 itemId: 'chkTankRequired',
+                                                                                padding: '5 5 0 5',
                                                                                 fieldLabel: 'Tank Required',
                                                                                 labelWidth: 110
                                                                             },
                                                                             {
                                                                                 xtype: 'checkboxfield',
                                                                                 itemId: 'chkAvailableForTm',
+                                                                                padding: '0 5 0 5',
                                                                                 fieldLabel: 'Available for TM',
                                                                                 labelWidth: 110
                                                                             },
                                                                             {
                                                                                 xtype: 'numericfield',
                                                                                 itemId: 'txtDefaultPercentFull',
+                                                                                padding: '0 5 10 5',
                                                                                 fieldLabel: 'Default % Full',
                                                                                 labelWidth: 110,
                                                                                 fieldStyle: 'text-align:right',
@@ -3810,8 +3812,7 @@ Ext.define('Inventory.view.Item', {
                                                                         title: 'Patronage',
                                                                         layout: {
                                                                             type: 'vbox',
-                                                                            align: 'stretch',
-                                                                            padding: 5
+                                                                            align: 'stretch'
                                                                         },
                                                                         items: [
                                                                             {
@@ -3838,6 +3839,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 ],
                                                                                 enableDrillDown: true,
                                                                                 itemId: 'cboPatronage',
+                                                                                padding: '5 5 0 5 ',
                                                                                 fieldLabel: 'Patronage Category',
                                                                                 labelWidth: 116,
                                                                                 displayField: 'strCategoryCode',
@@ -3867,6 +3869,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 ],
                                                                                 enableDrillDown: true,
                                                                                 itemId: 'cboPatronageDirect',
+                                                                                padding: '0 5 10 5',
                                                                                 fieldLabel: 'Direct Sale',
                                                                                 labelWidth: 116,
                                                                                 displayField: 'strCategoryCode',

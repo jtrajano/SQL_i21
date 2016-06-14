@@ -35,5 +35,12 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStorageBinDetails(param));
         }
+
+        [HttpGet]
+        [ActionName("GetStorageBinMeasurementReading")]
+        public async Task<HttpResponseMessage> GetStorageBinMeasurementReading(GetParameter param, int intStorageLocationId)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStorageBinMeasurementReading(param, intStorageLocationId));
+        }
     }
 }

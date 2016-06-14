@@ -202,7 +202,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         flex: 0.7,
                                                         itemId: 'cboReceiptType',
                                                         margin: '0 5 0 0',
-                                                        fieldLabel: 'Receipt Type',
+                                                        fieldLabel: 'Order Type',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strDescription',
@@ -742,8 +742,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             {
                                                                                                 xtype: 'label',
                                                                                                 itemId: 'lblWeightLossMsg',
-                                                                                                style: '{ color: red }',
-                                                                                                text: 'My Label'
+                                                                                                text: 'Wgt or Vol Gain/Loss: '
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'label',
+                                                                                                hidden: true,
+                                                                                                itemId: 'lblWeightLossMsgValue',
+                                                                                                style: 'color: red; padding-left: 5px',
+                                                                                                text: '0.00'
                                                                                             }
                                                                                         ]
                                                                                     }
@@ -807,9 +813,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'strSourceNumber',
                                                                                 itemId: 'colOrderNumber',
                                                                                 width: 100,
+                                                                                dataIndex: 'strSourceNumber',
                                                                                 text: 'Order Number'
                                                                             },
                                                                             {
@@ -1254,13 +1260,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                xtype: 'numbercolumn',
-                                                                                itemId: 'colTax',
-                                                                                width: 85,
-                                                                                dataIndex: 'strTax',
-                                                                                text: 'Tax'
-                                                                            },
-                                                                            {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colWeightUOM',
                                                                                 modelValidation: true,
@@ -1336,6 +1335,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 85,
                                                                                 dataIndex: 'dblLineTotal',
                                                                                 text: 'Line Total'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                itemId: 'colTax',
+                                                                                width: 85,
+                                                                                dataIndex: 'strTax',
+                                                                                text: 'Tax'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',

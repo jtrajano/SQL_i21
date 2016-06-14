@@ -18,7 +18,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
                 {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string', drillDownText: 'View Vendor', drillDownClick: 'onViewVendorName'},
                 {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string', drillDownText: 'View Location', drillDownClick: 'onViewLocationName'},
                 {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string'},
@@ -99,7 +99,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     columns: [
                         {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                         {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
@@ -127,7 +127,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     columns: [
                         {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                         {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
-                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string'},
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
 
@@ -166,7 +166,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string' },
                         {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn' },
                         {dataIndex: 'strBillOfLading', text: 'BOL', flex: 1, dataType: 'string' },
-                        {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string' },
+                        {dataIndex: 'strReceiptType', text: 'Order Type', flex: 1, dataType: 'string' },
                         {dataIndex: 'strOrderNumber', text: 'Order No', flex: 1, dataType: 'string' },
                         {dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
                         {dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
@@ -343,10 +343,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnQuality: {
                 hidden: '{current.ysnPosted}'
             },
-
             lblWeightLossMsg: {
                 hidden: false,
                 text: '{getWeightLossText}'
+            },
+            lblWeightLossMsgValue: {
+                text: '{getWeightLossValueText}',
+                hidden: '{hidelblWeightLossMsgValue}'
             },
             grdInventoryReceipt: {
                 readOnly: '{readOnlyReceiptItemGrid}',
@@ -1618,11 +1621,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (detailRecord) {
             var current = {
                 ItemId: detailRecord.get('intItemId'),
-                LocationId: masterRecord.get('intLocationId'),
                 TransactionDate: masterRecord.get('dtmReceiptDate'),
+                LocationId: masterRecord.get('intLocationId'),
                 TransactionType: 'Purchase',
+                TaxGroupId: masterRecord.get('intTaxGroupId'),
                 EntityId: masterRecord.get('intEntityVendorId'),
-                TaxGroupId: masterRecord.get('intTaxGroupId')
+                BillShipToLocationId: masterRecord.get('intShipFromId')
             };
 
             if (reset)
@@ -1698,12 +1702,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
             var taxableAmount,
                 taxAmount;
+               
 
             taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
             if (itemDetailTax.strCalculationMethod === 'Percentage') {
                 taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
             } else {
                 taxAmount = qtyOrdered * itemDetailTax.dblRate;
+            }
+
+            if (itemDetailTax.ysnCheckoffTax){
+                taxAmount = taxAmount * -1;
             }
 
             taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
@@ -4062,6 +4071,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         // Calculate the line total
                         var newReceiptItem = newReceiptItems.length > 0 ? newReceiptItems[0] : null;
                         newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentVM, newReceiptItem));
+
+                        // Calculate the taxes
+                        win.viewModel.data.currentReceiptItem = newReceiptItem;
+                        me.calculateItemTaxes();
 
                         if (ReceiptType === 'Purchase Contract') {
                             ContractStore.load({

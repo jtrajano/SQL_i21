@@ -57,6 +57,20 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuSMGetCompanyLocationSearchListMap : EntityTypeConfiguration<vyuSMGetCompanyLocationSearchList>
+    {
+        public vyuSMGetCompanyLocationSearchListMap()
+        {
+            this.HasKey(t => t.intCompanyLocationId);
+
+            this.ToTable("vyuSMGetCompanyLocationSearchList");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strLocationNumber).HasColumnName("strLocationNumber");
+            this.Property(t => t.strLocationType).HasColumnName("strLocationType");
+        }
+    }
+
     public class vyuAPVendorMap : EntityTypeConfiguration<vyuAPVendor>
     {
         public vyuAPVendorMap()
@@ -216,8 +230,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblPromoPrice).HasColumnName("dblPromoPrice");
             this.Property(t => t.intPromoSalesListId).HasColumnName("intPromoSalesListId");
             this.Property(t => t.intPromoUnits).HasColumnName("intPromoUnits");
-            this.Property(t => t.intPromoCode).HasColumnName("intPromoCode");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.intPromoCode).HasColumnName("intPromoSalesId");
+            this.Property(t => t.strDescription).HasColumnName("strPromoSalesDescription");
             this.Property(t => t.strPromoType).HasColumnName("strPromoType");
         }
     }

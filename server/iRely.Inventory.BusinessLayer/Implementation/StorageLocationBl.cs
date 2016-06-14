@@ -108,10 +108,25 @@ namespace iRely.Inventory.BusinessLayer
             else
             {
                 query = _db.GetQuery<vyuICGetStorageBinDetails>()
+                    .Where(w => w.intStorageLocationId == storageLocationId)
                     .Filter(param, true);
             }
 
             var data = await query.ExecuteProjection(param, "intItemLocationId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        public async Task<SearchResult> GetStorageBinMeasurementReading(GetParameter param, int intStorageLocationId)
+        {
+            var query = _db.GetQuery<vyuICGetStorageBinMeasurementReading>()
+                .Where(w => w.intStorageLocationId == intStorageLocationId)
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {

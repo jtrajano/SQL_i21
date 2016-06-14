@@ -1,0 +1,206 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "icimportlogmessagebox",
+        "designer|userClassName": "ImportLogMessageBox",
+        "height": 375,
+        "layout": "fit",
+        "modal": true,
+        "title": "Log Messages",
+        "width": 672
+    },
+    "name": "MyWindow",
+    "designerId": "3786c8be-10b7-4e31-b83f-df24e9151288",
+    "viewControllerInstanceId": "e6b19d87-81f7-4ae6-9cd4-7e02d1a252fe",
+    "viewModelInstanceId": "70c2b858-5715-4a3d-99e0-bd77883ba2f2",
+    "cn": [
+        {
+            "type": "Ext.panel.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "layout": "fit",
+                "title": null
+            },
+            "name": "MyPanel7",
+            "designerId": "bf4873f4-01d4-4326-a129-1ddf05871914",
+            "cn": [
+                {
+                    "type": "Ext.grid.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "height": 150,
+                        "itemId": "gridLogs",
+                        "title": null
+                    },
+                    "name": "MyGridPanel4",
+                    "designerId": "bbb7cd91-8f2d-47c8-b038-74dff1d35dea",
+                    "cn": [
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "Type",
+                                "itemId": "colType",
+                                "text": "Type"
+                            },
+                            "name": "MyColumn55",
+                            "designerId": "5703f1a2-6e0a-4572-82e4-2442c4392529"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "cellWrap": true,
+                                "dataIndex": "Message",
+                                "itemId": "colMessage",
+                                "text": "Message",
+                                "width": 250
+                            },
+                            "name": "MyColumn49",
+                            "designerId": "780200f1-37fe-4878-9dcd-73c100e01d44"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "Row",
+                                "itemId": "colRow",
+                                "text": "Row"
+                            },
+                            "name": "MyColumn53",
+                            "designerId": "f91848bc-ca69-4e49-ba2d-15e997951837"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "Column",
+                                "itemId": "colColumn",
+                                "text": "Field"
+                            },
+                            "name": "MyColumn52",
+                            "designerId": "da667cb5-63ab-4a0f-921f-22916e2abde6"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "Status",
+                                "itemId": "colStatus",
+                                "text": "Status",
+                                "width": 200
+                            },
+                            "name": "MyColumn58",
+                            "designerId": "6edfa75a-8c67-4a70-bdfb-bbbe199fb315"
+                        },
+                        {
+                            "type": "Ext.grid.View",
+                            "reference": {
+                                "name": "viewConfig",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "name": "MyGridView",
+                            "designerId": "b9604557-9a9e-4705-b7c6-e497ce17e01f"
+                        },
+                        {
+                            "type": "Ext.grid.feature.GroupingSummary",
+                            "reference": {
+                                "name": "features",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "name": "MyGroupingSummaryFeature",
+                            "designerId": "1ac4c2ac-4e09-4bc7-adc8-9003c2e3a20e",
+                            "cn": [
+                                {
+                                    "type": "Ext.XTemplate",
+                                    "reference": {
+                                        "name": "groupHeaderTpl",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|displayName": "groupHeaderTpl",
+                                        "implHandler": [
+                                            "{columnName}: {name}"
+                                        ]
+                                    },
+                                    "name": "groupHeaderTpl",
+                                    "designerId": "bb2ed922-1a1b-4e69-ae83-317ce1d4f940"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Ext.toolbar.Toolbar",
+            "reference": {
+                "name": "dockedItems",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|uiInterfaceName": "i21-toolbar",
+                "dock": "top",
+                "ui": "i21-toolbar"
+            },
+            "name": "MyToolbar",
+            "designerId": "742e8a89-308d-42ce-81f1-556315d98123",
+            "cn": [
+                {
+                    "type": "Ext.button.Button",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|uiInterfaceName": "i21-button-toolbar-small",
+                        "itemId": "btnClose",
+                        "layout|flex": null,
+                        "text": "Close",
+                        "ui": "i21-button-toolbar-small"
+                    },
+                    "name": "MyButton26",
+                    "designerId": "5ed030ed-59e7-402f-810b-6ce989dc9a8f"
+                }
+            ]
+        }
+    ]
+}

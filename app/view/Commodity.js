@@ -212,6 +212,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: 'true',
                                                                 flex: 1,
                                                                 enableDrillDown: true,
                                                                 itemId: 'cboFutureMarket',
