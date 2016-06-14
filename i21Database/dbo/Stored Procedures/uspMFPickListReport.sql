@@ -56,6 +56,7 @@ Declare @intBlendRequirementId int
 Declare @intKitStatusId int
 Declare @intSalesOrderId INT
 Declare @dblTotalCost NUMERIC(38,20)
+Declare @strUOM nvarchar(50)
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -83,8 +84,12 @@ DECLARE @tblInputItem TABLE (
 	)
 
 Select @intLocationId=intLocationId,@strPickListNo=strPickListNo,@strWorkOrderNo=strWorkOrderNo,@intSalesOrderId=ISNULL(intSalesOrderId,0) from tblMFPickList Where intPickListId=@intPickListId
-Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId,@intKitStatusId=intKitStatusId 
-From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId Where intPickListId=@intPickListId
+Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId,@intKitStatusId=intKitStatusId,
+@strUOM=um.strUnitMeasure 
+From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId 
+Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
+Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+Where intPickListId=@intPickListId
 Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
 Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
 
@@ -149,8 +154,8 @@ Begin
 			l.strGarden,
 			@intWorkOrderCount AS intWorkOrderCount,
 			p.strParentLotNumber,
-			dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) AS dblReqQty,
-			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblTotalPickQty,
+			dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) + ' ' + @strUOM AS dblReqQty,
+			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
 			pld.dblQuantity AS dblQuantity,
 			0 AS dblCost,
 			0 AS dblTotalCost
@@ -172,7 +177,7 @@ Begin
 	UNION
 	Select @strPickListNo,@strBlendItemNoDesc,@strWorkOrderNo,'' strLotNumber,'' strLotAlias,sl.strName AS strStorageLocationName,
 	i.strItemNo,i.strDescription,dbo.fnRemoveTrailingZeroes(sr.dblQty) AS dblPickQuantity,um.strUnitMeasure AS strUOM,'',
-	@intWorkOrderCount,'' strParentLotNumber,dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) AS dblReqQty,dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblTotalPickQty,
+	@intWorkOrderCount,'' strParentLotNumber,dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) + ' ' + @strUOM  AS dblReqQty,dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
 	sr.dblQty AS dblQuantity,0 AS dblCost,0 AS dblTotalCost
 	,@strCompanyName AS strCompanyName
 	,@strCompanyAddress AS strCompanyAddress
@@ -187,7 +192,7 @@ Begin
 	UNION --Non Lot Tracked Items
 	Select @strPickListNo,@strBlendItemNoDesc,@strWorkOrderNo,'' strLotNumber,'' strLotAlias,sl.strName AS strStorageLocationName,
 	i.strItemNo,i.strDescription,dbo.fnRemoveTrailingZeroes(pld.dblQuantity) AS dblPickQuantity,um.strUnitMeasure AS strUOM,'',
-	@intWorkOrderCount,'' strParentLotNumber,dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) AS dblReqQty,dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblTotalPickQty,
+	@intWorkOrderCount,'' strParentLotNumber,dbo.fnRemoveTrailingZeroes(@dblQtyToProduce) + ' ' + @strUOM AS dblReqQty,dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
 	pld.dblQuantity AS dblQuantity,0 AS dblCost,0 AS dblTotalCost
 	,@strCompanyName AS strCompanyName
 	,@strCompanyAddress AS strCompanyAddress
