@@ -12,7 +12,7 @@ AS
 BEGIN
 
 DECLARE @intPaycheckId INT
-		,@intTransactionId INT = -1
+		,@intTransactionId INT
 		,@intEmployeeId INT
 		,@dtmPayDate DATETIME
 		,@strTransactionId NVARCHAR(50) = ''
@@ -30,7 +30,9 @@ WHERE strPaycheckId = @strPaycheckId
 	CREATING BANK TRANSACTION RECORD
 *****************************************/
 DECLARE @PAYCHECK INT = 21,
-		@DIRECT_DEPOSIT INT = 23
+		@DIRECT_DEPOSIT INT = 23,
+		@BankTransactionTable BankTransactionTable,
+		@BankTransactionDetail BankTransactionDetailTable
 
 SELECT @intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END 
 FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
@@ -40,7 +42,7 @@ BEGIN
 	IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
 	BEGIN
 		--PRINT 'Insert Paycheck data into tblCMBankTransaction'
-		INSERT INTO [dbo].[tblCMBankTransaction]
+		INSERT INTO @BankTransactionTable
 			([strTransactionId]
 			,[intBankTransactionTypeId] 
 			,[intBankAccountId] 
@@ -113,8 +115,6 @@ BEGIN
 		FROM tblPRPaycheck PC LEFT JOIN tblCMBankAccount BA 
 			ON PC.intBankAccountId = BA.intBankAccountId
 		WHERE PC.intPaycheckId = @intPaycheckId
-
-		SELECT @intTransactionId = @@IDENTITY
 	END
 	ELSE
 	BEGIN
@@ -244,9 +244,8 @@ BEGIN
 	END
 	 
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
-	INSERT INTO [dbo].[tblCMBankTransactionDetail]
-		([intTransactionId]
-		,[dtmDate]
+	INSERT INTO @BankTransactionDetail
+		([dtmDate]
 		,[intGLAccountId]
 		,[strDescription]
 		,[dblDebit]
@@ -259,8 +258,7 @@ BEGIN
 		,[dtmLastModified]
 		,[intConcurrencyId])
 	SELECT
-		[intTransactionId]			= @intTransactionId
-		,[dtmDate]					= @dtmPayDate
+		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= E.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = E.intAccountId)
 		,[dblDebit]					= E.dblAmount
@@ -275,9 +273,8 @@ BEGIN
 	FROM #tmpEarning E
 
 	--PRINT 'Insert Employee Paid Deductions into tblCMBankTransactionDetail'
-	INSERT INTO [dbo].[tblCMBankTransactionDetail]
-		([intTransactionId]
-		,[dtmDate]
+	INSERT INTO @BankTransactionDetail
+		([dtmDate]
 		,[intGLAccountId]
 		,[strDescription]
 		,[dblDebit]
@@ -290,8 +287,7 @@ BEGIN
 		,[dtmLastModified]
 		,[intConcurrencyId])
 	SELECT
-		[intTransactionId]			= @intTransactionId
-		,[dtmDate]					= @dtmPayDate
+		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= D.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intAccountId)
 		,[dblDebit]					= 0
@@ -309,9 +305,8 @@ BEGIN
 		AND D.intPaycheckId = @intPaycheckId
 
 	--PRINT 'Insert Company Paid Deductions into tblCMBankTransactionDetail'
-	INSERT INTO [dbo].[tblCMBankTransactionDetail]
-		([intTransactionId]
-		,[dtmDate]
+	INSERT INTO @BankTransactionDetail
+		([dtmDate]
 		,[intGLAccountId]
 		,[strDescription]
 		,[dblDebit]
@@ -324,8 +319,7 @@ BEGIN
 		,[dtmLastModified]
 		,[intConcurrencyId])
 	SELECT
-		[intTransactionId]			= @intTransactionId
-		,[dtmDate]					= @dtmPayDate
+		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= D.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intAccountId)
 		,[dblDebit]					= 0
@@ -343,8 +337,7 @@ BEGIN
 		AND D.intPaycheckId = @intPaycheckId
 	UNION ALL
 	SELECT
-		[intTransactionId]			= @intTransactionId
-		,[dtmDate]					= @dtmPayDate
+		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= D.intExpenseAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intExpenseAccountId)
 		,[dblDebit]					= D.dblTotal
@@ -362,9 +355,8 @@ BEGIN
 		AND D.intPaycheckId = @intPaycheckId
 
 	--PRINT 'Insert Employee Taxes into tblCMBankTransactionDetail'
-	INSERT INTO [dbo].[tblCMBankTransactionDetail]
-		([intTransactionId]
-		,[dtmDate]
+	INSERT INTO @BankTransactionDetail
+		([dtmDate]
 		,[intGLAccountId]
 		,[strDescription]
 		,[dblDebit]
@@ -377,8 +369,7 @@ BEGIN
 		,[dtmLastModified]
 		,[intConcurrencyId])
 	SELECT
-		[intTransactionId]			= @intTransactionId
-		,[dtmDate]					= @dtmPayDate
+		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= T.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intAccountId)
 		,[dblDebit]					= 0
@@ -396,9 +387,8 @@ BEGIN
 		AND T.intPaycheckId = @intPaycheckId
 
 	--PRINT 'Insert Company Taxes into tblCMBankTransactionDetail'
-	INSERT INTO [dbo].[tblCMBankTransactionDetail]
-		([intTransactionId]
-		,[dtmDate]
+	INSERT INTO @BankTransactionDetail
+		([dtmDate]
 		,[intGLAccountId]
 		,[strDescription]
 		,[dblDebit]
@@ -411,8 +401,7 @@ BEGIN
 		,[dtmLastModified]
 		,[intConcurrencyId])
 	SELECT
-		[intTransactionId]			= @intTransactionId
-		,[dtmDate]					= @dtmPayDate
+		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= T.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intAccountId)
 		,[dblDebit]					= 0
@@ -430,8 +419,7 @@ BEGIN
 		AND intPaycheckId = @intPaycheckId
 	UNION ALL
 	SELECT
-		[intTransactionId]			= @intTransactionId
-		,[dtmDate]					= @dtmPayDate
+		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= T.intExpenseAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intExpenseAccountId)
 		,[dblDebit]					= T.dblTotal
@@ -448,6 +436,17 @@ BEGIN
 		AND T.dblTotal > 0
 		AND T.intPaycheckId = @intPaycheckId
 END
+
+IF (@ysnPost = 1) 
+BEGIN
+	EXEC uspCMCreateBankTransactionEntries @BankTransactionTable, @BankTransactionDetail, @intTransactionId
+	IF (@@ERROR <> 0)
+		BEGIN
+			RAISERROR('Failed to Generate Bank Transaction entries.', 11, 1)
+			GOTO Post_Rollback
+		END
+END
+
 
 /****************************************
 	EXECUTE POSTING PROCEDURE
