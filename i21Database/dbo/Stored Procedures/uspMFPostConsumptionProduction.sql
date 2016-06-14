@@ -243,8 +243,8 @@ BEGIN
 	SELECT @dblOtherCharges = SUM((
 				CASE 
 					WHEN intMarginById = 2
-						THEN P.dblStandardCost + RI.dblMargin
-					ELSE P.dblStandardCost + (@dblStandardCost * RI.dblMargin / 100)
+						THEN ISNULL(P.dblStandardCost,0) + ISNULL(RI.dblMargin,0)
+					ELSE ISNULL(P.dblStandardCost,0) + (ISNULL(@dblStandardCost,0) * ISNULL(RI.dblMargin,0) / 100)
 					END
 				) / R.dblQuantity)
 	FROM dbo.tblMFWorkOrderRecipeItem RI

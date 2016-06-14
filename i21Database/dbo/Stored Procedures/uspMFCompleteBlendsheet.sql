@@ -41,6 +41,7 @@ BEGIN TRY
 		,@dblPlannedQuantity NUMERIC(18, 6)
 		,@intMachineId INT
 		,@dblBlendBinSize NUMERIC(18, 6)
+		,@intBatchId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -296,6 +297,7 @@ BEGIN TRY
 	IF @strLotTracking = 'No'
 	BEGIN
 		SELECT @strRetBatchId = strBatchId
+			,@intBatchId = intBatchID
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -313,7 +315,7 @@ BEGIN TRY
 			,@intItemIssuedUOMId
 			,@strRetBatchId
 			,''
-			,0
+			,@intBatchId
 			,@intRetLotId OUT
 			,''
 			,''
@@ -363,8 +365,6 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = @dtmCurrentDate
 	WHERE intWorkOrderId = @intWorkOrderId
-
-	DECLARE @intBatchId INT
 
 	SELECT @intBatchId = intBatchId
 	FROM tblMFWorkOrderProducedLot
