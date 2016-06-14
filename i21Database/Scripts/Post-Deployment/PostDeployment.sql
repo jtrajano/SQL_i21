@@ -219,6 +219,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateBillPayToAddress.sql
 :r .\AP\UpdateBillGLEntriesRecords.SQL
 :r .\AP\UpdateBillDetailCurrencies.sql
+:r .\AP\UpdateOldCost.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 

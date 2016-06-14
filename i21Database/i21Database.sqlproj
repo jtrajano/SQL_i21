@@ -4080,6 +4080,7 @@
     <None Include="Scripts\Post-Deployment\EM\026_ImportPhoneNumbersToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
     <None Include="Scripts\Post-Deployment\EM\030-FixSalesperson.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateOldCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -216,7 +216,7 @@ FROM tblAPBill A
 	LEFT JOIN dbo.tblICLot Lot
 	ON Lot.intLotId = H.intLotId
 WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost != 0 AND B.dblCost != B.dblOldCost
+AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost
 
 IF ISNULL(@post,0) = 1
 BEGIN
