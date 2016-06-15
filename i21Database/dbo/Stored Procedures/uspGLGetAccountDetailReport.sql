@@ -131,7 +131,7 @@ AS
 
    ,dblTotal = (
 				CASE	WHEN Grp.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN (ISNULL(ROUND(A.dblDebit,2), 0 ) - ISNULL(ROUND(A.dblCredit,2),0))
-						ELSE ((ISNULL(ROUND(A.dblCredit,2), 0 ) - ISNULL(ROUND(A.dblDebit,2),0) ))
+						ELSE ((ISNULL(ROUND(A.dblCredit,2), 0 ) - ISNULL(ROUND(A.dblDebit,2),0) ))*-1
 				END
 				)
 
