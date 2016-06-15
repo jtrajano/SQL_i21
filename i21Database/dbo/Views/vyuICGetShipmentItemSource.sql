@@ -34,8 +34,8 @@ SELECT
 						THEN NULL
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 						THEN NULL
-					WHEN Shipment.intSourceType = 3 -- Transport
-						THEN ItemPricing.strUnitMeasure
+					WHEN Shipment.intSourceType = 3 -- Pick Lot
+						THEN PickLotUOM.strUnitMeasure
 					ELSE NULL
 					END
 				)
@@ -56,8 +56,10 @@ SELECT
 						THEN 0
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 						THEN 0
-					WHEN Shipment.intSourceType = 3 -- Transport
-						THEN ISNULL(TransportView.dblOrderedQuantity, 0)
+					--WHEN Shipment.intSourceType = 3 -- Transport
+						--THEN ISNULL(TransportView.dblOrderedQuantity, 0)
+					WHEN Shipment.intSourceType = 3 -- Pick Lot
+						THEN ISNULL(PickLotDetail.dblSalePickedQty, 0)
 					ELSE NULL
 					END
 				)
@@ -140,3 +142,8 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 		LEFT JOIN tblLGPickLotHeader PickLot
 			ON PickLot.intPickLotHeaderId = ShipmentItem.intSourceId
 			 AND Shipment.intSourceType = 3
+		LEFT JOIN tblLGPickLotDetail PickLotDetail
+			ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId
+		LEFT JOIN tblICUnitMeasure PickLotUOM
+			ON PickLotUOM.intUnitMeasureId = PickLotDetail.intSaleUnitMeasureId
+GO
