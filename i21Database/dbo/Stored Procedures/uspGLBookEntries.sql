@@ -80,12 +80,12 @@ BEGIN
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
-			,[dblDebitForeign]            
-            ,[dblCreditForeign]
-            ,[dblDebitReport]
-            ,[dblCreditReport]
+			,ISNULL([dblDebitForeign],0)
+            ,ISNULL([dblCreditForeign],0)
+            ,ISNULL([dblDebitReport],0)
+            ,ISNULL([dblCreditReport],0)
             ,[dblForeignRate]
-			,[dblReportingRate]
+			,ISNULL([dblReportingRate],0)
 			,[intConcurrencyId]
 	FROM	@GLEntries GLEntries 
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
