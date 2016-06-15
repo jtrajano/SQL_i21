@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARImportTransactionsCSV]
 	 @ImportLogId		INT
+	,@ImportFormat      NVARCHAR(50)
+	,@ImportItemId		INT = NULL
 	,@IsTank			BIT = 0
 	,@IsFromOldVersion	BIT = 0	
 	,@UserEntityId		INT	= NULL
