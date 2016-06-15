@@ -224,9 +224,9 @@ BEGIN
 					,@Comment				   = @strComment	
 					,@ItemPercentFull		   = @dblPercentFullAfterDelivery
 					,@ItemTaxGroupId		   = @intTaxGroupId	
-					,@InvoiceOriginId		   = @strInvoiceNumber
 					,@ItemDescription		   = @strItemDescription
 					,@ItemUOMId				   = @intItemUOMId
+					,@BOLNumber				   = @strInvoiceNumber
 
 				--GEt the created invoice number
 				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
