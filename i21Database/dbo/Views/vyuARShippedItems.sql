@@ -1073,4 +1073,4 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	[tblSMCompanyLocation] SMCL
 		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	
-WHERE ISNULL(ARID.[intRecipeItemId],0) = 0
+--WHERE ISNULL(ARID.[intRecipeItemId],0) = 0

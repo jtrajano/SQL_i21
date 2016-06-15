@@ -23,6 +23,7 @@ BEGIN
 	Declare @intLocationId INT
 	Declare @dblShipQty NUMERIC(38,20)
 	Declare @intSalesOrderDetailId INT
+	Declare @intItemUOMId INT
 
 	Declare @tblInputItem AS TABLE
 	(
@@ -53,22 +54,24 @@ BEGIN
 		Begin
 			Select @dblRecipeQty=dblQuantity From tblMFRecipe Where intRecipeId=@intRecipeId
 
-			Select @dblShipQty=SUM(dbo.fnICConvertUOMtoStockUnit(intItemId,intItemUOMId,dblQuantity))
+			Select @dblShipQty=SUM(dblQuantity)--SUM(dbo.fnICConvertUOMtoStockUnit(intItemId,intItemUOMId,dblQuantity))
 			From tblICInventoryShipmentItem Where intOrderId=@intSalesOrderId AND intLineNo 
 			IN (Select intSalesOrderDetailId From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId AND intRecipeId=@intRecipeId)
 		End
 		Else
 		Begin --Blend/FG Recipe
-			Select @intItemId=intItemId,@dblShipQty=dbo.fnICConvertUOMtoStockUnit(@intItemId,intItemUOMId,dblQuantity)
+			Select @intItemId=intItemId,@dblShipQty=dblQuantity--dbo.fnICConvertUOMtoStockUnit(@intItemId,intItemUOMId,dblQuantity)
 			From tblICInventoryShipmentItem Where intInventoryShipmentItemId=@intInventoryShipmentItemId
 
 			Select TOP 1 @intRecipeId=r.intRecipeId,@dblRecipeQty=dblQuantity From tblMFRecipe r where r.intItemId=@intItemId AND r.ysnActive=1
 		End
 
+			Select TOP 1 @intItemUOMId=intItemUOMId From tblMFRecipeItem Where intRecipeId=@intRecipeId AND intRecipeItemTypeId=1 AND intConsumptionMethodId <> 4
+
 			INSERT INTO @tblInputItem(intRecipeItemId,intItemId,intItemUOMId,dblPrice,dblLineTotal,dblQuantity)
-			Select t.intRecipeItemId,t.intItemId, t.intItemUOMId, t.dblPrice,(t.dblPrice * @dblShipQty) AS dblLineTotal, @dblShipQty From
-			(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblStandardCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost,0))/100 
-			ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End)/@dblRecipeQty AS dblPrice
+			Select t.intRecipeItemId,t.intItemId, t.intItemUOMId, t.dblPrice,(t.dblPrice * (@dblShipQty/@dblRecipeQty)) AS dblLineTotal, @dblShipQty/@dblRecipeQty From
+			(Select ri.intRecipeItemId,ri.intItemId, @intItemUOMId AS intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblStandardCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost,0))/100 
+			ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End) AS dblPrice
 			From tblMFRecipeItem ri 
 			Join tblICItem i on ri.intItemId=i.intItemId
 			Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
@@ -83,7 +86,7 @@ BEGIN
 
 		--Distinct Recipe
 		INSERT @tblRecipe(intRecipeId,dblShipQty)
-		Select intRecipeId,SUM(dbo.fnICConvertUOMtoStockUnit(intItemId,intItemUOMId,dblQtyOrdered)) 
+		Select intRecipeId,SUM(dblQtyOrdered)--SUM(dbo.fnICConvertUOMtoStockUnit(intItemId,intItemUOMId,dblQtyOrdered)) 
 		From tblSOSalesOrderDetail 
 		Where intSalesOrderId=@intSalesOrderId AND ISNULL(intRecipeId,0)>0 Group By intRecipeId
 
@@ -96,9 +99,9 @@ BEGIN
 
 		--Get Other Charges
 		INSERT INTO @tblInputItem(intRecipeItemId,intItemId,intItemUOMId,dblPrice,dblLineTotal,dblQuantity)
-		Select t.intRecipeItemId,t.intItemId,t.intItemUOMId,t.dblPrice,(t.dblPrice * t.dblShipQty) AS dblLineTotal, t.dblShipQty From
+		Select t.intRecipeItemId,t.intItemId,t.intItemUOMId,t.dblPrice,(t.dblPrice * (t.dblShipQty/t.dblRecipeQuantity)) AS dblLineTotal, t.dblShipQty/t.dblRecipeQuantity From
 		(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblStandardCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost,0))/100 
-		ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End)/r.dblQuantity AS dblPrice,tr.dblShipQty
+		ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End) AS dblPrice,tr.dblShipQty AS dblShipQty,r.dblQuantity AS dblRecipeQuantity
 		From tblMFRecipeItem ri 
 		Join tblICItem i on ri.intItemId=i.intItemId
 		Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
