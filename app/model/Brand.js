@@ -14,9 +14,19 @@ Ext.define('Inventory.model.Brand', {
         { name: 'intBrandId', type: 'int'},
         { name: 'strBrandCode', type: 'string'},
         { name: 'strBrandName', type: 'string'},
-        { name: 'intManufacturerId', type: 'int', allowNull: true},
+        { name: 'intManufacturerId', type: 'int', allowNull: true,
+            reference: {
+                type: 'Inventory.model.Manufacturer',
+                role: 'tblICManufacturer',
+                inverse: {
+                    role: 'tblICBrands',
+                    storeConfig: {
+                        complete: true
+                    }
+                }
+            }
+        },
         { name: 'intSort', type: 'int'},
-
         { name: 'strManufacturer', type: 'string'}
     ],
 

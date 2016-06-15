@@ -22,6 +22,7 @@ Ext.define('Inventory.view.BrandViewController', {
         var win = this.getView();
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
+            include: 'tblICManufacturer',
             store: Ext.create('Inventory.store.Brand'),
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
