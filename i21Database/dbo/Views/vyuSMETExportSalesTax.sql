@@ -6,7 +6,7 @@ SELECT
 	,county = ltrim(substring(strTaxCode,charindex(' ',strTaxCode), CHARINDEX(' ',ltrim(SUBSTRING(strTaxCode,charindex(' ',strTaxCode),LEN(strTaxCode)-charindex(' ',strTaxCode)))) ))
 	,city = strCity
 	,sales_tax = dblRate
-	,st_acct = ''
+	,st_acct = tblGLAccount.strAccountId
 	,use_tax = 0.00
 	,ut_acct = '00000000'
 	,chrTaxCode = REPLACE(tblSMTaxCode.strTaxCode, ' ', '')
@@ -27,3 +27,4 @@ inner join
 		and tblSMTaxCodeRate.dtmEffectiveDate = tblSMTaxCodeEffectivity.dtmEffectiveDate
 )tblTaxEffect
 on tblSMTaxCode.intTaxCodeId = tblTaxEffect.intTaxCodeId
+inner join tblGLAccount on tblGLAccount.intAccountId = tblSMTaxCode.intSalesTaxAccountId
