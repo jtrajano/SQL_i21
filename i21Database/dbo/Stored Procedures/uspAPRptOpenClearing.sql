@@ -8,40 +8,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Sample XML string structure:
---DECLARE @xmlParam NVARCHAR(MAX)
---SET @xmlParam = '
---<xmlparam>
---	<filters>
---		<filter>
---			<fieldname>dtmDate</fieldname>
---			<condition>Between</condition>
---			<from>1/1/1900</from>
---			<to>1/1/2014</to>
---			<join>And</join>
---			<begingroup>0</begingroup>
---			<endgroup>0</endgroup>
---			<datatype>Int</datatype>
---		</filter>
---		<filter>
---			<fieldname>intEntityVendorId</fieldname>
---			<condition>Equal To</condition>
---			<from>6</from>
---			<to />
---			<join>And</join>
---			<begingroup>0</begingroup>
---			<endgroup>0</endgroup>
---			<datatype>DateTime</datatype>
---		</filter>
---	</filters>
---	<options />
---</xmlparam>'
-
-DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
+DECLARE @query NVARCHAR(MAX), 
+	    @innerQuery NVARCHAR(MAX), 
+		@filter NVARCHAR(MAX) = '';
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
 DECLARE @dtmDateTo DATETIME = NULL;
-DECLARE @total NUMERIC(18,6), @amountDue NUMERIC(18,6), @amountPad NUMERIC(18,6);
+DECLARE @total NUMERIC(18,6),
+		@amountDue NUMERIC(18,6), 
+		@amountPad NUMERIC(18,6);
 DECLARE @count INT = 0;
 DECLARE @fieldname NVARCHAR(50)
 DECLARE @condition NVARCHAR(20)     
@@ -270,10 +245,10 @@ SET @query = '
 	,IR.strOrderNumber
 	,A.dtmDate
 	,A.dtmDueDate
-	,B.strVendorId
+	,IR.strVendorId
 	,B.[intEntityVendorId]
-	,A.intBillId
-	,A.strBillId
+	,IR.intBillId
+	,strBillId = ISNULL(A.strBillId, ''New Voucher'')
 	,A.strVendorOrderNumber
 	,T.strTerm
 	,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
@@ -281,7 +256,7 @@ SET @query = '
 	,tmpAgingSummaryTotal.dblTotal
 	,tmpAgingSummaryTotal.dblAmountPaid
 	,tmpAgingSummaryTotal.dblAmountDue
-	,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
+	,ISNULL(IR.strVendorIdName,'''') as strVendorIdName 
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 		THEN 0 
 		ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
@@ -332,9 +307,9 @@ SET @query = '
 		ON  A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T 
 		ON A.intTermsId = T.intTermID
-	INNER JOIN vyuICGetInventoryReceiptItem  IR
+	LEFT JOIN vyuAPClearables  IR
 		ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
-	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+	--WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 
 

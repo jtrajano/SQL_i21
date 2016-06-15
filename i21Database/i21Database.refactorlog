@@ -5348,4 +5348,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intImportSDToInvoiceId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a59f528e-b46c-4475-adb7-10683a0d798a" ChangeDateTime="06/15/2016 07:04:25">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConfigurationSequence" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b3c21283-e218-48c7-bab3-aebc38fab7f2" ChangeDateTime="06/15/2016 08:03:07">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponent].[intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponent]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSPInventory" />
+  </Operation>
 </Operations>
