@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMETExportFullTax]
-AS
+AS 
+
 select 
  ItemNumber				= strItemNo
 , [state]				= LEFT(strTaxCode, CASE WHEN charindex(' ', strTaxCode) = 0 THEN LEN(strTaxCode) ELSE charindex(' ', strTaxCode) - 1 END)
@@ -108,6 +109,13 @@ select
 , Locale12LC12OnFET		= ''
 from
 tblSMTaxCode 
+inner join 
+(
+	select tblSMTaxGroup.intTaxGroupId, intTaxCodeId 
+	from tblSMTaxGroup 
+	inner join tblSMTaxGroupCode on tblSMTaxGroup.intTaxGroupId = tblSMTaxGroupCode.intTaxGroupId
+	inner join tblETExportFilterTaxGroup on tblETExportFilterTaxGroup.intTaxGroupId = tblSMTaxGroup.intTaxGroupId
+)tblETExportFilterTaxGroup on tblSMTaxCode.intTaxCodeId = tblETExportFilterTaxGroup.intTaxCodeId
 inner join 
 (
 	select 

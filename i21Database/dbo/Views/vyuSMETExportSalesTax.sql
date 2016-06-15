@@ -14,6 +14,14 @@ SELECT
 from tblSMTaxCode
 inner join 
 (
+	select tblSMTaxGroup.intTaxGroupId, intTaxCodeId 
+	from tblSMTaxGroup 
+	inner join tblSMTaxGroupCode on tblSMTaxGroup.intTaxGroupId = tblSMTaxGroupCode.intTaxGroupId
+	inner join tblETExportFilterTaxGroup on tblETExportFilterTaxGroup.intTaxGroupId = tblSMTaxGroup.intTaxGroupId
+)tblETExportFilterTaxGroup on tblSMTaxCode.intTaxCodeId = tblETExportFilterTaxGroup.intTaxCodeId
+
+inner join 
+(
 	select 
 		 tblSMTaxCodeRate.intTaxCodeId
 		 , tblSMTaxCodeRate. dblRate
