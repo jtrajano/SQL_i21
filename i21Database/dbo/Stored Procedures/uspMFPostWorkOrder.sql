@@ -132,7 +132,7 @@ BEGIN TRY
 				,@intBatchId = @intBatchId
 
 			EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId
-			
+
 			DECLARE @GLEntries AS RecapTableType
 			DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
 			DECLARE @STARTING_NUMBER_BATCH AS INT = 3
@@ -141,6 +141,10 @@ BEGIN TRY
 				,@dblNewUnitCost NUMERIC(38, 20)
 				,@intTransactionId INT
 				,@userId INT
+				,@intWorkOrderProducedLotId int
+							, @dblOtherCost NUMERIC(18, 6)
+
+			SELECT @dblOtherCost = 0
 
 			SELECT @intTransactionId = intBatchId
 				,@strBatchId = strBatchId
@@ -149,7 +153,47 @@ BEGIN TRY
 
 			SELECT @dblNewCost = [dbo].[fnGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
 
-			SET @dblNewCost = ABS(@dblNewCost)
+			SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
+			FROM tblMFWorkOrderProducedLot PL
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND PL.ysnProductionReversed = 0
+				AND PL.intItemId IN (
+					SELECT RI.intItemId
+					FROM dbo.tblMFWorkOrderRecipeItem RI
+					WHERE RI.intRecipeItemTypeId = 2
+						AND RI.ysnConsumptionRequired = 1
+						AND RI.intWorkOrderId = @intWorkOrderId
+					)
+
+
+
+			WHILE @intWorkOrderProducedLotId IS NOT NULL
+			BEGIN
+				SELECT @intTransactionId = NULL
+					,@strBatchId = NULL
+
+				SELECT @intTransactionId = PL.intBatchId
+					,@strBatchId = PL.strBatchId
+				FROM tblMFWorkOrderProducedLot PL
+				WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+
+				SELECT @dblOtherCost = @dblOtherCost + ISNULL([dbo].[fnGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId), 0)
+
+				SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
+				FROM tblMFWorkOrderProducedLot PL
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND PL.ysnProductionReversed = 0
+					AND PL.intItemId IN (
+						SELECT RI.intItemId
+						FROM dbo.tblMFWorkOrderRecipeItem RI
+						WHERE RI.intRecipeItemTypeId = 2
+							AND RI.ysnConsumptionRequired = 1
+							AND RI.intWorkOrderId = @intWorkOrderId
+						)
+					AND intWorkOrderProducedLotId > @intWorkOrderProducedLotId
+			END
+
+			SET @dblNewCost = ABS(@dblNewCost)+ISNULL(@dblOtherCost,0)
 			SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
 
 			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
@@ -193,7 +237,10 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[dblNewCost] = @dblNewUnitCost
-				,[intCurrencyId] = NULL
+				,[intCurrencyId] = (
+				SELECT TOP 1 intDefaultReportingCurrencyId
+				FROM tblSMCompanyPreference
+				)
 				,[dblExchangeRate] = 0
 				,[intTransactionId] = @intBatchId
 				,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
@@ -212,14 +259,14 @@ BEGIN TRY
 			JOIN tblICLot L ON L.intLotId = PL.intLotId
 			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 			WHERE PL.intWorkOrderId = @intWorkOrderId
-			AND PL.ysnProductionReversed = 0
-			AND PL.intItemId IN (
-			SELECT intItemId
-			FROM dbo.tblMFWorkOrderRecipeItem
-			WHERE intRecipeItemTypeId = 2
-				AND ysnConsumptionRequired = 1
-				AND intWorkOrderId = @intWorkOrderId
-			)
+				AND PL.ysnProductionReversed = 0
+				AND PL.intItemId IN (
+					SELECT intItemId
+					FROM dbo.tblMFWorkOrderRecipeItem
+					WHERE intRecipeItemTypeId = 2
+						AND ysnConsumptionRequired = 1
+						AND intWorkOrderId = @intWorkOrderId
+					)
 
 			-- Get the next batch number
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH

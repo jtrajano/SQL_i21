@@ -175,9 +175,9 @@ BEGIN TRY
 	SELECT WI.intWorkOrderId
 		,WI.intItemId
 		,WI.intLotId
-		,WI.dblQuantity
+		,Case When (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))> WI.dblQuantity Then WI.dblQuantity Else (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) End
 		,WI.intItemUOMId
-		,WI.dblIssuedQuantity
+		,(Case When (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))> WI.dblQuantity Then WI.dblQuantity Else (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) End)/(Case When L.intWeightUOMId IS NULL OR L.dblWeightPerQty=0 then 1 else L.dblWeightPerQty  end)
 		,WI.intItemIssuedUOMId
 		,@intBatchId
 		,WI.intSequenceNo
@@ -190,6 +190,9 @@ BEGIN TRY
 		,WI.intStorageLocationId
 	FROM dbo.tblMFWorkOrderInputLot WI
 	JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
+	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+		AND r.intWorkOrderId = ri.intWorkOrderId
+	JOIN dbo.tblICLot L on L.intLotId=WI.intLotId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
