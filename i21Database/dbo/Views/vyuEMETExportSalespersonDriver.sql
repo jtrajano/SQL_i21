@@ -1,8 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuETSalespersonDriver]
+﻿CREATE VIEW [dbo].[vyuEMETExportSalespersonDriver]
 	AS 
-
-
-
 select 
 	case when a.strSalespersonId <> '' then a.strSalespersonId else c.strEntityNo end as bp_no,
 	c.strName as bpname,
@@ -20,4 +17,6 @@ select
 		on a.intEntitySalespersonId = b.intEntityId
 	join tblEMEntity c
 		on a.intEntitySalespersonId = c.intEntityId
+	join tblETExportFilterDriver d
+		on a.intEntitySalespersonId = d.intEntitySalesPersonId
 	where a.strType = 'Driver'

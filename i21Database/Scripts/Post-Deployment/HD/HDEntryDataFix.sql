@@ -219,27 +219,12 @@ GO
 	PRINT N'End updating tblHDTicket strJiraIssue.'
 	PRINT N'Start updating tblHDTicket Customer Id.'
 GO
-
-	/*
-	update tblHDTicket set intCustomerId = (
-		select top 1 tblARCustomer.intEntityCustomerId from tblARCustomer where strCustomerNumber = tblHDTicket.strCustomerNumber
-	)
-	*/
-
 	Update tblHDTicket set tblHDTicket.strType = 'HD' where tblHDTicket.strType is null and SUBSTRING(tblHDTicket.strTicketNumber,1,4) = 'HDTN';
 	Update tblHDTicket set tblHDTicket.strType = 'CRM' where tblHDTicket.strType is null and SUBSTRING(tblHDTicket.strTicketNumber,1,4) = 'CRMN';
 
 GO
 	PRINT N'End updating tblHDTicket Customer Id.'
-	/*
-	PRINT N'Start fixing tblHDTicket Due Date.'
-GO
-
-	update tblHDTicket set dtmDueDate = dtmCreated where dtmDueDate is null
-
-GO
-	PRINT N'End fixing tblHDTicket Due Date.'
-	*/
+/*
 	PRINT N'Start fixing Help Desk Settings.'
 GO
 
@@ -273,6 +258,7 @@ GO
 
 GO
 	PRINT N'End fixing Help Desk Settings.'
+*/
 	PRINT N'Start fixing Milestone data.'
 GO
 
@@ -287,27 +273,6 @@ GO
 														from vyuHDSMModuleMap
 														where vyuHDSMModuleMap.intHDModuleId = tblHDModule.intModuleId)
 	where tblHDModule.intSMModuleId is null
-
-	/*
-	Update
-		tblHDModule 
-	set
-		tblHDModule.intSMModuleId = (
-									 select top 1
-										tblSMModule.intModuleId 
-									 from
-										vyuHDSMModuleMap
-										,tblSMModule
-										,tblHDTicketProduct
-									 where
-										vyuHDSMModuleMap.strHDModulename = tblHDModule.strModule
-										and vyuHDSMModuleMap.intSMModuleId = tblSMModule.intModuleId
-										and vyuHDSMModuleMap.strApplicationName = tblHDTicketProduct.strProduct
-										and tblHDTicketProduct.intTicketProductId = tblHDModule.intTicketProductId
-									)
-	where
-		tblHDModule.intSMModuleId is null
-		*/
 
 GO
 	PRINT N'End updating HD modules with SM modules.'

@@ -50,7 +50,7 @@ BEGIN
 		,@OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
 		,@intItemId1 INT
 		,@strItemNo1 AS NVARCHAR(50)
-
+		,@intRecipeItemUOMId INT
 	DECLARE @tblMFLot TABLE (
 		intRecordId INT Identity(1, 1)
 		,intLotId INT
@@ -243,8 +243,8 @@ BEGIN
 	SELECT @dblOtherCharges = SUM((
 				CASE 
 					WHEN intMarginById = 2
-						THEN P.dblStandardCost + RI.dblMargin
-					ELSE P.dblStandardCost + (@dblStandardCost * RI.dblMargin / 100)
+						THEN ISNULL(P.dblStandardCost,0) + ISNULL(RI.dblMargin,0)
+					ELSE ISNULL(P.dblStandardCost,0) + (ISNULL(@dblStandardCost,0) * ISNULL(RI.dblMargin,0) / 100)
 					END
 				) / R.dblQuantity)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
@@ -515,6 +515,10 @@ BEGIN
 			,NULL
 			,@intUserId
 
+		SELECT @intRecipeItemUOMId = intItemUOMId
+		FROM tblMFWorkOrderRecipe
+		WHERE intWorkOrderId = @intWorkOrderId
+
 		INSERT INTO @GLEntriesForOtherCost
 		SELECT dtmDate = @dtmDate
 			,intItemId = @intItemId
@@ -523,7 +527,13 @@ BEGIN
 			,intChargeItemLocation = @intItemLocationId
 			,intTransactionId = @intBatchId
 			,strTransactionId = @strWorkOrderNo
-			,dblCost = @dblOtherCharges
+			,dblCost = (
+				CASE 
+					WHEN @intRecipeItemUOMId = @intItemUOMId
+						THEN @dblOtherCharges * @dblQty
+					ELSE @dblOtherCharges * @dblWeight
+					END
+				)
 			,intTransactionTypeId = @INVENTORY_PRODUCE
 			,intCurrencyId = (
 				SELECT TOP 1 intCurrencyId

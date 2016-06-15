@@ -1,6 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuICEnergyTracExportItem]
+﻿CREATE VIEW [dbo].[vyuICETExportItem]
 AS
-SELECT Item.intItemId, ItemLocation.intItemLocationId, 
+SELECT Item.intItemId, ItemLocation.intItemLocationId,
 	Item.strItemNo, Item.strDescription, Item.strType strItemType, Item.strLotTracking,
 	CASE WHEN Item.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') THEN 'Y' ELSE 'N' END strCounted,
 	Measure.strUnitMeasure, ItemPricing.dblSalePrice, ItemAccount.intAccountId, Item.strStatus, Account.intAccountGroupId
@@ -16,4 +16,6 @@ FROM tblICItem Item
 		AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 	LEFT OUTER JOIN tblICItemAccount ItemAccount ON ItemAccount.intItemId = Item.intItemId
 	LEFT OUTER JOIN tblGLAccount Account ON Account.intAccountId = ItemAccount.intAccountId
-WHERE Item.ysnUsedForEnergyTracExport = 1
+	LEFT OUTER JOIN tblETExportFilterItem ExportItem ON Item.intItemId = ExportItem.intItemId
+	LEFT OUTER JOIN tblETExportFilterCategory ExportCategory ON Item.intCategoryId = ExportCategory.intCategoryId
+WHERE Item.ysnUsedForEnergyTracExport = 1 AND Item.intItemId = ExportItem.intItemId OR Item.intCategoryId = ExportCategory.intCategoryId

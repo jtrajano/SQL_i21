@@ -208,7 +208,7 @@ BEGIN
 	IF (@intSalesPersonId = 0)
 	BEGIN
 		SELECT @intSalesPersonId = intEntityId  
-		FROM tblEntity E
+		FROM tblEMEntity E
 		INNER JOIN tblARSalesperson S
 		ON E.intEntityId = S.intEntitySalespersonId
 		WHERE E.strName = @strSalesPersonId

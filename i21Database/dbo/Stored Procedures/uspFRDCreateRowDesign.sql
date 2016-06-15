@@ -18,8 +18,7 @@ CREATE PROCEDURE [dbo].[uspFRDCreateRowDesign]
 	@strFontStyle NVARCHAR(100),
 	@strFontColor NVARCHAR(100),
 	@intFontSize INT,
-	@strOverrideFormatMask NVARCHAR(200),
-	@strDateOverride NVARCHAR(200),
+	@strOverrideFormatMask NVARCHAR(200),	
 	@ysnForceReversedExpense BIT,
 	@ysnOverrideFormula BIT,
 	@intSort INT
@@ -34,6 +33,7 @@ SET XACT_ABORT ON
 BEGIN
 
 DECLARE @Hidden BIT = 0
+DECLARE @strDateOverride NVARCHAR(200)
 
 IF(@strRowType = 'Hidden')
 BEGIN
