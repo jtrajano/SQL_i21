@@ -3977,6 +3977,7 @@
     <Build Include="dbo\Views\vyuLGLoadDetailLotsView.sql" />
     <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
     <Build Include="dbo\Views\vyuSMETExportSalesTax.sql" />
+    <Build Include="dbo\Views\vyuSMETExportFullTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
