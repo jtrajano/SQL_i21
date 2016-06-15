@@ -183,7 +183,8 @@ WHERE intTicketId = @intTicketId
 				,[intLocationId] 
 				,[intShipViaId] 
 				,[intShipFromId] 
-				,[intCurrencyId]  	
+				,[intCurrencyId]
+				,[intCostCurrencyId]  	
 				,[intChargeId] 
 				,[ysnInventoryCost] 
 				,[strCostMethod] 
@@ -205,6 +206,7 @@ WHERE intTicketId = @intTicketId
 		,[intShipViaId]						= RE.intShipViaId
 		,[intShipFromId]					= RE.intShipFromId
 		,[intCurrencyId]  					= RE.intCurrencyId
+		,[intCostCurrencyId]  				= RE.intCurrencyId
 		,[intChargeId]						= IC.intItemId
 		,[ysnInventoryCost]					= 0
 		,[strCostMethod]					= IC.strCostMethod
