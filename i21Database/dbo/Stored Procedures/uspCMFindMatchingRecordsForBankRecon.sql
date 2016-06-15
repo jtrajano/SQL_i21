@@ -98,7 +98,9 @@ WHERE	 A.intBankAccountId = @intBankAccountId
 		AND A.ysnCheckVoid = 0
 		AND A.ysnClr = 0
 		AND A.dtmDate <= @dtmStatementDate
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
+					SELECT strLink FROM [dbo].[fnGetDepositEntry]()
+			)
 		AND 1 = (
 					-- If check transaction is not yet printed, do not include record in the update.
 			CASE	WHEN intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT) AND dtmCheckPrinted IS NULL THEN 0
@@ -147,22 +149,22 @@ BEGIN
 		IF @@ERROR <> 0	GOTO _ROLLBACK
 	END
 	ELSE
-		WHILE EXISTS (SELECT TOP 1 1 FROM #tmp_list_of_transactions WHERE ysnTagged = 0 AND @intBankStatementImportId IS NOT NULL) 
-		BEGIN 
-		SELECT	TOP 1 
-				@intTransactionId = intTransactionId
-		FROM	#tmp_list_of_transactions
-		WHERE	ysnTagged = 0 
-		ORDER BY dtmDate
-		IF @@ERROR <> 0	GOTO _ROLLBACK
+		--WHILE EXISTS (SELECT TOP 1 1 FROM #tmp_list_of_transactions WHERE ysnTagged = 0 AND @intBankStatementImportId IS NOT NULL) 
+		--BEGIN 
+		--SELECT	TOP 1 
+		--		@intTransactionId = intTransactionId
+		--FROM	#tmp_list_of_transactions
+		--WHERE	ysnTagged = 0 
+		--ORDER BY dtmDate
+		--IF @@ERROR <> 0	GOTO _ROLLBACK
 		
 		SET @ysnMatchFound = 0
 		IF @@ERROR <> 0	GOTO _ROLLBACK
 	
-		SELECT  @ysnMatchFound = 1
+		SELECT  @ysnMatchFound = 1, @intTransactionId = A.intTransactionId
 		FROM	#tmp_list_of_transactions A
-		WHERE	A.intTransactionId = @intTransactionId
-				AND 1 = CASE	WHEN (@strPayee <> '') THEN 
+		WHERE	--A.intTransactionId = @intTransactionId
+				1 = CASE	WHEN (@strPayee <> '') THEN 
 									CASE WHEN (LTRIM(RTRIM(ISNULL(A.strPayee, ''))) = LTRIM(RTRIM(ISNULL(@strPayee, '')))) THEN 1 ELSE 0 END
 								ELSE 1 END
 				AND 1 = CASE WHEN(@strReferenceNumber <> '') THEN
@@ -229,11 +231,11 @@ BEGIN
 			IF @@ERROR <> 0	GOTO _ROLLBACK		
 		END
 		
-		UPDATE	#tmp_list_of_transactions
-		SET		ysnTagged = 1
-		WHERE	intTransactionId = @intTransactionId
-		IF @@ERROR <> 0	GOTO _ROLLBACK
-	END
+	--	UPDATE	#tmp_list_of_transactions
+	--	SET		ysnTagged = 1
+	--	WHERE	intTransactionId = @intTransactionId
+	--	IF @@ERROR <> 0	GOTO _ROLLBACK
+	--END
 		DELETE FROM #tmp_list_of_imported_record
 		WHERE intBankStatementImportId = @intBankStatementImportId
 		IF @@ERROR <> 0	GOTO _ROLLBACK
