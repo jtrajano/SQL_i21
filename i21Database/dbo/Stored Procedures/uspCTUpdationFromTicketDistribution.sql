@@ -28,7 +28,8 @@ BEGIN TRY
 			@intScaleUOMId			INT,
 			@intScaleUnitMeasureId	INT,
 			@intItemUOMId			INT,
-			@intNewContractHeaderId	INT
+			@intNewContractHeaderId	INT,
+			@ysnAutoCreateDP		BIT
 
 	DECLARE @Processed TABLE
 	(
@@ -43,6 +44,8 @@ BEGIN TRY
 		RAISERROR ('Ticket is deleted by other user.',16,1,'WITH NOWAIT')  
 	END
 	
+	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
+
 	SELECT	@intItemId		=	intItemId,
 			@strInOutFlag	=	strInOutFlag 
 	FROM	tblSCTicket
@@ -84,8 +87,11 @@ BEGIN TRY
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
-			EXEC uspCTCreateContract @intTicketId,'Scale',@intUserId,null,@intNewContractHeaderId OUTPUT
-			SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
+			IF ISNULL(@ysnAutoCreateDP ,0) = 1
+			BEGIN
+				EXEC uspCTCreateContract @intTicketId,'Scale',@intUserId,null,@intNewContractHeaderId OUTPUT
+				SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
+			END
 			IF	ISNULL(@intContractDetailId,0) = 0
 			BEGIN
 				RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT') 
