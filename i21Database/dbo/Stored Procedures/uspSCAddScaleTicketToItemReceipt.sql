@@ -22,7 +22,6 @@ DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strTicketNumber AS NVARCHAR(40)
 DECLARE @dblTicketFees AS DECIMAL(7, 2)
-DECLARE @intFeeItemId AS INT
 DECLARE @checkContract AS INT
 DECLARE @intContractDetailId AS INT,
 		@intLoadContractId AS INT,
@@ -214,7 +213,7 @@ WHERE intTicketId = @intTicketId
 												WHEN IC.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
-		,[intCostUOMId]						= IC.intCostUOMId
+		,[intCostUOMId]						= @intTicketItemUOMId
 		,[intOtherChargeEntityVendorId]		= NULL
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -229,7 +228,64 @@ WHERE intTicketId = @intTicketId
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
+		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount > 0
+
+		--Insert record for fee
+		INSERT INTO @OtherCharges
+		(
+				[intEntityVendorId] 
+				,[strBillOfLadding] 
+				,[strReceiptType] 
+				,[intLocationId] 
+				,[intShipViaId] 
+				,[intShipFromId] 
+				,[intCurrencyId]
+				,[intCostCurrencyId]  	
+				,[intChargeId] 
+				,[ysnInventoryCost] 
+				,[strCostMethod] 
+				,[dblRate] 
+				,[intCostUOMId] 
+				,[intOtherChargeEntityVendorId] 
+				,[dblAmount] 
+				,[strAllocateCostBy] 
+				,[intContractHeaderId]
+				,[intContractDetailId] 
+				,[ysnAccrue]
+				,[ysnPrice]
+		)
+		SELECT	
+		[intEntityVendorId]					= RE.intEntityVendorId
+		,[strBillOfLadding]					= RE.strBillOfLadding
+		,[strReceiptType]					= RE.strReceiptType
+		,[intLocationId]					= RE.intLocationId
+		,[intShipViaId]						= RE.intShipViaId
+		,[intShipFromId]					= RE.intShipFromId
+		,[intCurrencyId]  					= RE.intCurrencyId
+		,[intCostCurrencyId]  				= RE.intCurrencyId
+		,[intChargeId]						= IC.intItemId
+		,[ysnInventoryCost]					= 0
+		,[strCostMethod]					= IC.strCostMethod
+		,[dblRate]							= CASE
+												WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblTicketFees
+												WHEN IC.strCostMethod = 'Amount' THEN 0
+											END
+		,[intCostUOMId]						= @intTicketItemUOMId
+		,[intOtherChargeEntityVendorId]		= NULL
+		,[dblAmount]						= CASE
+												WHEN IC.strCostMethod = 'Per Unit' THEN 0
+												WHEN IC.strCostMethod = 'Amount' THEN SC.dblTicketFees
+											END
+		,[strAllocateCostBy]				= NULL
+		,[intContractHeaderId]				= NULL
+		,[intContractDetailId]				= NULL
+		,[ysnAccrue]						= IC.ysnAccrue
+		,[ysnPrice]							= IC.ysnPrice
+		FROM @ReceiptStagingTable RE
+		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
+		INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+		INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId
+		WHERE RE.intSourceId = @intTicketId AND SC.dblTicketFees > 0
 
 IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 	BEGIN
