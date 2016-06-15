@@ -14,8 +14,9 @@
 	[strSummaryPart] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strSummaryOperation] [nvarchar](120) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[intConcurrencyId] [int] NULL,
- CONSTRAINT [PK_tblTFTaxReportSummaryItems] PRIMARY KEY CLUSTERED 
+	[intConfigurationSequence] [int] NULL,
+	[intConcurrencyId] INT NULL, 
+    CONSTRAINT [PK_tblTFTaxReportSummaryItems] PRIMARY KEY CLUSTERED 
 (
 	[intTaxReportSummaryItems] ASC
 )
