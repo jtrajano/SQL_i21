@@ -44,13 +44,8 @@
 	[dblSpotRate] NUMERIC(18, 6) NULL,	
 	[ysnLiquidation]  BIT NULL,
 	[ysnSwap] bit,
-	[strSwapBuySell] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[dtmSwapMaturityDate] DATETIME NULL, 
-    [dblSwapContractAmount] NUMERIC(18, 6) NULL, 
-    [dblSwapExchangeRate] NUMERIC(18, 6) NULL,     
-	[dblSwapMatchAmount] NUMERIC(18, 6) NULL, 
-	[ysnSwapLiquidation]  BIT NULL,
-	
+	[strRefSwapTradeNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intRefFutOptTransactionId] INT NULL
     CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
