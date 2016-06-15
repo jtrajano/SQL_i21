@@ -3972,6 +3972,7 @@
     <Build Include="dbo\Views\vyuLGLoadDetailLotsView.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
