@@ -14,6 +14,7 @@ FROM	[dbo].[tblGLDetail] GL INNER JOIN [dbo].[tblCMBankAccount] BANK
 			ON GL.intAccountId = BANK.intGLAccountId
 WHERE	BANK.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(GL.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, GL.dtmDate) AS FLOAT)) AS DATETIME)
+		AND ysnIsUnposted = 0
 
 RETURN ISNULL(@totalGL, 0)
 
