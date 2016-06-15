@@ -20,7 +20,7 @@ BEGIN
 					strAccountId,
 					SUM ( CASE 
 						  WHEN D.dtmDateFrom IS NULL THEN 0 
-						  WHEN @accountType = 'Revenue' THEN dblCredit - dblDebit
+						  WHEN @accountType = 'Revenue' THEN (dblCredit - dblDebit)*-1
 						  ELSE dblDebit - dblCredit
 					END)  beginBalance,
 					SUM( 
@@ -41,7 +41,7 @@ BEGIN
 				strAccountId,
 				SUM( 
 				CASE WHEN B.strAccountType = 'Asset' THEN dblDebit - dblCredit
-						ELSE dblCredit - dblDebit
+						ELSE (dblCredit - dblDebit)*-1
 				END)  beginBalance,
 				SUM( 
 				CASE WHEN B.strAccountType = 'Asset' THEN dblDebitUnit - dblCreditUnit
