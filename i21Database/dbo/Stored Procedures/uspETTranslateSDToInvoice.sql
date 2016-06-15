@@ -27,6 +27,7 @@ BEGIN
 	DECLARE	@intLineItem							INT
 	DECLARE	@dblPrice								NUMERIC(18, 6)
 	DECLARE	@strComment								NVARCHAR(MAX)
+	DECLARE @strDetailType							NVARCHAR(2)
 
 	DECLARE @intCustomerEntityId					INT
 	DECLARE @intLocationId							INT
@@ -46,6 +47,7 @@ BEGIN
 	DECLARE @ysnHeader								BIT
 	DECLARE @intNewInvoiceDetailId					INT
 	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
+	DECLARE @ysnProcessNextAsHeader					BIT
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -107,12 +109,12 @@ BEGIN
 			AND dtmDate = @dtmInvoiceDate
 
 		SET @ysnHeader = 1
-
+		
 		--Loop through the details 
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceDetail)
 		BEGIN
 			SET @strErrorMessage = ''
-
+			SET @ysnProcessNextAsHeader = 0
 			--Get the first Record and create Invoice
 			SELECT TOP 1 
 				@strCustomerNumber			  = strCustomerNumber
@@ -137,8 +139,23 @@ BEGIN
 				,@dblPrice					  =	dblPrice
 				,@strComment				  =	strComment
 				,@intImportSDToInvoiceId	  = intImportSDToInvoiceId
+				,@strDetailType				  = strDetailType
 			FROM #tmpCustomerInvoiceDetail
 			ORDER BY intLineItem ASC
+
+			IF (@strDetailType <> 'D')
+			BEGIN
+				SET @strErrorMessage = 'Skipped Tax detail record.'
+				IF(@ysnHeader = 1)
+				BEGIN
+					SET @ysnProcessNextAsHeader = 1
+					GOTO LOGHEADERENTRY
+				END
+				ELSE
+				BEGIN
+					GOTO LOGDETAILENTRY
+				END
+			END
 
 			--Get Customer Entity Id
 			SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
@@ -257,33 +274,37 @@ BEGIN
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
 					
-					--Delete the Header record from the detail table
-					DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
+					--Proceed to next customer invoice list if header insertion failed and not a skipped tax record 
+					IF(@ysnProcessNextAsHeader = 0)
+					BEGIN
 
-					---insert the remaining details to the log table
-					INSERT INTO @ResultTableLog (
-							strCustomerNumber			
-							,strInvoiceNumber			
-							,strSiteNumber				
-							,dtmDate					
-							,intLineItem				
-							,strFileName				
-							,strStatus
-							,ysnSuccessful
-					)
-					SELECT
-							strCustomerNumber = strCustomerNumber		
-							,strInvoiceNumber =	strInvoiceNumber		
-							,strSiteNumber = strSiteNumber				
-							,dtmDate = dtmDate					
-							,intLineItem = intLineItem		
-							,strFileName = ''				
-							,strStatus = 'Header Record not Created'
-							,ysnSuccessful = 0
-					FROM #tmpCustomerInvoiceDetail
+						--Delete the Header record from the detail table
+						DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
 
-					--Proceed to next customer invoice list if header insertion failed
-					GOTO CONTINUELOOP
+						---insert the remaining details to the log table
+						INSERT INTO @ResultTableLog (
+								strCustomerNumber			
+								,strInvoiceNumber			
+								,strSiteNumber				
+								,dtmDate					
+								,intLineItem				
+								,strFileName				
+								,strStatus
+								,ysnSuccessful
+						)
+						SELECT
+								strCustomerNumber = strCustomerNumber		
+								,strInvoiceNumber =	strInvoiceNumber		
+								,strSiteNumber = strSiteNumber				
+								,dtmDate = dtmDate					
+								,intLineItem = intLineItem		
+								,strFileName = ''				
+								,strStatus = 'Header Record not Created'
+								,ysnSuccessful = 0
+						FROM #tmpCustomerInvoiceDetail
+					
+						GOTO CONTINUELOOP
+					END
 				END
 				ELSE
 				BEGIN
@@ -352,7 +373,7 @@ BEGIN
 				END
 				ELSE
 				BEGIN
-					-- Insert the header to log table 	
+					-- Insert the detail to log table 	
 					INSERT INTO @ResultTableLog (
 							strCustomerNumber			
 							,strInvoiceNumber			
@@ -378,7 +399,11 @@ BEGIN
 
 			--Delete the processed detail list
 			DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
-			SET @ysnHeader = 0
+			
+			IF(@ysnProcessNextAsHeader = 0)
+			BEGIN
+				SET @ysnHeader = 0
+			END
 		END
 
 		--Delete processed record

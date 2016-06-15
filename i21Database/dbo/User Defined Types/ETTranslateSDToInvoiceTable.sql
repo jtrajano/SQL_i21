@@ -23,7 +23,8 @@ CREATE TYPE [dbo].[ETTranslateSDToInvoiceTable] AS TABLE
     [dblTotal] NUMERIC(18, 6) NULL, 
     [intLineItem] INT NULL, 
     [dblPrice] NUMERIC(18, 6) NULL, 
-    [strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS  NULL 
+    [strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS  NULL,
+	[strDetailType] NVARCHAR(2) COLLATE Latin1_General_CI_AS  NULL
 )
 
 
