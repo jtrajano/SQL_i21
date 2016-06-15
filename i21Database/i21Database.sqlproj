@@ -2797,7 +2797,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetEquityRefundDetails.sql" />
-    <Build Include="dbo\Views\vyuETCustomer.sql" />
+    <Build Include="dbo\Views\vyuETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
     <Build Include="dbo\Views\vyuARShipmentItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCleanCost.sql" />
