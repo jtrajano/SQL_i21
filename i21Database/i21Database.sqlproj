@@ -3978,6 +3978,7 @@
     <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
     <Build Include="dbo\Views\vyuSMETExportSalesTax.sql" />
     <Build Include="dbo\Views\vyuSMETExportFullTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessSellOffsite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
