@@ -61,10 +61,14 @@ BEGIN
 			,intEmployees = ISNULL(PCHK.intEmployees, 0)
 			,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
-			,ysnNoTaxable = CASE WHEN ((ISNULL(TXBLSS.dblTotal, 0) + ISNULL(TXBLSSTIPS.dblTotal, 0) + ISNULL(TXBLMED.dblTotal, 0)) <= 0) THEN 0 ELSE 1 END
-			,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0)
-			,dblTaxableSSTips = ISNULL(TXBLSSTIPS.dblTotal, 0)
-			,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
+			,ysnNoTaxable = CASE WHEN (
+								(CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+								+ CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+								+ CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+								) <= 0) THEN 0 ELSE 1 END
+			,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+			,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+			,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
 			,dblTaxDueUnreported = 0
 			,dblAdjustFractionCents = 0
 			,dblAdjustSickPay = 0
@@ -72,9 +76,9 @@ BEGIN
 			,dblTotalDeposit = 0
 			,ysnRefundOverpayment = 0
 			,intScheduleType = 1
-			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotalSS, 0) * 0.124) + (ISNULL(MONTH1.dblMonthTotalMed, 0) * 0.029) + (ISNULL(MONTH1.dblMonthTotalFIT, 0))
-			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotalSS, 0) * 0.124) + (ISNULL(MONTH2.dblMonthTotalMed, 0) * 0.029) + (ISNULL(MONTH2.dblMonthTotalFIT, 0))
-			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotalSS, 0) * 0.124) + (ISNULL(MONTH3.dblMonthTotalMed, 0) * 0.029) + (ISNULL(MONTH3.dblMonthTotalFIT, 0))
+			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotalSS, 0)) + (ISNULL(MONTH1.dblMonthTotalMed, 0)) + (ISNULL(MONTH1.dblMonthTotalFIT, 0))
+			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotalSS, 0)) + (ISNULL(MONTH2.dblMonthTotalMed, 0)) + (ISNULL(MONTH2.dblMonthTotalFIT, 0))
+			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotalSS, 0)) + (ISNULL(MONTH3.dblMonthTotalMed, 0)) + (ISNULL(MONTH3.dblMonthTotalFIT, 0))
 			,ysnStoppedWages = 0
 			,dtmStoppedWages = NULL
 			,ysnSeasonalEmployer = 0
@@ -103,13 +107,16 @@ BEGIN
 		FROM (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax 
 				WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax') FIT,
 			 (SELECT dblMonthTotalSS = SUM(dblLiabilitySS) + SUM(dblTaxTotalSS), 
-				     dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), dblMonthTotalFIT = SUM(dblFIT)
+				     dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), 
+					 dblMonthTotalFIT = SUM(dblFIT)
 				FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (1, 4, 7, 10)) MONTH1,
 			 (SELECT dblMonthTotalSS = SUM(dblLiabilitySS) + SUM(dblTaxTotalSS), 
-					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), dblMonthTotalFIT = SUM(dblFIT)
+					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), 
+					 dblMonthTotalFIT = SUM(dblFIT)
 				FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (2, 5, 8, 11)) MONTH2,
 			 (SELECT dblMonthTotalSS = SUM(dblLiabilitySS) + SUM(dblTaxTotalSS), 
-					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), dblMonthTotalFIT = SUM(dblFIT)
+					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), 
+					 dblMonthTotalFIT = SUM(dblFIT)
 				FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (3, 6, 9, 12)) MONTH3,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnSSTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSS,
@@ -117,6 +124,8 @@ BEGIN
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSSTIPS,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnMedTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLMED,
+			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay'
+				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) PRETAX,
 			 (SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
 					 dblGrossSum = SUM(dblGross) 
 				FROM tblPRPaycheck 
@@ -130,24 +139,32 @@ BEGIN
 		/* If it exists, update the values */
 		UPDATE tblPRForm941 
 		SET intEmployees = ISNULL(PCHK.intEmployees, 0)
-			,ysnNoTaxable = CASE WHEN ((ISNULL(TXBLSS.dblTotal, 0) + ISNULL(TXBLMED.dblTotal, 0) + ISNULL(TXBLSSTIPS.dblTotal, 0)) <= 0) THEN 0 ELSE 1 END
+			,ysnNoTaxable = CASE WHEN (
+								(CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+								+ CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+								+ CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+								) <= 0) THEN 0 ELSE 1 END
 			,dblAdjustedGross = ISNULL(PCHK.dblGrossSum, 0)
 			,dblFIT = ISNULL(FIT.dblTotal, 0)
-			,dblTaxableSS = CONVERT(NUMERIC(18,2), ISNULL(TXBLSS.dblTotal, 0))
-			,dblTaxableSSTips = CONVERT(NUMERIC(18,2), ISNULL(TXBLSSTIPS.dblTotal, 0))
-			,dblTaxableMed = CONVERT(NUMERIC(18,2), ISNULL(TXBLMED.dblTotal, 0))
-			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotalSS, 0) * 0.124) + (ISNULL(MONTH1.dblMonthTotalMed, 0) * 0.029) + (ISNULL(MONTH1.dblMonthTotalFIT, 0))
-			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotalSS, 0) * 0.124) + (ISNULL(MONTH2.dblMonthTotalMed, 0) * 0.029) + (ISNULL(MONTH2.dblMonthTotalFIT, 0))
-			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotalSS, 0) * 0.124) + (ISNULL(MONTH3.dblMonthTotalMed, 0) * 0.029) + (ISNULL(MONTH3.dblMonthTotalFIT, 0))
+			,dblTaxableSS = CASE WHEN (ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+			,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+			,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRETAX.dblTotal, 0) END
+			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotalSS, 0)) + (ISNULL(MONTH1.dblMonthTotalMed, 0)) + (ISNULL(MONTH1.dblMonthTotalFIT, 0))
+			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotalSS, 0)) + (ISNULL(MONTH2.dblMonthTotalMed, 0)) + (ISNULL(MONTH2.dblMonthTotalFIT, 0))
+			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotalSS, 0)) + (ISNULL(MONTH3.dblMonthTotalMed, 0)) + (ISNULL(MONTH3.dblMonthTotalFIT, 0))
+						+ dblAdjustFractionCents + dblAdjustSickPay + dblAdjustTips
 		FROM (SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) FIT,
 			 (SELECT dblMonthTotalSS = SUM(dblLiabilitySS) + SUM(dblTaxTotalSS), 
-					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), dblMonthTotalFIT = SUM(dblFIT)
+					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), 
+					 dblMonthTotalFIT = SUM(dblFIT)
 				FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (1, 4, 7, 10)) MONTH1,
 			 (SELECT dblMonthTotalSS = SUM(dblLiabilitySS) + SUM(dblTaxTotalSS), 
-					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), dblMonthTotalFIT = SUM(dblFIT)
+					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), 
+					 dblMonthTotalFIT = SUM(dblFIT)
 				FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (2, 5, 8, 11)) MONTH2,
 			 (SELECT dblMonthTotalSS = SUM(dblLiabilitySS) + SUM(dblTaxTotalSS), 
-					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), dblMonthTotalFIT = SUM(dblFIT)
+					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), 
+					 dblMonthTotalFIT = SUM(dblFIT)
 				FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter AND intMonth IN (3, 6, 9, 12)) MONTH3,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnSSTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSS,
@@ -155,8 +172,10 @@ BEGIN
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLSSTIPS,
 			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE ysnMedTaxable = 1
 				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) TXBLMED,
+			 (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay'
+				  AND YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter) PRETAX,
 			 (SELECT intEmployees = COUNT(DISTINCT intEntityEmployeeId),
-					 dblGrossSum = SUM(dblGross) 
+					 dblGrossSum = SUM(dblAdjustedGross)
 				FROM tblPRPaycheck 
 				WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND ysnPosted = 1 AND ysnVoid = 0) PCHK
 		WHERE intYear = @intYear AND intQuarter = @intQuarter
