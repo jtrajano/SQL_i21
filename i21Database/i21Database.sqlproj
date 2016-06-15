@@ -3975,6 +3975,7 @@
     <Build Include="dbo\Stored Procedures\uspETTranslateSDToInvoice.sql" />
     <Build Include="dbo\User Defined Types\ETTranslateSDToInvoiceTable.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailLotsView.sql" />
+    <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
