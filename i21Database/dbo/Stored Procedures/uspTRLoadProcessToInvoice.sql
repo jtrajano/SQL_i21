@@ -38,7 +38,7 @@ BEGIN TRY
 	SELECT
 		ROW_NUMBER() OVER(ORDER BY DH.intLoadDistributionHeaderId, DD.intLoadDistributionDetailId DESC) AS intId
 		,[strSourceTransaction]					= 'Transport Load'
-		,[intLoadDistributionDetailId]		= DD.intLoadDistributionDetailId
+		,[intLoadDistributionDetailId]			= DD.intLoadDistributionDetailId
 		,[intSourceId]							= DH.intLoadDistributionHeaderId
 		,[strSourceId]							= TL.strTransaction
 		,[intInvoiceId]							= DH.intInvoiceId --NULL Value will create new invoice
@@ -70,7 +70,6 @@ BEGIN TRY
 		,[ysnSplitted]							= 0
 		,[intPaymentId]							= NULL
 		,[intSplitId]							= NULL
-		,[intDistributionHeaderId]				= DH.intLoadDistributionHeaderId
 		,[strActualCostId]						= (CASE WHEN (TR.strOrigin) = 'Terminal' AND (DH.strDestination) = 'Customer'
 														THEN (TL.strTransaction)
 													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Customer' AND (TR.intCompanyLocationId) = (DH.intCompanyLocationId)
@@ -225,7 +224,6 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -304,7 +302,6 @@ BEGIN TRY
 		,[ysnSplitted]							= IE.ysnSplitted
 		,[intPaymentId]							= IE.intPaymentId
 		,[intSplitId]							= IE.intSplitId
-		,[intDistributionHeaderId]				= IE.intDistributionHeaderId
 		,[strActualCostId]						= IE.strActualCostId
 		,[intShipmentId]						= IE.intShipmentId
 		,[intTransactionId]						= IE.intTransactionId
@@ -385,7 +382,6 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[intPaymentId]
 		,[intSplitId]
-		,[intDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
 		,[intTransactionId]
@@ -462,7 +458,6 @@ BEGIN TRY
 		,[ysnSplitted]							= TR.ysnSplitted
 		,[intPaymentId]							= TR.intPaymentId
 		,[intSplitId]							= TR.intSplitId
-		,[intDistributionHeaderId]				= TR.intDistributionHeaderId
 		,[strActualCostId]						= TR.strActualCostId
 		,[intShipmentId]						= TR.intShipmentId
 		,[intTransactionId]						= TR.intTransactionId
@@ -545,7 +540,6 @@ BEGIN TRY
 			,[ysnSplitted]
 			,[intPaymentId]
 			,[intSplitId]
-			,[intDistributionHeaderId]
 			,[strActualCostId]
 			,[intShipmentId]
 			,[intTransactionId]
@@ -621,7 +615,6 @@ BEGIN TRY
 			,[ysnSplitted]							= IE.ysnSplitted
 			,[intPaymentId]							= IE.intPaymentId
 			,[intSplitId]							= IE.intSplitId
-			,[intDistributionHeaderId]				= IE.intDistributionHeaderId
 			,[strActualCostId]						= IE.strActualCostId
 			,[intShipmentId]						= IE.intShipmentId
 			,[intTransactionId]						= IE.intTransactionId
