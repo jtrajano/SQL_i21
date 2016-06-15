@@ -42,6 +42,20 @@ namespace iRely.Inventory.BusinessLayer
                 switch (h)
                 {
                     case "location":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
+                                Message = "Location should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = GetLookUpId<tblSMCompanyLocation>(
                             context,
                             m => m.strLocationName == value,
@@ -56,6 +70,7 @@ namespace iRely.Inventory.BusinessLayer
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
                                 Message = string.Format("Invalid Location: {0}.", value)
                             });
                             dr.Info = INFO_WARN;
@@ -78,6 +93,28 @@ namespace iRely.Inventory.BusinessLayer
                                 Row = row,
                                 Type = TYPE_INNER_WARN,
                                 Message = "Can't find Category item: " + value + '.',
+                                Status = STAT_INNER_COL_SKIP
+                            });
+                            dr.Info = INFO_WARN;
+                        }
+                        break;
+                    case "commodity":
+                        if (string.IsNullOrEmpty(value))
+                            break;
+                        lu = GetLookUpId<tblICCommodity>(
+                            context,
+                            m => m.strCommodityCode == value,
+                            e => e.intCommodityId);
+                        if (lu != null)
+                            fc.intCommodityId = (int)lu;
+                        else
+                        {
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_WARN,
+                                Message = "Can't find Commodity: " + value + '.',
                                 Status = STAT_INNER_COL_SKIP
                             });
                             dr.Info = INFO_WARN;
@@ -115,19 +152,21 @@ namespace iRely.Inventory.BusinessLayer
                             break;
                         lu = GetLookUpId<tblSMCompanyLocationSubLocation>(
                             context,
-                            m => m.strSubLocationName == value,
+                            m => m.strSubLocationName == value && 
+                                m.strClassification == "Inventory" &&
+                                m.intCompanyLocationId == fc.intLocationId,
                             e => e.intCompanyLocationSubLocationId);
                         if (lu != null)
                             fc.intSubLocationId = (int)lu;
                         else
                         {
-                            valid = false;
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Invalid Sub Location: {0}.", value)
+                                Message = string.Format("Invalid Sub Location: {0}.", value),
+                                Status = STAT_INNER_COL_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -137,19 +176,20 @@ namespace iRely.Inventory.BusinessLayer
                             break;
                         lu = GetLookUpId<tblICStorageLocation>(
                             context,
-                            m => m.strName == value,
+                            m => m.strName == value && m.intLocationId == fc.intLocationId && 
+                                m.intSubLocationId == fc.intSubLocationId,
                             e => e.intStorageLocationId);
                         if (lu != null)
                             fc.intStorageLocationId = (int)lu;
                         else
                         {
-                            valid = false;
                             dr.Messages.Add(new ImportDataMessage()
                             {
                                 Column = header,
                                 Row = row,
                                 Type = TYPE_INNER_ERROR,
-                                Message = string.Format("Invalid Storage Location: {0}.", value)
+                                Message = string.Format("Invalid Storage Location: {0}.", value),
+                                Status = STAT_INNER_COL_SKIP
                             });
                             dr.Info = INFO_WARN;
                         }
@@ -191,7 +231,7 @@ namespace iRely.Inventory.BusinessLayer
                 return null;
 
             context.AddNew<tblICInventoryCount>(fc);
-
+            
             return fc;
         }
     }
