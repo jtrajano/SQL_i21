@@ -8,53 +8,69 @@ SELECT
 	C.intCustomerId,
 	C.strSite,
 	C.strSiteDescription,
-	G.strPaymentMethod,
-	I.strName as strCustomerName,
+	D.strPaymentMethod,
+	H.strName as strCustomerName,
+	J.strEmail,
     case when B.ysnPassedThruArCustomer is null then 'Company Owned' 
 	     when B.ysnPassedThruArCustomer = 1 then 'Company Owned Pass Thru' else 'Company Owned' 		 
 		 end strSiteType,
 	 convert(bit,0)  as ysnPostNetToArCustomer,
-	 0  as intSharedFeePercentage
+	 0  as intSharedFeePercentage,
+	 C.intCompanyOwnedSiteId,
+	 C.intDealerSiteId,
+	 null as intAccountId,
+ 	 B.intCreditCardReceivableAccountId,
+	 B.intFeeExpenseAccountId
 FROM
      dbo.tblCCVendorDefault A
 	JOIN dbo.tblCCCompanyOwnedSite B
 		ON A.intVendorDefaultId = B.intVendorDefaultId
 	JOIN dbo.tblCCSite C
 		ON B.intCompanyOwnedSiteId = C.intCompanyOwnedSiteId
-	LEFT JOIN dbo.tblSMPaymentMethod G
-	    ON G.intPaymentMethodID = C.intPaymentMethodId
-    LEFT JOIN dbo.tblARCustomer H
-	    ON H.intEntityCustomerId = C.intCustomerId
-	LEFT JOIN dbo.tblEMEntity I
-	    ON I.intEntityId = H.intEntityCustomerId
+	LEFT JOIN dbo.tblSMPaymentMethod D
+	    ON D.intPaymentMethodID = C.intPaymentMethodId
+    LEFT JOIN dbo.tblARCustomer F
+	    ON F.intEntityCustomerId = C.intCustomerId
+	LEFT JOIN dbo.tblEMEntity H
+	    ON H.intEntityId = F.intEntityCustomerId
+	INNER JOIN dbo.tblEMEntityToContact I 
+		ON I.intEntityId = H.intEntityId AND I.ysnDefaultContact = 1
+	INNER JOIN dbo.tblEMEntity J 
+		ON J.intEntityId = I.intEntityContactId
 UNION ALL
 SELECT
-    F.intSiteId, 
-	D.intVendorDefaultId,
-	F.intCustomerId,
-	F.strSite,
-	F.strSiteDescription,
-	J.strPaymentMethod,
-	L.strName as strCustomerName,
+    C.intSiteId, 
+	A.intVendorDefaultId,
+	C.intCustomerId,
+	C.strSite,
+	C.strSiteDescription,
+	D.strPaymentMethod,
+	H.strName as strCustomerName,
+	J.strEmail,
     case when E.ysnSharedFee is null then 'Dealer Site' 
 	     when E.ysnSharedFee = 1 then 'Dealer Site Shared Fees' else 'Dealer Site' 		 
 		 end strSiteType,
 	E.ysnPostNetToArCustomer,
-	E.intSharedFeePercentage
-FROM
-     
-	 dbo.tblCCVendorDefault D
+	E.intSharedFeePercentage,
+	C.intCompanyOwnedSiteId,
+	C.intDealerSiteId,
+	E.intAccountId,
+	null as intCreditCardReceivableAccountId,
+	null as intFeeExpenseAccountId
+FROM  
+	 dbo.tblCCVendorDefault A
 	JOIN dbo.tblCCDealerSite E
-		ON D.intVendorDefaultId = E.intVendorDefaultId
-	JOIN dbo.tblCCSite F
-		ON E.intDealerSiteId = F.intDealerSiteId
-    LEFT JOIN dbo.tblSMPaymentMethod J
-	    ON J.intPaymentMethodID = F.intPaymentMethodId
-    LEFT JOIN dbo.tblARCustomer K
-	    ON K.intEntityCustomerId = F.intCustomerId
-	LEFT JOIN dbo.tblEMEntity L
-	    ON L.intEntityId = K.intEntityCustomerId
-	
-	
-	
+		ON A.intVendorDefaultId = E.intVendorDefaultId
+	JOIN dbo.tblCCSite C
+		ON E.intDealerSiteId = C.intDealerSiteId
+    LEFT JOIN dbo.tblSMPaymentMethod D
+	    ON D.intPaymentMethodID = C.intPaymentMethodId
+    LEFT JOIN dbo.tblARCustomer F
+	    ON F.intEntityCustomerId = C.intCustomerId
+	LEFT JOIN dbo.tblEMEntity H
+	    ON H.intEntityId = F.intEntityCustomerId
+	INNER JOIN dbo.tblEMEntityToContact I 
+		ON I.intEntityId = H.intEntityId AND I.ysnDefaultContact = 1
+	INNER JOIN dbo.tblEMEntity J 
+		ON J.intEntityId = I.intEntityContactId
 
