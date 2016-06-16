@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentItemSource]
 	AS 
 
-SELECT 
+SELECT DISTINCT
 	ShipmentItem.intInventoryShipmentItemId,
 	ShipmentItem.intOrderId,
 	strOrderNumber = 
@@ -59,7 +59,7 @@ SELECT
 					--WHEN Shipment.intSourceType = 3 -- Transport
 						--THEN ISNULL(TransportView.dblOrderedQuantity, 0)
 					WHEN Shipment.intSourceType = 3 -- Pick Lot
-						THEN ISNULL(PickLotDetail.dblSalePickedQty, 0)
+						THEN ISNULL(PickLotAllocation.dblSAllocatedQty, 0)
 					ELSE NULL
 					END
 				)
@@ -144,6 +144,8 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			 AND Shipment.intSourceType = 3
 		LEFT JOIN tblLGPickLotDetail PickLotDetail
 			ON PickLotDetail.intPickLotHeaderId = PickLot.intPickLotHeaderId
+		LEFT JOIN tblLGAllocationDetail PickLotAllocation
+			ON PickLotAllocation.intAllocationDetailId = PickLotDetail.intAllocationDetailId
 		LEFT JOIN tblICUnitMeasure PickLotUOM
 			ON PickLotUOM.intUnitMeasureId = PickLotDetail.intSaleUnitMeasureId
 GO
