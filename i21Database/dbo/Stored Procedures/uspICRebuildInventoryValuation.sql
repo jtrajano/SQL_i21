@@ -143,10 +143,10 @@ END
 BEGIN 
 	DELETE	GLDetail
 	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
-				ON GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
+				ON GLDetail.strBatchId = InvTrans.strBatchId
 				AND GLDetail.strTransactionId = InvTrans.strTransactionId
 	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
 -- Create the temp table. 
