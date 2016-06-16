@@ -14,11 +14,12 @@ SELECT DISTINCT
 	, Receipt.dblLineTotal AS dblTotal
 	, CASE WHEN Bill.intTransactionType != 1 AND Bill.dblAmountDue > 0 THEN Bill.dblAmountDue * -1 ELSE Bill.dblAmountDue END AS dblAmountDue 
 	--, (Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) dblQtyToVoucher
-	, dblAmountToVoucher = CASE
+	, dblVoucherAmount = 
+	  CASE
 		WHEN Receipt.dblQtyToReceive = 0
 		THEN 0
-		ELSE (Receipt.dblLineTotal/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0))
-	  END  
+		ELSE (Receipt.dblLineTotal/Receipt.dblQtyToReceive)* ISNULL(Receipt.dblBillQty,0)
+	  END
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
