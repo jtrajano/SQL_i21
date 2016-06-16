@@ -470,6 +470,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             column: 'intGradeId',
                             value: '{grdInventoryShipment.selection.intGradeId}',
                             conjunction: 'and'
+                        },{
+                            column: 'dblQty',
+                            value: 0,
+                            conjunction: 'and',
+                            condition: 'gt'
                         }]
                     }
                 },
