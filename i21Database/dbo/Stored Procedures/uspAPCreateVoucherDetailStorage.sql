@@ -32,7 +32,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT
 		[intBillId]						=	@voucherId,
-		[intAccountId]					=	A.intAccountId,
+		[intAccountId]					=	ISNULL(A.intAccountId , ISNULL(G.intAccountId, D.intGLAccountExpenseId)),
 		[intCustomerStorageId]			=	A.intCustomerStorageId,
 		[strMiscDescription]				=	ISNULL(A.strMiscDescription, A2.strDescription),
 		[dblTotal]						=	A.dblCost * A.dblQtyReceived,
@@ -51,6 +51,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
 	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
+	LEFT JOIN vyuICGetItemAccount G ON G.intItemId = A2.intItemId AND G.strAccountCategory = 'General'
 	WHERE B.intBillId = @voucherId
 
 	INSERT INTO @voucherIds
