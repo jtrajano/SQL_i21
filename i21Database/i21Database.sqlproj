@@ -3979,6 +3979,8 @@
     <Build Include="dbo\Views\vyuSMETExportSalesTax.sql" />
     <Build Include="dbo\Views\vyuSMETExportFullTax.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessSellOffsite.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

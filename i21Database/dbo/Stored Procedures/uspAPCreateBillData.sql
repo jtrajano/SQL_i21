@@ -19,6 +19,7 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@voucherNonInvDetails AS VoucherDetailNonInventory READONLY,
 	@voucherDetailReceiptPO AS VoucherDetailReceipt READONLY,
 	@voucherDetailNonInvContract AS VoucherDetailNonInvContract READONLY,
+	@voucherDetailStorage AS VoucherDetailStorage READONLY,
 	@voucherDetaiCC AS VoucherDetailCC READONLY,
 	@shipTo INT= NULL,
 	@vendorOrderNumber NVARCHAR(50) = NULL,
@@ -134,7 +135,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SET @billId = SCOPE_IDENTITY()
 
 	--Add details
-	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO, @voucherDetailNonInvContract, @voucherDetaiCC
+	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO, @voucherDetailNonInvContract, @voucherDetaiCC, @voucherDetailStorage
 	--EXEC uspAPUpdateVoucherTax @billId
 	--EXEC uspAPUpdateVoucherContract @billId
 
