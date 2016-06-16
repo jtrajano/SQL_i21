@@ -2051,7 +2051,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                         dblQuantity: 0,
                                                         strOrderUOM: lot.get('strSaleUnitMeasure'),
                                                         //dblQtyOrdered: lot.get('dblSalesOrderedQty'),
-                                                        dblQtyOrdered: lot.get('dblSalePickedQty'),
+                                                        dblQtyOrdered: lot.get('dblDetailQuantity'),
                                                         dblUnitPrice: lot.get('dblCashPrice'),
                                                         intOwnershipType: lot.get('intOwnershipType'),
                                                         strOwnershipType: lot.get('strOwnershipType'),
