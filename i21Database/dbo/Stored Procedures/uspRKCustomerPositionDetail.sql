@@ -163,7 +163,7 @@ UNION
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		AND CH.intContractTypeId = 1
+		AND CH.intContractTypeId = 1 and CD.intContractStatusId <> 3
 	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 		AND PT.intPricingTypeId IN (1)
 	WHERE CH.intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
@@ -176,7 +176,7 @@ UNION
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		AND CH.intContractTypeId = 2
+		AND CH.intContractTypeId = 2 and CD.intContractStatusId <> 3
 	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 		AND PT.intPricingTypeId IN (1)
 	WHERE CH.intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
@@ -190,7 +190,7 @@ UNION
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		AND CH.intContractTypeId = 1
+		AND CH.intContractTypeId = 1  and CD.intContractStatusId <> 3
 	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 		AND PT.intPricingTypeId IN (2)
 	WHERE CH.intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
@@ -203,7 +203,7 @@ UNION
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		AND CH.intContractTypeId = 2
+		AND CH.intContractTypeId = 2  and CD.intContractStatusId <> 3
 	LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 	WHERE ISNULL(PT.intPricingTypeId, 0) = 2
 		AND CH.intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
@@ -216,7 +216,7 @@ UNION
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		AND CH.intContractTypeId = 1
+		AND CH.intContractTypeId = 1  and CD.intContractStatusId <> 3
 	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 		AND PT.intPricingTypeId IN (3)
 	WHERE CH.intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
@@ -229,7 +229,7 @@ UNION
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		AND CH.intContractTypeId = 2
+		AND CH.intContractTypeId = 2  and CD.intContractStatusId <> 3
 	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 		AND PT.intPricingTypeId IN (3)
 		AND CH.intCommodityId = @intCommodityId and intEntityId=@intVendorCustomerId
@@ -243,7 +243,7 @@ UNION
 		SELECT isnull(SUM(isnull(ri.dblOpenReceive, 0)), 0) AS dblTotal
 		FROM tblICInventoryReceipt r
 		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-		INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2
+		INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
 		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 		WHERE ch.intCommodityId = @intCommodityId and ch.intEntityId=@intVendorCustomerId
 		 AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
@@ -255,7 +255,7 @@ UNION
 		,'Purchase In-Transit' AS [strType]
 		,ISNULL(ReserveQty, 0) AS dblTotal
 	FROM (SELECT sum(dblStockQty) ReserveQty FROM  vyuLGInventoryView v
-			JOIN vyuCTContractDetailView cd on cd.intContractDetailId=v.intContractDetailId
+			JOIN vyuCTContractDetailView cd on cd.intContractDetailId=v.intContractDetailId and cd.intContractStatusId <> 3
 			WHERE  strStatus='In-transit' AND cd.intCommodityId = @intCommodityId AND intVendorEntityId=@intVendorCustomerId
 			AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end	) t
 		

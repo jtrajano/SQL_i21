@@ -21,7 +21,7 @@ isnull(dblOpenReceive,0) dblTotal
 FROM tblICInventoryReceipt r
 INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Purchase Contract')
 INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
-INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
+INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 WHERE ch.intCommodityId = @intCommodityId and ch.intEntityId=@intVendorCustomerId 
 AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
@@ -62,7 +62,7 @@ ELSE IF @intSeqId= 2
 			ISNULL(dblQuantity,0) dblTotal 
 		FROM tblICInventoryShipment s
 		join tblICInventoryShipmentItem si on s.intInventoryShipmentId=si.intInventoryShipmentId and intOrderType =4 and isnull(dblUnitPrice,0) <>0
-		JOIN vyuCTContractDetailView cd on cd.intContractDetailId=si.intLineNo
+		JOIN vyuCTContractDetailView cd on cd.intContractDetailId=si.intLineNo and cd.intContractStatusId <> 3
 		join tblICItem i on si.intItemId=i.intItemId  WHERE i.intCommodityId=@intCommodityId and s.intEntityCustomerId=@intVendorCustomerId
 		AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
 		
@@ -78,7 +78,7 @@ ELSE IF @intSeqId= 2
 			,cd.intCommodityId,
 			ISNULL(dblQuantity,0) dblTotal from tblICInventoryShipment s
 		JOIN tblICInventoryShipmentItem si on s.intInventoryShipmentId=si.intInventoryShipmentId 
-		JOIN vyuCTContractDetailView cd on cd.intContractDetailId=si.intLineNo and cd.intContractTypeId=2
+		JOIN vyuCTContractDetailView cd on cd.intContractDetailId=si.intLineNo and cd.intContractTypeId=2 and cd.intContractStatusId <> 3
 		AND cd.intCommodityId=@intCommodityId and cd.intEntityId=@intVendorCustomerId 
 		AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end	
 	
@@ -99,7 +99,7 @@ ELSE IF @intSeqId= 3
 		FROM tblICInventoryReceipt r
 		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType in('Purchase Contract')
 		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
-		INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
+		INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 		INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 		WHERE ch.intCommodityId = @intCommodityId and ch.intEntityId=@intVendorCustomerId 
 		AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
@@ -141,7 +141,7 @@ ELSE IF @intSeqId= 4
 		FROM tblICInventoryShipment s
 		JOIN tblICInventoryShipmentItem si on s.intInventoryShipmentId=si.intInventoryShipmentId and intOrderType =4 and isnull(dblUnitPrice,0) <>0
 		JOIN tblICItem i on si.intItemId=i.intItemId 
-		JOIN vyuCTContractDetailView cd on cd.intContractDetailId=si.intLineNo
+		JOIN vyuCTContractDetailView cd on cd.intContractDetailId=si.intLineNo and cd.intContractStatusId <> 3
 		WHERE i.intCommodityId=@intCommodityId and cd.intEntityId=@intVendorCustomerId  
 		AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
 		UNION
@@ -157,7 +157,7 @@ ELSE IF @intSeqId= 4
 			,cd.intCommodityId,
 			ISNULL(dblQuantity,0) dblTotal  FROM tblICInventoryShipment s
 		JOIN tblICInventoryShipmentItem si ON s.intInventoryShipmentId=si.intInventoryShipmentId 
-		JOIN vyuCTContractDetailView cd ON cd.intContractDetailId=si.intLineNo and cd.intContractTypeId=2
+		JOIN vyuCTContractDetailView cd ON cd.intContractDetailId=si.intLineNo and cd.intContractTypeId=2 and cd.intContractStatusId <> 3
 		AND cd.intCommodityId=@intCommodityId AND cd.intEntityId=@intVendorCustomerId 
 		AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end	
 END
@@ -180,7 +180,7 @@ ELSE IF @intSeqId= 5
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
-			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
+			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 			WHERE intSourceType = 1
 				AND strReceiptType IN ('Purchase Contract')	AND ch.intCommodityId = @intCommodityId	and r.intEntityVendorId=@intVendorCustomerId
@@ -227,7 +227,7 @@ IF @intSeqId= 6
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
-			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1
+			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intContractDetailId=intLineNo AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 			WHERE intSourceType = 1
 				AND strReceiptType IN ('Purchase Contract')	AND ch.intCommodityId = @intCommodityId	and r.intEntityVendorId=@intVendorCustomerId

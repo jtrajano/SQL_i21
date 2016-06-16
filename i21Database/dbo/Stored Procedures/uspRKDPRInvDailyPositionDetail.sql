@@ -242,7 +242,7 @@ SELECT 4 AS intSeqId,'Sales In-Transit',@strDescription
 		FROM tblRKCollateral c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		WHERE strType = 'Sale' AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
@@ -257,7 +257,7 @@ SELECT 4 AS intSeqId,'Sales In-Transit',@strDescription
 		FROM tblRKCollateral c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		WHERE strType = 'Purchase' AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
@@ -338,7 +338,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
 			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
-			INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId
+			INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId  and CT.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CT.intCommodityId AND CT.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=CT.intCompanyLocationId
 			WHERE CT.intPricingTypeId = 2 AND CT.intCommodityId = @intCommodityId 
@@ -353,7 +353,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2
+			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -367,7 +367,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId
 			FROM tblICInventoryShipment r
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	
+			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -412,7 +412,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 			   FROM tblRKCollateral c
 				JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
-				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
 				JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 				WHERE strType = 'Sale' AND c.intCommodityId = @intCommodityId 
 				AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end)t) AS CollateralSale
@@ -421,7 +421,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 			   FROM tblRKCollateral c
 				JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
-				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
 				JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 				WHERE strType = 'Purchase' AND c.intCommodityId = @intCommodityId 
 				AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end)t)   AS CollateralPurchases
@@ -437,7 +437,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 					 SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity,0)) SlsBasisDeliveries
 					 FROM tblICInventoryShipment r  
 					 INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId  
-					 INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND ri.intOrderId = 1  
+					 INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND ri.intOrderId = 1   and cd.intContractStatusId <> 3
 					 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId 
 					 WHERE cd.intCommodityId = @intCommodityId)t) as SlsBasisDeliveries
 
@@ -599,7 +599,7 @@ BEGIN
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
 		WHERE strType = 'Sale' AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
 		AND intEntityId= @intVendorId 
@@ -618,7 +618,7 @@ BEGIN
 		LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId
-		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+		LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		WHERE strType = 'Purchase' AND c.intCommodityId = @intCommodityId 
 		AND c.intLocationId = case when isnull(@intLocationId,0)=0 then c.intLocationId  else @intLocationId end
@@ -662,7 +662,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 				FROM tblRKCollateral c
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId
 				LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
-				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
 				WHERE strType = 'Sale' AND c.intCommodityId = @intCommodityId
 					AND c.intLocationId  = case when isnull(@intLocationId,0)=0 then c.intLocationId   else @intLocationId end	AND intEntityId= @intVendorId 		
 				)t) t1	WHERE dblAdjustmentAmount <> dblOriginalQuantity 
@@ -676,7 +676,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 				FROM tblRKCollateral c
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId
 				LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
-				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId
+				LEFT JOIN vyuCTContractDetailView ch on c.intContractHeaderId=ch.intContractHeaderId  and ch.intContractStatusId <> 3
 				WHERE strType = 'Purchase' AND c.intCommodityId = @intCommodityId
 					AND c.intLocationId  = case when isnull(@intLocationId,0)=0 then c.intLocationId   else @intLocationId end	AND intEntityId= @intVendorId 			
 				)t) t1	WHERE dblAdjustmentAmount <> dblOriginalQuantity 
@@ -705,7 +705,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
 			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
-			INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId
+			INNER JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = Lots.intContractDetailId  and CT.intContractStatusId <> 3
 			JOIN tblEMEntity e on e.intEntityId=CT.intEntityId
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CT.intCommodityId AND CT.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=CT.intCompanyLocationId
@@ -722,7 +722,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
 			JOIN tblEMEntity e on st.intEntityId=e.intEntityId
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2
+			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -737,7 +737,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId
 			FROM tblICInventoryShipment r
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	
+			INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3
 			JOIN tblEMEntity e on r.intEntityId=cd.intEntityId
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId

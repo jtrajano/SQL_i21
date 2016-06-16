@@ -20,7 +20,7 @@ AS
  b.strBook,
  sb.strSubBook
  FROM tblCTContractDetail    CD  
- JOIN vyuCTContractHeaderView   CH ON CH.intContractHeaderId  = CD.intContractHeaderId        
+ JOIN vyuCTContractHeaderView   CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CD.intContractStatusId <> 3   
  join tblRKFutureMarket m on CD.intFutureMarketId=m.intFutureMarketId
  join tblRKFuturesMonth mo on CD.intFutureMonthId=mo.intFutureMonthId
  JOIN tblSMCompanyLocation   CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId  

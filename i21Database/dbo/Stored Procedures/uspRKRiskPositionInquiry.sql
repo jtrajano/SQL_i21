@@ -56,7 +56,7 @@ SELECT * FROM(
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -83,7 +83,7 @@ end) as dblNoOfContract,
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity,
    cv.intContractHeaderId,null as intFutOptTransactionHeaderId    
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -111,7 +111,7 @@ SELECT * FROM(
   -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblQuantity, cv.intContractHeaderId,
   null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -133,7 +133,7 @@ SELECT * FROM(
    dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblQuantity  ,
     cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -160,7 +160,7 @@ SELECT * FROM(
    dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity   
     ,cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -183,7 +183,7 @@ end) as dblNoOfContract,
    dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity  
    , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -211,7 +211,7 @@ SELECT * FROM(
    -dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity  
    , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -234,7 +234,7 @@ SELECT * FROM(
    dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,isnull(dblBalance,0)) as dblQuantity  
    , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -258,7 +258,7 @@ SELECT * FROM(
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity  
   , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
 FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
 JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
 JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -281,7 +281,7 @@ SELECT * FROM(
   strContractType as TranType, strEntityName  as CustVendor,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)/dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize)   as dblNoOfLot,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   isnull(dblBalance,0)) as dblQuantity  , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
 FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
 JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
 JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -303,7 +303,7 @@ SELECT * FROM(
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity  
   , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
 FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
 JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
 JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -324,7 +324,7 @@ SELECT * FROM(
   strContractType as TranType, strEntityName  as CustVendor,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)/dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize)   as dblNoOfLot,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   isnull(dblBalance,0)) as dblQuantity  , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
 FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
 JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
 JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -347,7 +347,7 @@ SELECT * FROM(
   case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end) as dblQuantity  
   , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
 FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
      JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
 JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
 JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
@@ -369,7 +369,7 @@ SELECT * FROM(
   strContractType as TranType, strEntityName  as CustVendor,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0) end)/dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize)   as dblNoOfLot,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,   
   isnull(dblBalance,0)) as dblQuantity  , cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
 FROM vyuCTContractDetailView cv  
-  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
   JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
 JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
 JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  

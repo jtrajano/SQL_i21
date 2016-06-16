@@ -30,7 +30,7 @@ SELECT
 		,fot.intFutOptTransactionHeaderId    		
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN vyuCTContractHeaderView ch on ch.intContractHeaderId= cs.intContractHeaderId
-JOIN tblCTContractDetail cd ON ch.intContractHeaderId  = cd.intContractHeaderId and cs.intContractDetailId=cd.intContractDetailId       
+JOIN tblCTContractDetail cd ON ch.intContractHeaderId  = cd.intContractHeaderId and cs.intContractDetailId=cd.intContractDetailId   and cd.intContractStatusId <> 3    
 JOIN tblRKFutureMarket m on cd.intFutureMarketId=m.intFutureMarketId
 JOIN tblRKFuturesMonth mo on cd.intFutureMonthId=mo.intFutureMonthId
 JOIN tblSMCompanyLocation   cl ON cl.intCompanyLocationId  = cd.intCompanyLocationId

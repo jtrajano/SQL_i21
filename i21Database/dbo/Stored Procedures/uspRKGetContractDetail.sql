@@ -29,7 +29,7 @@ INSERT INTO @tblTemp (intContractDetailId,strLocationName,strContractNumber,intC
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1  AND CD.intPricingTypeId IN (1)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1 and CD.intContractStatusId <> 3  AND CD.intPricingTypeId IN (1)
 			and CD.intCommodityId = @intCommodityId AND CD.intCompanyLocationId = @intLocationId
 		END
 		ELSE
@@ -39,7 +39,7 @@ INSERT INTO @tblTemp (intContractDetailId,strLocationName,strContractNumber,intC
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1  AND CD.intPricingTypeId IN (1)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1 and CD.intContractStatusId <> 3 AND CD.intPricingTypeId IN (1)
 			AND CD.intCommodityId = @intCommodityId 
 		END	
 		
@@ -56,7 +56,7 @@ ELSE IF @intSeqId = 2
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1  AND CD.intPricingTypeId IN (2)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1 and CD.intContractStatusId <> 3 AND CD.intPricingTypeId IN (2)
 			and CD.intCommodityId = @intCommodityId AND CD.intCompanyLocationId = @intLocationId
 		END
 		ELSE
@@ -67,7 +67,7 @@ ELSE IF @intSeqId = 2
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1 AND CD.intPricingTypeId IN (2)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1 and CD.intContractStatusId <> 3 AND CD.intPricingTypeId IN (2)
 			AND CD.intCommodityId = @intCommodityId 
 		END	
 		
@@ -84,7 +84,7 @@ ELSE IF @intSeqId = 3
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1  AND CD.intPricingTypeId IN (3)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1  AND CD.intPricingTypeId IN (3) and CD.intContractStatusId <> 3
 			and CD.intCommodityId = @intCommodityId AND CD.intCompanyLocationId = @intLocationId
 		END
 		ELSE
@@ -95,7 +95,7 @@ ELSE IF @intSeqId = 3
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1 AND CD.intPricingTypeId IN (3)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 1 AND CD.intPricingTypeId IN (3) and CD.intContractStatusId <> 3
 			AND CD.intCommodityId = @intCommodityId 
 		END	
 		
@@ -112,7 +112,7 @@ ELSE IF @intSeqId = 4
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2  AND CD.intPricingTypeId IN (1)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2  AND CD.intPricingTypeId IN (1) and CD.intContractStatusId <> 3
 			and CD.intCommodityId = @intCommodityId AND CD.intCompanyLocationId = @intLocationId
 		END
 		ELSE
@@ -123,7 +123,7 @@ ELSE IF @intSeqId = 4
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2 AND CD.intPricingTypeId IN (1)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2 AND CD.intPricingTypeId IN (1) and CD.intContractStatusId <> 3
 			AND CD.intCommodityId = @intCommodityId 
 		END	
 		
@@ -141,7 +141,7 @@ ELSE IF @intSeqId = 5
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2  AND CD.intPricingTypeId IN (2)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2  AND CD.intPricingTypeId IN (2) and CD.intContractStatusId <> 3
 			and CD.intCommodityId = @intCommodityId AND CD.intCompanyLocationId = @intLocationId
 		END
 		ELSE
@@ -151,7 +151,7 @@ ELSE IF @intSeqId = 5
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2 AND CD.intPricingTypeId IN (2)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2 AND CD.intPricingTypeId IN (2) and CD.intContractStatusId <> 3
 			AND CD.intCommodityId = @intCommodityId 
 		END	
 		
@@ -168,7 +168,7 @@ ELSE IF @intSeqId = 6
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2  AND CD.intPricingTypeId IN (3)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2  AND CD.intPricingTypeId IN (3) and CD.intContractStatusId <> 3
 			and CD.intCommodityId = @intCommodityId AND CD.intCompanyLocationId = @intLocationId
 		END
 		ELSE
@@ -179,7 +179,7 @@ ELSE IF @intSeqId = 6
 			SELECT  CD.intContractDetailId,CD.strLocationName,CD.strContractNumber,CD.intContractSeq,strEntityName,
 					CD.dtmEndDate,CD.strRemark as Comments,strFreightTerm as strShipVia,isnull(dblCashPrice,0) dblCashPrice,
 					strPricingType,strCurrency,isnull(CD.dblBalance,0) AS dblTotal,intCommodityId
-			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2 AND CD.intPricingTypeId IN (3)
+			FROM vyuCTContractDetailView CD WHERE   CD.intContractTypeId = 2 AND CD.intPricingTypeId IN (3) and CD.intContractStatusId <> 3
 			AND CD.intCommodityId = @intCommodityId 
 		END	
 		

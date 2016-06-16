@@ -62,9 +62,9 @@ BEGIN
 				AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
 			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-				AND cd.intPricingTypeId = 1
+				AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
-			WHERE intSourceType = 1
+			WHERE intSourceType = 1 and cd.intContractStatusId <> 3
 				AND strReceiptType IN ('Purchase Contract')
 				AND st.intCommodityId = @intCommodityId
 				AND r.intLocationId = @intLocationId
@@ -148,9 +148,9 @@ BEGIN
 				AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
 			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-				AND cd.intPricingTypeId = 1
+				AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
-			WHERE intSourceType = 1
+			WHERE intSourceType = 1 and cd.intContractStatusId <> 3
 				AND strReceiptType IN ('Purchase Contract')
 				AND st.intCommodityId = @intCommodityId
 			) AS t
@@ -224,9 +224,9 @@ BEGIN
 			AND strDistributionOption IN ('CNT')
 		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
 		INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-			AND cd.intPricingTypeId = 1
+			AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 		INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
-		WHERE intSourceType = 1
+		WHERE intSourceType = 1 and cd.intContractStatusId <> 3
 			AND strReceiptType IN ('Purchase Contract')
 			AND ch.intCommodityId = @intCommodityId
 			AND r.intLocationId = @intLocationId
@@ -283,9 +283,9 @@ BEGIN
 			AND strDistributionOption IN ('CNT')
 		INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
 		INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-			AND cd.intPricingTypeId = 1
+			AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 		INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
-		WHERE intSourceType = 1
+		WHERE intSourceType = 1 and cd.intContractStatusId <> 3
 			AND strReceiptType IN ('Purchase Contract')
 			AND ch.intCommodityId = @intCommodityId
 		
@@ -357,7 +357,7 @@ BEGIN
 				AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = isi.intOrderId
 			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-				AND cd.intPricingTypeId = 1
+				AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
 			WHERE intOrderType IN (1)
 				AND intSourceType = 1
@@ -447,7 +447,7 @@ BEGIN
 				AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = isi.intOrderId
 			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-				AND cd.intPricingTypeId = 1
+				AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
 			WHERE intOrderType IN (1)
 				AND intSourceType = 1
@@ -538,7 +538,7 @@ BEGIN
 				AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = isi.intOrderId
 			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-				AND cd.intPricingTypeId = 1
+				AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
 			WHERE intOrderType IN (1)
 				AND intSourceType = 1
@@ -628,7 +628,7 @@ BEGIN
 				AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = isi.intOrderId
 			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-				AND cd.intPricingTypeId = 1
+				AND cd.intPricingTypeId = 1 and cd.intContractStatusId <> 3
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
 			WHERE intOrderType IN (1)
 				AND intSourceType = 1
