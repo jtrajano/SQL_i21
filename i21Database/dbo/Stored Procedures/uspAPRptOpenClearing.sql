@@ -54,12 +54,13 @@ BEGIN
 		NULL AS strBillId,
 		NULL AS strVendorOrderNumber,
 		NULL AS strTerm,
+		NULL AS strCompanyAddress,
 		NULL AS strCompanyName,
 		NULL AS strAccountId,
 		NULL AS strVendorIdName,
 		NULL AS strAge,
 		0 AS intAccountId,
-		0 AS dblAmountToVoucher,
+		0 AS dblVoucherAmount,
 		0 AS dblTotal,
 		0 AS dblAmountPaid,
 		0 AS dblDiscount,
@@ -114,7 +115,7 @@ SET @innerQuery = 'SELECT
 						,intBillId
 						,strVendorIdName
 						,dblTotal
-						,dblAmountToVoucher
+						,dblVoucherAmount
 						,dblAmountDue
 						,dblAmountPaid
 						,dblDiscount
@@ -251,8 +252,9 @@ SET @query = '
 	,strBillId = ISNULL(A.strBillId, ''New Voucher'')
 	,A.strVendorOrderNumber
 	,T.strTerm
+	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
-	,tmpAgingSummaryTotal.dblAmountToVoucher
+	,tmpAgingSummaryTotal.dblVoucherAmount
 	,tmpAgingSummaryTotal.dblTotal
 	,tmpAgingSummaryTotal.dblAmountPaid
 	,tmpAgingSummaryTotal.dblAmountDue
@@ -289,7 +291,7 @@ SET @query = '
 		SELECT 
 		 tmpAPClearables.intInventoryReceiptId
 		,tmpAPClearables.intBillId
-		,SUM(tmpAPClearables.dblAmountToVoucher) as dblAmountToVoucher
+		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
 		,SUM(tmpAPClearables.dblTotal) AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
 		,(SUM(tmpAPClearables.dblTotal) + SUM(tmpAPClearables.dblInterest) - SUM(tmpAPClearables.dblAmountPaid) - SUM(tmpAPClearables.dblDiscount)) AS dblAmountDue
