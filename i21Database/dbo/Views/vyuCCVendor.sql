@@ -32,7 +32,7 @@ FROM
 	INNER JOIN dbo.tblEMEntity C
 		ON B.intEntityVendorId = C.intEntityId
 	LEFT JOIN dbo.[tblEMEntityLocation] D
-		ON D.intEntityId = C.intEntityId  and D.ysnActive = 1
+		ON D.intEntityId = C.intEntityId  and D.ysnActive = 1 and D.ysnDefaultLocation = 1
     LEFT Join dbo.tblSMTerm E
 	    on E.intTermID = D.intTermsId
     LEFT Join dbo.tblSMPaymentMethod F
