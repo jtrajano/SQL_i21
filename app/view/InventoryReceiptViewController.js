@@ -2003,7 +2003,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onItemHeaderClick: function(menu, column) {
-        var grid = column.initOwnerCt.grid;
+       // var grid = column.initOwnerCt.grid; 
+         var grid = column.$initParent.grid;
 
         if (grid.itemId === 'grdInventoryReceipt') {
             i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
@@ -2014,9 +2015,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onVendorHeaderClick: function (menu, column) {
-        var grid = column.initOwnerCt.grid;
+       // var grid = column.initOwnerCt.grid;
+        var grid = column.$initParent.grid;
+        
+        if (grid.itemId === 'grdCharges') 
+            {
+                var selectedObj = grid.getSelectionModel().getSelection();
+                var vendorId = '';
 
-        i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('EntityManagement.view.Entity:searchEntityVendor', grid, 'intEntityVendorId');
+                if(selectedObj.length == 0)
+                    {
+                        iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new',  viewConfig: { modal: true }}); 
+                    }
+                
+                else
+                    {
+                        for (var x = 0; x < selectedObj.length; x++) {
+                            vendorId += selectedObj[x].data.intEntityVendorId + '|^|';
+                        } 
+                        
+                         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+                            filters: [{
+                                column: 'intEntityId',
+                                value: vendorId
+                            }]
+                        });
+                    }
+            }
     },
 
     onViewTaxDetailsClick: function (ReceiptItemId) {
