@@ -68,6 +68,7 @@
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemRecipeItemId				INT				= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
@@ -111,16 +112,21 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@ARAccountId INT
 		
 
-SET @ZeroDecimal = 0.000000	
-SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
-
+SET @ZeroDecimal = 0.000000
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
 	SET @DeliverPickUp = ISNULL((SELECT TOP 1 strDeliverPickupDefault FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
 	
-IF @Comment IS NULL OR LTRIM(RTRIM(@Comment)) = ''
-	SET @Comment = ISNULL((SELECT TOP 1 ISNULL(strInvoiceComments,'') FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
+IF @Comment IS NULL
+	BEGIN
+		EXEC	[dbo].[uspARGetDefaultComment]
+					@intCompanyLocationId = @CompanyLocationId,
+					@intEntityCustomerId = @EntityCustomerId,
+					@strTransactionType = @TransactionType,
+					@strType = @Type,
+					@strDefaultComment = @Comment OUTPUT
+	END
 
 
 IF ISNULL(@TransactionType, '') = ''
@@ -130,21 +136,13 @@ IF ISNULL(@Type, '') = ''
 	SET @Type = 'Standard'
 
 
-IF ISNULL(@AccountId, 0) <> 0 AND @TransactionType <>  'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @AccountId)
-	BEGIN
-		SET @ErrorMessage = 'There account id provided is not a valid account of category "AR Account".';
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
-	END
+IF @AccountId IS NOT NULL
+	SET @ARAccountId = @AccountId
 ELSE
-	IF @TransactionType <> 'Prepayment'
-		SET @ARAccountId = @AccountId
+	SET @ARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@TransactionType, @CompanyLocationId)
 
-IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType <>  'Prepayment'
-	SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 
-IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType <>  'Prepayment'
+IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Prepayment', 'Cash', 'Cash Refund')
 	BEGIN
 		SET @ErrorMessage = 'There is no setup for AR Account in the Company Configuration.';
 		IF ISNULL(@RaiseError,0) = 1
@@ -152,28 +150,50 @@ IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType <>  'Prepayment'
 		RETURN 0;
 	END
 
-IF @TransactionType = 'Prepayment'
-	SET @ARAccountId = NULL
+IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Prepayment', 'Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @ARAccountId)
+	BEGIN
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "AR Account".';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
 
-IF ISNULL(@AccountId, 0) <> 0 AND @TransactionType =  'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @AccountId)
+DECLARE @CompanyLocation NVARCHAR(250)
+IF @ARAccountId IS NULL AND @TransactionType IN ('Cash', 'Cash Refund')
+	BEGIN
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
+		SET @ErrorMessage = 'There is no Undeposited Funds account setup under Company Location - ' + @CompanyLocation + '.';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+
+IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Undeposited Funds' AND [intAccountId] =  @ARAccountId)
+	BEGIN
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "Undeposited Funds".';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+
+
+IF @ARAccountId IS NULL AND @TransactionType = 'Prepayment'
+	BEGIN		
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
+		SET @ErrorMessage = 'There is no Customer Prepaid account setup under Company Location - ' + @CompanyLocation + '.';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+
+IF  @TransactionType = 'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @ARAccountId)
 	BEGIN
 		SET @ErrorMessage = 'There account id provided is not a valid account of category "Customer Prepayments".';
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
-ELSE
-	IF @TransactionType = 'Prepayment'
-		SET @ARAccountId = @AccountId
 
-
-IF ISNULL(@ARAccountId, 0) = 0 AND @TransactionType =  'Prepayment'
-	BEGIN
-		SET @ErrorMessage = 'There account id provided is not a valid account of category "Customer Prepayments".';
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
-	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId)
 	BEGIN
@@ -215,6 +235,28 @@ IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 		RETURN 0;
 	END
 
+IF @CurrencyId IS NOT NULL
+	SET @DefaultCurrency = @CurrencyId
+ELSE
+	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurreny](@EntityCustomerId)
+
+
+IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHERE [intCurrencyID] = @CurrencyId)
+	BEGIN
+		SET @ErrorMessage = 'The currency Id provided does not exists!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+ 
+IF ISNULL(@DefaultCurrency,0) = 0
+	BEGIN
+		SET @ErrorMessage = 'There is no setup for default currency in the Company Preference.'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+
 IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Prepayment'))
 	BEGIN
 		SET @ErrorMessage = @TransactionType + ' is not a valid transaction type!'
@@ -223,7 +265,7 @@ IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Ca
 		RETURN 0;
 	END
 
-IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store'))
+IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling'))
 	BEGIN
 		SET @ErrorMessage = @TransactionType + ' is not a valid invoice type!'
 		IF ISNULL(@RaiseError,0) = 1
@@ -297,6 +339,7 @@ BEGIN TRY
 		,[intShipmentId]
 		,[intTransactionId]
 		,[intMeterReadingId]
+		,[intContractHeaderId]
 		,[intOriginalInvoiceId] 
 		,[intEntityId]
 		,[intConcurrencyId])
@@ -306,8 +349,8 @@ BEGIN TRY
 		,[intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
-		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))	
-		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))),1) ELSE @SubCurrencyCents END)
+		,[intCurrencyId]				= @DefaultCurrency
+		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = @DefaultCurrency),1) ELSE @SubCurrencyCents END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[intSourceId]					= @SourceId
 		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
@@ -346,7 +389,7 @@ BEGIN TRY
 		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
 		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
-		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Prepayment') THEN @Posted ELSE 0 END)
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment') THEN @Posted ELSE 0 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
@@ -359,6 +402,7 @@ BEGIN TRY
 		,[intShipmentId]				= @ShipmentId 
 		,[intTransactionId]				= @TransactionId
 		,[intMeterReadingId]			= @MeterReadingId
+		,[intContractHeaderId]			= @ItemContractHeaderId
 		,[intOriginalInvoiceId]			= @OriginalInvoiceId
 		,[intEntityId]					= @EntityId 
 		,[intConcurrencyId]				= 0
@@ -476,6 +520,7 @@ BEGIN TRY
 		,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 		,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 		,@ItemShipmentNumber			= @ItemShipmentNumber
+		,@ItemRecipeItemId				= @ItemRecipeItemId		
 		,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 		,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 		,@ItemContractHeaderId			= @ItemContractHeaderId

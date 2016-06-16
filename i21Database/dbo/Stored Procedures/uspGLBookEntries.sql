@@ -80,7 +80,7 @@ BEGIN
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
-			,ISNULL([dblDebitForeign],0)
+			,ISNULL([dblDebitForeign],0)            
             ,ISNULL([dblCreditForeign],0)
             ,ISNULL([dblDebitReport],0)
             ,ISNULL([dblCreditReport],0)

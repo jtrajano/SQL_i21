@@ -39,6 +39,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		DECLARE @ImportLogDetailId INT
 		SELECT TOP 1 @ImportLogDetailId = intImportLogDetailId FROM @InvoicesForImport ORDER BY intImportLogDetailId
 		
+		DELETE FROM @EntriesForInvoice
+
 		DECLARE	@EntityCustomerId			INT
 			,@Date							DATETIME
 			,@CompanyLocationId				INT

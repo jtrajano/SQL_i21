@@ -28,15 +28,9 @@
 	[apivc_currency_cnt] [char](8) NULL,
 	[apivc_user_id] [char](16) NULL,
 	[apivc_user_rev_dt] [int] NULL,
-	[A4GLIdentity] [numeric](9, 0) IDENTITY(1,1) NOT NULL,
-	[apchk_A4GLIdentity] INT NOT NULL,
-	[intBillId] INT
- CONSTRAINT [k_tblAPapivcmst] PRIMARY KEY NONCLUSTERED 
-(
-	[apivc_vnd_no] ASC,
-	[apivc_ivc_no] ASC,
-	[intBillId] ASC,
-	[apchk_A4GLIdentity] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
-    [dtmDateImported] DATETIME NULL DEFAULT GETDATE()
+	[A4GLIdentity] [numeric](9, 0) NOT NULL,
+	[apchk_A4GLIdentity] INT NULL,
+	[intBillId] INT NULL,
+	[dtmDateImported] DATETIME NULL DEFAULT GETDATE(),
+	[intId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY
 ) ON [PRIMARY]

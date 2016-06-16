@@ -2,6 +2,7 @@
 	@intInventoryShipmentItemId int,
 	@intSalesOrderId int
 AS
+
 Select 
 	 MFG.intItemId
 	,MFG.strItemNo

@@ -63,6 +63,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intTaxGroupId				INT,
 							intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
+							intRecipeItemId				INT,
 							strMaintenanceType			NVARCHAR(100),
 							strItemType					NVARCHAR(100),
 							strSalesOrderNumber			NVARCHAR(100),
@@ -94,6 +95,7 @@ SELECT SI.intItemId
 	 , SI.intTaxGroupId
 	 , SI.intSalesOrderDetailId
 	 , NULL
+	 , NULL
 	 , SOD.strMaintenanceType
 	 , I.strType
 	 , SI.strSalesOrderNumber
@@ -107,6 +109,7 @@ WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining > 0
 	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
+	AND (ISNULL(SI.intRecipeItemId, 0) = 0)
 
 --GET ITEMS FROM POSTED SHIPMENT
 INSERT INTO @tblItemsToInvoice
@@ -124,6 +127,7 @@ SELECT ICSI.intItemId
 	 , SOD.intTaxGroupId
 	 , SOD.intSalesOrderDetailId
 	 , ICSI.intInventoryShipmentItemId
+	 , NULL
 	 , SOD.strMaintenanceType
 	 , ICI.strType
 	 , SO.strSalesOrderNumber
@@ -135,6 +139,33 @@ INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
 LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
 WHERE ICSI.intOrderId = @SalesOrderId
 AND ICS.ysnPosted = 1
+
+--GET ITEMS FROM Manufacturing - Other Charges
+INSERT INTO @tblItemsToInvoice
+SELECT ARSI.intItemId
+	 , dbo.fnIsStockTrackingItem(ARSI.intItemId)
+	 , ARSI.strItemDescription
+	 , ARSI.intItemUOMId
+	 , ARSI.intContractHeaderId
+	 , ARSI.intContractDetailId
+	 , 0
+	 , ARSI.dblQtyRemaining  
+	 , 0 
+	 , ARSI.dblDiscount
+	 , ARSI.dblPrice 
+	 , NULL
+	 , NULL
+	 , NULL
+	 , NULL
+	 , ''
+	 , I.strType
+	 , ARSI.strSalesOrderNumber
+	 , ARSI.strShipmentNumber
+FROM vyuARShippedItems ARSI
+LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
+WHERE
+	ARSI.intSalesOrderId = @SalesOrderId
+	AND ISNULL(ARSI.intRecipeItemId,0) <> 0
 
 --GET SOFTWARE ITEMS
 IF @FromShipping = 0
@@ -441,6 +472,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemTaxGroupId			INT,		
 						@ItemSalesOrderDetailId	INT,
 						@ItemShipmentDetailId	INT,
+						@ItemRecipeItemId		INT,
 						@ItemSalesOrderNumber	NVARCHAR(100),
 						@ItemShipmentNumber		NVARCHAR(100)
 
@@ -460,6 +492,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemTaxGroupId			= intTaxGroupId,
 						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
 						@ItemShipmentDetailId	= intInventoryShipmentItemId,
+						@ItemRecipeItemId		= intRecipeItemId,
 						@ItemSalesOrderNumber	= strSalesOrderNumber,
 						@ItemShipmentNumber		= strShipmentNumber
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
@@ -486,6 +519,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@RecomputeTax					= 0
 							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId							
 							,@ItemInventoryShipmentItemId	= @ItemShipmentDetailId
+							,@ItemRecipeItemId				= @ItemRecipeItemId
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 							,@ItemShipmentNumber			= @ItemShipmentNumber
 							,@EntitySalespersonId			= @EntitySalespersonId

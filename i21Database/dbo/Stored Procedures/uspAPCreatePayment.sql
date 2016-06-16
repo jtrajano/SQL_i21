@@ -52,6 +52,7 @@ BEGIN
 	DECLARE @location INT;
 	DECLARE @bills AS Id;
 	DECLARE @autoPay BIT = 0; --Automatically compute the payment
+	DECLARE @paymentRecordNum NVARCHAR(50)
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -157,6 +158,7 @@ BEGIN
 		--SET @amountPaid = @amountPaid - @withholdAmount
 	END
 
+	EXEC uspSMGetStartingNumber 8, @paymentRecordNum OUT
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
@@ -166,6 +168,7 @@ BEGIN
 		[intCurrencyId],
 		[intEntityVendorId],
 		[strPaymentInfo],
+		[strPaymentRecordNum],
 		[strNotes],
 		[dtmDatePaid],
 		[dblAmountPaid],
@@ -181,6 +184,7 @@ BEGIN
 		[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount), (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'')),
 		[intEntityVendorId]		= @vendorId,
 		[strPaymentInfo]		= @paymentInfo,
+		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
 		[dblAmountPaid]			= ISNULL(@payment,0),
@@ -225,6 +229,7 @@ BEGIN
 	 @paymentMethod INT,
 	 @vendorId INT,
 	 @paymentInfo NVARCHAR(10),
+	 @paymentRecordNum NVARCHAR(50),
 	 @notes NVARCHAR(500),
 	 @payment DECIMAL(18, 6),
 	 @datePaid DATETIME,
@@ -236,6 +241,7 @@ BEGIN
 	 @bankAccount = @intBankAccountId,
 	 @paymentMethod = @paymentMethodId,
 	 @paymentInfo = @paymentInfo,
+	 @paymentRecordNum = @paymentRecordNum,
 	 @vendorId = @vendorId,
 	 @notes = @notes,
 	 @payment = @amountPaid,

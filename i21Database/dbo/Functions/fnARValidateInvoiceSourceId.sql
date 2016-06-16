@@ -54,5 +54,8 @@ BEGIN
 	IF @SourceTransaction = 'Credit Card Reconciliation'
 		RETURN 14
 
+	IF @SourceTransaction = 'Sales Contract'
+		RETURN 15
+
 	RETURN @SourceIdOut
 END

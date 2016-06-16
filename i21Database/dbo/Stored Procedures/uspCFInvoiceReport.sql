@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	@xmlParam NVARCHAR(MAX)=null
 )
 AS
@@ -74,10 +73,10 @@ BEGIN
 		DECLARE @idoc INT
 		DECLARE @whereClause NVARCHAR(MAX)
 		
-		DECLARE @From NVARCHAR(50)
-		DECLARE @To NVARCHAR(50)
-		DECLARE @Condition NVARCHAR(50)
-		DECLARE @Fieldname NVARCHAR(50)
+		DECLARE @From NVARCHAR(MAX)
+		DECLARE @To NVARCHAR(MAX)
+		DECLARE @Condition NVARCHAR(MAX)
+		DECLARE @Fieldname NVARCHAR(MAX)
 
 		DECLARE @tblCFFieldList TABLE
 		(
@@ -94,35 +93,35 @@ BEGIN
 		SELECT 
 			 RecordKey
 			,Record
-		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCylcle',',') 
+		FROM [fnCFSplitString]('intAccountId,strNetwork,strCustomerName,dtmTransactionDate,dtmPostedDate,strInvoiceCycle',',') 
 
 		--READ XML
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 
 		--TEMP TABLE FOR PARAMETERS
 		DECLARE @temp_params TABLE (
-			 [fieldname] NVARCHAR(50)
-			,[condition] NVARCHAR(20)      
-			,[from] NVARCHAR(50)
-			,[to] NVARCHAR(50)
-			,[join] NVARCHAR(10)
-			,[begingroup] NVARCHAR(50)
-			,[endgroup] NVARCHAR(50) 
-			,[datatype] NVARCHAR(50)
+			 [fieldname] NVARCHAR(MAX)
+			,[condition] NVARCHAR(MAX)      
+			,[from] NVARCHAR(MAX)
+			,[to] NVARCHAR(MAX)
+			,[join] NVARCHAR(MAX)
+			,[begingroup] NVARCHAR(MAX)
+			,[endgroup] NVARCHAR(MAX) 
+			,[datatype] NVARCHAR(MAX)
 		) 
 
 		--XML DATA TO TABLE
 		INSERT INTO @temp_params
 		SELECT *
 		FROM OPENXML(@idoc, 'xmlparam/filters/filter',2)
-		WITH ([fieldname] NVARCHAR(50)
-			, [condition] NVARCHAR(20)
-			, [from] NVARCHAR(50)
-			, [to] NVARCHAR(50)
-			, [join] NVARCHAR(10)
-			, [begingroup] NVARCHAR(50)
-			, [endgroup] NVARCHAR(50)
-			, [datatype] NVARCHAR(50))
+		WITH ([fieldname] NVARCHAR(MAX)
+			, [condition] NVARCHAR(MAX)
+			, [from] NVARCHAR(MAX)
+			, [to] NVARCHAR(MAX)
+			, [join] NVARCHAR(MAX)
+			, [begingroup] NVARCHAR(MAX)
+			, [endgroup] NVARCHAR(MAX)
+			, [datatype] NVARCHAR(MAX))
 
 
 
@@ -151,6 +150,11 @@ BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 			' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
 		END
+		ELSE IF (UPPER(@Condition) = 'IN')
+		BEGIN
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+			' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+		END
 
 		SET @From = ''
 		SET @To = ''
@@ -174,7 +178,7 @@ BEGIN
 		DECLARE @tblCFTableCardIds TABLE ([intCardId]	INT)
 		DECLARE @tblCFTableTransationIds TABLE ([intTransactionId]	INT)
 		DECLARE @tblCFFilterIds TABLE ([intTransactionId]	INT)
-		DECLARE @CFID NVARCHAR(50)
+		DECLARE @CFID NVARCHAR(MAX)
 		DECLARE @tblCFTempTableQuery nvarchar(MAX)
 
 

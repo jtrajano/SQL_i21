@@ -103,14 +103,6 @@ IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId)
 		RETURN 0;
 	END
 
-IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId AND [ysnActive] = 1)
-	BEGIN
-		SET @ErrorMessage = 'The entity provided is not active!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END	
-
 
 IF @AllowPrepayment = 0 AND @InvoiceId IS NULL AND @AmountPaid > @ZeroDecimal
 	BEGIN

@@ -29,55 +29,9 @@
     [aptrx_currency_cnt] CHAR (8)        NULL,
     [aptrx_user_id]      CHAR (16)       NULL,
     [aptrx_user_rev_dt]  INT             NULL,
-    [A4GLIdentity]       NUMERIC (9)     IDENTITY (1, 1) NOT NULL,
-	[intBillId] INT,
-    --CONSTRAINT [APk_aptrxmst] PRIMARY KEY NONCLUSTERED ([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC, [intBillId] ASC), 
+    [A4GLIdentity]       NUMERIC (9)     NOT NULL,
+	[intBillId] INT NULL,
     [dtmDateImported] DATETIME NOT NULL DEFAULT GETDATE(), 
-    [ysnInsertedToAPIVC] BIT NOT NULL DEFAULT 0
+    [ysnInsertedToAPIVC] BIT NOT NULL DEFAULT 0,
+	[intId]					INT IDENTITY(1,1) NOT NULL PRIMARY KEY
 );
-
-
-GO
-CREATE UNIQUE CLUSTERED INDEX [APIaptrxmst0]
-    ON [dbo].[tblAPaptrxmst]([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC, [intBillId] ASC);
-
-
-GO
-CREATE NONCLUSTERED INDEX [APIaptrxmst1]
-    ON [dbo].[tblAPaptrxmst]([aptrx_sys_rev_dt] ASC, [aptrx_sys_time] ASC);
-
-
-GO
-CREATE NONCLUSTERED INDEX [APIaptrxmst2]
-    ON [dbo].[tblAPaptrxmst]([aptrx_cbk_no] ASC, [aptrx_chk_no] ASC);
-
-
-GO
-GRANT DELETE
-    ON OBJECT::[dbo].[tblAPaptrxmst] TO PUBLIC
-    AS [dbo];
-
-
-GO
-GRANT INSERT
-    ON OBJECT::[dbo].[tblAPaptrxmst] TO PUBLIC
-    AS [dbo];
-
-
-GO
-GRANT REFERENCES
-    ON OBJECT::[dbo].[tblAPaptrxmst] TO PUBLIC
-    AS [dbo];
-
-
-GO
-GRANT SELECT
-    ON OBJECT::[dbo].[tblAPaptrxmst] TO PUBLIC
-    AS [dbo];
-
-
-GO
-GRANT UPDATE
-    ON OBJECT::[dbo].[tblAPaptrxmst] TO PUBLIC
-    AS [dbo];
-

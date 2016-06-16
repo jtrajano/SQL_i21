@@ -2797,7 +2797,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetEquityRefundDetails.sql" />
-    <Build Include="dbo\Views\vyuETCustomer.sql" />
+    <Build Include="dbo\Views\vyuETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
     <Build Include="dbo\Views\vyuARShipmentItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCleanCost.sql" />
@@ -3967,22 +3967,17 @@
     <Build Include="dbo\Views\vyuLGLoadWarehouseView.sql" />
     <Build Include="dbo\Views\vyuLGLoadCostView.sql" />
     <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction_1.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportPricingBySiteGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInsertModule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCascadeModule.sql" />
+    <Build Include="dbo\Stored Procedures\uspETTranslateSDToInvoice.sql" />
+    <Build Include="dbo\User Defined Types\ETTranslateSDToInvoiceTable.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailLotsView.sql" />
-    <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
-    <Build Include="dbo\Functions\fnCTGetAdditionalColumnForDetailView.sql" />
-    <Build Include="dbo\User Defined Types\VoucherDetailStorage.sql" />
-    <Build Include="dbo\Tables\tblQMCOAMapping.sql" />
-    <Build Include="dbo\Tables\tblQMCOAMappingDetail.sql" />
-    <Build Include="dbo\Tables\tblQMTestMethod.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMGetCOAApprovedSample.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMGetCOASampleProperties.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMReportCOAGetChemicalSample.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMReportCOAGetMicrobiologicalSample.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMReportCOAGetPhysicalSample.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMReportCOAHeader.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMReportCOAHeaderDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
+    <Build Include="dbo\Views\vyuSMETExportSalesTax.sql" />
+    <Build Include="dbo\Views\vyuSMETExportFullTax.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessSellOffsite.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -4095,6 +4090,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql" />
     <None Include="Scripts\Post-Deployment\EM\030-FixSalesperson.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateOldCost.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFieldTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

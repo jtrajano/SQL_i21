@@ -2,6 +2,7 @@
 	@UserId INT,
 	@DateFrom DATETIME = NULL,
 	@DateTo DATETIME = NULL,
+	@logKey NVARCHAR(100) OUTPUT,
 	@isValid BIT OUTPUT
 AS
 
@@ -13,19 +14,19 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @key NVARCHAR(100) = NEWID()
+DECLARE @logDate DATETIME = GETDATE()
+SET @logKey = @key;
+
 DECLARE @log TABLE
 (
-	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
-    [intEntityId] INT NOT NULL, 
-    [dtmDate] DATETIME NOT NULL,
-	[intLogType] INT NOT NULL,
-	[ysnSuccess] BIT NOT NULL
+	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 
 IF(NOT EXISTS(SELECT 1 FROM tblSMUserSecurity A WHERE A.intEntityUserSecurityId = @UserId))
 BEGIN
 	INSERT INTO @log
-	SELECT 'Invalid user provided.', @UserId, GETDATE(), 1, 0
+	SELECT 'Invalid user provided.'
 END
 
 --MAKE SURE USER HAS DEFAULT LOCATION
@@ -37,21 +38,21 @@ WHERE intEntityUserSecurityId = @UserId
 IF(@userLocation IS NULL OR @userLocation <= 0)
 BEGIN
 	INSERT INTO @log
-	SELECT 'Please setup default location on user screen.', @UserId, GETDATE(), 2, 0
+	SELECT 'Please setup default location on user screen.'
 END
 
 --VALIDATE THE AP ACCOUNT IF NO VALUE
 INSERT INTO @log
-SELECT 
-	CAST(A.apcbk_gl_ap AS NVARCHAR) + ' is not a valid AP Account.', @UserId, GETDATE(), 3, 0
+SELECT DISTINCT
+	CAST(A.apcbk_gl_ap AS NVARCHAR) + ' is not a valid AP Account.'
 FROM apcbkmst A INNER JOIN aptrxmst B ON A.apcbk_no = B.aptrx_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 			THEN
 				CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 			ELSE 1 END)
 UNION ALL
-SELECT 
-	CAST(A.apcbk_gl_ap AS NVARCHAR)+ ' is not a valid AP Account.', @UserId, GETDATE(), 3, 0 
+SELECT DISTINCT
+	CAST(A.apcbk_gl_ap AS NVARCHAR)+ ' is not a valid AP Account.'
 FROM apcbkmst A INNER JOIN apivcmst B ON A.apcbk_no = B.apivc_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 			THEN
@@ -62,8 +63,8 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 
 --VALIDATE THE AP ACCOUNT IF NOT EXISTS
 INSERT INTO @log
-SELECT
-	'AP Account ' + CAST(A.apcbk_gl_ap AS NVARCHAR) + ' in apcbkmst does not exists in i21.', @UserId, GETDATE(), 3, 0
+SELECT DISTINCT
+	'AP Account ' + CAST(A.apcbk_gl_ap AS NVARCHAR) + ' in apcbkmst does not exists in i21.'
 FROM apcbkmst A
 WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
 AND A.apcbk_no IN (
@@ -75,8 +76,8 @@ AND A.apcbk_no IN (
 					ELSE 1 END)
 )
 UNION ALL
-SELECT
-	'AP Account ' + CAST(A.apcbk_gl_ap AS NVARCHAR) + ' in apcbkmst does not exists in i21.', @UserId, GETDATE(), 3, 0
+SELECT DISTINCT
+	'AP Account ' + CAST(A.apcbk_gl_ap AS NVARCHAR) + ' in apcbkmst does not exists in i21.'
 FROM apcbkmst A
 WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
 AND A.apcbk_no IN (
@@ -87,9 +88,10 @@ AND A.apcbk_no IN (
 					ELSE 1 END)
 )
 
+--GET ALL INVALID GL ACCOUNT DETAIL
 INSERT INTO @log
-SELECT 
-	 'Invalid GL Account ' + CAST(A.apegl_gl_acct AS NVARCHAR)  + ' found in origin table apeglmst.', @UserId, GETDATE(), 5, 0
+SELECT DISTINCT
+	 'Invalid GL Account ' + CAST(A.apegl_gl_acct AS NVARCHAR)  + ' found in origin table apeglmst.'
 FROM apeglmst A
 INNER JOIN aptrxmst B ON A.apegl_vnd_no = B.aptrx_vnd_no AND A.apegl_ivc_no = B.aptrx_ivc_no
 WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
@@ -98,8 +100,8 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 			CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 		ELSE 1 END)
 UNION ALL
-SELECT
-	'Invalid GL Account ' + CAST(A.aphgl_gl_acct AS NVARCHAR) + ' found in origin table aphglmst.', @UserId, GETDATE(), 5, 0
+SELECT DISTINCT
+	'Invalid GL Account ' + CAST(A.aphgl_gl_acct AS NVARCHAR) + ' found in origin table aphglmst.'
 FROM aphglmst A
 INNER JOIN apivcmst B ON A.aphgl_vnd_no = B.apivc_vnd_no AND A.aphgl_ivc_no = B.apivc_ivc_no
 WHERE A.aphgl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
@@ -114,8 +116,8 @@ DECLARE @missingCheckBook NVARCHAR(4), @error NVARCHAR(200);
 IF @DateFrom IS NULL
 BEGIN
 	INSERT INTO @log
-	SELECT 
-		'Check book number ' + CAST(A.apchk_cbk_no AS NVARCHAR) + ' was not imported.', @UserId, GETDATE(), 6, 0
+	SELECT DISTINCT
+		'Check book number ' + CAST(A.apchk_cbk_no AS NVARCHAR) + ' was not imported.'
 	FROM apchkmst A 
 	LEFT JOIN tblCMBankAccount B
 		ON A.apchk_cbk_no = B.strCbkNo COLLATE Latin1_General_CS_AS
@@ -124,24 +126,24 @@ END
 ELSE
 BEGIN
 	INSERT INTO @log
-	SELECT 
-		'Check book number ' + CAST(A.apchk_cbk_no AS NVARCHAR)  + ' was not imported.', @UserId, GETDATE(), 6, 0
+	SELECT DISTINCT
+		'Check book number ' + CAST(A.apchk_cbk_no AS NVARCHAR)  + ' was not imported.'
 	FROM apchkmst A 
 	INNER JOIN apivcmst C ON A.apchk_cbk_no = C.apivc_cbk_no
 	LEFT JOIN tblCMBankAccount B
 		ON A.apchk_cbk_no = B.strCbkNo COLLATE Latin1_General_CS_AS
 	WHERE B.strCbkNo IS NULL
-	AND 1 = (CASE WHEN CONVERT(DATE, CAST(C.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
+	AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+		THEN
+			CASE WHEN CONVERT(DATE, CAST(C.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+				AND C.apivc_comment = 'CCD Reconciliation' AND C.apivc_status_ind = 'U' THEN 1 ELSE 0 END
+		ELSE 1 END)
 END
 
 --VERIFY IF VOUCHER'S VENDOR ORDER NUMBER HAVEN'T USED IN i21
 INSERT INTO @log
 SELECT
 	A.aptrx_ivc_no + ' already used in i21.'
-	,@UserId
-	,GETDATE()
-	,7
-	,0
 FROM aptrxmst A
 CROSS APPLY (
 	SELECT 
@@ -151,14 +153,13 @@ CROSS APPLY (
 	WHERE B.strVendorOrderNumber COLLATE Latin1_General_CS_AS = A.aptrx_ivc_no
 	AND C.strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no
 ) Vouchers
-WHERE 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
+WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+		THEN
+			CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+		ELSE 1 END)
 UNION ALL
 SELECT
 	A.apivc_ivc_no + ' already used in i21.'
-	,@UserId
-	,GETDATE()
-	,7
-	,0
 FROM apivcmst A
 CROSS APPLY (
 	SELECT 
@@ -168,19 +169,25 @@ CROSS APPLY (
 	WHERE B.strVendorOrderNumber COLLATE Latin1_General_CS_AS = A.apivc_ivc_no
 	AND C.strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no
 ) Vouchers
-WHERE 1 = (CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
-				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END)
-
+WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+		THEN
+			CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END
+		ELSE 1 END)
 
 INSERT INTO tblAPImportVoucherLog
 (
 	[strDescription], 
     [intEntityId], 
     [dtmDate], 
-    [intLogType], 
-    [ysnSuccess]
+	[strLogKey]
 )
-SELECT * FROM @log
+SELECT 
+	[strDescription], 
+    @UserId, 
+    @logDate, 
+	@key
+FROM @log
 
 IF EXISTS(SELECT 1 FROM @log) SET @isValid = 0;
 ELSE SET @isValid = 1

@@ -216,7 +216,7 @@ FROM tblAPBill A
 	LEFT JOIN dbo.tblICLot Lot
 	ON Lot.intLotId = H.intLotId
 WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost != 0 AND B.dblCost != B.dblOldCost
+AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost
 
 IF ISNULL(@post,0) = 1
 BEGIN
@@ -314,7 +314,7 @@ BEGIN
 			--Unpost Cost Adjustment
 			DECLARE @billsToUnpost AS Id
 			INSERT INTO @billsToUnpost
-			SELECT intTransactionId FROM @adjustedEntries
+			SELECT DISTINCT intTransactionId FROM @adjustedEntries
 
 			EXEC uspAPUnpostCostAdjustmentGL  @billsToUnpost, @batchId, @userId
 		END

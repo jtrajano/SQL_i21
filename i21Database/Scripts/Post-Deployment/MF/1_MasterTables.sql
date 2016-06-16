@@ -1416,27 +1416,16 @@ END
 GO
 Update tblMFRecipe Set intRecipeTypeId=1 Where intRecipeTypeId IS NULL
 GO
-	DECLARE @intCompanyLocationId INT
 
-	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
-	FROM tblSMCompanyLocation
-	ORDER BY 1
+IF EXISTS (SELECT * FROM tblWHCompanyPreference)
+BEGIN
+	DELETE FROM tblWHCompanyPreference
+END
 
-	IF EXISTS (
-		SELECT *
-		FROM tblWHCompanyPreference
-		)
-	BEGIN
-	
-		UPDATE tblWHCompanyPreference
-		SET intAllowablePickDayRange = 30, ysnAllowMoveAssignedTask = 1, ysnScanForkliftOnLogin = 0, strHandheldType = 'Small', strWarehouseType = 'Lite', intContainerMinimumLength = 3, intLocationMinLength = 3, ysnNegativeQtyAllowed = 0, ysnPartialMoveAllowed = 0, ysnGTINCaseCodeMandatory = 1, ysnEnableMoveAndMergeSplit = 1, ysnTicketLabelToPrinter = 1, intNoOfCopiesToPrintforPalletSlip = 3, strWebServiceServerURL = '', strWMSStatus = 'Release,Hold', dblPalletWeight = 50.000000, intNumberOfDecimalPlaces = 4, ysnCreateLoadTasks = 0, intMaximumPalletsOnForklift = 3
-	END
-	ELSE
-	BEGIN
-		INSERT INTO tblWHCompanyPreference (intCompanyLocationId, intAllowablePickDayRange, ysnAllowMoveAssignedTask, ysnScanForkliftOnLogin, strHandheldType, strWarehouseType, intContainerMinimumLength, intLocationMinLength, ysnNegativeQtyAllowed, ysnPartialMoveAllowed, ysnGTINCaseCodeMandatory, ysnEnableMoveAndMergeSplit, ysnTicketLabelToPrinter, intNoOfCopiesToPrintforPalletSlip, strWebServiceServerURL, strWMSStatus, dblPalletWeight, intNumberOfDecimalPlaces, ysnCreateLoadTasks, intMaximumPalletsOnForklift)
-		SELECT intCompanyLocationId, 30, 1, 0, 'Small', 'Lite', 3, 3, 0, 0, 1, 1, 1, 3, '', 'Release,Hold', 50.000000, 4, 0, 3
-		FROM tblSMCompanyLocation
-	END
+INSERT INTO tblWHCompanyPreference (intCompanyLocationId, intAllowablePickDayRange, ysnAllowMoveAssignedTask, ysnScanForkliftOnLogin, strHandheldType, strWarehouseType, intContainerMinimumLength, intLocationMinLength, ysnNegativeQtyAllowed, ysnPartialMoveAllowed, ysnGTINCaseCodeMandatory, ysnEnableMoveAndMergeSplit, ysnTicketLabelToPrinter, intNoOfCopiesToPrintforPalletSlip, strWebServiceServerURL, strWMSStatus, dblPalletWeight, intNumberOfDecimalPlaces, ysnCreateLoadTasks, intMaximumPalletsOnForklift)
+SELECT intCompanyLocationId, 30, 1, 0, 'Small', 'Lite', 3, 3, 0, 0, 1, 1, 1, 3, '', 'Release,Hold', 50.000000, 4, 0, 3
+FROM tblSMCompanyLocation
+
 GO
 
 GO
@@ -2029,7 +2018,3 @@ SET intBatchID = NULL
 WHERE intBlendRequirementId IS NULL
 	AND intBatchID IS NOT NULL
 Go
-UPDATE tblMFCompanyPreference
-SET dblDefaultResidueQty = 0.00001
-WHERE dblDefaultResidueQty IS NULL
-GO

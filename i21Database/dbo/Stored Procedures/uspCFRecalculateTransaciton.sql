@@ -11,6 +11,8 @@
 ,@TransferCost			NUMERIC(18,6)   
 ,@TransactionId			INT				=   NULL
 ,@CreditCardUsed		BIT				=	0
+,@PostedOrigin			BIT				=	0
+,@PostedCSV				BIT				=	0
 ,@IsImporting			BIT				=	0
 -------------REMOTE TAXES-------------
 --  1. REMOTE TRANSACTION			--
@@ -57,6 +59,8 @@ BEGIN
 
 	DECLARE @intTransactionId				INT
 	DECLARE @ysnCreditCardUsed				BIT
+	DECLARE @ysnPostedOrigin				BIT
+	DECLARE @ysnPostedCSV					BIT
 	DECLARE @guid							NVARCHAR(MAX)
 	DECLARE	@runDate						DATETIME
 
@@ -141,6 +145,9 @@ BEGIN
 	SET @guid		= NEWID()
 	SET	@runDate	= GETDATE()
 
+	 
+	SET @ysnPostedOrigin	= @PostedOrigin
+	SET @ysnPostedCSV		= @PostedCSV	
 	SET @ysnCreditCardUsed = @CreditCardUsed
 	SET @intCardId = @CardId
 	SET @dblQuantity = @Quantity
@@ -152,11 +159,11 @@ BEGIN
 	SET @dblOriginalPrice = @OriginalPrice
 	SET @intTransactionId = @TransactionId
 
-	IF (@intTransactionId > 0)
+	IF (@intTransactionId > 0 AND @IsImporting = 0)
 	BEGIN
 		DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId
 	END
-	ELSE
+	ELSE IF(@intTransactionId = 0)
 	BEGIN
 		SET @intTransactionId = NULL
 	END
@@ -229,6 +236,8 @@ BEGIN
 	@CFContractSeq				=	@intContractSeq			output,
 	@CFPriceBasis				=	@strPriceBasis			output,
 	@CFCreditCard				=	@ysnCreditCardUsed,      
+	@CFPostedOrigin				=	@ysnPostedOrigin,      
+	@CFPostedCSV				=	@ysnPostedCSV,      
 	@CFPriceProfileId			=	@intPriceProfileId		output,
 	@CFPriceIndexId				=	@intPriceIndexId 		output,
 	@CFSiteGroupId				= 	@intSiteGroupId 		output
@@ -388,6 +397,17 @@ BEGIN
 	DECLARE @ysnLoopTaxExempt	BIT
 	DECLARE @ysnLoopTaxCheckOff	BIT
 
+	DECLARE @strTaxExemptReason		NVARCHAR(MAX)
+	DECLARE @strNote				NVARCHAR(MAX)
+	DECLARE @strReason				NVARCHAR(MAX)
+	DECLARE @ysnCheckoffTax			BIT
+	DECLARE @ysnTaxExempt			NVARCHAR(MAX)
+	DECLARE @ysnInvalidSetup		NVARCHAR(MAX)
+	DECLARE @strTaxCode				NVARCHAR(MAX)
+
+	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
+	BEGIN
+
 	IF (LOWER(@strTransactionType) like '%remote%')
 	BEGIN
 
@@ -396,6 +416,12 @@ BEGIN
 			SELECT @strTaxCodes = COALESCE(@strTaxCodes + ', ', '') + CONVERT(varchar(10), intTaxCodeId)
 			FROM tblCFTransactionTax
 			WHERE intTransactionId = @intTransactionId
+
+			IF(@IsImporting = 0)
+			BEGIN
+				--GET TAX STATE FROM SITE
+				SET @TaxState = (SELECT TOP 1 strTaxState from tblCFSite where intSiteId = @intSiteId)
+			END
 		END	
 
 		INSERT INTO @tblTransactionTax(
@@ -428,7 +454,7 @@ BEGIN
 		,@dtmTransactionDate			=@dtmTransactionDate
 		,@intCustomerId					=@intCustomerId
 		,@strTaxCodeId					=@strTaxCodes
-		,@TaxState						=NULL
+		,@TaxState						=@TaxState
 		,@FederalExciseTaxRate        	=@FederalExciseTaxRate        	
 		,@StateExciseTaxRate1         	=@StateExciseTaxRate1         	
 		,@StateExciseTaxRate2         	=@StateExciseTaxRate2         	
@@ -444,6 +470,8 @@ BEGIN
 			SELECT * 
 			INTO #ItemTax
 			FROM @tblTransactionTax
+			WHERE (strCalculationMethod != '' OR strCalculationMethod IS NOT NULL)
+			AND	  (ysnInvalidSetup = 0)
 
 			WHILE exists (SELECT * FROM #ItemTax)
 			BEGIN
@@ -502,6 +530,30 @@ BEGIN
 		,@CustomerId		=@intCustomerId
 	END
 
+	IF (@intTransactionId is not null)
+		BEGIN
+			INSERT INTO tblCFTransactionNote (
+			intTransactionId
+			,strProcess
+			,dtmProcessDate
+			,strNote
+			,strGuid
+		)
+		SELECT 
+		 @intTransactionId
+		,'Calculation'
+		,@runDate
+		,ISNULL(strTaxExemptReason,ISNULL(strNotes,ISNULL(strReason,'Invalid Setup -' + strTaxCode)))
+		,@guid
+		FROM @tblTransactionTax
+		WHERE (intTaxGroupId =0 OR intTaxGroupId IS NULL) 
+		AND	  (intTaxClassId =0 OR intTaxClassId IS NULL)
+		AND	  (intTaxCodeId =0 OR intTaxCodeId IS NULL)
+		AND	  (strCalculationMethod ='' OR strCalculationMethod IS NULL)
+		AND	  (ysnInvalidSetup =1)
+	END
+
+
 	INSERT INTO @tblTaxRateTable	
 	SELECT 
 	 [intTransactionDetailTaxId]
@@ -558,14 +610,6 @@ BEGIN
 	
 	SET @QxOP = @dblQuantity * @dblOriginalPrice
 	SET @QxCP = @dblQuantity * @dblPrice
-	
-	DECLARE @strTaxExemptReason		NVARCHAR(MAX)
-	DECLARE @strNote				NVARCHAR(MAX)
-	DECLARE @strReason				NVARCHAR(MAX)
-	DECLARE @ysnCheckoffTax			BIT
-	DECLARE @ysnTaxExempt			NVARCHAR(MAX)
-	DECLARE @ysnInvalidSetup		NVARCHAR(MAX)
-	DECLARE @strTaxCode				NVARCHAR(MAX)
 
 	WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxUnitTable))
 	BEGIN
@@ -1150,6 +1194,8 @@ BEGIN
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
+	END
+
 
 	DECLARE @tblTransactionPrice TABLE(
 		 strTransactionPriceId		NVARCHAR(MAX)
@@ -1157,7 +1203,11 @@ BEGIN
 		,dblCalculatedAmount		NUMERIC(18,6)
 	)
 	
-	IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 OR @strPriceMethod = 'Import File Price')
+	IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+	OR @strPriceMethod = 'Import File Price' 
+	OR @strPriceMethod = 'Credit Card' 
+	OR @strPriceMethod = 'Posted Trans from CSV'
+	OR @strPriceMethod = 'Origin History')
 		BEGIN
 			INSERT INTO @tblTransactionPrice (
 		 strTransactionPriceId	

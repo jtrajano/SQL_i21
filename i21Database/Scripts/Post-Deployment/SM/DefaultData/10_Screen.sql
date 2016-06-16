@@ -27,13 +27,13 @@ GO
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.Entity') 
 		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId]) 
-			VALUES (N'Entity', N'Entity', N'EntityManagement.view.Entity', N'Entity Management', N'tblEMEntity', 0)
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomGrid], [intConcurrencyId]) 
+			VALUES (N'Entity', N'Entity', N'EntityManagement.view.Entity', N'Entity Management', N'tblEMEntity', 1, 0)
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
-			SET strTableName = N'tblEntity'
+			SET strTableName = N'tblEntity', ysnCustomGrid = 1
 			WHERE strNamespace = 'EntityManagement.view.Entity'
 		END
 		

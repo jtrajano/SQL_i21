@@ -5264,4 +5264,102 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTaxCategoryId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d4733874-25cb-4e3b-850c-a6090cebaec1" ChangeDateTime="06/08/2016 12:05:15">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[intDeliveryMetricsId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportSDToInvoice" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="788d3226-3ff7-423d-8ebf-a98337761e05" ChangeDateTime="06/08/2016 12:06:02">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[intBeginningOdometerReading ]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1f3f1790-0da6-422a-a732-d9e1d92dfc33" ChangeDateTime="06/08/2016 12:06:53">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[intEndingOdometerReading]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strInvoiceNumber" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ebfebacd-2e71-4528-83fb-ea7bc173b3d2" ChangeDateTime="06/08/2016 12:07:01">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[dblGallonsDelivered]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCustomerNumber" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8f450814-97d8-4b4f-b9d4-47331133c914" ChangeDateTime="06/08/2016 12:07:08">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[dblTotalFuelSales]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSiteNumber" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4216a067-9ec6-485e-8b71-874af60ae25e" ChangeDateTime="06/08/2016 12:07:15">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[intTotalInvoice]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmDate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="622b59c7-a885-4849-8834-d5183363c56b" ChangeDateTime="06/08/2016 12:07:22">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[strDriverNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strUOM" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="15e73955-bf67-4bfb-8829-0bd3ec55fc27" ChangeDateTime="06/08/2016 12:07:32">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[strTruckNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblUnitPrice" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6decab4f-768d-4847-93d0-8f868b33c218" ChangeDateTime="06/08/2016 12:07:38">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[strShiftNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strItemDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="788fdf26-42fd-4368-97f0-0253f2f704f8" ChangeDateTime="06/08/2016 12:07:44">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[dtmShiftBeginDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblPercentFullAfterDelivery" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a626fc9f-7968-4184-baec-b7baa4ebcf67" ChangeDateTime="06/08/2016 12:07:51">
+    <Property Name="ElementName" Value="[dbo].[tblETDeliveryMetrics].[dtmShiftEndDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETDeliveryMetrics]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strLocation" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f28089df-c166-4865-9493-beed8ac114f6" ChangeDateTime="06/10/2016 03:28:17">
+    <Property Name="ElementName" Value="[dbo].[tblETImportSDToInvoice].[intImportSDToInvoice]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblETImportSDToInvoice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportSDToInvoiceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a59f528e-b46c-4475-adb7-10683a0d798a" ChangeDateTime="06/15/2016 07:04:25">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConfigurationSequence" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b3c21283-e218-48c7-bab3-aebc38fab7f2" ChangeDateTime="06/15/2016 08:03:07">
+    <Property Name="ElementName" Value="[dbo].[tblTFReportingComponent].[intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFReportingComponent]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSPInventory" />
+  </Operation>
 </Operations>

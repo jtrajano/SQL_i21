@@ -25,6 +25,8 @@ DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
 DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 
+DECLARE @strTransactionForm NVARCHAR(255)
+
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 
@@ -212,6 +214,19 @@ SELECT
 FROM	@GLAccounts
 ;
 
+-- Get the default transaction form name
+SELECT TOP 1 
+		@strTransactionForm = TransType.strTransactionForm
+FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+			ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+		INNER JOIN @GLAccounts GLAccounts
+			ON TRANS.intItemId = GLAccounts.intItemId
+			AND TRANS.intItemLocationId = GLAccounts.intItemLocationId
+			AND TRANS.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+WHERE	TRANS.strBatchId = @strBatchId
+;
 
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
@@ -281,7 +296,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 
@@ -325,7 +340,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm 
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 
@@ -372,7 +387,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm 
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 
@@ -415,7 +430,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName 
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 
@@ -462,7 +477,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 
@@ -505,7 +520,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 
@@ -552,7 +567,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 
@@ -596,7 +611,7 @@ SELECT
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 		,dblDebitForeign			= NULL 

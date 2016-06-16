@@ -74,7 +74,7 @@ LEFT JOIN dbo.tblQMProperty AS Property_cup
  ON UPPER(Property_cup.strPropertyName) = UPPER(Property_cup_map.strActualPropertyName)
 LEFT JOIN dbo.vyuQMCuppingTestResult AS Result_cup
  ON Result_cup.intPropertyId = Property_cup.intPropertyId
-LEFT JOIN dbo.tblQMSample AS smp
+INNER JOIN dbo.tblQMSample AS smp
  ON smp.intSampleId = Result_cup.intSampleId
  AND smp.intLoadContainerId=Cont.intLoadContainerId
 LEFT JOIN tblQMSampleStatus st

@@ -15,6 +15,7 @@
 		[dblLessService] [numeric](18,6) NULL,
 		[dblCheckAmount] [numeric](18,6) NULL,
 		[dblNoRefund] [numeric](18,6) NULL,
+		[strDescription] [nvarchar](max) NULL,
 		[ysnPosted] BIT NULL DEFAULT 0,
 		[ysnPrinted] BIT NULL DEFAULT 0,
 		[intConcurrencyId] [int] NULL DEFAULT 0, 

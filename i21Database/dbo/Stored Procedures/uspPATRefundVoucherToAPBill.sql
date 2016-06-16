@@ -25,8 +25,10 @@ BEGIN TRY
 	DECLARE @intPatronageItemId INT 
 	DECLARE @intVendorId INT
 	DECLARE @strVendorOderNumber NVARCHAR(MAX)
+	DECLARE @intAPClearingGLAccount INT
 
 	SELECT @strVendorOderNumber = 'PAT-' + CONVERT(VARCHAR,@intRefundId) + '-' + CONVERT(VARCHAR,GETDATE(),112) + CONVERT(VARCHAR,CAST((RAND() * (899999) + 100000) AS INT))
+	SELECT @intAPClearingGLAccount = intAPClearingGLAccount FROM tblPATCompanyPreference
 
 	-- Fill-up voucher details
 	INSERT INTO @voucherDetailNonInventory
@@ -38,7 +40,7 @@ BEGIN TRY
 		,[dblCost]
 		,[intTaxGroupId])
 	VALUES
-		(NULL											
+		(@intAPClearingGLAccount											
 		,@intPaymentItemId							
 		,'Patronage Refund Voucher (Tax Inclusive)'		
 		,1												

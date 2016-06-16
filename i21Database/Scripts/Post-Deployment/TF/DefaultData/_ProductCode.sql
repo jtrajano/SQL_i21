@@ -10,8 +10,7 @@ DELETE from tblTFProductCode
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN'
 IF (@intTaxAuthorityId IS NOT NULL)
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
-	BEGIN
+	
 		INSERT INTO [tblTFProductCode]
 		(
 			[intTaxAuthorityId],[strProductCode],[strDescription],[strProductCodeGroup],[strNote]
@@ -71,8 +70,6 @@ BEGIN
 		,(@intTaxAuthorityId, N'E00', N'Ethanol (100%) Blended', N'Alcohol', NULL)
 		,(@intTaxAuthorityId, N'E11', N'Ethanol (11%) Blended', N'Alcohol', NULL)
 
-	
-	END
 END
 
 
@@ -80,8 +77,6 @@ SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE
 IF (@intTaxAuthorityId IS NOT NULL)
 
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
-	BEGIN
 		INSERT INTO [tblTFProductCode]
 		(
 			[intTaxAuthorityId],[strProductCode],[strDescription],[strProductCodeGroup],[strNote]
@@ -140,15 +135,12 @@ BEGIN
 		,(@intTaxAuthorityId, N'093', N'Undefined products - SFT', N'', NULL)
 		,(@intTaxAuthorityId, N'E00', N'Ethanol (100%) Blended', N'Alcohol', NULL)
 		,(@intTaxAuthorityId, N'E11', N'Ethanol (11%) Blended', N'Alcohol', NULL)
-	END
 END
 
 SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IL'
 IF (@intTaxAuthorityId IS NOT NULL)
 
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
-	BEGIN
 		INSERT INTO [tblTFProductCode]
 		(
 			[intTaxAuthorityId],[strProductCode],[strDescription],[strProductCodeGroup],[strNote]
@@ -178,7 +170,6 @@ BEGIN
 		,(@intTaxAuthorityId,'225','Liquid Natural Gas (LNG)','Alternative Fuels Products - For On Road Use', NULL)
 		,(@intTaxAuthorityId,'998','Motor Fuel Product - (gaseous state)','Other - Use When Your Product Is Not Listed', NULL)
 		,(@intTaxAuthorityId,'999','Motor Fuel Product - (liquid state)','Other - Use When Your Product Is Not Listed', NULL)
-	END
 END
 
 
@@ -186,8 +177,6 @@ SELECT TOP 1 @intTaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE
 IF (@intTaxAuthorityId IS NOT NULL)
 
 BEGIN
-	IF NOT EXISTS(SELECT TOP 1 [intTaxAuthorityId] FROM [tblTFProductCode] WHERE [intTaxAuthorityId] = @intTaxAuthorityId)
-	BEGIN
 		INSERT INTO [tblTFProductCode]
 		(
 			[intTaxAuthorityId],[strProductCode],[strDescription],[strProductCodeGroup],[strNote]
@@ -208,8 +197,6 @@ BEGIN
 		,(@intTaxAuthorityId,'284','Undyed Biodiesel Fuel','Clear Diesel', NULL)
 		,(@intTaxAuthorityId,'122','Blend Stock','Clear Diesel', NULL)
 		,(@intTaxAuthorityId,'130','Jet Fuel','Jet Fuel', NULL)
-
-	END
 END
 
 GO

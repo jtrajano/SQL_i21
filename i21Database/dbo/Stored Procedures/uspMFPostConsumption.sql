@@ -246,9 +246,6 @@ BEGIN
 	FROM dbo.tblMFWorkOrderConsumedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	SELECT @dblDefaultResidueQty = dblDefaultResidueQty
-	FROM dbo.tblMFCompanyPreference
-
 	SELECT @intRecordId = Min(intRecordId)
 	FROM @tblMFLot
 
@@ -266,16 +263,15 @@ BEGIN
 					SELECT dblWeight
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId
-					) < @dblDefaultResidueQty
+					) < 0.00001
 				)
 			AND (
 				(
 					SELECT dblQty
 					FROM dbo.tblICLot
 					WHERE intLotId = @intLotId
-					) < @dblDefaultResidueQty
+					) < 0.00001
 				)
-			AND @dblDefaultResidueQty IS NOT NULL
 		BEGIN
 			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
 				,@dblNewLotQty = 0

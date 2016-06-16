@@ -9,7 +9,7 @@
 		  ,ec.strEmail
 		  ,ec.strTitle
 		  ,strPhone = ph.strPhone
-		  ,strMobile = ''--mob.strPhone
+		  ,strMobile = mob.strPhone
 		  ,el.strLocationName
 		  ,ec.strTimezone
 		  ,intConcurrencyId = 1
@@ -30,5 +30,5 @@
 		  left outer join tblEMEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
 		  left join tblEMEntityPhoneNumber ph 
 		   on ec.intEntityId = ph.intEntityId
-		  --left join tblEMEntityMobileNumber mob
-		   --on ec.intEntityId = mob.intEntityId
+		  left join tblEMEntityMobileNumber mob
+		   on ec.intEntityId = mob.intEntityId

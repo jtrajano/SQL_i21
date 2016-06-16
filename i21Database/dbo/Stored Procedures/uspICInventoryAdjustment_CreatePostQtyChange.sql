@@ -81,6 +81,20 @@ BEGIN
 		RAISERROR(80020, 11, 1)  
 		GOTO _Exit
 	END 	
+
+	-- Check if the item uom id is valid for the lot record. 
+	IF NOT EXISTS (
+		SELECT	TOP 1 1
+		FROM	dbo.tblICLot 
+		WHERE	intItemId = @intItemId
+				AND intLotId = @intLotId
+				AND (intItemUOMId = @intItemUOMId OR intWeightUOMId = @intItemUOMId) 
+	)
+	BEGIN 
+		-- Item UOM is invalid or missing.
+		RAISERROR(80048, 11, 1)  
+		GOTO _Exit
+	END 
 END 
 
 -- Raise an error if Adjust By Quantity is invalid
@@ -97,20 +111,6 @@ IF NOT EXISTS (
 	FROM	dbo.tblICItemUOM
 	WHERE	intItemId = @intItemId
 			AND intItemUOMId = @intItemUOMId	
-)
-BEGIN 
-	-- Item UOM is invalid or missing.
-	RAISERROR(80048, 11, 1)  
-	GOTO _Exit
-END 
-
--- Check if the item uom id is valid for the lot record. 
-IF NOT EXISTS (
-	SELECT	TOP 1 1
-	FROM	dbo.tblICLot 
-	WHERE	intItemId = @intItemId
-			AND intLotId = @intLotId
-			AND (intItemUOMId = @intItemUOMId OR intWeightUOMId = @intItemUOMId) 
 )
 BEGIN 
 	-- Item UOM is invalid or missing.
@@ -168,7 +168,6 @@ END
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the detail record 
 ------------------------------------------------------------------------------------------------------------------------------------
-IF @intLotId IS NOT NULL
 BEGIN 
 	INSERT INTO dbo.tblICInventoryAdjustmentDetail (
 			intInventoryAdjustmentId
@@ -190,19 +189,19 @@ BEGIN
 	)
 	SELECT 
 			intInventoryAdjustmentId	= @intInventoryAdjustmentId
-			,intSubLocationId			= Lot.intSubLocationId
-			,intStorageLocationId		= Lot.intStorageLocationId
-			,intItemId					= Lot.intItemId
+			,intSubLocationId			= ISNULL(Lot.intSubLocationId, @intSubLocationId)
+			,intStorageLocationId		= ISNULL(Lot.intStorageLocationId, @intStorageLocationId)
+			,intItemId					= @intItemId
 			,intLotId					= Lot.intLotId
 			,intItemUOMId				= @intItemUOMId
 			,dblQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
 													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
-													ELSE 0 
+													ELSE ISNULL(StocksPerUOM.dblOnHand, 0)
 											END 
 			,dblAdjustByQuantity		= @dblAdjustByQuantity
 			,dblNewQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty
 													WHEN Lot.intWeightUOMId = @intItemUOMId THEN Lot.dblWeight
-													ELSE 0 
+													ELSE ISNULL(StocksPerUOM.dblOnHand, 0)
 											END 
 											+ @dblAdjustByQuantity
 			,intWeightUOMId				= Lot.intWeightUOMId
@@ -211,14 +210,29 @@ BEGIN
 													ELSE 0 
 											END 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
-			,dblCost					= Lot.dblLastCost
+			,dblCost					= ISNULL(Lot.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenUOM(ItemPricing.dblLastCost, StockUnit.intItemUOMId, @intItemUOMId), 0))
 			,dblNewCost					= @dblNewUnitCost
 			,intSort					= 1
 			,intConcurrencyId			= 1
-	FROM	dbo.tblICItem Item INNER JOIN dbo.tblICLot Lot
+	FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = Item.intItemId
+				AND ItemLocation.intLocationId = @intLocationId	
+			LEFT JOIN dbo.tblICLot Lot
 				ON Item.intItemId = Lot.intItemId
-	WHERE	Item.intItemId = @intItemId
-			AND Lot.intLotId = @intLotId
+				AND Lot.intLotId = @intLotId
+			LEFT JOIN dbo.tblICItemStockUOM StocksPerUOM
+				ON StocksPerUOM.intItemId = Item.intItemId
+				AND StocksPerUOM.intItemLocationId = ItemLocation.intItemLocationId	
+				AND StocksPerUOM.intItemUOMId = @intItemUOMId
+				AND StocksPerUOM.intSubLocationId = ItemLocation.intSubLocationId
+				AND StocksPerUOM.intStorageLocationId = ItemLocation.intStorageLocationId
+			LEFT JOIN dbo.tblICItemUOM StockUnit
+				ON StockUnit.intItemId = Item.intItemId
+				AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+			LEFT JOIN dbo.tblICItemPricing ItemPricing
+				ON ItemPricing.intItemId = Item.intItemId
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+	WHERE	Item.intItemId = @intItemId			
 END 
 
 -- Auto post the inventory adjustment

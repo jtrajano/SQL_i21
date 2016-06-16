@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCCPost]
 	@intSiteHeaderId	INT
 	,@userId			INT	
-	,@post				BIT	= NULL
+	,@post				BIT
 	,@recap				BIT	= NULL
 	,@success			BIT = NULL OUTPUT
 	,@errorMessage NVARCHAR(MAX) = NULL OUTPUT
@@ -19,12 +19,15 @@ DECLARE @InvoicesId NVARCHAR(MAX)
 DECLARE @bankTransactionId INT
 
 BEGIN TRY
+	
+	BEGIN TRANSACTION
 
 	-- AP Transaction and Posting
 	EXEC [dbo].[uspCCTransactionToAPBill] 
 		@intSiteHeaderId = @intSiteHeaderId
 		,@userId = @userId
-		,@post	= @recap
+		,@post	= @post
+		,@recap = 0
 		,@success = @success OUTPUT
 		,@errorMessage = @errorMessage OUTPUT
 		,@createdBillId = @billId OUTPUT
@@ -34,7 +37,7 @@ BEGIN TRY
 		@intSiteHeaderId = @intSiteHeaderId
 		,@UserId = @userId
 		,@Post	= @post
-		,@Recap = @recap
+		,@Recap = 0
 		,@CreatedIvoices = @InvoicesId OUTPUT
 		,@success = @success OUTPUT
 		,@ErrorMessage = @errorMessage OUTPUT
@@ -43,13 +46,23 @@ BEGIN TRY
 	EXEC [dbo].[uspCCTransactionToCMBankTransaction]
 		@intSiteHeaderId = @intSiteHeaderId
 		,@userId = @userId
-		,@post	= @recap
+		,@post	= @post
+		,@recap = 0
 		,@success = @success OUTPUT
 		,@errorMessage = @errorMessage OUTPUT
 		,@createdBankTransactionId = @bankTransactionId OUTPUT
 
 	-- SET Posted Flag
-	UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = 1 WHERE intSiteHeaderId = @intSiteHeaderId
+	IF(@post = 1)
+	BEGIN
+		UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post, intCMBankTransactionId = @bankTransactionId WHERE intSiteHeaderId = @intSiteHeaderId
+	END
+	ELSE IF(@post = 0)
+	BEGIN
+		UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post WHERE intSiteHeaderId = @intSiteHeaderId
+	END
+
+	COMMIT TRANSACTION
 
 END TRY
 BEGIN CATCH
@@ -62,6 +75,7 @@ BEGIN CATCH
 	SET @errorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()
 	SET	@success = 0
+	ROLLBACK TRANSACTION
 	RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
 

@@ -22,6 +22,10 @@ BEGIN
 	IF @divisor IS NULL
 		RETURN NULL; 
 
+	-- Return same dividend value if divisor is 1. 
+	IF @divisor = 1 
+		RETURN @dividend; 
+
 	SELECT @sign = SIGN(@dividend) * SIGN(@divisor) 
 
 	-- Divide it and process the raw result as a string. 

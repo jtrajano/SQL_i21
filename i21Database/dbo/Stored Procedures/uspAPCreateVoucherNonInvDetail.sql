@@ -36,7 +36,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	OUTPUT inserted.intBillDetailId INTO @detailCreated
 	SELECT
 		[intBillId]						=	@billId							,
-		[intAccountId]					=	ISNULL(C2.intAccountId,D.intGLAccountExpenseId),
+		[intAccountId]					=	ISNULL(A.intAccountId ,ISNULL(C2.intAccountId,D.intGLAccountExpenseId)),
 		[intItemId]						=	C.[intItemId]					,
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
 		[dblTotal]						=	(ISNULL(A.dblCost, C.dblReceiveLastCost) * A.dblQtyReceived) 
@@ -56,7 +56,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.intEntityVendorId
 	INNER JOIN tblEMEntity E ON D.intEntityVendorId = E.intEntityId
-	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId
+	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND B.intShipToId = C.intLocationId
 	LEFT JOIN vyuICGetItemAccount C2 ON C.intItemId = C2.intItemId AND C2.strAccountCategory = 'General'
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	WHERE B.intBillId = @billId

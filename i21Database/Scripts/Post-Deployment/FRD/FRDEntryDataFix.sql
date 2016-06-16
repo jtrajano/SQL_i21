@@ -530,3 +530,17 @@ UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType IN ('C
 GO
 	PRINT N'CHANGE Current Year Earnings and  Retained Earnings to  Filter Accounts'
 GO
+
+--=====================================================================================================================================
+-- 	ROW: DEFAULT Date Override (strDateOverride) to NONE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'DEFAULT Date Override (strDateOverride) to NONE'
+GO
+
+UPDATE tblFRRowDesign SET strDateOverride = 'None' WHERE strRowType IN ('Filter Accounts','Cash Flow Activity','Percentage') and (strDateOverride IS NULL or strDateOverride = '')
+
+GO
+	PRINT N'DEFAULT Date Override (strDateOverride) to NONE'
+GO

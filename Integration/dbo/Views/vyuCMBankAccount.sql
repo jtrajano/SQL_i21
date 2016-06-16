@@ -43,6 +43,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strEFTCompanyId
 				,i21.strEFTBankName
 				,i21.strMICRDescription
+				,i21.strMICRRoutingNo
+				,i21.strMICRBankAccountNo
 				,i21.intMICRBankAccountSpacesCount
 				,i21.intMICRBankAccountSpacesPosition
 				,i21.intMICRCheckNoSpacesCount
@@ -209,6 +211,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId
 					,strEFTBankName
 					,strMICRDescription
+					,strMICRRoutingNo
+					,strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount
@@ -262,6 +266,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
+					,strMICRRoutingNo					= i.strMICRRoutingNo
+					,strMICRBankAccountNo				= i.strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
@@ -425,6 +431,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
+					,strMICRRoutingNo					= i.strMICRRoutingNo
+					,strMICRBankAccountNo				= i.strMICRBankAccountNo
 					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
 					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
 					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount

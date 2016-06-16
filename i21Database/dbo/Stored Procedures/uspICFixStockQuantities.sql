@@ -62,7 +62,7 @@ USING (
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
+	SET		dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + ROUND(StockToUpdate.Qty, 6)
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -79,7 +79,7 @@ WHEN NOT MATCHED THEN
 	VALUES (
 		StockToUpdate.intItemId
 		,StockToUpdate.intItemLocationId
-		,StockToUpdate.Qty -- dblUnitOnHand
+		,ROUND(StockToUpdate.Qty, 6) -- dblUnitOnHand
 		,0
 		,0
 		,0
@@ -119,7 +119,7 @@ USING (
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + ROUND(RawStockData.Qty, 6)
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -139,14 +139,14 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,RawStockData.intItemUOMId
 		,RawStockData.intSubLocationId
 		,RawStockData.intStorageLocationId
-		,RawStockData.Qty 
+		,ROUND(RawStockData.Qty, 6) 
 		,0
 		,1	
 	)
 ;
 
 --------------------------------------------------------------------------------------------------------------------
--- Update the Item Stock UOM table for non lot items but converts it into the stock unit
+-- Update the Item Stock UOM table for non lot items but convert it to the stock unit. 
 --------------------------------------------------------------------------------------------------------------------
 MERGE	
 INTO	dbo.tblICItemStockUOM 
@@ -176,7 +176,7 @@ USING (
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + ROUND(RawStockData.Qty, 6)
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -196,7 +196,7 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,RawStockData.intItemUOMId
 		,RawStockData.intSubLocationId
 		,RawStockData.intStorageLocationId
-		,RawStockData.Qty 
+		,ROUND(RawStockData.Qty, 6) 
 		,0
 		,1	
 	)
@@ -219,13 +219,11 @@ USING (
 				)
 		FROM	dbo.tblICInventoryTransaction ItemTransactions LEFT JOIN tblICLot Lot
 					ON ItemTransactions.intLotId = Lot.intLotId
+					AND Lot.intItemUOMId = ItemTransactions.intItemUOMId
 				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-				LEFT JOIN tblICItemUOM WeightUOM
-					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId					
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
-				AND Lot.intLotId IS NOT NULL 
-				AND Lot.intItemUOMId = ItemTransactions.intItemUOMId
+				AND Lot.intLotId IS NOT NULL 				
 		GROUP BY ItemTransactions.intItemId, Lot.intItemUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -237,7 +235,7 @@ USING (
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + ROUND(RawStockData.Qty, 6)
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -257,7 +255,7 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,RawStockData.intItemUOMId
 		,RawStockData.intSubLocationId
 		,RawStockData.intStorageLocationId
-		,RawStockData.Qty 
+		,ROUND(RawStockData.Qty, 6) 
 		,0
 		,1	
 	)
@@ -282,13 +280,13 @@ USING (
 		FROM	dbo.tblICInventoryTransaction ItemTransactions LEFT JOIN tblICLot Lot
 					ON ItemTransactions.intLotId = Lot.intLotId
 				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId					
 				LEFT JOIN tblICItemUOM WeightUOM
 					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 				AND Lot.intLotId IS NOT NULL 
 				AND Lot.intItemUOMId = ItemTransactions.intItemUOMId
-				AND Lot.intItemUOMId <> Lot.intWeightUOMId
+				AND Lot.intItemUOMId <> Lot.intWeightUOMId 
 		GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId ,ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -300,7 +298,7 @@ USING (
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + ROUND(RawStockData.Qty, 6)
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -320,7 +318,7 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,RawStockData.intItemUOMId
 		,RawStockData.intSubLocationId
 		,RawStockData.intStorageLocationId
-		,RawStockData.Qty 
+		,ROUND(RawStockData.Qty, 6) 
 		,0
 		,1	
 	)
@@ -335,25 +333,22 @@ WITH	(HOLDLOCK)
 AS		ItemStockUOM	
 USING (
 		SELECT	ItemTransactions.intItemId
-				,Lot.intItemUOMId
+				,intItemUOMId = Lot.intWeightUOMId
 				,ItemTransactions.intItemLocationId
 				,ItemTransactions.intSubLocationId
 				,ItemTransactions.intStorageLocationId
 				,Qty = SUM(
-					ItemTransactions.dblQty / Lot.dblWeightPerQty
+					ItemTransactions.dblQty 
 				)
 		FROM	dbo.tblICInventoryTransaction ItemTransactions LEFT JOIN tblICLot Lot
 					ON ItemTransactions.intLotId = Lot.intLotId
-				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+					AND ItemTransactions.intItemUOMId = Lot.intWeightUOMId
 				LEFT JOIN tblICItemUOM WeightUOM
-					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
+					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId					
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 				AND Lot.intLotId IS NOT NULL 
-				AND Lot.intWeightUOMId = ItemTransactions.intItemUOMId
-				AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
 				AND Lot.intItemUOMId <> Lot.intWeightUOMId
-		GROUP BY ItemTransactions.intItemId, Lot.intItemUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
+		GROUP BY ItemTransactions.intItemId, Lot.intWeightUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
 	AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
@@ -364,7 +359,7 @@ USING (
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + ROUND(RawStockData.Qty, 6) 
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -384,7 +379,7 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,RawStockData.intItemUOMId
 		,RawStockData.intSubLocationId
 		,RawStockData.intStorageLocationId
-		,RawStockData.Qty 
+		,ROUND(RawStockData.Qty, 6)  
 		,0
 		,1	
 	)
@@ -428,7 +423,7 @@ USING (
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + ROUND(RawStockData.Qty, 6) 
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -448,7 +443,7 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,RawStockData.intItemUOMId
 		,RawStockData.intSubLocationId
 		,RawStockData.intStorageLocationId
-		,RawStockData.Qty 
+		,ROUND(RawStockData.Qty, 6) 
 		,0
 		,1	
 	);

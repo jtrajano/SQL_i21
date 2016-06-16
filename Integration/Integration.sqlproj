@@ -318,10 +318,16 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateGeneratedCallEntryView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryHistoryCallEntryView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateVoucherImport.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPIVCMST.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackUpAPTRXMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackupAPIVCMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherBackupAPTRXMST.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPIVCMST.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromAPTRXMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateMissingVendorFromOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPOriginBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCheckAPBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRevertImportVoucher.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
     <None Include="dbo\Views\vyuCMBankTransaction.sql" />
   </ItemGroup>

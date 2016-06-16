@@ -18,6 +18,13 @@ BEGIN
 	IF @factor2 IS NULL
 		RETURN NULL; 
 
+	-- Return same value if multiplying by 1. 
+	IF @factor1 = 1 
+		RETURN @factor2; 
+
+	IF @factor2 = 1 
+		RETURN @factor1; 
+
 	SELECT @sign = SIGN(@factor1) * SIGN(@factor2) 
 
 	-- Raw result is in string. 

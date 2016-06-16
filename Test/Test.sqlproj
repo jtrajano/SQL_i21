@@ -972,6 +972,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotMerge for validating the company location.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for validating the company location.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentItemChange for validating the company location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post on non-lotted item.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">

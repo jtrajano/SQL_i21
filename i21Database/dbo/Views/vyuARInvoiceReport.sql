@@ -44,6 +44,7 @@ SELECT INV.intInvoiceId
 	 , dblAmountDue = ISNULL(INV.dblAmountDue, 0)
 	 , I.strItemNo
 	 , ID.intInvoiceDetailId
+	 , ID.dblContractBalance
 	 , CH.strContractNumber
 	 , strItemDescription = ID.strItemDescription
 	 , UOM.strUnitMeasure

@@ -59,7 +59,12 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId 
 	
 -- 14. "Credit Card Reconciliation"
 IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intSiteDetailId], 0) <> 0)
-	RETURN 14					
+	RETURN 14
+
+-- 15. "Sales Contract"
+IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intContractHeaderId], 0) <> 0)
+	RETURN 15
+						
 	
 
 	RETURN @SourceId

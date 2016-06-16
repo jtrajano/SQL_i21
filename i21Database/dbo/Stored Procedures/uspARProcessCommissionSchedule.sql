@@ -4,6 +4,7 @@
 	, @dtmEndDate				DATETIME		= NULL
 	, @ysnRecap					BIT				= 1
 	, @batchId					NVARCHAR(100)	= NULL OUTPUT
+	, @totalAmount				NUMERIC(18,6)	= NULL OUTPUT
 AS
 	--VALIDATE DATES
 	IF @dtmStartDate IS NULL
@@ -19,6 +20,7 @@ AS
 		END
 
 	SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+	SET @totalAmount = 0
 
 	--CONSTANT VARIABLES
 	DECLARE @SCHEDTYPE_INDIVIDUAL	NVARCHAR(20) = 'Individual'
@@ -28,8 +30,16 @@ AS
 	--INSERT PARSE SELECTED COMM. SCHED. FROM STRING INTO TEMP TABLE
 	DECLARE @tmpCommissionSchedule TABLE (intCommissionScheduleId INT)	
 
-	INSERT INTO @tmpCommissionSchedule
-	SELECT intID FROM fnGetRowsFromDelimitedValues(@commissionScheduleIds)
+	IF (@commissionScheduleIds = '')
+		BEGIN
+			INSERT INTO @tmpCommissionSchedule
+			SELECT intCommissionScheduleId FROM tblARCommissionSchedule WHERE ysnActive = 1
+		END
+	ELSE
+		BEGIN
+			INSERT INTO @tmpCommissionSchedule
+			SELECT intID FROM fnGetRowsFromDelimitedValues(@commissionScheduleIds)
+		END	
 			
 	DECLARE @tblARCommissionSchedules TABLE (
 		  intCommissionScheduleId	INT
@@ -164,7 +174,7 @@ AS
 
 									EXEC dbo.uspARCalculateCommission @intSchedCommPlanId, NULL, @intNewCommissionRecapId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
 
-									UPDATE tblARCommissionRecap SET dblTotalAmount = @dblLineTotal WHERE intCommissionRecapId = @intNewCommissionRecapId
+									UPDATE tblARCommissionRecap SET dblTotalAmount = (SELECT SUM(ISNULL(dblAmount, 0)) FROM tblARCommissionRecapDetail WHERE intCommissionRecapId = @intNewCommissionRecapId) WHERE intCommissionRecapId = @intNewCommissionRecapId
 
 									IF @ysnRecap = 0
 										BEGIN
@@ -203,34 +213,34 @@ AS
 
 											SET @intNewCommissionId = SCOPE_IDENTITY()
 
-											DELETE FROM tblARCommissionRecap WHERE intCommissionRecapId = @intNewCommissionRecapId
-										END																		
+											IF EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
+											BEGIN											
+												INSERT INTO tblARCommissionDetail
+													( intCommissionId
+													, intEntityId	
+													, intSourceId
+													, strSourceType
+													, dtmSourceDate
+													, dblAmount)
+												SELECT 
+													  @intNewCommissionId
+													, intEntityId
+													, 0
+													, ''
+													, GETDATE()
+													, @dblLineTotal * ISNULL(dblPercentage, 0)
+												FROM @tblARCommissionScheduleDetails
+											END
 
-									IF EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
-										BEGIN											
-											INSERT INTO tblARCommissionDetail
-												( intCommissionId
-												, intEntityId	
-												, intSourceId
-												, strSourceType
-												, dtmSourceDate
-												, dblAmount)
-											SELECT 
-												  @intNewCommissionId
-												, intEntityId
-												, 0
-												, ''
-												, GETDATE()
-												, @dblLineTotal * ISNULL(dblPercentage, 0)
-											FROM @tblARCommissionScheduleDetails
-										END
+											DELETE FROM tblARCommissionRecap WHERE intCommissionRecapId = @intNewCommissionRecapId
+										END									
 
 									DELETE FROM @tblARCommissionScheduleDetails
 								END
 							ELSE IF @strScheduleType = @SCHEDTYPE_INDIVIDUAL
-								BEGIN																		
+								BEGIN
 									IF ISNULL(@strEntityIds, '') <> ''
-										BEGIN											
+										BEGIN
 											--loop through commission plans
 											WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionScheduleDetails)
 												BEGIN
@@ -293,7 +303,7 @@ AS
 
 															EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId, @intNewCommissionRecapId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
 
-															UPDATE tblARCommissionRecap SET dblTotalAmount = @dblLineTotal WHERE intCommissionRecapId = @intNewCommissionRecapId
+															UPDATE tblARCommissionRecap SET dblTotalAmount = (SELECT SUM(ISNULL(dblAmount, 0)) FROM tblARCommissionRecapDetail WHERE intCommissionRecapId = @intNewCommissionRecapId) WHERE intCommissionRecapId = @intNewCommissionRecapId
 
 															IF @ysnRecap = 0
 																BEGIN
@@ -362,7 +372,7 @@ AS
 								END
 						END
 					
-					
+					SET @totalAmount = @totalAmount + ISNULL((SELECT ISNULL(SUM(dblTotalAmount), 0) FROM tblARCommissionRecap WHERE strBatchId = @batchId), 0)
 					DELETE FROM @tblARCommissionSchedules WHERE intCommissionScheduleId = @intActiveCommSchedId
 				END
 		END

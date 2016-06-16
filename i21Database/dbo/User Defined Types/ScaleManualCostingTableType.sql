@@ -20,10 +20,11 @@ CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
 	,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
 	,[intTransactionTypeId] INT NOT NULL					-- The transaction type. Source table for the types are found in tblICInventoryTransactionType
 	,[intLotId] INT NULL									-- Place holder field for lot numbers
-	,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
-	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
-	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
+	,[intSubLocationId] INT NULL							-- Place holder field for storage sub location id
+	,[intStorageLocationId] INT NULL						-- Place holder field for storage location id
 	,[strDistributionOption] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- distribution type of scale ticket. 
+	,[intStorageScheduleId]  INT NULL						-- storage schedule for storage type distribution. 
     ,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
 	,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
+	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 )

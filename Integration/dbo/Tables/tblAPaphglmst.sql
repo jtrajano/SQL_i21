@@ -9,13 +9,5 @@
 	[aphgl_gl_amt] [decimal](11, 2) NULL,
 	[aphgl_gl_un] [decimal](13, 4) NULL,
 	[A4GLIdentity] [numeric](9, 0) NOT NULL,
-	[intBillDetailId] INT
- CONSTRAINT [k_tblAPaphglmst] PRIMARY KEY NONCLUSTERED 
-(
-	[aphgl_cbk_no] ASC,
-	[aphgl_trx_ind] ASC,
-	[aphgl_vnd_no] ASC,
-	[aphgl_ivc_no] ASC,
-	[aphgl_dist_no] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY] 
-) ON [PRIMARY]
+	[intHeaderId]			INT NULL
+)

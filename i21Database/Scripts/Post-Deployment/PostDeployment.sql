@@ -35,6 +35,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\16_PaymentMethod.sql
 :r .\SM\DefaultData\17_Notification.sql
 :r .\SM\DefaultData\18_SecurityPolicy.sql
+:r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
@@ -166,6 +167,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\1_BankTransactionTypes.sql
 :r .\CM\2_DataImportStatus.sql
 :r .\CM\3_PopulateSourceSystemData.sql
+:r .\CM\4_DataFix.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql
 :r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql
@@ -217,6 +219,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateBillPayToAddress.sql
 :r .\AP\UpdateBillGLEntriesRecords.SQL
 :r .\AP\UpdateBillDetailCurrencies.sql
+:r .\AP\UpdateOldCost.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
@@ -312,6 +315,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\028_MassCountryFormat.sql
 :r .\EM\026_ImportPhoneNumbersToNewTable.sql
 :r .\EM\027_MassUpdatePhoneNumber.sql
+:r .\EM\029_FillInPhoneAndMobile.sql
+:r .\EM\030-FixSalesperson.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
@@ -325,25 +330,17 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\7_Checkout_Radiant_MCM.sql
 :r .\ST\8_Checkout_Radiant_FGM.sql
 :r .\ST\9_Checkout_Radiant_MSM.sql
-:r .\ST\10_Checkout_Passport_FGM.sql
-:r .\ST\11_Checkout_Passport_ISM.sql
-:r .\ST\12_Checkout_Passport_MCM.sql
-:r .\ST\13_Checkout_Passport_MSM.sql
-:r .\ST\14_Checkout_Passport_TLM.sql
-:r .\ST\15_Checkout_Nucleus_FGM.sql
-:r .\ST\16_Checkout_Nucleus_ISM.sql
-:r .\ST\17_Checkout_Nucleus_MCM.sql
-:r .\ST\18_Checkout_Nucleus_MSM.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\_TaxAuthority.sql
 :r .\TF\DefaultData\_Frequency.sql
+:r .\TF\DefaultData\_ReportingComponent.sql
 :r .\TF\DefaultData\_ProductCode.sql
 :r .\TF\DefaultData\_TerminalControlNumber.sql
 :r .\TF\DefaultData\_ConfigurationType.sql
 :r .\TF\DefaultData\_ConfigurationTemplate.sql
 :r .\TF\DefaultData\_OriginDestinationState.sql
-:r .\TF\DefaultData\_ReportingComponent.sql
+
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql

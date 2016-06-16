@@ -38,8 +38,8 @@ DECLARE @strMICRPreview						AS NVARCHAR(100),
 
 
 SELECT					
- @strRoutingNumber					= LTRIM(RTRIM(strRTN))					
-,@strAccountNumber					= LTRIM(RTRIM(strBankAccountNo))		
+ @strRoutingNumber					= LTRIM(RTRIM(strMICRRoutingNo))					
+,@strAccountNumber					= LTRIM(RTRIM(strMICRBankAccountNo))		
 ,@intMICRBankAccountSpacesCount		= intMICRBankAccountSpacesCount		
 ,@intMICRBankAccountSpacesPosition	= intMICRBankAccountSpacesPosition	
 ,@intMICRCheckNoSpacesCount			= intMICRCheckNoSpacesCount

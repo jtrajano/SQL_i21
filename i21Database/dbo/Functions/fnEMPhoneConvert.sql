@@ -164,7 +164,7 @@ ContinuePoint:
 
 	IF LEN(@Extension) > 0 
 	BEGIN
-		SET @Extension = 'x' + @Extension
+		SET @Extension = ' x' + @Extension
 	END
 
 

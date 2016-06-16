@@ -51,6 +51,13 @@
 		DECLARE @dblOriginalNetPrice			NUMERIC(18,6)	= 0.000000
 		DECLARE @dblCalculatedPumpPrice			NUMERIC(18,6)	= 0.000000
 		DECLARE @dblOriginalPumpPrice			NUMERIC(18,6)	= 0.000000
+		DECLARE @guid							NVARCHAR(MAX)
+		DECLARE @processDate					NVARCHAR(MAX)
+		DECLARE @pk								INT
+
+
+		SET @guid = NEWID()
+		SET @processDate = CONVERT(VARCHAR(10), GETDATE(), 101)
 
 		--Import only those are not yet imported
 		SELECT A4GLIdentity INTO #tmpcftrxmst
@@ -149,6 +156,34 @@
 				,@dblOriginalNetPrice		= @dblOriginalNetPrice
 				,@dblCalculatedPumpPrice	= @dblCalculatedPumpPrice
 				,@dblOriginalPumpPrice		= @dblOriginalPumpPrice
+				,@ysnOriginHistory			= 1
+				,@strGUID					= @guid
+				,@strProcessDate			= @processDate
+
+				SET @pk = SCOPE_IDENTITY();
+
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+				   ,'Transaction'
+				   ,1
+				   ,''
+				   ,'cftrxmst'
+				   ,@originTransaction
+				   ,'tblCFTransaction'
+				   ,@pk
+				   ,''
+				)
 
 
 				COMMIT TRANSACTION
@@ -159,10 +194,30 @@
 			BEGIN CATCH
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
-				PRINT 'IMPORTING TRANSACTION' + ERROR_MESSAGE()
-				--INSERT INTO tblCFDiscountScheduleFailedImport(strDiscountScheduleId,strReason)					
-				--VALUES(@originCard,ERROR_MESSAGE())					
-				--PRINT 'Failed to imports' + CONVERT(@originTransaction,NVARCHAR); --@@ERROR;
+
+				INSERT INTO tblCFImportResult(
+					 dtmImportDate
+					,strSetupName
+					,ysnSuccessful
+					,strFailedReason
+					,strOriginTable
+					,strOriginIdentityId
+					,strI21Table
+					,intI21IdentityId
+					,strUserId
+				)
+				VALUES(
+					GETDATE()
+				   ,'Transaction'
+				   ,0
+				   ,ERROR_MESSAGE()
+				   ,'cftrxmst'
+				   ,@originTransaction
+				   ,'tblCFTransaction'
+				   ,null
+				   ,''
+				)
+
 				GOTO CONTINUELOOP;
 			END CATCH
 			IF(@@ERROR <> 0) 

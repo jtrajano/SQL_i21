@@ -171,6 +171,7 @@ WHERE [intEntityEmployeeId] = @intEmployee
 DECLARE @intPaycheckEarningId INT
 DECLARE @intEmployeeEarningId INT
 DECLARE @intPayGroupDetailId INT
+DECLARE @udtPRPaycheckEarningIn TABLE(intPaycheckEarningId INT)
 
 /* Insert Earnings to Temp Table for iteration */
 SELECT intPayGroupDetailId, intEmployeeEarningId
@@ -206,6 +207,10 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[intAccountId]
 			,[intSort]
 			,[intConcurrencyId])
+		OUTPUT
+			Inserted.intPaycheckEarningId
+		INTO 
+			@udtPRPaycheckEarningIn 
 		SELECT
 			@intPaycheckId
 			,P.intEmployeeEarningId
@@ -229,9 +234,9 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 		  AND P.dblTotal > 0
 
 		/* Get the Created Paycheck Earning Id*/
-		SELECT @intPaycheckEarningId = @@IDENTITY
+		SELECT TOP 1 @intPaycheckEarningId = intPaycheckEarningId FROM @udtPRPaycheckEarningIn
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId)
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId AND @intPaycheckEarningId IS NOT NULL)
 			BEGIN
 				/* Insert Paycheck Earning Taxes */
 				INSERT INTO tblPRPaycheckEarningTax
@@ -256,6 +261,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 /* Create Paycheck Deductions and Taxes*/
 DECLARE @intPaycheckDeductionId INT
 DECLARE @intEmployeeDeductionId INT
+DECLARE @udtPRPaycheckDeductionIn TABLE(intPaycheckDeductionId INT)
 
 /* Insert Deductions to Temp Table for iteration */
 SELECT tblPREmployeeDeduction.intEmployeeDeductionId 
@@ -286,6 +292,10 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			,[strPaidBy]
 			,[intSort]
 			,[intConcurrencyId])
+		OUTPUT
+			Inserted.intPaycheckDeductionId
+		INTO
+			@udtPRPaycheckDeductionIn
 		SELECT
 			@intPaycheckId
 			,@intEmployeeDeductionId
@@ -308,9 +318,9 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 		  AND ysnDefault = 1
 
 		/* Get the Created Paycheck Deduction Id*/
-		SELECT @intPaycheckDeductionId = @@IDENTITY
+		SELECT TOP 1 @intPaycheckDeductionId = intPaycheckDeductionId FROM @udtPRPaycheckDeductionIn
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @intEmployeeDeductionId AND ysnDefault = 1)
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @intEmployeeDeductionId AND ysnDefault = 1 AND @intPaycheckDeductionId IS NOT NULL)
 			BEGIN
 				/* Insert Paycheck Deduction Taxes */
 				INSERT INTO tblPRPaycheckDeductionTax

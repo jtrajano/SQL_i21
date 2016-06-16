@@ -25,6 +25,36 @@ BEGIN
     GOTO _Exit
 END
 
+CREATE TABLE #tmpComputeItemTaxes (
+	intId					INT IDENTITY(1, 1) PRIMARY KEY 
+
+	-- Integration fields. Foreign keys. 
+	,intHeaderId			INT
+	,intDetailId			INT 
+	,intTaxDetailId			INT 
+	,dtmDate				DATETIME 
+	,intItemId				INT
+
+	-- Taxes fields
+	,intTaxGroupId			INT
+	,intTaxCodeId			INT
+	,intTaxClassId			INT
+	,strTaxableByOtherTaxes NVARCHAR(MAX) 
+	,strCalculationMethod	NVARCHAR(50)
+	,dblRate				NUMERIC(18,6)
+	,dblTax					NUMERIC(18,6)
+	,dblAdjustedTax			NUMERIC(18,6)
+	,ysnCheckoffTax			BIT
+
+	-- Fields used in the calculation of the taxes
+	,dblAmount				NUMERIC(18,6) 
+	,dblQty					NUMERIC(18,6) 		
+		
+	-- Internal fields
+	,ysnCalculated			BIT 
+	,dblCalculatedTaxAmount	NUMERIC(18,6) 
+)
+
 -- Get the transaction id 
 EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
 
@@ -442,7 +472,7 @@ WHERE	ReceiptItem.intInventoryReceiptId = @InventoryReceiptId
 
 -- Re-update the line total 
 UPDATE	ReceiptItem 
-SET		dblLineTotal = ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0)
+SET		dblLineTotal = ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) --+ ISNULL(dblTax, 0)
 FROM	dbo.tblICInventoryReceiptItem ReceiptItem
 WHERE	intInventoryReceiptId = @InventoryReceiptId
 

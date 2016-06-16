@@ -20,6 +20,9 @@ SELECT TC.intTaxCodeId
 	 , I.dtmDate
 	 , C.strCustomerNumber
 	 , E.strName
+	 , dblUnitPrice     = (SELECT TOP 1 dblPrice FROM tblARInvoiceDetail IID 
+									 INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
+							WHERE intInvoiceId = I.intInvoiceId)
 	 , strCompanyName	= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
 	 , strItemNo        = (SELECT TOP 1 ICI.strItemNo FROM tblARInvoiceDetail IID 

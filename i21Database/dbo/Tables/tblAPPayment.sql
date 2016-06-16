@@ -30,7 +30,8 @@
 	CONSTRAINT [FK_dbo.tblAPPayment_tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPPayment_tblSMCurrency_intCurrencyId] FOREIGN KEY (intCurrencyId) REFERENCES tblSMCurrency(intCurrencyID),
 	CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY (intPaymentMethodId) REFERENCES tblSMPaymentMethod(intPaymentMethodID),
-	CONSTRAINT [FK_tblAPPayment_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
+	CONSTRAINT [FK_tblAPPayment_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId]),
+	CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum)
 );
 GO
 
@@ -42,26 +43,3 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPayment_intVendorId_intPaymentId] ON [dbo].[t
 	[dtmDatePaid] ASC
 )
 WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-
-
-GO
-
-ALTER TABLE dbo.tblAPPayment
-NOCHECK CONSTRAINT[FK_tblAPPayment_tblAPVendor];
-
-GO
-CREATE TRIGGER trgPaymentRecordNumber
-ON tblAPPayment
-AFTER INSERT
-AS
-	DECLARE @PaymentId NVARCHAR(50)
-	EXEC uspAPFixStartingNumbers 8
-	EXEC uspSMGetStartingNumber 8, @PaymentId OUT
-	
-	IF(@PaymentId IS NOT NULL)
-	BEGIN
-		UPDATE tblAPPayment
-			SET tblAPPayment.strPaymentRecordNum = @PaymentId
-		FROM tblAPPayment A
-			INNER JOIN INSERTED B ON A.intPaymentId = B.intPaymentId
-	END
