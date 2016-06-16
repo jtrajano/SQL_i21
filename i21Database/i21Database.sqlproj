@@ -3518,7 +3518,6 @@
     <Build Include="dbo\Tables\tblTFTaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponentConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
@@ -3597,7 +3596,6 @@
     <Build Include="dbo\Tables\tblHDActivityRecipient.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateStatus.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGetInventoryTax.sql" />
     <Build Include="dbo\Views\vyuSMEntityRole.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\13_GlobalJulianCalendar.sql" />
     <Build Include="dbo\Tables\tblTMGlobalJulianCalendar.sql" />
@@ -3981,6 +3979,11 @@
     <Build Include="dbo\User Defined Types\VoucherDetailStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailStorage.sql" />
     <Build Include="dbo\Tables\tblEMEntityMobileNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetInventoryTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetInvoiceTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGT103InventoryTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGT103InvoiceTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
