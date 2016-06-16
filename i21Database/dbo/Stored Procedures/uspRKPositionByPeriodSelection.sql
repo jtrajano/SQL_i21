@@ -998,28 +998,6 @@ SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContract
 
 UPDATE @List set dblBalance = null where dblBalance = 0 
 
-update @List set intOrderByOne=1  Where strSubHeading='Inventory' 
-update @List set intOrderByOne=2  Where strContractEndMonth='Previous' and strContractEndMonth<>'Inventory'
-update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=4  Where strSubHeading like '%Purchase-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=5  Where strSubHeading like '%Purchase-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=6  Where strSubHeading like '%Purchase-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=7  Where strSubHeading = 'Purchase Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=8  Where strSubHeading like '%Sale-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=9  Where strSubHeading like '%Sale-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=10  Where strSubHeading like '%Sale-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=11 Where strSubHeading like '%Sale-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=12 Where strSubHeading = 'Sale Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=13 Where strSubHeading = 'Net Physical Position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=14 Where strSubHeading = 'Cumulative physical position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=15 Where strSubHeading = 'Futures - Long' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=16 Where strSubHeading = 'Futures - Short' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=17 Where strSubHeading = 'Net Futures' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=18 Where strSubHeading = 'Cash Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=19 Where strSubHeading = 'Basis Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=20 Where strContractEndMonth='Future' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory'
-update @List set intOrderByOne=21 Where strContractEndMonth='Total' 
-
 update @List set intOrderByTwo=1  Where strSubHeading='Inventory' 
 update @List set intOrderByTwo=2  Where strContractEndMonth='Previous' 
 update @List set intOrderByTwo=3  Where strSubHeading like '%Purchase-Priced%' 
@@ -1039,7 +1017,8 @@ update @List set intOrderByTwo=16 Where strSubHeading = 'Futures - Short'
 update @List set intOrderByTwo=17 Where strSubHeading = 'Net Futures' 
 update @List set intOrderByTwo=18 Where strSubHeading = 'Cash Exposure' 
 update @List set intOrderByTwo=19 Where strSubHeading = 'Basis Exposure' 
-
+update @List set intOrderByTwo=20 Where strContractEndMonth='Future' 
+update @List set intOrderByTwo=21 Where strContractEndMonth='Total' 
 
 update @List set intOrderByThree=1 Where strSecondSubHeading like'%Quantity%'
 update @List set intOrderByThree=2 Where strSecondSubHeading ='Wt./Avg Futures'
@@ -1048,16 +1027,39 @@ update @List set intOrderByThree=4 Where strSecondSubHeading ='Wt./Avg Cash'
 update @List set intOrderByThree=5 Where strSecondSubHeading ='Wt./Avg Freight'
 update @List set intOrderByThree=6 Where strSecondSubHeading like '%' + @strCurrencyName + '%'
 
+update @List set intOrderByOne=1  Where strSubHeading='Inventory' 
+update @List set intOrderByOne=2  Where strContractEndMonth='Previous' and strContractEndMonth<>'Inventory'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading = 'Purchase Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Sale-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Sale-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Sale-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading like '%Sale-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Sale Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Net Physical Position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Cumulative physical position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Futures - Long' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Futures - Short' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Net Futures' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Cash Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Basis Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=4 Where strContractEndMonth='Future' 
+update @List set intOrderByOne=5 Where strContractEndMonth='Total' 
+
+
 IF ISNULL(@ysnSummary,0) = 0
 BEGIN 
 	SELECT * FROM @List WHERE dblBalance IS NOT NULL 
-	ORDER BY intOrderByTwo,intOrderByOne,intOrderByThree--,strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading
+	ORDER BY intOrderByTwo,intOrderByThree,intOrderByOne
 END
 ELSE
 BEGIN
 
 	SELECT * from @List WHERE strSecondSubHeading  not like '%Wt./Avg%'
 	and strSecondSubHeading not like '%' + @strCurrencyName + '%' and	dblBalance IS NOT NULL 	
-	ORDER BY intOrderByTwo,intOrderByOne,intOrderByThree--,strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading
+	ORDER BY intOrderByTwo,intOrderByThree,intOrderByOne
 
 END
