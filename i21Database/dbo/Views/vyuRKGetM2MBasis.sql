@@ -30,7 +30,7 @@ AS
 			,0 as intConcurrencyId,
 			i.strMarketValuation
 		FROM vyuCTContractDetailView cd
-		LEFT JOIN tblICItem i on i.intItemId=cd.intItemId	
+		LEFT JOIN tblICItem i on i.intItemId=cd.intItemId and cd.intContractStatusId <> 3	 
 		LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId
 		LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
 		LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
@@ -72,7 +72,7 @@ AS
 			FROM tblICItemStock iis		
 			JOIN tblICItem i on i.intItemId=iis.intItemId and strLotTracking = 'No'
 			LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=i.intOriginId
-			LEFT JOIN vyuCTContractDetailView cd on iis.intItemId=cd.intItemId 
+			LEFT JOIN vyuCTContractDetailView cd on iis.intItemId=cd.intItemId  and cd.intContractStatusId <> 3
 			LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
 			LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
 			LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId

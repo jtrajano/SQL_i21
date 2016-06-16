@@ -158,7 +158,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -166,14 +166,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -207,7 +207,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -215,13 +215,13 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -253,7 +253,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -261,14 +261,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
@@ -299,7 +299,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -307,14 +307,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
@@ -347,7 +347,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -355,14 +355,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -392,7 +392,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -400,14 +400,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -441,7 +441,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -449,14 +449,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -488,7 +488,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -496,14 +496,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
