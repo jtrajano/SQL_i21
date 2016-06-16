@@ -30,7 +30,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--CREATE TAXES FOR ITEM WHICH DON'T HAVE TAXES
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
-		--[intTaxGroupMasterId]	, 
 		[intTaxGroupId]			, 
 		[intTaxCodeId]			, 
 		[intTaxClassId]			, 
@@ -46,7 +45,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT 
 		[intBillDetailId]		=	B.intBillDetailId, 
-		--[intTaxGroupMasterId]	=	NULL, 
 		[intTaxGroupId]			=	Taxes.intTaxGroupId, 
 		[intTaxCodeId]			=	Taxes.intTaxCodeId, 
 		[intTaxClassId]			=	Taxes.intTaxClassId, 
@@ -65,16 +63,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT * FROM fnGetItemTaxComputationForVendor(B.intItemId, A.intEntityVendorId, A.dtmDate, B.dblCost, B.dblQtyReceived, B.intTaxGroupId, A.intShipToId, A.intShipFromId, 0)
 	) Taxes
 	WHERE (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)
-	OR NOT EXISTS(
-		--EXCLUDE ITEM WITH INVENTORY RECEIPT ITEM AND WITH TAX, WE WILL GET THOSE TAX BELOW
-		SELECT 1 FROM tblICInventoryReceiptItem C
-		WHERE C.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND C.dblTax > 0
-	)
+	--OR NOT EXISTS(
+	--	--EXCLUDE ITEM WITH INVENTORY RECEIPT ITEM AND WITH TAX, WE WILL GET THOSE TAX BELOW
+	--	SELECT 1 FROM tblICInventoryReceiptItem C
+	--	WHERE C.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND C.dblTax > 0
+	--)
 
 	--GET TAXES FOR THOSE FROM INVENTORY RECEIPT
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
-		--[intTaxGroupMasterId]	, 
 		[intTaxGroupId]			, 
 		[intTaxCodeId]			, 
 		[intTaxClassId]			, 
@@ -90,7 +87,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 	)
 	SELECT 
 		[intBillDetailId]		=	B.intBillDetailId			,
-		--[intTaxGroupMasterId]	=	D.intTaxGroupMasterId		,
 		[intTaxGroupId]			=	D.[intTaxGroupId]			,		
 		[intTaxCodeId]			=	D.[intTaxCodeId]			,
 		[intTaxClassId]			=	D.[intTaxClassId]			,
@@ -108,8 +104,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN tblICInventoryReceiptItem C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
 	INNER JOIN tblICInventoryReceiptItemTax D ON C.intInventoryReceiptItemId = D.intInventoryReceiptItemId
 	WHERE C.dblTax > 0
-
-	--GET TAXES FOR MISCELLANEOUS ITEM OF PO WITH TAX
 
 	UPDATE A
 		SET A.dblTax = TaxAmount.dblTax
