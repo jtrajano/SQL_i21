@@ -647,14 +647,16 @@ Ext.define('Inventory.view.CategoryViewController', {
     },
 
     onTaxClassHeaderClick: function(menu, column) {
-        var grid = column.initOwnerCt.grid;
-
+       // var grid = column.initOwnerCt.grid;
+        var grid = column.$initParent.grid;
+        
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('i21.view.TaxClass', grid, 'intTaxClassId');
     },
 
     onUOMHeaderClick: function(menu, column) {
-        var grid = column.initOwnerCt.grid;
-
+       // var grid = column.initOwnerCt.grid;
+        var grid = column.$initParent.grid;
+        
         i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.InventoryUOM', grid, 'intUnitMeasureId');
     },
 

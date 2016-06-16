@@ -2003,7 +2003,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onItemHeaderClick: function(menu, column) {
-        var grid = column.initOwnerCt.grid;
+       // var grid = column.initOwnerCt.grid; 
+         var grid = column.$initParent.grid;
 
         if (grid.itemId === 'grdInventoryReceipt') {
             i21.ModuleMgr.Inventory.showScreenFromHeaderDrilldown('Inventory.view.Item', grid, 'intItemId');
@@ -2014,8 +2015,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onVendorHeaderClick: function (menu, column) {
-        var grid = column.initOwnerCt.grid;
-                       
+       // var grid = column.initOwnerCt.grid;
+        var grid = column.$initParent.grid;
+        
         if (grid.itemId === 'grdCharges') 
             {
                 var selectedObj = grid.getSelectionModel().getSelection();
