@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            : base(iRely.Common.Security.GetCompanyName())
+           : base(iRely.Common.Security.GetCompanyName())
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;

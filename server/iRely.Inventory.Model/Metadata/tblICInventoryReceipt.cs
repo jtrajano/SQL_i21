@@ -981,7 +981,7 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptChargeId { get; set; }
         public int intInventoryReceiptId { get; set; }
         public int? intContractId { get; set; }
-       // public int? intContractDetailId { get; set; }
+        public int? intContractDetailId { get; set; }
         public int? intChargeId { get; set; }
         public bool? ysnInventoryCost { get; set; }
         public string strCostMethod { get; set; }
