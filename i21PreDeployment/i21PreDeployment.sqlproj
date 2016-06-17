@@ -275,4 +275,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\16_HD\OpportunitySourceDataFix.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\1_TM\8_DropFunctions.sql" />
+  </ItemGroup>
 </Project>

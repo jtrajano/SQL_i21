@@ -3986,6 +3986,7 @@
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
+    <Build Include="dbo\Views\vyuTMOutOfRangeBurnRateSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
