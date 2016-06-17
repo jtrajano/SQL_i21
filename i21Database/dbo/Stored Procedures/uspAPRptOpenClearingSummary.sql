@@ -43,7 +43,7 @@ BEGIN
 		NULL AS strVendorIdName,
 		NULL AS strAge,
 		0 AS dblTotal,
-		0 AS dblAmountPaid,
+		0 AS dblVoucherAmount,
 		0 AS dblAmountDue,
 		0 AS dblCurrent,
 		0 AS dbl1,
@@ -94,7 +94,7 @@ SET @innerQuery =
 			,strVendorIdName
 			,dblTotal
 			,dblAmountDue
-			,dblAmountPaid
+			,dblVoucherAmount
 			,dblDiscount
 			,dblInterest
 			,dtmDate
@@ -142,7 +142,7 @@ SET @query = '
 		,SUM(dbl60) dbl60
 		,SUM(dbl90) dbl90
 		,SUM(dblTotal) as dblTotal
-		,SUM(dblAmountPaid) dblAmountPaid
+		,SUM(dblVoucherAmount) dblVoucherAmount
 		,SUM(dblAmountDue) as dblAmountDue
 	FROM (
 		SELECT DISTINCT
@@ -153,8 +153,8 @@ SET @query = '
 		,IR.dtmDate
 		,ISNULL(IR.strVendorIdName,'''') as strVendorIdName 
 		,tmpAgingSummaryTotal.dblTotal
-		,tmpAgingSummaryTotal.dblAmountPaid
-		,tmpAgingSummaryTotal.dblAmountDue
+		,tmpAgingSummaryTotal.dblVoucherAmount
+		,ISNULL(tmpAgingSummaryTotal.dblAmountDue,0) as dblAmountDue
 		,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 			THEN 0 
 			ELSE tmpAgingSummaryTotal.dblAmountDue 
@@ -195,8 +195,8 @@ SET @query = '
 			,strVendorIdName
 			,tmpAPClearables.intBillId
 			,SUM(tmpAPClearables.dblTotal) AS dblTotal
-			,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
-			,(SUM(tmpAPClearables.dblTotal) + SUM(tmpAPClearables.dblInterest) - SUM(tmpAPClearables.dblAmountPaid) - SUM(tmpAPClearables.dblDiscount)) AS dblAmountDue
+			,SUM(tmpAPClearables.dblVoucherAmount) AS dblVoucherAmount
+			,SUM(tmpAPClearables.dblAmountDue) AS dblAmountDue
 			FROM (' 
 					+ @innerQuery +
 				') tmpAPClearables
