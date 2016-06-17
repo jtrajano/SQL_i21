@@ -158,7 +158,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -166,14 +166,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -207,7 +207,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -215,13 +215,13 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -253,7 +253,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -261,14 +261,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
@@ -299,7 +299,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -307,14 +307,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
@@ -347,7 +347,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -355,14 +355,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -392,7 +392,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -400,14 +400,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -441,7 +441,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -449,14 +449,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -488,7 +488,7 @@ BEGIN
 					 when @intCurrencyID = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
 					 else isnull(cd1.dblRate,0) end
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
@@ -496,14 +496,14 @@ BEGIN
 		(
 		SELECT strCurrencyExchangeRateType
 		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
+		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
 		join tblSMCurrencyExchangeRateDetail rd on rd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId
 		JOIN tblSMCurrencyExchangeRateType et1 on et1.intCurrencyExchangeRateTypeId=rd.intRateTypeId
 		WHERE cd.intContractDetailId=cd1.intContractDetailId
 		) AS strCurrencyExchangeRateType
 		,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuCTContractDetailView cd
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
@@ -998,28 +998,6 @@ SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContract
 
 UPDATE @List set dblBalance = null where dblBalance = 0 
 
-update @List set intOrderByOne=1  Where strSubHeading='Inventory' 
-update @List set intOrderByOne=2  Where strContractEndMonth='Previous' and strContractEndMonth<>'Inventory'
-update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=4  Where strSubHeading like '%Purchase-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=5  Where strSubHeading like '%Purchase-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=6  Where strSubHeading like '%Purchase-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=7  Where strSubHeading = 'Purchase Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=8  Where strSubHeading like '%Sale-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=9  Where strSubHeading like '%Sale-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=10  Where strSubHeading like '%Sale-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=11 Where strSubHeading like '%Sale-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=12 Where strSubHeading = 'Sale Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=13 Where strSubHeading = 'Net Physical Position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=14 Where strSubHeading = 'Cumulative physical position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=15 Where strSubHeading = 'Futures - Long' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=16 Where strSubHeading = 'Futures - Short' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=17 Where strSubHeading = 'Net Futures' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=18 Where strSubHeading = 'Cash Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=19 Where strSubHeading = 'Basis Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
-update @List set intOrderByOne=20 Where strContractEndMonth='Future' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory'
-update @List set intOrderByOne=21 Where strContractEndMonth='Total' 
-
 update @List set intOrderByTwo=1  Where strSubHeading='Inventory' 
 update @List set intOrderByTwo=2  Where strContractEndMonth='Previous' 
 update @List set intOrderByTwo=3  Where strSubHeading like '%Purchase-Priced%' 
@@ -1039,7 +1017,8 @@ update @List set intOrderByTwo=16 Where strSubHeading = 'Futures - Short'
 update @List set intOrderByTwo=17 Where strSubHeading = 'Net Futures' 
 update @List set intOrderByTwo=18 Where strSubHeading = 'Cash Exposure' 
 update @List set intOrderByTwo=19 Where strSubHeading = 'Basis Exposure' 
-
+update @List set intOrderByTwo=20 Where strContractEndMonth='Future' 
+update @List set intOrderByTwo=21 Where strContractEndMonth='Total' 
 
 update @List set intOrderByThree=1 Where strSecondSubHeading like'%Quantity%'
 update @List set intOrderByThree=2 Where strSecondSubHeading ='Wt./Avg Futures'
@@ -1048,16 +1027,39 @@ update @List set intOrderByThree=4 Where strSecondSubHeading ='Wt./Avg Cash'
 update @List set intOrderByThree=5 Where strSecondSubHeading ='Wt./Avg Freight'
 update @List set intOrderByThree=6 Where strSecondSubHeading like '%' + @strCurrencyName + '%'
 
+update @List set intOrderByOne=1  Where strSubHeading='Inventory' 
+update @List set intOrderByOne=2  Where strContractEndMonth='Previous' and strContractEndMonth<>'Inventory'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Purchase-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading = 'Purchase Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Sale-Priced%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Sale-Basis%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3  Where strSubHeading like '%Sale-HTA%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading like '%Sale-DP%' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Sale Total' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Net Physical Position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Cumulative physical position' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Futures - Long' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Futures - Short' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Net Futures' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Cash Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=3 Where strSubHeading = 'Basis Exposure' and strContractEndMonth<>'Previous' and strContractEndMonth<>'Inventory' and strContractEndMonth<>'Future'
+update @List set intOrderByOne=4 Where strContractEndMonth='Future' 
+update @List set intOrderByOne=5 Where strContractEndMonth='Total' 
+
+
 IF ISNULL(@ysnSummary,0) = 0
 BEGIN 
 	SELECT * FROM @List WHERE dblBalance IS NOT NULL 
-	ORDER BY intOrderByTwo,intOrderByOne,intOrderByThree--,strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading
+	ORDER BY intOrderByTwo,intOrderByThree,intOrderByOne
 END
 ELSE
 BEGIN
 
 	SELECT * from @List WHERE strSecondSubHeading  not like '%Wt./Avg%'
 	and strSecondSubHeading not like '%' + @strCurrencyName + '%' and	dblBalance IS NOT NULL 	
-	ORDER BY intOrderByTwo,intOrderByOne,intOrderByThree--,strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading
+	ORDER BY intOrderByTwo,intOrderByThree,intOrderByOne
 
 END

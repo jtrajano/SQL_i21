@@ -39,7 +39,7 @@ SELECT 1 AS intSeqId
 			,(SELECT sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblStockQty,0)),0)) 
 			  FROM vyuLGInventoryView iv 
 				JOIN tblICItem i on iv.intItemId=i.intItemId 
-				JOIN vyuCTContractDetailView cd on iv.intContractDetailId=cd.intContractDetailId
+				JOIN vyuCTContractDetailView cd on iv.intContractDetailId=cd.intContractDetailId and cd.intContractStatusId <> 3
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 				JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 				WHERE cd.intCommodityId =@intCommodityId
@@ -90,7 +90,7 @@ SELECT 3 AS intSeqId
 FROM tblICInventoryReceipt r
 INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 INNER JOIN vyuICGetReceiptItemSource ris on ris.intInventoryReceiptItemId=ri.intInventoryReceiptItemId
-INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo	AND cd.intPricingTypeId = 2
+INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo	AND cd.intPricingTypeId = 2 and cd.intContractStatusId <> 3
 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 WHERE cd.intCommodityId =@intCommodityId AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
@@ -102,7 +102,7 @@ SELECT 4 AS intSeqId
 		sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(ri.dblQuantity,0)),0)) AS dblTotal 
   FROM tblICInventoryShipment r  
   INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId  
-  INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 
+  INNER JOIN vyuCTContractDetailView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
   JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
   JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
   WHERE cd.intCommodityId =@intCommodityId 

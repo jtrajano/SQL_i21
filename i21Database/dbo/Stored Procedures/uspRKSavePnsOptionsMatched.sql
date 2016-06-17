@@ -175,7 +175,7 @@ SELECT @strTranNo=isnull(max(strTranNo),0) from tblRKOptionsMatchPnS
     [intLots] int ,   
  [intFutOptTransactionId] INT  
  )     
-     
+ 
    ---------------Exercised/Assigned Record Insert ----------------  
 DECLARE @tblExercisedAssignedDetail table          
   (     
@@ -223,7 +223,7 @@ BEGIN
    SELECT @strExercisedAssignedNo=isnull(max(strTranNo),0)+1 from tblRKOptionsPnSExercisedAssigned   
      
    SELECT @intFutOptTransactionId=intFutOptTransactionId,@intLots=intLots,@dtmTranDate=dtmTranDate,@ysnAssigned=ysnAssigned FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber    
-    
+
    INSERT INTO tblRKOptionsPnSExercisedAssigned  
   (   
   intOptionsMatchPnSHeaderId,  
@@ -240,11 +240,14 @@ BEGIN
  DECLARE @intTransactionId nvarchar(50)  
  set @strTranNo=''  
  select @strTranNo=strTranNo from tblRKOptionsPnSExercisedAssigned where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId  
-   
+       
 ----------------- Created Future Transaction Based on the Option Transaction ----------------------------------  
+ 
+ --SELECT @intInternalTradeNo=Max(replace(strInternalTradeNo,'O-','')+1)  from tblRKFutOptTransaction   
+  SELECT TOP 1 @intInternalTradeNo=case when max(strInternalTradeNo) LIKE '%-S%' THEN REPLACE(strInternalTradeNo,'-S' ,'') 
+				   WHEN max(strInternalTradeNo) LIKE '%O-%' THEN REPLACE(strInternalTradeNo,'O-' ,'') end +1  from tblRKFutOptTransaction 
+ group by strInternalTradeNo order by 1 desc
 
- SELECT @intInternalTradeNo=Max(replace(strInternalTradeNo,'O-','')+1)  from tblRKFutOptTransaction   
-  
  INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,  
          dtmTransactionDate,intEntityId, intBrokerageAccountId,  
          intFutureMarketId,intInstrumentTypeId,intCommodityId,  
@@ -265,7 +268,7 @@ SELECT @NewFutOptTransactionHeaderId,1,@dtmTranDate,
   JOIN tblRKOptionsMonth om on t.intOptionMonthId=om.intOptionMonthId WHERE intFutOptTransactionId =@intFutOptTransactionId        
      
 SELECT @NewFutOptTransactionId = SCOPE_IDENTITY();  
-  
+
 DECLARE @NewBuySell nvarchar(15)  
 SET @NewBuySell =''  
 SELECT @NewBuySell= CASE WHEN (strBuySell = 'Buy' AND strOptionType= 'Call') THEN 'Buy'   

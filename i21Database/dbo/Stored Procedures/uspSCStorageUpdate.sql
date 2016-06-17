@@ -684,7 +684,11 @@ BEGIN TRY
 					,intCurrencyId = ScaleTicket.intCurrencyId
 					,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 					,intTransactionId = ScaleTicket.intTicketId
-					,intTransactionDetailId = NULL
+					,intTransactionDetailId = 
+					CASE 
+						WHEN ISNULL(@intDPContractId,0) > 0 THEN @intDPContractId
+						WHEN ISNULL(@intDPContractId,0) = 0 THEN NULL
+					END
 					,strTransactionId = ScaleTicket.strTicketNumber
 					,intTransactionTypeId = @intDirectType 
 					,intLotId = NULL 

@@ -131,50 +131,29 @@ BEGIN
 	END
 END
 
-----CREATE vendor filter
---SELECT @vendorId = [fieldname], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table WHERE [fieldname] = 'intEntityVendorId';
---IF @vendorId IS NOT NULL
---BEGIN
---	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @from, @to, @join, @datatype)
---END
-
---SELECT @accountId = [fieldname], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table WHERE [fieldname] = 'intAccountId';
---IF @accountId IS NOT NULL
---BEGIN
---	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@accountId, @from, @to, @join, @datatype)
---END
-
---SELECT @billId = [fieldname], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table WHERE [fieldname] = 'intBillId';
---IF @billId IS NOT NULL
---BEGIN
---	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@billId, @from, @to, @join, @datatype)
---END
-
 SET @query = '
 	SELECT * FROM (
 	SELECT 
-		intEntityVendorId
-		,strVendorId
-		,strVendorIdName
+		 strVendorIdName
 		,(SELECT TOP 1strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
 		,SUM(dblCurrent) dblCurrent
 		,SUM(dbl1) dbl1
 		,SUM(dbl30) dbl30
 		,SUM(dbl60) dbl60
 		,SUM(dbl90) dbl90
-		,SUM(dblTotal) dblTotal
+		,SUM(dblTotal) as dblTotal
 		,SUM(dblAmountPaid) dblAmountPaid
-		,SUM(dblAmountDue) dblAmountDue
+		,SUM(dblAmountDue) as dblAmountDue
 	FROM (
-		SELECT
-		 tmpAgingSummaryTotal.dtmDate
-		,B.strVendorId
-		,B.[intEntityVendorId]
-		,A.intBillId
-		,A.strBillId
-		,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
+		SELECT DISTINCT
+		IR.strVendorId
+		,IR.intInventoryReceiptId
+		,IR.intBillId
+		,IR.strBillId
+		,IR.dtmDate
+		,ISNULL(IR.strVendorIdName,'''') as strVendorIdName 
 		,tmpAgingSummaryTotal.dblTotal
-		,ISNULL(tmpAgingSummaryTotal.dblAmountPaid, 0) as dblAmountPaid
+		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblAmountDue
 		,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 			THEN 0 
@@ -213,26 +192,26 @@ SET @query = '
 		(
 			SELECT 
 		     tmpAPClearables.intInventoryReceiptId
+			,strVendorIdName
 			,tmpAPClearables.intBillId
-			,tmpAPClearables.dtmDate
 			,SUM(tmpAPClearables.dblTotal) AS dblTotal
 			,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
 			,(SUM(tmpAPClearables.dblTotal) + SUM(tmpAPClearables.dblInterest) - SUM(tmpAPClearables.dblAmountPaid) - SUM(tmpAPClearables.dblDiscount)) AS dblAmountDue
 			FROM (' 
 					+ @innerQuery +
 				') tmpAPClearables
-			GROUP BY intInventoryReceiptId, intBillId, dtmDate
+			GROUP BY intInventoryReceiptId, intBillId , strVendorIdName
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
 			ON A.intBillId = tmpAgingSummaryTotal.intBillId
-		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityVendorId] = C.intEntityId)
-			ON B.[intEntityVendorId] = A.[intEntityVendorId]
-		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+		LEFT JOIN vyuAPClearables  IR
+			ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
+		--WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) SubQuery
 	GROUP BY 
-		intEntityVendorId
-		,strVendorId
+		strVendorId
 		,strVendorIdName
+		
 	) MainQuery
 '
 
