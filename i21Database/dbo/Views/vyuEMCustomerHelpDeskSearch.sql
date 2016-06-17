@@ -16,11 +16,14 @@
 		cust_product.strApplyDt,
 		cust_product.strInfoPulled,
 		ent.strName,
-		ent.strEntityNo
+		ent.strEntityNo,
+		intWarehouseId = isnull(eloc.intWarehouseId, -99)
 
 		from tblARCustomerProductVersion cust_product
 			inner join tblEMEntity ent
 				on cust_product.intCustomerId = ent.intEntityId
+		inner join tblEMEntityLocation eloc
+			on ent.intEntityId = eloc.intEntityId and eloc.ysnDefaultLocation = 1	
 			left join tblHDTicketProduct hd_product
 				on  cust_product.intProductId = hd_product.intTicketProductId
 			left join tblHDModule hd_module
