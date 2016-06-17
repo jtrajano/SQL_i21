@@ -15,6 +15,7 @@ BEGIN
 		DECLARE @AUTO_NEGATIVE AS INT = 1
 		DECLARE @WRITE_OFF_SOLD AS INT = 2
 		DECLARE @REVALUE_SOLD AS INT = 3
+		DECLARE @AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK AS INT = 35
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -1536,6 +1537,58 @@ BEGIN
 					,[intConcurrencyId]	= 1
 
 			-- 2nd expected: Write-Off Sold
+			--UNION ALL 
+			--SELECT	[intInventoryTransactionId] = 12
+			--		,[intItemId] = @intItemId
+			--		,[intItemLocationId] = @NewHaven
+			--		,[intItemUOMId] = @intItemUOMId
+			--		,[intSubLocationId] = @intSubLocationId
+			--		,[intStorageLocationId] = @intStorageLocationId
+			--		,[dtmDate] = @dtmDate
+			--		,[dblQty] = 0
+			--		,[dblUOMQty] = @EACH
+			--		,[dblCost] = 0
+			--		,[dblValue] = 15 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)
+			--		,[dblSalesPrice] = @dblSalesPrice
+			--		,[intCurrencyId] = @USD
+			--		,[dblExchangeRate] = 1
+			--		,[intTransactionId] = @intTransactionId
+			--		,[intTransactionDetailId] = @intTransactionDetailId
+			--		,[strTransactionId] = @strTransactionId
+			--		,[strBatchId] = @strBatchId
+			--		,[intTransactionTypeId] = @WRITE_OFF_SOLD
+			--		,[intLotId] = NULL 
+			--		,[intCreatedEntityId] = @intEntityUserSecurityId
+			--		,[intConcurrencyId]	= 1
+
+			---- 3rd expected: Revalue Sold
+			--UNION ALL 
+			--SELECT	[intInventoryTransactionId] = 13
+			--		,[intItemId] = @intItemId
+			--		,[intItemLocationId] = @NewHaven
+			--		,[intItemUOMId] = @intItemUOMId
+			--		,[intSubLocationId] = @intSubLocationId
+			--		,[intStorageLocationId] = @intStorageLocationId
+			--		,[dtmDate] = @dtmDate
+			--		,[dblQty] = 0
+			--		,[dblUOMQty] = @EACH
+			--		,[dblCost] = 0
+			--		,[dblValue] = -(15) * @dblCost
+			--		,[dblSalesPrice] = @dblSalesPrice
+			--		,[intCurrencyId] = @USD
+			--		,[dblExchangeRate] = 1
+			--		,[intTransactionId] = @intTransactionId
+			--		,[intTransactionDetailId] = @intTransactionDetailId
+			--		,[strTransactionId] = @strTransactionId
+			--		,[strBatchId] = @strBatchId
+			--		,[intTransactionTypeId] = @REVALUE_SOLD
+			--		,[intLotId] = NULL 
+			--		,[intCreatedEntityId] = @intEntityUserSecurityId
+			--		,[intConcurrencyId]	= 1
+
+			-- 4th expected: None, no Auto Negative record expected. 
+			-- Record not expected for auto-negative since the stock is zero (zero x $27 is still zero). 	
+			
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 12
 					,[intItemId] = @intItemId
@@ -1547,7 +1600,10 @@ BEGIN
 					,[dblQty] = 0
 					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
-					,[dblValue] = 15 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)
+					,[dblValue] = 
+						- (15 * @dblCost) -- Revalue Sold
+						+ (15 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)) -- Write Off Sold
+
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1555,38 +1611,10 @@ BEGIN
 					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @WRITE_OFF_SOLD
+					,[intTransactionTypeId] = @AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK
 					,[intLotId] = NULL 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
-					,[intConcurrencyId]	= 1
-
-			-- 3rd expected: Revalue Sold
-			UNION ALL 
-			SELECT	[intInventoryTransactionId] = 13
-					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
-					,[intItemUOMId] = @intItemUOMId
-					,[intSubLocationId] = @intSubLocationId
-					,[intStorageLocationId] = @intStorageLocationId
-					,[dtmDate] = @dtmDate
-					,[dblQty] = 0
-					,[dblUOMQty] = @EACH
-					,[dblCost] = 0
-					,[dblValue] = -(15) * @dblCost
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @USD
-					,[dblExchangeRate] = 1
-					,[intTransactionId] = @intTransactionId
-					,[intTransactionDetailId] = @intTransactionDetailId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
-					,[intLotId] = NULL 
-					,[intCreatedEntityId] = @intEntityUserSecurityId
-					,[intConcurrencyId]	= 1
-
-			-- 4th expected: None, no Auto Negative record expected. 
-			-- Record not expected for auto-negative since the stock is zero (zero x $27 is still zero). 			
+					,[intConcurrencyId]	= 1					
 					
 			-- Insert expected data for tblICInventoryFIFOOut
 			INSERT INTO expectedInventoryFIFOOut (
@@ -1594,7 +1622,7 @@ BEGIN
 				,intInventoryFIFOId
 				,dblQty
 			)
-			SELECT	intInventoryTransactionId = 13
+			SELECT	intInventoryTransactionId = 12
 					,intInventoryFIFOId = 7
 					,dblQty = 15					
 		END

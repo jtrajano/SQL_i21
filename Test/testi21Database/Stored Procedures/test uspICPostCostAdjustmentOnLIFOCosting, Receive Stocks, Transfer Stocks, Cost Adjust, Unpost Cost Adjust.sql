@@ -556,7 +556,7 @@ BEGIN
 				,[dblCost]					= 22.00
 				,[dblValue]					= 0
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -578,7 +578,7 @@ BEGIN
 				,[dblCost]					= 22.00
 				,[dblValue]					= 0
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -623,7 +623,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -645,7 +645,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= 17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -690,7 +690,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -1 * -17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -712,7 +712,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -1 * 17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -757,10 +757,10 @@ BEGIN
 	-- Assert
 	BEGIN
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual', 'Failed to generate the expected Inventory Transaction records.';
 		
 		-- Assert the expected data for tblICInventoryLIFOCostAdjustmentLog is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'expectedInventoryLIFOCostAdjustmentLog', 'actualInventoryLIFOCostAdjustmentLog'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryLIFOCostAdjustmentLog', 'actualInventoryLIFOCostAdjustmentLog', 'Failed to generate the expected LIFO Cost Adjustment Log records.'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

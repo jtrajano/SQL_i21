@@ -13,8 +13,6 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory';
---DECLARE @AccountCategory_WriteOffSold AS NVARCHAR(30) = 'Write-Off Sold';
---DECLARE @AccountCategory_RevalueSold AS NVARCHAR(30) = 'Revalue Sold';
 DECLARE @AccountCategory_AutoNegative AS NVARCHAR(30) = 'Auto-Variance';
 
 -- Get the default currency ID
@@ -117,7 +115,7 @@ BEGIN
 				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 				WHERE	TRANS.strBatchId = @strBatchId
-						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative 
+						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
 						AND TRANS.intItemId = Item.intItemId
 			)
 	

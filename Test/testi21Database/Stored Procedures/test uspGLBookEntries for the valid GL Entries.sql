@@ -133,6 +133,7 @@ BEGIN
 				,[strModuleName] = 'Inventory'
 				,[intConcurrencyId] = 1
 
+		-- Insert the expected tblGLDetail data. 
 		INSERT INTO expected_tblGLDetail (
 				[dtmDate]
 				,[strBatchId]
@@ -158,7 +159,12 @@ BEGIN
 				,[strTransactionType]
 				,[strTransactionForm]
 				,[strModuleName]
-				,[intConcurrencyId]		
+				,[intConcurrencyId]	
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
 		)
 		SELECT	[dtmDate] = dbo.fnRemoveTimeOnDate(@date)
 				,[strBatchId] = 'BATCH-0001'
@@ -185,6 +191,11 @@ BEGIN
 				,[strTransactionForm] = 'TRANSACTION FORM'
 				,[strModuleName] = 'Inventory'
 				,[intConcurrencyId] = 1
+				,[dblDebitForeign] = 0
+				,[dblDebitReport] = 0
+				,[dblCreditForeign] = 0
+				,[dblCreditReport] = 0
+				,[dblReportingRate] = 0
 		UNION ALL 
 		SELECT	[dtmDate] = dbo.fnRemoveTimeOnDate(@date)
 				,[strBatchId] = 'BATCH-0001'
@@ -211,6 +222,11 @@ BEGIN
 				,[strTransactionForm] = 'TRANSACTION FORM'
 				,[strModuleName] = 'Inventory'
 				,[intConcurrencyId] = 1
+				,[dblDebitForeign] = 0
+				,[dblDebitReport] = 0
+				,[dblCreditForeign] = 0
+				,[dblCreditReport] = 0
+				,[dblReportingRate] = 0
 
 			INSERT INTO expected_tblGLSummary (
 				intAccountId
