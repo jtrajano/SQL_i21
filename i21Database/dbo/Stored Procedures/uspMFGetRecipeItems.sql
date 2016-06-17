@@ -9,11 +9,11 @@ ISNULL(ip.dblStandardCost,0) AS dblCost,ISNULL(ip.dblStandardCost,0) AS dblCostC
 CASE WHEN ISNULL(ri.intMarginById,0)=1 THEN  dbo.fnICConvertUOMtoStockUnit(ri.intItemId,ri.intItemUOMId,ri.dblQuantity) * (ISNULL(ip.dblStandardCost ,0) + ((ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost ,1)) / 100))
 WHEN ISNULL(ri.intMarginById,0)=2 THEN dbo.fnICConvertUOMtoStockUnit(ri.intItemId,ri.intItemUOMId,ri.dblQuantity) * (ISNULL(ip.dblStandardCost ,0) + ISNULL(ri.dblMargin,0))
 ELSE dbo.fnICConvertUOMtoStockUnit(ri.intItemId,ri.intItemUOMId,ri.dblQuantity) * ISNULL(ip.dblStandardCost ,0) End AS dblRetailPrice,
-iu.dblUnitQty
+iu.dblUnitQty,ri.dblCalculatedLowerTolerance,ri.dblCalculatedUpperTolerance,ri.dblLowerTolerance,ri.dblUpperTolerance
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Left Join tblMFMarginBy mg on ri.intMarginById=mg.intMarginById
-Join tblICItemLocation il on ri.intItemId=il.intItemId AND il.intLocationId=@intLocationId
-Join tblICItemPricing ip on ri.intItemId=ip.intItemId
+Join tblICItemLocation il on ri.intItemId=il.intItemId AND il.intLocationId=@intLocationId 
+Join tblICItemPricing ip on ri.intItemId=ip.intItemId AND il.intItemLocationId=ip.intItemLocationId
 Where ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1 AND i.strType <> 'Other Charge'

@@ -5,6 +5,9 @@ SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intSourceType)) 
 SELECT 
 	intSourceType = 2
 	,intOrderId = TMO.intDispatchId
+	,intDispatchID = TMO.intDispatchId
+	,intLoadDetailId = NULL
+	,intSequence = -1
 	,strOrderNumber = TMO.strOrderNumber
 	,strLocationName = TMO.strCompanyLocationName
 	,intLocationId = TMO.intCompanyLocationId
@@ -17,11 +20,11 @@ SELECT
 	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = TMO.dtmRequestedDate
 	,strEntityName = TMO.strCustomerName
-	,strEntityAddress = TMO.strSiteAddress
-	,strEntityCity = TMO.strSiteCity
-	,strEntityZipCode = TMO.strSiteZipCode
-	,strEntityState = TMO.strSiteState
-	,strEntityCountry = TMO.strSiteCountry
+	,strToAddress = TMO.strSiteAddress
+	,strToCity = TMO.strSiteCity
+	,strToZipCode = TMO.strSiteZipCode
+	,strToState = TMO.strSiteState
+	,strToCountry = TMO.strSiteCountry
 	,strDestination = TMO.strSiteAddress + ', ' + TMO.strSiteCity + ', ' + TMO.strSiteState + ' ' + TMO.strSiteZipCode 
 	,dblToLongitude = TMO.dblLongitude
 	,dblToLatitude = TMO.dblLatitude
@@ -31,6 +34,7 @@ SELECT
 	,dblQuantity = TMO.dblQuantity
 	,strCustomerReference = ''
 	,strOrderComments = TMO.strComments
+	,strLocationType = 'Delivery'
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
@@ -41,6 +45,9 @@ UNION ALL
 SELECT
 	intSourceType = 1
 	,intOrderId = LGLD.intLoadDetailId
+	,intDispatchID = NULL
+	,intLoadDetailId = LGLD.intLoadDetailId
+	,intSequence = -1
 	,strOrderNumber = LGLD.strLoadNumber
 	,strLocationName = LGLD.strSLocationName
 	,intLocationId = LGLD.intSCompanyLocationId
@@ -53,11 +60,11 @@ SELECT
 	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = LGL.dtmScheduledDate
 	,strEntityName = LGLD.strCustomer
-	,strEntityAddress = LGLD.strShipToAddress
-	,strEntityCity = LGLD.strShipToCity
-	,strEntityZipCode = LGLD.strShipToZipCode
-	,strEntityState = LGLD.strShipToState
-	,strEntityCountry = LGLD.strShipToCountry
+	,strToAddress = LGLD.strShipToAddress
+	,strToCity = LGLD.strShipToCity
+	,strToZipCode = LGLD.strShipToZipCode
+	,strToState = LGLD.strShipToState
+	,strToCountry = LGLD.strShipToCountry
 	,strDestination = LGLD.strShipToAddress + ', ' + LGLD.strShipToCity + ', ' + LGLD.strShipToState + ' ' + LGLD.strShipToZipCode 
 	,dblToLongitude = EML.dblLongitude
 	,dblToLatitude = EML.dblLatitude
@@ -67,6 +74,7 @@ SELECT
 	,dblQuantity = LGLD.dblQuantity
 	,strCustomerReference = LGLD.strCustomerReference
 	,strOrderComments = LGLD.strComments
+	,strLocationType = 'Delivery'
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 

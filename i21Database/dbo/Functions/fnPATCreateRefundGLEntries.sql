@@ -265,6 +265,9 @@ FROM	[dbo].tblPATRefund A
 		INNER JOIN tblARCustomer ARC
 				ON B.intCustomerId = ARC.intEntityCustomerId
 WHERE	A.intRefundId IN (SELECT intTransactionId FROM @tmpTransacions)
+
+	DELETE FROM @returntable WHERE ( [dblCredit] = 0 AND strTransactionType = 'Undistributed Equity') OR ([dblCredit] = 0 AND strTransactionType = 'AP Clearing') OR ([dblDebit] = 0 AND strTransactionType = 'General Reserve') OR ([dblCredit] = 0 AND strTransactionType = 'Service Fee Income') OR ([dblCredit] = 0 AND strTransactionType = 'FWT Liability')
+	
 	RETURN
 END
 

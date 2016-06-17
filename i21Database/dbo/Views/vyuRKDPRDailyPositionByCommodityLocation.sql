@@ -31,7 +31,7 @@ SELECT distinct c.intCommodityId, strLocationName,
      ,(SELECT               
    isnull(Sum(CD.dblBalance),0) as Qty                   
    FROM tblCTContractDetail  CD                   
-   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId                
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId  and CD.intContractStatusId <> 3              
    JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId    and CH.intContractTypeId=1              
    JOIN tblCTPricingType  PT ON PT.intPricingTypeId     = CD.intPricingTypeId and PT.intPricingTypeId in(1,3)               
    JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId  
@@ -39,7 +39,7 @@ SELECT distinct c.intCommodityId, strLocationName,
    ,(SELECT               
    isnull(Sum(CD.dblBalance),0) as Qty                   
    FROM tblCTContractDetail  CD                   
-   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId                
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId  and CD.intContractStatusId <> 3                  
    JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId    and CH.intContractTypeId=2              
    JOIN tblCTPricingType  PT ON PT.intPricingTypeId     = CD.intPricingTypeId and PT.intPricingTypeId  in(1,3)               
    JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId  
@@ -47,7 +47,7 @@ SELECT distinct c.intCommodityId, strLocationName,
     ,(SELECT               
    isnull(Sum(CD.dblBalance),0) as Qty                   
    FROM tblCTContractDetail  CD                   
-   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId                
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId  and CD.intContractStatusId <> 3                  
    JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId   and CH.intContractTypeId=1              
    JOIN tblCTPricingType  PT ON PT.intPricingTypeId     = CD.intPricingTypeId and PT.intPricingTypeId in(1,2)               
    JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId  
@@ -55,7 +55,7 @@ SELECT distinct c.intCommodityId, strLocationName,
     ,(SELECT               
    isnull(Sum(CD.dblBalance),0) as Qty                   
    FROM tblCTContractDetail  CD                   
-   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId                
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId   and CD.intContractStatusId <> 3                 
    JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CH.intContractTypeId=1                 
    JOIN tblCTPricingType  PT ON PT.intPricingTypeId     = CD.intPricingTypeId and PT.intPricingTypeId in(1,2)               
    JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId  
@@ -63,7 +63,7 @@ SELECT distinct c.intCommodityId, strLocationName,
     ,(SELECT               
    isnull(Sum(CD.dblBalance),0) as Qty                   
    FROM tblCTContractDetail  CD                   
-   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId                
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId  and CD.intContractStatusId <> 3                  
    JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId   and  CH.intContractTypeId= 2               
    JOIN tblCTPricingType  PT ON PT.intPricingTypeId     = CD.intPricingTypeId and PT.intPricingTypeId in(1,2)               
    JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId   
@@ -112,7 +112,7 @@ SELECT distinct c.intCommodityId, strLocationName,
   ,(SELECT isnull(SUM(isnull(ri.dblQuantity, 0)),0) AS SlsBasisDeliveries  
   FROM tblICInventoryShipment r  
   INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId  
-  INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND ri.intOrderId = 1  
+  INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND ri.intOrderId = 1  and cd.intContractStatusId <> 3    
   INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId  
   WHERE ch.intCommodityId = c.intCommodityId AND cd.intCompanyLocationId = cl.intCompanyLocationId) as SlsBasisDeliveries  
   ,(SELECT isnull(sum(Balance),0) dblTotal  

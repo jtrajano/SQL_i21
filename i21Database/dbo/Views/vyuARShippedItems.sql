@@ -1070,6 +1070,7 @@ INNER JOIN
 LEFT OUTER JOIN
 	tblARInvoiceDetail ARID
 		ON MFG.[intRecipeItemId] = ARID.[intRecipeItemId]
+		AND ICIS.[strShipmentNumber] = ARID.[strShipmentNumber]
 LEFT OUTER JOIN
 	[tblSMCompanyLocation] SMCL
 		ON ICIS.[intShipFromLocationId] = SMCL.[intCompanyLocationId]	

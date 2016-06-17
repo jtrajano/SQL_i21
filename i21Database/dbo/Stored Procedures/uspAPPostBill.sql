@@ -314,7 +314,7 @@ BEGIN
 			--Unpost Cost Adjustment
 			DECLARE @billsToUnpost AS Id
 			INSERT INTO @billsToUnpost
-			SELECT intTransactionId FROM @adjustedEntries
+			SELECT DISTINCT intTransactionId FROM @adjustedEntries
 
 			EXEC uspAPUnpostCostAdjustmentGL  @billsToUnpost, @batchId, @userId
 		END

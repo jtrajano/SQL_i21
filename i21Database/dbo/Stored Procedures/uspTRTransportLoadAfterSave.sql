@@ -22,6 +22,7 @@ BEGIN
 	DECLARE @tblToProcess TABLE
 			(
 				intKeyId				INT IDENTITY
+				, intLoadHeaderId		INT
 				, intTransactionId		INT
 				, strTransactionType	NVARCHAR(50)
 				, intActivity			INT
@@ -47,9 +48,10 @@ BEGIN
 	BEGIN
 
 		-- Delete Receipts associated to this deleted Transport Load
-		INSERT INTO @tblToProcess(intTransactionId, strTransactionType, intActivity, dblQuantity)
+		INSERT INTO @tblToProcess(intLoadHeaderId, intTransactionId, strTransactionType, intActivity, dblQuantity)
 
-		SELECT DISTINCT intSourceId
+		SELECT DISTINCT intTransactionId
+			, intSourceId
 			, @SourceType_InventoryReceipt
 			, 3 -- Delete
 			, 0.00
@@ -61,7 +63,8 @@ BEGIN
 		UNION ALL
 
 		-- Delete Transfers associated to this deleted Transport Load
-		SELECT DISTINCT intSourceId
+		SELECT DISTINCT intTransactionId
+			, intSourceId
 			, @SourceType_InventoryTransfer 
 			, 3 -- Delete
 			, 0.00
@@ -72,7 +75,8 @@ BEGIN
 
 		UNION ALL
 		-- Delete Invoices associated to this deleted Transport Load
-		SELECT DISTINCT intSourceId
+		SELECT DISTINCT intTransactionId
+			, intSourceId
 			, @SourceType_Invoice 
 			, 3 -- Delete
 			, 0.00
@@ -121,11 +125,13 @@ BEGIN
 			, intItemUOMId = NULL
 			, LR.intContractDetailId
 		FROM tblTRLoadReceipt LR
+			LEFT JOIN tblICItem IC ON IC.intItemId = LR.intItemId
 			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
 			LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = LR.intInventoryReceiptId
 			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
 		WHERE LH.intLoadHeaderId = @LoadHeaderId
-			AND ISNULL(LR.intInventoryReceiptId, '') <> ''
+			AND LR.strOrigin = 'Terminal'
+			AND IC.strType != 'Non-Inventory'
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
 			, intTransactionId = @LoadHeaderId
@@ -137,11 +143,18 @@ BEGIN
 			, intItemUOMId = NULL
 			, LR.intContractDetailId
 		FROM tblTRLoadReceipt LR
+			LEFT JOIN tblICItem IC ON IC.intItemId = LR.intItemId
 			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
 			LEFT JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = LR.intInventoryTransferId
 			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
+			LEFT JOIN tblTRLoadDistributionHeader DH ON LH.intLoadHeaderId = DH.intLoadHeaderId		
+			LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId		
 		WHERE LH.intLoadHeaderId = @LoadHeaderId
-			AND ISNULL(LR.intInventoryTransferId, '') <> ''
+			AND IC.strType != 'Non-Inventory' 
+			AND ((LR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
+				OR (LR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND LR.intCompanyLocationId != DH.intCompanyLocationId)
+				OR (LR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND LR.intCompanyLocationId != DH.intCompanyLocationId)
+				OR (LR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND LR.intCompanyLocationId != DH.intCompanyLocationId AND (ISNULL(LR.dblUnitCost, 0) <> 0 OR ISNULL(LR.dblFreightRate, 0) <> 0 OR ISNULL(LR.dblPurSurcharge, 0) <> 0)))
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
 			, intTransactionId = @LoadHeaderId
@@ -155,12 +168,13 @@ BEGIN
 		FROM tblTRLoadDistributionHeader DH
 			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 		WHERE DH.intLoadHeaderId = @LoadHeaderId
-			AND ISNULL(DH.intInvoiceId, '') <> ''
+			AND DH.strDestination = 'Customer'
 
 		-- Check and Delete Deleted Inventory Receipt line items
-		INSERT INTO @tblToProcess(intTransactionId, strTransactionType, intActivity, dblQuantity, intContractDetailId)
+		INSERT INTO @tblToProcess(intLoadHeaderId, intTransactionId, strTransactionType, intActivity, dblQuantity, intContractDetailId)
 
-		SELECT DISTINCT previousSnapshot.intSourceId
+		SELECT DISTINCT previousSnapshot.intTransactionId
+			, previousSnapshot.intSourceId
 			, @SourceType_InventoryReceipt
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -177,7 +191,8 @@ BEGIN
 		UNION ALL
 
 		-- Check and Delete Deleted Inventory Transfer line items
-		SELECT DISTINCT previousSnapshot.intSourceId
+		SELECT DISTINCT previousSnapshot.intTransactionId
+			, previousSnapshot.intSourceId
 			, @SourceType_InventoryTransfer
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -194,7 +209,8 @@ BEGIN
 		UNION ALL
 
 		-- Check and Delete Deleted Invoice line items
-		SELECT DISTINCT previousSnapshot.intSourceId
+		SELECT DISTINCT previousSnapshot.intTransactionId
+			, previousSnapshot.intSourceId
 			, @SourceType_Invoice
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -211,7 +227,8 @@ BEGIN
 		UNION ALL 
 
 		-- Check Added Receipts
-		SELECT currentSnapshot.intSourceId
+		SELECT currentSnapshot.intTransactionId
+			, currentSnapshot.intSourceId
 			, currentSnapshot.strSourceType
 			, 1 --Add
 			, currentSnapshot.dblQuantity
@@ -224,7 +241,8 @@ BEGIN
 		UNION ALL 
 		
 		-- Check Added Transfers
-		SELECT currentSnapshot.intSourceId
+		SELECT currentSnapshot.intTransactionId
+			, currentSnapshot.intSourceId
 			, currentSnapshot.strSourceType
 			, 1 --Add
 			, currentSnapshot.dblQuantity
@@ -237,7 +255,8 @@ BEGIN
 		UNION ALL 
 		
 		-- Check Added Invoices
-		SELECT currentSnapshot.intSourceId
+		SELECT currentSnapshot.intTransactionId
+			, currentSnapshot.intSourceId
 			, currentSnapshot.strSourceType
 			, 1 --Add
 			, currentSnapshot.dblQuantity
@@ -250,7 +269,8 @@ BEGIN
         UNION ALL
 
 		-- Check Updated rows
-		SELECT previousSnapshot.intSourceId
+		SELECT previousSnapshot.intTransactionId
+			, previousSnapshot.intSourceId
 			, previousSnapshot.strSourceType
 			, 2 --Update
 			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (previousSnapshot.dblQuantity - currentSnapshot.dblQuantity)
@@ -259,13 +279,14 @@ BEGIN
 		FROM @tmpCurrentSnapshot currentSnapshot
 		INNER JOIN #tmpPreviousSnapshot previousSnapshot
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
-		WHERE (currentSnapshot.intContractDetailId != NULL AND previousSnapshot.intContractDetailId != NULL)
+		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
 			AND (currentSnapshot.dblQuantity <> previousSnapshot.dblQuantity)
 
 		UNION ALL 
 
 		-- Add another row if there was a change on Contract Detail Id used, for the new Contract Detail Id
-		SELECT currentSnapshot.intSourceId
+		SELECT currentSnapshot.intTransactionId
+			, currentSnapshot.intSourceId
 			, currentSnapshot.strSourceType
 			, 2 --Update
 			, currentSnapshot.dblQuantity
@@ -273,13 +294,14 @@ BEGIN
 		FROM @tmpCurrentSnapshot currentSnapshot
 		INNER JOIN #tmpPreviousSnapshot previousSnapshot
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
-		WHERE (currentSnapshot.intContractDetailId != NULL AND previousSnapshot.intContractDetailId != NULL)
+		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
 			AND currentSnapshot.intContractDetailId != previousSnapshot.intContractDetailId
 
 	END
 
 	-- Iterate and process records
 	DECLARE @Id					INT = NULL
+		, @intLoadHeaderId		INT = NULL
 		, @intTransactionId		INT = NULL
 		, @strTransactionType	NVARCHAR(50)
 		, @intActivity			INT
@@ -290,6 +312,7 @@ BEGIN
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblToProcess)
 	BEGIN
 		SELECT TOP 1  @Id		=	intKeyId
+			, @intLoadHeaderId	=	intLoadHeaderId
 			, @intTransactionId =	intTransactionId
 			, @strTransactionType = strTransactionType
 			, @intActivity = intActivity
@@ -304,12 +327,12 @@ BEGIN
 			ELSE IF (@strTransactionType = @SourceType_Invoice)
 				SET @strScreenName = 'Transport Sale'
 
-			IF (@intContractDetailId != NULL)
+			IF (ISNULL(@intContractDetailId, '') <> '')
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
 					, @dblQuantityToUpdate = @dblQuantity 
 					, @intUserId = @UserId 
-					, @intExternalId = @intTransactionId 
+					, @intExternalId = @intLoadHeaderId 
 					, @strScreenName = @strScreenName
 			END
 		END
@@ -346,7 +369,7 @@ BEGIN
 				SET @strScreenName = 'Transport Sale'
 			END
 
-			IF (@intContractDetailId != NULL)
+			IF (ISNULL(@intContractDetailId, '') <> '')
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
 					, @dblQuantityToUpdate = @dblQuantity

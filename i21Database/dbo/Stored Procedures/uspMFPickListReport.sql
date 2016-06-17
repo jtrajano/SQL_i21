@@ -57,6 +57,7 @@ Declare @intKitStatusId int
 Declare @intSalesOrderId INT
 Declare @dblTotalCost NUMERIC(38,20)
 Declare @strUOM nvarchar(50)
+Declare @strSONo nvarchar(50)
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -83,6 +84,13 @@ DECLARE @tblInputItem TABLE (
 	,intParentItemId INT
 	)
 
+DECLARE @tblRecipeInputItem TABLE (
+	intRecipeId INT,
+	intItemId INT,
+	intMarginById INT,
+	dblMargin NUMERIC(38,20)
+)
+
 Select @intLocationId=intLocationId,@strPickListNo=strPickListNo,@strWorkOrderNo=strWorkOrderNo,@intSalesOrderId=ISNULL(intSalesOrderId,0) from tblMFPickList Where intPickListId=@intPickListId
 Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId,@intKitStatusId=intKitStatusId,
 @strUOM=um.strUnitMeasure 
@@ -92,6 +100,7 @@ Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Where intPickListId=@intPickListId
 Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
 Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
+Select @strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
 
 	SELECT @intRecipeId = intRecipeId
 	FROM tblMFWorkOrderRecipe
@@ -208,51 +217,74 @@ Begin
 End
 Else
 Begin --Sales Order Pick List
-	Select @dblTotalCost= SUM(t.dblQuantity * t.dblCost)
-	From
-	(Select pl.dblQuantity,
-		CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
-			ISNULL(l.dblLastCost,0) 
-		ELSE
-			(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il 
-			Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId 
-			AND il.intItemId=pl.intItemId)
-		END	AS dblCost
-	From tblMFPickListDetail pl Join tblICLot l on pl.intLotId=l.intLotId 
-	Where intPickListId=@intPickListId AND ISNULL(pl.intLotId,0)>0
+	Select TOP 1 @strUOM = um.strUnitMeasure 
+	From tblMFPickListDetail pld Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId 
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where pld.intPickListId=@intPickListId
+
+	INSERT INTO @tblRecipeInputItem(intRecipeId,intItemId,intMarginById,dblMargin)
+	Select distinct r.intRecipeId,ri.intItemId,ri.intMarginById,ISNULL(ri.dblMargin,0)
+	From tblSOSalesOrderDetail sd Join tblMFRecipe r on sd.intRecipeId=r.intRecipeId
+	Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId AND ri.intItemId=sd.intItemId
+	Where sd.intSalesOrderId=@intSalesOrderId
+
+	Select @dblTotalCost=SUM(dblCost) From 
+	(
+	SELECT 
+			ISNULL(dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * (
+			CASE WHEN ISNULL(pld.intLotId,0) > 0 THEN 
+				CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
+					ISNULL(l.dblLastCost,0) 
+				ELSE
+					(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId)
+				END		
+			ELSE 
+			CASE WHEN ri.intMarginById=1 THEN 
+			ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0) 
+			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0))/100
+			ELSE (Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ) + ISNULL(ri.dblMargin,0) End
+			--(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId )
+			End ),0) AS dblCost
+		FROM tblMFPickList pl  
+		JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
+		JOIN tblICItem i on pld.intItemId=i.intItemId
+		Left JOIN tblICLot l on l.intLotId=pld.intLotId
+		Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Left Join @tblRecipeInputItem ri on pld.intItemId=ri.intItemId
+		WHERE pl.intPickListId=@intPickListId 
 	) t
 
-	Select @dblTotalCost=ISNULL(@dblTotalCost,0) + ISNULL(SUM(pl.dblQuantity * ISNULL(ip.dblStandardCost,0)),0) 
-	From tblMFPickListDetail pl Join tblICItem i on pl.intItemId=i.intItemId
-	Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
-	Join tblICItemPricing ip on i.intItemId=ip.intItemId AND ip.intItemLocationId=il.intItemLocationId
-	Where intPickListId=@intPickListId AND ISNULL(pl.intLotId,0)=0
+	Set @dblTotalCost=@dblTotalCost + (Select ISNULL(SUM(dblLineTotal),0) From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId))
 
-	SELECT distinct pl.strPickListNo,  
+	SELECT pl.strPickListNo ,  
 			''  AS strBlendItemNoDesc,  
 			pl.strWorkOrderNo,  
 			l.strLotNumber,
 			l.strLotAlias,
 			sl.strName AS strStorageLocationName,
-			i.strItemNo,
-			i.strDescription,
+			i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
+			i.strDescription COLLATE Latin1_General_CI_AS AS strDescription,
 			dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
 			um.strUnitMeasure AS strPickUOM,
 			l.strGarden,
 			@intWorkOrderCount AS intWorkOrderCount,
 			'' strParentLotNumber,
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
-			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblTotalPickQty,
+			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
 			pld.dblQuantity AS dblQuantity,
-			pld.dblQuantity * (
+			dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * (
 			CASE WHEN ISNULL(pld.intLotId,0) > 0 THEN 
 				CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
 					ISNULL(l.dblLastCost,0) 
 				ELSE
-					(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId)
+					(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId)
 				END		
 			ELSE 
-			(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId)
+			CASE WHEN ri.intMarginById=1 THEN 
+			ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0) 
+			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0))/100
+			ELSE (Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ) + ISNULL(ri.dblMargin,0) End
+			--(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId )
 			End ) AS dblCost,
 			@dblTotalCost AS dblTotalCost
 			,@strCompanyName AS strCompanyName
@@ -266,6 +298,31 @@ Begin --Sales Order Pick List
 	Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
 	Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Left Join @tblRecipeInputItem ri on pld.intItemId=ri.intItemId
 	WHERE pl.intPickListId=@intPickListId 
+	UNION ALL
+	Select @strPickListNo strPickListNo,  
+			''  AS strBlendItemNoDesc,  
+			@strSONo strWorkOrderNo,  
+			'' strLotNumber,
+			'' strLotAlias,
+			'' AS strStorageLocationName,
+			strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
+			strDescription COLLATE Latin1_General_CI_AS AS strDescription,
+			NULL AS dblPickQuantity,
+			'' AS strPickUOM,
+			'' strGarden,
+			@intWorkOrderCount AS intWorkOrderCount,
+			'' strParentLotNumber,
+			NULL AS dblReqQty,
+			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
+			NULL AS dblQuantity,
+			dblLineTotal AS dblCost,
+			@dblTotalCost AS dblTotalCost
+			,@strCompanyName AS strCompanyName
+			,@strCompanyAddress AS strCompanyAddress
+			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+			,@strCountry AS strCompanyCountry 
+	From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
 	ORDER BY dblQuantity
 End

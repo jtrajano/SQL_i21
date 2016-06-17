@@ -103,6 +103,7 @@ SELECT
 		strReceiptType				= CASE 
 										WHEN LI.strSourceTransactionId = 'SPT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'CNT' THEN 'Purchase Contract'
+										WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
 										ELSE 'Direct'
 									  END
 		,intEntityVendorId			= @intEntityId
@@ -1227,6 +1228,35 @@ BEGIN
 	FROM	#tmpAddItemReceiptResult 
   
 	SET @InventoryReceiptId = @ReceiptId
+
+
+	SELECT TOP 1 ReceiptId = intInventoryReceiptId FROM  #tmpAddItemReceiptResult	
+
+	DECLARE @intInventoryReceiptItemId	INT = NULL,
+			@dblQty						NUMERIC(18,6) = 0
+
+	SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
+	FROM	tblICInventoryReceiptItem
+	WHERE	intInventoryReceiptId = @InventoryReceiptId
+
+	WHILE ISNULL(@intInventoryReceiptItemId,0) > 0
+	BEGIN
+		SELECT	@dblQty						=	dblOpenReceive,
+				@intContractDetailId		=	intLineNo
+		FROM	tblICInventoryReceiptItem 
+		WHERE	intInventoryReceiptItemId	=	 @intInventoryReceiptItemId
+
+		IF @intContractDetailId > 0
+		BEGIN
+			EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQty, @intUserId, @intInventoryReceiptItemId, 'Scale', @intTicketItemUOMId
+		END
+
+		SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
+		FROM	tblICInventoryReceiptItem
+		WHERE	intInventoryReceiptId = @InventoryReceiptId	AND
+				intInventoryReceiptItemId > @intInventoryReceiptItemId
+	END
+
 	-- Post the Inventory Receipt that was created
 	--SELECT	@strTransactionId = strReceiptNumber 
 	--FROM	tblICInventoryReceipt 
@@ -1241,7 +1271,7 @@ BEGIN
 		
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
-END;
+END
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]

@@ -137,6 +137,7 @@
 
 --HD
 :r .\16_HD\Drop_Constraint.sql
+:r .\16_HD\OpportunitySourceDataFix.sql
 
 --TR
 :r .\17_TR\01_Drop_Column.sql
