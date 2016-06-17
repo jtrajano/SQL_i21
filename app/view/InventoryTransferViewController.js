@@ -211,9 +211,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 },
                 colDescription: 'strItemDescription',
                 colFromSubLocation: {
-                    dataIndex: 'strFromSubLocationName',
+                    dataIndex: 'strFromSubLocationName',    
                     editor: {
                         store: '{fromSubLocation}',
+                        readOnly: '{readOnlyInventoryTransferField}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryTransfer.selection.intItemId}',
@@ -240,6 +241,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'strFromStorageLocationName',
                     editor: {
                         store: '{fromStorageLocation}',
+                        readOnly: '{readOnlyInventoryTransferField}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryTransfer.selection.intItemId}',
@@ -264,6 +266,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'strLotNumber',
                     editor: {
                         store: '{lot}',
+                        readOnly: '{readOnlyInventoryTransferField}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryTransfer.selection.intItemId}',
@@ -289,11 +292,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 },
                 colAvailableQty: 'dblAvailableQty',
                 colAvailableUOM: 'strAvailableUOM',
-
                 colToSubLocation: {
                     dataIndex: 'strToSubLocationName',
                     editor: {
                         store: '{toSubLocation}',
+                        readOnly: '{readOnlyInventoryTransferField}',
                         defaultFilters: [
                             {
                                 column: 'intCompanyLocationId',
@@ -307,6 +310,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'strToStorageLocationName',
                     editor: {
                         store: '{toStorageLocation}',
+                        readOnly: '{readOnlyInventoryTransferField}',
                         defaultFilters: [
                             {
                                 column: 'intLocationId',
@@ -324,6 +328,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 colOwnershipType: {
                     dataIndex: 'strOwnershipType',
                     editor: {
+                        readOnly: '{readOnlyInventoryTransferField}',
                         origValueField: 'intOwnershipType',
                         origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'

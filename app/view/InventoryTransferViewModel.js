@@ -205,6 +205,16 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                 default:
                     return get('grdInventoryTransfer.selection.dblOriginalStorageQty');
             }
+        },
+        readOnlyInventoryTransferField: function(get) {
+            if (get('grdInventoryTransfer.selection.intItemId') !== null)
+                {
+                    return false;
+                }
+            else
+                {
+                    return true;
+                }
         }
     }
 
