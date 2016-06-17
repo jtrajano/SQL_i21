@@ -84,7 +84,7 @@ FROM
 				,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
 				,strAccountDesc = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
 				,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
-				,B1.dblTax
+				,ISNULL(B1.dblTax,0) AS dblTax
 				,ISNULL(G.dblRate,0) AS dblRate
 				,CASE WHEN B1.ysnSubCurrency > 0 THEN 1 ELSE 0 END AS ysnSubCurrency
 				,ISNULL(A1.intSubCurrencyCents, 0) AS intSubCurrencyCents
@@ -193,7 +193,7 @@ FROM
 	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
 	,[intInventoryReceiptChargeId]	= NULL
 	,[dblUnitCost]				=	B.dblCost
-	,[dblTax]					=	B.dblTax
+	,[dblTax]					=	ISNULL(B.dblTax,0)
 	,[dblRate]					=	0
 	,[ysnSubCurrency]			=	0
 	,[intSubCurrencyCents]		=	0
@@ -273,7 +273,7 @@ FROM
 												 THEN (CASE WHEN CD.dblCashPrice IS NOT NULL THEN CD.dblCashPrice ELSE B.dblUnitCost END)
 												 ELSE B.dblUnitCost
 											END  	
-	,[dblTax]					=	B.dblTax
+	,[dblTax]					=	ISNULL(B.dblTax,0)
 	,[dblRate]					=	ISNULL(G1.dblRate,0)
 	,[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END
 	,[intSubCurrencyCents]		=	ISNULL(A.intSubCurrencyCents, 0)
@@ -374,7 +374,7 @@ FROM
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[dblUnitCost]								=	A.dblUnitCost
-		,[dblTax]									=	A.dblTax
+		,[dblTax]									=	ISNULL(A.dblTax,0)
 		,[dblRate]									=	ISNULL(G1.dblRate,0)
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
@@ -403,16 +403,16 @@ FROM
 		,[dblWeightUnitQty]							=	1
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
-		,[intCurrencyId]							=	ISNULL(A.intCurrencyId,0)
-		,[strCurrency]								=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
-		,[intCostCurrencyId]						=	CASE WHEN A.ysnSubCurrency > 0 
+		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
 															 ELSE  ISNULL(A.intCurrencyId,0)
-														END			
-		,[strCostCurrency]							=	CASE WHEN A.ysnSubCurrency > 0 
+														END	
+		,[strCurrency]								=	CASE WHEN A.ysnSubCurrency > 0 
 															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT ISNULL(intMainCurrencyId, A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
 															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
-														END	
+														END
+		,[intCostCurrencyId]						=	ISNULL(A.intCurrencyId,0)		
+		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)	
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]				=	D2.str1099Form			 
 		,[str1099Type]				=	D2.str1099Type      
@@ -591,3 +591,4 @@ FROM
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON CC.intVendorId = D1.intEntityVendorId  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
 ) Items
+GO

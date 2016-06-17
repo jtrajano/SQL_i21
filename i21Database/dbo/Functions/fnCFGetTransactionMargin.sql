@@ -110,6 +110,8 @@ BEGIN
 	THEN @dblGrossPrice - @dblTransferCost 
 	WHEN 'Remote' 
 	THEN @dblGrossPrice - @dblTransferCost
+	WHEN 'Foreign Sale' 
+	THEN @dblGrossPrice - @dblTransferCost
 	ELSE 0 
 	END),
 	dblCost = CASE @strTransactionType 
@@ -118,6 +120,8 @@ BEGIN
 	WHEN 'Extended Remote' 
 	THEN @dblTransferCost 
 	WHEN 'Remote' 
+	THEN @dblTransferCost
+	WHEN 'Foreign Sale' 
 	THEN @dblTransferCost
 	ELSE 0 
 	END

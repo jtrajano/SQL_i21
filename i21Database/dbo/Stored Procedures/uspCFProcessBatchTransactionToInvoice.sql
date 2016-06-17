@@ -207,7 +207,7 @@ END
 				FROM tblCFTransaction cfTrans
 				INNER JOIN tblCFNetwork cfNetwork
 				ON cfTrans.intNetworkId = cfNetwork.intNetworkId
-				INNER JOIN (SELECT icfCards.intCardId
+				LEFT JOIN (SELECT icfCards.intCardId
 								   ,icfAccount.intAccountId
 								   ,icfAccount.intSalesPersonId
 								   ,icfAccount.intCustomerId

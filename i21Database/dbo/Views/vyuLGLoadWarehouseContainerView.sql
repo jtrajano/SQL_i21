@@ -55,7 +55,6 @@ JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadConta
 JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
-LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixHeaderId = WRMH.intWarehouseRateMatrixHeaderId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
 LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId

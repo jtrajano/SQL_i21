@@ -1,10 +1,7 @@
 ﻿CREATE VIEW vyuLGLoadVesselViewSearch
 AS
 SELECT  L.intLoadId
-	   ,LD.intLoadDetailId
 	   ,L.intGenerateLoadId
-	   ,LD.intVendorEntityId
-	   ,LD.intCustomerEntityId
 	   ,L.strLoadNumber
 	   ,L.strBLNumber
 	   ,L.dtmBLDate
@@ -39,7 +36,6 @@ SELECT  L.intLoadId
 	   ,[strInsuranceCurrency] = Currency.strCurrency
 	   ,[strContainerType] = CT.strContainerType
 FROM tblLGLoad L
-JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
