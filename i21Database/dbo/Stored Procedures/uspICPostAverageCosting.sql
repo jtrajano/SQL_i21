@@ -241,9 +241,9 @@ BEGIN
 				IF (ISNULL(@CostUsed, 0) <> @dblCost)
 				BEGIN
 					-- Calculate the variance amount. 
-					SET @dblAutoVarianceOnUsedOrSoldStock = 
-						dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
-						- dbo.fnMultiply(dbo.fnMultiply(@QtyOffset, @dblCost), -1) -- Revalue Sold
+					SET @dblAutoVarianceOnUsedOrSoldStock = 						
+						- dbo.fnMultiply(@QtyOffset, @dblCost) -- Revalue Sold
+						+ dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
 
 					EXEC [dbo].[uspICPostInventoryTransaction]
 							@intItemId = @intItemId

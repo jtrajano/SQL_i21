@@ -148,7 +148,7 @@ USING	(
 				,form = 'Pick List'
 		UNION ALL 
 		SELECT	id = 35
-				,name = 'Inventory Auto Variance on Sold or Used stock'
+				,name = 'Inventory Auto Variance on Negatively Sold or Used Stock'
 				,form = NULL
 
 ) AS InventoryTransactionTypeHardValues
