@@ -55,7 +55,7 @@ BEGIN
 			IF ISNULL(@IsCustomerSiteTaxable,0) = 0
 				SET @TaxCodeExemption = 'Customer Site is non taxable; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
-			--IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+			IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 			INSERT INTO @returntable
 			SELECT 
 				 [ysnTaxExempt] = 1
