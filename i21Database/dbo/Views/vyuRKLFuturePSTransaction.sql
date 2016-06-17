@@ -29,7 +29,7 @@ SELECT intSelectedInstrumentTypeId,
 	   ,ysnSubCurrency
 	  ,ot.intBankId
 	  ,ot.intBankAccountId
-	   ,null as intCurrencyExchangeRateTypeId       
+	   ,ot.intCurrencyExchangeRateTypeId       
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
@@ -56,7 +56,7 @@ SELECT intSelectedInstrumentTypeId,
       ,null  intBrokerageAccountId
       ,null intLocationId
       ,null intFutureMonthId
-      ,null intCommodityId
+      ,intCommodityId
       ,null intEntityId
       ,ISNULL(ot.intBookId,0) as intBookId
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
@@ -79,5 +79,3 @@ LEFT JOIN [dbo].[tblCMBankAccount] AS banAcc ON ot.[intBankAccountId] = banAcc.[
 LEFT JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ot.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 where intSelectedInstrumentTypeId=2 AND ot.intInstrumentTypeId = 3 and isnull(ysnLiquidation,0) = 0 
 )t)t1   where  dblBalanceLot > 0
-
-
