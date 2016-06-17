@@ -147,10 +147,10 @@ BEGIN TRY
 		BEGIN
 			SET @strReceiptType = 'Purchase Contract'
 		END
-		ELSE IF @ysnDPStorage = 1
-        BEGIN
-            SET @strReceiptType = 'Delayed Price'
-        END
+		--ELSE IF @ysnDPStorage = 1
+  --      BEGIN
+  --          SET @strReceiptType = 'Delayed Price'
+  --      END
 		ELSE
 		BEGIN
 			SET @strReceiptType = 'Direct'
