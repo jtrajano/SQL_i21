@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
-,@CardId				INT     
+,@CardId				INT				
 ,@SiteId				INT    
 ,@TransactionDate		DATETIME			    
 ,@Quantity				NUMERIC(18,6)     
@@ -174,13 +174,26 @@ BEGIN
 	@intTaxGroupId = intTaxGroupId
 	FROM tblCFSite WHERE intSiteId = @intSiteId
 
+
 	--GET CUSTOMER ID--
-	SELECT TOP 1
-	@intCustomerId = cfAccount.intCustomerId
-	FROM tblCFCard as cfCard
-	INNER JOIN tblCFAccount as cfAccount
-	ON cfCard.intAccountId = cfAccount.intAccountId
-	WHERE cfCard.intCardId = @intCardId
+	IF (@TransactionType = 'Foreign Sale')
+	BEGIN
+		SELECT TOP 1
+		@intCustomerId = intCustomerId
+		FROM tblCFNetwork 
+		WHERE intNetworkId = @intNetworkId
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1
+		@intCustomerId = cfAccount.intCustomerId
+		FROM tblCFCard as cfCard
+		INNER JOIN tblCFAccount as cfAccount
+		ON cfCard.intAccountId = cfAccount.intAccountId
+		WHERE cfCard.intCardId = @intCardId
+	END
+	
+	
 
 
 	--GET COMPANY LOCATION ID--
@@ -809,6 +822,7 @@ BEGIN
 					 @QxT = ROUND (@dblQuantity * dblRate,2)
 					,@QxOP = @QxOP - (@dblQuantity * dblRate)
 					,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * dblRate)
+					,@dblCPTotalTax = @dblCPTotalTax + (@dblQuantity * dblRate)
 					FROM @tblTaxUnitTable
 
 					INSERT INTO @tblTransactionTaxOut
@@ -1207,7 +1221,8 @@ BEGIN
 	OR @strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
 	OR @strPriceMethod = 'Posted Trans from CSV'
-	OR @strPriceMethod = 'Origin History')
+	OR @strPriceMethod = 'Origin History'
+	OR @strPriceMethod = 'Network Cost')
 		BEGIN
 			INSERT INTO @tblTransactionPrice (
 		 strTransactionPriceId	

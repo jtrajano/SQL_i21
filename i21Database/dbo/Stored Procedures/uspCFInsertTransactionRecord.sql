@@ -61,6 +61,13 @@
 	
 	,@ysnOriginHistory					BIT				= 0
 	,@ysnPostedCSV						BIT				= 0
+
+	,@intSellingHost					INT				= 0
+	,@intBuyingHost						INT				= 0
+	,@intForeignCustomerId				INT				= 0
+
+	
+	
 	--,@LC7							NUMERIC(18,6)	= 0.000000
 	--,@LC8							NUMERIC(18,6)	= 0.000000
 	--,@LC9							NUMERIC(18,6)	= 0.000000
@@ -120,6 +127,9 @@ BEGIN
 	DECLARE @ysnInvalid				BIT	= 0
 	DECLARE @ysnPosted				BIT = 0
 	DECLARE @ysnCreditCardUsed		BIT	= 0
+	DECLARE @intParticipantNo		INT = 0
+	DECLARE @strNetworkType			NVARCHAR(MAX)
+	DECLARE @intNetworkLocation		INT = 0
 	  
 	------------------------------------------------------------
 
@@ -170,29 +180,72 @@ BEGIN
 
 	IF(@intNetworkId = 0)
 		BEGIN
-			SELECT TOP 1 @intNetworkId = intNetworkId 
+			SELECT TOP 1
+			 @intNetworkId			= intNetworkId 
+			,@intParticipantNo		= strParticipant
+			,@strNetworkType		= strNetworkType	
+			,@intForeignCustomerId	= intCustomerId
+			,@strNetworkType		= strNetworkType
+			,@intNetworkLocation	= intLocationId
 			FROM tblCFNetwork
 			WHERE strNetwork = @strNetworkId
 		END
-	
+	ELSE
+		BEGIN
+			SELECT TOP 1
+			 @intNetworkId			= intNetworkId 
+			,@intParticipantNo		= strParticipant
+			,@strNetworkType		= strNetworkType	
+			,@intForeignCustomerId	= intCustomerId
+			,@strNetworkType		= strNetworkType
+			,@intNetworkLocation	= intLocationId
+			FROM tblCFNetwork
+			WHERE intNetworkId = @intNetworkId
+		END
+
+	IF(@strNetworkType = 'PacPride')
+	BEGIN
+		IF(@intSellingHost = @intParticipantNo AND @intBuyingHost = @intParticipantNo)
+		BEGIN
+			SET @strTransactionType = 'Local/Network'
+		END
+		ELSE IF (@intSellingHost = @intParticipantNo AND @intBuyingHost != @intParticipantNo)
+		BEGIN
+			SET @strTransactionType = 'Foreign Sale'
+			SET @dblOriginalGrossPrice = @dblTransferCost
+			--SET @intCustomerId = @intForeignCustomerId
+		END
+		ELSE IF (@intBuyingHost = @intParticipantNo AND @intSellingHost != @intParticipantNo)
+		BEGIN
+			SET @strTransactionType = (CASE @strPPSiteType 
+										WHEN 'N' 
+											THEN 'Remote'
+										WHEN 'R' 
+											THEN 'Extended Remote'
+									  END)
+		END
+		ELSE IF (@intBuyingHost != @intParticipantNo AND @intSellingHost != @intParticipantNo)
+		BEGIN
+			SET @strTransactionType = (CASE @strPPSiteType 
+										WHEN 'N' 
+											THEN 'Remote'
+										WHEN 'R' 
+											THEN 'Extended Remote'
+									  END)
+		END 
+	END
+	 
+
 	------------------------------------------------------------
 	--					AUTO CREATE SITE
 	-- if transaction is remote or ext remote				  --
 	------------------------------------------------------------
 	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R'))
 		BEGIN 
-			DECLARE @strNetworkType						NVARCHAR(MAX)
-			DECLARE @intNetworkLocation					INT
-
-			SELECT 
-				 @strNetworkType = strNetworkType
-				,@intNetworkLocation = intLocationId
-			FROM tblCFNetwork
-			WHERE intNetworkId = @intNetworkId
-
+			
 			INSERT INTO tblCFSite
 			(
-				intNetworkId		
+				 intNetworkId		
 				,strSiteNumber	
 				,strSiteName
 				,strDeliveryPickup	
@@ -349,13 +402,15 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT TOP 1 
-			 @intCardId = C.intCardId
-			,@intCustomerId = A.intCustomerId
-		FROM tblCFCard C
-		INNER JOIN tblCFAccount A
-		ON C.intAccountId = A.intAccountId
-		WHERE C.strCardNumber = @strCardId
+		BEGIN
+			SELECT TOP 1 
+				 @intCardId = C.intCardId
+				,@intCustomerId = A.intCustomerId
+			FROM tblCFCard C
+			INNER JOIN tblCFAccount A
+			ON C.intAccountId = A.intAccountId
+			WHERE C.strCardNumber = @strCardId
+		END
 	END
 
 	IF (@intCardId = 0)
@@ -539,6 +594,7 @@ BEGIN
 			,[ysnCreditCardUsed]			
 			,[ysnOriginHistory]
 			,[ysnPostedCSV]
+			,[strForeignCardId]
 		)
 		VALUES
 		(
@@ -578,6 +634,7 @@ BEGIN
 			,@ysnCreditCardUsed		
 			,@ysnOriginHistory
 			,@ysnPostedCSV  
+			,@strCardId
 		)			
 	
 		DECLARE @Pk	INT		
@@ -595,7 +652,7 @@ BEGIN
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 site item list')
 		END
-		IF(@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL)
+		IF((@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL) AND @strTransactionType != 'Foreign Sale')
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find customer number using card number ' + @strCardId + ' into i21 card account list')
@@ -637,7 +694,7 @@ BEGIN
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site ' + @strSiteId + ' has been automatically created')
 		END
-		IF(@intCardId = 0 OR @intCardId IS NULL)
+		IF((@intCardId = 0 OR @intCardId IS NULL) AND @strTransactionType != 'Foreign Sale')
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
@@ -748,6 +805,24 @@ BEGIN
 				,strPriceBasis = null
 				,dblTransferCost = 0
 				,strPriceMethod = 'Import File Price'
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= null
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= ''
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
+				WHERE intTransactionId = @Pk
+		END
+		IF (@strPriceMethod = 'Network Cost')
+		BEGIN
+				UPDATE tblCFTransaction 
+				SET intContractId = null 
+				,strPriceBasis = null
+				,dblTransferCost = @dblTransferCost
+				,strPriceMethod = @strPriceMethod
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
 				,intSiteGroupId			= null
