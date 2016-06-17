@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentItemSource]
 	AS 
 
-SELECT DISTINCT
+SELECT
 	ShipmentItem.intInventoryShipmentItemId,
 	ShipmentItem.intOrderId,
 	strOrderNumber = 
@@ -126,8 +126,8 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			AND SODetail.intSalesOrderDetailId = ShipmentItem.intLineNo
 			AND Shipment.intOrderType = 2
 		LEFT JOIN vyuCTContractDetailView ContractView
-			-- ON ContractView.intContractDetailId = ShipmentItem.intLineNo
-			ON ContractView.intContractHeaderId = ShipmentItem.intOrderId
+			ON ContractView.intContractDetailId = ShipmentItem.intLineNo
+			AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
 			AND Shipment.intOrderType = 1
 			-- AND Shipment.intSourceType IN (0, 1) 
 		LEFT JOIN vyuTRTransportReceipt TransportView
