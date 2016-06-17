@@ -20,11 +20,14 @@
 		strVendorRankLocationName = vend_location_rank.strLocationName,
 		special_price.strInvoiceType,
 		ent.strName,
-		ent.strEntityNo
+		ent.strEntityNo,
+		intWarehouseId = isnull(eloc.intWarehouseId, -99)
 
 		from tblARCustomerSpecialPrice special_price
 		inner join tblEMEntity ent
-			on special_price.intEntityCustomerId = ent.intEntityId
+			on special_price.intEntityCustomerId = ent.intEntityId			
+		inner join tblEMEntityLocation eloc
+			on ent.intEntityId = eloc.intEntityId and eloc.ysnDefaultLocation = 1	
 		left join [tblEMEntityLocation] cus_location
 			on cus_location.intEntityId = special_price.intEntityCustomerId
 				and special_price.intCustomerLocationId = cus_location.intEntityLocationId

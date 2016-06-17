@@ -9,11 +9,15 @@
 		category.strCategoryCode,
 		tax_group.strTaxGroup,
 		ent.strName,
-		ent.strEntityNo
+		ent.strEntityNo,
+		intWarehouseId = isnull(eloc.intWarehouseId, -99)
 
 	from tblARSpecialTax special_tax
 		inner join tblEMEntity ent
 			on special_tax.intEntityCustomerId = ent.intEntityId
+			
+		inner join tblEMEntityLocation eloc
+			on ent.intEntityId = eloc.intEntityId and eloc.ysnDefaultLocation = 1	
 		left join [tblEMEntityLocation] cus_location
 			on cus_location.intEntityId = special_tax.intEntityCustomerId
 				and special_tax.intEntityCustomerLocationId = cus_location.intEntityLocationId

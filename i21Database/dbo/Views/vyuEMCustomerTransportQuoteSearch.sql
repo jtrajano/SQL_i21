@@ -8,11 +8,14 @@
 		strCategoryCode = dbo.fnEMGetCustomerTransportQuoteCategory(quote_header.intCustomerRackQuoteHeaderId),
 		strItemNo = dbo.fnEMGetCustomerTransportQuoteItem(quote_header.intCustomerRackQuoteHeaderId),
 		ent.strName,
-		ent.strEntityNo
+		ent.strEntityNo,
+		intWarehouseId = isnull(eloc.intWarehouseId, -99)
 
 	from tblARCustomerRackQuoteHeader quote_header
 		inner join tblEMEntity ent
-			on quote_header.intEntityCustomerId = ent.intEntityId		
+			on quote_header.intEntityCustomerId = ent.intEntityId
+		inner join tblEMEntityLocation eloc
+			on ent.intEntityId = eloc.intEntityId and eloc.ysnDefaultLocation = 1		
 		--left join tblARCustomerRackQuoteCategory quote_category
 		--	on quote_header.intCustomerRackQuoteHeaderId = quote_category.intCustomerRackQuoteHeaderId		
 		--left join tblARCustomerRackQuoteItem quote_item

@@ -14,11 +14,14 @@
 		tax_exemption.strState,
 		tax_exemption.dblPartialTax,		
 		ent.strName,
-		ent.strEntityNo
+		ent.strEntityNo,
+		intWarehouseId = isnull(eloc.intWarehouseId, -99)
 
 	from tblARCustomerTaxingTaxException tax_exemption
 		inner join tblEMEntity ent
 				on tax_exemption.intEntityCustomerId = ent.intEntityId
+		inner join tblEMEntityLocation eloc
+			on ent.intEntityId = eloc.intEntityId and eloc.ysnDefaultLocation = 1
 		left join [tblEMEntityLocation] cus_location
 			on cus_location.intEntityId = tax_exemption.intEntityCustomerId	
 				and cus_location.intEntityLocationId = tax_exemption.intEntityCustomerLocationId
