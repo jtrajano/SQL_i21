@@ -172,6 +172,7 @@ DECLARE  @Id									INT
 		,@ResetDetails							BIT
 		,@Recap									BIT
 		,@Post									BIT
+		,@ImportFormat							NVARCHAR(50)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -304,6 +305,7 @@ BEGIN
 		,@ResetDetails					= [ysnResetDetails]
 		,@Recap							= [ysnRecap]
 		,@Post							= [ysnPost]
+		,@ImportFormat					= [strImportFormat]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -490,6 +492,7 @@ BEGIN
 			,@OriginalInvoiceId 			= @OriginalInvoiceId
 			,@PeriodsToAccrue				= @PeriodsToAccrue
 			,@SourceId						= @NewSourceId
+			,@ImportFormat					= @ImportFormat
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId

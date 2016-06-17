@@ -21,6 +21,7 @@
 	[strTaxGroup]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSiteNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strItemNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[dblCOGSAmount]				NUMERIC(18,6) NULL,
 	[dblSubtotal]				NUMERIC(18,6) NULL,
     [dblTax]					NUMERIC(18,6) NULL,
 	[dblQuantity]				NUMERIC(18,6) NULL,
