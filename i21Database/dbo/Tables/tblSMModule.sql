@@ -7,5 +7,6 @@
 	[ysnSupported] BIT NOT NULL DEFAULT 1, 
 	[ysnCustomerModule] BIT NOT NULL DEFAULT 0, 
 	[intSort] INT NOT NULL, 
-    [intConcurrencyId] INT NOT NULL DEFAULT 1 
+    [intConcurrencyId] INT NOT NULL DEFAULT 1, 
+    CONSTRAINT [AK_tblSMModule_strApplicationName_strModule] UNIQUE ([strApplicationName], [strModule]) 
 )
