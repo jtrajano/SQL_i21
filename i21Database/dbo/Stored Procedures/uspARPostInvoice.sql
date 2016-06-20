@@ -2658,6 +2658,13 @@ IF @recap = 0
 					UPDATE 
 						tblARInvoice
 					SET
+						dblPayment	= dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+					WHERE
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+					UPDATE 
+						tblARInvoice
+					SET
 						ysnPosted				= 0
 						,ysnPaid				= 0
 						,dblAmountDue			= ISNULL(dblInvoiceTotal, @ZeroDecimal) - ISNULL(dblPayment, @ZeroDecimal)
@@ -2883,13 +2890,12 @@ IF @recap = 0
 												
 				END
 
-
 		DELETE tblARPrepaidAndCredit  
 		FROM 
 			tblARPrepaidAndCredit A 
 		INNER JOIN @PostInvoiceData B  
 		   ON A.intInvoiceId = B.intInvoiceId
-		   AND  ISNULL(A.ysnApplied,0) = 0
+		   AND (ISNULL(A.ysnApplied,0) = 0 OR @post = 0)
 																
 		END TRY
 		BEGIN CATCH	

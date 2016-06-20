@@ -108,7 +108,7 @@ AS
    SELECT
 	strCompanyName = Company.strCompanyName
    ,A.intAccountId
-   ,RTRIM(ISNULL(Account.strDescription,'''')) + '' '' +  ISNULL(Grp.strAccountGroup,'''') + ''-'' + ISNULL(Grp.strAccountType,'''') as AccountHeader
+   ,''Account ID: '' + Account.strAccountId + '' '' + RTRIM(ISNULL(Account.strDescription,'''')) + '' '' +  ISNULL(Grp.strAccountGroup,'''') + ''-'' + ISNULL(Grp.strAccountType,'''') as AccountHeader
    ,strAccountDescription =ISNULL(Account.strDescription,'''')
    ,strAccountType = ISNULL(Grp.strAccountType,'''')
    ,strAccountGroup = ISNULL(Grp.strAccountGroup,'''')

@@ -128,6 +128,7 @@ BEGIN
 		C.intEntityCustomerId = @CustomerId
 		AND ((CAST(@TransactionDate AS DATE) BETWEEN CAST(SP.dtmBeginDate AS DATE) AND CAST(ISNULL(SP.dtmEndDate, GETDATE()) AS DATE)) OR (CAST(@TransactionDate AS DATE) >= CAST(SP.dtmBeginDate AS DATE) AND SP.dtmEndDate IS NULL))
 		AND ((@LocationId IS NOT NULL) OR (@LocationId IS NULL AND SP.strPriceBasis IN ('F', 'R', 'L', 'O')))
+		AND SP.intItemId = @ItemId
 
 	--Customer Special Pricing
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialPricing))

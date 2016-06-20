@@ -2,6 +2,7 @@
 	 @ImportLogId		INT
 	,@ImportFormat      NVARCHAR(50)
 	,@ImportItemId		INT = NULL
+	,@ImportLocationId  INT = NULL
 	,@IsTank			BIT = 0
 	,@IsFromOldVersion	BIT = 0	
 	,@UserEntityId		INT	= NULL
@@ -174,7 +175,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					  @EntityCustomerId				= C.intEntityCustomerId
 					, @CustomerNumber				= C.strCustomerNumber
 					, @Date							= ILD.dtmDate
-					, @PostDate						= NULL--ILD.dtmPostDate
+					, @PostDate						= NULL
 					, @ShipDate						= ILD.dtmShipDate
 					, @CompanyLocationId			= CL.intCompanyLocationId
 					, @EntityId						= ISNULL(@UserEntityId, IL.intEntityId)
@@ -213,7 +214,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						ON ILD.strCustomerNumber = C.strCustomerNumber
 				LEFT JOIN
 					tblSMCompanyLocation CL
-						ON ILD.strLocationName = CL.strLocationName
+						ON CL.intCompanyLocationId = @ImportLocationId
 				LEFT JOIN
 					tblARSalesperson SP
 						ON ILD.strSalespersonNumber = SP.strSalespersonId

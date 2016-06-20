@@ -94,6 +94,7 @@ SELECT
 									  END
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
+	,@BillToLocationId				= [intBillToLocationId]
 	,@Template						= 0		--[ysnTemplate]
 	,@Forgiven						= 0		--[ysnForgiven]
 	,@Calculated					= 0		--[ysnCalculated]

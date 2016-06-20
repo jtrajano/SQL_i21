@@ -36,6 +36,7 @@ RETURNS @returntable TABLE
 	,intContractSeq			INT
 	,dblAvailableQty        NUMERIC(18,6)
 	,ysnUnlimitedQty        BIT
+	,strPricingType			NVARCHAR(50)
 )
 AS
 BEGIN
@@ -44,6 +45,7 @@ DECLARE	 @Price			NUMERIC(18,6)
 		,@Pricing		NVARCHAR(250)
 		,@Deviation		NUMERIC(18,6)
 		,@TermDiscount	NUMERIC(18,6)
+		,@PricingType	NVARCHAR(50)
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
@@ -63,6 +65,7 @@ DECLARE	 @Price			NUMERIC(18,6)
 			,@ContractSeq		= intContractSeq
 			,@AvailableQuantity = dblAvailableQty
 			,@UnlimitedQuantity = ysnUnlimitedQty
+			,@PricingType		= strPricingType
 		FROM
 			[dbo].[fnARGetContractPricingDetails](
 				 @ItemId
@@ -80,8 +83,8 @@ DECLARE	 @Price			NUMERIC(18,6)
 			
 		IF(@Price IS NOT NULL)
 		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 			RETURN
 		END	
 		
@@ -112,8 +115,8 @@ DECLARE	 @Price			NUMERIC(18,6)
 			
 		IF(@Price IS NOT NULL)
 		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 			RETURN
 		END	
 	END
@@ -144,8 +147,8 @@ DECLARE	 @Price			NUMERIC(18,6)
 			
 		IF(@Price IS NOT NULL)
 		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 			RETURN
 		END	
 						
@@ -188,12 +191,12 @@ DECLARE	 @Price			NUMERIC(18,6)
 	IF(@Price IS NOT NULL)
 		BEGIN
 			SET @Pricing = 'Inventory - Standard Pricing'
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 			RETURN
 		END	
 			
-	INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty)
-	SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+	INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+	SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 	RETURN				
 END

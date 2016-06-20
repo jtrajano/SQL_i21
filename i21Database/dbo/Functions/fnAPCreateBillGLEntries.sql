@@ -161,7 +161,8 @@ BEGIN
 													CASE WHEN B.dblRate > 0 THEN 
 															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 															ELSE 
-																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																(CASE WHEN B.dblOldCost IS NOT NULL THEN (CASE WHEN B.dblOldCost = 0 THEN 0 --AP-2458
+																												WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
 																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
 																	  ELSE B.dblTotal END)
 																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
@@ -169,7 +170,8 @@ BEGIN
 													ELSE 
 															(CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 															ELSE 
-																(CASE WHEN B.dblOldCost != 0 THEN  (CASE WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
+																(CASE WHEN B.dblOldCost IS NOT NULL THEN  (CASE WHEN B.dblOldCost = 0 THEN 0 
+																												WHEN B.ysnSubCurrency > 0 THEN CAST((B.dblOldCost / A.intSubCurrencyCents * B.dblQtyReceived) AS DECIMAL(18,2)) 
 																																   ELSE CAST((B.dblOldCost * B.dblQtyReceived) AS DECIMAL(18,2)) END) --COST ADJUSTMENT
 																	  ELSE B.dblTotal END)
 																+ CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) --IC Tax
@@ -273,7 +275,7 @@ BEGIN
 			LEFT JOIN tblICInventoryReceiptCharge F
 				ON B.intInventoryReceiptChargeId = F.intInventoryReceiptChargeId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND B.dblOldCost != 0 AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL
+	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL
 	UNION ALL
 	--CHARGES
 	SELECT	
