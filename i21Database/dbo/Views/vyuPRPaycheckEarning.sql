@@ -38,6 +38,15 @@ SELECT
 	,ysnMedTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
 								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
 								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Medicare')), 0) AS BIT)
+	,ysnFITTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
+								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Federal Tax')), 0) AS BIT)
+	,ysnStateTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
+								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA State')), 0) AS BIT)
+	,ysnLocalTaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
+								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRTypeTax WHERE strCalculationType = 'USA Local')), 0) AS BIT)
 	,tblPRPaycheckEarning.intAccountId
 	,tblPRPaycheckEarning.intSort
 	,tblPRPaycheckEarning.intConcurrencyId
