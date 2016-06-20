@@ -3987,6 +3987,7 @@
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
     <Build Include="dbo\Views\vyuTMOutOfRangeBurnRateSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMEventSetActive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

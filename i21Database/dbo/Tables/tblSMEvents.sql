@@ -11,6 +11,7 @@ CREATE TABLE [dbo].[tblSMEvents] (
 	[dtmEnd] [datetime2](7) NULL,
 	[dtmCreated] [datetime] NULL,
 	[dtmModified] [datetime] NULL,
+	[ysnActive] [bit] DEFAULT ((1)) NULL,
 	[intConcurrencyId] [int] NOT NULL,
     CONSTRAINT [PK_tblSMEvents] PRIMARY KEY CLUSTERED ([intEventId] ASC)
 );
