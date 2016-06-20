@@ -172,6 +172,7 @@ DECLARE  @Id									INT
 		,@ResetDetails							BIT
 		,@Recap									BIT
 		,@Post									BIT
+		,@ImportFormat							NVARCHAR(50)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -304,13 +305,14 @@ BEGIN
 		,@ResetDetails					= [ysnResetDetails]
 		,@Recap							= [ysnRecap]
 		,@Post							= [ysnPost]
+		,@ImportFormat					= [strImportFormat]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
 		,@ItemPrepayTypeId 				= (CASE WHEN @GroupingOption = 0 THEN [intPrepayTypeId] ELSE NULL END) 
 		,@ItemPrepayRate 				= (CASE WHEN @GroupingOption = 0 THEN [dblPrepayRate] ELSE NULL END) 
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
-		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL([strDocumentNumber],[strSourceId]) ELSE NULL END)
+		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL(ISNULL([strDocumentNumber], @SourceNumber),[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
 		,@OrderUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
 		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
@@ -490,6 +492,7 @@ BEGIN
 			,@OriginalInvoiceId 			= @OriginalInvoiceId
 			,@PeriodsToAccrue				= @PeriodsToAccrue
 			,@SourceId						= @NewSourceId
+			,@ImportFormat					= @ImportFormat
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -617,7 +620,7 @@ BEGIN
 					,@ItemPrepayTypeId				= [intPrepayTypeId]
 					,@ItemPrepayRate 				= [dblPrepayRate]
 					,@Inventory						= [ysnInventory]
-					,@ItemDocumentNumber			= [strDocumentNumber]
+					,@ItemDocumentNumber			= ISNULL([strDocumentNumber], @SourceNumber)
 					,@ItemDescription				= [strItemDescription]
 					,@OrderUOMId					= [intOrderUOMId]					
 					,@ItemQtyOrdered				= [dblQtyOrdered]
@@ -1183,7 +1186,7 @@ BEGIN TRY
 						,@ItemPrepayTypeId				= [intPrepayTypeId]
 						,@ItemPrepayRate				= [dblPrepayRate]
 						,@Inventory						= [ysnInventory]
-						,@ItemDocumentNumber			= [strDocumentNumber]
+						,@ItemDocumentNumber			= ISNULL([strDocumentNumber], @SourceNumber)
 						,@ItemDescription				= [strItemDescription]
 						,@OrderUOMId					= [intOrderUOMId]
 						,@ItemQtyOrdered				= [dblQtyOrdered]
@@ -1410,7 +1413,7 @@ BEGIN TRY
 					,@ItemPrepayTypeId				= [intPrepayTypeId]
 					,@ItemPrepayRate				= [dblPrepayRate]
 					,@Inventory						= [ysnInventory]
-					,@ItemDocumentNumber			= [strDocumentNumber]
+					,@ItemDocumentNumber			= ISNULL([strDocumentNumber],@SourceNumber)
 					,@ItemDescription				= [strItemDescription]
 					,@OrderUOMId					= [intOrderUOMId]
 					,@ItemQtyOrdered				= [dblQtyOrdered]

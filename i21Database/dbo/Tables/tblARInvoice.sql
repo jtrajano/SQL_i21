@@ -62,6 +62,7 @@
 	[intDistributionHeaderId]		INT												NULL,
 	[intLoadDistributionHeaderId]	INT												NULL,
 	[strActualCostId]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
+	[strImportFormat]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[intShipmentId]					INT												NULL,        	
 	[intTransactionId]				INT												NULL,
 	[intMeterReadingId]        		INT												NULL,

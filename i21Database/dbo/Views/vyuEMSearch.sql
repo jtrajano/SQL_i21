@@ -9,6 +9,7 @@ SELECT
 		e.strCity,  
 		e.strState,  
 		e.strZipCode,
+		intWarehouseId = isnull(e.intWarehouseId, -99),
 		Customer,
 		Vendor,
 		Employee,

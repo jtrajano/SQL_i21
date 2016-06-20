@@ -41,6 +41,7 @@
 	,@OriginalInvoiceId				INT				= NULL
 	,@PeriodsToAccrue				INT				= 1
 	,@SourceId						INT				= 0
+	,@ImportFormat                  NVARCHAR(50)    = NULL
 		
 	,@ItemId						INT				= NULL
 	,@ItemPrepayTypeId				INT				= 0
@@ -326,6 +327,7 @@ BEGIN TRY
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,[strImportFormat]
 		,[ysnPosted]
 		,[ysnPaid]
 		,[ysnRecurring]
@@ -389,6 +391,7 @@ BEGIN TRY
 		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
 		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
+		,[strImportFormat]				= @ImportFormat
 		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment') THEN @Posted ELSE 0 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)

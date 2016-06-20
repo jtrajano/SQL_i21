@@ -96,14 +96,10 @@ INSERT into @ReceiptStagingTable(
 		,strSourceScreenName
 )	
 SELECT 
-		--strReceiptType				= CASE 
-		--								WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
-		--								WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
-		--							  END
 		strReceiptType				= CASE 
 										WHEN LI.strSourceTransactionId = 'SPT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'CNT' THEN 'Purchase Contract'
-										WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
+										--WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
 										ELSE 'Direct'
 									  END
 		,intEntityVendorId			= @intEntityId

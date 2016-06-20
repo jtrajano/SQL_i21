@@ -180,7 +180,7 @@ BEGIN
 				AND tblICInventoryLot.intTransactionDetailId = @intSourceTransactionDetailId
 				AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
 				AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
-				AND tblICInventoryLot.intLotId > ISNULL(@intLotId, 0) 
+				AND tblICInventoryLot.intLotId = ISNULL(@intLotId, 0) 
 				AND tblICInventoryLot.dblCost <> @dblNewCost
 	END 
 
