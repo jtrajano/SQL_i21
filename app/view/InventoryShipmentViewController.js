@@ -874,7 +874,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-
+        var grdLotTracking = win.down('#grdLotTracking');
+        
         if (combo.itemId === 'cboItemNo') {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
@@ -892,6 +893,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strSubLocationName', records[0].get('strSubLocationName'));
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
+            
+            switch(records[0].get('strLotTracking')) {
+                        case 'Yes - Serial Number':
+                        case 'Yes - Manual':
+                            grdLotTracking.setHidden(false);
+                            break;
+                        default:
+                            grdLotTracking.setHidden(true);
+                            break;
+                    }
+                    
         }
         else if (combo.itemId === 'cboUOM') {
             current.set('dblItemUOMConv', records[0].get('dblUnitQty'));
