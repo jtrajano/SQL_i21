@@ -864,6 +864,38 @@ SET @batchIdUsed = @batchId
 						ON B.intUndepositedFundId = TD.intUndepositedFundId
 				WHERE 
 					B.strSourceSystem = 'AR'
+
+
+				--Payment with applied Prepayment
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'You cannot unpost payment with applied prepaids.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblARPaymentDetail B
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN
+					tblARInvoice I
+						ON B.intInvoiceId = I.intInvoiceId
+				INNER JOIN
+					tblARPrepaidAndCredit  PC
+						ON I.intInvoiceId = PC.intPrepaymentId 
+						AND PC.ysnApplied = 1
+						AND PC.dblAppliedInvoiceDetailAmount <> 0
+				INNER JOIN
+					tblARInvoice I2
+						ON PC.intInvoiceId = I2.intInvoiceId 
+						AND I2.ysnPosted = 1
+
 				
 				---overpayment
 				INSERT INTO
