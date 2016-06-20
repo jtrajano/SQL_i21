@@ -1,6 +1,6 @@
 ﻿CREATE TABLE tblPREmployeeW2 (
 	[intEmployeeW2Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intEntityEmployeeId] INT NULL DEFAULT ((0)), 
+    [intEntityEmployeeId] INT NULL , 
 	[intYear] INT NULL,
 	[strControlNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [dblAdjustedGross] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -29,7 +29,8 @@
 	[dblStateTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[dblTaxableLocal] NUMERIC(18, 6) NULL DEFAULT ((0)),
 	[dblLocalTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
-    [intConcurrencyId] INT NULL DEFAULT ((1))
+    [intConcurrencyId] INT NULL DEFAULT ((1)),
+	CONSTRAINT [FK_tblPREmployeeW2_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
