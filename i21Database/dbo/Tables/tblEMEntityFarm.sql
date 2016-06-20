@@ -19,9 +19,11 @@
     [strSplitType]			NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strFieldMapFileName]	NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strDirections]			NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyLocationId]	INT NULL,
     [intConcurrencyId]		INT            NOT NULL,
     CONSTRAINT [PK_tblEMEntityFarm] PRIMARY KEY CLUSTERED ([intFarmFieldId] ASC),
 	CONSTRAINT [FK_tblEMEntityFarm_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	CONSTRAINT [FK_tblEMEntityFarm_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].tblSMCompanyLocation ([intCompanyLocationId]),
 	CONSTRAINT [UK_tblEMEntityFarm_strFarmNumber_strFieldNumber] UNIQUE NONCLUSTERED ([strFarmNumber] ASC, [strFieldNumber] ASC,[intEntityId] ASC)	
 
 )
