@@ -41,6 +41,7 @@ DECLARE @AVERAGECOST AS INT = 1
 DECLARE @Inventory_Auto_Negative AS INT = 1;
 DECLARE @Inventory_Write_Off_Sold AS INT = 2;
 DECLARE @Inventory_Revalue_Sold AS INT = 3;
+DECLARE @INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35;
 
 -- Create the variables 
 DECLARE @RemainingQty AS NUMERIC(38,20);
@@ -58,6 +59,7 @@ DECLARE @UpdatedInventoryLotId AS INT
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(38,20)
+DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38, 20)
 
 -------------------------------------------------
 -- 1. Process the Lot Storage Cost buckets
@@ -289,49 +291,25 @@ BEGIN
 			-- Insert the inventory transaction record					
 			IF @QtyOffset IS NOT NULL
 			BEGIN 				
-				-- Add Write-Off Sold				
-				SET @dblValue = (@QtyOffset * ISNULL(@CostUsed, 0))
-				EXEC [dbo].[uspICPostInventoryTransactionStorage]
-						@intItemId = @intItemId
-						,@intItemLocationId = @intItemLocationId
-						,@intItemUOMId = @intItemUOMId
-						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
-						,@dtmDate = @dtmDate
-						,@dblQty = 0
-						,@dblUOMQty = 0
-						,@dblCost = 0
-						,@dblValue = @dblValue
-						,@dblSalesPrice = @dblSalesPrice
-						,@intCurrencyId = @intCurrencyId
-						,@dblExchangeRate = @dblExchangeRate
-						,@intTransactionId = @intTransactionId
-						,@intTransactionDetailId = @intTransactionDetailId
-						,@strTransactionId = @strTransactionId
-						,@strBatchId = @strBatchId
-						,@intTransactionTypeId = @Inventory_Write_Off_Sold
-						,@intLotId = @intLotId 
-						,@intRelatedInventoryTransactionId = NULL 
-						,@intRelatedTransactionId = @intRelatedTransactionId
-						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @strTransactionForm
-						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@intCostingMethod = @LOTCOST
-						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
+				-- If there is a cost difference, do an auto-variance. 
+				IF (ISNULL(@CostUsed, 0) <> @dblCost)
+				BEGIN
+					-- Calculate the variance amount. 
+					SET @dblAutoVarianceOnUsedOrSoldStock = 						
+						- dbo.fnMultiply(@QtyOffset, @dblCost) -- Revalue Sold
+						+ dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
 
-				-- Add Revalue sold
-				SET @dblValue = (@QtyOffset * ISNULL(@dblCost, 0) * -1) 
 				EXEC [dbo].[uspICPostInventoryTransactionStorage]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
 						,@intItemUOMId = @intItemUOMId
 						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
+						,@intStorageLocationId = @intStorageLocationId					 
 						,@dtmDate = @dtmDate
 						,@dblQty = 0
-						,@dblUOMQty = 0
 						,@dblCost = 0
-						,@dblValue = @dblValue
+						,@dblUOMQty = 0
+						,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 						,@dblSalesPrice = @dblSalesPrice
 						,@intCurrencyId = @intCurrencyId
 						,@dblExchangeRate = @dblExchangeRate
@@ -339,15 +317,16 @@ BEGIN
 						,@intTransactionDetailId = @intTransactionDetailId
 						,@strTransactionId = @strTransactionId
 						,@strBatchId = @strBatchId
-						,@intTransactionTypeId = @Inventory_Revalue_Sold
-						,@intLotId = @intLotId 
+						,@intTransactionTypeId = @INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
+						,@intLotId = NULL 
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
 						,@strTransactionForm = @strTransactionForm
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@intCostingMethod = @LOTCOST
+						,@intCostingMethod = @FIFO
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
+				END				 
 			END
 			
 			-- Insert the record to the Lot-out table
