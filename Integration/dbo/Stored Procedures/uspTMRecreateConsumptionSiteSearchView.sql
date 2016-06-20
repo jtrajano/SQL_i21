@@ -53,6 +53,8 @@ BEGIN
 				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 				,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
 				,strContactEmailAddress = ''''
+				,strFillGroup = K.strFillGroupCode
+				,strFillDescription = K.strDescription
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -62,6 +64,8 @@ BEGIN
 					ON A.intProduct = I.A4GLIdentity
 				LEFT JOIN tblTMFillMethod H
 					ON A.intFillMethodId = H.intFillMethodId
+				LEFT JOIN tblTMFillGroup K
+					ON A.intFillGroupId = K.intFillGroupId
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
@@ -103,6 +107,8 @@ BEGIN
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
 				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 				,strContactEmailAddress = G.strEmail
+				,strFillGroup = K.strFillGroupCode
+				,strFillDescription = K.strDescription
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -121,6 +127,8 @@ BEGIN
 					ON A.intProduct = I.intItemId
 				LEFT JOIN tblTMFillMethod H
 					ON A.intFillMethodId = H.intFillMethodId
+				LEFT JOIN tblTMFillGroup K
+					ON A.intFillGroupId = K.intFillGroupId
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID

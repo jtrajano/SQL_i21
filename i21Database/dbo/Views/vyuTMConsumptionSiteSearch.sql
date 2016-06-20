@@ -32,6 +32,8 @@ AS
 	,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 	,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
 	,strContactEmailAddress = G.strEmail
+	,strFillGroup = K.strFillGroupCode
+	,strFillDescription = K.strDescription
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -50,6 +52,8 @@ AS
 		ON A.intProduct = I.intItemId
 	LEFT JOIN tblTMFillMethod H
 		ON A.intFillMethodId = H.intFillMethodId
+	LEFT JOIN tblTMFillGroup K
+		ON A.intFillGroupId = K.intFillGroupId
 	LEFT JOIN (
 					SELECT Y.strSerialNumber 
 						,Z.intSiteID
