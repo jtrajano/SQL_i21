@@ -447,6 +447,11 @@ BEGIN
 				,@strBatchId
 				,@intEntityUserSecurityId
 
+		EXEC dbo.uspGLBookEntries 
+			@GLEntries, 
+			1
+
+
 		INSERT INTO actualGLDetail (
 			dtmDate
 			,strBatchId
@@ -472,41 +477,51 @@ BEGIN
 			,strTransactionType
 			,strTransactionForm
 			,strModuleName
-			,intConcurrencyId		
+			,intConcurrencyId
+
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]				
 		)
 		SELECT
-			dtmDate
-			,strBatchId
-			,intAccountId
-			,dblDebit
-			,dblCredit
-			,dblDebitUnit
-			,dblCreditUnit
-			,strDescription
-			,strCode
-			,strReference
-			,intCurrencyId
-			,dblExchangeRate
-			,dtmDateEntered
-			,dtmTransactionDate
-			,strJournalLineDescription
-			,intJournalLineNo
-			,ysnIsUnposted
-			,intUserId
-			,intEntityId
-			,strTransactionId
-			,intTransactionId
-			,strTransactionType
-			,strTransactionForm
-			,strModuleName
-			,intConcurrencyId
-		FROM @GLEntries
+				dtmDate
+				,strBatchId
+				,intAccountId
+				,dblDebit
+				,dblCredit
+				,dblDebitUnit
+				,dblCreditUnit
+				,strDescription
+				,strCode
+				,strReference
+				,intCurrencyId
+				,dblExchangeRate
+				,dtmDateEntered
+				,dtmTransactionDate
+				,strJournalLineDescription
+				,intJournalLineNo
+				,ysnIsUnposted
+				,intUserId
+				,intEntityId
+				,strTransactionId
+				,intTransactionId
+				,strTransactionType
+				,strTransactionForm
+				,strModuleName
+				,intConcurrencyId
 
-		EXEC dbo.uspGLBookEntries 
-			@GLEntries, 
-			1
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+		FROM	tblGLDetail
+		WHERE	strBatchId = @strBatchId
+
 	END 
-	
+
 	-- Act 2: Unpost the Cost adjustment. 
 	BEGIN 
 		-- Declare the variables used in uspICPostCostAdjustmentOnAverageCosting
@@ -751,7 +766,13 @@ BEGIN
 				,[strTransactionType] 
 				,[strTransactionForm] 
 				,[strModuleName] 
-				,[intConcurrencyId] 
+				,[intConcurrencyId]				 
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+
 		)
 		-- Original posted G/L entries:
 		SELECT	[dtmDate]						= 'January 10, 2014'
@@ -779,6 +800,11 @@ BEGIN
 				,[strTransactionForm]			= 'Bill'
 				,[strModuleName]				= 'Inventory'
 				,[intConcurrencyId]				= 1
+				,[dblDebitForeign]				= 0
+				,[dblDebitReport]				= 0
+				,[dblCreditForeign]				= 0
+				,[dblCreditReport]				= 0
+				,[dblReportingRate]				= 0
 		UNION ALL 
 		SELECT	[dtmDate]						= 'January 10, 2014'
 				,[strBatchId]					= 'BATCH-10293'
@@ -805,6 +831,11 @@ BEGIN
 				,[strTransactionForm]			= 'Bill'
 				,[strModuleName]				= 'Inventory'
 				,[intConcurrencyId]				= 1
+				,[dblDebitForeign]				= 0
+				,[dblDebitReport]				= 0
+				,[dblCreditForeign]				= 0
+				,[dblCreditReport]				= 0
+				,[dblReportingRate]				= 0
 
 		-- Unpost G/L entries: 
 		UNION ALL 
@@ -833,6 +864,12 @@ BEGIN
 				,[strTransactionForm]			= 'Bill'
 				,[strModuleName]				= 'Inventory'
 				,[intConcurrencyId]				= 1
+				,[dblDebitForeign]				= 0
+				,[dblDebitReport]				= 0
+				,[dblCreditForeign]				= 0
+				,[dblCreditReport]				= 0
+				,[dblReportingRate]				= 0
+
 		UNION ALL 
 		SELECT	[dtmDate]						= 'January 10, 2014'
 				,[strBatchId]					= @strBatchId
@@ -859,6 +896,11 @@ BEGIN
 				,[strTransactionForm]			= 'Bill'
 				,[strModuleName]				= 'Inventory'
 				,[intConcurrencyId]				= 1
+				,[dblDebitForeign]				= 0
+				,[dblDebitReport]				= 0
+				,[dblCreditForeign]				= 0
+				,[dblCreditReport]				= 0
+				,[dblReportingRate]				= 0
 
 		-- Compute the expected Average Cost and Last Cost. 
 		SET @expected_AverageCost = 22.00
