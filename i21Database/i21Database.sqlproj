@@ -3988,6 +3988,9 @@
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
     <Build Include="dbo\Views\vyuTMOutOfRangeBurnRateSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspSMEventSetActive.sql" />
+    <Build Include="dbo\Views\vyuTMLeakGasCheckSearch.sql" />
+    <Build Include="dbo\Functions\fnTMGetFirstTankSiteDeviceTable.sql" />
+    <Build Include="dbo\Functions\fnTMLastLeakGasCheckTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
