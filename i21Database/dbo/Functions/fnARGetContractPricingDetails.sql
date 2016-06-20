@@ -21,6 +21,7 @@ RETURNS @returntable TABLE
 	,intContractSeq			INT
 	,dblAvailableQty        NUMERIC(18,6)
 	,ysnUnlimitedQty        BIT
+	,strPricingType			NVARCHAR(50)
 )
 AS
 BEGIN
@@ -31,6 +32,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,@ContractSeq			INT
 		,@AvailableQuantity		NUMERIC(18,6)
 		,@UnlimitedQuantity     BIT
+		,@PricingType			NVARCHAR(50)
 
 	IF ISNULL(@ContractDetailId,0) <> 0 AND ISNULL(@ContractHeaderId,0) = 0
 	BEGIN
@@ -46,7 +48,8 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,@ContractNumber	= strContractNumber
 		,@ContractSeq		= intContractSeq
 		,@AvailableQuantity = dblAvailableQty
-		,@UnlimitedQuantity = ysnUnlimitedQuantity
+		,@UnlimitedQuantity = ysnUnlimitedQuantity	
+		,@PricingType		= strPricingType	
 	FROM
 		vyuCTContractDetailView
 	WHERE
@@ -69,7 +72,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 	BEGIN
 		SET @Pricing = 'Contracts - Customer Pricing'
 		INSERT @returntable
-		SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+		SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 		RETURN
 	END
 	
@@ -87,7 +90,8 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,@ContractNumber	= strContractNumber
 		,@ContractSeq		= intContractSeq
 		,@AvailableQuantity = dblAvailableQty
-		,@UnlimitedQuantity = ysnUnlimitedQuantity
+		,@UnlimitedQuantity = ysnUnlimitedQuantity		
+		,@PricingType		= strPricingType	
 	FROM
 		vyuCTContractDetailView
 	WHERE
@@ -108,11 +112,11 @@ DECLARE	 @Price		NUMERIC(18,6)
 	BEGIN
 		SET @Pricing = 'Contracts - Customer Pricing'
 		INSERT @returntable
-		SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+		SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 		RETURN
 	END		
 	
 	INSERT @returntable
-	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 	RETURN				
 END
