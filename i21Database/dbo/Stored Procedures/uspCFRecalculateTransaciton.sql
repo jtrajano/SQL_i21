@@ -1108,12 +1108,33 @@ BEGIN
 			END
 			ELSE
 				BEGIN
-					SELECT TOP 1 
-					 @OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
-					,@CPTax = ROUND (((@QxCP / (dblRate/100 +1 )) * (dblRate/100)),2)
-					,@dblOPTotalTax = @dblOPTotalTax + ((@QxOP / (dblRate/100 +1 )) * (dblRate/100))
-					,@dblCPTotalTax = @dblCPTotalTax + ((@QxCP / (dblRate/100 +1 )) * (dblRate/100))
-					FROM @tblTaxRateTable
+
+					IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+					OR @strPriceMethod = 'Import File Price' 
+					OR @strPriceMethod = 'Credit Card' 
+					OR @strPriceMethod = 'Posted Trans from CSV'
+					OR @strPriceMethod = 'Origin History'
+					OR @strPriceMethod = 'Network Cost')
+					BEGIN
+						SELECT TOP 1 
+						 @OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
+						,@CPTax = ROUND (((@QxCP / (dblRate/100 +1 )) * (dblRate/100)),2)
+						,@dblOPTotalTax = @dblOPTotalTax + ((@QxOP / (dblRate/100 +1 )) * (dblRate/100))
+						,@dblCPTotalTax = @dblCPTotalTax + ((@QxCP / (dblRate/100 +1 )) * (dblRate/100))
+						FROM @tblTaxRateTable
+					END
+					ELSE
+					BEGIN
+						SELECT TOP 1 
+						 @OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
+						,@CPTax = ROUND ((@QxCP * (dblRate/100)),2)
+						,@dblOPTotalTax = @dblOPTotalTax + ((@QxOP / (dblRate/100 +1 )) * (dblRate/100))
+						,@dblCPTotalTax = @dblCPTotalTax + ((@QxCP / (dblRate/100 +1 )) * (dblRate/100))
+						FROM @tblTaxRateTable
+					END
+
+					
+
 				INSERT INTO @tblTransactionTaxOut
 				(
 					 [intTransactionDetailTaxId]
