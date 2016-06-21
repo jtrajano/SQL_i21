@@ -11,7 +11,7 @@ BEGIN TRY
    As GrossAmount, (A.dblPromotionalDiscountAmount + A.dblManagerDiscountAmount) AS DiscontAmount, A.dblTotalSalesAmount 
    as NetAmount, C.dblAmount as PumpTotal, ( C.dblAmount - A.dblTotalSalesAmount ) as Variance, SUM ( C.dblAmount - A.dblTotalSalesAmount ) 
    over() as TotalVariance from tblSTCheckoutDepartmetTotals A JOIN tblICCategory B ON A.intCategoryId = B.intCategoryId 
-   JOIN (select intCategoryId , SUM(dblAmount) as dblAmount from tblSTCheckoutPumpTotals
+   JOIN (select intCategoryId , SUM(dblAmount) as dblAmount from tblSTCheckoutPumpTotals where intCheckoutId = @intCheckoutId 
    group by intCategoryId) C ON A.intCategoryId = C.intCategoryId  where A.intCheckoutId = @intCheckoutId  
     
 END TRY
