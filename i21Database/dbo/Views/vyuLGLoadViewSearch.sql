@@ -42,6 +42,22 @@ SELECT L.intLoadId
 			THEN CAST(1 AS BIT)
 		ELSE CAST(0 AS BIT)
 		END
+	,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
+							THEN 
+							CAST(ST.strTicketNumber AS VARCHAR(100))
+							ELSE 
+							CASE WHEN IsNull(L.intTransportLoadId, 0) <> 0 
+								THEN 
+									TL.strTransaction
+								ELSE 
+									CASE WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
+										THEN 
+											TR.strTransaction
+										ELSE 
+											NULL 
+										END 
+								END 
+							END
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
@@ -62,3 +78,6 @@ LEFT JOIN tblEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
 LEFT JOIN tblEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 LEFT JOIN tblEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
+LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = L.intTransportLoadId
+LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
