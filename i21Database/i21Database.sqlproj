@@ -3988,6 +3988,7 @@
     <Build Include="dbo\Stored Procedures\uspDMAlterConstraint.sql" />
     <Build Include="dbo\Stored Procedures\uspDMTruncateTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBalanceForwardReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
