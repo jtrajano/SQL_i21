@@ -568,6 +568,92 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
                         { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
                         { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'dblPalletsBlank', text: 'No of Pallets', dataType: 'numeric' },
+                        { dataIndex: 'dblQtyPerPalletBlank', text: 'Qty Per Pallet', dataType: 'numeric' },
+                        { dataIndex: 'dblPhysicalCountBlank', text: 'Physical Count', dataType: 'numeric' },
+                        { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
+                        { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
+                    ];
+                }
+                else {
+                    search.columns = [
+                        { dataIndex: 'intInventoryCountDetailId', text: 'Inventory Count Detail Id', dataType: 'numeric', defaultSort: true, hidden: true, key: true},
+                        { dataIndex: 'strLocationName', text: 'Location Name', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCategory', text: 'Category', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCommodity', text: 'Commodity', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCountNo', text: 'Count No', dataType: 'string', hidden: true },
+                        { dataIndex: 'dtmCountDate', text: 'Count Date', dataType: 'date', xtype: 'datecolumn', hidden: true },
+
+                        { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
+                        { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
+                        { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'dblPalletsBlank', text: 'No of Pallets', dataType: 'numeric' },
+                        { dataIndex: 'dblQtyPerPalletBlank', text: 'Qty Per Pallet', dataType: 'numeric' },
+                        { dataIndex: 'dblPhysicalCountBlank', text: 'Physical Count', dataType: 'numeric' },
+                        { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
+                       // { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true },
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
+                    ];
+                }
+
+                search.title = "Print Count Sheets";
+                search.showNew = false;
+                search.multi = false;
+                search.show();
+            };
+            if (button.itemId === 'btnPrintCountSheets') {
+                current.set('intStatus', 2);
+            }
+            showAddScreen();
+        }
+    },
+    
+    onPrintVarianceClick: function (button) {
+        var win = button.up('window');
+        var me = win.controller;
+        var vm = win.getViewModel();
+        var current = vm.data.current;
+        var CountId = current.get('intInventoryCountId');
+     /*   var filters = [
+            {
+                column: 'intInventoryCountId',
+                value: current.get('intInventoryCountId')
+            }
+        ];*/
+        
+        if (current) {
+            var showAddScreen = function () {
+                var search = i21.ModuleMgr.Search;
+                search.scope = me;
+                search.url = '../Inventory/api/InventoryCount/GetCountSheets?CountId=' + CountId;
+               // search.filter = filters;
+
+                if (current.get('ysnIncludeOnHand')) {
+                    search.columns = [
+                        { dataIndex: 'intInventoryCountDetailId', text: 'Inventory Count Detail Id', dataType: 'numeric', defaultSort: true, hidden: true, key: true},
+                        { dataIndex: 'strLocationName', text: 'Location Name', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCategory', text: 'Category', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCommodity', text: 'Commodity', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCountNo', text: 'Count No', dataType: 'string', hidden: true },
+                        { dataIndex: 'dtmCountDate', text: 'Count Date', dataType: 'date', xtype: 'datecolumn', hidden: true },
+
+                        { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
+                        { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
+                        { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
+                        { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
                         { dataIndex: 'dblPallets', text: 'No of Pallets', dataType: 'numeric' },
                         { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
                         { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
@@ -598,14 +684,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
                         { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
                         { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
-                        { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
+                       // { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
                         { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true },
                         { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
                     ];
                 }
 
-                search.title = "Print Count Sheets";
+                search.title = "Print Variance";
                 search.showNew = false;
+                search.showOpenSelected = false;
+                search.showExport = true;
                 search.multi = false;
                 search.show();
             };
@@ -847,7 +935,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 click: this.onPrintCountSheetsClick
             },
             "#btnPrintVariance": {
-                click: this.onPrintCountSheetsClick
+                click: this.onPrintVarianceClick
             },
             "#btnLockInventory": {
                 click: this.onLockInventoryClick

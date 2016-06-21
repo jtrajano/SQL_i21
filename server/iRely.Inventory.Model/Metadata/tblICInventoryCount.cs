@@ -455,6 +455,9 @@ namespace iRely.Inventory.Model
         public bool? ysnCountByPallets { get; set; }
         public bool? ysnIncludeOnHand { get; set; }
         public bool? ysnIncludeZeroOnHand { get; set; }
+        public decimal? dblPalletsBlank { get; set; }
+        public decimal? dblQtyPerPalletBlank { get; set; }
+        public decimal? dblPhysicalCountBlank { get; set; }
     }
 
     public class vyuICGetItemStockSummary

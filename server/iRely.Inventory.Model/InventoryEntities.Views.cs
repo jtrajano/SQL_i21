@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetseaff602401856f9caf8db50c1e36913537d360fb4f2db1ce37af3040b60e9463))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets42dbb850a6e054760f5f88df94703b03dd5946b6056f2172f390e62f120b46f7))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetseaff602401856f9caf8db50c1e36913537d360fb4f2db1ce37af3040b60e9463 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets42dbb850a6e054760f5f88df94703b03dd5946b6056f2172f390e62f120b46f7 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "eaff602401856f9caf8db50c1e36913537d360fb4f2db1ce37af3040b60e9463"; }
+            get { return "42dbb850a6e054760f5f88df94703b03dd5946b6056f2172f390e62f120b46f7"; }
         }
 
         /// <summary>
@@ -13063,7 +13063,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCountSheet
-        [CodeFirstDatabaseSchema.vyuICGetCountSheet](T1.vyuICGetCountSheet_intInventoryCountDetailId, T1.vyuICGetCountSheet_intLocationId, T1.vyuICGetCountSheet_intCommodityId, T1.vyuICGetCountSheet_strCommodity, T1.vyuICGetCountSheet_strCountNo, T1.vyuICGetCountSheet_dtmCountDate, T1.vyuICGetCountSheet_intInventoryCountId, T1.vyuICGetCountSheet_intItemId, T1.vyuICGetCountSheet_strItemNo, T1.vyuICGetCountSheet_strItemDescription, T1.vyuICGetCountSheet_strLotTracking, T1.vyuICGetCountSheet_intCategoryId, T1.vyuICGetCountSheet_strCategory, T1.vyuICGetCountSheet_intItemLocationId, T1.vyuICGetCountSheet_strLocationName, T1.vyuICGetCountSheet_intSubLocationId, T1.vyuICGetCountSheet_strSubLocationName, T1.vyuICGetCountSheet_intStorageLocationId, T1.vyuICGetCountSheet_strStorageLocationName, T1.vyuICGetCountSheet_intLotId, T1.vyuICGetCountSheet_strLotNumber, T1.vyuICGetCountSheet_strLotAlias, T1.vyuICGetCountSheet_dblSystemCount, T1.vyuICGetCountSheet_dblLastCost, T1.vyuICGetCountSheet_strCountLine, T1.vyuICGetCountSheet_dblPallets, T1.vyuICGetCountSheet_dblQtyPerPallet, T1.vyuICGetCountSheet_dblPhysicalCount, T1.vyuICGetCountSheet_intItemUOMId, T1.vyuICGetCountSheet_strUnitMeasure, T1.vyuICGetCountSheet_dblPhysicalCountStockUnit, T1.vyuICGetCountSheet_dblVariance, T1.vyuICGetCountSheet_ysnRecount, T1.vyuICGetCountSheet_intEntityUserSecurityId, T1.vyuICGetCountSheet_strUserName, T1.vyuICGetCountSheet_intSort, T1.vyuICGetCountSheet_ysnCountByLots, T1.vyuICGetCountSheet_ysnCountByPallets, T1.vyuICGetCountSheet_ysnIncludeOnHand, T1.vyuICGetCountSheet_ysnIncludeZeroOnHand)
+        [CodeFirstDatabaseSchema.vyuICGetCountSheet](T1.vyuICGetCountSheet_intInventoryCountDetailId, T1.vyuICGetCountSheet_intLocationId, T1.vyuICGetCountSheet_intCommodityId, T1.vyuICGetCountSheet_strCommodity, T1.vyuICGetCountSheet_strCountNo, T1.vyuICGetCountSheet_dtmCountDate, T1.vyuICGetCountSheet_intInventoryCountId, T1.vyuICGetCountSheet_intItemId, T1.vyuICGetCountSheet_strItemNo, T1.vyuICGetCountSheet_strItemDescription, T1.vyuICGetCountSheet_strLotTracking, T1.vyuICGetCountSheet_intCategoryId, T1.vyuICGetCountSheet_strCategory, T1.vyuICGetCountSheet_intItemLocationId, T1.vyuICGetCountSheet_strLocationName, T1.vyuICGetCountSheet_intSubLocationId, T1.vyuICGetCountSheet_strSubLocationName, T1.vyuICGetCountSheet_intStorageLocationId, T1.vyuICGetCountSheet_strStorageLocationName, T1.vyuICGetCountSheet_intLotId, T1.vyuICGetCountSheet_strLotNumber, T1.vyuICGetCountSheet_strLotAlias, T1.vyuICGetCountSheet_dblSystemCount, T1.vyuICGetCountSheet_dblLastCost, T1.vyuICGetCountSheet_strCountLine, T1.vyuICGetCountSheet_dblPallets, T1.vyuICGetCountSheet_dblQtyPerPallet, T1.vyuICGetCountSheet_dblPhysicalCount, T1.vyuICGetCountSheet_intItemUOMId, T1.vyuICGetCountSheet_strUnitMeasure, T1.vyuICGetCountSheet_dblPhysicalCountStockUnit, T1.vyuICGetCountSheet_dblVariance, T1.vyuICGetCountSheet_ysnRecount, T1.vyuICGetCountSheet_intEntityUserSecurityId, T1.vyuICGetCountSheet_strUserName, T1.vyuICGetCountSheet_intSort, T1.vyuICGetCountSheet_ysnCountByLots, T1.vyuICGetCountSheet_ysnCountByPallets, T1.vyuICGetCountSheet_ysnIncludeOnHand, T1.vyuICGetCountSheet_ysnIncludeZeroOnHand, T1.vyuICGetCountSheet_dblPalletsBlank, T1.vyuICGetCountSheet_dblQtyPerPalletBlank, T1.vyuICGetCountSheet_dblPhysicalCountBlank)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS vyuICGetCountSheet_intInventoryCountDetailId, 
@@ -13106,6 +13106,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnCountByPallets AS vyuICGetCountSheet_ysnCountByPallets, 
             T.ysnIncludeOnHand AS vyuICGetCountSheet_ysnIncludeOnHand, 
             T.ysnIncludeZeroOnHand AS vyuICGetCountSheet_ysnIncludeZeroOnHand, 
+            T.dblPalletsBlank AS vyuICGetCountSheet_dblPalletsBlank, 
+            T.dblQtyPerPalletBlank AS vyuICGetCountSheet_dblQtyPerPalletBlank, 
+            T.dblPhysicalCountBlank AS vyuICGetCountSheet_dblPhysicalCountBlank, 
             True AS _from0
         FROM InventoryEntities.vyuICGetCountSheets AS T
     ) AS T1");
@@ -13119,7 +13122,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCountSheets
-        [iRely.Inventory.Model.vyuICGetCountSheet](T1.vyuICGetCountSheet_intInventoryCountDetailId, T1.vyuICGetCountSheet_intLocationId, T1.vyuICGetCountSheet_intCommodityId, T1.vyuICGetCountSheet_strCommodity, T1.vyuICGetCountSheet_strCountNo, T1.vyuICGetCountSheet_dtmCountDate, T1.vyuICGetCountSheet_intInventoryCountId, T1.vyuICGetCountSheet_intItemId, T1.vyuICGetCountSheet_strItemNo, T1.vyuICGetCountSheet_strItemDescription, T1.vyuICGetCountSheet_strLotTracking, T1.vyuICGetCountSheet_intCategoryId, T1.vyuICGetCountSheet_strCategory, T1.vyuICGetCountSheet_intItemLocationId, T1.vyuICGetCountSheet_strLocationName, T1.vyuICGetCountSheet_intSubLocationId, T1.vyuICGetCountSheet_strSubLocationName, T1.vyuICGetCountSheet_intStorageLocationId, T1.vyuICGetCountSheet_strStorageLocationName, T1.vyuICGetCountSheet_intLotId, T1.vyuICGetCountSheet_strLotNumber, T1.vyuICGetCountSheet_strLotAlias, T1.vyuICGetCountSheet_dblSystemCount, T1.vyuICGetCountSheet_dblLastCost, T1.vyuICGetCountSheet_strCountLine, T1.vyuICGetCountSheet_dblPallets, T1.vyuICGetCountSheet_dblQtyPerPallet, T1.vyuICGetCountSheet_dblPhysicalCount, T1.vyuICGetCountSheet_intItemUOMId, T1.vyuICGetCountSheet_strUnitMeasure, T1.vyuICGetCountSheet_dblPhysicalCountStockUnit, T1.vyuICGetCountSheet_dblVariance, T1.vyuICGetCountSheet_ysnRecount, T1.vyuICGetCountSheet_intEntityUserSecurityId, T1.vyuICGetCountSheet_strUserName, T1.vyuICGetCountSheet_intSort, T1.vyuICGetCountSheet_ysnCountByLots, T1.vyuICGetCountSheet_ysnCountByPallets, T1.vyuICGetCountSheet_ysnIncludeOnHand, T1.vyuICGetCountSheet_ysnIncludeZeroOnHand)
+        [iRely.Inventory.Model.vyuICGetCountSheet](T1.vyuICGetCountSheet_intInventoryCountDetailId, T1.vyuICGetCountSheet_intLocationId, T1.vyuICGetCountSheet_intCommodityId, T1.vyuICGetCountSheet_strCommodity, T1.vyuICGetCountSheet_strCountNo, T1.vyuICGetCountSheet_dtmCountDate, T1.vyuICGetCountSheet_intInventoryCountId, T1.vyuICGetCountSheet_intItemId, T1.vyuICGetCountSheet_strItemNo, T1.vyuICGetCountSheet_strItemDescription, T1.vyuICGetCountSheet_strLotTracking, T1.vyuICGetCountSheet_intCategoryId, T1.vyuICGetCountSheet_strCategory, T1.vyuICGetCountSheet_intItemLocationId, T1.vyuICGetCountSheet_strLocationName, T1.vyuICGetCountSheet_intSubLocationId, T1.vyuICGetCountSheet_strSubLocationName, T1.vyuICGetCountSheet_intStorageLocationId, T1.vyuICGetCountSheet_strStorageLocationName, T1.vyuICGetCountSheet_intLotId, T1.vyuICGetCountSheet_strLotNumber, T1.vyuICGetCountSheet_strLotAlias, T1.vyuICGetCountSheet_dblSystemCount, T1.vyuICGetCountSheet_dblLastCost, T1.vyuICGetCountSheet_strCountLine, T1.vyuICGetCountSheet_dblPallets, T1.vyuICGetCountSheet_dblQtyPerPallet, T1.vyuICGetCountSheet_dblPhysicalCount, T1.vyuICGetCountSheet_intItemUOMId, T1.vyuICGetCountSheet_strUnitMeasure, T1.vyuICGetCountSheet_dblPhysicalCountStockUnit, T1.vyuICGetCountSheet_dblVariance, T1.vyuICGetCountSheet_ysnRecount, T1.vyuICGetCountSheet_intEntityUserSecurityId, T1.vyuICGetCountSheet_strUserName, T1.vyuICGetCountSheet_intSort, T1.vyuICGetCountSheet_ysnCountByLots, T1.vyuICGetCountSheet_ysnCountByPallets, T1.vyuICGetCountSheet_ysnIncludeOnHand, T1.vyuICGetCountSheet_ysnIncludeZeroOnHand, T1.vyuICGetCountSheet_dblPalletsBlank, T1.vyuICGetCountSheet_dblQtyPerPalletBlank, T1.vyuICGetCountSheet_dblPhysicalCountBlank)
     FROM (
         SELECT 
             T.intInventoryCountDetailId AS vyuICGetCountSheet_intInventoryCountDetailId, 
@@ -13162,6 +13165,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnCountByPallets AS vyuICGetCountSheet_ysnCountByPallets, 
             T.ysnIncludeOnHand AS vyuICGetCountSheet_ysnIncludeOnHand, 
             T.ysnIncludeZeroOnHand AS vyuICGetCountSheet_ysnIncludeZeroOnHand, 
+            T.dblPalletsBlank AS vyuICGetCountSheet_dblPalletsBlank, 
+            T.dblQtyPerPalletBlank AS vyuICGetCountSheet_dblQtyPerPalletBlank, 
+            T.dblPhysicalCountBlank AS vyuICGetCountSheet_dblPhysicalCountBlank, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetCountSheet AS T
     ) AS T1");
