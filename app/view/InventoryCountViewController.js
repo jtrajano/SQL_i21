@@ -567,14 +567,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
                         { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
-                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
                         { dataIndex: 'dblPallets', text: 'No of Pallets', dataType: 'numeric' },
                         { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
                         { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
                         { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
                         { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
-                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric' },
-                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string' }
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
                     ];
                 }
                 else {
@@ -593,14 +593,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
-                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
                         { dataIndex: 'dblPallets', text: 'No of Pallets', dataType: 'numeric' },
                         { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
                         { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
                         { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
                         { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
-                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric' },
-                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string' }
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true },
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
                     ];
                 }
 
