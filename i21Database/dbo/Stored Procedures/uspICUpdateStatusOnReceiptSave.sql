@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICUpdatePOStatusOnReceiptSave]
+﻿CREATE PROCEDURE [dbo].[uspICUpdateStatusOnReceiptSave]
 	@intReceiptNo INT,
 	@ysnOpenStatus BIT = 0
 AS
