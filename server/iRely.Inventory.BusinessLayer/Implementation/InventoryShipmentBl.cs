@@ -65,72 +65,83 @@ namespace iRely.Inventory.BusinessLayer
         public override async Task<BusinessResult<tblICInventoryShipment>> SaveAsync(bool continueOnConflict)
         {
             SaveResult result = new SaveResult();
-            var salesOrderToUpdate = new List<int>();
 
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
                 try
-                {
-                    int? ShipmentId = null;
-                    bool ysnDeleted = false;
-                    // Get the shipment id from records with Updated or New data. 
-                    foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
-                    {
-                        ShipmentId = shipment.intInventoryShipmentId;
-                        if (shipment.intOrderType == 2)
-                        {
-                            if (!salesOrderToUpdate.Contains(shipment.intInventoryShipmentId))
-                                salesOrderToUpdate.Add(shipment.intInventoryShipmentId);
-                        }
-                    }
-
+                {                  
                     // Get the shipment id from deleted records 
                     var deletedShipments = _db.ContextManager.ChangeTracker.Entries<tblICInventoryShipment>().Where(p => p.State == EntityState.Deleted).ToList();
-                    foreach (var shipment in deletedShipments)
-                    {
-                        ShipmentId = shipment.Entity.intInventoryShipmentId;
-                        ysnDeleted = true;
-                        if (shipment.Entity.intOrderType == 2)
-                        {
-                            if (!salesOrderToUpdate.Contains(shipment.Entity.intInventoryShipmentId))
-                                salesOrderToUpdate.Add(shipment.Entity.intInventoryShipmentId);
-                        }
 
-                        //Update Contract for deleted shipments 
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId", new SqlParameter("ShipmentId", ShipmentId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
-                    }
-
-                    // Call the Sales Order SP to update the SO status 
-                    foreach (var shipmentId in salesOrderToUpdate)
-                    {
-                        var idParameter = new SqlParameter("intShipmentId", shipmentId);
-                        var openStatus = new SqlParameter("ysnOpenStatus", true);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId, @ysnOpenStatus", idParameter, openStatus);
-                    }
-
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICLogTransactionDetail @TransactionType, @TransactionId", new SqlParameter("TransactionType", 2), new SqlParameter("TransactionId", ShipmentId));
-
-                    result = await _db.SaveAsync(true).ConfigureAwait(false);
-
-                    // Update the stock reservation for the deleted shipments                    
-                    foreach (var shipment in deletedShipments)
-                    {
-                        var idParameter = new SqlParameter("intTransactionId", shipment.Entity.intInventoryShipmentId);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
-                    }
-                                        
+                    // Log the original data. 
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
-                        ShipmentId = shipment.intInventoryShipmentId;
-                        // Update the sales order status using the latest shipment data
-                        if (shipment.intOrderType == 2)
-                        {
-                            var intShipmentId = new SqlParameter("intShipmentId", shipment.intInventoryShipmentId);
-                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", intShipmentId);
-                        }
+                        // Log the original detail records. 
+                        _db.ContextManager.Database.ExecuteSqlCommand(
+                            "uspICLogTransactionDetail @TransactionType, @TransactionId",
+                            new SqlParameter("TransactionType", 2),
+                            new SqlParameter("TransactionId", shipment.intInventoryShipmentId)
+                        );
+                    }
 
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId", new SqlParameter("ShipmentId", ShipmentId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
+                    // Log the original data from the deleted shipments
+                    foreach (var shipment in deletedShipments)
+                    {
+                        // Log the original detail records. 
+                        _db.ContextManager.Database.ExecuteSqlCommand(
+                            "uspICLogTransactionDetail @TransactionType, @TransactionId",
+                            new SqlParameter("TransactionType", 2),
+                            new SqlParameter("TransactionId", shipment.Entity.intInventoryShipmentId)
+                        );
+
+                        // Update the SO or Scale status from deleted shipment records.
+                        // Usually, deleted records will "open" the status of the SO or Scale Ticket. 
+                        // Call this sp before the _db.SaveAsync because uspICUpdateStatusOnShipmentSave is not reading it from the log table. 
+                        _db.ContextManager.Database.ExecuteSqlCommand(
+                            "uspICUpdateStatusOnShipmentSave @intShipmentId, @ysnOpenStatus",
+                            new SqlParameter("intShipmentId", shipment.Entity.intInventoryShipmentId),
+                             new SqlParameter("ysnOpenStatus", true)
+                        );
+                    }
+
+                    // Save the data. 
+                    result = await _db.SaveAsync(true).ConfigureAwait(false);
+
+                    // Process the deleted records. 
+                    foreach (var shipment in deletedShipments)
+                    {
+                        // Update the stock reservation for the deleted shipments                    
+                        //_db.ContextManager.Database.ExecuteSqlCommand(
+                        //    "uspICReserveStockForInventoryShipment @intTransactionId",
+                        //    new SqlParameter("intTransactionId", shipment.Entity.intInventoryShipmentId)
+                        //);
+                        
+                        // This will also update contract from deleted shipment records. 
+                        _db.ContextManager.Database.ExecuteSqlCommand(
+                                "uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId",
+                                new SqlParameter("ShipmentId", shipment.Entity.intInventoryShipmentId),
+                                new SqlParameter("ForDelete", true),
+                                new SqlParameter("UserId", DefaultUserId)
+                        );
+                    }
+                                        
+                    // Process the newly saved record. 
+                    foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
+                    {
+                        var intShipmentId = new SqlParameter("intShipmentId", shipment.intInventoryShipmentId);
+                        
+                        _db.ContextManager.Database.ExecuteSqlCommand(
+                            "uspICUpdateStatusOnShipmentSave @intShipmentId", 
+                            intShipmentId
+                        );
+
+                        _db.ContextManager.Database.ExecuteSqlCommand(
+                            "uspICInventoryShipmentAfterSave @ShipmentId, @ForDelete, @UserId",
+                            new SqlParameter("ShipmentId", shipment.intInventoryShipmentId), 
+                            new SqlParameter("ForDelete", false), 
+                            new SqlParameter("UserId", DefaultUserId)
+                        );
                     }
 
                     if (result.HasError)
