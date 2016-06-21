@@ -535,19 +535,20 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var me = win.controller;
         var vm = win.getViewModel();
         var current = vm.data.current;
-        var filters = [
+        var CountId = current.get('intInventoryCountId');
+     /*   var filters = [
             {
                 column: 'intInventoryCountId',
                 value: current.get('intInventoryCountId')
             }
-        ];
-
+        ];*/
+        
         if (current) {
             var showAddScreen = function () {
                 var search = i21.ModuleMgr.Search;
                 search.scope = me;
-                search.url = '../Inventory/api/InventoryCount/GetCountSheets';
-                search.filter = filters;
+                search.url = '../Inventory/api/InventoryCount/GetCountSheets?CountId=' + CountId;
+               // search.filter = filters;
 
                 if (current.get('ysnIncludeOnHand')) {
                     search.columns = [

@@ -62,11 +62,12 @@ namespace iRely.Inventory.BusinessLayer
             base.Add(entity);
         }
 
-        public async Task<SearchResult> GetCountSheets(GetParameter param)
+        public async Task<SearchResult> GetCountSheets(GetParameter param, int CountId)
         {
             var query = _db.GetQuery<vyuICGetCountSheet>()
+                .Where(p => p.intInventoryCountId == CountId)
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intInventoryCountDetailId").ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryCountId").ToListAsync();
 
             return new SearchResult()
             {
