@@ -44,3 +44,8 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeviceType',
     @level2type = N'COLUMN',
     @level2name = N'ysnDefault'
+GO
+
+CREATE INDEX [IX_tblTMDeviceType_strDeviceType] ON [dbo].[tblTMDeviceType] ([strDeviceType])
+
+GO
