@@ -860,8 +860,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     },
 
     onViewCategory: function (value, record) {
-        var categoryId = record.get('intCategoryId');
-        i21.ModuleMgr.Inventory.showScreen(categoryId, 'CategoryId');
+        var category = record.get('strCategory');
+        i21.ModuleMgr.Inventory.showScreen(category, 'Category');
     },
 
     onInventoryCountDetailSelect: function (combo, records, eOpts) {
