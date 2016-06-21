@@ -2,16 +2,27 @@
 	@intShipmentId INT
 	,@ysnOpenStatus	BIT = 0
 AS
-
 BEGIN
+	DECLARE @OrderTypeSalesContract AS INT = 1
+			,@OrderTypeSalesOrder AS INT = 2
+			,@OrderTypeTransferOrder AS INT = 3
+			,@OrderTypeDirect AS INT = 4
 
-	IF EXISTS(SELECT * FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = 2)
+	DECLARE @SourceTypeNone AS INT = 0
+			,@SourceTypeScale AS INT = 1
+			,@SourceTypeInboundShipment AS INT = 2
+			,@SourceTypePickLot AS INT = 3
+
+	-- Update the Sales Order Status. 
+	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = @OrderTypeSalesOrder)
 	BEGIN
 		DECLARE @SOId INT
 
-		SELECT DISTINCT intOrderId INTO #tmpSOList FROM tblICInventoryShipmentItem
-		WHERE intInventoryShipmentId = @intShipmentId
-			AND ISNULL(intOrderId, '') <> ''
+		SELECT	DISTINCT 
+				intOrderId 
+		INTO	#tmpSOList FROM tblICInventoryShipmentItem
+		WHERE	intInventoryShipmentId = @intShipmentId
+				AND intOrderId IS NOT NULL 
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpSOList)
 		BEGIN
@@ -28,13 +39,16 @@ BEGIN
 		DROP TABLE #tmpSOList
 	END
 
-	IF EXISTS(SELECT * FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = 1 AND intSourceType = 3)
+	-- Update the Logistic Status
+	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intOrderType = @OrderTypeSalesContract AND intSourceType = @SourceTypePickLot)
 	BEGIN
 		DECLARE @PickLotId INT
 
-		SELECT DISTINCT intSourceId INTO #tmpPickLotList FROM tblICInventoryShipmentItem
-		WHERE intInventoryShipmentId = @intShipmentId
-			AND ISNULL(intSourceId, '') <> ''
+		SELECT	DISTINCT intSourceId 
+		INTO	#tmpPickLotList 
+		FROM	tblICInventoryShipmentItem
+		WHERE	intInventoryShipmentId = @intShipmentId
+				AND intSourceId IS NOT NULL 
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPickLotList)
 		BEGIN
@@ -46,6 +60,36 @@ BEGIN
 		END
 		
 		DROP TABLE #tmpPickLotList
+	END
+
+	-- Update the Scale Status 
+	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intShipmentId AND intSourceType = @SourceTypeScale)
+	BEGIN
+		DECLARE @ScaleId INT
+
+		SELECT DISTINCT 
+				intSourceId 
+		INTO	#tmpScaleTickets 
+		FROM	tblICInventoryShipmentItem
+		WHERE	intInventoryShipmentId = @intShipmentId
+				AND intSourceId IS NOT NULL 
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpScaleTickets)
+		BEGIN
+			SELECT TOP 1 
+					@ScaleId = intSourceId 
+			FROM	#tmpScaleTickets
+
+			IF (@ysnOpenStatus = 1)
+				EXEC uspSCUpdateStatus @ScaleId, 1
+			ELSE
+				EXEC uspSCUpdateStatus @ScaleId, NULL 
+			
+			DELETE	 FROM #tmpScaleTickets 
+			WHERE	intSourceId = @ScaleId
+		END
+		
+		DROP TABLE #tmpScaleTickets
 	END
 
 	RETURN
