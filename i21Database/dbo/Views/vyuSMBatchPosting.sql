@@ -25,7 +25,7 @@ FROM
 	UNION ALL
 	SELECT 'Debit Memo', intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE intTransactionType = 3 AND ISNULL(ysnPosted, 0) = 0 AND intTransactionType != 6 
 	UNION ALL
-	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, dblInvoiceTotal, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDate, strComments FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo') AND ysnPosted = 0  AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) AND ISNULL(ysnRecurring,0) = 0
+	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, dblInvoiceTotal, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDate, strComments FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo') AND ysnPosted = 0  AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) AND ISNULL(ysnRecurring,0) = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	UNION ALL
 	SELECT 'Payment', intPaymentId, strRecordNumber, dblAmountPaid, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDatePaid, strNotes FROM tblARPayment WHERE ysnPosted = 0
 	UNION ALL
