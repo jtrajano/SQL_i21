@@ -3989,6 +3989,7 @@
     <Build Include="dbo\Stored Procedures\uspDMTruncateTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBalanceForwardReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
