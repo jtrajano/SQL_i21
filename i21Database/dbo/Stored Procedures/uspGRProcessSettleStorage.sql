@@ -10,7 +10,7 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 	
 	---Header Variables	
-	DECLARE @Entityid INT
+	DECLARE @EntityId INT
 	DECLARE @ItemId INT
 	DECLARE @intUnitMeasureId INT
 	DECLARE @intSourceItemUOMId INT
@@ -139,7 +139,7 @@ BEGIN TRY
 	)
 
 	SELECT @UserKey = intCreatedUserId
-		,@Entityid = intEntityId
+		,@EntityId = intEntityId
 		,@ItemId = intItemId
 		,@TicketNo = strStorageTicket
 		,@strStorageAdjustment = strStorageAdjustment
