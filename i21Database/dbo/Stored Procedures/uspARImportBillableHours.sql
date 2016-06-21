@@ -121,7 +121,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			@NewInvoiceId												--[intInvoiceId]
 			,V.[intItemId]												--[intItemId]
 			,IC.[strDescription] + ' - ' + V.strTicketNumber			--strItemDescription] 
-			,IL.intIssueUOMId											--[intItemUOMId]
+			,ISNULL(IL.intIssueUOMId, V.intItemUOMId)					--[intItemUOMId]
 			,V.[intHours]												--[dblQtyOrdered]
 			,V.[intHours]												--[dblQtyShipped]
 			,V.[dblPrice] 												--[dblPrice]
