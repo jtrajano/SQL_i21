@@ -33,3 +33,6 @@ AS
 			JOIN [tblEMEntityToContact] b
 				on b.intEntityContactId = a.intEntityId
 		WHERE b.intEntityId = @Id
+
+
+	UPDATE tblEMEntity set ysnActive = 0 WHERE intEntityId = @Id
