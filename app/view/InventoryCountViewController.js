@@ -394,7 +394,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
     createLineItemRecord: function (config, action) {
         var record = Ext.create('Inventory.model.InventoryCountDetail');
-        var strCountLine = 'test';
+        var strCountLine = '';
 
         record.set('strCountLine', strCountLine);
         record.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
