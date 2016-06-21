@@ -164,3 +164,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMEvent',
     @level2type = N'COLUMN',
     @level2name = N'strDeviceDescription'
+GO
+
+CREATE INDEX [IX_tblTMEvent_dtmDate] ON [dbo].[tblTMEvent] ([dtmDate] DESC)
+
+GO
+
+CREATE INDEX [IX_tblTMEvent_intSiteId] ON [dbo].[tblTMEvent] ([intSiteID])

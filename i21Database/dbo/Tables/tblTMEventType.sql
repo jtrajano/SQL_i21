@@ -56,3 +56,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMEventType',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
+GO
+
+CREATE INDEX [IX_tblTMEventType_strEventType] ON [dbo].[tblTMEventType] ([strEventType])
