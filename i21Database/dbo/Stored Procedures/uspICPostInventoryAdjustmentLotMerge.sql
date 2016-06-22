@@ -267,12 +267,12 @@ BEGIN
 													Detail.dblNewWeight
 													,CASE	-- New Lot has the same weight UOM Id. 	
 															WHEN NewLot.intWeightUOMId = SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId = FromStock.intItemUOMId THEN															
-																dbo.fnMultiply(-1, FromStock.dblQty)
+																-FromStock.dblQty
 														
 															-- New Lot has the same weight UOM Id but Source Lot is reduced by bags. 
 															WHEN NewLot.intWeightUOMId = SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId <> FromStock.intItemUOMId THEN
 																dbo.fnMultiply(
-																	ISNULL(Detail.dblNewSplitLotQuantity, dbo.fnMultiply(-1, FromStock.dblQty)) 
+																	ISNULL(Detail.dblNewSplitLotQuantity, -FromStock.dblQty) 
 																	,NewLot.dblWeightPerQty	
 																) 
 																
@@ -283,7 +283,7 @@ BEGIN
 																dbo.fnCalculateQtyBetweenUOM(
 																		SourceLot.intWeightUOMId
 																		, NewLot.intWeightUOMId
-																		, dbo.fnMultiply(-1, FromStock.dblQty)
+																		, -FromStock.dblQty
 																)
 															--New Lot has a different weight UOM Id but source lot was reduced by bags. 
 															WHEN NewLot.intWeightUOMId <> SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId <> FromStock.intItemUOMId THEN 
@@ -291,7 +291,7 @@ BEGIN
 																dbo.fnCalculateQtyBetweenUOM(
 																		SourceLot.intWeightUOMId
 																		, NewLot.intWeightUOMId
-																		, dbo.fnMultiply(dbo.fnMultiply(-1, FromStock.dblQty), SourceLot.dblWeightPerQty)
+																		, dbo.fnMultiply(-FromStock.dblQty, SourceLot.dblWeightPerQty)
 																)
 													END 
 												)
@@ -306,14 +306,14 @@ BEGIN
 																dbo.fnCalculateQtyBetweenUOM (
 																	SourceLot.intItemUOMId
 																	, NewLot.intItemUOMId
-																	, dbo.fnDivide(dbo.fnMultiply(-1, FromStock.dblQty), SourceLot.dblWeightPerQty)
+																	, dbo.fnDivide(-FromStock.dblQty, SourceLot.dblWeightPerQty)
 																)
 															ELSE 
 																-- 
 																dbo.fnCalculateQtyBetweenUOM (
 																	SourceLot.intItemUOMId
 																	, NewLot.intItemUOMId
-																	, dbo.fnMultiply(-1, FromStock.dblQty)
+																	, -FromStock.dblQty
 																)
 													END 
 												) 
@@ -333,10 +333,7 @@ BEGIN
 															CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
 																		dbo.fnDivide(
 																			dbo.fnMultiply(
-																				dbo.fnMultiply(
-																					-1 
-																					,FromStock.dblQty 
-																				)
+																				-FromStock.dblQty 
 																				,ISNULL(
 																					-- convert the new cost to stock unit, and then convert it to source lot weight UOM. 
 																					dbo.fnCalculateQtyBetweenUOM (
@@ -370,12 +367,8 @@ BEGIN
 															CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
 																		dbo.fnDivide(
 																			dbo.fnMultiply(
-																				-1 
-																				,-- Convert the pack to weight. 
-																				dbo.fnMultiply(
-																					FromStock.dblQty 																		
-																					,ISNULL(Detail.dblNewCost, FromStock.dblCost)
-																				)
+																				-FromStock.dblQty 																		
+																				,ISNULL(Detail.dblNewCost, FromStock.dblCost)
 																			)
 																			,Detail.dblNewWeight
 																		)
@@ -384,17 +377,14 @@ BEGIN
 																		dbo.fnDivide(
 																			-- Get the value of the stock
 																			dbo.fnMultiply(
-																				-1
-																				,dbo.fnMultiply(
-																					FromStock.dblQty
-																					,ISNULL(Detail.dblNewCost, FromStock.dblCost)
-																				)
+																				-FromStock.dblQty
+																				,ISNULL(Detail.dblNewCost, FromStock.dblCost)
 																			)
 																			,	-- divide it by the new-lot's weight qty. 
 																				dbo.fnCalculateQtyBetweenUOM (
 																					SourceLotWeightUOM.intItemUOMId
 																					, NewLotWeightUOM.intItemUOMId
-																					, dbo.fnMultiply(-1, dbo.fnMultiply(FromStock.dblQty, SourceLot.dblWeightPerQty))
+																					, dbo.fnMultiply(-FromStock.dblQty, SourceLot.dblWeightPerQty)
 																			)
 																		)
 															END															
@@ -405,50 +395,43 @@ BEGIN
 
 																	-- Compute a new cost if there is new weight. 
 															CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
-																		dbo.fnMultiply(
-																			-1
-																			,dbo.fnDivide(
-																				dbo.fnMultiply(
-																					FromStock.dblQty
-																					,ISNULL(
-																						-- convert the new cost to stock unit, and then convert it to source-lot Item UOM. 
-																						dbo.fnCalculateQtyBetweenUOM (
-																								StockUnit.intItemUOMId
-																								, SourceLot.intWeightUOMId
-																								, dbo.fnDivide(Detail.dblNewCost, SourceLotItemUOM.dblUnitQty)
-																						)	
-																						-- otherwise, use the cost coming from the cost bucket. 
-																						, FromStock.dblCost
-																					)
+																		dbo.fnDivide(
+																			dbo.fnMultiply(
+																				- FromStock.dblQty
+																				,ISNULL(
+																					-- convert the new cost to stock unit, and then convert it to source-lot Item UOM. 
+																					dbo.fnCalculateQtyBetweenUOM (
+																							StockUnit.intItemUOMId
+																							, SourceLot.intWeightUOMId
+																							, dbo.fnDivide(Detail.dblNewCost, SourceLotItemUOM.dblUnitQty)
+																					)	
+																					-- otherwise, use the cost coming from the cost bucket. 
+																					, FromStock.dblCost
 																				)
-																				, Detail.dblNewWeight																		
 																			)
+																			, Detail.dblNewWeight																		
 																		)
 
 
-
 																	ELSE 
-																		dbo.fnMultiply(
-																			-1
-																			,dbo.fnDivide(
-																				dbo.fnMultiply(
-																					FromStock.dblQty
-																					,ISNULL(
-																						-- convert the new cost to stock unit, and then convert it to source-lot Item UOM. 
-																						dbo.fnCalculateQtyBetweenUOM (
-																								StockUnit.intItemUOMId
-																								, SourceLot.intWeightUOMId
-																								, dbo.fnDivide(Detail.dblNewCost, SourceLotItemUOM.dblUnitQty)
-																						)	
-																						-- otherwise, use the cost coming from the cost bucket. 
-																						, FromStock.dblCost
-																					)
+																		dbo.fnDivide(
+																			dbo.fnMultiply(
+																				-FromStock.dblQty
+																				,ISNULL(
+																					-- convert the new cost to stock unit, and then convert it to source-lot Item UOM. 
+																					dbo.fnCalculateQtyBetweenUOM (
+																							StockUnit.intItemUOMId
+																							, SourceLot.intWeightUOMId
+																							, dbo.fnDivide(Detail.dblNewCost, SourceLotItemUOM.dblUnitQty)
+																					)	
+																					-- otherwise, use the cost coming from the cost bucket. 
+																					, FromStock.dblCost
 																				)
-																				,dbo.fnCalculateQtyBetweenUOM (
-																					SourceLot.intWeightUOMId
-																					, NewLot.intWeightUOMId
-																					, dbo.fnMultiply(-1, FromStock.dblQty)
-																				)
+																			)
+																			,dbo.fnCalculateQtyBetweenUOM (
+																				SourceLot.intWeightUOMId
+																				, NewLot.intWeightUOMId
+																				, -FromStock.dblQty
 																			)
 																		)
 															END
@@ -458,23 +441,19 @@ BEGIN
 
 															CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
 																		dbo.fnDivide(
-																			dbo.fnMultiply(-1, dbo.fnMultiply(FromStock.dblQty, ISNULL(Detail.dblNewCost, FromStock.dblCost)))
+																			dbo.fnMultiply(-FromStock.dblQty, ISNULL(Detail.dblNewCost, FromStock.dblCost))
 																			, Detail.dblNewWeight
 																		)
 
 																	ELSE 
-																		dbo.fnMultiply(
-																			-1 
-																			,dbo.fnDivide(
-																				dbo.fnMultiply(FromStock.dblQty, ISNULL(Detail.dblNewCost, FromStock.dblCost))
-																				,dbo.fnCalculateQtyBetweenUOM (
-																					SourceLot.intWeightUOMId
-																					, NewLot.intWeightUOMId
-																					, dbo.fnMultiply(-1 , dbo.fnMultiply(FromStock.dblQty, SourceLot.dblWeightPerQty))
-																				)
+																		dbo.fnDivide(
+																			dbo.fnMultiply(-FromStock.dblQty, ISNULL(Detail.dblNewCost, FromStock.dblCost))
+																			,dbo.fnCalculateQtyBetweenUOM (
+																				SourceLot.intWeightUOMId
+																				, NewLot.intWeightUOMId
+																				, dbo.fnMultiply(-FromStock.dblQty, SourceLot.dblWeightPerQty)
 																			)
-
-																		) 																		
+																		)																	
 															END
 												END 
 											-- Else, use the cost in termns of Item UOM. 
@@ -489,17 +468,14 @@ BEGIN
 																dbo.fnDivide(
 																	(	
 																		dbo.fnMultiply(
-																			-1 
-																			,dbo.fnMultiply(
-																				FromStock.dblQty
-																				,ISNULL(dbo.fnDivide(Detail.dblNewCost, NewLotItemUOM.dblUnitQty), FromStock.dblCost)
-																			)
+																			-FromStock.dblQty
+																			,ISNULL(dbo.fnDivide(Detail.dblNewCost, NewLotItemUOM.dblUnitQty), FromStock.dblCost)
 																		)
 																	)
 																	,dbo.fnCalculateQtyBetweenUOM (
 																		SourceLot.intItemUOMId
 																		, NewLot.intItemUOMId
-																		, dbo.fnMultiply(-1 ,dbo.fnDivide(FromStock.dblQty, SourceLot.dblWeightPerQty))
+																		, dbo.fnDivide(-FromStock.dblQty, SourceLot.dblWeightPerQty)
 																	)
 																
 																)
@@ -509,18 +485,15 @@ BEGIN
 
 																dbo.fnDivide(
 																	dbo.fnMultiply(
-																		-1,
-																		dbo.fnMultiply(
-																			FromStock.dblQty
-																			,ISNULL(Detail.dblNewCost, FromStock.dblCost) 																
-																		)
+																		-FromStock.dblQty
+																		,ISNULL(Detail.dblNewCost, FromStock.dblCost) 																
 																	)
 
 																	
 																	, dbo.fnCalculateQtyBetweenUOM (
 																		SourceLot.intItemUOMId
 																		, NewLot.intItemUOMId
-																		, dbo.fnMultiply(-1, FromStock.dblQty)
+																		, -FromStock.dblQty
 																	)
 																)
 													END 
