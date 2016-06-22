@@ -270,11 +270,12 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT intItemId
-			,strItemNo
-			,strDescription
-		FROM tblICItem
-		WHERE strType = @strBlendAttributeValue
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		WHERE C.strCategoryCode = @strBlendAttributeValue
 			AND strItemNo LIKE @strItemNo + '%'
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
@@ -286,11 +287,12 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT intItemId
-			,strItemNo
-			,strDescription
-		FROM tblICItem
-		WHERE strType = @strBlendAttributeValue
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		WHERE C.strCategoryCode = @strBlendAttributeValue
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
 	ELSE IF @strItemNo <> ''
@@ -301,11 +303,12 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT intItemId
-			,strItemNo
-			,strDescription
-		FROM tblICItem
-		WHERE strType = @strBlendAttributeValue
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		WHERE C.strCategoryCode = @strBlendAttributeValue
 			AND strItemNo LIKE @strItemNo + '%'
 	END
 	ELSE
@@ -315,11 +318,12 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT intItemId
-			,strItemNo
-			,strDescription
-		FROM tblICItem
-		WHERE strType = @strBlendAttributeValue
+		SELECT I.intItemId
+			,I.strItemNo
+			,I.strDescription
+		FROM tblICItem I
+		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		WHERE C.strCategoryCode = @strBlendAttributeValue
 	END
 
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
@@ -391,7 +395,8 @@ BEGIN
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-			AND II.strType = @strBlendAttributeValue
+		JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
+		AND C.strCategoryCode = @strBlendAttributeValue
 		JOIN @tblICItem I ON I.intItemId = II.intItemId
 		--JOIN dbo.tblEMEntity E ON E.intEntityId = I.intOwnerId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
