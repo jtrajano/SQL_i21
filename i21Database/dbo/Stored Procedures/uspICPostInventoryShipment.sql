@@ -226,11 +226,10 @@ BEGIN
 			 									END
 
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
-				,dblQty						=	-1 *
-												CASE	WHEN  Lot.intLotId IS NULL THEN 
-															ISNULL(DetailItem.dblQuantity, 0) 
+				,dblQty						=	CASE	WHEN  Lot.intLotId IS NULL THEN 
+															-ISNULL(DetailItem.dblQuantity, 0) 
 														ELSE
-															ISNULL(DetailLot.dblQuantityShipped, 0)
+															-ISNULL(DetailLot.dblQuantityShipped, 0)
 												END
 
 				,dblUOMQty					=	CASE	WHEN  Lot.intLotId IS NULL THEN 
@@ -358,11 +357,10 @@ BEGIN
 			 									END
 
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
-				,dblQty						=	-1 *
-												CASE	WHEN  Lot.intLotId IS NULL THEN 
-															ISNULL(DetailItem.dblQuantity, 0) 
+				,dblQty						=	CASE	WHEN  Lot.intLotId IS NULL THEN 
+															-ISNULL(DetailItem.dblQuantity, 0) 
 														ELSE
-															ISNULL(DetailLot.dblQuantityShipped, 0)
+															-ISNULL(DetailLot.dblQuantityShipped, 0)
 												END
 
 				,dblUOMQty					=	CASE	WHEN  Lot.intLotId IS NULL THEN 
