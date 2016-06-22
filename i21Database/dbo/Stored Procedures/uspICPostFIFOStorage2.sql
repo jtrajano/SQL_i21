@@ -201,6 +201,7 @@ BEGIN
 				,@intRelatedTransactionId OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
+			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
 			-- Insert the inventory transaction record					
 			IF @QtyOffset IS NOT NULL
