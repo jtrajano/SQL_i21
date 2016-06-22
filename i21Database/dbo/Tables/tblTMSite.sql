@@ -831,4 +831,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblTMSite',
     @level2type = N'COLUMN',
-    @level2name = N'intGlobalJulianCalendarId'
+    @level2name = N'intGlobalJulianCalendarId'    
+GO
+
+CREATE INDEX [IX_tblTMSite_intCustomerID] ON [dbo].[tblTMSite] ([intCustomerID])

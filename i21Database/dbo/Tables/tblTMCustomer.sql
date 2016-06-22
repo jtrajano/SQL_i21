@@ -53,3 +53,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMCustomer',
     @level2type = N'COLUMN',
     @level2name = N'strOriginCustomerKey'
+GO
+
+CREATE INDEX [IX_tblTMCustomer_intCustomerNumber] ON [dbo].[tblTMCustomer] ([intCustomerNumber])
