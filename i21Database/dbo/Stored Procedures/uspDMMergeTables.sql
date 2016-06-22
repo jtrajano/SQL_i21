@@ -25,6 +25,10 @@ EXECUTE sp_addlinkedsrvlogin 'REMOTEDBSERVER', 'false', NULL, @remoteDBUserId, @
 IF @remoteDBServer IS NOT NULL
 BEGIN
 
+    EXEC sp_configure 'remote query timeout', 0;
+
+    RECONFIGURE;
+
     EXEC uspDMAlterConstraint;
 
     EXEC uspDMMergeEMTables

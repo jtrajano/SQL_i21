@@ -105,7 +105,7 @@ BEGIN
             )
 
             EXECUTE sp_executesql @fkSql
-        
+
             SET @fki += 1
 
         END
@@ -123,20 +123,20 @@ BEGIN
 
     END
 
-    IF @checkType = 'NoCheck'
-    BEGIN
+    -- IF @checkType = 'NoCheck'
+    -- BEGIN
 
-        WHILE @mii <= @mainCount
-        BEGIN
+    --     WHILE @mii <= @mainCount
+    --     BEGIN
 
-            SET @currentMainTableName = (SELECT TOP 1 name FROM @mainTableNames WHERE id = @mii)
+    --         SET @currentMainTableName = (SELECT TOP 1 name FROM @mainTableNames WHERE id = @mii)
 
-            EXECUTE uspDMTruncateTable @currentMainTableName
+    --         EXECUTE uspDMTruncateTable @currentMainTableName
 
-            SET @mii += 1
+    --         SET @mii += 1
 
-        END
+    --     END
 
-    END
+    -- END
 
 END
