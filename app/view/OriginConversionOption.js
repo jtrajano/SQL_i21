@@ -177,7 +177,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
         {
             xtype: 'panel',
             border: false,
-            height: 1097,
+            height: 1131,
             itemId: 'pnlImportOrigin',
             margin: '0 0 5 0',
             bodyPadding: 10,

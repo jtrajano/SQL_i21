@@ -230,8 +230,96 @@ namespace iRely.Inventory.BusinessLayer
             if (!valid)
                 return null;
 
+            if (fc.intCountGroupId != null)
+            {
+                tblICCountGroup cg = GetLookUpObject<tblICCountGroup>(context,
+                    t => t.intCountGroupId == fc.intCountGroupId);
+                if (cg != null)
+                {
+                    fc.ysnCountByLots = cg.ysnCountByLots;
+                    fc.ysnCountByPallets = cg.ysnCountByPallets;
+                    fc.ysnExternal = cg.ysnExternal;
+                    fc.ysnIncludeOnHand = cg.ysnIncludeOnHand;
+                    fc.ysnRecountMismatch = cg.ysnRecountMismatch;
+                    fc.ysnScannedCountEntry = cg.ysnScannedCountEntry;
+                }
+            }
+
             context.AddNew<tblICInventoryCount>(fc);
-            
+
+            // Fetch Items
+            if ((bool)fc.ysnCountByLots)
+            {
+                List<vyuICGetItemStockSummaryByLot> items = GetLookUps<vyuICGetItemStockSummaryByLot>(context,
+                    t => t.intLocationId == fc.intLocationId &&
+                        (t.intCategoryId == fc.intCategoryId || fc.intCategoryId == null) &&
+                        (t.intCommodityId == fc.intCommodityId || fc.intCommodityId == null) &&
+                        (t.intStorageLocationId == fc.intStorageLocationId || fc.intStorageLocationId == null) &&
+                        (t.intCountGroupId == fc.intCountGroupId || fc.intCountGroupId == null) &&
+                        (t.intSubLocationId == fc.intSubLocationId || fc.intSubLocationId == null));
+                if (items != null)
+                {
+                    int count = 0;
+                    foreach (var item in items)
+                    {
+                        tblICInventoryCountDetail detail = new tblICInventoryCountDetail()
+                        {
+                            intItemId = item.intItemId,
+                            intItemLocationId = item.intItemLocationId,
+                            intCategoryId = item.intCategoryId,
+                            intStorageLocationId = item.intStorageLocationId,
+                            intSubLocationId = item.intSubLocationId,
+                            intInventoryCountId = fc.intInventoryCountId,
+                            intItemUOMId = item.intItemUOMId,
+                            dblSystemCount = item.dblOnHand,
+                            dblLastCost = item.dblLastCost,
+                            strCountLine = fc.strCountNo + "-" + (++count).ToString(),
+                            ysnRecount = false,
+                            intEntityUserSecurityId = iRely.Common.Security.GetEntityId(),
+                            tblICInventoryCount = fc,
+                            dblPhysicalCount = 0,
+                            intLotId = item.intLotId
+                        };
+                        context.AddNew<tblICInventoryCountDetail>(detail);
+                    }
+                }
+            }
+            else
+            {
+                List<vyuICGetItemStockSummary> items = GetLookUps<vyuICGetItemStockSummary>(context,
+                    t => t.intLocationId == fc.intLocationId &&
+                        (t.intCategoryId == fc.intCategoryId || fc.intCategoryId == null) &&
+                        (t.intCommodityId == fc.intCommodityId || fc.intCommodityId == null) &&
+                        (t.intStorageLocationId == fc.intStorageLocationId || fc.intStorageLocationId == null) &&
+                        (t.intCountGroupId == fc.intCountGroupId || fc.intCountGroupId == null) &&
+                        (t.intSubLocationId == fc.intSubLocationId || fc.intSubLocationId == null));
+                if (items != null)
+                {
+                    int count = 0;
+                    foreach (var item in items)
+                    {
+                        tblICInventoryCountDetail detail = new tblICInventoryCountDetail()
+                        {
+                            intItemId = item.intItemId,
+                            intItemLocationId = item.intItemLocationId,
+                            intCategoryId = item.intCategoryId,
+                            intStorageLocationId = item.intStorageLocationId,
+                            intSubLocationId = item.intSubLocationId,
+                            intInventoryCountId = fc.intInventoryCountId,
+                            intItemUOMId = item.intItemUOMId,
+                            dblSystemCount = item.dblOnHand,
+                            dblLastCost = item.dblLastCost,
+                            strCountLine = fc.strCountNo + "-" + (++count).ToString(),
+                            ysnRecount = false,
+                            intEntityUserSecurityId = iRely.Common.Security.GetEntityId(),
+                            tblICInventoryCount = fc,
+                            dblPhysicalCount = 0
+                        };
+                        context.AddNew<tblICInventoryCountDetail>(detail);
+                    }
+                }
+            }
+
             return fc;
         }
     }

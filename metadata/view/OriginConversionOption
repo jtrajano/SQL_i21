@@ -434,7 +434,7 @@
                 "bodyPadding": 10,
                 "border": false,
                 "container|align": "stretch",
-                "height": 1097,
+                "height": 1131,
                 "itemId": "pnlImportOrigin",
                 "layout": "vbox",
                 "margin": "0 0 5 0",

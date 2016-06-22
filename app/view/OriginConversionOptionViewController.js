@@ -269,7 +269,7 @@ function getTemplateColumns(name) {
         case "Inventory Count":
             return ["Location","Category","Commodity","Count Group","Count Date","Sub Location","Storage Location","Description",
                 "Include Zero on Hand","Include on Hand","Scanned Count Entry","Count by Lots","Count by Pallets","Recount Mismatch",
-                "External","Recount","Reference Count No","Status"];
+                "External","Recount","Reference Count No"];
         case "Item Pricing":
             return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "End Month Cost", "Pricing Method",
                 "Amount/Percent", "Retail Price", "MSRP"];
