@@ -55,3 +55,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMSiteDevice',
     @level2type = N'COLUMN',
     @level2name = N'ysnAtCustomerToBeTransferred'
+GO
+
+CREATE INDEX [IX_tblTMSiteDevice_intDeviceId] ON [dbo].[tblTMSiteDevice] ([intDeviceId])
+
+GO
+
+CREATE INDEX [IX_tblTMSiteDevice_intSiteID] ON [dbo].[tblTMSiteDevice] ([intSiteID])

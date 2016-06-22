@@ -821,3 +821,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMSite',
     @level2type = N'COLUMN',
     @level2name = 'intCompanyLocationPricingLevelId'
+GO
+
+CREATE INDEX [IX_tblTMSite_intCustomerID] ON [dbo].[tblTMSite] ([intCustomerID])
