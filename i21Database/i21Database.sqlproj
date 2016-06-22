@@ -4004,6 +4004,8 @@
     <Build Include="dbo\Stored Procedures\uspQMGetCOASampleProperties.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupCodeCategoryExemption.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBatchPosting.sql" />
+    <Build Include="dbo\Views\vyuGLExchangeRate.sql" />
+    <Build Include="dbo\Functions\fnGLGetExchangeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
