@@ -66,7 +66,7 @@ BEGIN
 		,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 		,dblQty = Contract.dblDetailQuantity
 		,dblUOMQty = Contract.dblItemUOMCF
-		,dblCost = ISNULL(Contract.dblCashPrice, 0)
+		,dblCost = ISNULL(Contract.dblSeqPrice, 0)
 		,dblSalesPrice = 0
 		,intCurrencyId = null
 		,dblExchangeRate = 1
