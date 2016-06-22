@@ -13,7 +13,7 @@ BEGIN
 
     -- tblSCScaleSetup
     SET @SQLString = N'MERGE tblSCScaleSetup AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCScaleSetup) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCScaleSetup]) AS Source
         ON (Target.intScaleSetupId = Source.intScaleSetupId)
         WHEN MATCHED THEN
             UPDATE SET Target.strStationShortDescription = Source.strStationShortDescription, Target.strStationDescription = Source.strStationDescription, Target.intStationType = Source.intStationType, Target.intTicketPoolId = Source.intTicketPoolId, Target.strAddress = Source.strAddress, Target.strZipCode = Source.strZipCode, Target.strCity = Source.strCity, Target.strState = Source.strState, Target.strCountry = Source.strCountry, Target.strPhone = Source.strPhone, Target.intLocationId = Source.intLocationId, Target.ysnAllowManualTicketNumber = Source.ysnAllowManualTicketNumber, Target.strScaleOperator = Source.strScaleOperator, Target.intScaleProcessing = Source.intScaleProcessing, Target.intTransferDelayMinutes = Source.intTransferDelayMinutes, Target.intBatchTransferInterval = Source.intBatchTransferInterval, Target.strLocalFilePath = Source.strLocalFilePath, Target.strServerPath = Source.strServerPath, Target.strWebServicePath = Source.strWebServicePath, Target.intMinimumPurgeDays = Source.intMinimumPurgeDays, Target.dtmLastPurgeDate = Source.dtmLastPurgeDate, Target.intLastPurgeUserId = Source.intLastPurgeUserId, Target.intInScaleDeviceId = Source.intInScaleDeviceId, Target.ysnDisableInScale = Source.ysnDisableInScale, Target.intOutScaleDeviceId = Source.intOutScaleDeviceId, Target.ysnDisableOutScale = Source.ysnDisableOutScale, Target.ysnShowOutScale = Source.ysnShowOutScale, Target.ysnAllowZeroWeights = Source.ysnAllowZeroWeights, Target.strWeightDescription = Source.strWeightDescription, Target.intUnitMeasureId = Source.intUnitMeasureId, Target.intGraderDeviceId = Source.intGraderDeviceId, Target.intAlternateGraderDeviceId = Source.intAlternateGraderDeviceId, Target.intLEDDeviceId = Source.intLEDDeviceId, Target.ysnCustomerFirst = Source.ysnCustomerFirst, Target.intAllowOtherLocationContracts = Source.intAllowOtherLocationContracts, Target.intWeightDisplayDelay = Source.intWeightDisplayDelay, Target.intTicketSelectionDelay = Source.intTicketSelectionDelay, Target.intFreightHaulerIDRequired = Source.intFreightHaulerIDRequired, Target.intBinNumberRequired = Source.intBinNumberRequired, Target.intDriverNameRequired = Source.intDriverNameRequired, Target.intTruckIDRequired = Source.intTruckIDRequired, Target.intTrackAxleCount = Source.intTrackAxleCount, Target.intRequireSpotSalePrice = Source.intRequireSpotSalePrice, Target.ysnTicketCommentRequired = Source.ysnTicketCommentRequired, Target.ysnAllowElectronicSpotPrice = Source.ysnAllowElectronicSpotPrice, Target.ysnRefreshContractsOnOpen = Source.ysnRefreshContractsOnOpen, Target.ysnTrackVariety = Source.ysnTrackVariety, Target.ysnManualGrading = Source.ysnManualGrading, Target.ysnLockStoredGrade = Source.ysnLockStoredGrade, Target.ysnAllowManualWeight = Source.ysnAllowManualWeight, Target.intStorePitInformation = Source.intStorePitInformation, Target.ysnReferenceNumberRequired = Source.ysnReferenceNumberRequired, Target.ysnDefaultDriverOffTruck = Source.ysnDefaultDriverOffTruck, Target.ysnAutomateTakeOutTicket = Source.ysnAutomateTakeOutTicket, Target.ysnDefaultDeductFreightFromFarmer = Source.ysnDefaultDeductFreightFromFarmer, Target.intStoreScaleOperator = Source.intStoreScaleOperator, Target.intDefaultStorageTypeId = Source.intDefaultStorageTypeId, Target.intGrainBankStorageTypeId = Source.intGrainBankStorageTypeId, Target.ysnRefreshLoadsOnOpen = Source.ysnRefreshLoadsOnOpen, Target.ysnAllowSplitWeights = Source.ysnAllowSplitWeights, Target.ysnRequireContractForInTransitTicket = Source.ysnRequireContractForInTransitTicket, Target.intDefaultFeeItemId = Source.intDefaultFeeItemId, Target.intFreightItemId = Source.intFreightItemId, Target.intConcurrencyId = Source.intConcurrencyId
@@ -31,7 +31,7 @@ BEGIN
 
     -- tblSCLastScaleSetup
     SET @SQLString = N'MERGE tblSCLastScaleSetup AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCLastScaleSetup) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCLastScaleSetup]) AS Source
         ON (Target.intLastScaleSetupId = Source.intLastScaleSetupId)
         WHEN MATCHED THEN
             UPDATE SET Target.intScaleSetupId = Source.intScaleSetupId, Target.dtmScaleDate = Source.dtmScaleDate, Target.strScaleOperator = Source.strScaleOperator, Target.intConcurrencyId = Source.intConcurrencyId
@@ -48,7 +48,7 @@ BEGIN
 
     -- tblSCTicketType
     SET @SQLString = N'MERGE tblSCTicketType AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketType) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketType]) AS Source
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketPoolId = Source.intTicketPoolId, Target.intListTicketTypeId = Source.intListTicketTypeId, Target.ysnTicketAllowed = Source.ysnTicketAllowed, Target.intNextTicketNumber = Source.intNextTicketNumber, Target.intDiscountSchedule = Source.intDiscountSchedule, Target.intDiscountLocationId = Source.intDiscountLocationId, Target.intDistributionMethod = Source.intDistributionMethod, Target.ysnSelectByPO = Source.ysnSelectByPO, Target.intSplitInvoiceOption = Source.intSplitInvoiceOption, Target.intContractRequired = Source.intContractRequired, Target.intOverrideTicketCopies = Source.intOverrideTicketCopies, Target.ysnPrintAtKiosk = Source.ysnPrintAtKiosk, Target.ynsVerifySplitMethods = Source.ynsVerifySplitMethods, Target.ysnOverrideSingleTicketSeries = Source.ysnOverrideSingleTicketSeries, Target.intConcurrencyId = Source.intConcurrencyId
@@ -65,7 +65,7 @@ BEGIN
 
     -- tblSCListTicketTypes
     SET @SQLString = N'MERGE tblSCListTicketTypes AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCListTicketTypes) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCListTicketTypes]) AS Source
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketType = Source.intTicketType, Target.strTicketType = Source.strTicketType, Target.strInOutIndicator = Source.strInOutIndicator, Target.ysnActive = Source.ysnActive, Target.intConcurrencyId = Source.intConcurrencyId
@@ -82,7 +82,7 @@ BEGIN
 
     -- tblSCUncompletedTicketAlert
     SET @SQLString = N'MERGE tblSCUncompletedTicketAlert AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCUncompletedTicketAlert) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCUncompletedTicketAlert]) AS Source
         ON (Target.intUncompletedTicketAlertId = Source.intUncompletedTicketAlertId)
         WHEN MATCHED THEN
             UPDATE SET Target.intEntityId = Source.intEntityId, Target.intCompanyLocationId = Source.intCompanyLocationId, Target.intTicketUncompletedDaysAlert = Source.intTicketUncompletedDaysAlert, Target.intConcurrencyId = Source.intConcurrencyId
@@ -99,7 +99,7 @@ BEGIN
 
     -- tblSCDeviceInterfaceFile
     SET @SQLString = N'MERGE tblSCDeviceInterfaceFile AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCDeviceInterfaceFile) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeviceInterfaceFile]) AS Source
         ON (Target.intDeviceInterfaceFileId = Source.intDeviceInterfaceFileId)
         WHEN MATCHED THEN
             UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.intScaleDeviceId = Source.intScaleDeviceId, Target.dtmTicketVoidDateTime = Source.dtmTicketVoidDateTime, Target.strDeviceCommodity = Source.strDeviceCommodity, Target.strDeviceData = Source.strDeviceData
@@ -116,7 +116,7 @@ BEGIN
 
     -- tblSCDistributionOption
     SET @SQLString = N'MERGE tblSCDistributionOption AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCDistributionOption) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDistributionOption]) AS Source
         ON (Target.intDistributionOptionId = Source.intDistributionOptionId)
         WHEN MATCHED THEN
             UPDATE SET Target.strDistributionOption = Source.strDistributionOption, Target.intTicketPoolId = Source.intTicketPoolId, Target.intTicketTypeId = Source.intTicketTypeId, Target.ysnDistributionAllowed = Source.ysnDistributionAllowed, Target.ysnDefaultDistribution = Source.ysnDefaultDistribution, Target.intConcurrencyId = Source.intConcurrencyId
@@ -133,7 +133,7 @@ BEGIN
 
     -- tblSCScaleDevice
     SET @SQLString = N'MERGE tblSCScaleDevice AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCScaleDevice) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCScaleDevice]) AS Source
         ON (Target.intScaleDeviceId = Source.intScaleDeviceId)
         WHEN MATCHED THEN
             UPDATE SET Target.intPhysicalEquipmentId = Source.intPhysicalEquipmentId, Target.strDeviceDescription = Source.strDeviceDescription, Target.intDeviceTypeId = Source.intDeviceTypeId, Target.intConnectionMethod = Source.intConnectionMethod, Target.strFilePath = Source.strFilePath, Target.strFileName = Source.strFileName, Target.strIPAddress = Source.strIPAddress, Target.intIPPort = Source.intIPPort, Target.intComPort = Source.intComPort, Target.intBaudRate = Source.intBaudRate, Target.intDataBits = Source.intDataBits, Target.intStopBits = Source.intStopBits, Target.intParityBits = Source.intParityBits, Target.intFlowControl = Source.intFlowControl, Target.intGraderModel = Source.intGraderModel, Target.ysnVerifyCommodityCode = Source.ysnVerifyCommodityCode, Target.ysnVerifyDateTime = Source.ysnVerifyDateTime, Target.ysnDateTimeCheck = Source.ysnDateTimeCheck, Target.ysnDateTimeFixedLocation = Source.ysnDateTimeFixedLocation, Target.intDateTimeStartingLocation = Source.intDateTimeStartingLocation, Target.intDateTimeLength = Source.intDateTimeLength, Target.strDateTimeValidationString = Source.strDateTimeValidationString, Target.ysnMotionDetection = Source.ysnMotionDetection, Target.ysnMotionFixedLocation = Source.ysnMotionFixedLocation, Target.intMotionStartingLocation = Source.intMotionStartingLocation, Target.intMotionLength = Source.intMotionLength, Target.strMotionValidationString = Source.strMotionValidationString, Target.intWeightStabilityCheck = Source.intWeightStabilityCheck, Target.ysnWeightFixedLocation = Source.ysnWeightFixedLocation, Target.intWeightStartingLocation = Source.intWeightStartingLocation, Target.intWeightLength = Source.intWeightLength, Target.strNTEPCapacity = Source.strNTEPCapacity, Target.intConcurrencyId = Source.intConcurrencyId
@@ -150,7 +150,7 @@ BEGIN
 
     -- tblSCTicket
     SET @SQLString = N'MERGE tblSCTicket AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicket) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicket]) AS Source
         ON (Target.intTicketId = Source.intTicketId)
         WHEN MATCHED THEN
             UPDATE SET Target.strTicketStatus = Source.strTicketStatus, Target.strTicketNumber = Source.strTicketNumber, Target.intScaleSetupId = Source.intScaleSetupId, Target.intTicketPoolId = Source.intTicketPoolId, Target.intTicketLocationId = Source.intTicketLocationId, Target.intTicketType = Source.intTicketType, Target.strInOutFlag = Source.strInOutFlag, Target.dtmTicketDateTime = Source.dtmTicketDateTime, Target.dtmTicketTransferDateTime = Source.dtmTicketTransferDateTime, Target.dtmTicketVoidDateTime = Source.dtmTicketVoidDateTime, Target.intProcessingLocationId = Source.intProcessingLocationId, Target.strScaleOperatorUser = Source.strScaleOperatorUser, Target.intScaleOperatorId = Source.intScaleOperatorId, Target.strPurchaseOrderNumber = Source.strPurchaseOrderNumber, Target.strTruckName = Source.strTruckName, Target.strDriverName = Source.strDriverName, Target.ysnDriverOff = Source.ysnDriverOff, Target.ysnSplitWeightTicket = Source.ysnSplitWeightTicket, Target.ysnGrossManual = Source.ysnGrossManual, Target.dblGrossWeight = Source.dblGrossWeight, Target.dblGrossWeightOriginal = Source.dblGrossWeightOriginal, Target.dblGrossWeightSplit1 = Source.dblGrossWeightSplit1, Target.dblGrossWeightSplit2 = Source.dblGrossWeightSplit2, Target.dtmGrossDateTime = Source.dtmGrossDateTime, Target.intGrossUserId = Source.intGrossUserId, Target.ysnTareManual = Source.ysnTareManual, Target.dblTareWeight = Source.dblTareWeight, Target.dblTareWeightOriginal = Source.dblTareWeightOriginal, Target.dblTareWeightSplit1 = Source.dblTareWeightSplit1, Target.dblTareWeightSplit2 = Source.dblTareWeightSplit2, Target.dtmTareDateTime = Source.dtmTareDateTime, Target.intTareUserId = Source.intTareUserId, Target.dblGrossUnits = Source.dblGrossUnits, Target.dblNetUnits = Source.dblNetUnits, Target.strItemNumber = Source.strItemNumber, Target.strItemUOM = Source.strItemUOM, Target.intCustomerId = Source.intCustomerId, Target.intSplitId = Source.intSplitId, Target.strDistributionOption = Source.strDistributionOption, Target.intDiscountSchedule = Source.intDiscountSchedule, Target.strDiscountLocation = Source.strDiscountLocation, Target.dtmDeferDate = Source.dtmDeferDate, Target.strContractNumber = Source.strContractNumber, Target.intContractSequence = Source.intContractSequence, Target.strContractLocation = Source.strContractLocation, Target.dblUnitPrice = Source.dblUnitPrice, Target.dblUnitBasis = Source.dblUnitBasis, Target.dblTicketFees = Source.dblTicketFees, Target.intCurrencyId = Source.intCurrencyId, Target.dblCurrencyRate = Source.dblCurrencyRate, Target.strTicketComment = Source.strTicketComment, Target.strCustomerReference = Source.strCustomerReference, Target.ysnTicketPrinted = Source.ysnTicketPrinted, Target.ysnPlantTicketPrinted = Source.ysnPlantTicketPrinted, Target.ysnGradingTagPrinted = Source.ysnGradingTagPrinted, Target.intHaulerId = Source.intHaulerId, Target.intFreightCarrierId = Source.intFreightCarrierId, Target.dblFreightRate = Source.dblFreightRate, Target.dblFreightAdjustment = Source.dblFreightAdjustment, Target.intFreightCurrencyId = Source.intFreightCurrencyId, Target.dblFreightCurrencyRate = Source.dblFreightCurrencyRate, Target.strFreightCContractNumber = Source.strFreightCContractNumber, Target.ysnFarmerPaysFreight = Source.ysnFarmerPaysFreight, Target.strLoadNumber = Source.strLoadNumber, Target.intLoadLocationId = Source.intLoadLocationId, Target.intAxleCount = Source.intAxleCount, Target.strBinNumber = Source.strBinNumber, Target.strPitNumber = Source.strPitNumber, Target.intGradingFactor = Source.intGradingFactor, Target.strVarietyType = Source.strVarietyType, Target.strFarmNumber = Source.strFarmNumber, Target.strFieldNumber = Source.strFieldNumber, Target.strDiscountComment = Source.strDiscountComment, Target.strCommodityCode = Source.strCommodityCode, Target.intCommodityId = Source.intCommodityId, Target.intDiscountId = Source.intDiscountId, Target.intContractId = Source.intContractId, Target.intDiscountLocationId = Source.intDiscountLocationId, Target.intItemId = Source.intItemId, Target.intEntityId = Source.intEntityId, Target.intLoadId = Source.intLoadId, Target.intMatchTicketId = Source.intMatchTicketId, Target.intSubLocationId = Source.intSubLocationId, Target.intStorageLocationId = Source.intStorageLocationId, Target.intFarmFieldId = Source.intFarmFieldId, Target.intDistributionMethod = Source.intDistributionMethod, Target.intSplitInvoiceOption = Source.intSplitInvoiceOption, Target.intDriverEntityId = Source.intDriverEntityId, Target.intStorageScheduleId = Source.intStorageScheduleId, Target.intConcurrencyId = Source.intConcurrencyId, Target.dblNetWeightDestination = Source.dblNetWeightDestination, Target.ysnUseDestinationWeight = Source.ysnUseDestinationWeight, Target.ysnUseDestinationGrades = Source.ysnUseDestinationGrades, Target.ysnHasGeneratedTicketNumber = Source.ysnHasGeneratedTicketNumber, Target.intInventoryTransferId = Source.intInventoryTransferId, Target.intInventoryReceiptId = Source.intInventoryReceiptId, Target.dblGross = Source.dblGross, Target.dblShrink = Source.dblShrink, Target.dblConvertedUOMQty = Source.dblConvertedUOMQty, Target.intItemUOMIdFrom = Source.intItemUOMIdFrom, Target.intItemUOMIdTo = Source.intItemUOMIdTo
@@ -167,7 +167,7 @@ BEGIN
 
     -- tblSCTicketDiscount
     SET @SQLString = N'MERGE tblSCTicketDiscount AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketDiscount) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketDiscount]) AS Source
         ON (Target.intTicketDiscountId = Source.intTicketDiscountId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketId = Source.intTicketId, Target.strDiscountCode = Source.strDiscountCode, Target.dblGradeReading = Source.dblGradeReading, Target.strCalcMethod = Source.strCalcMethod, Target.dblDiscountAmount = Source.dblDiscountAmount, Target.strShrinkWhat = Source.strShrinkWhat, Target.dblShrinkPercent = Source.dblShrinkPercent, Target.ysnGraderAutoEntry = Source.ysnGraderAutoEntry, Target.intDiscountScheduleCodeId = Source.intDiscountScheduleCodeId, Target.intConcurrencyId = Source.intConcurrencyId
@@ -184,7 +184,7 @@ BEGIN
 
     -- tblSCTicketFormat
     SET @SQLString = N'MERGE tblSCTicketFormat AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketFormat) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketFormat]) AS Source
         ON (Target.intTicketFormatId = Source.intTicketFormatId)
         WHEN MATCHED THEN
             UPDATE SET Target.strTicketFormat = Source.strTicketFormat, Target.intTicketFormatSelection = Source.intTicketFormatSelection, Target.ysnSuppressCompanyName = Source.ysnSuppressCompanyName, Target.ysnFormFeedEachCopy = Source.ysnFormFeedEachCopy, Target.strTicketHeader = Source.strTicketHeader, Target.strTicketFooter = Source.strTicketFooter, Target.intConcurrencyId = Source.intConcurrencyId
@@ -201,7 +201,7 @@ BEGIN
 
     -- tblSCTicketPool
     SET @SQLString = N'MERGE tblSCTicketPool AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketPool) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketPool]) AS Source
         ON (Target.intTicketPoolId = Source.intTicketPoolId)
         WHEN MATCHED THEN
             UPDATE SET Target.strTicketPool = Source.strTicketPool, Target.intNextTicketNumber = Source.intNextTicketNumber, Target.intConcurrencyId = Source.intConcurrencyId
@@ -218,7 +218,7 @@ BEGIN
 
     -- tblSCTicketPrintOption
     SET @SQLString = N'MERGE tblSCTicketPrintOption AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketPrintOption) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketPrintOption]) AS Source
         ON (Target.intTicketPrintOptionId = Source.intTicketPrintOptionId)
         WHEN MATCHED THEN
             UPDATE SET Target.intScaleSetupId = Source.intScaleSetupId, Target.intTicketFormatId = Source.intTicketFormatId, Target.strTicketPrintDescription = Source.strTicketPrintDescription, Target.ysnPrintCustomerCopy = Source.ysnPrintCustomerCopy, Target.ysnPrintEachSplit = Source.ysnPrintEachSplit, Target.intTicketPrintCopies = Source.intTicketPrintCopies, Target.intIssueCutCode = Source.intIssueCutCode, Target.strTicketPrinter = Source.strTicketPrinter, Target.intTicketTypeOption = Source.intTicketTypeOption, Target.strInOutIndicator = Source.strInOutIndicator, Target.intPrintingOption = Source.intPrintingOption, Target.intListTicketTypeId = Source.intListTicketTypeId, Target.intConcurrencyId = Source.intConcurrencyId
@@ -235,7 +235,7 @@ BEGIN
 
     -- tblSCTicketSplit
     SET @SQLString = N'MERGE tblSCTicketSplit AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketSplit) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketSplit]) AS Source
         ON (Target.intTicketSplitId = Source.intTicketSplitId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketId = Source.intTicketId, Target.intCustomerId = Source.intCustomerId, Target.dblSplitPercent = Source.dblSplitPercent, Target.strDistributionOption = Source.strDistributionOption, Target.intConcurrencyId = Source.intConcurrencyId
@@ -252,7 +252,7 @@ BEGIN
 
     -- tblSCTicketStorageType
     SET @SQLString = N'MERGE tblSCTicketStorageType AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketStorageType) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketStorageType]) AS Source
         ON (Target.intTicketStorageTypeId = Source.intTicketStorageTypeId)
         WHEN MATCHED THEN
             UPDATE SET Target.intStorageNumber = Source.intStorageNumber, Target.strStorageDescription = Source.strStorageDescription, Target.intConcurrencyId = Source.intConcurrencyId
@@ -269,7 +269,7 @@ BEGIN
 
     -- tblSCTruckDriverReference
     SET @SQLString = N'MERGE tblSCTruckDriverReference AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTruckDriverReference) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTruckDriverReference]) AS Source
         ON (Target.intTruckDriverReferenceId = Source.intTruckDriverReferenceId)
         WHEN MATCHED THEN
             UPDATE SET Target.intEntityId = Source.intEntityId, Target.strRecordType = Source.strRecordType, Target.strData = Source.strData, Target.intConcurrencyId = Source.intConcurrencyId
@@ -286,7 +286,7 @@ BEGIN
 
     -- tblSCTicketCost
     SET @SQLString = N'MERGE tblSCTicketCost AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.repDB.dbo.tblSCTicketCost) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketCost]) AS Source
         ON (Target.intTicketCostId = Source.intTicketCostId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketId = Source.intTicketId, Target.intConcurrencyId = Source.intConcurrencyId, Target.intItemId = Source.intItemId, Target.intEntityVendorId = Source.intEntityVendorId, Target.strCostMethod = Source.strCostMethod, Target.dblRate = Source.dblRate, Target.intItemUOMId = Source.intItemUOMId, Target.ysnAccrue = Source.ysnAccrue, Target.ysnMTM = Source.ysnMTM, Target.ysnPrice = Source.ysnPrice
