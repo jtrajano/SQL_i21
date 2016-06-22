@@ -76,8 +76,9 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
-		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		,@INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
@@ -411,9 +412,9 @@ BEGIN
 										,(@dblNewCost - @InvTranCost) 
 									)
 
-			----------------------------------------------------------
-			-- 7. If stock was sold, then do the "Revalue Sold". 
-			----------------------------------------------------------
+			-----------------------------------------------------------------------------------
+			-- 7. If stock was sold, then do the "Auto Variance on Sold or Used Stock". 
+			-----------------------------------------------------------------------------------
 			IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
 			BEGIN 
 				EXEC [dbo].[uspICPostInventoryTransaction]
@@ -434,7 +435,7 @@ BEGIN
 					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
+					,@intTransactionTypeId					= @INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock
 					,@intLotId								= NULL 
 					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
