@@ -271,7 +271,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'strLotNumber',
                     hidden: '{!current.ysnCountByLots}',
                     editor: {
-                        store: '{compactItem}',
+                        store: '{lot}',
                         origValueField: 'intLotId',
                         origUpdateField: 'intLotId',
                         defaultFilters: [
