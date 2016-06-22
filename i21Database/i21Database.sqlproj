@@ -4002,6 +4002,7 @@
     <Build Include="dbo\Tables\tblQMTestMethod.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetCOAApprovedSample.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetCOASampleProperties.sql" />
+    <Build Include="dbo\Tables\tblSMTaxGroupCodeCategoryExemption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
