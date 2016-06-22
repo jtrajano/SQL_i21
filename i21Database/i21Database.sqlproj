@@ -3996,6 +3996,7 @@
     <Build Include="dbo\Functions\fnMinNumeric.sql" />
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupCodeCategoryExemption.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBatchPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
