@@ -22,6 +22,6 @@ EXECUTE sp_addlinkedserver @server = N'REMOTEDBSERVER',
 
 EXECUTE sp_addlinkedsrvlogin 'REMOTEDBSERVER', 'false', NULL, @remoteDBUserId, @remoteDBPassword;
 
-SET @SQLString = N'EXEC(''SELECT * FROM REMOTEDBSERVER.' + @remoteDB + '.dbo.tblSMOfflineConfiguration'')';
+SET @SQLString = N'EXEC(''SELECT * FROM REMOTEDBSERVER.[' + @remoteDB + '].[dbo].[tblSMOfflineConfiguration]'')';
 
 EXECUTE sp_executesql @SQLString;
