@@ -45,18 +45,20 @@ Ext.define('Inventory.view.StockDetailViewController', {
                         { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
                         { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, flex: 1, hidden: true },
                         { dataIndex: 'intCompanyLocationId', text: 'Company Location Id', width: 100, flex: 1, hidden: true },
-                        { dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },
-                        { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },
+                        /*{ dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },*/
+                        /*{ dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },*/
                         { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                         { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
                         { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinLocation' },
-                        { dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },
+                        /*{ dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },*/
                         { dataIndex: 'strStorageLocation', text: 'Storage Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
                         { dataIndex: 'dblStock', text: 'Stock', xtype: 'numbercolumn', summaryType: 'sum', width: 100, flex: 1 },
                         { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
-                        { dataIndex: 'strCommodityCode', text: 'Commodity', width: 100, flex: 1, hidden: true },
+                        { dataIndex: 'dblCapacity',  xtype: 'numbercolumn', text: 'Capacity', width: 100, flex: 1, summaryType: 'sum' },
                         { dataIndex: 'dblAvailable', xtype: 'numbercolumn', summaryType: 'sum', text: 'Space Available', width: 100, flex: 1 },
-                        { dataIndex: 'dblEffectiveDepth', xtype: 'numbercolumn', summaryType: 'sum', text: 'Effective Depth', width: 100, flex: 1, hidden: true }
+                        { dataIndex: 'dblEffectiveDepth', xtype: 'numbercolumn', summaryType: 'sum', text: 'Effective Depth', width: 100, flex: 1, hidden: true },
+                        { dataIndex: 'dblPackFactor', xtype: 'numbercolumn', summaryType: 'sum', text: 'Pack Factor', width: 100, flex: 1, hidden: true },
+                        { dataIndex: 'dblUnitPerFoot', xtype: 'numbercolumn', summaryType: 'sum', text: 'Unit Per Foot', width: 100, flex: 1, hidden: true }
                     ],
                     buttons: [
                         {
@@ -69,16 +71,22 @@ Ext.define('Inventory.view.StockDetailViewController', {
                     ],
                     chart: {
                         url: '../Inventory/api/StorageLocation/GetStorageBins',
+                        type: 'serial',
+                        /*startDuration: 1,
+                        startEffect: 'elastic',*/
+                        mouseWheelZoomEnabled: true,
+                        mouseWheelScrollEnabled: true,
                         valueAxes: [
                             {
                                 id: 'axis',
                                 position: 'left',
                                 title: 'Stock',
-                                stackType: "regular"
+                                stackType: "100%"
                             }
                         ],
                         graphs: [
                             {
+                                id: 'stockGraph',
                                 balloonText: "[[title]] of [[category]]:[[value]]",
                                 type: 'column',
                                 title: 'Stock',
@@ -87,15 +95,20 @@ Ext.define('Inventory.view.StockDetailViewController', {
                                 topRadius: 1,
                                 fillAlphas: 0.8,
                                 fillColors: "#FCD202",
+                                //fillColorsField: "strColor",
+                                //alphaField: "strLocation",
+                                //labelText: '[[value]]',
                                 lineAlpha: 0.5,
                                 lineColor: "#FFFFFF",
                                 lineThickness: 1
                             },
                             {
+                                id: 'spaceGraph',
                                 balloonText: "[[title]] storage for [[category]]:[[value]]",
                                 type: 'column',
                                 title: 'Available',
                                 valueField: 'dblAvailable',
+                                //labelText: '[[value]]',
                                 valueAxis: 'axis',
                                 topRadius: 1,
                                 fillAlphas: 0.7,
@@ -106,16 +119,29 @@ Ext.define('Inventory.view.StockDetailViewController', {
                             }
                         ],
                         legend: {
-                            enabled: true,
+                            enabled: false,
                             useGraphSettings: true
                         },
+                        autoMarginOffset: 24,
                         angle: 30,
                         depth3D: 30,
                         categoryAxis: {
                             title: 'Storage Location',
-                            labelRotation: 45
+                            labelRotation: 45,
+                            //labelColorField: 'strColor',
+                            boldLabels: false,
+                            /*type: 'serial',*/
+                            gridPosition: 'start'
                         },
-                        categoryField: 'strStorageLocation'
+                        categoryField: 'strStorageLocation',
+                        listeners: [
+                            {
+                                event: 'clickGraphItem',
+                                method: function(event) {
+                                    //
+                                }
+                            }
+                        ]
                     }
                 }
             ]

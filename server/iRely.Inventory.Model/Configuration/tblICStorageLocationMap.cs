@@ -192,20 +192,17 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
-            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
-            this.Property(t => t.intCompanyLocationSubLocationId).HasColumnName("intCompanyLocationSubLocationId");
-            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
-            this.Property(t => t.strSubLocation).HasColumnName("strSubLocation");
             this.Property(t => t.strUOM).HasColumnName("strUOM");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strLocation).HasColumnName("strLocation");
-            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
             this.Property(t => t.dblCapacity).HasColumnName("dblCapacity").HasPrecision(18, 6);
             this.Property(t => t.dblAvailable).HasColumnName("dblAvailable").HasPrecision(18, 6);
             this.Property(t => t.dblStock).HasColumnName("dblStock").HasPrecision(18, 6);
             this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth").HasPrecision(18, 6);
+            this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
         }
     }
 
