@@ -3992,6 +3992,8 @@
     <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspTFDefault.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGT103RunTax.sql" />
+    <Build Include="dbo\Functions\fnMaxNumeric.sql" />
+    <Build Include="dbo\Functions\fnMinNumeric.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
