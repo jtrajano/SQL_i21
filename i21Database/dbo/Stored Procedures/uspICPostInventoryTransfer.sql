@@ -96,7 +96,7 @@ BEGIN
 	GOTO Post_Exit  
 END
 
--- Check if all Items are avaiable under the To Location
+-- Check if all Items are available under the To Location
 SELECT TOP 1 
 		Detail.intItemId, 
 		Header.intToLocationId, 
@@ -224,7 +224,7 @@ BEGIN
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
 				,intItemUOMId = Detail.intItemUOMId
 				,Header.dtmTransferDate
-				,dblQty = -1 * Detail.dblQuantity
+				,dblQty = -Detail.dblQuantity
 				,dblUOMQty = ItemUOM.dblUnitQty
 				,ISNULL(Detail.dblCost, 0)
 				,0
@@ -291,7 +291,7 @@ BEGIN
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
 				,FromStock.intItemUOMId  
 				,Header.dtmTransferDate
-				,FromStock.dblQty * -1
+				,-FromStock.dblQty
 				,FromStock.dblUOMQty
 				,ISNULL(FromStock.dblCost, 0)
 				,0
