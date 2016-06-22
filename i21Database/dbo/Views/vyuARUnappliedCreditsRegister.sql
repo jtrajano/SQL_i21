@@ -23,4 +23,4 @@ AND I.ysnPaid = 0
 AND I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup = 'Receivables')
+						WHERE AG.strAccountGroup IN ('Liability', 'Receivables'))

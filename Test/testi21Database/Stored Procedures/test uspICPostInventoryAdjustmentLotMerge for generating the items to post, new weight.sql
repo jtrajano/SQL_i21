@@ -150,12 +150,12 @@ BEGIN
 			,@intEntityUserSecurityId INT = 1
 			,@strAdjustmentDescription AS NVARCHAR(255) = ''
 
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
+		--EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		--EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
+		--EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
+		--EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
+		--EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
+		--EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
 		DECLARE @TestItemToPost AS ItemCostingTableType
 
@@ -201,7 +201,7 @@ BEGIN
 				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
-				,intCurrencyId			= NULL 
+				,intCurrencyId			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 				,dblExchangeRate		= 1
 				,intTransactionId		= 9
 				,intTransactionDetailId = 8
@@ -222,7 +222,7 @@ BEGIN
 											/ (27500.00)					 -- New weight. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
-				,intCurrencyId			= NULL 
+				,intCurrencyId			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 				,dblExchangeRate		= 1
 				,intTransactionId		= 9
 				,intTransactionDetailId = 8

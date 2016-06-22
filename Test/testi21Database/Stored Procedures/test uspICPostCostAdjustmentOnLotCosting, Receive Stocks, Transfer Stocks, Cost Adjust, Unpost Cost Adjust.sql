@@ -622,7 +622,7 @@ BEGIN
 				,[dblCost]					= 22.00
 				,[dblValue]					= 0
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -644,7 +644,7 @@ BEGIN
 				,[dblCost]					= 22.00
 				,[dblValue]					= 0
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -690,7 +690,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -734,7 +734,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= 17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -780,7 +780,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -1 * -17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -825,7 +825,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -1 * 17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1

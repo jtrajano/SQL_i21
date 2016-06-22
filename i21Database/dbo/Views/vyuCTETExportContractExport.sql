@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCTContractExportET]
+﻿CREATE VIEW [dbo].[vyuCTETExportContractExport]
 	
 AS 
 

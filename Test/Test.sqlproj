@@ -973,6 +973,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for validating the company location.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentItemChange for validating the company location.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post on non-lotted item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Auto Variance on lower sold cost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Auto Variance on higher sold cost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromStorage for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromStorage for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for Auto Variance on Sold or Used Stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">

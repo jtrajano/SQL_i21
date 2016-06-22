@@ -12,9 +12,14 @@
 						case when g.intEntitySalespersonId is not null then 'salesperson,' else '' end
 	--Contact
 	,con_name		= c.strName
-	,con_phone		= c.strPhone
+	,con_phone		= l.strPhone--c.strPhone
 	--,con_extension	= ''
-	,con_fax		= c.strFax
+	,con_fax		= (select top 1 strPhone from tblEMContactDetail a2
+							join tblEMEntityContactNumber b2
+								on a2.intContactDetailId = b2.intContactDetailId
+							join tblEMContactDetailType c2
+								on c2.intContactDetailTypeId = a2.intContactDetailTypeId
+								 and c2.strField = 'Fax' where a2.intEntityId = c.intEntityId) --c.strFax
 	,con_email		= c.strEmail
 	
 	--Location
@@ -69,3 +74,5 @@
 		on e.intGLAccountExpenseId = j.intAccountId
 	left join tblSMCompanyLocation k
 		on k.intCompanyLocationId = d.intWarehouseId
+	left join tblEMEntityPhoneNumber l
+		on l.intEntityId = c.intEntityId

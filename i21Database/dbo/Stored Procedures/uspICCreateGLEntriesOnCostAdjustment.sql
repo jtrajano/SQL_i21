@@ -12,8 +12,8 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
-		,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
-		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
+		--,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
+		--,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
 		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Auto-Variance'
 
 		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
@@ -24,8 +24,9 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
-		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		,@INV_TRANS_TYPE_Auto_Varianc_On_Sold_Or_Used_Stock AS INT = 35
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
@@ -42,8 +43,8 @@ INSERT INTO @GLAccounts (
 		intItemId 
 		,intItemLocationId 
 		,intInventoryId 
-		,intWriteOffSoldId 
-		,intRevalueSoldId 
+		--,intWriteOffSoldId 
+		--,intRevalueSoldId 
 		,intAutoNegativeId 
 		,intCostAdjustment 
 		,intRevalueWIP 
@@ -55,8 +56,8 @@ INSERT INTO @GLAccounts (
 SELECT	Query.intItemId
 		,Query.intItemLocationId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
-		,intWriteOffSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Write_Off_Sold) 
-		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_Sold) 
+		--,intWriteOffSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Write_Off_Sold) 
+		--,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_Sold) 
 		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Negative) 
 		,intCostAdjustment = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment) 
 		,intRevalueWIP = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_WIP) 
@@ -94,71 +95,71 @@ BEGIN
 END 
 ;
 
--- Check for missing Write-Off Sold Account Id
-IF EXISTS (
-	SELECT	TOP 1 1 
-	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-	WHERE	TRANS.strBatchId = @strBatchId
-			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Write_Off_Sold 
-)
-BEGIN 
-	SET @strItemNo = NULL
-	SET @intItemId = NULL
+---- Check for missing Write-Off Sold Account Id
+--IF EXISTS (
+--	SELECT	TOP 1 1 
+--	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+--				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+--	WHERE	TRANS.strBatchId = @strBatchId
+--			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Write_Off_Sold 
+--)
+--BEGIN 
+--	SET @strItemNo = NULL
+--	SET @intItemId = NULL
 
-	SELECT	TOP 1 
-			@intItemId = Item.intItemId 
-			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-			INNER JOIN dbo.tblICInventoryTransaction TRANS 
-				ON TRANS.intItemId = Item.intItemId			
-			INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				AND TRANS.intItemId = Item.intItemId
-	WHERE	ItemGLAccount.intWriteOffSoldId IS NULL 
+--	SELECT	TOP 1 
+--			@intItemId = Item.intItemId 
+--			,@strItemNo = Item.strItemNo
+--	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+--				ON Item.intItemId = ItemGLAccount.intItemId
+--			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+--				ON TRANS.intItemId = Item.intItemId			
+--			INNER JOIN dbo.tblICInventoryTransactionType TransType
+--				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+--				AND TRANS.intItemId = Item.intItemId
+--	WHERE	ItemGLAccount.intWriteOffSoldId IS NULL 
 	
-	IF @intItemId IS NOT NULL 
-	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Write_Off_Sold) 	
-		RETURN -1;
-	END 
-END 
-;
+--	IF @intItemId IS NOT NULL 
+--	BEGIN 
+--		-- {Item} is missing a GL account setup for {Account Category} account category.
+--		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Write_Off_Sold) 	
+--		RETURN -1;
+--	END 
+--END 
+--;
 
--- Check for missing Revalue Sold Account id
-IF EXISTS (
-	SELECT	TOP 1 1 
-	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-	WHERE	TRANS.strBatchId = @strBatchId
-			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold  
-)
-BEGIN 
-	SET @strItemNo = NULL
-	SET @intItemId = NULL
+---- Check for missing Revalue Sold Account id
+--IF EXISTS (
+--	SELECT	TOP 1 1 
+--	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+--				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+--	WHERE	TRANS.strBatchId = @strBatchId
+--			AND TransType.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold  
+--)
+--BEGIN 
+--	SET @strItemNo = NULL
+--	SET @intItemId = NULL
 
-	SELECT	TOP 1 
-			@intItemId = Item.intItemId 
-			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-			INNER JOIN dbo.tblICInventoryTransaction TRANS 
-				ON TRANS.intItemId = Item.intItemId			
-			INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				AND TRANS.intItemId = Item.intItemId
-	WHERE	ItemGLAccount.intRevalueSoldId IS NULL 
+--	SELECT	TOP 1 
+--			@intItemId = Item.intItemId 
+--			,@strItemNo = Item.strItemNo
+--	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+--				ON Item.intItemId = ItemGLAccount.intItemId
+--			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+--				ON TRANS.intItemId = Item.intItemId			
+--			INNER JOIN dbo.tblICInventoryTransactionType TransType
+--				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+--				AND TRANS.intItemId = Item.intItemId
+--	WHERE	ItemGLAccount.intRevalueSoldId IS NULL 
 	
-	IF @intItemId IS NOT NULL 
-	BEGIN 
-		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Revalue_Sold) 	
-		RETURN -1;
-	END 
-END 
-;
+--	IF @intItemId IS NOT NULL 
+--	BEGIN 
+--		-- {Item} is missing a GL account setup for {Account Category} account category.
+--		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Revalue_Sold) 	
+--		RETURN -1;
+--	END 
+--END 
+--;
 
 -- Check for missing Auto Variance Account Id
 IF EXISTS (
@@ -342,99 +343,188 @@ AS
 	WHERE	TRANS.strBatchId = @strBatchId
 )
 
------------------------------------------------------------------------------------
--- This part is for the Write-Off Sold 
------------------------------------------------------------------------------------
-SELECT	
-		dtmDate						= ForGLEntries_CTE.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= GLAccounts.intInventoryId
-		,dblDebit					= Debit.Value
-		,dblCredit					= Credit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'IWS'
-		,strReference				= ''
-		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription  = '' 
-		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= 0
-		,intUserId					= NULL 
-		,intEntityId				= @intEntityUserSecurityId
-		,strTransactionId			= ForGLEntries_CTE.strTransactionId
-		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm 
-		,strModuleName				= @ModuleName
-		,intConcurrencyId			= 1
-		,[dblDebitForeign]			= NULL
-		,[dblDebitReport]			= NULL
-		,[dblCreditForeign]			= NULL
-		,[dblCreditReport]			= NULL
-		,[dblReportingRate]			= NULL
-		,[dblForeignRate]			= NULL
-FROM	ForGLEntries_CTE 			
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
-			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Write_Off_Sold
-UNION ALL 
-SELECT	
-		dtmDate						= ForGLEntries_CTE.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= GLAccounts.intWriteOffSoldId
-		,dblDebit					= Credit.Value
-		,dblCredit					= Debit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'IWS' 
-		,strReference				= '' 
-		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
-		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-        ,strJournalLineDescription    = '' 
-		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
-		,ysnIsUnposted				= 0
-		,intUserId					= NULL  
-		,intEntityId				= @intEntityUserSecurityId
-		,strTransactionId			= ForGLEntries_CTE.strTransactionId
-		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName 
-		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
-		,strModuleName				= @ModuleName
-		,intConcurrencyId			= 1
-		,[dblDebitForeign]			= NULL
-		,[dblDebitReport]			= NULL
-		,[dblCreditForeign]			= NULL
-		,[dblCreditReport]			= NULL
-		,[dblReportingRate]			= NULL
-		,[dblForeignRate]			= NULL
-FROM	ForGLEntries_CTE 
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
-			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intWriteOffSoldId
-		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Write_Off_Sold
+-------------------------------------------------------------------------------------
+---- This part is for the Write-Off Sold 
+-------------------------------------------------------------------------------------
+--SELECT	
+--		dtmDate						= ForGLEntries_CTE.dtmDate
+--		,strBatchId					= @strBatchId
+--		,intAccountId				= GLAccounts.intInventoryId
+--		,dblDebit					= Debit.Value
+--		,dblCredit					= Credit.Value
+--		,dblDebitUnit				= 0
+--		,dblCreditUnit				= 0
+--		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+--		,strCode					= 'IWS'
+--		,strReference				= ''
+--		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+--		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+--		,dtmDateEntered				= GETDATE()
+--		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+--        ,strJournalLineDescription  = '' 
+--		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+--		,ysnIsUnposted				= 0
+--		,intUserId					= NULL 
+--		,intEntityId				= @intEntityUserSecurityId
+--		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+--		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+--		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm 
+--		,strModuleName				= @ModuleName
+--		,intConcurrencyId			= 1
+--		,[dblDebitForeign]			= NULL
+--		,[dblDebitReport]			= NULL
+--		,[dblCreditForeign]			= NULL
+--		,[dblCreditReport]			= NULL
+--		,[dblReportingRate]			= NULL
+--		,[dblForeignRate]			= NULL
+--FROM	ForGLEntries_CTE 			
+--		INNER JOIN @GLAccounts GLAccounts
+--			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+--			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+--			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+--		INNER JOIN dbo.tblGLAccount
+--			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+--		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
+--		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
+--WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Write_Off_Sold
+--UNION ALL 
+--SELECT	
+--		dtmDate						= ForGLEntries_CTE.dtmDate
+--		,strBatchId					= @strBatchId
+--		,intAccountId				= GLAccounts.intWriteOffSoldId
+--		,dblDebit					= Credit.Value
+--		,dblCredit					= Debit.Value
+--		,dblDebitUnit				= 0
+--		,dblCreditUnit				= 0
+--		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+--		,strCode					= 'IWS' 
+--		,strReference				= '' 
+--		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+--		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+--		,dtmDateEntered				= GETDATE()
+--		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+--        ,strJournalLineDescription    = '' 
+--		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+--		,ysnIsUnposted				= 0
+--		,intUserId					= NULL  
+--		,intEntityId				= @intEntityUserSecurityId
+--		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+--		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+--		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName 
+--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+--		,strModuleName				= @ModuleName
+--		,intConcurrencyId			= 1
+--		,[dblDebitForeign]			= NULL
+--		,[dblDebitReport]			= NULL
+--		,[dblCreditForeign]			= NULL
+--		,[dblCreditReport]			= NULL
+--		,[dblReportingRate]			= NULL
+--		,[dblForeignRate]			= NULL
+--FROM	ForGLEntries_CTE 
+--		INNER JOIN @GLAccounts GLAccounts
+--			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+--			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+--			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+--		INNER JOIN dbo.tblGLAccount
+--			ON tblGLAccount.intAccountId = GLAccounts.intWriteOffSoldId
+--		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
+--		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
+--WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Write_Off_Sold
+
+-------------------------------------------------------------------------------------
+---- This part is for the Revalue Sold 
+-------------------------------------------------------------------------------------
+--UNION ALL  
+--SELECT	
+--		dtmDate						= ForGLEntries_CTE.dtmDate
+--		,strBatchId					= @strBatchId
+--		,intAccountId				= GLAccounts.intInventoryId
+--		,dblDebit					= Debit.Value
+--		,dblCredit					= Credit.Value
+--		,dblDebitUnit				= 0
+--		,dblCreditUnit				= 0
+--		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+--		,strCode					= 'IRS' -- TODO
+--		,strReference				= '' -- TODO
+--		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+--		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+--		,dtmDateEntered				= GETDATE()
+--		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+--        ,strJournalLineDescription  = '' 
+--		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+--		,ysnIsUnposted				= 0
+--		,intUserId					= NULL 
+--		,intEntityId				= @intEntityUserSecurityId
+--		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+--		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+--		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+--		,strModuleName				= @ModuleName
+--		,intConcurrencyId			= 1
+--		,[dblDebitForeign]			= NULL
+--		,[dblDebitReport]			= NULL
+--		,[dblCreditForeign]			= NULL
+--		,[dblCreditReport]			= NULL
+--		,[dblReportingRate]			= NULL
+--		,[dblForeignRate]			= NULL
+--FROM	ForGLEntries_CTE
+--		INNER JOIN @GLAccounts GLAccounts
+--			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+--			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
+--			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+--		INNER JOIN dbo.tblGLAccount
+--			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+--		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
+--		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
+--WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
+--UNION ALL 
+--SELECT	
+--		dtmDate						= ForGLEntries_CTE.dtmDate
+--		,strBatchId					= @strBatchId
+--		,intAccountId				= GLAccounts.intRevalueSoldId
+--		,dblDebit					= Credit.Value
+--		,dblCredit					= Debit.Value
+--		,dblDebitUnit				= 0
+--		,dblCreditUnit				= 0
+--		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+--		,strCode					= 'IRS' 
+--		,strReference				= '' 
+--		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+--		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+--		,dtmDateEntered				= GETDATE()
+--		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+--        ,strJournalLineDescription  = '' 
+--		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+--		,ysnIsUnposted				= 0
+--		,intUserId					= NULL 
+--		,intEntityId				= @intEntityUserSecurityId
+--		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+--		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+--		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+--		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+--		,strModuleName				= @ModuleName
+--		,intConcurrencyId			= 1
+--		,[dblDebitForeign]			= NULL
+--		,[dblDebitReport]			= NULL
+--		,[dblCreditForeign]			= NULL
+--		,[dblCreditReport]			= NULL
+--		,[dblReportingRate]			= NULL
+--		,[dblForeignRate]			= NULL
+--FROM	ForGLEntries_CTE 
+--		INNER JOIN @GLAccounts GLAccounts
+--			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+--			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+--			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+--		INNER JOIN dbo.tblGLAccount
+--			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
+--		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
+--		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
+--WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Revalue_Sold
 
 -----------------------------------------------------------------------------------
--- This part is for the Revalue Sold 
+-- This part is for Auto Variance on Sold or Used Stock
 -----------------------------------------------------------------------------------
-UNION ALL  
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
@@ -444,8 +534,8 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'IRS' -- TODO
-		,strReference				= '' -- TODO
+		,strCode					= 'IAV' 
+		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -476,18 +566,18 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Varianc_On_Sold_Or_Used_Stock
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
-		,intAccountId				= GLAccounts.intRevalueSoldId
+		,intAccountId				= GLAccounts.intAutoNegativeId
 		,dblDebit					= Credit.Value
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
-		,strCode					= 'IRS' 
+		,strCode					= 'IAV' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -516,10 +606,10 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
+			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Revalue_Sold
+WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Auto_Varianc_On_Sold_Or_Used_Stock
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto-Negative 

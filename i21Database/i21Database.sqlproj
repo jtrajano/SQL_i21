@@ -1415,7 +1415,7 @@
     <Build Include="dbo\Tables\tblSMApprovalListUserSecurity.sql" />
     <Build Include="dbo\Views\vyuEMSalesperson.sql" />
     <Build Include="dbo\Tables\tblSMShortcutKeys.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdatePOStatusOnReceiptSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateStatusOnReceiptSave.sql" />
     <Build Include="dbo\Tables\tblCFItem.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentItemSource.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateFuturePrice.sql" />
@@ -1849,7 +1849,7 @@
     <Build Include="dbo\Views\vyuQMSampleList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetFIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdateSOStatusOnShipmentSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateStatusOnShipmentSave.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDCashFlowStatementDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReceived.sql" />
@@ -2797,7 +2797,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetEquityRefundDetails.sql" />
-    <Build Include="dbo\Views\vyuETExportCustomer.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
     <Build Include="dbo\Views\vyuARShipmentItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCleanCost.sql" />
@@ -3818,7 +3818,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByDay.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
     <Build Include="dbo\Views\vyuMFStockReservation.sql" />
-    <Build Include="dbo\Views\vyuCTContractExportET.sql" />
+    <Build Include="dbo\Views\vyuCTETExportContractExport.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOffsetAccountForOriginTrans.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountCode.sql" />
@@ -3883,7 +3883,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptDetail.sql" />
-    <Build Include="dbo\Views\vyuARCustomerBalancesForET.sql" />
+    <Build Include="dbo\Views\vyuARETExportCustomerBalances.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
@@ -3952,7 +3952,7 @@
     <Build Include="dbo\Functions\fnMFGetInvoiceChargesByShipment.sql" />
     <Build Include="dbo\Views\vyuEMETExportSalespersonDriver.sql" />
     <Build Include="dbo\Tables\tblEMEntityPasswordHistory.sql" />
-    <Build Include="dbo\Views\vyuETCustomerSpecialPricing_1.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomerSpecialPricing.sql" />
     <Build Include="dbo\Tables\tblARPOSPayment.sql" />
     <Build Include="dbo\Tables\tblARPOSLog.sql" />
     <Build Include="dbo\Tables\tblARPOSDetail.sql" />
@@ -3987,6 +3987,13 @@
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Stored Procedures\uspDMAlterConstraint.sql" />
     <Build Include="dbo\Stored Procedures\uspDMTruncateTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBalanceForwardReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFDefault.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGT103RunTax.sql" />
+    <Build Include="dbo\Functions\fnMaxNumeric.sql" />
+    <Build Include="dbo\Functions\fnMinNumeric.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

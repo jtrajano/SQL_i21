@@ -62,7 +62,7 @@ BEGIN TRY
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
         ,[intEntityCustomerId] = ccSite.intCustomerId
         ,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
-        ,[intCurrencyId] = 1
+        ,[intCurrencyId] = ccCustomer.intCurrencyId
         ,[intTermId] = ccCustomer.intTermsId
         ,[dtmDate] = ccSiteHeader.dtmDate
         ,[dtmShipDate]  = ccSiteHeader.dtmDate
@@ -82,7 +82,7 @@ BEGIN TRY
     INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
-    LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId
+    LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
     WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intDealerSiteId IS NOT NULL
 
     --REMOVE -1 items

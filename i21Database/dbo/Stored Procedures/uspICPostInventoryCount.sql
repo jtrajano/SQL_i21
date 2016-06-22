@@ -19,7 +19,7 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Count Transaction' + CAST(
 
 -- Constants  
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjusment'
+DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
 
 -- Get the Inventory Count batch number
 DECLARE @strBatchId AS NVARCHAR(40) 

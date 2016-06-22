@@ -146,6 +146,10 @@ USING	(
 		SELECT	id = 34
 				,name = 'Pick List'
 				,form = 'Pick List'
+		UNION ALL 
+		SELECT	id = 35
+				,name = 'Inventory Auto Variance on Negatively Sold or Used Stock'
+				,form = NULL
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
