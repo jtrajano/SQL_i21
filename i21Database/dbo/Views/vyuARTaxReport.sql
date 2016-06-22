@@ -50,8 +50,20 @@ SELECT TC.intTaxCodeId
 								ELSE (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId) 
 						  END
 	 , dblTaxable       = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') 
-								THEN (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId) * -1 
-								ELSE (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId) 
+								THEN (SELECT SUM(Taxable)
+										FROM 
+										(
+										SELECT SUM(dblTotal) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId)
+										UNION ALL
+										SELECT SUM(dblTotal) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax < 0 AND intInvoiceId = I.intInvoiceId)
+										) ABC) * -1 
+								ELSE (SELECT SUM(Taxable)
+										FROM 
+										(
+										SELECT SUM(dblTotal) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId)
+										UNION ALL
+										SELECT SUM(dblTotal) Taxable FROM tblARInvoiceDetail WHERE intInvoiceId IN (Select intInvoiceId FROM tblARInvoice WHERE dblTotalTax < 0 AND intInvoiceId = I.intInvoiceId)
+										) ABC) 
 						  END
 	 , dblTotalSales    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 								THEN I.dblInvoiceTotal * -1 

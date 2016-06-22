@@ -199,8 +199,10 @@ BEGIN
 			SELECT TOP 1 strItemNo
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+			JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = @strBlendAttributeValue
+				AND C.strCategoryCode = @strBlendAttributeValue
+				AND RI.intRecipeItemTypeId=1
 			) AS strWIPItemNo
 		,Row_number() OVER (
 			ORDER BY WS.intSequenceNo DESC
@@ -323,6 +325,7 @@ SELECT C.intManufacturingCellId
 		JOIN dbo.tblICCategory C on C.intCategoryId =WI.intCategoryId
 		WHERE RI.intRecipeId = R.intRecipeId
 			AND C.strCategoryCode = @strBlendAttributeValue
+			AND RI.intRecipeItemTypeId=1
 		) AS strWIPItemNo
 	,I.intItemId
 	,I.strItemNo

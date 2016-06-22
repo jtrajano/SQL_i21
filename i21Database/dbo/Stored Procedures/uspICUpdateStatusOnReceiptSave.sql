@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICUpdatePOStatusOnReceiptSave]
+﻿CREATE PROCEDURE [dbo].[uspICUpdateStatusOnReceiptSave]
 	@intReceiptNo INT,
 	@ysnOpenStatus BIT = 0
 AS
@@ -18,7 +18,7 @@ BEGIN
 			,@SourceTypeTransport AS INT = 3
 
 	-- Update the status of the Purchase Order
-	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptType = @ReceiptTypePurchaseOrder)
+	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptNo AND strReceiptType = @ReceiptTypePurchaseOrder)
 	BEGIN
 		SELECT	DISTINCT intOrderId 
 		INTO	#tmpPOList 
@@ -42,7 +42,7 @@ BEGIN
 	END
 
 	-- Update the Status of the Scale Ticket
-	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptType = @ReceiptTypePurchaseOrder AND intSourceType = @SourceTypeScale)
+	IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptNo AND intSourceType = @SourceTypeScale)
 	BEGIN
 		SELECT	DISTINCT intSourceId 
 		INTO	#tmpScaleTickets 

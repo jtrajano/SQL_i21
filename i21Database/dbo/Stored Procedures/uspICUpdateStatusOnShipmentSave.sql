@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICUpdateSOStatusOnShipmentSave]
+﻿CREATE PROCEDURE [dbo].[uspICUpdateStatusOnShipmentSave]
 	@intShipmentId INT
 	,@ysnOpenStatus	BIT = 0
 AS
