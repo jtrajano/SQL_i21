@@ -10,5 +10,5 @@
 	CONSTRAINT [PK_tblARCustomerLicenseModule] PRIMARY KEY CLUSTERED ([intCustomerLicenseModuleId] ASC),
 	CONSTRAINT [FK_tblARCustomerLicenseModule_tblARCustomerLicenseInformation] FOREIGN KEY ([intCustomerLicenseInformationId]) REFERENCES [dbo].[tblARCustomerLicenseInformation] ([intCustomerLicenseInformationId]) ON DELETE CASCADE,	
 	CONSTRAINT [UK_tblARCustomerLicenseModule_strModuleName_intCustomerLicenseInformationId] UNIQUE NONCLUSTERED ([strModuleName] ASC, [intCustomerLicenseInformationId] ASC), 
-    CONSTRAINT [FK_tblARCustomerLicenseModule_tblSMModule] FOREIGN KEY ([intModuleId]) REFERENCES [tblSMModule]([intModuleId])	
+    CONSTRAINT [FK_tblARCustomerLicenseModule_tblSMModule] FOREIGN KEY ([intModuleId]) REFERENCES [tblSMModule]([intModuleId]) ON DELETE CASCADE
 )
