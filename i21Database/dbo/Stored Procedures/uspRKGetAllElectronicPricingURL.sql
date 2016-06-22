@@ -21,9 +21,9 @@ BEGIN TRY
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId		
 		
-	SELECT @URL = strInterfaceWebServicesURL FROM tblRKCompanyPreference
+	SELECT @URL = ''--strInterfaceWebServicesURL FROM tblRKCompanyPreference
 	
-	SELECT @UserIdCaption = strUserName FROM tblRKCompanyPreference
+	SELECT @UserIdCaption ='' --strUserName FROM tblRKCompanyPreference
 
 	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
 	
