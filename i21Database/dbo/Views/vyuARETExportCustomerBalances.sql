@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuARCustomerBalancesForET]
+﻿CREATE VIEW [dbo].[vyuARETExportCustomerBalances]
 AS 
 SELECT
 	 blpatr				= ARCI.[strCustomerNumber]
