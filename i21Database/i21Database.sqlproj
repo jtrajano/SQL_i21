@@ -3994,6 +3994,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGT103RunTax.sql" />
     <Build Include="dbo\Functions\fnMaxNumeric.sql" />
     <Build Include="dbo\Functions\fnMinNumeric.sql" />
+    <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
