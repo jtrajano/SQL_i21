@@ -606,6 +606,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
                 search.title = "Print Count Sheets";
                 search.showNew = false;
+                search.showOpenSelected = false;
+                search.showExport = true;
                 search.multi = false;
                 search.show();
             };
