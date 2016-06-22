@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuETCustomerSpecialPricing]
+﻿CREATE VIEW [dbo].[vyuEMETExportCustomerSpecialPricing]
 	AS 
 
 	select 
