@@ -94,7 +94,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strItemDescription
 		, dblQtyToReceive = dblDetailQuantity - (dblDetailQuantity - dblBalance)
 		, intLoadToReceive = intNoOfLoad - intLoadReceived
-		, dblCashPrice
+		, dblSeqPrice
 		, dblTax = 0
 		, dblLineTotal = 0
 		, strLotTracking
@@ -118,9 +118,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblItemUOMConvFactor = ItemUOM.dblUnitQty
 		, dblWeightUOMConvFactor = GrossNetUOM.dblUnitQty
 		-- Cost UOM
-		, intCostUOMId = CostUOM.intItemUOMId 
-		, strCostUOM = CostUnitMeasure.strUnitMeasure
-		, dblCostUOMConvFactor = CostUOM.dblUnitQty
+		, intCostUOMId = ContractView.intSeqPriceUOMId
+		, strCostUOM = ContractView.strSeqPriceUOM
+		, dblCostUOMConvFactor = ContractView.dblQtyToPriceUOMConvFactor
 		, intLifeTime
 		, strLifeTimeType
 		, 0 AS ysnLoad
@@ -129,7 +129,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
 		, ysnSubCurrency = CAST(ContractView.ysnSubCurrency AS BIT)
-		, intCurrencyId = ISNULL( ISNULL(ContractView.intMainCurrencyId, ContractView.intCurrencyId), DefaultCurrency.intCurrencyID)
+		, intCurrencyId = ISNULL( ISNULL(ContractView.intSeqCurrencyId, ContractView.intCurrencyId), DefaultCurrency.intCurrencyID)
 		, strSubCurrency = CASE WHEN ContractView.ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ISNULL(ContractView.strMainCurrency, ISNULL(ContractView.strCurrency, DefaultCurrency.strCurrency)) END 
 		, dblGross = CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts. 
 		, dblNet = CAST(ContractView.dblNetWeight AS NUMERIC(38, 20))

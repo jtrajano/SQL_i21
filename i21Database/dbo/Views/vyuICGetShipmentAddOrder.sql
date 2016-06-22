@@ -94,12 +94,12 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, dblQtyOrdered = CASE WHEN ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
 		, dblQtyAllocated = ISNULL(dblAllocatedQty, 0)
 		, dblQtyShipped = 0
-		, dblUnitPrice = ISNULL(dblCashPrice, 0)
+		, dblUnitPrice = ISNULL(dblSeqPrice, 0)
 		, dblDiscount = 0
 		, dblTotal = 0
 		, dblQtyToShip = ISNULL(dblDetailQuantity, 0)
-		, dblPrice = ISNULL(dblCashPrice, 0)
-		, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblCashPrice, 0)
+		, dblPrice = ISNULL(dblSeqPrice, 0)
+		, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblSeqPrice, 0)
 		, intGradeId = NULL
 		, strGrade = NULL
 	FROM vyuCTContractDetailView ContractView
