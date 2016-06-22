@@ -121,7 +121,6 @@ BEGIN
 					ON E.intCustomerNumber = B.intEntityId
 				LEFT JOIN tblTMFillMethod F
 					ON C.intFillMethodId = F.intFillMethodId
-			GO
 		')
 	END
 END

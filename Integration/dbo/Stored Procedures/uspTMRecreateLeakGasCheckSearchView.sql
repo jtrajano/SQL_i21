@@ -132,7 +132,7 @@ BEGIN
 				CROSS APPLY fnTMLastLeakGasCheckTable(A.intSiteID) G
 				WHERE ISNULL(I.ysnAppliance,0) = 0
 					AND K.strDeviceType = ''Tank''
-			GO
+			
 		')
 	END
 END
