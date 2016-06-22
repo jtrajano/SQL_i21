@@ -27,7 +27,7 @@ BEGIN
     EXECUTE sp_executesql @SQLString;
 
     -- tblSMStartingNumber
-    SET @SQLString = N'EXEC(''MERGE tblSMStartingNumber AS Target
+    SET @SQLString = N'MERGE tblSMStartingNumber AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSMStartingNumber]) AS Source
         ON (Target.intStartingNumberId = Source.intStartingNumberId)
         WHEN MATCHED THEN
@@ -36,7 +36,7 @@ BEGIN
             INSERT (intStartingNumberId, strTransactionType, strPrefix, intNumber, strModule, ysnUseLocation, ysnEnable, intConcurrencyId)
             VALUES (Source.intStartingNumberId, Source.strTransactionType, Source.strPrefix, Source.intNumber, Source.strModule, Source.ysnUseLocation, Source.ysnEnable, Source.intConcurrencyId)
         WHEN NOT MATCHED BY SOURCE THEN
-            DELETE;'')';
+            DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     SET IDENTITY_INSERT tblSMStartingNumber ON
