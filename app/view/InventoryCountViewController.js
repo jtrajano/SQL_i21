@@ -891,6 +891,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('strSubLocationName', null);
                     current.set('intSubLocationId', null);
                     current.set('dblSystemCount', null);
+                    
+                    if(current.get('strCountLine') === '' || current.get('strCountLine') === null)
+                        {
+                            var win = combo.up('window');
+                            var currentItems = win.viewModel.data.current;
+                            var countDetail = currentItems.tblICInventoryCountDetails().data.items;
+                            var count = countDetail.length;
+
+                            current.set('strCountLine', currentItems.get('strCountNo') + '-' + count);
+                        }
                     break;
                 case 'cboSubLocation':
                     current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
@@ -907,7 +917,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
             }
-            ;
         }
     },
 
@@ -933,6 +942,21 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
     onCountGroupClick: function () {
         iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { action: 'new', viewConfig: { modal: true }});
+    },
+    
+    onGrdPhysicalClick: function(view, record, cellIndex, e, eOpts) {
+         var win = view.up('window');    
+         var current = win.viewModel.data.current;
+         var grid = view.up('grid');
+        
+        //Check if column is Item 
+        if(cellIndex === 1)
+            {
+               if(current.get('strCountNo') === null || current.get('strCountNo') === '')
+                {
+                    win.context.data.saveRecord ();
+                }
+            }
     },
 
     init: function (application) {
@@ -972,6 +996,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#cboLot": {
                 select: this.onInventoryCountDetailSelect
+            },
+            "#grdPhysicalCount": {
+                cellclick: this.onGrdPhysicalClick
             }
         });
     }
