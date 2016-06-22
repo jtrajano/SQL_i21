@@ -62,7 +62,7 @@ BEGIN TRY
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
         ,[intEntityCustomerId] = ccSite.intCustomerId
         ,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
-        ,[intCurrencyId] = 1
+        ,[intCurrencyId] = ccCustomer.intCurrencyId
         ,[intTermId] = ccCustomer.intTermsId
         ,[dtmDate] = ccSiteHeader.dtmDate
         ,[dtmShipDate]  = ccSiteHeader.dtmDate
