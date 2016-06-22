@@ -344,3 +344,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDevice',
     @level2type = N'COLUMN',
     @level2name = N'intLocationId'
+GO
+
+CREATE INDEX [IX_tblTMDevice_strSerialNumber] ON [dbo].[tblTMDevice] ([strSerialNumber])
