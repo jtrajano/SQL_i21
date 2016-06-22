@@ -978,6 +978,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromStorage for sell-add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromStorage for sell-add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromStorage for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntriesOnCostAdjustment for Auto Variance on Sold or Used Stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">

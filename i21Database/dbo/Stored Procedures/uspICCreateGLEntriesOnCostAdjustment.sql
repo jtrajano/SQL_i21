@@ -24,8 +24,8 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
-		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 		,@INV_TRANS_TYPE_Auto_Varianc_On_Sold_Or_Used_Stock AS INT = 35
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
@@ -566,7 +566,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Auto_Varianc_On_Sold_Or_Used_Stock
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -609,7 +609,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty) + ISNULL(dblValue, 0)) Credit
-WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Revalue_Sold
+WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Auto_Varianc_On_Sold_Or_Used_Stock
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto-Negative 
