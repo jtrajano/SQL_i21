@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuETExportCustomer]
+﻿CREATE VIEW [dbo].[vyuEMETExportCustomer]
 	AS 
 	
 	SELECT       
