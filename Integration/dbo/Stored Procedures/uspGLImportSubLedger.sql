@@ -210,7 +210,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			BEGIN
     				SELECT @debit = 0,@credit = 0,@debitUnit = 0,@creditUnit = 0, @creditUnitInLBS = 0 , @debitUnitInLBS = 0
     				IF NOT EXISTS (
-    					SELECT * FROM tblGLCOACrossReference WHERE REPLACE(CONVERT(VARCHAR(50),@glije_acct_no),''.'','''') = stri21IdNumber)
+    					SELECT * FROM tblGLCOACrossReference WHERE @glije_acct_no = strExternalId)
     				BEGIN
     					IF @importLogId = 0
     						EXEC uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
