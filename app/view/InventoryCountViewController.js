@@ -207,7 +207,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
-                        store: '{orderNumbers}',
+                        store: '{fromSubLocation}',
                         origValueField: 'intSubLocationId',
                         origUpdateField: 'intSubLocationId',
                         defaultFilters: [
@@ -239,7 +239,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colStorageLocation: {
                     dataIndex: 'strStorageLocationName',
                     editor: {
-                        store: '{orderNumbers}',
+                        store: '{fromStorageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
                         defaultFilters: [
@@ -880,6 +880,11 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('strItemDescription', records[0].get('strDescription'));
                     current.set('intCategoryId', records[0].get('intCategoryId'));
                     current.set('strCategory', records[0].get('strCategoryCode'));
+                    current.set('strStorageLocationName', null);
+                    current.set('intStorageLocationId', null);
+                    current.set('strSubLocationName', null);
+                    current.set('intSubLocationId', null);
+                    current.set('dblSystemCount', null);
                     break;
                 case 'cboSubLocation':
                     current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
@@ -887,6 +892,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
                 case 'cboStorageLocation':
+                    current.set('strSubLocationName', records[0].get('strSubLocationName'));
+                    current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
                 case 'cboLot':

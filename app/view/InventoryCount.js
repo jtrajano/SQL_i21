@@ -698,8 +698,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     }
                                                 ],
                                                 itemId: 'cboSubLocation',
-                                                displayField: 'strSubLocation',
-                                                valueField: 'strSubLocation'
+                                                displayField: 'strSubLocationName',
+                                                valueField: 'strSubLocationName'
                                             }
                                         },
                                         {
@@ -741,6 +741,11 @@ Ext.define('Inventory.view.InventoryCount', {
                                                         flex: 1
                                                     },
                                                     {
+                                                        dataIndex: 'strSubLocationName',
+                                                        dataType: 'string',
+                                                        hidden: true
+                                                    },
+                                                    {
                                                         dataIndex: 'dblOnHand',
                                                         dataType: 'float',
                                                         text: 'Available Qty',
@@ -760,8 +765,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     }
                                                 ],
                                                 itemId: 'cboStorageLocation',
-                                                displayField: 'strName',
-                                                valueField: 'strName'
+                                                displayField: 'strStorageLocationName',
+                                                valueField: 'strStorageLocationName'
                                             }
                                         },
                                         {
