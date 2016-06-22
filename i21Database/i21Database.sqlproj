@@ -3995,6 +3995,7 @@
     <Build Include="dbo\Functions\fnMaxNumeric.sql" />
     <Build Include="dbo\Functions\fnMinNumeric.sql" />
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
+    <Build Include="dbo\Tables\tblSMTaxGroupCodeCategoryExemption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
