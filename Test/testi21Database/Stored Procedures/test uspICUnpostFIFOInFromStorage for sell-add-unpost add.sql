@@ -445,6 +445,15 @@ BEGIN
 			,strRelatedTransactionId			= NULL  
 			,intRelatedTransactionId			= NULL 
 			,intTransactionTypeId				= @InventoryReceipt
+		UNION ALL 
+		SELECT 
+			intInventoryTransactionStorageId	= 3
+			,intTransactionId					= 1
+			,strTransactionId					= 'InvRcpt-0000001'
+			,strRelatedTransactionId			= NULL  
+			,intRelatedTransactionId			= NULL 
+			,intTransactionTypeId				= @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
+
 
 		INSERT INTO actualTransactionToReverse
 		SELECT * FROM #tmpInventoryTransactionStockToReverse
