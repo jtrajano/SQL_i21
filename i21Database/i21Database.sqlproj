@@ -3984,6 +3984,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGT103InventoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGT103InvoiceTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGT103RunTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFDefault.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
     <Build Include="dbo\Views\vyuTMOutOfRangeBurnRateSearch.sql" />
