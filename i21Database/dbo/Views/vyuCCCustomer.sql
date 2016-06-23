@@ -11,8 +11,7 @@ SELECT A.intSiteId,
        D.intTermsId,
        B.intSalespersonId,
 	   C.strEntityNo AS strCustomerEntityNo,
-	   C.strName AS strCustomerName,
-	   B.intCurrencyId
+	   C.strName AS strCustomerName
 FROM dbo.tblCCSite AS A
 	INNER JOIN dbo.tblARCustomer AS B
 		ON B.intEntityCustomerId = A.intCustomerId

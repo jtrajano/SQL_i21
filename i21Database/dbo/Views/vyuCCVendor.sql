@@ -22,7 +22,8 @@ SELECT DISTINCT
 	A.strImportFileName,
 	A.strImportAuxiliaryFileName,
 	A.intImportFileHeaderId,
-	D.strAddress
+	D.strAddress,
+	B.intCurrencyId
 FROM
      dbo.tblCCVendorDefault A
 	INNER JOIN dbo.tblCCDealerSite AS I

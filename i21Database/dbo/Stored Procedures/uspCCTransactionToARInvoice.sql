@@ -61,8 +61,8 @@ BEGIN TRY
         ,[intSourceId] = null
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
         ,[intEntityCustomerId] = ccSite.intCustomerId
-        ,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
-        ,[intCurrencyId] = ccCustomer.intCurrencyId
+        ,[intCompanyLocationId] = ccVendor.intCompanyLocationId
+        ,[intCurrencyId] = ccVendor.intCurrencyId
         ,[intTermId] = ccCustomer.intTermsId
         ,[dtmDate] = ccSiteHeader.dtmDate
         ,[dtmShipDate]  = ccSiteHeader.dtmDate
@@ -78,7 +78,7 @@ BEGIN TRY
         ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
         ,[ysnInventory] = 1
     FROM tblCCSiteHeader ccSiteHeader 
-    INNER JOIN tblCCVendorDefault ccVendorDefault ON ccSiteHeader.intVendorDefaultId = ccVendorDefault.intVendorDefaultId 
+    INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
     INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
