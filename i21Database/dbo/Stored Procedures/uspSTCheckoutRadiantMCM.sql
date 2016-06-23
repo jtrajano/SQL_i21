@@ -13,7 +13,7 @@ BEGIN
 		, Cat.intCategoryId
 		, ISNULL(CAST(Chk.SalesQuantity as int),0) [intTotalSalesCount]
 		, (CASE WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' 
-			THEN ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)   
+			THEN ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0)
 			WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' 
 			THEN ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
 		   END) [dblTotalSalesAmount]
@@ -44,7 +44,7 @@ BEGIN
 		UPDATE dbo.tblSTCheckoutDepartmetTotals  
 		SET intTotalSalesCount = ISNULL(CAST(Chk.SalesQuantity AS INT),0),
 		dblTotalSalesAmount = (CASE WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' 
-			THEN ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)   
+			THEN ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) 
 			WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' 
 			THEN ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
 		   END)
