@@ -106,6 +106,24 @@ Begin
 Select @intWorkOrderId=intWorkOrderId From @tblWorkOrder
 Select @intPickListId=intPickListId,@intBlendItemId=intItemId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
+If (Select intKitStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) = 8
+Begin
+	Set @ErrMsg='The Blend Sheet is already transferred.'
+	RaisError(@ErrMsg,16,1)
+End
+
+If (Select intKitStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) <> 12 
+Begin
+	Set @ErrMsg='The Blend Sheet is not staged.'
+	RaisError(@ErrMsg,16,1)
+End
+
+If (Select intStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) = 13
+Begin
+	Set @ErrMsg='The Blend Sheet is already completed.'
+	RaisError(@ErrMsg,16,1)
+End
+
 If (Select COUNT(1) From tblMFWorkOrder Where intPickListId=@intPickListId)=1
 Begin Try
 	Begin Tran
