@@ -11,7 +11,7 @@
 	[strPosition] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[strContractStatus] [nvarchar](50)  COLLATE Latin1_General_CI_AS NULL,
 	[intContractSeq] [int] NULL,
-	[strCompanyLocation] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
+	[strLocationName] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmStartDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
 	[strItem] [nvarchar](256)  COLLATE Latin1_General_CI_AS NULL,

@@ -184,7 +184,7 @@ BEGIN TRY
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CM.intCommodityId	 		
 												AND	CU.intUnitMeasureId =	IU.intUnitMeasureId		LEFT
 		JOIN	tblSMCurrency				CY	ON	CY.strCurrency		=	CI.strCurrency			LEFT
-		JOIN	tblSMCompanyLocation		CL	ON	CL.strLocationName	=	CI.strCompanyLocation	LEFT
+		JOIN	tblSMCompanyLocation		CL	ON	CL.strLocationName	=	CI.strLocationName		LEFT
 		JOIN	tblCTCropYear				CP	ON	CP.strCropYear		=	CI.strCropYear			
 												AND	CP.intCommodityId	=	CM.intCommodityId		LEFT
 		JOIN	tblCTPosition				PN	ON	PN.strPosition		=	CI.strPosition			LEFT

@@ -4009,6 +4009,7 @@
     <Build Include="dbo\Functions\fnGLGetExchangeRate.sql" />
     <Build Include="dbo\Views\vyuPREmployeeW2.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMergeRole.sql" />
+    <Build Include="dbo\Views\vyuCTContractImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

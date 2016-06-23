@@ -10,9 +10,14 @@ BEGIN TRY
 			@intContractDetailId		INT,
 			@dblCashPrice				NUMERIC(18,6),
 			@intPricingTypeId			INT,
-			@ysnMultiplePriceFixation	BIT
+			@ysnMultiplePriceFixation	BIT,
+			@strContractNumber			NVARCHAR(100)
 	
-	SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
+			@strContractNumber			=	strContractNumber
+	FROM	tblCTContractHeader 
+	WHERE	intContractHeaderId			=	@intContractHeaderId
+
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	
 	WHILE ISNULL(@intContractDetailId,0) > 0
@@ -45,6 +50,14 @@ BEGIN TRY
 	END
 	
 	EXEC uspCTUpdateAdditionalCost @intContractHeaderId
+
+	IF EXISTS(SELECT * FROM tblCTContractImport WHERE strContractNumber = @strContractNumber AND ysnImported = 0)
+	BEGIN
+		UPDATE	tblCTContractImport
+		SET		ysnImported = 1,
+				intContractHeaderId = @intContractHeaderId
+		WHERE	strContractNumber = @strContractNumber AND ysnImported = 0
+	END
 
 END TRY
 

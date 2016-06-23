@@ -17,7 +17,7 @@ BEGIN TRY
 			strCropYear,
 			strPosition,
 
-			strCompanyLocation,
+			strLocationName,
 			dtmStartDate,
 			dtmEndDate,
 			strItem,
