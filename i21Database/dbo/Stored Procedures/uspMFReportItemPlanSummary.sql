@@ -131,8 +131,8 @@ BEGIN
 	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		--AND II.intCategoryId = @intCategoryId
-		AND II.strType = @strBlendAttributeValue
+	JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
+		AND C.strCategoryCode = @strBlendAttributeValue
 	WHERE S.ysnStandard = 1
 		AND CD.dtmCalendarDate <= @dtmCurrentDate
 	GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
@@ -330,8 +330,8 @@ BEGIN
 	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		--AND II.intCategoryId = @intCategoryId
-		AND II.strType = @strBlendAttributeValue
+		JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
+		AND C.strCategoryCode = @strBlendAttributeValue
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	
 	UNION
@@ -343,8 +343,8 @@ BEGIN
 		,CL.strLocationName
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-		--AND intCategoryId = @intCategoryId
-		AND I.strType = @strBlendAttributeValue
+	JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		AND C.strCategoryCode = @strBlendAttributeValue
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	WHERE L.dblWeight > 0
 

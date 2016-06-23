@@ -59,7 +59,7 @@ BEGIN
 
 	SELECT @strNoOfDays = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strNoOfDays'
+	WHERE [fieldname] = 'NoOfDays'
 
 	IF @strNoOfDays = ''
 		OR @strNoOfDays IS NULL
@@ -71,7 +71,7 @@ BEGIN
 
 	SELECT @strShowOpenWorkOrder = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strShowOpenWorkOrder'
+	WHERE [fieldname] = 'ShowOpenWorkOrder'
 
 	IF @strShowOpenWorkOrder = ''
 		OR @strShowOpenWorkOrder IS NULL
@@ -81,7 +81,7 @@ BEGIN
 
 	SELECT @strShowFrozenWorkOrder = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strShowFrozenWorkOrder'
+	WHERE [fieldname] = 'ShowFrozenWorkOrder'
 
 	IF @strShowFrozenWorkOrder = ''
 		OR @strShowFrozenWorkOrder IS NULL
@@ -91,7 +91,7 @@ BEGIN
 
 	SELECT @strShowPausedWorkOrder = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strShowPausedWorkOrder'
+	WHERE [fieldname] = 'ShowPausedWorkOrder'
 
 	IF @strShowPausedWorkOrder = ''
 		OR @strShowPausedWorkOrder IS NULL
@@ -101,7 +101,7 @@ BEGIN
 
 	SELECT @strShowReleasedWorkOrder = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strShowReleasedWorkOrder'
+	WHERE [fieldname] = 'ShowReleasedWorkOrder'
 
 	IF @strShowReleasedWorkOrder = ''
 		OR @strShowReleasedWorkOrder IS NULL
@@ -111,7 +111,7 @@ BEGIN
 
 	SELECT @strShowStartedWorkOrder = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strShowStartedWorkOrder'
+	WHERE [fieldname] = 'ShowStartedWorkOrder'
 
 	IF @strShowStartedWorkOrder = ''
 		OR @strShowStartedWorkOrder IS NULL
@@ -121,7 +121,7 @@ BEGIN
 
 	SELECT @strItemNo = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strItemNo'
+	WHERE [fieldname] = 'Blend'
 
 	IF @strItemNo = ''
 		OR @strItemNo IS NULL
@@ -131,21 +131,21 @@ BEGIN
 
 	SELECT @strCompanyLocationName = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strCompanyLocationName'
+	WHERE [fieldname] = 'Location'
 
 	IF @strCompanyLocationName IS NULL
 		SELECT @strCompanyLocationName = ''
 
 	SELECT @strItemGroupName = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strItemGroupName'
+	WHERE [fieldname] = 'ItemGroupName'
 
 	IF @strItemGroupName IS NULL
 		SELECT @strItemGroupName = ''
 
 	SELECT @strShowStorage = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strShowStorage'
+	WHERE [fieldname] = 'ShowStorage'
 
 	IF @strShowStorage IS NULL
 	BEGIN
@@ -377,7 +377,7 @@ BEGIN
 			,I.strDescription
 			,CL.intCompanyLocationId
 			,CL.strLocationName
-			,SUM(RI.dblCalculatedQuantity * SWD.dblPlannedQty)
+			,SUM(RI.dblCalculatedQuantity * Round(SWD.dblPlannedQty,0))
 			,'' AS strName
 			,CD.dtmCalendarDate
 			,'' strWorkInstruction
@@ -418,7 +418,7 @@ BEGIN
 			,I.strDescription
 			,CL.intCompanyLocationId
 			,CL.strLocationName
-			,dtmCalendarDate
+			,CD.dtmCalendarDate
 		ORDER BY I.strItemNo
 			,CD.dtmCalendarDate
 			,W.strWorkOrderNo
@@ -1031,11 +1031,11 @@ BEGIN
 	WHERE intDisplayOrder = 0
 
 	UPDATE @tblMFFinalWIPItem
-	SET dtmPlannedDateTime = '1900-01-01'
+	SET dtmPlannedDateTime = '1900-01-01',strCellName='1900-01-01'
 	WHERE intDisplayOrder = 1
 
 	UPDATE @tblMFFinalWIPItem
-	SET dtmPlannedDateTime = '1900-01-02'
+	SET dtmPlannedDateTime = '1901-01-02',strCellName='1901-01-02'
 	WHERE intDisplayOrder IN (
 			2
 			,3
