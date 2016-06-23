@@ -45,7 +45,7 @@
     [dtmDeferDate] DATETIME NULL, 
     [strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intContractSequence] INT NULL, 
-    [strContractLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
+    [strContractLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblUnitPrice] DECIMAL(9, 5) NULL, 
     [dblUnitBasis] DECIMAL(9, 5) NULL, 
     [dblTicketFees] DECIMAL(7, 2) NULL, 

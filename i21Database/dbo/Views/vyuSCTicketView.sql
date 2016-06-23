@@ -41,6 +41,8 @@
        tblSCTicket.intTareUserId,
        tblSCTicket.dblGrossUnits,
        tblSCTicket.dblNetUnits,
+	   (tblSCTicket.dblGrossWeight - tblSCTicket.dblTareWeight)
+	   AS dblNetWeight,
        tblSCTicket.strItemNumber,
        tblSCTicket.strItemUOM,
        tblSCTicket.intCustomerId,
@@ -126,7 +128,8 @@
 	   tblICInventoryReceipt.intInventoryReceiptId,
 	   tblICInventoryReceipt.strReceiptNumber,
 	   vyuICGetInventoryShipmentItem.intInventoryShipmentId,
-	   vyuICGetInventoryShipmentItem.strShipmentNumber
+	   vyuICGetInventoryShipmentItem.strShipmentNumber,
+	   tblEMEntityFarm.strFarmDescription
   from ((tblSCTicket tblSCTicket
 	left join tblEMEntity tblEMEntity
        on (tblEMEntity.intEntityId = tblSCTicket.intEntityId)
@@ -154,3 +157,5 @@
 	   on  tblICInventoryReceipt.intInventoryReceiptId = tblSCTicket.intInventoryReceiptId
 	left join vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem
 	   on  vyuICGetInventoryShipmentItem.intSourceId = tblSCTicket.intTicketId
+	left join tblEMEntityFarm tblEMEntityFarm
+	   on tblEMEntityFarm.intFarmFieldId = tblSCTicket.intFarmFieldId
