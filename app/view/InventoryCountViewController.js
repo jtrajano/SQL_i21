@@ -439,7 +439,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
                     filter.push({
                         column: 'intCategoryId',
@@ -447,7 +447,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
                     filter.push({
                         column: 'intCommodityId',
@@ -455,7 +455,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
                     filter.push({
                         column: 'intCountGroupId',
@@ -463,7 +463,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
                     filter.push({
                         column: 'intSubLocationId',
@@ -471,7 +471,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
                     filter.push({
                         column: 'intStorageLocationId',
@@ -479,8 +479,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
-
+               
+                if(current.get('ysnIncludeZeroOnHand') === false){
+                        filter.push({
+                        column: 'dblOnHand',
+                        value: 0,
+                        condition: 'gt',
+                        conjunction: 'and'
+                    });
+                }
+                
                 if (current.get('ysnCountByLots')) {
                     itemList = vm.storeInfo.itemListByLot;
                 }
@@ -1007,7 +1015,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 click: this.onPostClick
             },
             "#btnRecap": {
-                click: this.onPostClick
+                click: this.onRecapClick
             },
             "#cboItem": {
                 select: this.onInventoryCountDetailSelect
