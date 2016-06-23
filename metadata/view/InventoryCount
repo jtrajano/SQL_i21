@@ -1833,7 +1833,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboUOM",
-                                                        "valueField": "intItemUOMId"
+                                                        "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox1",
                                                     "configAlternates": {

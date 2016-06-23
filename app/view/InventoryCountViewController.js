@@ -315,7 +315,25 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 },
                 colPhysicalCount: 'dblPhysicalCount',
                 colUOM: {
-                    dataIndex: 'strUnitMeasure'
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUOMId',
+                        store: '{itemUOM}',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdPhysicalCount.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
                 },
                 colPhysicalCountStockUnit: 'dblPhysicalCountStockUnit',
                 colVariance: 'dblVariance',

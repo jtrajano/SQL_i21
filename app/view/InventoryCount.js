@@ -941,7 +941,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                 ],
                                                 itemId: 'cboUOM',
                                                 displayField: 'strUnitMeasure',
-                                                valueField: 'intItemUOMId'
+                                                valueField: 'strUnitMeasure'
                                             }
                                         },
                                         {
