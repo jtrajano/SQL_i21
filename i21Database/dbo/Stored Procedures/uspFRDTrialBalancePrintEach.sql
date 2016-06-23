@@ -14,7 +14,7 @@ DECLARE @intRefNo INT = 1
 DECLARE @intSort INT = 1
 DECLARE @strRelatedRows NVARCHAR(MAX) = ''
 
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Column Name',	'',	'',	'',	'', '',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Column Name - Page Header',	'',	'',	'',	'', '',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 SET @intRefNo = @intRefNo + 1
 SET @intSort = @intSort + 1;
