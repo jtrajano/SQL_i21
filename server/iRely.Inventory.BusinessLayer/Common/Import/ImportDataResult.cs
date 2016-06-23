@@ -11,6 +11,8 @@ namespace iRely.Inventory.BusinessLayer
         public string Info { get; set; }
         public string Description { get; set; }
         private List<ImportDataMessage> messages;
+        public bool IsUpdate { get; set; }
+        public int Rows { get; set; }
 
         public ImportDataResult()
         {

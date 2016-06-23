@@ -153,6 +153,20 @@ namespace iRely.Inventory.BusinessLayer
             if (context.GetQuery<tblICItemAccount>().Any(t => t.intItemId == fc.intItemId 
                 && (t.intItemAccountId == fc.intItemAccountId || t.intAccountCategoryId == fc.intAccountCategoryId)))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The account already exists. The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
                 var entry = context.ContextManager.Entry<tblICItemAccount>(context.GetQuery<tblICItemAccount>().First(
                     t => t.intItemId == fc.intItemId
                 && (t.intItemAccountId == fc.intItemAccountId || t.intAccountCategoryId == fc.intAccountCategoryId)));

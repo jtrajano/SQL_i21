@@ -44,6 +44,20 @@ namespace iRely.Inventory.BusinessLayer
 
             if (context.GetQuery<tblICRinFeedStock>().Any(t => t.strRinFeedStockCode == fc.strRinFeedStockCode))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The record already exists: " + fc.strRinFeedStockCode + ". The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
                 var entry = context.ContextManager.Entry<tblICRinFeedStock>(context.GetQuery<tblICRinFeedStock>().First(t => t.strRinFeedStockCode == fc.strRinFeedStockCode));
 
                 entry.Property(e => e.strDescription).CurrentValue = fc.strDescription;

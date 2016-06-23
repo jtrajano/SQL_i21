@@ -41,6 +41,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                         url: '../Inventory/api/ImportData/Import',
                         file: file,
                         importType: params.type,
+                        allowOverwrite: params.allowOverwrite,
                         params: params.params,
                         method: params.method,
                         callback: function(records, success, options) {
@@ -65,6 +66,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
     show: function(cfg) {
         var me = this;
         me.formParams = cfg.param;
+        me.getView().setTitle(cfg.param.title + ' from CSV File');
     },
 
     init: function(application) {
@@ -92,7 +94,8 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                'X-File-Name': p.file.name,
                'X-File-Size': p.file.size,
                'X-File-Type': p.file.type,
-               'X-Import-Type': p.importType
+               'X-Import-Type': p.importType,
+               'X-Import-Allow-Overwrite': p.allowOverwrite ? "true" : "false"
             },
             data: p.file,
             processData: false,
@@ -105,6 +108,9 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
                 var type = 'info';
                 var msg = "File imported successfully.";
                 var json = JSON.parse(jqXHR.responseText);
+                if(json.rows == 0)
+                    msg = "There's nothing to import.";
+
                 if (json.result.Info == "warning") {
                     type = "warning";
                     msg = "File imported successfully with warnings.";
@@ -127,7 +133,7 @@ Ext.define('Inventory.view.ImportDataFromCsvViewController', {
             error: function(jqXHR, status, error) {
                 iRely.Msg.close();
                 var json = JSON.parse(jqXHR.responseText);
-                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
+                i21.functions.showCustomDialog('error', 'ok', 'Import completed with error(s)! ' + json.info,
                     function() {
                         win.close();
 

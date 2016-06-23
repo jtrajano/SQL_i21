@@ -38,6 +38,8 @@ namespace iRely.Inventory.WebApi.Controllers
             {
                 var data = await Request.Content.ReadAsByteArrayAsync();
                 var type = Request.Headers.GetValues("X-Import-Type").First();
+                GlobalSettings.Instance.AllowOverwriteOnImport = bool.Parse(Request.Headers.GetValues("X-Import-Allow-Overwrite").First());
+
                 var output = func(data, type);
                 if (output.Info == "error")
                 {
@@ -46,6 +48,7 @@ namespace iRely.Inventory.WebApi.Controllers
                         success = false,
                         info = output.Description != null ? output.Description : "Error(s) found during import.",
                         messages = output.Messages,
+                        rows = output.Rows,
                         result = output
                     };
                     return Request.CreateResponse(HttpStatusCode.BadRequest, response);
@@ -56,6 +59,7 @@ namespace iRely.Inventory.WebApi.Controllers
                     {
                         success = true,
                         messages = output.Messages,
+                        rows = output.Rows,
                         result = output
                     };
                     return Request.CreateResponse(HttpStatusCode.OK, response);

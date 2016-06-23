@@ -58,6 +58,19 @@ namespace iRely.Inventory.BusinessLayer
 
             if (context.GetQuery<tblICUnitMeasure>().Any(t => t.strUnitMeasure == fc.strUnitMeasure))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The record already exists: " + fc.strUnitMeasure + ". The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
                 var entry = context.ContextManager.Entry<tblICUnitMeasure>(context.GetQuery<tblICUnitMeasure>().First(t => t.strUnitMeasure == fc.strUnitMeasure));
                 entry.Property(e => e.strSymbol).CurrentValue = fc.strSymbol;
                 entry.Property(e => e.strUnitType).CurrentValue = fc.strUnitType;

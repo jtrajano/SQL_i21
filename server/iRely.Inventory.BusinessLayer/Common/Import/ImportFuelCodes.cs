@@ -44,6 +44,20 @@ namespace iRely.Inventory.BusinessLayer
 
             if (context.GetQuery<tblICRinFuel>().Any(t => t.strRinFuelCode == fc.strRinFuelCode))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The record already exists: " + fc.strRinFuelCode + ". The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
                 var entry = context.ContextManager.Entry<tblICRinFuel>(context.GetQuery<tblICRinFuel>().First(t => t.strRinFuelCode == fc.strRinFuelCode));
 
                 entry.Property(e => e.strDescription).CurrentValue = fc.strDescription;

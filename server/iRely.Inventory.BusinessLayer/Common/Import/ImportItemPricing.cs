@@ -171,6 +171,20 @@ namespace iRely.Inventory.BusinessLayer
 
             if (context.GetQuery<tblICItemPricing>().Any(t => t.intItemLocationId == fc.intItemLocationId && t.intItemId == fc.intItemId))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The item pricing already exists. The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
                 var entry = context.ContextManager.Entry<tblICItemPricing>(context.GetQuery<tblICItemPricing>().First(t => t.intItemLocationId == fc.intItemLocationId && t.intItemId == fc.intItemId));
                 entry.Property(e => e.intItemId).CurrentValue = fc.intItemId;
                 entry.Property(e => e.intItemLocationId).CurrentValue = fc.intItemLocationId;

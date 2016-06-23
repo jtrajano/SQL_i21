@@ -25,14 +25,15 @@ Ext.define('Inventory.view.OriginConversionOption', {
         'Ext.form.Label'
     ],
 
-    autoScroll: true,
-    height: 1211,
-    width: 628,
+    height: 409,
 
     items: [
         {
             xtype: 'toolbar',
+            height: 30,
+            maxHeight: 30,
             ui: 'i21-toolbar',
+            anchorSize: 30,
             items: [
                 {
                     xtype: 'button',
@@ -156,17 +157,30 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             }
                         ]
                     }
+                },
+                {
+                    xtype: 'button',
+                    itemId: 'btnAllowOverwrite',
+                    ui: 'i21-button-toolbar-small',
+                    enableToggle: true,
+                    text: 'Overwrite Existing Record',
+                    tooltip: 'When checked, existing records that are matched to the records in the file will be overwritten.',
+                    tooltipType: 'title'
                 }
             ]
         },
         {
             xtype: 'panel',
             border: false,
-            height: 1128,
+            height: 1097,
             itemId: 'pnlImportOrigin',
             margin: '0 0 5 0',
             bodyPadding: 10,
             title: 'Inventory Data Import',
+            layout: {
+                type: 'vbox',
+                align: 'stretch'
+            },
             items: [
                 {
                     xtype: 'container',

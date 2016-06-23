@@ -92,12 +92,16 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 break;
         }
 
-        if (type != null)
+        var allowOverwrite = this.view.viewModel.getData().allowOverwrite;
+
+        if (type != null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
                 method: "POST",
-                title: button.text
+                title: button.text,
+                allowOverwrite: allowOverwrite
             });
+        }
     },
 
     init: function(application) {
@@ -109,8 +113,16 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
             "icoriginconversionoption menuitem": {
                 click: this.onExportCsvTemplate
+            },
+
+            "#btnAllowOverwrite": {
+                toggle: this.onAllowOverwriteCheckChange
             }
         });
+    },
+
+    onAllowOverwriteCheckChange: function(button, state) {
+        this.view.viewModel.setData({ allowOverwrite: state });
     },
 
     onExportCsvTemplate: function(button, e, eOpts) {

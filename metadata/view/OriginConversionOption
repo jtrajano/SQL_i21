@@ -6,12 +6,11 @@
     },
     "codeClass": null,
     "userConfig": {
-        "autoScroll": true,
         "designer|userAlias": "icoriginconversionoption",
         "designer|userClassName": "OriginConversionOption",
-        "height": 1211,
+        "height": 409,
         "layout": null,
-        "width": 628
+        "width": null
     },
     "name": "MyContainer12",
     "designerId": "467f343c-c005-4700-bed6-351559b316d7",
@@ -26,7 +25,10 @@
             },
             "codeClass": null,
             "userConfig": {
+                "anchorSize": 30,
                 "designer|uiInterfaceName": "i21-toolbar",
+                "height": 30,
+                "maxHeight": 30,
                 "ui": "i21-toolbar"
             },
             "name": "MyToolbar1",
@@ -382,6 +384,28 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "type": "Ext.button.Button",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|uiInterfaceName": "i21-button-toolbar-small",
+                        "enableToggle": true,
+                        "itemId": "btnAllowOverwrite",
+                        "layout|flex": null,
+                        "text": "Overwrite Existing Record",
+                        "tooltip": [
+                            "When checked, existing records that are matched to the records in the file will be overwritten."
+                        ],
+                        "tooltipType": "title",
+                        "ui": "i21-button-toolbar-small"
+                    },
+                    "name": "MyButton7",
+                    "designerId": "ecbdc451-68ce-4792-ae80-6f659b424e1e"
                 }
             ]
         },
@@ -395,8 +419,10 @@
             "userConfig": {
                 "bodyPadding": 10,
                 "border": false,
-                "height": 1128,
+                "container|align": "stretch",
+                "height": 1097,
                 "itemId": "pnlImportOrigin",
+                "layout": "vbox",
                 "margin": "0 0 5 0",
                 "title": "Inventory Data Import"
             },
