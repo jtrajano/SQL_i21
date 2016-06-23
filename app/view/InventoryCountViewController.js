@@ -898,8 +898,32 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                             var currentItems = win.viewModel.data.current;
                             var countDetail = currentItems.tblICInventoryCountDetails().data.items;
                             var count = countDetail.length;
-
-                            current.set('strCountLine', currentItems.get('strCountNo') + '-' + count);
+                            var strCountLine = currentItems.get('strCountNo') + '-' + count;
+                            var countLength = 0;
+                            
+                            if (count === 1)
+                                {
+                                    current.set('strCountLine', strCountLine);
+                                }
+                            
+                            if(count > 1)
+                                {
+                                   Ext.Array.each(currentItems.tblICInventoryCountDetails().data.items, function (item) {
+                                            if (!item.dummy) {
+                                                 countLength++;
+                                                    if(countLength == count -1)
+                                                        {
+                                                            var itemCountLine =  item.get('strCountLine') + '';
+                                                            var strCountLineSplit = itemCountLine.split('-');
+                                                            count = parseInt(strCountLineSplit[2]) + 1;
+                                                            strCountLine = currentItems.get('strCountNo') + '-' + count;
+                                                            current.set('strCountLine', strCountLine);
+                                                        }
+                                                }
+                                            
+                                    });   
+                                }
+                            
                         }
                     break;
                 case 'cboSubLocation':
