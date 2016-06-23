@@ -76,7 +76,7 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        public SaveResult LockInventory(int InventoryCountId, bool ysnLock = true)
+        public SaveResult LockInventory(int InventoryCountId, bool ysnLock)
         {
             var postResult = new SaveResult();
             try
