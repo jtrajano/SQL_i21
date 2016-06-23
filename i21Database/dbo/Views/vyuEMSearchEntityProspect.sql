@@ -11,7 +11,8 @@ SELECT
         e.strCity,  
         e.strState,  
         e.strZipCode,
-		b.strType
+		b.strType,
+		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC)
     FROM         
             tblEMEntity a
         join [tblEMEntityType] b
@@ -23,4 +24,5 @@ SELECT
         left join [tblEMEntityToContact] f  
             on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
         left join tblEMEntity g  
-            on f.intEntityContactId = g.intEntityId  
+            on f.intEntityContactId = g.intEntityId
+
