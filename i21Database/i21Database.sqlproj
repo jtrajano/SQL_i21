@@ -3997,6 +3997,7 @@
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupCodeCategoryExemption.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBatchPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMergeRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
