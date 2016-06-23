@@ -4006,6 +4006,7 @@
     <Build Include="dbo\Stored Procedures\uspCMBatchPosting.sql" />
     <Build Include="dbo\Views\vyuGLExchangeRate.sql" />
     <Build Include="dbo\Functions\fnGLGetExchangeRate.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeW2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
