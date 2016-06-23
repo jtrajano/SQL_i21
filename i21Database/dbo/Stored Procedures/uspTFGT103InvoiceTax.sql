@@ -101,8 +101,7 @@ DECLARE @tblTempTransaction TABLE (
 	SET @RCId = (SELECT intReportingComponentId FROM @tblTempReportingComponent WHERE intId = @CountRC)
 
 	-- ORIGIN
-		DECLARE @IncludeValidOriginState nvarchar(MAX)
-		
+		DECLARE @IncludeValidOriginState NVARCHAR(MAX) = NULL
 		SELECT @IncludeValidOriginState = COALESCE(@IncludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentDetailId = @RCId AND strFilter = 'Include'
 		IF(@IncludeValidOriginState IS NOT NULL)
 			BEGIN
@@ -114,7 +113,7 @@ DECLARE @tblTempTransaction TABLE (
 				SET @IncludeOriginState = ''
 			END
 
-		DECLARE @ExcludeValidOriginState nvarchar(MAX)
+		DECLARE @ExcludeValidOriginState NVARCHAR(MAX) = NULL
 		SELECT @ExcludeValidOriginState = COALESCE(@ExcludeValidOriginState + ',', '') + strOriginState FROM tblTFValidOriginState WHERE intReportingComponentDetailId = @RCId AND strFilter = 'Exclude'
 		IF(@ExcludeValidOriginState IS NOT NULL)
 			BEGIN
@@ -127,7 +126,7 @@ DECLARE @tblTempTransaction TABLE (
 			END
 
 		-- DESTINATION
-		DECLARE @IncludeValidDestinationState nvarchar(MAX)
+		DECLARE @IncludeValidDestinationState NVARCHAR(MAX) = NULL
 		SELECT @IncludeValidDestinationState = COALESCE(@IncludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentDetailId = @RCId AND strStatus = 'Include'
 		IF(@IncludeValidDestinationState IS NOT NULL)
 			BEGIN
@@ -139,7 +138,7 @@ DECLARE @tblTempTransaction TABLE (
 				SET @IncludeDestinationState = ''
 			END
 
-		DECLARE @ExcludeValidDestinationState nvarchar(MAX)
+		DECLARE @ExcludeValidDestinationState NVARCHAR(MAX) = NULL
 		SELECT @ExcludeValidDestinationState = COALESCE(@ExcludeValidDestinationState + ',', '') + strDestinationState FROM tblTFValidDestinationState WHERE intReportingComponentDetailId = @RCId AND strStatus = 'Exclude'
 		IF(@ExcludeValidDestinationState IS NOT NULL)
 			BEGIN
@@ -222,7 +221,6 @@ DECLARE @tblTempTransaction TABLE (
 
 				IF (@ReportingComponentId <> '' AND @FormReport = '')
 					BEGIN
-
 						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
 																	   intTaxAuthorityId,
 																	   strFormCode,
@@ -308,6 +306,5 @@ DECLARE @tblTempTransaction TABLE (
 					END
 			SET @CountRC = @CountRC - 1
 		END
-				
-					--select dblQtyShipped, dblTax,dblTaxExempt from @tblTempTransaction
+
 			--exec uspTFGT103InvoiceTax '66f6568c-a9cd-487b-ba80-e59876eb683f', '83,84', '05/01/2016', '05/30/2016', '', 'false'
