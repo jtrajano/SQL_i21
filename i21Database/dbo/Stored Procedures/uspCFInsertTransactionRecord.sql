@@ -130,6 +130,7 @@ BEGIN
 	DECLARE @intParticipantNo		INT = 0
 	DECLARE @strNetworkType			NVARCHAR(MAX)
 	DECLARE @intNetworkLocation		INT = 0
+	DECLARE @intDupTransCount		INT = 0
 	  
 	------------------------------------------------------------
 
@@ -552,6 +553,22 @@ BEGIN
 		BEGIN
 			SET @ysnInvalid = 1
 		END
+
+		-- DUPLICATE CHECK -- 
+		SELECT @intDupTransCount = COUNT(*)
+		FROM tblCFTransaction
+		WHERE intNetworkId = @intNetworkId
+		AND intSiteId = @intSiteId
+		AND dtmTransactionDate = @dtmTransactionDate
+		AND intCardId = @intCardId
+		AND intProductId = @intProductId
+		AND intPumpNumber = @intPumpNumber
+
+		IF(@intDupTransCount > 0)
+		BEGIN
+			SET @ysnInvalid = 1
+		END		
+
 		------------------------------------------------------------
 
 		------------------------------------------------------------
@@ -721,6 +738,11 @@ BEGIN
 			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site item ' + @strProductId + ' has been used')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site item ' + @strProductId + ' has been used')
+		END
+		IF(@intDupTransCount > 0)
+		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
 		END
 
 		------------------------------------------------------------
