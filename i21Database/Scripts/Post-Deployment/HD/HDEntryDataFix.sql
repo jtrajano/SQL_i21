@@ -331,4 +331,18 @@ GO
 
 GO
 	PRINT N'End updating HD Project Type.'
+	PRINT N'Start updating HD Statuses.'
+GO
+
+	update
+		tblHDTicketStatus
+	set
+		ysnUpdated = 1
+		,ysnTicket = ysnSupported
+	where
+		ysnUpdated <> 1
+		or ysnUpdated is null
+
+GO
+	PRINT N'End updating HD Statuses.'
 GO
