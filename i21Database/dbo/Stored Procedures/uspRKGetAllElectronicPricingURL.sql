@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKGetAllElectronicPricingURL] 
+﻿CREATE PROCEDURE [dbo].uspRKGetAllElectronicPricingURL 
 	 @FutureMarketId INT
 	,@intUserId INT
 AS
@@ -15,24 +15,20 @@ BEGIN TRY
 	DECLARE @Commoditycode NVARCHAR(10)
 	DECLARE @URL NVARCHAR(1000)
 	DECLARE @SymbolPrefix NVARCHAR(5)
-	DECLARE @UserIdCaption nvarchar(50)
+	DECLARE @strOpen nvarchar(50)
+	DECLARE @strHigh nvarchar(50)
+	DECLARE @strLow nvarchar(50)
+	DECLARE @strLastSettle nvarchar(50)
+	DECLARE @strLastElement nvarchar(50)
 	
-	SELECT @Commoditycode = strFutSymbol,@SymbolPrefix=strSymbolPrefix
+	SELECT @Commoditycode = strFutSymbol
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId		
 		
-	SELECT @URL = ''--strInterfaceWebServicesURL FROM tblRKCompanyPreference
-	
-	SELECT @UserIdCaption ='' --strUserName FROM tblRKCompanyPreference
+	SELECT TOP 1 @URL= strInterfaceSystemURL,@SymbolPrefix=strSymbolPrefix, @strOpen=strOpen,@strHigh=strHigh,@strLow=strLow,@strLastSettle=strLastSettle,@strLastElement=strLastElement FROM tblRKCompanyPreference c
+	JOIN tblRKInterfaceSystem s on c.intInterfaceSystemId=s.intInterfaceSystemId 
 
-	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
-	
-	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId  
-	IF @strPassword = ''
-			SET @strPassword = '?&Type=F'
-	
-    SELECT @URL + @UserIdCaption+'=' + @strUserName + '&Password=' + @strPassword + '&Symbol='+@SymbolPrefix + @Commoditycode + strSymbol+RIGHT(intYear,1) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId from tblRKFuturesMonth where intFutureMarketId=1 and dtmFutureMonthsDate >= getdate() and ysnExpired = 0 
-	
+	SELECT  @URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId from tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
 END TRY
 
 BEGIN CATCH
