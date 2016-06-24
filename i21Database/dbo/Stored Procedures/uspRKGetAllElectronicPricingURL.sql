@@ -25,12 +25,18 @@ BEGIN TRY
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId		
 		
-	SELECT TOP 1 @URL= strInterfaceSystemURL,@SymbolPrefix=strSymbolPrefix, @strOpen=strOpen,@strHigh=strHigh,@strLow=strLow,@strLastSettle=strLastSettle,@strLastElement=strLastElement FROM tblRKCompanyPreference c
+	SELECT TOP 1 @URL= s.strInterfaceSystemURL,@SymbolPrefix=strSymbolPrefix, @strOpen=strOpen,@strHigh=strHigh,@strLow=strLow,@strLastSettle=strLastSettle,@strLastElement=strLastElement FROM tblRKCompanyPreference c
 	JOIN tblRKInterfaceSystem s on c.intInterfaceSystemId=s.intInterfaceSystemId 
 
-	SELECT  @URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId from tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
-END TRY
-
+	if isnull(@URL,'') <> ''
+	BEGIN
+		SELECT  @URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId,
+		@strOpen as strOpen,@strHigh as strHigh,@strLow as strLow,@strLastSettle as strLastSettle,@strLastElement as strLastElement
+		FROM tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
+	END
+	
+	END TRY
+	
 BEGIN CATCH
 
 	SET @ErrMsg = ERROR_MESSAGE()
@@ -38,3 +44,4 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 	
 END CATCH
+
