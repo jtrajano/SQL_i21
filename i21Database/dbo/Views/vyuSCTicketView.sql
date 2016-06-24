@@ -107,6 +107,7 @@
        tblSCTicket.dblGross,
        tblSCTicket.dblShrink,
        tblSCTicket.dblConvertedUOMQty,
+	   tblSCTicket.strFreightSettlement,
        tblEMEntity.strName,
        tblSCListTicketTypes.strTicketType,
 	   tblSMCompanyLocation.strLocationName,
