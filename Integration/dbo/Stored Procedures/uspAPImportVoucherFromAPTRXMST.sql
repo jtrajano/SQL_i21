@@ -346,9 +346,8 @@ SELECT
 									END) 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
-	[dblTotal]				=	CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN C.apegl_gl_amt * -1
-										WHEN C.apegl_gl_amt < 0 AND C2.aptrx_trans_type = 'I' THEN C.apegl_gl_amt * -1
-									ELSE C.apegl_gl_amt END, --Do not make the total positive if cost is negative
+	[dblTotal]				=	CASE WHEN  C.apegl_gl_amt < 0 AND C2.aptrx_trans_type IN ('C','A') THEN C.apegl_gl_amt * -1 --make this positive as this is from a debit memo or prepayment
+										ELSE C.apegl_gl_amt END,
 	[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN ('C','A','I') THEN
 										(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END) --Cost should always positive
 									ELSE C.apegl_gl_amt END) / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
