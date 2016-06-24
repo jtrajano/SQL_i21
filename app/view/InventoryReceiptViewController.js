@@ -1923,6 +1923,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     calculateGrossWeight: function (record) {
         var me = this;
+        var totalGross = 0
+            ,totalNet = 0;
         if (!record) return;
 
         if (record.tblICInventoryReceiptItemLots()) {
@@ -1943,24 +1945,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
 
                     // If gross qty is zero, auto-calculate it. Otherwise, keep it the same value.
-                    
-                        grossQty = lot.get('dblGrossWeight');
-                        grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
-                        if (grossQty == 0){
-                            grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
-                        }
-
-                        lot.set('dblGrossWeight', grossQty);
-                    
+                    grossQty = lot.get('dblGrossWeight');
+                    grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
+                    if (grossQty == 0) {
+                        grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
+                    }
+                    lot.set('dblGrossWeight', grossQty);
 
                     // Calculate the net qty
-                    
-                        var tare = lot.get('dblTareWeight');
-                        tare = Ext.isNumeric(tare) ? tare : 0.00;
-                        grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
-                        lot.set('dblNetWeight', grossQty - tare);
+                    var tare = lot.get('dblTareWeight');
+                    tare = Ext.isNumeric(tare) ? tare : 0.00;
+                    grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
+                    lot.set('dblNetWeight', grossQty - tare);
+                    totalGross += grossQty;
+                    totalNet += (grossQty - tare);
                 }
             });
+
+            if (!iRely.Functions.isEmpty(record.get('intWeightUOMId'))) {
+                record.set('dblGross', totalGross);
+                record.set('dblNet', totalNet);
+            }
         }
     },
 
@@ -2606,13 +2611,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onEditLots: function (editor, context, eOpts) {
         var me = this;
+        var win = editor.grid.up('window');
+        var receiptItem = win.viewModel.data.currentReceiptItem;
+        var totalGross = iRely.Functions.isEmpty(receiptItem.get('dblGross')) ? 0 : receiptItem.get('dblGross');
+        var totalNet = iRely.Functions.isEmpty(receiptItem.get('dblNet')) ? 0 : receiptItem.get('dblNet');
 
         if (context.field === 'dblQuantity') {
-            var win = editor.grid.up('window');
             var lotQty = context.value;
             var lotCF = context.record.get('dblLotUOMConvFactor');
-            var itemUOMCF = win.viewModel.data.currentReceiptItem.get('dblItemUOMConvFactor');
-            var weightCF = win.viewModel.data.currentReceiptItem.get('dblWeightUOMConvFactor');
+            var itemUOMCF = receiptItem.get('dblItemUOMConvFactor');
+            var weightCF = receiptItem.get('dblWeightUOMConvFactor');
 
             if (iRely.Functions.isEmpty(lotQty)) lotQty = 0.00;
             if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
@@ -2625,26 +2633,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             var grossQty;
             grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
-
+            totalGross -= context.record.get('dblGrossWeight');
+            totalNet -= context.record.get('dblNetWeight');
             context.record.set('dblGrossWeight', grossQty);
+            totalGross += grossQty;
             var tare = context.record.get('dblTareWeight');
             var netTotal = grossQty - tare;
             context.record.set('dblNetWeight', netTotal);
+            totalNet += netTotal;
         }
         
         else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
             var gross = context.record.get('dblGrossWeight');
             var tare = context.record.get('dblTareWeight');
+            var net = context.record.get('dblNetWeight');
 
             if (context.field === 'dblGrossWeight') {
+                totalGross -= (tare + net);
                 gross = context.value;
+                totalGross += gross;
             }
             else if (context.field === 'dblTareWeight') {
                 tare = context.value;
             }
-
+            totalNet -= context.record.get('dblNetWeight');
             context.record.set('dblNetWeight', gross - tare);
+            totalNet += context.record.get('dblNetWeight');
         }
+        receiptItem.set('dblGross', totalGross);
+        receiptItem.set('dblNet', totalNet);
     },
 
     onChargeValidateEdit: function (editor, context, eOpts) {
