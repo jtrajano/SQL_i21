@@ -4019,6 +4019,8 @@
     <Build Include="dbo\Views\vyuEMSearchEntityEmployeeDeduction.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityEmployeeTax.sql" />
     <Build Include="dbo\Tables\tblARCustomerCompetitor.sql" />
+    <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
