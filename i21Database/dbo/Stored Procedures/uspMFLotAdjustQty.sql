@@ -84,8 +84,8 @@ BEGIN TRY
 
 	IF @dblNewLotQty=0
 	BEGIN
-		Select @dblAdjustByQuantity=-@dblLotQty
-		Select @intAdjustItemUOMId =@intItemUOMId 
+		Select @dblAdjustByQuantity=-@dblWeight
+		Select @intAdjustItemUOMId =@intWeightUOMId 
 	END
 
 	SELECT @dtmDate = GETDATE()
