@@ -31,6 +31,7 @@ DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
 		,@intReturnValue AS INT
+		,@ysnGLEntriesRequired AS BIT = 0
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -207,6 +208,8 @@ BEGIN
 		-----------------------------------------
 		-- Generate a new set of g/l entries
 		-----------------------------------------
+		SET @ysnGLEntriesRequired = 1
+
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -309,13 +312,27 @@ END
 --------------------------------------------------------------------------------------------  
 IF	@ysnRecap = 1	
 BEGIN 
-	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspGLPostRecap 
-			@GLEntries
-			,@intTransactionId
-			,@strTransactionId
-			,'IC'
-	COMMIT TRAN @TransactionName
+
+	IF @ysnGLEntriesRequired=0
+		BEGIN
+			ROLLBACK TRAN @TransactionName
+			COMMIT TRAN @TransactionName
+
+			-- 'Recap is not applicable for this type of transaction.'
+			RAISERROR(80025, 11, 1)  
+			GOTO Post_Exit  
+		END
+
+	 ELSE
+		BEGIN
+			ROLLBACK TRAN @TransactionName
+			EXEC dbo.uspGLPostRecap 
+					@GLEntries
+					,@intTransactionId
+					,@strTransactionId
+					,'IC'
+			COMMIT TRAN @TransactionName
+		END
 END 
 
 --------------------------------------------------------------------------------------------  
