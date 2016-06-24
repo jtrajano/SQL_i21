@@ -739,7 +739,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             if (button.itemId === 'btnPrintCountSheets') {
                 current.set('intStatus', 2);
             }
-            showAddScreen();
+            
+            //Save the record first before showing the Print Count Sheets screen
+            win.context.data.saveRecord ({
+            successFn: function () {
+                showAddScreen();
+                }
+            });
         }
     },
 
