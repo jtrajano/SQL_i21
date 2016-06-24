@@ -4,6 +4,7 @@
 	[intEntityCustomerId]					INT NOT NULL,
     [intLineOfBusinessId]					INT NOT NULL,	
 	[intConcurrencyId]						INT CONSTRAINT [DF_tblARCustomerLineOfBusiness_intConCurrencyId] DEFAULT ((0)) NOT NULL,
+	CONSTRAINT [PK_tblARCustomerLineOfBusiness] PRIMARY KEY CLUSTERED ([intCustomerLineOfBusinessId] ASC),
 	CONSTRAINT [FK_tblARCustomerLineOfBusiness_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARCustomerLineOfBusiness_tblHDLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [dbo].[tblHDLineOfBusiness] ([intLineOfBusinessId]),
 )

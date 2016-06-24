@@ -4018,6 +4018,7 @@
     <Build Include="dbo\Views\vyuEMSearchEntityEmployeeEarnings.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityEmployeeDeduction.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityEmployeeTax.sql" />
+    <Build Include="dbo\Tables\tblARCustomerCompetitor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
