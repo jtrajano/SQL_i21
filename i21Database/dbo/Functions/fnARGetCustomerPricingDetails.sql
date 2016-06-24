@@ -369,6 +369,7 @@ BEGIN
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'R'
+			AND (intCustomerLocationId = @ShipToLocationId OR ISNULL(@ShipToLocationId,0) = 0)
 					
 		
 		--(O)Origin Rack			
@@ -395,7 +396,8 @@ BEGIN
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'O'
-			AND intItemId = @ItemId 
+			AND intItemId = @ItemId
+			AND (intCustomerLocationId = @ShipToLocationId OR ISNULL(@ShipToLocationId,0) = 0)
 						
 		DECLARE @SpecialGroupPricing TABLE(
 			intSpecialPriceId INT
