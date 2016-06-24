@@ -174,6 +174,7 @@ BEGIN
 			,intStorageLocationId	= Detail.intStorageLocationId
 	FROM	dbo.tblICInventoryCount Header INNER JOIN dbo.tblICInventoryCountDetail Detail
 				ON Header.intInventoryCountId = Detail.intInventoryCountId
+				AND Detail.ysnRecount = 0
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
 				ON ItemLocation.intLocationId = Header.intLocationId 
 				AND ItemLocation.intItemId = Detail.intItemId
