@@ -174,6 +174,7 @@ BEGIN
 			,intStorageLocationId	= Detail.intStorageLocationId
 	FROM	dbo.tblICInventoryCount Header INNER JOIN dbo.tblICInventoryCountDetail Detail
 				ON Header.intInventoryCountId = Detail.intInventoryCountId
+				AND Detail.ysnRecount = 0
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
 				ON ItemLocation.intLocationId = Header.intLocationId 
 				AND ItemLocation.intItemId = Detail.intItemId
@@ -182,7 +183,7 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 	WHERE	Header.intInventoryCountId = @intTransactionId
-			AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
+			--AND ISNULL(Detail.dblPhysicalCount, 0) <> ISNULL(Detail.dblSystemCount, 0)
 	
 
 
