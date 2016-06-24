@@ -313,7 +313,12 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'dblQtyPerPallet',
                     hidden: '{!current.ysnCountByPallets}'
                 },
-                colPhysicalCount: 'dblPhysicalCount',
+                colPhysicalCount: {
+                    dataIndex: 'dblPhysicalCount',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
