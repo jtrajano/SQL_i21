@@ -783,6 +783,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var me = this;
         var win = button.up('window');
         var context = win.context;
+        
+        var currentCountItems = win.viewModel.data.current;
+        var countDetail = currentCountItems.tblICInventoryCountDetails().data.items;
+        var countItemsToPost = 0;  
+        var countItemsNotPosted = 0;
+        var itemIndex = 0; 
+        var itemsNotPosted = new Array();
 
         var doPost = function () {
             var strCountNo = win.viewModel.data.current.get('strCountNo');
@@ -799,18 +806,68 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
             CashManagement.common.BusinessRules.callPostRequest(options);
         };
+        
+        var validatePost = function() {
+            Ext.Array.each(currentCountItems.tblICInventoryCountDetails().data.items, function (item) {
+                        
+                    itemIndex++;
+                        
+                    if (item.get('ysnRecount') === false)
+                        {
+                            if (!item.dummy)
+                                {
+                                     countItemsToPost++;
+                                }        
+                        }
+                        
+                    else
+                        {
+                            if (!item.dummy)
+                                {
+                                    itemsNotPosted[countItemsNotPosted] = item.get('strItemNo');
+                                    countItemsNotPosted++;
+                                }    
+                        }
+                        
+                    if(itemIndex === countDetail.length)
+                        {
+                            if(countItemsNotPosted > 0)
+                                {
+                                        if(countItemsNotPosted === 1) {
+                                            iRely.Functions.showCustomDialog('Warning','ok','Item ' + itemsNotPosted[0] + ' cannot be processed since it is subject for recounting.');
+                                        }
+                                        
+                                        if(countItemsNotPosted > 1)
+                                            {
+                                                var listItems = '<br><br>';
+                                                
+                                                for (var i=0; i<= countItemsNotPosted-1; i++)
+                                                    {
+                                                        listItems = listItems + itemsNotPosted[i] + '<br>';
+                                                    }
+                                                
+                                                iRely.Functions.showCustomDialog('Warning','ok','The following items cannot be processed since they are subject for recounting:' + listItems);
+                                            }
+                                }
+                            
+                            if(countItemsToPost > 0)
+                                {
+                                        doPost();
+                                }
+                        }
+             });   
+        };
 
         // If there is no data change, do the post.
         if (!context.data.hasChanges()) {
-            doPost();
-            return;
+             validatePost();
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function () {
-                doPost();
-            }
+                validatePost();
+           }
         });
     },
 
