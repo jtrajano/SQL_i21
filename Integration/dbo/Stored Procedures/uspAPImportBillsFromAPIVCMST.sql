@@ -158,7 +158,7 @@ BEGIN
 						AND A.apivc_vnd_no = E.apivc_vnd_no
 						AND A.apivc_ivc_no = E.apivc_ivc_no
 					) DuplicateData
-					WHERE A.apivc_trans_type IN (''I'',''C'',''A'',''O'')
+					WHERE A.apivc_trans_type IN (''I'',''C'',''A'')
 					AND A.apivc_orig_amt != 0
 					AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 								THEN
@@ -300,7 +300,7 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(C2.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
-				AND C2.apivc_trans_type IN (''I'',''C'',''A'',''O'')
+				AND C2.apivc_trans_type IN (''I'',''C'',''A'')
 				AND C2.apivc_orig_amt != 0
 				AND 1 = (CASE WHEN @creditCardOnly = 1 AND C2.apivc_comment = ''CCD Reconciliation'' AND C2.apivc_status_ind = ''U'' THEN 1 
 							WHEN @creditCardOnly = 0 THEN 1
@@ -431,7 +431,7 @@ BEGIN
 							THEN
 								CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 							ELSE 1 END)
-				AND A.apivc_trans_type IN (''I'',''C'',''A'',''O'')
+				AND A.apivc_trans_type IN (''I'',''C'',''A'')
 				AND A.apivc_orig_amt != 0
 		
 			SET @totalInsertedTBLAPIVCMST = @@ROWCOUNT;
@@ -463,7 +463,7 @@ BEGIN
 							THEN
 								CASE WHEN CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 							ELSE 1 END)
-				AND B.apivc_trans_type IN (''I'',''C'',''A'',''O'')
+				AND B.apivc_trans_type IN (''I'',''C'',''A'')
 				AND B.apivc_orig_amt != 0
 			) AS sourceData
 			ON (1=0)
