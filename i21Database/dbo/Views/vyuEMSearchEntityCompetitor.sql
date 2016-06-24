@@ -11,7 +11,9 @@
         e.strCity,  
         e.strState,  
         e.strZipCode,
-		b.strType
+		b.strType,
+		strLineOfBusiness = dbo.fnEMGetEntityLineOfBusiness(a.intEntityId),
+		strContactName = g.strName
     FROM         
             tblEMEntity a
         join [tblEMEntityType] b

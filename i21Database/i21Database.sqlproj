@@ -4021,6 +4021,7 @@
     <Build Include="dbo\Tables\tblARCustomerCompetitor.sql" />
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
+    <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
