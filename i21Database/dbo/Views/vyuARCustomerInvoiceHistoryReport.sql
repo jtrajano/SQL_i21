@@ -28,7 +28,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup IN ('Asset', 'Receivables'))) AS A
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))) AS A
 LEFT JOIN 
 (SELECT grandDblInvoiceTotal = SUM(ISNULL(dblInvoiceTotal, 0))
      , grandDblAmountApplied = SUM(ISNULL(dblPayment, 0))

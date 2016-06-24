@@ -24,17 +24,17 @@ SELECT DISTINCT
 	 , Item.intCommodityId
 	 , dblUnappliedAmount = ISNULL(P.dblUnappliedAmount, 0)
 FROM tblARInvoice I
-	LEFT JOIN (tblARPayment P INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId 
+	LEFT JOIN (tblARPayment P INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId AND P.ysnPosted = 1
 							  LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) 
-		ON I.intEntityCustomerId = P.intEntityCustomerId  AND PD.intInvoiceId = I.intInvoiceId
+		ON I.intEntityCustomerId = P.intEntityCustomerId AND PD.intInvoiceId = I.intInvoiceId
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) 
 		ON I.intEntityCustomerId = C.intEntityCustomerId
 	LEFT JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
 	LEFT JOIN tblICItem Item ON D.intItemId = Item.intItemId	
-WHERE I.ysnPosted = 1 AND P.ysnPosted = 1
+WHERE I.ysnPosted = 1
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup = 'Receivables')) AS A
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))) AS A
 LEFT JOIN 
 (SELECT grandDblAmountPaid		= SUM(dblAmountPaid)
 	 , grandDblUnappliedAmount	= SUM(dblUnappliedAmount)
