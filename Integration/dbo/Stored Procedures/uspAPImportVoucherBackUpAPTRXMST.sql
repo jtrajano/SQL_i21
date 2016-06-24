@@ -475,6 +475,11 @@ FROM aptrxmst A
 INNER JOIN tmp_aptrxmstImport B 
 ON A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no AND A.A4GLIdentity = B.A4GLIdentity
 
+DELETE A
+FROM apeglmst A
+INNER JOIN tmp_aptrxmstImport B
+ON A.apegl_vnd_no = B.aptrx_vnd_no AND A.apegl_ivc_no = B.aptrx_ivc_no
+
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
