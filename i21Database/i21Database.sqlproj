@@ -4012,6 +4012,12 @@
     <Build Include="dbo\Views\vyuPREmployeeW2.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMergeRole.sql" />
     <Build Include="dbo\Views\vyuCTContractImport.sql" />
+    <Build Include="dbo\Functions\fnEMGetEmployeeSupervisor.sql" />
+    <Build Include="dbo\Functions\fnEMGetEmployeeDepartment.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmployeeEarnings.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmployeeDeduction.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmployeeTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

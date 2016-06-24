@@ -12,7 +12,30 @@ SELECT
 		e.strZipCode,
 		c.ysnActive,
 		a.strTitle,
-		c.strPayPeriod
+		c.strPayPeriod,
+		strDepartment = dbo.fnEMGetEmployeeDepartment(a.intEntityId),
+		strSupervisor = dbo.fnEMGetEmployeeSupervisor(a.intEntityId),
+		c.strType,
+		c.intRank,
+		c.dtmReviewDate,
+		c.dtmNextReview,
+		c.dtmBirthDate,
+		c.dtmOriginalDateHired,
+		c.dtmDateHired,
+		c.strMaritalStatus,
+		c.strSpouse,
+		c.strGender,
+		strWorkCompCode = h.strWCCode,
+		c.strEthnicity,
+		strSocialSecurity = case when c.strSocialSecurity is null or c.strSocialSecurity = '' then '' else 'xxx-xx-' + substring(c.strSocialSecurity, len(c.strSocialSecurity) - 3, 4) end,
+		c.strTerminatedReason,
+		c.ysn1099Employee,
+		strTimeEntryPassword = CASE WHEN c.strTimeEntryPassword IS NULL or c.strTimeEntryPassword = '' then '' else '****************' end,
+		c.strEmergencyContact,
+		c.strEmergencyRelation,
+		c.strEmergencyPhone,
+		c.strEmergencyPhone2
+
 	FROM 		
 			tblEMEntity a
 		join [tblEMEntityType] b
@@ -25,3 +48,5 @@ SELECT
 			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
 		left join tblEMEntity g  
 			on f.intEntityContactId = g.intEntityId  
+		left join tblPRWorkersCompensation h
+			on h.intWorkersCompensationId = c.intWorkersCompensationId
