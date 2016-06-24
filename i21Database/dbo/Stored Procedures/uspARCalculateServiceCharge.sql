@@ -63,7 +63,7 @@ AS
 	IF (@statusIds <> '')
 		BEGIN
 			DELETE FROM #tmpCustomers
-			WHERE intEntityId NOT IN (SELECT intEntityCustomerId FROM tblARCustomer WHERE intAccountStatusId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@statusIds)))
+			WHERE intEntityId NOT IN (SELECT intEntityCustomerId FROM tblARCustomerAccountStatus WHERE intAccountStatusId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@statusIds)))
 		END
 
 	--PROCESS EACH CUSTOMER
