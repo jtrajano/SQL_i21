@@ -131,8 +131,9 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
 
-			-- Insert the inventory transaction record
-			DECLARE @dblComputedUnitQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
+			-- Calculate the stock reduced
+			-- Get the cost used. It is usually the cost from the cost bucket or the last cost. 
+			DECLARE @dblReduceStockQty AS NUMERIC(38,20) = ISNULL(-@QtyOffset, @dblReduceQty - ISNULL(@RemainingQty, 0))
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
 
 			EXEC [dbo].[uspICPostInventoryTransactionStorage]
@@ -142,7 +143,7 @@ BEGIN
 					,@intSubLocationId = @intSubLocationId
 					,@intStorageLocationId = @intStorageLocationId					 
 					,@dtmDate = @dtmDate
-					,@dblQty = @dblComputedUnitQty
+					,@dblQty = @dblReduceStockQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
 					,@dblValue = NULL
@@ -176,8 +177,35 @@ BEGIN
 					AND @UpdatedInventoryLotId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
 			
+			-- Update the Lot's Qty and Weights. 
+			BEGIN 
+				UPDATE	Lot 
+				SET		Lot.dblQty =	
+							dbo.fnCalculateLotQty(
+								Lot.intItemUOMId
+								, @intItemUOMId
+								, Lot.dblQty
+								, Lot.dblWeight
+								, @dblReduceStockQty 
+								, Lot.dblWeightPerQty
+							)
+						,Lot.dblWeight = 
+							dbo.fnCalculateLotWeight(
+								Lot.intItemUOMId
+								, Lot.intWeightUOMId
+								, @intItemUOMId 
+								, Lot.dblWeight
+								, @dblReduceStockQty 
+								, Lot.dblWeightPerQty
+							)
+				FROM	dbo.tblICLot Lot
+				WHERE	Lot.intItemLocationId = @intItemLocationId
+						AND Lot.intLotId = @intLotId
+			END 
+			
 			-- Reduce the remaining qty
-			SET @dblReduceQty = @RemainingQty;
+			-- Round it to the sixth decimal place. If it turns out as zero, the system has fully consumed the stock. 
+			SET @dblReduceQty = ROUND(@RemainingQty, 6);
 		END 
 	END
 
@@ -380,5 +408,32 @@ BEGIN
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 		WHERE	@NewInventoryLotStorageId IS NOT NULL 
+
+		-- Increase the lot Qty and Weight. 
+		BEGIN 
+			UPDATE	Lot 
+			SET		Lot.dblQty =	
+						dbo.fnCalculateLotQty(
+							Lot.intItemUOMId
+							, @intItemUOMId
+							, Lot.dblQty
+							, Lot.dblWeight
+							, @FullQty 
+							, Lot.dblWeightPerQty
+						)
+					,Lot.dblWeight = 
+						dbo.fnCalculateLotWeight(
+							Lot.intItemUOMId
+							, Lot.intWeightUOMId
+							, @intItemUOMId 
+							, Lot.dblWeight
+							, @FullQty 
+							, Lot.dblWeightPerQty
+						)
+					,Lot.dblLastCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
+			FROM	dbo.tblICLot Lot
+			WHERE	Lot.intItemLocationId = @intItemLocationId
+					AND Lot.intLotId = @intLotId
+		END 
 	END 
 END 
