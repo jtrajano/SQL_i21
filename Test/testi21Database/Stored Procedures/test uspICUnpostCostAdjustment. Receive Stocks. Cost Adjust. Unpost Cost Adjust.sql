@@ -371,7 +371,8 @@ BEGIN
 				,[dtmDate] 
 				,[dblQty] 
 				,[dblUOMQty] 
-				,[dblNewCost] 
+				,[intCostUOMId]
+				,[dblVoucherCost] 
 				,[intCurrencyId] 
 				,[dblExchangeRate] 
 				,[intTransactionId] 
@@ -393,7 +394,8 @@ BEGIN
 				,[dtmDate]					= 'January 10, 2014'
 				,[dblQty]					= 40
 				,[dblUOMQty]				= @BushelUnitQty
-				,[dblNewCost]				= 37.261
+				,[intCostUOMId]				= @WetGrains_BushelUOM
+				,[dblVoucherCost]			= 37.261
 				,[intCurrencyId]			= 1
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
