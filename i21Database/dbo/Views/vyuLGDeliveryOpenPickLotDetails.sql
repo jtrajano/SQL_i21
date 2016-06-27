@@ -37,13 +37,13 @@ SELECT PL.intPickLotDetailId,
   Lot.strStorageLocation,
   PCD.intContractHeaderId as intPContractHeaderId,
   PCD.intContractDetailId as intPContractDetailId,
-  PCD.strContractNumber as strPContractNumber,
+  PCH.strContractNumber as strPContractNumber,
   PCD.intContractSeq as intPContractSeq,
   SCD.dblCashPrice,
-  SCD.dblDetailQuantity,
+  SCD.dblQuantity as dblDetailQuantity,
   SCD.intContractHeaderId as intSContractHeaderId,
   SCD.intContractDetailId as intSContractDetailId,
-  SCD.strContractNumber as strSContractNumber,
+  SCH.strContractNumber as strSContractNumber,
   SCD.intContractSeq as intSContractSeq,
   UM.strUnitMeasure as strLotUnitMeasure,
   UM.strUnitType as strLotUnitType,
@@ -61,8 +61,10 @@ JOIN vyuLGDeliveryOpenPickLots PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHea
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
 JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId
-JOIN vyuCTContractDetailView PCD ON PCD.intContractDetailId  = AD.intPContractDetailId
-JOIN vyuCTContractDetailView SCD ON SCD.intContractDetailId  = AD.intSContractDetailId
+JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = AD.intPContractDetailId
+JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = AD.intSContractDetailId
+JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 JOIN tblICUnitMeasure  UM ON UM.intUnitMeasureId   = PL.intLotUnitMeasureId
 JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasureId
 JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
