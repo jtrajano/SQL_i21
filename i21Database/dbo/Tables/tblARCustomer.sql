@@ -86,6 +86,15 @@
 	[intEmployeeCount]					INT			  NULL  DEFAULT(0),
 	[ysnIncludeEntityName]				  BIT             DEFAULT ((0)) NOT NULL,
     [ysnCustomerBudgetTieBudget]              BIT             DEFAULT ((0)) NOT NULL,
+	[intInvoicePostingApprovalId]	INT NULL,
+	[intOverCreditLimitApprovalId]	INT NULL,
+	[intOrderApprovalApprovalId]	INT NULL,
+	[intQuoteApprovalApprovalId]	INT NULL,
+	[intOrderQuantityShortageApprovalId]	INT NULL,
+	[intReceivePaymentPostingApprovalId]	INT NULL,
+	[intCommisionsApprovalId]	INT NULL,
+	[intPastDueApprovalId]	INT NULL,
+	[ysnApprovalsNotRequired] BIT DEFAULT(0),
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
@@ -100,7 +109,16 @@
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_PriceGroup] FOREIGN KEY([intPriceGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
 	CONSTRAINT [FK_tblARCustomer_tblEMEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARCustomer_tblSMCompanyLocationPricingLevel] FOREIGN KEY ([intCompanyLocationPricingLevelId]) REFERENCES [dbo].[tblSMCompanyLocationPricingLevel] ([intCompanyLocationPricingLevelId]),
-	CONSTRAINT [FK_tblARCustomer_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
+	CONSTRAINT [FK_tblARCustomer_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intInvoicePostingApprovalId] FOREIGN KEY ([intInvoicePostingApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intOverCreditLimitApprovalId] FOREIGN KEY ([intOverCreditLimitApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intOrderApprovalApprovalId] FOREIGN KEY ([intOrderApprovalApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intQuoteApprovalApprovalId] FOREIGN KEY ([intQuoteApprovalApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intOrderQuantityShortageApprovalId] FOREIGN KEY ([intOrderQuantityShortageApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intReceivePaymentPostingApprovalId] FOREIGN KEY ([intReceivePaymentPostingApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intCommisionsApprovalId] FOREIGN KEY ([intCommisionsApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intPastDueApprovalId] FOREIGN KEY ([intPastDueApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 
