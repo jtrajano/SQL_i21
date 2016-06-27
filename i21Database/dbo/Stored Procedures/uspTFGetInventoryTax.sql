@@ -165,7 +165,7 @@ DECLARE @tblTempTransaction TABLE (
                          tblSMShipVia.strTransportationMode,tblEMEntity.strName AS strVendorName,tblEMEntity_Transporter.strName AS strTransporterName,tblEMEntity.strFederalTaxId AS strVendorFEIN, 
                          tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN,tblSMCompanySetup.strCompanyName,tblSMCompanySetup.strAddress,tblSMCompanySetup.strCity,tblSMCompanySetup.strState, 
                          tblSMCompanySetup.strZip,tblSMCompanySetup.strPhone,tblSMCompanySetup.strStateTaxID,tblSMCompanySetup.strFederalTaxID,
-						 FIRST_VALUE(tblEMEntityLocation.strState) OVER(ORDER BY tblICInventoryReceipt.strBillOfLading ASC),tblSMCompanyLocation.strStateProvince
+						 (SELECT TOP 1 strState FROM tblEMEntityLocation) AS strOriginState,tblSMCompanyLocation.strStateProvince
 					FROM tblSMShipVia FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId = tblEMEntity_Transporter.intEntityId FULL OUTER JOIN
                          tblAPVendor INNER JOIN tblICInventoryReceiptItem INNER JOIN
                          tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId INNER JOIN
