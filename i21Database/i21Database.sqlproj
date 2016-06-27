@@ -4022,6 +4022,7 @@
     <Build Include="dbo\Tables\tblRKInterfaceSystem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
+    <Build Include="vyuSCTicketFormatView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
