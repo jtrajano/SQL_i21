@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intStorageLocationId AS INT 
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(38,20)
-	,@dblNewCost AS NUMERIC(38,20)
+	,@intCostUOMId AS INT 
+	,@dblVoucherCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -76,9 +77,8 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
-		--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-		--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
-		,@INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35
+		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
@@ -129,7 +129,8 @@ DECLARE @LoopTransactionTypeId AS INT
 DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@AdjustedQty AS NUMERIC(38,20) 
 		,@AdjustableQty AS NUMERIC(38,20)
-
+		,@dblNewCost AS NUMERIC(38,20)
+		
 -- Exit immediately if item is a non-lot type. 
 IF dbo.fnGetItemLotType(@intItemId) = 0 
 BEGIN 
@@ -172,17 +173,18 @@ BEGIN
 				,@CostBucketIntTransactionId = intTransactionId
 				,@CostBucketStrTransactionId = strTransactionId
 				,@intLotId = intLotId
+				,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLot.intItemUOMId, @dblVoucherCost)
 		FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
 					ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
 		WHERE	tblICInventoryLot.intItemId = @intItemId
-				AND tblICInventoryLot.intItemUOMId = @intItemUOMId
+				--AND tblICInventoryLot.intItemUOMId = @intItemUOMId
 				AND tblICInventoryLot.intItemLocationId = @intItemLocationId
 				AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
 				AND tblICInventoryLot.intTransactionDetailId = @intSourceTransactionDetailId
 				AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
 				AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
-				AND tblICInventoryLot.intLotId >= ISNULL(@intLotId, 0) 
-				AND tblICInventoryLot.dblCost <> @dblNewCost
+				AND tblICInventoryLot.intLotId > ISNULL(@intLotId, 0) 
+				AND tblICInventoryLot.dblCost <> dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLot.intItemUOMId, @dblVoucherCost) --@dblNewCost
 	END 
 
 	-- Validate the cost bucket
@@ -456,20 +458,18 @@ BEGIN
 			BEGIN 
 				-- Calculate the revalue amount for the inventory transaction. 
 				SELECT @InvTranValue =	dbo.fnMultiply(
-											dbo.fnMultiply(
-												-1 	
-												, CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
+											-
+											CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
 														@StockQtyToRevalue
 													ELSE 
 														ISNULL(@StockQtyAvailableToRevalue, 0)
-												END
-											)
+											END
 											, (@dblNewCost - @InvTranCost) 
 										) 
 
-			-----------------------------------------------------------------------------------
-			-- 7. If stock was sold, then do the "Auto Variance on Sold or Used Stock". 
-			-----------------------------------------------------------------------------------
+				----------------------------------------------------------
+				-- 7. If stock was sold, then do the "Revalue Sold". 
+				----------------------------------------------------------
 				IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
 				BEGIN 
 					EXEC [dbo].[uspICPostInventoryTransaction]
@@ -490,7 +490,7 @@ BEGIN
 						,@intTransactionDetailId				= @intTransactionDetailId
 						,@strTransactionId						= @strTransactionId
 						,@strBatchId							= @strBatchId
-						,@intTransactionTypeId					= @INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock
+						,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
 						,@intLotId								= @intLotId 
 						,@intRelatedInventoryTransactionId		= @LotOutInventoryTransactionId
 						,@intRelatedTransactionId				= @InvTranIntTransactionId 
@@ -584,7 +584,7 @@ BEGIN
 							,[intTransactionId]				= @intTransactionId
 							,[intTransactionDetailId]		= @intTransactionDetailId
 							,[strTransactionId]				= @strTransactionId
-							,[intTransactionTypeId]			= @LoopTransactionTypeId 
+							,[intTransactionTypeId]			= @LoopTransactionTypeId -- @intTransactionTypeId
 							,[intLotId]						= InvTran.intLotId
 							,[intSubLocationId]				= InvTran.intSubLocationId
 							,[intStorageLocationId]			= InvTran.intStorageLocationId

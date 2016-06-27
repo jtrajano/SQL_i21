@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLIFOCosting]
 	,@intStorageLocationId AS INT 
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(38,20)
-	,@dblNewCost AS NUMERIC(38,20)
+	,@intCostUOMId AS INT 
+	,@dblVoucherCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -125,6 +126,8 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId
 
+		,@dblNewCost AS NUMERIC(38,20)
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- 1. Get the cost bucket and original cost. 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -136,6 +139,7 @@ BEGIN
 			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
 			,@CostBucketIntTransactionId = intTransactionId
 			,@CostBucketStrTransactionId = strTransactionId
+			,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLIFO.intItemUOMId, @dblVoucherCost)
 	FROM	dbo.tblICInventoryLIFO LEFT JOIN dbo.tblICItemUOM 
 				ON tblICInventoryLIFO.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryLIFO.intItemId = @intItemId
