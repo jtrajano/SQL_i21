@@ -21,16 +21,19 @@ BEGIN TRY
 	DECLARE @strLastSettle nvarchar(50)
 	DECLARE @strLastElement nvarchar(50)
 	
-	SELECT @Commoditycode = strFutSymbol
+	SELECT @Commoditycode = strFutSymbol,@SymbolPrefix=strSymbolPrefix
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId		
+
+	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 	
+	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId 
 		
-	SELECT TOP 1 @URL= s.strInterfaceSystemURL,@SymbolPrefix=strSymbolPrefix, @strOpen=strOpen,@strHigh=strHigh,@strLow=strLow,@strLastSettle=strLastSettle,@strLastElement=strLastElement FROM tblRKCompanyPreference c
+	SELECT TOP 1 @URL= s.strInterfaceSystemURL,@strOpen=strOpen,@strHigh=strHigh,@strLow=strLow,@strLastSettle=strLastSettle,@strLastElement=strLastElement FROM tblRKCompanyPreference c
 	JOIN tblRKInterfaceSystem s on c.intInterfaceSystemId=s.intInterfaceSystemId 
 
 	if isnull(@URL,'') <> ''
 	BEGIN
-		SELECT  @URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId,
+		SELECT  replace(replace(@URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1),'¶¶',@strUserName),'¶¶¶¶',@strPassword) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId,
 		@strOpen as strOpen,@strHigh as strHigh,@strLow as strLow,@strLastSettle as strLastSettle,@strLastElement as strLastElement
 		FROM tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
 	END
