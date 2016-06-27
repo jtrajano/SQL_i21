@@ -783,6 +783,94 @@ Order By [Profit]', N'', N'@DATE@', N'', NULL, NULL, NULL, NULL, N'', N'None', N
  
 print('/*******************  END INSERTING canned panels on temporary panel table  *******************/')
 
+--PAYROLL
+print('/*******************  BEGIN INSERTING payroll canned panels on temporary panel table  *******************/')
+
+INSERT INTO #TempCannedPanels VALUES (15561, 0, 20, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Payroll - Paycheck Tax', N'Grid', N'', N'Paycheck Tax', N'Bar', N'outside', N'Chameleon', N'i21', N'Last Week', N'Last Week', N'PayDate', N'',
+N'Declare @cols nvarchar(max)
+select @cols = stuff( ( select distinct  '',['' + Ltrim(rtrim(strTax)) +'']'' from tblPRTypeTax FOR XML PATH('''')),1,1,'''')
+EXEC(''select * from 
+(
+ select distinct
+ EmployeeName = strFirstName + '''' '''' + strMiddleName + '''' '''' + strLastName 
+ , CheckNo = PCheck.strPaycheckId
+ , PayDate = PCheck.dtmPayDate
+ , TaxTotal = PTax.dblTotal
+ , TaxCode = TType.strTax
+ --, TaxDescription = TType.strDescription
+ , CheckTotal = PCheck.dblGross
+ , CheckNet = PCheck.dblNetPayTotal
+ from 
+ tblPRPaycheck PCheck
+ inner join tblPRPaycheckTax PTax on PCheck.intPaycheckId = PTax.intPaycheckId
+ inner join tblPRTypeTax TType on PTax.intTypeTaxId = TType.intTypeTaxId
+ inner join tblPREmployee E on E.intEntityEmployeeId = PCheck.intEntityEmployeeId
+) as s PIVOT
+(
+ SUM(TaxTotal)
+ FOR TaxCode IN ('' + @cols + '')
+)as pvt 
+where @DATE@ '')',
+N'', N'@DATE@', N'@DATE@', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', N'', N'', N'', 0, 0, NULL, NULL, N'16.2', NULL, 2, 131, N'')
+
+INSERT INTO #TempCannedPanels VALUES (15562, 50, 15, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Payroll - Paycheck Earnings', N'Grid', N'', N'Paycheck Deductions', N'Bar', N'outside', N'Chameleon', N'i21', N'Last Week', N'Last Week', N'PayDate', N'',
+N'Declare @cols nvarchar(max)
+select @cols = stuff( ( select distinct  '',['' + Ltrim(rtrim(strEarning)) +'']'' from tblPRTypeEarning FOR XML PATH('''')),1,1,'''')
+EXEC(N''select * from 
+(
+	select distinct
+	EmployeeName = strFirstName + '''' '''' + strMiddleName + '''' '''' + strLastName 
+	, CheckNo = PCheck.strPaycheckId
+	, PayDate = PCheck.dtmPayDate
+	, EarningTotal = PTax.dblTotal
+	, EarningCode = TType.strEarning 
+	, CheckTotal = PCheck.dblGross
+	, CheckNet = PCheck.dblNetPayTotal
+	from 
+	tblPRPaycheck PCheck
+	inner join tblPRPaycheckEarning PTax on PCheck.intPaycheckId = PTax.intPaycheckId
+	inner join tblPRTypeEarning TType on PTax.intTypeEarningId = TType.intTypeEarningId
+	inner join tblPREmployee E on E.intEntityEmployeeId = PCheck.intEntityEmployeeId
+) as s
+PIVOT
+(	SUM(EarningTotal)
+	FOR EarningCode IN ('' + @cols + '')
+)as pvt
+where @DATE@ '')' ,
+N'', N'@DATE@', N'@DATE@', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', N'', N'', N'', 0, 0, NULL, NULL, N'16.2', NULL, 1, 132, N'')
+
+
+
+INSERT INTO #TempCannedPanels VALUES (15563, 50, 15, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Payroll - Paycheck Deductions', N'Grid', N'', N'Paycheck Deductions', N'Bar', N'outside', N'Chameleon', N'i21', N'Last Week', N'Last Week', N'PayDate', N'',
+N'Declare @cols nvarchar(max)
+select @cols = stuff( ( select distinct '',['' + Ltrim(rtrim(strDeduction)) +'']'' from tblPRTypeDeduction FOR XML PATH('''')),1,1,'''')
+EXEC(N''select * from 
+(
+	select distinct
+	EmployeeName = strFirstName + '''' '''' + strMiddleName + '''' '''' + strLastName 
+	, CheckNo = PCheck.strPaycheckId
+	, PayDate = PCheck.dtmPayDate
+	, DeductionTotal = PTax.dblTotal
+	, DeductionCode = TType.strDeduction 
+	--, TaxDescription = TType.strDescription
+	, CheckTotal = PCheck.dblGross
+	, CheckNet = PCheck.dblNetPayTotal
+	from 
+	tblPRPaycheck PCheck
+	inner join tblPRPaycheckDeduction PTax on PCheck.intPaycheckId = PTax.intPaycheckId
+	inner join tblPRTypeDeduction TType on PTax.intTypeDeductionId = TType.intTypeDeductionId
+	inner join tblPREmployee E on E.intEntityEmployeeId = PCheck.intEntityEmployeeId
+) as s
+PIVOT
+(	SUM(DeductionTotal)
+	FOR DeductionCode IN ('' + @cols + '')
+)as pvt 
+where @DATE@ '')' ,
+N'', N'@DATE@', N'@DATE@', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', N'', N'', N'', 0, 0, NULL, NULL, N'16.2', NULL, 1, 133, N'')
+
+
+print('/*******************  END INSERTING payroll canned panels on temporary panel table  *******************/')
+
 
 print('/*******************  BEGIN DELETING deleted canned panels  on table Panel  *******************/')
 --This are panels that are deleted on  canned panel server.
