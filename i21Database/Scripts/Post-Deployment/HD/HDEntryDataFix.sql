@@ -345,4 +345,18 @@ GO
 
 GO
 	PRINT N'End updating HD Statuses.'
+	PRINT N'Start updating HD Priorities.'
+GO
+
+	update
+		tblHDTicketPriority
+	set
+		ysnUpdated = 1
+		,ysnTicket = ysnSupported
+	where
+		ysnUpdated <> 1
+		or ysnUpdated is null
+
+GO
+	PRINT N'End updating HD Priorities.'
 GO
