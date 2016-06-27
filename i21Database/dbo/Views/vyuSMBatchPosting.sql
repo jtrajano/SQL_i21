@@ -27,7 +27,7 @@ FROM
 	UNION ALL
 	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, dblInvoiceTotal, strPONumber, intEntityCustomerId, intEntityId, dtmDate, strComments FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo') AND ysnPosted = 0  AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) AND ISNULL(ysnRecurring,0) = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	UNION ALL
-	SELECT 'Payment', intPaymentId, strRecordNumber, dblAmountPaid, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmDatePaid, strNotes FROM tblARPayment WHERE ysnPosted = 0
+	SELECT 'Payment', intPaymentId, strRecordNumber, dblAmountPaid, strPaymentInfo as strVendorInvoiceNumber, intEntityCustomerId, intEntityId, dtmDatePaid, strNotes FROM tblARPayment WHERE ysnPosted = 0
 	UNION ALL
 	SELECT 'Card Fueling', intTransactionId, strTransactionId, dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, intEntityId, dtmTransactionDate, strDescription FROM vyuCFBatchPostTransactions
 	UNION ALL
