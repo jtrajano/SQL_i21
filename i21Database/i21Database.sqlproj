@@ -4023,6 +4023,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetAllElectronicPricingURL.sql" />
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
     <Build Include="vyuSCTicketFormatView.sql" />
+    <Build Include="dbo\Tables\tblSCTicketEmailOption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
