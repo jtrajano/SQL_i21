@@ -285,8 +285,23 @@ Ext.define('Inventory.view.ItemLocationViewController', {
     },
 
     onSubCategoryDrilldown: function(combo) {
-        iRely.Functions.openScreen('Store.view.SubCategory');
-//        i21.ModuleMgr.Inventory.showScreen(null, 'SubCategory');
+        var win = combo.up('window');
+        
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Store.view.SubCategory', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('Store.view.SubCategory', { 
+                filters: [
+                    {
+                        column: 'strSubcategoryId',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
     },
 
     onProductCodeDrilldown: function(combo) {
