@@ -6,9 +6,11 @@
 	[strOrder] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strProjectStatus] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[dblProbability] NUMERIC(18, 6) NULL,
+	[intTicketStatusId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblHDSalesPipeStatus] PRIMARY KEY CLUSTERED ([intSalesPipeStatusId] ASC),
- CONSTRAINT [UNQ_tblHDSalesPipeStatus] UNIQUE ([strStatus])
+ CONSTRAINT [UNQ_tblHDSalesPipeStatus] UNIQUE ([strStatus]),
+ CONSTRAINT [FK_tblHDSalesPipeStatus_tblHDTicketStatus] FOREIGN KEY ([intTicketStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId])
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
