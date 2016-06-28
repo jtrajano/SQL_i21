@@ -89,6 +89,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 break;
             case "btnImportItemLocation":
                 type = "ItemLocation";
+                break;
             case "btnImportItemPricingLevels":
                 type = "ItemPricingLevels";
                 break;
