@@ -1,7 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnGLGetExchangeRate]
 (
 	@intFromCurrencyId INT,
-	@intToCurrencyId INT,
 	@intCurrencyExchangeRateTypeId INT,
 	@dtmDate DATETIME
 )
@@ -10,7 +9,8 @@ AS
 BEGIN
 	DECLARE @dblRate NUMERIC(18,6)
 	SELECT TOP 1 @dblRate = dblRate FROM vyuGLExchangeRate
-	WHERE intFromCurrencyId = @intFromCurrencyId AND intToCurrencyId = @intToCurrencyId
+	CROSS APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
+	WHERE intFromCurrencyId = @intFromCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
 	AND intCurrencyExchangeRateTypeId = @intCurrencyExchangeRateTypeId
 	AND dtmValidFromDate<=@dtmDate
 	ORDER BY dtmValidFromDate DESC
