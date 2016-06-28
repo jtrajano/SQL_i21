@@ -188,7 +188,7 @@ SELECT
 		,[dtmDate] 							=	A.dtmDate
 		,[dblQty] 							=	B.dblQtyReceived
 		,[dblUOMQty] 						=	itemUOM.dblUnitQty
-		,[intCostUOMId]						=	costUOM.intItemUOMId 
+		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
 		,[dblNewCost] 						=	B.dblCost
 		,[intCurrencyId] 					=	A.intCurrencyId
 		,[dblExchangeRate] 					=	0
@@ -217,12 +217,17 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
 		LEFT JOIN tblICItemUOM itemUOM
 			ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
-		LEFT JOIN tblICItemUOM costUOM
-			ON costUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		LEFT JOIN tblICItemUOM voucherCostUOM
+			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		LEFT JOIN tblICItemUOM receiptCostUOM
+			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+
 WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 		AND B.intInventoryReceiptChargeId IS NULL 
-		AND B.dblCost != E2.dblUnitCost -- Compare the Bill cost against the IR cost. 
-
+		-- Compare the cost used in Voucher against the IR cost. 
+		-- If there is a difference, add it to @adjustedEntries table variable. 
+		AND dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) != E2.dblUnitCost
+		
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
