@@ -6,6 +6,7 @@
 	[intCustomerId] [int] NOT NULL,
 	[intCustomerContactId] [int] NOT NULL,
 	[intSalesPipeStatusId] [int] NULL,
+	[intTicketStatusId] [int] NULL,
 	[intOpportunitySourceId] [int] NULL,
 	[intTicketTypeId] [int] NULL,
 	[intOpportunityCampaignId] [int] NULL,
@@ -52,6 +53,7 @@
 	--CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEMEntityContact] ([intEntityContactId])
 	CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblHDProject_tblHDSalesPipeStatus] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblHDSalesPipeStatus] ([intSalesPipeStatusId]),
+	CONSTRAINT [FK_tblHDProject_tblHDTicketStatus] FOREIGN KEY ([intTicketStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId]),
 	CONSTRAINT [FK_tblHDProject_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId])
 )
 
