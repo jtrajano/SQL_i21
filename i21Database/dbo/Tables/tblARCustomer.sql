@@ -94,6 +94,8 @@
 	[intReceivePaymentPostingApprovalId]	INT NULL,
 	[intCommisionsApprovalId]	INT NULL,
 	[intPastDueApprovalId]	INT NULL,
+	[intPriceChangeApprovalId]	INT NULL,
+	
 	[ysnApprovalsNotRequired] BIT DEFAULT(0),
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),	
@@ -118,7 +120,8 @@
 	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intReceivePaymentPostingApprovalId] FOREIGN KEY ([intReceivePaymentPostingApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
 	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intCommisionsApprovalId] FOREIGN KEY ([intCommisionsApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
 	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intPastDueApprovalId] FOREIGN KEY ([intPastDueApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
-
+	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intPriceChangeApprovalId] FOREIGN KEY ([intPriceChangeApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 
