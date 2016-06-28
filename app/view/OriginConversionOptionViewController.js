@@ -272,7 +272,7 @@ function getTemplateColumns(name) {
                 "Include Zero on Hand","Include on Hand","Scanned Count Entry","Count by Lots","Count by Pallets","Recount Mismatch",
                 "External","Recount","Reference Count No"];
         case "Item Pricing":
-            return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "End Month Cost", "Pricing Method",
+            return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
                 "Amount/Percent", "Retail Price", "MSRP"];
         case "Item Location":
             return ["Item No","Location","POS Description","Vendor Id","Costing Method","Sub Location","Storage Location",
