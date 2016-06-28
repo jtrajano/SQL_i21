@@ -352,7 +352,7 @@ GO
 		tblHDTicketPriority
 	set
 		ysnUpdated = 1
-		,ysnTicket = ysnSupported
+		,ysnTicket = 1
 	where
 		ysnUpdated <> 1
 		or ysnUpdated is null
