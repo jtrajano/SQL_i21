@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnActualCosting]
 	,@intStorageLocationId AS INT 
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(38,20)
-	,@dblNewCost AS NUMERIC(38,20)
+	,@intCostUOMId AS INT 
+	,@dblVoucherCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -125,6 +126,8 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId
 
+DECLARE	@dblNewCost AS NUMERIC(38,20)
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- 1. Get the cost bucket and original cost. 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -136,11 +139,12 @@ BEGIN
 			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
 			,@CostBucketIntTransactionId = intTransactionId
 			,@CostBucketStrTransactionId = strTransactionId
+			,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryActualCost.intItemUOMId, @dblVoucherCost)
 	FROM	dbo.tblICInventoryActualCost LEFT JOIN dbo.tblICItemUOM 
 				ON tblICInventoryActualCost.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryActualCost.intItemId = @intItemId
 			AND tblICInventoryActualCost.intItemLocationId = @intItemLocationId
-			AND tblICInventoryActualCost.intItemUOMId = @intItemUOMId
+			--AND tblICInventoryActualCost.intItemUOMId = @intItemUOMId
 			AND tblICInventoryActualCost.intTransactionId = @intSourceTransactionId
 			AND tblICInventoryActualCost.intTransactionDetailId = @intSourceTransactionDetailId
 			AND tblICInventoryActualCost.strTransactionId = @strSourceTransactionId

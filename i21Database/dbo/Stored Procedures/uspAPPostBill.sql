@@ -179,45 +179,55 @@ ORDER BY intBillId
 
 --CREATE DATA FOR COST ADJUSTMENT
 DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
+
 INSERT INTO @adjustedEntries
 SELECT
-	[intItemId]							=	B.intItemId
-	,[intItemLocationId]				=	D.intItemLocationId
-	,[intItemUOMId]						=   ISNULL(ISNULL(Lot.intWeightUOMId, Lot.intItemUOMId),E2.intUnitMeasureId)
-	,[dtmDate] 							=	A.dtmDate
-	,[dblQty] 							=	B.dblQtyReceived
-	,[dblUOMQty] 						=	B.dblQtyReceived
-	,[dblNewCost] 						=	B.dblCost
-	,[intCurrencyId] 					=	A.intConcurrencyId
-	,[dblExchangeRate] 					=	0
-	,[intTransactionId]					=	A.intBillId
-	,[intTransactionDetailId] 			=	B.intBillDetailId
-	,[strTransactionId] 				=	A.strBillId
-	,[intTransactionTypeId] 			=	25
-	,[intLotId] 						=	H.intLotId
-	,[intSubLocationId] 				=	E2.intSubLocationId
-	,[intStorageLocationId] 			=	E2.intStorageLocationId
-	,[ysnIsStorage] 					=	NULL
-	,[strActualCostId] 					=	E1.strActualCostId
-	,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
-	,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
-	,[strSourceTransactionId] 			=	E1.strReceiptNumber
-FROM tblAPBill A
-	INNER JOIN tblAPBillDetail B
-	ON A.intBillId = B.intBillId
-	INNER JOIN (tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 ON E1.intInventoryReceiptId = E2.intInventoryReceiptId)
-	ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
-	INNER JOIN tblICItem C
-	ON B.intItemId = C.intItemId
-	INNER JOIN tblICItemLocation D
-	ON D.intLocationId = A.intShipToId AND D.intItemId = C.intItemId
-	LEFT JOIN tblICInventoryReceiptItemLot H
-	ON B.intInventoryReceiptItemId = H.intInventoryReceiptItemId
-	LEFT JOIN dbo.tblICLot Lot
-	ON Lot.intLotId = H.intLotId
-WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-AND B.intInventoryReceiptChargeId IS NULL AND B.dblOldCost != 0 AND B.dblCost != B.dblOldCost
+		[intItemId]							=	B.intItemId
+		,[intItemLocationId]				=	D.intItemLocationId
+		,[intItemUOMId]						=   itemUOM.intItemUOMId
+		,[dtmDate] 							=	A.dtmDate
+		,[dblQty] 							=	B.dblQtyReceived
+		,[dblUOMQty] 						=	itemUOM.dblUnitQty
+		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
+		,[dblNewCost] 						=	B.dblCost
+		,[intCurrencyId] 					=	A.intCurrencyId
+		,[dblExchangeRate] 					=	0
+		,[intTransactionId]					=	A.intBillId
+		,[intTransactionDetailId] 			=	B.intBillDetailId
+		,[strTransactionId] 				=	A.strBillId
+		,[intTransactionTypeId] 			=	25
+		,[intLotId] 						=	NULL 
+		,[intSubLocationId] 				=	E2.intSubLocationId
+		,[intStorageLocationId] 			=	E2.intStorageLocationId
+		,[ysnIsStorage] 					=	0
+		,[strActualCostId] 					=	E1.strActualCostId
+		,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
+		,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
+		,[strSourceTransactionId] 			=	E1.strReceiptNumber
+FROM	tblAPBill A INNER JOIN tblAPBillDetail B
+			ON A.intBillId = B.intBillId
+		INNER JOIN (
+			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
+				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
+		)
+			ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
+		INNER JOIN tblICItem item 
+			ON B.intItemId = item.intItemId
+		INNER JOIN tblICItemLocation D
+			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
+		LEFT JOIN tblICItemUOM itemUOM
+			ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
+		LEFT JOIN tblICItemUOM voucherCostUOM
+			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		LEFT JOIN tblICItemUOM receiptCostUOM
+			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
 
+WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+		AND B.intInventoryReceiptChargeId IS NULL 
+		-- Compare the cost used in Voucher against the IR cost. 
+		-- If there is a difference, add it to @adjustedEntries table variable. 
+		AND dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, B.dblCost) != E2.dblUnitCost
+		
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
@@ -228,7 +238,6 @@ BEGIN
 		INSERT INTO @GLEntries
 		EXEC uspICPostCostAdjustment @adjustedEntries, @batchId, @userId
 	END
-
 END
 ELSE
 BEGIN

@@ -169,6 +169,7 @@ BEGIN
 				,@intStorageLocationId AS INT				= NULL 
 				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblQty AS NUMERIC(18,6)					= 40
+				,@intCostUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblNewCost AS NUMERIC(38,20)				= 37.261
 				,@intTransactionId AS INT					= 1
 				,@intTransactionDetailId AS INT				= 1
@@ -280,6 +281,7 @@ BEGIN
 			,@intStorageLocationId
 			,@intItemUOMId
 			,@dblQty
+			,@intCostUOMId
 			,@dblNewCost
 			,@intTransactionId
 			,@intTransactionDetailId
