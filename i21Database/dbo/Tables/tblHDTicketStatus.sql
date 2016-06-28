@@ -94,3 +94,32 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicketStatus',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+
+GO
+CREATE TRIGGER [dbo].[trgHDTicketStatus]
+    ON [dbo].[tblHDTicketStatus]
+    AFTER UPDATE
+    AS
+	declare
+		@newTicketStatusId  int = 0
+		,@newStatus  nvarchar(100) = null
+		
+	begin transaction;
+
+		begin try			
+			select
+				@newTicketStatusId = i.intTicketStatusId
+				,@newStatus = i.strStatus
+			from inserted i;
+
+			update tblHDProject set tblHDProject.strProjectStatus = @newStatus where tblHDProject.intTicketStatusId = @newTicketStatusId;
+
+			update tblHDSalesPipeStatus set tblHDSalesPipeStatus.strProjectStatus = @newStatus where tblHDSalesPipeStatus.intTicketStatusId = @newTicketStatusId;
+			
+
+		end try
+		begin catch
+			rollback transaction;
+		end catch
+
+	commit transaction;
