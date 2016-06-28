@@ -12,6 +12,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @UserSecurityID INT
 DECLARE @IsAdmin BIT
+DECLARE @isContact BIT
 
 BEGIN TRANSACTION
 
@@ -25,7 +26,8 @@ BEGIN TRY
 
 	-- Get whether User Role has administrative rights
 	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-		
+	SELECT @isContact = CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
+
 	-- Check whether or not to build the specified user role according to the Master Menus
 	IF (@BuildUserRole = 1)
 	BEGIN
@@ -33,16 +35,32 @@ BEGIN TRY
 		DELETE FROM tblSMUserRoleMenu
 		WHERE intUserRoleId = @UserRoleID
 		AND intMenuId NOT IN (SELECT intMenuID FROM tblSMMasterMenu)
-		
-		-- Iterate through all affected user roles and apply Master Menus
-		INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
-		SELECT @UserRoleID, intMenuID, (CASE @IsAdmin WHEN 1
-										THEN (CASE @ForceVisibility WHEN 1
-											THEN 1
-											ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
-										ELSE 0 END),
-		intSort = intMenuID FROM tblSMMasterMenu Menu
-		WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
+
+		IF (@isContact <> 1)
+		BEGIN
+			-- Iterate through all affected user roles and apply Master Menus
+			INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
+			SELECT @UserRoleID, intMenuID, (CASE @IsAdmin WHEN 1
+											THEN (CASE @ForceVisibility WHEN 1
+												THEN 1
+												ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
+											ELSE 0 END),
+			intSort = intMenuID FROM tblSMMasterMenu Menu
+			WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
+		END
+		ELSE
+		BEGIN
+			-- Iterate through all affected user roles and apply Master Menus
+			INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
+			SELECT @UserRoleID, intMenuID, (CASE @IsAdmin WHEN 1
+											THEN (CASE @ForceVisibility WHEN 1
+												THEN 1
+												ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
+											ELSE 0 END),
+			intSort = intMenuID FROM tblSMMasterMenu Menu
+			INNER JOIN tblSMContactMenu ContactMenu ON Menu.intMenuID = ContactMenu.intMasterMenuId
+			WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
+		END
 
 		-- DELETE UNNECESSARY MENUS FOR DIFFERENT KIND OF ROLES -> Original statement move on the other stored procedure
 		EXEC uspSMFixUserRoleMenus @UserRoleID
