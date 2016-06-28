@@ -38,6 +38,7 @@
 	[ysnGenerateTicket] [bit] null,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strLinesOfBusinessId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[strRFPRFILink] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
