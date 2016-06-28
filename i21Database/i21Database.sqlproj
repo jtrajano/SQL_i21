@@ -4024,6 +4024,7 @@
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
     <Build Include="vyuSCTicketFormatView.sql" />
     <Build Include="dbo\Tables\tblSCTicketEmailOption.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
