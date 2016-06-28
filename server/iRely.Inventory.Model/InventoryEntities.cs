@@ -63,6 +63,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemPOSSLAMap());
             modelBuilder.Configurations.Add(new tblICItemPricingMap());
             modelBuilder.Configurations.Add(new tblICItemPricingLevelMap());
+            modelBuilder.Configurations.Add(new tblSMCompanyLocationPricingLevelMap());
             modelBuilder.Configurations.Add(new tblICItemSpecialPricingMap());
             modelBuilder.Configurations.Add(new tblICItemStockMap());
             modelBuilder.Configurations.Add(new tblICItemSubstitutionMap());

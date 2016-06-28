@@ -94,6 +94,7 @@
     <Compile Include="Common\Import\ImportItemContracts.cs" />
     <Compile Include="Common\Import\ImportItemLocation.cs" />
     <Compile Include="Common\Import\ImportItemPricing.cs" />
+    <Compile Include="Common\Import\ImportItemPricingLevels.cs" />
     <Compile Include="Common\Import\ImportItems.cs" />
     <Compile Include="Common\Import\ImportLineOfBusiness.cs" />
     <Compile Include="Common\Import\ImportLogItem.cs" />

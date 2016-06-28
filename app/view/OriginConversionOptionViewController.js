@@ -89,6 +89,8 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 break;
             case "btnImportItemLocation":
                 type = "ItemLocation";
+            case "btnImportItemPricingLevels":
+                type = "ItemPricingLevels";
                 break;
         }
 
@@ -281,5 +283,8 @@ function getTemplateColumns(name) {
                 "Reorder Point","Min Order","Suggested Qty","Lead Time (Days)","Inventory Count Group","Counted","Counted Daily",
                 "Count by Serial Number","Serial Number Begin","Serial Number End","Auto Calculate Freight","Freight Rate",
                 "Freight Term","Ship Via"];
+        case "Item Pricing Levels":
+            return ["Item No", "Location", "Price Level", "UOM", "Min", "Max", "Pricing Method",
+                "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent"];
     }
 }

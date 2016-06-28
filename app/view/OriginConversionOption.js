@@ -148,6 +148,11 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                 text: 'Item Pricing'
                             },
                             {
+                                xtype: 'menuitem',
+                                itemId: 'mnuImportItemPricingLevels',
+                                text: 'Item Pricing Levels'
+                            },
+                            {
                                 xtype: 'menuseparator'
                             },
                             {
@@ -603,7 +608,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                 },
                 {
                     xtype: 'panel',
-                    height: 398,
+                    height: 429,
                     padding: '15 0 0 0',
                     animCollapse: true,
                     bodyPadding: 10,
@@ -852,6 +857,41 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                         {
                                             xtype: 'label',
                                             text: 'Import Item Pricing from CSV'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntImportItemPricingLevels',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnImportItemPricingLevels',
+                                    text: 'Import Item Pricing Levels'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
+                                    height: 40,
+                                    padding: 10,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            text: 'Import Item Pricing Levels from CSV'
                                         }
                                     ]
                                 }

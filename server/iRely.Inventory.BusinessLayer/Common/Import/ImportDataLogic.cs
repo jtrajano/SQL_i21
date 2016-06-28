@@ -326,6 +326,25 @@ namespace iRely.Inventory.BusinessLayer
             return null;
         }
 
+        protected static T GetLookUpObject<T>(InventoryRepository context, Expression<Func<T, bool>> predicate) where T : class
+        {
+            if (context.GetQuery<T>().Any<T>(predicate))
+            {
+                var entry = context.ContextManager.Entry<T>(context.GetQuery<T>().First<T>(predicate));
+                return entry.Entity;
+            }
+            return null;
+        }
+
+        protected static List<T> GetLookUps<T>(InventoryRepository context, Expression<Func<T, bool>> predicate) where T : class
+        {
+            if (context.GetQuery<T>().Any<T>(predicate))
+            {
+                return context.GetQuery<T>().Where<T>(predicate).ToList<T>();
+            }
+            return null;
+        }
+
         protected void LogItem(int id, string action, string viewNamespace, ImportDataResult dr)
         {
             try
