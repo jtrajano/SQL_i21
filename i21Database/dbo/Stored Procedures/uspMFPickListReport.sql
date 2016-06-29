@@ -235,14 +235,13 @@ Begin --Sales Order Pick List
 				CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
 					ISNULL(l.dblLastCost,0) 
 				ELSE
-					(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId)
+					(Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId)
 				END		
 			ELSE 
 			CASE WHEN ri.intMarginById=1 THEN 
-			ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0) 
-			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0))/100
-			ELSE (Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ) + ISNULL(ri.dblMargin,0) End
-			--(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId )
+			ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId),0) 
+			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ),0))/100
+			ELSE (Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ) + ISNULL(ri.dblMargin,0) End
 			End ),0) AS dblCost
 		FROM tblMFPickList pl  
 		JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
@@ -277,14 +276,13 @@ Begin --Sales Order Pick List
 				CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
 					ISNULL(l.dblLastCost,0) 
 				ELSE
-					(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId)
+					(Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId)
 				END		
 			ELSE 
 			CASE WHEN ri.intMarginById=1 THEN 
-			ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0) 
-			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ),0))/100
-			ELSE (Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId ) + ISNULL(ri.dblMargin,0) End
-			--(Select TOP 1 ISNULL(ip.dblStandardCost,0) From tblICItemLocation il Join tblICItemPricing ip on il.intItemId=ip.intItemId AND il.intLocationId=@intLocationId AND il.intItemId=pld.intItemId AND il.intItemLocationId=ip.intItemLocationId )
+			ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ),0) 
+			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ),0))/100
+			ELSE (Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ) + ISNULL(ri.dblMargin,0) End
 			End ) AS dblCost,
 			@dblTotalCost AS dblTotalCost
 			,@strCompanyName AS strCompanyName

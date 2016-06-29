@@ -4002,6 +4002,8 @@
     <Build Include="dbo\Stored Procedures\uspAPRptCashRequirements.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptCheckRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
+    <Build Include="dbo\Functions\fnMFConvertCostToTargetItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemCostInTargetUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
