@@ -9947,7 +9947,7 @@
         "topInstance": "467f343c-c005-4700-bed6-351559b316d7",
         "selectedInstance": "931dbf4b-346b-40eb-9ad5-e67bb4efb00b"
     },
-    "editMode": "design",
+    "editMode": "code",
     "userSettings": {
         "no-cmd": true
     }
