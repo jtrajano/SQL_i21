@@ -70,12 +70,12 @@ BEGIN
 
 			INSERT INTO @tblInputItem(intRecipeItemId,intItemId,intItemUOMId,dblPrice,dblLineTotal,dblQuantity)
 			Select t.intRecipeItemId,t.intItemId, t.intItemUOMId, t.dblPrice,(t.dblPrice * (@dblShipQty/@dblRecipeQty)) AS dblLineTotal, @dblShipQty/@dblRecipeQty From
-			(Select ri.intRecipeItemId,ri.intItemId, @intItemUOMId AS intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblStandardCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost,0))/100 
-			ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End) AS dblPrice
+			(Select ri.intRecipeItemId,ri.intItemId, @intItemUOMId AS intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblCost,0))/100 
+			ELSE ISNULL(ip.dblCost,0) + ISNULL(ri.dblMargin,0) End) AS dblPrice
 			From tblMFRecipeItem ri 
 			Join tblICItem i on ri.intItemId=i.intItemId
 			Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
-			Left Join tblICItemPricing ip on i.intItemId=ip.intItemId AND il.intItemLocationId=ip.intItemLocationId
+			Left Join vyuMFGetItemByLocation ip on i.intItemId=ip.intItemId AND ip.intLocationId=@intLocationId
 			where ri.intRecipeId=@intRecipeId AND i.strType='Other Charge'
 			AND ISNULL(ri.ysnCostAppliedAtInvoice,0)=1) t
 	End
@@ -100,12 +100,12 @@ BEGIN
 		--Get Other Charges
 		INSERT INTO @tblInputItem(intRecipeItemId,intItemId,intItemUOMId,dblPrice,dblLineTotal,dblQuantity)
 		Select t.intRecipeItemId,t.intItemId,t.intItemUOMId,t.dblPrice,(t.dblPrice * (t.dblShipQty/t.dblRecipeQuantity)) AS dblLineTotal, t.dblShipQty/t.dblRecipeQuantity From
-		(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblStandardCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblStandardCost,0))/100 
-		ELSE ISNULL(ip.dblStandardCost,0) + ISNULL(ri.dblMargin,0) End) AS dblPrice,tr.dblShipQty AS dblShipQty,r.dblQuantity AS dblRecipeQuantity
+		(Select ri.intRecipeItemId,ri.intItemId, ri.intItemUOMId,(CASE WHEN ri.intMarginById=1 THEN  ISNULL(ip.dblCost,0) + (ISNULL(ri.dblMargin,0) * ISNULL(ip.dblCost,0))/100 
+		ELSE ISNULL(ip.dblCost,0) + ISNULL(ri.dblMargin,0) End) AS dblPrice,tr.dblShipQty AS dblShipQty,r.dblQuantity AS dblRecipeQuantity
 		From tblMFRecipeItem ri 
 		Join tblICItem i on ri.intItemId=i.intItemId
 		Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId
-		Left Join tblICItemPricing ip on i.intItemId=ip.intItemId AND il.intItemLocationId=ip.intItemLocationId
+		Left Join vyuMFGetItemByLocation ip on i.intItemId=ip.intItemId AND ip.intLocationId=@intLocationId
 		Join @tblRecipe tr on ri.intRecipeId=tr.intRecipeId
 		Join tblMFRecipe r on tr.intRecipeId=r.intRecipeId
 		where i.strType='Other Charge' 

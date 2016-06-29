@@ -283,7 +283,7 @@ Begin
 		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,intImageTypeId)
 		Exec uspMFGetTraceabilityLotDetail @intLotId,@intDirectionId,@ysnParentLot
 
-		Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
+		Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L',strTransactionName='Produce' Where intParentId is null
 	End
 
 	--Shipment
@@ -395,6 +395,8 @@ Begin
 		GOTO DIR_FORWARD	
 	End
 End
+
+Update @tblNodeData Set strTransactionName='Work Order' Where strType='W'
 
 Select * 
 		,@strLotNumber AS strRecallLotNumber
