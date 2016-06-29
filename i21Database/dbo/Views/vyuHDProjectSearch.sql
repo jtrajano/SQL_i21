@@ -4,6 +4,7 @@
 					 intProjectId
 					,strProjectName
 					,strSalesPipeStatus
+					,dtmLastDescriptionModified
 					,dtmExpectedCloseDate
 					,strExpectedCloseDate
 					,strPipePercentage
@@ -26,12 +27,20 @@
 					,dtmCreated
 					,intCustomerId
 					,dtmClose
+					,strSource
+					,strLinesOfBusiness
+					,strCurrentSolution
+					,strCompetitorEntity
+					,strCompetitorEntityId
+					,strCurrentSolutionId
+					,strLinesOfBusinessId
 		from 
 				(
 				select
 					proj.intProjectId
 					,proj.strProjectName
 					,strSalesPipeStatus = pipe.strStatus
+					,proj.dtmLastDescriptionModified
 					,dtmExpectedCloseDate = proj.dtmSalesDate
 					,strExpectedCloseDate = CONVERT(nvarchar(10),proj.dtmSalesDate,101)
 					,strPipePercentage = convert(nvarchar(20), cast(round(pipe.dblProbability,2) as numeric(36,2))) + '%'
@@ -54,10 +63,18 @@
 					,proj.dtmCreated
 					,proj.intCustomerId
 					,proj.dtmClose
+					,tblHDOpportunitySource.strSource
+					,proj.strLinesOfBusiness
+					,proj.strCurrentSolution
+					,proj.strCompetitorEntity
+					,proj.strCompetitorEntityId
+					,proj.strCurrentSolutionId
+					,proj.strLinesOfBusinessId
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityCustomerId] = proj.intCustomerId
 					left outer join tblEMEntity con on con.[intEntityId] = proj.intCustomerContactId
 					left outer join tblHDTicketType typ on typ.intTicketTypeId = proj.intTicketTypeId
 					left outer join tblHDSalesPipeStatus pipe on pipe.intSalesPipeStatusId = proj.intSalesPipeStatusId
+					left outer join tblHDOpportunitySource tblHDOpportunitySource on tblHDOpportunitySource.intOpportunitySourceId = proj.intOpportunitySourceId
 				) as query1
