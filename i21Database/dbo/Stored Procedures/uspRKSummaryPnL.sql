@@ -1,6 +1,7 @@
-﻿CREATE PROC uspRKSummaryPnL    
+﻿CREATE PROC uspRKSummaryPnL
     @dtmToDate datetime,
-	@intCommodityId int = null
+	@intCommodityId int = null,
+	@ysnExpired bit
  AS  
   
 SELECT *
@@ -32,7 +33,7 @@ FROM (
 				FROM vyuRKRealizedPnL r
 				WHERE u.intFutureMarketId = r.intFutureMarketId
 					AND u.intFutureMonthId = r.intFutureMonthId
-				), 0) AS dblRealized
+				), 0) AS dblRealized,ysnExpired
 	FROM (
 		SELECT *
 			,(isnull(GrossPnL, 0) * (isnull(dblClosing1,0) - isnull(dblPrice,0)))-isnull(dblFutCommission,0) AS dblClosing
@@ -64,12 +65,12 @@ FROM (
 				,dblFutCommission1
 				,MatchLong
 				,MatchShort
-				,NetPnL
-			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end
+				,NetPnL,ysnExpired
+			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end and ysnExpired=@ysnExpired
 			) t
 		) u
 	GROUP BY intFutureMonthId
 		,intFutureMarketId
 		,strFutMarketName
-		,strFutureMonth
+		,strFutureMonth,ysnExpired
 	) t
