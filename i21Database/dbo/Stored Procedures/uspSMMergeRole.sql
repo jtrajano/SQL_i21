@@ -37,6 +37,14 @@ BEGIN TRY
 		INNER JOIN tblEMEntityToRole EntityToRole ON EntityToRole.intEntityRoleId = UserRole.intUserRoleID
 		WHERE UserRole.ysnAdmin = 1 AND EntityToRole.intEntityId = @fromEntityId
 
+		-- DELETE ADMIN MENU
+		DELETE RoleMenu FROM tblSMUserRoleMenu RoleMenu
+		INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityToRole.intEntityRoleId = UserRole.intUserRoleID
+		INNER JOIN tblSMMasterMenu MasterMenu on MasterMenu.intMenuID = RoleMenu.intMenuId
+		WHERE UserRole.ysnAdmin = 1 AND EntityToRole.intEntityId = @fromEntityId
+		AND (MasterMenu.intMenuID = 1 OR MasterMenu.intParentMenuID = 1)
+		
 		-- Commit changes
 		GOTO uspSMMergeRole_Commit
 	END
