@@ -357,7 +357,9 @@
     <Compile Include="Controllers\CommodityUOMController.cs" />
     <Compile Include="Controllers\CompanyPreferenceController.cs" />
     <Compile Include="Controllers\ImportDataController.cs" />
+    <Compile Include="Controllers\MeasurementController.cs" />
     <Compile Include="Controllers\ParentLotController.cs" />
+    <Compile Include="Controllers\ReadingPointController.cs" />
     <Compile Include="Controllers\RestrictionController.cs" />
     <Compile Include="Controllers\ItemMotorFuelTaxController.cs" />
     <Compile Include="Controllers\InventoryCountController.cs" />
