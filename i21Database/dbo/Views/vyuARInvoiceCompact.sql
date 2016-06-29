@@ -31,8 +31,8 @@ SELECT
 	,strAccountId					= GLA.strAccountId
 	,intCompanyLocationId			= ARI.intCompanyLocationId	
 	,strLocationName				= SML.strLocationName
-	,intPaymentMethodId				= ARI.intPaymentMethodId
-	,strPaymentMethod				= SMP.strPaymentMethod	
+	,intPaymentMethodId				= ARI.intPaymentMethodId	
+	,strPaymentMethod				= CASE WHEN ARI.strTransactionType = 'Overpayment' THEN '' ELSE SMP.strPaymentMethod END
 	,strCustomerEmail				= E.strEmail
 	,intCurrencyId					= ARI.intCurrencyId
 	,strCurrency					= SMC.strCurrency
