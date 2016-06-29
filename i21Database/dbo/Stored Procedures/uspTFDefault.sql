@@ -9,5 +9,4 @@ AS
 
 DELETE FROM tblTFTransactions
 
-INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, dtmDate, dtmReportingPeriodBegin, dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, @FormReport, @DateFrom, @DateFrom, @DateTo, 1)
-
+INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, dtmDate, dtmReportingPeriodBegin, dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, @FormReport, GETDATE(), @DateFrom, @DateTo, 1)

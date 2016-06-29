@@ -4,7 +4,7 @@
 @ReportingComponentId NVARCHAR(20),
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
-@FormReport NVARCHAR(50)
+@FormReport NVARCHAR(50) = ''
 
 AS
 
@@ -216,7 +216,7 @@ DECLARE @tblTempTransaction TABLE (
 							 tblTFReportingComponent ON tblTFReportingComponentDetail.intReportingComponentId=tblTFReportingComponent.intReportingComponentId ON 
 							 tblAPVendor.intEntityVendorId=tblICInventoryReceipt.intEntityVendorId INNER JOIN
 							 tblEMEntity ON tblEMEntity.intEntityId=tblAPVendor.intEntityVendorId INNER JOIN
-							 tblEMEntityLocation AS tblEMEntityLocation_1 ON tblEMEntity.intEntityId=tblEMEntityLocation_1.intEntityId ON tblSMShipVia.intEntityShipViaId=tblICInventoryReceipt.intShipViaId CROSS JOIN
+							 tblEMEntityLocation ON tblEMEntity.intEntityId=tblEMEntityLocation.intEntityId ON tblSMShipVia.intEntityShipViaId=tblICInventoryReceipt.intShipViaId CROSS JOIN
 							 tblSMCompanySetup
 					   WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
 							 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
@@ -368,3 +368,13 @@ DECLARE @tblTempTransaction TABLE (
 					END
 			SET @CountRC = @CountRC - 1
 		END
+
+		DECLARE @HasResult INT
+		SELECT TOP 1 @HasResult = intId from @tblTempTransaction
+		IF(@HasResult IS NULL)
+			BEGIN
+				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+			END
+
+
+	
