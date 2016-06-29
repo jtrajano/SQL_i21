@@ -4001,6 +4001,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptVendorHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptCashRequirements.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptCheckRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
