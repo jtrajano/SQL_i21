@@ -255,7 +255,7 @@ BEGIN TRY
 				,[intPrepayTypeId]					= @ItemPrepayTypeId 
 				,[dblPrepayRate]					= @ItemPrepayRate
 				,[strDocumentNumber]				= @ItemDocumentNumber
-				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
+				,[strItemDescription]				= (CASE WHEN ISNULL(@ItemDescription, '') = '' THEN IC.[strDescription] ELSE ISNULL(@ItemDescription, '') END)
 				,[intOrderUOMId]					= @OrderUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
