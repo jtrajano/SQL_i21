@@ -238,8 +238,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 	UNION ALL
 
 	SELECT
-		intLocationId = TransferView.intToLocationId
-		, intEntityVendorId = TransferView.intFromLocationId
+		intLocationId = TransferView.intFromLocationId
+		, intEntityVendorId = TransferView.intToLocationId
 		, NULL
 		, NULL
 		, strReceiptType = 'Transfer Order'
