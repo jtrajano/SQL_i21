@@ -27,7 +27,7 @@ SELECT psh.intMatchFuturesPSHeaderId,
     acc.strAccountNumber,  
     icc.strCommodityCode,  
     sl.strLocationName,ot.intFutureMonthId,ot.intCommodityId,ot.intFutureMarketId,
-	c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency                    
+	c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,ysnExpired                    
  FROM tblRKMatchFuturesPSHeader psh  
  JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId   
  JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId  
