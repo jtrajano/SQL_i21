@@ -6,6 +6,7 @@ SELECT
 	,tblPRPaycheck.intEntityEmployeeId
 	,tblPRPaycheck.dtmPayDate
 	,strDeduction = (SELECT TOP 1 strDeduction FROM tblPRTypeDeduction WHERE intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId)
+	,strDescription = (SELECT TOP 1 strDescription FROM tblPRTypeDeduction WHERE intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId)
 	,tblPRPaycheckDeduction.intEmployeeDeductionId
 	,tblPRPaycheckDeduction.intTypeDeductionId
 	,tblPRPaycheckDeduction.strDeductFrom

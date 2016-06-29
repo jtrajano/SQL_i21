@@ -6,6 +6,7 @@ SELECT
 	,tblPRPaycheck.intEntityEmployeeId
 	,tblPRPaycheck.dtmPayDate
 	,strTaxId = (SELECT TOP 1 strTax FROM tblPRTypeTax WHERE intTypeTaxId = tblPRPaycheckTax.intTypeTaxId)
+	,strDescription = (SELECT TOP 1 strDescription FROM tblPRTypeTax WHERE intTypeTaxId = tblPRPaycheckTax.intTypeTaxId)
 	,tblPRPaycheckTax.intTypeTaxId
 	,tblPRPaycheckTax.strCalculationType
 	,tblPRPaycheckTax.strFilingStatus

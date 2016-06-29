@@ -7,6 +7,7 @@ SELECT
 	,tblPRPaycheck.dtmPayDate
 	,tblPRPaycheckEarning.intEmployeeEarningId
 	,tblPRTypeEarning.strEarning
+	,tblPRTypeEarning.strDescription
 	,tblPRPaycheckEarning.intTypeEarningId
 	,tblPRPaycheckEarning.strCalculationType
 	,tblPRPaycheckEarning.intEmployeeDepartmentId
