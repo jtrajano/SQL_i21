@@ -3949,14 +3949,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     From: strLotNo,
                     To: '',
                     Operator: ''
-                },
-                {
-                    Name: 'intLotId',
-                    Type: 'string',
-                    Condition: 'EQUAL TO',
-                    From: intLotId,
-                    To: '',
-                    Operator: ''
                 }],
             directPrint: true
         });
