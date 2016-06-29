@@ -25,3 +25,7 @@ FROM tblICItem item
 			INNER JOIN tblGLAccountCategory accountCategory ON accountCategory.intAccountCategoryId = itemAccount.intAccountCategoryId
 		WHERE accountCategory.strAccountCategory = 'Sales Account'
 	) salesAccount ON salesAccount.intItemId = item.intItemId
+	LEFT OUTER JOIN tblETExportFilterItem exportItem ON item.intItemId = exportItem.intItemId
+	LEFT OUTER JOIN tblETExportFilterCategory exportCategory ON item.intCategoryId = exportCategory.intCategoryId
+WHERE item.ysnUsedForEnergyTracExport = 1
+	AND item.intItemId = exportItem.intItemId OR item.intCategoryId = exportCategory.intCategoryId
