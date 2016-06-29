@@ -356,22 +356,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber'
-                    //editor: {
-                    //    readOnly: '{readOnlyOrderNumberDropdown}',
-                    //    store: '{orderNumbers}',
-                    //    defaultFilters: [
-                    //        {
-                    //            column: 'ysnCompleted',
-                    //            value: 'false',
-                    //            conjunction: 'and'
-                    //        },
-                    //        {
-                    //            column: 'intEntityVendorId',
-                    //            value: '{current.intEntityVendorId}',
-                    //            conjunction: 'and'
-                    //        }
-                    //    ]
-                    //}
                 },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
@@ -390,6 +374,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             {
                                 column: 'ysnReceiveUOMAllowPurchase',
                                 value: true,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strType',
+                                condition: 'noteq',
+                                value: 'Other Charge',
                                 conjunction: 'and'
                             }
                         ],
@@ -3938,21 +3928,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             return;
         }
 
-        var strLotNo = selectedObj[0].data.strLotNumber
-
+        var strLotNo = '';
+        for (var x = 0; x < selectedObj.length; x++) {
+            strLotNo += selectedObj[x].data.strLotNumber + '^';
+        }
         iRely.Functions.openScreen('Reporting.view.ReportViewer', {
             selectedReport: 'LotLabel',
             selectedGroup: 'Manufacturing',
             selectedParameters: [
                 {
                     Name: 'strLotNo',
-                    Type: 'int',
-                    Condition: 'EQUAL TO',
+                    Type: 'string',
+                    Condition:'EQUAL TO',
                     From: strLotNo,
                     To: '',
                     Operator: ''
-                }
-            ],
+                },
+                {
+                    Name: 'intLotId',
+                    Type: 'string',
+                    Condition: 'EQUAL TO',
+                    From: intLotId,
+                    To: '',
+                    Operator: ''
+                }],
             directPrint: true
         });
     },
