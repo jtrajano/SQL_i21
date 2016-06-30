@@ -353,7 +353,7 @@ SELECT C.intManufacturingCellId
 							WHEN @ysnAutoPriorityOrderByDemandRatio = 1
 								AND W.intStatusId = 3
 								THEN WD.intDemandRatio
-							ELSE SL.intExecutionOrder
+							ELSE ISNULL(SL.intExecutionOrder,9999)
 							END
 						,CASE 
 							WHEN @ysnAutoPriorityOrderByDemandRatio = 1
@@ -381,7 +381,8 @@ SELECT C.intManufacturingCellId
 	,SL.strComments
 	,SL.strNote
 	,SL.strAdditionalComments
-	,SL.intNoOfSelectedMachine
+	--,SL.intNoOfSelectedMachine
+    ,Convert(int,Case When W.intStatusId = 1 Then SL.intNoOfSelectedMachine Else IsNULL(SL.intNoOfSelectedMachine,1) End) AS intNoOfSelectedMachine
 	,SL.dtmEarliestStartDate
 	,SL.intPlannedShiftId
 	,SL.ysnFrozen
@@ -428,7 +429,7 @@ ORDER BY CASE
 		WHEN @ysnCheckCrossContamination = 1
 			AND W.intStatusId = 3
 			THEN CC.intExecutionOrder 
-		ELSE SL.intExecutionOrder
+		ELSE ISNULL(SL.intExecutionOrder,9999)
 		END
 	,CASE 
 		WHEN @ysnAutoPriorityOrderByDemandRatio = 1

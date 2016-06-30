@@ -14,18 +14,19 @@ BEGIN
 		,@strCompanyLocationName NVARCHAR(50)
 		,@strItemGroupName NVARCHAR(50)
 		,@strShowStorage NVARCHAR(50)
-		,@intBlendAttributeId int
-		,@strBlendAttributeValue nvarchar(50)
-		,@dtmCurrentDateTime datetime
+		,@intBlendAttributeId INT
+		,@strBlendAttributeValue NVARCHAR(50)
+		,@dtmCurrentDateTime DATETIME
 
-	Select @dtmCurrentDateTime=GETDATE()
+	SELECT @dtmCurrentDateTime = GETDATE()
 
+	SELECT @intBlendAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Blend Category'
 
-	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
-	
-	Select @strBlendAttributeValue=strAttributeValue
-	From tblMFManufacturingProcessAttribute
-	Where intAttributeId=@intBlendAttributeId
+	SELECT @strBlendAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = @intBlendAttributeId
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -274,7 +275,7 @@ BEGIN
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
-		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		WHERE C.strCategoryCode = @strBlendAttributeValue
 			AND strItemNo LIKE @strItemNo + '%'
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
@@ -291,7 +292,7 @@ BEGIN
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
-		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		WHERE C.strCategoryCode = @strBlendAttributeValue
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
@@ -307,7 +308,7 @@ BEGIN
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
-		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		WHERE C.strCategoryCode = @strBlendAttributeValue
 			AND strItemNo LIKE @strItemNo + '%'
 	END
@@ -322,7 +323,7 @@ BEGIN
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
-		JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		WHERE C.strCategoryCode = @strBlendAttributeValue
 	END
 
@@ -377,7 +378,7 @@ BEGIN
 			,I.strDescription
 			,CL.intCompanyLocationId
 			,CL.strLocationName
-			,SUM(RI.dblCalculatedQuantity * Round(SWD.dblPlannedQty,0))
+			,SUM(RI.dblCalculatedQuantity * Round(SWD.dblPlannedQty, 0))
 			,'' AS strName
 			,CD.dtmCalendarDate
 			,'' strWorkInstruction
@@ -395,8 +396,8 @@ BEGIN
 		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
-		AND C.strCategoryCode = @strBlendAttributeValue
+		JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+			AND C.strCategoryCode = @strBlendAttributeValue
 		JOIN @tblICItem I ON I.intItemId = II.intItemId
 		--JOIN dbo.tblEMEntity E ON E.intEntityId = I.intOwnerId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
@@ -526,7 +527,7 @@ BEGIN
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
 	WHERE L.intLotStatusId = 1
-		AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
+		AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 		AND CSL.strSubLocationName <> 'Intrasit'
 	GROUP BY L.intLocationId
 		,I.intItemId
@@ -989,7 +990,7 @@ BEGIN
 		,strOwner
 		,dtmPlannedDate
 		,strComments
-		,'Total kilos per blend for ' + CONVERT(NVARCHAR, @intNoOfDays) + ' rolling days' AS intNoOfDays
+		,'Ingredient demand for ' + CONVERT(NVARCHAR, @intNoOfDays) + ' rolling days' AS intNoOfDays
 		,dblQuantity
 		,@intNoOfDays AS intDays
 		,strQtyType
@@ -1031,11 +1032,13 @@ BEGIN
 	WHERE intDisplayOrder = 0
 
 	UPDATE @tblMFFinalWIPItem
-	SET dtmPlannedDateTime = '1900-01-01',strCellName='1900-01-01'
+	SET dtmPlannedDateTime = '1900-01-01'
+		,strCellName = '1900-01-01'
 	WHERE intDisplayOrder = 1
 
 	UPDATE @tblMFFinalWIPItem
-	SET dtmPlannedDateTime = '1901-01-02',strCellName='1901-01-02'
+	SET dtmPlannedDateTime = '1901-01-02'
+		,strCellName = '1901-01-02'
 	WHERE intDisplayOrder IN (
 			2
 			,3
@@ -1045,14 +1048,14 @@ BEGIN
 	BEGIN
 		SELECT a.strCellName
 			,a.strItemNo
-			,'Blend' as strItemType
+			,'Blend' AS strItemType
 			,a.intRowNumber
 			,a.strWorkOrderNo
-			,a.dtmPlannedDateTime
+			,Convert(NVARCHAR, a.dtmPlannedDateTime, 106) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner
-			,a.dtmPlannedDate
+			,Convert(DateTime, a.dtmPlannedDate, 106) AS dtmPlannedDate
 			,a.strComments
 			,a.intNoOfDays
 			,a.dblQuantity
@@ -1084,14 +1087,14 @@ BEGIN
 	BEGIN
 		SELECT a.strCellName
 			,a.strItemNo
-			,'Blend' as strItemType
+			,'Blend' AS strItemType
 			,a.intRowNumber
 			,a.strWorkOrderNo
-			,a.dtmPlannedDateTime
+			,Convert(NVARCHAR, a.dtmPlannedDateTime, 106) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner
-			,a.dtmPlannedDate
+			,Convert(DateTime, a.dtmPlannedDate, 106) AS dtmPlannedDate
 			,a.strComments
 			,a.intNoOfDays
 			,a.dblQuantity
@@ -1128,14 +1131,14 @@ BEGIN
 	BEGIN
 		SELECT a.strCellName
 			,a.strItemNo
-			,'Blend' as strItemType
+			,'Blend' AS strItemType
 			,a.intRowNumber
 			,a.strWorkOrderNo
-			,a.dtmPlannedDateTime
+			,Convert(NVARCHAR, a.dtmPlannedDateTime, 106) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner
-			,a.dtmPlannedDate
+			,Convert(DateTime, a.dtmPlannedDate, 106) AS dtmPlannedDate
 			,a.strComments
 			,a.intNoOfDays
 			,a.dblQuantity
@@ -1144,6 +1147,9 @@ BEGIN
 			,a.intDisplayOrder
 		FROM @tblMFFinalWIPItem a
 		WHERE a.strCompanyLocationName <> 'WD'
+		ORDER BY strItemNo
+			,strCompanyLocationName
+			,dtmPlannedDateTime
 	END
 END
 GO
