@@ -4005,6 +4005,7 @@
     <Build Include="dbo\Functions\fnMFConvertCostToTargetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemCostInTargetUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
