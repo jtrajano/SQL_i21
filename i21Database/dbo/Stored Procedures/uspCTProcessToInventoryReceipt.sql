@@ -63,7 +63,8 @@ AS
 				intSourceType,		 	
 				strSourceId,
 				strSourceScreenName,
-				ysnSubCurrency
+				ysnSubCurrency,
+				intGrossNetUOMId
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CD.intEntityId,
@@ -90,8 +91,9 @@ AS
 				intSourceType		 		=	0,
 				strSourceId					=	CD.strContractNumber,
 				strSourceScreenName			=	'Contract',
-				ysnSubCurrency				=	SubCurrency.ysnSubCurrency 
-				
+				ysnSubCurrency				=	SubCurrency.ysnSubCurrency ,
+				intGrossNetUOMId			=	0
+
 		FROM	vyuCTContractDetailView		CD	
 		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CD.intEntityId	AND
 													EL.ysnDefaultLocation	=	1				LEFT
