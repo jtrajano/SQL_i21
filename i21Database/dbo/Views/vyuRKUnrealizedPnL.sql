@@ -98,3 +98,4 @@ SELECT  intFutOptTransactionId,
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId  
   )t1)t1 WHERE MatchLong = intOriginalQty or MatchShort = intOriginalQty )t ORDER BY RowNum ASC
+
