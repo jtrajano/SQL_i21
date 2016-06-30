@@ -686,10 +686,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },
 
     onLotCreateRecord: function(config, action) {
-        var win = config.grid.up('window');
-        var currentShipmentItem = win.viewModel.data.currentShipmentItem;
+        // var win = config.grid.up('window');
+        // var currentShipmentItem = win.viewModel.data.currentShipmentItem;
         var record = Ext.create('Inventory.model.ShipmentItemLot');
-        record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
+        // record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
         record.set('dblQuantityShipped', config.dummy.get('dblQuantityShipped'));
         action(record);
     },
