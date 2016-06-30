@@ -282,7 +282,8 @@ END CATCH
 				--zero amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
-					'You cannot post an ' + A.strTransactionType + ' with zero amount.',
+					CASE WHEN A.strTransactionType = 'Invoice ' THEN 'You cannot post an ' + A.strTransactionType + ' with zero amount.' 
+					ELSE 'You cannot post a ' + A.strTransactionType + ' with zero amount.' END,
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -300,7 +301,8 @@ END CATCH
 				--negative amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
-					'You cannot post an ' + A.strTransactionType + ' with negative amount.',
+					CASE WHEN A.strTransactionType = 'Invoice' THEN 'You cannot post an ' + A.strTransactionType + ' with negative amount.' 
+					ELSE 'You cannot post a ' + A.strTransactionType + ' with negative amount.' END ,
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
