@@ -1374,6 +1374,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onLocationSelect: function (combo, records, eOpts) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        var me = this;
+
+        if (current) {
+            current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+            if (current.tblICInventoryReceiptItems()) {
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                    current.currentReceiptItem = item;
+                    me.calculateItemTaxes();
+                });
+            }
+        }
+    },
+
     onTransferorSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -4525,7 +4541,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 drilldown: this.onVendorDrilldown
             },
             "#cboLocation": {
-                drilldown: this.onLocationDrilldown
+                drilldown: this.onLocationDrilldown,
+                select: this.onLocationSelect
             },
             "#cboCurrency": {
                 drilldown: this.onCurrencyDrilldown,
