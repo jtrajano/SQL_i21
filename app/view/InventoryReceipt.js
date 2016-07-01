@@ -307,7 +307,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 dataIndex: 'intCompanyLocationId',
                                                                 dataType: 'numeric',
-                                                                text: 'Location Id',
                                                                 hidden: true
                                                             },
                                                             {
@@ -321,6 +320,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 dataType: 'string',
                                                                 text: 'Location Type',
                                                                 flex: 1
+                                                            },
+                                                            {
+                                                                dataIndex: 'intTaxGroupId',
+                                                                dataType: 'numeric',
+                                                                hidden: true
                                                             }
                                                         ],
                                                         enableDrillDown: true,
