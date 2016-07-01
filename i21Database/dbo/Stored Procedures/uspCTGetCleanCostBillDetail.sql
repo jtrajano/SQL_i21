@@ -83,7 +83,7 @@ BEGIN TRY
 
 				FROM	tblAPBillDetail				BD
 				JOIN	tblAPBill					BL	ON	BL.intBillId		=	BD.intBillId
-				JOIN	tblICItem					IM	ON	IM.intItemId		=	BD.intItemId					
+				JOIN	tblICItem					IM	ON	IM.intItemId		=	BD.intItemId		 LEFT			
 				JOIN	tblICItemUOM                IU  ON  IU.intItemUOMId     =   BD.intWeightUOMId    LEFT
                 JOIN	tblSMCurrency               CU  ON  CU.intCurrencyID    =   BL.intCurrencyId
                 WHERE	BD.intContractDetailId = @intContractDetailId AND BL.intTransactionType = 1 
