@@ -3600,7 +3600,7 @@ Ext.define('Inventory.view.Item', {
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
-                                                                        xtype: 'advancefiltergrid',
+                                                                        xtype: 'toolbar',
                                                                         dock: 'top',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
