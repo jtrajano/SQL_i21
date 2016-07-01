@@ -340,9 +340,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnBill: {
                 hidden: '{!current.ysnPosted}'
             },
-            btnQuality: {
-                hidden: '{current.ysnPosted}'
-            },
             lblWeightLossMsg: {
                 hidden: false,
                 text: '{getWeightLossText}'
