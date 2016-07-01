@@ -3517,7 +3517,6 @@
     <Build Include="dbo\Tables\tblTFTaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblTFTaxReportTemplate.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentConfiguration.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponentConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertVehicleRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertCardRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
@@ -3557,7 +3556,6 @@
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
@@ -3658,7 +3656,6 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReport.sql" />
     <Build Include="dbo\Tables\tblTFOriginDestinationState.sql" />
     <Build Include="dbo\Tables\tblTFValidDestinationState.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
     <Build Include="dbo\Stored Procedures\uspMBDuplicateConsignmentRate.sql" />
     <Build Include="dbo\Tables\tblSMEmail.sql" />
     <Build Include="dbo\Tables\tblSMEmailUpload.sql" />
