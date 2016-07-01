@@ -8,6 +8,7 @@ AS
 			CDP.intContractSeq as intPContractSeq,
 			CHP.intEntityId AS intPEntityId,
 			CDP.intCompanyLocationId AS intPCompanyLocationId,
+			PCL.strLocationName AS strPCompanyLocation,
 			CDP.intItemId AS intPItemId,
 			CAST (CHP.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
 			AD.dblPAllocatedQty,
@@ -31,6 +32,7 @@ AS
 			CDS.intContractSeq as intSContractSeq,
 			CHS.intEntityId AS intSEntityId,
 			CDS.intCompanyLocationId AS intSCompanyLocationId,
+			SCL.strLocationName AS strSCompanyLocation,
 			CDS.intItemId AS intSItemId,
 			CAST (CHS.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.dblSAllocatedQty,
@@ -61,6 +63,8 @@ AS
 	JOIN	tblICUnitMeasure		US	ON	US.intUnitMeasureId				=	AD.intSUnitMeasureId
 	JOIN	tblICItem				ITP	ON	ITP.intItemId				= CDP.intItemId
 	JOIN	tblICItem				ITS	ON	ITS.intItemId				= CDS.intItemId
+	LEFT JOIN tblSMCompanyLocation	PCL ON PCL.intCompanyLocationId = CDP.intCompanyLocationId
+	LEFT JOIN tblSMCompanyLocation	SCL ON SCL.intCompanyLocationId = CDS.intCompanyLocationId
 	LEFT JOIN	tblCTPosition			PP	ON	PP.intPositionId			= CHP.intPositionId
 	LEFT JOIN	tblCTPosition			PS	ON	PS.intPositionId			= CHS.intPositionId
 	LEFT JOIN	tblSMCountry			CP	ON	CP.intCountryID				= ITP.intOriginId
