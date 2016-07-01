@@ -57,19 +57,19 @@ AS
 		
 		SELECT 		CAST (NULL AS INT)			AS	intPriceFixationId,
 					CAST (NULL AS INT)			AS	intContractDetailId, 
-					intContractHeaderId,
-					strContractNumber,
+					CD.intContractHeaderId,
+					CD.strContractNumber,
 					CAST (NULL AS INT)			AS	intContractSeq,
-					intContractTypeId,
+					CD.intContractTypeId,
 					strContractType,
-					intEntityId,
+					CD.intEntityId,
 					strEntityName,
 					CD.intCommodityId,
 					strCommodityDescription,
-					ysnMultiplePriceFixation,
+					CD.ysnMultiplePriceFixation,
 					CAST(NULL AS NUMERIC(12,4)) AS dblHeaderQuantity,
 					strHeaderUnitMeasure,
-					SUM(dblNoOfLots)			AS	dblNoOfLots,
+					ISNULL(CH.dblNoOfLots,SUM(CD.dblNoOfLots))			AS	dblNoOfLots,
 					LTRIM(NULL)					AS	strLocationName,
 					CAST (NULL AS INT)			AS	intItemId,
 					CAST (NULL AS INT)			AS	intItemUOMId,
@@ -83,12 +83,12 @@ AS
 					CAST (NULL AS INT)			AS	intPriceItemUOMId,
 					CAST (NULL AS INT)			AS	intBookId,
 					CAST (NULL AS INT)			AS	intSubBookId,
-					intSalespersonId,
+					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
 					'Unpriced' AS strStatus,
 					CAST(0 AS INT) AS intLotsFixed,
-					CAST(ROUND(SUM(dblNoOfLots),0)AS INT) AS intBalanceNoOfLots,
+					CAST(ROUND(SUM(CD.dblNoOfLots),0)AS INT) AS intBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
@@ -96,22 +96,24 @@ AS
 					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
 
 		FROM		vyuCTContractDetailView		CD
-		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
-		WHERE		ISNULL(ysnMultiplePriceFixation,0) = 1
-		AND			intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
-		GROUP BY	intContractHeaderId,
-					strContractNumber,
-					intContractTypeId,
+		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
+		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
+		AND			CD.intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
+		GROUP BY	CD.intContractHeaderId,
+					CD.strContractNumber,
+					CD.intContractTypeId,
 					strContractType,
-					intEntityId,
+					CD.intEntityId,
 					strEntityName,
 					CD.intCommodityId,
 					strCommodityDescription,
-					ysnMultiplePriceFixation,
+					CD.ysnMultiplePriceFixation,
 					dblHeaderQuantity,
 					strHeaderUnitMeasure,
-					intSalespersonId,
-					CU.intCommodityUnitMeasureId
+					CD.intSalespersonId,
+					CU.intCommodityUnitMeasureId,
+					CH.dblNoOfLots
 
 		UNION ALL
 
@@ -172,15 +174,15 @@ AS
 		SELECT 		PF.intPriceFixationId,
 					CAST (NULL AS INT)			AS	intContractDetailId, 
 					CD.intContractHeaderId,
-					strContractNumber,
+					CD.strContractNumber,
 					CAST (NULL AS INT)			AS	intContractSeq,
-					intContractTypeId,
+					CD.intContractTypeId,
 					strContractType,
-					intEntityId,
+					CD.intEntityId,
 					strEntityName,
 					CD.intCommodityId,
 					strCommodityDescription,
-					ysnMultiplePriceFixation,
+					CD.ysnMultiplePriceFixation,
 					CAST(NULL AS NUMERIC(12,4)) AS  dblHeaderQuantity,
 					strHeaderUnitMeasure,
 					PF.intTotalLots				AS	dblNoOfLots,
@@ -197,10 +199,10 @@ AS
 					CAST (NULL AS INT)			AS	intPriceItemUOMId,
 					CAST (NULL AS INT)			AS	intBookId,
 					CAST (NULL AS INT)			AS	intSubBookId,
-					intSalespersonId,
+					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
-					CASE	WHEN ISNULL(CAST(ROUND(SUM(dblNoOfLots),0)AS INT),0)-ISNULL(PF.intLotsFixed,0) = 0 
+					CASE	WHEN ISNULL(CAST(ROUND(SUM(CD.dblNoOfLots),0)AS INT),0)-ISNULL(PF.intLotsFixed,0) = 0 
 							THEN 'Fully Priced' 
 							WHEN ISNULL(intLotsFixed,0) = 0 THEN 'Unpriced'
 							ELSE 'Partially Priced' 
@@ -215,20 +217,21 @@ AS
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
+		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
-		WHERE		ISNULL(ysnMultiplePriceFixation,0) = 1
+		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		GROUP BY	CD.intContractHeaderId,
 					CD.strContractNumber,
-					intContractTypeId,
+					CD.intContractTypeId,
 					strContractType,
-					intEntityId,
+					CD.intEntityId,
 					strEntityName,
 					CD.intCommodityId,
 					strCommodityDescription,
-					ysnMultiplePriceFixation,
+					CD.ysnMultiplePriceFixation,
 					dblHeaderQuantity,
 					strHeaderUnitMeasure,
-					intSalespersonId,
+					CD.intSalespersonId,
 					PF.intLotsFixed,
 					PF.intTotalLots,
 					PF.intLotsHedged,
