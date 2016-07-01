@@ -1204,10 +1204,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 120,
                                                                                 dataIndex: 'dblUnitCost',
                                                                                 text: 'Cost',
-                                                                                format: '0,000.00####',
+                                                                                format: '0,000.000###',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
                                                                                     itemId: 'txtUnitCost',
+                                                                                    decimalPrecision: 6,
                                                                                     minValue: 0
                                                                                 }
                                                                             },
