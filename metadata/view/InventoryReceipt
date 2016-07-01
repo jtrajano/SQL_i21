@@ -2311,7 +2311,7 @@
                                                                         "align": null,
                                                                         "dataIndex": "dblUnitCost",
                                                                         "dataType": null,
-                                                                        "format": "0,000.00####",
+                                                                        "format": "0,000.000###",
                                                                         "itemId": "colUnitCost",
                                                                         "text": "Cost",
                                                                         "width": 120
@@ -2334,6 +2334,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "decimalPrecision": 6,
                                                                                 "itemId": "txtUnitCost",
                                                                                 "minValue": 0
                                                                             },
