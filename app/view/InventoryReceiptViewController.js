@@ -504,6 +504,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
+                        readOnly: '{computeWeightUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
