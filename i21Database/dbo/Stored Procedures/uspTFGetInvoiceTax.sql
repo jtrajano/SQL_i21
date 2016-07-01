@@ -351,3 +351,10 @@ DECLARE @tblTempTransaction TABLE (
 
 			SET @CountRC = @CountRC - 1
 		END
+
+		DECLARE @HasResult INT
+		SELECT TOP 1 @HasResult = intId from @tblTempTransaction
+		IF(@HasResult IS NULL)
+			BEGIN
+				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+			END

@@ -307,4 +307,9 @@ DECLARE @tblTempTransaction TABLE (
 			SET @CountRC = @CountRC - 1
 		END
 
-			--exec uspTFGT103InvoiceTax '66f6568c-a9cd-487b-ba80-e59876eb683f', '83,84', '05/01/2016', '05/30/2016', '', 'false'
+		DECLARE @HasResult INT
+		SELECT TOP 1 @HasResult = intId from @tblTempTransaction
+		IF(@HasResult IS NULL)
+			BEGIN
+				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+			END
