@@ -40,11 +40,11 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
 		, strUnitType = strType
 		-- Gross/Net 
-		, intWeightUOMId = NULL
-		, strWeightUOM = NULL
+		, intWeightUOMId = GrossNetUOM.intItemUOMId
+		, strWeightUOM = GrossNetName.strUnitMeasure
 		-- Conversion factor
 		, dblItemUOMConvFactor = ItemUOM.dblUnitQty
-		, dblWeightUOMConvFactor = NULL 
+		, dblWeightUOMConvFactor = GrossNetUOM.dblUnitQty 
 		-- Cost UOM
 		, intCostUOMId = CostUOM.intItemUOMId
 		, strCostUOM = CostUnitMeasure.strUnitMeasure
@@ -69,7 +69,11 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 				ON POView.intUnitOfMeasureId = CostUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-
+			CROSS APPLY dbo.fnGetDefaultGrossNetUOMForLotItem(POView.intItemId) DefaultGrossNetUOM
+			LEFT JOIN dbo.tblICItemUOM GrossNetUOM
+				ON GrossNetUOM.intItemUOMId = DefaultGrossNetUOM.intGrossNetUOMId
+			LEFT JOIN dbo.tblICUnitMeasure GrossNetName 
+				ON GrossNetName.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 
 	WHERE ysnCompleted = 0
 

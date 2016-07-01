@@ -3604,6 +3604,7 @@
     <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
     <Build Include="dbo\Functions\fnGetDepositEntry.sql" />
+    <Build Include="dbo\Functions\fnGetDefaultGrossNetUOMForLotItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
