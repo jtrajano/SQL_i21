@@ -306,33 +306,31 @@
 					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 				)
 			AND (CL.intServiceCharges IS NULL OR CL.intServiceCharges = 0))
+			IF(@CompanyLocation IS NULL)
+			BEGIN
+				SET @Sucess = 1
+			END
+			IF(@CompanyLocation IS NOT NULL)
+			BEGIN
+				SET @Sucess = 0
+				SET @Message = 'The Service Charge Account of Company Location - ' + @CompanyLocation + ' was not set.'
+				RETURN;	
+			END
+
 		 END
 
 	IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
 		 BEGIN
-			SET @CompanyLocation = 
-			(SELECT TOP 1 CL.strLocationName
-			FROM ptivcmst
-			LEFT JOIN tblARInvoice Inv ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-			INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptivc_sold_to COLLATE Latin1_General_CI_AS
-			INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = ptivc_sold_by COLLATE Latin1_General_CI_AS
-			INNER JOIN tblSMCompanyLocation CL ON ptivcmst.ptivc_loc_no COLLATE Latin1_General_CI_AS = CL.strLocationNumber  COLLATE Latin1_General_CI_AS
-			WHERE Inv.strInvoiceNumber IS NULL AND ptivcmst.ptivc_invc_no = UPPER(ptivcmst.ptivc_invc_no) COLLATE Latin1_General_CS_AS
-			AND (
-					((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
-					OR
-					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-				)
-			AND (CL.intServiceCharges IS NULL OR CL.intServiceCharges = 0))
+			SET @CompanyLocation = (SELECT intServiceChargeAccountId FROM tblARCompanyPreference)
+			IF(@CompanyLocation IS NOT NULL)
+			BEGIN
+				SET @Sucess = 1
+			END
+			IF(@CompanyLocation IS NULL)
+			BEGIN
+				SET @Sucess = 0
+				SET @Message = 'The Service Charge Account in the Company Configuration was not set.'
+				RETURN;	
+			END
 		 END
 
-	IF(@CompanyLocation IS NULL)
-	BEGIN
-		SET @Sucess = 1
-	END
-	IF(@CompanyLocation IS NOT NULL)
-	BEGIN
-		SET @Sucess = 0
-		SET @Message = 'The Service Charge Account of Company Location - ' + @CompanyLocation + 'was not set.'
-		RETURN;	
-	END
