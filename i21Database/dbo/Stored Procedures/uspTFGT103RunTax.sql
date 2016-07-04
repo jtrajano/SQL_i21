@@ -39,19 +39,24 @@ DECLARE @DatePeriod DATETIME
 DECLARE @DateBegin DATETIME
 DECLARE @DateEnd DATETIME
 
+DECLARE @TPName NVARCHAR(150)
 DECLARE @TaxID NVARCHAR(50)
+DECLARE @EIN NVARCHAR(50)
+
 SET @FormCode = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
+SET @TPName = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intTaxReportSummaryItemId = 'TaxPayerName')
 SET @TaxID = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intTaxReportSummaryItemId = 'TID')
+SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 
-INSERT INTO tblTFTaxReportSummary (uniqGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strTaxType, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, 
-					strTaxPayerName, strTaxPayerIdentificationNumber, strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName)
+INSERT INTO tblTFTaxReportSummary (uniqGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strTaxType, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, strTaxPayerIdentificationNumber, 
+					strTaxPayerFEIN,strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName)
 
-SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, strCompanyName, @TaxID,
-				strContactEmail, strTaxAddress, strCity, strState, strZipCode, strContactPhone, strContactName from tblTFCompanyPreference
+SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, @TPName, @TaxID,
+				@EIN, strContactEmail, strTaxAddress, strCity, strState, strZipCode, strContactPhone, strContactName from tblTFCompanyPreference
 -- ======================== SUMMARY ==============================
 
 	INSERT INTO @tblTempSummaryItem (TaxReportSummaryItemId)  -- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
@@ -352,5 +357,3 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 					
 						SET @CountTemplateItem = @CountTemplateItem - 1
 					END
-
-		--EXEC uspTFRunTax_GT_103 '748b0127-8249-4573-bd4f-15d06f78a0eb', ''
