@@ -171,3 +171,7 @@ CREATE INDEX [IX_tblTMEvent_dtmDate] ON [dbo].[tblTMEvent] ([dtmDate] DESC)
 GO
 
 CREATE INDEX [IX_tblTMEvent_intSiteId] ON [dbo].[tblTMEvent] ([intSiteID])
+
+GO
+
+CREATE INDEX [IX_tblTMEvent_intEventTypeID] ON [dbo].[tblTMEvent] ([intEventTypeID])
