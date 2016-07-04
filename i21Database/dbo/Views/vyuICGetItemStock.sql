@@ -129,5 +129,3 @@ LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodi
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
 LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ItemLocation.intVendorId
 LEFT JOIN vyuICGetItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId AND StockUOM.ysnStockUnit = 1
-WHERE Item.strType = 'Inventory' OR Item.strType = 'Finished Good' OR Item.strType = 'Raw Material'
-
