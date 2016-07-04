@@ -55,6 +55,10 @@ BEGIN
 				,strContactEmailAddress = ''''
 				,strFillGroup = K.strFillGroupCode
 				,strFillDescription = K.strDescription
+				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
+				,L.strHoldReason
+				,A.dtmOnHoldStartDate
+				,A.dtmOnHoldEndDate
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -66,6 +70,8 @@ BEGIN
 					ON A.intFillMethodId = H.intFillMethodId
 				LEFT JOIN tblTMFillGroup K
 					ON A.intFillGroupId = K.intFillGroupId
+				LEFT JOIN tblTMHoldReason L
+					ON A.intHoldReasonID = L.intHoldReasonID
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
@@ -109,6 +115,10 @@ BEGIN
 				,strContactEmailAddress = G.strEmail
 				,strFillGroup = K.strFillGroupCode
 				,strFillDescription = K.strDescription
+				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
+				,L.strHoldReason
+				,A.dtmOnHoldStartDate
+				,A.dtmOnHoldEndDate
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -129,6 +139,8 @@ BEGIN
 					ON A.intFillMethodId = H.intFillMethodId
 				LEFT JOIN tblTMFillGroup K
 					ON A.intFillGroupId = K.intFillGroupId
+				LEFT JOIN tblTMHoldReason L
+					ON A.intHoldReasonID = L.intHoldReasonID
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
