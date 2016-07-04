@@ -4,7 +4,8 @@
     [dtmDateSync]         DATETIME NOT NULL,
     [ysnCommit]           BIT      DEFAULT 0 NOT NULL,
     [intConcurrencyId]    INT      DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblTMSyncOutOfRange] PRIMARY KEY CLUSTERED ([intSyncOutOfRangeID] ASC)
+    CONSTRAINT [PK_tblTMSyncOutOfRange] PRIMARY KEY CLUSTERED ([intSyncOutOfRangeID] ASC), 
+    CONSTRAINT [FK_tblTMSyncOutOfRange_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [tblTMSite]([intSiteID])
 );
 
 
@@ -53,3 +54,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMSyncOutOfRange',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+
+CREATE INDEX [IX_tblTMSyncOutOfRange_dtmDateSync] ON [dbo].[tblTMSyncOutOfRange] ([dtmDateSync])
+
+GO
+
+CREATE INDEX [IX_tblTMSyncOutOfRange_intSiteID] ON [dbo].[tblTMSyncOutOfRange] ([intSiteID])

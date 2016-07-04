@@ -728,3 +728,26 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = 'dtmCreatedDate'
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intSiteID] ON [dbo].[tblTMDeliveryHistory] ([intSiteID])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_dtmInvoiceDate] ON [dbo].[tblTMDeliveryHistory] ([dtmInvoiceDate])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_dtmCreatedDate] ON [dbo].[tblTMDeliveryHistory] ([dtmCreatedDate] DESC)
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallRouteId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallRouteId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intInvoiceId] ON [dbo].[tblTMDeliveryHistory] ([intInvoiceId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_strInvoiceNumber] ON [dbo].[tblTMDeliveryHistory] ([strInvoiceNumber])

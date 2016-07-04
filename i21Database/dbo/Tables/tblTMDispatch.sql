@@ -375,3 +375,22 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'intRouteId'
+GO
+
+CREATE INDEX [IX_tblTMDispatch_intSiteID] ON [dbo].[tblTMDispatch] ([intSiteID])
+
+GO
+
+CREATE INDEX [IX_tblTMDispatch_intRouteId] ON [dbo].[tblTMDispatch] ([intRouteId])
+
+GO
+
+CREATE INDEX [IX_tblTMDispatch_intProductID] ON [dbo].[tblTMDispatch] ([intProductID])
+
+GO
+
+CREATE INDEX [IX_tblTMDispatch_intSubstituteProductID] ON [dbo].[tblTMDispatch] ([intSubstituteProductID])
+
+GO
+
+CREATE INDEX [IX_tblTMDispatch_intDriverID] ON [dbo].[tblTMDispatch] ([intDriverID])
