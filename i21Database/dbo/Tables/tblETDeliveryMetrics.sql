@@ -14,3 +14,14 @@
 	[intConcurrencyId] INT NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblETDeliveryMetrics] PRIMARY KEY ([intDeliveryMetricsId])
 )
+GO
+
+CREATE INDEX [IX_tblETDeliveryMetrics_strDriverNumber] ON [dbo].[tblETDeliveryMetrics] ([strDriverNumber])
+
+GO
+
+CREATE INDEX [IX_tblETDeliveryMetrics_strTruckNumber] ON [dbo].[tblETDeliveryMetrics] ([strTruckNumber])
+
+GO
+
+CREATE INDEX [IX_tblETDeliveryMetrics_strShiftNumber] ON [dbo].[tblETDeliveryMetrics] ([strShiftNumber])
