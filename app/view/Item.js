@@ -3593,6 +3593,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
+                                                                reference: 'grdMotorFuelTax',
                                                                 itemId: 'grdMotorFuelTax',
                                                                 margin: '-1 -1 4 -1',
                                                                 header: false,

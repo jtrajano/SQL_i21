@@ -7835,6 +7835,7 @@
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "-1 -1 4 -1",
+                                                        "reference": "grdMotorFuelTax",
                                                         "title": "Customer Item Cross Reference Grid"
                                                     },
                                                     "name": "MyGridPanel4",
