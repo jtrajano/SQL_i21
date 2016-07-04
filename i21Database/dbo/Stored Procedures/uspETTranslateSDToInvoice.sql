@@ -28,6 +28,35 @@ BEGIN
 	DECLARE	@dblPrice								NUMERIC(18, 6)
 	DECLARE	@strComment								NVARCHAR(MAX)
 	DECLARE @strDetailType							NVARCHAR(2)
+	DECLARE @strContractNumber						NVARCHAR(50)
+	DECLARE @intImportSDToInvoiceId					INT
+
+	DECLARE @strCustomerNumberTax						NVARCHAR(100)
+	DECLARE @strInvoiceNumberTax						NVARCHAR(25)
+	DECLARE @dtmInvoiceDateTax							DATETIME
+	DECLARE	@strSiteNumberTax							NVARCHAR(5)
+	DECLARE	@strUOMTax									NVARCHAR(50)
+	DECLARE	@dblUnitPriceTax							NUMERIC(18,6)
+	DECLARE	@strItemDescriptionTax						NVARCHAR(250)
+	DECLARE	@dblPercentFullAfterDeliveryTax			NUMERIC(18,6)
+	DECLARE	@strLocationTax							NVARCHAR(50)
+	DECLARE	@strTermCodeTax							NVARCHAR(100)
+	DECLARE	@strSalesAccountTax						NVARCHAR(40)
+	DECLARE	@strItemNumberTax							NVARCHAR(50)
+	DECLARE	@strSalesTaxIdTax							NVARCHAR(50)
+	DECLARE	@strDriverNumberTax						NVARCHAR(100)
+	DECLARE	@strTypeTax								NVARCHAR(10)
+	DECLARE	@dblQuantityTax							NUMERIC(18, 6)
+	DECLARE	@dblTotalTax								NUMERIC(18, 6)
+	DECLARE	@intLineItemTax							INT
+	DECLARE	@dblPriceTax								NUMERIC(18, 6)
+	DECLARE	@strCommentTax								NVARCHAR(MAX)
+	DECLARE @strDetailTypeTax							NVARCHAR(2)
+	DECLARE @strContractNumberTax						NVARCHAR(50)
+	DECLARE @intImportSDToInvoiceIdTax					INT
+
+
+
 
 	DECLARE @intCustomerEntityId					INT
 	DECLARE @intLocationId							INT
@@ -43,13 +72,14 @@ BEGIN
 	DECLARE @strSiteBillingBy						NVARCHAR(10)
 	DECLARE @intItemUOMId							INT		
 	DECLARE @intUnitMeasureId						INT	
-	DECLARE @intImportSDToInvoiceId					INT
 	DECLARE @ysnHeader								BIT
 	DECLARE @intNewInvoiceDetailId					INT
 	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
-	DECLARE @ysnProcessNextAsHeader					BIT
-	DECLARE @strContractNumber						NVARCHAR(50)
+	--DECLARE @ysnProcessNextAsHeader					BIT
 	DECLARE @intContractHeaderNumber				INT
+	DECLARE @intTaxCodeId							INT
+	DECLARE @intTaxClassId							INT
+	
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -61,6 +91,7 @@ BEGIN
 		,strStatus					NVARCHAR(MAX)
 		,ysnSuccessful				BIT
 	)
+
 
 
 	SET @strAllErrorMessage = ''
@@ -96,7 +127,8 @@ BEGIN
 			,@dtmInvoiceDate = dtmDate
 			,@intCntIdUniqueInvoiceCustomerDate = intCntId
 		FROM #tmpUniqueInvoiceList
-
+		
+				
 		IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceDetail')) 
 		BEGIN
 			DROP TABLE #tmpCustomerInvoiceDetail
@@ -109,14 +141,28 @@ BEGIN
 		WHERE strCustomerNumber = @strCustomerNumber
 			AND strInvoiceNumber = @strInvoiceNumber
 			AND dtmDate = @dtmInvoiceDate
+			AND strDetailType = 'D'
 
+		IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceTaxDetail')) 
+		BEGIN
+			DROP TABLE #tmpCustomerInvoiceTaxDetail
+		END
+
+		SELECT *
+		INTO #tmpCustomerInvoiceTaxDetail
+		FROM  #tmpSDToInvoice
+		WHERE strCustomerNumber = @strCustomerNumber
+			AND strInvoiceNumber = @strInvoiceNumber
+			AND dtmDate = @dtmInvoiceDate
+			AND strDetailType <> 'D'
+
+		BEGIN TRANSACTION
 		SET @ysnHeader = 1
-		
 		--Loop through the details 
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceDetail)
 		BEGIN
 			SET @strErrorMessage = ''
-			SET @ysnProcessNextAsHeader = 0
+			--SET @ysnProcessNextAsHeader = 0
 			--Get the first Record and create Invoice
 			SELECT TOP 1 
 				@strCustomerNumber			  = strCustomerNumber
@@ -145,20 +191,6 @@ BEGIN
 				,@strContractNumber			  = strContractNumber
 			FROM #tmpCustomerInvoiceDetail
 			ORDER BY intLineItem ASC
-
-			IF (@strDetailType <> 'D')
-			BEGIN
-				SET @strErrorMessage = 'Skipped Tax detail record.'
-				IF(@ysnHeader = 1)
-				BEGIN
-					SET @ysnProcessNextAsHeader = 1
-					GOTO LOGHEADERENTRY
-				END
-				ELSE
-				BEGIN
-					GOTO LOGDETAILENTRY
-				END
-			END
 
 			--Get Customer Entity Id
 			SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
@@ -261,12 +293,15 @@ BEGIN
 
 				--GEt the created invoice number
 				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
+				SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
 
 				--Check if any error in creating invoice 
 				--Log Entry
 				LOGHEADERENTRY:
 				IF 	LTRIM(@strErrorMessage) != ''
 				BEGIN		
+					ROLLBACK TRANSACTION
+					
 					-- Insert the header to log table 	
 					INSERT INTO @ResultTableLog (
 							strCustomerNumber			
@@ -288,10 +323,12 @@ BEGIN
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
 					
+					GOTO CONTINUELOOP
+
+					/*
 					--Proceed to next customer invoice list if header insertion failed and not a skipped tax record 
 					IF(@ysnProcessNextAsHeader = 0)
 					BEGIN
-
 						--Delete the Header record from the detail table
 						DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
 
@@ -316,13 +353,35 @@ BEGIN
 								,strStatus = 'Header Record not Created'
 								,ysnSuccessful = 0
 						FROM #tmpCustomerInvoiceDetail
+						
 					
 						GOTO CONTINUELOOP
-					END
+					END */
 				END
-				ELSE
-				BEGIN
-					-- Insert the header to log table 	
+			END
+			ELSE
+			BEGIN
+				---- Add as line Item to Existing Invoice
+				EXEC [dbo].[uspARAddInventoryItemToInvoice]
+						@InvoiceId = @intNewInvoiceId
+						,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
+						,@ErrorMessage = @strErrorMessage OUTPUT
+						,@ItemId                   = @intItemId
+						,@ItemQtyShipped           = @dblQuantity
+						,@ItemPrice                = @dblPrice
+						,@ItemSiteId               = @intSiteId
+						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
+						,@ItemTaxGroupId		   = @intTaxGroupId	
+						,@ItemDescription		   = @strItemDescription
+						,@ItemUOMId				   = @intItemUOMId
+						,@ItemContractHeaderId     = @intContractHeaderNumber
+				LOGDETAILENTRY:
+				IF 	LTRIM(@strErrorMessage) != ''
+				BEGIN		
+					ROLLBACK TRANSACTION
+					
+
+					---insert log table
 					INSERT INTO @ResultTableLog (
 							strCustomerNumber			
 							,strInvoiceNumber			
@@ -340,51 +399,11 @@ BEGIN
 							,dtmDate = @dtmInvoiceDate					
 							,intLineItem = @intLineItem		
 							,strFileName = ''				
-							,strStatus = 'Successfully created ' + @strNewInvoiceNumber
-							,ysnSuccessful = 1
-				END
-			END
-			ELSE
-			BEGIN
-				---- Add as line Item to Existing Invoice
-					EXEC [dbo].[uspARAddInventoryItemToInvoice]
-						@InvoiceId = @intNewInvoiceId
-						,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
-						,@ErrorMessage = @strErrorMessage OUTPUT
-						,@ItemId                   = @intItemId
-						,@ItemQtyShipped           = @dblQuantity
-						,@ItemPrice                = @dblPrice
-						,@ItemSiteId               = @intSiteId
-						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-						,@ItemTaxGroupId		   = @intTaxGroupId	
-						,@ItemDescription		   = @strItemDescription
-						,@ItemUOMId				   = @intItemUOMId
-						,@ItemContractHeaderId     = @intContractHeaderNumber
-				LOGDETAILENTRY:
-				IF 	LTRIM(@strErrorMessage) != ''
-				BEGIN		
-					---insert log table
-					INSERT INTO @ResultTableLog (
-							strCustomerNumber			
-							,strInvoiceNumber			
-							,strSiteNumber				
-							,dtmDate					
-							,intLineItem				
-							,strFileName				
-							,strStatus
-							,ysnSuccessful
-					)
-					SELECT
-							strCustomerNumber = strCustomerNumber		
-							,strInvoiceNumber =	strInvoiceNumber		
-							,strSiteNumber = strSiteNumber				
-							,dtmDate = dtmDate					
-							,intLineItem = intLineItem		
-							,strFileName = ''				
 							,strStatus = @strErrorMessage
 							,ysnSuccessful = 0
-					FROM #tmpCustomerInvoiceDetail
+					GOTO CONTINUELOOP
 				END
+				/*
 				ELSE
 				BEGIN
 					-- Insert the detail to log table 	
@@ -407,21 +426,150 @@ BEGIN
 							,strFileName = ''				
 							,strStatus = 'Added as line item to ' + @strNewInvoiceNumber
 							,ysnSuccessful = 1
-				END
+				END*/
 			END
 			
+			--CHECK  for taxes
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceTaxDetail)
+			BEGIN
+				--Check for Detail Tax
+				IF(@intLineItem <> 0)
+				BEGIN
+					IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpLineTax')) 
+					BEGIN
+						DROP TABLE #tmpLineTax
+					END
+
+					--Get Tax detail for the line item
+					SELECT * 
+					INTO #tmpLineTax
+					FROM #tmpCustomerInvoiceTaxDetail
+					WHERE ((intLineItem / 100) = @intLineItem)
+
+					WHILE EXISTS(SELECT TOP 1 1 FROM #tmpLineTax)
+					BEGIN
+						SELECT TOP 1 
+							@strCustomerNumberTax			  = strCustomerNumber
+							,@strInvoiceNumberTax			  = strInvoiceNumber
+							,@dtmInvoiceDateTax				  = dtmDate
+							,@intLineItemTax				  = intLineItem
+							,@strSiteNumberTax				  = strSiteNumber	
+							,@strUOMTax						  =	strUOM
+							,@dblUnitPriceTax				  = dblUnitPrice
+							,@strItemDescriptionTax		      = strItemDescription
+							,@dblPercentFullAfterDeliveryTax  = dblPercentFullAfterDelivery
+							,@strLocationTax				  =	strLocation
+							,@strTermCodeTax				  =	strTermCode
+							,@strSalesAccountTax			  =	strSalesAccount
+							,@strItemNumberTax				  =	strItemNumber
+							,@strSalesTaxIdTax				  =	strSalesTaxId
+							,@strDriverNumberTax			  =	strDriverNumber
+							,@strTypeTax					  =	strType
+							,@dblQuantityTax				  =	dblQuantity
+							,@dblTotalTax					  =	dblTotal
+							,@intLineItemTax				  =	intLineItem
+							,@dblPriceTax					  =	dblPrice
+							,@strCommentTax					  =	strComment
+							,@intImportSDToInvoiceIdTax		  = intImportSDToInvoiceId
+							,@strDetailTypeTax				  = strDetailType
+							,@strContractNumberTax			  = strContractNumber
+						FROM #tmpCustomerInvoiceDetail
+						ORDER BY intLineItem ASC
+						
+						--GetTaxcode detail
+						SET @intTaxCodeId = NULL
+						SET @intTaxClassId = NULL
+						SET @intTaxGroupId = NULL
+						
+						SELECT TOP 1 
+							@intTaxCodeId = intTaxCodeId 
+							,@intTaxClassId = intTaxClassId
+						FROM tblSMTaxCode 
+						WHERE strTaxCode = @strSalesTaxIdTax
+
+						IF (ISNULL(@intSiteId,0) = 0)
+						BEGIN
+							SET @strErrorMessage = 'Tax Code does not Exists!'
+							IF(@ysnHeader = 1)
+							BEGIN
+								GOTO LOGHEADERENTRY
+							END
+							ELSE
+							BEGIN
+								GOTO LOGDETAILENTRY
+							END
+				
+						END
+						ELSE
+						BEGIN
+							EXEC [uspARAddInvoiceTaxDetail]
+								 @InvoiceDetailId		= @intNewInvoiceDetailId
+								,@TaxGroupId			= @intTaxGroupId
+								,@TaxCodeId				= @intTaxCodeId
+								,@TaxClassId			= @intTaxClassId
+								,@AdjustedTax			= @dblQuantityTax
+								,@Notes					= @strItemDescriptionTax
+								,@TaxAdjusted		    = 1
+								,@ErrorMessage			= @strErrorMessage OUTPUT
+
+							IF (ISNULL(@strErrorMessage,'') != '')
+							BEGIN
+								IF(@ysnHeader = 1)
+								BEGIN
+									GOTO LOGHEADERENTRY
+								END
+								ELSE
+								BEGIN
+									GOTO LOGDETAILENTRY
+								END
+				
+							END
+						END
+
+					END
+
+				END
+			END
+
+			-- Check if there are more details left
+			IF((SELECT COUNT(1) FROM #tmpCustomerInvoiceDetail) = 1)
+			BEGIN
+				-- Insert the succes log to table 	
+				INSERT INTO @ResultTableLog (
+						strCustomerNumber			
+						,strInvoiceNumber			
+						,strSiteNumber				
+						,dtmDate	
+						,intLineItem				
+						,strFileName				
+						,strStatus
+						,ysnSuccessful
+				)
+				SELECT
+						strCustomerNumber = @strCustomerNumber		
+						,strInvoiceNumber =	@strInvoiceNumber		
+						,strSiteNumber = @strSiteNumber				
+						,dtmDate = @dtmInvoiceDate
+						,intLineItem = 0						
+						,strFileName = ''				
+						,strStatus = 'Successfully created ' + @strNewInvoiceNumber
+						,ysnSuccessful = 1
+			END
 
 			--Delete the processed detail list
 			DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
 			
-			IF(@ysnProcessNextAsHeader = 0)
-			BEGIN
+			
+			
+			--IF(@ysnProcessNextAsHeader = 0)
+			--BEGIN
 				SET @ysnHeader = 0
-			END
+			--END
 		END
-
-		--Delete processed record
+		
+		COMMIT TRANSACTION
 		CONTINUELOOP:
+		--Delete processed record
 		DELETE FROM #tmpUniqueInvoiceList 
 		WHERE strCustomerNumber = @strCustomerNumber 
 			AND strInvoiceNumber = @strInvoiceNumber
