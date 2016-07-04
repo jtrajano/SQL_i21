@@ -1,5 +1,6 @@
 ﻿CREATE VIEW vyuRKLFuturePSTransaction
 AS
+
 SELECT TOP 100 PERCENT * FROM (
 SELECT intTotalLot-dblSelectedLot1 AS dblBalanceLot, 0.0 as dblSelectedLot ,* from  (
 SELECT intSelectedInstrumentTypeId,
@@ -10,6 +11,7 @@ SELECT intSelectedInstrumentTypeId,
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
       ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
       ,dblPrice as dblPrice
+	  	   ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime
       ,strBook 
       ,strSubBook 
       ,ot.intFutureMarketId 
@@ -29,7 +31,7 @@ SELECT intSelectedInstrumentTypeId,
 	   ,ysnSubCurrency
 	  ,ot.intBankId
 	  ,ot.intBankAccountId
-	   ,ot.intCurrencyExchangeRateTypeId       
+	   ,ot.intCurrencyExchangeRateTypeId
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
@@ -50,6 +52,7 @@ SELECT intSelectedInstrumentTypeId,
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
       ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
        ,ot.dblExchangeRate as dblPrice
+	    ,case when isnull(ot.dtmCreateDateTime,'')='' then ot.dtmTransactionDate else ot.dtmCreateDateTime end as dtmCreateDateTime  
       ,strBook 
       ,strSubBook 
       ,null intFutureMarketId 
@@ -70,7 +73,7 @@ SELECT intSelectedInstrumentTypeId,
 	  ,null ysnSubCurrency
 	  ,ot.intBankId
 	  ,ot.intBankAccountId
-	  ,ot.intCurrencyExchangeRateTypeId     
+	  ,ot.intCurrencyExchangeRateTypeId  	
 FROM tblRKFutOptTransaction ot
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId
@@ -78,4 +81,5 @@ LEFT JOIN [dbo].[tblCMBank] AS ban ON ot.[intBankId] = ban.[intBankId]
 LEFT JOIN [dbo].[tblCMBankAccount] AS banAcc ON ot.[intBankAccountId] = banAcc.[intBankAccountId]
 LEFT JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ot.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 where intSelectedInstrumentTypeId=2 AND ot.intInstrumentTypeId = 3 and isnull(ysnLiquidation,0) = 0 
-)t)t1   where  dblBalanceLot > 0
+)t)t1 WHERE dblBalanceLot > 0
+Order by dtmCreateDateTime Asc, dblPrice desc
