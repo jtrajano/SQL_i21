@@ -960,8 +960,7 @@ END CATCH
 						ON ARIA.intCOGSAccountId = GLA.intAccountId	
 				WHERE
 					Detail.dblTotal <> @ZeroDecimal
-					AND ISNULL(Detail.intInventoryShipmentItemId,0) = 0
-					AND ISNULL(Detail.intShipmentPurchaseSalesContractId,0) = 0
+					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
@@ -1002,8 +1001,7 @@ END CATCH
 						ON ARIA.intCOGSAccountId = GLA.intAccountId	 
 				WHERE
 					ARID.[dblTotal] <> 0
-					AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
-					AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
+					AND (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 OR ISNULL(ARID.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(ARID.[intItemId],0) <> 0
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
@@ -1039,8 +1037,7 @@ END CATCH
 						ON ARIA.intInventoryInTransitAccountId = GLA.intAccountId
 				WHERE
 					Detail.dblTotal <> @ZeroDecimal
-					AND ISNULL(Detail.intInventoryShipmentItemId,0) = 0
-					AND ISNULL(Detail.intShipmentPurchaseSalesContractId,0) = 0
+					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
@@ -1081,8 +1078,7 @@ END CATCH
 						ON ARIA.intInventoryInTransitAccountId = GLA.intAccountId 		 
 				WHERE
 					ARID.[dblTotal] <> 0
-					AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
-					AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
+					AND (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 OR ISNULL(ARID.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(ARID.[intItemId],0) <> 0
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
