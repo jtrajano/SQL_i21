@@ -184,26 +184,26 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			--Get a new BOL code          
-			SELECT @intCompanyLocationDestId = ISNULL(l.intCompanyLocationId, 0)
-			FROM tblWHOrderHeader h
-			INNER JOIN PAP_Address a ON a.AddressID = h.intShipToAddressId
-			LEFT OUTER JOIN tblSMCompanyLocationSubLocation l ON l.AddressID = a.AddressID
-			WHERE h.intOrderHeaderId = @intOrderHeaderId;
+			--SELECT @intCompanyLocationDestId = ISNULL(l.intCompanyLocationId, 0)
+			--FROM tblWHOrderHeader h
+			--INNER JOIN tblEMEntity a ON a.intEntityId = h.intShipToAddressId
+			--LEFT OUTER JOIN tblSMCompanyLocationSubLocation l ON l.intCompanyLocationId = a.intEntityId
+			--WHERE h.intOrderHeaderId = @intOrderHeaderId;
 
-			--EXEC GEN_GetNextSequence @strSequenceCode, @intSequenceNumber OUT, @strSequenceText out                              
-			--EXEC dbo.Pattern_GenerateID @intItemId = 0, @intComapnyLocationId = @intCompanyLocationDestId, @intCompantLocationSubLocationId = 0, @intStorageLocationId = 0, @CellKey = 0, @UserKey = 0, @PatternString = @strSequenceText OUTPUT, @IsProposed = 0, @PatternSettingName = 'WHPatternOrder', @WMOrderTypeKey = 1
+			----EXEC GEN_GetNextSequence @strSequenceCode, @intSequenceNumber OUT, @strSequenceText out                              
+			----EXEC dbo.Pattern_GenerateID @intItemId = 0, @intComapnyLocationId = @intCompanyLocationDestId, @intCompantLocationSubLocationId = 0, @intStorageLocationId = 0, @CellKey = 0, @UserKey = 0, @PatternString = @strSequenceText OUTPUT, @IsProposed = 0, @PatternSettingName = 'WHPatternOrder', @WMOrderTypeKey = 1
 
-			--Get the default staging location from the ship to address record       
-			SET @intStagingLocationId = 0
+			----Get the default staging location from the ship to address record       
+			--SET @intStagingLocationId = 0
 
-			SELECT @intStagingLocationId = ISNULL(InboundStagingID, 0), @strShipToAddressTitle = AddressTitle
-			FROM PAP_Address
-			WHERE AddressID = @intStagingLocationId
+			--SELECT @intStagingLocationId = ISNULL(InboundStagingID, 0), @strShipToAddressTitle = AddressTitle
+			--FROM PAP_Address
+			--WHERE AddressID = @intStagingLocationId
 
-			IF @intStagingLocationId = 0
-			BEGIN
-				RAISERROR ('Destination warehouse''s, staging unit not configured.', 16, 1)
-			END
+			--IF @intStagingLocationId = 0
+			--BEGIN
+			--	RAISERROR ('Destination warehouse''s, staging unit not configured.', 16, 1)
+			--END
 
 			--Create a new inbound order based on the outbound warehouse transfer                              
 			INSERT INTO tblWHOrderHeader (intOrderStatusId, intOrderTypeId, intOrderDirectionId, strBOLNo, strCustOrderNo, strReferenceNo, intOwnerAddressId, intStagingLocationId, strComment, dtmRAD, dtmShipDate, intFreightTermId, intChep, intShipFromAddressId, intShipToAddressId, intPallets, intCreatedById, dtmCreatedOn, intLastUpdateById, dtmLastUpdateOn, strProNo)
