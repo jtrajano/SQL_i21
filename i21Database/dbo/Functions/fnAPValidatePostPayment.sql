@@ -346,6 +346,7 @@ BEGIN
 		INNER JOIN tblAPBillDetail D ON C.intBillId = D.intBillId
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND C.intTransactionType = 2 AND D.ysnRestricted = 1 AND D.intContractDetailId > 0
+		AND B.dblPayment > 0 
 
 	END
 	ELSE
