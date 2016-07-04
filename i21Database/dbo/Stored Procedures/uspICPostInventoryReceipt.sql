@@ -48,16 +48,22 @@ DECLARE @intReturnValue AS INT
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
-	DECLARE @intTransactionId AS INT  
-	DECLARE @intCreatedEntityId AS INT  
-	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT  
+			,@intTransactionId AS INT  
+			,@intCreatedEntityId AS INT  
+			,@ysnAllowUserSelfPost AS BIT   
+			,@ysnTransactionPostedFlag AS BIT  
+			,@receiptType AS NVARCHAR(50) 
+			,@intTransferorId AS INT
+			,@intLocationId AS INT 
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryReceiptId  
 			,@ysnTransactionPostedFlag = ysnPosted  
 			,@dtmDate = dtmReceiptDate  
 			,@intCreatedEntityId = intEntityId  
+			,@receiptType = strReceiptType
+			,@intTransferorId = intTransferorId
+			,@intLocationId = intLocationId
 	FROM	dbo.tblICInventoryReceipt   
 	WHERE	strReceiptNumber = @strTransactionId  
 END  
