@@ -173,8 +173,10 @@ DECLARE @tblTempTransaction TABLE (
 									' + @IncludeOriginState + ' ' + @ExcludeOriginState + ' 
 									' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ''
 
-
-		SET @QueryInvoice = 'SELECT DISTINCT
+		 DECLARE @HasCriteria INT = (SELECT TOP 1 tblTFTaxCriteria.intTaxCategoryId FROM tblTFTaxCriteria INNER JOIN tblTFReportingComponentDetail ON tblTFTaxCriteria.intReportingComponentDetailId = tblTFReportingComponentDetail.intReportingComponentDetailId WHERE (tblTFTaxCriteria.intReportingComponentDetailId = @RCId))
+		 IF(@HasCriteria IS NOT NULL)
+			BEGIN
+				SET @QueryInvoice = 'SELECT DISTINCT
                              tblARInvoiceDetail.intInvoiceDetailId,tblTFReportingComponent.intTaxAuthorityId,tblTFReportingComponent.strFormCode, 
 							 tblTFReportingComponentDetail.intReportingComponentDetailId,tblTFReportingComponent.strScheduleCode,tblTFReportingComponent.strType,tblTFValidProductCode.intProductCode,tblTFValidProductCode.strProductCode, 
 							 tblARInvoiceDetail.intItemId,tblARInvoiceDetail.dblQtyShipped,tblARInvoiceDetailTax.dblTax,tblARInvoice.strInvoiceNumber,tblARInvoice.strPONumber, 
@@ -201,7 +203,42 @@ DECLARE @tblTempTransaction TABLE (
 							 AND dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
 							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ''
-			
+			END
+		ELSE
+			BEGIN
+				SET @QueryInvoice = 'SELECT DISTINCT 
+                         tblARInvoiceDetail.intInvoiceDetailId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponentDetail.intReportingComponentDetailId, 
+                         tblTFReportingComponent.strScheduleCode, tblTFReportingComponent.strType, tblTFValidProductCode.intProductCode, tblTFValidProductCode.strProductCode, tblARInvoiceDetail.intItemId, 
+                         tblARInvoiceDetail.dblQtyShipped, tblARInvoiceDetailTax.dblTax, tblARInvoice.strInvoiceNumber, tblARInvoice.strPONumber, tblARInvoice.strBOLNumber, tblARInvoice.dtmDate, 
+                         tblARInvoice.strShipToCity AS strDestinationCity, tblARInvoice.strShipToState AS strDestinationState, tblSMCompanyLocation.strCity AS strOriginCity, tblSMCompanyLocation.strStateProvince AS strOriginState, 
+                         tblEMEntity.strName, tblEMEntity.strFederalTaxId AS strCustomerFEIN, tblARAccountStatus.strAccountStatusCode, tblSMShipVia.strShipVia, tblSMShipVia.strTransporterLicense, 
+                         tblSMShipVia.strTransportationMode, tblEMEntity_Transporter.strName AS strTransporterName, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN, tblSMTaxCode.strTaxCode, 
+                         tblSMCompanySetup.strCompanyName, tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity, tblSMCompanySetup.strState, tblSMCompanySetup.strZip, tblSMCompanySetup.strPhone, 
+                         tblSMCompanySetup.strStateTaxID, tblSMCompanySetup.strFederalTaxID
+					 FROM tblEMEntity AS tblEMEntity_Transporter INNER JOIN
+                         tblSMShipVia ON tblEMEntity_Transporter.intEntityId = tblSMShipVia.intEntityShipViaId FULL OUTER JOIN
+                         tblTFReportingComponent INNER JOIN
+                         tblICItemMotorFuelTax INNER JOIN
+                         tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFValidProductCode.intProductCode INNER JOIN
+                         tblTFReportingComponentDetail ON tblTFValidProductCode.intReportingComponentDetailId = tblTFReportingComponentDetail.intReportingComponentDetailId ON 
+                         tblTFReportingComponent.intReportingComponentId = tblTFReportingComponentDetail.intReportingComponentId INNER JOIN
+                         tblSMTaxCode INNER JOIN
+                         tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId INNER JOIN
+                         tblARInvoiceDetail INNER JOIN
+                         tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId INNER JOIN
+                         tblARInvoiceDetailTax ON tblARInvoiceDetail.intInvoiceDetailId = tblARInvoiceDetailTax.intInvoiceDetailId ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId ON 
+                         tblICItemMotorFuelTax.intItemId = tblARInvoiceDetail.intItemId INNER JOIN
+                         tblSMCompanyLocation ON tblARInvoice.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId INNER JOIN
+                         tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityCustomerId INNER JOIN
+                         tblEMEntity ON tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId ON tblSMShipVia.intEntityShipViaId = tblARInvoice.intShipViaId FULL OUTER JOIN
+                         tblARAccountStatus ON tblARCustomer.intAccountStatusId = tblARAccountStatus.intAccountStatusId CROSS JOIN
+                         tblSMCompanySetup
+						 WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + '))
+						 AND dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
+							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
+							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ''
+			END
+	
 		DELETE FROM @tblTempInvoiceTransaction
 		INSERT INTO @tblTempInvoiceTransaction
 		EXEC(@QueryInvoiceNumber)
