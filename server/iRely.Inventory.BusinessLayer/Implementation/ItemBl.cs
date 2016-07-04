@@ -217,7 +217,13 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> GetItemStocks(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetItemStock>().Filter(param, true);
+            var query = _db.GetQuery<vyuICGetItemStock>()
+                .Where(
+                    p => p.strType == "Inventory" ||
+                    p.strType == "Finished Good" ||
+                    p.strType == "Raw Material"
+                )
+                .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
