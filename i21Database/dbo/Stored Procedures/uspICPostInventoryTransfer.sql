@@ -494,8 +494,6 @@ BEGIN
 	BEGIN 
 		-- Increase the In-Transit Outbound for the source location
 		BEGIN 
-			
-
 			INSERT INTO @InTransit_Outbound (
 				[intItemId]
 				,[intItemLocationId]

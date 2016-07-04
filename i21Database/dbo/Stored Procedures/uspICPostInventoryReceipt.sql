@@ -21,11 +21,18 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Receipt Transaction' + CAS
 DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@STARTING_NUMBER_BATCH AS INT = 3  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
+		,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
 		
 		,@OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_Storage AS INT = 2
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
+
+		-- Receipt Types
+		,@RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
+		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
+		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
 
 -- Posting variables
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -590,6 +597,11 @@ BEGIN
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
+				IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+				BEGIN 
+					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				END
+
 				INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]

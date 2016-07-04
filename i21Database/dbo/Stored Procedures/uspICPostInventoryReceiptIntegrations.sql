@@ -205,7 +205,7 @@ BEGIN
 			SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END 
 
 			-- Update the In-Transit Inbound
-			EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Inbound 
+			EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound 
 		END
 	END 
 END 
