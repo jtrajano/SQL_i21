@@ -131,6 +131,7 @@ BEGIN
 	DECLARE @strNetworkType			NVARCHAR(MAX)
 	DECLARE @intNetworkLocation		INT = 0
 	DECLARE @intDupTransCount		INT = 0
+	DECLARE @ysnDuplicate			BIT = 0
 	  
 	------------------------------------------------------------
 
@@ -567,6 +568,7 @@ BEGIN
 		IF(@intDupTransCount > 0)
 		BEGIN
 			SET @ysnInvalid = 1
+			SET @ysnDuplicate = 1
 		END		
 
 		------------------------------------------------------------
@@ -612,6 +614,7 @@ BEGIN
 			,[ysnOriginHistory]
 			,[ysnPostedCSV]
 			,[strForeignCardId]
+			,[ysnDuplicate]
 		)
 		VALUES
 		(
@@ -652,6 +655,7 @@ BEGIN
 			,@ysnOriginHistory
 			,@ysnPostedCSV  
 			,@strCardId
+			,@ysnDuplicate
 		)			
 	
 		DECLARE @Pk	INT		

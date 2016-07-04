@@ -46,8 +46,11 @@
     CONSTRAINT [FK_tblCFAccount_tblCFDiscountSchedule] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [dbo].[tblCFDiscountSchedule] ([intDiscountScheduleId]),
     CONSTRAINT [FK_tblCFAccount_tblCFFeeProfile] FOREIGN KEY ([intFeeProfileId]) REFERENCES [dbo].[tblCFFeeProfile] ([intFeeProfileId]),
     CONSTRAINT [FK_tblCFAccount_tblCFInvoiceCycle] FOREIGN KEY ([intInvoiceCycle]) REFERENCES [dbo].[tblCFInvoiceCycle] ([intInvoiceCycleId]),
+    CONSTRAINT [FK_tblCFAccount_tblCFPriceRuleGroup] FOREIGN KEY ([intPriceRuleGroup]) REFERENCES [dbo].[tblCFPriceRuleGroup] ([intPriceRuleGroupId]),
     CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 );
+
+
 
 
 
