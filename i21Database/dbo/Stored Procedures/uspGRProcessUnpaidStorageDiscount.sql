@@ -213,7 +213,7 @@ BEGIN TRY
 				,[ysnVirtualMeterReading]
 				,[intCustomerStorageId]
 			 )
-			SELECT 
+			SELECT DISTINCT
 				 [strTransactionType] = 'Invoice'
 				,[strType] = 'Standard'
 				,[strSourceTransaction] = 'Process Grain Storage'
@@ -289,9 +289,9 @@ BEGIN TRY
 				,[intCustomerStorageId] = BD.intCustomerStorageId
 			FROM @BillDiscounts BD
 			JOIN tblICItem Item ON Item.intItemId = BD.intDiscountItemId
-			JOIN tblGRCustomerStorage CS ON CS.intItemId = BD.intItemId
+			JOIN tblGRCustomerStorage CS ON CS.intItemId = BD.intItemId AND  CS.intCustomerStorageId = BD.intCustomerStorageId
 			JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
-			JOIN tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=CU.intUnitMeasureId
+			JOIN tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=CU.intUnitMeasureId AND ItemUOM.intItemId = BD.intItemId
 			WHERE BD.intEntityId = @EntityId AND BD.intCompanyLocationId = @LocationId AND BD.IsProcessed = 0
 
 			EXEC [dbo].[uspARProcessInvoices] 
