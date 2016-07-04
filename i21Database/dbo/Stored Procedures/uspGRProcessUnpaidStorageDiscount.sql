@@ -405,7 +405,19 @@ BEGIN TRY
 				  IF @intCreatedBillId >0
 				  BEGIN
 					 COMMIT TRANSACTION
-					 
+					
+					    UPDATE APD
+						SET
+						APD.intCustomerStorageId=BD.intCustomerStorageId,
+						APD.intUnitOfMeasureId=ItemUOM.intItemUOMId
+						FROM tblAPBillDetail APD
+						JOIN tblAPBill AP ON AP.intBillId=APD.intBillId
+						JOIN @BillDiscounts BD ON BD.intDiscountItemId=APD.intItemId
+						JOIN tblGRCustomerStorage CS ON CS.intItemId = BD.intItemId
+						JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
+						JOIN tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=CU.intUnitMeasureId
+						WHERE AP.[intBillId]=@intCreatedBillId AND BD.intEntityId = @EntityId AND BD.intCompanyLocationId = @LocationId AND BD.IsProcessed = 0
+
 					INSERT INTO [dbo].[tblGRStorageHistory] 
 					(
 						 [intConcurrencyId]
@@ -427,7 +439,8 @@ BEGIN TRY
 						,[strType] = 'Generated Bill'
 						,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserKey)
 					FROM @BillDiscounts WHERE intEntityId = @EntityId AND intCompanyLocationId = @LocationId AND IsProcessed = 0
-				
+					
+					
 					 
 					;WITH SRC
 					AS (
