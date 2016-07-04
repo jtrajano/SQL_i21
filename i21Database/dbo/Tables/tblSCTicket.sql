@@ -102,7 +102,8 @@
 	[dblScheduleQty] DECIMAL(13, 3) NULL,
 	[dblConvertedUOMQty] DECIMAL(13, 3) NULL,
 	[intItemUOMIdFrom] INT NULL, 
-	[intItemUOMIdTo] INT NULL
+	[intItemUOMIdTo] INT NULL,
+	[intTicketTypeId] INT NULL
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -123,7 +124,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblEMEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCTicket_tblGRStorageScheduleRule_intStorageScheduleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId]),
 	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdFrom] FOREIGN KEY (intItemUOMIdFrom) REFERENCES [tblICItemUOM](intItemUOMId),
-	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId)
+	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId),
+	CONSTRAINT [FK_tblSCTicket_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY (intTicketTypeId) REFERENCES [tblSCListTicketTypes](intTicketTypeId)
 )
 
 GO
