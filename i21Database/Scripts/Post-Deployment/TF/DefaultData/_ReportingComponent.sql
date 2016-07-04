@@ -54,8 +54,19 @@ DROP CONSTRAINT FK_tblTFValidDestinationState_tblTFReportingComponentDetail
 ALTER TABLE tblTFTaxCriteria
 DROP CONSTRAINT FK_tblTFTaxCriteria_tblTFReportingComponentDetail
 
-ALTER TABLE tblTFValidOriginDestinationState
-DROP CONSTRAINT FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail
+GO
+PRINT 'START MFT CHECK TABLE EXISTENCE - tblTFValidOriginDestinationState'
+GO
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFValidOriginDestinationState')
+		BEGIN
+			ALTER TABLE tblTFValidOriginDestinationState
+			DROP CONSTRAINT FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail
+		END
+	ELSE
+		BEGIN
+			PRINT 'TABLE NOT EXIST!'
+		END
+
 
 TRUNCATE TABLE tblTFReportingComponentDetail
 
@@ -102,11 +113,22 @@ FK_tblTFTaxCriteria_tblTFReportingComponentDetail FOREIGN KEY
 REFERENCES tblTFReportingComponentDetail
 ( intReportingComponentDetailId )
 
-ALTER TABLE tblTFValidOriginDestinationState ADD CONSTRAINT
-FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail FOREIGN KEY
-( intReportingComponentDetailId )
-REFERENCES tblTFReportingComponentDetail
-( intReportingComponentDetailId )
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFValidOriginDestinationState')
+		BEGIN
+			ALTER TABLE tblTFValidOriginDestinationState ADD CONSTRAINT
+			FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail FOREIGN KEY
+			( intReportingComponentDetailId )
+			REFERENCES tblTFReportingComponentDetail
+			( intReportingComponentDetailId )
+			PRINT 'SUCCESSFULLY TRUNCATED tblTFReportingComponentDetail'
+		END
+	ELSE
+		BEGIN
+			PRINT 'TABLE NOT EXIST!'
+		END
+GO
+PRINT 'END MFT CHECK TABLE EXISTENCE - tblTFValidOriginDestinationState'
+GO
 
 PRINT 'END TF CLEAR TEST DATA'
 

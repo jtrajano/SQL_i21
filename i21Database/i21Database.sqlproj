@@ -3558,7 +3558,6 @@
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSummary.sql" />
     <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />

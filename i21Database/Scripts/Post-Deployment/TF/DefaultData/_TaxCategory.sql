@@ -4,7 +4,6 @@ GO
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFTaxCategory')
 BEGIN
-	TRUNCATE TABLE tblTFTaxCategory
 
 DECLARE @intTaxAuthorityId INT
 
@@ -16,12 +15,12 @@ BEGIN
 	BEGIN
 		INSERT INTO [tblTFTaxCategory]
 		(
-			[intTaxAuthorityId],[strState],[strTaxCategory]
+			[intTaxAuthorityId],[strState],[strTaxCategory],[intConcurrencyId]
 		)
 		VALUES
-		(@intTaxAuthorityId,'IN','IN Excise Tax')
-		,(@intTaxAuthorityId,'IN','IN Inspection Fee')
-		,(@intTaxAuthorityId,'IN','IN Gasoline Use Tax (GUT)')
+		(@intTaxAuthorityId,'IN','IN Excise Tax', 0)
+		,(@intTaxAuthorityId,'IN','IN Inspection Fee', 0)
+		,(@intTaxAuthorityId,'IN','IN Gasoline Use Tax (GUT)', 0)
 	END
 END
 
@@ -33,10 +32,10 @@ BEGIN
 	BEGIN
 		INSERT INTO [tblTFTaxCategory]
 		(
-			[intTaxAuthorityId],[strState],[strTaxCategory]
+			[intTaxAuthorityId],[strState],[strTaxCategory],[intConcurrencyId]
 		)
 		VALUES
-		(@intTaxAuthorityId,'OH','OH Excise Tax')
+		(@intTaxAuthorityId,'OH','OH Excise Tax', 0)
 
 	END
 END
@@ -49,11 +48,11 @@ BEGIN
 	BEGIN
 		INSERT INTO [tblTFTaxCategory]
 		(
-			[intTaxAuthorityId],[strState],[strTaxCategory]
+			[intTaxAuthorityId],[strState],[strTaxCategory],[intConcurrencyId]
 		)
 		VALUES
-		(@intTaxAuthorityId,'IL','IL Excise Tax')
-		,(@intTaxAuthorityId,'IL','IL UST/EIF')
+		(@intTaxAuthorityId,'IL','IL Excise Tax', 0)
+		,(@intTaxAuthorityId,'IL','IL UST/EIF', 0)
 
 	END
 END
@@ -66,10 +65,10 @@ BEGIN
 	BEGIN
 		INSERT INTO [tblTFTaxCategory]
 		(
-			[intTaxAuthorityId],[strState],[strTaxCategory]
+			[intTaxAuthorityId],[strState],[strTaxCategory],[intConcurrencyId]
 		)
 		VALUES
-		(@intTaxAuthorityId,'MS','MS Excise Tax')
+		(@intTaxAuthorityId,'MS','MS Excise Tax', 0)
 
 	END
 END
@@ -82,10 +81,10 @@ BEGIN
 	BEGIN
 		INSERT INTO [tblTFTaxCategory]
 		(
-			[intTaxAuthorityId],[strState],[strTaxCategory]
+			[intTaxAuthorityId],[strState],[strTaxCategory],[intConcurrencyId]
 		)
 		VALUES
-		(@intTaxAuthorityId,'Federal','Federal Excise Tax')
+		(@intTaxAuthorityId,'Federal','Federal Excise Tax', 0)
 
 	END
 END
