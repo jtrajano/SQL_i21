@@ -1,4 +1,4 @@
-﻿ALTER VIEW [dbo].[vyuTRQuoteReport]
+﻿CREATE VIEW [dbo].[vyuTRQuoteReport]
 	AS
 
 SELECT TOP 100 PERCENT strCompanyName = CompanySetup.strCompanyName
