@@ -835,3 +835,35 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 GO
 
 CREATE INDEX [IX_tblTMSite_intCustomerID] ON [dbo].[tblTMSite] ([intCustomerID])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intLocationId] ON [dbo].[tblTMSite] ([intLocationId])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intClockID] ON [dbo].[tblTMSite] ([intClockID])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intFillMethodId] ON [dbo].[tblTMSite] ([intFillMethodId])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intHoldReasonID] ON [dbo].[tblTMSite] ([intHoldReasonID])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intRouteId] ON [dbo].[tblTMSite] ([intRouteId])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intFillGroupId] ON [dbo].[tblTMSite] ([intFillGroupId])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intTankTownshipId] ON [dbo].[tblTMSite] ([intTankTownshipId])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intGlobalJulianCalendarId] ON [dbo].[tblTMSite] ([intGlobalJulianCalendarId])
