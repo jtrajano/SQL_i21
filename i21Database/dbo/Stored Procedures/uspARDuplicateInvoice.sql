@@ -65,6 +65,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@ShipmentId				INT
 		,@TransactionId				INT
 		,@EntityId					INT
+		,@OldInvoiceRecurring		BIT
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -107,7 +108,7 @@ SELECT
 	,@TransactionId					= NULL	--[intTransactionId]
 	,@OriginalInvoiceId				= NULL	--[intOriginalInvoiceId]
 	,@EntityId						= @UserId
-	,@ForRecurring					=  [ysnRecurring]
+	,@OldInvoiceRecurring			= [ysnRecurring]
 FROM
 	tblARInvoice
 WHERE
@@ -523,7 +524,8 @@ BEGIN CATCH
 END CATCH
 
 BEGIN TRY
- UPDATE tblARInvoice SET ysnRecurring = @ForRecurring WHERE intInvoiceId = @NewInvoiceId
+	UPDATE tblARInvoice SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END
+	WHERE intInvoiceId = @NewInvoiceId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

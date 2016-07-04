@@ -93,7 +93,10 @@ BEGIN
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
-		   ,[ysnRecurring]      
+		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
+				THEN 0     
+				ELSE [ysnRecurring]     
+			END   
 		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
 				THEN [strComments]
 				ELSE [strComments] + ' DUP: ' + [strSalesOrderNumber] 
