@@ -15,6 +15,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Card Fueling
 :r .\CF\1_ImportMapping.sql
+:r .\CF\2_DataFix.sql
 
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
