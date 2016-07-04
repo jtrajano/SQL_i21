@@ -5425,4 +5425,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblHDTicket_tblSMLineOfBusiness]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0235319a-90d4-4b70-b1af-d00de1b1f488" ChangeDateTime="07/01/2016 09:28:09">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicket].[intListTicketTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicket]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6d7ac843-2eaf-4007-95a9-c6d1cce082c1" ChangeDateTime="07/01/2016 12:16:17">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketSplit].[intStorageTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketSplit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageScheduleTypeId" />
+  </Operation>
 </Operations>

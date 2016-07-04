@@ -103,6 +103,7 @@
 	[dblConvertedUOMQty] NUMERIC(38, 20) NULL,
 	[intItemUOMIdFrom] INT NULL, 
 	[intItemUOMIdTo] INT NULL,
+	[intTicketTypeId] INT NULL,
 	[strFreightSettlement]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
@@ -124,7 +125,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblEMEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCTicket_tblGRStorageScheduleRule_intStorageScheduleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId]),
 	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdFrom] FOREIGN KEY (intItemUOMIdFrom) REFERENCES [tblICItemUOM](intItemUOMId),
-	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId)
+	CONSTRAINT [FK_tblSCTicket_tblICItemUOM_intItemUOMIdTo] FOREIGN KEY (intItemUOMIdTo) REFERENCES [tblICItemUOM](intItemUOMId),
+	CONSTRAINT [FK_tblSCTicket_tblSCListTicketTypes_intTicketTypeId] FOREIGN KEY (intTicketTypeId) REFERENCES [tblSCListTicketTypes](intTicketTypeId)
 )
 
 GO
@@ -955,6 +957,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intItemUOMIdTo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ticket Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intTicketTypeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Freight Settlement',
