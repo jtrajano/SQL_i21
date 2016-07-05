@@ -41,7 +41,7 @@ BEGIN
 	DECLARE @paymentId INT
 	DECLARE @vendorId INT
 	DECLARE @withHoldAccount INT
-	DECLARE @amountPaid NUMERIC(18,6) = @payment;
+	DECLARE @amountPaid NUMERIC(18,2) = @payment;
 	DECLARE @withholdAmount NUMERIC(18,6)
 	DECLARE @withholdPercent NUMERIC(18,6)
 	DECLARE @discountAmount NUMERIC(18,6) = 0;
@@ -214,7 +214,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
 		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
-		[dblPayment]	= (CASE WHEN ISNULL(@payment,0) = 0 THEN 0 ELSE A.dblPayment END),
+		[dblPayment]	= (CASE WHEN ISNULL(@payment,0) > 0 THEN @payment ELSE A.dblPayment END),
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A

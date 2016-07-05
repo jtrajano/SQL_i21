@@ -14,7 +14,7 @@ BEGIN
                     ELSE A.dblPayment * -1 
             END)
         ELSE
-            (CASE WHEN (A.dblAmountDue = ((A.dblPayment + A.dblDiscount) - A.dblInterest)) --add discount only if fully paid
+            (CASE WHEN (A.dblAmountDue = CAST(((A.dblPayment + A.dblDiscount) - A.dblInterest) AS DECIMAL(18,2))) --add discount only if fully paid
                     THEN A.dblPayment + A.dblDiscount - A.dblInterest
                     ELSE A.dblPayment 
             END)

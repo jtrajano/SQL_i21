@@ -274,7 +274,7 @@ BEGIN
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount - B.dblInterest)
+		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2)))
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
