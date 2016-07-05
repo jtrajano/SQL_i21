@@ -301,13 +301,13 @@ BEGIN TRY
 					SET dblStorageUnits = 0
 					WHERE intSellOffsiteKey = @SellOffsiteKey
 
-					EXEC uspCTUpdateSequenceQuantityUsingUOM 
-						 @intContractDetailId = @intContractDetailId
-						,@dblQuantityToUpdate = @dblNegativeStorageUnits
-						,@intUserId = @UserKey
-						,@intExternalId = @intCustomerStorageId
-						,@strScreenName = 'Settle Storage'
-						,@intSourceItemUOMId = @intSourceItemUOMId
+					--EXEC uspCTUpdateSequenceQuantityUsingUOM 
+					--	 @intContractDetailId = @intContractDetailId
+					--	,@dblQuantityToUpdate = @dblNegativeStorageUnits
+					--	,@intUserId = @UserKey
+					--	,@intExternalId = @intCustomerStorageId
+					--	,@strScreenName = 'Settle Storage'
+					--	,@intSourceItemUOMId = @intSourceItemUOMId
 
 					UPDATE tblGRCustomerStorage
 					SET dblOpenBalance = dblOpenBalance - @dblStorageUnits
@@ -356,12 +356,12 @@ BEGIN TRY
 					SET dblStorageUnits = 0
 					WHERE intSellOffsiteKey = @SellOffsiteKey
 
-					EXEC uspCTUpdateSequenceQuantityUsingUOM @intContractDetailId = @intContractDetailId
-						,@dblQuantityToUpdate = @dblNegativeStorageUnits
-						,@intUserId = @UserKey
-						,@intExternalId = @intCustomerStorageId
-						,@strScreenName = 'Settle Storage'
-						,@intSourceItemUOMId = @intSourceItemUOMId
+					--EXEC uspCTUpdateSequenceQuantityUsingUOM @intContractDetailId = @intContractDetailId
+					--	,@dblQuantityToUpdate = @dblNegativeStorageUnits
+					--	,@intUserId = @UserKey
+					--	,@intExternalId = @intCustomerStorageId
+					--	,@strScreenName = 'Settle Storage'
+					--	,@intSourceItemUOMId = @intSourceItemUOMId
 
 					UPDATE tblGRCustomerStorage
 					SET dblOpenBalance = dblOpenBalance - @dblContractUnits
