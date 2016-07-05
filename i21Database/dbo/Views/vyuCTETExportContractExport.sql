@@ -2,21 +2,33 @@
 	
 AS 
 
-	SELECT	strLocationName		AS bkloc,
-			strEntityName		AS bkcust,
-			strItemNo			AS bkitem,
-			intContractSeq		AS bkseq,
-			dblDetailQuantity	AS bkunit,
-			dblCashPrice		AS bkpric,
-			null				AS bkppd,
-			dblAppliedQty		AS bkdelu,
-			strTerm				AS bkterm,
-			dblAppliedQty * 
-				dblCashPrice	AS bkusp,
-			null				AS bkdelt,
-			'N'					AS chrTaxable,
-			strContractNumber	AS bknum,
-			dtmStartDate		AS bkstart,
-			dtmEndDate			AS bkend
+	SELECT	*,
+			bkdelu * bkpric				AS bkusp
+	FROM
+	(
+		SELECT	CL.strLocationNumber	AS bkloc,
+				EY.strEntityNo			AS bkcust,
+				IM.strItemNo			AS bkitem,
+				CD.intContractSeq		AS bkseq,
+				CD.dblQuantity			AS bkunit,
+				CD.dblCashPrice			AS bkpric,
+				null					AS bkppd,
+				CASE	WHEN	CH.ysnLoad = 1
+						THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
+						ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
+				END						AS bkdelu,
+				TM.strTermCode			AS bkterm,
+			
+				null					AS bkdelt,
+				'N'						AS chrTaxable,
+				strContractNumber		AS bknum,
+				REPLACE(CONVERT(NVARCHAR(50),dtmStartDate,101),'/','')		AS bkstart,
+				REPLACE(CONVERT(NVARCHAR(50),dtmEndDate,101),'/','')		AS bkend
 
-	FROM	vyuCTContractDetailView
+		FROM	tblCTContractDetail		CD
+		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT	
+		JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
+		JOIN	tblSMTerm				TM	ON	TM.intTermID				=	CH.intTermId				LEFT
+		JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId				LEFT
+		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intCreatedById		
+	)t
