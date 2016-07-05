@@ -38,9 +38,9 @@ BEGIN
 		SELECT AB.intEntityVendorId,
 			   IC.intPatronageCategoryId,
 			   AB.ysnPosted,
-			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (ABD.dblQtyReceived * ABD.dblCost) 
+			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ABD.dblQtyReceived <= 0 THEN ABD.dblCost ELSE (ABD.dblQtyReceived * ABD.dblCost) END) 
 						   ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ABD.dblQtyReceived ELSE (ABD.dblQtyReceived * ICU.dblUnitQty) END ) END),
-						   @intFiscalYear as fiscalYear
+			   @intFiscalYear as fiscalYear
 		  INTO #tempItem
 		  FROM tblAPBill AB
 	INNER JOIN tblAPBillDetail ABD
