@@ -3,7 +3,7 @@
 	[intTicketId] INT NOT NULL IDENTITY, 
     [strTicketStatus] NVARCHAR COLLATE Latin1_General_CI_AS NOT NULL, 
     [strTicketNumber] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intScaleSetupId] INT NOT NULL, 
+    [intScaleSetupId] INT NULL, 
 	[intTicketPoolId] INT NOT NULL,
     [intTicketLocationId] INT NOT NULL, 
     [intTicketType] INT NOT NULL, 
@@ -100,7 +100,7 @@
     [dblGross] DECIMAL(13, 3) NULL, 
     [dblShrink] DECIMAL(13, 3) NULL,
 	[dblScheduleQty] DECIMAL(13, 3) NULL,
-	[dblConvertedUOMQty] DECIMAL(13, 3) NULL,
+	[dblConvertedUOMQty] NUMERIC(38, 20) NULL,
 	[intItemUOMIdFrom] INT NULL, 
 	[intItemUOMIdTo] INT NULL,
 	[intTicketTypeId] INT NULL

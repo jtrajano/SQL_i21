@@ -56,3 +56,8 @@ GO
     END
     SET IDENTITY_INSERT [dbo].[tblSCListTicketTypes] OFF
 GO
+	IF EXISTS(SELECT TOP 1 1 FROM tblSCTicket WHERE ISNULL([intTicketTypeId],0) = 0)
+	BEGIN
+		UPDATE tblSCTicket SET intTicketTypeId = (select TOP 1 SCTicketType.intTicketTypeId from tblSCListTicketTypes SCTicketType where SCTicketType.strInOutIndicator = strInOutFlag and SCTicketType.intTicketType = intTicketType)
+	END
+GO
