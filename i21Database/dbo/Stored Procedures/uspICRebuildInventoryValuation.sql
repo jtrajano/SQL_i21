@@ -670,33 +670,16 @@ BEGIN
 			BEGIN 
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
-				SET		dblCost =	dbo.fnMultiply(
-										CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
-													-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
-													CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
-																(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
-															ELSE 
-																ISNULL(Lot.dblLastCost, 0) 
-													END 
-												WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
-													-- It item is using Average Costing, then get the Average Cost. 
-													dbo.fnGetItemAverageCost(
-														AdjDetail.intItemId
-														, ItemLocation.intItemLocationId
-														, AdjDetail.intItemUOMId
-													) 
-												ELSE
-													-- Otherwise, get the item's last cost. 
-													(	
-														SELECT	TOP 1 
-																dblLastCost 
-														FROM	tblICItemPricing 
-														WHERE	intItemId = AdjDetail.intItemId 
-																AND intItemLocationId = ItemLocation.intItemLocationId
-													)
-										END								
-										,ItemUOM.dblUnitQty 
-									)
+				SET		dblCost =	CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
+												-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
+											WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
+												-- It item is using Average Costing, then get the Average Cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblAverageCost, 0)) 
+											ELSE
+												-- Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblLastCost, 0))
+									END								
 				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
@@ -706,6 +689,13 @@ BEGIN
 							ON AdjDetail.intLotId = Lot.intLotId
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
+						LEFT JOIN dbo.tblICItemUOM StockUnit
+							ON StockUnit.intItemId = AdjDetail.intItemId
+							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+						LEFT JOIN dbo.tblICItemPricing ItemPricing
+							ON ItemPricing.intItemId = Lot.intItemId
+							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
 						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
 
@@ -1110,33 +1100,16 @@ BEGIN
 			BEGIN 								
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
-				SET		dblCost =	dbo.fnMultiply(
-										CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
-													-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
-													CASE	WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
-																(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = AdjDetail.intItemId and intItemLocationId = dbo.fnICGetItemLocation(AdjDetail.intItemId, Adj.intLocationId))
-															ELSE 
-																ISNULL(Lot.dblLastCost, 0) 
-													END 
-												WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
-													-- It item is using Average Costing, then get the Average Cost. 
-													dbo.fnGetItemAverageCost(
-														AdjDetail.intItemId
-														, ItemLocation.intItemLocationId
-														, AdjDetail.intItemUOMId
-													) 
-												ELSE
-													-- Otherwise, get the item's last cost. 
-													(	
-														SELECT	TOP 1 
-																dblLastCost 
-														FROM	tblICItemPricing 
-														WHERE	intItemId = AdjDetail.intItemId 
-																AND intItemLocationId = ItemLocation.intItemLocationId
-													)
-										END								
-										,ItemUOM.dblUnitQty 
-									)
+				SET		dblCost =	CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
+												-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
+											WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
+												-- It item is using Average Costing, then get the Average Cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblAverageCost, 0)) 
+											ELSE
+												-- Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblLastCost, 0))
+									END
 				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
@@ -1146,6 +1119,12 @@ BEGIN
 							ON AdjDetail.intLotId = Lot.intLotId
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
+						LEFT JOIN dbo.tblICItemUOM StockUnit
+							ON StockUnit.intItemId = AdjDetail.intItemId
+							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+						LEFT JOIN dbo.tblICItemPricing ItemPricing
+							ON ItemPricing.intItemId = Lot.intItemId
+							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
 						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
 
