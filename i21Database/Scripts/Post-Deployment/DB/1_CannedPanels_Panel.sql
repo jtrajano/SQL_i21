@@ -813,7 +813,7 @@ EXEC(''select * from
 where @DATE@ '')',
 N'', N'@DATE@', N'@DATE@', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', N'', N'', N'', 0, 0, NULL, NULL, N'16.2', NULL, 2, 131, N'')
 
-INSERT INTO #TempCannedPanels VALUES (15562, 50, 15, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Payroll - Paycheck Earnings', N'Grid', N'', N'Paycheck Deductions', N'Bar', N'outside', N'Chameleon', N'i21', N'Last Week', N'Last Week', N'PayDate', N'',
+INSERT INTO #TempCannedPanels VALUES (15562, 50, 15, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Payroll - Paycheck Earnings', N'Grid', N'', N'Paycheck Earnings', N'Bar', N'outside', N'Chameleon', N'i21', N'Last Week', N'Last Week', N'PayDate', N'',
 N'Declare @cols nvarchar(max)
 select @cols = stuff( ( select distinct  '',['' + Ltrim(rtrim(strEarning)) +'']'' from tblPRTypeEarning FOR XML PATH('''')),1,1,'''')
 EXEC(N''select * from 
