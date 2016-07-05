@@ -28,6 +28,6 @@ FROM dbo.tblCCSiteHeader AS ccSiteHeader
 	LEFT OUTER JOIN dbo.vyuCCSite AS ccSite
 		ON ccSite.intSiteId = ccSiteDetail.intSiteId
 	LEFT OUTER JOIN dbo.vyuCCCustomer AS ccCustomer
-       ON ccCustomer.intCustomerId = ccSite.intCustomerId;
+       ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intDealerSiteId = ccSite.intDealerSiteId 
 
 GO
