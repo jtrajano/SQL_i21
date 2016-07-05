@@ -4,6 +4,6 @@
     [intTaxGroupId] INT NOT NULL, 
     [intTaxCodeId] INT NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_tblSMTaxGroupCode_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId), 
+    CONSTRAINT [FK_tblSMTaxGroupCode_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMTaxGroupCode_tblSMTaxCode] FOREIGN KEY (intTaxCodeId) REFERENCES tblSMTaxCode(intTaxCodeId)
 )
