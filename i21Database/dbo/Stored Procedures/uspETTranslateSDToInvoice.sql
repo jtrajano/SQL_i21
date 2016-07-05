@@ -473,7 +473,7 @@ BEGIN
 							,@intImportSDToInvoiceIdTax		  = intImportSDToInvoiceId
 							,@strDetailTypeTax				  = strDetailType
 							,@strContractNumberTax			  = strContractNumber
-						FROM #tmpCustomerInvoiceDetail
+						FROM #tmpLineTax
 						ORDER BY intLineItem ASC
 						
 						--GetTaxcode detail
@@ -525,6 +525,8 @@ BEGIN
 				
 							END
 						END
+
+						DELETE FROM #tmpLineTax WHERE intImportSDToInvoiceId = @intImportSDToInvoiceIdTax
 
 					END
 
