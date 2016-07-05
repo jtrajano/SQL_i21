@@ -471,8 +471,9 @@ END
 -- If RECAP is FALSE,
 -- 1. Book the G/L entries
 -- 2. Update the ysnPosted flag in the transaction. Increase the concurrency. 
--- 3. Update the PO (if it exists)
--- 4. Commit the save point 
+-- 3. Update Status to Closed if transaction is posted and Shipment is not required.
+-- 4. Update the PO (if it exists)
+-- 5. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 	
@@ -486,6 +487,19 @@ BEGIN
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strTransferNo = @strTransactionId  
 
+	
+	IF @ysnPost = 1
+		BEGIN
+			UPDATE	dbo.tblICInventoryTransfer  
+			SET		intStatusId = 3 -- Status: Closed
+			WHERE	strTransferNo = @strTransactionId AND ysnShipmentRequired=0   
+		END
+	ELSE
+		BEGIN
+			UPDATE	dbo.tblICInventoryTransfer  
+			SET		intStatusId = 1 -- Status: Open
+			WHERE	strTransferNo = @strTransactionId
+		END
 	COMMIT TRAN @TransactionName
 END 
 
