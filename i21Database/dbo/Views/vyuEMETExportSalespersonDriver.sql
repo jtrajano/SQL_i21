@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuEMETExportSalespersonDriver]
 	AS 
 select 
-	case when a.strSalespersonId <> '' then a.strSalespersonId else c.strEntityNo end as bp_no,
+	case when a.strSalespersonId <> '' then a.strSalespersonId else RIGHT(c.strEntityNo, 3) end as bp_no,
 	c.strName as bpname,
 	dbo.fnEMSplitWithGetByIdx(b.strAddress, CHAR(10), 1) as addr1,
 	dbo.fnEMSplitWithGetByIdx(b.strAddress, CHAR(10), 2) as addr2,
