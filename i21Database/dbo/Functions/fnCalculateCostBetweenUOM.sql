@@ -30,6 +30,10 @@ BEGIN
 	DECLARE @dblUnitQtyFrom AS NUMERIC(38,20)
 			,@dblUnitQtyTo AS NUMERIC(38,20)
 
+	-- Optimize the function. If From and To are equal, return the same cost. 
+	IF @intItemUOMIdFrom = @intItemUOMIdTo
+		RETURN @dblCost 
+
 	SELECT	@dblUnitQtyFrom = ItemUOM.dblUnitQty
 	FROM	dbo.tblICItemUOM ItemUOM 
 	WHERE	ItemUOM.intItemUOMId = @intItemUOMIdFrom

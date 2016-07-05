@@ -254,7 +254,7 @@ BEGIN
 				,dblNewWeight					= 2000 
 				,dblWeightPerQty				= 55.1155
 				,dblNewWeightPerQty				= 2000 / 2
-				,dblCost						= 2.50
+				,dblCost						= 2.50 * @25KgBagUnitQty
 				,dblNewCost						= NULL 
 				,intConcurrencyId				= 1
 
