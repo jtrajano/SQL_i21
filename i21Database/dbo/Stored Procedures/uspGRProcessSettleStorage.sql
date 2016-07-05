@@ -338,7 +338,7 @@ BEGIN TRY
 		ELSE
 			SET @dblTicketStorageDue = @dblStorageDueAmount + @dblStorageDueTotalAmount - @dblStorageBilledAmount
 
-		IF NOT EXISTS (SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId = @intStorageChargeItemId AND @dblTicketStorageDue > 0)
+		IF NOT EXISTS (SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId = @intStorageChargeItemId) AND @dblTicketStorageDue > 0
 		BEGIN
 			INSERT INTO @SettleVoucherCreate 
 			(
@@ -828,7 +828,6 @@ BEGIN TRY
 		ELSE
 			BREAK;
 	END
-
 	----CREATING VOUCHER
 	SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
 	FROM @SettleVoucherCreate
@@ -870,7 +869,7 @@ BEGIN TRY
 			,[intContractHeaderId]
 			,[intContractDetailId]
 		FROM @SettleVoucherCreate
-		WHERE intCompanyLocationId = @LocationId
+		WHERE intCompanyLocationId = @LocationId AND IsProcessed = 0
 
 		EXEC [dbo].[uspAPCreateBillData] 
 			 @userId = @UserKey
@@ -885,7 +884,7 @@ BEGIN TRY
 		IF @intCreatedBillId > 0
 		BEGIN
 			COMMIT TRANSACTION
-
+			
 			INSERT INTO [dbo].[tblGRStorageHistory] 
 			(
 				 [intConcurrencyId]
