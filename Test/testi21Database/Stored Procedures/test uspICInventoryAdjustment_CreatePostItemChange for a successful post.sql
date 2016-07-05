@@ -162,7 +162,7 @@ BEGIN
 			-- Parameters for the new values: 
 			,@dblAdjustByQuantity			= -100
 			,@intNewItemId					= @SerializedLotGrains
-			,@intNewSubLocationId			= NULL 
+			,@intNewSubLocationId			= NULL  
 			,@intNewStorageLocationId		= NULL 
 			,@intItemUOMId					= @ManualGrains_25KgBagUOM 
 
@@ -241,7 +241,7 @@ BEGIN
 				,intItemUOMId					= @ManualGrains_25KgBagUOM
 				,dblWeight						= 55.1155 * 100
 				,dblWeightPerQty				= 55.1155
-				,dblCost						= 2.50
+				,dblCost						= 2.50 * @25KgBagUnitQty
 				,dblNewCost						= NULL 
 				,intConcurrencyId				= 1
 				,intNewItemId					= @SerializedLotGrains
