@@ -702,6 +702,16 @@ BEGIN
 				,[dblExemptionPercent] = ISNULL(@ExemptionPercent, 0.000000)
 			RETURN 	
 		END					
+	
+	IF (@TaxExempt = 0)
+	BEGIN
+		IF EXISTS(SELECT TOP 1 intCategoryId FROM tblSMTaxGroupCodeCategoryExemption 
+					WHERE intTaxGroupCodeId IN (SELECT intTaxGroupCodeId FROM [tblSMTaxGroupCode] WHERE intTaxCodeId = @TaxCodeId) AND intCategoryId = @ItemCategoryId
+		)
+		BEGIN
+			SET @TaxExempt = 1
+		END
+	END
 
 	INSERT INTO @returntable
 	SELECT 
