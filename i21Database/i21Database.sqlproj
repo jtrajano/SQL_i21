@@ -4138,6 +4138,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ScheduleFieldTemplate.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCategory.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
+    <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
