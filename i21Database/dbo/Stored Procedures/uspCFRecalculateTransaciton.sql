@@ -10,6 +10,7 @@
 ,@NetworkId				INT
 ,@TransferCost			NUMERIC(18,6)   
 ,@TransactionId			INT				=   NULL
+,@PumpId				INT				=	NULL
 ,@CreditCardUsed		BIT				=	0
 ,@PostedOrigin			BIT				=	0
 ,@PostedCSV				BIT				=	0
@@ -116,6 +117,7 @@ BEGIN
 		,dblPriceIndexRate				NUMERIC(18,6)
 		,dtmPriceIndexDate				DATETIME
 		,dblMargin						NUMERIC(18,6)
+		,ysnDuplicate					BIT
 	);
 
 		IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
@@ -225,6 +227,8 @@ BEGIN
 	FROM tblICItemLocation as icItemLocation
 	WHERE icItemLocation.intItemId = @intItemId
 	AND icItemLocation.intLocationId = @intLocationId
+
+	
 
 	--GET ITEM PRICE--
 	--if @ysnCreditCardUsed is true then pricing should always from import file
@@ -1308,6 +1312,33 @@ END
 	,@strTransactionType
 	)
 
+
+	DECLARE @intDupTransCount INT = 0
+	DECLARE @ysnDuplicate BIT = 0
+	DECLARE @ysnInvalid	BIT = 0
+
+	-- DUPLICATE CHECK -- 
+	SELECT @intDupTransCount = COUNT(*)
+	FROM tblCFTransaction
+	WHERE intNetworkId = @intNetworkId
+	AND intSiteId = @intSiteId
+	AND dtmTransactionDate = @dtmTransactionDate
+	AND intCardId = @intCardId
+	AND intProductId = @ProductId
+	AND intPumpNumber = @PumpId
+
+	IF(@intDupTransCount > 0)
+	BEGIN
+		--SET @ysnInvalid = 1
+		SET @ysnDuplicate = 1
+		IF(@ysnDuplicate = 1)
+		BEGIN
+			SET @ysnInvalid = 1
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',GETDATE(),NEWID(), @intTransactionId, 'Duplicate transaction history found.')
+		END
+	END
+
 	--PRICING OUT--
 	--if @IsImporting is true then save pricing to global temp table
 	IF(@IsImporting = 1)
@@ -1343,6 +1374,7 @@ END
 			,dblPriceIndexRate	
 			,dtmPriceIndexDate
 			,dblMargin	
+			,ysnDuplicate
 			)
 			SELECT
 			 @intItemId					AS intItemId
@@ -1374,6 +1406,7 @@ END
 			,@dblPriceIndexRate			AS dblPriceIndexRate	
 			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
 			,@dblMargin					AS dblMargin
+			,@ysnDuplicate				AS ysnDuplicate
 		END
 	ELSE
 		BEGIN
@@ -1407,6 +1440,7 @@ END
 			,@dblPriceIndexRate			AS dblPriceIndexRate		
 			,@dtmPriceIndexDate			AS dtmPriceIndexDate	
 			,@dblMargin					AS dblMargin	
+			,@ysnDuplicate				AS ysnDuplicate
 		END
 
 IF(@IsImporting = 1)

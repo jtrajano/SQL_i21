@@ -555,21 +555,21 @@ BEGIN
 			SET @ysnInvalid = 1
 		END
 
-		-- DUPLICATE CHECK -- 
-		SELECT @intDupTransCount = COUNT(*)
-		FROM tblCFTransaction
-		WHERE intNetworkId = @intNetworkId
-		AND intSiteId = @intSiteId
-		AND dtmTransactionDate = @dtmTransactionDate
-		AND intCardId = @intCardId
-		AND intProductId = @intProductId
-		AND intPumpNumber = @intPumpNumber
+		---- DUPLICATE CHECK -- 
+		--SELECT @intDupTransCount = COUNT(*)
+		--FROM tblCFTransaction
+		--WHERE intNetworkId = @intNetworkId
+		--AND intSiteId = @intSiteId
+		--AND dtmTransactionDate = @dtmTransactionDate
+		--AND intCardId = @intCardId
+		--AND intProductId = @intProductId
+		--AND intPumpNumber = @intPumpNumber
 
-		IF(@intDupTransCount > 0)
-		BEGIN
-			SET @ysnInvalid = 1
-			SET @ysnDuplicate = 1
-		END		
+		--IF(@intDupTransCount > 0)
+		--BEGIN
+		--	SET @ysnInvalid = 1
+		--	SET @ysnDuplicate = 1
+		--END		
 
 		------------------------------------------------------------
 
@@ -743,11 +743,7 @@ BEGIN
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site item ' + @strProductId + ' has been used')
 		END
-		IF(@intDupTransCount > 0)
-		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
-		END
+		
 
 		------------------------------------------------------------
 
@@ -765,6 +761,7 @@ BEGIN
 		,@CreditCardUsed				=	@ysnCreditCardUsed
 		,@PostedOrigin					=	@ysnOriginHistory  
 		,@PostedCSV						=	@ysnPostedCSV  
+		,@PumpId						=	@intPumpNumber
 		,@IsImporting					=	1
 		,@TaxState						=	@TaxState						
 		,@FederalExciseTaxRate        	=	@FederalExciseTaxRate        
@@ -804,7 +801,15 @@ BEGIN
 		,@dblPriceProfileRate			= dblPriceProfileRate
 		,@dblPriceIndexRate				= dblPriceIndexRate	
 		,@dtmPriceIndexDate				= dtmPriceIndexDate	
+		,@ysnDuplicate					= ysnDuplicate
 		FROM ##tblCFTransactionPricingType
+
+		IF(@ysnDuplicate = 1)
+		BEGIN
+			SET @ysnInvalid = 1
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
+		END
 
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
 		BEGIN
@@ -822,6 +827,8 @@ BEGIN
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Import File Price')
@@ -840,6 +847,8 @@ BEGIN
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
 				WHERE intTransactionId = @Pk
 		END
 		IF (@strPriceMethod = 'Network Cost')
@@ -858,6 +867,8 @@ BEGIN
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Special Pricing')
@@ -876,6 +887,8 @@ BEGIN
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
 				WHERE intTransactionId = @Pk
 		END
 		ELSE IF (@strPriceMethod = 'Price Profile')
@@ -903,6 +916,8 @@ BEGIN
 				,dblPriceProfileRate	= @dblPriceProfileRate
 				,dblPriceIndexRate		= @dblPriceIndexRate	
 				,dtmPriceIndexDate		= @dtmPriceIndexDate	
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
 				WHERE intTransactionId = @Pk
 					
 		END
@@ -939,6 +954,8 @@ BEGIN
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
 				WHERE intTransactionId = @Pk
 
 				------------------------------------------------------------
@@ -972,6 +989,8 @@ BEGIN
 				,dblPriceProfileRate	= null
 				,dblPriceIndexRate		= null
 				,dtmPriceIndexDate		= null
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
 				WHERE intTransactionId = @Pk
 		END
 
