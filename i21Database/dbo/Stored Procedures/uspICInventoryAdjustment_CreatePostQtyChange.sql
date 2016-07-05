@@ -210,7 +210,7 @@ BEGIN
 													ELSE 0 
 											END 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
-			,dblCost					= ISNULL(Lot.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenUOM(ItemPricing.dblLastCost, StockUnit.intItemUOMId, @intItemUOMId), 0))
+			,dblCost					= dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, @intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
 			,dblNewCost					= @dblNewUnitCost
 			,intSort					= 1
 			,intConcurrencyId			= 1
