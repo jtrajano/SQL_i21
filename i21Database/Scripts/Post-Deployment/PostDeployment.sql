@@ -319,6 +319,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\029_FillInPhoneAndMobile.sql
 :r .\EM\030-FixSalesperson.sql
 :r .\EM\031_DefaultDateAndNumberFormat.sql
+:r .\EM\024_CleanOrphanCustomerGroup.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

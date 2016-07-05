@@ -4121,6 +4121,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCategory.sql" />
     <None Include="Scripts\Post-Deployment\EM\031_DefaultDateAndNumberFormat.sql" />
     <None Include="Scripts\Post-Deployment\CF\2_DataFix.sql" />
+    <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
