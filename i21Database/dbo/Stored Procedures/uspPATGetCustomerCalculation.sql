@@ -128,7 +128,7 @@ END
 	END
 	ELSE
 	BEGIN
-		SELECT	intCustomerId = RCus.intRefundCustomerId,
+		SELECT	intCustomerId = RCus.intCustomerId,
 				strCustomerName = EN.strName,
 				ARC.strStockStatus,
 				dtmLastActivityDate = R.dtmRefundDate,
