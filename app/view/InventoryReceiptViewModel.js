@@ -701,24 +701,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             }
         },
-        computeWeightUOM: function (get) {
-            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
-                this.data.currentReceiptItem.set('dblGross', 0);
-                this.data.currentReceiptItem.set('dblNet', 0);
-            }
-            else {
-                var receiptUOMCF = get('grdInventoryReceipt.selection.dblItemUOMConvFactor');
-                var weightUOMCF = get('grdInventoryReceipt.selection.dblWeightUOMConvFactor');
-                var qtyToReceive = get('grdInventoryReceipt.selection.dblOpenReceive');
-                if (receiptUOMCF > 0 && weightUOMCF > 0) {
-                    qtyToReceive = (qtyToReceive * receiptUOMCF) / weightUOMCF;
-                    this.data.currentReceiptItem.set('dblGross', qtyToReceive);
-                    this.data.currentReceiptItem.set('dblNet', qtyToReceive);
-                }
-            }
-
-            return false;
-        },
         readOnlyNoGrossNetUOM: function (get) {
             if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
                 return true;
