@@ -31,12 +31,6 @@ BEGIN TRY
 		INNER JOIN tblEMEntityToRole EntityToRole ON EntityToRole.intEntityRoleId = UserRole.intUserRoleID
 		WHERE UserRole.ysnAdmin = 0 AND EntityToRole.intEntityId = @fromEntityId
 
-		-- Unset and update Contact Admin
-		UPDATE UserRole SET ysnAdmin = 0, strRoleType = 'Contact', strName = strName + ' ' + CONVERT(VARCHAR(8),GETDATE(),112), strDescription = strDescription + ' (merged)'
-		FROM tblSMUserRole UserRole
-		INNER JOIN tblEMEntityToRole EntityToRole ON EntityToRole.intEntityRoleId = UserRole.intUserRoleID
-		WHERE UserRole.ysnAdmin = 1 AND EntityToRole.intEntityId = @fromEntityId
-
 		-- DELETE ADMIN MENU
 		DELETE RoleMenu FROM tblSMUserRoleMenu RoleMenu
 		INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
@@ -44,6 +38,12 @@ BEGIN TRY
 		INNER JOIN tblSMMasterMenu MasterMenu on MasterMenu.intMenuID = RoleMenu.intMenuId
 		WHERE UserRole.ysnAdmin = 1 AND EntityToRole.intEntityId = @fromEntityId
 		AND (MasterMenu.intMenuID = 1 OR MasterMenu.intParentMenuID = 1)
+
+		-- Unset and update Contact Admin
+		UPDATE UserRole SET ysnAdmin = 0, strRoleType = 'Contact', strName = strName + ' ' + CONVERT(VARCHAR(8),GETDATE(),112), strDescription = strDescription + ' (merged)'
+		FROM tblSMUserRole UserRole
+		INNER JOIN tblEMEntityToRole EntityToRole ON EntityToRole.intEntityRoleId = UserRole.intUserRoleID
+		WHERE UserRole.ysnAdmin = 1 AND EntityToRole.intEntityId = @fromEntityId
 		
 		-- Commit changes
 		GOTO uspSMMergeRole_Commit
