@@ -22,7 +22,7 @@ SELECT
 	,blcchr				= ISNULL(ARCI.[dblFuture], 0.000000) + ISNULL(ARCI.[dbl0Days], 0.000000) + ISNULL(ARCI.[dbl10Days], 0.000000)
 	,blcpay				= ISNULL(ARCI.[dblUnappliedCredits], 0.000000) + ISNULL(ARCI.[dblPrepaids], 0.000000)
 	,decLastPaymentAmt	= ISNULL(ARCI.[dblLastPayment], 0.000000)
-	,dtLastPaymentDate	= CONVERT(DATE, ARCI.[dtmLastPaymentDate], 112)
+	,dtLastPaymentDate	= CONVERT(NVARCHAR(8), ARCI.[dtmLastPaymentDate], 112)
 FROM
 	vyuARCustomerInquiry ARCI
 INNER JOIN
