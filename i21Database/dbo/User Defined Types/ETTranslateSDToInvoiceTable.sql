@@ -25,7 +25,8 @@ CREATE TYPE [dbo].[ETTranslateSDToInvoiceTable] AS TABLE
     [dblPrice] NUMERIC(18, 6) NULL, 
     [strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS  NULL,
 	[strDetailType] NVARCHAR(2) COLLATE Latin1_General_CI_AS  NULL,
-	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL
+	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	[intContractSequence] INT NULL 
 )
 
 
