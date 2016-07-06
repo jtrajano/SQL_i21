@@ -161,13 +161,34 @@ OUTPUT inserted.intPaymentId, SourceData.intId INTO #tmpPaymentCreated;
 
 SET @totalCreated = @@ROWCOUNT;
 
-ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
-
 IF @totalCreated <= 0 
 BEGIN
+	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 	IF @transCount = 0 COMMIT TRANSACTION
 	RETURN;
 END
+
+IF OBJECT_ID('tempdb..#tmpPaymentsWithRecordNumber') IS NOT NULL DROP TABLE #tmpPaymentsWithRecordNumber
+--UPDATE strPaymentRecordNumber
+CREATE TABLE #tmpPaymentsWithRecordNumber
+(
+	intPaymentId INT NOT NULL,
+	intRecordNumber INT NOT NULL
+)
+
+INSERT INTO #tmpPaymentsWithRecordNumber
+SELECT
+	A.intPaymentId,
+	@paymentRecordNum + ROW_NUMBER() OVER(ORDER BY A.intPaymentId)
+FROM tblAPPayment A
+INNER JOIN #tmpPaymentCreated B ON A.intPaymentId = B.intPaymentId
+
+UPDATE A
+	SET A.strPaymentRecordNum = @pay + CAST(B.intRecordNumber AS NVARCHAR)
+FROM tblAPPayment A
+INNER JOIN #tmpPaymentsWithRecordNumber B ON A.intPaymentId = B.intPaymentId
+
+ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 
 --UPDATE STARTING NUMBER
 UPDATE A
