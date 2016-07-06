@@ -9,6 +9,7 @@ select
 , Authority2			= reverse(LEFT(reverse(strTaxCode), CASE WHEN charindex(' ', reverse(strTaxCode)) = 0 THEN LEN(reverse(strTaxCode)) ELSE charindex(' ', reverse(strTaxCode)) - 1 END))
 , Authority2Description	= 'NULL'	
 , [Description]			= tblSMTaxCode.strDescription
+, FETRatePerUnit		= 0
 , FETGLAccount			= ''
 , EFTonFET				= 'N'
 , SETRatePerUnit		= dblRate
