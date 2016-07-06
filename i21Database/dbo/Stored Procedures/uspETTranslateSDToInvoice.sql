@@ -30,6 +30,7 @@ BEGIN
 	DECLARE @strDetailType							NVARCHAR(2)
 	DECLARE @strContractNumber						NVARCHAR(50)
 	DECLARE @intImportSDToInvoiceId					INT
+	DECLARE @intContractSequence						INT
 
 	DECLARE @strCustomerNumberTax						NVARCHAR(100)
 	DECLARE @strInvoiceNumberTax						NVARCHAR(25)
@@ -54,6 +55,7 @@ BEGIN
 	DECLARE @strDetailTypeTax							NVARCHAR(2)
 	DECLARE @strContractNumberTax						NVARCHAR(50)
 	DECLARE @intImportSDToInvoiceIdTax					INT
+	
 
 
 
@@ -76,7 +78,7 @@ BEGIN
 	DECLARE @intNewInvoiceDetailId					INT
 	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
 	--DECLARE @ysnProcessNextAsHeader					BIT
-	DECLARE @intContractHeaderNumber				INT
+	DECLARE @intContractDetailId					INT
 	DECLARE @intTaxCodeId							INT
 	DECLARE @intTaxClassId							INT
 	
@@ -189,6 +191,7 @@ BEGIN
 				,@intImportSDToInvoiceId	  = intImportSDToInvoiceId
 				,@strDetailType				  = strDetailType
 				,@strContractNumber			  = strContractNumber
+				,@intContractSequence		  = intContractSequence
 			FROM #tmpCustomerInvoiceDetail
 			ORDER BY intLineItem ASC
 
@@ -258,10 +261,13 @@ BEGIN
 			SET	@intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intUnitMeasureId = @intUnitMeasureId AND intItemId = @intItemId)
 
 			--Get contract ID
-			SET @intContractHeaderNumber = (SELECT TOP 1 intContractHeaderId 
-											FROM tblCTContractHeader 
-											WHERE strContractNumber = @strContractNumber
-											AND intEntityId = @intCustomerEntityId)
+			SET @intContractDetailId = (SELECT TOP 1 B.intContractDetailId 
+											FROM tblCTContractHeader A
+											INNER JOIN tblCTContractDetail B
+												ON A.intContractHeaderId = B.intContractHeaderId
+											WHERE A.strContractNumber = @strContractNumber
+											AND A.intEntityId = @intCustomerEntityId
+											AND B.intContractSeq = @intContractSequence)
 
 			---Insert/Create Invoice 
 			IF(@ysnHeader = 1)
@@ -289,7 +295,7 @@ BEGIN
 					,@ItemDescription		   = @strItemDescription
 					,@ItemUOMId				   = @intItemUOMId
 					,@BOLNumber				   = @strInvoiceNumber
-					,@ItemContractHeaderId     = @intContractHeaderNumber
+					,@ItemContractDetailId     = @intContractDetailId
 
 				--GEt the created invoice number
 				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
@@ -371,10 +377,11 @@ BEGIN
 						,@ItemPrice                = @dblPrice
 						,@ItemSiteId               = @intSiteId
 						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
-						,@ItemTaxGroupId		   = @intTaxGroupId	
+						--,@ItemTaxGroupId		   = @intTaxGroupId	
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
-						,@ItemContractHeaderId     = @intContractHeaderNumber
+						,@ItemContractDetailId     = @intContractDetailId
+						,@RecomputeTax			   = 0
 				LOGDETAILENTRY:
 				IF 	LTRIM(@strErrorMessage) != ''
 				BEGIN		
