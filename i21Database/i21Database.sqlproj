@@ -4006,6 +4006,7 @@
     <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
