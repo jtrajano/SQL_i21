@@ -2,10 +2,10 @@
 AS 
 
 SELECT 
- dmpat = RIGHT(C.strEntityNo, 3) 
+ dmpat = C.strEntityNo 
 ,dmtank = REPLICATE('0',4-LEN(CAST(intSiteNumber AS NVARCHAR))) + CAST(intSiteNumber AS NVARCHAR)
 ,dbtype = 0
-,dmdriv = D.strEntityNo
+,dmdriv = RIGHT(D.strEntityNo, 3)
 ,rmrte =  G.strRouteId
 ,dmtsze = ISNULL(A.dblTotalCapacity,0)
 ,dmldd = ISNULL(A.intLastDeliveryDegreeDay,0)
