@@ -4008,6 +4008,7 @@
     <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
     <Build Include="dbo\Views\vyuCTContractDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

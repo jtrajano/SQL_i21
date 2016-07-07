@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRUpdateGrainOpenBalanceByFIFO]
 	 @strOptionType NVARCHAR(30)
+	,@strSourceType NVARCHAR(30)---[SalesOrder,Scale]
 	,@intEntityId INT
 	,@intItemId INT
 	,@intStorageTypeId INT
@@ -67,10 +68,9 @@ BEGIN TRY
 	SELECT @FeeItemId=intItemId FROM tblGRCompanyPreference
 	SELECT @strFeeItem=strItemNo FROM tblICItem WHERE intItemId=@FeeItemId
 	 
-	SELECT @dblAvailableGrainOpenBalance = SUM(a.dblOpenBalance)
-	FROM tblGRCustomerStorage a
-	JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
-	WHERE a.intEntityId = @intEntityId AND a.intItemId = @intItemId AND a.intStorageTypeId = @intStorageTypeId
+	SELECT @dblAvailableGrainOpenBalance = SUM(dblOpenBalance)
+	FROM vyuGRGetStorageTransferTicket
+	WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND ysnDPOwnedType=0 AND ysnCustomerStorage=0
 
 	IF @strOptionType = 'Inquiry'
 	BEGIN
@@ -97,11 +97,12 @@ BEGIN TRY
 
 			SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId
 				,@dblStorageUnits = dblOpenBalance
-			FROM tblGRCustomerStorage
+			FROM vyuGRGetStorageTransferTicket
 			WHERE intEntityId = @intEntityId
 				AND intItemId = @intItemId
 				AND intStorageTypeId = @intStorageTypeId
-				AND dblOpenBalance > 0
+				AND ysnDPOwnedType=0 
+				AND ysnCustomerStorage=0				
 				AND dtmDeliveryDate IS NOT NULL
 				AND intCustomerStorageId NOT IN (SELECT intCustomerStorageId FROM #tblGRCustomerStorage)
 			ORDER BY dtmDeliveryDate,intCustomerStorageId
@@ -268,6 +269,7 @@ BEGIN TRY
 			(
 				 [intConcurrencyId]
 				,[intCustomerStorageId]
+				,[intTicketId]
 				,[intSalesOrderId]
 				,[dblUnits]
 				,[dtmHistoryDate]
@@ -278,11 +280,15 @@ BEGIN TRY
 			SELECT 
 				 [intConcurrencyId] = 1
 				,[intCustomerStorageId] = intCustomerStorageId
-				,[intSalesOrderId]=@IntSourceKey				
+				,[intTicketId] =    CASE WHEN @strSourceType='Scale' THEN @IntSourceKey ELSE NULL END
+				,[intSalesOrderId]= CASE WHEN @strSourceType='SalesOrder' THEN @IntSourceKey ELSE NULL END				
 				,[dblUnits] = dblOpenBalance
 				,[dtmHistoryDate] = GetDATE()
 				,[dblPaidAmount] = [dblStorageCharge]* dblOpenBalance
-				,[strType] = 'Reduced By Sales Order'
+				,[strType] = CASE 
+								 WHEN @strSourceType='SalesOrder' THEN 'Reduced By Sales Order'
+								 WHEN @strSourceType='Scale'	  THEN 'Reduced By Scale'
+							 END
 				,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
 			FROM #tblGRCustomerStorage
 
