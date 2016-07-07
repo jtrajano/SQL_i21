@@ -176,7 +176,6 @@
     <Compile Include="Metadata\tblICUnitMeasure.cs" />
     <Compile Include="Metadata\tblPATPatronageCategory.cs" />
     <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
-    <Compile Include="Metadata\vyuICGetInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblSMCompanyLocationPricingLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\LockInventory.cs" />
