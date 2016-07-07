@@ -4039,6 +4039,7 @@
     <Build Include="dbo\Views\vyuEMSearchEntityPartner.sql" />
     <Build Include="dbo\Views\vyuEMEntityType.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntitySalesEntity.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
