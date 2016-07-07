@@ -21,11 +21,18 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Receipt Transaction' + CAS
 DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@STARTING_NUMBER_BATCH AS INT = 3  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
+		,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
 		
 		,@OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_Storage AS INT = 2
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
+
+		-- Receipt Types
+		,@RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
+		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
+		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
 
 -- Posting variables
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -48,16 +55,22 @@ DECLARE @intReturnValue AS INT
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
-	DECLARE @intTransactionId AS INT  
-	DECLARE @intCreatedEntityId AS INT  
-	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT  
+			,@intTransactionId AS INT  
+			,@intCreatedEntityId AS INT  
+			,@ysnAllowUserSelfPost AS BIT   
+			,@ysnTransactionPostedFlag AS BIT  
+			,@receiptType AS NVARCHAR(50) 
+			,@intTransferorId AS INT
+			,@intLocationId AS INT 
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryReceiptId  
 			,@ysnTransactionPostedFlag = ysnPosted  
 			,@dtmDate = dtmReceiptDate  
 			,@intCreatedEntityId = intEntityId  
+			,@receiptType = strReceiptType
+			,@intTransferorId = intTransferorId
+			,@intLocationId = intLocationId
 	FROM	dbo.tblICInventoryReceipt   
 	WHERE	strReceiptNumber = @strTransactionId  
 END  
@@ -351,6 +364,7 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,strActualCostId
+				,intInTransitSourceLocationId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -473,6 +487,7 @@ BEGIN
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
+				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
 				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -488,6 +503,9 @@ BEGIN
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
 				LEFT JOIN dbo.tblICItemUOM CostUOM
 					ON CostUOM.intItemUOMId = DetailItem.intCostUOMId
+				LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
+					ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
+					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
@@ -514,7 +532,8 @@ BEGIN
 					,intLotId 
 					,intSubLocationId
 					,intStorageLocationId
-					,strActualCostId			
+					,strActualCostId
+					,intInTransitSourceLocationId
 			)
 			SELECT 
 					intItemId  
@@ -535,6 +554,7 @@ BEGIN
 					,intSubLocationId
 					,intStorageLocationId
 					,strActualCostId
+					,intInTransitSourceLocationId
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 
@@ -557,7 +577,8 @@ BEGIN
 					,intLotId 
 					,intSubLocationId
 					,intStorageLocationId
-					,strActualCostId			
+					,strActualCostId
+					,intInTransitSourceLocationId	
 			)
 			SELECT 
 					intItemId  
@@ -578,12 +599,18 @@ BEGIN
 					,intSubLocationId
 					,intStorageLocationId
 					,strActualCostId
+					,intInTransitSourceLocationId
 			FROM	@ItemsForPost
 			WHERE	dblQty < 0 
 			
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
+				IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+				BEGIN 
+					SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				END
+
 				INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]
@@ -693,6 +720,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intInTransitSourceLocationId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -804,6 +832,7 @@ BEGIN
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
 				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -817,6 +846,9 @@ BEGIN
 					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM WeightUOM
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
+				LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
+					ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
+					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
   

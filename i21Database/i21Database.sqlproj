@@ -3998,6 +3998,8 @@
     <Build Include="dbo\Tables\tblSMTaxGroupCodeCategoryExemption.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMergeRole.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInbound.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitOutbound.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVendorHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptCashRequirements.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptCheckRegister.sql" />
@@ -4010,6 +4012,7 @@
     <Build Include="dbo\Views\vyuCTContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

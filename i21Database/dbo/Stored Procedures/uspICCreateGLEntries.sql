@@ -2,7 +2,8 @@
 	@strBatchId AS NVARCHAR(20)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
-	,@strGLDescription AS NVARCHAR(255) = NULL 	
+	,@strGLDescription AS NVARCHAR(255) = NULL 
+	,@intContraInventory_ItemLocationId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -42,7 +43,7 @@ INSERT INTO @GLAccounts (
 SELECT	Query.intItemId
 		,Query.intItemLocationId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
-		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
 		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_AutoNegative) 
 		,intTransactionTypeId
 FROM	(

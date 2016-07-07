@@ -26,4 +26,5 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
     ,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
 	,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
+	,[intInTransitSourceLocationId] INT NULL				-- If has value, it indicates where the item was coming from. 
 )
