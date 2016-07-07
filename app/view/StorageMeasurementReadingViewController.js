@@ -110,7 +110,21 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
                 colEffectiveDepth: 'dblEffectiveDepth',
                 colAirSpaceReading: 'dblAirSpaceReading',
                 colCashPrice: 'dblCashPrice',
-                colDiscountSchedule: 'strDiscountSchedule'
+                colDiscountSchedule: {
+                     dataIndex: 'strDiscountDescription',
+                     editor: {
+                        origValueField: 'intDiscountScheduleId',
+                        origUpdateField: 'intDiscountScheduleId',
+                        store: '{discountSchedule}',
+                        defaultFilters: [
+                            {
+                                column: 'intCommodityId',
+                                value: '{grdStorageMeasurementReading.selection.intCommodityId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                }
             }
         }
     },
