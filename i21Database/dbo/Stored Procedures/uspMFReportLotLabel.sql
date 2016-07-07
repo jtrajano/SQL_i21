@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @strLotNo NVARCHAR(100), @xmlDocumentId INT
 	DECLARE @intLotId INT
+	DECLARE @strLotId NVARCHAR(MAX)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -43,11 +44,11 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strLotNo'
 	
-	SELECT @intLotId = [from]
+	SELECT @strLotId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intLotId'
 
-	IF ISNULL(@intLotId,0) <> 0 
+	IF ISNULL(@strLotId,'') <> ''
 	BEGIN
 		SELECT l.intLotId,
 			   l.intItemId, 
@@ -66,7 +67,8 @@ BEGIN TRY
 		LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 		LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
 		LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu1.intUnitMeasureId
-		WHERE l.intLotId = @intLotId
+		WHERE l.intLotId IN (SELECT * FROM dbo.fnSplitString(@strLotId,'^'))
+		ORDER BY strParentLotNumber
 	END
 	ELSE
 	BEGIN
@@ -74,7 +76,7 @@ BEGIN TRY
 			   l.intItemId, 
 			   l.dblQty,
 			   um.strUnitMeasure AS strQtyUOM,
-			   l.dblWeight, 
+			   l.dblWeight,
 			   um1.strUnitMeasure AS strWeightUOM,
 			   l.strLotNumber, 
 			   i.strItemNo, 
@@ -87,7 +89,8 @@ BEGIN TRY
 		LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 		LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
 		LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = iu1.intUnitMeasureId
-		WHERE l.strLotNumber = @strLotNo AND l.dblQty>0
+		WHERE l.strLotNumber IN (SELECT Item COLLATE DATABASE_DEFAULT FROM dbo.fnSplitString(@strLotNo,'^')) AND l.dblQty>0
+		ORDER BY strParentLotNumber
 	END	
 	
 END TRY
