@@ -395,7 +395,37 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDiscountSchedule',
                                                         width: 120,
-                                                        text: 'Discount Schedule'
+                                                        text: 'Discount Schedule',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intDiscountScheduleId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intCommodityId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDiscountDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Discount Description',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCurrency',
+                                                                    dataType: 'string',
+                                                                    text: 'Currency',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDiscountSchedule',
+                                                            displayField: 'strDiscountDescription',
+                                                            valueField: 'strDiscountDescription'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {

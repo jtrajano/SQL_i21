@@ -762,7 +762,62 @@
                                                 "width": 120
                                             },
                                             "name": "MyColumn48",
-                                            "designerId": "22b7f7c2-04d7-40d3-85b7-13d43f9f33c5"
+                                            "designerId": "22b7f7c2-04d7-40d3-85b7-13d43f9f33c5",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intDiscountScheduleId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCommodityId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDiscountDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Discount Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strCurrency',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Currency',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "designer|displayName": null,
+                                                        "displayField": "strDiscountDescription",
+                                                        "itemId": "cboDiscountSchedule",
+                                                        "valueField": "strDiscountDescription"
+                                                    },
+                                                    "name": "MyComboBox20",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "b1573399-0a9d-4cfa-9941-9ac96689e782",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -820,7 +875,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging11",
                     "designerId": "ac3df6f4-409d-46ea-8bc7-e00669c50ed4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
