@@ -89,7 +89,7 @@ BEGIN TRY
 
 	IF @intLotId <> @intAlternateLotId
 	BEGIN
-		SELECT @dblAlternateLotReservedQty = dblQty
+		SELECT @dblAlternateLotReservedQty = SUM(dblQty)
 		FROM tblICStockReservation
 		WHERE intLotId = @intAlternateLotId
 
