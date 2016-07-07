@@ -2,7 +2,8 @@
 AS
 
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intLineNo) AS INT)
-, * FROM (
+, * 
+FROM (
 	SELECT 	
 		intLocationId
 		, intEntityVendorId
@@ -230,81 +231,115 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 	UNION ALL
 
 	SELECT
-		intLocationId = TransferView.intFromLocationId
-		, intEntityVendorId = TransferView.intToLocationId
+		intLocationId		= h.intFromLocationId
+		, intEntityVendorId = NULL 
 		, NULL
 		, NULL
-		, strReceiptType = 'Transfer Order'
-		, intLineNo = intInventoryTransferDetailId
-		, intOrderId = intInventoryTransferId
-		, strOrderNumber = strTransferNo
-		, dblOrdered = dblQuantity
-		, dblReceived = NULL
-		, intSourceType = 0
-		, intSourceId = NULL
-		, strSourceNumber = NULL
-		, TransferView.intItemId
-		, strItemNo
-		, strItemDescription
-		, dblQtyToReceive = dblQuantity
-		, intLoadToReceive = 0
-		, dblCost = dblLastCost
-		, dblTax = 0
-		, dblLineTotal = 0
-		, strLotTracking
-		, intCommodityId
-		, intContainerId = NULL
-		, strContainer = NULL
-		, intSubLocationId = intToSubLocationId
-		, strSubLocationName = strToSubLocationName
-		, intStorageLocationId = intToStorageLocationId
-		, strStorageLocationName = strToStorageLocationName
-		, intOrderUOMId = ItemUOM.intItemUOMId
-		, strOrderUOM = ItemUnitMeasure.strUnitMeasure
-		, dblOrderUOMConvFactor = ItemUOM.dblUnitQty
-		, intItemUOMId = ItemUOM.intItemUOMId
-		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
-		, strUnitType = NULL
+		, strReceiptType	= 'Transfer Order'
+		, intLineNo			= d.intInventoryTransferDetailId
+		, intOrderId		= h.intInventoryTransferId
+		, strOrderNumber	= h.strTransferNo
+		, dblOrdered		= d.dblQuantity
+		, dblReceived		= NULL
+		, intSourceType		= 0
+		, intSourceId		= NULL
+		, strSourceNumber	= NULL
+		, d.intItemId
+		, item.strItemNo
+		, strItemDescription = item.strDescription
+		, dblQtyToReceive	= dblQuantity
+		, intLoadToReceive	= 0
+		, dblCost			= ip.dblLastCost
+		, dblTax			= 0
+		, dblLineTotal		= 0
+		, strLotTracking	= item.strLotTracking
+		, item.intCommodityId
+		, intContainerId	= NULL
+		, strContainer		= NULL
+		, intSubLocationId			= fromSubLocation.intCompanyLocationSubLocationId
+		, strSubLocationName		= fromSubLocation.strSubLocationName 
+		, intStorageLocationId		= fromStorageLocation.intStorageLocationId
+		, strStorageLocationName	= fromStorageLocation.strName
+		, intOrderUOMId				= ItemUOM.intItemUOMId
+		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
+		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
+		, intItemUOMId				= ItemUOM.intItemUOMId
+		, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
+		, strUnitType				= NULL
 		-- Gross/Net UOM
-		, intWeightUOMId = GrossNetUOM.intItemUOMId
-		, strWeightUOM = GrossNetUnitMeasure.strUnitMeasure
+		, intWeightUOMId			= GrossNetUOM.intItemUOMId
+		, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
 		-- Conversion factor
-		, dblItemUOMConvFactor = ItemUOM.dblUnitQty
-		, dblWeightUOMConvFactor = GrossNetUOM.dblUnitQty
+		, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
+		, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
 		-- Cost UOM 
-		, intCostUOMId = CostUOM.intItemUOMId -- intItemUOMId
-		, strCostUOM = CostUnitMeasure.strUnitMeasure
-		, dblCostUOMConvFactor = CostUOM.dblUnitQty
-		, intLifeTime
-		, strLifeTimeType
+		, intCostUOMId				= CostUOM.intItemUOMId -- intItemUOMId
+		, strCostUOM				= CostUnitMeasure.strUnitMeasure
+		, dblCostUOMConvFactor		= CostUOM.dblUnitQty
+		, item.intLifeTime
+		, item.strLifeTimeType
 		, ysnLoad = 0
 		, dblAvailableQty = 0
 		, strBOL = NULL
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
 		, ysnSubCurrency = CAST(0 AS BIT) 
-		, tblSMCompanyPreference.intDefaultCurrencyId
+		, intDefaultCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 		, strSubCurrency = NULL 
 		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from transfer
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
 
-	FROM	vyuICGetInventoryTransferDetail TransferView
+	FROM	dbo.tblICInventoryTransfer h INNER JOIN dbo.tblICInventoryTransferDetail d
+				ON d.intInventoryTransferId = h.intInventoryTransferId
+			
+			INNER JOIN dbo.tblICItem item
+				ON item.intItemId = d.intItemId
+
+			LEFT JOIN tblICItemLocation fromLocation
+				ON fromLocation.intItemId = d.intItemId
+				AND fromLocation.intLocationId = h.intFromLocationId
+
+			LEFT JOIN tblICItemLocation toLocation
+				ON toLocation.intItemId = d.intItemId
+				AND toLocation.intLocationId = h.intToLocationId
+			
+			LEFT JOIN dbo.tblICItemPricing ip
+				ON ip.intItemId = d.intItemId
+				AND ip.intItemLocationId = fromLocation.intItemLocationId
+
+			LEFT JOIN dbo.tblSMCompanyLocationSubLocation fromSubLocation
+				ON fromSubLocation.intCompanyLocationSubLocationId = d.intFromSubLocationId
+
+			LEFT JOIN dbo.tblSMCompanyLocationSubLocation toSubLocation
+				ON toSubLocation.intCompanyLocationSubLocationId = d.intToSubLocationId
+
+			LEFT JOIN dbo.tblICStorageLocation fromStorageLocation
+				ON fromStorageLocation.intStorageLocationId = d.intFromStorageLocationId
+
+			LEFT JOIN dbo.tblICStorageLocation toStorageLocation
+				ON toStorageLocation.intStorageLocationId = d.intToStorageLocationId
+
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON TransferView.intItemUOMId = ItemUOM.intItemUOMId
+				ON ItemUOM.intItemUOMId = d.intItemUOMId 
+				AND ItemUOM.intItemId = item.intItemId
+
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
 				ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 
 			LEFT JOIN dbo.tblICItemUOM GrossNetUOM
-				ON TransferView.intWeightUOMId = GrossNetUOM.intItemUOMId
+				ON GrossNetUOM.intItemUOMId = d.intItemWeightUOMId
+				AND GrossNetUOM.intItemId = item.intItemId
+
 			LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure
 				ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 
 			LEFT JOIN dbo.tblICItemUOM CostUOM
-				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(TransferView.intItemId, TransferView.intItemUOMId)
+				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(d.intItemId, d.intItemUOMId)
+				AND CostUOM.intItemId = item.intItemId
+
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 
-			,tblSMCompanyPreference
-
-	WHERE TransferView.ysnPosted = 1)
-tblAddOrders
+	WHERE h.ysnPosted = 1
+	
+) tblAddOrders
