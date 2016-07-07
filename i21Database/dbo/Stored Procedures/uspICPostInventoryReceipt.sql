@@ -364,6 +364,7 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,strActualCostId
+				,intInTransitSourceLocationId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -486,6 +487,7 @@ BEGIN
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
+				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
 				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -501,6 +503,9 @@ BEGIN
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
 				LEFT JOIN dbo.tblICItemUOM CostUOM
 					ON CostUOM.intItemUOMId = DetailItem.intCostUOMId
+				LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
+					ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
+					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
@@ -527,7 +532,8 @@ BEGIN
 					,intLotId 
 					,intSubLocationId
 					,intStorageLocationId
-					,strActualCostId			
+					,strActualCostId
+					,intInTransitSourceLocationId
 			)
 			SELECT 
 					intItemId  
@@ -548,6 +554,7 @@ BEGIN
 					,intSubLocationId
 					,intStorageLocationId
 					,strActualCostId
+					,intInTransitSourceLocationId
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 
@@ -570,7 +577,8 @@ BEGIN
 					,intLotId 
 					,intSubLocationId
 					,intStorageLocationId
-					,strActualCostId			
+					,strActualCostId
+					,intInTransitSourceLocationId	
 			)
 			SELECT 
 					intItemId  
@@ -591,6 +599,7 @@ BEGIN
 					,intSubLocationId
 					,intStorageLocationId
 					,strActualCostId
+					,intInTransitSourceLocationId
 			FROM	@ItemsForPost
 			WHERE	dblQty < 0 
 			
@@ -711,6 +720,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intInTransitSourceLocationId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -822,6 +832,7 @@ BEGIN
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
 				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -835,6 +846,9 @@ BEGIN
 					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM WeightUOM
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
+				LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
+					ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
+					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
   

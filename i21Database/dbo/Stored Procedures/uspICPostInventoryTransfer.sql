@@ -526,39 +526,39 @@ BEGIN
 			EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 		END
 
-		-- Increase the In-Transit Inbound for the destination. 
-		BEGIN 
-			INSERT INTO @InTransit_Inbound (
-				[intItemId]
-				,[intItemLocationId]
-				,[intItemUOMId]
-				,[intLotId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQty]
-				,[intTransactionId]
-				,[strTransactionId]
-				,[intTransactionTypeId]
-			)
-			SELECT	[intItemId]				= d.intItemId
-					,[intItemLocationId]	= itemLocation.intItemLocationId
-					,[intItemUOMId]			= d.intItemUOMId
-					,[intLotId]				= d.intLotId --itemLot.intLotId
-					,[intSubLocationId]		= d.intToSubLocationId
-					,[intStorageLocationId]	= d.intToStorageLocationId
-					,[dblQty]				= CASE WHEN @ysnPost = 1 THEN d.dblQuantity ELSE -d.dblQuantity END 
-					,[intTransactionId]		= h.intInventoryTransferId
-					,[strTransactionId]		= h.strTransferNo
-					,[intTransactionTypeId] = 12 -- Inventory Transfer
-			FROM	dbo.tblICInventoryTransfer h INNER JOIN dbo.tblICInventoryTransferDetail d
-						ON h.intInventoryTransferId = d.intInventoryTransferId
-					INNER JOIN dbo.tblICItemLocation itemLocation
-						ON itemLocation.intItemId = d.intItemId
-						AND itemLocation.intLocationId = h.intToLocationId
-			WHERE	h.intInventoryTransferId = @intTransactionId
+		---- Increase the In-Transit Inbound for the destination. 
+		--BEGIN 
+		--	INSERT INTO @InTransit_Inbound (
+		--		[intItemId]
+		--		,[intItemLocationId]
+		--		,[intItemUOMId]
+		--		,[intLotId]
+		--		,[intSubLocationId]
+		--		,[intStorageLocationId]
+		--		,[dblQty]
+		--		,[intTransactionId]
+		--		,[strTransactionId]
+		--		,[intTransactionTypeId]
+		--	)
+		--	SELECT	[intItemId]				= d.intItemId
+		--			,[intItemLocationId]	= itemLocation.intItemLocationId
+		--			,[intItemUOMId]			= d.intItemUOMId
+		--			,[intLotId]				= d.intLotId --itemLot.intLotId
+		--			,[intSubLocationId]		= d.intToSubLocationId
+		--			,[intStorageLocationId]	= d.intToStorageLocationId
+		--			,[dblQty]				= CASE WHEN @ysnPost = 1 THEN d.dblQuantity ELSE -d.dblQuantity END 
+		--			,[intTransactionId]		= h.intInventoryTransferId
+		--			,[strTransactionId]		= h.strTransferNo
+		--			,[intTransactionTypeId] = 12 -- Inventory Transfer
+		--	FROM	dbo.tblICInventoryTransfer h INNER JOIN dbo.tblICInventoryTransferDetail d
+		--				ON h.intInventoryTransferId = d.intInventoryTransferId
+		--			INNER JOIN dbo.tblICItemLocation itemLocation
+		--				ON itemLocation.intItemId = d.intItemId
+		--				AND itemLocation.intLocationId = h.intToLocationId
+		--	WHERE	h.intInventoryTransferId = @intTransactionId
 
-			EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
-		END 		
+		--	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
+		--END 		
 	END 
 
 	COMMIT TRAN @TransactionName

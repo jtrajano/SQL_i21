@@ -156,57 +156,57 @@ BEGIN
 			EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 		END
 
-		-- Update the In-Transit Inbound
-		BEGIN 
-			DECLARE @InTransit_Inbound AS InTransitTableType
+		---- Update the In-Transit Inbound
+		--BEGIN 
+		--	DECLARE @InTransit_Inbound AS InTransitTableType
 
-			-- Get all company-owned stocks. 
-			INSERT INTO @InTransit_Inbound (
-				[intItemId]
-				,[intItemLocationId]
-				,[intItemUOMId]
-				,[intLotId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQty]
-				,[intTransactionId]
-				,[strTransactionId]
-				,[intTransactionTypeId]
-			)
-			SELECT	[intItemId]				= ri.intItemId
-					,[intItemLocationId]	= itemLocation.intItemLocationId
-					,[intItemUOMId]			= ISNULL(itemLot.intItemUnitMeasureId, ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId))
-					,[intLotId]				= itemLot.intLotId
-					,[intSubLocationId]		= ri.intSubLocationId
-					,[intStorageLocationId]	= ri.intStorageLocationId
-					,[dblQty]				=	CASE	WHEN itemLot.intLotId IS NOT NULL THEN 
-															itemLot.dblQuantity
-														WHEN ri.intWeightUOMId IS NOT NULL THEN 
-															ri.dblNet
-														ELSE	
-															ri.dblOpenReceive
-												END 
-					,[intTransactionId]		= r.intInventoryReceiptId
-					,[strTransactionId]		= r.strReceiptNumber
-					,[intTransactionTypeId] = 4 -- Inventory Receipt
-			FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
-						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-					INNER JOIN dbo.tblICItemLocation itemLocation
-						ON itemLocation.intItemId = ri.intItemId
-						AND itemLocation.intLocationId = r.intLocationId	
-					LEFT JOIN dbo.tblICInventoryReceiptItemLot itemLot
-						ON itemLot.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-			WHERE	r.intInventoryReceiptId = @intTransactionId
-					AND ISNULL(ri.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-					AND ri.dblOpenReceive > 0
+		--	-- Get all company-owned stocks. 
+		--	INSERT INTO @InTransit_Inbound (
+		--		[intItemId]
+		--		,[intItemLocationId]
+		--		,[intItemUOMId]
+		--		,[intLotId]
+		--		,[intSubLocationId]
+		--		,[intStorageLocationId]
+		--		,[dblQty]
+		--		,[intTransactionId]
+		--		,[strTransactionId]
+		--		,[intTransactionTypeId]
+		--	)
+		--	SELECT	[intItemId]				= ri.intItemId
+		--			,[intItemLocationId]	= itemLocation.intItemLocationId
+		--			,[intItemUOMId]			= ISNULL(itemLot.intItemUnitMeasureId, ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId))
+		--			,[intLotId]				= itemLot.intLotId
+		--			,[intSubLocationId]		= ri.intSubLocationId
+		--			,[intStorageLocationId]	= ri.intStorageLocationId
+		--			,[dblQty]				=	CASE	WHEN itemLot.intLotId IS NOT NULL THEN 
+		--													itemLot.dblQuantity
+		--												WHEN ri.intWeightUOMId IS NOT NULL THEN 
+		--													ri.dblNet
+		--												ELSE	
+		--													ri.dblOpenReceive
+		--										END 
+		--			,[intTransactionId]		= r.intInventoryReceiptId
+		--			,[strTransactionId]		= r.strReceiptNumber
+		--			,[intTransactionTypeId] = 4 -- Inventory Receipt
+		--	FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
+		--				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		--			INNER JOIN dbo.tblICItemLocation itemLocation
+		--				ON itemLocation.intItemId = ri.intItemId
+		--				AND itemLocation.intLocationId = r.intLocationId	
+		--			LEFT JOIN dbo.tblICInventoryReceiptItemLot itemLot
+		--				ON itemLot.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+		--	WHERE	r.intInventoryReceiptId = @intTransactionId
+		--			AND ISNULL(ri.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+		--			AND ri.dblOpenReceive > 0
 
-			-- If posting, reduce the in-transit 
-			UPDATE @InTransit_Inbound
-			SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END 
+		--	-- If posting, reduce the in-transit 
+		--	UPDATE @InTransit_Inbound
+		--	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END 
 
-			-- Update the In-Transit Inbound
-			EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound 
-		END
+		--	-- Update the In-Transit Inbound
+		--	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound 
+		--END
 	END 
 END 
 

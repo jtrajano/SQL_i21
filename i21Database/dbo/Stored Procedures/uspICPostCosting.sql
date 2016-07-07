@@ -689,10 +689,20 @@ END
 -----------------------------------------
 IF @strAccountToCounterInventory IS NOT NULL 
 BEGIN 
+	DECLARE @intContraInventory_ItemLocationId AS INT
+
+	IF @strAccountToCounterInventory = 'Inventory In-Transit'
+	BEGIN 
+		SELECT TOP 1 @intContraInventory_ItemLocationId = intInTransitSourceLocationId
+		FROM @ItemsToPost 
+		WHERE intInTransitSourceLocationId IS NOT NULL 
+	END 
+
 	EXEC dbo.uspICCreateGLEntries 
 		@strBatchId
 		,@strAccountToCounterInventory
 		,@intEntityUserSecurityId
 		,@strGLDescription
+		,@intContraInventory_ItemLocationId
 END 
 
