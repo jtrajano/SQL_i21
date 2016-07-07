@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKGetAllElectronicPricingURL] 
+﻿CREATE PROCEDURE [dbo].uspRKGetAllElectronicPricingURL 
 	 @FutureMarketId INT
 	,@intUserId INT
 AS
@@ -15,26 +15,31 @@ BEGIN TRY
 	DECLARE @Commoditycode NVARCHAR(10)
 	DECLARE @URL NVARCHAR(1000)
 	DECLARE @SymbolPrefix NVARCHAR(5)
-	DECLARE @UserIdCaption nvarchar(50)
+	DECLARE @strOpen nvarchar(50)
+	DECLARE @strHigh nvarchar(50)
+	DECLARE @strLow nvarchar(50)
+	DECLARE @strLastSettle nvarchar(50)
+	DECLARE @strLastElement nvarchar(50)
 	
 	SELECT @Commoditycode = strFutSymbol,@SymbolPrefix=strSymbolPrefix
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId		
+
+	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 	
+	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId 
 		
-	SELECT @URL = ''--strInterfaceWebServicesURL FROM tblRKCompanyPreference
-	
-	SELECT @UserIdCaption ='' --strUserName FROM tblRKCompanyPreference
+	SELECT TOP 1 @URL= s.strInterfaceSystemURL,@strOpen=strOpen,@strHigh=strHigh,@strLow=strLow,@strLastSettle=strLastSettle,@strLastElement=strLastElement FROM tblRKCompanyPreference c
+	JOIN tblRKInterfaceSystem s on c.intInterfaceSystemId=s.intInterfaceSystemId 
 
-	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
+	if isnull(@URL,'') <> ''
+	BEGIN
+		SELECT  replace(replace(@URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1),'¶¶',@strUserName),'¶¶¶¶',@strPassword) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId,
+		@strOpen as strOpen,@strHigh as strHigh,@strLow as strLow,@strLastSettle as strLastSettle,@strLastElement as strLastElement
+		FROM tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
+	END
 	
-	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId  
-	IF @strPassword = ''
-			SET @strPassword = '?&Type=F'
+	END TRY
 	
-    SELECT @URL + @UserIdCaption+'=' + @strUserName + '&Password=' + @strPassword + '&Symbol='+@SymbolPrefix + @Commoditycode + strSymbol+RIGHT(intYear,1) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId from tblRKFuturesMonth where intFutureMarketId=1 and dtmFutureMonthsDate >= getdate() and ysnExpired = 0 
-	
-END TRY
-
 BEGIN CATCH
 
 	SET @ErrMsg = ERROR_MESSAGE()
@@ -42,3 +47,4 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 	
 END CATCH
+

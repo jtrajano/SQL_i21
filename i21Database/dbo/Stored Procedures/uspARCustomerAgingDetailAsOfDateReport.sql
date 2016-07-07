@@ -79,7 +79,7 @@ WHERE I.ysnPosted = 1
   AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup = 'Receivables')
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
 
 UNION ALL
 						
@@ -129,7 +129,7 @@ WHERE I.ysnPosted = 1
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup = 'Receivables')
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
       
 UNION ALL
 
@@ -169,7 +169,7 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-                                    WHERE AG.strAccountGroup = 'Receivables')
+                                    WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
     INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
@@ -220,7 +220,7 @@ WHERE I.ysnPosted  = 1
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup = 'Receivables')) AS A    
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))) AS A    
 
 LEFT JOIN
     
@@ -273,7 +273,7 @@ WHERE I.ysnPosted = 1
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup = 'Receivables')
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
 
 UNION ALL
 
@@ -307,7 +307,7 @@ WHERE I.ysnPosted = 1
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup = 'Receivables')
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
 						      
 UNION ALL
 
@@ -333,7 +333,7 @@ FROM tblARPayment P
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))
 				AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
                                     INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-                                    WHERE AG.strAccountGroup = 'Receivables')
+                                    WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
     INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE P.ysnPosted = 1
@@ -367,7 +367,7 @@ WHERE I.ysnPosted  = 1
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-										WHERE AG.strAccountGroup = 'Receivables')) AS TBL) AS B   
+										WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))) AS TBL) AS B   
     
 ON
 A.intEntityCustomerId	 = B.intEntityCustomerId

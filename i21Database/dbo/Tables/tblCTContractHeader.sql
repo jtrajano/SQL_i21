@@ -48,6 +48,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [intLoadUOMId] INT NULL, 
 	[ysnCategory] BIT,
 
+	[dblNoOfLots] NUMERIC(18, 6) NULL,
     [ysnMultiplePriceFixation] BIT NULL, 
 	[intCategoryUnitMeasureId] INT NULL,
 	[intLoadCategoryUnitMeasureId] INT NULL,

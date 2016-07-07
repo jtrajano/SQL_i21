@@ -31,10 +31,6 @@
 	[intCurrencyId] INT NULL, 
 	[strDateTimeFormat] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[intInterfaceSystemId] INT NULL, 
-	[strOpen] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strHigh] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strLow] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strLastSettle] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
     CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),

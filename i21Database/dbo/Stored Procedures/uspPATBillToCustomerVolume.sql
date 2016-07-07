@@ -39,7 +39,7 @@ BEGIN
 			   IC.intPatronageCategoryId,
 			   AB.ysnPosted,
 			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (ABD.dblQtyReceived * ABD.dblCost) 
-						   ELSE (ABD.dblQtyReceived * ICU.dblUnitQty) END),
+						   ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ABD.dblQtyReceived ELSE (ABD.dblQtyReceived * ICU.dblUnitQty) END ) END),
 						   @intFiscalYear as fiscalYear
 		  INTO #tempItem
 		  FROM tblAPBill AB
@@ -54,7 +54,6 @@ BEGIN
 		   AND PC.strPurchaseSale = 'Purchase'
 		 WHERE AB.intBillId = @intBillId
 		   AND IC.intPatronageCategoryId IS NOT NULL
-		   AND ICU.ysnStockUnit = 1 -- Confirm with sir Ajith
 		   group by AB.intEntityVendorId,
 			   IC.intPatronageCategoryId,
 			   AB.ysnPosted

@@ -249,7 +249,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 					,1
 				FROM tblPREmployeeEarningTax
 				WHERE intEmployeeEarningId = @intEmployeeEarningId
+				AND @intPaycheckEarningId NOT IN (SELECT intPaycheckEarningId 
+													FROM tblPRPaycheckEarningTax 
+													WHERE intTypeTaxId = tblPREmployeeEarningTax.intTypeTaxId)
 			END
+
+		DELETE FROM @udtPRPaycheckEarningIn
 
 		/* Loop Control */
 		DELETE FROM #tmpEarnings 
@@ -333,8 +338,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 					,1
 				FROM tblPREmployeeDeductionTax
 				WHERE intEmployeeDeductionId = @intEmployeeDeductionId
+				AND @intPaycheckDeductionId NOT IN (SELECT intPaycheckDeductionId 
+													FROM tblPRPaycheckDeductionTax 
+													WHERE intTypeTaxId = tblPREmployeeDeductionTax.intTypeTaxId)
 			END
 
+		DELETE FROM @udtPRPaycheckDeductionIn
 		DELETE FROM #tmpDeductions WHERE intEmployeeDeductionId = @intEmployeeDeductionId
 	END
 

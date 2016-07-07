@@ -363,7 +363,8 @@ BEGIN
 				,@intStorageLocationId AS INT				= NULL 
 				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblQty AS NUMERIC(18,6)					= 40
-				,@dblNewCost AS NUMERIC(38,20)				= 37.261
+				,@intCostUOMId AS INT						= @WetGrains_BushelUOM
+				,@dblVoucherCost AS NUMERIC(38,20)			= 37.261
 				,@intTransactionId AS INT					= 1
 				,@intTransactionDetailId AS INT				= 1
 				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
@@ -385,7 +386,8 @@ BEGIN
 			,intStorageLocationId
 			,intItemUOMId
 			,dblQty
-			,dblNewCost
+			,intCostUOMId
+			,dblVoucherCost
 			,intTransactionId
 			,intTransactionDetailId
 			,strTransactionId
@@ -404,7 +406,8 @@ BEGIN
 			,@intStorageLocationId
 			,@intItemUOMId
 			,@dblQty
-			,@dblNewCost
+			,@intCostUOMId
+			,@dblVoucherCost
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId

@@ -8,9 +8,10 @@ CREATE TYPE [dbo].[ItemCostAdjustmentTableType] AS TABLE
 	,[intItemLocationId] INT NULL							-- The location where the item is stored.
 	,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
-	,[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
+	,[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0			-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
 	,[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 1			-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
-	,[dblNewCost] NUMERIC(38, 20) NOT NULL DEFAULT 0		-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
+	,[intCostUOMId] INT NOT NULL							-- The uom related to the cost of the item. Ex: A box can be priced as $4 per LB. 
+	,[dblVoucherCost] NUMERIC(38, 20) NOT NULL DEFAULT 0		-- Cost of the item. It must be related to the cost uom. Ex: $4/LB. 
 	,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 	,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 	,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 

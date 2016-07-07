@@ -26,7 +26,7 @@ BEGIN
 
 		-- Declare the variables for sub-locations
 		DECLARE @Raw_Materials_SubLocation_DefaultLocation AS INT = 1
-,@FinishedGoods_SubLocation_DefaultLocation AS INT = 2
+				,@FinishedGoods_SubLocation_DefaultLocation AS INT = 2
 				,@Raw_Materials_SubLocation_NewHaven AS INT = 3
 				,@FinishedGoods_SubLocation_NewHaven AS INT = 4
 				,@Raw_Materials_SubLocation_BetterHaven AS INT = 5
@@ -168,6 +168,7 @@ BEGIN
 				,@intStorageLocationId AS INT				= NULL 
 				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblQty AS NUMERIC(18,6)					= 40
+				,@intCostUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblNewCost AS NUMERIC(38,20)				= 37.261
 				,@intTransactionId AS INT					= 1
 				,@intTransactionDetailId AS INT				= 1
@@ -281,6 +282,7 @@ BEGIN
 			,@intStorageLocationId
 			,@intItemUOMId
 			,@dblQty
+			,@intCostUOMId
 			,@dblNewCost
 			,@intTransactionId
 			,@intTransactionDetailId

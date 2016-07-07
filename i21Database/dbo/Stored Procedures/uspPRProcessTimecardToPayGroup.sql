@@ -27,12 +27,12 @@ SELECT
 	T.intEntityEmployeeId
 	,T.intEmployeeEarningId
 	,T.intEmployeeDepartmentId
-	,dblRegularHours =  CASE WHEN (SUM(T.dblHours) > ISNULL(E.dblDefaultHours, 0))
+	,dblRegularHours =  CASE WHEN (SUM(T.dblHours) > ISNULL(E.dblDefaultHours, 0) AND ISNULL(E.dblDefaultHours, 0) > 0)
 							THEN ISNULL(E.dblDefaultHours, 0)
 						ELSE 
 							SUM(T.dblHours)
 						END
-	,dblOvertimeHours = CASE WHEN (SUM(T.dblHours) > ISNULL(E.dblDefaultHours, 0))
+	,dblOvertimeHours = CASE WHEN (SUM(T.dblHours) > ISNULL(E.dblDefaultHours, 0) AND ISNULL(E.dblDefaultHours, 0) > 0)
 							THEN SUM(T.dblHours) - ISNULL(E.dblDefaultHours, 0)
 						ELSE 
 							0

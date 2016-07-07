@@ -534,7 +534,53 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						RETURN 0;
 					END
 				ELSE
+					BEGIN
+					DELETE FROM tblARInvoiceDetailTax WHERE intInvoiceDetailId =  @NewDetailId
+
+					INSERT INTO [tblARInvoiceDetailTax]
+						([intInvoiceDetailId]
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[dblRate]
+						,[dblExemptionPercent]
+						,[intSalesTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes]
+						,[intConcurrencyId])
+					SELECT
+						 @NewDetailId
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[dblRate]
+						,[dblExemptionPercent]
+						,[intSalesTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes]
+						,0
+					FROM
+						[tblSOSalesOrderDetailTax]
+					WHERE
+						[intSalesOrderDetailId] = @ItemSalesOrderDetailId
+
+
 					DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId				
+					END
 			END	
 	END
 
@@ -561,7 +607,7 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		EXEC dbo.[uspARReComputeInvoiceAmounts] @NewInvoiceId
 		
 		UPDATE
 			tblSOSalesOrder

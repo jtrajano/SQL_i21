@@ -52,15 +52,19 @@ SET @IsOpen = (	SELECT COUNT(1)
 						)										
 					)
 					
-IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intOrderId = @SalesOrderId) 
-		AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ISD
-		INNER JOIN tblARInvoice ISH
-			ON ISD.intInvoiceId = ISH.intInvoiceId
-		INNER JOIN tblSOSalesOrderDetail SOD
-			ON ISD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-		WHERE (ISD.intInventoryShipmentItemId IS NULL OR ISD.intInventoryShipmentItemId = 0)			
-		  AND (ISD.[intSalesOrderDetailId] IS NOT NULL OR ISD.[intSalesOrderDetailId] <> 0)	
-		  AND SOD.intSalesOrderId = @SalesOrderId
+IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem ISHI 
+					INNER JOIN tblICInventoryShipment ISH
+						ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
+					INNER JOIN tblSOSalesOrderDetail SOD
+						ON ISHI.intLineNo = SOD.intSalesOrderDetailId
+				WHERE SOD.intSalesOrderId = @SalesOrderId) 
+AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ISD
+					INNER JOIN tblARInvoice ISH
+						ON ISD.intInvoiceId = ISH.intInvoiceId
+					INNER JOIN tblSOSalesOrderDetail SOD
+						ON ISD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+					WHERE SOD.intSalesOrderId = @SalesOrderId
+					  AND ISNULL(ISD.[intSalesOrderDetailId], 0) <> 0	
 		GROUP BY
 			ISD.[intSalesOrderDetailId]))
 	SET @IsOpen = 1
@@ -78,7 +82,7 @@ SET
 FROM
 	(
 		SELECT SOD.intSalesOrderDetailId
-			 , dblQuantity			= SUM(ISNULL(CASE WHEN ID.intItemUOMId IS NOT NULL AND SOD.intItemUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)) ELSE ISNULL(ID.dblQtyShipped,0) END, 0)) + SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, SOD.intItemUOMId, ISNULL(ISHI.dblQuantity,0)), 0))
+			 , dblQuantity			= SUM(ISNULL(CASE WHEN ID.intItemUOMId IS NOT NULL AND SOD.intItemUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)) ELSE ISNULL(ID.dblQtyShipped,0) END, 0)) + SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, SOD.intItemUOMId, ISNULL(ISHI.dblQuantity,0)), 0))			 
 		FROM tblSOSalesOrderDetail SOD
 			LEFT JOIN (SELECT ID.intSalesOrderDetailId
 							, ID.intItemUOMId

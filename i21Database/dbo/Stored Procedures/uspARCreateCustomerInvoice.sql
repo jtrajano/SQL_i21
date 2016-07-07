@@ -313,6 +313,7 @@ BEGIN TRY
 		,[strBOLNumber]
 		,[strDeliverPickup]
 		,[strComments]
+		,[strFooterComments]
 		,[intShipToLocationId]
 		,[strShipToLocationName]
 		,[strShipToAddress]
@@ -377,6 +378,7 @@ BEGIN TRY
 		,[strBOLNumber]					= @BOLNumber
 		,[strDeliverPickup]				= @DeliverPickUp
 		,[strComments]					= @Comment
+		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.intEntityCustomerId, 'Invoice Footer')
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))

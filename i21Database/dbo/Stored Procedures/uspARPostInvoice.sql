@@ -1531,6 +1531,7 @@ IF @post = 1
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND A.dblPayment <> @ZeroDecimal
 			
 			UNION ALL
 			--Credit Prepaids

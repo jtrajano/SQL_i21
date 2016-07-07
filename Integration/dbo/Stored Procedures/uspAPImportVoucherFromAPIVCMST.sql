@@ -348,26 +348,27 @@ INSERT INTO tblAPBillDetail
 SELECT 
 	[intBillId]				=	A.intBillId,
 	[strMiscDescription]	=	A.strReference,
-	[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN ('C','A') AND C.aphgl_gl_amt > 0 THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1) --make it negative if detail of debit memo is positive
-								ELSE 
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 
-										ELSE 
-											(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_un * -1 ELSE C.aphgl_gl_un END)
-									END) 
+	[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									* 
+									 (CASE WHEN C.aphgl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
+								ELSE --('I')
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									*
+									(CASE WHEN C.aphgl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
 								END),
-	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') AND C.aphgl_gl_amt > 0 THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1)
+	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									* 
+									 (CASE WHEN C.aphgl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE 
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 
-									ELSE 
-										(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_un * -1 ELSE C.aphgl_gl_un END)
-									END) 
+									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									*
+									(CASE WHEN C.aphgl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
-	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') THEN C.aphgl_gl_amt * -1
-											WHEN C.aphgl_gl_amt < 0 AND C2.apivc_trans_type = 'I' THEN C.aphgl_gl_amt * -1
-									ELSE C.aphgl_gl_amt END,
+	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') AND C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 --make this positive as this is from a debit memo or prepayment
+										ELSE C.aphgl_gl_amt END,
 	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') THEN
 										(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
 									ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),

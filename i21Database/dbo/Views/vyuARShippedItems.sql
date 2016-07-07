@@ -712,6 +712,7 @@ INNER JOIN
 	tblICInventoryShipment ICIS
 		ON ICISC.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId]
 		AND ICIS.[ysnPosted] = 1
+		AND ISNULL(ICISC.[ysnPrice],0) = 1
 LEFT OUTER JOIN 
 	vyuCTContractDetailView CTCD	
 		ON ICISC.[intContractId] = CTCD.[intContractHeaderId]

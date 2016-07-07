@@ -48,6 +48,8 @@ BEGIN
 	DECLARE @intNewInvoiceDetailId					INT
 	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
 	DECLARE @ysnProcessNextAsHeader					BIT
+	DECLARE @strContractNumber						NVARCHAR(50)
+	DECLARE @intContractHeaderNumber				INT
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -140,6 +142,7 @@ BEGIN
 				,@strComment				  =	strComment
 				,@intImportSDToInvoiceId	  = intImportSDToInvoiceId
 				,@strDetailType				  = strDetailType
+				,@strContractNumber			  = strContractNumber
 			FROM #tmpCustomerInvoiceDetail
 			ORDER BY intLineItem ASC
 
@@ -210,13 +213,23 @@ BEGIN
 			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strDriverNumber)
 
 			---GEt Tax Group Id
-			SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = @strSalesTaxId)
+			SET @intTaxGroupId = (SELECT TOP 1 B.intTaxGroupId 
+									FROM tblSMTaxCode A
+									INNER JOIN  tblSMTaxGroupCode B
+										ON A.intTaxCodeId = B.intTaxCodeId
+									WHERE A.strTaxCode = @strSalesTaxId)
 
 			--get Item Unit Measure Id = ()
 			SET @intUnitMeasureId = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol = @strUOM)
 
 			---Get Uom ID
 			SET	@intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intUnitMeasureId = @intUnitMeasureId AND intItemId = @intItemId)
+
+			--Get contract ID
+			SET @intContractHeaderNumber = (SELECT TOP 1 intContractHeaderId 
+											FROM tblCTContractHeader 
+											WHERE strContractNumber = @strContractNumber
+											AND intEntityId = @intCustomerEntityId)
 
 			---Insert/Create Invoice 
 			IF(@ysnHeader = 1)
@@ -244,6 +257,7 @@ BEGIN
 					,@ItemDescription		   = @strItemDescription
 					,@ItemUOMId				   = @intItemUOMId
 					,@BOLNumber				   = @strInvoiceNumber
+					,@ItemContractHeaderId     = @intContractHeaderNumber
 
 				--GEt the created invoice number
 				SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
@@ -345,7 +359,7 @@ BEGIN
 						,@ItemTaxGroupId		   = @intTaxGroupId	
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
-
+						,@ItemContractHeaderId     = @intContractHeaderNumber
 				LOGDETAILENTRY:
 				IF 	LTRIM(@strErrorMessage) != ''
 				BEGIN		

@@ -1,12 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInvoiceHistoryReport]
 AS
-SELECT strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-     , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
-     , * 
-FROM (
 SELECT DISTINCT
-	  C.strName
+	   C.strName	 
 	 , strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
+	 , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+     , strCompanyAddress	= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
 	 , P.strRecordNumber
 	 , I.strInvoiceNumber
 	 , I.dtmDate
@@ -19,7 +17,7 @@ SELECT DISTINCT
 	 , P.intPaymentId	 
 	 , I.intEntityCustomerId
 	 , PM.strPaymentMethod
-	 , I.intInvoiceId	 
+	 , I.intInvoiceId
 FROM tblARInvoice I
 	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId AND P.ysnPosted = 1
 							         LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) 
@@ -28,22 +26,4 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))) AS A
-LEFT JOIN 
-(SELECT grandDblInvoiceTotal = SUM(ISNULL(dblInvoiceTotal, 0))
-     , grandDblAmountApplied = SUM(ISNULL(dblPayment, 0))
-	 , grandDblAmountDue     = SUM(ISNULL(dblAmountDue, 0))
-	 , intTotalCount	     = COUNT(*)
-	 , intEntityCustomer     = intEntityCustomerId
-FROM
-(SELECT DISTINCT
-       dblInvoiceTotal = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
-     , dblPayment      = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
-	 , dblAmountDue    = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
-	 , I.intInvoiceId
-	 , I.intEntityCustomerId
-FROM tblARInvoice I
-WHERE I.ysnPosted = 1) AS TBL
-GROUP BY intEntityCustomerId) B
-
-ON A.intEntityCustomerId = B.intEntityCustomer
+						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))

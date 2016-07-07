@@ -198,8 +198,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @TaxGroupId					= EL.intTaxGroupId
 					, @Total						= ILD.dblTotal
 					, @COGSAmount					= ILD.dblCOGSAmount
-					, @FreightTermId				= EL.intFreightTermId
-					, @ShipViaId					= EL.intShipViaId
+					, @FreightTermId				= ISNULL(EL.intFreightTermId, 0)
+					, @ShipViaId					= ISNULL(EL.intShipViaId, 0)
 					, @TaxAmount					= ILD.dblTax
 				FROM
 					tblARImportLogDetail ILD

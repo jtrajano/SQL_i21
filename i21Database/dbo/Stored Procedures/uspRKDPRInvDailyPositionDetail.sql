@@ -775,13 +775,14 @@ INSERT INTO @FinalTable (intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTo
 SELECT	intSeqId,strSeqHeader, strCommodityCode ,strType ,
 			    Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,
 		case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal,
-			@strUnitMeasure as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
+			case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure, intCollateralId,strLocationName,strCustomer,
 		intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,t.intCommodityId,
 		strCustomerReference ,strDistributionOption ,strDPAReceiptNo ,
 		dblDiscDue ,[Storage Due] ,	dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 		dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName  
 FROM @Final  t
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
+	JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 	WHERE t.intCommodityId= @intCommodityId	
 END
