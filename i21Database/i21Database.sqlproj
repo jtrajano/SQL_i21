@@ -4025,6 +4025,8 @@
     <Build Include="dbo\Functions\fnMFConvertCostToTargetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemCostInTargetUOM.sql" />
     <Build Include="dbo\Views\vyuLGLoadPurchaseContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
