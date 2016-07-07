@@ -351,31 +351,31 @@ SELECT
 	[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
 									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
 									* 
-									 (CASE WHEN C.aphgl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
+									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
 									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
 									*
-									(CASE WHEN C.aphgl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
 									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
 									* 
-									 (CASE WHEN C.aphgl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
+									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE 
 									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
 									*
-									(CASE WHEN C.aphgl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
 								END),
-	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
-	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') AND C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 --make this positive as this is from a debit memo or prepayment
-										ELSE C.aphgl_gl_amt END,
+	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), B.intGLAccountExpenseId),
+	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') AND ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 --make this positive as this is from a debit memo or prepayment
+										ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END,
 	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') THEN
-										(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
-									ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
+										(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) --Cost should always positive
+									ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
 	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
 								THEN 
 									(
-										((CASE WHEN C2.apivc_trans_type IN ('C','A') THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+										((CASE WHEN C2.apivc_trans_type IN ('C','A') THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END)
 											/
 											(A.dblTotal)
 										)
@@ -385,7 +385,7 @@ SELECT
 								ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
 	[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
 	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
-	[intLineNo]				=	C.aphgl_dist_no
+	[intLineNo]				=	ISNULL(C.aphgl_dist_no, 0)
 FROM tblAPBill A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityVendorId

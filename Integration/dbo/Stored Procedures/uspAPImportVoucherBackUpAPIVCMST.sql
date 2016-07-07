@@ -155,7 +155,7 @@ BEGIN
 			AND G.apchk_chk_no = A.apivc_chk_no
 			AND G.apchk_rev_dt = A.apivc_chk_rev_dt
 			AND G.apchk_cbk_no = A.apivc_cbk_no
-			AND G.apchk_chk_amt <> 0
+			--AND G.apchk_chk_amt <> 0
 	) PaymentInfo
 	WHERE A.apivc_orig_amt != 0
 	AND A.apivc_trans_type IN ('I', 'C', 'A')
@@ -237,7 +237,7 @@ BEGIN
 			AND G.apchk_chk_no = A.apivc_chk_no
 			AND G.apchk_rev_dt = A.apivc_chk_rev_dt
 			AND G.apchk_cbk_no = A.apivc_cbk_no
-			AND G.apchk_chk_amt <> 0
+			--AND G.apchk_chk_amt <> 0
 	) PaymentInfo
 	WHERE A.apivc_orig_amt != 0
 	AND 1 = CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
