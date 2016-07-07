@@ -60,7 +60,9 @@
 	CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblHDProject_tblHDSalesPipeStatus] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblHDSalesPipeStatus] ([intSalesPipeStatusId]),
 	CONSTRAINT [FK_tblHDProject_tblHDTicketStatus] FOREIGN KEY ([intTicketStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId]),
-	CONSTRAINT [FK_tblHDProject_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId])
+	CONSTRAINT [FK_tblHDProject_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId]),
+	CONSTRAINT [FK_tblHDProject_tblHDOpportunitySource] FOREIGN KEY (intOpportunitySourceId) REFERENCES [dbo].[tblHDOpportunitySource] (intOpportunitySourceId)
+	--[intOpportunitySourceId]
 )
 
 GO
