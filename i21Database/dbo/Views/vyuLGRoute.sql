@@ -95,9 +95,19 @@ SELECT
 								ELSE 
 									''
 								END
+	,ShipVia.strName as strShipVia
+	,Truck.strTruckNumber
+	,Truck.dblTimePerStop
+	,Truck.dblPumpingQty
+	,Truck.dblAverageSpeed
+	,Truck.dblReloadPumpingQty
+	,Truck.dblLeakCheckTime
+
 FROM tblLGRoute Rte
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Rte.intDriverEntityId
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = Rte.intFromCompanyLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubCompLoc ON SubCompLoc.intCompanyLocationSubLocationId = Rte.intFromCompanyLocationSubLocationId
+LEFT JOIN tblEMEntity ShipVia ON ShipVia.intEntityId = Rte.intEntityShipViaId
+LEFT JOIN tblSMShipViaTruck Truck ON Truck.intEntityShipViaTruckId = Rte.intEntityShipViaTruckId
 
 
