@@ -43,6 +43,7 @@
 	[strLinesOfBusiness] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strRFPRFILink] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[dtmLastDescriptionModified] [datetime] null,
+	[strDirection] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
