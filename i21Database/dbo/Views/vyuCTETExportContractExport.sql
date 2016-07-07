@@ -30,5 +30,9 @@ AS
 		JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
 		JOIN	tblSMTerm				TM	ON	TM.intTermID				=	CH.intTermId				LEFT
 		JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId				LEFT
-		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intCreatedById		
+		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
+		
+		WHERE	ISNULL(CD.dblCashPrice,0)	>	0		AND
+				ISNULL(EY.strEntityNo,'')	<>	''		AND
+				CD.dtmEndDate > DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
 	)t
