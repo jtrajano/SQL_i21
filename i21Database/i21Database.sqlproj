@@ -3960,6 +3960,7 @@
     <Build Include="dbo\Stored Procedures\uspARGetReceiptNumber.sql" />
     <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailViewSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
     <Build Include="dbo\Views\vyuLGLoadVesselViewSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspLGTransferContractLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitItemMove.sql" />
@@ -4006,6 +4007,9 @@
     <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4121,6 +4125,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCategory.sql" />
     <None Include="Scripts\Post-Deployment\EM\031_DefaultDateAndNumberFormat.sql" />
     <None Include="Scripts\Post-Deployment\CF\2_DataFix.sql" />
+    <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

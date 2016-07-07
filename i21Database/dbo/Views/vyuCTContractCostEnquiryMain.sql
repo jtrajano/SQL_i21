@@ -1,77 +1,43 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractCostEnquiryMain]
 
 AS
-	SELECT	*,
-			ISNULL(dblCashPrice,0) + ISNULL(dblAmountPer,0) - ISNULL(dblNetImpactPer,0) dblAdjEstimated,
-			ISNULL(dblCashPrice,0) + ISNULL(dblActualPer,0) - ISNULL(dblNetImpactPer,0) dblAdjActual
-	FROM	(
-				SELECT	CD.intContractDetailId,
-						strContractNumber + ' - ' + LTRIM(intContractSeq) strContractSeq,
-						CD.strEntityName,
-						CD.dtmContractDate,
-						CD.strContractBasis,
-						CD.strINCOLocation,
-						CD.strCountry ,
-						CD.strPosition ,
-						CD.dtmStartDate,
-						CD.dtmEndDate,
-						CD.strPricingType,
-						CD.strTerm,
-						CD.strGrade,
-						CD.strWeight,
-						IM.strItemNo,
-						RY.strCountry strOrigin,
-						CP.strDescription AS strProductType,
-						PL.strDescription AS strProductLine,
-						CG.strDescription AS strItemGrade,
-						CD.strLoadingPointType,
-						CD.strLoadingPoint,
-						CD.strDestinationPointType,
-						CD.strDestinationPoint,
-						CD.strDestinationCity,
-						CD.strFutMarketName,
-						CD.strFutureMonth,
-						CD.dblDetailQuantity,
-						CD.strItemUOM,
-						RI.dblOpenReceive,
-						CD.strItemUOM strReceivedUOM,
-						CD.dblCashPrice * ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) dblCashPrice,
-						CD.strPriceUOM,
-						CC.dblAmount,
-						CC.dblAmountPer,
-						CC.dblActual,
-						CC.dblActualPer,
-						HE.dblNetImpactInDefCurrency dblNetImpact,
-						CASE	WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intPriceUnitMeasureId,CD.intUnitMeasureId,CD.dblDetailQuantity),0) = 0 
-								THEN NULL
-								ELSE HE.dblNetImpactInDefCurrency / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,CD.intPriceUnitMeasureId,CD.dblDetailQuantity)
-						END	 	dblNetImpactPer
-				FROM	vyuCTContractDetailView		CD
-				JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId		LEFT
-				JOIN	tblSMCountry				RY	ON	RY.intCountryID					=	IM.intOriginId		LEFT
-				JOIN	tblICCommodityProductLine	PL	ON	PL.intCommodityProductLineId	=	IM.intProductLineId	LEFT
-				JOIN	tblICCommodityAttribute		CP	ON	CP.intCommodityAttributeId		=	IM.intProductTypeId	LEFT
-				JOIN	tblICCommodityAttribute		CG	ON	CG.intCommodityAttributeId		=	IM.intGradeId		LEFT
-				JOIN	(
-							SELECT		RI.intLineNo intContractDetailId,
-										SUM(dbo.fnCTConvertQtyToTargetItemUOM(PT.intUnitMeasureId,DL.intItemUOMId,PT.dblOpenReceive)) dblOpenReceive
-							FROM		vyuICGetInventoryReceiptItem	RI
-							JOIN		tblCTContractDetail				DL	ON	DL.intContractDetailId			=	RI.intLineNo
-							JOIN		tblICInventoryReceipt			IR	ON	IR.intInventoryReceiptId		=	RI.intInventoryReceiptId
-							JOIN		tblICInventoryReceiptItem		PT	ON	PT.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
-							WHERE		IR.strReceiptType = 'Purchase Contract' AND IR.ysnPosted = 1
-							GROUP BY	RI.intLineNo
-						)RI	ON RI.intContractDetailId	=	CD.intContractDetailId	LEFT
-				JOIN	(
-							SELECT		intContractDetailId,
-										SUM(dblAmount) dblAmount,SUM(dblAmountPer) dblAmountPer,SUM(dblActual) dblActual,SUM(dblActualPer) dblActualPer 
-							FROM		vyuCTContractCostEnquiryCost
-							GROUP BY	intContractDetailId
-						)CC ON CC.intContractDetailId = CD.intContractDetailId		LEFT
-				JOIN	(
-							SELECT		intContractDetailId,
-										SUM(dblNetImpactInDefCurrency) dblNetImpactInDefCurrency
-							FROM		vyuCTContractCostEnquiryHedge
-							GROUP BY	intContractDetailId
-						)HE ON HE.intContractDetailId = CD.intContractDetailId		
-			)t
+SELECT *,
+	ISNULL(dblCashPrice,0) + ISNULL(dblAmountPer,0) - ISNULL(dblNetImpactPer,0) dblAdjEstimated,
+	ISNULL(dblCashPrice,0) + ISNULL(dblActualPer,0) - ISNULL(dblNetImpactPer,0) dblAdjActual
+FROM (
+	SELECT cd.intContractDetailId, cd.strContractNumber + ' - ' + LTRIM(cd.intContractSeq) strContractSeq, cd.strEntityName, cd.dtmContractDate,
+		cd.strContractBasis, cd.strINCOLocation, cd.strCountry, cd.strPosition, cd.dtmStartDate, cd.dtmEndDate, cd.strPricingType, cd.strTerm,
+		cd.strGrade, cd.strWeight, i.strItemNo, c.strCountry strOrigin, cp.strDescription strProductType, pl.strDescription strProductLine,
+		cg.strDescription strItemGrade, cd.strLoadingPointType, cd.strLoadingPoint, cd.strDestinationPointType, cd.strDestinationPoint,
+		cd.strDestinationCity, cd.strFutMarketName, cd.strFutureMonth, cd.dblDetailQuantity, cd.strItemUOM, ri.dblOpenReceive, cd.strItemUOM strReceivedUOM,
+		cd.dblCashPrice * ISNULL(dbo.fnCTGetCurrencyExchangeRate(cd.intContractDetailId, 0), 1) dblCashPrice,
+		cd.strPriceUOM, cc.dblAmount, cc.dblAmountPer, cc.dblActual, cc.dblActualPer, he.dblNetImpactInDefCurrency dblNetImpact,
+		CASE WHEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId, cd.intPriceUnitMeasureId, cd.intUnitMeasureId, cd.dblDetailQuantity), 0) = 0 
+			THEN NULL ELSE he.dblNetImpactInDefCurrency / dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId, cd.intUnitMeasureId, cd.intPriceUnitMeasureId, cd.dblDetailQuantity)
+		END	dblNetImpactPer
+	FROM vyuCTContractDetailView cd
+		INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+		LEFT OUTER JOIN tblSMCountry c ON c.intCountryID = i.intOriginId
+		LEFT OUTER JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = i.intProductLineId
+		LEFT OUTER JOIN tblICCommodityAttribute cp ON cp.intCommodityAttributeId = i.intProductTypeId
+		LEFT OUTER JOIN tblICCommodityAttribute cg ON cg.intCommodityAttributeId = i.intGradeId
+		LEFT OUTER JOIN (
+			SELECT ri.intLineNo intContractDetailId, SUM(dbo.fnCTConvertQtyToTargetItemUOM(iri.intUnitMeasureId, cd.intItemUOMId, iri.dblOpenReceive)) dblOpenReceive
+			FROM tblICInventoryReceiptItem ri
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
+				INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN tblICInventoryReceiptItem iri ON iri.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+			WHERE r.strReceiptType = 'Purchase Contract' AND r.ysnPosted = 1
+			GROUP BY ri.intLineNo
+		) ri ON ri.intContractDetailId = cd.intContractDetailId
+		LEFT OUTER JOIN (
+			SELECT intContractDetailId, SUM(dblAmount) dblAmount, SUM(dblAmountPer) dblAmountPer, SUM(dblActual) dblActual, SUM(dblActualPer) dblActualPer 
+			FROM vyuCTContractCostEnquiryCost
+			GROUP BY intContractDetailId
+		) cc ON cc.intContractDetailId = cd.intContractDetailId
+		LEFT OUTER JOIN (
+			SELECT intContractDetailId, SUM(dblNetImpactInDefCurrency) dblNetImpactInDefCurrency
+			FROM vyuCTContractCostEnquiryHedge
+			GROUP BY intContractDetailId
+		) he ON he.intContractDetailId = cd.intContractDetailId
+	) t

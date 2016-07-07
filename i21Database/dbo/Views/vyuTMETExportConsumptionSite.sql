@@ -5,7 +5,7 @@ SELECT
  dmpat = C.strEntityNo 
 ,dmtank = REPLICATE('0',4-LEN(CAST(intSiteNumber AS NVARCHAR))) + CAST(intSiteNumber AS NVARCHAR)
 ,dbtype = 0
-,dmdriv = D.strEntityNo
+,dmdriv = RIGHT(D.strEntityNo, 3)
 ,rmrte =  G.strRouteId
 ,dmtsze = ISNULL(A.dblTotalCapacity,0)
 ,dmldd = ISNULL(A.intLastDeliveryDegreeDay,0)
@@ -16,7 +16,7 @@ SELECT
 ,ddonhg = 0
 ,dmusab = ISNULL(A.dblTotalCapacity,0)
 ,ddkfac = ISNULL(A.dblBurnRate,0.00) 
-,ddwill = ISNULL(E.strFillMethod,'')
+,ddwill = LEFT(ISNULL(E.strFillMethod,''), 1)
 ,dmdate = ISNULL(CONVERT(VARCHAR,A.dtmLastDeliveryDate,112),'00000000')
 ,dmetype =	CASE (SELECT TOP 1 strOwnership FROM tblTMDevice WHERE intDeviceId IN 
 					(SELECT intDeviceId FROM tblTMSiteDevice WHERE intSiteID =A.intSiteID))

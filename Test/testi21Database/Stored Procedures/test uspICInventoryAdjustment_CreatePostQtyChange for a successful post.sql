@@ -234,7 +234,7 @@ BEGIN
 				,intItemUOMId					= @ManualGrains_25KgBagUOM
 				,dblWeight						= 55.1155 * 100
 				,dblWeightPerQty				= 55.1155
-				,dblCost						= 2.50
+				,dblCost						= 2.50 * @25KgBagUnitQty
 				,dblNewCost						= 12.25 
 				,intConcurrencyId				= 1
 

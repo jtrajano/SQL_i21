@@ -122,7 +122,7 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 	END
 	ELSE
 	BEGIN
-		SELECT	intCustomerId = RCus.intRefundCustomerId,
+		SELECT	intCustomerId = RCus.intCustomerId,
 				strCustomerName = EN.strName,
 				ysnEligibleRefund = (CASE WHEN ARC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND RCatPCat.dblRefundRate < R.dblMinimumRefund THEN 1 ELSE 0 END),
 				ARC.strStockStatus,
