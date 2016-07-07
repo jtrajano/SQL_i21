@@ -4009,6 +4009,7 @@
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
     <Build Include="dbo\Views\vyuCTContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
