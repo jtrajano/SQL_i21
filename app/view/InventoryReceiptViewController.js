@@ -2120,14 +2120,41 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onQualityClick: function (button, e, eOpts) {
         var win = button.up('window');
         var grd = win.down('#grdInventoryReceipt');
-
         var selected = grd.getSelectionModel().getSelection();
+        
+        var win = button.up('window');
+        var vm = win.viewModel;
+        var currentReceiptItem = vm.data.current;
 
         if (selected) {
             if (selected.length > 0) {
                 var current = selected[0];
                 if (!current.dummy)
-                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
+                    if(currentReceiptItem.get('ysnPosted') === true)
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', 
+                                { 
+                                    strSourceType: 'Inventory Receipt', 
+                                    intTicketFileId: current.get('intInventoryReceiptItemId'),
+                                    viewConfig:{
+                                        modal: true, 
+                                        listeners:
+                                        {
+                                            show: function(win) {
+                                                Ext.defer(function(){
+                                                    win.context.screenMgr.securityMgr.screen.setViewOnlyAccess();
+                                                }, 100);
+                                            }
+                                        }
+                                    }
+                                }
+                            );
+                            
+                        }
+                    else
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
+                        }
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');
