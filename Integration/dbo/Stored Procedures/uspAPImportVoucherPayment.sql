@@ -273,7 +273,7 @@ INNER JOIN tblAPPayment B
 	AND A.dtmDate = B.dtmDatePaid
 	AND A.intBankAccountId = B.intBankAccountId
 	AND A.strReferenceNo = B.strPaymentInfo
-INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityVendorId = D.intEntityId)
+INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId)
 	ON B.intEntityVendorId = C.intEntityVendorId 
 	--AND A.strPayee = D.strName
 WHERE A.strSourceSystem IN ('AP','CW')
