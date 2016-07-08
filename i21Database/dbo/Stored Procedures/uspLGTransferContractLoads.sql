@@ -109,8 +109,8 @@ BEGIN TRY
 	IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intPContractDetailId = @intOldContractDetailId)
 	BEGIN
 		INSERT INTO @tblLoadDetail 
-		SELECT intLoadDetailId,dblQuantity 
-		FROM tblLGLoadDetail 
+		SELECT LD.intLoadDetailId,LD.dblQuantity
+		FROM tblLGLoadDetail LD
 		WHERE intPContractDetailId = @intOldContractDetailId
 
 		SELECT @intRecordId = MIN(intRecordId) FROM @tblLoadDetail
@@ -133,17 +133,25 @@ BEGIN TRY
 				intWeightItemUOMId = @intNewWeightItemUOMId
 			WHERE intLoadDetailId = @intLoadDetailId
 		
-			EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intNewContractDetailId, 
-											   @dblQuantityToUpdate = @dblDestLoadDetailQuantity, 
-											   @intUserId = @intUserId, 
-											   @intExternalId = @intLoadDetailId, 
-											   @strScreenName = 'Load Schedule'
+		IF EXISTS(SELECT 1
+				  FROM tblLGLoadDetail LD
+				  JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+				  JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+				  WHERE intPContractDetailId = @intOldContractDetailId AND ISNULL(LC.ysnRejected,0) <> 1 AND LD.intLoadDetailId = @intLoadDetailId)
+			BEGIN
 
-			EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intOldContractDetailId, 
-											   @dblQuantityToUpdate = @dblSourceLoadDetailQuantity, 
-											   @intUserId = @intUserId, 
-											   @intExternalId = @intLoadDetailId, 
-											   @strScreenName = 'Load Schedule'
+				EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intNewContractDetailId, 
+												   @dblQuantityToUpdate = @dblDestLoadDetailQuantity, 
+												   @intUserId = @intUserId, 
+												   @intExternalId = @intLoadDetailId, 
+												   @strScreenName = 'Load Schedule'
+
+				EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intOldContractDetailId, 
+												   @dblQuantityToUpdate = @dblSourceLoadDetailQuantity, 
+												   @intUserId = @intUserId, 
+												   @intExternalId = @intLoadDetailId, 
+												   @strScreenName = 'Load Schedule'
+			END
 
 			SELECT @intRecordId = MIN(intRecordId) FROM @tblLoadDetail WHERE intRecordId > @intRecordId			
 		END
@@ -151,8 +159,8 @@ BEGIN TRY
 	ELSE IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intSContractDetailId = @intOldContractDetailId)
 	BEGIN
 		INSERT INTO @tblLoadDetail 
-		SELECT intLoadDetailId,dblQuantity 
-		FROM tblLGLoadDetail 
+		SELECT LD.intLoadDetailId,LD.dblQuantity
+		FROM tblLGLoadDetail LD
 		WHERE intSContractDetailId = @intOldContractDetailId
 
 		SELECT @intRecordId = MIN(intRecordId) FROM @tblLoadDetail
@@ -175,18 +183,27 @@ BEGIN TRY
 				intItemUOMId = @intNewItemUOMId,
 				intWeightItemUOMId = @intNewWeightItemUOMId
 			WHERE intLoadDetailId = @intLoadDetailId
-		
-			EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intNewContractDetailId, 
-											   @dblQuantityToUpdate = @dblDestLoadDetailQuantity, 
-											   @intUserId = @intUserId, 
-											   @intExternalId = @intLoadDetailId, 
-											   @strScreenName = 'Load Schedule'
 
-			EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intOldContractDetailId, 
-											   @dblQuantityToUpdate = @dblSourceLoadDetailQuantity, 
-											   @intUserId = @intUserId, 
-											   @intExternalId = @intLoadDetailId, 
-											   @strScreenName = 'Load Schedule'
+		IF EXISTS(SELECT 1
+				  FROM tblLGLoadDetail LD
+				  JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+				  JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+				  WHERE intSContractDetailId = @intOldContractDetailId AND ISNULL(LC.ysnRejected,0) <> 1 AND LD.intLoadDetailId = @intLoadDetailId)
+
+			BEGIN
+
+				EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intNewContractDetailId, 
+												   @dblQuantityToUpdate = @dblDestLoadDetailQuantity, 
+												   @intUserId = @intUserId, 
+												   @intExternalId = @intLoadDetailId, 
+												   @strScreenName = 'Load Schedule'
+
+				EXEC [uspCTUpdateScheduleQuantity] @intContractDetailId = @intOldContractDetailId, 
+												   @dblQuantityToUpdate = @dblSourceLoadDetailQuantity, 
+												   @intUserId = @intUserId, 
+												   @intExternalId = @intLoadDetailId, 
+												   @strScreenName = 'Load Schedule'
+			END
 
 			SELECT @intRecordId = MIN(intRecordId) FROM @tblLoadDetail WHERE intRecordId > @intRecordId			
 		END
