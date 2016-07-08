@@ -3,7 +3,7 @@
 
 SELECT LG.intLoadId
 	, LG.intLoadDetailId
-	, LG.strLoadNumber
+	, strLoadNumber = ISNULL(LG.strExternalLoadNumber, LG.strLoadNumber)
 	, LG.strType
 	, LG.intItemId
 	, intEntityVendorId = CASE WHEN (LG.strType != 'Outbound') THEN LG.intVendorEntityId
