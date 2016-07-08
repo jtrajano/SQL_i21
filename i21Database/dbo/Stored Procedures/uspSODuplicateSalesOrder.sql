@@ -39,6 +39,7 @@ BEGIN
            ,[strOrderStatus]
            ,[intAccountId]
            ,[dtmProcessDate]
+		   ,[dtmExpirationDate]
            ,[ysnProcessed]
 		   ,[ysnRecurring]
            ,[strComments]
@@ -92,6 +93,7 @@ BEGIN
            ,@OrderStatus
            ,[intAccountId]
            ,NULL --Processed Date
+		   ,[dtmExpirationDate]
            ,0 --Processed
 		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
 				THEN 0     
