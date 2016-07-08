@@ -4015,6 +4015,7 @@
     <Build Include="dbo\Views\vyuAPReceiptPayables.sql" />
     <Build Include="dbo\Views\vyuAPLogisticsPayables.sql" />
     <Build Include="dbo\Views\vyuAPContractPayables.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
