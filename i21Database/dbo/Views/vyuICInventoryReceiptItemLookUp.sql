@@ -224,7 +224,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			AND Receipt.strReceiptType = 'Transfer Order'
 
 		-- 4. Logistics
-		LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
+		LEFT JOIN vyuICLoadContainerReceiptContracts LogisticsView
 			ON LogisticsView.intLoadDetailId = ReceiptItem.intSourceId
 			AND intLoadContainerId = ReceiptItem.intContainerId
 			AND Receipt.strReceiptType = 'Purchase Contract'

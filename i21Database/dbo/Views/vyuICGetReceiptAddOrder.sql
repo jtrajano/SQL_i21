@@ -214,7 +214,7 @@ FROM (
 		, strSubCurrency = CASE WHEN LogisticsView.ysnSubCurrency = 1 THEN LogisticsView.strCurrency ELSE LogisticsView.strMainCurrency END 
 		, dblGross = CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet = CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
-	FROM	vyuLGLoadContainerReceiptContracts LogisticsView 
+	FROM	vyuICLoadContainerReceiptContracts LogisticsView 
 	LEFT JOIN dbo.tblSMCurrency Currency ON Currency.strCurrency = ISNULL(LogisticsView.strMainCurrency, LogisticsView.strCurrency) 
 	LEFT JOIN dbo.tblICItemUOM ItemUOM ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
