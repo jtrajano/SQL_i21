@@ -4027,6 +4027,9 @@
     <Build Include="dbo\Views\vyuLGLoadPurchaseContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
+    <Build Include="dbo\Views\vyuSTMarkUpDownItems.sql" />
+    <Build Include="dbo\Views\vyuSTMarkUpDownDetail.sql" />
+    <Build Include="dbo\Views\vyuSTMarkUpDown.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
