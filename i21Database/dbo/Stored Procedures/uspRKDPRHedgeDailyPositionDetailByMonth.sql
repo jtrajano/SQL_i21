@@ -6,7 +6,7 @@
 AS
 
 BEGIN
-
+ 
 if isnull(@strPurchaseSales,'') <> ''
 BEGIN
 	if @strPurchaseSales='Purchase'
@@ -99,7 +99,13 @@ INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContra
 		,strContractType+ ' ' + strPricingType [strType]
 		,strLocationName
 		,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) 
-		,dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0)) AS dblTotal,CD.intUnitMeasureId
+		, case when intContractTypeId = 1 then
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0))		
+		else
+		-dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((CD.dblBalance),0))
+		end AS dblTotal,
+		
+		CD.intUnitMeasureId
 	FROM vyuCTContractDetailView CD
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=CD.intCommodityId AND CD.intUnitMeasureId=ium.intUnitMeasureId  and CD.intContractStatusId <> 3
 	WHERE intContractTypeId in(1,2) AND intPricingTypeId IN (1,2,3) and CD.intCommodityId =@intCommodityId
@@ -241,15 +247,16 @@ UPDATE @List set intSeqNo = 4 where strType='Sale Priced'
 UPDATE @List set intSeqNo = 5 where strType='Sale Basis'
 UPDATE @List set intSeqNo = 6 where strType='Sale HTA'
 UPDATE @List set intSeqNo = 7 where strType='Net Hedge'
+UPDATE @List set intSeqNo = 8 where strType='Position'
 
 IF isnull(@intVendorId,0) = 0
 BEGIN
-select intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
-from @List where dblTotal <> 0 order by intRowNumber,intSeqNo
+SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
+FROM @List where dblTotal <> 0 order by intRowNumber,intSeqNo
 
-ENd
+END
 ELSE
 BEGIN
 SELECT intSeqNo,intRowNumber,strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
-from @List where dblTotal <> 0  and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' order by intRowNumber,intSeqNo
+FROM @List where dblTotal <> 0  and strType NOT like '%'+@strPurchaseSales+'%' and  strType<>'Net Hedge' order by intRowNumber,intSeqNo
 END
