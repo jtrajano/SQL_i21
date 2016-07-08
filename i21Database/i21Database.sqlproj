@@ -4030,6 +4030,7 @@
     <Build Include="dbo\Views\vyuSTMarkUpDownItems.sql" />
     <Build Include="dbo\Views\vyuSTMarkUpDownDetail.sql" />
     <Build Include="dbo\Views\vyuSTMarkUpDown.sql" />
+    <Build Include="dbo\Tables\tblHDCampaignCompetitor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
