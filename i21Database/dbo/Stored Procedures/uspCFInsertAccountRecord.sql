@@ -205,7 +205,7 @@ BEGIN
 	INNER JOIN tblARSalesperson S
 	ON E.intEntityId = S.intEntitySalespersonId
 	WHERE E.strName = @strSalesPersonId
-	IF (@intSalesPersonId = 0)
+	IF (@strSalesPersonId != '')
 	BEGIN
 		SELECT @intSalesPersonId = intEntityId  
 		FROM tblEMEntity E
@@ -623,10 +623,11 @@ BEGIN
 			RETURN 1
 		END TRY
 		BEGIN CATCH
-			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-			VALUES (@strCustomerId,'Internal Error - ' + ERROR_MESSAGE())
+		
 			SET @ysnHasError = 1
 			ROLLBACK TRANSACTION
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Internal Error - ' + ERROR_MESSAGE())
 			RETURN 0
 		END CATCH
 		
