@@ -16,6 +16,7 @@ SELECT TC.intTaxCodeId
 	 , IDT.strCalculationMethod
 	 , IDT.dblRate
 	 , I.intInvoiceId
+	 , I.intEntityCustomerId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
@@ -25,6 +26,9 @@ SELECT TC.intTaxCodeId
 							WHERE intInvoiceId = I.intInvoiceId)
 	 , strCompanyName	= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
+	 , intItemId        = (SELECT TOP 1 IID.intItemId FROM tblARInvoiceDetail IID 
+									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId									
+							WHERE intInvoiceId = I.intInvoiceId)
 	 , strItemNo        = (SELECT TOP 1 ICI.strItemNo FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
@@ -32,7 +36,11 @@ SELECT TC.intTaxCodeId
 	 , dblQtyShipped	= (SELECT TOP 1 dblQtyShipped FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 							WHERE intInvoiceId = I.intInvoiceId)
-	 , strItemCategory  = (SELECT TOP 1 ICC.strDescription FROM tblARInvoiceDetail IID 
+	 , intCategoryId    = (SELECT TOP 1 ICI.intCategoryId FROM tblARInvoiceDetail IID 
+									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
+									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
+							WHERE intInvoiceId = I.intInvoiceId)
+	 , strItemCategory  = (SELECT TOP 1 ICC.strCategoryCode FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
 									LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
@@ -97,6 +105,7 @@ GROUP BY
 	,TC.intPurchaseTaxAccountId
 	,ISNULL(PA.strAccountId, '')
 	,I.intInvoiceId
+	,I.intEntityCustomerId
 	,I.strInvoiceNumber
 	,I.dtmDate
 	,C.strCustomerNumber
