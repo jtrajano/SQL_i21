@@ -20,7 +20,7 @@ namespace iRely.Inventory.Model
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
-        }          
+        }     
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -215,6 +215,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetCategoryTaxMap());
 
             modelBuilder.Configurations.Add(new vyuICGetReceiptAddOrderMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddPurchaseOrderMap());
             modelBuilder.Configurations.Add(new vyuICGetShipmentAddOrderMap());
 
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingMap());
