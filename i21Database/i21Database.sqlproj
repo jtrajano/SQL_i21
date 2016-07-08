@@ -4011,6 +4011,10 @@
     <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
+    <Build Include="dbo\Views\vyuAPPurchaseOrderPayables.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptPayables.sql" />
+    <Build Include="dbo\Views\vyuAPLogisticsPayables.sql" />
+    <Build Include="dbo\Views\vyuAPContractPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
