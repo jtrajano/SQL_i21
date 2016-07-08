@@ -21,11 +21,11 @@ Ext.define('Inventory.model.ReceiptItem', {
                     role: 'tblICInventoryReceiptItems',
                     storeConfig: {
                         complete: true,
-                        sortOnLoad: true,
+                     /*   sortOnLoad: true,
                         sorters: {
                             direction: 'DESC',
                             property: 'intSort'
-                        }
+                        }*/
                     }
                 }
             }
