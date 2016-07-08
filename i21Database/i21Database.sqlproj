@@ -4010,12 +4010,12 @@
     <Build Include="dbo\Views\vyuCTContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
-    <Build Include="dbo\Stored Procedures\uspGRUpdateGrainOpenBalanceByFIFO.sql" />
+    <Build Include="dbo\Views\vyuCTContractSearchView2.sql" />
+    <Build Include="dbo\Views\vyuCTContractHeaderView2.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
     <Build Include="dbo\Views\vyuAPPurchaseOrderPayables.sql" />
     <Build Include="dbo\Views\vyuAPReceiptPayables.sql" />
     <Build Include="dbo\Views\vyuAPLogisticsPayables.sql" />
-    <Build Include="dbo\Views\vyuAPContractPayables.sql" />
-    <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
