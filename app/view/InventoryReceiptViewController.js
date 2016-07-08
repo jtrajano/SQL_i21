@@ -171,11 +171,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
                         {dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' },
                         {dataIndex: 'dblQtyVouchered', text: 'Qty Vouchered', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' },
                         {dataIndex: 'dblQtyToVoucher', text: 'Qty To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' }
+                        {dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' }
                     ]
                 }
             ]
