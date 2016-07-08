@@ -51,8 +51,6 @@ BEGIN TRY
 	DECLARE @dblSpotPrice DECIMAL(24, 10)
 	DECLARE @dblSpotBasis DECIMAL(24, 10)
 	DECLARE @dblSpotCashPrice DECIMAL(24, 10)
-	DECLARE @InventoryStockUOMKey INT
-	DECLARE @InventoryStockUOM NVARCHAR(50)
 	
 	--Storage Charge Variables
 	DECLARE @strStorageAdjustment NVARCHAR(50)
@@ -78,6 +76,8 @@ BEGIN TRY
 	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
 	DECLARE @dblTicketStorageDue DECIMAL(24, 10)
+	DECLARE @FeeItemId INT
+	DECLARE @strFeeItem NVARCHAR(40)
 
 	SET @dtmDate = GETDATE()
 
@@ -135,6 +135,7 @@ BEGIN TRY
 		,dblCashPrice DECIMAL(24, 10)
 		,intItemId INT NULL
 		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intItemSort INT NULL
 		,IsProcessed BIT
 	)
 
@@ -241,6 +242,9 @@ BEGIN TRY
 	SELECT @ItemDescription = strItemNo
 	FROM tblICItem
 	WHERE intItemId = @ItemId
+		
+	SELECT @FeeItemId=intItemId FROM tblGRCompanyPreference
+	SELECT @strFeeItem=strItemNo FROM tblICItem WHERE intItemId=@FeeItemId
 
 	SELECT @IntCommodityId = a.intCommodityId
 		,@intUnitMeasureId = a.intUnitMeasureId
@@ -334,9 +338,9 @@ BEGIN TRY
 			,@dblStorageBilledAmount OUTPUT
 
 		IF @strStorageAdjustment = 'Override'
-			SET @dblTicketStorageDue = @dblAdjustPerUnit * @dblOpenBalance + @dblStorageDueAmount + @dblStorageDueTotalAmount - @dblStorageBilledAmount
+			SET @dblTicketStorageDue = @dblAdjustPerUnit+ @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
 		ELSE
-			SET @dblTicketStorageDue = @dblStorageDueAmount + @dblStorageDueTotalAmount - @dblStorageBilledAmount
+			SET @dblTicketStorageDue =  @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
 
 		IF NOT EXISTS (SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId = @intStorageChargeItemId) AND @dblTicketStorageDue > 0
 		BEGIN
@@ -350,6 +354,7 @@ BEGIN TRY
 				,dblCashPrice
 				,intItemId
 				,strItemNo
+				,intItemSort
 				,IsProcessed
 			)
 			SELECT 
@@ -358,12 +363,13 @@ BEGIN TRY
 				,NULL
 				,NULL
 				,@dblOpenBalance
-				,@dblTicketStorageDue
+				,- @dblTicketStorageDue
 				,@intStorageChargeItemId
 				,@StorageChargeItemDescription
+				,2
 				,0
-		END
-
+		END	
+		
 		--Discount
 		IF NOT EXISTS ( SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId IN 
 						(
@@ -387,6 +393,7 @@ BEGIN TRY
 				,dblCashPrice
 				,intItemId
 				,strItemNo
+				,intItemSort
 				,IsProcessed
 			)
 			SELECT 
@@ -398,6 +405,7 @@ BEGIN TRY
 				,(ISNULL(QM.dblDiscountPaid, 0) - ISNULL(QM.dblDiscountDue, 0)) AS dblCashPrice
 				,DItem.intItemId
 				,DItem.strItemNo
+				,3
 				,0 AS IsProcessed
 			FROM tblGRCustomerStorage CS
 			LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId AND QM.strSourceType = 'Storage'
@@ -407,7 +415,38 @@ BEGIN TRY
 				AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
 				AND QM.intTicketFileId = @intCustomerStorageId
 		END
-
+		--Unpaid Fee
+		
+		IF NOT EXISTS (SELECT 1 FROM @SettleVoucherCreate WHERE intCustomerStorageId = @intCustomerStorageId AND intItemId =@FeeItemId AND intItemSort = 4)
+			AND EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId AND ISNULL(dblFeesDue,0)< >ISNULL(dblFeesPaid,0))
+		BEGIN
+			INSERT INTO @SettleVoucherCreate 
+			(
+				 intCustomerStorageId
+				,intCompanyLocationId
+				,intContractHeaderId
+				,intContractDetailId
+				,dblUnits
+				,dblCashPrice
+				,intItemId
+				,strItemNo
+				,intItemSort
+				,IsProcessed
+			)
+			SELECT 
+				 @intCustomerStorageId
+				,@intCompanyLocationId
+				,NULL intContractHeaderId
+				,NULL intContractDetailId
+				,@dblOpenBalance dblUnits
+				,(ISNULL(dblFeesDue,0) - ISNULL(dblFeesPaid,0)) AS dblCashPrice
+				,@FeeItemId
+				,@strFeeItem
+				,4
+				,0 AS IsProcessed
+			FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
+		END
+		
 		IF ISNULL(@DPContractHeaderId, 0) > 0
 		BEGIN
 			SELECT @ContractDetailId = intContractDetailId
@@ -519,6 +558,7 @@ BEGIN TRY
 						,dblCashPrice
 						,intItemId
 						,strItemNo
+						,intItemSort
 						,IsProcessed
 					)
 					SELECT 
@@ -530,6 +570,7 @@ BEGIN TRY
 						,@dblCashPrice
 						,@ItemId
 						,@ItemDescription
+						,1
 						,0
 
 					BREAK;
@@ -595,6 +636,7 @@ BEGIN TRY
 						,dblCashPrice
 						,intItemId
 						,strItemNo
+						,intItemSort
 						,IsProcessed
 					)
 					SELECT 
@@ -606,6 +648,7 @@ BEGIN TRY
 						,@dblCashPrice
 						,@ItemId
 						,@ItemDescription
+						,1
 						,0
 
 					DELETE
@@ -752,6 +795,7 @@ BEGIN TRY
 					,dblCashPrice
 					,intItemId
 					,strItemNo
+					,intItemSort
 					,IsProcessed
 				)
 				SELECT 
@@ -763,6 +807,7 @@ BEGIN TRY
 					,@dblSpotCashPrice
 					,@ItemId
 					,@ItemDescription
+					,1
 					,0
 			END
 			ELSE
@@ -811,6 +856,7 @@ BEGIN TRY
 					,dblCashPrice
 					,intItemId
 					,strItemNo
+					,intItemSort
 					,IsProcessed
 				)
 				SELECT 
@@ -822,6 +868,7 @@ BEGIN TRY
 					,@dblSpotCashPrice
 					,@ItemId
 					,@ItemDescription
+					,1
 					,0
 			END
 		END
@@ -869,7 +916,7 @@ BEGIN TRY
 			,[intContractHeaderId]
 			,[intContractDetailId]
 		FROM @SettleVoucherCreate
-		WHERE intCompanyLocationId = @LocationId AND IsProcessed = 0
+		WHERE intCompanyLocationId = @LocationId AND IsProcessed = 0 ORDER BY intItemSort
 
 		EXEC [dbo].[uspAPCreateBillData] 
 			 @userId = @UserKey
@@ -884,7 +931,14 @@ BEGIN TRY
 		IF @intCreatedBillId > 0
 		BEGIN
 			COMMIT TRANSACTION
-			
+				
+				UPDATE APD
+				SET				
+				APD.intUnitOfMeasureId=@intSourceItemUOMId
+				FROM tblAPBillDetail APD
+				JOIN tblAPBill AP ON AP.intBillId=APD.intBillId				
+				WHERE AP.[intBillId]=@intCreatedBillId 
+
 			INSERT INTO [dbo].[tblGRStorageHistory] 
 			(
 				 [intConcurrencyId]
