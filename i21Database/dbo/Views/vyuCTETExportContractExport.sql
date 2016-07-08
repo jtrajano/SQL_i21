@@ -34,5 +34,11 @@ AS
 		
 		WHERE	ISNULL(CD.dblCashPrice,0)	>	0		AND
 				ISNULL(EY.strEntityNo,'')	<>	''		AND
-				CD.dtmEndDate > DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+				IM.strStatus = 'Active'					AND
+				CD.dtmEndDate >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) AND
+				(
+					IM.intItemId IN (SELECT intItemId FROM tblETExportFilterItem) OR 
+					IM.intCategoryId IN (SELECT intCategoryId FROM tblETExportFilterCategory)
+				)
+
 	)t
