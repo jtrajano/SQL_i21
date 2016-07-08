@@ -65,139 +65,64 @@ BEGIN
 			
 	--Vendor Location
 
+
+	--Customer Tax Exemption
+	SET @ExemptionPercent = 0.00000
 	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
+		@TaxCodeExemption =  'Tax Exemption > '
+							 + ISNULL('Number: ' + CAST(TE.[intAPVendorTaxExceptionId] AS NVARCHAR(250)) +  ' - ' + ISNULL(TE.[strException], ''), '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
+							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
+							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
+							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblSMTaxCode TC
-			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @ShipFromLocationId
-		AND TE.[intItemId] = @ItemId
-		AND TE.[intTaxCodeId] = @TaxCodeId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
-							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblSMTaxCode TC
-			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @ShipFromLocationId
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND TE.[intTaxCodeId] = @TaxCodeId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-	
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
-							 + ISNULL('; Tax Class: ' + SMTC.[strTaxClass], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	LEFT OUTER JOIN
-		tblSMTaxClass SMTC
-			ON TE.[intTaxClassId] = SMTC.[intTaxClassId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND intEntityVendorLocationId = @ShipFromLocationId
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND TE.[intTaxClassId] = @TaxClassId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate	
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END	
-	
-	
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
+							 + ISNULL('; Tax Class: ' + TCL.[strTaxClass], '')
 							 + ISNULL('; Tax State: ' + TE.[strState], '')
+		--,@ExemptionPercent = TE.[dblPartialTax] 
 	FROM
 		tblAPVendorTaxException TE
 	LEFT OUTER JOIN
+		tblSMTaxCode TC
+			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
+	LEFT OUTER JOIN
 		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
+			ON TE.[intEntityVendorLocationId] = EL.[intEntityLocationId]
+	LEFT OUTER JOIN
+		tblSMTaxClass TCL
+			ON TE.[intTaxClassId] = TCL.[intTaxClassId]
+	LEFT OUTER JOIN
+		tblICItem  IC
+			ON TE.[intItemId] = IC.[intItemId]
+	LEFT OUTER JOIN
+		tblICCategory ICC
+			ON TE.[intCategoryId] = ICC.[intCategoryId]
 	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @ShipFromLocationId
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0
-		AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = @TaxState
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
+		TE.[intEntityVendorId] = @VendorId
+		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(TE.[dtmStartDate], @TransactionDate) AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
+		AND (ISNULL(TE.[intEntityVendorLocationId], 0) = 0 OR TE.[intEntityVendorLocationId] = @ShipFromLocationId)
+		AND (ISNULL(TE.[intItemId], 0) = 0 OR TE.[intItemId] = @ItemId)
+		AND (ISNULL(TE.[intCategoryId], 0) = 0 OR TE.[intCategoryId] = @ItemCategoryId)
+		AND (ISNULL(TE.[intTaxCodeId], 0) = 0 OR TE.[intTaxCodeId] = @TaxCodeId)
+		AND (ISNULL(TE.[intTaxClassId], 0) = 0 OR TE.[intTaxClassId] = @TaxClassId)
+		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
 	ORDER BY
-		dtmStartDate	
-		
+		(
+			(CASE WHEN ISNULL(TE.[intEntityVendorLocationId],0) = 0 THEN 0 ELSE 1 END)
+			+
+			(CASE WHEN ISNULL(TE.[intItemId],0) = 0 THEN 0 ELSE 1 END)
+			+
+			(CASE WHEN ISNULL(TE.[intCategoryId],0) = 0 THEN 0 ELSE 1 END)
+			+
+			(CASE WHEN ISNULL(TE.[intTaxCodeId],0) = 0 THEN 0 ELSE 1 END)
+			+
+			(CASE WHEN ISNULL(TE.[intTaxClassId],0) = 0 THEN 0 ELSE 1 END)
+			+
+			(CASE WHEN LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 THEN 0 ELSE 1 END)
+		) DESC
+		,ISNULL(TE.[dtmStartDate], @TransactionDate) ASC
+		,ISNULL(TE.[dtmEndDate], @TransactionDate) DESC
+	
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
@@ -209,424 +134,6 @@ BEGIN
 				,[dblExemptionPercent] = @ExemptionPercent
 			RETURN 	
 		END	
-
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
-							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
-							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	LEFT OUTER JOIN
-		tblICItem  IC
-			ON TE.[intItemId] = IC.[intItemId]
-	LEFT OUTER JOIN
-		tblICCategory ICC
-			ON TE.[intCategoryId] = ICC.[intCategoryId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @ShipFromLocationId
-		AND TE.[intItemId] = @ItemId
-		AND TE.[intCategoryId]  = @ItemCategoryId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
-							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	LEFT OUTER JOIN
-		tblICItem  IC
-			ON TE.[intItemId] = IC.[intItemId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @ShipFromLocationId
-		AND TE.[intItemId] = @ItemId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
-							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	LEFT OUTER JOIN
-		tblICCategory ICC
-			ON TE.[intCategoryId] = ICC.[intCategoryId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.intEntityVendorLocationId = @ShipFromLocationId
-		AND TE.[intCategoryId]  = @ItemCategoryId
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-					
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Vendor Location: ' + EL.[strLocationName], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND TE.intEntityVendorLocationId = @ShipFromLocationId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-
-	
-	--Item
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
-							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblSMTaxCode TC
-			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
-	LEFT OUTER JOIN
-		tblICItem  IC
-			ON TE.[intItemId] = IC.[intItemId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.[intItemId] = @ItemId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND TE.[intTaxCodeId] = @TaxCodeId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-		
-		
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
-							 + ISNULL('; Tax Code: ' + TC.[strTaxClass], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblSMTaxClass TC
-			ON TE.[intTaxClassId] = TC.[intTaxClassId]
-	LEFT OUTER JOIN
-		tblICItem  IC
-			ON TE.[intItemId] = IC.[intItemId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.[intItemId] = @ItemId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND TE.[intTaxClassId] = @TaxClassId
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END		
-	
-		
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
-							 + ISNULL('; Tax Code: ' + TE.[strState], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblICItem  IC
-			ON TE.[intItemId] = IC.[intItemId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.[intItemId] = @ItemId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = @TaxState)
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblICItem  IC
-			ON TE.[intItemId] = IC.[intItemId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.[intItemId] = @ItemId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-
-
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	LEFT OUTER JOIN
-		tblICCategory ICC
-			ON TE.[intCategoryId] = ICC.[intCategoryId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND TE.[intCategoryId]  = @ItemCategoryId
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-
-
-	--Tax Code
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblSMTaxCode TC
-			ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.[intTaxCodeId] = @TaxCodeId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
-	
-	--Tax Class
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Tax Class: ' + SMTC.[strTaxClass], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		tblSMTaxClass SMTC
-			ON TE.[intTaxClassId] = SMTC.[intTaxClassId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND TE.[intTaxClassId] = @TaxClassId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate	
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END	
-	
-	--Tax State
-	SELECT TOP 1
-		@TaxCodeExemption = 'Tax Exemption '
-							 + ISNULL('Number: ' + strException, '') 
-							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
-							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
-							 + ISNULL('; Tax State: ' + TE.[strState], '')
-	FROM
-		tblAPVendorTaxException TE
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] EL
-			ON TE.intEntityVendorLocationId = EL.[intEntityLocationId]
-	WHERE
-		[intEntityVendorId] = @VendorId
-		AND ISNULL(TE.intEntityVendorLocationId,0) = 0
-		AND ISNULL(TE.[intItemId],0) = 0
-		AND LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0
-		AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = @TaxState
-		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(TE.[dtmStartDate] AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
-	ORDER BY
-		dtmStartDate	
-		
-		
-	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT 
-				 [ysnTaxExempt] = 1
-				,[ysnInvalidSetup] = @InvalidSetup
-				,[strExemptionNotes] = @TaxCodeExemption
-				,[dblExemptionPercent] = @ExemptionPercent
-			RETURN 	
-		END
 		
 				
 	SELECT TOP 1
