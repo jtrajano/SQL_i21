@@ -19,6 +19,7 @@ namespace iRely.Inventory.BusinessLayer
         public InventoryReceiptBl(IRepository db) : base(db)
         {
             _db = db;
+            _db.ContextManager.Database.CommandTimeout = 180000;
         }
         #endregion
         public static int DefaultUserId;
@@ -186,7 +187,7 @@ namespace iRely.Inventory.BusinessLayer
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
         {
             SaveResult result = new SaveResult();
-
+            
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
