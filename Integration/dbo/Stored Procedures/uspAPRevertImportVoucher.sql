@@ -84,6 +84,13 @@ BEGIN
 	(
 		SELECT 1 FROM aptrxmst B WHERE A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no
 	)
+	
+	DELETE A
+	FROM tblAPPayment A
+	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	INNER JOIN tblAPaptrxmst D ON C.intBillId = D.intBillId
+	INNER JOIN tmp_aptrxmstImport E ON D.intId = E.intBackupId
 
 	--DELETE FIRST THE INSERTED VOUCHER
 	DELETE A
@@ -159,11 +166,6 @@ END
 
 IF OBJECT_ID(N'dbo.tmp_apivcmstImport') IS NOT NULL
 BEGIN
-	
-	DELETE A
-	FROM tblAPBill A
-	INNER JOIN tblAPapivcmst B ON A.intBillId = B.intBillId
-	INNER JOIN tmp_apivcmstImport C ON B.intId = C.intBackupId
 
 	DELETE A
 	FROM tblAPPayment A
@@ -171,6 +173,11 @@ BEGIN
 	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 	INNER JOIN tblAPapivcmst D ON C.intBillId = D.intBillId
 	INNER JOIN tmp_apivcmstImport E ON D.intId = E.intBackupId
+		
+	DELETE A
+	FROM tblAPBill A
+	INNER JOIN tblAPapivcmst B ON A.intBillId = B.intBillId
+	INNER JOIN tmp_apivcmstImport C ON B.intId = C.intBackupId
 
 	DELETE A
 	FROM tblAPapivcmst A
