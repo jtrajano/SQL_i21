@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuEMSearchEntityCompetitor]
+﻿CREATE VIEW [dbo].[vyuEMSearchEntityBuyer]
 	AS 
 
 
@@ -17,12 +17,12 @@
     FROM         
             tblEMEntity a
         join [tblEMEntityType] b
-            on b.intEntityId = a.intEntityId and b.strType IN ('Competitor')
+            on b.intEntityId = a.intEntityId and b.strType IN ('Buyer')
         left join [tblEMEntityLocation] e  
             on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
         left join [tblEMEntityToContact] f  
             on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
         left join tblEMEntity g  
-            on f.intEntityContactId = g.intEntityId 
+            on f.intEntityContactId = g.intEntityId
 		left join tblEMEntityPhoneNumber h
-			on h.intEntityId = g.intEntityId 
+			on h.intEntityId = g.intEntityId
