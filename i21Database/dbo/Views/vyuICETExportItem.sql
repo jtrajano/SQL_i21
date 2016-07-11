@@ -18,4 +18,4 @@ FROM tblICItem Item
 	LEFT OUTER JOIN tblGLAccount Account ON Account.intAccountId = ItemAccount.intAccountId
 	LEFT OUTER JOIN tblETExportFilterItem ExportItem ON Item.intItemId = ExportItem.intItemId
 	LEFT OUTER JOIN tblETExportFilterCategory ExportCategory ON Item.intCategoryId = ExportCategory.intCategoryId
-WHERE Item.ysnUsedForEnergyTracExport = 1 AND Item.intItemId = ExportItem.intItemId OR Item.intCategoryId = ExportCategory.intCategoryId
+WHERE Item.ysnUsedForEnergyTracExport = 1 AND (Item.intItemId = ExportItem.intItemId OR Item.intCategoryId = ExportCategory.intCategoryId)
