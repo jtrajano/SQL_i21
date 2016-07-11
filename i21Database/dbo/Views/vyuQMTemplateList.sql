@@ -6,6 +6,7 @@ SELECT DISTINCT P.intProductId
 	,IC.strCategoryCode 'strProductValue'
 	,IC.strDescription
 	,P.intProductValueId
+	,P.ysnActive
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -35,6 +36,7 @@ SELECT DISTINCT P.intProductId
 	,II.strItemNo 'strProductValue'
 	,II.strDescription
 	,P.intProductValueId
+	,P.ysnActive
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -65,6 +67,7 @@ SELECT DISTINCT P.intProductId
 	,'' 'strProductValue' --PT1.strProductTypeName 'strProductValue'
 	,'' --PT1.strDescription
 	,P.intProductValueId
+	,P.ysnActive
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -94,6 +97,7 @@ SELECT DISTINCT P.intProductId
 	,'' 'strProductValue' --PT1.strProductTypeName 'strProductValue'
 	,'' --PT1.strDescription
 	,P.intProductValueId
+	,P.ysnActive
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -123,6 +127,7 @@ SELECT DISTINCT P.intProductId
 	,'' 'strProductValue' --PT1.strProductTypeName 'strProductValue'
 	,'' --PT1.strDescription
 	,P.intProductValueId
+	,P.ysnActive
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName

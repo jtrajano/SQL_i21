@@ -4035,6 +4035,7 @@
     <Build Include="dbo\Functions\fnTMGetSiteEfficiencyTable.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityBuyer.sql" />
     <Build Include="dbo\Views\vyuTMDeliveriesSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSetExistingTemplateAsInactive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
