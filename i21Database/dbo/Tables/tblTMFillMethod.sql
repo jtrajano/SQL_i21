@@ -44,3 +44,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMFillMethod',
     @level2type = N'COLUMN',
     @level2name = N'ysnDefault'
+GO
+
+CREATE INDEX [IX_tblTMFillMethod_strFillMethod] ON [dbo].[tblTMFillMethod] ([strFillMethod])

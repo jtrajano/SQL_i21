@@ -4031,6 +4031,8 @@
     <Build Include="dbo\Views\vyuSTMarkUpDownDetail.sql" />
     <Build Include="dbo\Views\vyuSTMarkUpDown.sql" />
     <Build Include="dbo\Tables\tblHDCampaignCompetitor.sql" />
+    <Build Include="dbo\Views\vyuTMEfficiencySearch.sql" />
+    <Build Include="dbo\Functions\fnTMGetSiteEfficiencyTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

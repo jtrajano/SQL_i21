@@ -109,3 +109,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDegreeDayReading',
     @level2type = N'COLUMN',
     @level2name = N'intClockID'
+GO
+
+CREATE INDEX [IX_tblTMDegreeDayReading_intClockID] ON [dbo].[tblTMDegreeDayReading] ([intClockID])
+
+GO
+
+CREATE INDEX [IX_tblTMDegreeDayReading_dtmDate] ON [dbo].[tblTMDegreeDayReading] ([dtmDate])

@@ -332,5 +332,6 @@
     <None Include="dbo\Views\vyuCMBankTransaction.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOutOfRangeBurnRateSearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLeakGasCheckSearchView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateEfficiencySearchView.sql" />
   </ItemGroup>
 </Project>

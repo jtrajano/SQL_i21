@@ -82,3 +82,14 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDDReadingSeasonResetArchive',
     @level2type = N'COLUMN',
     @level2name = N'intClockID'
+GO
+
+CREATE INDEX [IX_tblTMDDReadingSeasonResetArchive_intClockID] ON [dbo].[tblTMDDReadingSeasonResetArchive] ([intClockID])
+
+GO
+
+CREATE INDEX [IX_tblTMDDReadingSeasonResetArchive_intSeasonResetArchiveID] ON [dbo].[tblTMDDReadingSeasonResetArchive] ([intSeasonResetArchiveID])
+
+GO
+
+CREATE INDEX [IX_tblTMDDReadingSeasonResetArchive_dtmDate] ON [dbo].[tblTMDDReadingSeasonResetArchive] ([dtmDate])
