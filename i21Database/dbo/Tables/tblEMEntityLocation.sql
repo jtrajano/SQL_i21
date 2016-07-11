@@ -40,3 +40,7 @@ GO
 CREATE NONCLUSTERED INDEX [IX_intEntityId]
     ON [dbo].[tblEMEntityLocation]([intEntityId] ASC);
 
+	
+GO
+CREATE NONCLUSTERED INDEX [IX_tblEMEntityLocation_intEntityId_ysnDefaultLocation] ON [dbo].[tblEMEntityLocation] ([intEntityId], [ysnDefaultLocation])
+
