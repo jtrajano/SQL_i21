@@ -333,5 +333,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateOutOfRangeBurnRateSearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLeakGasCheckSearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateEfficiencySearchView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateDeliveriesSearchView.sql" />
   </ItemGroup>
 </Project>
