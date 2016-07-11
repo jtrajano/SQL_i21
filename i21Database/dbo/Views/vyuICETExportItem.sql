@@ -27,5 +27,5 @@ FROM tblICItem item
 	) salesAccount ON salesAccount.intItemId = item.intItemId
 	LEFT OUTER JOIN tblETExportFilterItem exportItem ON item.intItemId = exportItem.intItemId
 	LEFT OUTER JOIN tblETExportFilterCategory exportCategory ON item.intCategoryId = exportCategory.intCategoryId
-WHERE item.ysnUsedForEnergyTracExport = 1 AND item.strStatus = 'Active'
+WHERE item.strStatus = 'Active'
 	AND (item.intItemId = exportItem.intItemId OR item.intCategoryId = exportCategory.intCategoryId)
