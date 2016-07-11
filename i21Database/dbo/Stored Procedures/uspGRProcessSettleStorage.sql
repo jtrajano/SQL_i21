@@ -439,7 +439,7 @@ BEGIN TRY
 				,NULL intContractHeaderId
 				,NULL intContractDetailId
 				,@dblOpenBalance dblUnits
-				,(ISNULL(dblFeesDue,0) - ISNULL(dblFeesPaid,0)) AS dblCashPrice
+				,(ISNULL(dblFeesPaid,0) - ISNULL(dblFeesDue,0)) AS dblCashPrice
 				,@FeeItemId
 				,@strFeeItem
 				,4
