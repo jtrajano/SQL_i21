@@ -359,4 +359,16 @@ GO
 
 GO
 	PRINT N'End updating HD Priorities.'
+	PRINT N'Start updating HD Opportunity Campaign Image Id.'
+GO
+
+	update
+		tblHDOpportunityCampaign
+		set
+			tblHDOpportunityCampaign.strImageId = LOWER(NEWID())
+	where
+		tblHDOpportunityCampaign.strImageId is null
+
+GO
+	PRINT N'End updating HD Opportunity Campaign Image Id.'
 GO
