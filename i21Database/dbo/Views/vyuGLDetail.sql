@@ -38,7 +38,9 @@ AS
             A.dblReportingRate,
             A.dblForeignRate,
 			A.intJournalLineNo,
-			J.strDocument
+			J.strDocument,
+			A.ysnIsUnposted,
+			A.intTransactionId
      FROM tblGLDetail AS A
 		  LEFT JOIN tblGLJournalDetail J ON A.intJournalLineNo = J.intJournalDetailId
           LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
