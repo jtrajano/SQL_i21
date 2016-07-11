@@ -38,6 +38,7 @@ BEGIN TRY
 	SELECT
 		ROW_NUMBER() OVER(ORDER BY DH.intLoadDistributionHeaderId, DD.intLoadDistributionDetailId DESC) AS intId
 		,[strSourceTransaction]					= 'Transport Load'
+		,[intLoadDistributionHeaderId]			= DH.intLoadDistributionHeaderId
 		,[intLoadDistributionDetailId]			= DD.intLoadDistributionDetailId
 		,[intSourceId]							= DH.intLoadDistributionHeaderId
 		,[strSourceId]							= TL.strTransaction
@@ -428,6 +429,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
+		,[intLoadDistributionHeaderId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -504,6 +506,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]				= TR.ysnVirtualMeterReading
 		,[ysnClearDetailTaxes]					= TR.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= TR.intTempDetailIdForTaxes
+		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
 	FROM #tmpSourceTable TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
@@ -734,6 +737,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]
 		,[intTempDetailIdForTaxes]
+		,[intLoadDistributionHeaderId]
 	)
 	SELECT 
 		[strSourceTransaction]					= IE.strSourceTransaction
@@ -802,6 +806,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
+		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]
 		,[strSourceId]
@@ -864,6 +869,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]
 		,[intTempDetailIdForTaxes]
+		,[intLoadDistributionHeaderId]
 
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice
