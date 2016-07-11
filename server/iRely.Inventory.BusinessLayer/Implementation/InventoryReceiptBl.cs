@@ -64,7 +64,6 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICInventoryReceipt entity)
         {
-            entity.strReceiptNumber = Common.GetStartingNumber(Common.StartingNumber.InventoryReceipt);
             entity.intCreatedUserId = iRely.Common.Security.GetUserId();
             entity.intEntityId = iRely.Common.Security.GetEntityId();
             base.Add(entity);
@@ -187,7 +186,12 @@ namespace iRely.Inventory.BusinessLayer
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
         {
             SaveResult result = new SaveResult();
-            
+
+            var addedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(w => w.State == EntityState.Added);
+            foreach (var receipt in addedReceipts) {
+                receipt.Entity.strReceiptNumber = await Common.GetStartingNumberAsync(Common.StartingNumber.InventoryReceipt);
+            }
+
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
@@ -199,7 +203,7 @@ namespace iRely.Inventory.BusinessLayer
                     // Log the original data. 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
-                        _db.ContextManager.Database.ExecuteSqlCommand(
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICLogTransactionDetail @TransactionType, @TransactionId", 
                             new SqlParameter("TransactionType", 1),
                             new SqlParameter("TransactionId", receipt.intInventoryReceiptId)
@@ -209,7 +213,7 @@ namespace iRely.Inventory.BusinessLayer
                     // Log the original data from the deleted receipts.
                     foreach (var receipt in deletedReceipts)
                     {
-                        _db.ContextManager.Database.ExecuteSqlCommand(
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICLogTransactionDetail @TransactionType, @TransactionId",
                             new SqlParameter("TransactionType", 1),
                             new SqlParameter("TransactionId", receipt.Entity.intInventoryReceiptId)
@@ -218,20 +222,20 @@ namespace iRely.Inventory.BusinessLayer
                         // Update the PO or Scale status from deleted shipment records.
                         // Usually, deleted records will "open" the status of the PO or Scale Ticket.
                         // Call this sp before the _db.SaveAsync because uspICUpdateStatusOnShipmentSave is not reading it from the log table. 
-                        _db.ContextManager.Database.ExecuteSqlCommand(
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICUpdateStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus",
                             new SqlParameter("intReceiptNo", receipt.Entity.intInventoryReceiptId),
                             new SqlParameter("ysnOpenStatus", true)
                         );                    
                     }
-                    
+
                     // Save the data
                     result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
 
                     // Process the deleted receipts. 
                     foreach (var receipt in deletedReceipts)
                     {
-                        _db.ContextManager.Database.ExecuteSqlCommand(
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId",
                             new SqlParameter("ReceiptId", receipt.Entity.intInventoryReceiptId), 
                             new SqlParameter("ForDelete", true), 
@@ -242,12 +246,12 @@ namespace iRely.Inventory.BusinessLayer
                     // Process the newly saved data. 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
-                        _db.ContextManager.Database.ExecuteSqlCommand(
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICUpdateStatusOnReceiptSave @intReceiptNo"
                             , new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId)
                         );
 
-                        _db.ContextManager.Database.ExecuteSqlCommand(
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId",
                             new SqlParameter("ReceiptId", receipt.intInventoryReceiptId), 
                             new SqlParameter("ForDelete", false), 
