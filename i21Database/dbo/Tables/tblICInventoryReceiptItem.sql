@@ -54,6 +54,10 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblGRDiscountId] FOREIGN KEY ([intDiscountSchedule]) REFERENCES [tblGRDiscountId]([intDiscountId])
 		--CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItem]
+		ON [dbo].[tblICInventoryReceiptItem]([intInventoryReceiptId] ASC, [intInventoryReceiptItemId] ASC);
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
