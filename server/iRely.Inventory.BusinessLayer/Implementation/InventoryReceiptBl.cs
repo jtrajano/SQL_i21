@@ -470,7 +470,8 @@ namespace iRely.Inventory.BusinessLayer
         {
             if (ReceiptType == "Transfer Order")
             {
-                var query = _db.GetQuery<vyuICGetReceiptAddOrder>()
+                // Get the Transfer Orders
+                var query = _db.GetQuery<vyuICGetReceiptAddTransferOrder>()
                     .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
                     .Filter(param, true);
 
@@ -482,9 +483,10 @@ namespace iRely.Inventory.BusinessLayer
                     total = await query.CountAsync()
                 };
             }
-            else if (ReceiptType == "Purchase Order")
+            else if (ReceiptType == "Purchase Contract" && SourceType == 0)
             {
-                var query = _db.GetQuery<vyuICGetReceiptAddPurchaseOrder>()
+                // Get Contracts that are "Purchase" type. 
+                var query = _db.GetQuery<vyuICGetReceiptAddPurchaseContract>()
                     .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
                     .Filter(param, true);
 
@@ -495,11 +497,12 @@ namespace iRely.Inventory.BusinessLayer
                     total = await query.CountAsync()
                 };
             }
-
-            else {
-                var query = _db.GetQuery<vyuICGetReceiptAddOrder>()
-                                .Where(p => p.intEntityVendorId == VendorId && p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
-                                .Filter(param, true);
+            else if (ReceiptType == "Purchase Contract" && SourceType == 2)
+            {
+                // Get Purchase Contracts that are linked with Logistic's Inbound Shipments 
+                var query = _db.GetQuery<vyuICGetReceiptAddLGInboundShipment>()
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
+                    .Filter(param, true);
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
 
@@ -509,6 +512,22 @@ namespace iRely.Inventory.BusinessLayer
                     total = await query.CountAsync()
                 };
             }
+            else 
+            {
+                // Get the Purchase Orders
+                var query = _db.GetQuery<vyuICGetReceiptAddPurchaseOrder>()
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
+                    .Filter(param, true);
+
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+
         }
 
         public async Task<SearchResult> GetReceiptVouchers(GetParameter param)

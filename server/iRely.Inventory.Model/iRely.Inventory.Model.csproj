@@ -113,6 +113,7 @@
     <Compile Include="Configuration\tblPATPatronageCategoryMap.cs" />
     <Compile Include="Configuration\tblSMCompanyLocationPricingLevelMap.cs" />
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\tblICInventoryReceiptItemLot.cs" />
     <Compile Include="Metadata\tblICInventoryReceiptItemLot2.cs" />
     <Compile Include="Metadata\tblICParentLot.cs" />

@@ -216,6 +216,10 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new vyuICGetReceiptAddOrderMap());
             modelBuilder.Configurations.Add(new vyuICGetReceiptAddPurchaseOrderMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddTransferOrderMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddPurchaseContractMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddLGInboundShipmentMap());
+
             modelBuilder.Configurations.Add(new vyuICGetShipmentAddOrderMap());
 
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingMap());
