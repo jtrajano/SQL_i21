@@ -5,6 +5,9 @@ EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportOriginReall
 			DROP PROCEDURE [dbo].[uspGLImportOriginReallocation];')
 
 EXEC('CREATE PROCEDURE [dbo].[uspGLImportOriginReallocation]
+(
+	@intUserId INT
+)
 AS
 	BEGIN TRY
 	BEGIN TRANSACTION
@@ -43,6 +46,10 @@ AS
 		INSERT tblGLAccountReallocationDetail (intAccountReallocationId,intAccountId,dblPercentage,intConcurrencyId)
 			SELECT intAccountReallocationId,T.intAccountId,decPercentage,1 FROM tblGLReallocationTemp T inner join
 				tblGLAccount A on T.intAccountId = A.intAccountId ORDER BY intAccountReallocationId
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPreferences WHERE strPreference = ''isReallocationImported'')
+		BEGIN
+			INSERT INTO tblSMPreferences (strPreference, strValue, intUserID) VALUES(''isReallocationImported'',''true'', @intUserId)
+		END
 		COMMIT TRANSACTION
 		SELECT ''Success''
 	END TRY
