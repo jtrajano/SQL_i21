@@ -145,6 +145,7 @@ BEGIN
 	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
 				ON GLDetail.strBatchId = InvTrans.strBatchId
 				AND GLDetail.strTransactionId = InvTrans.strTransactionId
+				AND GLDetail.strCode IN ('IC', 'IRS', 'IWS', 'IAN', 'ICA', 'IAV', 'RPRD', 'RWIP', 'RTRF', 'RBLD') 
 	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
