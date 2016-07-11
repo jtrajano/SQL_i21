@@ -162,6 +162,7 @@ BEGIN
 	UPDATE A
 		SET A.intPaymentId  = B.intNewPaymentId
 		,A.dblPayment = A.dblPayment * -1
+		,A.dblDiscount = A.dblDiscount * -1
 	FROM #tmpPaymentDetail A
 		INNER JOIN #tmpPayables B
 			ON A.intPaymentId = B.intPaymentId
