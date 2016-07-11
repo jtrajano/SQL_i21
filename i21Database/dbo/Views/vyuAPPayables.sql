@@ -30,7 +30,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
-	, B.dblDiscount 
+	, CASE WHEN C.intTransactionType != 1 AND abs(B.dblDiscount) > 0 THEN B.dblDiscount * -1 ELSE B.dblDiscount END AS dblDiscount
 	, B.dblInterest 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
