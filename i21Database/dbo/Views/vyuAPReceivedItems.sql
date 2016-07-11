@@ -10,7 +10,7 @@ FROM
 	UNION ALL
 	SELECT * FROM [vyuAPReceiptPayables]
 	UNION ALL
-	SELECT * FROM [vyuAPLogisticsPayables]
+	SELECT * FROM [vyuAPContractPayables]
 	UNION ALL
 	SELECT * FROM [vyuAPLogisticsPayables]
 ) Items
