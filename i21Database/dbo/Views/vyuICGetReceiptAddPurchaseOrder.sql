@@ -52,8 +52,8 @@ FROM (
 		, dblCostUOMConvFactor = CostUOM.dblUnitQty
 		, intLifeTime
 		, strLifeTimeType
-		, 0 AS ysnLoad
-		, 0 AS dblAvailableQty
+		, CAST(0 AS BIT) AS ysnLoad
+		, CAST(0 AS NUMERIC(38, 20)) AS dblAvailableQty
 		, strBOL = NULL
 		, dblFranchise = 0.00
 		, dblContainerWeightPerQty = 0.00
