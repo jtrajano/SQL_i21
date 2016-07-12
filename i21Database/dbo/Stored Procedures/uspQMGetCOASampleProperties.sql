@@ -41,5 +41,6 @@ BEGIN
 	JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		AND TR.intProductTypeId = @intProductTypeId
 	JOIN dbo.tblQMProduct PRD ON PRD.intProductId = TR.intProductId
+		AND PRD.ysnActive = 1
 		AND TR.intProductValueId = @intProductValueId
 END

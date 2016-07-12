@@ -18,6 +18,7 @@ SET @intProductId = (
 		WHERE P.intProductTypeId = 2 -- Item
 			AND P.intProductValueId = @intItemId
 			AND PC.intControlPointId = @intControlPointId
+			AND P.ysnActive = 1
 		)
 
 IF @intProductId IS NULL
@@ -34,6 +35,7 @@ BEGIN
 			WHERE P.intProductTypeId = 1 -- Item Category
 				AND P.intProductValueId = @intCategoryId
 				AND PC.intControlPointId = @intControlPointId
+				AND P.ysnActive = 1
 			)
 END
 

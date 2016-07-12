@@ -360,6 +360,7 @@ BEGIN TRY
 		JOIN tblQMProperty pt ON pt.intPropertyId=pp.intPropertyId
 		WHERE p.intProductValueId=@intBlendItemId
 		AND p.intProductTypeId=2 AND pt.intDataTypeId in (1,2,6)
+		AND p.ysnActive = 1
 		ORDER BY pp.intSequenceNo
 
 		Select @intPropertyCount = COUNT(1) From #tblProductProperty

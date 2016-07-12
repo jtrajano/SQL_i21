@@ -85,6 +85,7 @@ AS
 	JOIN tblQMTestProperty TP ON TP.intPropertyId=PRT.intPropertyId
 	JOIN tblQMTest TST ON TST.intTestId = TP.intTestId
 	WHERE PRD.intProductValueId = @intProductId AND PRD.intProductTypeId = 2
+	AND PRD.ysnActive = 1
 	AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 	AND DATEPART(dy, PPV.dtmValidTo)
 	ORDER BY PP.intSequenceNo

@@ -34,6 +34,7 @@ BEGIN
 		JOIN dbo.tblQMProperty PR ON PR.intPropertyId = PP.intPropertyId
 		WHERE P.intProductTypeId = @intProductTypeId
 			AND PC.intControlPointId = @intControlPointId
+			AND P.ysnActive = 1
 			AND P.intProductValueId IS NULL
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 				AND DATEPART(dy, PPV.dtmValidTo)

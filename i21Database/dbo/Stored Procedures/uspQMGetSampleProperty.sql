@@ -31,6 +31,7 @@ BEGIN
 				WHERE P.intProductTypeId = @intProductTypeId
 					AND P.intProductValueId IS NULL
 					AND PC.intControlPointId = @intControlPointId
+					AND P.ysnActive = 1
 				)
 	END
 	ELSE
@@ -42,6 +43,7 @@ BEGIN
 				WHERE P.intProductTypeId = 2 -- Item
 					AND P.intProductValueId = @intItemId
 					AND PC.intControlPointId = @intControlPointId
+					AND P.ysnActive = 1
 				)
 
 		IF @intProductId IS NULL
@@ -58,6 +60,7 @@ BEGIN
 					WHERE P.intProductTypeId = 1 -- Item Category
 						AND P.intProductValueId = @intCategoryId
 						AND PC.intControlPointId = @intControlPointId
+						AND P.ysnActive = 1
 					)
 		END
 	END

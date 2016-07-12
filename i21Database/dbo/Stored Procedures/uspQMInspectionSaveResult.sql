@@ -39,6 +39,7 @@ BEGIN TRY
 				WHERE P.intProductTypeId = @intProductTypeId
 					AND P.intProductValueId IS NULL
 					AND PC.intControlPointId = @intControlPointId
+					AND P.ysnActive = 1
 				)
 
 		SELECT @intTestResultId = ISNULL(TR.intTestResultId, 0)
