@@ -5362,4 +5362,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strSPInventory" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f973eb76-6ad7-42dd-bda2-94b371398f6d" ChangeDateTime="07/12/2016 02:51:21">
+    <Property Name="ElementName" Value="[dbo].[tblSTMarkUpDownDetail].[intItemUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTMarkUpDownDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemId" />
+  </Operation>
 </Operations>

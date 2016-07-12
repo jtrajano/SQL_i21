@@ -2,7 +2,7 @@
 (
 	[intMarkUpDownDetailId] INT NOT NULL IDENTITY,
 	[intMarkUpDownId] INT NOT NULL,
-	[intItemUOMId] INT,
+	[intItemId] INT,
 	[intCategoryId] INT,
 	[strMarkUpOrDown] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strRetailShrinkRS] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,

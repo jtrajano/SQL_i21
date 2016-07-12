@@ -3,7 +3,8 @@ AS
 
 select C.intMarkUpDownDetailId
 , A.intMarkUpDownId
-, D.strUpcCode
+, D.strItemNo
+, D.intItemId
 , E.strCategoryCode
 , C.strMarkUpOrDown
 , C.intQty
@@ -18,9 +19,10 @@ on A.intStoreId = B.intStoreId
 inner join tblSTMarkUpDownDetail C
 on A.intMarkUpDownId = C.intMarkUpDownId
 
-inner join tblICItemUOM D
-on D.intItemUOMId = C.intItemUOMId
+left join vyuSTMarkUpDownItems D
+on C.intItemId = D.intItemId
 
 left join tblICCategory E
 on E.intCategoryId =  C.intCategoryId
+
 
