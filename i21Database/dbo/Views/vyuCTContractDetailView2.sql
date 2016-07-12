@@ -1,4 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractDetailView2]
+
 AS
 
 	SELECT	CD.intContractDetailId,		 	
@@ -67,7 +68,9 @@ AS
 
 			TP.strContractType,
 			CH.intContractHeaderId,		
-			CH.intEntityId,			
+			CH.intEntityId,	
+			CH.ysnPrinted,		
+			CH.strCustomerContract,
 			CY.strCommodityCode,		
 			CY.strDescription AS strCommodityDescription,
 			CH.strContractNumber						
