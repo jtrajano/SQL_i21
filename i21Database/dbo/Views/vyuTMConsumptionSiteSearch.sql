@@ -38,6 +38,9 @@ AS
 	,L.strHoldReason
 	,A.dtmOnHoldStartDate
 	,A.dtmOnHoldEndDate
+	,D.dblCreditLimit
+	,strTerm = M.strTerm
+	,A.strInstruction
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -60,6 +63,8 @@ AS
 		ON A.intFillGroupId = K.intFillGroupId
 	LEFT JOIN tblTMHoldReason L
 		ON A.intHoldReasonID = L.intHoldReasonID
+	LEFT JOIN tblSMTerm M
+					ON A.intDeliveryTermID = M.intTermID
 	LEFT JOIN (
 					SELECT Y.strSerialNumber 
 						,Z.intSiteID

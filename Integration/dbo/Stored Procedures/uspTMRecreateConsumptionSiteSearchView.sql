@@ -18,6 +18,7 @@ BEGIN
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwtrmmst') = 1 
 	)
 	BEGIN
 		EXEC('
@@ -59,6 +60,9 @@ BEGIN
 				,L.strHoldReason
 				,A.dtmOnHoldStartDate
 				,A.dtmOnHoldEndDate
+				,dblCreditLimit = C.vwcus_cred_limit
+				,strTerm = M.vwtrm_desc
+				,A.strInstruction
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -72,6 +76,8 @@ BEGIN
 					ON A.intFillGroupId = K.intFillGroupId
 				LEFT JOIN tblTMHoldReason L
 					ON A.intHoldReasonID = L.intHoldReasonID
+				LEFT JOIN vwtrmmst M
+					ON A.intDeliveryTermID = M.A4GLIdentity
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
@@ -119,6 +125,9 @@ BEGIN
 				,L.strHoldReason
 				,A.dtmOnHoldStartDate
 				,A.dtmOnHoldEndDate
+				,D.dblCreditLimit
+				,strTerm = M.strTerm
+				,A.strInstruction
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -141,6 +150,8 @@ BEGIN
 					ON A.intFillGroupId = K.intFillGroupId
 				LEFT JOIN tblTMHoldReason L
 					ON A.intHoldReasonID = L.intHoldReasonID
+				LEFT JOIN tblSMTerm M
+					ON A.intDeliveryTermID = M.intTermID
 				LEFT JOIN (
 								SELECT Y.strSerialNumber 
 									,Z.intSiteID
