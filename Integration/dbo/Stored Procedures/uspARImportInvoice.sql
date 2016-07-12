@@ -250,14 +250,15 @@ BEGIN
 			   ,[dblTotal])		
 			SELECT 
 				INV.intInvoiceId,
-				NULL,
-				agstm_itm_no,
+				ITM.intItemId,
+				ITM.strDescription,
 				NULL,
 				agstm_un,
 				agstm_un_prc,
 				agstm_sls 
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL	
 		 end 
 
@@ -276,14 +277,15 @@ BEGIN
 			   ,[dblTotal])		
 			SELECT 
 				INV.intInvoiceId,
-				NULL,
-				ptstm_itm_no,
+				ITM.intItemId,
+				ITM.strDescription,
 				NULL,
 				ptstm_un,
 				ptstm_un_prc,
 				ptstm_net 
 			FROM ptstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL	
 		 end
 

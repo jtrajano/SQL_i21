@@ -150,7 +150,6 @@ Type the overview for the table here.
 		[intAccountManagerId] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[ysnItemUsedInDiscountCode] BIT NULL, 
-		[ysnUsedForEnergyTracExport] BIT NULL , 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
