@@ -39,88 +39,80 @@ FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
 
 IF (@ysnPost = 1)
 BEGIN
-	IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
-	BEGIN
-		--PRINT 'Insert Paycheck data into tblCMBankTransaction'
-		INSERT INTO @BankTransactionTable
-			([strTransactionId]
-			,[intBankTransactionTypeId] 
-			,[intBankAccountId] 
-			,[intCurrencyId] 
-			,[dblExchangeRate]            
-			,[dtmDate] 
-			,[strPayee] 
-			,[intPayeeId] 
-			,[strAddress] 
-			,[strZipCode] 
-			,[strCity] 
-			,[strState] 
-			,[strCountry]               
-			,[dblAmount] 
-			,[strAmountInWords] 
-			,[strMemo] 
-			,[strReferenceNo] 
-			,[dtmCheckPrinted] 
-			,[ysnCheckToBePrinted]       
-			,[ysnCheckVoid] 
-			,[ysnPosted] 
-			,[strLink] 
-			,[ysnClr] 
-			,[dtmDateReconciled] 
-			,[intBankStatementImportId] 
-			,[intBankFileAuditId] 
-			,[strSourceSystem] 
-			,[intEntityId] 
-			,[intCreatedUserId] 
-			,[intCompanyLocationId]              
-			,[dtmCreated] 
-			,[intLastModifiedUserId] 
-			,[dtmLastModified] 
-			,[intConcurrencyId])
-		SELECT		 
-			[strTransactionId]			= PC.strPaycheckId
-			,[intBankTransactionTypeId] = @intBankTransactionTypeId
-			,[intBankAccountId]			= PC.intBankAccountId
-			,[intCurrencyId]			= BA.intCurrencyId
-			,[dblExchangeRate]			= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = BA.intCurrencyId)
-			,[dtmDate]					= @dtmPayDate
-			,[strPayee]					= (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @intEmployeeId)
-			,[intPayeeId]				= PC.[intEntityEmployeeId]
-			,[strAddress]				= BA.strAddress
-			,[strZipCode]				= BA.strZipCode
-			,[strCity]					= BA.strCity
-			,[strState]					= BA.strState
-			,[strCountry]				= BA.strCountry             
-			,[dblAmount]				= PC.dblNetPayTotal
-			,[strAmountInWords]			= dbo.fnConvertNumberToWord(PC.dblNetPayTotal)
-			,[strMemo]					= ''
-			,[strReferenceNo]			= ''
-			,[dtmCheckPrinted]			= NULL
-			,[ysnCheckToBePrinted]		= 1
-			,[ysnCheckVoid]				= 0
-			,[ysnPosted]				= 0
-			,[strLink]					= ''
-			,[ysnClr]					= 0
-			,[dtmDateReconciled]		= NULL
-			,[intBankStatementImportId]	= 1
-			,[intBankFileAuditId]		= NULL
-			,[strSourceSystem]			= 'PR'
-			,[intEntityId]				= PC.intCreatedUserId
-			,[intCreatedUserId]			= PC.intCreatedUserId
-			,[intCompanyLocationId]		= NULL
-			,[dtmCreated]				= GETDATE()
-			,[intLastModifiedUserId]	= PC.intLastModifiedUserId
-			,[dtmLastModified]			= GETDATE()
-			,[intConcurrencyId]			= 1
-		FROM tblPRPaycheck PC LEFT JOIN tblCMBankAccount BA 
-			ON PC.intBankAccountId = BA.intBankAccountId
-		WHERE PC.intPaycheckId = @intPaycheckId
-	END
-	ELSE
-	BEGIN
-		SELECT @intTransactionId = (SELECT intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
-		DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-	END
+	--PRINT 'Insert Paycheck data into tblCMBankTransaction'
+	INSERT INTO @BankTransactionTable
+		([strTransactionId]
+		,[intBankTransactionTypeId] 
+		,[intBankAccountId] 
+		,[intCurrencyId] 
+		,[dblExchangeRate]            
+		,[dtmDate] 
+		,[strPayee] 
+		,[intPayeeId] 
+		,[strAddress] 
+		,[strZipCode] 
+		,[strCity] 
+		,[strState] 
+		,[strCountry]               
+		,[dblAmount] 
+		,[strAmountInWords] 
+		,[strMemo] 
+		,[strReferenceNo] 
+		,[dtmCheckPrinted] 
+		,[ysnCheckToBePrinted]       
+		,[ysnCheckVoid] 
+		,[ysnPosted] 
+		,[strLink] 
+		,[ysnClr] 
+		,[dtmDateReconciled] 
+		,[intBankStatementImportId] 
+		,[intBankFileAuditId] 
+		,[strSourceSystem] 
+		,[intEntityId] 
+		,[intCreatedUserId] 
+		,[intCompanyLocationId]              
+		,[dtmCreated] 
+		,[intLastModifiedUserId] 
+		,[dtmLastModified] 
+		,[intConcurrencyId])
+	SELECT		 
+		[strTransactionId]			= PC.strPaycheckId
+		,[intBankTransactionTypeId] = @intBankTransactionTypeId
+		,[intBankAccountId]			= PC.intBankAccountId
+		,[intCurrencyId]			= BA.intCurrencyId
+		,[dblExchangeRate]			= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = BA.intCurrencyId)
+		,[dtmDate]					= @dtmPayDate
+		,[strPayee]					= (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @intEmployeeId)
+		,[intPayeeId]				= PC.[intEntityEmployeeId]
+		,[strAddress]				= BA.strAddress
+		,[strZipCode]				= BA.strZipCode
+		,[strCity]					= BA.strCity
+		,[strState]					= BA.strState
+		,[strCountry]				= BA.strCountry             
+		,[dblAmount]				= PC.dblNetPayTotal
+		,[strAmountInWords]			= dbo.fnConvertNumberToWord(PC.dblNetPayTotal)
+		,[strMemo]					= ''
+		,[strReferenceNo]			= ''
+		,[dtmCheckPrinted]			= NULL
+		,[ysnCheckToBePrinted]		= 1
+		,[ysnCheckVoid]				= 0
+		,[ysnPosted]				= 0
+		,[strLink]					= ''
+		,[ysnClr]					= 0
+		,[dtmDateReconciled]		= NULL
+		,[intBankStatementImportId]	= 1
+		,[intBankFileAuditId]		= NULL
+		,[strSourceSystem]			= 'PR'
+		,[intEntityId]				= PC.intCreatedUserId
+		,[intCreatedUserId]			= PC.intCreatedUserId
+		,[intCompanyLocationId]		= NULL
+		,[dtmCreated]				= GETDATE()
+		,[intLastModifiedUserId]	= PC.intLastModifiedUserId
+		,[dtmLastModified]			= GETDATE()
+		,[intConcurrencyId]			= 1
+	FROM tblPRPaycheck PC LEFT JOIN tblCMBankAccount BA 
+		ON PC.intBankAccountId = BA.intBankAccountId
+	WHERE PC.intPaycheckId = @intPaycheckId
 END
 
 IF (@ysnPost = 1)
@@ -439,7 +431,20 @@ END
 
 IF (@ysnPost = 1) 
 BEGIN
-	EXEC uspCMCreateBankTransactionEntries @BankTransactionTable, @BankTransactionDetail, @intTransactionId
+	DECLARE @dblCurrentAmount NUMERIC(18, 6)
+	SELECT @intTransactionId = intTransactionId,
+		   @dblCurrentAmount = dblAmount
+		FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
+
+	IF EXISTS (SELECT 1 FROM @BankTransactionTable WHERE strTransactionId = @strTransactionId AND dblAmount <> @dblCurrentAmount)
+	BEGIN
+		DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
+		SELECT @intTransactionId = NULL
+	END
+
+	IF (@intTransactionId IS NULL)
+		EXEC uspCMCreateBankTransactionEntries @BankTransactionTable, @BankTransactionDetail, @intTransactionId
+
 	IF (@@ERROR <> 0)
 		BEGIN
 			RAISERROR('Failed to Generate Bank Transaction entries.', 11, 1)
