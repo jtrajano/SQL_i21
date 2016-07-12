@@ -267,7 +267,11 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
             if (selected.length > 0){
                 var current = selected[0];
                 if (!current.dummy)
-                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Storage Measurement Reading', intTicketFileId: current.get('intStorageMeasurementReadingConversionId') });
+                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { 
+                        strSourceType: 'Storage Measurement Reading', 
+                        intTicketFileId: current.get('intStorageMeasurementReadingConversionId'),
+                        intDiscountScheduleId: current.get('intDiscountScheduleId')
+                    });
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');
