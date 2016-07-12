@@ -35,6 +35,8 @@ SELECT
 	,strCustomerReference = ''
 	,strOrderComments = TMO.strComments
 	,strLocationType = 'Delivery'
+	,intDaysPassed = DATEDIFF (day, TMO.dtmRequestedDate, GetDate())
+	,strOrderType = 'Outbound'
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
@@ -75,10 +77,56 @@ SELECT
 	,strCustomerReference = LGLD.strCustomerReference
 	,strOrderComments = LGLD.strComments
 	,strLocationType = 'Delivery'
+	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
+	,strOrderType = 'Outbound'
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intSCompanyLocationId
 JOIN tblEMEntityLocation EML ON EML.intEntityLocationId = LGLD.intCustomerEntityLocationId
 WHERE LGL.intPurchaseSale = 2 AND LGL.intShipmentStatus = 1 AND IsNull(LGLD.intLoadDetailId, 0) NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblLGRouteOrder)
+
+UNION ALL
+
+SELECT
+	intSourceType = 1
+	,intOrderId = LGLD.intLoadDetailId
+	,intDispatchID = NULL
+	,intLoadDetailId = LGLD.intLoadDetailId
+	,intSequence = -1
+	,strOrderNumber = LGLD.strLoadNumber
+	,strLocationName = LGLD.strPLocationName
+	,intLocationId = LGLD.intPCompanyLocationId
+	,strLocationAddress = LGLD.strPLocationAddress
+	,strLocationCity = LGLD.strPLocationCity
+	,strLocationZipCode = LGLD.strPLocationZipCode
+	,strLocationState = LGLD.strPLocationState
+	,strLocationCountry = LGLD.strPLocationCountry
+	,dblFromLongitude = CompLoc.dblLongitude
+	,dblFromLatitude = CompLoc.dblLatitude
+	,dtmScheduledDate = LGL.dtmScheduledDate
+	,strEntityName = LGLD.strVendor
+	,strToAddress = LGLD.strShipFromAddress
+	,strToCity = LGLD.strShipFromCity
+	,strToZipCode = LGLD.strShipFromZipCode
+	,strToState = LGLD.strShipFromState
+	,strToCountry = LGLD.strShipFromCountry
+	,strDestination = LGLD.strShipFromAddress + ', ' + LGLD.strShipFromCity + ', ' + LGLD.strShipFromState + ' ' + LGLD.strShipFromZipCode 
+	,dblToLongitude = EML.dblLongitude
+	,dblToLatitude = EML.dblLatitude
+	,strOrderStatus = LGL.strShipmentStatus
+	,strDriver = LGL.strDriver
+	,strItemNo = LGLD.strItemNo
+	,dblQuantity = LGLD.dblQuantity
+	,strCustomerReference = LGLD.strCustomerReference
+	,strOrderComments = LGLD.strComments
+	,strLocationType = 'Delivery'
+	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
+	,strOrderType = 'Inbound'
+
+FROM vyuLGLoadDetailView LGLD
+JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
+JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intPCompanyLocationId
+JOIN tblEMEntityLocation EML ON EML.intEntityLocationId = LGLD.intVendorEntityLocationId
+WHERE LGL.intPurchaseSale = 1 AND LGL.intShipmentStatus = 1 AND IsNull(LGLD.intLoadDetailId, 0) NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblLGRouteOrder)
 ) t1
