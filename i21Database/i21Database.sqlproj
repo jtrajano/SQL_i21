@@ -4041,6 +4041,7 @@
     <Build Include="dbo\Views\vyuEMSearchEntitySalesEntity.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBasis.sql" />
+    <Build Include="dbo\Tables\tblIPSecondaryStepDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

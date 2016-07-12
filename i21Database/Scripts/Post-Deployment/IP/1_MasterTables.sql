@@ -166,3 +166,27 @@ BEGIN
     VALUES(5,'Database Operation')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 6)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(6,'Import Compound File')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 7)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(7,'Export Compound File')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 8)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(8,'Transform XML')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 9)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(9,'Send Mail')
+END
+GO
