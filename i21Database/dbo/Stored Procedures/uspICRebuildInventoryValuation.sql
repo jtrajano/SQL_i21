@@ -789,7 +789,7 @@ BEGIN
 							,intStorageLocationId	
 							,strActualCostId 	
 					)
-					SELECT 	AdjDetail.intItemId  
+					SELECT 	ISNULL(AdjDetail.intNewItemId, AdjDetail.intItemId)
 							,ISNULL(NewLotItemLocation.intItemLocationId, SourceLotItemLocation.intItemLocationId) 
 							,intItemUOMId = 
 									-- Try to use the new-lot's weight UOM id. 
@@ -1079,14 +1079,14 @@ BEGIN
 							LEFT JOIN dbo.tblICLot NewLot
 								ON NewLot.intLotId = AdjDetail.intNewLotId
 							LEFT JOIN dbo.tblICItemLocation NewLotItemLocation 
-								ON NewLotItemLocation.intLocationId = AdjDetail.intNewLocationId
-								AND NewLotItemLocation.intItemId = NewLot.intItemId
+								ON NewLotItemLocation.intLocationId = ISNULL(AdjDetail.intNewLocationId, Adj.intLocationId) 
+								AND NewLotItemLocation.intItemId = ISNULL(AdjDetail.intNewItemId, NewLot.intItemId)
 							LEFT JOIN dbo.tblICItemUOM NewLotItemUOM
 								ON NewLotItemUOM.intItemUOMId = NewLot.intItemUOMId
-								AND NewLotItemUOM.intItemId = NewLot.intItemId
+								AND NewLotItemUOM.intItemId = ISNULL(AdjDetail.intNewItemId, NewLot.intItemId)
 							LEFT JOIN dbo.tblICItemUOM NewLotWeightUOM
 								ON NewLotWeightUOM.intItemUOMId = NewLot.intWeightUOMId
-								AND NewLotWeightUOM.intItemId = NewLot.intItemId
+								AND NewLotWeightUOM.intItemId = ISNULL(AdjDetail.intNewItemId, NewLot.intItemId)
 
 							LEFT JOIN dbo.tblICItemUOM StockUnit 
 								ON StockUnit.intItemId = AdjDetail.intItemId
@@ -1094,8 +1094,6 @@ BEGIN
 
 					WHERE	Adj.strAdjustmentNo = @strTransactionId
 							AND FromStock.strBatchId = @strBatchId
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-
 
 					EXEC dbo.uspICRepostCosting
 						@strBatchId
