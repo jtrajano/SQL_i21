@@ -179,7 +179,7 @@ AS
 
    SELECT @dtmToDateRetain = CASE WHEN @dtmDateTo = '' THEN '2100/01/01' ELSE @dtmDateTo END
    SELECT @sqlCte += ',cteRetainAccount as ( SELECT * FROM (SELECT * from RAWREPORT '  + CASE WHEN @Where <> 'Where' THEN @Where ELSE ' ' END + ') A
-   Where A.dtmDate BETWEEN  ''' + isnull(@dtmFromDateRetain,'1900/01/01') + ''' AND ''' + @dtmToDateRetain + ''' AND intAccountId = ' + @intRetainAccount + ')'
+   Where A.dtmDate BETWEEN  ''' + isnull(@dtmDateFrom,'1900/01/01') + ''' AND ''' + @dtmToDateRetain + ''' AND intAccountId = ' + @intRetainAccount + ')'
 
    DECLARE @colsWithoutBalance NVARCHAR(MAX)
 
