@@ -32,7 +32,9 @@ BEGIN
 			LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
 		WHERE
 		(B.strAccountType in ('Expense','Revenue')  and C.dtmDate < CASE WHEN @multiFiscal= 1 THEN @dtmDate ELSE @dtmDate1 end
-		OR (strAccountId =@strAccountId AND C.dtmDate >=  @dtmDate1 AND C.dtmDate < @dtmDate) and isnull(strCode,'') <> '' 
+		OR (strAccountId =@strAccountId 
+		--AND C.dtmDate >=  @dtmDate1 
+		AND C.dtmDate < @dtmDate) and isnull(strCode,'') <> '' 
 		AND ysnIsUnposted = 0))  
 		insert into @tbl
 		select strAccountId, sum(beginbalance) beginBalance ,sum(beginbalanceunit) beginBalanceUnit from cte group by strAccountId
