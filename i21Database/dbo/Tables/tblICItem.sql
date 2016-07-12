@@ -151,6 +151,8 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[ysnItemUsedInDiscountCode] BIT NULL, 
 		[ysnUsedForEnergyTracExport] BIT NULL , 
+		[strInvoiceComments] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
+		[strPickListComments] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
