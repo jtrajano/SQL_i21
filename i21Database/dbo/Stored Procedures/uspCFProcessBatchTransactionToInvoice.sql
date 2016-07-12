@@ -84,6 +84,7 @@ END
 					,[intEntityId]
 					,[ysnResetDetails]
 					,[ysnPost]
+					,[ysnRecap]
 					,[intInvoiceDetailId]
 					,[intItemId]
 					,[ysnInventory]
@@ -160,7 +161,7 @@ END
 					,[intEntityId]							= @UserEntityId
 					,[ysnResetDetails]						= 0
 					,[ysnPost]								= @Post
-	
+					,[ysnRecap]								= @Recap
 					,[intInvoiceDetailId]					= NULL
 					,[intItemId]							= cfSiteItem.intARItemId
 					,[ysnInventory]							= 1
@@ -236,7 +237,7 @@ END
 							AND iicItemLoc.intItemId = icfItem.intARItemId)
 							AS cfSiteItem
 				ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
-				AND cfSiteItem.intARItemId = cfTrans.intARItemId
+				--AND cfSiteItem.intARItemId = cfTrans.intARItemId
 				AND cfSiteItem.intItemId = cfTrans.intProductId
 				INNER JOIN (SELECT * 
 							FROM tblCFTransactionPrice
