@@ -169,7 +169,9 @@ Ext.define('Inventory.model.Item', {
         { name: 'dblMinStockWeeks', type: 'float' },
         { name: 'dblFullContainerSize', type: 'float' },
         { name: 'ysnHasMFTImplication', type: 'boolean' },
-        { name: 'ysnItemUsedInDiscountCode', type: 'boolean' }
+        { name: 'ysnItemUsedInDiscountCode', type: 'boolean' },
+        { name: 'strInvoiceComments', type: 'string' },
+        { name: 'strPickListComments', type: 'string' }
     ],
 
     validators: [

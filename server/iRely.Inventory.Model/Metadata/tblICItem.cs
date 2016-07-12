@@ -148,6 +148,8 @@ namespace iRely.Inventory.Model
         public decimal? dblFullContainerSize { get; set; }
         public bool? ysnHasMFTImplication { get; set; }
         public bool? ysnItemUsedInDiscountCode { get; set; }
+        public string strInvoiceComments { get; set; }
+        public string strPickListComments { get; set; }
 
         private string _manufacturer;
         [NotMapped]
