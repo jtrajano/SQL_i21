@@ -123,6 +123,15 @@ BEGIN TRY
 				,@ErrorMessage		= @ErrorMessage OUTPUT
 				,@CreatedIvoices	= @CreatedIvoices OUTPUT
 				,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+
+		--DELETE Invoice Transaction
+		DELETE FROM tblARInvoice WHERE intInvoiceId IN (
+			SELECT DISTINCT C.intInvoiceId 
+				FROM tblCCSiteHeader A 
+			JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
+			JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
+				WHERE A.intSiteHeaderId = @intSiteHeaderId)
+
 		END
 		ELSE
 			RAISERROR('Invoice ID is null', 0 ,1)	
