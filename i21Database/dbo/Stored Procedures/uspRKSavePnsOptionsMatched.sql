@@ -248,7 +248,7 @@ BEGIN
 				   WHEN max(strInternalTradeNo) LIKE '%O-%' THEN REPLACE(strInternalTradeNo,'O-' ,'') end +1  from tblRKFutOptTransaction 
  group by strInternalTradeNo order by 1 desc
 
- INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,  
+ INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,intSelectedInstrumentTypeId,  
          dtmTransactionDate,intEntityId, intBrokerageAccountId,  
          intFutureMarketId,intInstrumentTypeId,intCommodityId,  
          intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,  
@@ -256,7 +256,7 @@ BEGIN
          strOptionType,dblPrice,strReference,strStatus,  
          dtmFilledDate,strReserveForFix,intBookId,intSubBookId,ysnOffset)  
            
-SELECT @NewFutOptTransactionHeaderId,1,@dtmTranDate,  
+SELECT @NewFutOptTransactionHeaderId,1,1,@dtmTranDate,  
   t.intEntityId,t.intBrokerageAccountId,t.intFutureMarketId, 1,t.intCommodityId,  
   t.intLocationId,t.intTraderId,t.intCurrencyId,'O-'+CONVERT(nvarchar(50),@intInternalTradeNo)as strInternalTradeNo,  
   t.strBrokerTradeNo,t.strBuySell,@intLots as intLots,om.intFutureMonthId as intFutureMonthId,t.intOptionMonthId,  
