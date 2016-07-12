@@ -4036,6 +4036,7 @@
     <Build Include="dbo\Views\vyuEMSearchEntityBuyer.sql" />
     <Build Include="dbo\Views\vyuTMDeliveriesSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetExistingTemplateAsInactive.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityPartner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
