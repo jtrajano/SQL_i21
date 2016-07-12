@@ -155,7 +155,7 @@ BEGIN
 			AND G.apchk_chk_no = A.apivc_chk_no
 			AND G.apchk_rev_dt = A.apivc_chk_rev_dt
 			AND G.apchk_cbk_no = A.apivc_cbk_no
-			--AND G.apchk_chk_amt <> 0
+			AND G.apchk_alt_trx_ind != 'O'
 	) PaymentInfo
 	WHERE A.apivc_orig_amt != 0
 	AND A.apivc_trans_type IN ('I', 'C', 'A')
