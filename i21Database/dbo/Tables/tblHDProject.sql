@@ -14,6 +14,7 @@
 	[strCurrentSolutionId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strCompetitorEntity] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strCurrentSolution] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[intReferredByEntityId] [int] null,
 	[dtmCreated] [datetime] NULL,
 	[dtmClose] [datetime] NULL,
 	[dtmGoLive] [datetime] NULL,
@@ -61,7 +62,8 @@
 	CONSTRAINT [FK_tblHDProject_tblHDSalesPipeStatus] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblHDSalesPipeStatus] ([intSalesPipeStatusId]),
 	CONSTRAINT [FK_tblHDProject_tblHDTicketStatus] FOREIGN KEY ([intTicketStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId]),
 	CONSTRAINT [FK_tblHDProject_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId]),
-	CONSTRAINT [FK_tblHDProject_tblHDOpportunitySource] FOREIGN KEY (intOpportunitySourceId) REFERENCES [dbo].[tblHDOpportunitySource] (intOpportunitySourceId)
+	CONSTRAINT [FK_tblHDProject_tblHDOpportunitySource] FOREIGN KEY (intOpportunitySourceId) REFERENCES [dbo].[tblHDOpportunitySource] (intOpportunitySourceId),
+    CONSTRAINT [FK_tblHDProjectProject_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 	--[intOpportunitySourceId]
 )
 
