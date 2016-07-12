@@ -120,7 +120,7 @@ INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_Genera
 INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no
 INNER JOIN tblCMBankAccount D ON A.apivc_cbk_no = D.strCbkNo COLLATE Latin1_General_CS_AS
 LEFT JOIN apchkmst E ON A.apchk_A4GLIdentity = E.A4GLIdentity
-WHERE A.apivc_status_ind = 'P' AND ISNULL(A.apivc_chk_no,'') != ''
+WHERE A.apivc_status_ind = 'P'
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN
