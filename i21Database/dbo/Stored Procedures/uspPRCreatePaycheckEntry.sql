@@ -244,9 +244,9 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				, @strCalculationType			= strCalculationType
 				, @intTypeEarningId				= intTypeEarningId
 				, @intEmployeeEarningLinkId		= intEmployeeEarningLinkId
-				, @intEmployeeTimeOffId			= @intEmployeeTimeOffId 
+				, @intEmployeeTimeOffId			= intEmployeeTimeOffId 
 				, @dblDefaultHours				= dblDefaultHours 
-				, @strW2Code					= @strW2Code 
+				, @strW2Code					= strW2Code 
 				, @intAccountId					= intAccountId 
 				, @intSort						= intSort 
 				FROM #tmpEarnings
