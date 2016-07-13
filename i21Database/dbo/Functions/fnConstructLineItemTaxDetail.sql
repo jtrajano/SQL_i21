@@ -1,8 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnConstructLineItemTaxDetail]
 (
-	 @ItemPrice				NUMERIC(18,6)
-	,@QtyShipped			NUMERIC(18,6)
-	,@NetAmount				NUMERIC(18,6)
+	 @Quantity				NUMERIC(18,6)
 	,@GrossAmount			NUMERIC(18,6)
 	,@LineItemTaxEntries	LineItemTaxDetailStagingTable	READONLY
 	,@TransactionDate		DATE							= NULL
@@ -25,7 +23,9 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @ZeroDecimal	NUMERIC(18, 6)		
+	DECLARE @ZeroDecimal		NUMERIC(18, 6)
+			,@TaxAmount			NUMERIC(18,6)
+			
 	SET @ZeroDecimal = 0.000000
 
 	DECLARE @ItemTaxes AS TABLE(
@@ -73,8 +73,8 @@ BEGIN
 		,[intTaxCodeId]				= LITE.[intTaxCodeId]
 		,[intTaxClassId]			= ISNULL(LITE.[intTaxClassId], SMTC.[intTaxClassId])
 		,[strTaxableByOtherTaxes]	= ISNULL(LITE.[strTaxableByOtherTaxes], SMTC.[strTaxableByOtherTaxes])
-		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], TCRD.[strCalculationMethod])
-		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], TCRD.[dblRate]), @ZeroDecimal)
+		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], (SELECT [strCalculationMethod] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate)))
+		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], (SELECT [dblRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate))), @ZeroDecimal)
 		,[dblExemptionPercent]		= @ZeroDecimal
 		,[dblTax]					= LITE.[dblTax]
 		,[dblAdjustedTax]			= LITE.[dblAdjustedTax]
@@ -88,10 +88,31 @@ BEGIN
 	INNER JOIN
 		tblSMTaxCode SMTC
 			ON LITE.[intTaxCodeId] = SMTC.[intTaxCodeId]
-	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate) TCRD
+		
+		
+	DECLARE @TotalUnitTax			NUMERIC(18,6)
+			,@TotalPercentageTax	NUMERIC(18,6)
+			,@ItemPrice				NUMERIC(18,6)
+	
+	
+	SELECT
+		@TotalUnitTax = SUM(@Quantity * [dblRate])
+	FROM
+		@ItemTaxes
+	WHERE
+		LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
 
-
+		
+	--t = pq + (pqr)
+	--t/(q + qr) = p		
+	SELECT
+		@ItemPrice = (@GrossAmount - @TotalUnitTax) / (@Quantity + (@Quantity * (SUM([dblRate])/100.00)))
+	FROM
+		@ItemTaxes
+	WHERE
+		LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'		
+		
+		
 
 	-- Calculate Item Tax
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @ItemTaxes WHERE ISNULL([ysnComputed], 0) = 0)
@@ -110,7 +131,7 @@ BEGIN
 					
 			SELECT TOP 1 
 				 @Id			= [Id]
-				,@TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@QtyShipped, @ZeroDecimal)
+				,@TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
 			FROM
 				@ItemTaxes
 			WHERE
@@ -204,11 +225,11 @@ BEGIN
 							BEGIN
 								IF(@TaxCalculationMethod = 'Percentage')
 									BEGIN
-										SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/100.00) END))
+										SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@ItemPrice * @Quantity) * (@TaxRate/100.00) END))
 									END
 								ELSE
 									BEGIN
-										SET @TaxableAmount = (@ItemPrice * @QtyShipped) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@QtyShipped * @TaxRate) END))
+										SET @TaxableAmount = (@ItemPrice * @Quantity) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@Quantity * @TaxRate) END))
 									END
 							END
 					END 
@@ -221,7 +242,7 @@ BEGIN
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
 			ELSE
-				SET @ItemTaxAmount = (@QtyShipped * @Rate);
+				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
 			IF(@TaxExempt = 1 AND @ExemptionPercent = 0.00)
 				SET @ItemTaxAmount = 0.00;
