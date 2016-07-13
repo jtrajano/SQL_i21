@@ -298,7 +298,8 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,CASE WHEN (@strCalculationType IN ('Hourly Rate', 'Overtime')
 					OR (@strCalculationType = 'Rate Factor' AND (SELECT TOP 1 strCalculationType FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId) = 'Hourly Rate')) THEN 
 				-- If Calculation is Hourly Based
-				CASE 
+				ROUND(
+				(CASE 
 					--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
 					WHEN (((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = @intTypeEarningId) LIKE '%holiday%')
 					AND ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup P LEFT JOIN tblPREmployeeEarning E ON P.intPayGroupId = E.intPayGroupId WHERE E.intTypeEarningId = @intTypeEarningId), 0) > 0)
@@ -320,7 +321,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 							AND CAST(FLOOR(CAST(dtmDateOut AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDateOut) AS FLOAT)) AS DATETIME)	
 						), 0)
 					END 
-				  * @dblEarningAmount
+				  * @dblEarningAmount), 2)
 			 ELSE 
 				 -- If Calculation is Fixed Amount
 				 @dblEarningAmount
