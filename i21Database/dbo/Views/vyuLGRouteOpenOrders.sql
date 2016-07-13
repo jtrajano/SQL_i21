@@ -38,7 +38,7 @@ SELECT
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
-WHERE TMO.strOrderStatus = 'Generated' AND IsNull(TMO.intDispatchId, 0) NOT IN (SELECT IsNull(intDispatchID, 0) FROM tblLGRouteOrder)
+WHERE TMO.strOrderStatus <> 'Delivered' --AND IsNull(TMO.intDispatchId, 0) NOT IN (SELECT IsNull(intDispatchID, 0) FROM tblLGRouteOrder)
 
 UNION ALL
 
