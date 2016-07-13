@@ -36,13 +36,13 @@ SELECT
 ,[strName]					=	D2.strName
 ,[strVendorId]				=	D1.strVendorId
 ,[strShipVia]				=	E.strShipVia
-,[strTerm]					=	NULL
+,[strTerm]					=	CAST('' AS NVARCHAR)
 ,[strContractNumber]		=	F1.strContractNumber
 ,[strBillOfLading]			=	A.strBillOfLading
 ,[intContractHeaderId]		=	F1.intContractHeaderId
 ,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 ,[intScaleTicketId]			=	G.intTicketId
-,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(50))
+,[strScaleTicketNumber]		=	G.strTicketNumber
 ,[intShipmentId]			=	0
 ,[intShipmentContractQtyId]	=	NULL
 ,[intUnitMeasureId]			=	B.intUnitMeasureId
@@ -142,7 +142,7 @@ SELECT DISTINCT
 	,[intContractHeaderId]						=	A.intContractHeaderId
 	,[intContractDetailId]						=	A.intContractDetailId
 	,[intScaleTicketId]							=	NULL
-	,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
+	,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intShipmentId]							=	0      
 	,[intShipmentContractQtyId]					=	NULL
   	,[intUnitMeasureId]							=	NULL

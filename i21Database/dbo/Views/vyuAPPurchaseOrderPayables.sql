@@ -40,7 +40,7 @@ SELECT
 	,[intContractHeaderId]		=	G1.intContractHeaderId
 	,[intContractDetailId]		=	G2.intContractDetailId
 	,[intScaleTicketId]			=	NULL
-	,[strScaleTicketNumber]		=	NULL
+	,[strScaleTicketNumber]		=	N''
 	,[intShipmentId]			=	0            
 	,[intShipmentContractQtyId]	=	NULL
 	,[intUnitMeasureId]			=	tblReceived.intUnitMeasureId
@@ -204,7 +204,7 @@ FROM tblPOPurchase A
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
-	,[strScaleTicketNumber]		=	NULL
+	,[strScaleTicketNumber]		=	N''
 	,[intShipmentId]			=	0    
 	,[intShipmentContractQtyId]	=	NULL
 	,[intUnitMeasureId]			=	B.intUnitOfMeasureId
@@ -212,8 +212,8 @@ FROM tblPOPurchase A
 	,[intWeightUOMId]			=	NULL
 	,[intCostUOMId]				=	NULL
 	,[dblNetWeight]				=	0
-	,[strCostUOM]				=	NULL
-	,[strgrossNetUOM]			=	NULL
+	,[strCostUOM]				=	N''
+	,[strgrossNetUOM]			=	N''
 	,[dblWeightUnitQty]			=	1
 	,[dblCostUnitQty]			=	1
 	,[dblUnitQty]				=	1

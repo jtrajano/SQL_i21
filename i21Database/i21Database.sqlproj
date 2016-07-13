@@ -4027,6 +4027,7 @@
     <Build Include="dbo\Tables\tblIPSecondaryStepDetail.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBasis.sql" />
+    <Build Include="dbo\User Defined Types\VoucherPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
