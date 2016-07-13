@@ -1,5 +1,4 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractDetailView2]
-
 AS
 
 	SELECT	CD.intContractDetailId,		 	
