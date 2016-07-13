@@ -246,6 +246,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
 :R .\HD\HDEntryDataFix.sql
+:R .\HD\CustomField.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql

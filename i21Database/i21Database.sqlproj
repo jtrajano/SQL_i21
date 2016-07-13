@@ -4155,6 +4155,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxCategory.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
+    <None Include="Scripts\Post-Deployment\HD\CustomField.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
