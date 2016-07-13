@@ -669,8 +669,8 @@ namespace iRely.Inventory.Model
     public class vyuICGetInventoryValuation
     {
         public int intInventoryValuationKeyId { get; set; }
-        public int intInventoryTransactionId { get; set; }
-        public int intItemId { get; set; }
+        public int? intInventoryTransactionId { get; set; }
+        public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public int? intCategoryId { get; set; }
