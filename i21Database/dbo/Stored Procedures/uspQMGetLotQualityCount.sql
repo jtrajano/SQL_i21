@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetLotQualityCount]
 	@strFilterCriteria NVARCHAR(MAX) = ''
+	,@strLocationId NVARCHAR(10) = '0'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -25,6 +26,7 @@ BEGIN TRY
   JOIN dbo.tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
   JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
   JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
+	AND S.intLocationId =' + @strLocationId + '
   JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
   JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
      ) t  
@@ -81,6 +83,7 @@ BEGIN TRY
   JOIN dbo.tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
   JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
   JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
+	AND S.intLocationId =' + @strLocationId + '
   JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
   JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
   JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId

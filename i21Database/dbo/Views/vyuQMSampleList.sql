@@ -47,6 +47,8 @@ SELECT S.intSampleId
 			)) AS intLotId
 	,S.intSampleUOMId
 	,S.intRepresentingUOMId
+	,S.intLocationId
+	,CL.strLocationName
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -70,3 +72,4 @@ LEFT JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = S.intLotStatusId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 LEFT JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intSampleUOMId
 LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUOMId
+LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId

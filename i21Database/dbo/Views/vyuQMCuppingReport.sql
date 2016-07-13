@@ -19,6 +19,7 @@ SELECT S.intSampleId
 	,S.dtmTestedOn
 	,S.strSampleNote
 	,ST.strSampleTypeName
+	,S.intLocationId
 FROM dbo.tblQMSample AS S
 JOIN dbo.tblICItem AS I ON I.intItemId = S.intItemId
 JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId

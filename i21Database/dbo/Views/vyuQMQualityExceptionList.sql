@@ -23,6 +23,7 @@ SELECT TR.intTestResultId
 	,E.strName
 	,SS.strStatus
 	,S.intSampleId
+	,S.intLocationId
 	,(
 		SELECT strShipperCode
 		FROM dbo.fnQMGetShipperName(S.strMarks)

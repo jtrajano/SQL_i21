@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetContractQualityCount]
      @strFilterCriteria NVARCHAR(MAX) = ''
+	 ,@strLocationId NVARCHAR(10) = '0'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -23,7 +24,8 @@ BEGIN TRY
      JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
      JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
      JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId  
-     JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId  
+     JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
+		AND S.intLocationId =' + @strLocationId + '
      JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
      JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  
      JOIN dbo.tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
@@ -88,7 +90,8 @@ BEGIN TRY
   JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
   JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
   JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId  
-  JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId  
+  JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId
+	AND S.intLocationId =' + @strLocationId + '
   LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
   JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
   JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId  

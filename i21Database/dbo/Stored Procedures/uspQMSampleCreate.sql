@@ -17,12 +17,18 @@ BEGIN TRY
 		,@strXml
 
 	DECLARE @strLotNumber NVARCHAR(30)
+	DECLARE @intLocationId INT
+	DECLARE @intShiftId INT
+	DECLARE @dtmBusinessDate DATETIME
+	DECLARE @dtmCreated DATETIME = GETDATE()
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
+		,@intLocationId = intLocationId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(30)
+			,intLocationId INT
 			)
 
 	IF (
@@ -87,6 +93,14 @@ BEGIN TRY
 				)
 	END
 
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated, @intLocationId)
+
+	SELECT @intShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -132,6 +146,9 @@ BEGIN TRY
 		,intCompanyLocationSubLocationId
 		,strCountry
 		,intItemBundleId
+		,dtmBusinessDate
+		,intShiftId
+		,intLocationId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -179,6 +196,9 @@ BEGIN TRY
 		,intCompanyLocationSubLocationId
 		,strCountry
 		,intItemBundleId
+		,@dtmBusinessDate
+		,@intShiftId
+		,intLocationId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -224,6 +244,7 @@ BEGIN TRY
 			,intCompanyLocationSubLocationId INT
 			,strCountry NVARCHAR(100)
 			,intItemBundleId INT
+			,intLocationId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

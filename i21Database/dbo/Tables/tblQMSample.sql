@@ -43,6 +43,9 @@
 	[intLoadDetailContainerLinkId] INT, 
 	[intLoadId] INT, 
 	[intLoadDetailId] INT, 
+	[dtmBusinessDate] DATETIME, 
+	[intShiftId] INT, 
+	[intLocationId] INT, 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
@@ -71,6 +74,7 @@
 	CONSTRAINT [FK_tblQMSample_tblLGLoadContainer] FOREIGN KEY ([intLoadContainerId]) REFERENCES [tblLGLoadContainer]([intLoadContainerId]), 
 	CONSTRAINT [FK_tblQMSample_tblLGLoadDetailContainerLink] FOREIGN KEY ([intLoadDetailContainerLinkId]) REFERENCES [tblLGLoadDetailContainerLink]([intLoadDetailContainerLinkId]), 
 	CONSTRAINT [FK_tblQMSample_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]), 
-	CONSTRAINT [FK_tblQMSample_tblLGLoadDetail] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId])
-	
+	CONSTRAINT [FK_tblQMSample_tblLGLoadDetail] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId]),
+	CONSTRAINT [FK_tblQMSample_tblMFShift] FOREIGN KEY ([intShiftId]) REFERENCES tblMFShift([intShiftId]),
+	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId])
 )

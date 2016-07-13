@@ -710,3 +710,65 @@ BEGIN
 	DELETE tblQMReportCuppingPropertyMapping WHERE strPropertyName = 'TOTAL DEFECTS'
 END
 GO
+
+-- Updating Location
+GO
+DECLARE @intLocationId INT
+
+SELECT TOP 1 @intLocationId = intCompanyLocationId
+FROM tblSMCompanyLocation
+ORDER BY intCompanyLocationId ASC
+
+UPDATE tblQMSample
+SET intLocationId = @intLocationId
+WHERE intLocationId IS NULL
+GO
+
+-- Updating Business Date
+GO
+UPDATE tblQMSample
+SET dtmBusinessDate = dbo.fnGetBusinessDate(dtmCreated, intLocationId)
+WHERE dtmBusinessDate IS NULL
+GO
+
+-- Updating Business Shift Id
+GO
+IF OBJECT_ID('fnQMGetBusinessShiftId') IS NOT NULL
+BEGIN
+	DROP FUNCTION fnQMGetBusinessShiftId
+END
+GO
+
+GO
+CREATE FUNCTION fnQMGetBusinessShiftId (
+	@dtmCreated DATETIME
+	,@dtmBusinessDate DATETIME
+	,@intLocationId INT
+	)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @intShiftId INT
+
+	SELECT @intShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+	RETURN @intShiftId
+END
+GO
+
+GO
+UPDATE tblQMSample
+SET intShiftId = dbo.fnQMGetBusinessShiftId(dtmCreated, dtmBusinessDate, intLocationId)
+WHERE intShiftId IS NULL
+GO
+
+GO
+IF OBJECT_ID('fnQMGetBusinessShiftId') IS NOT NULL
+BEGIN
+	DROP FUNCTION fnQMGetBusinessShiftId
+END
+GO
