@@ -112,7 +112,8 @@ SELECT
 	strGrade = Grade.strDescription,
 	Item.intLifeTime,
 	Item.strLifeTimeType,
-	Item.ysnListBundleSeparately 
+	Item.ysnListBundleSeparately,
+	dblExtendedCost = ISNULL(ItemStock.dblUnitOnHand, 0) * ISNULL(ItemPricing.dblAverageCost, 0)
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
