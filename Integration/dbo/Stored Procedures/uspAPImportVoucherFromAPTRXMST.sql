@@ -280,6 +280,7 @@ IF @totalInsertedBill <= 0
 BEGIN
 	SET @totalHeaderImported = 0;
 	SET @totalDetailImported = 0;
+	SET @totalUnpostedVoucher = 0;
 	IF @transCount = 0 COMMIT TRANSACTION
 	RETURN;
 END
