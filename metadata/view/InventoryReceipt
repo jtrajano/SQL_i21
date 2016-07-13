@@ -578,7 +578,7 @@
                                                 ],
                                                 "designer|createAlias": "gridcombobox",
                                                 "displayField": "strLocationName",
-                                                "fieldLabel": "Transferor",
+                                                "fieldLabel": "From Location",
                                                 "itemId": "cboTransferor",
                                                 "labelAlign": "top",
                                                 "labelWidth": 80,
@@ -6656,7 +6656,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
