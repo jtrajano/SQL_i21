@@ -176,10 +176,10 @@ Ext.define('Inventory.model.Item', {
 
     validators: [
         {type: 'presence', field: 'strItemNo'},
-        {type: 'presence', field: 'strStatus'},
-        {type: 'presence', field: 'intCategoryId'},
-        {type: 'presence', field: 'strInventoryTracking'},
-        {type: 'presence', field: 'strLotTracking'},
+       // {type: 'presence', field: 'strStatus'},
+       // {type: 'presence', field: 'intCategoryId'},
+       // {type: 'presence', field: 'strInventoryTracking'},
+       // {type: 'presence', field: 'strLotTracking'},
 
         { type: 'inclusion',
             field: 'strType',
@@ -192,7 +192,8 @@ Ext.define('Inventory.model.Item', {
                 'Raw Material',
                 'Other Charge',
                 'Service',
-                'Software'
+                'Software',
+                'Comment'
             ],
             message: 'Invalid Type! Please select an Item Type from the list.'
         }
@@ -220,6 +221,39 @@ Ext.define('Inventory.model.Item', {
                 })
             }
         }
+        
+        if(this.get('strType') !== 'Comment' && (this.get('strStatus') === null || this.get('strStatus') === ''))
+            {
+               errors.add({
+                    field: 'strStatus',
+                    message: 'Status must be present' 
+               })
+            }
+        
+        if(this.get('strType') !== 'Comment' && (this.get('intCategoryId') === null || this.get('intCategoryId') === ''))
+            {
+               errors.add({
+                    field: 'intCategoryId',
+                    message: 'Category must be present' 
+               })
+            }
+        
+        if(this.get('strType') !== 'Comment' && (this.get('strInventoryTracking') === null || this.get('strInventoryTracking') === ''))
+            {
+               errors.add({
+                    field: 'strInventoryTracking',
+                    message: 'Inventory Tracking must be present' 
+               })
+            }
+        
+        if(this.get('strType') !== 'Comment' && (this.get('strLotTracking') === null || this.get('strLotTracking') === ''))
+            {
+               errors.add({
+                    field: 'strLotTracking',
+                    message: 'Lot Tracking must be present' 
+               })
+            }
+        
         return errors;
     }
 });

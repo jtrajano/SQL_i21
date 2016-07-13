@@ -72,6 +72,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 {
                     strType: 'Software'
+                },
+                {
+                    strType: 'Comment'
                 }
             ],
             fields: [
@@ -842,7 +845,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 return true;
             }
             else {
-                this.data.current.set('strInventoryTracking', 'Lot Level');
+                if (get('current.strType') === 'Comment') {
+                        this.data.current.set('strInventoryTracking', null);
+                    }
+                else {
+                        this.data.current.set('strInventoryTracking', 'Lot Level');
+                    }
                 return true;
             }
         },
@@ -895,6 +903,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                     case 'Service':
                     case 'Software':
                     case 'Bundle':
+                    case 'Comment':
                         this.data.current.set('intCommodityId', null);
                         return true;
                         break;
@@ -949,6 +958,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Raw Material':
                     isNotStockTracked = false;
                     break;
+                case 'Comment':
+                    isNotStockTracked = true;
+                    break;
             };
 
             if (isNotStockTracked) {
@@ -985,6 +997,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1017,6 +1030,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Other Charge':
                 case 'Service':
                 case 'Raw Material':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1041,6 +1055,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Other Charge':
                 case 'Service':
                 case 'Raw Material':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1065,6 +1080,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Other Charge':
                 case 'Service':
                 case 'Raw Material':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1089,6 +1105,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1113,6 +1130,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1137,6 +1155,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Other Charge':
                 case 'Service':
                 case 'Raw Material':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1161,6 +1180,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
+                case 'Comment':
                     return true;
                     break;
             }
@@ -1171,7 +1191,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-
+                case 'Comment':
                     return true;
                     break;
 
@@ -1210,6 +1230,7 @@ Ext.define('Inventory.view.ItemViewModel', {
 
                 case 'Other Charge':
                 case 'Software':
+                case 'Comment':
                     return true
                     break;
             }
@@ -1234,6 +1255,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Software':
                 case 'Service':
                 case 'Raw Material':
+                case 'Comment':
                     return true
                     break;
             }
@@ -1258,9 +1280,27 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Manufacturing Item':
                 case 'Manufacturing':
                 case 'Software':
+                case 'Comment':
                     return true;
                     break;
             }
+        },
+        HideDisableForComment: function(get) {
+            if(get('current.strType') === 'Comment') {
+                    this.data.current.set('strStatus', null);
+                    this.data.current.set('strInventoryTracking', null);
+                    this.data.current.set('strLotTracking', null);
+                    this.data.current.set('ysnListBundleSeparately', null);
+                    this.data.current.set('strShortName', null);
+                    this.data.current.set('intManufacturerId', null);
+                    this.data.current.set('intBrandId', null);
+                    this.data.current.set('strModelNo', null);
+                    this.data.current.set('intCategoryId', null);
+                    return true;
+                }
+            else {
+                    return false;
+                }
         },
         readOnlyCostMethod: function (get) {
             if (iRely.Functions.isEmpty(get('current.intOnCostTypeId'))) {
@@ -1335,8 +1375,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             }
             
+            else if(get('current.strType') === 'Comment') {
+                return true;
+            }
+                
             else {
-                return false;
+                    return false;
             }
         }
     }

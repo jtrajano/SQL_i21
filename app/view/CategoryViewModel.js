@@ -46,6 +46,10 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 {
                     strType: 'Software'
                 }
+                ,
+                {
+                    strType: 'Comment'
+                }
             ],
             fields: [
                 {

@@ -188,20 +188,28 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             txtItemNo: '{current.strItemNo}',
             txtDescription: '{current.strDescription}',
-            txtModelNo: '{current.strModelNo}',
+            txtModelNo: {
+                value: '{current.strModelNo}',
+                readOnly: '{HideDisableForComment}'
+             },
             cboType: {
                 value: '{current.strType}',
                 store: '{itemTypes}',
                 readOnly: '{readOnlyForDiscountType}'
             },
-            txtShortName: '{current.strShortName}',
+            txtShortName: {
+                value: '{current.strShortName}',
+                readOnly: '{HideDisableForComment}'
+            },
             cboManufacturer: {
                 value: '{current.intManufacturerId}',
-                store: '{manufacturer}'
+                store: '{manufacturer}',
+                readOnly: '{HideDisableForComment}'
             },
             cboBrand: {
                 value: '{current.intBrandId}',
-                store: '{brand}'
+                store: '{brand}',
+                readOnly: '{HideDisableForComment}'
             },
             cboStatus: {
                 value: '{current.strStatus}',
@@ -215,7 +223,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     column: 'strInventoryType',
                     value: '{current.strType}',
                     conjunction: 'and'
-                }]
+                }],
+                 readOnly: '{HideDisableForComment}'
             },
             cboCommodity: {
                 readOnly: '{readOnlyCommodity}',
@@ -272,8 +281,14 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgOthers: {
                 hidden: '{pgeOthersHide}'
             },
-
+            cfgSetup: {
+                hidden: '{HideDisableForComment}'
+            },
+            cfgPricing: {
+                hidden: '{HideDisableForComment}'
+            },
             grdUnitOfMeasure: {
+                hidden: '{HideDisableForComment}',
                 colDetailUnitMeasure: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
@@ -2442,7 +2457,10 @@ Ext.define('Inventory.view.ItemViewController', {
             case "Kit":
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
                 break;
-
+                
+            case "Comment":
+                break;
+                
             default:
                 iRely.Functions.showErrorDialog('Please select an Inventory Type.');
                 break;

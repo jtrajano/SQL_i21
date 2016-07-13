@@ -56,6 +56,7 @@ namespace iRely.Inventory.BusinessLayer
                             case "raw material":
                             case "service":
                             case "software":
+                            case "comment":
                                 fc.strType = value;
                                 break;
                             default:

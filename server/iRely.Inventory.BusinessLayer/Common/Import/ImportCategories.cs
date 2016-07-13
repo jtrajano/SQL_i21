@@ -14,7 +14,7 @@ namespace iRely.Inventory.BusinessLayer
             : base()
         {
             inventoryTypes = new List<string>();
-            inventoryTypes.AddRange(new string[] { "Bundle", "Inventory", "Kit", "Finished Good", "Non-Inventory", "Other Charge", "Raw Material", "Service", "Software" });
+            inventoryTypes.AddRange(new string[] { "Bundle", "Inventory", "Kit", "Finished Good", "Non-Inventory", "Other Charge", "Raw Material", "Service", "Software", "Comment" });
         }
 
         private List<string> inventoryTypes;
