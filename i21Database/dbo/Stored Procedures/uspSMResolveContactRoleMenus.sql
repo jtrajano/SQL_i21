@@ -12,7 +12,6 @@ BEGIN
 	-- CHECK IF ROLE IS FOR CONTACT/S
 	SELECT @isContact = CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @userRoleId
 	SELECT @IsDefaultPortal = CASE strRoleType WHEN 'Portal Default' THEN 1 ELSE 0 END FROM tblSMUserRole WHERE intUserRoleID = @userRoleId
-	SELECT @isDuplicateUR = CASE SUBSTRING(UPPER(strName),1,3) WHEN 'DUP' THEN 1 ELSE 0 END FROM tblSMUserRole WHERE intUserRoleID = @userRoleId
 
 	IF @IsDefaultPortal = 1
 	BEGIN
@@ -95,34 +94,7 @@ BEGIN
 
 					SET @currentRow = @currentRow + 1
 				END			
-			END
-			ELSE IF @isDuplicateUR = 1 
-			BEGIN
-			DECLARE @currentRow2 INT
-				DECLARE @totalRows2 INT
-
-				SET @currentRow2 = 1
-				SELECT @totalRows2 = Count(*) FROM [dbo].[tblEMEntityToRole] EntityToRole
-				INNER JOIN tblSMUserRole UserRole ON EntityToRole.intEntityRoleId = UserRole.intUserRoleID
-				WHERE UserRole.ysnAdmin = 0 AND EntityToRole.intEntityId = @groupId
-
-				WHILE (@currentRow2 <= @totalRows2)
-				BEGIN
-					DECLARE @roleId2 INT
-					SELECT @roleId2 = intUserRoleID FROM (  
-						SELECT UserRole.intUserRoleID,  ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID'
-						FROM [dbo].[tblEMEntityToRole] EntityToRole
-						INNER JOIN tblSMUserRole UserRole ON EntityToRole.intEntityRoleId = UserRole.intUserRoleID
-						WHERE UserRole.ysnAdmin = 0 AND EntityToRole.intEntityId = @groupId
-					) a
-					WHERE ROWID = @currentRow2
-
-					PRINT N'Executing uspSMUpdateUserRoleMenus'
-					Exec uspSMUpdateUserRoleMenus @roleId2, 1, 0
-
-					SET @currentRow2 = @currentRow2 + 1
-				END	
-			END
+			END			
 			ELSE
 			BEGIN
 				-- Delete unavailable menus
