@@ -334,4 +334,31 @@
 			SET	[strMessage] = N'{0} {1} {2} unapproved.'
 			WHERE [strReminder] = N'Approve' AND [strType] = N'Purchase Order' 
 		END
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Sales Order')
+		BEGIN
+			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			SELECT [strReminder]        =        N'Process',
+				   [strType]        	=        N'Sales Order',
+				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
+				   [strQuery]  			=        N'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Sales Order'' ' +
+												  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'UNION ' +
+												  'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Sales Order'' ' +
+												  'AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
+												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
+				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [intSort]            =        17
+		END
+	ELSE
+		BEGIN
+			UPDATE [dbo].[tblSMReminderList]
+			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
+			WHERE [strReminder] = N'Process' AND [strType] = N'Sales Order' 
+		END
 GO
