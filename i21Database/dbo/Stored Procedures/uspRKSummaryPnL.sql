@@ -69,7 +69,6 @@ FROM (
 				,MatchShort
 				,NetPnL,ysnExpired
 			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end and ysnExpired=@ysnExpired
-			and dtmTradeDate >= @dtmToDate
 			) t
 		) u
 	GROUP BY intFutureMonthId
@@ -143,7 +142,6 @@ ELSE
 				,MatchShort
 				,NetPnL,ysnExpired
 			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
-			and dtmTradeDate >= @dtmToDate
 			) t
 		) u
 	GROUP BY intFutureMonthId
