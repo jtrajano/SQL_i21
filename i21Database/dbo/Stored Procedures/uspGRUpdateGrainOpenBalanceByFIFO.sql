@@ -173,7 +173,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				RAISERROR('Invoice cannot be created because there is no Other Charge Item having Storage Charge as CostType.', 16, 1);
+				RAISERROR('There should be atleast One Storage charge Cost Type Item.', 16, 1);
 			END
 			
 			SET @dblUnitsConsumed = @dblUnitsConsumed - @dblStorageUnits
