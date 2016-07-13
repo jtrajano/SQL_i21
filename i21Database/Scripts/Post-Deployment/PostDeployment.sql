@@ -245,6 +245,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
+:R .\HD\DefaultData\2_Screen.sql
 :R .\HD\HDEntryDataFix.sql
 :R .\HD\CustomField.sql
 

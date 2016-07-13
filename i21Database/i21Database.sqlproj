@@ -4156,6 +4156,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_OriginDestinationState.sql" />
     <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
     <None Include="Scripts\Post-Deployment\HD\CustomField.sql" />
+    <None Include="Scripts\Post-Deployment\HD\DefaultData\2_Screen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
