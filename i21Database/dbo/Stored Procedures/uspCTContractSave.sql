@@ -10,7 +10,9 @@ BEGIN TRY
 			@intContractDetailId		INT,
 			@dblCashPrice				NUMERIC(18,6),
 			@intPricingTypeId			INT,
-			@ysnMultiplePriceFixation	BIT
+			@ysnMultiplePriceFixation	BIT,
+			@dblBasis					NUMERIC(18,6),
+			@dblOriginalBasis			NUMERIC(18,6)
 	
 	SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
@@ -18,10 +20,14 @@ BEGIN TRY
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		SELECT	@intPricingTypeId	=	NULL,
-				@dblCashPrice		=	NULL
-				
+				@dblCashPrice		=	NULL,
+				@dblBasis			=	NULL,
+				@dblOriginalBasis	=	NULL
+
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
-				@dblCashPrice		=	dblCashPrice 
+				@dblCashPrice		=	dblCashPrice,
+				@dblBasis			=	dblBasis,
+				@dblOriginalBasis	=	dblOriginalBasis
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
@@ -30,6 +36,11 @@ BEGIN TRY
 			EXEC uspICUpdateInventoryReceiptUnitCost @intContractDetailId,@dblCashPrice
 		END
 		
+		IF @dblOriginalBasis IS NOT NULL AND  @dblBasis <> @dblOriginalBasis
+		BEGIN
+			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis
+		END
+
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId

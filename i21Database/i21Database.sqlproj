@@ -4026,6 +4026,7 @@
     <Build Include="dbo\Functions\fnConstructLineItemTaxDetail.sql" />
     <Build Include="dbo\Tables\tblIPSecondaryStepDetail.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
