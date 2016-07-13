@@ -54,3 +54,4 @@ FROM 	tblICItem Item  LEFT JOIN tblICItemUOM StockUnit
 			ON StorageLocation.intStorageLocationId = [Transaction].intStorageLocationId
 		LEFT JOIN tblICInventoryTransactionType TransactionType 
 			ON TransactionType.intTransactionTypeId = [Transaction].intTransactionTypeId
+WHERE	Item.strType != 'Comment'

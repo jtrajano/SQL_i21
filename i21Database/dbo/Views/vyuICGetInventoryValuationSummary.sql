@@ -32,3 +32,4 @@ FROM (
 	tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId LEFT JOIN
 	tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId LEFT JOIN
 	tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = [Transaction].intSubLocationId
+WHERE	Item.strType != 'Comment'
