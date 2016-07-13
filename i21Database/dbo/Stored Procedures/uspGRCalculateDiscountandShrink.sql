@@ -234,8 +234,8 @@ BEGIN TRY
 				 intExtendedKey
 				,dblFrom
 				,dblTo
-				,dblDiscountAmount
-				,dblShrink
+    			,0.0 AS dblDiscountAmount  
+    			,0.0 AS dblShrink  
 				,'Success' AS strMessage 
 				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
 				,@strCalculationDiscountOption AS strCalculationDiscountOption
@@ -290,8 +290,8 @@ BEGIN TRY
 				 intExtendedKey
 				,dblFrom
 				,dblTo
-				,dblDiscountAmount
-				,dblShrink
+    			,0.0 AS dblDiscountAmount  
+    			,0.0 AS dblShrink  
 				,'Success' AS strMessage 
 				,@intDiscountCalculationOptionId AS intDiscountCalculationOptionId
 				,@strCalculationDiscountOption AS strCalculationDiscountOption
