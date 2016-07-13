@@ -1,5 +1,4 @@
-﻿
-CREATE TABLE [dbo].[tblRKFutOptTransactionImport]
+﻿CREATE TABLE [dbo].[tblRKFutOptTransactionImport]
 (
 	[intFutOptTransactionId] INT IDENTITY(1,1) NOT NULL,
 	[strName] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
@@ -23,6 +22,6 @@ CREATE TABLE [dbo].[tblRKFutOptTransactionImport]
 	[dtmFilledDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strBook] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSubBook] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
-	[intConcurrencyId] int
+	[intConcurrencyId] int,
+	[dtmCreateDateTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 )
-
