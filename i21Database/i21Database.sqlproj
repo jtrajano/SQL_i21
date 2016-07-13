@@ -4040,6 +4040,7 @@
     <Build Include="dbo\Views\vyuEMEntityType.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntitySalesEntity.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
