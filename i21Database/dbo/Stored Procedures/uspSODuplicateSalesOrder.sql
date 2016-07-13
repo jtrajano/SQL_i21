@@ -90,7 +90,7 @@ BEGIN
            ,[strTransactionType]
 		   ,[strQuoteType]
 		   ,[strType]
-           ,@OrderStatus
+           ,CASE WHEN  @ForRecurring = 1 THEN 'Open' ELSE ISNULL(@OrderStatus, 'Open') END
            ,[intAccountId]
            ,NULL --Processed Date
 		   ,[dtmExpirationDate]
