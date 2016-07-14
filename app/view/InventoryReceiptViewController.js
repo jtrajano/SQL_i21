@@ -1539,10 +1539,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
                     if (!lot.dummy) {
-                        // lot.set('strUnitMeasure', records[0].get('strUnitMeasure'));
-                        // lot.set('intItemUnitMeasureId', records[0].get('intItemUnitMeasureId'));
-                        lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
-                        lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+                        //Set Default Value for Lot Wgt UOM 
+                        if(lot.get('strWeightUOM') === null || lot.get('strWeightUOM') === '')
+                            {
+                                lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                                lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
+                            }
                     }
                 });
             }
@@ -1570,8 +1572,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
             
             //Set Default Value for Gross/Net UOM
-            current.set('strWeightUOM', records[0].get('strUnitMeasure'));
-            current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+            if (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')
+                {
+                    current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                    current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+                }
         }
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
@@ -1930,29 +1935,54 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var totalGross = 0
             ,totalNet = 0
             ,lotGross = 0
-            ,lotTare = 0;
+            ,lotTare = 0
+            ,ysnCalculatedInLot = 0;
 
         if (record.tblICInventoryReceiptItemLots()) {
             Ext.Array.each(record.tblICInventoryReceiptItemLots().data.items, function (lot) {
                 if (!lot.dummy) {
                     // If Gross/Net UOM is blank, do not calculate the lot Gross and Net.
                     if (!iRely.Functions.isEmpty(record.get('intWeightUOMId'))) {
+                        if(lot.get('dblQuantity') !== 0 )
+                            {
+                                 // Get the Gross Qty
+                                lotGross = lot.get('dblGrossWeight');
+                                lotGross = Ext.isNumeric(lotGross) ? lotGross : 0.00;
 
-                        // Get the Gross Qty
-                        lotGross = lot.get('dblGrossWeight');
-                        lotGross = Ext.isNumeric(lotGross) ? lotGross : 0.00;
+                                // Get the Tare Qty
+                                lotTare = lot.get('dblTareWeight');
+                                lotTare = Ext.isNumeric(lotTare) ? lotTare : 0.00;
 
-                        // Get the Tare Qty
-                        lotTare = lot.get('dblTareWeight');
-                        lotTare = Ext.isNumeric(lotTare) ? lotTare : 0.00;
-
-                        // Calculate the total Gross and total Net
-                        totalGross += lotGross;
-                        totalNet += (lotGross - lotTare);
+                                // Calculate the total Gross and total Net
+                                totalGross += lotGross;
+                                totalNet += (lotGross - lotTare);
+                                ysnCalculatedInLot = 1;
+                            }
                     }
                 }
             });
         }
+        
+        if(ysnCalculatedInLot === 0)
+            {
+                 var receiptItemQty = record.get('dblOpenReceive');
+                 var receiptUOMCF = record.get('dblItemUOMConvFactor');
+                 var weightUOMCF = record.get('dblWeightUOMConvFactor');
+
+                 if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
+                 if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
+                 if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
+
+                 // If there is not Gross/Net UOM, do not calculate the lot gross and net.
+                 if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === '') {
+                    totalGross = 0;
+                 }
+                else {
+                    totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; 
+                    
+                 }    
+                totalNet = totalGross;
+            }
 
         record.set('dblGross', totalGross);
         record.set('dblNet', totalNet);
@@ -2567,30 +2597,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     context.record.set('dblUnitRetail', context.value);
                     context.record.set('dblGrossMargin', 0);
                 }
-                
-                if(context.field === 'dblOpenReceive')
-                    {
-                        //Calculate Gross and Net without Lot
-                        var receiptItemQty = context.value;
-                        var receiptUOMCF = context.record.get('dblItemUOMConvFactor');
-                        var weightUOMCF = context.record.get('dblWeightUOMConvFactor');
-                        
-                        if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
-                        if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
-                        if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
-
-                        // If there is not Gross/Net UOM, do not calculate the lot gross and net.
-                        if (iRely.Functions.isEmpty(win.viewModel.data.currentReceiptItem.get('intWeightUOMId'))) {
-                            context.record.set('dblGross', 0);
-                            context.record.set('dblNet', 0);
-                        }
-                        else {
-                                var valGrossNet = (receiptItemQty * receiptUOMCF) / weightUOMCF;
-                                
-                                context.record.set('dblGross', valGrossNet);
-                                context.record.set('dblNet', valGrossNet);
-                            }
-                    }
             }
         }
         // If editing the unit retail, update the gross margin too.
@@ -2606,7 +2612,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         context.record.set(context.field, context.value);
 
         // Calculate the gross weight.
-        // me.calculateGrossNet(context.record);
+         me.calculateGrossNet(context.record);
 
         // Validate the gross and net variance.
         vw.data.currentReceiptItem = context.record;
@@ -2655,6 +2661,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var netTotal = grossQty - tare;
                 context.record.set('dblNetWeight', netTotal);
             }
+            
+            //Set Default Value for Lot UOM
+            if(context.record.get('strUnitMeasure') === null || context.record.get('strUnitMeasure') === '') {
+                    context.record.set('strUnitMeasure', receiptItem.get('strUnitMeasure'));
+                    context.record.set('intItemUnitMeasureId', receiptItem.get('intItemUnitMeasureId'));
+                } 
         }
 
         else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
@@ -3859,8 +3871,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (current && (newValue === null || newValue === '')) {
             current.set('intWeightUOMId', null);
             current.set('dblWeightUOMConvFactor', null);
-           // current.set('dblGross', 0);
-           // current.set('dblNet', 0);
+            current.set('dblGross', 0);
+            current.set('dblNet', 0);
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
                     if (!lot.dummy) {
