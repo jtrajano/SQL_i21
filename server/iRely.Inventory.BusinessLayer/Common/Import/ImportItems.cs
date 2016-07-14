@@ -11,7 +11,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         protected override string[] GetRequiredFields()
         {
-            return new string[] { "item no", "type", "category" };
+            return new string[] { "item no", "description", "type", "category" };
         }
 
         protected override tblICItem ProcessRow(int row, int fieldCount, string[] headers, LumenWorks.Framework.IO.Csv.CsvReader csv, ImportDataResult dr)
@@ -76,7 +76,10 @@ namespace iRely.Inventory.BusinessLayer
                         fc.strShortName = value;
                         break;
                     case "description":
-                        fc.strDescription = value;
+                        if (string.IsNullOrEmpty(value))
+                            valid = false;
+                        else
+                            fc.strDescription = value;
                         break;
                     case "manufacturer":
                         if (string.IsNullOrEmpty(value))
