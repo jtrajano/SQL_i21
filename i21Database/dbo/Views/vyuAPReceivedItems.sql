@@ -523,7 +523,7 @@ FROM
 		[intEntityVendorId]							=	CC.intVendorId
 		,[dtmDate]									=	CD.dtmStartDate
 		,[strReference]								=	'' --?
-		,[strSourceNumber]							=	LTRIM(CD.strContractNumber)
+		,[strSourceNumber]							=	LTRIM(CH.strContractNumber)
 		,[strPurchaseOrderNumber]					=	NULL
 		,[intPurchaseDetailId]						=	NULL
 		,[intItemId]								=	CC.intItemId
@@ -534,7 +534,7 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	1
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN CC.dblRate ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
@@ -551,7 +551,7 @@ FROM
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
-		,[strContractNumber]						=	CD.strContractNumber
+		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
@@ -571,29 +571,31 @@ FROM
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
-															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))
+															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
 														END		
 		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
-															 ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))))
+															 ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
 														END	
-		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))	
-		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CD.intMainCurrencyId,CD.intCurrencyId))))
+		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
+		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
 	FROM		vyuCTContractCostView		CC
-	JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
 	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
 													RC.intChargeId			=	CC.intItemId
-	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intUnitMeasureId
+	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intItemUOMId
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
-	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CD.intMainCurrencyId) 
+	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON CC.intVendorId = D1.intEntityVendorId  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
