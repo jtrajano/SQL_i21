@@ -12,8 +12,12 @@
 	[dtmEndDate]						DATETIME		NULL,	
 	[intEntityCustomerLocationId]		INT				NULL,	
     [dblPartialTax]						NUMERIC(18,6) NULL,
+	[intCardId]							INT				NULL,
+	[intVehicleId]						INT				NULL,
     [intConcurrencyId]					INT			CONSTRAINT [DF_tblARCustomerTaxingTaxException_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomerTaxingTaxException] PRIMARY KEY CLUSTERED ([intCustomerTaxingTaxExceptionId] ASC),
 	CONSTRAINT [FK_tblARCustomerTaxingTaxException_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+	CONSTRAINT [FK_tblARCustomerTaxingTaxException_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
+	CONSTRAINT [FK_tblARCustomerTaxingTaxException_tblCFVehicle] FOREIGN KEY ([intVehicleId]) REFERENCES [dbo].[tblCFVehicle] ([intVehicleId]),
 	CONSTRAINT FK_tblARCustomerTaxingTaxException_tblEMEntityLocation FOREIGN KEY ([intEntityCustomerLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId])
 )
