@@ -209,6 +209,37 @@ END
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
+DECLARE @EntityNo NVARCHAR(25)
+SELECT TOP 1 @EntityNo = strEntityNo 
+FROM (
+	SELECT [strEntityNo]		= STATEMENTREPORT.strCustomerNumber
+		  ,[dtmAsOfDate]		= @dtmDateTo		 
+		  ,[dblLastStatement]	= ISNULL(STATEMENTREPORT.dblTotalAmount,0)
+	FROM @temp_statement_table AS STATEMENTREPORT
+	LEFT JOIN @temp_aging_table AS AGINGREPORT 
+	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+) ABC
+
+DELETE FROM [tblARStatementOfAccount] WHERE [strEntityNo] = @EntityNo
+INSERT INTO [tblARStatementOfAccount]
+(
+	[strEntityNo]
+	, [dtmLastStatementDate]
+	, [dblLastStatement]
+)
+SELECT TOP 1 [strEntityNo], dtmAsOfDate, SUM( [dblLastStatement]) FROM
+(
+	SELECT [strEntityNo]		= STATEMENTREPORT.strCustomerNumber
+		  ,[dtmAsOfDate]		= @dtmDateTo		 
+		  ,[dblLastStatement]	= ISNULL(STATEMENTREPORT.dblTotalAmount,0)
+	FROM @temp_statement_table AS STATEMENTREPORT
+	LEFT JOIN @temp_aging_table AS AGINGREPORT 
+	ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+	
+)   ABC
+GROUP BY ABC.dtmAsOfDate, ABC.[strEntityNo] 
+ORDER BY dtmAsOfDate DESC
+
 SELECT STATEMENTREPORT.strReferenceNumber
       ,STATEMENTREPORT.strTransactionType
 	  ,STATEMENTREPORT.dtmDueDate

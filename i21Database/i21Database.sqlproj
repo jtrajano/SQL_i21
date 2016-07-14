@@ -4028,6 +4028,7 @@
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBasis.sql" />
     <Build Include="dbo\User Defined Types\VoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblARStatementOfAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
