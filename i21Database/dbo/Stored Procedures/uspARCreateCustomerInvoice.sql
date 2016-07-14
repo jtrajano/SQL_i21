@@ -252,7 +252,7 @@ IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHER
  
 IF ISNULL(@DefaultCurrency,0) = 0
 	BEGIN
-		SET @ErrorMessage = 'There is no setup for default currency in the Company Preference.'
+		SET @ErrorMessage = 'There is no setup for default currency in the Company Configuration.'
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
