@@ -396,7 +396,7 @@ BEGIN TRY
 		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
 		,[strImportFormat]				= @ImportFormat
-		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment') THEN @Posted ELSE 0 END)
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Prepayment') THEN @Posted ELSE 0 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
