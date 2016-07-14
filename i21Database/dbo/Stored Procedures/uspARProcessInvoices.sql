@@ -167,6 +167,7 @@ DECLARE  @Id									INT
 		,@TransactionId							INT
 		,@MeterReadingId						INT
 		,@ContractHeaderId						INT
+		,@LoadId								INT
 		,@OriginalInvoiceId						INT
 		,@EntityId								INT
 		,@ResetDetails							BIT
@@ -300,6 +301,7 @@ BEGIN
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@ContractHeaderId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
+		,@LoadId						= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Load Schedule' THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional Invoice' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@ResetDetails					= [ysnResetDetails]
@@ -418,9 +420,15 @@ BEGIN
 					BEGIN
 						SET @SourceColumn = 'intContractHeaderId'
 						SET @SourceTable = 'tblCTContractHeader'
-					END	
+					END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract')
+				IF ISNULL(@SourceTransaction,'') = 'Load Schedule'
+					BEGIN
+						SET @SourceColumn = 'intLoadId'
+						SET @SourceTable = 'tblLGLoad'
+					END
+
+				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
 					BEGIN
 						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 					END
@@ -490,6 +498,7 @@ BEGIN
 			,@TransactionId 				= @TransactionId
 			,@MeterReadingId				= @MeterReadingId
 			,@OriginalInvoiceId 			= @OriginalInvoiceId
+			,@LoadId			 			= @LoadId
 			,@PeriodsToAccrue				= @PeriodsToAccrue
 			,@SourceId						= @NewSourceId
 			,@ImportFormat					= @ImportFormat
@@ -993,6 +1002,7 @@ BEGIN TRY
 			,@TransactionId 				= [intTransactionId]
 			,@MeterReadingId				= [intMeterReadingId]
 			,@ContractHeaderId				= [intContractHeaderId] 
+			,@LoadId						= [intLoadId] 
 			,@OriginalInvoiceId				= [intOriginalInvoiceId]
 			,@EntityId						= [intEntityId]
 			,@ResetDetails					= [ysnResetDetails]
@@ -1044,7 +1054,13 @@ BEGIN TRY
 						SET @SourceTable = 'tblCTContractHeader'
 					END	
 
-			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract')
+			IF ISNULL(@SourceTransaction,'') = 'Load Schedule'
+					BEGIN
+						SET @SourceColumn = 'intLoadId'
+						SET @SourceTable = 'tblLGLoad'
+					END
+
+			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'Meter Billing', 'Provisional Invoice', 'Inventory Shipment', 'Sales Contract', 'Load Schedule')
 				BEGIN
 					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
 				END
@@ -1117,6 +1133,7 @@ BEGIN TRY
 			,[intTransactionId]			= @TransactionId 
 			,[intMeterReadingId]		= @MeterReadingId
 			,[intContractHeaderId]		= @ContractHeaderId
+			,[intLoadId]				= @LoadId
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1

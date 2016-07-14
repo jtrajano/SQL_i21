@@ -39,6 +39,7 @@
 	,@TransactionId					INT				= NULL
 	,@MeterReadingId				INT				= NULL
 	,@OriginalInvoiceId				INT				= NULL
+	,@LoadId                        INT             = NULL
 	,@PeriodsToAccrue				INT				= 1
 	,@SourceId						INT				= 0
 	,@ImportFormat                  NVARCHAR(50)    = NULL
@@ -343,7 +344,8 @@ BEGIN TRY
 		,[intTransactionId]
 		,[intMeterReadingId]
 		,[intContractHeaderId]
-		,[intOriginalInvoiceId] 
+		,[intOriginalInvoiceId]
+		,[intLoadId]
 		,[intEntityId]
 		,[intConcurrencyId])
 	SELECT
@@ -409,6 +411,7 @@ BEGIN TRY
 		,[intMeterReadingId]			= @MeterReadingId
 		,[intContractHeaderId]			= @ItemContractHeaderId
 		,[intOriginalInvoiceId]			= @OriginalInvoiceId
+		,[intLoadId]                    = @LoadId
 		,[intEntityId]					= @EntityId 
 		,[intConcurrencyId]				= 0
 	FROM	

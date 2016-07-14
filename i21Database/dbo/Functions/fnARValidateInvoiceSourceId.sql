@@ -57,5 +57,8 @@ BEGIN
 	IF @SourceTransaction = 'Sales Contract'
 		RETURN 15
 
+	IF @SourceTransaction = 'Load Schedule'
+		RETURN 16
+
 	RETURN @SourceIdOut
 END

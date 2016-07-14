@@ -40,6 +40,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 13. "Load/Shipment Schedules"
 																											-- 14. "Credit Card Reconciliation"
 																											-- 15. "Sales Contract"
+																											-- 16. "Load Schedule"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
@@ -75,6 +76,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
 	,[intMeterReadingId]					INT												NULL		-- Key Value from tblMBMeterReading (Meter Reading)
 	,[intContractHeaderId]					INT												NULL		-- Key Value from tblCTContractHeader (Sales Contract)
+	,[intLoadId]							INT												NULL		-- Key Value from tblLGLoad (Load Schedule)
 	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional Invoice/ Duplicate/ Import/ Recurring) 	
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
