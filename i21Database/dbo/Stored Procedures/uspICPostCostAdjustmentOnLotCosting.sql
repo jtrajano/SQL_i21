@@ -215,6 +215,8 @@ BEGIN
 		-- Get the original cost. 
 		BEGIN 
 			-- Get the original cost from the Lot cost adjustment log table. 
+			SET @OriginalCost = NULL
+			 
 			SELECT	@OriginalCost = dblCost
 			FROM	dbo.tblICInventoryLotCostAdjustmentLog
 			WHERE	intInventoryLotId = @CostBucketId
