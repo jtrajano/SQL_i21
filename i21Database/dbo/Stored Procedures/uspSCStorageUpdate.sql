@@ -123,9 +123,10 @@ BEGIN TRY
 
 		SET @dblUnits = @dblNetUnits * -1
 		SELECT @intStorageEntityId = SC.intEntityId, @intStorageCommodityId = SC.intCommodityId,
-		@intStorageLocationId =  SC.intProcessingLocationId
+		@intStorageLocationId =  SC.intProcessingLocationId , @intItemId = SC.intItemId
 		FROM dbo.tblSCTicket SC
 		WHERE SC.intTicketId = @intTicketId
+
 		SELECT @intStorageTypeId = ST.intStorageScheduleTypeId
 		FROM dbo.tblGRStorageType ST
 		WHERE ST.strStorageTypeCode = @strDistributionOption
@@ -137,6 +138,7 @@ BEGIN TRY
 			and CS.intEntityId = @intStorageEntityId and CS.intCompanyLocationId = @intStorageLocationId
 			and CS.intStorageTypeId = @intStorageTypeId 
 			ORDER BY CS.intCustomerStorageId ASC
+			--EXEC uspGRUpdateGrainOpenBalanceByFIFO @strDistributionOption,'Scale',@intEntityId,@intItemId,@intStorageTypeId, @dblUnits, @intTicketId , @intUserId
 			IF	ISNULL(@intStorageTicketId,0) = 0 AND @dblUnits > 0
 			BEGIN
 				INSERT INTO @LineItems (
@@ -418,13 +420,8 @@ BEGIN TRY
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 1
 				FROM	dbo.tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM
-							ON ScaleTicket.intItemId = ItemUOM.intItemId
-							AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-						INNER JOIN dbo.tblICItemLocation ItemLocation
-							ON ScaleTicket.intItemId = ItemLocation.intItemId
-							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
 				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 				END
 				SET @intStorageTicketId = 0
@@ -701,14 +698,8 @@ BEGIN TRY
 					END
 					,strSourceTransactionId  = @strDistributionOption
 			FROM	dbo.tblSCTicket ScaleTicket
-					INNER JOIN dbo.tblICItemUOM ItemUOM
-						ON ScaleTicket.intItemId = ItemUOM.intItemId
-						--AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-						AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-					INNER JOIN dbo.tblICItemLocation ItemLocation
-						ON ScaleTicket.intItemId = ItemLocation.intItemId
-						-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-						AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+					INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+					INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
 			WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 	END
 	
