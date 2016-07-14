@@ -338,7 +338,7 @@ DECLARE @tblTempTransaction TABLE (
 																	   dblGross, 
 																		dblNet, 
 																		dblBillQty, 
-																		dtmReceiptDate, 
+																		@DateFrom, 
 																		strShipVia, 
 																		strTransporterLicense, 
 																		strTransportationMode, 
