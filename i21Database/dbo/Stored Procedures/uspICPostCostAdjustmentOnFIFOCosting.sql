@@ -186,6 +186,8 @@ BEGIN
 	-- Get the original cost. 
 	BEGIN 
 		-- Get the original cost from the FIFO cost adjustment log table. 
+		SET @OriginalCost = NULL 
+
 		SELECT	@OriginalCost = dblCost
 		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
 		WHERE	intInventoryFIFOId = @CostBucketId
