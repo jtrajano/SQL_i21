@@ -60,6 +60,10 @@ DECLARE @tblTempSummaryItem TABLE (
 DECLARE @tblTempTaxReportSummary TABLE(
 	intDefaultValue INT
 )
+DECLARE @tblSchedule TABLE (
+		intId INT IDENTITY(1,1),
+		strSchedule NVARCHAR(MAX)
+		)
 DELETE FROM tblTFTaxReportSummary
 	-- ======================== HEADER ==============================
 DECLARE @DatePeriod DATETIME
@@ -125,7 +129,7 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 				IF @SmrySummaryItemId = 'MF-360-Summary-001'
 					BEGIN
 					--PRINT @SmryReportingComponentId
-						SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''')'  
+						SET @SmryQuery = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCode + ''') AND strType = ''Gasoline / Aviation Gasoline / Gasohol'''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
@@ -362,49 +366,79 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 
 				IF (@paramScheduleCode = '5' OR @paramScheduleCode = '11' OR @paramScheduleCode = '6D' OR @paramScheduleCode = '6X' OR @paramScheduleCode = '7' OR @paramScheduleCode = '8' OR @paramScheduleCode = '10A' OR @paramScheduleCode = '10B')
 					BEGIN
-						SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid)
-						SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid)
-						SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid)
+						SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid)
+						SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid)
+						SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid)
 						SET @ItemTotal = (SELECT ISNULL(sum(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN(@paramScheduleCode))
 					END
 				ELSE
 					BEGIN
-						SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblGross), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid)
-						SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblGross), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid)
-						SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblGross), 0) AS 'FET' FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid)
+						SET @DetailColumnValue_gas = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid)
+						SET @DetailColumnValue_kerosene = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid)
+						SET @DetailColumnValue_others = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramScheduleCode AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid)
 						SET @ItemTotal = (SELECT ISNULL(sum(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN(@paramScheduleCode) AND uniqTransactionGuid = @Guid)
 					END
 			
 					SET @ItemDescription = (SELECT strSummaryItemDescription FROM tblTFTaxReportTemplate WHERE intSummaryItemNumber = @CountItems AND strTaxType = 'Details' AND strSummaryFormCode = 'MF-360')
 
 					-- ITEMS THAT HAVE MULTIPLE SCHEDULE CODES TO COMPUTE
-					IF (@CountItems = 8 OR @CountItems = 9)
+					DECLARE @SchedQuery NVARCHAR(MAX)
+					IF (@CountItems = 8)
 						BEGIN
-							SET @tplScheduleCode = REPLACE(@tplScheduleCode,',',''',''')
-							SET @ScheduleCodeParam = REPLACE(@ScheduleCodeParam,',',''',''')
-					
-							SET @itemQuery = 'SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @ScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + '''' 
-	
-							INSERT INTO @tblTempSummaryTotal
-							EXEC(@itemQuery)
-			
-							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode,strScheduleCode,strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-							VALUES(@Guid,@TA,@FormCode,'','Details','TOTAL', '',(SELECT ISNULL(dbLColumnValue, 0) FROM @tblTempSummaryTotal), @ItemDescription, CAST(GETDATE() AS DATE))
-							DELETE FROM @tblTempSummaryTotal
+							SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
+							INSERT INTO @tblSchedule (strSchedule)
+							EXEC(@SchedQuery)
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',(SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 4, 'Details','TOTAL', '',(SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							DELETE FROM @tblSchedule
 						END
-					ELSE IF (@CountItems = 20 OR @CountItems = 21)
+
+					ELSE IF (@CountItems = 9)
 						BEGIN
-							SET @tplScheduleCode = REPLACE(@tplScheduleCode,',',''',''')
-							SET @ScheduleCodeParam = REPLACE(@ScheduleCodeParam,',',''',''')
-					
-							SET @itemQuery = 'SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @ScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + '''' 
-	
-							INSERT INTO @tblTempSummaryTotal
-							EXEC(@itemQuery)
-			
-							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode,strScheduleCode,strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
-							VALUES(@Guid,@TA,@FormCode,'','Details','TOTAL', '',(SELECT ISNULL(dbLColumnValue, 0) FROM @tblTempSummaryTotal), @ItemDescription, CAST(GETDATE() AS DATE))
-							DELETE FROM @tblTempSummaryTotal
+							SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
+							INSERT INTO @tblSchedule (strSchedule)
+							EXEC(@SchedQuery)
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',(SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 2, 'Details','K-1/K-2 Kerosene B', '',(SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							-- OTHERS
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 3, 'Details','All Other Products C', '',(SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 4, 'Details','TOTAL', '',(SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							DELETE FROM @tblSchedule
+						END
+					ELSE IF (@CountItems = 21)
+						BEGIN
+							SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
+							INSERT INTO @tblSchedule (strSchedule)
+							EXEC(@SchedQuery)
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 2, 'Details','K-1/K-2 Kerosene B', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'K-1 / K-2 Kerosene' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							-- OTHERS
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 3, 'Details','All Other Products C', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'All Other Products' AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', '', 'Details','TOTAL', '',(SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND uniqTransactionGuid = @Guid), @ItemDescription, CAST(GETDATE() AS DATE))
+							DELETE FROM @tblSchedule
+						END
+					ELSE IF (@CountItems = 20)
+						BEGIN
+							SELECT @SchedQuery = 'SELECT ''' + REPLACE (@tplScheduleCode,',',''' UNION SELECT ''') + ''''
+							INSERT INTO @tblSchedule (strSchedule)
+							EXEC(@SchedQuery)
+							DECLARE @TOTAL NUMERIC(18,2)
+							SET @TOTAL = (SELECT SUM(CONVERT(NUMERIC(18, 2), strConfiguration)) FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND strSummaryScheduleCode = 'E-1') + (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode IN (SELECT strSchedule FROM @tblSchedule) AND strType = 'Gasoline / Aviation Gasoline / Gasohol' AND uniqTransactionGuid = @Guid)
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 1, 'Details','Gasoline / Aviation Gasoline / Gasohol A', '',@TOTAL, @ItemDescription, CAST(GETDATE() AS DATE))
+							INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType,strColumn,strProductCode,strColumnValue,strDescription,dtmDateRun)		
+							VALUES(@Guid,@TA,@FormCode,'', 4, 'Details','TOTAL', '',@TOTAL, @ItemDescription, CAST(GETDATE() AS DATE))
+							DELETE FROM @tblSchedule
 						END
 					ELSE 
 						BEGIN
