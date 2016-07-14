@@ -256,6 +256,8 @@ DECLARE @tblTempTransaction TABLE (
 																	   strTelephoneNumber,
 																	   strTaxPayerIdentificationNumber,
 																	   strTaxPayerFEIN,
+																	   dtmReportingPeriodBegin,
+																	   dtmReportingPeriodEnd,
 																	   leaf) 
 
 																	   SELECT DISTINCT @Guid, 
@@ -296,6 +298,8 @@ DECLARE @tblTempTransaction TABLE (
 																		strHeaderPhone,
 																		strHeaderStateTaxID,
 																		strHeaderFederalTaxID,
+																		@DateFrom,
+																		@DateTo,
 																		1
 																		FROM @tblTempTransaction
 																		
