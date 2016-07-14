@@ -5,6 +5,7 @@
 	[strCountryFormat]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
 	[strAreaCityFormat]			NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
 	[strLocalNumberFormat]		NVARCHAR (40)	COLLATE Latin1_General_CI_AS NULL,
+	[intAreaCityLength]			INT				NOT NULL DEFAULT 3,
     [intSort]					INT				NULL,
     [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC), 
