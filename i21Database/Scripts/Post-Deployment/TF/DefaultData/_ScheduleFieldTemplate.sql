@@ -1,9 +1,6 @@
 ﻿PRINT 'START TF Schedule Field Template'
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM [tblTFScheduleFieldTemplate])
-BEGIN
-	PRINT 'START TF tblTFScheduleFieldTemplate'
-
+--IF NOT EXISTS(SELECT TOP 1 1 FROM [tblTFScheduleFieldTemplate])
+--BEGIN
 		INSERT INTO [tblTFScheduleFieldTemplate]
 		(
 			[intReportingComponentDetailId],[strColumn],[intConcurrencyId]
@@ -60,7 +57,5 @@ BEGIN
 		,(0, N'strScheduleCode', 0)
 		,(0, N'strScheduleName', 0)
 		,(0, N'dblTaxExempt', 0)
-	
-	PRINT 'START TF tblTFScheduleFieldTemplate'
-END
+--END
 PRINT 'END TF Schedule Field Template'
