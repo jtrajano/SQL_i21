@@ -24,6 +24,4 @@ FROM tblARInvoice I
 		ON I.intEntityCustomerId = P.intEntityCustomerId AND PD.intInvoiceId = I.intInvoiceId
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE I.ysnPosted = 1
-  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
-						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
+  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))

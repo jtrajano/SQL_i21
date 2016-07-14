@@ -30,6 +30,4 @@ FROM tblARInvoice I
 	LEFT JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
 	LEFT JOIN tblICItem Item ON D.intItemId = Item.intItemId	
 WHERE I.ysnPosted = 1
-  AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
-						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup IN ('Asset', 'Liability', 'Receivables'))
+  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))

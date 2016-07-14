@@ -29,6 +29,4 @@ WHERE I.ysnPosted = 1
 AND I.ysnPaid = 0
 AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 AND I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
-AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
-						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
-						WHERE AG.strAccountGroup IN ('Liability', 'Receivables'))
+AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
