@@ -197,9 +197,13 @@ FROM
 	,[dblRate]					=	0
 	,[ysnSubCurrency]			=	0
 	,[intSubCurrencyCents]		=	0
-	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
-	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
-	,[strAccountDesc]			=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
+	,[intAccountId]				=	CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory') END
+	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = 
+										CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory') END
+									)
+	,[strAccountDesc]			=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = 
+										CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory') END
+									)
 	,[strName]					=	D2.strName
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
@@ -231,9 +235,9 @@ FROM
 	,[str1099Type]				=	D2.str1099Type
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
-		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
-		INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+		LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
+		LEFT JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId
 		LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitOfMeasureId
@@ -244,7 +248,10 @@ FROM
 			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
 			GROUP BY G.intPurchaseDetailId
 		) Billed
-	WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
+	WHERE 1 = CASE WHEN C.intItemId IS NOT NULL THEN 
+				(CASE WHEN C.strType IN ('Service','Software','Non-Inventory','Other Charge') THEN 1 ELSE 0 END )
+			ELSE 1
+			END
 	AND B.dblQtyOrdered != B.dblQtyReceived
 	AND ((Billed.dblQty < B.dblQtyReceived) OR Billed.dblQty IS NULL)
 	UNION ALL
