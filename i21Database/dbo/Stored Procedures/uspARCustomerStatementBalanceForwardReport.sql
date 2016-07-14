@@ -147,9 +147,9 @@ BEGIN
 END
 
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
 
-SET @query = 'SELECT * FROM
+SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
 	  , C.strCustomerNumber
 	  , strCustomerName		= C.strName
@@ -177,18 +177,18 @@ FROM vyuARCustomer C
 	LEFT JOIN tblARInvoice I ON I.intEntityCustomerId = C.intEntityCustomerId
 		AND I.ysnPosted  = 1		
 		AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
-		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +' 
+		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 			AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'))
 			 OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) > '+ @strDateTo +'))))
 		AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 											INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
 											WHERE AG.strAccountGroup IN (''Asset'', ''Liability'', ''Receivables''))			
-	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= '+ @strDateTo +') ON I.intInvoiceId = PD.intInvoiceId
+	LEFT JOIN (tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +') ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN tblARPayment PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId AND PCREDITS.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), PCREDITS.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 	LEFT JOIN (
 		(SELECT SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest) AS dblPayment
 			  , intInvoiceId 
-			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= '+ @strDateTo +'
+			FROM tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 			GROUP BY intInvoiceId)
 		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	LEFT JOIN tblSMTerm T ON T.intTermID = I.intTermId	
