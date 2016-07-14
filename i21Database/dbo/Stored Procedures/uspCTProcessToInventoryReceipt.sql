@@ -67,7 +67,7 @@ AS
 				intGrossNetUOMId
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
-				intEntityVendorId			=	CD.intEntityId,
+				intEntityVendorId			=	CH.intEntityId,
 				intShipFromId				=	EL.intEntityLocationId,
 				intLocationId				=	CD.intCompanyLocationId,
 				intItemId					=	CD.intItemId,
@@ -77,10 +77,10 @@ AS
 				intContractDetailId			=	CD.intContractDetailId,
 				dtmDate						=	CD.dtmStartDate,
 				intShipViaId				=	CD.intShipViaId,
-				dblQty						=	CD.dblAvailableQty,
-				dblCost						=	ISNULL(CD.dblCashPrice,0),
-				intCostUOMId				=	CD.intPriceItemUOMId,
-				intCurrencyId				=	ISNULL(CD.intMainCurrencyId, CD.intCurrencyId),
+				dblQty						=	ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0),
+				dblCost						=	ISNULL(AD.dblSeqPrice,0),
+				intCostUOMId				=	AD.intSeqPriceUOMId,
+				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SubCurrency.intCent, 1), 
 				dblExchangeRate				=	1,
 				intLotId					=	NULL ,
@@ -89,17 +89,20 @@ AS
 				ysnIsStorage				=	0,
 				intSourceId					=	NULL,
 				intSourceType		 		=	0,
-				strSourceId					=	CD.strContractNumber,
+				strSourceId					=	CH.strContractNumber,
 				strSourceScreenName			=	'Contract',
 				ysnSubCurrency				=	SubCurrency.ysnSubCurrency ,
 				intGrossNetUOMId			=	0
 
-		FROM	vyuCTContractDetailView		CD	
-		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CD.intEntityId	AND
+		FROM	tblCTContractDetail			CD	
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CH.intEntityId	AND
 													EL.ysnDefaultLocation	=	1				LEFT
 		JOIN	vyuICGetItemStock			SK	ON	SK.intItemId			=	CD.intItemId	AND		
 													SK.intLocationId		=	CD.intCompanyLocationId
-		LEFT JOIN tblSMCurrency				SubCurrency  ON SubCurrency.intCurrencyID = CASE WHEN CD.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
+		LEFT JOIN tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
+		LEFT JOIN tblSMCurrency				SubCurrency  ON SubCurrency.intCurrencyID = CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		INSERT	INTO	@OtherCharges
