@@ -37,10 +37,11 @@ SELECT
 	,strLocationType = 'Delivery'
 	,intDaysPassed = DATEDIFF (day, TMO.dtmRequestedDate, GetDate())
 	,strOrderType = 'Outbound'
+	,intPriority = TMO.intPriority
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
-WHERE TMO.strOrderStatus = 'Generated' AND IsNull(TMO.intDispatchId, 0) NOT IN (SELECT IsNull(intDispatchID, 0) FROM tblLGRouteOrder)
+WHERE TMO.strOrderStatus <> 'Delivered' --AND IsNull(TMO.intDispatchId, 0) NOT IN (SELECT IsNull(intDispatchID, 0) FROM tblLGRouteOrder)
 
 UNION ALL
 
@@ -79,6 +80,7 @@ SELECT
 	,strLocationType = 'Delivery'
 	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
 	,strOrderType = 'Outbound'
+	,intPriority = -1
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
@@ -123,6 +125,7 @@ SELECT
 	,strLocationType = 'Delivery'
 	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
 	,strOrderType = 'Inbound'
+	,intPriority = -1
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
