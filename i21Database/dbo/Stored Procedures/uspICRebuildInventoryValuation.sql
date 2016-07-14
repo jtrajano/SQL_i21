@@ -406,7 +406,7 @@ BEGIN
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
 						,dblCost  = 
 							dbo.fnMultiply(
-								CASE WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+								CASE WHEN Lot.dblLastCost IS NULL THEN 
 											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
 										ELSE 
 											Lot.dblLastCost
@@ -563,7 +563,7 @@ BEGIN
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
 								dbo.fnMultiply(
-									(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
+									ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId))
 									,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 								)
 						,ICTrans.dblSalesPrice  
@@ -582,6 +582,8 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICot lot
+							ON lot.intLotId = ICTrans.intLotId
 				WHERE	strBatchId = @strBatchId
 						AND dblQty < 0 
 					
@@ -1160,7 +1162,7 @@ BEGIN
 						,RebuilInvTrans.dtmDate  
 						,RebuilInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
-						,dblCost  = CASE WHEN dblQty < 0 THEN 
+						,dblCost  = CASE WHEN RebuilInvTrans.dblQty < 0 THEN 
 											CASE	WHEN Receipt.intInventoryReceiptId IS NOT NULL THEN 
 														CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
 																WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
@@ -1202,12 +1204,12 @@ BEGIN
 														) 
 													ELSE 
 														dbo.fnMultiply(
-															(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId) 
+															ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
 															,dblUOMQty
 														)
 											END 
 											
-										 WHEN (dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
+										 WHEN (RebuilInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
 											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 1 
 
 													ELSE 
@@ -1221,7 +1223,8 @@ BEGIN
 											END 		
 																				
 										-- When it is a credit memo:
-										 WHEN (dblQty > 0 AND strTransactionId LIKE 'SI%') THEN 											
+										 WHEN (RebuilInvTrans.dblQty > 0 AND RebuilInvTrans.strTransactionId LIKE 'SI%') THEN 
+											
 											CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														-- If using Average Costing, use Ave Cost.
 														dbo.fnGetItemAverageCost(
@@ -1231,7 +1234,7 @@ BEGIN
 														) 
 													ELSE
 														-- Otherwise, get the last cost. 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId)
+														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
 											END 
 
 										 ELSE 
@@ -1274,6 +1277,8 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuilInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = RebuilInvTrans.intLotId 
 				WHERE	strBatchId = @strBatchId
 
 				EXEC dbo.uspICRepostCosting
