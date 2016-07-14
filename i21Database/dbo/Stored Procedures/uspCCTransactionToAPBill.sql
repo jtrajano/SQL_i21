@@ -86,6 +86,8 @@ BEGIN TRY
 				,@voucherDetaiCC = @voucherDetailCC
 				,@billId = @createdBillId OUTPUT
 
+			UPDATE tblAPBill SET strComment = @ccdReference WHERE intBillId = @createdBillId
+
 			EXEC [dbo].[uspAPPostBill]
 				@post = @post
 				,@recap = @recap

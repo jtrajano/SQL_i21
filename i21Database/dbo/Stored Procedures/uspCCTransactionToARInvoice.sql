@@ -55,6 +55,7 @@ BEGIN TRY
         ,[ysnRecomputeTax]
         ,[intSiteDetailId]
         ,[ysnInventory]
+		,[strComments]
     )
     SELECT [strTransactionType] = 'Credit Memo' 
         ,[strSourceTransaction] = 'Credit Card Reconciliation'
@@ -77,6 +78,7 @@ BEGIN TRY
         ,[ysnRecomputeTax] = 0
         ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
         ,[ysnInventory] = 1
+		,[strComments] = ccSiteHeader.strCcdReference
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
     INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
