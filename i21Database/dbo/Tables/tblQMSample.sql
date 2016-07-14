@@ -46,6 +46,8 @@
 	[dtmBusinessDate] DATETIME, 
 	[intShiftId] INT, 
 	[intLocationId] INT, 
+	[intInventoryReceiptId] INT, 
+	[intWorkOrderId] INT, 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
@@ -76,5 +78,7 @@
 	CONSTRAINT [FK_tblQMSample_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]), 
 	CONSTRAINT [FK_tblQMSample_tblLGLoadDetail] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId]),
 	CONSTRAINT [FK_tblQMSample_tblMFShift] FOREIGN KEY ([intShiftId]) REFERENCES tblMFShift([intShiftId]),
-	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId])
+	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId]),
+	CONSTRAINT [FK_tblQMSample_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE
 )

@@ -8,6 +8,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @intInventoryReceiptId INT
+DECLARE @intWorkOrderId INT
+DECLARE @strReceiptWONo NVARCHAR(50)
+
 IF @intProductTypeId = 2 -- Item  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
@@ -121,6 +125,25 @@ BEGIN
 END
 ELSE IF @intProductTypeId = 6 -- Lot  
 BEGIN
+	-- Inventory Receipt / Work Order No
+	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
+		,@strReceiptWONo = R.strReceiptNumber
+	FROM tblICInventoryReceiptItemLot RIL
+	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	WHERE RIL.intLotId = @intProductValueId
+	ORDER BY RI.intInventoryReceiptId DESC
+
+	IF ISNULL(@intInventoryReceiptId, 0) = 0
+	BEGIN
+		SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
+			,@strReceiptWONo = W.strWorkOrderNo
+		FROM tblMFWorkOrderProducedLot WPL
+		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		WHERE WPL.intLotId = @intProductValueId
+		ORDER BY WPL.intWorkOrderId DESC
+	END
+
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
 		,L.intLotStatusId
@@ -137,6 +160,9 @@ BEGIN
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 		,I.intOriginId AS intCountryId
 		,CA.strDescription AS strCountry
+		,@intInventoryReceiptId AS intInventoryReceiptId
+		,@intWorkOrderId AS intWorkOrderId
+		,@strReceiptWONo AS strReceiptWONo
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -160,6 +186,33 @@ BEGIN
 		AND IU.ysnStockUnit = 1
 	WHERE L.intParentLotId = @intProductValueId
 
+	-- Inventory Receipt / Work Order No
+	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
+		,@strReceiptWONo = R.strReceiptNumber
+	FROM tblICInventoryReceiptItemLot RIL
+	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	WHERE RIL.intLotId IN (
+			SELECT intLotId
+			FROM tblICLot
+			WHERE intParentLotId = @intProductValueId
+			)
+	ORDER BY RI.intInventoryReceiptId DESC
+
+	IF ISNULL(@intInventoryReceiptId, 0) = 0
+	BEGIN
+		SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
+			,@strReceiptWONo = W.strWorkOrderNo
+		FROM tblMFWorkOrderProducedLot WPL
+		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
+		WHERE WPL.intLotId IN (
+				SELECT intLotId
+				FROM tblICLot
+				WHERE intParentLotId = @intProductValueId
+				)
+		ORDER BY WPL.intWorkOrderId DESC
+	END
+
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
 		,PL.intLotStatusId
@@ -170,6 +223,9 @@ BEGIN
 		,@intRepresentingUOMId AS intRepresentingUOMId
 		,I.intOriginId AS intCountryId
 		,CA.strDescription AS strCountry
+		,@intInventoryReceiptId AS intInventoryReceiptId
+		,@intWorkOrderId AS intWorkOrderId
+		,@strReceiptWONo AS strReceiptWONo
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId

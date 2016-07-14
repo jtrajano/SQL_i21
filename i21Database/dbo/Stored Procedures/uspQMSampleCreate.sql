@@ -21,14 +21,21 @@ BEGIN TRY
 	DECLARE @intShiftId INT
 	DECLARE @dtmBusinessDate DATETIME
 	DECLARE @dtmCreated DATETIME = GETDATE()
+	DECLARE @intInventoryReceiptId INT
+	DECLARE @intWorkOrderId INT
+	DECLARE @ysnEnableParentLot BIT
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
+		,@intInventoryReceiptId = intInventoryReceiptId
+		,@intWorkOrderId = intWorkOrderId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(30)
 			,intLocationId INT
+			,intInventoryReceiptId INT
+			,intWorkOrderId INT
 			)
 
 	IF (
@@ -101,6 +108,73 @@ BEGIN TRY
 		AND @dtmCreated BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
+	-- Inventory Receipt / Work Order No
+	-- Creating sample from other screens should take value directly from xml
+	IF ISNULL(@intInventoryReceiptId, 0) = 0
+		AND ISNULL(@intWorkOrderId, 0) = 0
+	BEGIN
+		IF ISNULL(@strLotNumber, '') <> ''
+		BEGIN
+			SELECT @ysnEnableParentLot = ysnEnableParentLot
+			FROM dbo.tblQMCompanyPreference
+
+			IF @ysnEnableParentLot = 0 -- Lot
+			BEGIN
+				SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
+				FROM tblICInventoryReceiptItemLot RIL
+				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+				WHERE RIL.intLotId IN (
+						SELECT intLotId
+						FROM tblICLot
+						WHERE strLotNumber = @strLotNumber
+						)
+				ORDER BY RI.intInventoryReceiptId DESC
+
+				IF ISNULL(@intInventoryReceiptId, 0) = 0
+				BEGIN
+					SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
+					FROM tblMFWorkOrderProducedLot WPL
+					WHERE WPL.intLotId IN (
+							SELECT intLotId
+							FROM tblICLot
+							WHERE strLotNumber = @strLotNumber
+							)
+					ORDER BY WPL.intWorkOrderId DESC
+				END
+			END
+			ELSE -- Parent Lot
+			BEGIN
+				DECLARE @intParentLotId INT
+
+				SELECT @intParentLotId = intParentLotId
+				FROM tblICParentLot
+				WHERE strParentLotNumber = @strLotNumber
+
+				SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
+				FROM tblICInventoryReceiptItemLot RIL
+				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+				WHERE RIL.intLotId IN (
+						SELECT intLotId
+						FROM tblICLot
+						WHERE intParentLotId = @intParentLotId
+						)
+				ORDER BY RI.intInventoryReceiptId DESC
+
+				IF ISNULL(@intInventoryReceiptId, 0) = 0
+				BEGIN
+					SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
+					FROM tblMFWorkOrderProducedLot WPL
+					WHERE WPL.intLotId IN (
+							SELECT intLotId
+							FROM tblICLot
+							WHERE intParentLotId = @intParentLotId
+							)
+					ORDER BY WPL.intWorkOrderId DESC
+				END
+			END
+		END
+	END
+
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -149,6 +223,8 @@ BEGIN TRY
 		,dtmBusinessDate
 		,intShiftId
 		,intLocationId
+		,intInventoryReceiptId
+		,intWorkOrderId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -199,6 +275,8 @@ BEGIN TRY
 		,@dtmBusinessDate
 		,@intShiftId
 		,intLocationId
+		,@intInventoryReceiptId
+		,@intWorkOrderId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
