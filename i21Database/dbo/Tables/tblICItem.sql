@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[strItemNo]                 NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
 		[strShortName]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strType]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS NOT NULL,
-		[strDescription]            NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+		[strDescription]            NVARCHAR (250)  COLLATE Latin1_General_CI_AS NOT NULL,
 		[intManufacturerId]         INT             NULL,
 		[intBrandId]                INT             NULL,
 		[intCategoryId]				INT				NULL,
