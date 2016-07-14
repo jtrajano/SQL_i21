@@ -4046,6 +4046,7 @@
     <Build Include="dbo\Views\vyuCTContractHeaderView2.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM2.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailView2.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntitySalesEntityContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
