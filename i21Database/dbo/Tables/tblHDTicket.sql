@@ -39,6 +39,8 @@
 	[strDatabase] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strMultipleActivityId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyLocationId] [int] null,
+	[intEntityLocationId] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
@@ -52,7 +54,9 @@
     CONSTRAINT [FK_Ticket_Version] FOREIGN KEY ([intVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId]),
     CONSTRAINT [FK_Ticket_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblHDTicket_tblHDLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [dbo].[tblHDLineOfBusiness] ([intLineOfBusinessId]),
-    CONSTRAINT [FK_tblHDTicket_ttblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId])
+    CONSTRAINT [FK_tblHDTicket_ttblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId]),
+    CONSTRAINT [FK_tblHDTicket_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+    CONSTRAINT [FK_tblHDTicket_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
 )
 
 GO

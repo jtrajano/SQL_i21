@@ -46,6 +46,8 @@
 	[dtmLastDescriptionModified] [datetime] null,
 	[strDirection] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intMilestoneId] [int] null,
+	[intCompanyLocationId] [int] null,
+	[intEntityLocationId] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
@@ -65,7 +67,9 @@
 	CONSTRAINT [FK_tblHDProject_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId]),
 	CONSTRAINT [FK_tblHDProject_tblHDOpportunitySource] FOREIGN KEY (intOpportunitySourceId) REFERENCES [dbo].[tblHDOpportunitySource] (intOpportunitySourceId),
     CONSTRAINT [FK_tblHDProjectProject_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
-    CONSTRAINT [FK_tblHDProjectProject_tblHDMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblHDMilestone] ([intMilestoneId])
+    CONSTRAINT [FK_tblHDProjectProject_tblHDMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblHDMilestone] ([intMilestoneId]),
+    CONSTRAINT [FK_tblHDProjectProject_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+    CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
 	--[intOpportunitySourceId]
 )
 
