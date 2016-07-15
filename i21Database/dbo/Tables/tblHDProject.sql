@@ -48,6 +48,13 @@
 	[intMilestoneId] [int] null,
 	[intCompanyLocationId] [int] null,
 	[intEntityLocationId] [int] null,
+	[intOpportunityWinLossReasonId] [int] null,
+	[dtmWinLossDate] [datetime] null,
+	[intWinLossLengthOfCycle] [int] null,
+	[strWinLossDetails] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strWinLossDidRight] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strWinLossDidWrong] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strWinLossActionItem] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
@@ -69,7 +76,8 @@
     CONSTRAINT [FK_tblHDProjectProject_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblHDProjectProject_tblHDMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblHDMilestone] ([intMilestoneId]),
     CONSTRAINT [FK_tblHDProjectProject_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
-    CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
+    CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
+    CONSTRAINT [FK_tblHDProjectProject_tblHDOpportunityWinLossReason_intOpportunityWinLossReasonId] FOREIGN KEY ([intOpportunityWinLossReasonId]) REFERENCES [dbo].[tblHDOpportunityWinLossReason] ([intOpportunityWinLossReasonId])
 	--[intOpportunitySourceId]
 )
 
@@ -120,7 +128,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intCustomerContactId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Ticket Type Id',
+    @value = N'Ticket Type Reference Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -361,3 +369,219 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDProject',
     @level2type = N'COLUMN',
     @level2name = N'dtmClose'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Line of Business Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strLinesOfBusinessId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Line of Business Reference',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strLinesOfBusiness'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'RFR / RFI Link',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strRFPRFILink'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Last Description Modified',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmLastDescriptionModified'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Direction',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strDirection'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Milestone Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intMilestoneId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Company Location Refernce Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intCompanyLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Entity Location Reference  Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Opportunity Win/Loss Reason Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intOpportunityWinLossReasonId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Win/Loss Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmWinLossDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Win/Loss Length of Cycle',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intWinLossLengthOfCycle'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Win/Loss Details',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strWinLossDetails'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Win/Loss Did Right',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strWinLossDidRight'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Win/Loss Did Wrong',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strWinLossDidWrong'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Win/LossActionItem',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strWinLossActionItem'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ticket Status Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intTicketStatusId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Opportunity Source Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intOpportunitySourceId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Opportunity Campaign Referebce Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intOpportunityCampaignId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Competitor Entity Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strCompetitorEntityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Current Solution Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strCurrentSolutionId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Competitor Entity Reference',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strCompetitorEntity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Current Solution Reference',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'strCurrentSolution'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Referred By Entity Reference Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'intReferredByEntityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Creadted Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmCreated'
