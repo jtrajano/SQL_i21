@@ -41,7 +41,7 @@ DECLARE @DetailColumnValue_gas NVARCHAR(MAX)
 DECLARE @DetailColumnValue_kerosene NVARCHAR(MAX)
 DECLARE @DetailColumnValue_others NVARCHAR(MAX)
 DECLARE @SummaryItems NVARCHAR(MAX)
-DECLARE @ScheduleCodeCount int
+DECLARE @ScheduleCodeCount NUMERIC(18,2)
 DECLARE @q NVARCHAR(MAX)
 
 DECLARE @DefaultValue INT = 0
@@ -62,7 +62,7 @@ DECLARE @tblTempTaxReportSummary TABLE(
 )
 DECLARE @tblSchedule TABLE (
 		intId INT IDENTITY(1,1),
-		strSchedule NVARCHAR(MAX)
+		strSchedule NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		)
 DELETE FROM tblTFTaxReportSummary
 	-- ======================== HEADER ==============================
