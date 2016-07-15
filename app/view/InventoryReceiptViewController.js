@@ -2634,7 +2634,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     context.record.set('dblGrossMargin', 0);
                 }
             }
+            
+           // Calculate the gross weight.
+           me.calculateGrossNet(context.record);
         }
+        
         // If editing the unit retail, update the gross margin too.
         else if (context.field === 'dblUnitRetail') {
             if (context.record) {
@@ -2643,12 +2647,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 context.record.set('dblGrossMargin', grossMargin);
             }
         }
+        
+        else if (context.field === 'strWeightUOM')
+            {
+                // Calculate the gross weight.
+                me.calculateGrossNet(context.record);
+            }
 
         // Accept the data input.
         context.record.set(context.field, context.value);
-
-        // Calculate the gross weight.
-         me.calculateGrossNet(context.record);
 
         // Validate the gross and net variance.
         vw.data.currentReceiptItem = context.record;
