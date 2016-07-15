@@ -260,102 +260,164 @@ BEGIN TRY
 		WHEN MATCHED AND B.ysnPosted = 0 AND EQ.dblEquity = B.dblVolume -- is this correct? dblVolume
 			THEN DELETE
 		WHEN MATCHED
-			THEN UPDATE SET EQ.dblEquity = CASE WHEN B.ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END
+			THEN UPDATE SET EQ.dblEquity = CASE WHEN @ysnPosted = 1 THEN EQ.dblEquity + B.dblEquityRefund ELSE EQ.dblEquity - B.dblEquityRefund END,
+			EQ.dtmLastActivityDate = GETDATE()
 		WHEN NOT MATCHED BY TARGET
 			THEN INSERT (intCustomerId, intFiscalYearId, strEquityType, intRefundTypeId, dblEquity, dtmLastActivityDate, intConcurrencyId)
 				VALUES (B.intCustomerId, B.intFiscalYearId , 'Undistributed', B.intRefundTypeId, B.dblEquityRefund, GETDATE(), 1);
 
+	IF @ysnPosted = 1
+	BEGIN
+		--=====================================================================================================================================
+		-- 	UPDATE REFUND TABLE
+		---------------------------------------------------------------------------------------------------------------------------------------
+		SELECT	TRD.intRefundId as intRefundId, 
+				TRD.intFiscalYearId as intFiscalYearId, 
+				dblPurchaseVolume = SUM(TRD.dblPurchaseVolume), 
+				dblSaleVolume = SUM(TRD.dblSaleVolume), 
+				dblEquityRefund = SUM(TRD.dblEquityRefund), 
+				dblCashRefund = SUM(TRD.dblCashRefund),
+				dblLessFWT = SUM(TRD.dblLessFWT),
+				dblLessService = SUM(TRD.dblLessService),
+				dblCheckAmount = SUM(TRD.dblCheckAmount),
+				dblNoRefund = SUM(TRD.dblNoRefund)
+		INTO #tmpCurrentData
+		FROM #tmpRefundData TRD
+		WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)
+		GROUP BY TRD.intRefundId, TRD.intFiscalYearId;
 
---=====================================================================================================================================
--- 	UPDATE REFUND TABLE
----------------------------------------------------------------------------------------------------------------------------------------
-	SELECT	TRD.intRefundId as intRefundId, 
-			TRD.intFiscalYearId as intFiscalYearId, 
-			dblPurchaseVolume = SUM(TRD.dblPurchaseVolume), 
-			dblSaleVolume = SUM(TRD.dblSaleVolume), 
-			dblEquityRefund = SUM(TRD.dblEquityRefund), 
-			dblCashRefund = SUM(TRD.dblCashRefund),
-			dblLessFWT = SUM(TRD.dblLessFWT),
-			dblLessService = SUM(TRD.dblLessService),
-			dblCheckAmount = SUM(TRD.dblCheckAmount),
-			dblNoRefund = SUM(TRD.dblNoRefund)
-	INTO #tmpCurrentData
-	FROM #tmpRefundData TRD
-	WHERE intRefundId = (SELECT MAX(intRefundId) FROM #tmpRefundData)
-	GROUP BY TRD.intRefundId, TRD.intFiscalYearId;
+		UPDATE Ref
+		SET Ref.dblPurchaseVolume = CDat.dblPurchaseVolume, 
+		Ref.dblSaleVolume = CDat.dblSaleVolume,
+		Ref.dblEquityRefund = CDat.dblEquityRefund,
+		Ref.dblCashRefund = CDat.dblCashRefund,
+		Ref.dblLessFWT = CDat.dblLessFWT,
+		Ref.dblLessService = CDat.dblLessService,
+		Ref.dblCheckAmount = CDat.dblCheckAmount,
+		Ref.dblNoRefund = CDat.dblNoRefund
+		FROM tblPATRefund Ref
+		INNER JOIN #tmpCurrentData CDat
+		ON Ref.intRefundId = CDat.intRefundId
 
-	UPDATE Ref
-	SET Ref.dblPurchaseVolume = CDat.dblPurchaseVolume, 
-	Ref.dblSaleVolume = CDat.dblSaleVolume,
-	Ref.dblEquityRefund = CDat.dblEquityRefund,
-	Ref.dblCashRefund = CDat.dblCashRefund,
-	Ref.dblLessFWT = CDat.dblLessFWT,
-	Ref.dblLessService = CDat.dblLessService,
-	Ref.dblCheckAmount = CDat.dblCheckAmount,
-	Ref.dblNoRefund = CDat.dblNoRefund
-	FROM tblPATRefund Ref
-	INNER JOIN #tmpCurrentData CDat
-	ON Ref.intRefundId = CDat.intRefundId
+		--=====================================================================================================================================
+		-- 	UPDATE REFUND CATEGORY TABLE
+		---------------------------------------------------------------------------------------------------------------------------------------
 
---=====================================================================================================================================
--- 	UPDATE REFUND CATEGORY TABLE
----------------------------------------------------------------------------------------------------------------------------------------
+		UPDATE RCat
+		SET RCat.intPatronageCategoryId = CVol.intPatronageCategoryId,
+		RCat.dblVolume = CVol.dblVolume,
+		RCat.dblRefundRate = CVol.dblRate
+		FROM tblPATRefundCategory RCat
+		INNER JOIN 
+		(
+			select
+				Cus.intCustomerId,
+				dblVolume = Cus.dblPurchaseVolume + Cus.dblSaleVolume,
+				Cus.dblRate,
+				Cus.intPatronageCategoryId,
+				Cus.intRefundCategoryId,
+				Cus.intRefundCustomerId
+			from tblPATRefundCustomer RCus
+			inner join
+			(
+				select distinct CVol.intCustomerPatronId AS intCustomerId,
+								intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END) THEN RCat.intRefundCategoryId ELSE null END),
+								intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END),
+								PCat.intPatronageCategoryId,
+								dblRate = SUM(RRD.dblRate),
+								dblPurchaseVolume = (CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN CVol.dblVolume ELSE 0 END),
+								dblSaleVolume = (CASE WHEN PCat.strPurchaseSale = 'Sale' THEN CVol.dblVolume ELSE 0 END)
+				from tblPATCustomerVolume CVol
+				inner join tblPATPatronageCategory PCat
+				on CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
+				inner join tblPATRefundRateDetail RRD
+				on PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
+				inner join tblPATRefundCustomer RCus
+				on RCus.intCustomerId = CVol.intCustomerPatronId
+				inner join tblPATRefundCategory RCat
+				on RCus.intRefundCustomerId = RCat.intRefundCustomerId
+				where intRefundCategoryId is not null
+				GROUP BY	CVol.intCustomerPatronId, 
+							PCat.strPurchaseSale,
+							RCat.dblRefundAmount,
+							CVol.dblVolume,
+							RCus.intRefundCustomerId,RCus.intRefundTypeId,RRD.intRefundTypeId,RCat.intRefundCategoryId,RCat.intRefundCustomerId,PCat.intPatronageCategoryId
+			) Cus
+			on RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId is not null
+		) CVol
+		ON RCat.intRefundCategoryId = CVol.intRefundCategoryId
+		WHERE CVol.dblVolume <> 0.00
 
-UPDATE RCat
-SET RCat.intPatronageCategoryId = CVol.intPatronageCategoryId,
-RCat.dblVolume = CVol.dblVolume,
-RCat.dblRefundRate = CVol.dblRate
-FROM tblPATRefundCategory RCat
-INNER JOIN 
-(
-	select
-		Cus.intCustomerId,
-		dblVolume = Cus.dblPurchaseVolume + Cus.dblSaleVolume,
-		Cus.dblRate,
-		Cus.intPatronageCategoryId,
-		Cus.intRefundCategoryId,
-		Cus.intRefundCustomerId
-	from tblPATRefundCustomer RCus
-	inner join
-	(
-		select distinct CVol.intCustomerPatronId AS intCustomerId,
-						intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END) THEN RCat.intRefundCategoryId ELSE null END),
-						intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END),
-						PCat.intPatronageCategoryId,
-						dblRate = SUM(RRD.dblRate),
-						dblPurchaseVolume = (CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN CVol.dblVolume ELSE 0 END),
-						dblSaleVolume = (CASE WHEN PCat.strPurchaseSale = 'Sale' THEN CVol.dblVolume ELSE 0 END)
-		from tblPATCustomerVolume CVol
-		inner join tblPATPatronageCategory PCat
-		on CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
-		inner join tblPATRefundRateDetail RRD
-		on PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
-		inner join tblPATRefundCustomer RCus
-		on RCus.intCustomerId = CVol.intCustomerPatronId
-		inner join tblPATRefundCategory RCat
-		on RCus.intRefundCustomerId = RCat.intRefundCustomerId
-		where intRefundCategoryId is not null
-		GROUP BY	CVol.intCustomerPatronId, 
-					PCat.strPurchaseSale,
-					RCat.dblRefundAmount,
-					CVol.dblVolume,
-					RCus.intRefundCustomerId,RCus.intRefundTypeId,RRD.intRefundTypeId,RCat.intRefundCategoryId,RCat.intRefundCustomerId,PCat.intPatronageCategoryId
-	) Cus
-	on RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId is not null
-) CVol
-ON RCat.intRefundCategoryId = CVol.intRefundCategoryId
-WHERE CVol.dblVolume <> 0.00
+		--=====================================================================================================================================
+		-- 	UPDATE CUSTOMER VOLUME TABLE
+		---------------------------------------------------------------------------------------------------------------------------------------
 
---=====================================================================================================================================
--- 	UPDATE CUSTOMER VOLUME TABLE
----------------------------------------------------------------------------------------------------------------------------------------
+		UPDATE CVol
+		SET CVol.dblVolume = 0.00
+		FROM tblPATCustomerVolume CVol
+		INNER JOIN #tmpCurrentData
+		ON CVol.intFiscalYear = #tmpCurrentData.intFiscalYearId
+		WHERE CVol.dblVolume <> 0.00
+	END
+	ELSE
+	BEGIN
+		----------------------------------RECREATE VOLUME---------------------------------------------------------------------
+		SELECT	RCus.intCustomerId,
+		RCat.intPatronageCategoryId,
+		Ref.intFiscalYearId, 
+		RCat.dblVolume
+		INTO #tmpCustomerVolume
+		FROM tblPATRefund Ref
+		INNER JOIN tblPATRefundCustomer RCus
+		ON Ref.intRefundId = RCus.intRefundId
+		INNER JOIN tblPATRefundCategory RCat
+		ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
+		INNER JOIN tblPATPatronageCategory PCat
+		ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
+		INNER JOIN tblARCustomer ARC
+		ON RCus.intCustomerId = ARC.intEntityCustomerId
+		WHERE Ref.intRefundId = @intRefundId
 
-	UPDATE CVol
-	SET CVol.dblVolume = 0.00
-	FROM tblPATCustomerVolume CVol
-	INNER JOIN #tmpCurrentData
-	ON CVol.intFiscalYear = #tmpCurrentData.intFiscalYearId
-	WHERE CVol.dblVolume <> 0.00
+		IF NOT EXISTS(SELECT * FROM #tmpCustomerVolume)
+		BEGIN
+			DROP TABLE #tmpCustomerVolume
+		END
+		ELSE
+		BEGIN
+			MERGE tblPATCustomerVolume AS PAT
+			USING #tmpCustomerVolume AS B
+			   ON (PAT.intCustomerPatronId = B.intCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.intFiscalYearId)
+			 WHEN MATCHED
+				  THEN UPDATE SET PAT.dblVolume = PAT.dblVolume + B.dblVolume, PAT.dtmLastActivityDate = GETDATE()
+			 WHEN NOT MATCHED BY TARGET
+				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
+					   VALUES (B.intCustomerId, B.intPatronageCategoryId, B.intFiscalYearId, GETDATE(),  B.dblVolume, 1);
+
+			DROP TABLE #tmpCustomerVolume
+		END
+
+		----------------------------------------------------------------------------------------------------------------------------
+
+		DELETE RCat
+		FROM tblPATRefund Ref
+		INNER JOIN tblPATRefundCustomer RCus
+		ON Ref.intRefundId = RCus.intRefundId
+		INNER JOIN tblPATRefundCategory RCat
+		ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
+		INNER JOIN tblPATPatronageCategory PCat
+		ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
+		WHERE Ref.intRefundId = @intRefundId
+
+		DELETE RCus
+		FROM tblPATRefund Ref
+		INNER JOIN tblPATRefundCustomer RCus
+		ON Ref.intRefundId = RCus.intRefundId
+		WHERE Ref.intRefundId = @intRefundId
+
+		DELETE Ref
+		FROM tblPATRefund Ref
+		WHERE Ref.intRefundId = @intRefundId
+	END
 
 END TRY
 BEGIN CATCH
