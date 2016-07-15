@@ -1792,8 +1792,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // Formula is:
             // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
             // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
-            // {Line Total} = Tax + ( {Qty in Item UOM} x {New Cost} )
-            lineTotal = tax + (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
+            // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
+            lineTotal = (qty * (unitCost / costCentsFactor) * (qtyCF / costCF));
         }
 
         // Compute the line total with respect to the Gross UOM..
@@ -1808,8 +1808,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // Formula is:
             // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
             // {New Cost} = {Sub Cost} x {Gross/Net UOM Conv Factor} / {Cost UOM Conv Factor}
-            // {Line Total} = Tax + ( {Net Qty in Gross/Net UOM} x {New Cost} )
-            lineTotal = tax + (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
+            // {Line Total} = ( {Net Qty in Gross/Net UOM} x {New Cost} )
+            lineTotal = (netWgt * (unitCost / costCentsFactor) * (netWgtCF / costCF));
         }
 
         return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
@@ -2810,7 +2810,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strCostUOM', po.get('strUOM'));
                 current.set('dblUnitCost', po.get('dblCost'));
                 current.set('dblCostUOMConvFactor', po.get('dblItemUOMCF'));
-                current.set('dblLineTotal', po.get('dblTotal') + po.get('dblTax'));
+               // current.set('dblLineTotal', po.get('dblTotal') + po.get('dblTax'));
+                current.set('dblLineTotal', po.get('dblTotal'));
                 current.set('dblTax', po.get('dblTax'));
                 current.set('strLotTracking', po.get('strLotTracking'));
                 current.set('intCommodityId', po.get('intCommodityId'));
