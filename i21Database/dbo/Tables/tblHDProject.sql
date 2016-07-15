@@ -48,7 +48,7 @@
 	[intMilestoneId] [int] null,
 	[intCompanyLocationId] [int] null,
 	[intEntityLocationId] [int] null,
-	[intOpportunityWinLossReasonId] [int] null,
+	[strOpportunityWinLossReasonId] NVARCHAR(MAX) null,
 	[dtmWinLossDate] [datetime] null,
 	[intWinLossLengthOfCycle] [int] null,
 	[strWinLossDetails] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
@@ -76,8 +76,7 @@
     CONSTRAINT [FK_tblHDProjectProject_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblHDProjectProject_tblHDMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblHDMilestone] ([intMilestoneId]),
     CONSTRAINT [FK_tblHDProjectProject_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
-    CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
-    CONSTRAINT [FK_tblHDProjectProject_tblHDOpportunityWinLossReason_intOpportunityWinLossReasonId] FOREIGN KEY ([intOpportunityWinLossReasonId]) REFERENCES [dbo].[tblHDOpportunityWinLossReason] ([intOpportunityWinLossReasonId])
+    CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
 	--[intOpportunitySourceId]
 )
 
@@ -449,7 +448,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblHDProject',
     @level2type = N'COLUMN',
-    @level2name = N'intOpportunityWinLossReasonId'
+    @level2name = 'strOpportunityWinLossReasonId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Win/Loss Date',

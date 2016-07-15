@@ -5369,4 +5369,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b958f8c7-924d-48e5-9f6e-ef90e799117a" ChangeDateTime="07/15/2016 06:06:42">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[intOpportunityWinLossReasonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strOpportunityWinLossReasonId" />
+  </Operation>
 </Operations>
