@@ -3846,6 +3846,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onItemSelectionChange: function (selModel, selected, eOpts) {
         if (selModel) {
+            if (selModel.view == null || selModel.view == 'undefined') {
+                if (selModel.views == 'undefined' || selModel.views == null || selModel.views.length == 0)
+                    return;
+                var w = selModel.views[0].up('window');
+                var plt = w.down("#pnlLotTracking");
+                plt.setVisible(false);
+                return;
+            }
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
             var pnlLotTracking = win.down("#pnlLotTracking");
