@@ -10,8 +10,7 @@ BEGIN TRY
 	DECLARE @strReceiptType NVARCHAR(50)
 	DECLARE @intCustomerStorageId INT
 	DECLARE @intSourceType INT
-	DECLARE @intSourceId INT
-	DECLARE @TotalReceiptsForScaleTicketNumber INT
+	DECLARE @intSourceId INT	
 	
 	SELECT @intEntityVendorId = intEntityVendorId
 		,@intLocationId = intLocationId
@@ -20,20 +19,14 @@ BEGIN TRY
 	FROM dbo.tblICInventoryReceipt
 	WHERE intInventoryReceiptId = @InventoryReceiptId
 
+	----Receipt Created By Scale Distributuion
 	IF @intSourceType = 1
 	BEGIN
 	  SELECT @intSourceId= ReceiptItem.intSourceId 
 	  FROM tblICInventoryReceipt Receipt
 	  JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId 
 	  WHERE Receipt.intInventoryReceiptId = @InventoryReceiptId
-	  
-	  SELECT @TotalReceiptsForScaleTicketNumber=COUNT(*)
-	  FROM tblICInventoryReceipt Receipt 
-	  JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-	  WHERE Receipt.intSourceType=1 AND ReceiptItem.intSourceId=@intSourceId
-			
-		--1. IF Original Balance NOT EQUAL to OPEN BALANCE??
-		---Receipt With Grain Storage Ticket------
+
 		IF EXISTS (
 				SELECT 1
 				FROM tblGRCustomerStorage CS
@@ -63,7 +56,6 @@ BEGIN TRY
 				RAISERROR('There is mismatch between the original balance and open balance of the grain ticket of this receipt.',16, 1);
 			END
 
-			--2. IF Ticket is Transfered or Invoiced Or Billed,Show Error. 
 			DELETE
 			FROM tblQMTicketDiscount
 			WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
@@ -71,15 +63,7 @@ BEGIN TRY
 			DELETE
 			FROM tblGRCustomerStorage
 			WHERE intCustomerStorageId = @intCustomerStorageId
-		END
-		---END Receipt With Grain Storage Ticket---
-		--Suppose a Scale Ticket has mutiple Receipts then the Scale Ticket Status should be changed when all Receipts Will be deleted .
-		
-		IF @TotalReceiptsForScaleTicketNumber=1
-		BEGIN
-			UPDATE tblSCTicket SET strTicketStatus='O' WHERE intTicketId=@intSourceId
-		END
-		
+		END		
 	END
 END TRY
 
