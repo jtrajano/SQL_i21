@@ -2,6 +2,7 @@
 	@dtmStartDate AS DATETIME 
 	,@isPeriodic AS BIT = 1
 	,@strItemNo AS NVARCHAR(50) = NULL 
+	,@ysnRegenerateBillGLEntries AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -145,9 +146,40 @@ BEGIN
 	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
 				ON GLDetail.strBatchId = InvTrans.strBatchId
 				AND GLDetail.strTransactionId = InvTrans.strTransactionId
+				AND GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
 	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
+
+-- Clear the cost adjustments
+BEGIN 
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryLIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryActualCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+END 
+
+-- TODO:
+-- 1. Fix the Unpost Cost adjustment. It must reduce the Lot Out > dblCostAdjustQty
 
 -- Create the temp table. 
 BEGIN 
@@ -284,7 +316,7 @@ END
 BEGIN 
 	DECLARE @strBatchId AS NVARCHAR(20)
 			,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
-			,@intUserId AS INT
+			,@intEntityUserSecurityId AS INT
 			,@strGLDescription AS NVARCHAR(255) = NULL 
 			,@ItemsToPost AS ItemCostingTableType 
 			,@strTransactionForm AS NVARCHAR(50)
@@ -309,7 +341,7 @@ BEGIN
 		BEGIN 
 			SELECT	TOP 1 
 					@strBatchId = strBatchId
-					,@intUserId = intCreatedUserId
+					,@intEntityUserSecurityId = intCreatedUserId
 					,@strTransactionForm = strTransactionForm
 					,@strTransactionId = strTransactionId
 					,@intTransactionId = intTransactionId
@@ -323,7 +355,7 @@ BEGIN
 		BEGIN 
 			SELECT	TOP 1 
 					@strBatchId = strBatchId
-					,@intUserId = intCreatedUserId
+					,@intEntityUserSecurityId = intCreatedUserId
 					,@strTransactionForm = strTransactionForm
 					,@strTransactionId = strTransactionId
 					,@intTransactionId = intTransactionId
@@ -334,11 +366,11 @@ BEGIN
 			ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
 		END 
 
-
 		-- Run the post routine. 
 		BEGIN 
 			PRINT 'Posting ' + @strBatchId
 
+			-- Setup the GL Description
 			SET @strGLDescription = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
 									(SELECT strDescription FROM dbo.tblICInventoryAdjustment WHERE strAdjustmentNo = @strTransactionId)
@@ -346,7 +378,7 @@ BEGIN
 									NULL
 						END
 
-
+			-- Setup the contra-gl account to use. 
 			SET @strAccountToCounterInventory = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
 									'Inventory Adjustment'
@@ -370,13 +402,21 @@ BEGIN
 									NULL 
 						END
 
-
-
-
+			-- Clear the data on @ItemsToPost
 			DELETE FROM @ItemsToPost
 
+			-- Process the cost adjustments
+			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
+			BEGIN 
+				EXEC dbo.uspICRepostCostAdjustment
+					@strTransactionId
+					,@strBatchId
+					,@intEntityUserSecurityId
+					,@ysnRegenerateBillGLEntries
+			END
+
 			--IF @strTransactionForm IN ('Consume', 'Produce') 
-			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
+			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -459,7 +499,7 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 
@@ -529,10 +569,11 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 			END
+
 			--ELSE IF @strTransactionForm = 'Inventory Transfer'
 			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Transfer'))
 			BEGIN 
@@ -591,7 +632,7 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 
@@ -654,7 +695,7 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 			END	
@@ -762,7 +803,7 @@ BEGIN
 					EXEC dbo.uspICRepostCosting
 						@strBatchId
 						,@strAccountToCounterInventory
-						,@intUserId
+						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
 				END 
@@ -1100,7 +1141,7 @@ BEGIN
 					EXEC dbo.uspICRepostCosting
 						@strBatchId
 						,@strAccountToCounterInventory
-						,@intUserId
+						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
 				END
@@ -1285,7 +1326,7 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 			END 
@@ -1329,7 +1370,7 @@ BEGIN
 			EXEC @intReturnId = dbo.uspICCreateGLEntries
 				@strBatchId
 				,@strAccountToCounterInventory
-				,@intUserId
+				,@intEntityUserSecurityId
 				,@strGLDescription					
 
 			IF @intReturnId <> 0 
