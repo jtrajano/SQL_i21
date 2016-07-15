@@ -5,6 +5,6 @@
     [intLineOfBusinessId]			INT NOT NULL,	
 	[intConcurrencyId]				INT DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [FK_tblEMEntityLineOfBusiness_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblEMEntityLineOfBusiness_tblHDLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [dbo].[tblHDLineOfBusiness] ([intLineOfBusinessId]),
+	CONSTRAINT [FK_tblEMEntityLineOfBusiness_tblSMLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [dbo].[tblSMLineOfBusiness] ([intLineOfBusinessId]),
 	CONSTRAINT [PK_tblEMEntityLineOfBusiness] PRIMARY KEY CLUSTERED ([intEntityLineOfBusinessId] ASC),
 )

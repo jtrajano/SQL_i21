@@ -5376,4 +5376,53 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strOpportunityWinLossReasonId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="17d2f867-e98d-42fb-a89f-5e027b2a8bbb" ChangeDateTime="07/15/2016 07:08:43">
+    <Property Name="ElementName" Value="[dbo].[tblHDLineOfBusiness]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblSMLineOfBusiness]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9085658e-1174-4f94-b4c6-398d8f69b4e9" ChangeDateTime="07/15/2016 07:10:40">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDLineOfBusiness]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMLineOfBusiness]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblSMLineOfBusiness]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8fe715f8-fc8c-4ae0-937a-23ac590a438e" ChangeDateTime="07/15/2016 07:11:59">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDLineOfBusiness_tblEMEntity]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMLineOfBusiness]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblSMLineOfBusiness_tblEMEntity]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ffd03956-ac14-472c-b48f-d2b4bbb6022e" ChangeDateTime="07/15/2016 07:13:50">
+    <Property Name="ElementName" Value="[dbo].[UNQ_tblHDLineOfBusiness_SalesPersonEntity]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMLineOfBusiness]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UNQ_tblSMLineOfBusiness_SalesPersonEntity]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="260362b7-2607-4ecc-a2cb-2f0c779dc5aa" ChangeDateTime="07/15/2016 07:15:45">
+    <Property Name="ElementName" Value="[dbo].[FK_tblARCustomerLineOfBusiness_tblHDLineOfBusiness]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerLineOfBusiness]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblARCustomerLineOfBusiness_tblSMLineOfBusiness]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="60174567-69c0-440b-921f-8ce4b5f39bd4" ChangeDateTime="07/15/2016 07:16:55">
+    <Property Name="ElementName" Value="[dbo].[FK_tblEMEntityLineOfBusiness_tblHDLineOfBusiness]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEMEntityLineOfBusiness]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblEMEntityLineOfBusiness_tblSMLineOfBusiness]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bdba3ef5-eb95-4dbf-a4e5-62c23cbfdde6" ChangeDateTime="07/15/2016 07:18:14">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDTicket_tblHDLineOfBusiness]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDTicket]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblHDTicket_tblSMLineOfBusiness]" />
+  </Operation>
 </Operations>

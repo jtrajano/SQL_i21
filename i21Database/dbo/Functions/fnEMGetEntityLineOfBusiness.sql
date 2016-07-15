@@ -9,7 +9,7 @@ BEGIN
 		from tblEMEntityLineOfBusiness a			
 			join tblEMEntity b
 				on a.intEntityId = b.intEntityId
-			join tblHDLineOfBusiness c
+			join [tblSMLineOfBusiness] c
 				on c.intLineOfBusinessId = a.intLineOfBusinessId
 	where a.intEntityId = @intEntityId
 	RETURN @col

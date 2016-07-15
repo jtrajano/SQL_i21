@@ -3,12 +3,12 @@
 		select distinct
 			tblARCustomerLineOfBusiness.intCustomerLineOfBusinessId
 			,tblARCustomerLineOfBusiness.intEntityCustomerId
-			,tblHDLineOfBusiness.*
+			,[tblSMLineOfBusiness].*
 			,strSalesPerson = tblEMEntity.strName
 		from
 			tblARCustomerLineOfBusiness
-			,tblHDLineOfBusiness
+			,[tblSMLineOfBusiness]
 			,tblEMEntity
 		where
-			tblHDLineOfBusiness.intLineOfBusinessId = tblARCustomerLineOfBusiness.intLineOfBusinessId
-			and tblEMEntity.intEntityId = tblHDLineOfBusiness.intEntityId
+			[tblSMLineOfBusiness].intLineOfBusinessId = tblARCustomerLineOfBusiness.intLineOfBusinessId
+			and tblEMEntity.intEntityId = [tblSMLineOfBusiness].intEntityId
