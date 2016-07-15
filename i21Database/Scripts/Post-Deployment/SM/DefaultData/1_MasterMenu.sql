@@ -1796,11 +1796,11 @@ ELSE
 --ELSE 
 --	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.ProjectList' WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 	
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reminder Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Reminder Lists', N'Help Desk', @HelpDeskParentMenuId, N'Reminder Lists', N'Activity', N'Screen', N'HelpDesk.view.ReminderList', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.ReminderList' WHERE strMenuName = 'Reminder Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reminder Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Reminder Lists', N'Help Desk', @HelpDeskParentMenuId, N'Reminder Lists', N'Activity', N'Screen', N'HelpDesk.view.ReminderList', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
+--ELSE 
+--	UPDATE tblSMMasterMenu SET strCommand = N'HelpDesk.view.ReminderList' WHERE strMenuName = 'Reminder Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Projects' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1828,6 +1828,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND str
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Create Ticket' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Email Setup' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reminder Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskParentMenuId
 /* End of delete */
 
 /* INVENTORY */
