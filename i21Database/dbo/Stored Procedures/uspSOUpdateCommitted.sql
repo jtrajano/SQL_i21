@@ -40,7 +40,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	(CASE WHEN @Negate = 1 THEN (Detail.dblQtyShipped * -1) ELSE (CASE WHEN @QuantityToPost IS NULL OR @QuantityToPost = 0 THEN ((Detail.dblQtyOrdered - Detail.dblQtyShipped) - (TD.dblQtyOrdered - TD.dblQtyShipped)) ELSE @QuantityToPost END) END)
+		,[dblQty]					=	(CASE WHEN @Negate = 1 THEN (Detail.dblQtyShipped * -1) ELSE (CASE WHEN @QuantityToPost IS NULL OR @QuantityToPost = 0 THEN ((Detail.dblQtyOrdered - Detail.dblQtyShipped) - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, (TD.dblQtyOrdered - TD.dblQtyShipped))) ELSE @QuantityToPost END) END)
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
