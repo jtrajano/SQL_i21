@@ -85,6 +85,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@BillingBy						NVARCHAR(50)	= NULL
 			,@COGSAmount					NUMERIC(18,6)   = @ZeroDecimal
 			,@CustomerNumber				NVARCHAR(100)	= NULL
+			,@intItemLocationId				INT				= NULL
+			,@ysnAllowNegativeStock			BIT				= 0
+			,@intStockUnit					INT				= NULL
 
 		IF @IsTank = 1
 			BEGIN
@@ -201,6 +204,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @FreightTermId				= ISNULL(EL.intFreightTermId, 0)
 					, @ShipViaId					= ISNULL(EL.intShipViaId, 0)
 					, @TaxAmount					= ILD.dblTax
+					, @intItemLocationId			= ICIL.intItemLocationId
+					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
+					, @intStockUnit					= ICUOM.intItemUOMId
 				FROM
 					tblARImportLogDetail ILD
 				INNER JOIN
@@ -221,6 +227,15 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				LEFT JOIN
 					tblICItem ICI
 						ON ICI.intItemId = @ImportItemId
+						AND ICI.strType = 'Inventory'
+				LEFT JOIN
+					tblICItemLocation ICIL 
+						ON ICIL.intItemId = ICI.intItemId 
+						AND ICIL.intLocationId = @ImportLocationId
+				LEFT JOIN
+					tblICItemUOM ICUOM
+						ON ICUOM.intItemId = ICI.intItemId						
+						AND ICUOM.ysnStockUnit = 1
 				WHERE 
 					ILD.intImportLogDetailId = @ImportLogDetailId
 			END
@@ -324,6 +339,14 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 				IF ISNULL(@TaxGroupId, 0) > 0 AND NOT EXISTS (SELECT NULL FROM tblSMTaxGroupCode WHERE intTaxGroupId = @TaxGroupId)
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Tax Group must have atleast (1) one Tax Code setup.'
 				
+				IF ISNULL(@intItemLocationId, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item Location for the selected item is required.'
+
+				IF ISNULL(@ysnAllowNegativeStock, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item should allow negative stock.'
+
+				IF ISNULL(@intStockUnit, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s stock unit should not be null.'
 			END
 
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
@@ -539,7 +562,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							 @InvoiceEntries	 = @EntriesForInvoice
 							,@LineItemTaxEntries = @TaxDetails
 							,@UserId			 = @EntityId
-							,@GroupingOption	 = 11
+		 					,@GroupingOption	 = 11
 							,@RaiseError		 = 1
 							,@ErrorMessage		 = @ErrorMessage OUTPUT
 							,@CreatedIvoices	 = @CreatedIvoices OUTPUT
@@ -547,10 +570,22 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
 						IF ISNULL(@NewTransactionId, 0) > 0
-							UPDATE tblARInvoice 
-							SET intEntitySalespersonId = @EntitySalespersonId
-							  , strType = CASE WHEN @IsTank = 1 THEN 'Tank Delivery' ELSE @Type END
-							WHERE intInvoiceId = @NewTransactionId
+							BEGIN
+								UPDATE tblARInvoice 
+								SET intEntitySalespersonId = @EntitySalespersonId
+								  , strType = CASE WHEN @IsTank = 1 THEN 'Tank Delivery' ELSE @Type END
+								WHERE intInvoiceId = @NewTransactionId
+
+								IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+									BEGIN
+										DECLARE @invoiceToPost	NVARCHAR(MAX)
+										SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewTransactionId)
+
+										UPDATE tblICItemPricing SET dblLastCost = @COGSAmount WHERE intItemId = @ImportItemId AND intItemLocationId = @intItemLocationId
+
+										EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserEntityId
+									END
+							END
 					END
 				ELSE
 					BEGIN
