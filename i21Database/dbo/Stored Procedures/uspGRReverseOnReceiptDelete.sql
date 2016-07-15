@@ -19,6 +19,7 @@ BEGIN TRY
 	FROM dbo.tblICInventoryReceipt
 	WHERE intInventoryReceiptId = @InventoryReceiptId
 
+	----Receipt Created By Scale Distributuion
 	IF @intSourceType = 1
 	BEGIN
 	  SELECT @intSourceId= ReceiptItem.intSourceId 
@@ -26,8 +27,6 @@ BEGIN TRY
 	  JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId 
 	  WHERE Receipt.intInventoryReceiptId = @InventoryReceiptId
 
-		--1. IF Original Balance NOT EQUAL to OPEN BALANCE??
-		---Receipt With Grain Storage Ticket------
 		IF EXISTS (
 				SELECT 1
 				FROM tblGRCustomerStorage CS
@@ -57,7 +56,6 @@ BEGIN TRY
 				RAISERROR('There is mismatch between the original balance and open balance of the grain ticket of this receipt.',16, 1);
 			END
 
-			--2. IF Ticket is Transfered or Invoiced Or Billed,Show Error. 
 			DELETE
 			FROM tblQMTicketDiscount
 			WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
@@ -65,8 +63,7 @@ BEGIN TRY
 			DELETE
 			FROM tblGRCustomerStorage
 			WHERE intCustomerStorageId = @intCustomerStorageId
-		END
-		---END Receipt With Grain Storage Ticket---
+		END		
 	END
 END TRY
 
