@@ -1115,6 +1115,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
     createRecord: function (config, action) {
+        var win = config.window;
+        win.down("#lblWeightLossMsgValue").setText("");
+        win.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
         record.set('strReceiptType', 'Purchase Order');
@@ -3879,6 +3882,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     return;
                 var w = selModel.views[0].up('window');
                 var plt = w.down("#pnlLotTracking");
+                w.down("#lblWeightLossMsgValue").setText("");
+                w.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
                 plt.setVisible(false);
                 return;
             }
