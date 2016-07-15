@@ -1903,7 +1903,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
     },
-
+/*
     convertLotUOMToGross: function(lotCF, weightCF, lotQty){
         var result = 0;
         if (lotCF === weightCF) {
@@ -1914,7 +1914,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         return result;
-    },
+    },*/
 
     convertQtyBetweenUOM: function(sourceUOMConversionFactor, targetUOMConversionFactor, qty){
         var result = 0;
@@ -1938,6 +1938,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             ,lotTare = 0
             ,ysnCalculatedInLot = 0;
 
+        //Calculate based on Lot
         if (record.tblICInventoryReceiptItemLots()) {
             Ext.Array.each(record.tblICInventoryReceiptItemLots().data.items, function (lot) {
                 if (!lot.dummy) {
@@ -1945,6 +1946,40 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!iRely.Functions.isEmpty(record.get('intWeightUOMId'))) {
                         if(lot.get('dblQuantity') !== 0 )
                             {
+                                //Calculate First Gross and Net for Lots
+                                    var lotQty = lot.get('dblQuantity');
+                                    var lotCF = lot.get('dblLotUOMConvFactor');
+                                    var itemUOMCF = record.get('dblItemUOMConvFactor');
+                                    var weightCF = record.get('dblWeightUOMConvFactor');
+
+                                    if (iRely.Functions.isEmpty(lotQty)) lotQty = 0.00;
+                                    if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
+                                    if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
+                                    if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
+
+                                    // If there is not Gross/Net UOM, do not calculate the lot gross and net.
+                                    if (record.get('intWeightUOMId') !== null) {
+                                        var grossQty;
+                                        //Convert Lot UOM to Gross
+                                                if (lotCF === weightCF) {
+                                                        grossQty = lotQty;
+                                                }
+                                                else if (weightCF !== 0){
+                                                        grossQty = (lotCF * lotQty) / weightCF;
+                                                }
+                                        
+                                        lot.set('dblGrossWeight', grossQty);
+                                        var tare = lot.get('dblTareWeight');
+                                        var netTotal = grossQty - tare;
+                                        lot.set('dblNetWeight', netTotal);
+                                    }
+
+                                    //Set Default Value for Lot UOM
+                                    if(lot.get('strUnitMeasure') === null || lot.get('strUnitMeasure') === '') {
+                                            lot.set('strUnitMeasure', record.get('strUnitMeasure'));
+                                            lot.set('intItemUnitMeasureId', record.get('intItemUnitMeasureId'));
+                                        } 
+                                
                                  // Get the Gross Qty
                                 lotGross = lot.get('dblGrossWeight');
                                 lotGross = Ext.isNumeric(lotGross) ? lotGross : 0.00;
@@ -1963,6 +1998,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
         
+        //Use this calculation if the item has no lot
         if(ysnCalculatedInLot === 0)
             {
                  var receiptItemQty = record.get('dblOpenReceive');
@@ -2641,35 +2677,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var totalGross = iRely.Functions.isEmpty(receiptItem.get('dblGross')) ? 0 : receiptItem.get('dblGross');
         var totalNet = iRely.Functions.isEmpty(receiptItem.get('dblNet')) ? 0 : receiptItem.get('dblNet');
 
-        if (context.field === 'dblQuantity') {
-            var lotQty = context.value;
-            var lotCF = context.record.get('dblLotUOMConvFactor');
-            var itemUOMCF = receiptItem.get('dblItemUOMConvFactor');
-            var weightCF = receiptItem.get('dblWeightUOMConvFactor');
-
-            if (iRely.Functions.isEmpty(lotQty)) lotQty = 0.00;
-            if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
-            if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
-            if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
-
-            // If there is not Gross/Net UOM, do not calculate the lot gross and net.
-            if (!iRely.Functions.isEmpty(win.viewModel.data.currentReceiptItem.get('intWeightUOMId'))) {
-                var grossQty;
-                grossQty = me.convertLotUOMToGross(lotCF, weightCF, lotQty);
-                context.record.set('dblGrossWeight', grossQty);
-                var tare = context.record.get('dblTareWeight');
-                var netTotal = grossQty - tare;
-                context.record.set('dblNetWeight', netTotal);
-            }
-            
-            //Set Default Value for Lot UOM
-            if(context.record.get('strUnitMeasure') === null || context.record.get('strUnitMeasure') === '') {
-                    context.record.set('strUnitMeasure', receiptItem.get('strUnitMeasure'));
-                    context.record.set('intItemUnitMeasureId', receiptItem.get('intItemUnitMeasureId'));
-                } 
-        }
-
-        else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
+        if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
             var gross = context.record.get('dblGrossWeight');
             var tare = context.record.get('dblTareWeight');
             var net = context.record.get('dblNetWeight');
