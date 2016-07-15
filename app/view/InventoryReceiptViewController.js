@@ -504,7 +504,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
-                        readOnly: '{computeWeightUOM}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
@@ -1620,7 +1619,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        this.calculateGrossWeight(current);
+        this.calculateGrossNet(current);
         win.viewModel.data.currentReceiptItem = current;
         this.calculateItemTaxes();
     },
@@ -1940,8 +1939,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return result;
     },
 
-    calculateGrossWeight: function (record) {
-        var me = this;
+    calculateGrossNet: function (record) {
+        if (!record) return;
+
         var totalGross = 0
             ,totalNet = 0
             ,lotGross = 0
@@ -2004,15 +2004,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 ysnCalculatedInLot = 1;
                             }
                     }
-                    lot.set('dblGrossWeight', grossQty);
-
-                    // Calculate the net qty
-                    var tare = lot.get('dblTareWeight');
-                    tare = Ext.isNumeric(tare) ? tare : 0.00;
-                    grossQty = Ext.isNumeric(grossQty) ? grossQty : 0.00;
-                    lot.set('dblNetWeight', grossQty - tare);
-                    totalGross += grossQty;
-                    totalNet += (grossQty - tare);
                 }
             });
         }
@@ -2039,11 +2030,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 totalNet = totalGross;
             }
 
-            if (!iRely.Functions.isEmpty(record.get('intWeightUOMId'))) {
-                record.set('dblGross', totalGross);
-                record.set('dblNet', totalNet);
-            }
-        }
+        record.set('dblGross', totalGross);
+        record.set('dblNet', totalNet);
     },
 
     onViewReceiptNo: function (value, record) {
@@ -2708,17 +2696,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (context.field === 'dblGrossWeight') {
                 totalGross -= (tare + net);
                 gross = context.value;
-                totalGross += gross;
             }
             else if (context.field === 'dblTareWeight') {
                 tare = context.value;
             }
-            totalNet -= context.record.get('dblNetWeight');
             context.record.set('dblNetWeight', gross - tare);
-            totalNet += context.record.get('dblNetWeight');
         }
-        receiptItem.set('dblGross', totalGross);
-        receiptItem.set('dblNet', totalNet);
+
+        // Call this function to auto-calculate the Gross and Net at the item grid.
+        me.calculateGrossNet(receiptItem);
     },
 
     onChargeValidateEdit: function (editor, context, eOpts) {
@@ -3893,7 +3879,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.itemId === 'cboLotUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
-            me.calculateGrossWeight(win.viewModel.data.currentReceiptItem);
+            me.calculateGrossNet(win.viewModel.data.currentReceiptItem);
         }
     },
 
@@ -4397,6 +4383,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     if ( ctr === replicaCount - 1){
                         grdLotTracking.resumeEvents(true);
+                        me.calculateGrossNet(currentReceiptItem);
                     }
                 }
 
