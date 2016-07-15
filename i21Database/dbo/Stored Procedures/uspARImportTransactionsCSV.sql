@@ -196,14 +196,14 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 													   END)
 					, @ItemQtyShipped				= 1
 					, @ItemId						= ICI.intItemId
-					, @ItemPrice					= ISNULL(ILD.dblSubtotal, @ZeroDecimal)
+					, @ItemPrice					= ABS(ISNULL(ILD.dblSubtotal, @ZeroDecimal))
 					, @ItemDescription				= ICI.strDescription
 					, @TaxGroupId					= EL.intTaxGroupId
-					, @Total						= ILD.dblTotal
-					, @COGSAmount					= ILD.dblCOGSAmount
+					, @Total						= ABS(ILD.dblTotal)
+					, @COGSAmount					= ABS(ILD.dblCOGSAmount)
 					, @FreightTermId				= ISNULL(EL.intFreightTermId, 0)
 					, @ShipViaId					= ISNULL(EL.intShipViaId, 0)
-					, @TaxAmount					= ILD.dblTax
+					, @TaxAmount					= ABS(ILD.dblTax)
 					, @intItemLocationId			= ICIL.intItemLocationId
 					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
 					, @intStockUnit					= ICUOM.intItemUOMId
@@ -355,6 +355,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					BEGIN
 						INSERT INTO @EntriesForInvoice(
 							 [strSourceTransaction]
+							,[strTransactionType]
 							,[intSourceId]
 							,[strSourceId]
 							,[intInvoiceId]
@@ -433,6 +434,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
+							,[strTransactionType]		= @TransactionType
 							,[intSourceId]				= @ImportLogDetailId
 							,[strSourceId]				= CAST(@ImportLogDetailId AS NVARCHAR(250))
 							,[intInvoiceId]				= NULL
