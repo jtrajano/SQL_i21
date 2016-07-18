@@ -143,6 +143,23 @@ Begin Try
 
 	Begin Tran
 
+	--Create Reservation
+	--Get Bulk Items From Reserved Lots
+	Set @strBulkItemXml='<root>'
+
+	--Bulk Item
+	Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+	'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
+	'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
+	'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
+	From tblICStockReservation sr 
+	Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+
+	Set @strBulkItemXml=@strBulkItemXml+'</root>'
+
+	If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+		Set @strBulkItemXml=''
+
 	EXEC uspMFDeleteLotReservationByPickList @intPickListId = @intPickListId
 
 	If @ysnBlendSheetRequired=0
@@ -240,23 +257,6 @@ Begin Try
 		NEXT_RECORD:
 		Select @intMinChildLot=Min(intRowNo) from @tblChildLot where intRowNo>@intMinChildLot
 	End --End Loop Child Lots
-
-	--Create Reservation
-	--Get Bulk Items From Reserved Lots
-	Set @strBulkItemXml='<root>'
-
-	--Bulk Item
-	Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
-	'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
-	'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
-	'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
-	From tblICStockReservation sr Join tblICItem i on sr.intItemId=i.intItemId
-	Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0 AND i.strLotTracking <> 'No'
-
-	Set @strBulkItemXml=@strBulkItemXml+'</root>'
-
-	If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
-		Set @strBulkItemXml=''
 
 	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=0,@strBulkItemXml=@strBulkItemXml
 
