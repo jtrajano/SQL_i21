@@ -38,15 +38,15 @@ BEGIN
 		,[intItemLocationId]		=	ItemLocation.intItemLocationId
 		,[intItemUOMId]				=	B.intUnitOfMeasureId
 		,[dtmDate]					=	A.dtmDate
-		,[dblQty]					=	CASE WHEN @negate = 1 
-											THEN 
-												(B.dblQtyOrdered - B.dblQtyReceived) * -1
-											ELSE 
-												CASE WHEN A.intOrderStatusId IN (4, 6) --Short Closed, Cancellled
-													THEN 0
-													ELSE B.dblQtyOrdered - B.dblQtyReceived
-													END
-											END
+		,[dblQty]					=	CASE WHEN A.intOrderStatusId IN (4,6) THEN 0 --Short closed, cancelled
+										ELSE 
+											(CASE WHEN @negate = 1 
+												THEN 
+													(B.dblQtyOrdered - B.dblQtyReceived) * -1
+												ELSE 
+													B.dblQtyOrdered - B.dblQtyReceived
+												END)
+										END
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	B.dblCost
 		,[dblValue]					=	0
