@@ -34,6 +34,9 @@
 					,strCompetitorEntityId
 					,strCurrentSolutionId
 					,strLinesOfBusinessId
+					,strCampaignName
+					,strCompanyLocation
+					,strEntityLocation
 		from 
 				(
 				select
@@ -70,6 +73,9 @@
 					,proj.strCompetitorEntityId
 					,proj.strCurrentSolutionId
 					,proj.strLinesOfBusinessId
+					,cam.strCampaignName
+					,strCompanyLocation = camloc.strLocationName
+					,strEntityLocation = enloc.strLocationName
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityCustomerId] = proj.intCustomerId
@@ -77,4 +83,7 @@
 					left outer join tblHDTicketType typ on typ.intTicketTypeId = proj.intTicketTypeId
 					left outer join tblHDSalesPipeStatus pipe on pipe.intSalesPipeStatusId = proj.intSalesPipeStatusId
 					left outer join tblHDOpportunitySource tblHDOpportunitySource on tblHDOpportunitySource.intOpportunitySourceId = proj.intOpportunitySourceId
+					left outer join tblHDOpportunityCampaign cam on cam.intOpportunityCampaignId = proj.intOpportunityCampaignId
+					left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = proj.intCompanyLocationId
+					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
 				) as query1

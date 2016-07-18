@@ -39,6 +39,9 @@ AS
 		,tic.dtmLastCommented
 		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101)
 		,strLastCommentedBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
+		,cam.strCampaignName
+		,strCompanyLocation = camloc.strLocationName
+		,strEntityLocation = enloc.strLocationName
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
@@ -49,3 +52,6 @@ AS
 		left outer join tblSMModule smmo on smmo.intModuleId = mo.intSMModuleId
 		left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
 		left outer join tblHDProject proj on proj.intProjectId = (select top 1 projt.intProjectId from tblHDProjectTask projt where projt.intTicketId = tic.intTicketId)
+		left outer join tblHDOpportunityCampaign cam on cam.intOpportunityCampaignId = tic.intOpportunityCampaignId
+		left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = tic.intCompanyLocationId
+		left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = tic.intEntityLocationId
