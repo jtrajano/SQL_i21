@@ -411,3 +411,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80083) EXEC sp_dropmessa
 SET @strmessage = 'The new Item Location is invalid or missing for %s.'
 EXEC sp_addmessage 80083,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80084) EXEC sp_dropmessage 80084, 'us_english'	
+SET @strmessage = 'Check the Rebuild Valuation GL Snapshot. The original GL values changed when compared against the rebuild values.'
+EXEC sp_addmessage 80084,11,@strmessage,'us_english','False'

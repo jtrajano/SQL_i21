@@ -11,7 +11,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intItemId AS INT 
+DECLARE @intItemId AS INT
+		,@dtmRebuildDate AS DATETIME = GETDATE() 
 
 SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
 
@@ -52,7 +53,15 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@AdjustmentTypeLotMerge AS INT = 7
 		,@AdjustmentTypeLotMove AS INT = 8 
 
+
+-- Create a snapshot of the gl values
+BEGIN
+	EXEC uspICCreateGLSnapshotOnRebuildInventoryValuation
+		@dtmRebuildDate
+END
+
 BEGIN TRANSACTION 
+
 
 -- Return all the "Out" stock qty back to the cost buckets. 
 BEGIN 
@@ -1439,6 +1448,12 @@ BEGIN
 		tblGLDetail
 	WHERE ysnIsUnposted = 0	
 	GROUP BY intAccountId, dtmDate, strCode
+END
+
+-- Compare the snapshot of the gl entries 
+BEGIN
+	EXEC uspICCompareGLSnapshotOnRebuildInventoryValuation
+		@dtmRebuildDate
 END
 
 COMMIT TRANSACTION 
