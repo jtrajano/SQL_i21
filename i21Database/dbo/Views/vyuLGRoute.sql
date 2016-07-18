@@ -5,13 +5,11 @@ SELECT
 	,Rte.strRouteNumber
 	,Rte.intSourceType
 	,strSourceType = CASE WHEN Rte.intSourceType = 1 THEN 
-							'LG Loads'
-						ELSE
-							CASE WHEN Rte.intSourceType = 2 THEN
+							'LG Loads - Inbound'
+						  WHEN Rte.intSourceType = 2 THEN
 								'TM Orders'
-							ELSE
-								''
-							END
+						  WHEN Rte.intSourceType = 3 THEN
+								'LG Loads - Outbound'
 						END
 	,Rte.intDriverEntityId
 	,strDriver = Driver.strName

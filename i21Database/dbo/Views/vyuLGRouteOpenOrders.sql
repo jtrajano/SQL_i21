@@ -91,7 +91,7 @@ WHERE LGL.intPurchaseSale = 2 AND LGL.intShipmentStatus = 1 AND IsNull(LGLD.intL
 UNION ALL
 
 SELECT
-	intSourceType = 1
+	intSourceType = 3
 	,intOrderId = LGLD.intLoadDetailId
 	,intDispatchID = NULL
 	,intLoadDetailId = LGLD.intLoadDetailId
