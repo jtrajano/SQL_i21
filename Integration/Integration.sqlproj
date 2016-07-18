@@ -334,5 +334,7 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateLeakGasCheckSearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateEfficiencySearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveriesSearchView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateCallEntryPrintOutReportView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql" />
   </ItemGroup>
 </Project>

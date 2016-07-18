@@ -4050,6 +4050,11 @@
     <Build Include="dbo\Tables\tblHDOpportunityWinLossReason.sql" />
     <Build Include="dbo\Views\vyuEMSearchVendorMin.sql" />
     <Build Include="dbo\Views\vyuSTRetailPriceAdjustmentDetailView.sql" />
+    <Build Include="dbo\Views\vyuTMCallEntryPrintOutReport.sql" />
+    <Build Include="dbo\Views\vyuTMTankInformationSubReport.sql" />
+    <Build Include="dbo\Views\vyuTMCustomerContractSubReport.sql" />
+    <Build Include="dbo\Views\vyuTMRegulatorInformationSubReport.sql" />
+    <Build Include="dbo\Views\vyuTMCustomerEntityView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
