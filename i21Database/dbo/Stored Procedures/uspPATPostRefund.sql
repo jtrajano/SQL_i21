@@ -353,7 +353,7 @@ BEGIN TRY
 		---------------------------------------------------------------------------------------------------------------------------------------
 
 		UPDATE CVol
-		SET CVol.dblVolume = 0.00
+		SET CVol.dtmLastActivityDate = GETDATE()
 		FROM tblPATCustomerVolume CVol
 		INNER JOIN #tmpCurrentData
 		ON CVol.intFiscalYear = #tmpCurrentData.intFiscalYearId
