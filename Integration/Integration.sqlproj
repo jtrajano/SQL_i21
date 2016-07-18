@@ -158,6 +158,7 @@
   <ItemGroup>
     <PostDeploy Include="Scripts\PostDeployment1.sql" />
     <None Include="Scripts\SM\FixCompanyLocationNumber.sql" />
+    <None Include="Scripts\SM\SetDefaultValues.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\vyuTFTaxCycle.sql" />
