@@ -33,4 +33,3 @@ GO
 
 --System Manager
 :r "..\Scripts\SM\FixCompanyLocationNumber.sql"
-:r "..\Scripts\SM\CleanActiveScreen.sql"
