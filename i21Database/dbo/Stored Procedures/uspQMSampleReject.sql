@@ -20,7 +20,7 @@ BEGIN TRY
 	DECLARE @intLotStatusId INT
 	DECLARE @intLastModifiedUserId INT
 	DECLARE @dtmLastModified DATETIME
-	DECLARE @strLotNumber NVARCHAR(30)
+	DECLARE @strLotNumber NVARCHAR(50)
 	DECLARE @intItemId INT
 	DECLARE @intLocationId INT
 	DECLARE @intSubLocationId INT
@@ -87,7 +87,7 @@ BEGIN TRY
 		DECLARE @ParentLotData TABLE (
 			intSeqNo INT IDENTITY(1, 1)
 			,intLotId INT
-			,strLotNumber NVARCHAR(30)
+			,strLotNumber NVARCHAR(50)
 			,intItemId INT
 			,intLocationId INT
 			,intSubLocationId INT

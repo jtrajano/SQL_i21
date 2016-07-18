@@ -20,7 +20,7 @@
 	[intLotStatusId] INT, 
 	[intEntityId] INT, -- Party Id
 	[strShipmentNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS,
-	[strLotNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS, 
+	[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	[strSampleNote] NVARCHAR(512) COLLATE Latin1_General_CI_AS, 
 	[dtmSampleReceivedDate] DATETIME, 
 	[dtmTestedOn] DATETIME, 

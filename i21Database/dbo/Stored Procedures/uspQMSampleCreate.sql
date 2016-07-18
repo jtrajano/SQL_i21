@@ -16,7 +16,7 @@ BEGIN TRY
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
-	DECLARE @strLotNumber NVARCHAR(30)
+	DECLARE @strLotNumber NVARCHAR(50)
 	DECLARE @intLocationId INT
 	DECLARE @intShiftId INT
 	DECLARE @dtmBusinessDate DATETIME
@@ -32,7 +32,7 @@ BEGIN TRY
 		,@intWorkOrderId = intWorkOrderId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
-			,strLotNumber NVARCHAR(30)
+			,strLotNumber NVARCHAR(50)
 			,intLocationId INT
 			,intInventoryReceiptId INT
 			,intWorkOrderId INT
@@ -123,22 +123,16 @@ BEGIN TRY
 				SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
 				FROM tblICInventoryReceiptItemLot RIL
 				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
-				WHERE RIL.intLotId IN (
-						SELECT intLotId
-						FROM tblICLot
-						WHERE strLotNumber = @strLotNumber
-						)
+				JOIN tblICLot L ON L.intLotId = RIL.intLotId
+					AND L.strLotNumber = @strLotNumber
 				ORDER BY RI.intInventoryReceiptId DESC
 
 				IF ISNULL(@intInventoryReceiptId, 0) = 0
 				BEGIN
 					SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
 					FROM tblMFWorkOrderProducedLot WPL
-					WHERE WPL.intLotId IN (
-							SELECT intLotId
-							FROM tblICLot
-							WHERE strLotNumber = @strLotNumber
-							)
+					JOIN tblICLot L ON L.intLotId = WPL.intLotId
+						AND L.strLotNumber = @strLotNumber
 					ORDER BY WPL.intWorkOrderId DESC
 				END
 			END
@@ -153,22 +147,16 @@ BEGIN TRY
 				SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
 				FROM tblICInventoryReceiptItemLot RIL
 				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
-				WHERE RIL.intLotId IN (
-						SELECT intLotId
-						FROM tblICLot
-						WHERE intParentLotId = @intParentLotId
-						)
+				JOIN tblICLot L ON L.intLotId = RIL.intLotId
+					AND L.intParentLotId = @intParentLotId
 				ORDER BY RI.intInventoryReceiptId DESC
 
 				IF ISNULL(@intInventoryReceiptId, 0) = 0
 				BEGIN
 					SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
 					FROM tblMFWorkOrderProducedLot WPL
-					WHERE WPL.intLotId IN (
-							SELECT intLotId
-							FROM tblICLot
-							WHERE intParentLotId = @intParentLotId
-							)
+					JOIN tblICLot L ON L.intLotId = WPL.intLotId
+						AND L.intParentLotId = @intParentLotId
 					ORDER BY WPL.intWorkOrderId DESC
 				END
 			END
@@ -303,7 +291,7 @@ BEGIN TRY
 			,intLotStatusId INT
 			,intEntityId INT
 			,strShipmentNumber NVARCHAR(30)
-			,strLotNumber NVARCHAR(30)
+			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
 			,dtmTestedOn DATETIME

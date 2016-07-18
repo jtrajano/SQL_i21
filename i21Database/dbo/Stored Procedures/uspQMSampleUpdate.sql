@@ -101,7 +101,7 @@ BEGIN TRY
 			,intLotStatusId INT
 			,intEntityId INT
 			,strShipmentNumber NVARCHAR(30)
-			,strLotNumber NVARCHAR(30)
+			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
 			,dtmTestedOn DATETIME

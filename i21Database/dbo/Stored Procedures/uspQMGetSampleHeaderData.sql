@@ -11,6 +11,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @intInventoryReceiptId INT
 DECLARE @intWorkOrderId INT
 DECLARE @strReceiptWONo NVARCHAR(50)
+DECLARE @strLotNumber NVARCHAR(50)
 
 IF @intProductTypeId = 2 -- Item  
 BEGIN
@@ -125,13 +126,18 @@ BEGIN
 END
 ELSE IF @intProductTypeId = 6 -- Lot  
 BEGIN
+	SELECT TOP 1 @strLotNumber = strLotNumber
+	FROM tblICLot
+	WHERE intLotId = @intProductValueId
+
 	-- Inventory Receipt / Work Order No
 	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
 		,@strReceiptWONo = R.strReceiptNumber
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	WHERE RIL.intLotId = @intProductValueId
+	JOIN tblICLot L ON L.intLotId = RIL.intLotId
+		AND L.strLotNumber = @strLotNumber
 	ORDER BY RI.intInventoryReceiptId DESC
 
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
@@ -140,7 +146,8 @@ BEGIN
 			,@strReceiptWONo = W.strWorkOrderNo
 		FROM tblMFWorkOrderProducedLot WPL
 		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-		WHERE WPL.intLotId = @intProductValueId
+		JOIN tblICLot L ON L.intLotId = WPL.intLotId
+			AND L.strLotNumber = @strLotNumber
 		ORDER BY WPL.intWorkOrderId DESC
 	END
 
@@ -192,11 +199,8 @@ BEGIN
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	WHERE RIL.intLotId IN (
-			SELECT intLotId
-			FROM tblICLot
-			WHERE intParentLotId = @intProductValueId
-			)
+	JOIN tblICLot L ON L.intLotId = RIL.intLotId
+		AND L.intParentLotId = @intProductValueId
 	ORDER BY RI.intInventoryReceiptId DESC
 
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
@@ -205,11 +209,8 @@ BEGIN
 			,@strReceiptWONo = W.strWorkOrderNo
 		FROM tblMFWorkOrderProducedLot WPL
 		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
-		WHERE WPL.intLotId IN (
-				SELECT intLotId
-				FROM tblICLot
-				WHERE intParentLotId = @intProductValueId
-				)
+		JOIN tblICLot L ON L.intLotId = WPL.intLotId
+			AND L.intParentLotId = @intProductValueId
 		ORDER BY WPL.intWorkOrderId DESC
 	END
 
