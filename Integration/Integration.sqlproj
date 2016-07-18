@@ -148,7 +148,6 @@
     <None Include="Scripts\AP\BackupImportedUnpostedBillDetail.sql" />
     <None Include="dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql" />
     <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
-    <None Include="Scripts\SM\CleanActiveScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
