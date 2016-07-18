@@ -2049,7 +2049,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
-            search.url = '../i21/api/CompanyLocation/SearchCompanyLocations';
+            search.url = '../i21/api/CompanyLocation/Search';
             search.columns = [
                 { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
                 { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
