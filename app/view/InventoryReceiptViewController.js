@@ -1978,7 +1978,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
                                     if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
 
-                                    // If there is not Gross/Net UOM, do not calculate the lot gross and net.
+                                    // If there is no Gross/Net UOM, do not calculate the lot gross and net.
                                     if (record.get('intWeightUOMId') !== null) {
                                         var grossQty;
                                         //Convert Lot UOM to Gross
@@ -4371,11 +4371,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
 
                 // Compute the last net weight.
-                {
+                
                     lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
                     lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt : 0;
                     lastNetWgt = lastGrossWgt - lastTareWgt;
-                }
+                
             }
             else {
                 replicaCount -= 1;
@@ -4443,7 +4443,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strParentLotNumber: currentLot.get('strParentLotNumber'),
                         strParentLotAlias: currentLot.get('strParentLotAlias'),
                         strStorageLocation: currentLot.get('strStorageLocation'),
-                        strSubLocationName: currentLot.get('strSubLocationName')
+                        strSubLocationName: currentLot.get('strSubLocationName'),
+                        dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
                     });
                     grdLotTracking.suspendEvents(true);
                     currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
@@ -4453,6 +4454,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     if ( ctr === replicaCount - 1){
                         grdLotTracking.resumeEvents(true);
+                        //Calculate Gross/Net
                         me.calculateGrossNet(currentReceiptItem);
                         
                         //Calculate Line Total
