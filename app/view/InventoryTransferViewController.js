@@ -130,7 +130,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 iconCls: '{getPostButtonIcon}',
                 hidden: '{checkTransportPosting}'
             },
-
+            btnAddItem: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnRemoveItem: {
+                hidden: '{current.ysnPosted}'
+            },
             txtTransferNumber: '{current.strTransferNo}',
             dtmTransferDate: {
                 value: '{current.dtmTransferDate}',

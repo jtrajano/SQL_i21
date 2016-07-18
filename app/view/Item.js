@@ -3593,6 +3593,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'frmadvancesearchgrid',
                                                                 flex: 1,
+                                                                reference: 'grdMotorFuelTax',
                                                                 itemId: 'grdMotorFuelTax',
                                                                 margin: '-1 -1 4 -1',
                                                                 header: false,
@@ -3600,7 +3601,7 @@ Ext.define('Inventory.view.Item', {
                                                                 columnLines: true,
                                                                 dockedItems: [
                                                                     {
-                                                                        xtype: 'advancefiltergrid',
+                                                                        xtype: 'toolbar',
                                                                         dock: 'top',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {

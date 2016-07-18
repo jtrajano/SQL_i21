@@ -171,11 +171,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {dataIndex: 'strItemDescription', text: 'Product', flex: 1, dataType: 'string' },
                         {dataIndex: 'dblUnitCost', text: 'Unit Cost', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
                         {dataIndex: 'dblQtyToReceive', text: 'Qty Received', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblLineTotal', text: 'Receipt Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' },
                         {dataIndex: 'dblQtyVouchered', text: 'Qty Vouchered', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
+                        {dataIndex: 'dblVoucherAmount', text: 'Voucher Amount', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' },
                         {dataIndex: 'dblQtyToVoucher', text: 'Qty To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' },
-                        {dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn' }
+                        {dataIndex: 'dblAmountToVoucher', text: 'Amount To Voucher', flex: 1, dataType: 'float', xtype: 'numbercolumn', emptyCellText: '0.00', aggregate:'sum', aggregateFormat: '#,###.00' }
                     ]
                 }
             ]
@@ -563,9 +563,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colGrossMargin: 'dblGrossMargin'
             },
 
-            pnlLotTracking: {
+            /*pnlLotTracking: {
                 hidden: '{hasItemSelection}'
-            },
+            },*/
             grdLotTracking: {
                 readOnly: '{current.ysnPosted}',
                 colLotId: {
@@ -949,7 +949,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             include: 'tblICInventoryReceiptInspections,' +
             'vyuICInventoryReceiptLookUp,' +
             'tblICInventoryReceiptItems.vyuICInventoryReceiptItemLookUp,' +
-            'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
+            /*'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +*/
             'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
             'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -1099,12 +1099,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.setupAdditionalBinding(win);
         }
     },
-
     onPageChange: function(pagingStatusBar, record, eOpts) {
         var win = pagingStatusBar.up('window');
+        var grd = win.down('#grdLotTracking');
+        grd.getStore().removeAll();
+
         var me = win.controller;
         var current = win.viewModel.data.current;
-
         if (current){
             var ReceiptItems = current.tblICInventoryReceiptItems();
 
@@ -1113,8 +1114,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             me.showOtherCharges(win);
         }
     },
-
     createRecord: function (config, action) {
+        var win = config.window;
+        win.down("#lblWeightLossMsgValue").setText("");
+        win.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
         record.set('strReceiptType', 'Purchase Order');
@@ -1512,6 +1515,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strStorageLocation: current.get('strStorageLocationName'),
                         dtmExpiryDate: expiryDate
                     });
+                    //current.tblICInventoryReceiptItemLots().store.load();
                     current.tblICInventoryReceiptItemLots().add(newLot);
                     break;
             }
@@ -1535,6 +1539,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 qtyToReceive = (qtyToReceive * origCF) / newCF;
                 current.set('dblOpenReceive', qtyToReceive);
             }
+
+            //current.tblICInventoryReceiptItemLots().store.load();
 
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
@@ -1580,6 +1586,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
+            //current.tblICInventoryReceiptItemLots().store.load();
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
                     if (!lot.dummy) {
@@ -1597,6 +1604,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intSubLocationId', records[0].get('intSubLocationId'));
                 current.set('strSubLocationName', records[0].get('strSubLocationName'));
             }
+            //current.tblICInventoryReceiptItemLots().store.load();
             var lots = current.tblICInventoryReceiptItemLots();
 
             if (lots) {
@@ -2196,14 +2204,41 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onQualityClick: function (button, e, eOpts) {
         var win = button.up('window');
         var grd = win.down('#grdInventoryReceipt');
-
         var selected = grd.getSelectionModel().getSelection();
+        
+        var win = button.up('window');
+        var vm = win.viewModel;
+        var currentReceiptItem = vm.data.current;
 
         if (selected) {
             if (selected.length > 0) {
                 var current = selected[0];
                 if (!current.dummy)
-                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
+                    if(currentReceiptItem.get('ysnPosted') === true)
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', 
+                                { 
+                                    strSourceType: 'Inventory Receipt', 
+                                    intTicketFileId: current.get('intInventoryReceiptItemId'),
+                                    viewConfig:{
+                                        modal: true, 
+                                        listeners:
+                                        {
+                                            show: function(win) {
+                                                Ext.defer(function(){
+                                                    win.context.screenMgr.securityMgr.screen.setViewOnlyAccess();
+                                                }, 100);
+                                            }
+                                        }
+                                    }
+                                }
+                            );
+                            
+                        }
+                    else
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
+                        }
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');
@@ -3851,23 +3886,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onItemSelectionChange: function (selModel, selected, eOpts) {
         if (selModel) {
+            if (selModel.view == null || selModel.view == 'undefined') {
+                if (selModel.views == 'undefined' || selModel.views == null || selModel.views.length == 0)
+                    return;
+                var w = selModel.views[0].up('window');
+                var plt = w.down("#pnlLotTracking");
+                w.down("#lblWeightLossMsgValue").setText("");
+                w.down("#lblWeightLossMsg").setText("Wgt or Vol Gain/Loss: ");
+                plt.setVisible(false);
+                return;
+            }
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
+            var pnlLotTracking = win.down("#pnlLotTracking");
 
             if (selected.length > 0) {
                 var current = selected[0];
+
                 if (current.dummy) {
                     vm.data.currentReceiptItem = null;
+                    pnlLotTracking.setVisible(false);
                 }
                 else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
                     vm.data.currentReceiptItem = current;
+                    pnlLotTracking.setVisible(true);
                 }
                 else {
+                    pnlLotTracking.setVisible(false);
                     vm.data.currentReceiptItem = null;
                 }
             }
             else {
                 vm.data.currentReceiptItem = null;
+                pnlLotTracking.setVisible(false);
             }
         }
     },

@@ -204,7 +204,7 @@ namespace iRely.Inventory.Model
     }
 
     public class tblICInventoryReceiptItem : BaseEntity
-    {
+    {   
         public tblICInventoryReceiptItem()
         {
             this.tblICInventoryReceiptItemLots = new List<tblICInventoryReceiptItemLot>();
@@ -1207,204 +1207,6 @@ namespace iRely.Inventory.Model
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }
 
-    public class tblICInventoryReceiptItemLot : BaseEntity
-    {
-        public int intInventoryReceiptItemLotId { get; set; }
-        public int intInventoryReceiptItemId { get; set; }
-        public int? intLotId { get; set; }
-        public string strLotNumber { get; set; }
-        public string strLotAlias { get; set; }
-        public int? intSubLocationId { get; set; }
-        public int? intStorageLocationId { get; set; }
-        public int? intItemUnitMeasureId { get; set; }
-        public decimal? dblQuantity { get; set; }
-        public decimal? dblGrossWeight { get; set; }
-        public decimal? dblTareWeight { get; set; }
-        public decimal? dblCost { get; set; }
-        public int? intNoPallet { get; set; }
-        public int? intUnitPallet { get; set; }
-        public decimal? dblStatedGrossPerUnit { get; set; }
-        public decimal? dblStatedTarePerUnit { get; set; }
-        public string strContainerNo { get; set; }
-        public int? intEntityVendorId { get; set; }
-        public string strGarden { get; set; }
-        public string strMarkings { get; set; }
-        public int? intOriginId { get; set; }
-        public int? intGradeId { get; set; }
-        public int? intSeasonCropYear { get; set; }
-        public string strVendorLotId { get; set; }
-        public DateTime? dtmManufacturedDate { get; set; }
-        public string strRemarks { get; set; }
-        public string strCondition { get; set; }
-        public DateTime? dtmCertified { get; set; }
-        public DateTime? dtmExpiryDate { get; set; }
-        public int? intParentLotId { get; set; }
-        public string strParentLotNumber { get; set; }
-        public string strParentLotAlias { get; set; }
-        public int? intSort { get; set; }
-
-        [NotMapped]
-        public decimal dblNetWeight
-        {
-            get
-            {
-                return (this.dblGrossWeight ?? 0) - (this.dblTareWeight ?? 0);
-            }
-        }
-        private string _uom;
-        [NotMapped]
-        public string strUnitMeasure
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_uom))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _uom;
-            }
-            set
-            {
-                _uom = value;
-            }
-        }
-        private string _weightUOM;
-        [NotMapped]
-        public string strWeightUOM
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_weightUOM))
-                    if (tblICInventoryReceiptItem != null)
-                        return tblICInventoryReceiptItem.strWeightUOM;
-                    else
-                        return null;
-                else
-                    return _weightUOM;
-            }
-            set
-            {
-                _weightUOM = value;
-            }
-        }
-        private decimal _lotConv;
-        [NotMapped]
-        public decimal dblLotUOMConvFactor
-        {
-            get
-            {
-                if (vyuICGetInventoryReceiptItemLot != null)
-                    return vyuICGetInventoryReceiptItemLot.dblUnitQty ?? 0;
-                else
-                    return _lotConv;
-            }
-            set
-            {
-                _lotConv = value;
-            }
-        }
-        private string _storageLocation;
-        [NotMapped]
-        public string strStorageLocation
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_storageLocation))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strStorageLocationName;
-                    else
-                        return null;
-                else
-                    return _storageLocation;
-            }
-            set
-            {
-                _storageLocation = value;
-            }
-        }
-        private string _subLocation;
-        [NotMapped]
-        public string strSubLocationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_subLocation))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strSubLocationName;
-                    else
-                        return null;
-                else
-                    return _subLocation;
-            }
-            set
-            {
-                _subLocation = value;
-            }
-        }
-        private string _vendorId;
-        [NotMapped]
-        public string strVendorId
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_vendorId))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strVendorId;
-                    else
-                        return null;
-                else
-                    return _vendorId;
-            }
-            set
-            {
-                _vendorId = value;
-            }
-        }
-        private string _origin;
-        [NotMapped]
-        public string strOrigin
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_origin))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strOrigin;
-                    else
-                        return null;
-                else
-                    return _origin;
-            }
-            set
-            {
-                _origin = value;
-            }
-        }
-        private string _grade;
-        [NotMapped]
-        public string strGrade
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_grade))
-                    if (vyuICGetInventoryReceiptItemLot != null)
-                        return vyuICGetInventoryReceiptItemLot.strGrade;
-                    else
-                        return null;
-                else
-                    return _grade;
-            }
-            set
-            {
-                _grade = value;
-            }
-        }
-
-        public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
-        public vyuICGetInventoryReceiptItemLot vyuICGetInventoryReceiptItemLot { get; set; }
-    }
-
     public class vyuICGetInventoryReceiptItemLot
     {
         public int intInventoryReceiptItemLotId { get; set; }
@@ -1611,8 +1413,67 @@ namespace iRely.Inventory.Model
         public decimal? dblCostUOMConvFactor { get; set; }
         public int? intLifeTime { get; set; }
         public string strLifeTimeType { get; set; }
-        public int? ysnLoad { get; set; }
-        public int? dblAvailableQty { get; set; }
+        public bool? ysnLoad { get; set; }
+        public decimal? dblAvailableQty { get; set; }
+        public string strBOL { get; set; }
+        public decimal? dblFranchise { get; set; }
+        public decimal? dblContainerWeightPerQty { get; set; }
+        public bool? ysnSubCurrency { get; set; }
+        public int intCurrencyId { get; set; }
+        public string strSubCurrency { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblNet { get; set; }
+    }
+
+    public class vyuICGetReceiptAddPurchaseOrder
+    {
+        public int? intKey { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
+        public string strReceiptType { get; set; }
+        public int? intLineNo { get; set; }
+        public int? intOrderId { get; set; }
+        public string strOrderNumber { get; set; }
+        public decimal? dblOrdered { get; set; }
+        public decimal? dblReceived { get; set; }
+        public int? intSourceType { get; set; }
+        public int? intSourceId { get; set; }
+        public string strSourceNumber { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public decimal? dblQtyToReceive { get; set; }
+        public int? intLoadToReceive { get; set; }
+        public decimal? dblUnitCost { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblLineTotal { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
+        public int? intContainerId { get; set; }
+        public string strContainer { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intOrderUOMId { get; set; }
+        public string strOrderUOM { get; set; }
+        public decimal? dblOrderUOMConvFactor { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public string strWeightUOM { get; set; }
+        public decimal? dblItemUOMConvFactor { get; set; }
+        public decimal? dblWeightUOMConvFactor { get; set; }
+        public int? intCostUOMId { get; set; }
+        public string strCostUOM { get; set; }
+        public decimal? dblCostUOMConvFactor { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
+        public bool? ysnLoad { get; set; }
+        public decimal? dblAvailableQty { get; set; }
         public string strBOL { get; set; }
         public decimal? dblFranchise { get; set; }
         public decimal? dblContainerWeightPerQty { get; set; }
@@ -1645,5 +1506,182 @@ namespace iRely.Inventory.Model
         public string strBillId { get; set; }
         public DateTime? dtmBillDate { get; set; }
         public int intBillId { get; set; }
+    }
+
+    public class vyuICGetReceiptAddTransferOrder
+    {
+        public int? intKey { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
+        public string strReceiptType { get; set; }
+        public int? intLineNo { get; set; }
+        public int? intOrderId { get; set; }
+        public string strOrderNumber { get; set; }
+        public decimal? dblOrdered { get; set; }
+        public decimal? dblReceived { get; set; }
+        public int? intSourceType { get; set; }
+        public int? intSourceId { get; set; }
+        public string strSourceNumber { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public decimal? dblQtyToReceive { get; set; }
+        public int? intLoadToReceive { get; set; }
+        public decimal? dblUnitCost { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblLineTotal { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
+        public int? intContainerId { get; set; }
+        public string strContainer { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intOrderUOMId { get; set; }
+        public string strOrderUOM { get; set; }
+        public decimal? dblOrderUOMConvFactor { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public string strWeightUOM { get; set; }
+        public decimal? dblItemUOMConvFactor { get; set; }
+        public decimal? dblWeightUOMConvFactor { get; set; }
+        public int? intCostUOMId { get; set; }
+        public string strCostUOM { get; set; }
+        public decimal? dblCostUOMConvFactor { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
+        public bool? ysnLoad { get; set; }
+        public decimal? dblAvailableQty { get; set; }
+        public string strBOL { get; set; }
+        public decimal? dblFranchise { get; set; }
+        public decimal? dblContainerWeightPerQty { get; set; }
+        public bool? ysnSubCurrency { get; set; }
+        public int intCurrencyId { get; set; }
+        public string strSubCurrency { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblNet { get; set; }
+    }
+
+    public class vyuICGetReceiptAddPurchaseContract
+    {
+        public int? intKey { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
+        public string strReceiptType { get; set; }
+        public int? intLineNo { get; set; }
+        public int? intOrderId { get; set; }
+        public string strOrderNumber { get; set; }
+        public decimal? dblOrdered { get; set; }
+        public decimal? dblReceived { get; set; }
+        public int? intSourceType { get; set; }
+        public int? intSourceId { get; set; }
+        public string strSourceNumber { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public decimal? dblQtyToReceive { get; set; }
+        public int? intLoadToReceive { get; set; }
+        public decimal? dblUnitCost { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblLineTotal { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
+        public int? intContainerId { get; set; }
+        public string strContainer { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intOrderUOMId { get; set; }
+        public string strOrderUOM { get; set; }
+        public decimal? dblOrderUOMConvFactor { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public string strWeightUOM { get; set; }
+        public decimal? dblItemUOMConvFactor { get; set; }
+        public decimal? dblWeightUOMConvFactor { get; set; }
+        public int? intCostUOMId { get; set; }
+        public string strCostUOM { get; set; }
+        public decimal? dblCostUOMConvFactor { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
+        public bool? ysnLoad { get; set; }
+        public decimal? dblAvailableQty { get; set; }
+        public string strBOL { get; set; }
+        public decimal? dblFranchise { get; set; }
+        public decimal? dblContainerWeightPerQty { get; set; }
+        public bool? ysnSubCurrency { get; set; }
+        public int intCurrencyId { get; set; }
+        public string strSubCurrency { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblNet { get; set; }
+    }
+
+    public class vyuICGetReceiptAddLGInboundShipment
+    {
+        public int? intKey { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strVendorName { get; set; }
+        public string strReceiptType { get; set; }
+        public int? intLineNo { get; set; }
+        public int? intOrderId { get; set; }
+        public string strOrderNumber { get; set; }
+        public decimal? dblOrdered { get; set; }
+        public decimal? dblReceived { get; set; }
+        public int? intSourceType { get; set; }
+        public int? intSourceId { get; set; }
+        public string strSourceNumber { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public decimal? dblQtyToReceive { get; set; }
+        public int? intLoadToReceive { get; set; }
+        public decimal? dblUnitCost { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblLineTotal { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
+        public int? intContainerId { get; set; }
+        public string strContainer { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intOrderUOMId { get; set; }
+        public string strOrderUOM { get; set; }
+        public decimal? dblOrderUOMConvFactor { get; set; }
+        public int? intItemUOMId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public string strWeightUOM { get; set; }
+        public decimal? dblItemUOMConvFactor { get; set; }
+        public decimal? dblWeightUOMConvFactor { get; set; }
+        public int? intCostUOMId { get; set; }
+        public string strCostUOM { get; set; }
+        public decimal? dblCostUOMConvFactor { get; set; }
+        public int? intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
+        public bool? ysnLoad { get; set; }
+        public decimal? dblAvailableQty { get; set; }
+        public string strBOL { get; set; }
+        public decimal? dblFranchise { get; set; }
+        public decimal? dblContainerWeightPerQty { get; set; }
+        public bool? ysnSubCurrency { get; set; }
+        public int intCurrencyId { get; set; }
+        public string strSubCurrency { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblNet { get; set; }
     }
 }

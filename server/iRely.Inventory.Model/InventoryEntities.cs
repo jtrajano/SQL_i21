@@ -16,11 +16,11 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-           : base(iRely.Common.Security.GetCompanyName())
+            : base(iRely.Common.Security.GetCompanyName())
         {
             Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
-        }          
+        }     
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -194,6 +194,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());            
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemTaxMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemLotMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemLot2Map());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptVoucherMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemViewMap());
@@ -214,6 +215,11 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetCategoryTaxMap());
 
             modelBuilder.Configurations.Add(new vyuICGetReceiptAddOrderMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddPurchaseOrderMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddTransferOrderMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddPurchaseContractMap());
+            modelBuilder.Configurations.Add(new vyuICGetReceiptAddLGInboundShipmentMap());
+
             modelBuilder.Configurations.Add(new vyuICGetShipmentAddOrderMap());
 
             modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingMap());
