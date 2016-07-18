@@ -141,24 +141,6 @@ BEGIN
 			AND ActualCostCostBucket.intItemId = ISNULL(@intItemId, ActualCostCostBucket.intItemId) 
 END 
 
--- Remove the cost buckets if it is posted within the date range. 
-BEGIN 
-	DELETE FROM tblICInventoryLot WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryFIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryLIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryActualCost WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-END 
-
--- Clear the G/L entries 
-BEGIN 
-	DELETE	GLDetail
-	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
-				ON GLDetail.strTransactionId = InvTrans.strTransactionId
-				AND GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
-	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
-			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
-END 
-
 -- Clear the cost adjustments
 BEGIN 
 	DELETE	CostAdjustment
@@ -187,7 +169,25 @@ BEGIN
 END 
 
 -- TODO:
--- 1. Fix the Unpost Cost adjustment. It must reduce the Lot Out > dblCostAdjustQty
+-- 1. Fix the Unpost Cost adjustment. It must reduce the Lot Out --> dblCostAdjustQty
+
+-- Remove the cost buckets if it is posted within the date range. 
+BEGIN 
+	DELETE FROM tblICInventoryLot WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE FROM tblICInventoryFIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE FROM tblICInventoryLIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE FROM tblICInventoryActualCost WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+END 
+
+-- Clear the G/L entries 
+BEGIN 
+	DELETE	GLDetail
+	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
+				ON GLDetail.strTransactionId = InvTrans.strTransactionId
+				AND GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+END 
 
 -- Create the temp table. 
 BEGIN 
@@ -631,7 +631,7 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
-						LEFT JOIN dbo.tblICot lot
+						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = ICTrans.intLotId
 				WHERE	strBatchId = @strBatchId
 						AND dblQty < 0 
