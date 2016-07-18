@@ -183,7 +183,9 @@ END
 BEGIN 
 	DELETE	GLDetail
 	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
-				ON GLDetail.strTransactionId = InvTrans.strTransactionId
+				ON  
+				--GLDetail.strBatchId = InvTrans.strBatchId
+				GLDetail.strTransactionId = InvTrans.strTransactionId
 				AND GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
 	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
@@ -634,7 +636,7 @@ BEGIN
 						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = ICTrans.intLotId
 				WHERE	strBatchId = @strBatchId
-						AND dblQty < 0 
+						AND ICTrans.dblQty < 0 
 					
 				EXEC dbo.uspICRepostCosting
 					@strBatchId

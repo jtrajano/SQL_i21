@@ -118,6 +118,7 @@ BEGIN
 				WHERE	TRANS.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
 						AND TRANS.intItemId = Item.intItemId
+						AND TRANS.dblQty * TRANS.dblCost + TRANS.dblValue <> 0
 			)
 	
 	IF @intItemId IS NOT NULL 
