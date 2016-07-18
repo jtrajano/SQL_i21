@@ -4055,6 +4055,10 @@
     <Build Include="dbo\Views\vyuTMCustomerContractSubReport.sql" />
     <Build Include="dbo\Views\vyuTMRegulatorInformationSubReport.sql" />
     <Build Include="dbo\Views\vyuTMCustomerEntityView.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForDropShip.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessInvoice.sql" />
+    <Build Include="dbo\Views\vyuLGLoadWarehouseServicesForInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
