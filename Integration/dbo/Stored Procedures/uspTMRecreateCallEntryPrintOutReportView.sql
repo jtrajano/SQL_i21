@@ -81,7 +81,7 @@ BEGIN
 					,C.intRouteId
 					,C.strSequenceID
 					,intLastDeliveryDegreeDay = ISNULL(C.intLastDeliveryDegreeDay, 0)
-					,strSiteAddress = REPLACE (C.strSiteAddress, CHAR (13), '' '') 
+					,strSiteAddress = REPLACE(REPLACE (C.strSiteAddress, CHAR(13), '' ''),CHAR(10), '' '') 
 					,strCity = (CASE WHEN C.strSiteAddress IS NOT NULL 
 										THEN '', '' + C.strCity
 										ELSE C.strCity 
@@ -213,7 +213,7 @@ BEGIN
 					,C.intRouteId
 					,C.strSequenceID
 					,intLastDeliveryDegreeDay = ISNULL(C.intLastDeliveryDegreeDay, 0)
-					,strSiteAddress = REPLACE (C.strSiteAddress, CHAR (13), '' '') 
+					,strSiteAddress = REPLACE(REPLACE (C.strSiteAddress, CHAR(13), '' ''),CHAR(10), '' '') 
 					,strCity = (CASE WHEN C.strSiteAddress IS NOT NULL 
 										THEN '', '' + C.strCity
 										ELSE C.strCity 
