@@ -143,6 +143,8 @@ Begin Try
 
 	Begin Tran
 
+	EXEC uspMFDeleteLotReservationByPickList @intPickListId = @intPickListId
+
 	If @ysnBlendSheetRequired=0
 	Begin
 		--Add Parent Lots to Work Order Parent Lot Table

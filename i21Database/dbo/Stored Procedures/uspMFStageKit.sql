@@ -252,6 +252,8 @@ End
 
 Begin Tran
 
+EXEC uspMFDeleteLotReservationByPickList @intPickListId = @intPickListId
+
 --Move or Merge
 Select @intMinLot=Min(intRowNo) from @tblPickListDetail
 
