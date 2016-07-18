@@ -23,54 +23,53 @@ BEGIN TRY
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
 	DECLARE @StorageChargeDate DATETIME
 	DECLARE @dblStorageUnits DECIMAL(24, 10)
-	DECLARE @intColumnKey INT
-	DECLARE @strColumnName NVARCHAR(40)
-	DECLARE @strColumnSuffix NVARCHAR(40)
-	DECLARE @strOriginalColumnName NVARCHAR(40)
-	DECLARE @SqlAddColumn NVARCHAR(MAX)
-	DECLARE @strItemNo NVARCHAR(MAX)
 	DECLARE @intStorageChargeItemId INT
+	DECLARE @strStorageChargeItemNo NVARCHAR(MAX)
 	DECLARE @IntCommodityId INT
 	DECLARE @FeeItemId INT
 	DECLARE @strFeeItem NVARCHAR(40)
-
-	IF OBJECT_ID('tempdb..#tblGRCustomerStorage') IS NOT NULL
-		DROP TABLE #tblGRCustomerStorage
-
-	CREATE TABLE #tblGRCustomerStorage 
+	DECLARE @strUserName NVARCHAR(40)
+	DECLARE @strInventoryItem NVARCHAR(40)
+	
+	DECLARE @StorageTicketInfoByFIFO AS TABLE 
 	(
 		 [intCustomerStorageId] INT
 		,[strStorageTicketNumber] NVARCHAR(40) COLLATE Latin1_General_CI_AS
-		,[dblOpenBalance] NUMERIC(18,6)
+		,[dblOpenBalance] NUMERIC(18, 6)
 		,[intUnitMeasureId] INT
 		,[strUnitMeasure] NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,[dblStorageCharge] NUMERIC(18,6)
-		,[intStorageItemId] INT
-		,[strStorageItem] NVARCHAR(40) COLLATE Latin1_General_CI_AS
-		,[FeeItemId] INT
-		,[strFeeItem] NVARCHAR(40) COLLATE Latin1_General_CI_AS
-		,[dblFees] NUMERIC(18,6)		
+		,[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS ---'Storage Charge','Fee','Discount'
+		,[intItemId] INT
+		,[strItem] NVARCHAR(40) COLLATE Latin1_General_CI_AS
+		,[dblCharge] DECIMAL(24, 10)
 	)
-
-	IF OBJECT_ID('tempdb..#tblRequiredColumns') IS NOT NULL
-		DROP TABLE #tblRequiredColumns
-
-	CREATE TABLE #tblRequiredColumns 
-	(
-		 [intColumnKey] INT IDENTITY(1,1)
-		,[strColumnName] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	 )
 
 	SET @strUpdateType = 'estimate'
 	SET @strProcessType = 'calculate'
 	SET @StorageChargeDate = GetDATE()
+
+	SELECT @FeeItemId = intItemId
+	FROM tblGRCompanyPreference
+
+	SELECT @strFeeItem = strItemNo
+	FROM tblICItem
+	WHERE intItemId = @FeeItemId
 	
-	SELECT @FeeItemId=intItemId FROM tblGRCompanyPreference
-	SELECT @strFeeItem=strItemNo FROM tblICItem WHERE intItemId=@FeeItemId
-	 
+	SELECT @strInventoryItem = strItemNo
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+	
+	SELECT @strUserName=strUserName
+	FROM tblSMUserSecurity
+	WHERE [intEntityUserSecurityId] = @intUserId
+
 	SELECT @dblAvailableGrainOpenBalance = SUM(dblOpenBalance)
 	FROM vyuGRGetStorageTransferTicket
-	WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND ysnDPOwnedType=0 AND ysnCustomerStorage=0
+	WHERE intEntityId = @intEntityId
+		AND intItemId = @intItemId
+		AND intStorageTypeId = @intStorageTypeId
+		AND ysnDPOwnedType = 0
+		AND ysnCustomerStorage = 0
 
 	IF @strOptionType = 'Inquiry'
 	BEGIN
@@ -78,11 +77,33 @@ BEGIN TRY
 	END
 	ELSE IF @dblUnitsConsumed > 0 AND @dblAvailableGrainOpenBalance > 0
 	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND dblOpenBalance > 0)
+		IF NOT EXISTS (SELECT 1 FROM vyuGRGetStorageTransferTicket WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intStorageTypeId = @intStorageTypeId AND dblOpenBalance > 0)
 		BEGIN
 			RAISERROR ('There is no available grain balance for this Entity,Item and Storage Type.',16,1);
 		END
-
+		
+		SELECT @IntCommodityId = C.intCommodityId
+		FROM tblICCommodity C
+		JOIN tblICItem Item ON Item.intCommodityId = C.intCommodityId
+		WHERE  Item.intItemId = @intItemId
+		
+		IF EXISTS (SELECT 1 FROM tblICItem WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId = @IntCommodityId)
+		BEGIN
+			SELECT TOP 1 @intStorageChargeItemId = intItemId
+			FROM tblICItem
+			WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId = @IntCommodityId
+		END
+		ELSE IF EXISTS (SELECT 1 FROM tblICItem WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId IS NULL)
+		BEGIN
+			SELECT TOP 1 @intStorageChargeItemId = intItemId
+			FROM tblICItem
+			WHERE strType = 'Other Charge' AND strCostType = 'Storage Charge' AND intCommodityId IS NULL
+		END
+		
+		SELECT @strStorageChargeItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intStorageChargeItemId
+				
 		---1.Choosing the Grain Tickets Based ON FIFO(Delivery Date).
 		WHILE @dblUnitsConsumed > 0
 		BEGIN
@@ -101,10 +122,10 @@ BEGIN TRY
 			WHERE intEntityId = @intEntityId
 				AND intItemId = @intItemId
 				AND intStorageTypeId = @intStorageTypeId
-				AND ysnDPOwnedType=0 
-				AND ysnCustomerStorage=0				
+				AND ysnDPOwnedType = 0
+				AND ysnCustomerStorage = 0
 				AND dtmDeliveryDate IS NOT NULL
-				AND intCustomerStorageId NOT IN (SELECT intCustomerStorageId FROM #tblGRCustomerStorage)
+				AND intCustomerStorageId NOT IN (SELECT intCustomerStorageId FROM @StorageTicketInfoByFIFO)
 			ORDER BY dtmDeliveryDate,intCustomerStorageId
 
 			IF @intCustomerStorageId IS NULL
@@ -119,7 +140,7 @@ BEGIN TRY
 				,@intCustomerStorageId
 				,NULL
 				,NULL
-				,@dblStorageUnits
+				,1
 				,@StorageChargeDate
 				,@intUserId
 				,'Process Grain Storage'
@@ -129,172 +150,211 @@ BEGIN TRY
 				,@dblStorageDueTotalAmount OUTPUT
 				,@dblStorageBilledPerUnit OUTPUT
 				,@dblStorageBilledAmount OUTPUT
+			
+		 --1.Inventory	
+			IF NOT EXISTS (
+					SELECT 1
+					FROM @StorageTicketInfoByFIFO
+					WHERE [intCustomerStorageId] = @intCustomerStorageId AND [strItemType] = 'Inventory'
+					)
+			 BEGIN
+				INSERT INTO @StorageTicketInfoByFIFO 
+				(
+					[intCustomerStorageId]
+					,[strStorageTicketNumber]
+					,[dblOpenBalance]
+					,[intUnitMeasureId]
+					,[strUnitMeasure]
+					,[strItemType]
+					,[intItemId]
+					,[strItem]
+					,[dblCharge]
+				 )
+				SELECT 
+					 @intCustomerStorageId
+					,a.[strStorageTicketNumber]
+					,@dblStorageUnits
+					,a.[intUnitMeasureId]
+					,b.[strUnitMeasure]
+					,'Inventory'
+					,@intItemId
+					,@strInventoryItem
+					,0
+				FROM tblGRCustomerStorage a
+				JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
+				WHERE [intCustomerStorageId] = @intCustomerStorageId
+			END
 
-			INSERT INTO #tblGRCustomerStorage 
-			(
-				 [intCustomerStorageId]
-				,[strStorageTicketNumber]
-				,[dblOpenBalance]
-				,[intUnitMeasureId]
-				,[strUnitMeasure]
-				,[dblStorageCharge]				
-				,[dblFees]				
-			 )
-			SELECT 
-				 @intCustomerStorageId
-				,a.[strStorageTicketNumber]
-				,@dblStorageUnits
-				,a.[intUnitMeasureId]
-				,b.[strUnitMeasure]
-				,@dblStorageDueAmount+@dblStorageDueTotalAmount --(Unpaid:@dblStorageDueAmount+ Additional :@dblStorageDueTotalAmount)				
-				,a.[dblFeesDue]- a.[dblFeesPaid]
-			FROM tblGRCustomerStorage a
-			JOIN tblICUnitMeasure b ON a.[intUnitMeasureId]=b.[intUnitMeasureId]
-			WHERE [intCustomerStorageId] = @intCustomerStorageId
-			
-			SET @intStorageChargeItemId=NULL
-			SET @IntCommodityId=NULL
-			
-			SELECT @IntCommodityId=intCommodityId FROM tblGRCustomerStorage Where[intCustomerStorageId] = @intCustomerStorageId
-			
-			IF EXISTS(SELECT 1 FROM tblICItem WHERE strType='Other Charge' AND strCostType='Storage Charge' AND intCommodityId = @IntCommodityId)
+		 --2. Storage Charge Item
+		 
+			IF @dblStorageDueAmount + @dblStorageDueTotalAmount > 0 
 			BEGIN
-				SELECT TOP 1 @intStorageChargeItemId=intItemId FROM tblICItem 
-				WHERE strType='Other Charge' AND strCostType='Storage Charge' AND intCommodityId = @IntCommodityId				
-				UPDATE #tblGRCustomerStorage SET [intStorageItemId]=@intStorageChargeItemId WHERE [intCustomerStorageId] = @intCustomerStorageId
-				UPDATE #tblGRCustomerStorage SET [strStorageItem]=(SELECT strItemNo FROM tblICItem WHERE intItemId=@intStorageChargeItemId)
+									
+				IF @intStorageChargeItemId IS NULL
+				RAISERROR ('There should be atleast One Storage charge Cost Type Item.',16,1);
+							
+			IF NOT EXISTS (
+						SELECT 1
+						FROM @StorageTicketInfoByFIFO
+						WHERE [intCustomerStorageId] = @intCustomerStorageId AND [strItemType] = 'Storage Charge'
+						)
+				BEGIN
+					INSERT INTO @StorageTicketInfoByFIFO 
+					(
+						[intCustomerStorageId]
+						,[strStorageTicketNumber]
+						,[dblOpenBalance]
+						,[intUnitMeasureId]
+						,[strUnitMeasure]
+						,[strItemType]
+						,[intItemId]
+						,[strItem]
+						,[dblCharge]
+					)
+					SELECT 
+						 @intCustomerStorageId
+						,a.[strStorageTicketNumber]
+						,@dblStorageUnits
+						,a.[intUnitMeasureId]
+						,b.[strUnitMeasure]
+						,'Storage Charge'
+						,@intStorageChargeItemId
+						,@strStorageChargeItemNo
+						,@dblStorageDueAmount + @dblStorageDueTotalAmount --(Unpaid:@dblStorageDueAmount+ Additional :@dblStorageDueTotalAmount)				
+					FROM tblGRCustomerStorage a
+					JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
+					WHERE [intCustomerStorageId] = @intCustomerStorageId
+				END
 			END
-			ELSE IF EXISTS(SELECT 1 FROM tblICItem WHERE strType='Other Charge' AND strCostType='Storage Charge' AND intCommodityId IS NULL)
+
+			--3. Fee Item
+			IF NOT EXISTS (
+					SELECT 1
+					FROM @StorageTicketInfoByFIFO
+					WHERE intCustomerStorageId = @intCustomerStorageId AND [strItemType] = 'Fee'
+					)
+				AND EXISTS (
+					SELECT 1
+					FROM tblGRCustomerStorage
+					WHERE intCustomerStorageId = @intCustomerStorageId AND ISNULL(dblFeesDue, 0) < > ISNULL(dblFeesPaid, 0)
+					)
 			BEGIN
-				SELECT TOP 1 @intStorageChargeItemId=intItemId FROM tblICItem 
-				WHERE strType='Other Charge' AND strCostType='Storage Charge' AND intCommodityId IS NULL			
-				UPDATE #tblGRCustomerStorage SET [intStorageItemId]=@intStorageChargeItemId WHERE [intCustomerStorageId] = @intCustomerStorageId
-				UPDATE #tblGRCustomerStorage SET [strStorageItem]=(SELECT strItemNo FROM tblICItem WHERE intItemId=@intStorageChargeItemId)
+				INSERT INTO @StorageTicketInfoByFIFO 
+				(
+					[intCustomerStorageId]
+					,[strStorageTicketNumber]
+					,[dblOpenBalance]
+					,[intUnitMeasureId]
+					,[strUnitMeasure]
+					,[strItemType]
+					,[intItemId]
+					,[strItem]
+					,[dblCharge]
+				)
+				SELECT 
+					 @intCustomerStorageId
+					,a.[strStorageTicketNumber]
+					,@dblStorageUnits
+					,a.[intUnitMeasureId]
+					,b.[strUnitMeasure]
+					,'Fee'
+					,@FeeItemId
+					,@strFeeItem
+					,ISNULL(a.dblFeesDue, 0) - ISNULL(a.dblFeesPaid, 0)
+				FROM tblGRCustomerStorage a
+				JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
+				WHERE [intCustomerStorageId] = @intCustomerStorageId				
 			END
-			ELSE
-			BEGIN
-				RAISERROR('There should be atleast One Storage charge Cost Type Item.', 16, 1);
-			END
-			
+
+			--4. Discount Information
+			IF NOT EXISTS (
+					SELECT 1
+					FROM @StorageTicketInfoByFIFO
+					WHERE intCustomerStorageId = @intCustomerStorageId AND [strItemType] = 'Discount'
+					)
+				AND EXISTS (
+					SELECT 1
+					FROM tblQMTicketDiscount
+					WHERE intTicketFileId = @intCustomerStorageId AND ISNULL(dblDiscountDue, 0) <> ISNULL(dblDiscountPaid, 0) AND strSourceType = 'Storage'
+					)
+				INSERT INTO @StorageTicketInfoByFIFO 
+				(
+					[intCustomerStorageId]
+					,[strStorageTicketNumber]
+					,[dblOpenBalance]
+					,[intUnitMeasureId]
+					,[strUnitMeasure]
+					,[strItemType]
+					,[intItemId]
+					,[strItem]
+					,[dblCharge]
+				 )
+				SELECT 
+					 @intCustomerStorageId
+					,a.[strStorageTicketNumber]
+					,@dblStorageUnits
+					,a.[intUnitMeasureId]
+					,b.[strUnitMeasure]
+					,'Discount'
+					,DItem.intItemId
+					,DItem.strItemNo
+					,ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)
+				FROM tblGRCustomerStorage a
+				JOIN tblICUnitMeasure b ON a.[intUnitMeasureId] = b.[intUnitMeasureId]
+				JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = a.intCustomerStorageId AND QM.strSourceType = 'Storage'
+				JOIN tblGRDiscountScheduleCode DC ON DC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+				JOIN tblICItem DItem ON DItem.intItemId = DC.intItemId
+				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+					AND QM.intTicketFileId = @intCustomerStorageId
+
 			SET @dblUnitsConsumed = @dblUnitsConsumed - @dblStorageUnits
 		END
 
-		---2. Adding the Required Columns in the Temporary Table AND updating the Columns.
-		IF EXISTS (SELECT 1 FROM #tblGRCustomerStorage)
-		BEGIN
-			INSERT INTO #tblRequiredColumns ([strColumnName])
-			SELECT DISTINCT '[' + b.strItemNo + ' Discount]'
-			FROM tblGRDiscountScheduleCode a
-			JOIN tblICItem b ON b.intItemId = a.intItemId
-			JOIN tblQMTicketDiscount c ON c.intDiscountScheduleCodeId = a.intDiscountScheduleCodeId
-			WHERE strSourceType = 'Storage'
-				AND c.dblDiscountDue < > 0
-				AND c.intTicketFileId IN (SELECT [intCustomerStorageId] FROM #tblGRCustomerStorage)
-			
-			UNION			
-			SELECT DISTINCT '[' + b.strItemNo + ' Item Key]'
-			FROM tblGRDiscountScheduleCode a
-			JOIN tblICItem b ON b.intItemId = a.intItemId
-			JOIN tblQMTicketDiscount c ON c.intDiscountScheduleCodeId = a.intDiscountScheduleCodeId
-			WHERE strSourceType = 'Storage' 
-				AND c.dblDiscountDue < > 0 
-				AND c.intTicketFileId IN (SELECT [intCustomerStorageId] FROM #tblGRCustomerStorage)
+		UPDATE CS
+		SET CS.dblOpenBalance = CS.dblOpenBalance - tblFIFO.dblOpenBalance
+		FROM tblGRCustomerStorage CS
+		JOIN @StorageTicketInfoByFIFO tblFIFO ON CS.intCustomerStorageId = tblFIFO.intCustomerStorageId AND tblFIFO.strItemType = 'Inventory'
 
-			IF EXISTS (SELECT 1 FROM #tblRequiredColumns)
-			BEGIN
-				SELECT @intColumnKey = MIN(intColumnKey)
-				FROM #tblRequiredColumns
+		INSERT INTO [dbo].[tblGRStorageHistory] 
+		(
+			[intConcurrencyId]
+			,[intCustomerStorageId]
+			,[intTicketId]
+			,[intSalesOrderId]
+			,[dblUnits]
+			,[dtmHistoryDate]
+			,[dblPaidAmount]
+			,[strType]
+			,[strUserName]
+		)
+		SELECT 
+			 [intConcurrencyId] = 1
+			,[intCustomerStorageId] = intCustomerStorageId
+			,[intTicketId] = CASE WHEN @strSourceType = 'Scale' THEN @IntSourceKey ELSE NULL END
+			,[intSalesOrderId] = CASE WHEN @strSourceType = 'SalesOrder' THEN @IntSourceKey ELSE NULL END
+			,[dblUnits] = dblOpenBalance
+			,[dtmHistoryDate] = GetDATE()
+			,[dblPaidAmount] = [dblCharge] * dblOpenBalance
+			,[strType] = CASE 
+							 WHEN @strSourceType = 'SalesOrder' THEN 'Reduced By Sales Order'
+							 WHEN @strSourceType = 'Scale'      THEN 'Reduced By Scale'
+					     END
+			,[strUserName] = @strUserName
+		FROM @StorageTicketInfoByFIFO
+		WHERE strItemType = 'Inventory'
 
-				WHILE @intColumnKey > 0
-				BEGIN
-					SET @strColumnName = NULL
-					SET @strColumnSuffix = NULL
-					SET @SqlAddColumn = NULL
-					SET @strItemNo = NULL
-
-					SELECT @strColumnName = strColumnName
-					FROM #tblRequiredColumns
-					WHERE intColumnKey = @intColumnKey
-					
-					SET @strColumnSuffix = RIGHT(@strColumnName, 9)					
-					SET @strItemNo = REPLACE(@strColumnName, '[', '''')
-					SET @strItemNo = REPLACE(@strItemNo, ']', '''')
-
-					IF @strColumnSuffix = 'Discount]'
-					BEGIN
-					
-					SET @SqlAddColumn = 'ALTER TABLE #tblGRCustomerStorage ADD ' + @strColumnName + ' DECIMAL(24,10) NULL'
-					EXEC (@SqlAddColumn)
-					SET @SqlAddColumn = NULL
-					
-						SET @strItemNo = REPLACE(@strItemNo, ' Discount', '')
-						SET @SqlAddColumn = 'UPDATE CS SET CS.' + @strColumnName + '= QM.dblDiscountDue 
-												FROM #tblGRCustomerStorage CS
-												JOIN tblQMTicketDiscount QM on QM.intTicketFileId=CS.intCustomerStorageId AND QM.strSourceType=''Storage''
-												JOIN tblGRDiscountScheduleCode DS ON DS.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-												JOIN tblICItem Item ON Item.intItemId=DS.intItemId AND Item.strItemNo=' + @strItemNo
-
-						EXEC (@SqlAddColumn)
-					END
-					ELSE IF @strColumnSuffix = 'Item Key]'
-					BEGIN
-					SET @SqlAddColumn = 'ALTER TABLE #tblGRCustomerStorage ADD ' + @strColumnName + ' INT NULL'
-					EXEC (@SqlAddColumn)
-					SET @SqlAddColumn = NULL
-					
-						SET @strItemNo = REPLACE(@strItemNo, ' Item Key', '')
-						SET @SqlAddColumn = 'UPDATE CS SET CS.' + @strColumnName + '= DS.intItemId 
-												FROM #tblGRCustomerStorage CS
-												JOIN tblQMTicketDiscount QM on QM.intTicketFileId=CS.intCustomerStorageId AND QM.strSourceType=''Storage''
-												JOIN tblGRDiscountScheduleCode DS ON DS.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-												JOIN tblICItem Item ON Item.intItemId=DS.intItemId AND Item.strItemNo=' + @strItemNo
-
-						EXEC (@SqlAddColumn)
-					END
-
-					SELECT @intColumnKey = MIN(intColumnKey)
-					FROM #tblRequiredColumns
-					WHERE intColumnKey > @intColumnKey
-				END
-			END
-			
-			UPDATE #tblGRCustomerStorage SET [FeeItemId]=@FeeItemId,[strFeeItem]=@strFeeItem				
-			
-			UPDATE CS
-			SET CS.dblOpenBalance=CS.dblOpenBalance-tblCS.dblOpenBalance
-			FROM tblGRCustomerStorage CS 
-			JOIN #tblGRCustomerStorage tblCS ON CS.intCustomerStorageId=tblCS.intCustomerStorageId
-			
-			INSERT INTO [dbo].[tblGRStorageHistory] 
-			(
-				 [intConcurrencyId]
-				,[intCustomerStorageId]
-				,[intTicketId]
-				,[intSalesOrderId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[dblPaidAmount]
-				,[strType]
-				,[strUserName]
-			 )
-			SELECT 
-				 [intConcurrencyId] = 1
-				,[intCustomerStorageId] = intCustomerStorageId
-				,[intTicketId] =    CASE WHEN @strSourceType='Scale' THEN @IntSourceKey ELSE NULL END
-				,[intSalesOrderId]= CASE WHEN @strSourceType='SalesOrder' THEN @IntSourceKey ELSE NULL END				
-				,[dblUnits] = dblOpenBalance
-				,[dtmHistoryDate] = GetDATE()
-				,[dblPaidAmount] = [dblStorageCharge]* dblOpenBalance
-				,[strType] = CASE 
-								 WHEN @strSourceType='SalesOrder' THEN 'Reduced By Sales Order'
-								 WHEN @strSourceType='Scale'	  THEN 'Reduced By Scale'
-							 END
-				,[strUserName] = (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
-			FROM #tblGRCustomerStorage
-
-			SELECT * FROM #tblGRCustomerStorage
-			
-		END
+		SELECT 
+			 [intCustomerStorageId]
+			,[strStorageTicketNumber]
+			,[dblOpenBalance]
+			,[intUnitMeasureId]
+			,[strUnitMeasure]
+			,[strItemType]
+			,[intItemId]
+			,[strItem]
+			,[dblCharge]			
+		FROM @StorageTicketInfoByFIFO
+		
 	END
 END TRY
 
@@ -302,8 +362,6 @@ BEGIN CATCH
 	IF XACT_STATE() != 0
 		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
-
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
-	
 END CATCH
