@@ -1398,6 +1398,34 @@ INSERT INTO #TempCannedPanelColumn VALUES (79186, 23, N'strDescription', N'Descr
  
 INSERT INTO #TempCannedPanelColumn VALUES (79187, 23, N'Balance', N'Balance', 549, N'Left', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 0, 76, NULL)
 
+--Payroll
+INSERT INTO #TempCannedPanelColumn VALUES (79188, 15561, N'EmployeeName',	N'Employee Name',	75, N'Left', N'', N'',		N'',		2,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 131, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79189, 15561, N'CheckNo',		N'Paycheck ID',		75, N'Left', N'', N'',		N'',		3,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 131, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79190, 15561, N'PayDate',		N'Pay Date',		75, N'Left', N'', N'',		N'',		4,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 131, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79191, 15561, N'CheckTotal',		N'Gross Pay',		75, N'Left', N'', N'Sum',	N'',		5,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 131, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79192, 15561, N'CheckNet',		N'Net Pay',			75, N'Left', N'', N'Sum',	N'',		6,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 131, NULL)
+
+INSERT INTO #TempCannedPanelColumn VALUES (79193, 15562, N'EmployeeName',	N'Employee Name',	75, N'Left', N'', N'',		N'',		2,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 132, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79194, 15562, N'CheckNo',		N'Paycheck ID',		75, N'Left', N'', N'Count',	N'',		3,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 132, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79195, 15562, N'PayDate',		N'Pay Date',		75, N'Left', N'', N'',		N'',		4,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 132, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79196, 15562, N'CheckTotal',		N'Gross Pay',		75, N'Left', N'', N'Sum',	N'',		5,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 132, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79197, 15562, N'CheckNet',		N'Net Pay',			75, N'Left', N'', N'Sum',	N'',		6,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 132, NULL)
+
+INSERT INTO #TempCannedPanelColumn VALUES (79198, 15563, N'EmployeeName',	N'Employee Name',	75, N'Left', N'', N'',		N'',		2,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 133, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79199, 15563, N'CheckNo',		N'Paycheck ID',		75, N'Left', N'', N'Count',	N'',		3,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 133, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79200, 15563, N'PayDate',		N'Pay Date',		75, N'Left', N'', N'',		N'',		4,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 133, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79201, 15563, N'CheckTotal',		N'Gross Pay',		75, N'Left', N'', N'Sum',	N'',		5,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 133, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79202, 15563, N'CheckNet',		N'Net Pay',			75, N'Left', N'', N'Sum',	N'',		6,	N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 133, NULL)
+--End Payroll
+
+INSERT INTO #TempCannedPanelColumn VALUES (79203, 15564, N'sthss_store_name',	N'Store',	0, N'Series1AxisX', N'', N'',		N'General',		2,	N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 134, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79204, 15564, N'',					N'',		0, N'Series2AxisX', N'', N'',		N'',			2,	N'', N'', N'', 0, N'Chart', N'Series2AxisX', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 134, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79205, 15564, N'c',					N'Gallons',	0, N'Series1AxisY', N'', N'',		N'Currency',	2,	N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 134, NULL)
+INSERT INTO #TempCannedPanelColumn VALUES (79206, 15564, N'',					N'',		0, N'Series2AxisY', N'', N'',		N'',			2,	N'', N'', N'', 0, N'Chart', N'Series2AxisY', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 134, NULL)
+
+
+
+
 print('/*******************  END INSERTING canned panels on temporary panel column table  *******************/')
 
 print('/*******************  BEGIN DELETE old panel column records  *******************/')
