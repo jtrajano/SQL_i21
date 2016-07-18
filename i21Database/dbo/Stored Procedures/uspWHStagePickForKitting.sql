@@ -29,6 +29,7 @@ BEGIN TRY
 	DECLARE @intItemIssuedUOMId INT
 	DECLARE @dblPickedLotWeightPerUnit NUMERIC(38,20)
 			,@intPickUOMId int
+	DECLARE @strBulkItemXml nvarchar(max)
 
 	SELECT @intPickListId = pl.intPickListId, @strPickListNo = pl.strPickListNo, @intPickListLotId = pld.intStageLotId, @dblPickListQty = pld.dblPickQuantity, @intPickListDetailId = pld.intPickListDetailId
 	FROM tblMFPickList pl
@@ -80,7 +81,24 @@ BEGIN TRY
 		   @intLotStorageLocationId = intStorageLocationId
 	FROM tblICLot 
 	WHERE intLotId = @intPickedLotId
-	
+
+	SET @strBulkItemXml='<root>'
+
+--Bulk Item
+	SELECT @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+						'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
+						'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
+						'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
+	FROM tblICStockReservation sr Join tblICItem i on sr.intItemId=i.intItemId
+	WHERE sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0 AND i.strLotTracking <> 'No'
+
+	SET @strBulkItemXml=@strBulkItemXml+'</root>'
+
+	IF LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+		SET @strBulkItemXml=''
+
+	EXEC [uspMFDeleteLotReservationByPickList] @intPickListId
+
 	--SELECT @intPickedLotId intPickedLotId, @intSubLocationId intSubLocationId, @intStorageLocationId intStorageLocationId, @dblPickedQty dblPickedQty, @intUserId intUserId
 
 	IF @intLotStorageLocationId <> @intStorageLocationId
@@ -122,11 +140,11 @@ BEGIN TRY
 		AND ysnActive = 1
 		AND ri.intConsumptionMethodId = 1
 
-	UPDATE tblICStockReservation
-	SET intLotId = @intNewLotId,
-		intStorageLocationId = @intKitStagingLocationId
-	WHERE intLotId = @intPickedLotId
-		AND strTransactionId = @strPickListNo
+	--UPDATE tblICStockReservation
+	--SET intLotId = @intNewLotId,
+	--	intStorageLocationId = @intKitStagingLocationId
+	--WHERE intLotId = @intPickedLotId
+	--	AND strTransactionId = @strPickListNo
 
 	IF NOT EXISTS(SELECT *
 				  FROM tblMFPickListDetail
@@ -143,6 +161,8 @@ BEGIN TRY
 							UPDATE tblMFWorkOrder SET intKitStatusId = 12 WHERE intPickListId = @intPickListId
 						END
 					END
+	
+	EXEC [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml
 	
 	COMMIT TRANSACTION
 END TRY
