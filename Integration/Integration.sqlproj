@@ -329,7 +329,6 @@
     <Build Include="dbo\Stored Procedures\uspAPCheckAPBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedVouchers.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRevertImportVoucher.sql" />
-    <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
     <None Include="dbo\Views\vyuCMBankTransaction.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOutOfRangeBurnRateSearchView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLeakGasCheckSearchView.sql" />
