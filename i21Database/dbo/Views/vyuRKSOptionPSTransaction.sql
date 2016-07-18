@@ -58,14 +58,14 @@ SELECT DISTINCT
 		CASE WHEN CONVERT(VARCHAR(10),dtmExpirationDate,111) < CONVERT(VARCHAR(10),GETDATE(),111) then 1 else 0 end  ysnExpired 
 FROM tblRKFutOptTransaction ot  
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.strStatus='Filled' 
-JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId  
 join tblICUnitMeasure um on fm.intUnitMeasureId=um.intUnitMeasureId  
 JOIN tblICCommodity ic on ic.intCommodityId=ot.intCommodityId  
 JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=ot.intLocationId  
 JOIN tblRKOptionsMonth om on ot.intOptionMonthId=om.intOptionMonthId   
 JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId
 JOIN tblEMEntity e on e.intEntityId=ot.intEntityId   
-LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId  AND ba.intBrokerageAccountId=bc.intBrokerageAccountId     
+LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId  AND ba.intBrokerageAccountId=bc.intBrokerageAccountId  
+LEFT JOIN tblSMCurrency c on c.intCurrencyID=bc.intFutCurrencyId     
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId  
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId where ot.intInstrumentTypeId=2 and strBuySell='Sell'
  )t)t1  where dblOpenLots > 0 

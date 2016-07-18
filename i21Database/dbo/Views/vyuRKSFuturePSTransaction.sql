@@ -22,9 +22,9 @@ SELECT intSelectedInstrumentTypeId,
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId
       ,fm.dblContractSize
-      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission,dtmFilledDate
+      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 'true' then cur.intCent else 1 end end as dblFutCommission,dtmFilledDate
 	  ,ot.intFutOptTransactionHeaderId,
-	   c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency 
+	   c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency 
 	   	  ,ot.intBankId
 	  ,ot.intBankAccountId
 	  , ot.intCurrencyExchangeRateTypeId    
@@ -33,6 +33,7 @@ FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId and ot.intBrokerageAccountId=bc.intBrokerageAccountId
+ LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId =1
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId and intSelectedInstrumentTypeId=1 )t)t1  where dblBalanceLot > 0

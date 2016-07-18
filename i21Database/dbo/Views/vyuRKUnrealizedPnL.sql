@@ -5,7 +5,7 @@ SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'
 (SELECT *,(GrossPnL-dblFutCommission)  NetPnL FROM (  
 SELECT (convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)))*dblContractSize/ case when ysnSubCurrency = 'true' then intCent else 1 end  GrossPnL,isnull(((Long1-MatchLong)*dblPrice),0) LongWaitedPrice,  
 isnull((Long1-MatchLong),0) as dblLong,isnull(Sell1-MatchShort,0) as dblShort, isnull(((Sell1-MatchShort)*dblPrice),0) ShortWaitedPrice,  
-CASE WHEN Long1 > 0  THEN (Long1 * dblFutCommission1) ELSE (Sell1 * dblFutCommission1) END / case when ysnSubCurrency = 'true' then intCent else 1 end  AS dblFutCommission,
+CASE WHEN Long1 > 0  THEN (Long1 * dblFutCommission1) ELSE (Sell1 * dblFutCommission1) END / case when ComSubCurrency = 'true' then ComCent else 1 end  AS dblFutCommission,
 convert(int,isnull((Long1-MatchLong),0)- isnull(Sell1-MatchShort,0)) as  intNet,   
 * FROM (   
 SELECT  intFutOptTransactionId,
@@ -34,7 +34,7 @@ SELECT  intFutOptTransactionId,
 		CASE WHEN bc.intFuturesRateType= 1 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission1,  
 	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId),0)as MatchLong,  
 	   isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId),0)as MatchShort,            
-		c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired           
+		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,cur.intCent ComCent,cur.ysnSubCurrency ComSubCurrency            
  FROM tblRKFutOptTransaction ot   
  JOIN tblRKFuturesMonth om on om.intFutureMonthId=ot.intFutureMonthId   and ot.strStatus='Filled'
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  
@@ -44,7 +44,8 @@ SELECT  intFutOptTransactionId,
  JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
- JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId   
+ JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId     
+  JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId =1 
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId  
@@ -82,8 +83,8 @@ SELECT  intFutOptTransactionId,
        CASE WHEN bc.intFuturesRateType= 2 then isnull(bc.dblFutCommission,0) else 0  end as dblFutCommission1,   
    isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId),0)as MatchLong,  
    isnull((select sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId),0)as MatchShort,
-   c.intCurrencyID as intCurrencyId,c.intCent,ysnSubCurrency,
-   intFutOptTransactionHeaderId,ysnExpired
+   c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,
+   intFutOptTransactionHeaderId,ysnExpired,cur.intCent ComCent,cur.ysnSubCurrency ComSubCurrency 
  FROM tblRKFutOptTransaction ot   
  JOIN tblRKFuturesMonth om on om.intFutureMonthId=ot.intFutureMonthId   and ot.strStatus='Filled'
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  
@@ -92,10 +93,12 @@ SELECT  intFutOptTransactionId,
  join tblARSalesperson sp on sp.intEntitySalespersonId= ot.intTraderId  
  JOIN tblEMEntity e on e.intEntityId=ot.intEntityId  
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId  
-  JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
+ JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
  JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ot.intBrokerageAccountId=bc.intBrokerageAccountId  AND bc.intFuturesRateType=2  
+ JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId =1  
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId  
-  )t1)t1 WHERE MatchLong = intOriginalQty or MatchShort = intOriginalQty )t ORDER BY RowNum ASC
+  )t1)t1 WHERE MatchLong = intOriginalQty or MatchShort = intOriginalQty )t
+   ORDER BY RowNum ASC
 
