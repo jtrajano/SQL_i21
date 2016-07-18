@@ -78,10 +78,10 @@ BEGIN
 				FROM tblCTContractHeader A
 				INNER JOIN tblCTContractDetail B
 					ON A.intContractHeaderId = B.intContractHeaderId
-				INNER JOIN tblEMEntity B
-					ON A.intEntityId = B.intEntityId
+				INNER JOIN tblEMEntity D
+					ON A.intEntityId = D.intEntityId
 				INNER JOIN tblTMCustomer C
-					ON B.intEntityId = C.intCustomerNumber
+					ON D.intEntityId = C.intCustomerNumber
 				WHERE DATEADD(dd, DATEDIFF(dd, 0, B.dtmEndDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
 		')
 	END
