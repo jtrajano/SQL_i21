@@ -9,5 +9,5 @@ AS
 		'Full Access' AS strPermission
 	FROM tblSMUserRoleMenu A 
 		INNER JOIN tblSMMasterMenu B ON A.intMenuId = B.intMenuID 
-		INNER JOIN tblSMUserSecurityCompanyLocationRolePermission P ON A.intUserRoleId = P.intUserRoleId
+		INNER JOIN vyuSMUserLocationSubRolePermission P ON A.intUserRoleId = P.intUserRoleId
 	WHERE ISNULL(A.ysnVisible, 0) = 1 AND B.strCommand LIKE '%.view.%'
