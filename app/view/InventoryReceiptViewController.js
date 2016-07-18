@@ -1612,6 +1612,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         this.calculateGrossNet(current);
         win.viewModel.data.currentReceiptItem = current;
         this.calculateItemTaxes();
+        
+        //Calculate Line Total
+        var currentReceiptItem = win.viewModel.data.currentReceiptItem;
+        var currentReceipt  = win.viewModel.data.current;
+        currentReceiptItem.set('dblLineTotal', this.calculateLineTotal(currentReceipt, currentReceiptItem));
+
+        var pnlLotTracking = win.down("#pnlLotTracking");
+
+        if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual') {
+            pnlLotTracking.setVisible(true);
+        } else {
+            pnlLotTracking.setVisible(false);
+        }
     },
 
     calculateItemTaxes: function (reset) {
@@ -2701,6 +2714,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // Call this function to auto-calculate the Gross and Net at the item grid.
         me.calculateGrossNet(receiptItem);
+        
+        //Calculate Line Total
+        var currentReceipt  = win.viewModel.data.current;
+        receiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, receiptItem));
     },
 
     onChargeValidateEdit: function (editor, context, eOpts) {
@@ -3877,6 +3894,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
             me.calculateGrossNet(win.viewModel.data.currentReceiptItem);
+            
+            //Calculate Line Total
+            var currentReceiptItem = win.viewModel.data.currentReceiptItem;
+            var currentReceipt  = win.viewModel.data.current;
+            currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
         }
     },
 
@@ -4381,6 +4403,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if ( ctr === replicaCount - 1){
                         grdLotTracking.resumeEvents(true);
                         me.calculateGrossNet(currentReceiptItem);
+                        
+                        //Calculate Line Total
+                        var currentReceipt  = win.viewModel.data.current;
+                        currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
                     }
                 }
 
