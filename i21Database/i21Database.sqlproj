@@ -4034,6 +4034,9 @@
     <Build Include="dbo\Stored Procedures\uspARValidatePendingSOItems.sql" />
     <Build Include="dbo\Functions\fnGetDefaultGrossNetUOMForLotItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLSnapshotOnRebuildInventoryValuation.sql" />
+    <Build Include="dbo\Tables\tblICRebuildValuationGLSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareGLSnapshotOnRebuildInventoryValuation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
