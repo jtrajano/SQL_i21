@@ -1857,7 +1857,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
         var totalCharges = this.calculateOtherCharges(win);
-        var grandTotal = totalAmount + totalCharges;
+        var grandTotal = totalAmount + totalCharges + totalTax;
 
         lblSubTotal.setText('SubTotal: ' + Ext.util.Format.number(totalAmount, '0,000.00'));
         lblTax.setText('Tax: ' + Ext.util.Format.number(totalTax, '0,000.00'));
