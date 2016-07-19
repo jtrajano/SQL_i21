@@ -70,7 +70,10 @@ BEGIN
 				SELECT	ISNULL(SUM(LotOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON LotOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(							
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND LotCostBucket.intInventoryLotId = LotOut.intInventoryLotId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -82,7 +85,10 @@ BEGIN
 				SELECT	ISNULL(SUM(FIFOOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON FIFOOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND FIFOCostBucket.intInventoryFIFOId = FIFOOut.intInventoryFIFOId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -94,7 +100,10 @@ BEGIN
 				SELECT	ISNULL(SUM(LIFOOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON LIFOOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND LIFOCostBucket.intInventoryLIFOId = LIFOOut.intInventoryLIFOId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -106,7 +115,10 @@ BEGIN
 				SELECT	ISNULL(SUM(ActualCostOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON ActualCostOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND ActualCostBucket.intInventoryActualCostId = ActualCostOut.intInventoryActualCostId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -119,25 +131,37 @@ BEGIN
 	DELETE	LotOut
 	FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN dbo.tblICInventoryLot LotCostBucket
 				ON LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId
-	WHERE	dbo.fnDateGreaterThanEquals(LotCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(				
+				CASE WHEN @isPeriodic = 0 THEN LotCostBucket.dtmCreated ELSE LotCostBucket.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId) 
 
 	DELETE	FIFOOut
 	FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN dbo.tblICInventoryFIFO FIFOCostBucket
 				ON FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId
-	WHERE	dbo.fnDateGreaterThanEquals(FIFOCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN FIFOCostBucket.dtmCreated ELSE FIFOCostBucket.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId) 
 
 	DELETE	LIFOOut
 	FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryLIFO LIFOCostBucket
 				ON LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId
-	WHERE	dbo.fnDateGreaterThanEquals(LIFOCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN LIFOCostBucket.dtmCreated ELSE LIFOCostBucket.dtmDate END
+				, @dtmStartDate
+				) = 1
 			AND LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId) 
 
 	DELETE	ActualCostOut
 	FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryActualCost ActualCostCostBucket
 				ON ActualCostOut.intInventoryActualCostId = ActualCostCostBucket.intInventoryActualCostId
-	WHERE	dbo.fnDateGreaterThanEquals(ActualCostCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN ActualCostCostBucket.dtmCreated ELSE ActualCostCostBucket.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND ActualCostCostBucket.intItemId = ISNULL(@intItemId, ActualCostCostBucket.intItemId) 
 END 
 
@@ -146,25 +170,37 @@ BEGIN
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryLIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryActualCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-	WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
@@ -173,21 +209,45 @@ END
 
 -- Remove the cost buckets if it is posted within the date range. 
 BEGIN 
-	DELETE FROM tblICInventoryLot WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryFIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryLIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryActualCost WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE	FROM tblICInventoryLot 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+	
+	DELETE	FROM tblICInventoryFIFO 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	FROM tblICInventoryLIFO 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	FROM tblICInventoryActualCost 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
 -- Clear the G/L entries 
 BEGIN 
 	DELETE	GLDetail
 	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
-				ON  
-				--GLDetail.strBatchId = InvTrans.strBatchId
-				GLDetail.strTransactionId = InvTrans.strTransactionId
+				ON  GLDetail.strTransactionId = InvTrans.strTransactionId
 				AND GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
-	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
@@ -218,7 +278,10 @@ BEGIN
 	FROM	tblICInventoryTransaction
 	WHERE	ISNULL(dblQty, 0) <> 0
 			AND ISNULL(ysnIsUnposted, 0) = 0 -- This part of the 'WHERE' clause will exclude any unposted transactions during the re-post. 
-			AND dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1
+			AND dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND intItemId = ISNULL(@intItemId, intItemId) 
 END
 
@@ -233,8 +296,19 @@ END
 
 -- Delete the inventory transaction record if it falls within the date range. 
 BEGIN 
-	DELETE FROM tblICInventoryTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryLotTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE	FROM tblICInventoryTransaction 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	FROM tblICInventoryLotTransaction 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
 --------------------------------------------------------------------
@@ -347,7 +421,7 @@ BEGIN
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
-		IF ISNULL(@isPeriodic, 1) = 1
+		IF ISNULL(@isPeriodic, 0) = 1
 		BEGIN 
 			SELECT	TOP 1 
 					@strBatchId = strBatchId
