@@ -487,7 +487,7 @@ namespace iRely.Inventory.BusinessLayer
             {
                 // Get Contracts that are "Purchase" type. 
                 var query = _db.GetQuery<vyuICGetReceiptAddPurchaseContract>()
-                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
                     .Filter(param, true);
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
