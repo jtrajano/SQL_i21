@@ -472,7 +472,7 @@ namespace iRely.Inventory.BusinessLayer
             {
                 // Get the Transfer Orders
                 var query = _db.GetQuery<vyuICGetReceiptAddTransferOrder>()
-                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
                     .Filter(param, true);
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
@@ -501,7 +501,7 @@ namespace iRely.Inventory.BusinessLayer
             {
                 // Get Purchase Contracts that are linked with Logistic's Inbound Shipments 
                 var query = _db.GetQuery<vyuICGetReceiptAddLGInboundShipment>()
-                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
                     .Filter(param, true);
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
@@ -516,7 +516,7 @@ namespace iRely.Inventory.BusinessLayer
             {
                 // Get the Purchase Orders
                 var query = _db.GetQuery<vyuICGetReceiptAddPurchaseOrder>()
-                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
                     .Filter(param, true);
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
