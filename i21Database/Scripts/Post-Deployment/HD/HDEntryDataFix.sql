@@ -371,4 +371,55 @@ GO
 
 GO
 	PRINT N'End updating HD Opportunity Campaign Image Id.'
+	PRINT N'Start updating HD Ticket Sequence in Project.'
+GO
+
+	DECLARE @intProjectId INT
+	DECLARE @intTicketId INT
+	DECLARE @queryResult CURSOR
+
+	DECLARE @cnt INT = 0;
+	DECLARE @activeProjectId INT = 0;
+
+	SET @queryResult = CURSOR FOR
+	select
+		tblHDProject.intProjectId
+		,tblHDTicket.intTicketId
+	from
+		tblHDProject
+		,tblHDProjectTask
+		,tblHDTicket
+	where
+		tblHDProjectTask.intProjectId = tblHDProject.intProjectId
+		and tblHDTicket.intTicketId = tblHDProjectTask.intTicketId
+		and tblHDTicket.intSequenceInProject is null
+	order by
+		tblHDProject.intProjectId
+		,tblHDTicket.intTicketId
+
+	OPEN @queryResult
+	FETCH NEXT
+	FROM @queryResult INTO @intProjectId, @intTicketId
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		if (@activeProjectId <> @intProjectId)
+		begin
+			set @activeProjectId = @intProjectId;
+			set @cnt = 0;
+		end
+
+		set @cnt = @cnt + 1;
+
+		update tblHDTicket set tblHDTicket.intSequenceInProject = @cnt where tblHDTicket.intTicketId = @intTicketId;
+				
+		FETCH NEXT
+		FROM @queryResult INTO @intProjectId, @intTicketId
+	END
+
+	CLOSE @queryResult
+	DEALLOCATE @queryResult
+
+GO
+	PRINT N'End updating HD Ticket Sequence in Project.'
 GO
