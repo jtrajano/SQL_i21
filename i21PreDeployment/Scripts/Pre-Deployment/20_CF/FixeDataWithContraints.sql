@@ -186,3 +186,14 @@ BEGIN
 	
 	print 'end updating account data'
 END
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFIndexPricingBySiteGroupHeader')
+BEGIN
+	print 'begin updating account data'
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFIndexPricingBySiteGroupHeader'AND COLUMN_NAME = 'intSiteGroupId')
+	BEGIN
+		EXEC ('update tblCFIndexPricingBySiteGroupHeader set intSiteGroupId = NULL where intSiteGroupId = 0')
+	END
+	
+	print 'end updating account data'
+END
