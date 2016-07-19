@@ -294,9 +294,9 @@ END CATCH
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId				
 				WHERE  
-					A.dblInvoiceTotal = 0.00			
-					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = A.intInvoiceId)		
-					
+					A.dblInvoiceTotal = 0.00
+					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = A.intInvoiceId)
+					AND A.strImportFormat <> 'CarQuest'					
 					
 				--negative amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -2249,7 +2249,7 @@ IF @post = 1
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
 			WHERE
-				Detail.dblTotal <> @ZeroDecimal
+				((Header.strImportFormat <> 'CarQuest' AND Detail.dblTotal <> @ZeroDecimal) OR Header.strImportFormat = 'CarQuest')
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
@@ -2308,7 +2308,7 @@ IF @post = 1
 					ON ARIC.[intComponentItemId] = IST.intItemId 
 					AND ARI.[intCompanyLocationId] = IST.intLocationId 			 
 			WHERE
-				ARID.[dblTotal] <> 0
+				((ARI.[strImportFormat] <> 'CarQuest' AND ARID.[dblTotal] <> @ZeroDecimal) OR ARI.[strImportFormat] = 'CarQuest')
 				AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
 				AND ISNULL(ARID.[intItemId],0) <> 0

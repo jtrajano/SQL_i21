@@ -88,6 +88,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@intItemLocationId				INT				= NULL
 			,@ysnAllowNegativeStock			BIT				= 0
 			,@intStockUnit					INT				= NULL
+			,@intCostingMethod				INT				= NULL
 
 		IF @IsTank = 1
 			BEGIN
@@ -207,6 +208,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @intItemLocationId			= ICIL.intItemLocationId
 					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
 					, @intStockUnit					= ICUOM.intItemUOMId
+					, @intCostingMethod				= ICIL.intCostingMethod
 				FROM
 					tblARImportLogDetail ILD
 				INNER JOIN
@@ -347,6 +349,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 
 				IF ISNULL(@intStockUnit, 0) = 0
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s stock unit should not be null.'
+
+				IF ISNULL(@intCostingMethod, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s location costing method should be either FIFO or LIFO.'
 			END
 
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
