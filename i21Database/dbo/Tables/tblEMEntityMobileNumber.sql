@@ -15,6 +15,7 @@
     [strFormatArea]                 NVARCHAR (50)   COLLATE Latin1_General_CI_AS  NULL,
     [strFormatLocal]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS  NULL,
     [intCountryId]                  INT NULL DEFAULT(0),
+	[intAreaCityLength]				INT NOT NULL DEFAULT 3,
     [ysnDisplayCountryCode]         BIT NULL,
     [intConcurrencyId]              INT CONSTRAINT [DF_tblEMEntityMobileNumber_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
