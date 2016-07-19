@@ -25,6 +25,7 @@
 			,ts.strIcon
 			,ts.strStatus
 			,strTicketType = tt.strType
+			,t.intSequenceInProject
 		from
 			tblHDTicket t
 			/*
