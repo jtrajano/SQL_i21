@@ -20,6 +20,9 @@ AS
 	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
 	FROM @tblTypeServiceCharge
 
+	IF ISNULL(@intCurrencyId, 0) = 0
+		SELECT TOP 1 @intCurrencyId = intCurrencyId FROM tblARCustomer WHERE intEntityCustomerId = @intEntityCustomerId
+
 	DECLARE @tempServiceChargeTable TABLE (
 		 [intServiceChargeId]	INT
 		,[intInvoiceId]			INT
