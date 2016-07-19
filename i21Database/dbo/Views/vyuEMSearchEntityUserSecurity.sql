@@ -13,7 +13,8 @@ SELECT
         ysnActive = ~c.ysnDisabled,
 		c.strUserName,
 		h.intUserRoleID,
-		strDefaultUserRole = h.strName
+		strDefaultUserRole = h.strName,
+		dtmLastLogin = c.dtmLastLogin
     FROM         
             tblEMEntity a
         join [tblEMEntityType] b

@@ -30,6 +30,7 @@
 	[intInvalidAttempt]				INT NOT NULL DEFAULT 0,
 	[ysnLockedOut]					BIT NOT NULL DEFAULT 0,
 	[dtmLockOutTime]				DATETIME NULL,
+	[dtmLastLogin]					DATETIME NULL,
     [intConcurrencyId]				INT	DEFAULT (1) NOT NULL,
 	[intEntityIdOld]				INT NULL,
 	[intUserSecurityIdOld]			INT NULL,
