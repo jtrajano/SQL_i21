@@ -189,7 +189,7 @@ SELECT
 		,[dblQty] 							=	B.dblQtyReceived
 		,[dblUOMQty] 						=	itemUOM.dblUnitQty
 		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
-		,[dblVoucherCost] 					=	ROUND(B.dblTotal / (B.dblQtyReceived),6) --Cost with line item discount consideration
+		,[dblVoucherCost] 					=	B.dblCost
 		,[intCurrencyId] 					=	A.intCurrencyId
 		,[dblExchangeRate] 					=	0
 		,[intTransactionId]					=	A.intBillId
