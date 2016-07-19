@@ -178,8 +178,10 @@ BEGIN TRY
 			BEGIN
 				IF EXISTS(SELECT * FROM dbo.tblMFWorkOrderConsumedLot WHERE intLotId = @intLotId)
 				BEGIN
-					UPDATE dbo.tblMFWorkOrderConsumedLot 
+					UPDATE WC 
 					SET intLotId = @intNewLotId
+					From tblMFWorkOrderConsumedLot WC 
+					JOIN tblMFWorkOrder W on W.intWorkOrderId =WC.intWorkOrderId AND W.intStatusId NOT IN (12,13)
 					WHERE intLotId = @intLotId
 				END
 	
