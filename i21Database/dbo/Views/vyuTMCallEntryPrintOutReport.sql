@@ -43,7 +43,7 @@ SELECT
 						THEN ' ' + C.strZipCode 
 						ELSE C.strZipCode 
 				END) 
-	,C.strComment
+	,strSiteComment = C.strComment
 	,C.strInstruction
 	,C.dblDegreeDayBetweenDelivery
 	,C.dblTotalCapacity
@@ -70,7 +70,7 @@ SELECT
     ,F.dblPercentLeft
 	,F.dblMinimumQuantity
 	,F.dtmRequestedDate
-	,F.strComments
+	,strDispatchComment = F.strComments
 	,C.intFillMethodId
 	,strDriverName = J.strName 
 	,strDriverID = J.strEntityNo
@@ -87,6 +87,7 @@ SELECT
 	,F.intUserID
 	,strTermDescription = I.strTerm
 	,strTermId = CAST(I.intTermID AS NVARCHAR(8)) 
+	,Z.strCompanyName
 FROM tblTMCustomer A 
 INNER JOIN vyuTMCustomerEntityView B 
 	ON A.intCustomerNumber = B.A4GLIdentity 
@@ -114,6 +115,7 @@ LEFT JOIN tblTMFillMethod O
 	ON C.intFillMethodId = O.intFillMethodId
 LEFT JOIN tblTMRoute P
 	ON C.intRouteId = P.intRouteId
+,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 WHERE H.strCurrentSeason IS NOT NULL 
 	AND vwcus_active_yn = 'Y' 
 	AND (C.ysnOnHold = 0 OR dtmOnHoldEndDate < DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)) AND C.ysnActive = 1

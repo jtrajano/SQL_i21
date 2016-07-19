@@ -94,7 +94,7 @@ BEGIN
 										THEN '' '' + C.strZipCode 
 										ELSE C.strZipCode 
 								END) 
-					,C.strComment
+					,strSiteComment = C.strComment
 					,C.strInstruction
 					,C.dblDegreeDayBetweenDelivery
 					,C.dblTotalCapacity
@@ -121,7 +121,7 @@ BEGIN
 					,F.dblPercentLeft
 					,F.dblMinimumQuantity
 					,F.dtmRequestedDate
-					,F.strComments
+					,strDispatchComment = F.strComments
 					,C.intFillMethodId
 					,strDriverName = J.vwsls_name 
 					,strDriverID = J.vwsls_slsmn_id
@@ -138,6 +138,7 @@ BEGIN
 					,F.intUserID
 					,strTermDescription = I.vwtrm_desc
 					,strTermId = I.vwtrm_key_n 
+					,Z.strCompanyName
 				FROM tblTMCustomer A 
 				INNER JOIN vwcusmst B 
 					ON A.intCustomerNumber = B.A4GLIdentity 
@@ -167,6 +168,7 @@ BEGIN
 					ON C.intFillMethodId = O.intFillMethodId
 				LEFT JOIN tblTMRoute P
 					ON C.intRouteId = P.intRouteId
+				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 				WHERE H.strCurrentSeason IS NOT NULL 
 					AND vwcus_active_yn = ''Y'' 
 					AND (C.ysnOnHold = 0 OR dtmOnHoldEndDate < DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)) AND C.ysnActive = 1
@@ -226,7 +228,7 @@ BEGIN
 										THEN '' '' + C.strZipCode 
 										ELSE C.strZipCode 
 								END) 
-					,C.strComment
+					,strSiteComment = C.strComment
 					,C.strInstruction
 					,C.dblDegreeDayBetweenDelivery
 					,C.dblTotalCapacity
@@ -253,7 +255,7 @@ BEGIN
 					,F.dblPercentLeft
 					,F.dblMinimumQuantity
 					,F.dtmRequestedDate
-					,F.strComments
+					,strDispatchComment = F.strComments
 					,C.intFillMethodId
 					,strDriverName = J.strName 
 					,strDriverID = J.strEntityNo
@@ -270,6 +272,7 @@ BEGIN
 					,F.intUserID
 					,strTermDescription = I.strTerm
 					,strTermId = CAST(I.intTermID AS NVARCHAR(8)) 
+					,Z.strCompanyName
 				FROM tblTMCustomer A 
 				INNER JOIN vyuTMCustomerEntityView B 
 					ON A.intCustomerNumber = B.A4GLIdentity 
@@ -297,6 +300,7 @@ BEGIN
 					ON C.intFillMethodId = O.intFillMethodId
 				LEFT JOIN tblTMRoute P
 					ON C.intRouteId = P.intRouteId
+				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 				WHERE H.strCurrentSeason IS NOT NULL 
 					AND vwcus_active_yn = ''Y'' 
 					AND (C.ysnOnHold = 0 OR dtmOnHoldEndDate < DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)) AND C.ysnActive = 1
