@@ -45,6 +45,8 @@ BEGIN
 					 END) FROM tblICTransactionDetailLog
 			WHERE intTransactionId = @ReceiptId
 			AND strTransactionType = 'Inventory Receipt' 
+
+			EXEC uspGRReverseOnReceiptDelete @ReceiptId
 		END
 		ELSE
 		BEGIN
