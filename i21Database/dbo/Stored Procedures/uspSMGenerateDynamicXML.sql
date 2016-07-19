@@ -30,7 +30,7 @@ BEGIN
 		IF @blnLayoutPreview = 1
 		BEGIN
 			SET @strWhereClause = @strMainTable + '~'
-			SELECT @strWhereClause = @strWhereClause + ' ' + PKColumnName + ' IN (SELECT TOP 1 ' + PKColumnName + ' FROM ' + @strMainTable + ') AND '  
+			SELECT @strWhereClause = @strWhereClause + ' ' + PKColumnName + ' IN (SELECT TOP 1 ' + PKColumnName + ' FROM ' + @strMainTable + ') AND '
 			FROM    @tblPKColumns
 			
 			SELECT @strWhereClause = LEFT(@strWhereClause,LEN(@strWhereClause)-3) 
@@ -56,7 +56,7 @@ BEGIN
 					ORDER BY KU.TABLE_NAME, KU.ORDINAL_POSITION;
 					
 					SET @strWhereClause = @strWhereClause + ', ' + @strTempTable + '~'
-					SELECT @strWhereClause = @strWhereClause + ' ' + PKColumnName + ' IN (SELECT TOP 1 ' + PKColumnName + ' FROM ' + @strTempTable + ') AND '  
+					SELECT @strWhereClause = @strWhereClause + ' ' + PKColumnName + ' IN (SELECT TOP 1 ' + PKColumnName + ' FROM ' + @strTempTable + ') AND '
 					FROM    @tblTempPKColumns
 					
 					SELECT @strWhereClause = LEFT(@strWhereClause,LEN(@strWhereClause)-3) 
@@ -179,7 +179,7 @@ BEGIN
 					END
 					ELSE
 					BEGIN
-						SET @strTagAttribute =  (SELECT @strTagAttribute + ' (SELECT  ' + strColumnName + ' FROM ' + strTable + ' [' + strTagAttribute + '] ' 
+						SET @strTagAttribute =  (SELECT @strTagAttribute + ' (SELECT ' + strColumnName + ' FROM ' + strTable + ' [' + strTagAttribute + '] ' 
 						+ CASE  strTable 
 							WHEN  @strMainTable THEN ' WHERE ' + REPLACE(@PKColumnCondition, 'sub', '[' + strTagAttribute + ']') 
 							WHEN  (SELECT LTRIM(RTRIM(strWhereTable)) FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = strTable) 
@@ -220,10 +220,7 @@ BEGIN
 					BEGIN	
 						IF CHARINDEX('@' + @strParentTag +  CAST(@intMinPosition as nvarchar(5)) + '',@strMainSQL) = 0				
 						SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' nvarchar(max) SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '''' '
-							
-						SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' + '' ( select ' + @strTagAttribute + '
-						 for xml raw(''''' + @strXMLTag + '''''), type
-						)'' '
+						SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' + '' ( select ' + @strTagAttribute + ' for xml raw(''''' + @strXMLTag + '''''), type)'' '
 					END
 				END
 				ELSE -- ==========> no table, column name and no attributes <======================
@@ -241,8 +238,7 @@ BEGIN
 								SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' nvarchar(max) SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '''' '
 								SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '' ( SELECT '' '
 							END
-							SET @strMainSQL = @strMainSQL  + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + 
-								' + @' + @strXMLTag + CAST(@intMinPos1 as nvarchar(5)) + ' + '','' '
+							SET @strMainSQL = @strMainSQL  + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' + @' + @strXMLTag + CAST(@intMinPos1 as nvarchar(5)) + ' + '','' '
 							
 							SET @intMinPos1 = @intMinPos1 + 1
 						END
@@ -271,8 +267,7 @@ BEGIN
 							SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' nvarchar(max) SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '''' '
 							SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '' ( SELECT '' '
 						END
-						SET @strMainSQL = @strMainSQL  + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + 
-							' + @' + @strXMLTag + CAST(@intMinPos as nvarchar(5)) + ' + '','' '
+						SET @strMainSQL = @strMainSQL  + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' + @' + @strXMLTag + CAST(@intMinPos as nvarchar(5)) + ' + '','' '
 						
 						SET @intMinPos = @intMinPos + 1
 					END
@@ -319,11 +314,9 @@ BEGIN
 									
 					SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' nvarchar(max) SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = '''' '
 						
-					SET @strMainSQL = @strMainSQL  + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + 
-					' + ''( SELECT ' + CASE WHEN (ISNULL(@strTagAttribute, '') <> '') THEN @strTagAttribute + ' , ' ELSE '' END + ' CAST(CAST(''''<![CDATA['''' + CAST(' + @strColumnName + ' as nvarchar(200)) + '''']]>'''' as nvarchar(200))  as XML) 		
-					FROM [dbo].[' + @strTable + '] ' + @strXMLTag + ' ' 
-					+ CASE  @strTable 
-							WHEN  @strMainTable THEN ' WHERE ' + REPLACE(@PKColumnCondition, 'sub', @strXMLTag) 
+					SET @strMainSQL = @strMainSQL  + ' SET @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' = @' + @strParentTag + CAST(@intMinPosition as nvarchar(5)) + ' + ''( SELECT ' + CASE WHEN (ISNULL(@strTagAttribute, '') <> '') THEN @strTagAttribute + ' , ' ELSE '' END + ' CAST(CAST(''''<![CDATA['''' + CAST(' 
+					+ @strColumnName + ' as nvarchar(200)) + '''']]>'''' as nvarchar(200)) as XML) FROM [dbo].[' + @strTable + '] ' + @strXMLTag + ' ' 
+					+ CASE  @strTable WHEN  @strMainTable THEN ' WHERE ' + REPLACE(@PKColumnCondition, 'sub', @strXMLTag) 
 							WHEN (SELECT LTRIM(RTRIM(strWhereTable)) FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) 
 								THEN ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) 
 							ELSE ' ' END
@@ -336,8 +329,7 @@ BEGIN
 					DECLARE @oldText nvarchar(max), @newText nvarchar(max)
 					SET @oldText = ' FROM [dbo].[' + @strTable + '] ' + @strParentTag + ''
 					
-					SET @newText = ',' + @strColumnName + ' [' + @strXMLTag + ']		
-					FROM [dbo].[' + @strTable + '] ' + @strParentTag + ''
+					SET @newText = ',' + @strColumnName + ' [' + @strXMLTag + '] FROM [dbo].[' + @strTable + '] ' + @strParentTag + ''
 					
 					SET @strMainSQL = REPLACE(@strMainSQL, @oldText, @newText)
 				END
@@ -355,7 +347,7 @@ BEGIN
 	SELECT @intMinPosFin = MIN(intPosition), @intMaxPosFin = MAX(intPosition) 
 	FROM dbo.tblSMImportFileColumnDetail WHERE intLength = 1 AND intImportFileHeaderId = @intImportFileHeaderId AND ysnActive = 1
 
-	SET @strMainSQL = @strMainSQL + ' DECLARE @strResult nvarchar(max)  SET @strResult = '''' '
+	SET @strMainSQL = @strMainSQL + ' DECLARE @strResult nvarchar(max) SET @strResult = '''' '
 
 	IF @intMinPosFin <> @intMaxPosFin
 	BEGIN -- =================> root has more than 1 children <================
@@ -374,19 +366,18 @@ BEGIN
 				
 			IF (@intStart = 1)
 			BEGIN--SELECT * FROM @tblXML WHERE intLength = @intLevel
-				SET @strMainSQL = @strMainSQL + ' DECLARE  @' + @strParentTag +  ' nvarchar(max) SET @' + @strParentTag + ' = '''' '
-				SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + ' =  '' SELECT ' + CASE WHEN ISNULL(@strDataType,'')='' THEN '' ELSE ' TOP 1 ' END + ' '' '
+				SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + ' nvarchar(max) SET @' + @strParentTag + ' = '''' '
+				SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + ' = '' SELECT ' + CASE WHEN ISNULL(@strDataType,'')='' THEN '' ELSE ' TOP 1 ' END + ' '' '
 			END		
 
 			IF (ISNULL(@intStart,0) = 0 AND ISNULL(@intEnd,0) = 0)
 			BEGIN
 				IF (ISNULL(@strTable,'') <> '' AND ISNULL(@strColumnName,'') <> '')
 				BEGIN
-					SET @strMainSQL = @strMainSQL + ' DECLARE  @' + @strParentTag +  ' nvarchar(max) SET @' + @strParentTag + ' = '''' '
-					SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + ' =  '
-					SET @strMainSQL = @strMainSQL + ' '' SELECT CAST(CAST(''''<![CDATA['''' + CAST(' + @strColumnName + ' as nvarchar(200)) + '''']]>'''' as nvarchar(200))  as XML) 		
-					FROM [dbo].[' + @strTable + '] main ' + 
-							CASE WHEN ISNULL(@strWhereClause, '') = '' THEN '  ' ELSE ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) +  '  ' END  
+					SET @strMainSQL = @strMainSQL + ' DECLARE @' + @strParentTag + ' nvarchar(max) SET @' + @strParentTag + ' = '''' '
+					SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + ' = '
+					SET @strMainSQL = @strMainSQL + ' '' SELECT CAST(CAST(''''<![CDATA['''' + CAST(' + @strColumnName + ' as nvarchar(200)) + '''']]>'''' as nvarchar(200)) as XML) FROM [dbo].[' + @strTable + '] main ' + 
+							CASE WHEN ISNULL(@strWhereClause, '') = '' THEN ' ' ELSE ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) + ' ' END  
 							+ ' FOR XML RAW (''''' + @strParentTag + ''''') , ELEMENTS'' '
 				END
 			END
@@ -408,7 +399,7 @@ BEGIN
 				ELSE
 				BEGIN
 					SET @strMainSQL = @strMainSQL + ' + '' FROM [dbo].[' + @strTable + '] main ' + 
-							CASE WHEN ISNULL(@strWhereClause, '') = '' THEN '  ' ELSE ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) +  '  ' END  
+							CASE WHEN ISNULL(@strWhereClause, '') = '' THEN ' ' ELSE ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) + ' ' END  
 							+ ' FOR XML RAW (''''' + @strParentTag + ''''') , ELEMENTS'' '
 					print @strTable
 					print SUBSTRING(@strMainSQL, (LEN(@strMainSQL)-100),100)
@@ -418,18 +409,11 @@ BEGIN
 			
 --SET @strMainSQL  = @strMainSQL + ' SELECT @' + @strParentTag + ''
 			
-			SET @strMainSQL = @strMainSQL + '   SET @' + @strParentTag + ' = @' + @strParentTag + ' + ''
-								DECLARE @xmlSample XML
-								SET @xmlSample = 
-								(
-								 '' + @' + @strParentTag + ' + ''
-								)
-
-								SELECT @strResult = @strResult + Cast(@xmlSample as nvarchar(max)) 
-								'' exec sp_executesql @' + @strParentTag + ', N''@strResult nvarchar(max) out'', @strResult out
-								'--SELECT @strResult
+			SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + ' = @' 
+			+ @strParentTag + ' + '' DECLARE @xmlSample XML SET @xmlSample = ('' + @' 
+								 + @strParentTag + ' + '') SELECT @strResult = @strResult + Cast(@xmlSample as nvarchar(max)) '' exec sp_executesql @' 
+								 + @strParentTag + ', N''@strResult nvarchar(max) out'', @strResult out '--SELECT @strResult
 								
-			
 			SET @intMinPosFin = @intMinPosFin + 1
 		END
 
@@ -442,15 +426,12 @@ BEGIN
 		IF (CHARINDEX(':' ,@strParentTag) > 0	)		
 		SET @strParentTag = REPLACE(SUBSTRING(@strParentTag, CHARINDEX(':', @strParentTag), LEN(@strParentTag)), ':', '')
 		
-		SET @strMainSQL = @strMainSQL + '   SET @' + @strParentTag + CAST(@intLevel as nvarchar(5)) + ' =  ''
-								DECLARE @xmlSample XML
-								SET @xmlSample = 
-								( '' + @' + @strParentTag + CAST(@intLevel as nvarchar(5)) + ' + '')
-								SELECT @strResult = @strResult + Cast(@xmlSample as nvarchar(max))
-								'' exec sp_executesql @' + @strParentTag + CAST(@intLevel as nvarchar(5)) + ', N''@strResult nvarchar(max) out'', @strResult out
-								' --SELECT @strResult
-								
-		
+		SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag 
+			+ CAST(@intLevel as nvarchar(5)) + ' = '' DECLARE @xmlSample XML SET @xmlSample = ( '' + @' 
+			+ @strParentTag + CAST(@intLevel as nvarchar(5)) 
+			+ ' + '') SELECT @strResult = @strResult + Cast(@xmlSample as nvarchar(max)) '' exec sp_executesql @' 
+			+ @strParentTag + CAST(@intLevel as nvarchar(5)) + ', N''@strResult nvarchar(max) out'', @strResult out' --SELECT @strResult
+
 	END
 
 --SELECT @strMainSQL '@strMainSQL'
@@ -473,7 +454,7 @@ BEGIN
 		SET @strTagAttribute = ''
 		WHILE (@intMinTagPosition <= @intMaxTagPosition)
 		BEGIN
-			SET @strTagAttribute =  (SELECT @strTagAttribute + ' ' + strTagAttribute + '="' + strDefaultValue + '"  ' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition AND ysnActive = 1)
+			SET @strTagAttribute =  (SELECT @strTagAttribute + ' ' + strTagAttribute + '="' + strDefaultValue + '" ' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition AND ysnActive = 1)
 			
 			SET @intMinTagPosition = @intMinTagPosition + 1
 		END
