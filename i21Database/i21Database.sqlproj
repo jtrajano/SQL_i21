@@ -4059,6 +4059,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCreateInvoiceForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessInvoice.sql" />
     <Build Include="dbo\Views\vyuLGLoadWarehouseServicesForInvoice.sql" />
+    <Build Include="dbo\Tables\tblSMUserLogin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

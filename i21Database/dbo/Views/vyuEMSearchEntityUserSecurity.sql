@@ -14,7 +14,7 @@ SELECT
 		c.strUserName,
 		h.intUserRoleID,
 		strDefaultUserRole = h.strName,
-		dtmLastLogin = c.dtmLastLogin
+		dtmLastLogin = u.dtmDate
     FROM         
             tblEMEntity a
         join [tblEMEntityType] b
@@ -29,3 +29,7 @@ SELECT
             on f.intEntityContactId = g.intEntityId  
 		left join tblSMUserRole h
 			on h.intUserRoleID = c.intUserRoleID
+		outer apply 
+		(
+			SELECT TOP 1 dtmDate FROM tblSMUserLogin u WHERE u.intEntityId = c.intEntityUserSecurityId ORDER BY dtmDate DESC
+		) u
