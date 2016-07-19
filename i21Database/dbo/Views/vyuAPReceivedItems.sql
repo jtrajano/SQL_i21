@@ -476,7 +476,7 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	1
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN CC.dblRate ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
