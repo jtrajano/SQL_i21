@@ -1166,8 +1166,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colOwnerDefault: 'ysnActive'
-            }
-
+            },
+            
+            //----------//
+            //Others Tab//
+            //----------//
+            
+            txtInvoiceComments: '{current.strInvoiceComments}',
+            txtPickListComments: '{current.strPickListComments}'
         }
     },
 
