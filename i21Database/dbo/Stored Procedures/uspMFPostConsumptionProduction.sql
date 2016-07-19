@@ -386,19 +386,29 @@ BEGIN
 		WHERE intRecordId = @intRecordId
 
 		IF (
-				(
-					SELECT dblWeight
-					FROM dbo.tblICLot
-					WHERE intLotId = @intLotId1
-					) < 0.00001
-				)
-			AND (
-				(
-					SELECT dblQty
-					FROM dbo.tblICLot
-					WHERE intLotId = @intLotId1
-					) < 0.00001
-				)
+		(
+			SELECT dblWeight
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId1
+			) < 0.00001
+		AND (
+			SELECT dblWeight
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId1
+			) > 0
+		)
+	OR (
+		(
+			SELECT dblQty
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId1
+			) < 0.00001
+		AND (
+			SELECT dblQty
+			FROM dbo.tblICLot
+			WHERE intLotId = @intLotId1
+			) > 0
+		)
 		BEGIN
 			--EXEC dbo.uspMFLotAdjustQty
 			-- @intLotId =@intLotId,       
