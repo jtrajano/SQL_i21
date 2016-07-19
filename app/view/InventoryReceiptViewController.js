@@ -4246,6 +4246,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                             });
                         }
+                        
+                        if (order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
+                                //Set default value for Gross/Net UOM
+                                newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
+                                newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
+                                //Set defefault value for Gross and Net quantities
+                                newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
+                                newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
+                                //Set default value for Weight UOM Conversion Factor
+                                newReceiptItem.set('dblWeightUOMConvFactor', 1);
+                            }
                     });
                     search.close();
                     //win.context.data.saveRecord();
