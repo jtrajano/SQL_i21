@@ -205,7 +205,11 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Lot.dblLastCost
+			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
+										dbo.fnGetItemStockUOM(Lot.intItemId)
+										,Detail.intItemUOMId
+										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
+									)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -226,6 +230,10 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON ItemUOM.intItemId = Detail.intItemId
 				AND ItemUOM.intItemUOMId = Lot.intItemUOMId
+			LEFT JOIN tblICItemPricing ItemPricing
+				ON ItemPricing.intItemId = Detail.intItemId
+				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intLocationId)
+
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Lot.dblQty > 0 
 

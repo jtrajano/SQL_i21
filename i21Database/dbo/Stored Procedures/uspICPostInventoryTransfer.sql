@@ -229,7 +229,7 @@ BEGIN
 				,Header.dtmTransferDate
 				,dblQty = -Detail.dblQuantity
 				,dblUOMQty = ItemUOM.dblUnitQty
-				,ISNULL(Detail.dblCost, 0)
+				,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
 				,0
 				,@DefaultCurrencyId
 				,1
@@ -252,6 +252,9 @@ BEGIN
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
 				LEFT JOIN tblICItemUOM LotWeightUOM
 					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+				LEFT JOIN tblICItemPricing ItemPricing
+					ON ItemPricing.intItemId = Detail.intItemId
+					AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
 		WHERE	Header.intInventoryTransferId = @intTransactionId
 
 		-------------------------------------------
