@@ -1121,7 +1121,13 @@ BEGIN TRY
 						
 				UPDATE tblAPBill SET strVendorOrderNumber=strBillId WHERE intBillId=@intBillId
 				
-				UPDATE tblGRStorageHistory SET intInventoryReceiptId=@intReceiptId,intBillId=@intBillId WHERE strType='Settlement' AND strSettleTicket=@TicketNo	
+				UPDATE SH
+				SET  SH.intInventoryReceiptId = @intReceiptId
+					,SH.intBillId = @intBillId
+				FROM tblGRStorageHistory SH
+				JOIN tblICInventoryReceiptItem RL ON RL.intSourceId = SH.intCustomerStorageId
+				JOIN tblICInventoryReceipt RH ON RH.intInventoryReceiptId = RL.intInventoryReceiptId
+				WHERE SH.strType = 'Settlement' AND SH.strSettleTicket = @TicketNo AND RH.intInventoryReceiptId = @intReceiptId	
 				
 				IF @@ERROR <> 0 GOTO SettleStorage_Exit;	
 			END 
