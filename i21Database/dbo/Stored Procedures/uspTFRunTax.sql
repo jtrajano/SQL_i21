@@ -21,7 +21,7 @@ DECLARE @SmrySummaryDescription NVARCHAR(MAX)
 DECLARE @SmrySummaryItemNumber NVARCHAR(MAX)
 DECLARE @SmrySummaryItemSequenceNumber NVARCHAR(MAX)
 DECLARE @SmrySummarySection NVARCHAR(MAX)
-DECLARE @SmryTempTotal INT
+DECLARE @SmryTempTotal NUMERIC(18, 2)
 DECLARE @SmrySummaryItemsCount NVARCHAR(MAX) 
 DECLARE @SmryQuery NVARCHAR(MAX)
 --DETAIL VARIABLES
