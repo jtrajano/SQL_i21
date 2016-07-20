@@ -127,3 +127,6 @@ GO
 GO
 	UPDATE A SET A.strAnnouncement = REPLACE(REPLACE(A.strAnnouncement, 'HelpDesk', 'i21'), 'redactorUpload', 'Upload/Announcement') FROM tblSMAnnouncement A WHERE A.strAnnouncement LIKE '%/HelpDesk/redactorUpload/%'
 GO
+	PRINT N'UPDATE SECURITY POLICY WITH intLockUserAccountAfter > 0 AND intLockUserAccountDuration = 0'
+	UPDATE tblSMSecurityPolicy SET intLockUserAccountDuration = 10 WHERE intSecurityPolicyId IN (SELECT intSecurityPolicyId FROM tblSMSecurityPolicy WHERE intLockUserAccountAfter > 0 AND intLockUserAccountDuration = 0)
+GO
