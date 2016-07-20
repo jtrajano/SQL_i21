@@ -130,3 +130,25 @@ GO
 	PRINT N'UPDATE SECURITY POLICY WITH intLockUserAccountAfter > 0 AND intLockUserAccountDuration = 0'
 	UPDATE tblSMSecurityPolicy SET intLockUserAccountDuration = 10 WHERE intSecurityPolicyId IN (SELECT intSecurityPolicyId FROM tblSMSecurityPolicy WHERE intLockUserAccountAfter > 0 AND intLockUserAccountDuration = 0)
 GO
+	/* UPDATE intCountryID in tblSMZipCode */
+	BEGIN
+		DECLARE @ColCountryId int
+		DECLARE @ColCountryName NVARCHAR(100)
+		DECLARE @CountryIdCursor CURSOR
+		SET @CountryIdCursor = CURSOR FAST_FORWARD
+		FOR
+		SELECT intCountryID,strCountry
+		FROM   tblSMCountry 
+		OPEN @CountryIdCursor
+		FETCH NEXT FROM @CountryIdCursor
+		INTO @ColCountryId,@ColCountryName
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			UPDATE tblSMZipCode SET intCountryID=@ColCountryId where strCountry=@ColCountryName
+			FETCH NEXT FROM @CountryIdCursor
+			INTO @ColCountryId,@ColCountryName
+		END
+		CLOSE @CountryIdCursor
+		DEALLOCATE @CountryIdCursor
+	END
+GO
