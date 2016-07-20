@@ -4,7 +4,7 @@ SELECT CAST (ROW_NUMBER() OVER (ORDER BY intEntityId DESC) AS INT)	AS	intEntityR
 (
 	SELECT DISTINCT intEntityId, strName, intUserRoleId FROM 
 	(
-		SELECT Entity.intEntityId AS intEntityId, Entity.strName AS strName,  UserRole.intUserRoleID AS intUserRoleId FROM tblSMUserSecurityCompanyLocationRolePermission UserSecurityCompanyLocationRolePermission
+		SELECT Entity.intEntityId AS intEntityId, Entity.strName AS strName,  UserRole.intUserRoleID AS intUserRoleId FROM vyuSMUserLocationSubRolePermission UserSecurityCompanyLocationRolePermission
 		INNER JOIN tblEMEntity Entity ON UserSecurityCompanyLocationRolePermission.intEntityUserSecurityId = Entity.intEntityId
 		INNER JOIN tblSMUserRole UserRole ON UserSecurityCompanyLocationRolePermission.intUserRoleId = UserRole.intUserRoleID
 		UNION ALL
