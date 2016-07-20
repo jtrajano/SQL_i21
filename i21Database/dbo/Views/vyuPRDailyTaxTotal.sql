@@ -14,6 +14,7 @@ SELECT
 					+ ISNULL(LiabilityMed.dblTotal, 0) 
 					+ ISNULL(TaxTotalSS.dblTotal, 0) 
 					+ ISNULL(TaxTotalMed.dblTotal, 0)
+					+ ISNULL(FIT.dblTotal, 0)
 FROM 
 	(SELECT 
 		DISTINCT
@@ -92,7 +93,7 @@ FROM
 		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
-			AND vyuPRPaycheckTax.strPaidBy = 'Company'
+			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
 	 GROUP BY 
 		DATEPART(YY, vyuPRPaycheckTax.dtmPayDate), 
 		DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate), 

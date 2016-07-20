@@ -13,6 +13,7 @@ SELECT
 					+ ISNULL(LiabilityMed.dblTotal, 0) 
 					+ ISNULL(TaxTotalSS.dblTotal, 0) 
 					+ ISNULL(TaxTotalMed.dblTotal, 0)
+					+ ISNULL(FIT.dblTotal, 0)
 FROM 
 	(SELECT 
 		DISTINCT
@@ -26,7 +27,7 @@ FROM
 		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
 		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
 		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Social Security'
 			AND vyuPRPaycheckTax.strPaidBy = 'Company'
@@ -43,7 +44,7 @@ FROM
 		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
 		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
 		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
 			AND vyuPRPaycheckTax.strPaidBy = 'Company'
@@ -60,7 +61,7 @@ FROM
 		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
 		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
 		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Social Security'
 			AND vyuPRPaycheckTax.strPaidBy = 'Employee'
@@ -77,7 +78,7 @@ FROM
 		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
 		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
 		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Medicare'
 			AND vyuPRPaycheckTax.strPaidBy = 'Company'
@@ -94,7 +95,7 @@ FROM
 		intYear		= DATEPART(YEAR, vyuPRPaycheckTax.dtmPayDate)
 		,intQuarter = DATEPART(Q, vyuPRPaycheckTax.dtmPayDate)
 		,intMonth	= DATEPART(M, vyuPRPaycheckTax.dtmPayDate)
-		,dblTotal	= CONVERT(NUMERIC(18,2), SUM(vyuPRPaycheckTax.dblTotal))
+		,dblTotal	= SUM(vyuPRPaycheckTax.dblTotal)
 	 FROM vyuPRPaycheckTax
 	 WHERE vyuPRPaycheckTax.strCalculationType = 'USA Federal Tax'
 	GROUP BY
