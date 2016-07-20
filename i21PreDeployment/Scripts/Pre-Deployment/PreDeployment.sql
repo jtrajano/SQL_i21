@@ -98,7 +98,6 @@
 :r .\11_IC\1520_to_1530.sql
 :r .\11_IC\Fix_Location_on_Reservation_Table.sql
 :r .\11_IC\1530_to_1540.sql
-:r .\11_IC\Update_Blank_Description_tblICItem.sql
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql
