@@ -18,7 +18,8 @@ BEGIN
 			[intTaxAuthorityId],[strState],[strTaxCategory],[intConcurrencyId]
 		)
 		VALUES
-		(@intTaxAuthorityId,'IN','IN Excise Tax', 0)
+		 (@intTaxAuthorityId,'IN','IN Excise Tax Gasoline', 0)
+		,(@intTaxAuthorityId,'IN','IN Excise Tax Diesel Clear', 0)
 		,(@intTaxAuthorityId,'IN','IN Inspection Fee', 0)
 		,(@intTaxAuthorityId,'IN','IN Gasoline Use Tax (GUT)', 0)
 	END
