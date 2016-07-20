@@ -7,16 +7,6 @@ AS
 
 DECLARE @TA INT
 DECLARE @FormCode NVARCHAR(50)
---HEADER
-DECLARE @TPName NVARCHAR(250)
-DECLARE @TPAddress NVARCHAR(MAX)
-DECLARE @TPCity NVARCHAR(50)
-DECLARE @TPState NVARCHAR(50)
-DECLARE @TPZip NVARCHAR(10)
-DECLARE @TPPhone NVARCHAR(50)
-DECLARE @TPStateTaxID NVARCHAR(50)
-DECLARE @TPFEIN NVARCHAR(50)
-DECLARE @TPDBA NVARCHAR(50)
 
 --SUMMARY VARIABLES
 DECLARE @SmrySummaryItems NVARCHAR(MAX)
@@ -70,8 +60,6 @@ DECLARE @DatePeriod DATETIME
 DECLARE @DateBegin DATETIME
 DECLARE @DateEnd DATETIME
 
-
-DECLARE @LicenseHolderName NVARCHAR(150)
 DECLARE @LicenseNumber NVARCHAR(50)
 DECLARE @EIN NVARCHAR(50)
 
@@ -80,26 +68,15 @@ SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTrans
 SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-SET @LicenseHolderName = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intTaxReportSummaryItemId = 'License Holder Name')
 SET @LicenseNumber = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intTaxReportSummaryItemId = 'License Number')
 SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 
+-- ======================== HEADER ==============================
 INSERT INTO tblTFTaxReportSummary (uniqGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strTaxType, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, 
 		 	strFEINSSN, strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName, strLicenseNumber)
 
-SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, @LicenseHolderName,
+SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, strCompanyName,
 				@EIN, strContactEmail, strTaxAddress, strCity, strState, strZipCode, strContactPhone, strContactName, @LicenseNumber from tblTFCompanyPreference
-
-	-- ======================== SUMMARY ==============================
-	SET @TPName = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPAddress = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPCity = (SELECT TOP 1 strCity FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPState = (SELECT TOP 1 strState FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPZip = (SELECT TOP 1 strZipCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPPhone = (SELECT TOP 1 strTelephoneNumber FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPStateTaxID = (SELECT TOP 1 strTaxPayerIdentificationNumber FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPFEIN = (SELECT TOP 1 strTaxPayerFEIN FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-	SET @TPDBA = (SELECT TOP 1 strTaxPayerDBA FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 
 	INSERT INTO @tblTempSummaryItem (TaxReportSummaryItemId)  -- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
 	SELECT intTaxReportSummaryItems FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND strTaxType = 'Summary'  ORDER BY intTaxReportSummaryItems DESC
@@ -299,16 +276,7 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 						 intItemNumber,
 						 intItemSequenceNumber,
 						 strSection,
-						 dtmDateRun,
-						 strTaxPayerName,
-						 strTaxPayerAddress,
-						 strCity,
-						 strState,
-						 strZipCode,
-						 strTelephoneNumber,
-						 strTaxPayerIdentificationNumber,
-						 strTaxPayerFEIN,
-						 strTaxPayerDBA
+						 dtmDateRun
 					)		
 					VALUES
 					(
@@ -323,16 +291,7 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 						 @SmrySummaryItemNumber,
 						 @SmrySummaryItemSequenceNumber,
 						 @SmrySummarySection,
-						 (CAST(GETDATE() AS DATE)),
-						 @TPName,
-						 @TPAddress,
-						 @TPCity,
-						 @TPState,
-						 @TPZip,
-						 @TPPhone,
-						 @TPStateTaxID,
-						 @TPFEIN,
-						 @TPDBA
+						 (CAST(GETDATE() AS DATE))
 					)
 				--END
 			END
