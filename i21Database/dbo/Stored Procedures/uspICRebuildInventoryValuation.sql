@@ -273,26 +273,159 @@ BEGIN
 	IF OBJECT_ID('tempdb..#tmpICInventoryTransaction') IS NOT NULL  
 		DROP TABLE #tmpICInventoryTransaction
 
-	SELECT * 
-	INTO	#tmpICInventoryTransaction
-	FROM	tblICInventoryTransaction
-	WHERE	ISNULL(dblQty, 0) <> 0
+	IF OBJECT_ID('tempdb..#tmpUnOrderedICTransaction') IS NOT NULL  
+		DROP TABLE #tmpUnOrderedICTransaction
+
+	SELECT	t.* 
+	INTO	#tmpUnOrderedICTransaction
+	FROM	tblICInventoryTransaction t LEFT JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId
+	WHERE	1 = CASE	WHEN ty.strName = 'Cost Adjustment' THEN 1 
+						WHEN ISNULL(dblQty, 0) <> 0 THEN 1
+						ELSE 0
+				END 	
 			AND ISNULL(ysnIsUnposted, 0) = 0 -- This part of the 'WHERE' clause will exclude any unposted transactions during the re-post. 
 			AND dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1
 			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	-- Intialize #tmpICInventoryTransaction
+	SELECT	id = CAST(0 AS INT) 
+			,id2 = CAST(0 AS INT) 
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intSubLocationId
+			,intStorageLocationId
+			,dtmDate
+			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblValue
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,strTransactionId
+			,intTransactionDetailId
+			,strBatchId
+			,intTransactionTypeId
+			,intLotId
+			,ysnIsUnposted
+			,intRelatedInventoryTransactionId
+			,intRelatedTransactionId
+			,strRelatedTransactionId
+			,strTransactionForm
+			,intCostingMethod
+			,dtmCreated
+			,strDescription
+			,intCreatedUserId
+			,intCreatedEntityId
+			,intConcurrencyId 
+	INTO	#tmpICInventoryTransaction
+	FROM	#tmpUnOrderedICTransaction
+	WHERE	1 = 0 
+
+	IF ISNULL(@isPeriodic, 0) = 1
+	BEGIN 	
+		INSERT INTO #tmpICInventoryTransaction
+		SELECT	CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				,intInventoryTransactionId
+				,intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intSubLocationId
+				,intStorageLocationId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblValue
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionDetailId
+				,strBatchId
+				,intTransactionTypeId
+				,intLotId
+				,ysnIsUnposted
+				,intRelatedInventoryTransactionId
+				,intRelatedTransactionId
+				,strRelatedTransactionId
+				,strTransactionForm
+				,intCostingMethod
+				,dtmCreated
+				,strDescription
+				,intCreatedUserId
+				,intCreatedEntityId
+				,intConcurrencyId  
+		FROM	#tmpUnOrderedICTransaction
+		ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC , intInventoryTransactionId ASC
+
+		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
+			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
+
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [id] ASC, [id2] ASC);') 
+
+	END
+	ELSE 
+	BEGIN 
+		INSERT INTO #tmpICInventoryTransaction
+		SELECT	CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				,intInventoryTransactionId
+				,intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intSubLocationId
+				,intStorageLocationId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblValue
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionDetailId
+				,strBatchId
+				,intTransactionTypeId
+				,intLotId
+				,ysnIsUnposted
+				,intRelatedInventoryTransactionId
+				,intRelatedTransactionId
+				,strRelatedTransactionId
+				,strTransactionForm
+				,intCostingMethod
+				,dtmCreated
+				,strDescription
+				,intCreatedUserId
+				,intCreatedEntityId
+				,intConcurrencyId  
+		FROM	#tmpUnOrderedICTransaction
+		ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
+
+		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
+			ON dbo.#tmpICInventoryTransaction(strBatchId ASC);
+
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Perpetual] ON dbo.#tmpICInventoryTransaction([id] ASC, [id2] ASC);') 
+	END
+
 END
 
-BEGIN 
-	IF OBJECT_ID('tempdb..#tmpICPostedTransactions') IS NOT NULL  
-		DROP TABLE #tmpICPostedTransactions
+--BEGIN 
+--	IF OBJECT_ID('tempdb..#tmpICPostedTransactions') IS NOT NULL  
+--		DROP TABLE #tmpICPostedTransactions
 
-	CREATE TABLE #tmpICPostedTransactions (
-		strTransactionId NVARCHAR(50) PRIMARY KEY 
-	)
-END 
+--	CREATE TABLE #tmpICPostedTransactions (
+--		strTransactionId NVARCHAR(50) PRIMARY KEY 
+--	)
+--END 
 
 -- Delete the inventory transaction record if it falls within the date range. 
 BEGIN 
@@ -421,34 +554,15 @@ BEGIN
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
-		IF ISNULL(@isPeriodic, 0) = 1
-		BEGIN 
-			SELECT	TOP 1 
-					@strBatchId = strBatchId
-					,@intEntityUserSecurityId = intCreatedUserId
-					,@strTransactionForm = strTransactionForm
-					,@strTransactionId = strTransactionId
-					,@intTransactionId = intTransactionId
-					--,@intItemId = intItemId
-					,@dblQty = dblQty 
-					,@intTransactionTypeId = intTransactionTypeId
-			FROM	#tmpICInventoryTransaction			
-			ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
-		END 
-		ELSE 
-		BEGIN 
-			SELECT	TOP 1 
-					@strBatchId = strBatchId
-					,@intEntityUserSecurityId = intCreatedUserId
-					,@strTransactionForm = strTransactionForm
-					,@strTransactionId = strTransactionId
-					,@intTransactionId = intTransactionId
-					--,@intItemId = intItemId
-					,@dblQty = dblQty 
-					,@intTransactionTypeId = intTransactionTypeId
-			FROM	#tmpICInventoryTransaction
-			ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
-		END 
+		SELECT	TOP 1 
+				@strBatchId = strBatchId
+				,@intEntityUserSecurityId = intCreatedUserId
+				,@strTransactionForm = strTransactionForm
+				,@strTransactionId = strTransactionId
+				,@intTransactionId = intTransactionId
+				,@dblQty = dblQty 
+				,@intTransactionTypeId = intTransactionTypeId
+		FROM	#tmpICInventoryTransaction
 
 		-- Run the post routine. 
 		BEGIN 
