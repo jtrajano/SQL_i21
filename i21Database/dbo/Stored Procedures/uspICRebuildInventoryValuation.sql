@@ -607,6 +607,8 @@ BEGIN
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
 			BEGIN 
 				PRINT 'Reposting Cost Adjustments'
+				
+				-- uspICRepostCostAdjustment creates and posts it own g/l entries 
 				EXEC dbo.uspICRepostCostAdjustment
 					@strTransactionId
 					,@strBatchId
@@ -1530,52 +1532,62 @@ BEGIN
 					,@ItemsToPost
 			END 
 
-			-- Re-create the Post g/l entries 
+			-- Clear the GL entries 
 			DELETE FROM @GLEntries
-			SET @intReturnId = NULL 
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm] 
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-			)			
-			EXEC @intReturnId = dbo.uspICCreateGLEntries
-				@strBatchId
-				,@strAccountToCounterInventory
-				,@intEntityUserSecurityId
-				,@strGLDescription					
 
-			IF @intReturnId <> 0 
+			-- Re-create the Post g/l entries (except for Cost Adjustments)
+			IF EXISTS (
+				SELECT	TOP 1 1 
+				FROM	tblICInventoryTransactionType 
+				WHERE	intTransactionTypeId = @intTransactionTypeId 
+						AND strName <> 'Cost Adjustment'
+			)
 			BEGIN 
-				PRINT 'Error found in uspICCreateGLEntries'
-				GOTO _EXIT_WITH_ERROR
+				SET @intReturnId = NULL 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]					
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm] 
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+				)			
+				EXEC @intReturnId = dbo.uspICCreateGLEntries
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+					,@strGLDescription					
+
+				IF @intReturnId <> 0 
+				BEGIN 
+					PRINT 'Error found in uspICCreateGLEntries'
+					GOTO _EXIT_WITH_ERROR
+				END 
 			END 
 				
 			-- Fix discrepancies when posting Consume and Produce. 
@@ -1596,12 +1608,16 @@ BEGIN
 
 		END 
 
-		-- Book the G/L Entries
+		-- Book the G/L Entries (except for cost adjustment)
+		IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryTransactionType 
+			WHERE	intTransactionTypeId = @intTransactionTypeId 
+					AND strName <> 'Cost Adjustment'
+		)
 		BEGIN 
 			BEGIN TRY
-
 				EXEC dbo.uspGLBookEntries @GLEntries, 1 
-
 			END TRY
 			BEGIN CATCH
 				PRINT 'Error in posting the g/l entries.'

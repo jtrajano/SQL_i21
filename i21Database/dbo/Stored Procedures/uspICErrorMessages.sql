@@ -360,7 +360,7 @@ SET @strmessage = 'Delete is not allowed. %s is posted.'
 EXEC sp_addmessage 80070,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80071) EXEC sp_dropmessage 80071, 'us_english'	
-SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item %s.'
+SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot %s in item %s that was posted in %s.'
 EXEC sp_addmessage 80071,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80072) EXEC sp_dropmessage 80072, 'us_english'	
