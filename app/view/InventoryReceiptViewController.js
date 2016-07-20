@@ -2032,7 +2032,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                  if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
                  if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
 
-                 // If there is no Gross/Net UOM, do not calculate the lot gross and net.
+                 // If there is not Gross/Net UOM, do not calculate the lot gross and net.
                  if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === '') {
                     totalGross = 0;
                  }
@@ -4248,16 +4248,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                         
                         if (order.get('strLotTracking') !== 'No' && newReceiptItem.get('intWeightUOMId') === null) {
-                                //Set default values
+                                //Set default value for Gross/Net UOM
                                 newReceiptItem.set('intWeightUOMId', order.get('intItemUOMId'));
                                 newReceiptItem.set('strWeightUOM', order.get('strUnitMeasure'));
+                                //Set defefault value for Gross and Net quantities
                                 newReceiptItem.set('dblGross', order.get('dblQtyToReceive'));
                                 newReceiptItem.set('dblNet', order.get('dblQtyToReceive'));
-                                newReceiptItem.set('dblWeightUOMConvFactor', order.get('dblItemUOMConvFactor'));
-                            
-                               //Calculate Line Total
-                                var currentReceipt  = win.viewModel.data.current;
-                                newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
+                                //Set default value for Weight UOM Conversion Factor
+                                newReceiptItem.set('dblWeightUOMConvFactor', 1);
                             }
                     });
                     search.close();
