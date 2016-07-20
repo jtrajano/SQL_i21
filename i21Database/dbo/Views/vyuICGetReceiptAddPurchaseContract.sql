@@ -49,7 +49,8 @@ FROM (
 		-- Cost UOM ----------------
 		, intCostUOMId				= ContractView.intSeqPriceUOMId
 		, strCostUOM				= ContractView.strSeqPriceUOM
-		, dblCostUOMConvFactor		= ContractView.dblQtyToPriceUOMConvFactor
+		--, dblCostUOMConvFactor		= ContractView.dblQtyToPriceUOMConvFactor
+		, dblCostUOMConvFactor		= (SELECT dblUnitQty from tblICItemUOM WHERE intItemUOMId = ContractView.intSeqPriceUOMId)
 		, intLifeTime				= intLifeTime
 		, strLifeTimeType			= strLifeTimeType
 		, ysnLoad					= CAST(0 AS BIT)
@@ -59,7 +60,7 @@ FROM (
 		, dblContainerWeightPerQty	= CAST(NULL AS NUMERIC(18, 6))
 		, ysnSubCurrency			= CAST(ContractView.ysnSubCurrency AS BIT)
 		, intCurrencyId				= ISNULL( ISNULL(ContractView.intSeqCurrencyId, ContractView.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
-		, strSubCurrency			= CASE WHEN ContractView.ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ISNULL(ContractView.strMainCurrency, ISNULL(ContractView.strCurrency, dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))) END 
+		, strSubCurrency			= CASE WHEN ContractView.ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ISNULL(ContractView.strSeqCurrency, ISNULL(ContractView.strMainCurrency, ISNULL(ContractView.strCurrency, dbo.fnSMGetDefaultCurrency('FUNCTIONAL')))) END 
 		, dblGross					= CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts.
 		, dblNet					= CAST(ContractView.dblNetWeight AS NUMERIC(38, 20))
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM
