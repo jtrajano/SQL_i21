@@ -49,6 +49,7 @@ DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @PostShipment INT = 1;
+DECLARE @total AS INT;
 
 DECLARE @ItemsForItemShipment AS ItemCostingTableType 
 DECLARE @ItemsForItemShipmentContract AS ItemCostingTableType
@@ -130,261 +131,292 @@ BEGIN TRY
 		SELECT @intStorageTypeId = ST.intStorageScheduleTypeId
 		FROM dbo.tblGRStorageType ST
 		WHERE ST.strStorageTypeCode = @strDistributionOption
-		WHILE @dblUnits > 0
-		BEGIN
-			SELECT TOP 1 @intStorageTicketId = CS.intCustomerStorageId, @dblRunningBalance = CS.dblOpenBalance
-			FROM dbo.tblGRCustomerStorage CS
-			WHERE CS.dblOpenBalance > 0 and CS.intCommodityId = @intStorageCommodityId
-			and CS.intEntityId = @intStorageEntityId and CS.intCompanyLocationId = @intStorageLocationId
-			and CS.intStorageTypeId = @intStorageTypeId 
-			ORDER BY CS.intCustomerStorageId ASC
-			--EXEC uspGRUpdateGrainOpenBalanceByFIFO @strDistributionOption,'Scale',@intEntityId,@intItemId,@intStorageTypeId, @dblUnits, @intTicketId , @intUserId
-			IF	ISNULL(@intStorageTicketId,0) = 0 AND @dblUnits > 0
+
+		DECLARE @StorageTicketInfoByFIFO AS TABLE 
+		(
+			[intCustomerStorageId] INT
+			,[strStorageTicketNumber] NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[dblOpenBalance] NUMERIC(18, 6)
+			,[intUnitMeasureId] INT
+			,[strUnitMeasure] NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			,[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS ---'Inventory','Storage Charge','Fee','Discount'
+			,[intItemId] INT
+			,[strItem] NVARCHAR(40) COLLATE Latin1_General_CI_AS
+			,[dblCharge] DECIMAL(24, 10)
+			)
+
+		INSERT INTO @StorageTicketInfoByFIFO 
+		(
+			[intCustomerStorageId]
+			,[strStorageTicketNumber]
+			,[dblOpenBalance]
+			,[intUnitMeasureId]
+			,[strUnitMeasure]
+			,[strItemType]
+			,[intItemId]
+			,[strItem]
+			,[dblCharge]
+		)
+		EXEC uspGRUpdateGrainOpenBalanceByFIFO @strDistributionOption,'Scale',@intEntityId,@intItemId,@intStorageTypeId, @dblUnits, @intTicketId , @intUserId
+		SELECT @total = COUNT(*) FROM @StorageTicketInfoByFIFO;
+		IF (@total >= 1)
 			BEGIN
-				INSERT INTO @LineItems (
-						 intContractDetailId,
-						 dblUnitsDistributed,
-						 dblUnitsRemaining,
-						 dblCost)
-					EXEC dbo.uspCTUpdationFromTicketDistribution 
-						 @intTicketId
-						,@intEntityId
-						,@dblUnits
-						,NULL
-						,@intUserId
-						,0
-				UPDATE @LineItems set intTicketId = @intTicketId
-				SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
-				IF(@dblRemainingUnits IS NULL)
+				DECLARE @intLoopCustomerStorageId INT,
+				 @dblLoopdblOpenBalance NUMERIC(12,4)
+				,@dblLoopstrItemType NVARCHAR(50);
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intCustomerStorageId, dblOpenBalance , strItemType
+				FROM @StorageTicketInfoByFIFO WHERE strItemType = 'Inventory';
+
+				OPEN intListCursor;
+
+				FETCH NEXT FROM intListCursor INTO @intLoopCustomerStorageId, @dblLoopdblOpenBalance, @dblLoopstrItemType;
+				WHILE @@FETCH_STATUS = 0
 				BEGIN
-				SET @dblRemainingUnits = @dblUnits
-				END
-				IF(@dblRemainingUnits != @dblUnits)
-				BEGIN
-						INSERT INTO @ItemsForItemShipmentContract (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,strTransactionId
-							,intTransactionTypeId
-							,intTransactionDetailId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId 
-							,ysnIsStorage
-						)
-						EXEC dbo.uspSCGetScaleItemForItemShipment
-							 @intTicketId
-							,@strSourceType
-							,@intUserId
-							,@dblRemainingUnits
-							,0
-							,@intEntityId
+					SET @intStorageTicketId = @intLoopCustomerStorageId;
+					SET @dblRunningBalance = @dblLoopdblOpenBalance;
+					IF	ISNULL(@intLoopCustomerStorageId,0) != 0 
+					BEGIN
+					IF @dblRunningBalance >= @dblUnits
+						BEGIN
+						UPDATE tblGRCustomerStorage 
+						SET dblOpenBalance = @dblRunningBalance - @dblUnits
+						WHERE intCustomerStorageId = @intStorageTicketId
+						INSERT INTO [dbo].[tblGRStorageHistory]
+							([intConcurrencyId]
+							,[intCustomerStorageId]
+							,[intTicketId]
+							,[intInventoryReceiptId]
+							,[intInvoiceId]
+							,[intContractHeaderId]
+							,[dblUnits]
+							,[dtmHistoryDate]
+							,[dblPaidAmount]
+							,[strPaidDescription]
+							,[dblCurrencyRate]
+							,[strType]
+							,[strUserName])
+						VALUES
+							(1
+							,@intStorageTicketId
+							,@intTicketId
 							,NULL
-							,'CNT'
-							,@LineItems
-
-							--select * from @ItemsForItemShipment
-
-						-- Validate the items to shipment 
-						EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipmentContract; 
-
-						---- Add the items into inventory shipment > sales order type. 
-						BEGIN 
-							EXEC dbo.uspSCAddScaleTicketToItemShipment 
-								  @intTicketId
-								 ,@intUserId
-								 ,@ItemsForItemShipmentContract
-								 ,@intEntityId
-								 ,1
-								 ,@InventoryShipmentId OUTPUT;
-						END
-
-						BEGIN 
-						SELECT	@strTransactionId = ship.strShipmentNumber
-						FROM	dbo.tblICInventoryShipment ship	        
-						WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
-						END
-
-						EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
-					END
-				IF(@dblRemainingUnits > 0)
-				BEGIN
+							,NULL
+							,NULL
+							,@dblUnits
+							,dbo.fnRemoveTimeOnDate(GETDATE())
+							,0
+							,'TakeOut From Scale'
+							,1
+							,'TakeOut'
+							,@strUserName)
 						INSERT INTO @ItemsForItemShipment (
-							 intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId 
-							,ysnIsStorage
-							)
-							SELECT	intItemId = ScaleTicket.intItemId
-									,intLocationId = ItemLocation.intItemLocationId 
-									,intItemUOMId = ItemUOM.intItemUOMId
-									,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-									,dblQty = @dblRemainingUnits 
-									,dblUOMQty = ItemUOM.dblUnitQty
-									,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
-									,dblSalesPrice = 0
-									,intCurrencyId = ScaleTicket.intCurrencyId
-									,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-									,intTransactionId = ScaleTicket.intTicketId
-									,strTransactionId = ScaleTicket.strTicketNumber
-									,intTransactionTypeId = @intDirectType 
-									,intLotId = NULL 
-									,intSubLocationId = ScaleTicket.intSubLocationId
-									,intStorageLocationId = ScaleTicket.intStorageLocationId
-									,ysnIsStorage = @ysnIsStorage
-							FROM	dbo.tblSCTicket ScaleTicket
-									INNER JOIN dbo.tblICItemUOM ItemUOM
-										ON ScaleTicket.intItemId = ItemUOM.intItemId
-										AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-									INNER JOIN dbo.tblICItemLocation ItemLocation
-										ON ScaleTicket.intItemId = ItemLocation.intItemId
-										-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-										AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+							intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId 
+						,ysnIsStorage
+						)
+						SELECT	intItemId = ScaleTicket.intItemId
+								,intLocationId = ItemLocation.intItemLocationId 
+								,intItemUOMId = ItemUOM.intItemUOMId
+								,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+								,dblQty = @dblUnits 
+								,dblUOMQty = ItemUOM.dblUnitQty
+								,dblCost = 0
+								,dblSalesPrice = 0
+								,intCurrencyId = ScaleTicket.intCurrencyId
+								,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+								,intTransactionId = ScaleTicket.intTicketId
+								,strTransactionId = ScaleTicket.strTicketNumber
+								,intTransactionTypeId = @intDirectType 
+								,intLotId = NULL 
+								,intSubLocationId = ScaleTicket.intSubLocationId
+								,intStorageLocationId = ScaleTicket.intStorageLocationId
+								,ysnIsStorage = 1
+						FROM	dbo.tblSCTicket ScaleTicket
+								INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+								INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
+								AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+						WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+						SET @dblUnits = 0
+						GOTO CONTINUEISH
+						END
+					IF @dblRunningBalance <= @dblUnits
+						BEGIN
+						UPDATE tblGRCustomerStorage 
+						SET dblOpenBalance = 0
+						WHERE intCustomerStorageId = @intStorageTicketId
+						SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
+						SET @dblUnits = @dblUnits - @dblRunningBalance
+						INSERT INTO [dbo].[tblGRStorageHistory]
+							([intConcurrencyId]
+							,[intCustomerStorageId]
+							,[intTicketId]
+							,[intInventoryReceiptId]
+							,[intInvoiceId]
+							,[intContractHeaderId]
+							,[dblUnits]
+							,[dtmHistoryDate]
+							,[dblPaidAmount]
+							,[strPaidDescription]
+							,[dblCurrencyRate]
+							,[strType]
+							,[strUserName])
+						VALUES
+							(1
+							,@intStorageTicketId
+							,@intTicketId
+							,NULL
+							,NULL
+							,NULL
+							,@dblRunningBalance
+							,dbo.fnRemoveTimeOnDate(GETDATE())
+							,0
+							,'TakeOut From Scale'
+							,1
+							,'TakeOut'
+							,@strUserName)
+						INSERT INTO @ItemsForItemShipment (
+							intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId 
+						,ysnIsStorage
+						)
+						SELECT	intItemId = ScaleTicket.intItemId
+								,intLocationId = ItemLocation.intItemLocationId 
+								,intItemUOMId = ItemUOM.intItemUOMId
+								,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+								,dblQty = @dblRunningBalance 
+								,dblUOMQty = ItemUOM.dblUnitQty
+								,dblCost = 0
+								,dblSalesPrice = 0
+								,intCurrencyId = ScaleTicket.intCurrencyId
+								,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+								,intTransactionId = ScaleTicket.intTicketId
+								,strTransactionId = ScaleTicket.strTicketNumber
+								,intTransactionTypeId = @intDirectType 
+								,intLotId = NULL 
+								,intSubLocationId = ScaleTicket.intSubLocationId
+								,intStorageLocationId = ScaleTicket.intStorageLocationId
+								,ysnIsStorage = 1
+						FROM	dbo.tblSCTicket ScaleTicket
+								INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+								INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+						WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+						END
 					END
-				SET @dblUnits = 0
-				GOTO CONTINUEISH
+					-- Attempt to fetch next row from cursor
+					FETCH NEXT FROM intListCursor INTO @intLoopCustomerStorageId, @dblLoopdblOpenBalance, @dblLoopstrItemType;
+				END;
+
+				CLOSE intListCursor;
+				DEALLOCATE intListCursor;
 			END
-			IF @dblRunningBalance > @dblUnits
-				BEGIN
-				UPDATE tblGRCustomerStorage 
-				SET dblOpenBalance = @dblRunningBalance - @dblUnits
-				WHERE intCustomerStorageId = @intStorageTicketId
-				INSERT INTO [dbo].[tblGRStorageHistory]
-				   ([intConcurrencyId]
-				   ,[intCustomerStorageId]
-				   ,[intTicketId]
-				   ,[intInventoryReceiptId]
-				   ,[intInvoiceId]
-				   ,[intContractHeaderId]
-				   ,[dblUnits]
-				   ,[dtmHistoryDate]
-				   ,[dblPaidAmount]
-				   ,[strPaidDescription]
-				   ,[dblCurrencyRate]
-				   ,[strType]
-				   ,[strUserName])
-			   VALUES
-				   (1
-				   ,@intStorageTicketId
-				   ,@intTicketId
-				   ,NULL
-				   ,NULL
-				   ,NULL
-				   ,@dblUnits
-				   ,dbo.fnRemoveTimeOnDate(GETDATE())
-				   ,0
-				   ,'TakeOut From Scale'
-				   ,1
-				   ,'TakeOut'
-				   ,@strUserName)
-				INSERT INTO @ItemsForItemShipment (
-				 intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId 
-				,ysnIsStorage
-				)
-				SELECT	intItemId = ScaleTicket.intItemId
-						,intLocationId = ItemLocation.intItemLocationId 
-						,intItemUOMId = ItemUOM.intItemUOMId
-						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-						,dblQty = @dblUnits 
-						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = 0
-						,dblSalesPrice = 0
-						,intCurrencyId = ScaleTicket.intCurrencyId
-						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-						,intTransactionId = ScaleTicket.intTicketId
-						,strTransactionId = ScaleTicket.strTicketNumber
-						,intTransactionTypeId = @intDirectType 
-						,intLotId = NULL 
-						,intSubLocationId = ScaleTicket.intSubLocationId
-						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsStorage = 1
-				FROM	dbo.tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM
-							ON ScaleTicket.intItemId = ItemUOM.intItemId
-							AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-						INNER JOIN dbo.tblICItemLocation ItemLocation
-							ON ScaleTicket.intItemId = ItemLocation.intItemId
-							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
-				SET @dblUnits = 0
-				GOTO CONTINUEISH
+		BEGIN
+			INSERT INTO @LineItems (
+			intContractDetailId,
+			dblUnitsDistributed,
+			dblUnitsRemaining,
+			dblCost)
+			EXEC dbo.uspCTUpdationFromTicketDistribution 
+				@intTicketId
+				,@intEntityId
+				,@dblUnits
+				,NULL
+				,@intUserId
+				,0
+			UPDATE @LineItems set intTicketId = @intTicketId
+			SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
+			IF(@dblRemainingUnits IS NULL)
+			BEGIN
+			SET @dblRemainingUnits = @dblUnits
+			END
+			IF(@dblRemainingUnits != @dblUnits)
+			BEGIN
+					INSERT INTO @ItemsForItemShipmentContract (
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,strTransactionId
+						,intTransactionTypeId
+						,intTransactionDetailId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId 
+						,ysnIsStorage
+					)
+					EXEC dbo.uspSCGetScaleItemForItemShipment
+						@intTicketId
+						,@strSourceType
+						,@intUserId
+						,@dblRemainingUnits
+						,0
+						,@intEntityId
+						,NULL
+						,'CNT'
+						,@LineItems
+
+					-- Validate the items to shipment 
+					EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipmentContract; 
+
+					---- Add the items into inventory shipment > sales order type. 
+					BEGIN 
+						EXEC dbo.uspSCAddScaleTicketToItemShipment 
+								@intTicketId
+								,@intUserId
+								,@ItemsForItemShipmentContract
+								,@intEntityId
+								,1
+								,@InventoryShipmentId OUTPUT;
+					END
+
+					BEGIN 
+					SELECT	@strTransactionId = ship.strShipmentNumber
+					FROM	dbo.tblICInventoryShipment ship	        
+					WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+					END
+
+					EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
 				END
-			IF @dblRunningBalance < @dblUnits
-				BEGIN
-				UPDATE tblGRCustomerStorage 
-				SET dblOpenBalance = 0
-				WHERE intCustomerStorageId = @intStorageTicketId
-				SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
-				SET @dblUnits = @dblUnits - @dblRunningBalance
-				INSERT INTO [dbo].[tblGRStorageHistory]
-				   ([intConcurrencyId]
-				   ,[intCustomerStorageId]
-				   ,[intTicketId]
-				   ,[intInventoryReceiptId]
-				   ,[intInvoiceId]
-				   ,[intContractHeaderId]
-				   ,[dblUnits]
-				   ,[dtmHistoryDate]
-				   ,[dblPaidAmount]
-				   ,[strPaidDescription]
-				   ,[dblCurrencyRate]
-				   ,[strType]
-				   ,[strUserName])
-			   VALUES
-				   (1
-				   ,@intStorageTicketId
-				   ,@intTicketId
-				   ,NULL
-				   ,NULL
-				   ,NULL
-				   ,@dblRunningBalance
-				   ,dbo.fnRemoveTimeOnDate(GETDATE())
-				   ,0
-				   ,'TakeOut From Scale'
-				   ,1
-				   ,'TakeOut'
-				   ,@strUserName)
+			IF(@dblRemainingUnits > 0)
+			BEGIN
 				INSERT INTO @ItemsForItemShipment (
-				 intItemId
+				intItemId
 				,intItemLocationId
 				,intItemUOMId
 				,dtmDate
@@ -406,9 +438,9 @@ BEGIN TRY
 						,intLocationId = ItemLocation.intItemLocationId 
 						,intItemUOMId = ItemUOM.intItemUOMId
 						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-						,dblQty = @dblRunningBalance 
+						,dblQty = @dblRemainingUnits 
 						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = 0
+						,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
 						,dblSalesPrice = 0
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
@@ -418,14 +450,303 @@ BEGIN TRY
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsStorage = 1
+						,ysnIsStorage = 0
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
-						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
+						AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
 				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
-				END
-				SET @intStorageTicketId = 0
+			END
+			SET @dblUnits = 0
+			GOTO CONTINUEISH
 		END
+		--WHILE @dblUnits > 0
+		--BEGIN
+		--	--SELECT TOP 1 @intStorageTicketId = CS.intCustomerStorageId, @dblRunningBalance = CS.dblOpenBalance
+		--	--FROM dbo.tblGRCustomerStorage CS
+		--	--WHERE CS.dblOpenBalance > 0 and CS.intCommodityId = @intStorageCommodityId
+		--	--and CS.intEntityId = @intStorageEntityId and CS.intCompanyLocationId = @intStorageLocationId
+		--	--and CS.intStorageTypeId = @intStorageTypeId 
+		--	--ORDER BY CS.intCustomerStorageId ASC
+		--	IF	ISNULL(@intStorageTicketId,0) = 0 AND @dblUnits > 0
+		--	BEGIN
+		--		INSERT INTO @LineItems (
+		--				 intContractDetailId,
+		--				 dblUnitsDistributed,
+		--				 dblUnitsRemaining,
+		--				 dblCost)
+		--			EXEC dbo.uspCTUpdationFromTicketDistribution 
+		--				 @intTicketId
+		--				,@intEntityId
+		--				,@dblUnits
+		--				,NULL
+		--				,@intUserId
+		--				,0
+		--		UPDATE @LineItems set intTicketId = @intTicketId
+		--		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
+		--		IF(@dblRemainingUnits IS NULL)
+		--		BEGIN
+		--		SET @dblRemainingUnits = @dblUnits
+		--		END
+		--		IF(@dblRemainingUnits != @dblUnits)
+		--		BEGIN
+		--				INSERT INTO @ItemsForItemShipmentContract (
+		--					intItemId
+		--					,intItemLocationId
+		--					,intItemUOMId
+		--					,dtmDate
+		--					,dblQty
+		--					,dblUOMQty
+		--					,dblCost
+		--					,dblSalesPrice
+		--					,intCurrencyId
+		--					,dblExchangeRate
+		--					,intTransactionId
+		--					,strTransactionId
+		--					,intTransactionTypeId
+		--					,intTransactionDetailId
+		--					,intLotId
+		--					,intSubLocationId
+		--					,intStorageLocationId 
+		--					,ysnIsStorage
+		--				)
+		--				EXEC dbo.uspSCGetScaleItemForItemShipment
+		--					 @intTicketId
+		--					,@strSourceType
+		--					,@intUserId
+		--					,@dblRemainingUnits
+		--					,0
+		--					,@intEntityId
+		--					,NULL
+		--					,'CNT'
+		--					,@LineItems
+
+		--					--select * from @ItemsForItemShipment
+
+		--				-- Validate the items to shipment 
+		--				EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipmentContract; 
+
+		--				---- Add the items into inventory shipment > sales order type. 
+		--				BEGIN 
+		--					EXEC dbo.uspSCAddScaleTicketToItemShipment 
+		--						  @intTicketId
+		--						 ,@intUserId
+		--						 ,@ItemsForItemShipmentContract
+		--						 ,@intEntityId
+		--						 ,1
+		--						 ,@InventoryShipmentId OUTPUT;
+		--				END
+
+		--				BEGIN 
+		--				SELECT	@strTransactionId = ship.strShipmentNumber
+		--				FROM	dbo.tblICInventoryShipment ship	        
+		--				WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+		--				END
+
+		--				EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
+		--			END
+		--		IF(@dblRemainingUnits > 0)
+		--		BEGIN
+		--				INSERT INTO @ItemsForItemShipment (
+		--					 intItemId
+		--					,intItemLocationId
+		--					,intItemUOMId
+		--					,dtmDate
+		--					,dblQty
+		--					,dblUOMQty
+		--					,dblCost
+		--					,dblSalesPrice
+		--					,intCurrencyId
+		--					,dblExchangeRate
+		--					,intTransactionId
+		--					,strTransactionId
+		--					,intTransactionTypeId
+		--					,intLotId
+		--					,intSubLocationId
+		--					,intStorageLocationId 
+		--					,ysnIsStorage
+		--					)
+		--					SELECT	intItemId = ScaleTicket.intItemId
+		--							,intLocationId = ItemLocation.intItemLocationId 
+		--							,intItemUOMId = ItemUOM.intItemUOMId
+		--							,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+		--							,dblQty = @dblRemainingUnits 
+		--							,dblUOMQty = ItemUOM.dblUnitQty
+		--							,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
+		--							,dblSalesPrice = 0
+		--							,intCurrencyId = ScaleTicket.intCurrencyId
+		--							,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+		--							,intTransactionId = ScaleTicket.intTicketId
+		--							,strTransactionId = ScaleTicket.strTicketNumber
+		--							,intTransactionTypeId = @intDirectType 
+		--							,intLotId = NULL 
+		--							,intSubLocationId = ScaleTicket.intSubLocationId
+		--							,intStorageLocationId = ScaleTicket.intStorageLocationId
+		--							,ysnIsStorage = @ysnIsStorage
+		--					FROM	dbo.tblSCTicket ScaleTicket
+		--							INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+		--							INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
+		--							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+		--					WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+		--			END
+		--		SET @dblUnits = 0
+		--		GOTO CONTINUEISH
+		--	END
+		--	IF @dblRunningBalance >= @dblUnits
+		--		BEGIN
+		--		UPDATE tblGRCustomerStorage 
+		--		SET dblOpenBalance = @dblRunningBalance - @dblUnits
+		--		WHERE intCustomerStorageId = @intStorageTicketId
+		--		INSERT INTO [dbo].[tblGRStorageHistory]
+		--		   ([intConcurrencyId]
+		--		   ,[intCustomerStorageId]
+		--		   ,[intTicketId]
+		--		   ,[intInventoryReceiptId]
+		--		   ,[intInvoiceId]
+		--		   ,[intContractHeaderId]
+		--		   ,[dblUnits]
+		--		   ,[dtmHistoryDate]
+		--		   ,[dblPaidAmount]
+		--		   ,[strPaidDescription]
+		--		   ,[dblCurrencyRate]
+		--		   ,[strType]
+		--		   ,[strUserName])
+		--	   VALUES
+		--		   (1
+		--		   ,@intStorageTicketId
+		--		   ,@intTicketId
+		--		   ,NULL
+		--		   ,NULL
+		--		   ,NULL
+		--		   ,@dblUnits
+		--		   ,dbo.fnRemoveTimeOnDate(GETDATE())
+		--		   ,0
+		--		   ,'TakeOut From Scale'
+		--		   ,1
+		--		   ,'TakeOut'
+		--		   ,@strUserName)
+		--		INSERT INTO @ItemsForItemShipment (
+		--		 intItemId
+		--		,intItemLocationId
+		--		,intItemUOMId
+		--		,dtmDate
+		--		,dblQty
+		--		,dblUOMQty
+		--		,dblCost
+		--		,dblSalesPrice
+		--		,intCurrencyId
+		--		,dblExchangeRate
+		--		,intTransactionId
+		--		,strTransactionId
+		--		,intTransactionTypeId
+		--		,intLotId
+		--		,intSubLocationId
+		--		,intStorageLocationId 
+		--		,ysnIsStorage
+		--		)
+		--		SELECT	intItemId = ScaleTicket.intItemId
+		--				,intLocationId = ItemLocation.intItemLocationId 
+		--				,intItemUOMId = ItemUOM.intItemUOMId
+		--				,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+		--				,dblQty = @dblUnits 
+		--				,dblUOMQty = ItemUOM.dblUnitQty
+		--				,dblCost = 0
+		--				,dblSalesPrice = 0
+		--				,intCurrencyId = ScaleTicket.intCurrencyId
+		--				,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+		--				,intTransactionId = ScaleTicket.intTicketId
+		--				,strTransactionId = ScaleTicket.strTicketNumber
+		--				,intTransactionTypeId = @intDirectType 
+		--				,intLotId = NULL 
+		--				,intSubLocationId = ScaleTicket.intSubLocationId
+		--				,intStorageLocationId = ScaleTicket.intStorageLocationId
+		--				,ysnIsStorage = 1
+		--		FROM	dbo.tblSCTicket ScaleTicket
+		--				INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+		--				INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
+		--				AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+		--		WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+		--		SET @dblUnits = 0
+		--		GOTO CONTINUEISH
+		--		END
+		--	IF @dblRunningBalance <= @dblUnits
+		--		BEGIN
+		--		UPDATE tblGRCustomerStorage 
+		--		SET dblOpenBalance = 0
+		--		WHERE intCustomerStorageId = @intStorageTicketId
+		--		SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
+		--		SET @dblUnits = @dblUnits - @dblRunningBalance
+		--		INSERT INTO [dbo].[tblGRStorageHistory]
+		--		   ([intConcurrencyId]
+		--		   ,[intCustomerStorageId]
+		--		   ,[intTicketId]
+		--		   ,[intInventoryReceiptId]
+		--		   ,[intInvoiceId]
+		--		   ,[intContractHeaderId]
+		--		   ,[dblUnits]
+		--		   ,[dtmHistoryDate]
+		--		   ,[dblPaidAmount]
+		--		   ,[strPaidDescription]
+		--		   ,[dblCurrencyRate]
+		--		   ,[strType]
+		--		   ,[strUserName])
+		--	   VALUES
+		--		   (1
+		--		   ,@intStorageTicketId
+		--		   ,@intTicketId
+		--		   ,NULL
+		--		   ,NULL
+		--		   ,NULL
+		--		   ,@dblRunningBalance
+		--		   ,dbo.fnRemoveTimeOnDate(GETDATE())
+		--		   ,0
+		--		   ,'TakeOut From Scale'
+		--		   ,1
+		--		   ,'TakeOut'
+		--		   ,@strUserName)
+		--		INSERT INTO @ItemsForItemShipment (
+		--		 intItemId
+		--		,intItemLocationId
+		--		,intItemUOMId
+		--		,dtmDate
+		--		,dblQty
+		--		,dblUOMQty
+		--		,dblCost
+		--		,dblSalesPrice
+		--		,intCurrencyId
+		--		,dblExchangeRate
+		--		,intTransactionId
+		--		,strTransactionId
+		--		,intTransactionTypeId
+		--		,intLotId
+		--		,intSubLocationId
+		--		,intStorageLocationId 
+		--		,ysnIsStorage
+		--		)
+		--		SELECT	intItemId = ScaleTicket.intItemId
+		--				,intLocationId = ItemLocation.intItemLocationId 
+		--				,intItemUOMId = ItemUOM.intItemUOMId
+		--				,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+		--				,dblQty = @dblRunningBalance 
+		--				,dblUOMQty = ItemUOM.dblUnitQty
+		--				,dblCost = 0
+		--				,dblSalesPrice = 0
+		--				,intCurrencyId = ScaleTicket.intCurrencyId
+		--				,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+		--				,intTransactionId = ScaleTicket.intTicketId
+		--				,strTransactionId = ScaleTicket.strTicketNumber
+		--				,intTransactionTypeId = @intDirectType 
+		--				,intLotId = NULL 
+		--				,intSubLocationId = ScaleTicket.intSubLocationId
+		--				,intStorageLocationId = ScaleTicket.intStorageLocationId
+		--				,ysnIsStorage = 1
+		--		FROM	dbo.tblSCTicket ScaleTicket
+		--				INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+		--				INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+		--		WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+		--		END
+		--		SET @intStorageTicketId = 0
+		--END
 		GOTO CONTINUEISH
 	END
 
