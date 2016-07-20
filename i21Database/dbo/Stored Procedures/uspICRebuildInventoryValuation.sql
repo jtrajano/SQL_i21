@@ -492,6 +492,7 @@ BEGIN
 			-- Process the cost adjustments
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
 			BEGIN 
+				PRINT 'Reposting Cost Adjustments'
 				EXEC dbo.uspICRepostCostAdjustment
 					@strTransactionId
 					,@strBatchId
