@@ -10,7 +10,7 @@
 	[intCustomerId] [int] NULL,
 	[intMilestoneId] [int] NULL,
 	[intTicketTypeId] [int] NULL,
-	[intTicketStatusId] [int] NOT NULL,
+	[intTicketStatusId] [int] NULL,
 	[intLineOfBusinessId] [int] NULL,
 	[strLineOfBusinessId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intOpportunityCampaignId] [int] NULL,
