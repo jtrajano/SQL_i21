@@ -29,6 +29,8 @@
 		,Con.ysnActive AS active
 
  	FROM tblEMEntity AS Entity  
+		INNER JOIN tblEMEntityType as EntType
+			ON Entity.intEntityId = EntType.intEntityId and EntType.strType = 'Customer'
 		INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]  
 		INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1  
 		LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]  
