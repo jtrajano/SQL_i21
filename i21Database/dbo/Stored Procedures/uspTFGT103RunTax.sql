@@ -39,7 +39,6 @@ DECLARE @DatePeriod DATETIME
 DECLARE @DateBegin DATETIME
 DECLARE @DateEnd DATETIME
 
-DECLARE @TPName NVARCHAR(150)
 DECLARE @TaxID NVARCHAR(50)
 DECLARE @EIN NVARCHAR(50)
 
@@ -48,14 +47,13 @@ SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTrans
 SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
 SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-SET @TPName = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intTaxReportSummaryItemId = 'TaxPayerName')
 SET @TaxID = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intTaxReportSummaryItemId = 'TID')
 SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 
 INSERT INTO tblTFTaxReportSummary (uniqGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strTaxType, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, strTaxPayerIdentificationNumber, 
 					strTaxPayerFEIN,strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName)
 
-SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, @TPName, @TaxID,
+SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, strCompanyName, @TaxID,
 				@EIN, strContactEmail, strTaxAddress, strCity, strState, strZipCode, strContactPhone, strContactName from tblTFCompanyPreference
 -- ======================== SUMMARY ==============================
 
