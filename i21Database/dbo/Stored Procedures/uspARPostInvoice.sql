@@ -1896,6 +1896,54 @@ IF @post = 1
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
+UNION ALL 
+
+		--Credit Discount
+			SELECT			
+				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
+				,strBatchID					= @batchId
+				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
+				,dblDebit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
+												ELSE 0 END
+				,dblCredit					= CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
+												ELSE 0 END
+				,dblDebitUnit				= 0
+				,dblCreditUnit				= 0				
+				,strDescription				= A.strComments
+				,strCode					= @CODE
+				,strReference				= C.strCustomerNumber
+				,intCurrencyId				= A.intCurrencyId 
+				,dblExchangeRate			= 1
+				,dtmDateEntered				= @PostDate
+				,dtmTransactionDate			= A.dtmDate
+				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
+				,intJournalLineNo			= D.intInvoiceDetailId
+				,ysnIsUnposted				= 0
+				,intUserId					= @userId
+				,intEntityId				= @UserEntityID				
+				,strTransactionId			= A.strInvoiceNumber
+				,intTransactionId			= A.intInvoiceId
+				,strTransactionType			= A.strTransactionType
+				,strTransactionForm			= @SCREEN_NAME
+				,strModuleName				= @MODULE_NAME
+				,intConcurrencyId			= 1
+			FROM
+				tblARInvoiceDetail D
+			INNER JOIN			
+				tblARInvoice A 
+					ON D.intInvoiceId = A.intInvoiceId
+			LEFT OUTER JOIN
+				vyuARGetItemAccount IST
+					ON D.intItemId = IST.intItemId 
+					AND A.intCompanyLocationId = IST.intLocationId 
+			INNER JOIN
+				tblARCustomer C
+					ON A.intEntityCustomerId = C.intEntityCustomerId
+			INNER JOIN 
+				@PostInvoiceData	P
+					ON A.intInvoiceId = P.intInvoiceId					
+			WHERE
+				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
 			UNION ALL 
 			--DEBIT COGS - SHIPPED
