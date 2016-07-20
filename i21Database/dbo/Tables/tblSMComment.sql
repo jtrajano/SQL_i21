@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[tblSMComment] (
 	[strRecordNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmAdded]			DATETIME DEFAULT (GETDATE()) NULL,
 	[dtmModified]		DATETIME DEFAULT (GETDATE()) NULL,
+	[ysnInternal]		BIT NULL,
 	[intEntityId]		INT NULL,
 	[intConcurrencyId]	INT NOT NULL,
     CONSTRAINT [PK_tblSMComment] PRIMARY KEY CLUSTERED ([intCommentId] ASC)
