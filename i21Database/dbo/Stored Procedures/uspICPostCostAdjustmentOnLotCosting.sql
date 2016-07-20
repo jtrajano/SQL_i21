@@ -130,6 +130,7 @@ DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@AdjustedQty AS NUMERIC(38,20) 
 		,@AdjustableQty AS NUMERIC(38,20)
 		,@dblNewCost AS NUMERIC(38,20)
+		,@strLotNumber AS NVARCHAR(50)
 		
 -- Exit immediately if item is a non-lot type. 
 IF dbo.fnGetItemLotType(@intItemId) = 0 
@@ -197,8 +198,14 @@ BEGIN
 			FROM	dbo.tblICItem 
 			WHERE	intItemId = @intItemId
 
-			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item {Item No}.'
-			RAISERROR(80071, 11, 1, @strItemNo)  
+			SELECT	@strLotNumber = strLotNumber
+			FROM	dbo.tblICLot 
+			WHERE	intLotId = @intLotId
+
+			SET @strLotNumber = ISNULL(@strLotNumber, '{Unknown lot}')
+
+			-- 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot %s in item %s that was posted in %s.'
+			RAISERROR(80071, 11, 1, @strLotNumber, @strItemNo, @strSourceTransactionId)  
 			RETURN -1 
 		END
 	END 
