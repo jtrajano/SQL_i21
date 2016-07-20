@@ -646,6 +646,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         return win.context;
     },
+    
+    orgValueShipFrom: '',
 
     show : function(config) {
         "use strict";
@@ -712,10 +714,31 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-
+        var currentShipmentItem = win.viewModel.data.currentShipmentItem;
+        
         if (current){
             if (combo.itemId === 'cboShipFromAddress'){
-                current.set('strShipFromAddress', records[0].get('strAddress'));
+                if(Inventory.view.InventoryShipmentViewController.orgValueShipFrom !== current.get('intShipFromLocationId')) {
+                        var buttonAction = function(button) {
+                            if (button === 'yes') {
+                                 currentShipmentItem.set('intSubLocationId', null);
+                                 currentShipmentItem.set('intStorageLocationId', null);
+                                 currentShipmentItem.set('strSubLocationName', null);
+                                 currentShipmentItem.set('strStorageLocationName', null);
+                                 current.set('strShipFromAddress', 'changed');
+                                
+                                var grdLotTracking = win.down('#grdLotTracking');
+                                grdLotTracking.getStore().removeAll();
+                                
+                                current.set('strShipFromAddress', records[0].get('strAddress'));
+                            }
+                            else {
+                               current.set('intShipFromLocationId', Inventory.view.InventoryShipmentViewController.orgValueShipFrom);
+                            }
+                        };
+                        iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear the values for Sub Location, Storage Location, and Lot details. Do you want to continue?', buttonAction);
+                    }
+                 
             }
             else if (combo.itemId === 'cboShipToAddress'){
                 current.set('strShipToAddress', records[0].get('strAddress'));
@@ -2284,32 +2307,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     },
     
     onShipFromAddressBeforeSelect: function(combo, record, index, eOpts) {
-        if (record.length <= 0)
-            return;
-
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-        var currentShipmentItem = win.viewModel.data.currentShipmentItem;
         
-        if (current){
-            if (combo.itemId === 'cboShipFromAddress'){
-                 var buttonAction = function(button) {
-                            if (button === 'yes') {
-                                 currentShipmentItem.set('intSubLocationId', null);
-                                 currentShipmentItem.set('intStorageLocationId', null);
-                                 currentShipmentItem.set('strSubLocationName', null);
-                                 currentShipmentItem.set('strStorageLocationName', null);
-                                
-                                var grdLotTracking = win.down('#grdLotTracking');
-                                grdLotTracking.getStore().removeAll();
-                            }
-                            else {
-                                return false;
-                            }
-                        };
-                        iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear the values for Sub Location, Storage Location, and Lot details. Do you want to continue?', buttonAction);
-            }
-        }
+        Inventory.view.InventoryShipmentViewController.orgValueShipFrom = current.get('intShipFromLocationId');
     },
 
     init: function(application) {
