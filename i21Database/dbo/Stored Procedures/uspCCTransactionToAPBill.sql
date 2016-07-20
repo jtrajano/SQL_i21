@@ -19,7 +19,7 @@ DECLARE @ErrorSeverity INT,
 		@ErrorNumber   INT,
 		@ErrorState INT
 
-BEGIN TRY
+BEGIN
 
 	IF(@post = 1)
 		BEGIN
@@ -100,6 +100,7 @@ BEGIN TRY
 		BEGIN
 			
 			DECLARE @billId	INT = NULL
+			DECLARE @isPaid BIT = NULL
 			
 			--Find AP Info
 			SELECT @billId = C.intBillId FROM tblCCSiteHeader A 
@@ -108,35 +109,34 @@ BEGIN TRY
 			WHERE A.intSiteHeaderId = @intSiteHeaderId
 			GROUP BY C.intBillId
 
+			SELECT @isPaid = ysnPaid FROM tblAPBill WHERE intBillId = @billId
+
 			IF(@billId IS NOT NULL)
 			BEGIN
-				EXEC [dbo].[uspAPPostBill]
-					@post = @post
-					,@recap = 0
-					,@isBatch = 0
-					,@param = @billId
-					,@userId = @userId
-					,@success = @success OUTPUT
 
-				--DELETE Bill Transaction
-				DELETE FROM tblAPBill WHERE intBillId = 
-				(SELECT DISTINCT intBillId 
-					FROM tblAPBillDetail A
-				JOIN  tblCCSiteDetail B ON A.intCCSiteDetailId = B.intSiteDetailId
-					WHERE B.intSiteHeaderId = @intSiteHeaderId)
+				IF(@isPaid = 1)
+					BEGIN
+						RAISERROR('Cannot unpost this transaction. There is already payment made on the associated Voucher/Invoice.', 16, 1)
+					END
+				ELSE
+					BEGIN
+						EXEC [dbo].[uspAPPostBill]
+							@post = @post
+							,@recap = 0
+							,@isBatch = 0
+							,@param = @billId
+							,@userId = @userId
+							,@success = @success OUTPUT
 
+						--DELETE Bill Transaction
+						DELETE FROM tblAPBill WHERE intBillId = 
+						(SELECT DISTINCT intBillId 
+							FROM tblAPBillDetail A
+						JOIN  tblCCSiteDetail B ON A.intCCSiteDetailId = B.intSiteDetailId
+							WHERE B.intSiteHeaderId = @intSiteHeaderId)
+					END
 			END
 			ELSE
-				RAISERROR('Bill ID is null', 0, 1)
-	
+				RAISERROR('Bill ID is null', 16, 1)
 		END
-
-END TRY
-BEGIN CATCH
-	SET @ErrorSeverity = ERROR_SEVERITY()
-	SET @ErrorNumber   = ERROR_NUMBER()
-	SET @errorMessage  = ERROR_MESSAGE()
-	SET @ErrorState    = ERROR_STATE()
-	SET	@success = 0
-	RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-END CATCH
+END
