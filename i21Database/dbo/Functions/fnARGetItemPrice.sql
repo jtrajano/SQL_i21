@@ -42,6 +42,7 @@ BEGIN
 			,NULL
 			,@OriginalQuantity
 			,@CustomerPricingOnly
+			,NULL
 			,@VendorId
 			,@SupplyPointId
 			,@LastCost
