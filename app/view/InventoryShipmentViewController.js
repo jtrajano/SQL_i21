@@ -2306,11 +2306,41 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
         });
     },
+    
+    onShipFromAddressBeforeSelect: function(combo, record, index, eOpts) {
+        if (record.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        var currentShipmentItem = win.viewModel.data.currentShipmentItem;
+        
+        if (current){
+            if (combo.itemId === 'cboShipFromAddress'){
+                 var buttonAction = function(button) {
+                            if (button === 'yes') {
+                                 currentShipmentItem.set('intSubLocationId', null);
+                                 currentShipmentItem.set('intStorageLocationId', null);
+                                 currentShipmentItem.set('strSubLocationName', null);
+                                 currentShipmentItem.set('strStorageLocationName', null);
+                                
+                                var grdLotTracking = win.down('#grdLotTracking');
+                                grdLotTracking.getStore().removeAll();
+                            }
+                            else {
+                                return false;
+                            }
+                        };
+                        iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear the values for Sub Location, Storage Location, and Lot details. Do you want to continue?', buttonAction);
+            }
+        }
+    },
 
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
-                select: this.onShipLocationSelect
+                select: this.onShipLocationSelect,
+                beforeselect: this.onShipFromAddressBeforeSelect
             },
             "#cboShipToAddress": {
                 select: this.onShipLocationSelect
