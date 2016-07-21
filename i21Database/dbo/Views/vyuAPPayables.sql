@@ -1,4 +1,7 @@
-﻿CREATE VIEW vyuAPPayables
+﻿/*
+	Note: Standard amount of void payment transaction is negative. The original transaction should be positive
+*/
+CREATE VIEW vyuAPPayables
 WITH SCHEMABINDING
 AS 
 SELECT 
@@ -26,9 +29,11 @@ SELECT A.dtmDatePaid AS dtmDate,
 	 B.intBillId,   
 	 C.strBillId ,
 	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0
-				THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId IS NULL)
+			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId IS NULL)
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
-				ELSE B.dblPayment END AS dblAmountPaid,     
+			WHEN C.intTransactionType != 1 AND B.dblPayment < 0 AND E.intBankTransactionTypeId = 19
+				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
+			ELSE B.dblPayment END AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
