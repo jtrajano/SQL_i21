@@ -4091,6 +4091,7 @@
     <Build Include="dbo\User Defined Types\VoucherPayable.sql" />
     <Build Include="dbo\Tables\tblARStatementOfAccount.sql" />
     <None Include="Scripts\Post-Deployment\IC\17_Update_Blank_Description_tblICItem.sql" />
+    <Build Include="dbo\Views\vyuHDWinLossAnalysis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
