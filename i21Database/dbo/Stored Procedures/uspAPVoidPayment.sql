@@ -139,7 +139,6 @@ BEGIN
 		,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
 		,A.dblAmountPaid = A.dblAmountPaid * -1
 		,A.dblWithheld = A.dblWithheld * -1
-		,A.dblTotal = A.dblTotal * -1
 	FROM tblAPPayment A
 	INNER JOIN #tmpPayables B
 		ON A.intPaymentId = B.intNewPaymentId
@@ -166,6 +165,7 @@ BEGIN
 		SET A.intPaymentId  = B.intNewPaymentId
 		,A.dblPayment = A.dblPayment * -1
 		,A.dblDiscount = A.dblDiscount * -1
+		,A.dblTotal = A.dblTotal * -1
 	FROM #tmpPaymentDetail A
 		INNER JOIN #tmpPayables B
 			ON A.intPaymentId = B.intPaymentId
