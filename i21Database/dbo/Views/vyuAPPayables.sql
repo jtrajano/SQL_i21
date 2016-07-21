@@ -26,7 +26,8 @@ SELECT A.dtmDatePaid AS dtmDate,
 	 B.intBillId,   
 	 C.strBillId ,
 	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0
-				THEN (CASE WHEN E.intBankTransactionTypeId <> 19 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+				THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId IS NULL)
+						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
 				ELSE B.dblPayment END AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
