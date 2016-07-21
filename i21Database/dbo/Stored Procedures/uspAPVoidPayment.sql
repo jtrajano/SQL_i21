@@ -73,6 +73,8 @@ BEGIN
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--DELETE FROM #tmpPayables
+	IF OBJECT_ID('dbo.[UK_dbo.tblAPPayment_strPaymentRecordNum]', 'UQ') IS NOT NULL 
+	ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum]
 
 	--Insert new payment records
 	MERGE INTO tblAPPayment
@@ -190,6 +192,7 @@ BEGIN
 
 	IF @isSuccessful = 0
 	BEGIN
+		ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 		RAISERROR('There was an error on reversing bank transaction.', 16, 1);
 	END
 
@@ -216,6 +219,7 @@ BEGIN
 		EXEC uspGLBookEntries @GLEntries, 1
 	END TRY
 	BEGIN CATCH
+		ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
 		RAISERROR(@error, 16, 1);
 	END CATCH
@@ -254,6 +258,8 @@ BEGIN
 				INNER JOIN tblAPBill C
 						ON B.intBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
+	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 
 	IF @transCount = 0 COMMIT TRANSACTION
 
