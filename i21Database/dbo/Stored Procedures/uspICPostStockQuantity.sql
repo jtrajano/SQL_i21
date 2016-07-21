@@ -56,9 +56,9 @@ BEGIN
 			SELECT	intItemId = @intItemId
 					,intItemLocationId = @intItemLocationId
 					,Qty =	CASE	WHEN @intLotWeightUOMId IS NOT NULL AND @intItemUOMId <> @intLotWeightUOMId THEN 
-										dbo.fnCalculateStockUnitQty(dbo.fnMultiply(@dblQty, @dblWeightPerQty), @dblWeightUnitQty) 
+										ROUND(dbo.fnCalculateStockUnitQty(dbo.fnMultiply(@dblQty, @dblWeightPerQty), @dblWeightUnitQty) , 6)
 									ELSE 
-										dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
+										ROUND(dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) , 6)
 							END 
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
@@ -105,7 +105,7 @@ BEGIN
 						,intItemLocationId 
 						,intSubLocationId 
 						,intStorageLocationId 
-						,Qty = SUM(Qty) 
+						,Qty = ROUND(SUM(Qty), 6)
 				FROM (
 					-------------------------------------------
 					-- Item is NOT a Lot. 
@@ -334,7 +334,7 @@ BEGIN
 			,RawStockData.intItemUOMId
 			,RawStockData.intSubLocationId
 			,RawStockData.intStorageLocationId
-			,RawStockData.Qty 
+			,RawStockData.Qty
 			,0
 			,1	
 		)

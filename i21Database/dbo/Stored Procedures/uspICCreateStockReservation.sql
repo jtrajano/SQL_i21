@@ -63,7 +63,7 @@ BEGIN
 			,intItemLocationId
 			,intItemUOMId
 			,intLotId
-			,dblQty * -1 -- Negate the qty to reduce the reserved qty. 
+			,-dblQty -- Negate the qty to reduce the reserved qty. 
 			,intTransactionId
 			,strTransactionId
 			,intInventoryTransactionType

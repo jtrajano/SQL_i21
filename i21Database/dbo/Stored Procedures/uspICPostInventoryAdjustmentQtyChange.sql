@@ -117,10 +117,21 @@ BEGIN
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
 			,dblUOMQty				= ItemUOM.dblUnitQty	
 			,dblCost				= CASE	WHEN ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) > 0 THEN 
-												ISNULL(Detail.dblNewCost, Detail.dblCost)	
+												ISNULL(
+													Detail.dblNewCost
+													,dbo.fnCalculateCostBetweenUOM( 
+														dbo.fnGetItemStockUOM(Detail.intItemId)
+														,Detail.intItemUOMId
+														,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
+													)
+												)	
 											ELSE 
-												ISNULL(Detail.dblCost, 0)	
-									  END 			
+												dbo.fnCalculateCostBetweenUOM( 
+													dbo.fnGetItemStockUOM(Detail.intItemId)
+													,Detail.intItemUOMId
+													,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
+												)	
+									  END 	
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -140,6 +151,11 @@ BEGIN
 				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICItemUOM WeightUOM
 				ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
+			LEFT JOIN dbo.tblICLot Lot
+				ON Lot.intLotId = Detail.intLotId  
+			LEFT JOIN dbo.tblICItemPricing ItemPricing
+				ON ItemPricing.intItemId = Detail.intItemId
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 
 END

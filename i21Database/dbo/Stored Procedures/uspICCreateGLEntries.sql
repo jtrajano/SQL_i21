@@ -119,6 +119,7 @@ BEGIN
 				WHERE	TRANS.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_WriteOffSold 
 						AND TRANS.intItemId = Item.intItemId
+						AND TRANS.dblQty * TRANS.dblCost + TRANS.dblValue <> 0
 			)
 	
 	IF @intItemId IS NOT NULL 
@@ -148,6 +149,7 @@ BEGIN
 				WHERE	TRANS.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_RevalueSold  
 						AND TRANS.intItemId = Item.intItemId
+						AND TRANS.dblQty * TRANS.dblCost + TRANS.dblValue <> 0
 			)
 	
 	IF @intItemId IS NOT NULL 
@@ -177,6 +179,7 @@ BEGIN
 				WHERE	TRANS.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative 
 						AND TRANS.intItemId = Item.intItemId
+						AND TRANS.dblQty * TRANS.dblCost + TRANS.dblValue <> 0
 			)
 	
 	IF @intItemId IS NOT NULL 

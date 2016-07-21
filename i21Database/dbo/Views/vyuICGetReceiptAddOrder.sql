@@ -69,7 +69,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 				ON POView.intUnitOfMeasureId = CostUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-			CROSS APPLY dbo.fnGetDefaultGrossNetUOMForLotItem(POView.intItemId) DefaultGrossNetUOM
+			OUTER APPLY dbo.fnGetDefaultGrossNetUOMForLotItem(POView.intItemId) DefaultGrossNetUOM
 			LEFT JOIN dbo.tblICItemUOM GrossNetUOM
 				ON GrossNetUOM.intItemUOMId = DefaultGrossNetUOM.intGrossNetUOMId
 			LEFT JOIN dbo.tblICUnitMeasure GrossNetName 

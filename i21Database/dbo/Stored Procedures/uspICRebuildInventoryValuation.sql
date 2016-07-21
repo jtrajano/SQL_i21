@@ -2,6 +2,7 @@
 	@dtmStartDate AS DATETIME 
 	,@isPeriodic AS BIT = 1
 	,@strItemNo AS NVARCHAR(50) = NULL 
+	,@ysnRegenerateBillGLEntries AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -10,7 +11,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intItemId AS INT 
+DECLARE @intItemId AS INT
+		,@dtmRebuildDate AS DATETIME = GETDATE() 
 
 SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
 
@@ -51,7 +53,15 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@AdjustmentTypeLotMerge AS INT = 7
 		,@AdjustmentTypeLotMove AS INT = 8 
 
+
+-- Create a snapshot of the gl values
+BEGIN
+	EXEC uspICCreateGLSnapshotOnRebuildInventoryValuation
+		@dtmRebuildDate
+END
+
 BEGIN TRANSACTION 
+
 
 -- Return all the "Out" stock qty back to the cost buckets. 
 BEGIN 
@@ -60,7 +70,10 @@ BEGIN
 				SELECT	ISNULL(SUM(LotOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON LotOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(							
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND LotCostBucket.intInventoryLotId = LotOut.intInventoryLotId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -72,7 +85,10 @@ BEGIN
 				SELECT	ISNULL(SUM(FIFOOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON FIFOOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND FIFOCostBucket.intInventoryFIFOId = FIFOOut.intInventoryFIFOId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -84,7 +100,10 @@ BEGIN
 				SELECT	ISNULL(SUM(LIFOOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON LIFOOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND LIFOCostBucket.intInventoryLIFOId = LIFOOut.intInventoryLIFOId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -96,7 +115,10 @@ BEGIN
 				SELECT	ISNULL(SUM(ActualCostOut.dblQty), 0) 
 				FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
 							ON ActualCostOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
-				WHERE	dbo.fnDateGreaterThanEquals(InvTrans.dtmDate, @dtmStartDate) = 1
+				WHERE	dbo.fnDateGreaterThanEquals(
+							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+							, @dtmStartDate
+						) = 1
 						AND ActualCostBucket.intInventoryActualCostId = ActualCostOut.intInventoryActualCostId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
@@ -109,44 +131,123 @@ BEGIN
 	DELETE	LotOut
 	FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN dbo.tblICInventoryLot LotCostBucket
 				ON LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId
-	WHERE	dbo.fnDateGreaterThanEquals(LotCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(				
+				CASE WHEN @isPeriodic = 0 THEN LotCostBucket.dtmCreated ELSE LotCostBucket.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId) 
 
 	DELETE	FIFOOut
 	FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN dbo.tblICInventoryFIFO FIFOCostBucket
 				ON FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId
-	WHERE	dbo.fnDateGreaterThanEquals(FIFOCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN FIFOCostBucket.dtmCreated ELSE FIFOCostBucket.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId) 
 
 	DELETE	LIFOOut
 	FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryLIFO LIFOCostBucket
 				ON LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId
-	WHERE	dbo.fnDateGreaterThanEquals(LIFOCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN LIFOCostBucket.dtmCreated ELSE LIFOCostBucket.dtmDate END
+				, @dtmStartDate
+				) = 1
 			AND LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId) 
 
 	DELETE	ActualCostOut
 	FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryActualCost ActualCostCostBucket
 				ON ActualCostOut.intInventoryActualCostId = ActualCostCostBucket.intInventoryActualCostId
-	WHERE	dbo.fnDateGreaterThanEquals(ActualCostCostBucket.dtmDate, @dtmStartDate) = 1
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN ActualCostCostBucket.dtmCreated ELSE ActualCostCostBucket.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND ActualCostCostBucket.intItemId = ISNULL(@intItemId, ActualCostCostBucket.intItemId) 
 END 
 
+-- Clear the cost adjustments
+BEGIN 
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryLIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	CostAdjustment
+	FROM	dbo.tblICInventoryActualCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+END 
+
+-- TODO:
+-- 1. Fix the Unpost Cost adjustment. It must reduce the Lot Out --> dblCostAdjustQty
+
 -- Remove the cost buckets if it is posted within the date range. 
 BEGIN 
-	DELETE FROM tblICInventoryLot WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryFIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryLIFO WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryActualCost WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE	FROM tblICInventoryLot 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+	
+	DELETE	FROM tblICInventoryFIFO 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	FROM tblICInventoryLIFO 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	FROM tblICInventoryActualCost 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
 -- Clear the G/L entries 
 BEGIN 
 	DELETE	GLDetail
 	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
-				ON GLDetail.strBatchId = InvTrans.strBatchId
-				AND GLDetail.strTransactionId = InvTrans.strTransactionId
-				AND GLDetail.strCode IN ('IC', 'IRS', 'IWS', 'IAN', 'ICA', 'IAV', 'RPRD', 'RWIP', 'RTRF', 'RBLD') 
-	WHERE	dbo.fnDateGreaterThanEquals(GLDetail.dtmDate, @dtmStartDate) = 1
+				ON  GLDetail.strTransactionId = InvTrans.strTransactionId
+				AND GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
@@ -172,28 +273,175 @@ BEGIN
 	IF OBJECT_ID('tempdb..#tmpICInventoryTransaction') IS NOT NULL  
 		DROP TABLE #tmpICInventoryTransaction
 
-	SELECT * 
-	INTO	#tmpICInventoryTransaction
-	FROM	tblICInventoryTransaction
-	WHERE	ISNULL(dblQty, 0) <> 0
+	IF OBJECT_ID('tempdb..#tmpUnOrderedICTransaction') IS NOT NULL  
+		DROP TABLE #tmpUnOrderedICTransaction
+
+	SELECT	t.* 
+	INTO	#tmpUnOrderedICTransaction
+	FROM	tblICInventoryTransaction t LEFT JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId
+	WHERE	1 = CASE	WHEN ty.strName = 'Cost Adjustment' THEN 1 
+						WHEN ISNULL(dblQty, 0) <> 0 THEN 1
+						ELSE 0
+				END 	
 			AND ISNULL(ysnIsUnposted, 0) = 0 -- This part of the 'WHERE' clause will exclude any unposted transactions during the re-post. 
-			AND dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1
+			AND dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1
 			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	-- Intialize #tmpICInventoryTransaction
+	SELECT	id = CAST(0 AS INT) 
+			,id2 = CAST(0 AS INT) 
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intSubLocationId
+			,intStorageLocationId
+			,dtmDate
+			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblValue
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,strTransactionId
+			,intTransactionDetailId
+			,strBatchId
+			,intTransactionTypeId
+			,intLotId
+			,ysnIsUnposted
+			,intRelatedInventoryTransactionId
+			,intRelatedTransactionId
+			,strRelatedTransactionId
+			,strTransactionForm
+			,intCostingMethod
+			,dtmCreated
+			,strDescription
+			,intCreatedUserId
+			,intCreatedEntityId
+			,intConcurrencyId 
+	INTO	#tmpICInventoryTransaction
+	FROM	#tmpUnOrderedICTransaction
+	WHERE	1 = 0 
+
+	IF ISNULL(@isPeriodic, 0) = 1
+	BEGIN 	
+		INSERT INTO #tmpICInventoryTransaction
+		SELECT	CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				,intInventoryTransactionId
+				,intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intSubLocationId
+				,intStorageLocationId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblValue
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionDetailId
+				,strBatchId
+				,intTransactionTypeId
+				,intLotId
+				,ysnIsUnposted
+				,intRelatedInventoryTransactionId
+				,intRelatedTransactionId
+				,strRelatedTransactionId
+				,strTransactionForm
+				,intCostingMethod
+				,dtmCreated
+				,strDescription
+				,intCreatedUserId
+				,intCreatedEntityId
+				,intConcurrencyId  
+		FROM	#tmpUnOrderedICTransaction
+		ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC , intInventoryTransactionId ASC
+
+		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
+			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
+
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [id] ASC, [id2] ASC);') 
+
+	END
+	ELSE 
+	BEGIN 
+		INSERT INTO #tmpICInventoryTransaction
+		SELECT	CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				,intInventoryTransactionId
+				,intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intSubLocationId
+				,intStorageLocationId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblValue
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionDetailId
+				,strBatchId
+				,intTransactionTypeId
+				,intLotId
+				,ysnIsUnposted
+				,intRelatedInventoryTransactionId
+				,intRelatedTransactionId
+				,strRelatedTransactionId
+				,strTransactionForm
+				,intCostingMethod
+				,dtmCreated
+				,strDescription
+				,intCreatedUserId
+				,intCreatedEntityId
+				,intConcurrencyId  
+		FROM	#tmpUnOrderedICTransaction
+		ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
+
+		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
+			ON dbo.#tmpICInventoryTransaction(strBatchId ASC);
+
+		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Perpetual] ON dbo.#tmpICInventoryTransaction([id] ASC, [id2] ASC);') 
+	END
+
 END
 
-BEGIN 
-	IF OBJECT_ID('tempdb..#tmpICPostedTransactions') IS NOT NULL  
-		DROP TABLE #tmpICPostedTransactions
+--BEGIN 
+--	IF OBJECT_ID('tempdb..#tmpICPostedTransactions') IS NOT NULL  
+--		DROP TABLE #tmpICPostedTransactions
 
-	CREATE TABLE #tmpICPostedTransactions (
-		strTransactionId NVARCHAR(50) PRIMARY KEY 
-	)
-END 
+--	CREATE TABLE #tmpICPostedTransactions (
+--		strTransactionId NVARCHAR(50) PRIMARY KEY 
+--	)
+--END 
 
 -- Delete the inventory transaction record if it falls within the date range. 
 BEGIN 
-	DELETE FROM tblICInventoryTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
-	DELETE FROM tblICInventoryLotTransaction WHERE dbo.fnDateGreaterThanEquals(dtmDate, @dtmStartDate) = 1 AND intItemId = ISNULL(@intItemId, intItemId) 
+	DELETE	FROM tblICInventoryTransaction 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
+
+	DELETE	FROM tblICInventoryLotTransaction 
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
 --------------------------------------------------------------------
@@ -285,7 +533,7 @@ END
 BEGIN 
 	DECLARE @strBatchId AS NVARCHAR(20)
 			,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
-			,@intUserId AS INT
+			,@intEntityUserSecurityId AS INT
 			,@strGLDescription AS NVARCHAR(255) = NULL 
 			,@ItemsToPost AS ItemCostingTableType 
 			,@strTransactionForm AS NVARCHAR(50)
@@ -306,40 +554,21 @@ BEGIN
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
-		IF ISNULL(@isPeriodic, 1) = 1
-		BEGIN 
-			SELECT	TOP 1 
-					@strBatchId = strBatchId
-					,@intUserId = intCreatedUserId
-					,@strTransactionForm = strTransactionForm
-					,@strTransactionId = strTransactionId
-					,@intTransactionId = intTransactionId
-					--,@intItemId = intItemId
-					,@dblQty = dblQty 
-					,@intTransactionTypeId = intTransactionTypeId
-			FROM	#tmpICInventoryTransaction			
-			ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
-		END 
-		ELSE 
-		BEGIN 
-			SELECT	TOP 1 
-					@strBatchId = strBatchId
-					,@intUserId = intCreatedUserId
-					,@strTransactionForm = strTransactionForm
-					,@strTransactionId = strTransactionId
-					,@intTransactionId = intTransactionId
-					--,@intItemId = intItemId
-					,@dblQty = dblQty 
-					,@intTransactionTypeId = intTransactionTypeId
-			FROM	#tmpICInventoryTransaction
-			ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
-		END 
-
+		SELECT	TOP 1 
+				@strBatchId = strBatchId
+				,@intEntityUserSecurityId = intCreatedUserId
+				,@strTransactionForm = strTransactionForm
+				,@strTransactionId = strTransactionId
+				,@intTransactionId = intTransactionId
+				,@dblQty = dblQty 
+				,@intTransactionTypeId = intTransactionTypeId
+		FROM	#tmpICInventoryTransaction
 
 		-- Run the post routine. 
 		BEGIN 
 			PRINT 'Posting ' + @strBatchId
 
+			-- Setup the GL Description
 			SET @strGLDescription = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
 									(SELECT strDescription FROM dbo.tblICInventoryAdjustment WHERE strAdjustmentNo = @strTransactionId)
@@ -347,7 +576,7 @@ BEGIN
 									NULL
 						END
 
-
+			-- Setup the contra-gl account to use. 
 			SET @strAccountToCounterInventory = 
 						CASE	WHEN @strTransactionForm = 'Inventory Adjustment' THEN 
 									'Inventory Adjustment'
@@ -371,13 +600,24 @@ BEGIN
 									NULL 
 						END
 
-
-
-
+			-- Clear the data on @ItemsToPost
 			DELETE FROM @ItemsToPost
 
+			-- Process the cost adjustments
+			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
+			BEGIN 
+				PRINT 'Reposting Cost Adjustments'
+				
+				-- uspICRepostCostAdjustment creates and posts it own g/l entries 
+				EXEC dbo.uspICRepostCostAdjustment
+					@strTransactionId
+					,@strBatchId
+					,@intEntityUserSecurityId
+					,@ysnRegenerateBillGLEntries
+			END
+
 			--IF @strTransactionForm IN ('Consume', 'Produce') 
-			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
+			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -407,7 +647,7 @@ BEGIN
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
 						,dblCost  = 
 							dbo.fnMultiply(
-								CASE WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN 
+								CASE WHEN Lot.dblLastCost IS NULL THEN 
 											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
 										ELSE 
 											Lot.dblLastCost
@@ -460,7 +700,7 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 
@@ -530,10 +770,11 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 			END
+
 			--ELSE IF @strTransactionForm = 'Inventory Transfer'
 			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Transfer'))
 			BEGIN 
@@ -565,7 +806,7 @@ BEGIN
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
 								dbo.fnMultiply(
-									(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
+									ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId))
 									,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 								)
 						,ICTrans.dblSalesPrice  
@@ -584,13 +825,15 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = ICTrans.intLotId
 				WHERE	strBatchId = @strBatchId
-						AND dblQty < 0 
+						AND ICTrans.dblQty < 0 
 					
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 
@@ -653,7 +896,7 @@ BEGIN
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 			END	
@@ -761,7 +1004,7 @@ BEGIN
 					EXEC dbo.uspICRepostCosting
 						@strBatchId
 						,@strAccountToCounterInventory
-						,@intUserId
+						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
 				END 
@@ -790,7 +1033,7 @@ BEGIN
 							,intStorageLocationId	
 							,strActualCostId 	
 					)
-					SELECT 	AdjDetail.intItemId  
+					SELECT 	ISNULL(AdjDetail.intNewItemId, AdjDetail.intItemId)
 							,ISNULL(NewLotItemLocation.intItemLocationId, SourceLotItemLocation.intItemLocationId) 
 							,intItemUOMId = 
 									-- Try to use the new-lot's weight UOM id. 
@@ -1080,14 +1323,14 @@ BEGIN
 							LEFT JOIN dbo.tblICLot NewLot
 								ON NewLot.intLotId = AdjDetail.intNewLotId
 							LEFT JOIN dbo.tblICItemLocation NewLotItemLocation 
-								ON NewLotItemLocation.intLocationId = AdjDetail.intNewLocationId
-								AND NewLotItemLocation.intItemId = NewLot.intItemId
+								ON NewLotItemLocation.intLocationId = ISNULL(AdjDetail.intNewLocationId, Adj.intLocationId) 
+								AND NewLotItemLocation.intItemId = ISNULL(AdjDetail.intNewItemId, NewLot.intItemId)
 							LEFT JOIN dbo.tblICItemUOM NewLotItemUOM
 								ON NewLotItemUOM.intItemUOMId = NewLot.intItemUOMId
-								AND NewLotItemUOM.intItemId = NewLot.intItemId
+								AND NewLotItemUOM.intItemId = ISNULL(AdjDetail.intNewItemId, NewLot.intItemId)
 							LEFT JOIN dbo.tblICItemUOM NewLotWeightUOM
 								ON NewLotWeightUOM.intItemUOMId = NewLot.intWeightUOMId
-								AND NewLotWeightUOM.intItemId = NewLot.intItemId
+								AND NewLotWeightUOM.intItemId = ISNULL(AdjDetail.intNewItemId, NewLot.intItemId)
 
 							LEFT JOIN dbo.tblICItemUOM StockUnit 
 								ON StockUnit.intItemId = AdjDetail.intItemId
@@ -1095,13 +1338,11 @@ BEGIN
 
 					WHERE	Adj.strAdjustmentNo = @strTransactionId
 							AND FromStock.strBatchId = @strBatchId
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-
 
 					EXEC dbo.uspICRepostCosting
 						@strBatchId
 						,@strAccountToCounterInventory
-						,@intUserId
+						,@intEntityUserSecurityId
 						,@strGLDescription
 						,@ItemsToPost
 				END
@@ -1164,7 +1405,7 @@ BEGIN
 						,RebuilInvTrans.dtmDate  
 						,RebuilInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
-						,dblCost  = CASE WHEN dblQty < 0 THEN 
+						,dblCost  = CASE WHEN RebuilInvTrans.dblQty < 0 THEN 
 											CASE	WHEN Receipt.intInventoryReceiptId IS NOT NULL THEN 
 														CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
 																WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
@@ -1206,12 +1447,12 @@ BEGIN
 														) 
 													ELSE 
 														dbo.fnMultiply(
-															(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId) 
+															ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
 															,dblUOMQty
 														)
 											END 
 											
-										 WHEN (dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
+										 WHEN (RebuilInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
 											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 1 
 
 													ELSE 
@@ -1225,7 +1466,7 @@ BEGIN
 											END 											
 										
 										-- When it is a credit memo:
-										 WHEN (dblQty > 0 AND strTransactionId LIKE 'SI%') THEN 
+										 WHEN (RebuilInvTrans.dblQty > 0 AND RebuilInvTrans.strTransactionId LIKE 'SI%') THEN 
 											
 											CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														-- If using Average Costing, use Ave Cost.
@@ -1236,7 +1477,7 @@ BEGIN
 														) 
 													ELSE
 														-- Otherwise, get the last cost. 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId)
+														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
 											END 
 
 										 ELSE 
@@ -1279,62 +1520,74 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuilInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuilInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = RebuilInvTrans.intLotId 
 				WHERE	strBatchId = @strBatchId
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
-					,@intUserId
+					,@intEntityUserSecurityId
 					,@strGLDescription
 					,@ItemsToPost
 			END 
 
-			-- Re-create the Post g/l entries 
+			-- Clear the GL entries 
 			DELETE FROM @GLEntries
-			SET @intReturnId = NULL 
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm] 
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-			)			
-			EXEC @intReturnId = dbo.uspICCreateGLEntries
-				@strBatchId
-				,@strAccountToCounterInventory
-				,@intUserId
-				,@strGLDescription					
 
-			IF @intReturnId <> 0 
+			-- Re-create the Post g/l entries (except for Cost Adjustments)
+			IF EXISTS (
+				SELECT	TOP 1 1 
+				FROM	tblICInventoryTransactionType 
+				WHERE	intTransactionTypeId = @intTransactionTypeId 
+						AND strName <> 'Cost Adjustment'
+			)
 			BEGIN 
-				PRINT 'Error found in uspICCreateGLEntries'
-				GOTO _EXIT_WITH_ERROR
+				SET @intReturnId = NULL 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]					
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm] 
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+				)			
+				EXEC @intReturnId = dbo.uspICCreateGLEntries
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+					,@strGLDescription					
+
+				IF @intReturnId <> 0 
+				BEGIN 
+					PRINT 'Error found in uspICCreateGLEntries'
+					GOTO _EXIT_WITH_ERROR
+				END 
 			END 
 				
 			-- Fix discrepancies when posting Consume and Produce. 
@@ -1355,12 +1608,16 @@ BEGIN
 
 		END 
 
-		-- Book the G/L Entries
+		-- Book the G/L Entries (except for cost adjustment)
+		IF EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryTransactionType 
+			WHERE	intTransactionTypeId = @intTransactionTypeId 
+					AND strName <> 'Cost Adjustment'
+		)
 		BEGIN 
 			BEGIN TRY
-
 				EXEC dbo.uspGLBookEntries @GLEntries, 1 
-
 			END TRY
 			BEGIN CATCH
 				PRINT 'Error in posting the g/l entries.'
@@ -1397,6 +1654,12 @@ BEGIN
 		tblGLDetail
 	WHERE ysnIsUnposted = 0	
 	GROUP BY intAccountId, dtmDate, strCode
+END
+
+-- Compare the snapshot of the gl entries 
+BEGIN
+	EXEC uspICCompareGLSnapshotOnRebuildInventoryValuation
+		@dtmRebuildDate
 END
 
 COMMIT TRANSACTION 
