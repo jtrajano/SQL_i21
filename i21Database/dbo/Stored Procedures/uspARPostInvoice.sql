@@ -314,6 +314,26 @@ END CATCH
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					A.dblInvoiceTotal < 0.00
+					
+				--Inactive Customer
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					CASE WHEN A.strTransactionType = 'Invoice ' THEN 'You cannot post an ' + A.strTransactionType + ' with zero amount.' 
+					ELSE 'Customer - ' + ARC.strCustomerNumber + ' is not active!' END,
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A					
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId				
+				INNER JOIN
+					tblARCustomer ARC
+						ON A.intEntityCustomerId = ARC.intEntityCustomerId 
+						AND ARC.ysnActive = 0
+					
 				
 				--UOM is required
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
