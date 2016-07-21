@@ -721,11 +721,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 if(Inventory.view.InventoryShipmentViewController.orgValueShipFrom !== current.get('intShipFromLocationId')) {
                         var buttonAction = function(button) {
                             if (button === 'yes') {
-                                 currentShipmentItem.set('intSubLocationId', null);
-                                 currentShipmentItem.set('intStorageLocationId', null);
-                                 currentShipmentItem.set('strSubLocationName', null);
-                                 currentShipmentItem.set('strStorageLocationName', null);
-                                 current.set('strShipFromAddress', 'changed');
+
+                                
+                                if(currentShipmentItem) {
+                                    currentShipmentItem.set('intSubLocationId', null);
+                                    currentShipmentItem.set('intStorageLocationId', null);
+                                    currentShipmentItem.set('strSubLocationName', null);
+                                    currentShipmentItem.set('strStorageLocationName', null);
+                                }
+                                else {
+                                    var grdInventoryShipment = win.down('#grdInventoryShipment');
+                                    
+                                   // var shipmentStore = grdInventoryShipment.getStore().getRange();
+                                    var shipmentStore = grdInventoryShipment.getSelectionModel().getSelection();
+                                    shipmentStore[0].set('strSubLocationName', null);
+                                    shipmentStore[0].set('strStorageLocationName', null);
+                                }
                                 
                                 var grdLotTracking = win.down('#grdLotTracking');
                                 grdLotTracking.getStore().removeAll();
