@@ -242,6 +242,11 @@ SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeN
 	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  FROM @FinalList WHERE strContractEndMonth <> 'Near By' 
 	ORDER BY CONVERT(DATETIME,'01 '+ strContractEndMonth) asc
 
+INSERT into @List (strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType )
+SELECT strCommodityCode ,strContractNumber,intContractHeaderId,strInternalTradeNo,intFutOptTransactionHeaderId,'Position',strLocationName,strContractEndMonth, strContractEndMonthNearBy,
+	isnull(dblTotal,0) dblTotal,
+	strUnitMeasure,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  FROM @List 
+
 UPDATE @List set intSeqNo = 1 where strType='Purchase Priced'
 UPDATE @List set intSeqNo = 2 where strType='Purchase Basis'
 UPDATE @List set intSeqNo = 3 where strType='Purchase HTA'

@@ -96,12 +96,22 @@ SELECT
   
 IF EXISTS(select * from @tblExercisedAssignedDelete)  
 BEGIN  
-  
+
+SELECT intFutOptTransactionHeaderId into #temp FROM tblRKFutOptTransaction   
+WHERE intFutOptTransactionId in(SELECT intFutTransactionId   
+        FROM tblRKOptionsPnSExercisedAssigned  
+        WHERE convert(int,strTranNo) in(SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete))  
+		 
+
 DELETE FROM tblRKFutOptTransaction   
 WHERE intFutOptTransactionId in(SELECT intFutTransactionId   
         FROM tblRKOptionsPnSExercisedAssigned  
         WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete))  
-  select * from @tblExercisedAssignedDelete
+
+--delete from tblRKFutOptTransactionHeader where intFutOptTransactionHeaderId in(SELECT f.intFutOptTransactionHeaderId FROM tblRKFutOptTransaction f
+--																				JOIN #temp t on f.intFutOptTransactionHeaderId=t.intFutOptTransactionHeaderId 
+--																				group by f.intFutOptTransactionHeaderId having count(f.intFutOptTransactionHeaderId)<= 0)
+
 DELETE FROM tblRKOptionsPnSExercisedAssigned  
   WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete)  
 END  
@@ -210,18 +220,20 @@ DECLARE @mRowNumber int,
   @intInternalTradeNo int,  
   @ysnAssigned bit  
    
-INSERT INTO tblRKFutOptTransactionHeader  
-VALUES (1)  
-SELECT @NewFutOptTransactionHeaderId = SCOPE_IDENTITY();  
+
    
   
 SELECT @mRowNumber=MIN(RowNumber) FROM @tblExercisedAssignedDetail    
 WHILE @mRowNumber IS NOT NULL    
 BEGIN  
-  
+	
+	INSERT INTO tblRKFutOptTransactionHeader  
+	VALUES (1)  
+	SELECT @NewFutOptTransactionHeaderId = SCOPE_IDENTITY();  
+
    DECLARE @intOptionsPnSExercisedAssignedId int  
-   SELECT @strExercisedAssignedNo=isnull(max(strTranNo),0)+1 from tblRKOptionsPnSExercisedAssigned   
-     
+   
+   SELECT @strExercisedAssignedNo=isnull(max(convert(int,strTranNo)),0)+1 from tblRKOptionsPnSExercisedAssigned     
    SELECT @intFutOptTransactionId=intFutOptTransactionId,@intLots=intLots,@dtmTranDate=dtmTranDate,@ysnAssigned=ysnAssigned FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber    
 
    INSERT INTO tblRKOptionsPnSExercisedAssigned  
@@ -243,10 +255,8 @@ BEGIN
        
 ----------------- Created Future Transaction Based on the Option Transaction ----------------------------------  
  
- --SELECT @intInternalTradeNo=Max(replace(strInternalTradeNo,'O-','')+1)  from tblRKFutOptTransaction   
-  SELECT TOP 1 @intInternalTradeNo=case when max(strInternalTradeNo) LIKE '%-S%' THEN REPLACE(strInternalTradeNo,'-S' ,'') 
-				   WHEN max(strInternalTradeNo) LIKE '%O-%' THEN REPLACE(strInternalTradeNo,'O-' ,'') end +1  from tblRKFutOptTransaction 
- group by strInternalTradeNo order by 1 desc
+ SELECT @intInternalTradeNo = Max(convert(int,REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''))) + 1
+							  from tblRKFutOptTransaction group by strInternalTradeNo 
 
  INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,intSelectedInstrumentTypeId,  
          dtmTransactionDate,intEntityId, intBrokerageAccountId,  
