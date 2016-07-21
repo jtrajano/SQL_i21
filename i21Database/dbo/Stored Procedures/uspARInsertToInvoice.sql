@@ -65,6 +65,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intInventoryShipmentItemId	INT,
 							intRecipeItemId				INT,
 							strMaintenanceType			NVARCHAR(100),
+							strFrequency				NVARCHAR(100),
+							dtmMaintenanceDate			DATETIME,
 							strItemType					NVARCHAR(100),
 							strSalesOrderNumber			NVARCHAR(100),
 							strShipmentNumber			NVARCHAR(100))
@@ -97,6 +99,8 @@ SELECT SI.intItemId
 	 , NULL
 	 , NULL
 	 , SOD.strMaintenanceType
+	 , SOD.strFrequency
+	 , SOD.dtmMaintenanceDate
 	 , I.strType
 	 , SI.strSalesOrderNumber
 	 , NULL
@@ -109,7 +113,7 @@ WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining > 0
 	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
-	AND (ISNULL(SI.intRecipeItemId, 0) = 0)
+	AND (ISNULL(SI.intRecipeItemId, 0) = 0)	
 
 --GET ITEMS FROM POSTED SHIPMENT
 INSERT INTO @tblItemsToInvoice
@@ -129,6 +133,8 @@ SELECT ICSI.intItemId
 	 , ICSI.intInventoryShipmentItemId
 	 , NULL
 	 , SOD.strMaintenanceType
+	 , SOD.strFrequency
+	 , SOD.dtmMaintenanceDate
 	 , ICI.strType
 	 , SO.strSalesOrderNumber
 	 , ICS.strShipmentNumber
@@ -158,6 +164,8 @@ SELECT ARSI.intItemId
 	 , NULL
 	 , NULL
 	 , ''
+	 , NULL
+	 , NULL
 	 , I.strType
 	 , ARSI.strSalesOrderNumber
 	 , ARSI.strShipmentNumber
@@ -400,11 +408,15 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				
 				DELETE FROM @tblSODSoftware WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 			END
+
+		EXEC dbo.uspARReComputeInvoiceTaxes @SoftwareInvoiceId
 	END
 
 --CHECK IF THERE IS NON STOCK ITEMS
 IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN ('Maintenance Only', 'SaaS'))
 	BEGIN
+		DELETE FROM @tblItemsToInvoice WHERE strMaintenanceType IN ('Maintenance Only', 'SaaS')
+
 		--INSERT INVOICE HEADER
 		BEGIN TRY
 			EXEC uspARCreateCustomerInvoice
@@ -475,7 +487,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemShipmentDetailId	INT,
 						@ItemRecipeItemId		INT,
 						@ItemSalesOrderNumber	NVARCHAR(100),
-						@ItemShipmentNumber		NVARCHAR(100)
+						@ItemShipmentNumber		NVARCHAR(100),
+						@ItemMaintenanceType	NVARCHAR(100),
+						@ItemFrequency			NVARCHAR(100),
+						@ItemMaintenanceDate	DATETIME
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -495,7 +510,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemShipmentDetailId	= intInventoryShipmentItemId,
 						@ItemRecipeItemId		= intRecipeItemId,
 						@ItemSalesOrderNumber	= strSalesOrderNumber,
-						@ItemShipmentNumber		= strShipmentNumber
+						@ItemShipmentNumber		= strShipmentNumber,
+						@ItemMaintenanceType	= strMaintenanceType,
+						@ItemFrequency			= strFrequency,
+						@ItemMaintenanceDate	= dtmMaintenanceDate
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -524,7 +542,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 							,@ItemShipmentNumber			= @ItemShipmentNumber
 							,@EntitySalespersonId			= @EntitySalespersonId
-
+							,@ItemMaintenanceType			= @ItemMaintenanceType
+							,@ItemFrequency					= @ItemFrequency
+							,@ItemMaintenanceDate			= @ItemMaintenanceDate
 				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 					BEGIN
 						IF ISNULL(@RaiseError,0) = 0
@@ -608,7 +628,7 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-		EXEC dbo.[uspARReComputeInvoiceAmounts] @NewInvoiceId
+		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
 		
 		UPDATE
 			tblSOSalesOrder
