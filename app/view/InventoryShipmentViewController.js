@@ -714,40 +714,43 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-        var currentShipmentItem = win.viewModel.data.currentShipmentItem;
+        var grdInventoryShipment = win.down('#grdInventoryShipment');
+        var grdInventoryShipmentCount = 0;
+        var grdLotTracking = win.down('#grdLotTracking');
+        
+        if (current.tblICInventoryShipmentItems()) {
+                Ext.Array.each(current.tblICInventoryShipmentItems().data.items, function(row) {
+                    if (!row.dummy) {
+                        grdInventoryShipmentCount++;
+                    }
+                });
+            }
         
         if (current){
             if (combo.itemId === 'cboShipFromAddress'){
-                if(Inventory.view.InventoryShipmentViewController.orgValueShipFrom !== current.get('intShipFromLocationId')) {
+                    if(Inventory.view.InventoryShipmentViewController.orgValueShipFrom !== current.get('intShipFromLocationId')) {
                         var buttonAction = function(button) {
-                            if (button === 'yes') {
-
-                                
-                                if(currentShipmentItem) {
-                                    currentShipmentItem.set('intSubLocationId', null);
-                                    currentShipmentItem.set('intStorageLocationId', null);
-                                    currentShipmentItem.set('strSubLocationName', null);
-                                    currentShipmentItem.set('strStorageLocationName', null);
-                                }
-                                else {
-                                    var grdInventoryShipment = win.down('#grdInventoryShipment');
-                                    
-                                   // var shipmentStore = grdInventoryShipment.getStore().getRange();
-                                    var shipmentStore = grdInventoryShipment.getSelectionModel().getSelection();
-                                    shipmentStore[0].set('strSubLocationName', null);
-                                    shipmentStore[0].set('strStorageLocationName', null);
-                                }
-                                
-                                var grdLotTracking = win.down('#grdLotTracking');
-                                grdLotTracking.getStore().removeAll();
-                                
-                                current.set('strShipFromAddress', records[0].get('strAddress'));
+                            if (button === 'yes') {  
+                                 //Remove all values in Shipment Grid                   
+                                 grdInventoryShipment.getStore().removeAll();
+                                 grdInventoryShipment.getStore().load();
+                                 //Remove all values in Lot Grid
+                                 grdLotTracking.getStore().removeAll();
+                                                            
+                                 current.set('strShipFromAddress', records[0].get('strAddress'));
                             }
                             else {
                                current.set('intShipFromLocationId', Inventory.view.InventoryShipmentViewController.orgValueShipFrom);
                             }
                         };
-                        iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear the values for Sub Location, Storage Location, and Lot details. Do you want to continue?', buttonAction);
+                        
+                        if(grdInventoryShipmentCount > 0) {
+                                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear all Items. Do you want to continue?', buttonAction);
+                            }
+                        else {
+                            current.set('strShipFromAddress', records[0].get('strAddress'));
+                        }
+                            
                     }
                  
             }
@@ -851,6 +854,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         case 'Yes - Serial Number':
                         case 'Yes - Manual':
                             grdLotTracking.setHidden(false);
+                            grdLotTracking.getStore().load();
+                            grdLotTracking.gridMgr.newRow.enable();
                             break;
                         default:
                             grdLotTracking.setHidden(true);
@@ -878,6 +883,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         case 'Yes - Serial Number':
                         case 'Yes - Manual':
                             grdLotTracking.setHidden(false);
+                            grdLotTracking.getStore().load();
+                            grdLotTracking.gridMgr.newRow.enable();
                             break;
                         default:
                             grdLotTracking.setHidden(true);
@@ -932,6 +939,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         case 'Yes - Serial Number':
                         case 'Yes - Manual':
                             grdLotTracking.setHidden(false);
+                            grdLotTracking.getStore().load();
+                            grdLotTracking.gridMgr.newRow.enable();
                             break;
                         default:
                             grdLotTracking.setHidden(true);
@@ -950,6 +959,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('intSubLocationId', records[0].get('intSubLocationId'));
                 current.set('intStorageLocationId', null);
                 current.set('strStorageLocationName', null);
+                
+                var grdLotTracking = win.down('#grdLotTracking');
+                grdLotTracking.getStore().removeAll();
+                grdLotTracking.getStore().load(); 
             }
         }
 
@@ -958,6 +971,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('intSubLocationId', records[0].get('intSubLocationId'));
                 current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
                 current.set('strSubLocationName', records[0].get('strSubLocationName'));
+                
+                var grdLotTracking = win.down('#grdLotTracking');
+                grdLotTracking.getStore().removeAll();
+                grdLotTracking.getStore().load();
             }
         }
     },
@@ -991,7 +1008,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 var lotDefaultQty = shipQty > availQty ? availQty : shipQty;
 
                 current.set('dblQuantityShipped', lotDefaultQty);
-
+                
                 // Calculate the Gross Wgt based on the default lot qty.
                 //var wgtPerQty = records[0].get('dblWeightPerQty');
                 //var grossWgt;
@@ -999,6 +1016,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 //grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
                 //current.set('dblGrossWeight', grossWgt);
             }
+            
+                var grdInventoryShipment = win.down('#grdInventoryShipment');
+
+                var selected = grdInventoryShipment.getSelectionModel().getSelection();
+
+                if (selected) {
+                    if (selected.length > 0){
+                        var currentShipment = selected[0];
+                        if (!currentShipment.dummy)
+                            currentShipment.set('strSubLocationName', records[0].get('strSubLocationName'));
+                            currentShipment.set('strStorageLocationName', current.get('strStorageLocation'));
+                    }
+                }
+
         }
     },
 
@@ -1025,6 +1056,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
             if (vm.data.currentShipmentItem !== null){
                 grdLotTracking.setHidden(false);
+                grdLotTracking.getStore().load();
+                grdLotTracking.gridMgr.newRow.enable();
             }
             else {
                 grdLotTracking.setHidden(true);
