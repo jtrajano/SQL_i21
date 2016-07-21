@@ -4032,6 +4032,8 @@
     <None Include="Scripts\Post-Deployment\IC\17_Update_Blank_Description_tblICItem.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectContainerFromQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidatePendingSOItems.sql" />
+    <Build Include="dbo\Functions\fnGetDefaultGrossNetUOMForLotItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRepostCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
