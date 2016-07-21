@@ -318,8 +318,7 @@ END CATCH
 				--Inactive Customer
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
-					CASE WHEN A.strTransactionType = 'Invoice ' THEN 'You cannot post an ' + A.strTransactionType + ' with zero amount.' 
-					ELSE 'Customer - ' + ARC.strCustomerNumber + ' is not active!' END,
+					'Customer - ' + ARC.strCustomerNumber + ' is not active!',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
