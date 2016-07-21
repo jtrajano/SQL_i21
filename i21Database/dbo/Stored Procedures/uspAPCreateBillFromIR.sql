@@ -152,7 +152,7 @@ BEGIN
 		[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
 		[intAccountId] 			=	@APAccount,
 		[strBillId]				=	@generatedBillRecordId,
-		[strReference] 			=	NULL,
+		[strReference] 			=	A.strBillOfLading,
 		[dblTotal] 				=	A.dblInvoiceAmount,
 		[dblAmountDue]			=	A.dblInvoiceAmount,
 		[intEntityId]			=	@userId,
@@ -213,7 +213,7 @@ BEGIN
 		[intPODetailId]				=	CASE WHEN A.strReceiptType = 'Purchase Order' THEN (CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END) ELSE NULL END,
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
-		[dblTax]					=	B.dblTax,
+		[dblTax]					=	ISNULL(B.dblTax,0),
 		[dblRate]					=	ISNULL(G.dblRate,0),
 		[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 		[intTaxGroupId]				=	NULL,
@@ -232,7 +232,7 @@ BEGIN
 											 THEN (CASE WHEN E1.dblCashPrice IS NOT NULL THEN E1.dblCashPrice ELSE B.dblUnitCost END)
 											 ELSE B.dblUnitCost
 										END,
-		[dblOldCost]				=	0,
+		[dblOldCost]				=	NULL,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
@@ -307,15 +307,14 @@ BEGIN
 		[dblWeightUnitQty]			=	1,
 		[dblCostUnitQty]			=	1,
 		[dblUnitQty]				=	1,
-		[intCurrencyId]				=	CASE WHEN A.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
-										ELSE ISNULL(A.intCurrencyId,0) END
+		[intCurrencyId]				=	ISNULL(A.intCurrencyId,0) 
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
 											--OR (F.intToCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intFromCurrencyId = C.intCurrencyId)
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId
-	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+	--LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT

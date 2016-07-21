@@ -214,7 +214,7 @@ BEGIN TRY
 				,[dtmDate]
 				,[dblQty]
 				,[dblUOMQty]
-				,[dblNewCost]
+				,[dblVoucherCost]
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]

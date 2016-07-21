@@ -56,7 +56,7 @@ BEGIN
 		ssvnd_city						=	CAST(strCity AS VARCHAR(20)),
 		ssvnd_st						=	CAST(C.strState AS VARCHAR(2)),
 		ssvnd_zip						=	CAST(C.strZipCode AS VARCHAR(10)),
-		ssvnd_phone						=	CAST(ISNULL(D.strPhone,'''') AS VARCHAR(15)),
+		ssvnd_phone						=	CAST(ISNULL(I.strPhone,'''') AS VARCHAR(15)),
 		ssvnd_phone2					=	CAST(ISNULL(D.strPhone2,'''') AS VARCHAR(15)),
 		ssvnd_contact					=	CAST(D.strName AS VARCHAR(15)),
 		ssvnd_1099_yn					=	CASE WHEN A.ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
@@ -97,6 +97,8 @@ BEGIN
 			ON B.intGLAccountExpenseId = F.inti21Id
 		LEFT JOIN tblSMTerm H
 			on C.intTermsId = H.intTermID
+		LEFT JOIN tblEMEntityPhoneNumber I
+			ON D.intEntityId = I.intEntityId
 		WHERE ssvndmst.ssvnd_vnd_no =  SUBSTRING(@VendorId, 1, 10)
 	END
 	ELSE
@@ -139,7 +141,7 @@ BEGIN
 			ssvnd_city						=	strCity,
 			ssvnd_st						=	CAST(C.strState AS VARCHAR(2)),
 			ssvnd_zip						=	CAST(C.strZipCode AS VARCHAR(10)),
-			ssvnd_phone						=	CAST(ISNULL(D.strPhone,'''') AS VARCHAR(15)),
+			ssvnd_phone						=	CAST(ISNULL(I.strPhone,'''') AS VARCHAR(15)),
 			ssvnd_phone2					=	CAST(ISNULL(D.strPhone2,'''') AS VARCHAR(15)),
 			ssvnd_contact					=	CAST(D.strName AS VARCHAR(15)),
 			ssvnd_1099_yn					=	CASE WHEN A.ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
@@ -178,6 +180,8 @@ BEGIN
 			ON B.intGLAccountExpenseId = F.inti21Id
 		LEFT JOIN tblSMTerm H
 			on C.intTermsId = H.intTermID
+		LEFT JOIN tblEMEntityPhoneNumber I
+			on D.intEntityId = I.intEntityId
 		WHERE B.strVendorId = @VendorId
 
 		--Insert new record to tblAPImportedVendors
@@ -502,6 +506,9 @@ BEGIN
 		DECLARE @EntityContactId INT
 		SET @EntityContactId = @ContactEntityId
 
+
+		INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
+		select top 1 @ContactEntityId, @strPhone, intDefaultCountryId FROM tblSMCompanyPreference
 		/*INSERT INTO tblEMEntityToContact( intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact)
 		VALUES (@EntityId, @ContactEntityId, 0, 1)*/
 

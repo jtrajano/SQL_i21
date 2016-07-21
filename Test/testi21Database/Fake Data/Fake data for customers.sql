@@ -3,7 +3,7 @@ AS
 BEGIN	
 	EXEC tSQLt.FakeTable 'dbo.tblSMTerm', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblARCustomer';
-	EXEC tSQLt.FakeTable 'dbo.tblEntityLocation', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblEMEntityLocation', @Identity = 1;
 
 	DECLARE @Customer_Paul_Unlimited AS NVARCHAR(50) = 'Paul Unlimited'
 	DECLARE @Customer_Paul_Unlimited_Id AS INT = 1
@@ -43,7 +43,7 @@ BEGIN
 		,intSort			= 1
 		,intConcurrencyId	= 1
 
-	INSERT INTO dbo.tblEntityLocation (
+	INSERT INTO dbo.tblEMEntityLocation (
 		strLocationName
 		,strAddress
 		,strCity

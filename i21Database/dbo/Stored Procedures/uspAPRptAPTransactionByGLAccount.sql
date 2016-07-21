@@ -8,23 +8,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
---exec "dbo"."uspAPRptAPTransactionByGLAccount" @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strBillId</fieldname>
---<condition>Equal To</condition><from>BL-4</from><join /><begingroup /><endgroup /><datatype>String</datatype></filter><filter><fieldname>strVendorIdName</fieldname>
---<condition>Equal To</condition><from>0001005025 - Mercury Payment Systems</from><join /><begingroup /><endgroup /><datatype>String</datatype></filter></filters></xmlparam>'
-
---exec "dbo"."uspAPRptAPTransactionByGLAccount" @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmBillDate</fieldname>
---<condition>Equal To</condition><from>01/31/2015</from><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter></filters></xmlparam>'
-
--- Sample XML string structure:
---exec "dbo"."uspAPRptAPTransactionByGLAccount" @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dtmBillDate</fieldname>
---<condition>Between</condition><from>05/13/2015</from><to>05/14/2015</to><join /><begingroup /><endgroup /><datatype>DateTime</datatype></filter></filters></xmlparam>'
-
---exec "dbo"."uspAPRptAPTransactionByGLAccount" @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlRparam><filters><filter><fieldname>dblTotal</fieldname>
---<condition>Equal To</condition><from>91.00</from><join /><begingroup /><endgroup /><datatype>Int 32</datatype></filter></filters></xmlparam>'
-
---exec "dbo"."uspAPRptAPTransactionByGLAccount" @xmlParam=N'<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>dblTotal</fieldname>
---<condition>Equal To</condition><from>91.000000</from><join /><begingroup /><endgroup /><datatype>Decimal</datatype></filter></filters></xmlparam>'
-
 DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
 DECLARE @dtmBillDate DATETIME = NULL;
 DECLARE @dateFrom DATETIME = NULL;
@@ -129,6 +112,8 @@ SET @query = 'SELECT [intEntityVendorId]
       ,[strCompanyName]
       ,[strVendorOrderNumber]
       ,[strInvoiceNumber]
+	  ,[intBillId]
+	  ,[intBillDetailId]
       ,[strBillId]
       ,[strAccountID]
       ,[strDescription]
@@ -148,8 +133,16 @@ SET @query = 'SELECT [intEntityVendorId]
       ,[dblAmountPaid]
       ,[dblCost]
       ,[strTaxCode]
-      ,[ysnPaid] FROM [vyuAPRptAPTransactionByGLAccount]'
-
+	  ,[strItem]
+	  ,[strMiscDescription]
+	  ,[dblDetailCost]
+	  ,[dblDetailTotalCost]
+	  ,[dblDetailDiscount]
+	  ,[strDetailAccountID]
+	  ,[strtPrepaidAccountId]
+	  ,[strDetailDescription]
+	  ,[strCompanyAddress]
+	  ,[ysnPaid] FROM [vyuAPRptAPTransactionByGLAccount]'
 
 IF ISNULL(@filter,'') != ''
 BEGIN

@@ -22,8 +22,8 @@ WHILE EXISTS(
 				tblARInvoice I
 			INNER JOIN
 				tblARPayment P
-					--ON I.strComments = P.strRecordNumber				
-					ON I.intPaymentId = P.intPaymentId
+					ON I.strComments = P.strRecordNumber				
+					AND I.intPaymentId = P.intPaymentId
 			WHERE
 				I.strTransactionType = 'Prepayment'
 				AND P.intPaymentId = @PaymentId
@@ -38,8 +38,8 @@ WHILE EXISTS(
 			tblARInvoice I
 		INNER JOIN
 			tblARPayment P
-				--ON I.strComments = P.strRecordNumber
-				ON I.intPaymentId = P.intPaymentId			
+				ON I.strComments = P.strRecordNumber
+				AND I.intPaymentId = P.intPaymentId			
 		WHERE
 			I.strTransactionType = 'Prepayment'
 			AND P.intPaymentId = @PaymentId

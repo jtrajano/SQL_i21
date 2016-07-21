@@ -14,6 +14,7 @@ BEGIN
 		DECLARE @AUTO_NEGATIVE AS INT = 1
 		DECLARE @WRITE_OFF_SOLD AS INT = 2
 		DECLARE @REVALUE_SOLD AS INT = 3
+		DECLARE @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35
 		
 		DECLARE @PurchaseType AS INT = 4
 		DECLARE @SalesType AS INT = 5
@@ -401,7 +402,48 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-		-- Write-off sold
+		---- Write-off sold
+		--UNION ALL 
+		--SELECT	intItemId = @WetGrains
+		--		,intItemLocationId = @Default_Location
+		--		,intItemUOMId = @WetGrains_BushelUOMId
+		--		,dtmDate = 'November 17, 2014'
+		--		,dblQty = 0
+		--		,dblUOMQty = 1
+		--		,dblCost = 0
+		--		,dblValue = 360.00
+		--		,dblSalesPrice = 0 
+		--		,intCurrencyId = @USD
+		--		,dblExchangeRate = 1
+		--		,intTransactionId = 1
+		--		,strTransactionId = 'PURCHASE-000002'
+		--		,strBatchId = 'BATCH-000001'
+		--		,intTransactionTypeId = @WRITE_OFF_SOLD
+		--		,intLotId = NULL
+		--		,intCreatedEntityId = 1
+		--		,intConcurrencyId = 1
+		---- Revalue sold
+		--UNION ALL 
+		--SELECT	intItemId = @WetGrains
+		--		,intItemLocationId = @Default_Location
+		--		,intItemUOMId = @WetGrains_BushelUOMId
+		--		,dtmDate = 'November 17, 2014'
+		--		,dblQty = 0
+		--		,dblUOMQty = 1
+		--		,dblCost = 0
+		--		,dblValue = -310.00
+		--		,dblSalesPrice = 0 
+		--		,intCurrencyId = @USD
+		--		,dblExchangeRate = 1
+		--		,intTransactionId = 1
+		--		,strTransactionId = 'PURCHASE-000002'
+		--		,strBatchId = 'BATCH-000001'
+		--		,intTransactionTypeId = @REVALUE_SOLD
+		--		,intLotId = NULL
+		--		,intCreatedEntityId = 1
+		--		,intConcurrencyId = 1
+
+		-- Auto Variance on Sold or Used Stock
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
@@ -410,37 +452,20 @@ BEGIN
 				,dblQty = 0
 				,dblUOMQty = 1
 				,dblCost = 0
-				,dblValue = 360.00
+				,dblValue = 						
+						- 310.00
+						+ 360.00
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
 				,strTransactionId = 'PURCHASE-000002'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @WRITE_OFF_SOLD
+				,intTransactionTypeId = @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-		-- Revalue sold
-		UNION ALL 
-		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
-				,intItemUOMId = @WetGrains_BushelUOMId
-				,dtmDate = 'November 17, 2014'
-				,dblQty = 0
-				,dblUOMQty = 1
-				,dblCost = 0
-				,dblValue = -310.00
-				,dblSalesPrice = 0 
-				,intCurrencyId = @USD
-				,dblExchangeRate = 1
-				,intTransactionId = 1
-				,strTransactionId = 'PURCHASE-000002'
-				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @REVALUE_SOLD
-				,intLotId = NULL
-				,intCreatedEntityId = 1
-				,intConcurrencyId = 1
+
 		-- Auto-Negative
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
@@ -461,6 +486,7 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
+
 		-- Purchase 3: 22 @16.50
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
@@ -481,7 +507,50 @@ BEGIN
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-		-- Write-off sold
+
+
+		---- Write-off sold
+		--UNION ALL 
+		--SELECT	intItemId = @WetGrains
+		--		,intItemLocationId = @Default_Location
+		--		,intItemUOMId = @WetGrains_BushelUOMId
+		--		,dtmDate = 'November 17, 2014'
+		--		,dblQty = 0
+		--		,dblUOMQty = 1
+		--		,dblCost = 0
+		--		,dblValue = 396.00
+		--		,dblSalesPrice = 0 
+		--		,intCurrencyId = @USD
+		--		,dblExchangeRate = 1
+		--		,intTransactionId = 1
+		--		,strTransactionId = 'PURCHASE-000003'
+		--		,strBatchId = 'BATCH-000001'
+		--		,intTransactionTypeId = @WRITE_OFF_SOLD
+		--		,intLotId = NULL
+		--		,intCreatedEntityId = 1
+		--		,intConcurrencyId = 1
+		---- Revalue sold
+		--UNION ALL 
+		--SELECT	intItemId = @WetGrains
+		--		,intItemLocationId = @Default_Location
+		--		,intItemUOMId = @WetGrains_BushelUOMId
+		--		,dtmDate = 'November 17, 2014'
+		--		,dblQty = 0
+		--		,dblUOMQty = 1
+		--		,dblCost = 0
+		--		,dblValue = -363.00
+		--		,dblSalesPrice = 0 
+		--		,intCurrencyId = @USD
+		--		,dblExchangeRate = 1
+		--		,intTransactionId = 1
+		--		,strTransactionId = 'PURCHASE-000003'
+		--		,strBatchId = 'BATCH-000001'
+		--		,intTransactionTypeId = @REVALUE_SOLD
+		--		,intLotId = NULL
+		--		,intCreatedEntityId = 1
+		--		,intConcurrencyId = 1
+
+		-- Auto Variance on Sold or Used Stock
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
@@ -490,37 +559,19 @@ BEGIN
 				,dblQty = 0
 				,dblUOMQty = 1
 				,dblCost = 0
-				,dblValue = 396.00
+				,dblValue = 396.00 - 363.00
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
 				,strTransactionId = 'PURCHASE-000003'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @WRITE_OFF_SOLD
+				,intTransactionTypeId = @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
 				,intLotId = NULL
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
-		-- Revalue sold
-		UNION ALL 
-		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
-				,intItemUOMId = @WetGrains_BushelUOMId
-				,dtmDate = 'November 17, 2014'
-				,dblQty = 0
-				,dblUOMQty = 1
-				,dblCost = 0
-				,dblValue = -363.00
-				,dblSalesPrice = 0 
-				,intCurrencyId = @USD
-				,dblExchangeRate = 1
-				,intTransactionId = 1
-				,strTransactionId = 'PURCHASE-000003'
-				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @REVALUE_SOLD
-				,intLotId = NULL
-				,intCreatedEntityId = 1
-				,intConcurrencyId = 1
+
+
 		-- No auto negative because the stock is zero. 
 		-- Purchase 3: 100 @ $18.00
 		UNION ALL 

@@ -114,7 +114,7 @@ BEGIN TRY
 				ysnSigned			=	0,					strContractNumber			=	CAST('' AS NVARCHAR(100)),
 				ysnPrinted			=	0,
 
-				intItemId			=	SC.intItemId,		intItemUOMId				=	SC.intItemUOMIdFrom,
+				intItemId			=	SC.intItemId,		intItemUOMId				=	SC.intItemUOMIdTo,
 				intContractSeq		=	1,					intStorageScheduleRuleId	=	SC.intStorageScheduleId,
 				dtmEndDate			=	CP.dtmDefEndDate,	intCompanyLocationId		=	SC.intProcessingLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
@@ -125,7 +125,7 @@ BEGIN TRY
 		FROM	tblSCTicket					SC	CROSS 
 		JOIN	tblCTCompanyPreference		CP
 		JOIN	tblICItem					IM	ON	IM.intItemId		=	SC.intItemId
-		JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId		=	SC.intItemUOMIdFrom
+		JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId		=	SC.intItemUOMIdTo
 		JOIN	tblICCommodity				CM	ON	CM.intCommodityId	=	IM.intCommodityId
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CM.intCommodityId	AND 
 													CU.intUnitMeasureId =	QU.intUnitMeasureId

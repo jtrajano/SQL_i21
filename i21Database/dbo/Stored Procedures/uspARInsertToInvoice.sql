@@ -534,7 +534,53 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						RETURN 0;
 					END
 				ELSE
+					BEGIN
+					DELETE FROM tblARInvoiceDetailTax WHERE intInvoiceDetailId =  @NewDetailId
+
+					INSERT INTO [tblARInvoiceDetailTax]
+						([intInvoiceDetailId]
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[dblRate]
+						,[dblExemptionPercent]
+						,[intSalesTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes]
+						,[intConcurrencyId])
+					SELECT
+						 @NewDetailId
+						,[intTaxGroupId]
+						,[intTaxCodeId]
+						,[intTaxClassId]
+						,[strTaxableByOtherTaxes]
+						,[strCalculationMethod]
+						,[dblRate]
+						,[dblExemptionPercent]
+						,[intSalesTaxAccountId]
+						,[dblTax]
+						,[dblAdjustedTax]
+						,[ysnTaxAdjusted]
+						,[ysnSeparateOnInvoice]
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[strNotes]
+						,0
+					FROM
+						[tblSOSalesOrderDetailTax]
+					WHERE
+						[intSalesOrderDetailId] = @ItemSalesOrderDetailId
+
+
 					DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId				
+					END
 			END	
 	END
 
@@ -561,7 +607,7 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		EXEC dbo.[uspARReComputeInvoiceAmounts] @NewInvoiceId
 		
 		UPDATE
 			tblSOSalesOrder
@@ -579,17 +625,8 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			BEGIN
 				EXEC dbo.uspARInsertRecurringInvoice @SoftwareInvoiceId, @UserId
 			END
-
-		DECLARE @ysnSOSoftwareType BIT
-		SELECT TOP 1 @ysnSOSoftwareType = CASE WHEN strType = 'Software' THEN 1 ELSE 0 END
-		FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
-
-		IF NOT EXISTS(SELECT TOP 1 1 FROM @tblItemsToInvoice WHERE strItemType = 'Software' AND strMaintenanceType NOT IN ('Maintenance Only', 'SaaS'))
-			BEGIN
-				SET @ysnSOSoftwareType = 0
-			END
-
-		IF @ysnSOSoftwareType = 1 AND ISNULL(@NewInvoiceId, 0) > 0
+			
+		IF EXISTS(SELECT TOP 1 1 FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId AND ICI.strType = 'Software' WHERE SOD.intSalesOrderId = @SalesOrderId) AND ISNULL(@NewInvoiceId, 0) > 0
 			BEGIN
 				DECLARE @invoiceToPost NVARCHAR(MAX)
 				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)

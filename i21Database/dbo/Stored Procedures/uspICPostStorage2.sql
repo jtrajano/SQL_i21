@@ -232,18 +232,18 @@ BEGIN
 			,@intEntityUserSecurityId;
 	END
 
-	--------------------------------------
-	-- Update the Lot's Qty and Weights. 
-	--------------------------------------
-	BEGIN 
-		UPDATE	Lot 
-		SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-				,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-				,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
-		FROM	dbo.tblICLot Lot
-		WHERE	Lot.intItemLocationId = @intItemLocationId
-				AND Lot.intLotId = @intLotId
-	END 
+	----------------------------------------
+	---- Update the Lot's Qty and Weights. 
+	----------------------------------------
+	--BEGIN 
+	--	UPDATE	Lot 
+	--	SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
+	--			,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
+	--			,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
+	--	FROM	dbo.tblICLot Lot
+	--	WHERE	Lot.intItemLocationId = @intItemLocationId
+	--			AND Lot.intLotId = @intLotId
+	--END 
 
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO 

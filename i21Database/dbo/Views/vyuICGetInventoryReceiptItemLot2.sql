@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryReceiptItemLot2]
-	AS
+AS
 SELECT lot.intInventoryReceiptItemLotId, lot.intInventoryReceiptItemId, lot.intLotId, lot.strLotNumber, lot.strLotAlias,
 	lot.intSubLocationId, lot.intStorageLocationId, lot.intItemUnitMeasureId, lot.dblQuantity, lot.dblGrossWeight, lot.dblTareWeight,
 	lot.dblCost, lot.intNoPallet, lot.intUnitPallet, lot.dblStatedGrossPerUnit, lot.dblStatedTarePerUnit, lot.strContainerNo,

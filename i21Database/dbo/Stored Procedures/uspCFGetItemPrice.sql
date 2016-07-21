@@ -82,6 +82,14 @@ BEGIN
 		SET @CFPricingOut = 'Posted Trans from CSV'
 	END
 END
+ELSE IF (@CFTransactionType = 'Foreign Sale')
+BEGIN
+	IF (@CFOriginalPrice IS NOT NULL)
+	BEGIN
+		SET @CFPricingOut = 'Network Cost'
+		SET @CFStandardPrice = @CFOriginalPrice
+	END
+END
 ELSE
 BEGIN
 EXEC [uspARGetItemPrice] 

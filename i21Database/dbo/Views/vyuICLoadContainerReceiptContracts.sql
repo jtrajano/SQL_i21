@@ -1,0 +1,64 @@
+﻿CREATE VIEW [dbo].[vyuICLoadContainerReceiptContracts]
+AS
+SELECT
+	COALESCE(t2.intLoadDetailId, t1.intLoadDetailId) intLoadDetailId
+	,COALESCE(t2.intLoadId, t1.intLoadId) intLoadId
+	,COALESCE(t2.strLoadNumber, t1.strLoadNumber) strLoadNumber
+	,COALESCE(t2.intPContractDetailId, t1.intPContractDetailId) intPContractDetailId
+	,COALESCE(t2.intContractHeaderId, t1.intPContractHeaderId) intPContractHeaderId
+	,COALESCE(t2.intContractSeq, t1.intPContractSeq) intPContractSeq
+	,COALESCE(t2.strContractNumber, t1.strPContractNumber) strPContractNumber
+	,COALESCE(t2.intCommodityId, t1.intPCommodityId) intPCommodityId
+	,COALESCE(t2.intItemId, t1.intItemId) intItemId
+	,COALESCE(t2.intLifeTime, t1.intPLifeTime) intPLifeTime
+	,COALESCE(t2.strLifeTimeType, t1.strPLifeTimeType) strPLifeTimeType
+	,COALESCE(t2.intItemUOMId, t1.intItemUOMId) intItemUOMId
+	,COALESCE(t2.intLocationId, t1.intCompanyLocationId) intCompanyLocationId
+	,COALESCE(t2.dblQuantity, t1.dblQuantity) dblQuantity
+	,COALESCE(t2.dblReceivedQty, t1.dblDeliveredQuantity) dblDeliveredQuantity
+	,COALESCE(t2.dblQuantity - t2.dblReceivedQty, t1.dblQuantity - t1.dblDeliveredQuantity) dblBalanceToReceive
+	,COALESCE(t2.dblGrossWt, t1.dblGross) dblGross
+	,COALESCE(t2.dblTareWt, t1.dblTare) dblTare
+	,COALESCE(t2.dblNetWt, t1.dblNet) dblNet
+	,COALESCE(t2.dblCost, t1.dblPCashPrice) dblCost
+	,COALESCE(t2.strCostUOM, t1.strPCostUOM) strPCostUOM
+	,COALESCE(t2.intCostUOMId, t1.intPCostUOMId) intPCostUOMId
+	,COALESCE(t2.dblCostUOMCF, t1.dblPCostUOMCF) dblPCostUOMCF
+	,COALESCE(t2.intWeightUOMId, t1.intWeightItemUOMId) intWeightUOMId
+	,COALESCE(t2.strWeightUOM, t1.strWeightItemUOM) strWeightItemUOM
+	,COALESCE(t2.intEntityVendorId, t1.intVendorEntityId) intEntityVendorId
+	,COALESCE(t2.strVendor, t1.strVendor) strVendor
+	,COALESCE(t2.strItemNo, t1.strItemNo) strItemNo
+	,COALESCE(t2.strItemDescription, t1.strItemDescription) strItemDescription
+	,COALESCE(t2.strLotTracking, t1.strLotTracking) strLotTracking
+	,COALESCE(t2.strType, t1.strType) strType
+	,COALESCE(t2.strUnitMeasure, t1.strItemUOM) strUnitMeasure
+	,COALESCE(t2.dblItemUOMCF, t1.dblItemUOMCF) dblItemUOMCF
+	,COALESCE(t2.intStockUOM, t1.intPStockUOM) intStockUOM
+	,COALESCE(t2.strStockUOM, t1.strPStockUOM) strStockUOM
+	,COALESCE(t2.strStockUOMType, t1.strPStockUOMType) strStockUOMType
+	,COALESCE(t2.dblStockUOMCF, t1.dblPStockUOMCF) dblStockUOMCF
+	,COALESCE(t2.strBLNumber, NULL) strBLNumber
+	,COALESCE(t2.strContainerNumber, NULL) strContainerNumber
+	,COALESCE(t2.strLotNumber, NULL) strLotNumber
+	,COALESCE(t2.strMarks, NULL) strMarks
+	,COALESCE(t2.strOtherMarks, NULL) strOtherMarks
+	,COALESCE(t2.strSealNumber, NULL) strSealNumber
+	,COALESCE(t2.strContainerType, NULL) strContainerType
+	,COALESCE(t2.intWeightItemUOMId, t1.intWeightItemUOMId) intWeightItemUOMId
+	,COALESCE(t2.strCurrency, t1.strPCurrency) strCurrency
+	,COALESCE(t2.strMainCurrency, t1.strPMainCurrency) strMainCurrency
+	,COALESCE(t2.ysnSubCurrency, t1.ysnPSubCurrency) ysnSubCurrency
+	,COALESCE(t2.dblMainCashPrice, t1.dblPMainCashPrice) dblMainCashPrice
+	,COALESCE(t2.dblFranchise, t1.dblPFranchise) dblFranchise
+	,COALESCE(t2.dblContainerWeightPerQty, NULL) dblContainerWeightPerQty
+	,COALESCE(t2.intSubLocationId, NULL) intSubLocationId
+	,COALESCE(t2.strSubLocationName, NULL) strSubLocationName
+	,COALESCE(t2.intLoadContainerId, -1) intLoadContainerId
+	,COALESCE(t2.intLoadDetailContainerLinkId, -1) intLoadDetailContainerLinkId
+	,COALESCE(t2.intPurchaseSale, t1.intPurchaseSale) intPurchaseSale
+	,COALESCE(t2.intTransUsedBy, t1.intTransUsedBy) intTransUsedBy
+	,COALESCE(t2.intSourceType, t1.intSourceType) intSourceType
+	,COALESCE(t2.ysnPosted, t1.ysnPosted) ysnPosted
+FROM vyuLGLoadDetailView t1
+	FULL OUTER JOIN vyuLGLoadContainerPurchaseContracts t2 ON t2.intLoadDetailId = t1.intLoadDetailId

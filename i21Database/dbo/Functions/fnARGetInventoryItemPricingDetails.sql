@@ -166,7 +166,7 @@ BEGIN
 
 		DECLARE @PriceLevel AS NVARCHAR(100)
 		SELECT TOP 1 @PriceLevel = strPricingLevelName FROM tblSMCompanyLocationPricingLevel WHERE intCompanyLocationPricingLevelId = @PricingLevelId
-		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId AND strPricing = 'Multi-Level Pricing')
+		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId)
 			BEGIN
 				SELECT TOP 1 
 					@Price			= @UOMQuantity * PL.dblUnitPrice
@@ -211,7 +211,6 @@ BEGIN
 			AND PL.intItemLocationId = VIS.intItemLocationId															
 	WHERE
 		C.intEntityCustomerId = @CustomerId
-		AND C.strPricing = 'Multi-Level Pricing'
 		AND PL.intItemId = @ItemId
 		AND PL.intItemLocationId = @ItemLocationId
 		AND PL.intItemUnitMeasureId = @ItemUOMId

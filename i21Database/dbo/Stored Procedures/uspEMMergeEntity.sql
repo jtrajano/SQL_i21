@@ -275,7 +275,7 @@ BEGIN
 									where ' + @CurTableKey + ' = ' +  @CurMergeId)
 			end
 			
-			 
+			EXEC('uspSMMergeRole ' + @CurMergeId + ',' + @PrimaryKeyString)
 			
 			EXEC('delete from tblEMEntityType where intEntityId = ' + @CurMergeId + ' and strType IN (SELECT strType from tblEMEntityType where intEntityId = ' + @PrimaryKeyString + ')' )
 			EXEC('update tblEMEntityLocation set ysnDefaultLocation = 0 where intEntityId = ' + @CurMergeId)

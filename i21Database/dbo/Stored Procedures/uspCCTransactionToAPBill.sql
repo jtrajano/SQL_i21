@@ -86,6 +86,8 @@ BEGIN TRY
 				,@voucherDetaiCC = @voucherDetailCC
 				,@billId = @createdBillId OUTPUT
 
+			UPDATE tblAPBill SET strComment = @ccdReference WHERE intBillId = @createdBillId
+
 			EXEC [dbo].[uspAPPostBill]
 				@post = @post
 				,@recap = @recap
@@ -115,6 +117,14 @@ BEGIN TRY
 					,@param = @billId
 					,@userId = @userId
 					,@success = @success OUTPUT
+
+				--DELETE Bill Transaction
+				DELETE FROM tblAPBill WHERE intBillId = 
+				(SELECT DISTINCT intBillId 
+					FROM tblAPBillDetail A
+				JOIN  tblCCSiteDetail B ON A.intCCSiteDetailId = B.intSiteDetailId
+					WHERE B.intSiteHeaderId = @intSiteHeaderId)
+
 			END
 			ELSE
 				RAISERROR('Bill ID is null', 0, 1)

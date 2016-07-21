@@ -42,7 +42,7 @@ IF @Unship = 1
 
 		IF ISNULL(@shipmentNos, '') <> ''
 			BEGIN
-				DECLARE @errorMsg NVARCHAR(MAX) = 'Failed to unship Sales Order. Unpost this/these Shipment Records first: ' + @shipmentNos
+				DECLARE @errorMsg NVARCHAR(MAX) = 'Failed to unship Sales Order. Unpost this Shipment Record first: ' + @shipmentNos
 				RAISERROR(@errorMsg, 16, 1)
 				RETURN
 			END

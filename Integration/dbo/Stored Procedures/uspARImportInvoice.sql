@@ -100,12 +100,12 @@ BEGIN
 				(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = agivc_loc_no COLLATE Latin1_General_CI_AS),--[intCompanyLocationId]
 				Salesperson.intEntitySalespersonId,--[intEntitySalespersonId]
 				NULL, -- [dtmShipDate]
-				0, --to do [intShipViaId]
+				NULL, --to do [intShipViaId]
 				agivc_po_no, --[strPONumber]
 				ISNULL(Term.intTermID,0),-- [intTermId]
-				NULL,--[dblInvoiceSubtotal]
-				NULL,--[dblShipping]
-				NULL,--[dblTax]
+				0,--[dblInvoiceSubtotal]
+				0,--[dblShipping]
+				0,--[dblTax]
 				agivc_slsmn_tot,--[dblInvoiceTotal]
 				agivc_disc_amt,--[dblDiscount]
 				agivc_bal_due,--[dblAmountDue]
@@ -114,9 +114,9 @@ BEGIN
 					WHEN agivc_type = 'I' 
 						THEN 'Invoice' 
 					WHEN agivc_type = 'C' 
-						THEN 'Credit' 
+						THEN 'Credit Memo' 
 					WHEN agivc_type = 'D' 
-						THEN 'Debit' 
+						THEN 'Debit Memo' 
 					WHEN agivc_type = 'S' 
 						THEN 'Cash Sale'
 					WHEN agivc_type = 'R' 
@@ -124,7 +124,7 @@ BEGIN
 					WHEN agivc_type = 'X' 
 						THEN 'Transfer'
 				 END),--[strTransactionType]
-				0, --agivc_pay_type [intPaymentMethodId]
+				NULL, --agivc_pay_type [intPaymentMethodId]
 				agivc_comment, --[strComments]
 				@ARAccount, --to do [intAccountId]
 				1, --"If Invoice exists in the agivcmst, that means it is posted" -Joe [ysnPosted]
@@ -185,16 +185,16 @@ BEGIN
 				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDate]
 				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
 				(CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmPostDate]
-				0,--[intCurrencyId]
+				(select intDefaultCurrencyId from tblSMCompanyPreference),--[intCurrencyId]
 				(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = ptivc_loc_no COLLATE Latin1_General_CI_AS),--[intCompanyLocationId]
 				Salesperson.intEntitySalespersonId,--[intEntitySalespersonId]
 				NULL, -- [dtmShipDate]
-				0, --to do [intShipViaId]
+				NULL, --to do [intShipViaId]
 				ptivc_po_no, --[strPONumber]
 				ISNULL(Term.intTermID,1),-- [intTermId]
-				NULL,--[dblInvoiceSubtotal]
-				NULL,--[dblShipping]
-				NULL,--[dblTax]
+				0,--[dblInvoiceSubtotal]
+				0,--[dblShipping]
+				0,--[dblTax]
 				ptivc_sold_by_tot,--[dblInvoiceTotal]
 				ptivc_disc_amt,--[dblDiscount]
 				ptivc_bal_due,--[dblAmountDue]
@@ -203,9 +203,9 @@ BEGIN
 					WHEN ptivc_type = 'I' 
 						THEN 'Invoice' 
 					WHEN ptivc_type = 'C' 
-						THEN 'Credit' 
+						THEN 'Credit Memo' 
 					WHEN ptivc_type = 'D' 
-						THEN 'Debit' 
+						THEN 'Debit Memo' 
 					WHEN ptivc_type = 'S' 
 						THEN 'Cash Sale'
 					WHEN ptivc_type = 'R' 
@@ -213,7 +213,7 @@ BEGIN
 					WHEN ptivc_type = 'X' 
 						THEN 'Transfer'
 				 END),--[strTransactionType]
-				0, --ptivc_pay_type [intPaymentMethodId]
+				NULL, --ptivc_pay_type [intPaymentMethodId]
 				ptivc_comment, --[strComments]
 				@ARAccount, --to do [intAccountId]
 				1, --"If Invoice exists in the ptivcmst, that means it is posted" -Joe [ysnPosted]
@@ -250,14 +250,15 @@ BEGIN
 			   ,[dblTotal])		
 			SELECT 
 				INV.intInvoiceId,
-				NULL,
-				agstm_itm_no,
+				ITM.intItemId,
+				ITM.strDescription,
 				NULL,
 				agstm_un,
 				agstm_un_prc,
 				agstm_sls 
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(agstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL	
 		 end 
 
@@ -276,14 +277,15 @@ BEGIN
 			   ,[dblTotal])		
 			SELECT 
 				INV.intInvoiceId,
-				NULL,
-				ptstm_itm_no,
+				ITM.intItemId,
+				ITM.strDescription,
 				NULL,
 				ptstm_un,
 				ptstm_un_prc,
 				ptstm_net 
 			FROM ptstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(ptstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(ptstm_bill_to_cus COLLATE Latin1_General_CI_AS))
+			INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(ptstm_itm_no  COLLATE Latin1_General_CI_AS)
 			WHERE ptstm_un IS NOT NULL AND ptstm_un_prc IS NOT NULL AND ptstm_net IS NOT NULL	
 		 end
 

@@ -1415,7 +1415,7 @@
     <Build Include="dbo\Tables\tblSMApprovalListUserSecurity.sql" />
     <Build Include="dbo\Views\vyuEMSalesperson.sql" />
     <Build Include="dbo\Tables\tblSMShortcutKeys.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdatePOStatusOnReceiptSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateStatusOnReceiptSave.sql" />
     <Build Include="dbo\Tables\tblCFItem.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentItemSource.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateFuturePrice.sql" />
@@ -1849,7 +1849,7 @@
     <Build Include="dbo\Views\vyuQMSampleList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetFIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdateSOStatusOnShipmentSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateStatusOnShipmentSave.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDCashFlowStatementDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReceived.sql" />
@@ -2797,7 +2797,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Stored Procedures\uspPATGetEquityRefundDetails.sql" />
-    <Build Include="dbo\Views\vyuETExportCustomer.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
     <Build Include="dbo\Views\vyuARShipmentItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCleanCost.sql" />
@@ -3813,7 +3813,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByDay.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
     <Build Include="dbo\Views\vyuMFStockReservation.sql" />
-    <Build Include="dbo\Views\vyuCTContractExportET.sql" />
+    <Build Include="dbo\Views\vyuCTETExportContractExport.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOffsetAccountForOriginTrans.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strSourceType.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountCode.sql" />
@@ -3877,7 +3877,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityReceiptDetail.sql" />
-    <Build Include="dbo\Views\vyuARCustomerBalancesForET.sql" />
+    <Build Include="dbo\Views\vyuARETExportCustomerBalances.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPriceDetailItem.sql" />
     <Build Include="dbo\Views\vyuSCPrintPreviewTicketView.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageType.sql" />
@@ -3946,7 +3946,7 @@
     <Build Include="dbo\Functions\fnMFGetInvoiceChargesByShipment.sql" />
     <Build Include="dbo\Views\vyuEMETExportSalespersonDriver.sql" />
     <Build Include="dbo\Tables\tblEMEntityPasswordHistory.sql" />
-    <Build Include="dbo\Views\vyuETCustomerSpecialPricing_1.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomerSpecialPricing.sql" />
     <Build Include="dbo\Tables\tblARPOSPayment.sql" />
     <Build Include="dbo\Tables\tblARPOSLog.sql" />
     <Build Include="dbo\Tables\tblARPOSDetail.sql" />
@@ -3955,6 +3955,7 @@
     <Build Include="dbo\Stored Procedures\uspARGetReceiptNumber.sql" />
     <Build Include="dbo\Views\vyuLGLoadViewSearch.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailViewSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot2.sql" />
     <Build Include="dbo\Views\vyuLGLoadVesselViewSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspLGTransferContractLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitItemMove.sql" />
@@ -4063,6 +4064,33 @@
     <Build Include="dbo\Tables\tblEMEntitySMTPInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateSF900.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectContainerFromQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMAlterConstraint.sql" />
+    <Build Include="dbo\Stored Procedures\uspDMTruncateTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBalanceForwardReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessUnpaidStorageDiscount.sql" />
+    <Build Include="dbo\Functions\fnMaxNumeric.sql" />
+    <Build Include="dbo\Functions\fnMinNumeric.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVendorHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptCashRequirements.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptCheckRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetails.sql" />
+    <Build Include="dbo\Views\vyuCTContractSearchView2.sql" />
+    <Build Include="dbo\Views\vyuCTContractHeaderView2.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
+    <Build Include="dbo\Views\vyuAPPurchaseOrderPayables.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptPayables.sql" />
+    <Build Include="dbo\Views\vyuAPLogisticsPayables.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptAddPurchaseOrder.sql" />
+    <Build Include="dbo\Views\vyuAPContractPayables.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptAddTransferOrder.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptAddPurchaseContract.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptAddLGInboundShipment.sql" />
+    <Build Include="dbo\Functions\fnConstructLineItemTaxDetail.sql" />
+    <Build Include="dbo\User Defined Types\VoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblARStatementOfAccount.sql" />
+    <None Include="Scripts\Post-Deployment\IC\17_Update_Blank_Description_tblICItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4181,6 +4209,8 @@
     <None Include="Scripts\Post-Deployment\HD\CustomField.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\2_Screen.sql" />
     <None Include="Scripts\Post-Deployment\EM\031_UpdatePhoneAreaLength.sql" />
+    <None Include="Scripts\Post-Deployment\EM\031_DefaultDateAndNumberFormat.sql" />
+    <None Include="Scripts\Post-Deployment\CF\2_DataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

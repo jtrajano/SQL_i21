@@ -49,6 +49,7 @@ BEGIN
 		FROM tblICInventoryShipmentItem ShipmentItem
 			LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 		WHERE ShipmentItem.intInventoryShipmentId = @ShipmentId
+
 		-- Create snapshot of Shipment Items before Save
 		SELECT 
 			intInventoryShipmentId = intTransactionId,

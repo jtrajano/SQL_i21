@@ -7,6 +7,7 @@
     [intInventoryReceiptId] INT NULL, 
     [intInvoiceId] INT NULL, 
 	[intSalesOrderId] INT NULL, 
+	[intBillId] INT NULL, 
     [intContractHeaderId] INT NULL, 
     [dblUnits] NUMERIC(18, 6) NULL, 
     [dtmHistoryDate] DATETIME NULL, 
@@ -26,96 +27,6 @@
 	CONSTRAINT [FK_tblGRStorageHistory_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),	
 	CONSTRAINT [FK_tblGRStorageHistory_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]),
+	CONSTRAINT [FK_tblGRStorageHistory_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
 )
-
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Identity Column',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'intStorageHistoryId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Concurrency Column',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'intConcurrencyId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Customer Storage Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'intCustomerStorageId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Ticket Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'intTicketId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Inventory Receipt Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'intInventoryReceiptId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Invoice Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'intInvoiceId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Contract Sequence Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = 'intContractHeaderId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Currency Rate',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'dblCurrencyRate'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'History Date',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'dtmHistoryDate'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Units',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'dblUnits'

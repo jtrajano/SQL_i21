@@ -55,14 +55,15 @@ BEGIN TRY
         ,[ysnRecomputeTax]
         ,[intSiteDetailId]
         ,[ysnInventory]
+		,[strComments]
     )
     SELECT [strTransactionType] = 'Credit Memo' 
         ,[strSourceTransaction] = 'Credit Card Reconciliation'
         ,[intSourceId] = null
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
         ,[intEntityCustomerId] = ccSite.intCustomerId
-        ,[intCompanyLocationId] = ccVendorDefault.intCompanyLocationId
-        ,[intCurrencyId] = 1
+        ,[intCompanyLocationId] = ccVendor.intCompanyLocationId
+        ,[intCurrencyId] = ccVendor.intCurrencyId
         ,[intTermId] = ccCustomer.intTermsId
         ,[dtmDate] = ccSiteHeader.dtmDate
         ,[dtmShipDate]  = ccSiteHeader.dtmDate
@@ -77,12 +78,13 @@ BEGIN TRY
         ,[ysnRecomputeTax] = 0
         ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
         ,[ysnInventory] = 1
+		,[strComments] = ccSiteHeader.strCcdReference
     FROM tblCCSiteHeader ccSiteHeader 
-    INNER JOIN tblCCVendorDefault ccVendorDefault ON ccSiteHeader.intVendorDefaultId = ccVendorDefault.intVendorDefaultId 
+    INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
     INNER JOIN @CCRItemToARItem  ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
-    LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId
+    LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
     WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intDealerSiteId IS NOT NULL
 
     --REMOVE -1 items
@@ -123,6 +125,15 @@ BEGIN TRY
 				,@ErrorMessage		= @ErrorMessage OUTPUT
 				,@CreatedIvoices	= @CreatedIvoices OUTPUT
 				,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+
+		--DELETE Invoice Transaction
+		DELETE FROM tblARInvoice WHERE intInvoiceId IN (
+			SELECT DISTINCT C.intInvoiceId 
+				FROM tblCCSiteHeader A 
+			JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
+			JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
+				WHERE A.intSiteHeaderId = @intSiteHeaderId)
+
 		END
 		ELSE
 			RAISERROR('Invoice ID is null', 0 ,1)	

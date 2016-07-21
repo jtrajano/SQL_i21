@@ -49,7 +49,9 @@
     [strInvoiceReportNumber]  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intInvoiceId]            INT             NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId_1] DEFAULT ((1)) NULL,
-    [ysnPostedCSV]			  BIT			  NULL, 
+    [ysnPostedCSV]            BIT             NULL,
+    [strForeignCardId]        NVARCHAR (MAX)  NULL,
+    [ysnDuplicate]            BIT             NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
@@ -60,6 +62,10 @@
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
+
+
+
+
 
 
 

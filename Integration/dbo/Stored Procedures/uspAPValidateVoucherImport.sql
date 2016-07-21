@@ -175,6 +175,17 @@ WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 		ELSE 1 END)
 
+--DO NOT ALLOW TO IMPORT IF THERE ARE CHECK NO 00000000 AND IT IS PREPAYMENT
+INSERT INTO @log
+SELECT DISTINCT
+	'Please fix the payment for check # ''00000000'' and for vendor ' + dbo.fnTrim(A.apivc_vnd_no)
+FROM apivcmst A
+WHERE A.apivc_chk_no = '00000000' AND A.apivc_trans_type = 'A'
+AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+					THEN
+						CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+					ELSE 1 END)
+
 INSERT INTO tblAPImportVoucherLog
 (
 	[strDescription], 

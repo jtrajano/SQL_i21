@@ -1,5 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARImportTransactionsCSV]
 	 @ImportLogId		INT
+	,@ImportFormat      NVARCHAR(50)
+	,@ImportItemId		INT = NULL
+	,@ImportLocationId  INT = NULL
 	,@IsTank			BIT = 0
 	,@IsFromOldVersion	BIT = 0	
 	,@UserEntityId		INT	= NULL
@@ -21,6 +24,10 @@ DECLARE @ZeroDecimal		NUMERIC(18, 6)
 
 DECLARE @InvoicesForImport AS TABLE(intImportLogDetailId INT UNIQUE)
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
+
+DECLARE @IMPORTFORMAT_STANDARD NVARCHAR(50) = 'Standard'
+      , @IMPORTFORMAT_CARQUEST NVARCHAR(50) = 'CarQuest'
 
 SET @ZeroDecimal = 0.000000
 SET @DateNow = CAST(GETDATE() AS DATE)
@@ -76,6 +83,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@PreviousMeterReading			NUMERIC(18,6)   = @ZeroDecimal
 			,@ConversionFactor				NUMERIC(18,6)   = @ZeroDecimal	
 			,@BillingBy						NVARCHAR(50)	= NULL
+			,@COGSAmount					NUMERIC(18,6)   = @ZeroDecimal
+			,@CustomerNumber				NVARCHAR(100)	= NULL
+			,@intItemLocationId				INT				= NULL
+			,@ysnAllowNegativeStock			BIT				= 0
+			,@intStockUnit					INT				= NULL
+			,@intCostingMethod				INT				= NULL
 
 		IF @IsTank = 1
 			BEGIN
@@ -159,6 +172,74 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					END
 
 				UPDATE tblARImportLogDetail SET dblTotal = @Total, strTransactionType = 'Invoice' WHERE intImportLogDetailId = @ImportLogDetailId
+			END
+		ELSE IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+			BEGIN
+				SELECT 
+					  @EntityCustomerId				= C.intEntityCustomerId
+					, @CustomerNumber				= C.strCustomerNumber
+					, @Date							= ILD.dtmDate
+					, @PostDate						= NULL
+					, @ShipDate						= ILD.dtmShipDate
+					, @CompanyLocationId			= CL.intCompanyLocationId
+					, @EntityId						= ISNULL(@UserEntityId, IL.intEntityId)
+					, @EntitySalespersonId			= SP.intEntitySalespersonId
+					, @TermId						= EL.intTermsId
+					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, EL.intTermsId)
+					, @TransactionType				= ILD.strTransactionType
+					, @Type							= @Type
+					, @Comment						= @IMPORTFORMAT_CARQUEST + ' ' + ILD.strTransactionType + ' ' + ILD.strTransactionNumber
+					, @OriginId						= ILD.strTransactionNumber
+					, @DiscountAmount				= ISNULL(ABS(ILD.dblDiscount), @ZeroDecimal)
+					, @DiscountPercentage			= (CASE WHEN ISNULL(ILD.dblDiscount, @ZeroDecimal) > 0 
+															THEN (1 - ((ABS(ILD.dblTotal) - ISNULL(ILD.dblDiscount, @ZeroDecimal)) / ABS(ILD.dblTotal))) * 100
+															ELSE @ZeroDecimal
+													   END)
+					, @ItemQtyShipped				= 1
+					, @ItemId						= ICI.intItemId
+					, @ItemPrice					= ABS(ISNULL(ILD.dblSubtotal, @ZeroDecimal))
+					, @ItemDescription				= ICI.strDescription
+					, @TaxGroupId					= EL.intTaxGroupId
+					, @Total						= ABS(ILD.dblTotal)
+					, @COGSAmount					= ABS(ILD.dblCOGSAmount)
+					, @FreightTermId				= ISNULL(EL.intFreightTermId, 0)
+					, @ShipViaId					= ISNULL(EL.intShipViaId, 0)
+					, @TaxAmount					= ABS(ILD.dblTax)
+					, @intItemLocationId			= ICIL.intItemLocationId
+					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
+					, @intStockUnit					= ICUOM.intItemUOMId
+					, @intCostingMethod				= ICIL.intCostingMethod
+				FROM
+					tblARImportLogDetail ILD
+				INNER JOIN
+					tblARImportLog IL
+						ON ILD.intImportLogId = IL.intImportLogId
+				LEFT JOIN
+					(tblARCustomer C
+						INNER JOIN tblEMEntityLocation EL
+							ON C.intEntityCustomerId = EL.intEntityId
+							AND EL.ysnDefaultLocation = 1)
+						ON ILD.strCustomerNumber = C.strCustomerNumber
+				LEFT JOIN
+					tblSMCompanyLocation CL
+						ON CL.intCompanyLocationId = @ImportLocationId
+				LEFT JOIN
+					tblARSalesperson SP
+						ON ILD.strSalespersonNumber = SP.strSalespersonId
+				LEFT JOIN
+					tblICItem ICI
+						ON ICI.intItemId = @ImportItemId
+						AND ICI.strType = 'Inventory'
+				LEFT JOIN
+					tblICItemLocation ICIL 
+						ON ICIL.intItemId = ICI.intItemId 
+						AND ICIL.intLocationId = @ImportLocationId
+				LEFT JOIN
+					tblICItemUOM ICUOM
+						ON ICUOM.intItemId = ICI.intItemId						
+						AND ICUOM.ysnStockUnit = 1
+				WHERE 
+					ILD.intImportLogDetailId = @ImportLogDetailId
 			END
 		ELSE
 			BEGIN
@@ -244,9 +325,34 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			SELECT TOP 1 @EntitySalespersonId = intSalespersonId FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId
 
 		IF @TaxGroupId IS NULL
-			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Tax Group provided does not exists. '
+			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 
+								CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST
+									THEN 'Customer ' + @CustomerNumber + ' doesn''t have default tax group set up.'
+									ELSE 'The Tax Group provided does not exists. '
+								END									
 		ELSE IF @TaxGroupId = 0
 			SET @TaxGroupId = NULL
+			
+		IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+			BEGIN
+				IF ISNULL(@ItemId, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item is required.'
+
+				IF ISNULL(@TaxGroupId, 0) > 0 AND NOT EXISTS (SELECT NULL FROM tblSMTaxGroupCode WHERE intTaxGroupId = @TaxGroupId)
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Tax Group must have atleast (1) one Tax Code setup.'
+				
+				IF ISNULL(@intItemLocationId, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item Location for the selected item is required.'
+
+				IF ISNULL(@ysnAllowNegativeStock, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item should allow negative stock.'
+
+				IF ISNULL(@intStockUnit, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s stock unit should not be null.'
+
+				IF ISNULL(@intCostingMethod, 0) = 0
+					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s location costing method should be either FIFO or LIFO.'
+			END
 
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
 			BEGIN TRY
@@ -254,6 +360,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					BEGIN
 						INSERT INTO @EntriesForInvoice(
 							 [strSourceTransaction]
+							,[strTransactionType]
 							,[intSourceId]
 							,[strSourceId]
 							,[intInvoiceId]
@@ -326,9 +433,13 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intPerformerId]
 							,[ysnLeaseBilling]
 							,[ysnVirtualMeterReading]
+							,[strImportFormat]
+							,[dblCOGSAmount]
+							,[intTempDetailIdForTaxes]
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
+							,[strTransactionType]		= @TransactionType
 							,[intSourceId]				= @ImportLogDetailId
 							,[strSourceId]				= CAST(@ImportLogDetailId AS NVARCHAR(250))
 							,[intInvoiceId]				= NULL
@@ -364,8 +475,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[ysnResetDetails]			= 1
 							,[ysnPost]					= CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END
 							,[intInvoiceDetailId]		= NULL
-							,[intItemId]				= CASE WHEN @IsTank = 1 THEN @ItemId ELSE NULL END
-							,[ysnInventory]				= CASE WHEN @IsTank = 1 AND ISNULL(@ItemId, 0) > 0 THEN 
+							,[intItemId]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @ItemId ELSE NULL END
+							,[ysnInventory]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST AND ISNULL(@ItemId, 0) > 0 THEN 
 															CASE WHEN (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @ItemId) = 'Inventory' THEN 1 ELSE 0 END
 														  ELSE 0 END
 							,[strItemDescription]		= @ItemDescription
@@ -382,7 +493,10 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblMaintenanceAmount]		= NULL
 							,[dblLicenseAmount]			= NULL
 							,[intTaxGroupId]			= @TaxGroupId
-							,[ysnRecomputeTax]			= CASE WHEN ISNULL(@TaxGroupId, 0) > 0 THEN 1 ELSE 0 END
+							,[ysnRecomputeTax]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST 
+															   THEN 0 
+															   ELSE CASE WHEN ISNULL(@TaxGroupId, 0) > 0 THEN 1 ELSE 0 END
+														  END
 							,[intSCInvoiceId]			= NULL
 							,[strSCInvoiceNumber]		= NULL
 							,[intInventoryShipmentItemId] = NULL
@@ -403,22 +517,82 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intPerformerId]			= @PerformerId
 							,[ysnLeaseBilling]			= NULL
 							,[ysnVirtualMeterReading]	= CASE WHEN @BillingBy = 'Virtual Meter' THEN 1 ELSE 0 END
+							,[strImportFormat]			= @ImportFormat
+							,[dblCOGSAmount]			= CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @COGSAmount ELSE NULL END
+							,[intTempDetailIdForTaxes]  = @ImportLogDetailId
 				
+						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+							BEGIN
+								INSERT INTO @TaxDetails(
+									[intDetailId] 
+								  , [intTaxGroupId]
+								  , [intTaxCodeId]
+								  , [intTaxClassId]
+								  , [strTaxableByOtherTaxes]
+								  , [strCalculationMethod]
+								  , [dblRate]
+								  , [intTaxAccountId]
+								  , [dblTax]
+								  , [dblAdjustedTax]
+								  , [ysnTaxAdjusted]
+								  , [ysnSeparateOnInvoice]
+								  , [ysnCheckoffTax]
+								  , [ysnTaxExempt]
+								  , [strNotes]
+								  , [intTempDetailIdForTaxes])
+								SELECT  TOP 1
+								    [intDetailId]				= NULL
+								  , [intTaxGroupId]				= TGC.intTaxGroupId
+								  , [intTaxCodeId]				= TGC.intTaxCodeId
+								  , [intTaxClassId]				= TC.intTaxClassId
+								  , [strTaxableByOtherTaxes]	= TC.strTaxableByOtherTaxes
+								  , [strCalculationMethod]		= TCR.strCalculationMethod
+								  , [dblRate]					= TCR.dblRate
+								  , [intTaxAccountId]			= TC.intSalesTaxAccountId
+								  , [dblTax]					= 0
+								  , [dblAdjustedTax]			= @TaxAmount
+								  , [ysnTaxAdjusted]			= 1
+								  , [ysnSeparateOnInvoice]		= 0 
+								  , [ysnCheckoffTax]			= TC.ysnCheckoffTax
+								  , [ysnTaxExempt]				= CASE WHEN ISNULL(@TaxAmount, 0) > 0 THEN 0 ELSE 1 END
+								  , [strNotes]					= NULL
+								  , [intTempDetailIdForTaxes]	= @ImportLogDetailId
+								FROM tblSMTaxGroupCode TGC
+									INNER JOIN tblSMTaxCode TC
+										ON TGC.intTaxCodeId = TC.intTaxCodeId
+									INNER JOIN tblSMTaxCodeRate TCR
+										ON TC.intTaxCodeId = TCR.intTaxCodeId
+								WHERE TGC.intTaxGroupId = @TaxGroupId 
+							END
+						
 						EXEC [dbo].[uspARProcessInvoices]
-							 @InvoiceEntries	= @EntriesForInvoice
-							,@UserId			= @EntityId
-							,@GroupingOption	= 11
-							,@RaiseError		= 1
-							,@ErrorMessage		= @ErrorMessage OUTPUT
-							,@CreatedIvoices	= @CreatedIvoices OUTPUT
+							 @InvoiceEntries	 = @EntriesForInvoice
+							,@LineItemTaxEntries = @TaxDetails
+							,@UserId			 = @EntityId
+		 					,@GroupingOption	 = 11
+							,@RaiseError		 = 1
+							,@ErrorMessage		 = @ErrorMessage OUTPUT
+							,@CreatedIvoices	 = @CreatedIvoices OUTPUT
 			
 						SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
 						IF ISNULL(@NewTransactionId, 0) > 0
-							UPDATE tblARInvoice 
-							SET intEntitySalespersonId = @EntitySalespersonId
-							  , strType = CASE WHEN @IsTank = 1 THEN 'Tank Delivery' ELSE @Type END
-							WHERE intInvoiceId = @NewTransactionId
+							BEGIN
+								UPDATE tblARInvoice 
+								SET intEntitySalespersonId = @EntitySalespersonId
+								  , strType = CASE WHEN @IsTank = 1 THEN 'Tank Delivery' ELSE @Type END
+								WHERE intInvoiceId = @NewTransactionId
+
+								IF @ImportFormat = @IMPORTFORMAT_CARQUEST
+									BEGIN
+										DECLARE @invoiceToPost	NVARCHAR(MAX)
+										SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewTransactionId)
+
+										UPDATE tblICItemPricing SET dblLastCost = @COGSAmount WHERE intItemId = @ImportItemId AND intItemLocationId = @intItemLocationId
+
+										EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserEntityId
+									END
+							END
 					END
 				ELSE
 					BEGIN

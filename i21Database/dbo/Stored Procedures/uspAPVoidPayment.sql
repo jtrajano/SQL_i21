@@ -91,7 +91,6 @@ BEGIN
 			[dblAmountPaid],
 			[dblUnapplied],
 			[ysnPosted],
-			[strPaymentRecordNum],
 			[dblWithheld],
 			[intUserId],
 			[intConcurrencyId],
@@ -116,7 +115,6 @@ BEGIN
 			p.[dblAmountPaid],
 			p.[dblUnapplied],
 			p.[ysnPosted],
-			p.[strPaymentRecordNum],
 			p.[dblWithheld],
 			p.[intUserId],
 			p.[intConcurrencyId],
@@ -164,6 +162,7 @@ BEGIN
 	UPDATE A
 		SET A.intPaymentId  = B.intNewPaymentId
 		,A.dblPayment = A.dblPayment * -1
+		,A.dblDiscount = A.dblDiscount * -1
 	FROM #tmpPaymentDetail A
 		INNER JOIN #tmpPayables B
 			ON A.intPaymentId = B.intPaymentId

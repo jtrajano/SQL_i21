@@ -64,6 +64,10 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = @InvoiceId 
 -- 15. "Sales Contract"
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intContractHeaderId], 0) <> 0)
 	RETURN 15
+
+-- 16. "Load Schedule"
+IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND ISNULL([intLoadId], 0) <> 0)
+	RETURN 16
 						
 	
 

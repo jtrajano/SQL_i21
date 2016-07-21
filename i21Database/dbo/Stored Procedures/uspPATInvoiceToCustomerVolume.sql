@@ -37,9 +37,9 @@ BEGIN
 		SELECT AR.intEntityCustomerId,
 			   IC.intPatronageCategoryId,
 			   AR.ysnPosted,
-			   dblVolume = sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (ARD.dblQtyShipped * ARD.dblPrice) 
-						   ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END),
-						   @intFiscalYear as fiscalYear
+			   dblVolume =	sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN ARD.dblPrice ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
+							ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ARD.dblQtyShipped ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END ) END),
+			   @intFiscalYear as fiscalYear
 		  INTO #tempItem
 		  FROM tblARInvoice AR 
 	INNER JOIN tblARInvoiceDetail ARD
@@ -54,7 +54,6 @@ BEGIN
 		   AND PC.strPurchaseSale = 'Sale'
 		 WHERE AR.intInvoiceId = @intInvoiceId
 		   AND IC.intPatronageCategoryId IS NOT NULL
-		   AND ICU.ysnStockUnit = 1 -- Confirm with sir Ajith
 		   group by AR.intEntityCustomerId,
 			   IC.intPatronageCategoryId,
 			   AR.ysnPosted

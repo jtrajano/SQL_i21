@@ -2,6 +2,7 @@
 (
 	[intImportFileId]	INT NOT NULL  IDENTITY, 
     [strFileName]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 
+	[strImportFormat]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dtmDate]		    DATETIME NULL, 
     [dblFileSize]		NUMERIC(18, 6) NULL,
 	[strOriginType]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

@@ -58,12 +58,6 @@ BEGIN
 			INSERT INTO @tblOriginTransactions
 			SELECT  strTransactionId,strTransactionType, dtmDate,@strModule  from vyuPRUnpostedTransactions
 			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
-	
-	ELSE IF @strModule = 'CM' -- SHOW ONLY PR TRANSACTIONS
-			INSERT INTO @tblOriginTransactions
-			SELECT  strTransactionId,strTransactionType, dtmDate,@strModule  from [vyuCMUnpostedTransaction]
-			WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
-			
 	ELSE IF @strModule = 'GL'
 	BEGIN
 		-- BEGIN SHOW CM,INV, PR (I21) AND AP,GL (ORIGIN) TRANSACTIONS
@@ -101,8 +95,8 @@ BEGIN
 		
 		;WITH I21Transactions (strTransactionId,strTransactionType,dtmDate,strModule) AS(
 			 SELECT strTransactionId COLLATE Latin1_General_CI_AS,strTransactionType COLLATE Latin1_General_CI_AS, dtmDate ,'INV' from [vyuICGetUnpostedTransactions] UNION ALL
-			SELECT strTransactionId COLLATE Latin1_General_CI_AS,strTransactionType COLLATE Latin1_General_CI_AS, dtmDate ,'PR' from vyuPRUnpostedTransactions UNION ALL
-			SELECT strTransactionId COLLATE Latin1_General_CI_AS, strTransactionType COLLATE Latin1_General_CI_AS, dtmDate,'CM' from [vyuCMUnpostedTransaction])
+			SELECT strTransactionId COLLATE Latin1_General_CI_AS,strTransactionType COLLATE Latin1_General_CI_AS, dtmDate ,'PR' from vyuPRUnpostedTransactions
+			)
 		INSERT INTO @tblOriginTransactions SELECT strTransactionId,strTransactionType,dtmDate,strModule FROM I21Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		-- END SHOW CM,INV, PR (I21) AND AP,GL (ORIGIN) TRANSACTIONS
 	END
@@ -135,6 +129,8 @@ BEGIN
 			
 			UNION ALL
 				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName, intEntityId, dtmDate,'AR' from [vyuARUnpostedTransactions] --AR
+			UNION ALL
+				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName, intEntityId, dtmDate, 'CM' FROM vyuCMUnpostedTransaction --CM
 		)
 		INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate, strModule)
 		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,T.strModule from Transactions T

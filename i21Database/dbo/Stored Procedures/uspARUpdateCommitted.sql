@@ -653,7 +653,7 @@ BEGIN
 		
 	UNION ALL
 	
-	--SO/IS shipped = ordered
+	--SO shipped = ordered
 	SELECT
 		[intItemId]					=	ARID.intItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
@@ -693,10 +693,11 @@ BEGIN
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.dblQtyShipped = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
-		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)		
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 		
 	UNION ALL
-	--SO/IS shipped < ordered
+	--SO shipped < ordered
 	SELECT
 		[intItemId]					=	ARID.intItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
@@ -736,7 +737,8 @@ BEGIN
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.dblQtyShipped < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
-		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)		
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 	
 		
 	UPDATE

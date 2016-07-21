@@ -168,6 +168,7 @@ BEGIN
 				,@intStorageLocationId AS INT				= NULL 
 				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblQty AS NUMERIC(18,6)					= 40
+				,@intCostUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblNewCost AS NUMERIC(38,20)				= 37.261
 				,@intTransactionId AS INT					= 1
 				,@intTransactionDetailId AS INT				= 1
@@ -281,6 +282,7 @@ BEGIN
 			,@intStorageLocationId
 			,@intItemUOMId
 			,@dblQty
+			,@intCostUOMId
 			,@dblNewCost
 			,@intTransactionId
 			,@intTransactionDetailId
@@ -504,10 +506,10 @@ BEGIN
 	-- Assert
 	BEGIN
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual', 'Failed to generate the expected Inventory Transaction records.';
 		
 		-- Assert the expected data for tblICInventoryFIFOCostAdjustmentLog is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOCostAdjustmentLog', 'actualInventoryFIFOCostAdjustmentLog', 'Adjustment Log '
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOCostAdjustmentLog', 'actualInventoryFIFOCostAdjustmentLog', 'Failed to generate the expected FIFO Cost Adjustment Log records.'
 
 		-- Assert the average cost 
 		EXEC tSQLt.AssertEquals @dblAverageCost_Expected, @dblAverageCost_Actual, 'Average cost not computed correctly!'

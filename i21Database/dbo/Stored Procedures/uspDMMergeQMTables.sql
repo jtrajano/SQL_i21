@@ -13,7 +13,7 @@ BEGIN
 
     -- tblQMTicketDiscount
     SET @SQLString = N'MERGE tblQMTicketDiscount AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.' + @remoteDB + '.dbo.tblQMTicketDiscount) AS Source
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblQMTicketDiscount]) AS Source
         ON (Target.intTicketDiscountId = Source.intTicketDiscountId)
         WHEN MATCHED THEN
             UPDATE SET Target.intConcurrencyId = Source.intConcurrencyId, Target.dblGradeReading = Source.dblGradeReading, Target.strCalcMethod = Source.strCalcMethod, Target.strShrinkWhat = Source.strShrinkWhat, Target.dblShrinkPercent = Source.dblShrinkPercent, Target.dblDiscountAmount = Source.dblDiscountAmount, Target.dblDiscountDue = Source.dblDiscountDue, Target.dblDiscountPaid = Source.dblDiscountPaid, Target.ysnGraderAutoEntry = Source.ysnGraderAutoEntry, Target.intDiscountScheduleCodeId = Source.intDiscountScheduleCodeId, Target.dtmDiscountPaidDate = Source.dtmDiscountPaidDate, Target.intTicketId = Source.intTicketId, Target.intTicketFileId = Source.intTicketFileId, Target.strSourceType = Source.strSourceType, Target.intSort = Source.intSort, Target.strDiscountChargeType = Source.strDiscountChargeType
@@ -23,6 +23,7 @@ BEGIN
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     SET IDENTITY_INSERT tblQMTicketDiscount ON
     EXECUTE sp_executesql @SQLString;
     SET IDENTITY_INSERT tblQMTicketDiscount OFF

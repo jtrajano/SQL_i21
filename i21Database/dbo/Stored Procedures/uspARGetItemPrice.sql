@@ -26,8 +26,9 @@
 	,@AllowQtyToExceedContract	BIT				= 0
 	,@InvoiceType				NVARCHAR(200)	= NULL
 	,@TermId					INT				= NULL
+	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
 AS	
-	
+
 	SELECT
 		 @Price				= dblPrice
 		,@Pricing			= strPricing
@@ -39,6 +40,7 @@ AS
 		,@UnlimitedQuantity = ysnUnlimitedQty
 		,@Deviation			= dblDeviation
 		,@TermDiscount		= dblTermDiscount  
+		,@PricingType		= strPricingType
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId

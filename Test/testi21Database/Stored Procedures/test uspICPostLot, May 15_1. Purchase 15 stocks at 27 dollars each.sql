@@ -15,6 +15,7 @@ BEGIN
 		DECLARE @AUTO_NEGATIVE AS INT = 1
 		DECLARE @WRITE_OFF_SOLD AS INT = 2
 		DECLARE @REVALUE_SOLD AS INT = 3
+		DECLARE @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -1609,6 +1610,55 @@ BEGIN
 					,[intConcurrencyId]	= 1
 
 			-- 2ND expected: Write-Off Sold
+			--UNION ALL 
+			--SELECT	[intInventoryTransactionId] = 15
+			--		,[intItemId] = @WetGrains
+			--		,[intItemLocationId] = @NewHaven
+			--		,[intItemUOMId] = @intItemUOMId
+			--		,[intSubLocationId] = @intSubLocationId
+			--		,[intStorageLocationId] = @intStorageLocationId
+			--		,[dtmDate] = 'May 15, 2014'
+			--		,[dblQty] = 0
+			--		,[dblUOMQty] = @EACH
+			--		,[dblCost] = 0
+			--		,[dblValue] = 15 * 20.50
+			--		,[dblSalesPrice] = @dblSalesPrice
+			--		,[intCurrencyId] = @USD
+			--		,[dblExchangeRate] = 1
+			--		,[intTransactionId] = @intTransactionId
+			--		,[intTransactionDetailId] = @intTransactionDetailId
+			--		,[strTransactionId] = @strTransactionId
+			--		,[strBatchId] = @strBatchId
+			--		,[intTransactionTypeId] = @WRITE_OFF_SOLD
+			--		,[intLotId] = @intLotId 
+			--		,[intCreatedEntityId] = @intEntityUserSecurityId
+			--		,[intConcurrencyId]	= 1
+
+			---- 3RD expected: Revalue Sold
+			--UNION ALL 
+			--SELECT	[intInventoryTransactionId] = 16
+			--		,[intItemId] = @WetGrains
+			--		,[intItemLocationId] = @NewHaven
+			--		,[intItemUOMId] = @intItemUOMId
+			--		,[intSubLocationId] = @intSubLocationId
+			--		,[intStorageLocationId] = @intStorageLocationId
+			--		,[dtmDate] = 'May 15, 2014'
+			--		,[dblQty] = 0
+			--		,[dblUOMQty] = @EACH
+			--		,[dblCost] = 0
+			--		,[dblValue] = 15 * 27.00 * -1
+			--		,[dblSalesPrice] = @dblSalesPrice
+			--		,[intCurrencyId] = @USD
+			--		,[dblExchangeRate] = 1
+			--		,[intTransactionId] = @intTransactionId
+			--		,[intTransactionDetailId] = @intTransactionDetailId
+			--		,[strTransactionId] = @strTransactionId
+			--		,[strBatchId] = @strBatchId
+			--		,[intTransactionTypeId] = @REVALUE_SOLD
+			--		,[intLotId] = @intLotId 
+			--		,[intCreatedEntityId] = @intEntityUserSecurityId
+			--		,[intConcurrencyId]	= 1
+
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 15
 					,[intItemId] = @WetGrains
@@ -1620,7 +1670,7 @@ BEGIN
 					,[dblQty] = 0
 					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
-					,[dblValue] = 15 * 20.50
+					,[dblValue] = (15 * 20.50) - (15 * 27.00)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1628,32 +1678,7 @@ BEGIN
 					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @WRITE_OFF_SOLD
-					,[intLotId] = @intLotId 
-					,[intCreatedEntityId] = @intEntityUserSecurityId
-					,[intConcurrencyId]	= 1
-
-			-- 3RD expected: Revalue Sold
-			UNION ALL 
-			SELECT	[intInventoryTransactionId] = 16
-					,[intItemId] = @WetGrains
-					,[intItemLocationId] = @NewHaven
-					,[intItemUOMId] = @intItemUOMId
-					,[intSubLocationId] = @intSubLocationId
-					,[intStorageLocationId] = @intStorageLocationId
-					,[dtmDate] = 'May 15, 2014'
-					,[dblQty] = 0
-					,[dblUOMQty] = @EACH
-					,[dblCost] = 0
-					,[dblValue] = 15 * 27.00 * -1
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @USD
-					,[dblExchangeRate] = 1
-					,[intTransactionId] = @intTransactionId
-					,[intTransactionDetailId] = @intTransactionDetailId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[intTransactionTypeId] = @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
 					,[intLotId] = @intLotId 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
@@ -1664,7 +1689,7 @@ BEGIN
 				,intInventoryLotId
 				,dblQty
 			)
-			SELECT	intInventoryTransactionId = 16
+			SELECT	intInventoryTransactionId = 15
 					,intInventoryLotId = 7
 					,dblQty = 15
 		END

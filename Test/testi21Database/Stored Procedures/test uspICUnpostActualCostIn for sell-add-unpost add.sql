@@ -19,8 +19,10 @@ BEGIN
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @AUTO_NEGATIVE AS INT = 1
-		DECLARE @WRITE_OFF_SOLD AS INT = 2
-		DECLARE @REVALUE_SOLD AS INT = 3		
+				,@WRITE_OFF_SOLD AS INT = 2
+				,@REVALUE_SOLD AS INT = 3		
+				,@AUTO_VARIANCE_SOLD_OR_USED_STOCK AS INT = 35
+
 		DECLARE @InventoryReceipt AS INT = 4
 		DECLARE @InventoryShipment AS INT = 5;
 
@@ -119,7 +121,7 @@ BEGIN
 			,intRevalueActualCostId
 		) 
 		SELECT	intInventoryActualCostId = 2
-				,intInventoryTransactionId = 4
+				,intInventoryTransactionId = 3
 				,dblQty = 25
 				,intRevalueActualCostId = 1
 
@@ -174,32 +176,18 @@ BEGIN
 		SELECT	dtmDate = '1/2/2014'
 				,dblQty = 0
 				,dblCost = 0
-				,dblValue = -53.75
+				,dblValue = 75 - 53.75
 				,dblSalesPrice = 0
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0000001'
 				,intRelatedTransactionId = 1
 				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @REVALUE_SOLD
+				,intTransactionTypeId = @AUTO_VARIANCE_SOLD_OR_USED_STOCK
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0002'
-		UNION ALL 
-		SELECT	dtmDate = '1/2/2014'
-				,dblQty = 0
-				,dblCost = 0
-				,dblValue = 75
-				,dblSalesPrice = 0
-				,intTransactionId = 1
-				,strTransactionId = 'InvRcpt-0000001'
-				,intRelatedTransactionId = 1
-				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @WRITE_OFF_SOLD
-				,ysnIsUnposted = 0
-				,intItemId = @WetGrains
-				,intItemLocationId = 6
-				,strBatchId = 'BATCH-0002'
+
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
 				,dblQty = 0
@@ -260,21 +248,7 @@ BEGIN
 				,strTransactionId = 'InvRcpt-0000001'
 				,intRelatedTransactionId = 1
 				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @REVALUE_SOLD				
-		UNION ALL 
-		SELECT	intInventoryTransactionId = 4
-				,intTransactionId = 1
-				,strTransactionId = 'InvRcpt-0000001'
-				,intRelatedTransactionId = 1
-				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @WRITE_OFF_SOLD
-		--UNION ALL 
-		--SELECT	intInventoryTransactionId = 5
-		--		,intTransactionId = 1
-		--		,strTransactionId = 'InvRcpt-0000001'
-		--		,intRelatedTransactionId = 1
-		--		,strRelatedTransactionId = 'InvShip-0000001'
-		--		,intTransactionTypeId = @AUTO_NEGATIVE				
+				,intTransactionTypeId = @AUTO_VARIANCE_SOLD_OR_USED_STOCK		
 	END 
 	
 	-- Act
@@ -308,8 +282,8 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedActualCost', 'actualActualCost';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
+		EXEC tSQLt.AssertEqualsTable 'expectedActualCost', 'actualActualCost', 'Failed to generate the expected records for the Actual Cost bucket.';
+		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse', 'Failed to generate the expected records for #tmpInventoryTransactionStockToReverse.';
 	END
 
 	-- Clean-up: remove the tables used in the unit test

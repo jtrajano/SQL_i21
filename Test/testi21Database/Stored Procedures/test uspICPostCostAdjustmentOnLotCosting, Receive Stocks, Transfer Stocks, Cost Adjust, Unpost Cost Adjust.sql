@@ -386,7 +386,8 @@ BEGIN
 				,@intStorageLocationId AS INT				= NULL 
 				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
 				,@dblQty AS NUMERIC(18,6)					= 40
-				,@dblNewCost AS NUMERIC(38,20)				= 37.261
+				,@intCostUOMId AS INT						= @WetGrains_BushelUOM
+				,@dblVoucherCost AS NUMERIC(38,20)			= 37.261
 				,@intTransactionId AS INT					= 1
 				,@intTransactionDetailId AS INT				= 1
 				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
@@ -408,7 +409,8 @@ BEGIN
 			,intStorageLocationId
 			,intItemUOMId
 			,dblQty
-			,dblNewCost
+			,intCostUOMId
+			,dblVoucherCost
 			,intTransactionId
 			,intTransactionDetailId
 			,strTransactionId
@@ -427,7 +429,8 @@ BEGIN
 			,@intStorageLocationId
 			,@intItemUOMId
 			,@dblQty
-			,@dblNewCost
+			,@intCostUOMId
+			,@dblVoucherCost
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -622,7 +625,7 @@ BEGIN
 				,[dblCost]					= 22.00
 				,[dblValue]					= 0
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -644,7 +647,7 @@ BEGIN
 				,[dblCost]					= 22.00
 				,[dblValue]					= 0
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -690,7 +693,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -734,7 +737,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= 17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -780,7 +783,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -1 * -17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
@@ -825,7 +828,7 @@ BEGIN
 				,[dblCost]					= 0
 				,[dblValue]					= -1 * 17 * (37.261 - 22.00)
 				,[dblSalesPrice]			= 0 
-				,[intCurrencyId]			= NULL -- Inventory Transfers does not have currency Ids. 
+				,[intCurrencyId]			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') -- Inventory Transfers does not have currency Ids. 
 				,[dblExchangeRate]			= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1

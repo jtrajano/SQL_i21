@@ -6,7 +6,7 @@ SELECT
 ,Entity.strName
 ,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
 ,Cus.strType
-,Con.strPhone
+,EnPhoneNo.strPhone
 ,Loc.strAddress
 ,Loc.strCity
 ,Loc.strState
@@ -32,7 +32,7 @@ SELECT
 ,Cus.intBillToId
 ,dblCreditLimit = ISNULL(Cus.dblCreditLimit, 0)
 ,Cus.strVatNumber
-,Con.strPhone as strPhone1
+,EnPhoneNo.strPhone as strPhone1
 ,Con.strPhone2 as strPhone2
 ,Loc.strCountry
 ,Loc.strLocationName
@@ -40,9 +40,8 @@ SELECT
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
---INNER JOIN tblARCustomerToContact as CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
---LEFT JOIN tblEMEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
 LEFT JOIN tblEMEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]
+LEFT JOIN tblEMEntityPhoneNumber as EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
 LEFT JOIN [tblEMEntityLocation] as Loc ON Cus.intEntityCustomerId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 LEFT JOIN [tblEMEntityLocation] as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
 LEFT JOIN [tblEMEntityLocation] as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId

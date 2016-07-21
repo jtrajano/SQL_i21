@@ -84,6 +84,19 @@ BEGIN
 	(
 		SELECT 1 FROM aptrxmst B WHERE A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no
 	)
+	
+	DELETE A
+	FROM tblAPPayment A
+	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	INNER JOIN tblAPaptrxmst D ON C.intBillId = D.intBillId
+	INNER JOIN tmp_aptrxmstImport E ON D.intId = E.intBackupId
+
+	--DELETE FIRST THE INSERTED VOUCHER
+	DELETE A
+	FROM tblAPBill A
+	INNER JOIN tblAPaptrxmst B ON A.intBillId = B.intBillId
+	INNER JOIN tmp_aptrxmstImport C ON B.intId = C.intBackupId
 
 	--DELETE BACK UP RECORDS FROM tblAPaptrxmst
 	DELETE A
@@ -119,11 +132,6 @@ BEGIN
 		SELECT 1 FROM aptrxmst B WHERE A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no
 	)
 
-	DELETE A
-	FROM tblAPBill A
-	INNER JOIN tblAPaptrxmst B ON A.intBillId = B.intBillId
-	INNER JOIN tmp_aptrxmstImport C ON B.intBillId = C.intBackupId
-
 	--DELETE BACK UP RECORDS FROM tblAPapeglmst
 	DELETE A
 	FROM tblAPapeglmst A
@@ -138,8 +146,10 @@ BEGIN
 
 	DELETE A
 	FROM aphglmst A
-	INNER JOIN tmp_aptrxmstImport B
-		ON A.aphgl_vnd_no = B.aptrx_vnd_no AND A.aphgl_ivc_no = B.aptrx_ivc_no
+	INNER JOIN apivcmst B ON A.aphgl_vnd_no = B.apivc_vnd_no AND A.aphgl_ivc_no = B.apivc_ivc_no
+	INNER JOIN tmp_aptrxmstImport C
+		ON A.aphgl_vnd_no = C.aptrx_vnd_no AND A.aphgl_ivc_no = C.aptrx_ivc_no
+	WHERE B.apivc_status_ind = 'R'
 
 	DELETE A
 	FROM tblAPapivcmst A
@@ -156,7 +166,19 @@ END
 
 IF OBJECT_ID(N'dbo.tmp_apivcmstImport') IS NOT NULL
 BEGIN
-	
+
+	DELETE A
+	FROM tblAPPayment A
+	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	INNER JOIN tblAPapivcmst D ON C.intBillId = D.intBillId
+	INNER JOIN tmp_apivcmstImport E ON D.intId = E.intBackupId
+		
+	DELETE A
+	FROM tblAPBill A
+	INNER JOIN tblAPapivcmst B ON A.intBillId = B.intBillId
+	INNER JOIN tmp_apivcmstImport C ON B.intId = C.intBackupId
+
 	DELETE A
 	FROM tblAPapivcmst A
 	INNER JOIN tmp_apivcmstImport B ON A.intId = B.intBackupId
@@ -164,19 +186,7 @@ BEGIN
 	DELETE A
 	FROM tblAPaphglmst A
 	INNER JOIN tmp_apivcmstImport B ON A.intHeaderId = B.intBackupId
-
-	DELETE A
-	FROM tblAPPayment A
-	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-	INNER JOIN tblAPapivcmst D ON C.intBillId = D.intBillId
-	INNER JOIN tmp_apivcmstImport E ON D.intBillId = E.intBackupId
-
-	DELETE A
-	FROM tblAPBill A
-	INNER JOIN tblAPapivcmst B ON A.intBillId = B.intBillId
-	INNER JOIN tmp_apivcmstImport C ON B.intBillId = C.intBackupId
-
+	
 END
 
 IF @transCount = 0 COMMIT TRANSACTION

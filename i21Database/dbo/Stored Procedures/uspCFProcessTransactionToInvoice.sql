@@ -114,7 +114,10 @@ SELECT
 	,[intSourceId]							= cfTrans.intTransactionId
 	,[strSourceId]							= cfTrans.strTransactionId
 	,[intInvoiceId]							= @InvoiceId --NULL Value will create new invoice
-	,[intEntityCustomerId]					= cfCardAccount.intCustomerId
+	,[intEntityCustomerId]					= (case
+												when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Foreign Sale' then cfNetwork.intCustomerId
+												else cfCardAccount.intCustomerId
+											  end)
 	,[intCompanyLocationId]					= cfSiteItem.intARLocationId
 	,[intCurrencyId]						= 1
 	,[intTermId]							= cfCardAccount.intTermsCode
@@ -195,7 +198,7 @@ SELECT
 FROM tblCFTransaction cfTrans
 INNER JOIN tblCFNetwork cfNetwork
 ON cfTrans.intNetworkId = cfNetwork.intNetworkId
-INNER JOIN (SELECT icfCards.intCardId
+LEFT JOIN (SELECT icfCards.intCardId
 				   ,icfAccount.intAccountId
 				   ,icfAccount.intSalesPersonId
 				   ,icfAccount.intCustomerId
@@ -224,7 +227,7 @@ INNER JOIN (SELECT  icfSite.*
 			AND iicItemLoc.intItemId = icfItem.intARItemId)
 			AS cfSiteItem
 ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
-AND cfSiteItem.intARItemId = cfTrans.intARItemId
+--AND cfSiteItem.intARItemId = cfTrans.intARItemId
 AND cfSiteItem.intItemId = cfTrans.intProductId
 INNER JOIN (SELECT * 
 			FROM tblCFTransactionPrice

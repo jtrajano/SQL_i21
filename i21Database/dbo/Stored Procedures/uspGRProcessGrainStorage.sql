@@ -173,6 +173,9 @@ BEGIN TRY
 	END
 
 	--Creating Invoice
+	
+	SELECT @intDefaultCurrencyId=intDefaultCurrencyId FROm tblSMCompanyPreference
+
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 	

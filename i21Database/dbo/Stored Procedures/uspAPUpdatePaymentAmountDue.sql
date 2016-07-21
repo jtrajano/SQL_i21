@@ -31,11 +31,11 @@ ELSE IF @post = 1
 BEGIN
 	UPDATE B
 		SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-								THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END,
-		B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-							THEN B.dblDiscount ELSE 0 END,
-		B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-							THEN B.dblInterest ELSE 0 END
+								THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END
+		--B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+		--					THEN B.dblDiscount ELSE 0 END,
+		--B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+		--					THEN B.dblInterest ELSE 0 END
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId

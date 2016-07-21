@@ -40,6 +40,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 13. "Load/Shipment Schedules"
 																											-- 14. "Credit Card Reconciliation"
 																											-- 15. "Sales Contract"
+																											-- 16. "Load Schedule"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
@@ -75,6 +76,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
 	,[intMeterReadingId]					INT												NULL		-- Key Value from tblMBMeterReading (Meter Reading)
 	,[intContractHeaderId]					INT												NULL		-- Key Value from tblCTContractHeader (Sales Contract)
+	,[intLoadId]							INT												NULL		-- Key Value from tblLGLoad (Load Schedule)
 	,[intOriginalInvoiceId]					INT												NULL		-- Key Value from tblARInvoice (Provisional Invoice/ Duplicate/ Import/ Recurring) 	
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEMEntity			
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
@@ -145,5 +147,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnClearDetailTaxes]					BIT												NULL		-- Indicate whether to clear tax details before inserting tax details from LineItemTaxDetailStagingTable
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id for linking line item detail taxes (LineItemTaxDetailStagingTable) which are also fro processing
 	,[ysnSubCurrency]						BIT												NULL		-- Indicates whether the line item price is on sub currency
-
+	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
+	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
 )

@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
 	,@intStorageLocationId AS INT 
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(38,20)
-	,@dblNewCost AS NUMERIC(38,20)
+	,@intCostUOMId AS INT 
+	,@dblVoucherCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -41,7 +42,7 @@ BEGIN
 		,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
 		,[dblQty] NUMERIC(38,20) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
 		,[dblUOMQty] NUMERIC(38,20) NOT NULL DEFAULT 1			-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
-		,[dblNewCost] NUMERIC(38,20) NOT NULL DEFAULT 0		-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
+		,[dblNewCost] NUMERIC(38,20) NOT NULL DEFAULT 0			-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
 		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 		,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
@@ -76,8 +77,9 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
-		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		,@INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
@@ -123,6 +125,7 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId
+		,@dblNewCost AS NUMERIC(38,20)
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- 1. Get the cost bucket and original cost. 
@@ -135,11 +138,12 @@ BEGIN
 			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
 			,@CostBucketIntTransactionId = intTransactionId
 			,@CostBucketStrTransactionId = strTransactionId
+			,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryFIFO.intItemUOMId, @dblVoucherCost)
 	FROM	dbo.tblICInventoryFIFO LEFT JOIN dbo.tblICItemUOM 
 				ON tblICInventoryFIFO.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryFIFO.intItemId = @intItemId
 			AND tblICInventoryFIFO.intItemLocationId = @intItemLocationId
-			AND tblICInventoryFIFO.intItemUOMId = @intItemUOMId
+			--AND tblICInventoryFIFO.intItemUOMId = @intItemUOMId
 			AND tblICInventoryFIFO.intTransactionId = @intSourceTransactionId
 			AND tblICInventoryFIFO.intTransactionDetailId = @intSourceTransactionDetailId
 			AND tblICInventoryFIFO.strTransactionId = @strSourceTransactionId
@@ -182,6 +186,8 @@ BEGIN
 	-- Get the original cost. 
 	BEGIN 
 		-- Get the original cost from the FIFO cost adjustment log table. 
+		SET @OriginalCost = NULL 
+
 		SELECT	@OriginalCost = dblCost
 		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
 		WHERE	intInventoryFIFOId = @CostBucketId
@@ -404,9 +410,9 @@ BEGIN
 										) 																								
 										,(@dblNewCost - @InvTranCost) 
 									) 
-			----------------------------------------------------------
-			-- 7. If stock was sold, then do the "Revalue Sold". 
-			----------------------------------------------------------
+			-----------------------------------------------------------------------------------
+			-- 7. If stock was sold, then do the "Auto Variance on Sold or Used Stock". 
+			-----------------------------------------------------------------------------------
 			IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
 			BEGIN 
 				EXEC [dbo].[uspICPostInventoryTransaction]
@@ -427,7 +433,7 @@ BEGIN
 					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
+					,@intTransactionTypeId					= @INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock
 					,@intLotId								= NULL 
 					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
@@ -524,7 +530,7 @@ BEGIN
 						,[intTransactionId]				= @intTransactionId
 						,[intTransactionDetailId]		= @intTransactionDetailId
 						,[strTransactionId]				= @strTransactionId
-						,[intTransactionTypeId]			= @LoopTransactionTypeId -- @intTransactionTypeId
+						,[intTransactionTypeId]			= @LoopTransactionTypeId 
 						,[intLotId]						= InvTran.intLotId
 						,[intSubLocationId]				= InvTran.intSubLocationId
 						,[intStorageLocationId]			= InvTran.intStorageLocationId

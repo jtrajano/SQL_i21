@@ -7,9 +7,16 @@ BEGIN TRY
 	
    DECLARE @ErrMsg NVARCHAR(MAX)
   
-   select A.intCheckoutId,A.dblTotalTax As TotalTax, A.dblTaxableSales as TaxableSales, A.dblTaxExemptSales as TaxExemptSales,  B.strAccountId, B.strDescription
-   from tblSTCheckoutSalesTaxTotals A LEFT OUTER JOIN tblGLAccount B ON A.intSalesTaxAccount = B.intAccountId
+   select A.intCheckoutId
+    ,A.dblTotalTax As TotalTax
+	,A.dblTaxableSales as TaxableSales
+	,A.dblTaxExemptSales as TaxExemptSales
+	,B.strAccountId
+	,B.strDescription
+   from tblSTCheckoutSalesTaxTotals A 
+   LEFT JOIN tblGLAccount B ON A.intSalesTaxAccount = B.intAccountId
    where A.intCheckoutId = @intCheckoutId
+   and A.dblTotalTax is not NULL 
     
 END TRY
 

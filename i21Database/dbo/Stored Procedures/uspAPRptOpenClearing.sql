@@ -257,7 +257,7 @@ SET @query = '
 	,tmpAgingSummaryTotal.dblVoucherAmount
 	,tmpAgingSummaryTotal.dblTotal
 	,tmpAgingSummaryTotal.dblAmountPaid
-	,tmpAgingSummaryTotal.dblAmountDue
+	,ISNULL(tmpAgingSummaryTotal.dblAmountDue,0) as dblAmountDue
 	,ISNULL(IR.strVendorIdName,'''') as strVendorIdName 
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 		THEN 0 
@@ -294,11 +294,11 @@ SET @query = '
 		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
 		,SUM(tmpAPClearables.dblTotal) AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
-		,(SUM(tmpAPClearables.dblTotal) + SUM(tmpAPClearables.dblInterest) - SUM(tmpAPClearables.dblAmountPaid) - SUM(tmpAPClearables.dblDiscount)) AS dblAmountDue
+		,SUM(tmpAPClearables.dblAmountDue) AS dblAmountDue
 		FROM ('
 				+ @innerQuery + 
 			 ') tmpAPClearables 
-		GROUP BY intInventoryReceiptId,intBillId
+		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId

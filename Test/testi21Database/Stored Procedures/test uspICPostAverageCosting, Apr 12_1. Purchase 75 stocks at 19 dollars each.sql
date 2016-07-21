@@ -15,6 +15,7 @@ BEGIN
 		DECLARE @AUTO_NEGATIVE AS INT = 1
 		DECLARE @WRITE_OFF_SOLD AS INT = 2
 		DECLARE @REVALUE_SOLD AS INT = 3
+		DECLARE @AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK AS INT = 35
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -1105,17 +1106,20 @@ BEGIN
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 2nd expected: Write-Off sold
+			-- 2ND expected: Auto Variance on Negatively Sold or Used Stock
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 8
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
-					,[dblQty] = 0 
+					,[dblQty] = 0
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = 0
-					,[dblValue] = 30 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)
+					,[dblValue] = 
+							- (30 * @dblCost) -- Revalue Sold
+							+ (30 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)) -- Write Off Sold
+						
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1123,12 +1127,12 @@ BEGIN
 					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @WRITE_OFF_SOLD
+					,[intTransactionTypeId] = @AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK
 					,[intLotId] = NULL 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
 					,[intConcurrencyId]	= 1
 
-			-- 3rd expected: Revalue sold
+			-- 3RD expected: Auto Variance on Negatively Sold or Used Stock
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 9
 					,[intItemId] = @intItemId
@@ -1138,7 +1142,9 @@ BEGIN
 					,[dblQty] = 0
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = 0
-					,[dblValue] = -(30) * @dblCost
+					,[dblValue] = 
+							- (45 * @dblCost) -- Revalue Sold
+							+ (45 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)) -- Write Off Sold
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1146,58 +1152,12 @@ BEGIN
 					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[intTransactionTypeId] = @AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK
 					,[intLotId] = NULL 
 					,[intCreatedEntityId] = @intEntityUserSecurityId
-					,[intConcurrencyId]	= 1
-					
-			-- 4TH expected: Write-Off sold
-			UNION ALL 
-			SELECT	[intInventoryTransactionId] = 10
-					,[intItemId] = @intItemId
-					,[intItemLocationId] = @WetGrains_NewHaven
-					,[intItemUOMId] = @intItemUOMId
-					,[dtmDate] = @dtmDate
-					,[dblQty] = 0 
-					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = 0
-					,[dblValue] = 45 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId, @intItemUOMId)
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @USD
-					,[dblExchangeRate] = 1
-					,[intTransactionId] = @intTransactionId
-					,[intTransactionDetailId] = @intTransactionDetailId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @WRITE_OFF_SOLD
-					,[intLotId] = NULL 
-					,[intCreatedEntityId] = @intEntityUserSecurityId
-					,[intConcurrencyId]	= 1
+					,[intConcurrencyId]	= 1	
 
-			-- 5TH expected: Revalue sold
-			UNION ALL 
-			SELECT	[intInventoryTransactionId] = 11
-					,[intItemId] = @intItemId
-					,[intItemLocationId] = @WetGrains_NewHaven
-					,[intItemUOMId] = @intItemUOMId
-					,[dtmDate] = @dtmDate
-					,[dblQty] = 0
-					,[dblUOMQty] = @dblUOMQty
-					,[dblCost] = 0
-					,[dblValue] = -(45) * @dblCost
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @USD
-					,[dblExchangeRate] = 1
-					,[intTransactionId] = @intTransactionId
-					,[intTransactionDetailId] = @intTransactionDetailId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
-					,[intLotId] = NULL 
-					,[intCreatedEntityId] = @intEntityUserSecurityId
-					,[intConcurrencyId]	= 1					
-
-			-- 6TH expected: The Auto Negative
+			-- 4TH expected: The Auto Negative
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]
@@ -1220,7 +1180,7 @@ BEGIN
 					,[intCreatedEntityId]
 					,[intConcurrencyId]
 			)
-			SELECT	[intInventoryTransactionId] = 12
+			SELECT	[intInventoryTransactionId] = 10
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
@@ -1247,11 +1207,11 @@ BEGIN
 				,intInventoryFIFOId
 				,dblQty
 			)
-			SELECT	intInventoryTransactionId = 9
+			SELECT	intInventoryTransactionId = 8
 					,intInventoryFIFOId = 6
 					,dblQty = 30
 			UNION ALL 
-			SELECT	intInventoryTransactionId = 11
+			SELECT	intInventoryTransactionId = 9
 					,intInventoryFIFOId = 6
 					,dblQty = 45					
 		END
@@ -1329,10 +1289,10 @@ BEGIN
 				AND intItemLocationId = @intItemLocationId
 				
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual', 'Failed to generate the expected Inventory Transaction records.';
 		
 		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOOut', 'tblICInventoryFIFOOut', 'Failed to generate the expected Inventory FIFO Out records.'
 	END 
 	
 	-- Clean-up: remove the tables used in the unit test

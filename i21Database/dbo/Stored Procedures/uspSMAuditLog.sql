@@ -82,7 +82,7 @@ BEGIN
 		@screenName,
 		@entityId,
 		1,
-		GETDATE()
+		GETUTCDATE()
 
 	DELETE TOP (1) FROM #tmpAuditEntries
 END

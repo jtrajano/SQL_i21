@@ -17,3 +17,8 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICTransactionDetailLog] PRIMARY KEY ([intTransactionDetailLogId]) 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICTransactionDetailLog]
+	ON [dbo].[tblICTransactionDetailLog]([strTransactionType] ASC, [intTransactionId] ASC);
+GO

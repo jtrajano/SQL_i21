@@ -276,7 +276,7 @@ BEGIN
 			,dblNewWeight				= NULL 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
 			,dblNewWeightPerQty			= NULL 											
-			,dblCost					= Lot.dblLastCost
+			,dblCost					= dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, @intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
 			,dblNewCost					= NULL 
 			,intNewLocationId			= @intNewLocationId
 			,intNewSubLocationId		= @intNewSubLocationId
@@ -285,7 +285,12 @@ BEGIN
 			,intConcurrencyId			= 1
 	FROM	dbo.tblICItem Item INNER JOIN dbo.tblICLot Lot
 				ON Item.intItemId = Lot.intItemId
-
+			LEFT JOIN dbo.tblICItemUOM StockUnit
+				ON StockUnit.intItemId = Item.intItemId
+				AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+			LEFT JOIN dbo.tblICItemPricing ItemPricing
+				ON ItemPricing.intItemId = Item.intItemId
+				AND ItemPricing.intItemLocationId = Lot.intItemLocationId	
 	WHERE	Item.intItemId = @intItemId
 			AND Lot.intLotId = @intLotId
 END 

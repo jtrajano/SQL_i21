@@ -57,6 +57,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	WHERE B.intBillId = @voucherId
 
+	EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
 	INSERT INTO @voucherIds
 	SELECT @voucherId
 	EXEC uspAPUpdateVoucherTotal @voucherIds

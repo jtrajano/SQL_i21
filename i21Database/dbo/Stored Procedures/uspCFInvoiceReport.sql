@@ -15,6 +15,7 @@ BEGIN
 		,EXPR18					   = 0
 		,intAccountId			   = 0
 		,intInvoiceCycle		   = 0
+		,intOdometerAging		   = 0
 		,strCustomerNumber		   = ''
 		,strShipTo				   = ''
 		,strBillTo				   = ''
@@ -44,6 +45,7 @@ BEGIN
 		,strDescription			   = ''
 		,strVehicleNumber		   = ''
 		,strVehicleDescription	   = ''
+		,dblTotalMiles			   = 0.0
 		,dblQuantity			   = 0.0
 		,dblCalculatedTotalAmount  = 0.0
 		,dblOriginalTotalAmount	   = 0.0

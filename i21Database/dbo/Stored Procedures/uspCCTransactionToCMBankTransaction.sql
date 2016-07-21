@@ -140,6 +140,13 @@ BEGIN TRY
 							,@intUserId = @userId
 							,@intEntityId = @userId
 							,@isSuccessful = @success OUTPUT
+
+						--DELETE Bank Transaction
+						DELETE FROM tblCMBankTransaction WHERE intTransactionId = 
+						(SELECT intCMBankTransactionId 
+							FROM tblCCSiteHeader 
+						WHERE intSiteHeaderId = @intSiteHeaderId)
+
 					END
 					ELSE
 						RAISERROR('Bank Transaction ID is null',0,1)

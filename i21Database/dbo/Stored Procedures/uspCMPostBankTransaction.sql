@@ -488,8 +488,8 @@ BEGIN
 	SELECT	[dtmDate] 
 			,[strBatchId]
 			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
+			,CASE WHEN [dblDebit] < 0 THEN 0 ELSE [dblDebit] END 
+			,CASE WHEN [dblDebit] < 0 THEN ABS([dblDebit]) ELSE [dblCredit] END 
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]

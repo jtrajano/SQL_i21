@@ -4,10 +4,13 @@
     [intTicketId] INT NOT NULL, 
     [intCustomerId] INT NOT NULL, 
     [dblSplitPercent] DECIMAL(6, 3) NOT NULL, 
+	[intStorageScheduleTypeId] INT NULL,
     [strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicketSplit_intTicketSplitId] PRIMARY KEY ([intTicketSplitId]) ,
-	CONSTRAINT [FK_tblSCTicketSplit_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId])
+	CONSTRAINT [FK_tblSCTicketSplit_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
+	CONSTRAINT [FK_tblSCTicketSplit_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
+	CONSTRAINT [FK_tblSCTicketSplit_tblEMEntity_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblEMEntity]([intEntityId])
 )
 
 GO

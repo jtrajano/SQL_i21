@@ -39,8 +39,10 @@
 	,@TransactionId					INT				= NULL
 	,@MeterReadingId				INT				= NULL
 	,@OriginalInvoiceId				INT				= NULL
+	,@LoadId                        INT             = NULL
 	,@PeriodsToAccrue				INT				= 1
 	,@SourceId						INT				= 0
+	,@ImportFormat                  NVARCHAR(50)    = NULL
 		
 	,@ItemId						INT				= NULL
 	,@ItemPrepayTypeId				INT				= 0
@@ -251,7 +253,7 @@ IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHER
  
 IF ISNULL(@DefaultCurrency,0) = 0
 	BEGIN
-		SET @ErrorMessage = 'There is no setup for default currency in the Company Preference.'
+		SET @ErrorMessage = 'There is no setup for default currency in the Company Configuration.'
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
@@ -312,6 +314,7 @@ BEGIN TRY
 		,[strBOLNumber]
 		,[strDeliverPickup]
 		,[strComments]
+		,[strFooterComments]
 		,[intShipToLocationId]
 		,[strShipToLocationName]
 		,[strShipToAddress]
@@ -326,6 +329,7 @@ BEGIN TRY
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,[strImportFormat]
 		,[ysnPosted]
 		,[ysnPaid]
 		,[ysnRecurring]
@@ -340,7 +344,8 @@ BEGIN TRY
 		,[intTransactionId]
 		,[intMeterReadingId]
 		,[intContractHeaderId]
-		,[intOriginalInvoiceId] 
+		,[intOriginalInvoiceId]
+		,[intLoadId]
 		,[intEntityId]
 		,[intConcurrencyId])
 	SELECT
@@ -375,6 +380,7 @@ BEGIN TRY
 		,[strBOLNumber]					= @BOLNumber
 		,[strDeliverPickup]				= @DeliverPickUp
 		,[strComments]					= @Comment
+		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.intEntityCustomerId, 'Invoice Footer')
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
@@ -389,7 +395,8 @@ BEGIN TRY
 		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
 		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
-		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment') THEN @Posted ELSE 0 END)
+		,[strImportFormat]				= @ImportFormat
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Prepayment') THEN @Posted ELSE 0 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
@@ -404,6 +411,7 @@ BEGIN TRY
 		,[intMeterReadingId]			= @MeterReadingId
 		,[intContractHeaderId]			= @ItemContractHeaderId
 		,[intOriginalInvoiceId]			= @OriginalInvoiceId
+		,[intLoadId]                    = @LoadId
 		,[intEntityId]					= @EntityId 
 		,[intConcurrencyId]				= 0
 	FROM	

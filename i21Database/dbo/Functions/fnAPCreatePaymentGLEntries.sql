@@ -207,7 +207,7 @@ BEGIN
 				INNER JOIN tblAPVendor C
 					ON A.intEntityVendorId = C.intEntityVendorId
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-		AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
+		AND 1 = (CASE WHEN B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) THEN 1 ELSE 0 END)
 		AND B.dblDiscount <> 0 AND B.dblPayment > 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,

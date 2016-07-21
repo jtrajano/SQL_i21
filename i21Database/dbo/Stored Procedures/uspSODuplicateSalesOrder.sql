@@ -39,6 +39,7 @@ BEGIN
            ,[strOrderStatus]
            ,[intAccountId]
            ,[dtmProcessDate]
+		   ,[dtmExpirationDate]
            ,[ysnProcessed]
 		   ,[ysnRecurring]
            ,[strComments]
@@ -89,11 +90,15 @@ BEGIN
            ,[strTransactionType]
 		   ,[strQuoteType]
 		   ,[strType]
-           ,@OrderStatus
+           ,CASE WHEN  @ForRecurring = 1 THEN 'Open' ELSE ISNULL(@OrderStatus, 'Open') END
            ,[intAccountId]
            ,NULL --Processed Date
+		   ,[dtmExpirationDate]
            ,0 --Processed
-		   ,[ysnRecurring]      
+		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
+				THEN 0     
+				ELSE [ysnRecurring]     
+			END   
 		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
 				THEN [strComments]
 				ELSE [strComments] + ' DUP: ' + [strSalesOrderNumber] 

@@ -138,7 +138,7 @@ BEGIN
 			FROM pttrmmst 
 			LEFT JOIN tblSMTerm
 						ON CAST(pttrmmst.pttrm_code as CHAR(10)) COLLATE Latin1_General_CI_AS = tblSMTerm.strTermCode COLLATE Latin1_General_CI_AS
-			 WHERE tblSMTerm.strTermCode is  null
+			 WHERE tblSMTerm.strTermCode is  null and pttrm_desc is not null
 
 		 
 			WHILE (EXISTS(SELECT 1 FROM #tmpPTTerm))
@@ -225,7 +225,7 @@ BEGIN
 			FROM pttrmmst 
 			LEFT JOIN tblSMTerm
 						ON CAST(pttrmmst.pttrm_code as CHAR(10)) COLLATE Latin1_General_CI_AS = tblSMTerm.strTermCode COLLATE Latin1_General_CI_AS
-			 WHERE tblSMTerm.strTermCode is  null
+			 WHERE tblSMTerm.strTermCode is  null and pttrm_desc is not null
 		 END		
 	 END	
 END

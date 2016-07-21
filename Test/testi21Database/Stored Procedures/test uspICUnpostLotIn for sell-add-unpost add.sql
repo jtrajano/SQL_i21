@@ -19,8 +19,10 @@ BEGIN
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @AUTO_NEGATIVE AS INT = 1
-		DECLARE @WRITE_OFF_SOLD AS INT = 2
-		DECLARE @REVALUE_SOLD AS INT = 3		
+				,@WRITE_OFF_SOLD AS INT = 2
+				,@REVALUE_SOLD AS INT = 3		
+				,@AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35
+		
 		DECLARE @InventoryReceipt AS INT = 4
 		DECLARE @InventoryShipment AS INT = 5;
 
@@ -113,6 +115,7 @@ BEGIN
 				,intItemId = @WetGrains
 				,intItemLocationId = 6
 
+
 		-- Add fake data for tblICInventoryLotOut
 		INSERT INTO dbo.tblICInventoryLotOut (
 			intInventoryLotId
@@ -121,7 +124,7 @@ BEGIN
 			,intRevalueLotId
 		) 
 		SELECT	intInventoryLotId = 2
-				,intInventoryTransactionId = 4
+				,intInventoryTransactionId = 3
 				,dblQty = 25
 				,intRevalueLotId = 1
 
@@ -179,34 +182,19 @@ BEGIN
 		SELECT	dtmDate = '1/2/2014'
 				,dblQty = 0
 				,dblCost = 0
-				,dblValue = -53.75
+				,dblValue = 75 - 53.75
 				,dblSalesPrice = 0
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0000001'
 				,intRelatedTransactionId = 1
 				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @REVALUE_SOLD
+				,intTransactionTypeId = @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0002'
 				,intLotId = 12345
-		UNION ALL 
-		SELECT	dtmDate = '1/2/2014'
-				,dblQty = 0
-				,dblCost = 0
-				,dblValue = 75
-				,dblSalesPrice = 0
-				,intTransactionId = 1
-				,strTransactionId = 'InvRcpt-0000001'
-				,intRelatedTransactionId = 1
-				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @WRITE_OFF_SOLD
-				,ysnIsUnposted = 0
-				,intItemId = @WetGrains
-				,intItemLocationId = 6
-				,strBatchId = 'BATCH-0002'
-				,intLotId = 12345
+				
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
 				,dblQty = 0
@@ -247,6 +235,7 @@ BEGIN
 				,dblCost = 2.15
 				,intLotId = 12345
 
+
 		-- Setup the expected data for transactions to reverse 
 		INSERT INTO expectedTransactionToReverse (
 				intInventoryTransactionId
@@ -268,14 +257,7 @@ BEGIN
 				,strTransactionId = 'InvRcpt-0000001'
 				,intRelatedTransactionId = 1
 				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @REVALUE_SOLD				
-		UNION ALL 
-		SELECT	intInventoryTransactionId = 4
-				,intTransactionId = 1
-				,strTransactionId = 'InvRcpt-0000001'
-				,intRelatedTransactionId = 1
-				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @WRITE_OFF_SOLD
+				,intTransactionTypeId = @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
 	END 
 	
 	-- Act
@@ -309,7 +291,7 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedLot', 'actualLot';
+		EXEC tSQLt.AssertEqualsTable 'expectedLot', 'actualLot', 'Failed to generate the expected Lot Cost Bucket records.';
 		--EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
 	END
 

@@ -26,6 +26,7 @@ END
 DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
 		,@REVALUE_SOLD AS INT = 3
+		,@AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
@@ -98,11 +99,11 @@ FROM	(
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
 							AND ISNULL(inventory_transaction.dblQty, 0) > 0 -- Reverse Qty that is positive. 
 						)
-						-- Link to revalue and write-off sold 
+						-- Link to revalue, write-off sold, auto variance on sold or used stock. 
 						OR (
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
-							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD)
+							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK)
 						)
 					)
 
@@ -174,5 +175,5 @@ SET		dblStockOut = dblStockIn
 FROM	dbo.tblICInventoryLIFOStorage lifoStorageBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 			ON lifoStorageBucket.intTransactionId = Reversal.intTransactionId
 			AND lifoStorageBucket.strTransactionId = Reversal.strTransactionId
-WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK) 
 ;

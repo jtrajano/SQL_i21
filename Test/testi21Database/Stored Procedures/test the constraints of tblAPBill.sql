@@ -14,6 +14,6 @@ BEGIN
 	IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_NAME='FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId')
 	EXEC tSQLt.Fail 'Foreign key to tblSMTerm on tblAPBill does not exists'
 	--Foreign key to tblEntity
-	IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_NAME='FK_dbo.tblAPBill_dbo.tblEntity_intEntityId')
-	EXEC tSQLt.Fail 'Foreign key to tblEntity on tblAPBill does not exists'
+	IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_NAME='FK_dbo.tblAPBill_dbo.tblEMEntity_intEntityId')
+	EXEC tSQLt.Fail 'Foreign key to tblEMEntity on tblAPBill does not exists'
 END

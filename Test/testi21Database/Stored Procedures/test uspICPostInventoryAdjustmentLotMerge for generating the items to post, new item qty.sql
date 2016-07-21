@@ -201,7 +201,7 @@ BEGIN
 				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
-				,intCurrencyId			= NULL 
+				,intCurrencyId			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 				,dblExchangeRate		= 1
 				,intTransactionId		= 10
 				,intTransactionDetailId = 9
@@ -221,7 +221,7 @@ BEGIN
 				,dblCost				= 2.500000 -- Cost used for Weight Per Qty. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
-				,intCurrencyId			= NULL 
+				,intCurrencyId			= dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 				,dblExchangeRate		= 1
 				,intTransactionId		= 10
 				,intTransactionDetailId = 9

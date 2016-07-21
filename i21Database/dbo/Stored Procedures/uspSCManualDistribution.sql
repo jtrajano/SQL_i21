@@ -19,7 +19,7 @@ DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @total AS INT
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @strTransactionId NVARCHAR(40) = NULL
-DECLARE @strDistributionOption NVARCHAR(40) = NULL
+DECLARE @strDistributionOption NVARCHAR(50) = NULL
 
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
@@ -63,6 +63,7 @@ END
 
 BEGIN TRY
 DECLARE @intId INT;
+DECLARE @ysnDPStorage AS BIT;
 DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(12,4);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
@@ -81,6 +82,13 @@ OPEN intListCursor;
 			-- process the table variable row-by-row. This example simply
 			-- uses a PRINT statement as that action (not a very good
 			-- example).
+
+			BEGIN
+				SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
+				FROM dbo.tblGRStorageType ST WHERE 
+				ST.strStorageTypeCode = @strDistributionOption
+			END
+
 			IF @ysnIsStorage = 0
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
@@ -247,28 +255,95 @@ OPEN intListCursor;
 				END
 			IF @ysnIsStorage = 1
 			BEGIN
-				INSERT INTO @ItemsForItemReceipt (
-						intItemId
-						,intItemLocationId
-						,intItemUOMId
-						,dtmDate
-						,dblQty
-						,dblUOMQty
-						,dblCost
-						,dblSalesPrice
-						,intCurrencyId
-						,dblExchangeRate
-						,intTransactionId
-						,intTransactionDetailId
-						,strTransactionId
-						,intTransactionTypeId
-						,intLotId
-						,intSubLocationId
-						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-						,ysnIsStorage
-						,strSourceTransactionId
-				)
-				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
+				IF @ysnDPStorage = 1 AND ISNULL(@intLoopContractId,0) = 0
+					BEGIN
+					--SET @strReceiptType = 'Delayed Price'
+					INSERT INTO @LineItems (
+					intContractDetailId,
+					dblUnitsDistributed,
+					dblUnitsRemaining,
+					dblCost)
+					EXEC dbo.uspCTUpdationFromTicketDistribution 
+					@intTicketId
+					,@intEntityId
+					,@dblLoopContractUnits
+					,@intLoopContractId
+					,@intUserId
+					,@ysnDPStorage
+
+					DECLARE @intDPContractId INT;
+					DECLARE @dblDPContractUnits NUMERIC(12,4);
+					DECLARE intListCursorDP CURSOR LOCAL FAST_FORWARD
+					FOR
+					SELECT intContractDetailId, dblUnitsDistributed
+					FROM @LineItems;
+
+					OPEN intListCursorDP;
+
+					-- Initial fetch attempt
+					FETCH NEXT FROM intListCursorDP INTO @intDPContractId, @dblDPContractUnits;
+
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						-- Here we do some kind of action that requires us to 
+						-- process the table variable row-by-row. This example simply
+						-- uses a PRINT statement as that action (not a very good
+						-- example).
+						IF	ISNULL(@intDPContractId,0) != 0
+							INSERT INTO @ItemsForItemReceipt (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage
+							,strSourceTransactionId  
+							)
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
+						-- Attempt to fetch next row from cursor
+						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
+					END;
+
+					CLOSE intListCursorDP;
+					DEALLOCATE intListCursorDP;
+				END
+				ELSE
+					BEGIN
+					INSERT INTO @ItemsForItemReceipt (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage
+							,strSourceTransactionId
+					)
+					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
+					END
 			END		   
 			-- Attempt to fetch next row from cursor
 			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
@@ -281,7 +356,7 @@ SELECT @total = COUNT(*) FROM @ItemsForItemReceipt;
 IF (@total = 0)
 	RETURN;
 BEGIN 
-	EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, NULL, @InventoryReceiptId OUTPUT; 
+	EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @strReceiptType, @InventoryReceiptId OUTPUT; 
 END
 
 BEGIN 

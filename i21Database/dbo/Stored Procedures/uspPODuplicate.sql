@@ -57,7 +57,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	UPDATE A
 		SET A.intPurchaseId = @poIdCreated
 		,A.dblQtyReceived = 0
-		,A.dblQtyOrdered = (CASE WHEN B.intContractDetailId IS NOT NULL THEN (B.dblQuantity - B.dblScheduleQty) ELSE A.dblQtyOrdered END)
+		,A.dblQtyOrdered = (CASE WHEN B.intContractDetailId IS NOT NULL THEN (B.dblBalance - B.dblScheduleQty) ELSE A.dblQtyOrdered END)
 	FROM #tmpDuplicatePurchaseDetail A
 	LEFT JOIN tblCTContractDetail B ON A.intContractDetailId = B.intContractDetailId
 

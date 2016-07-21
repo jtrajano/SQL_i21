@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLotCosting]
 	,@intStorageLocationId AS INT 
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(38,20)
-	,@dblNewCost AS NUMERIC(38,20)
+	,@intCostUOMId AS INT 
+	,@dblVoucherCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -128,7 +129,8 @@ DECLARE @LoopTransactionTypeId AS INT
 DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@AdjustedQty AS NUMERIC(38,20) 
 		,@AdjustableQty AS NUMERIC(38,20)
-
+		,@dblNewCost AS NUMERIC(38,20)
+		
 -- Exit immediately if item is a non-lot type. 
 IF dbo.fnGetItemLotType(@intItemId) = 0 
 BEGIN 
@@ -171,17 +173,18 @@ BEGIN
 				,@CostBucketIntTransactionId = intTransactionId
 				,@CostBucketStrTransactionId = strTransactionId
 				,@intLotId = intLotId
+				,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLot.intItemUOMId, @dblVoucherCost)
 		FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
 					ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
 		WHERE	tblICInventoryLot.intItemId = @intItemId
-				AND tblICInventoryLot.intItemUOMId = @intItemUOMId
+				--AND tblICInventoryLot.intItemUOMId = @intItemUOMId
 				AND tblICInventoryLot.intItemLocationId = @intItemLocationId
 				AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
 				AND tblICInventoryLot.intTransactionDetailId = @intSourceTransactionDetailId
 				AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
 				AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
 				AND tblICInventoryLot.intLotId > ISNULL(@intLotId, 0) 
-				AND tblICInventoryLot.dblCost <> @dblNewCost
+				AND tblICInventoryLot.dblCost <> dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLot.intItemUOMId, @dblVoucherCost) --@dblNewCost
 	END 
 
 	-- Validate the cost bucket
@@ -212,6 +215,8 @@ BEGIN
 		-- Get the original cost. 
 		BEGIN 
 			-- Get the original cost from the Lot cost adjustment log table. 
+			SET @OriginalCost = NULL
+			 
 			SELECT	@OriginalCost = dblCost
 			FROM	dbo.tblICInventoryLotCostAdjustmentLog
 			WHERE	intInventoryLotId = @CostBucketId
@@ -455,14 +460,12 @@ BEGIN
 			BEGIN 
 				-- Calculate the revalue amount for the inventory transaction. 
 				SELECT @InvTranValue =	dbo.fnMultiply(
-											dbo.fnMultiply(
-												-1 	
-												, CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
+											-
+											CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
 														@StockQtyToRevalue
 													ELSE 
 														ISNULL(@StockQtyAvailableToRevalue, 0)
-												END
-											)
+											END
 											, (@dblNewCost - @InvTranCost) 
 										) 
 

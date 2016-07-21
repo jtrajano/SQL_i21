@@ -528,7 +528,7 @@ BEGIN
 				,[strRelatedTransactionId]				= NULL 
 				,[strTransactionForm]					= @strTransactionForm
 				,[dtmCreated]							= GETDATE()
-				,[intCreatedEntityId]						= @intEntityUserSecurityId
+				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId

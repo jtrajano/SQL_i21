@@ -16,7 +16,7 @@ BEGIN
 	BEGIN
 		UPDATE A SET A.strTicketStatus = 
 		CASE
-			WHEN @status = 1 THEN 'O'
+			WHEN @status = 1 THEN 'R'
 		END
 		FROM tblSCTicket A
 		WHERE A.intTicketId = @scId
@@ -44,7 +44,7 @@ BEGIN
 										WHEN ISNULL(@status, 0 ) = 0
 											THEN 'C' --Completed
 										WHEN @status = 1
-											THEN 'O' --Open
+											THEN 'R' --Reopen
 									END)
 		FROM #tmpSC A
 			INNER JOIN tblSCTicket B

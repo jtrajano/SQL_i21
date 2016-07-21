@@ -39,7 +39,7 @@ BEGIN
 		,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
 		,[dblQty] NUMERIC(38,20) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
 		,[dblUOMQty] NUMERIC(38,20) NOT NULL DEFAULT 1			-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
-		,[dblNewCost] NUMERIC(38,20) NOT NULL DEFAULT 0		-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
+		,[dblNewCost] NUMERIC(38,20) NOT NULL DEFAULT 0			-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
 		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 		,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
@@ -58,10 +58,11 @@ BEGIN
 END 
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1;
-DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
-DECLARE @INVENTORY_REVALUE_SOLD AS INT = 3;
-DECLARE @INVENTORY_COST_VARIANCE AS INT = 1;
+DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1
+		--,@INVENTORY_WRITE_OFF_SOLD AS INT = 2
+		--,@INVENTORY_REVALUE_SOLD AS INT = 3
+		,@INVENTORY_COST_VARIANCE AS INT = 1
+		,@INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -72,7 +73,8 @@ DECLARE @intId AS INT
 		,@intStorageLocationId AS INT 
 		,@dtmDate AS DATETIME
 		,@dblQty AS NUMERIC(38,20)
-		,@dblNewCost AS NUMERIC(38,20)
+		,@intCostUOMId AS INT 
+		,@dblVoucherCost AS NUMERIC(38,20)
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
@@ -117,7 +119,8 @@ BEGIN
 			,[dtmDate] 
 			,[dblQty] 
 			,[dblUOMQty] 
-			,[dblNewCost] 
+			,[intCostUOMId]
+			,[dblVoucherCost] 
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
 			,[intTransactionId]
@@ -140,7 +143,8 @@ BEGIN
 			,[dtmDate] 
 			,[dblQty] 
 			,[dblUOMQty] 
-			,[dblNewCost] 
+			,[intCostUOMId]
+			,[dblVoucherCost] 
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
 			,[intTransactionId]
@@ -176,7 +180,8 @@ SELECT  intId
 		,intStorageLocationId
 		,dtmDate
 		,dblQty 
-		,dblNewCost
+		,intCostUOMId
+		,dblVoucherCost
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -201,7 +206,8 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intStorageLocationId
 	,@dtmDate
 	,@dblQty
-	,@dblNewCost
+	,@intCostUOMId
+	,@dblVoucherCost
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -239,8 +245,9 @@ BEGIN
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@intItemUOMId
-			,@dblQty			
-			,@dblNewCost 
+			,@dblQty
+			,@intCostUOMId			
+			,@dblVoucherCost 
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -267,7 +274,8 @@ BEGIN
 			,@intStorageLocationId
 			,@intItemUOMId
 			,@dblQty			
-			,@dblNewCost 
+			,@intCostUOMId
+			,@dblVoucherCost 
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -293,8 +301,9 @@ BEGIN
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@intItemUOMId
-			,@dblQty			
-			,@dblNewCost 
+			,@dblQty		
+			,@intCostUOMId	
+			,@dblVoucherCost 
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -320,8 +329,9 @@ BEGIN
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@intItemUOMId
-			,@dblQty			
-			,@dblNewCost 
+			,@dblQty
+			,@intCostUOMId			
+			,@dblVoucherCost 
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -347,8 +357,9 @@ BEGIN
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@intItemUOMId
-			,@dblQty			
-			,@dblNewCost 
+			,@dblQty
+			,@intCostUOMId			
+			,@dblVoucherCost 
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -375,7 +386,8 @@ BEGIN
 		,@intStorageLocationId
 		,@dtmDate
 		,@dblQty
-		,@dblNewCost
+		,@intCostUOMId
+		,@dblVoucherCost
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -412,7 +424,8 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			,dtmDate
-			,dblNewCost
+			,intCostUOMId
+			,dblVoucherCost
 			,intTransactionId
 			,intTransactionDetailId
 			,strTransactionId
@@ -431,7 +444,8 @@ BEGIN
 		,@intSubLocationId
 		,@intStorageLocationId
 		,@dtmDate
-		,@dblNewCost
+		,@intCostUOMId
+		,@dblVoucherCost
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -508,7 +522,8 @@ BEGIN
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@dtmDate
-			,@dblNewCost
+			,@intCostUOMId
+			,@dblVoucherCost
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -540,7 +555,8 @@ BEGIN
 			,[dtmDate] 
 			,[dblQty] 
 			,[dblUOMQty] 
-			,[dblNewCost] 
+			,[intCostUOMId]
+			,[dblVoucherCost] 
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
 			,[intTransactionId]
@@ -563,6 +579,7 @@ BEGIN
 			,[dtmDate] 
 			,[dblQty] 
 			,[dblUOMQty] 
+			,[intItemUOMId] -- Use the cost bucket item uom id as the Cost UOM id. 
 			,[dblNewCost] 
 			,[intCurrencyId] 
 			,[dblExchangeRate] 

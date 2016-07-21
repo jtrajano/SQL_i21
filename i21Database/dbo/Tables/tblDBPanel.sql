@@ -52,6 +52,9 @@
     [strSortValue]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL, 
 	[ysnAutoRefresh]		BIT				DEFAULT ((0)) NULL,
 	[intAutoRefreshInterval] INT			NULL,
+	[strOrderByVariable]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strOrderByFieldName]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[ysnOrderByFieldDescending]      BIT				DEFAULT ((0)) NULL,
     CONSTRAINT [PK_dbo.tblDBPanel] PRIMARY KEY CLUSTERED ([intPanelId] ASC),
     CONSTRAINT [FK_dbo.tblDBPanelFilter_dbo.tblDBPanel_intFilterId] FOREIGN KEY ([intFilterId]) REFERENCES [dbo].[tblDBPanelFilter] ([intFilterId]),
 	CONSTRAINT [FK_dbo.tblRMConnection_dbo.tblDBPanel_intConnectionId] FOREIGN KEY ([intConnectionId]) REFERENCES [dbo].[tblRMConnection] ([intConnectionId])

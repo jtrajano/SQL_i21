@@ -3,10 +3,10 @@ AS
 BEGIN
 	-- User id 
 	BEGIN 
-		EXEC tSQLt.FakeTable 'dbo.tblEntity';	
+		EXEC tSQLt.FakeTable 'dbo.tblEMEntity';	
 		EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity';	
 
-		INSERT INTO tblEntity (
+		INSERT INTO tblEMEntity (
 			intEntityId
 		)
 		SELECT intEntityId = 10
@@ -25,7 +25,7 @@ BEGIN
 	BEGIN 
 		EXEC testi21Database.[Fake data for inventory transfer table]
 
-		EXEC tSQLt.ApplyConstraint 'tblICInventoryTransfer', 'FK_tblICInventoryTransfer_tblEntity';
+		EXEC tSQLt.ApplyConstraint 'tblICInventoryTransfer', 'FK_tblICInventoryTransfer_tblEMEntity';
 		EXEC tSQLt.ApplyConstraint 'tblICInventoryTransfer', 'FK_tblICInventoryTransfer_EntityCreator';
 		
 		-- Declare the variables for grains (item)

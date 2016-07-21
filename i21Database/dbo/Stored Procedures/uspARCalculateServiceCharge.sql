@@ -63,7 +63,7 @@ AS
 	IF (@statusIds <> '')
 		BEGIN
 			DELETE FROM #tmpCustomers
-			WHERE intEntityId NOT IN (SELECT intEntityCustomerId FROM tblARCustomer WHERE intAccountStatusId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@statusIds)))
+			WHERE intEntityId NOT IN (SELECT intEntityCustomerId FROM tblARCustomerAccountStatus WHERE intAccountStatusId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@statusIds)))
 		END
 
 	--PROCESS EACH CUSTOMER
@@ -94,10 +94,10 @@ AS
 																																					ELSE I.dtmCalculated 
 																																				 END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal))
 						 		  								THEN SC.dblMinimumCharge
-						 		  								ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
-																															  THEN I.dtmDueDate 
-																															  ELSE I.dtmCalculated 
-																														   END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))
+																ELSE (((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0  AND ISNULL(I.ysnCalculated, 0) = 0
+																																	THEN I.dtmDueDate 
+ 																																	ELSE I.dtmCalculated 
+																																END, ISNULL(PD.dtmDatePaid, @asOfDate)) * (I.dblInvoiceTotal - ISNULL(PD.dblAmountPaid, @zeroDecimal)))						 		  								
 						 									END
 						 								ELSE 0
 						 							END
@@ -115,7 +115,7 @@ AS
 										AND P.ysnPosted = 1 
 										AND P.dtmDatePaid <= @asOfDate
 								  GROUP BY PD.intInvoiceId
-						) AS PD ON PD.intInvoiceId = I.intInvoiceId 
+						) AS PD ON PD.intInvoiceId = I.intInvoiceId AND PD.dtmDatePaid < I.dtmDueDate						
 					WHERE I.ysnPosted = 1 							  
 						AND I.strTransactionType = 'Invoice'
 						AND I.strType IN ('Standard', 'Transport Delivery')

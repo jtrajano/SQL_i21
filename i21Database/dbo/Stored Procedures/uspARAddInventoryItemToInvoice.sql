@@ -255,7 +255,7 @@ BEGIN TRY
 				,[intPrepayTypeId]					= @ItemPrepayTypeId 
 				,[dblPrepayRate]					= @ItemPrepayRate
 				,[strDocumentNumber]				= @ItemDocumentNumber
-				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
+				,[strItemDescription]				= (CASE WHEN ISNULL(@ItemDescription, '') = '' THEN IC.[strDescription] ELSE ISNULL(@ItemDescription, '') END)
 				,[intOrderUOMId]					= @OrderUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
@@ -341,7 +341,8 @@ DECLARE @NewId INT
 SET @NewId = SCOPE_IDENTITY()
 		
 BEGIN TRY
-	EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
+	IF @RecomputeTax = 1
+		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0	

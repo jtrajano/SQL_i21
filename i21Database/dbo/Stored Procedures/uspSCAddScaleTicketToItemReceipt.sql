@@ -96,13 +96,10 @@ INSERT into @ReceiptStagingTable(
 		,strSourceScreenName
 )	
 SELECT 
-		--strReceiptType				= CASE 
-		--								WHEN LI.intTransactionDetailId IS NULL THEN 'Direct'
-		--								WHEN LI.intTransactionDetailId IS NOT NULL THEN 'Purchase Contract'
-		--							  END
 		strReceiptType				= CASE 
 										WHEN LI.strSourceTransactionId = 'SPT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'CNT' THEN 'Purchase Contract'
+										--WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
 										ELSE 'Direct'
 									  END
 		,intEntityVendorId			= @intEntityId
@@ -1227,6 +1224,37 @@ BEGIN
 	FROM	#tmpAddItemReceiptResult 
   
 	SET @InventoryReceiptId = @ReceiptId
+
+	UPDATE tblGRStorageHistory 
+	SET [intInventoryReceiptId] = @InventoryReceiptId
+	WHERE [strType] = 'From Scale' AND intCustomerStorageId = (SELECT MAX(intCustomerStorageId) FROM tblGRCustomerStorage) 
+	AND ISNULL(intInventoryReceiptId,0) = 0
+
+	--DECLARE @intInventoryReceiptItemId	INT = NULL,
+	--		@dblQty						NUMERIC(18,6) = 0
+
+	--SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
+	--FROM	tblICInventoryReceiptItem
+	--WHERE	intInventoryReceiptId = @InventoryReceiptId
+
+	--WHILE ISNULL(@intInventoryReceiptItemId,0) > 0
+	--BEGIN
+	--	SELECT	@dblQty						=	dblOpenReceive,
+	--			@intContractDetailId		=	intLineNo
+	--	FROM	tblICInventoryReceiptItem 
+	--	WHERE	intInventoryReceiptItemId	=	 @intInventoryReceiptItemId
+
+	--	IF @intContractDetailId > 0
+	--	BEGIN
+	--		EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQty, @intUserId, @intInventoryReceiptItemId, 'Scale', @intTicketItemUOMId
+	--	END
+
+	--	SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
+	--	FROM	tblICInventoryReceiptItem
+	--	WHERE	intInventoryReceiptId = @InventoryReceiptId	AND
+	--			intInventoryReceiptItemId > @intInventoryReceiptItemId
+	--END
+
 	-- Post the Inventory Receipt that was created
 	--SELECT	@strTransactionId = strReceiptNumber 
 	--FROM	tblICInventoryReceipt 
@@ -1241,7 +1269,7 @@ BEGIN
 		
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
-END;
+END
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]

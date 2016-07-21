@@ -14,7 +14,8 @@ BEGIN
 		DECLARE @AUTO_NEGATIVE AS INT = 1
 		DECLARE @WRITE_OFF_SOLD AS INT = 2
 		DECLARE @REVALUE_SOLD AS INT = 3
-		
+		DECLARE @AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCKS AS INT = 35
+				
 		DECLARE @PurchaseType AS INT = 4
 		DECLARE @SalesType AS INT = 5
 
@@ -105,6 +106,7 @@ BEGIN
 		DECLARE @INVENTORY_AUTONEGATIVE_NAME AS NVARCHAR(50) = 'Inventory Auto Variance'  
 		DECLARE @INVENTORY_REVALUESOLD_NAME AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @INVENTORY_WRITEOFFSOLD_NAME AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
+		DECLARE @INVENTORY_AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK_NAME AS NVARCHAR(200) = 'Inventory Auto Variance on Negatively Sold or Used Stock'  
 
 		-- Create the expected and actual tables.   
 		DECLARE @recap AS dbo.RecapTableType    
@@ -675,119 +677,63 @@ BEGIN
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @CostOfGoods_Default     
 
-		-- 20 stock in for $15.50 (Write-off sold)  
-		UNION ALL   
-		SELECT   
-				dtmDate  = 'November 17, 2014'  
-				,strBatchId = 'BATCH-000001'  
-				,intAccountId = @Inventory_Default  
-				,dblDebit = 360.00  
-				,dblCredit = 0  
-				,dblDebitUnit = 0  
-				,dblCreditUnit = 0  
-				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IWS' 
-				,strReference = '' 
-				,intCurrencyId = @USD  
-				,dblExchangeRate  = 1   
-				,dtmTransactionDate  = 'November 17, 2014'  
-				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 12
-				,ysnIsUnposted = 0  
-				,intEntityId = 1 
-				,strTransactionId  = 'PURCHASE-000002'  
-				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_WRITEOFFSOLD_NAME
-				,strTransactionForm  = 'Inventory Receipt'  
-				,strModuleName = @MODULENAME  
-				,intConcurrencyId  = 1  
-		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @Inventory_Default     
-		 
-		UNION ALL   
-		SELECT   
-				dtmDate  = 'November 17, 2014'  
-				,strBatchId = 'BATCH-000001'  
-				,intAccountId = @WriteOffSold_Default  
-				,dblDebit = 0  
-				,dblCredit = 360.00  
-				,dblDebitUnit = 0  
-				,dblCreditUnit = 0  
-				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IWS' 
-				,strReference = '' 
-				,intCurrencyId = @USD  
-				,dblExchangeRate  = 1  
-				,dtmTransactionDate  = 'November 17, 2014'  
-				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 12
-				,ysnIsUnposted = 0  
-				,intEntityId = 1 
-				,strTransactionId  = 'PURCHASE-000002'  
-				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_WRITEOFFSOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'
-				,strModuleName = @MODULENAME  
-				,intConcurrencyId  = 1  
-		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @WriteOffSold_Default     
-		 
 		-- 20 stock in for $15.50 (Revalue sold)  
 		UNION ALL   
 		SELECT   
 				dtmDate  = 'November 17, 2014'  
 				,strBatchId = 'BATCH-000001'  
 				,intAccountId = @Inventory_Default  
-				,dblDebit = 0  
-				,dblCredit = 310.00  
+				,dblDebit = 50.00  
+				,dblCredit = 0
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
 				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IRS'
+				,strCode = 'IAV'
 				,strReference = '' 
 				,intCurrencyId = @USD  
 				,dblExchangeRate  = 1   
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 13
+				,intJournalLineNo  = 12
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
+				,strTransactionType  = @INVENTORY_AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK_NAME  
 				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @Inventory_Default     
-		 
+		WHERE tblGLAccount.intAccountId = @Inventory_Default    
+
 		UNION ALL   
 		SELECT   
 				dtmDate  = 'November 17, 2014'  
 				,strBatchId = 'BATCH-000001'  
-				,intAccountId = @RevalueSold_Default  
-				,dblDebit = 310.00  
-				,dblCredit = 0  
+				,intAccountId = @AutoNegative_Default  
+				,dblDebit = 0
+				,dblCredit = 50  
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
 				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IRS' 
+				,strCode = 'IAV' 
 				,strReference = '' 
 				,intCurrencyId = @USD  
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 13
+				,intJournalLineNo  = 12
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
+				,strTransactionType  = @INVENTORY_AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK_NAME  
 				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @RevalueSold_Default     
+		WHERE tblGLAccount.intAccountId = @AutoNegative_Default    
+
 		 
 		-- 20 stock in for $15.50 (Auto-Negative)  
 		UNION ALL   
@@ -806,7 +752,7 @@ BEGIN
 				,dblExchangeRate  = 1   
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 14
+				,intJournalLineNo  = 13
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
@@ -834,7 +780,7 @@ BEGIN
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 14
+				,intJournalLineNo  = 13
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000002'  
@@ -863,7 +809,7 @@ BEGIN
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 15
+				,intJournalLineNo  = 14
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
@@ -891,7 +837,7 @@ BEGIN
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 15
+				,intJournalLineNo  = 14
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
@@ -902,30 +848,30 @@ BEGIN
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
 		WHERE tblGLAccount.intAccountId = @CostOfGoods_Default     
-		 
+
 		-- 22 stock in for $18.00 (Write-off sold)  
 		UNION ALL   
 		SELECT   
 				dtmDate  = 'November 17, 2014'  
 				,strBatchId = 'BATCH-000001'  
 				,intAccountId = @Inventory_Default  
-				,dblDebit = 18.00 * 22 -- 341.00 -- (15.50 x 22)  
+				,dblDebit = 33
 				,dblCredit = 0  
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
 				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IWS' 
+				,strCode = 'IAV' 
 				,strReference = '' 
 				,intCurrencyId = @USD  
 				,dblExchangeRate  = 1   
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 16
+				,intJournalLineNo  = 15
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_WRITEOFFSOLD_NAME
+				,strTransactionType  = @INVENTORY_AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK_NAME
 				,strTransactionForm  = 'Inventory Receipt'  
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
@@ -936,86 +882,29 @@ BEGIN
 		SELECT   
 				dtmDate  = 'November 17, 2014'  
 				,strBatchId = 'BATCH-000001'  
-				,intAccountId = @WriteOffSold_Default  
-				,dblDebit = 0  
-				,dblCredit = 18.00 * 22 -- 341.00 -- (15.50 x 22)  
+				,intAccountId = @AutoNegative_Default  
+				,dblDebit = 0 
+				,dblCredit = 33
 				,dblDebitUnit = 0  
 				,dblCreditUnit = 0  
 				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IWS' 
+				,strCode = 'IAV' 
 				,strReference = '' 
 				,intCurrencyId = @USD  
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 16
+				,intJournalLineNo  = 15
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000003'  
 				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_WRITEOFFSOLD_NAME  
+				,strTransactionType  = @INVENTORY_AUTO_VARIANCE_ON_NEGATIVELY_SOLD_OR_USED_STOCK_NAME  
 				,strTransactionForm  = 'Inventory Receipt'  
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @WriteOffSold_Default  
-		 
-		-- 22 stock in for $16.50 (Revalue sold)  
-		UNION ALL   
-		SELECT   
-				dtmDate = 'November 17, 2014'  
-				,strBatchId = 'BATCH-000001'  
-				,intAccountId = @Inventory_Default  
-				,dblDebit = 0  
-				,dblCredit = 363.00  
-				,dblDebitUnit = 0  
-				,dblCreditUnit = 0  
-				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IRS' 
-				,strReference = ''
-				,intCurrencyId = @USD  
-				,dblExchangeRate  = 1   
-				,dtmTransactionDate  = 'November 17, 2014'  
-				,strJournalLineDescription = ''
-				,intJournalLineNo  = 17
-				,ysnIsUnposted = 0  
-				,intEntityId = 1 
-				,strTransactionId  = 'PURCHASE-000003'  
-				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
-				,strModuleName = @MODULENAME  
-				,intConcurrencyId  = 1  
-		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @Inventory_Default  
-
-		UNION ALL   
-		SELECT   
-				dtmDate  = 'November 17, 2014'  
-				,strBatchId = 'BATCH-000001'  
-				,intAccountId = @RevalueSold_Default  
-				,dblDebit = 363.00  
-				,dblCredit = 0  
-				,dblDebitUnit = 0  
-				,dblCreditUnit = 0  
-				,strDescription = tblGLAccount.strDescription  
-				,strCode = 'IRS' 
-				,strReference = '' 
-				,intCurrencyId = @USD  
-				,dblExchangeRate  = 1  
-				,dtmTransactionDate  = 'November 17, 2014'  
-				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 17
-				,ysnIsUnposted = 0  
-				,intEntityId = 1 
-				,strTransactionId  = 'PURCHASE-000003'  
-				,intTransactionId  = 1  
-				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
-				,strModuleName = @MODULENAME  
-				,intConcurrencyId  = 1  
-		FROM dbo.tblGLAccount   
-		WHERE tblGLAccount.intAccountId = @RevalueSold_Default  
+		WHERE tblGLAccount.intAccountId = @AutoNegative_Default  
 		 
 		-- Nothing to auto-negative since stock is zero.   
 		 
@@ -1036,7 +925,7 @@ BEGIN
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 18
+				,intJournalLineNo  = 16
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000004'  
@@ -1064,7 +953,7 @@ BEGIN
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 18
+				,intJournalLineNo  = 16
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000004'  
@@ -1093,7 +982,7 @@ BEGIN
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 19
+				,intJournalLineNo  = 17
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000001'  
@@ -1121,7 +1010,7 @@ BEGIN
 				,dblExchangeRate  = 1  
 				,dtmTransactionDate  = 'November 17, 2014'  
 				,strJournalLineDescription = '' 
-				,intJournalLineNo  = 19
+				,intJournalLineNo  = 17
 				,ysnIsUnposted = 0  
 				,intEntityId = 1 
 				,strTransactionId  = 'PURCHASE-000001'  

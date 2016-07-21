@@ -50,7 +50,9 @@ WHERE	ysnPosted = 1
 			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
 			OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
-		AND dbo.fnIsDepositEntry(strLink) = 0
+		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
+					SELECT strLink FROM [dbo].[fnGetDepositEntry]()
+			)
 
 RETURN ISNULL(@returnBalance, 0)
 

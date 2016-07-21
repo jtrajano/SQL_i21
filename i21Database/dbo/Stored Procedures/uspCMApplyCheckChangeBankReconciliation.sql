@@ -33,6 +33,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@ACH AS INT = 22
+		,@DIRECT_DEPOSIT AS INT = 23
 
 -- Bulk update the ysnClr
 UPDATE	tblCMBankTransaction 
@@ -45,7 +47,7 @@ WHERE	ysnPosted = 1
 		AND 1 = 
 			CASE	WHEN	@strSide = 'DEBIT' 
 							AND (
-								intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
+								intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK,  @ACH, @DIRECT_DEPOSIT)
 								OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 							) THEN 1 					
 					WHEN	@strSide = 'CREDIT' 
@@ -60,7 +62,7 @@ WHERE	ysnPosted = 1
 			END
 		AND 1 = (
 					-- If check transaction is not yet printed, do not include record in the update.
-			CASE	WHEN intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT) AND dtmCheckPrinted IS NULL THEN 0
+			CASE	WHEN intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT, @PAYCHECK, @ACH, @DIRECT_DEPOSIT) AND dtmCheckPrinted IS NULL THEN 0
 					-- If record is a non-check, no need to check the date printed. 
 					ELSE 1
 			END 		

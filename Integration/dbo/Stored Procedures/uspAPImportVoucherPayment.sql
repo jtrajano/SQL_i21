@@ -15,7 +15,7 @@ BEGIN TRY
 
 DECLARE @defaultCurrencyId INT;
 --PAYMENT METHOD ID
-DECLARE @check INT, @eft INT, @wire INT, @withdrawal INT, @deposit INT;
+DECLARE @check INT, @eft INT, @wire INT, @withdrawal INT, @deposit INT, @debitmemosandpayments INT;
 --MISSING PAYMENT VARIABLES
 DECLARE @defaultBankAccountId INT, @defaultBankGLAccountId INT;
 
@@ -50,6 +50,8 @@ USING
 	SELECT strPaymentMethod = 'Withdrawal', ysnActive = 1
 	UNION ALL
 	SELECT strPaymentMethod = 'Deposit', ysnActive = 1
+	UNION ALL
+	SELECT strPaymentMethod = 'Debit memos and payments', ysnActive = 1
 ) AS SourceData
 ON (LOWER(Destination.strPaymentMethod) = LOWER(SourceData.strPaymentMethod))
 WHEN NOT MATCHED THEN
@@ -69,17 +71,19 @@ SELECT @eft = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentM
 SELECT @wire = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'wire'
 SELECT @withdrawal = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'withdrawal'
 SELECT @deposit = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'deposit'
+SELECT @debitmemosandpayments = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'debit memos and payments'
 
 IF OBJECT_ID('tempdb..#tmpPaymentCreated') IS NOT NULL DROP TABLE #tmpPaymentCreated
 CREATE TABLE #tmpPaymentCreated(intPaymentId INT, intId INT);
 
+IF OBJECT_ID('dbo.[UK_dbo.tblAPPayment_strPaymentRecordNum]', 'UQ') IS NOT NULL 
 ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum]
 
 --CREATE PAYMENT
 MERGE INTO tblAPPayment AS destination
 USING
 (
-SELECT
+SELECT DISTINCT
 	[intAccountId]			= D.intGLAccountId,
 	[intBankAccountId]		= D.intBankAccountId,
 	[intPaymentMethodId]	= CASE
@@ -91,6 +95,7 @@ SELECT
 											ELSE @withdrawal
 										END
 									WHEN ISNULL(E.apchk_chk_amt, A.apivc_net_amt) < 0 THEN @deposit
+									WHEN E.apchk_chk_amt = 0 THEN @debitmemosandpayments
 								END,
 	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
 	[intEntityVendorId]		= B.intEntityVendorId,
@@ -107,15 +112,15 @@ SELECT
 	[dblWithheld]			= 0,
 	[intEntityId]			= @UserId,
 	[intConcurrencyId]		= 0,
-	[intId]					= A.intId,
-	[ysnOrigin]				= 1,
-	[intPaymentRecordNum]	= (@paymentRecordNum + ROW_NUMBER() OVER(ORDER BY A.intId))
+	[intId]					= ISNULL(A.apchk_A4GLIdentity, A.intId), --IF NOT PAYMENT CREATED IN ORIGIN, USE THE ID AS REFERENCE
+	[ysnOrigin]				= 1
+	--[intPaymentRecordNum]	= (@paymentRecordNum + ROW_NUMBER() OVER(ORDER BY A.intId))
 FROM tmp_apivcmstImport A
 INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 INNER JOIN apcbkmst C ON A.apivc_cbk_no = C.apcbk_no
 INNER JOIN tblCMBankAccount D ON A.apivc_cbk_no = D.strCbkNo COLLATE Latin1_General_CS_AS
 LEFT JOIN apchkmst E ON A.apchk_A4GLIdentity = E.A4GLIdentity
-WHERE A.apivc_status_ind = 'P' AND ISNULL(A.apivc_chk_no,'') != ''
+WHERE A.apivc_status_ind = 'P'
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN
@@ -127,7 +132,7 @@ INSERT
 	[intCurrencyId],
 	[intEntityVendorId],
 	[strPaymentInfo],
-	[strPaymentRecordNum],
+	--[strPaymentRecordNum],
 	[strNotes],
 	[dtmDatePaid],
 	[dblAmountPaid],
@@ -146,7 +151,7 @@ VALUES
 	[intCurrencyId],
 	[intEntityVendorId],
 	[strPaymentInfo],
-	@pay + CAST(intPaymentRecordNum AS NVARCHAR),
+	--@pay + CAST(intPaymentRecordNum AS NVARCHAR),
 	[strNotes],
 	[dtmDatePaid],
 	[dblAmountPaid],
@@ -161,13 +166,34 @@ OUTPUT inserted.intPaymentId, SourceData.intId INTO #tmpPaymentCreated;
 
 SET @totalCreated = @@ROWCOUNT;
 
-ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
-
 IF @totalCreated <= 0 
 BEGIN
+	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 	IF @transCount = 0 COMMIT TRANSACTION
 	RETURN;
 END
+
+IF OBJECT_ID('tempdb..#tmpPaymentsWithRecordNumber') IS NOT NULL DROP TABLE #tmpPaymentsWithRecordNumber
+--UPDATE strPaymentRecordNumber
+CREATE TABLE #tmpPaymentsWithRecordNumber
+(
+	intPaymentId INT NOT NULL,
+	intRecordNumber INT NOT NULL
+)
+
+INSERT INTO #tmpPaymentsWithRecordNumber
+SELECT
+	A.intPaymentId,
+	@paymentRecordNum + ROW_NUMBER() OVER(ORDER BY A.intPaymentId)
+FROM tblAPPayment A
+INNER JOIN #tmpPaymentCreated B ON A.intPaymentId = B.intPaymentId
+
+UPDATE A
+	SET A.strPaymentRecordNum = @pay + CAST(B.intRecordNumber AS NVARCHAR)
+FROM tblAPPayment A
+INNER JOIN #tmpPaymentsWithRecordNumber B ON A.intPaymentId = B.intPaymentId
+
+ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 
 --UPDATE STARTING NUMBER
 UPDATE A
@@ -190,7 +216,7 @@ USING
 		[dblInterest]	= 0,
 		[dblTotal]		= D.dblTotal
 	FROM tmp_apivcmstImport A
-	INNER JOIN #tmpPaymentCreated B ON A.intId = B.intId
+	INNER JOIN #tmpPaymentCreated B ON ISNULL(A.apchk_A4GLIdentity, A.intId) = B.intId
 	INNER JOIN tblAPapivcmst C ON A.intBackupId = C.intId
 	INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
 ) AS SourceData
@@ -220,6 +246,38 @@ VALUES
 	[dblInterest],
 	[dblTotal]
 );
+
+
+--UPDATE ysnPrepay
+UPDATE A
+	SET A.ysnPrepay = CASE WHEN (SELECT intTransactionType 
+										FROM tblAPBill B INNER JOIN tblAPPaymentDetail C ON B.intBillId = C.intBillId 
+										WHERE C.intPaymentId = A.intPaymentId) = 2 
+								THEN 1 ELSE 0 END
+FROM tblAPPayment A
+CROSS APPLY (
+	SELECT 
+		COUNT(intPaymentDetailId) AS intCount
+	FROM tblAPPaymentDetail E
+	WHERE E.intPaymentId = A.intPaymentId
+) DetailCount
+WHERE DetailCount.intCount = 1
+
+--UPDATE Bank Transaction
+UPDATE tblCMBankTransaction
+SET strTransactionId = B.strPaymentRecordNum,
+	intPayeeId = C.intEntityVendorId
+FROM tblCMBankTransaction A
+INNER JOIN tblAPPayment B
+	ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
+	AND A.dtmDate = B.dtmDatePaid
+	AND A.intBankAccountId = B.intBankAccountId
+	AND A.strReferenceNo = B.strPaymentInfo
+INNER JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityVendorId = D.intEntityId)
+	ON B.intEntityVendorId = C.intEntityVendorId 
+	--AND A.strPayee = D.strName
+WHERE A.strSourceSystem IN ('AP','CW')
+AND A.strTransactionId <> B.strPaymentRecordNum
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY

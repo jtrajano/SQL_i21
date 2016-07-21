@@ -20,6 +20,8 @@ BEGIN
 				, 'tblAPapivcmst'
 				, 'tblAPapeglmst'
 				, 'tblAPaphglmst'
+				, 'tblARTempMarketZone'
+				, 'tblARTempAccount'
 			)
 			AND COLUMN_NAME NOT IN ('strPassword')
 			AND TABLE_NAME LIKE 'tbl%'

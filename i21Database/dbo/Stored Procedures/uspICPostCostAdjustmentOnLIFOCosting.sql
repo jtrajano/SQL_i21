@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLIFOCosting]
 	,@intStorageLocationId AS INT 
 	,@intItemUOMId AS INT	
 	,@dblQty AS NUMERIC(38,20)
-	,@dblNewCost AS NUMERIC(38,20)
+	,@intCostUOMId AS INT 
+	,@dblVoucherCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -76,8 +77,9 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
-		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
-		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		--,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		--,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		,@INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35
 
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 28
@@ -124,6 +126,8 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId
 
+		,@dblNewCost AS NUMERIC(38,20)
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- 1. Get the cost bucket and original cost. 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -135,6 +139,7 @@ BEGIN
 			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
 			,@CostBucketIntTransactionId = intTransactionId
 			,@CostBucketStrTransactionId = strTransactionId
+			,@dblNewCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLIFO.intItemUOMId, @dblVoucherCost)
 	FROM	dbo.tblICInventoryLIFO LEFT JOIN dbo.tblICItemUOM 
 				ON tblICInventoryLIFO.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryLIFO.intItemId = @intItemId
@@ -182,6 +187,8 @@ BEGIN
 	-- Get the original cost. 
 	BEGIN 
 		-- Get the original cost from the LIFO cost adjustment log table. 
+		SET @OriginalCost = NULL 
+
 		SELECT	@OriginalCost = dblCost
 		FROM	dbo.tblICInventoryLIFOCostAdjustmentLog
 		WHERE	intInventoryLIFOId = @CostBucketId
@@ -405,9 +412,9 @@ BEGIN
 										, (@dblNewCost - @InvTranCost) 
 									)
 
-			----------------------------------------------------------
-			-- 7. If stock was sold, then do the "Revalue Sold". 
-			----------------------------------------------------------
+			-----------------------------------------------------------------------------------
+			-- 7. If stock was sold, then do the "Auto Variance on Sold or Used Stock". 
+			-----------------------------------------------------------------------------------
 			IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
 			BEGIN 
 				EXEC [dbo].[uspICPostInventoryTransaction]
@@ -428,7 +435,7 @@ BEGIN
 					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_Sold
+					,@intTransactionTypeId					= @INV_TRANS_TYPE_Auto_Variance_On_Sold_Or_Used_Stock
 					,@intLotId								= NULL 
 					,@intRelatedInventoryTransactionId		= @LIFOOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
@@ -522,7 +529,7 @@ BEGIN
 						,[intTransactionId]				= @intTransactionId
 						,[intTransactionDetailId]		= @intTransactionDetailId
 						,[strTransactionId]				= @strTransactionId
-						,[intTransactionTypeId]			= @LoopTransactionTypeId -- @intTransactionTypeId
+						,[intTransactionTypeId]			= @LoopTransactionTypeId 
 						,[intLotId]						= InvTran.intLotId
 						,[intSubLocationId]				= InvTran.intSubLocationId
 						,[intStorageLocationId]			= InvTran.intStorageLocationId

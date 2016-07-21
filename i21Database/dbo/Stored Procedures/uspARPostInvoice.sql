@@ -282,7 +282,8 @@ END CATCH
 				--zero amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
-					'You cannot post an ' + A.strTransactionType + ' with zero amount.',
+					CASE WHEN A.strTransactionType = 'Invoice ' THEN 'You cannot post an ' + A.strTransactionType + ' with zero amount.' 
+					ELSE 'You cannot post a ' + A.strTransactionType + ' with zero amount.' END,
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -293,14 +294,15 @@ END CATCH
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId				
 				WHERE  
-					A.dblInvoiceTotal = 0.00			
-					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = A.intInvoiceId)		
-					
+					A.dblInvoiceTotal = 0.00
+					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = A.intInvoiceId)
+					AND A.strImportFormat <> 'CarQuest'					
 					
 				--negative amount
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
-					'You cannot post an ' + A.strTransactionType + ' with negative amount.',
+					CASE WHEN A.strTransactionType = 'Invoice' THEN 'You cannot post an ' + A.strTransactionType + ' with negative amount.' 
+					ELSE 'You cannot post a ' + A.strTransactionType + ' with negative amount.' END ,
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -958,8 +960,7 @@ END CATCH
 						ON ARIA.intCOGSAccountId = GLA.intAccountId	
 				WHERE
 					Detail.dblTotal <> @ZeroDecimal
-					AND ISNULL(Detail.intInventoryShipmentItemId,0) = 0
-					AND ISNULL(Detail.intShipmentPurchaseSalesContractId,0) = 0
+					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
@@ -1000,8 +1001,7 @@ END CATCH
 						ON ARIA.intCOGSAccountId = GLA.intAccountId	 
 				WHERE
 					ARID.[dblTotal] <> 0
-					AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
-					AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
+					AND (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 OR ISNULL(ARID.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(ARID.[intItemId],0) <> 0
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
@@ -1037,8 +1037,7 @@ END CATCH
 						ON ARIA.intInventoryInTransitAccountId = GLA.intAccountId
 				WHERE
 					Detail.dblTotal <> @ZeroDecimal
-					AND ISNULL(Detail.intInventoryShipmentItemId,0) = 0
-					AND ISNULL(Detail.intShipmentPurchaseSalesContractId,0) = 0
+					AND (ISNULL(Detail.intInventoryShipmentItemId,0) <> 0 OR ISNULL(Detail.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(Detail.intItemId, 0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ICI.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
@@ -1079,8 +1078,7 @@ END CATCH
 						ON ARIA.intInventoryInTransitAccountId = GLA.intAccountId 		 
 				WHERE
 					ARID.[dblTotal] <> 0
-					AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
-					AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
+					AND (ISNULL(ARID.intInventoryShipmentItemId,0) <> 0 OR ISNULL(ARID.intShipmentPurchaseSalesContractId,0) <> 0)
 					AND ISNULL(ARID.[intItemId],0) <> 0
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
@@ -1531,6 +1529,7 @@ IF @post = 1
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND A.dblPayment <> @ZeroDecimal
 			
 			UNION ALL
 			--Credit Prepaids
@@ -2250,7 +2249,7 @@ IF @post = 1
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
 			WHERE
-				Detail.dblTotal <> @ZeroDecimal
+				((Header.strImportFormat <> 'CarQuest' AND Detail.dblTotal <> @ZeroDecimal) OR Header.strImportFormat = 'CarQuest')
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
@@ -2309,7 +2308,7 @@ IF @post = 1
 					ON ARIC.[intComponentItemId] = IST.intItemId 
 					AND ARI.[intCompanyLocationId] = IST.intLocationId 			 
 			WHERE
-				ARID.[dblTotal] <> 0
+				((ARI.[strImportFormat] <> 'CarQuest' AND ARID.[dblTotal] <> @ZeroDecimal) OR ARI.[strImportFormat] = 'CarQuest')
 				AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
 				AND ISNULL(ARID.[intItemId],0) <> 0
@@ -2658,6 +2657,13 @@ IF @recap = 0
 					UPDATE 
 						tblARInvoice
 					SET
+						dblPayment	= dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+					WHERE
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+					UPDATE 
+						tblARInvoice
+					SET
 						ysnPosted				= 0
 						,ysnPaid				= 0
 						,dblAmountDue			= ISNULL(dblInvoiceTotal, @ZeroDecimal) - ISNULL(dblPayment, @ZeroDecimal)
@@ -2883,13 +2889,12 @@ IF @recap = 0
 												
 				END
 
-
 		DELETE tblARPrepaidAndCredit  
 		FROM 
 			tblARPrepaidAndCredit A 
 		INNER JOIN @PostInvoiceData B  
 		   ON A.intInvoiceId = B.intInvoiceId
-		   AND  ISNULL(A.ysnApplied,0) = 0
+		   AND (ISNULL(A.ysnApplied,0) = 0 OR @post = 0)
 																
 		END TRY
 		BEGIN CATCH	

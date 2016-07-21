@@ -177,11 +177,12 @@ BEGIN
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
-		LEFT JOIN tblAPPaymentDetail B
-			ON A.intPaymentId = B.intPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		GROUP BY A.intPaymentId, A.strPaymentRecordNum
-		HAVING SUM(B.dblPayment) = 0
+		OUTER APPLY (
+			SELECT intPaymentDetailId FROM tblAPPaymentDetail B
+			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
+		) PaymentDetails
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND PaymentDetails.intPaymentDetailId IS NULL
 
 		--Payment without detail
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -273,7 +274,7 @@ BEGIN
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount - B.dblInterest)
+		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2)))
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
@@ -331,6 +332,21 @@ BEGIN
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.dblAmountPaid = 0
 		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
+
+		--DO NOT ALLOW TO POST PAYMENT IF IT HAS ASSOCIATED PREPAYMENT FOR CONTRACT OR IT IS RESTRICTED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT DISTINCT
+			'Payment ' + A.strPaymentRecordNum + ' has prepayment for contract associated. Please use Prepaid tab of voucher to offset.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A
+		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+		INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+		INNER JOIN tblAPBillDetail D ON C.intBillId = D.intBillId
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND C.intTransactionType = 2 AND D.ysnRestricted = 1 AND D.intContractDetailId > 0
+		AND B.dblPayment > 0 
 
 	END
 	ELSE
