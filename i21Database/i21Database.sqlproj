@@ -3714,6 +3714,7 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql" />
     <None Include="Scripts\Post-Deployment\CF\1_ImportMapping.sql" />
+    <None Include="Scripts\Post-Deployment\EM\024_CleanOrphanCustomerGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

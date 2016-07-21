@@ -237,7 +237,7 @@ BEGIN TRY
 				 [intInvoiceId]						= @InvoiceId
 				,[intItemId]						= IC.[intItemId] 
 				,[strDocumentNumber]				= @ItemDocumentNumber
-				,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
+				,[strItemDescription]				= (CASE WHEN ISNULL(@ItemDescription, '') = '' THEN IC.[strDescription] ELSE ISNULL(@ItemDescription, '') END)
 				,[intOrderUOMId]					= @OrderUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, ISNULL(@ItemQtyShipped,@ZeroDecimal))
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)

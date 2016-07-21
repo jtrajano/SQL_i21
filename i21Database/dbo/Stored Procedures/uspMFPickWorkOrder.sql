@@ -1165,6 +1165,7 @@ BEGIN TRY
 							OR L.intItemId = SI.intSubstituteItemId
 							)
 						AND WC.intWorkOrderId = @intWorkOrderId
+						AND IsNULL(WC.intBatchId,@intBatchId)=@intBatchId
 					)
 			)
 	BEGIN
@@ -1197,6 +1198,7 @@ BEGIN TRY
 						OR L.intItemId = SI.intSubstituteItemId
 						)
 					AND WC.intWorkOrderId = @intWorkOrderId
+					AND IsNULL(WC.intBatchId,@intBatchId)=@intBatchId
 				)
 
 		SELECT @strItemNo = strItemNo

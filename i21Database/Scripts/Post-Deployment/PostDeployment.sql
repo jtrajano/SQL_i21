@@ -299,6 +299,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r .\EM\022_DefaultDataForContactTypeAndImport.sql
 :r .\EM\023_RenameEntityContactEmailDistribution.sql
+:r .\EM\024_CleanOrphanCustomerGroup.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

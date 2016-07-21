@@ -135,7 +135,6 @@ BEGIN
 			--CONFORM THE External ID and Current External Id with glactmst
 			UPDATE C SET
 			strExternalId =
-				REPLICATE(''0'',(SELECT TOP 1 intLength FROM tblGLAccountStructure where strType = ''Primary'') - LEN(B.glact_acct1_8)) +
 				CAST(CAST(B.glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''.'' + REPLICATE(''0'',(select 8 - LEN (B.glact_acct9_16))) + CAST(CAST(B.glact_acct9_16 AS INT) AS NVARCHAR(50))  ,
 			strCurrentExternalId = 
 				REPLICATE(''0'',8 - LEN(B.glact_acct1_8)) +

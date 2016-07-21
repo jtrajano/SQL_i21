@@ -234,6 +234,25 @@ End
 
 Begin Tran
 
+--Reserve Lots
+--Get Bulk Items From Reserved Lots
+Set @strBulkItemXml='<root>'
+
+--Bulk Item
+Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
+'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
+'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
+'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
+From tblICStockReservation sr 
+Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+
+Set @strBulkItemXml=@strBulkItemXml+'</root>'
+
+If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
+	Set @strBulkItemXml=''
+
+EXEC uspMFDeleteLotReservationByPickList @intPickListId = @intPickListId
+
 --Move or Merge
 Select @intMinLot=Min(intRowNo) from @tblPickListDetail
 
@@ -292,23 +311,6 @@ Begin
 
 	Select @intMinLot=Min(intRowNo) from @tblPickListDetail where intRowNo>@intMinLot
 End
-
---Reserve Lots
---Get Bulk Items From Reserved Lots
-Set @strBulkItemXml='<root>'
-
---Bulk Item
-Select @strBulkItemXml=COALESCE(@strBulkItemXml, '') + '<lot>' + 
-'<intItemId>' + convert(varchar,sr.intItemId) + '</intItemId>' +
-'<intItemUOMId>' + convert(varchar,sr.intItemUOMId) + '</intItemUOMId>' + 
-'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
-From tblICStockReservation sr 
-Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
-
-Set @strBulkItemXml=@strBulkItemXml+'</root>'
-
-If LTRIM(RTRIM(@strBulkItemXml))='<root></root>' 
-	Set @strBulkItemXml=''
 
 Exec [uspMFCreateLotReservationByPickList] @intPickListId,@strBulkItemXml
 

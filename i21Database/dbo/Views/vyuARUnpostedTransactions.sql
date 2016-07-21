@@ -19,6 +19,7 @@ WHERE
 	AND I.strTransactionType IN ('Invoice','Credit Memo')
 	AND ISNULL(I.intDistributionHeaderId, 0) = 0
 	AND I.ysnTemplate = 0
+	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	
 UNION ALL
 
