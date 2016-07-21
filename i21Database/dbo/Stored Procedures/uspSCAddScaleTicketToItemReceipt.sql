@@ -325,6 +325,7 @@ ELSE
 								,[intShipViaId] 
 								,[intShipFromId] 
 								,[intCurrencyId]  	
+								,[intCostCurrencyId]
 								,[intChargeId] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
@@ -346,6 +347,7 @@ ELSE
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
+								,[intCostCurrencyId]				= RE.intCurrencyId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
@@ -373,7 +375,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -395,6 +398,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
@@ -425,7 +429,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -447,6 +452,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
@@ -478,7 +484,8 @@ ELSE
 								,[intLocationId] 
 								,[intShipViaId] 
 								,[intShipFromId] 
-								,[intCurrencyId]  	
+								,[intCurrencyId]
+								,[intCostCurrencyId]  	
 								,[intChargeId] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
@@ -499,6 +506,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
@@ -530,7 +538,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -552,6 +561,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
@@ -581,7 +591,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -602,6 +613,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
@@ -632,7 +644,8 @@ ELSE
 									,[intLocationId] 
 									,[intShipViaId] 
 									,[intShipFromId] 
-									,[intCurrencyId]  	
+									,[intCurrencyId]
+									,[intCostCurrencyId]  	
 									,[intChargeId] 
 									,[ysnInventoryCost] 
 									,[strCostMethod] 
@@ -654,6 +667,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
@@ -681,7 +695,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -703,6 +718,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
@@ -735,7 +751,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -757,6 +774,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
@@ -786,7 +804,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -808,6 +827,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= LoadCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= LoadCost.strCostMethod
@@ -839,7 +859,8 @@ ELSE
 									,[intLocationId] 
 									,[intShipViaId] 
 									,[intShipFromId] 
-									,[intCurrencyId]  	
+									,[intCurrencyId]
+									,[intCostCurrencyId]  	
 									,[intChargeId] 
 									,[ysnInventoryCost] 
 									,[strCostMethod] 
@@ -861,6 +882,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
@@ -888,7 +910,8 @@ ELSE
 										,[intLocationId] 
 										,[intShipViaId] 
 										,[intShipFromId] 
-										,[intCurrencyId]  	
+										,[intCurrencyId]
+										,[intCostCurrencyId]  	
 										,[intChargeId] 
 										,[ysnInventoryCost] 
 										,[strCostMethod] 
@@ -910,6 +933,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= ContractCost.intItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= ContractCost.strCostMethod
@@ -943,7 +967,8 @@ ELSE
 									,[intLocationId] 
 									,[intShipViaId] 
 									,[intShipFromId] 
-									,[intCurrencyId]  	
+									,[intCurrencyId]
+									,[intCostCurrencyId]  	
 									,[intChargeId] 
 									,[ysnInventoryCost] 
 									,[strCostMethod] 
@@ -964,6 +989,7 @@ ELSE
 									,[intShipViaId]						= RE.intShipViaId
 									,[intShipFromId]					= RE.intShipFromId
 									,[intCurrencyId]  					= RE.intCurrencyId
+									,[intCostCurrencyId]				= RE.intCurrencyId
 									,[intChargeId]						= @intFreightItemId
 									,[ysnInventoryCost]					= 0
 									,[strCostMethod]					= 'Per Unit'
@@ -993,6 +1019,7 @@ ELSE
 								,[intShipViaId] 
 								,[intShipFromId] 
 								,[intCurrencyId]  	
+								,[intCostCurrencyId]  
 								,[intChargeId] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
@@ -1013,6 +1040,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
@@ -1042,7 +1070,8 @@ ELSE
 								,[intLocationId] 
 								,[intShipViaId] 
 								,[intShipFromId] 
-								,[intCurrencyId]  	
+								,[intCurrencyId]
+								,[intCostCurrencyId]  	
 								,[intChargeId] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
@@ -1063,6 +1092,7 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
+								,[intCostCurrencyId]				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
@@ -1092,7 +1122,8 @@ ELSE
 								,[intLocationId] 
 								,[intShipViaId] 
 								,[intShipFromId] 
-								,[intCurrencyId]  	
+								,[intCurrencyId]
+								,[intCostCurrencyId]  	
 								,[intChargeId] 
 								,[ysnInventoryCost] 
 								,[strCostMethod] 
@@ -1114,6 +1145,7 @@ ELSE
 						,[intShipViaId]						= RE.intShipViaId
 						,[intShipFromId]					= RE.intShipFromId
 						,[intCurrencyId]  					= RE.intCurrencyId
+						,[intCostCurrencyId]				= RE.intCurrencyId
 						,[intChargeId]						= ContractCost.intItemId
 						,[ysnInventoryCost]					= 0
 						,[strCostMethod]					= ContractCost.strCostMethod
@@ -1148,7 +1180,8 @@ ELSE
 						,[intLocationId] 
 						,[intShipViaId] 
 						,[intShipFromId] 
-						,[intCurrencyId]  	
+						,[intCurrencyId]
+						,[intCostCurrencyId]  	
 						,[intChargeId] 
 						,[ysnInventoryCost] 
 						,[strCostMethod] 
@@ -1170,6 +1203,7 @@ ELSE
 				,[intShipViaId]						= RE.intShipViaId
 				,[intShipFromId]					= RE.intShipFromId
 				,[intCurrencyId]  					= RE.intCurrencyId
+				,[intCostCurrencyId]				= RE.intCurrencyId
 				,[intChargeId]						= ContractCost.intItemId
 				,[ysnInventoryCost]					= 0
 				,[strCostMethod]					= ContractCost.strCostMethod
