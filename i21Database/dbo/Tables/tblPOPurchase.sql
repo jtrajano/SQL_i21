@@ -49,6 +49,7 @@
 	[ysnApproved] BIT NOT NULL DEFAULT 0,
 	[ysnForApproval] BIT NOT NULL DEFAULT 0,
 	[ysnForApprovalSubmitted] BIT NOT NULL DEFAULT 0 ,
+	[ysnRecurring] BIT NULL DEFAULT 0 ,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
     CONSTRAINT [UK_dbo.tblPOPurchase_strPurchaseOrderNumber] UNIQUE (strPurchaseOrderNumber),
