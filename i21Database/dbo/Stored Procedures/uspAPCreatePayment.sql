@@ -187,7 +187,7 @@ BEGIN
 		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
-		[dblAmountPaid]			= ISNULL(@payment,0),
+		[dblAmountPaid]			= CAST(ISNULL(@payment,0) AS DECIMAL(18,2)),
 		[dblUnapplied]			= 0,
 		[ysnPosted]				= @isPost,
 		[dblWithheld]			= 0,
@@ -214,7 +214,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
 		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
-		[dblPayment]	= (CASE WHEN ISNULL(@payment,0) > 0 THEN @payment ELSE A.dblPayment END),
+		[dblPayment]	= CAST((CASE WHEN ISNULL(@payment,0) = 0 THEN 0 ELSE A.dblPayment END) - A.dblDiscount AS DECIMAL(18,2)),
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
@@ -259,7 +259,7 @@ BEGIN
 
 	 UPDATE A
 		SET A.dblWithheld = Withheld.dblWithheld
-		,A.dblAmountPaid = A.dblAmountPaid - Withheld.dblWithheld
+		,A.dblAmountPaid = CAST((A.dblAmountPaid - Withheld.dblWithheld) AS DECIMAL(18,2))
 	 FROM tblAPPayment A
 	 CROSS APPLY 
 	 (
