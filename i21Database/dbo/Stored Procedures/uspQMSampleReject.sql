@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMSampleReject]
-	@strXml NVARCHAR(Max)
+     @strXml NVARCHAR(Max)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -28,6 +28,8 @@ BEGIN TRY
 	DECLARE @intCurrentLotStatusId INT
 	DECLARE @intLotId INT
 	DECLARE @intRejectLotStatusId INT
+	DECLARE @intContractDetailId INT
+	DECLARE @intLoadDetailContainerLinkId INT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -48,6 +50,19 @@ BEGIN TRY
 	FROM dbo.tblQMCompanyPreference
 
 	BEGIN TRAN
+
+	SELECT @intContractDetailId = intContractDetailId
+		,@intLoadDetailContainerLinkId = intLoadDetailContainerLinkId
+	FROM tblQMSample
+
+	IF @intContractDetailId IS NOT NULL
+		AND @intLoadDetailContainerLinkId IS NOT NULL
+	BEGIN
+		EXEC uspLGRejectContainerFromQuality @intLoadDetailContainerLinkId
+			,@intContractDetailId
+			,1
+			,@intLastModifiedUserId
+	END
 
 	UPDATE dbo.tblQMSample
 	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
