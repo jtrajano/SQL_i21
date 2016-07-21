@@ -556,51 +556,53 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					END
 				ELSE
 					BEGIN
-					DELETE FROM tblARInvoiceDetailTax WHERE intInvoiceDetailId =  @NewDetailId
+						IF ISNULL(@NewDetailId, 0) > 0
+							BEGIN
+								DELETE FROM tblARInvoiceDetailTax WHERE intInvoiceDetailId =  @NewDetailId
 
-					INSERT INTO [tblARInvoiceDetailTax]
-						([intInvoiceDetailId]
-						,[intTaxGroupId]
-						,[intTaxCodeId]
-						,[intTaxClassId]
-						,[strTaxableByOtherTaxes]
-						,[strCalculationMethod]
-						,[dblRate]
-						,[dblExemptionPercent]
-						,[intSalesTaxAccountId]
-						,[dblTax]
-						,[dblAdjustedTax]
-						,[ysnTaxAdjusted]
-						,[ysnSeparateOnInvoice]
-						,[ysnCheckoffTax]
-						,[ysnTaxExempt]
-						,[strNotes]
-						,[intConcurrencyId])
-					SELECT
-						 @NewDetailId
-						,[intTaxGroupId]
-						,[intTaxCodeId]
-						,[intTaxClassId]
-						,[strTaxableByOtherTaxes]
-						,[strCalculationMethod]
-						,[dblRate]
-						,[dblExemptionPercent]
-						,[intSalesTaxAccountId]
-						,[dblTax]
-						,[dblAdjustedTax]
-						,[ysnTaxAdjusted]
-						,[ysnSeparateOnInvoice]
-						,[ysnCheckoffTax]
-						,[ysnTaxExempt]
-						,[strNotes]
-						,0
-					FROM
-						[tblSOSalesOrderDetailTax]
-					WHERE
-						[intSalesOrderDetailId] = @ItemSalesOrderDetailId
+								INSERT INTO [tblARInvoiceDetailTax]
+									([intInvoiceDetailId]
+									,[intTaxGroupId]
+									,[intTaxCodeId]
+									,[intTaxClassId]
+									,[strTaxableByOtherTaxes]
+									,[strCalculationMethod]
+									,[dblRate]
+									,[dblExemptionPercent]
+									,[intSalesTaxAccountId]
+									,[dblTax]
+									,[dblAdjustedTax]
+									,[ysnTaxAdjusted]
+									,[ysnSeparateOnInvoice]
+									,[ysnCheckoffTax]
+									,[ysnTaxExempt]
+									,[strNotes]
+									,[intConcurrencyId])
+								SELECT
+									 @NewDetailId
+									,[intTaxGroupId]
+									,[intTaxCodeId]
+									,[intTaxClassId]
+									,[strTaxableByOtherTaxes]
+									,[strCalculationMethod]
+									,[dblRate]
+									,[dblExemptionPercent]
+									,[intSalesTaxAccountId]
+									,[dblTax]
+									,[dblAdjustedTax]
+									,[ysnTaxAdjusted]
+									,[ysnSeparateOnInvoice]
+									,[ysnCheckoffTax]
+									,[ysnTaxExempt]
+									,[strNotes]
+									,0
+								FROM
+									[tblSOSalesOrderDetailTax]
+								WHERE
+									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
 
-
-					DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId				
+								DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId
+						END
 					END
 			END	
 	END
