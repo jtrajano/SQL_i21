@@ -1042,7 +1042,7 @@ BEGIN TRY
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												(
 													CASE 
 														WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
@@ -1050,19 +1050,19 @@ BEGIN TRY
 														ELSE Floor(@dblRequiredQty / L.dblWeightPerQty)
 														END
 													) * L.dblWeightPerQty
-												)
+												))
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
 									END AS dblQuantity
 								,L.intWeightUOMId AS intItemUOMId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												CASE 
 													WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
 														THEN 1
 													ELSE Convert(numeric(38,20),Floor(@dblRequiredQty / L.dblWeightPerQty))
 													END
-												)
+												))
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
 									END AS dblIssuedQuantity
 								,CASE 
@@ -1092,7 +1092,7 @@ BEGIN TRY
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												(
 													CASE 
 														WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
@@ -1100,19 +1100,19 @@ BEGIN TRY
 														ELSE Floor(@dblRequiredQty / L.dblWeightPerQty)
 														END
 													) * L.dblWeightPerQty
-												)
+												))
 									ELSE @dblRequiredQty -- To Review ROUND(@dblRequiredQty,3) 
 									END AS dblQuantity
 								,L.intItemUOMId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												CASE 
 													WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
 														THEN 1
 													ELSE Convert(numeric(38,20),Floor(@dblRequiredQty / L.dblWeightPerQty))
 													END
-												)
+												))
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
 									END AS dblIssuedQuantity
 								,CASE 
@@ -1161,7 +1161,7 @@ BEGIN TRY
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												(
 													CASE 
 														WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
@@ -1169,19 +1169,19 @@ BEGIN TRY
 														ELSE Floor(@dblAvailableQty / L.dblWeightPerQty)
 														END
 													) * L.dblWeightPerQty
-												)
+												))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
 									END AS dblQuantity
 								,L.intWeightUOMId AS intItemUOMId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												CASE 
 													WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
 														THEN 1
 													ELSE Convert(numeric(38,20),Floor(@dblAvailableQty / L.dblWeightPerQty))
 													END
-												)
+												))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
 									END AS dblIssuedQuantity
 								,CASE 
@@ -1211,7 +1211,7 @@ BEGIN TRY
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												(
 													CASE 
 														WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
@@ -1219,19 +1219,19 @@ BEGIN TRY
 														ELSE Floor(@dblAvailableQty / L.dblWeightPerQty)
 														END
 													) * L.dblWeightPerQty
-												)
+												))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
 									END AS dblQuantity
 								,L.intItemUOMId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
-										THEN (
+										THEN Convert(numeric(38,20),(
 												CASE 
 													WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
 														THEN 1
 													ELSE Convert(numeric(38,20),Floor(@dblAvailableQty / L.dblWeightPerQty))
 													END
-												)
+												))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
 									END AS dblIssuedQuantity
 								,CASE 

@@ -86,8 +86,15 @@ BEGIN TRY
 
 			If Not Exists (Select 1 From tblMFWorkOrder Where intPickListId=@intPickListId)
 				Begin
-					Delete From tblMFPickListDetail Where intPickListId=@intPickListId
-					Delete From tblMFPickList Where intPickListId=@intPickListId
+					If (Select intKitStatusId from tblMFPickList Where intPickListId = @intPickListId) IN (7,12)
+					Begin
+						Exec uspMFDeletePickList @intPickListId,@intUserId
+					End
+					Else
+					Begin
+						Delete From tblMFPickListDetail Where intPickListId=@intPickListId
+						Delete From tblMFPickList Where intPickListId=@intPickListId
+					End
 				End
 
 			If @intPickListId > 0

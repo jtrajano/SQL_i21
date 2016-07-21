@@ -52,6 +52,8 @@ Begin Tran
 
 	If @intKitStatusId = 7
 	Begin
+		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
+
 		--Move the Staged (Kitting Area) Lots back to Storage Location
 		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId,dblQuantity,intItemUOMId)
 		Select PL.intPickListDetailId,PL.intStageLotId,PL.intStorageLocationId,
@@ -106,13 +108,13 @@ Begin Tran
 			Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder where intPickListId=@intPickListId And intWorkOrderId>@intWorkOrderId
 		End
 
-		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
-
 		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
 	End
 
 	If @intKitStatusId = 12
 	Begin
+
+		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
 
 		--Move the Staged (Kitting Area) Lots back to Storage Location
 		Insert Into @tblPickListDetail(intPickListDetailId,intStageLotId,intStorageLocationId,dblPickQuantity,intPickUOMId,dblQuantity,intItemUOMId)
@@ -166,8 +168,6 @@ Begin Tran
 
 			Select @intMinWO=Min(intWorkOrderId) from tblMFWorkOrder where intPickListId=@intPickListId And intWorkOrderId>@intWorkOrderId
 		End
-
-		Exec [uspMFDeleteLotReservationByPickList] @intPickListId
 
 		Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
 
