@@ -69,7 +69,7 @@ LEFT JOIN (tblARInvoiceDetail ID
 	LEFT JOIN tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 	LEFT JOIN tblARInvoiceDetailTax IDT ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId 
-									   AND ID.intItemId <> (SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference)
+									   AND ID.intItemId <> (SELECT TOP 1 ISNULL(intItemForFreightId, 0) FROM tblTRCompanyPreference)
 									   AND IDT.dblAdjustedTax <> 0.000000
 	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId) ON INV.intInvoiceId = ID.intInvoiceId
