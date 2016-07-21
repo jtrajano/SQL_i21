@@ -48,13 +48,15 @@
 	[intMilestoneId] [int] null,
 	[intCompanyLocationId] [int] null,
 	[intEntityLocationId] [int] null,
-	[strOpportunityWinLossReasonId] NVARCHAR(MAX) null,
+	[strOpportunityWinLossReasonId] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS null,
+	[strOpportunityWinLossReason] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS null,
 	[dtmWinLossDate] [datetime] null,
 	[intWinLossLengthOfCycle] [int] null,
 	[strWinLossDetails] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strWinLossDidRight] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strWinLossDidWrong] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strWinLossActionItem] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[intLostToCompetitorId] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
@@ -76,7 +78,8 @@
     CONSTRAINT [FK_tblHDProjectProject_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblHDProjectProject_tblHDMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblHDMilestone] ([intMilestoneId]),
     CONSTRAINT [FK_tblHDProjectProject_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
-    CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId])
+    CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
+    CONSTRAINT [FK_tblHDProject_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 	--[intOpportunitySourceId]
 )
 
