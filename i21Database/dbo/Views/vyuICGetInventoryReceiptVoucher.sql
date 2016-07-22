@@ -15,13 +15,13 @@ SELECT
 	, ReceiptItem.dblUnitCost
 	, ReceiptItem.dblQtyToReceive
 	, ReceiptItem.dblLineTotal
-	, ISNULL(ReceiptItem.dblBillQty,0) dblQtyVouchered
+	, dblQtyVouchered = ISNULL(Bill.dblQtyReceived,ISNULL(ReceiptItem.dblBillQty,0))
 	, dblVoucherAmount = 
-	  CASE
+	  ISNULL(Bill.dblTotal, CASE
 		WHEN ReceiptItem.dblQtyToReceive = 0
 		THEN 0
 		ELSE (ReceiptItem.dblLineTotal/ReceiptItem.dblQtyToReceive)* ISNULL(ReceiptItem.dblBillQty,0)
-	  END
+	  END)
 	, (ReceiptItem.dblQtyToReceive - ISNULL(ReceiptItem.dblBillQty,0)) dblQtyToVoucher
 	, dblAmountToVoucher =
 	  CASE
@@ -38,6 +38,8 @@ FROM vyuICGetInventoryReceiptItem ReceiptItem
 			, dtmBillDate
 			, intInventoryReceiptItemId
 			, Detail.intBillId
+			, Detail.dblTotal
+			, Detail.dblQtyReceived
 		FROM tblAPBillDetail Detail
 			LEFT JOIN tblAPBill Header ON Header.intBillId = Detail.intBillId
 		WHERE ISNULL(intInventoryReceiptItemId, '') <> ''
