@@ -16,7 +16,7 @@ BEGIN
 			AS
 			BEGIN
 
-			DECLARE @RecordsToProcess table(strPaymentMethod nvarchar(12), strGLAccount decimal(16,8), strPrintOption nvarchar(50), strPaymentMethodCode nvarchar(3))
+			DECLARE @RecordsToProcess table(strPaymentMethod nvarchar(25), strGLAccount decimal(16,8), strPrintOption nvarchar(50), strPaymentMethodCode nvarchar(3))
 			DECLARE @RecordsToAdd table(strPaymentMethodCode varchar(3), strPaymentMethod varchar(30))
 			DECLARE @RecordsToUpdate table(strPaymentMethodCode varchar(3), strPaymentMethod varchar(30))
 
