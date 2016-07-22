@@ -1,7 +1,7 @@
 CREATE VIEW vyuLGDeliveryOpenPickLots
 AS
 	SELECT 	PL.intPickLotHeaderId, 
-			PL.intReferenceNumber, 
+			PL.[strPickLotNumber], 
 			PL.dtmPickDate, 
 			PL.intCustomerEntityId,
 			PL.intCompanyLocationId,

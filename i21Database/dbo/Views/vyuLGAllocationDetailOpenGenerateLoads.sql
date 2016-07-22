@@ -6,7 +6,7 @@ AS
 				ELSE 0
 				END as dblGenerateLoadOpenQuantity
 	FROM 
-	(SELECT	AH.intReferenceNumber,
+	(SELECT	AH.[strAllocationNumber],
 			AH.intAllocationHeaderId,
 
 			AD.intAllocationDetailId,

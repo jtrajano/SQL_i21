@@ -2,7 +2,7 @@
 (
 	[intAllocationHeaderId] INT NOT NULL IDENTITY(1, 1), 
     [intConcurrencyId] INT NOT NULL, 
-    [intReferenceNumber] INT NOT NULL, 
+    [strAllocationNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[dtmTransDate] DATETIME NOT NULL,
     [intCompanyLocationId] INT NOT NULL, 
     [intCommodityId] INT NOT NULL, 
@@ -11,7 +11,7 @@
 	[intWeightUnitMeasureId] INT NULL,
 
     CONSTRAINT [PK_tblLGAllocationHeader_intAllocationHeaderId] PRIMARY KEY ([intAllocationHeaderId]), 
-	CONSTRAINT [UK_tblLGAllocationHeader_intReferenceNumber] UNIQUE ([intReferenceNumber]),
+	CONSTRAINT [UK_tblLGAllocationHeader_intReferenceNumber] UNIQUE ([strAllocationNumber]),
     CONSTRAINT [FK_tblLGAllocationHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
     CONSTRAINT [FK_tblLGAllocationHeader_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
     CONSTRAINT [FK_tblLGAllocationHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),

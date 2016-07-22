@@ -1,6 +1,6 @@
 CREATE VIEW vyuLGShipmentOpenAllocationDetails
 AS
-	SELECT	AH.intReferenceNumber,
+	SELECT	AH.[strAllocationNumber],
 			AH.intAllocationHeaderId,
 			AD.intAllocationDetailId,
 			AD.intPContractDetailId,

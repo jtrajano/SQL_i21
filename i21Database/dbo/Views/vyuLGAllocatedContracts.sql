@@ -5,7 +5,7 @@ SELECT
 	,ALD.intAllocationHeaderId
 
 -- Allocation Header details
-	,ALH.intReferenceNumber
+	,ALH.[strAllocationNumber]
 	,ALH.intCommodityId
 	,Comm.strDescription as strCommodity
 	,ALH.intCompanyLocationId

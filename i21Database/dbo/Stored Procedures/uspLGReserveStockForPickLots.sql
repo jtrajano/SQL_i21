@@ -43,7 +43,7 @@ BEGIN
 			,intStorageLocationId = Lot.intStorageLocationId
 			,dblQty = PLDetail.dblLotPickedQty
 			,intTransactionId = PLHeader.intPickLotHeaderId
-			,strTransactionId = CAST(PLHeader.intReferenceNumber AS VARCHAR(100))
+			,strTransactionId = CAST(PLHeader.[strPickLotNumber] AS VARCHAR(100))
 			,intTransactionTypeId = @intInventoryTransactionType
 	FROM	tblLGPickLotDetail PLDetail
 			JOIN tblLGPickLotHeader PLHeader ON PLHeader.intPickLotHeaderId = PLDetail.intPickLotHeaderId

@@ -21,7 +21,7 @@ SELECT
 			WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 				THEN CONVERT(NVARCHAR(100), LogisticView.intTrackingNumber)
 			WHEN Shipment.intSourceType = 3 -- Pick Lot
-				THEN CONVERT(NVARCHAR(100), PickLot.intReferenceNumber)
+				THEN CONVERT(NVARCHAR(100), PickLot.[strPickLotNumber])
 			ELSE NULL
 			END,
 	strOrderUOM = 

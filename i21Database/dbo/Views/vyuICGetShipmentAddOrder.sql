@@ -120,7 +120,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityCustomer
 		, intOrderId = PickLotDetail.intSContractHeaderId
 		, strOrderNumber = PickLotDetail.strSContractNumber
 		, intSourceId = PickLotDetail.intPickLotHeaderId
-		, strSourceNumber = PickLotDetail.intReferenceNumber
+		, strSourceNumber = PickLotDetail.[strPickLotNumber]
 		, intItemId
 		, strItemNo
 		, strItemDescription

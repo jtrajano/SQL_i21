@@ -5438,5 +5438,26 @@
     <Property Name="ParentElementName" Value="[dbo].[tblSCTicketSplit]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStorageScheduleTypeId" />
+  </Operation>	
+  <Operation Name="Rename Refactor" Key="6ab5d0ec-5ea6-4ae9-903f-b7ba4171129b" ChangeDateTime="07/22/2016 03:56:55">
+    <Property Name="ElementName" Value="[dbo].[tblLGAllocationHeader].[intReferenceNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGAllocationHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strAllocationNumber]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c9b3533f-a886-4bf8-8ee0-d99272701375" ChangeDateTime="07/22/2016 04:03:09">
+    <Property Name="ElementName" Value="[dbo].[tblLGPickLotHeader].[intReferenceNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGPickLotHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strPickLotNumber]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7e2adaa9-3ddf-4afa-8d29-9e3bdc9e606c" ChangeDateTime="07/22/2016 04:04:58">
+    <Property Name="ElementName" Value="[dbo].[tblLGStockSalesHeader].[intReferenceNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGStockSalesHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strStockSalesNumber]" />
   </Operation>
 </Operations>
