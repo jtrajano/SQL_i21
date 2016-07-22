@@ -63,6 +63,7 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'dblStatedTarePerUnit', type: 'float' },
         { name: 'strContainerNo', type: 'string' },
         { name: 'intEntityVendorId', type: 'int', allowNull: true },
+        { name: 'intItemUnitMeasureId', type: 'int', allowNull: false },
         { name: 'strGarden', type: 'string' },
         { name: 'strMarkings', type: 'string' },
         { name: 'strGrade', type: 'string' },
