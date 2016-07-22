@@ -160,7 +160,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateLocationUsedBySiteView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDriverUsedBySiteView.sql"
 :r "..\dbo\Views\vyuTMDeliveryFillReport.sql"
-:r "..\dbo\Stored Procedures\uspTMDeliveryFillReport.sql"
+--:r "..\dbo\Stored Procedures\uspTMDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r "..\dbo\Views\vyuTMOriginItemUsedBySite.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateGeneratedCallEntryView.sql"
@@ -169,6 +169,7 @@
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOutOfRangeBurnRateSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateLeakGasCheckSearchView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillReportView.sql"
 
 
 

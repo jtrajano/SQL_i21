@@ -867,3 +867,33 @@ CREATE INDEX [IX_tblTMSite_intTankTownshipId] ON [dbo].[tblTMSite] ([intTankTown
 GO
 
 CREATE INDEX [IX_tblTMSite_intGlobalJulianCalendarId] ON [dbo].[tblTMSite] ([intGlobalJulianCalendarId])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intProduct] ON [dbo].[tblTMSite] ([intProduct])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intDriverID] ON [dbo].[tblTMSite] ([intDriverID])
+
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intTaxStateID] ON [dbo].[tblTMSite] ([intTaxStateID])
+
+GO
+
+CREATE INDEX [IX_tblTMSite_intDeliveryTermID] ON [dbo].[tblTMSite] ([intDeliveryTermID])
+
+GO
+
+
+CREATE INDEX [IX_tblTMSite_strCity] ON [dbo].[tblTMSite] ([strCity])
+
+
+GO
+
+CREATE INDEX [IX_tblTMSite_strState] ON [dbo].[tblTMSite] ([strState])
+
+
+

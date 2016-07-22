@@ -4093,6 +4093,8 @@
     <None Include="Scripts\Post-Deployment\IC\17_Update_Blank_Description_tblICItem.sql" />
     <Build Include="dbo\Views\vyuHDWinLossAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipment.sql" />
+    <Build Include="dbo\Views\vyuTMDeliveryFillGroupSubReport.sql" />
+    <Build Include="dbo\Views\vyuTMDeliveryFillWithItemPriceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

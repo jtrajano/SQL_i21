@@ -58,10 +58,12 @@ BEGIN
 					,dblQuantity = COALESCE (F.dblQuantity, 0.0) 
 					,strCustomerLastName = RTRIM (LTRIM(B.vwcus_last_name)) 
 					,strCustomerFirstName = RTRIM(LTRIM(B.vwcus_first_name)) 
-					,strCustomerName = (CASE WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = '''' 
-											THEN RTRIM (B.vwcus_last_name) 
-											ELSE RTRIM (B.vwcus_last_name) + '', '' + RTRIM (B.vwcus_first_name) 
-										END) COLLATE Latin1_General_CI_AS
+					,strCustomerName = (CASE WHEN B.vwcus_co_per_ind_cp = ''C'' 
+											THEN RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_first_name) + RTRIM(B.vwcus_mid_init) + RTRIM(B.vwcus_name_suffix)   
+										WHEN B.vwcus_first_name IS NULL OR RTRIM(B.vwcus_first_name) = ''''  
+											THEN     RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_name_suffix)    
+										ELSE     RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_name_suffix) + '', '' + RTRIM(B.vwcus_first_name) + RTRIM(B.vwcus_mid_init)
+									 END)  COLLATE Latin1_General_CI_AS
 					,strPhoneNumber = B.vwcus_phone 
 					,strCustomerNumber = B.vwcus_key 
 					,strCustomerZipCode = B.vwcus_zip 
@@ -192,10 +194,7 @@ BEGIN
 					,dblQuantity = COALESCE (F.dblQuantity, 0.0) 
 					,strCustomerLastName = RTRIM (LTRIM(B.vwcus_last_name)) 
 					,strCustomerFirstName = RTRIM(LTRIM(B.vwcus_first_name)) 
-					,strCustomerName = (CASE WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = '''' 
-											THEN RTRIM (B.vwcus_last_name) 
-											ELSE RTRIM (B.vwcus_last_name) + '', '' + RTRIM (B.vwcus_first_name) 
-										END) COLLATE Latin1_General_CI_AS
+					,strCustomerName = B.strFullCustomerName
 					,strPhoneNumber = B.vwcus_phone 
 					,strCustomerNumber = B.vwcus_key 
 					,strCustomerZipCode = B.vwcus_zip 

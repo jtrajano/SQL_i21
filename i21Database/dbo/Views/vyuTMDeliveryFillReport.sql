@@ -1,138 +1,111 @@
 ﻿CREATE VIEW [dbo].[vyuTMDeliveryFillReport]
 AS
 
-SELECT DISTINCT  
-A.intCustomerID
-, agcus_last_name = ISNULL((CASE WHEN Cus.strType = 'Company' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  -1 ELSE 25 END)) END),'')
-, agcus_first_name = ISNULL((CASE WHEN Cus.strType = 'Company' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  + 2 ELSE 50 END),50) END),'')
-, CustomerName = Ent.strName
-, agcus_phone = (CASE WHEN CHARINDEX('x', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX('x',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END)
-, agcus_key = ISNULL(Ent.strEntityNo,'')
-, agcus_tax_state =  ISNULL(K.strTaxGroup,'')
-, agcus_ar_per1 = ISNULL(CI.dbl10Days,0.0) 
-, agcus_cred_limit = Cus.dblCreditLimit
-, agcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
-, agcus_budget_amt_due = ISNULL(CI.dblTotalDue,0.0)
-, agcus_ar_future = CAST(ISNULL(CI.dblFuture,0.0) AS NUMERIC(18,6))
-, agcus_prc_lvl = CAST(0 AS INT)
-, Terms = (CASE  WHEN (SELECT ysnUseDeliveryTermOnCS From tblTMPreferenceCompany) <> 1 
-			THEN 
-				(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID = Loc.intTermsId)
-			ELSE  
-				(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID = C.intDeliveryTermID)
-			END) 
-, Credits = ISNULL(CI.dblUnappliedCredits,0.0) + CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
-, TotalPast = ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0)
-, ARBalance =  ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0)- CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
-, dblPastCredit = (ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0)) 
-, C.intSiteNumber
-, dblLastDeliveredGal = ISNULL(C.dblLastDeliveredGal,0)
-, C.strSequenceID
-, intLastDeliveryDegreeDay = ISNULL(C.intLastDeliveryDegreeDay,0)
-, strSiteAddress = REPLACE(C.strSiteAddress,Char(13),' ') 
-, C.dtmOnHoldEndDate
-, C.ysnOnHold
-,strHoldReason = (Case When C.ysnOnHold = 0 Then
-		''
-		When C.ysnOnHold = 1 Then 
-		 HR.strHoldReason
-		When (C.dtmOnHoldEndDate > GetDate() or C.dtmOnHoldEndDate is null)THEN
-		 HR.strHoldReason
-		End)
-, strOnHold = (Case C.ysnOnHold 
-	When 1 then
-		'Yes'
-	When 0 then
-		'No'
-	End)
-, C.intFillMethodId
-,  strCity= (Case When C.strSiteAddress is not null Then
-		', ' + C.strCity
-	ELSE
-		C.strCity  
-	END ) 
-, strState = (Case When C.strCity IS NOT NULL and C.strSiteAddress is not null Then
-		', ' + C.strState
-	ELSE
-		C.strState  
-	END ) 
-, strZipCode = (Case When C.strState IS NOT NULL and C.strCity IS NOT NULL and C.strSiteAddress is not null Then
-		' ' + C.strZipCode
-	ELSE
-		C.strZipCode  
-	END )
-, C.strComment
-, C.strInstruction
-, C.dblDegreeDayBetweenDelivery
-, C.dblTotalCapacity
-, C.dblTotalReserve
-, C.strDescription AS strSiteDescription
-, ISNULL(C.dblLastGalsInTank,0) AS dblLastGalsInTank
-, C.dtmLastDeliveryDate
-, C.intSiteID
-, ISNULL(C.dblEstimatedPercentLeft,0) as dblEstimatedPercentLeft
-, C.dtmNextDeliveryDate
-, ISNULL(C.intNextDeliveryDegreeDay,0) AS intNextDeliveryDegreeDay
-,(Case When C.dtmNextDeliveryDate is not Null Then
-	'Date'
-Else
-	'DD'
-End) as [SiteLabel]
-,(Case When C.dtmNextDeliveryDate is not Null Then
-	CONVERT(varchar,C.dtmNextDeliveryDate,101)
-Else
-	CAST(C.intNextDeliveryDegreeDay as nvarchar(20))
-End) as [SiteDeliveryDD]
-, 	(Case When H.strCurrentSeason = 'Summer' Then 
-		C.dblSummerDailyUse
-		When H.strCurrentSeason = 'Winter'
-		Then  C.dblWinterDailyUse
-		ELSE
-			Coalesce(C.dblWinterDailyUse,0) End) AS dblDailyUse
-, ISNULL( I.strFillGroupCode,'') as strFillGroupCode
-, I.strDescription
-, (Case I.ysnActive
-	When 1 then
-		'Yes'
-	When 0 then
-		'No'
-	End) as ysnActive
-, I.intFillGroupId
-, strDriverName = J.strName  
-, strDriverId = J.strEntityNo
-, F.dtmRequestedDate
-, Coalesce(F.dblQuantity,0.0) as dblQuantity
-, strProductId = G.strItemNo
-, strProductDescription = G.strDescription
-,(Select r.strRouteId FROM tblTMRoute r WHERE r.intRouteId = C.intRouteId) as strRouteId
-, (SELECT strFillMethod FROM tblTMFillMethod tt WHERE tt.intFillMethodId = C.intFillMethodId) AS strFillMethod
-, (Case When C.intFillMethodId = 1 Then
-			Case When (SELECT COUNT(intSiteID)FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) > 1 Then
-					'Varies'
-				When (SELECT COUNT(intSiteID)FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) = 1 Then
-					Case When (SELECT intRecurPattern FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID)= 0 Then
-							Cast((SELECT intRecurInterval FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) as varchar(50))
-						When (SELECT intRecurPattern FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) = 1 Then
-							'Weekly'
-						When (SELECT intRecurPattern FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) = 2 Then 
-							'Monthly'
-						When (SELECT intRecurPattern FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) = 3 Then
-							'Single'
-					End
-				End
-		Else
-		Cast((CONVERT(DECIMAL (10,2),C.dblDegreeDayBetweenDelivery)) as varchar(50))
-	End) as strBetweenDlvry		
-, (CASE WHEN ISNumeric(C.strLocation) = 1 THEN
-	C.strLocation
-	ELSE
-	substring(C.strLocation, patindex('%[^0]%',C.strLocation), 50) END) AS strLocation
-,C.dtmForecastedDelivery
-,CAST((CASE WHEN F.intDispatchID IS NULL THEN 0 ELSE 1 END) AS BIT) AS ysnPending
-,vwitm_class = G.strCategoryCode
-,F.dtmCallInDate
-,dblCallEntryPrice = F.dblPrice
-,dblCallEntryMinimumQuantity = F.dblMinimumQuantity
+SELECT  
+	intCustomerId = A.intCustomerID
+	--, strCustomerLastName = ISNULL((CASE WHEN Cus.strType = 'Company' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  -1 ELSE 25 END)) END),'')
+	--, strCustomerFirstName = ISNULL((CASE WHEN Cus.strType = 'Company' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  + 2 ELSE 50 END),50) END),'')
+	, strCustomerName = Ent.strName
+	, strCustomerPhone = (CASE WHEN CHARINDEX('x', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX('x',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END)
+	, strCustomerNumber = ISNULL(Ent.strEntityNo,'')
+	, strCustomerTax =  ISNULL(K.strTaxGroup,'')
+	, dblCustomerPer1 = ISNULL(CI.dbl10Days,0.0) 
+	, dblCustomerCreditLimit = Cus.dblCreditLimit
+	, dblCustomerLastStatement = ISNULL(CI.dblLastStatement,0.0)
+	, dblCustomerTotalDue = ISNULL(CI.dblTotalDue,0.0)
+	, dblCustomerFuture = CAST(ISNULL(CI.dblFuture,0.0) AS NUMERIC(18,6))
+	, dblCustomerPriceLevel = CAST(0 AS INT)
+	, strTerms = (CASE  WHEN Q.ysnUseDeliveryTermOnCS <> 1 
+				THEN 
+					(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID = Loc.intTermsId)
+				ELSE  
+					(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID = C.intDeliveryTermID)
+				END) 
+	, dblCredits = ISNULL(CI.dblUnappliedCredits,0.0) + CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
+	, dblTotalPast = ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0)
+	, dblARBalance =  ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0)- CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
+	, dblPastCredit = (ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0)) 
+	, C.intSiteNumber
+	, dblSiteLastDeliveredGal = ISNULL(C.dblLastDeliveredGal,0)
+	, strSiteSequenceId =  C.strSequenceID
+	, intSiteLastDeliveryDegreeDay = ISNULL(C.intLastDeliveryDegreeDay,0)
+	, strSiteAddress = REPLACE(REPLACE (C.strSiteAddress, CHAR(13), ' '),CHAR(10), ' ') 
+	, C.dtmOnHoldEndDate
+	, C.ysnOnHold
+	, strHoldReason = (CASE WHEN C.ysnOnHold = 0 
+						THEN ''
+						WHEN C.ysnOnHold = 1 
+						THEN HR.strHoldReason
+						WHEN (C.dtmOnHoldEndDate > DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) OR C.dtmOnHoldEndDate IS NULL)
+						THEN HR.strHoldReason
+						End)
+	, C.intFillMethodId
+	,  strCity= (CASE WHEN C.strSiteAddress IS NOT NULL THEN
+						', ' + C.strCity
+					ELSE
+						C.strCity  
+					END ) 
+	, strState = (CASE WHEN C.strCity IS NOT NULL and C.strSiteAddress IS NOT NULL Then
+						', ' + C.strState
+					ELSE
+						C.strState  
+					END ) 
+	, strZipCode = (CASE WHEN C.strState IS NOT NULL and C.strCity IS NOT NULL AND C.strSiteAddress IS NOT NULL Then
+						' ' + C.strZipCode
+					ELSE
+						C.strZipCode  
+					END )
+	, C.strComment
+	, C.strInstruction
+	, C.dblDegreeDayBetweenDelivery
+	, C.dblTotalCapacity
+	, C.dblTotalReserve
+	, strSiteDescription = C.strDescription
+	, dblLastGalsInTank = ISNULL(C.dblLastGalsInTank,0)
+	, C.dtmLastDeliveryDate
+	, intSiteId = C.intSiteID
+	, dblEstimatedPercentLeft = ISNULL(C.dblEstimatedPercentLeft,0)
+	, C.dtmNextDeliveryDate
+	, intNextDeliveryDegreeDay = ISNULL(C.intNextDeliveryDegreeDay,0)
+	, strSiteLabel =(	CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN
+							'Date'
+						ELSE
+							'DD'
+						END)
+	,strSiteDeliveryDD= (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN
+							CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
+						ELSE
+							CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20))
+						END) 
+	,dblDailyUse = (CASE WHEN H.strCurrentSeason = 'Summer' THEN C.dblSummerDailyUse
+					WHEN H.strCurrentSeason = 'Winter' THEN  C.dblWinterDailyUse
+					ELSE Coalesce(C.dblWinterDailyUse,0) End) 
+	, strFillGroupCode = ISNULL( I.strFillGroupCode,'')
+	, strFillGroupDescription = I.strDescription
+	, ysnFillGroupActive = I.ysnActive
+	, intFillGroupCodeId = CAST(C.intFillGroupId AS INT)
+	, strDriverName = J.strName  
+	, strDriverId = J.strEntityNo
+	, F.dtmRequestedDate
+	, dblQuantity = (CASE WHEN COALESCE(F.dblMinimumQuantity,0.0) <> 0 THEN F.dblMinimumQuantity
+						ELSE COALESCE(F.dblQuantity,0.0) END) 
+	, strProductId = G.strItemNo
+	, strProductDescription = G.strDescription
+	, O.strRouteId
+	, P.strFillMethod
+	, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
+							ELSE CAST((CONVERT(INT,C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
+						END)  
+	, strLocation = (CASE WHEN ISNUMERIC(C.strLocation) = 1 THEN C.strLocation
+					 ELSE SUBSTRING(C.strLocation, PATINDEX('%[^0]%',C.strLocation), 50) 
+					 END)  
+	,C.dtmForecastedDelivery
+	,ysnPending = CAST((CASE WHEN F.intDispatchID IS NULL THEN 0 ELSE 1 END) AS BIT)
+	,strItemClass = G.strCategoryCode
+	,F.dtmCallInDate
+	,dblCallEntryPrice = F.dblPrice
+	,dblCallEntryMinimumQuantity = F.dblMinimumQuantity
+	,Z.strCompanyName
 FROM tblTMCustomer A 
 INNER JOIN tblEMEntity Ent
 	ON A.intCustomerNumber = Ent.intEntityId
@@ -169,7 +142,7 @@ LEFT JOIN (
 	AND C.intLocationId = G.intLocationId
 LEFT JOIN tblTMClock H 
 	ON H.intClockID = C.intClockID
-Left Join tblTMFillGroup I 
+LEFT JOIN tblTMFillGroup I 
 	On I.intFillGroupId = C.intFillGroupId
 LEFT JOIN (
 	SELECT  
@@ -190,8 +163,16 @@ LEFT JOIN tblTMHoldReason HR
 	ON C.intHoldReasonID = HR.intHoldReasonID
 LEFT JOIN tblSMTaxGroup K
 	ON C.intTaxStateID = K.intTaxGroupId
+LEFT JOIN tblTMRoute O
+	ON C.intRouteId = O.intRouteId
+LEFT JOIN tblTMFillMethod P
+	ON C.intFillMethodId = P.intFillMethodId
+,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) Q
+,(SELECT TOP 1 intFillMethodId FROM tblTMFillMethod WHERE strFillMethod = 'Julian Calendar') U
+,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 WHERE Cus.ysnActive = 1 and C.ysnActive = 1
 
+GO
 
 
 
