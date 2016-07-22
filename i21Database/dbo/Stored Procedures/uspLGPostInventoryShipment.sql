@@ -52,7 +52,8 @@ BEGIN
 	DECLARE @intCreatedEntityId AS INT  
 	DECLARE @ysnAllowUserSelfPost AS BIT   
 	DECLARE @ysnTransactionPostedFlag AS BIT  
-  
+  	DECLARE @ysnDirectShip BIT;  
+
 	SELECT TOP 1   
 			@intTransactionId = intLoadId
 			,@ysnTransactionPostedFlag = ysnPosted  
@@ -464,6 +465,53 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   
+
+DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType,
+        @total as int;
+
+INSERT INTO @ItemsToIncreaseInTransitInBound (
+	[intItemId]
+	,[intItemLocationId]
+	,[intItemUOMId]
+	,[intLotId]
+	,[intSubLocationId]
+	,[intStorageLocationId]
+	,[dblQty]
+	,[intTransactionId]
+	,[strTransactionId]
+	,[intTransactionTypeId]
+	)
+SELECT LD.intItemId
+	,intItemLocationId = (SELECT TOP (1) intItemLocationId FROM tblICItemLocation WHERE intItemId = LD.intItemId)
+	,CT.intItemUOMId
+	,LDL.intLotId
+	,LW.intSubLocationId
+	,LOT.intStorageLocationId
+	,CASE 
+		WHEN @ysnPost = 1
+		THEN LD.dblQuantity
+		ELSE - LD.dblQuantity
+		END
+	,LD.intLoadId
+	,CAST(L.strLoadNumber AS VARCHAR(100))
+	,5
+FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblLGLoadDetailLot LDL ON LD.intLoadDetailId = LDL.intLoadDetailId
+LEFT JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
+LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intSContractDetailId
+WHERE L.intLoadId = @intTransactionId;
+
+SELECT @ysnDirectShip = CASE WHEN intSourceType = 3 THEN 1 ELSE 0 END FROM tblLGLoad S WHERE intLoadId=@intTransactionId
+
+IF (@ysnDirectShip <> 1)
+BEGIN
+	EXEC dbo.uspICIncreaseInTransitOutBoundQty @ItemsToIncreaseInTransitInBound;
+END
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
