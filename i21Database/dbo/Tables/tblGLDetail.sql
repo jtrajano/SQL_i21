@@ -31,6 +31,9 @@
     [dblCreditReport] [numeric](18, 9) NULL CONSTRAINT [DF_tblGLDetail_dblCreditReport]  DEFAULT ((0)),
     [dblReportingRate] [numeric](18, 9) NULL CONSTRAINT [DF_tblGLDetail_dblReportingRate]  DEFAULT ((0)),
     [dblForeignRate] NUMERIC(18, 9) NULL, 
+    [intReconciledId] INT NULL, 
+    [dtmReconciled] DATETIME NULL, 
+    [ysnReconciled] BIT NULL, 
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
