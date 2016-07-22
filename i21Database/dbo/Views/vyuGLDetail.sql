@@ -6,6 +6,7 @@ AS
 		  A.dtmDate,
             A.strBatchId,
             B.strAccountId,
+            B.strDescription strAccountDescription,
             C.strAccountGroup,
             C.strAccountType,
             A.dblDebit,
@@ -39,10 +40,14 @@ AS
 			A.intJournalLineNo,
 			J.strDocument,
 			A.ysnIsUnposted,
-			A.intTransactionId
+			A.intTransactionId,
+			E.intEntityId,
+			J.strComments,
+			U.strUOMCode
      FROM tblGLDetail AS A
 		  LEFT JOIN tblGLJournalDetail J ON A.intJournalLineNo = J.intJournalDetailId
           LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
+		  LEFT JOIN tblGLAccountUnit AS U ON B.intAccountUnitId = U.intAccountUnitId
           LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
           LEFT JOIN tblSMCurrency AS D ON D.intCurrencyID = A.intCurrencyId
           LEFT JOIN [tblEMEntityCredential] AS E ON E.intEntityId = A.intEntityId
