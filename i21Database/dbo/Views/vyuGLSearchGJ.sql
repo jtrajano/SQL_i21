@@ -15,7 +15,7 @@ WITH total AS
            j.strDescription,
            j.intJournalId,
            ysnPosted,
-           dtmDate,
+           dtmPosted,
            dtmReverseDate,
            dtmDateEntered,
            e.strName strUserName,
