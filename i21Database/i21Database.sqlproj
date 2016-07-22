@@ -4038,6 +4038,10 @@
     <Build Include="dbo\Tables\tblICRebuildValuationGLSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareGLSnapshotOnRebuildInventoryValuation.sql" />
     <Build Include="dbo\Views\vyuICCompareRebuildValuationSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemShipment.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentChargeStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemLotStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
