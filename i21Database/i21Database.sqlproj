@@ -4095,6 +4095,10 @@
     <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipment.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillGroupSubReport.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillWithItemPriceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemShipment.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentChargeStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemLotStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
