@@ -147,3 +147,20 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMWorkOrder',
     @level2type = N'COLUMN',
     @level2name = N'intWorkOrderCategoryId'
+
+GO
+
+CREATE INDEX [IX_tblTMWorkOrder_intSiteID] ON [dbo].[tblTMWorkOrder] ([intSiteID])
+
+GO
+
+CREATE INDEX [IX_tblTMWorkOrder_intCloseReasonID] ON [dbo].[tblTMWorkOrder] ([intCloseReasonID])
+
+GO
+
+CREATE INDEX [IX_tblTMWorkOrder_intWorkStatusTypeID] ON [dbo].[tblTMWorkOrder] ([intWorkStatusTypeID])
+
+GO
+
+CREATE INDEX [IX_tblTMWorkOrder_intWorkOrderCategoryId] ON [dbo].[tblTMWorkOrder] ([intWorkOrderCategoryId])
+

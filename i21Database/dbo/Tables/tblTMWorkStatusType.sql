@@ -46,3 +46,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMWorkStatusType',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+
+GO
+
+CREATE INDEX [IX_tblTMWorkStatusType_strWorkStatus] ON [dbo].[tblTMWorkStatusType] ([strWorkStatus])
+
+
+
