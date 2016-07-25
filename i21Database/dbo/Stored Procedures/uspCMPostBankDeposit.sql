@@ -344,7 +344,7 @@ BEGIN
 				ON A.intShortGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
-	WHERE	A.strTransactionId = @strTransactionId AND A.intShortGLAccountId IS NOT NULL AND A.intShortGLAccountId <> 0
+	WHERE	A.strTransactionId = @strTransactionId AND A.intShortGLAccountId IS NOT NULL AND A.intShortGLAccountId <> 0 AND A.dblShortAmount <> 0
 	
 	-- 2. CREDIT SIdE
 	UNION ALL 
