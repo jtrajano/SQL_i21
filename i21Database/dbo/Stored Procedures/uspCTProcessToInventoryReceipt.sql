@@ -50,6 +50,9 @@ AS
 				dtmDate,
 				intShipViaId,
 				dblQty,
+				intGrossNetUOMId,
+				dblGross,
+				dblNet,
 				dblCost,
 				intCostUOMId,
 				intCurrencyId,
@@ -63,8 +66,7 @@ AS
 				intSourceType,		 	
 				strSourceId,
 				strSourceScreenName,
-				ysnSubCurrency,
-				intGrossNetUOMId
+				ysnSubCurrency
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -78,6 +80,9 @@ AS
 				dtmDate						=	CD.dtmStartDate,
 				intShipViaId				=	CD.intShipViaId,
 				dblQty						=	ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0),
+				intGrossNetUOMId			=	ISNULL(CD.intNetWeightUOMId,0),	
+				dblGross					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
+				dblNet						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblCost						=	ISNULL(AD.dblSeqPrice,0),
 				intCostUOMId				=	AD.intSeqPriceUOMId,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
@@ -91,8 +96,7 @@ AS
 				intSourceType		 		=	0,
 				strSourceId					=	CH.strContractNumber,
 				strSourceScreenName			=	'Contract',
-				ysnSubCurrency				=	SubCurrency.ysnSubCurrency ,
-				intGrossNetUOMId			=	0
+				ysnSubCurrency				=	SubCurrency.ysnSubCurrency
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
