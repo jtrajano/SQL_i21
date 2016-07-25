@@ -34,7 +34,7 @@ BEGIN TRY
 	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 	
 	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId 
 
-	IF @strinterfaceSystem = 'DTN'
+	IF @strInterfaceSystem = 'DTN'
 	BEGIN
 		IF @strPassword = ''
 		SET @strPassword = '?&Type=F'
