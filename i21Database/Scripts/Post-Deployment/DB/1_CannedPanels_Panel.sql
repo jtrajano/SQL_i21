@@ -872,7 +872,7 @@ N'', N'@DATE@', N'@DATE@', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'',
 print('/*******************  END INSERTING payroll canned panels on temporary panel table  *******************/')
 
 
-INSERT INTO #TempCannedPanels VALUES (15564, 0, 5, 100, 400, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Gallons by Store Chart', N'Grid', N'', N'iRely Store - Gallons by Store Chart', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name, 
+INSERT INTO #TempCannedPanels VALUES (15564, 0, 5, 100, 400, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Gallons by Store Chart', N'Chart', N'', N'iRely Store - Gallons by Store Chart', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name, 
 	sthssmst.sthss_pmp_id, 
 	Sum(sthssmst.sthss_pmp_qty) as c, 
 	sthssmst.sthss_rec_type

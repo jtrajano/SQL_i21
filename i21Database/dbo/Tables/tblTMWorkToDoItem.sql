@@ -44,3 +44,8 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMWorkToDoItem',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+
+GO
+
+CREATE INDEX [IX_tblTMWorkToDoItem_strToDoItem] ON [dbo].[tblTMWorkToDoItem] ([strToDoItem])
+

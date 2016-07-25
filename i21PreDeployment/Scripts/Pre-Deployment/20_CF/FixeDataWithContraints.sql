@@ -186,3 +186,40 @@ BEGIN
 	
 	print 'end updating account data'
 END
+
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFAccount')
+BEGIN
+	print 'begin updating account data'
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFAccount'AND COLUMN_NAME = 'intPriceRuleGroup')
+	BEGIN
+		EXEC ('update tblCFAccount set intPriceRuleGroup = NULL where intPriceRuleGroup = 0')
+	END
+	
+	print 'end updating account data'
+END
+
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFPriceProfileDetail')
+BEGIN
+	print 'begin updating account data'
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFPriceProfileDetail'AND COLUMN_NAME = 'intPriceIndexId')
+	BEGIN
+		EXEC ('update tblCFPriceProfileDetail set intPriceIndexId = NULL where intPriceIndexId = 0')
+	END
+	
+	print 'end updating account data'
+END
+
+
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFPriceProfileDetail')
+BEGIN
+	print 'begin updating account data'
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFPriceProfileDetail'AND COLUMN_NAME = 'intLocalPricingIndex')
+	BEGIN
+		EXEC ('update tblCFPriceProfileDetail set intLocalPricingIndex = NULL where intLocalPricingIndex = 0')
+	END
+	
+	print 'end updating account data'
+END

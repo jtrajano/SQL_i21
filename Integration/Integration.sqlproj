@@ -337,5 +337,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateCustomerContractSubReportView.sql" />
     <None Include="dbo\Stored Procedures\uspTMDeliveryFillGroupSubReportView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryFillReportView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateWorkOrderReportView.sql" />
   </ItemGroup>
 </Project>
