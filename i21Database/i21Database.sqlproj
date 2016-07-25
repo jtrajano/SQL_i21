@@ -4095,6 +4095,13 @@
     <Build Include="dbo\Stored Procedures\uspLGPostInventoryShipment.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillGroupSubReport.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillWithItemPriceReport.sql" />
+    <Build Include="dbo\Tables\tblSMComboBoxValue.sql" />
+    <Build Include="dbo\Tables\tblSMRow.sql" />
+    <Build Include="dbo\Tables\tblSMGridColumn.sql" />
+    <Build Include="dbo\Tables\tblSMGridCellValue.sql" />
+    <Build Include="dbo\Tables\tblSMFieldValue.sql" />
+    <Build Include="dbo\Tables\tblSMCustomTab.sql" />
+    <Build Include="dbo\Tables\tblSMCustomTabDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
