@@ -17,52 +17,66 @@ SET ANSI_WARNINGS OFF
 DECLARE @billId INT
 DECLARE @InvoicesId NVARCHAR(MAX)
 DECLARE @bankTransactionId INT
+DECLARE @intCompanyLocationId INT
 
 BEGIN TRY
 	
 	BEGIN TRANSACTION
 
-	-- AP Transaction and Posting
-	EXEC [dbo].[uspCCTransactionToAPBill] 
-		@intSiteHeaderId = @intSiteHeaderId
-		,@userId = @userId
-		,@post	= @post
-		,@recap = 0
-		,@success = @success OUTPUT
-		,@errorMessage = @errorMessage OUTPUT
-		,@createdBillId = @billId OUTPUT
+	SELECT @intCompanyLocationId = VD.intCompanyLocationId FROM tblCCSiteHeader SH 
+	JOIN tblCCVendorDefault VD ON VD.intVendorDefaultId = SH.intVendorDefaultId
+	JOIN tblSMUserSecurityCompanyLocationRolePermission CL ON VD.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE SH.intSiteHeaderId = @intSiteHeaderId AND CL.intEntityId = @userId
 
-	-- AR Transaction and Posting
-	EXEC [dbo].[uspCCTransactionToARInvoice] 
-		@intSiteHeaderId = @intSiteHeaderId
-		,@UserId = @userId
-		,@Post	= @post
-		,@Recap = 0
-		,@CreatedIvoices = @InvoicesId OUTPUT
-		,@success = @success OUTPUT
-		,@ErrorMessage = @errorMessage OUTPUT
-
-	-- CM Transaction and Posting
-	EXEC [dbo].[uspCCTransactionToCMBankTransaction]
-		@intSiteHeaderId = @intSiteHeaderId
-		,@userId = @userId
-		,@post	= @post
-		,@recap = 0
-		,@success = @success OUTPUT
-		,@errorMessage = @errorMessage OUTPUT
-		,@createdBankTransactionId = @bankTransactionId OUTPUT
-
-	-- SET Posted Flag
-	IF(@post = 1)
+	IF(@intCompanyLocationId IS NULL)
 	BEGIN
-		UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post, intCMBankTransactionId = @bankTransactionId WHERE intSiteHeaderId = @intSiteHeaderId
+		RAISERROR('Vendor Company Location does not exists!. Please check the setup.',16,1);
 	END
-	ELSE IF(@post = 0)
+	ELSE
 	BEGIN
-		UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post WHERE intSiteHeaderId = @intSiteHeaderId
-	END
+		-- AP Transaction and Posting
+		EXEC [dbo].[uspCCTransactionToAPBill] 
+			@intSiteHeaderId = @intSiteHeaderId
+			,@userId = @userId
+			,@post	= @post
+			,@recap = 0
+			,@success = @success OUTPUT
+			,@errorMessage = @errorMessage OUTPUT
+			,@createdBillId = @billId OUTPUT
 
-	COMMIT TRANSACTION
+		-- AR Transaction and Posting
+		EXEC [dbo].[uspCCTransactionToARInvoice] 
+			@intSiteHeaderId = @intSiteHeaderId
+			,@UserId = @userId
+			,@Post	= @post
+			,@Recap = 0
+			,@CreatedIvoices = @InvoicesId OUTPUT
+			,@success = @success OUTPUT
+			,@ErrorMessage = @errorMessage OUTPUT
+
+		-- CM Transaction and Posting
+		EXEC [dbo].[uspCCTransactionToCMBankTransaction]
+			@intSiteHeaderId = @intSiteHeaderId
+			,@userId = @userId
+			,@post	= @post
+			,@recap = 0
+			,@success = @success OUTPUT
+			,@errorMessage = @errorMessage OUTPUT
+			,@createdBankTransactionId = @bankTransactionId OUTPUT
+
+		-- SET Posted Flag
+		IF(@post = 1)
+		BEGIN
+			UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post, intCMBankTransactionId = @bankTransactionId WHERE intSiteHeaderId = @intSiteHeaderId
+		END
+		ELSE IF(@post = 0)
+		BEGIN
+			UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post WHERE intSiteHeaderId = @intSiteHeaderId
+		END
+
+		COMMIT TRANSACTION
+
+	END
 
 END TRY
 BEGIN CATCH
