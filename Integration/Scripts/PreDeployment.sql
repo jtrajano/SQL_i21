@@ -168,6 +168,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateOutOfRangeBurnRateSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateLeakGasCheckSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillReportView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateWorkOrderReportView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateCallEntryPrintOutReportView.sql"
 
 
 
