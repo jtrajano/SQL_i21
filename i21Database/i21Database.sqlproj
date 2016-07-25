@@ -4099,6 +4099,7 @@
     <Build Include="dbo\User Defined Types\ShipmentStagingTable.sql" />
     <Build Include="dbo\User Defined Types\ShipmentChargeStagingTable.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemLotStagingTable.sql" />
+    <Build Include="dbo\Views\vyuTMWorkOrderReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
