@@ -731,12 +731,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     if(Inventory.view.InventoryShipmentViewController.orgValueShipFrom !== current.get('intShipFromLocationId')) {
                         var buttonAction = function(button) {
                             if (button === 'yes') {  
-                                 //Remove all values in Shipment Grid                   
-                                 grdInventoryShipment.getStore().removeAll();
-                                 grdInventoryShipment.getStore().load();
-                                 //Remove all values in Lot Grid
-                                 grdLotTracking.getStore().removeAll();
-                                                            
+                                //Remove all items in Shipment Grid                   
+                                var shipmentItems = current['tblICInventoryShipmentItems'](),
+                                    shipmentItemRecords = shipmentItems ? shipmentItems.getRange() : [];
+
+                                 var i = shipmentItemRecords.length - 1;
+
+                                  for (; i >= 0; i--) {
+                                      if (!shipmentItemRecords[i].dummy)
+                                           shipmentItems.removeAt(i);
+                                  }
+
                                  current.set('strShipFromAddress', records[0].get('strAddress'));
                             }
                             else {
@@ -854,8 +859,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         case 'Yes - Serial Number':
                         case 'Yes - Manual':
                             grdLotTracking.setHidden(false);
-                            grdLotTracking.getStore().load();
-                            grdLotTracking.gridMgr.newRow.enable();
                             break;
                         default:
                             grdLotTracking.setHidden(true);
@@ -883,8 +886,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         case 'Yes - Serial Number':
                         case 'Yes - Manual':
                             grdLotTracking.setHidden(false);
-                            grdLotTracking.getStore().load();
-                            grdLotTracking.gridMgr.newRow.enable();
                             break;
                         default:
                             grdLotTracking.setHidden(true);
@@ -939,8 +940,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         case 'Yes - Serial Number':
                         case 'Yes - Manual':
                             grdLotTracking.setHidden(false);
-                            grdLotTracking.getStore().load();
-                            grdLotTracking.gridMgr.newRow.enable();
                             break;
                         default:
                             grdLotTracking.setHidden(true);
@@ -956,13 +955,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
         else if (combo.itemId === 'cboSubLocation') {
             if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
-                current.set('intSubLocationId', records[0].get('intSubLocationId'));
+                current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
                 current.set('intStorageLocationId', null);
                 current.set('strStorageLocationName', null);
                 
-                var grdLotTracking = win.down('#grdLotTracking');
-                grdLotTracking.getStore().removeAll();
-                grdLotTracking.getStore().load(); 
+                 //Remove all lots in Lot Grid                   
+                 var shipmentLotItems = current['tblICInventoryShipmentItemLots'](),
+                     shipmentLotRecords = shipmentLotItems ? shipmentLotItems.getRange() : [];
+
+                      var i = shipmentLotRecords.length - 1;
+
+                      for (; i >= 0; i--) {
+                        if (!shipmentLotRecords[i].dummy)
+                            shipmentLotItems.removeAt(i);
+                      }
             }
         }
 
@@ -972,9 +978,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
                 current.set('strSubLocationName', records[0].get('strSubLocationName'));
                 
-                var grdLotTracking = win.down('#grdLotTracking');
-                grdLotTracking.getStore().removeAll();
-                grdLotTracking.getStore().load();
+                 //Remove all lots in Lot Grid                   
+                 var shipmentLotItems = current['tblICInventoryShipmentItemLots'](),
+                     shipmentLotRecords = shipmentLotItems ? shipmentLotItems.getRange() : [];
+
+                      var i = shipmentLotRecords.length - 1;
+
+                      for (; i >= 0; i--) {
+                        if (!shipmentLotRecords[i].dummy)
+                            shipmentLotItems.removeAt(i);
+                      }
             }
         }
     },
@@ -1056,8 +1069,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
             if (vm.data.currentShipmentItem !== null){
                 grdLotTracking.setHidden(false);
-                grdLotTracking.getStore().load();
-                grdLotTracking.gridMgr.newRow.enable();
             }
             else {
                 grdLotTracking.setHidden(true);
