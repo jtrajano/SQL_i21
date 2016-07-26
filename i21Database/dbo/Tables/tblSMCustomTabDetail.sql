@@ -1,8 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblSMCustomTabDetail] (
     [intCustomTabDetailId]		INT			  IDENTITY (1, 1) NOT NULL,
     [intCustomTabId]			INT           NOT NULL,
-    [strControlName]			NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strControlType]			NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strFieldName]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
+    [strControlName]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strControlType]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [intTextLength]				INT			  NULL,
 	[intFlex]					INT			  NULL,
 	[intWidth]					INT			  NULL,
