@@ -4102,6 +4102,7 @@
     <Build Include="dbo\Views\vyuTMWorkOrderReport.sql" />
     <Build Include="dbo\Views\vyuHDLostRevenue.sql" />
     <Build Include="dbo\Tables\tblSMPricingLevel.sql" />
+    <Build Include="dbo\Views\vyuQMContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
