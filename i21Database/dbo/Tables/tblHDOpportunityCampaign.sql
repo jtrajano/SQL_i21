@@ -2,7 +2,7 @@
 (
 	[intOpportunityCampaignId] [int] IDENTITY(1,1) NOT NULL,
 	[strCampaignName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strDescription] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intTicketTypeId] [int] NULL,
 	[intLineOfBusinessId] [int] NULL,
 	[dtmStartDate] [datetime] NULL,
