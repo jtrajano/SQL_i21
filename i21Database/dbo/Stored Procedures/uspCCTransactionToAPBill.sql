@@ -76,25 +76,33 @@ BEGIN
 			WHERE intAccountId IS NOT NULL
 			GROUP BY  intAccountId, intSiteDetailId, strItem 
 
-			EXEC [dbo].[uspAPCreateBillData]
-				 @userId	= @userId
-				,@vendorId = @vendorId
-				,@type = 3	
-				,@shipTo = @shipTo
-				,@vendorOrderNumber = @ccdReference
-				,@voucherDate = @dtmDate
-				,@voucherDetaiCC = @voucherDetailCC
-				,@billId = @createdBillId OUTPUT
+			DECLARE @intCountDetail INT = 0
 
-			UPDATE tblAPBill SET strComment = @ccdReference WHERE intBillId = @createdBillId
+			SELECT @intCountDetail = COUNT(*) FROM @voucherDetailCC
 
-			EXEC [dbo].[uspAPPostBill]
-				@post = @post
-				,@recap = @recap
-				,@isBatch = 0
-				,@param = @createdBillId
-				,@userId = @userId
-				,@success = @success OUTPUT
+			IF(@intCountDetail > 0)
+			BEGIN
+				EXEC [dbo].[uspAPCreateBillData]
+					 @userId	= @userId
+					,@vendorId = @vendorId
+					,@type = 3	
+					,@shipTo = @shipTo
+					,@vendorOrderNumber = @ccdReference
+					,@voucherDate = @dtmDate
+					,@voucherDetaiCC = @voucherDetailCC
+					,@billId = @createdBillId OUTPUT
+
+				UPDATE tblAPBill SET strComment = @ccdReference WHERE intBillId = @createdBillId
+
+				EXEC [dbo].[uspAPPostBill]
+					@post = @post
+					,@recap = @recap
+					,@isBatch = 0
+					,@param = @createdBillId
+					,@userId = @userId
+					,@success = @success OUTPUT
+			END
+
 		END
 	ELSE IF (@post = 0)
 		BEGIN
