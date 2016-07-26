@@ -2,7 +2,7 @@
 (
 	[intProjectId] [int] IDENTITY(1,1) NOT NULL,
 	[strProjectName] [nvarchar](255) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strDescription] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerId] [int] NOT NULL,
 	[intCustomerContactId] [int] NOT NULL,
 	[intSalesPipeStatusId] [int] NULL,
