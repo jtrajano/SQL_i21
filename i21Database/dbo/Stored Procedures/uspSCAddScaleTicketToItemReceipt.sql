@@ -207,25 +207,39 @@ WHERE intTicketId = @intTicketId
 		,[ysnInventoryCost]					= 0
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
-												WHEN IC.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
+												WHEN IC.strCostMethod = 'Per Unit' THEN 
+												CASE 
+													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+												END
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
 		,[intCostUOMId]						= @intTicketItemUOMId
 		,[intOtherChargeEntityVendorId]		= NULL
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
-												WHEN IC.strCostMethod = 'Amount' THEN QM.dblDiscountAmount
+												WHEN IC.strCostMethod = 'Amount' THEN 
+												CASE 
+													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+												END
 											END
 		,[strAllocateCostBy]				= NULL
 		,[intContractHeaderId]				= NULL
 		,[intContractDetailId]				= NULL
-		,[ysnAccrue]						= IC.ysnAccrue
-		,[ysnPrice]							= IC.ysnPrice
+		,[ysnAccrue]						= CASE
+												WHEN QM.dblDiscountAmount < 0 THEN 1
+												WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
+											END
+		,[ysnPrice]							= CASE
+												WHEN QM.dblDiscountAmount < 0 THEN 1
+												WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
+											END
 		FROM @ReceiptStagingTable RE
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 		INNER JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount > 0
+		WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0
 
 		--Insert record for fee
 		INSERT INTO @OtherCharges
