@@ -30,7 +30,7 @@ GO
 
 --Entity
 :r "..\dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql"
-
+:r "..\dbo\Stored Procedures\uspEMImportEmployees.sql"
 --System Manager
 :r "..\Scripts\SM\FixCompanyLocationNumber.sql"
 :r "..\Scripts\SM\SetDefaultValues.sql"
