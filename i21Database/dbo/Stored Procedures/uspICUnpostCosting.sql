@@ -77,7 +77,7 @@ BEGIN
 			,ItemTrans.intItemLocationId
 			,ItemTrans.intItemUOMId
 			,ItemTrans.intLotId
-			,dbo.fnMultiply(-1, ISNULL(ItemTrans.dblQty, 0)) 
+			,ISNULL(-ItemTrans.dblQty, 0)
 			,ItemTrans.dblCost
 			,ItemTrans.dblUOMQty		
 			,ItemTrans.intSubLocationId
@@ -244,10 +244,10 @@ BEGIN
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
 			,[dtmDate]								= ActualTransaction.dtmDate
-			,[dblQty]								= dbo.fnMultiply(ActualTransaction.dblQty, -1) 
+			,[dblQty]								= -ActualTransaction.dblQty
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
-			,[dblValue]								= dbo.fnMultiply(ActualTransaction.dblValue, -1)
+			,[dblValue]								= -ActualTransaction.dblValue
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
@@ -302,7 +302,7 @@ BEGIN
 			,[intSubLocationId]			= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
 			,[dtmDate]					= ActualTransaction.dtmDate
-			,[dblQty]					= dbo.fnMultiply(ActualTransaction.dblQty, -1) 
+			,[dblQty]					= -ActualTransaction.dblQty
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost
 			,[intTransactionId]			= ActualTransaction.intTransactionId
