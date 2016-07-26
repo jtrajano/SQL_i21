@@ -233,7 +233,7 @@ WHERE intTicketId = @intTicketId
 											END
 		,[ysnPrice]							= CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 1
-												WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
+												WHEN QM.dblDiscountAmount > 0 THEN IC.ysnPrice
 											END
 		FROM @ReceiptStagingTable RE
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
