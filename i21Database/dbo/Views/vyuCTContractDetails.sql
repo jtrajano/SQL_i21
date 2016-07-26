@@ -21,7 +21,7 @@ SELECT
 	cdm.strPriceUOM, REPLACE(futuresMonth.strFutureMonth, ' ', '(' + futuresMonth.strSymbol + ')') strFutureMonth, ctIndex.strIndex, contractStatus.strContractStatus,
 	detail.dblBalance - ISNULL(detail.dblScheduleQty, 0) dblAvailableQty, detail.intContractStatusId intCurrentContractStatusId, cdm.intPriceFixationId,
 	cdm.ysnSpreadAvailable, cdm.ysnFixationDetailAvailable, cdm.dblQuantityPriceFixed, cdm.dblPFQuantityUOMId, cdm.intTotalLots, cdm.intLotsFixed, cdm.strContractItemName,
-	cdm.strNetWeightUOM, cdm.strOrigin, cdm.strMainCurrency, cdm.ysnSubCurrency, cdm.dblAppliedQty, cdm.dblExchangeRate
+	cdm.strNetWeightUOM, cdm.strOrigin, cdm.strMainCurrency, cdm.ysnSubCurrency, cdm.dblAppliedQty, cdm.dblExchangeRate,detail.intConcurrencyId
 FROM tblCTContractDetail detail
 	LEFT JOIN vyuCTContractDetailNotMapped cdm ON cdm.intContractDetailId = detail.intContractDetailId
 	LEFT JOIN tblARMarketZone marketZone ON marketZone.intMarketZoneId = detail.intMarketZoneId
