@@ -2321,7 +2321,7 @@ UNION ALL
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Finished Good')
 				AND Header.strTransactionType <> 'Debit Memo'
 				
 
