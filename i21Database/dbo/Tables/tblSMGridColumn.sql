@@ -7,5 +7,5 @@
 	[ysnBuild]					BIT             NOT NULL DEFAULT 0,	
     [intSort]					INT             NOT NULL DEFAULT (1),
     [intConcurrencyId]			INT				NOT NULL DEFAULT (1),
-	CONSTRAINT [FK_tblSMGridColumn_tblSMScreenDesignerDetail] FOREIGN KEY ([intCustomTabDetailId]) REFERENCES [tblSMCustomTabDetail]([intCustomTabDetailId])
+	CONSTRAINT [FK_tblSMGridColumn_tblSMCustomTabDetail] FOREIGN KEY ([intCustomTabDetailId]) REFERENCES [tblSMCustomTabDetail]([intCustomTabDetailId])
 )

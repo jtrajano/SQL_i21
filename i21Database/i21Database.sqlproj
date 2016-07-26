@@ -4096,7 +4096,6 @@
     <Build Include="dbo\Views\vyuTMDeliveryFillGroupSubReport.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryFillWithItemPriceReport.sql" />
     <Build Include="dbo\Tables\tblSMComboBoxValue.sql" />
-    <Build Include="dbo\Tables\tblSMRow.sql" />
     <Build Include="dbo\Tables\tblSMGridColumn.sql" />
     <Build Include="dbo\Tables\tblSMGridCellValue.sql" />
     <Build Include="dbo\Tables\tblSMFieldValue.sql" />
@@ -4107,6 +4106,8 @@
     <Build Include="dbo\User Defined Types\ShipmentChargeStagingTable.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemLotStagingTable.sql" />
     <Build Include="dbo\Views\vyuTMWorkOrderReport.sql" />
+    <Build Include="dbo\Tables\tblSMGridRow.sql" />
+    <Build Include="dbo\Tables\tblSMTabRow.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
