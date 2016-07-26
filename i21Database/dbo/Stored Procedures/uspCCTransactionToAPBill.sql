@@ -144,7 +144,6 @@ BEGIN
 							WHERE B.intSiteHeaderId = @intSiteHeaderId)
 					END
 			END
-			ELSE
-				RAISERROR('Bill ID is null', 16, 1)
+
 		END
 END
