@@ -20,21 +20,34 @@ BEGIN TRY
 	DECLARE @strLow nvarchar(50)
 	DECLARE @strLastSettle nvarchar(50)
 	DECLARE @strLastElement nvarchar(50)
-	
-	SELECT @Commoditycode = strFutSymbol,@SymbolPrefix=strSymbolPrefix
+	DECLARE @strInterfaceSystem nvarchar(50)
+	declare @dblConversionRate numeric(16,10)
+
+	SELECT @Commoditycode = strFutSymbol,@SymbolPrefix=strSymbolPrefix,@dblConversionRate=isnull(dblConversionRate,1)
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId		
 
+	select @strInterfaceSystem=fs.strInterfaceSystem from tblRKCompanyPreference p
+	join tblRKInterfaceSystem fs on p.intInterfaceSystemId=fs.intInterfaceSystemId
+	
+
 	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 	
 	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId 
-		
+
+	IF @strInterfaceSystem = 'DTN'
+	BEGIN
+		IF @strPassword = ''
+		SET @strPassword = '?&Type=F'
+	END		
+
+
 	SELECT TOP 1 @URL= s.strInterfaceSystemURL,@strOpen=strOpen,@strHigh=strHigh,@strLow=strLow,@strLastSettle=strLastSettle,@strLastElement=strLastElement FROM tblRKCompanyPreference c
 	JOIN tblRKInterfaceSystem s on c.intInterfaceSystemId=s.intInterfaceSystemId 
 
 	if isnull(@URL,'') <> ''
 	BEGIN
-		SELECT  replace(replace(@URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1),'¶¶',@strUserName),'¶¶¶¶',@strPassword) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId,
-		@strOpen as strOpen,@strHigh as strHigh,@strLow as strLow,@strLastSettle as strLastSettle,@strLastElement as strLastElement
+		SELECT  replace(replace(@URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1),'¶¶¶¶',@strUserName),'¶¶~~',@strPassword) as URL,strFutureMonth strFutureMonthYearWOSymbol,intFutureMonthId as intFutureMonthId,
+		@strOpen as strOpen,@strHigh as strHigh,@strLow as strLow,@strLastSettle as strLastSettle,@strLastElement as strLastElement,@dblConversionRate as dblConversionRate
 		FROM tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
 	END
 	

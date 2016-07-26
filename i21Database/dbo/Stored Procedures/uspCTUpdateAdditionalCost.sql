@@ -42,7 +42,7 @@ BEGIN TRY
 			LEFT JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CC.intItemUOMId
 			LEFT JOIN tblICCommodityUnitMeasure CM	ON	CM.intUnitMeasureId =	IM.intUnitMeasureId AND 
 														CM.intCommodityId	=	@intCommodityId
-			WHERE	CC.intContractDetailId = @intContractDetailId
+			WHERE	CC.intContractDetailId = @intContractDetailId AND CC.ysnAdditionalCost = 1
 
 			UPDATE	tblCTPriceFixation 
 			SET		dblAdditionalCost	=	@dblNewAdditionalCost,

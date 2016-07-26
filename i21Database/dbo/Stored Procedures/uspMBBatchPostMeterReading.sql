@@ -243,7 +243,7 @@ BEGIN
 				SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpCreatedInvoice
 				
 				UPDATE tblMBMeterReading 
-					SET ysnPosted = 1
+					SET ysnPosted = (CASE WHEN @Recap = 1 THEN 0 ELSE 1 END)
 						, intInvoiceId = @InvoiceId
 						, dtmPostedDate = GETDATE()
 				WHERE intMeterReadingId = (SELECT intMeterReadingId
@@ -277,7 +277,7 @@ BEGIN
 				SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdatedInvoice WHERE Item = @InvoiceId
 				
 				UPDATE tblMBMeterReading 
-					SET ysnPosted = 1
+					SET ysnPosted = (CASE WHEN @Recap = 1 THEN 0 ELSE 1 END)
 						, intInvoiceId = @InvoiceId
 						, dtmPostedDate = GETDATE()
 				WHERE intMeterReadingId = (SELECT intMeterReadingId

@@ -12,10 +12,11 @@ SELECT TOP 100 PERCENT strCompanyName = CompanySetup.strCompanyName
 	, strItemNo = IC.strDescription
 	, TR.strSupplyPoint
 	, QH.dtmQuoteEffectiveDate
-	, dblPriceChange = CASE WHEN (ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) < 0 THEN CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50))
+	, dblPriceChange = CASE WHEN ISNULL(QuotePrice.dblQuotePrice, 0) = 0 THEN CAST('N/A' AS NVARCHAR(50))
+							WHEN (ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) < 0 THEN CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50))
 							WHEN (ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) = 0 THEN CAST('0.00' AS NVARCHAR(50))
 							ELSE '+' + CAST((ISNULL(QD.dblQuotePrice, 0) - ISNULL(QuotePrice.dblQuotePrice, 0)) AS NVARCHAR(50)) END
-	, dblQuotePrice = ISNULL(QuotePrice.dblQuotePrice, 0)
+	, dblQuotePrice = ISNULL(QD.dblQuotePrice, 0)
 	, ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) 
 									FROM vyuARCustomerContacts CC 
 									WHERE CC.intCustomerEntityId = QH.intEntityCustomerId 
@@ -33,16 +34,16 @@ LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = QD.intShipToLocatio
 	AND EL.intEntityId = QH.intEntityCustomerId
 LEFT JOIN tblICItem IC ON IC.intItemId = QD.intItemId
 LEFT JOIN vyuTRSupplyPointView TR ON TR.intSupplyPointId = QD.intSupplyPointId
-CROSS APPLY (
+OUTER APPLY (
 	SELECT TOP 1 dblQuotePrice = ISNULL(PQD.dblQuotePrice, 0)
 	FROM tblTRQuoteHeader PQH
 	JOIN tblTRQuoteDetail PQD on PQH.intQuoteHeaderId = PQD.intQuoteHeaderId
-	WHERE PQH.strQuoteNumber < QH.strQuoteNumber 
+	WHERE PQH.dtmQuoteEffectiveDate < QH.dtmQuoteEffectiveDate 
 		AND PQH.intEntityCustomerId = QH.intEntityCustomerId 
-		AND PQH.strQuoteStatus = 'Confirmed' 
+		AND PQH.strQuoteStatus in ('Confirmed','Sent')
 		AND PQD.intItemId = QD.intItemId 
 		AND PQD.intShipToLocationId = QD.intShipToLocationId
-	ORDER BY PQH.strQuoteNumber DESC
+	ORDER BY PQH.dtmQuoteEffectiveDate DESC, PQH.intQuoteHeaderId DESC
 ) QuotePrice
 WHERE QH.strQuoteStatus = 'Confirmed'
 	OR QH.strQuoteStatus = 'Sent'

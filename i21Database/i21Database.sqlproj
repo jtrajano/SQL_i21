@@ -4108,6 +4108,8 @@
     <Build Include="dbo\Views\vyuTMWorkOrderReport.sql" />
     <Build Include="dbo\Tables\tblSMGridRow.sql" />
     <Build Include="dbo\Tables\tblSMTabRow.sql" />
+    <Build Include="dbo\Views\vyuHDLostRevenue.sql" />
+    <Build Include="dbo\Tables\tblSMPricingLevel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -16,7 +16,8 @@ SELECT	Item.intItemId,
 			Item.dblAmount,
 			Item.intCostUOMId,
 			CostUOM.strUnitMeasure AS strCostUOM,
-			CostItemUOM.intUnitMeasureId AS intCostUnitMeasureId
+			CostItemUOM.intUnitMeasureId AS intCostUnitMeasureId,
+			Item.strCostType
 			
 	FROM	tblICItem Item																			LEFT
 	JOIN	tblICItem OnCostType		ON	OnCostType.intItemId		=	Item.intOnCostTypeId	LEFT
