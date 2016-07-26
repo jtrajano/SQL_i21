@@ -288,7 +288,7 @@ END CATCH
 						ON PID.intInvoiceId = ARI.intInvoiceId						
 				WHERE
 					ARI.dblInvoiceTotal = @ZeroDecimal
-					AND ARI.strImportFormat <> 'CarQuest'
+					AND ISNULL(ARI.strImportFormat, '') <> 'CarQuest'
 					AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE tblARInvoiceDetail.dblTotal <> @ZeroDecimal AND tblARInvoiceDetail.intInvoiceId = ARI.intInvoiceId)
 								
 					
@@ -2316,8 +2316,8 @@ UNION ALL
 				vyuICGetItemStock IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
-			WHERE
-				((Header.strImportFormat <> 'CarQuest' AND Detail.dblTotal <> @ZeroDecimal) OR Header.strImportFormat = 'CarQuest')
+			WHERE				
+				((ISNULL(Header.strImportFormat, '') <> 'CarQuest' AND Detail.dblTotal <> 0) OR ISNULL(Header.strImportFormat, '') = 'CarQuest') 
 				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
@@ -2376,7 +2376,7 @@ UNION ALL
 					ON ARIC.[intComponentItemId] = IST.intItemId 
 					AND ARI.[intCompanyLocationId] = IST.intLocationId 			 
 			WHERE
-				((ARI.[strImportFormat] <> 'CarQuest' AND ARID.[dblTotal] <> @ZeroDecimal) OR ARI.[strImportFormat] = 'CarQuest')
+				((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND ARID.[dblTotal] <> @ZeroDecimal) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest')
 				AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
 				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
 				AND ISNULL(ARID.[intItemId],0) <> 0
