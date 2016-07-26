@@ -30,7 +30,7 @@ BEGIN TRY
 
 	IF(@intCompanyLocationId IS NULL)
 	BEGIN
-		RAISERROR('Invalid Vendor Company Location!',16,1);
+		RAISERROR('Invalid Vendor Company Location Id found!',16,1);
 	END
 	ELSE
 	BEGIN
