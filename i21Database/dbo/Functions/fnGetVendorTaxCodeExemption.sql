@@ -27,6 +27,37 @@ BEGIN
 	SET @ExemptionPercent = 0.00000
 	SET @TaxExempt = 0
 	SET @InvalidSetup = 0
+
+	SELECT TOP 1
+		@TaxCodeExemption =  'Tax Code - ' + SMTC.[strTaxCode] +  ' under Tax Group  ' + SMTG.strTaxGroup + ' has an exemption set for item category - ' + ICC.[strCategoryCode] 
+	FROM
+		tblSMTaxGroupCodeCategoryExemption SMTGCE
+	INNER JOIN
+		tblSMTaxGroupCode SMTGC
+			ON SMTGCE.[intTaxGroupCodeId] = SMTGC.[intTaxGroupCodeId]
+	INNER JOIN
+		tblSMTaxGroup SMTG
+			ON SMTGC.[intTaxGroupId] = SMTG.[intTaxGroupId] 
+	INNER JOIN
+		tblSMTaxCode SMTC
+			ON SMTGC.[intTaxCodeId] = SMTC.[intTaxCodeId] 
+	INNER JOIN
+		tblICCategory ICC
+			ON SMTGCE.[intCategoryId] = ICC.[intCategoryId]
+	WHERE 
+		SMTGCE.intCategoryId = @ItemCategoryId
+		AND SMTGC.[intTaxCodeId] = @TaxCodeId
+
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 	
 	--Item Category Tax Class
 	IF NOT EXISTS	(
@@ -44,7 +75,8 @@ BEGIN
 							ICI.intItemId = @ItemId
 							AND ICC.intCategoryId = @ItemCategoryId
 							AND ICCT.intTaxClassId = @TaxClassId
-					)
+					)					
+		AND ISNULL(@ItemId,0) <> 0
 	BEGIN
 		SET @TaxCodeExemption	= ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
 								+ ISNULL(' is not included in Item Category - ' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ' tax class setup.', '') 	
