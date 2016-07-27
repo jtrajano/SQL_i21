@@ -331,5 +331,6 @@
     <Build Include="dbo\Stored Procedures\uspAPRevertImportVoucher.sql" />
     <None Include="dbo\Views\vyuCMBankTransaction.sql" />
     <None Include="dbo\Functions\fnGetDepositEntry.sql" />
+    <None Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
   </ItemGroup>
 </Project>
