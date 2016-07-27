@@ -232,6 +232,7 @@ DECLARE
 		,[intSCBudgetId]
 		,[strSCBudgetDescription]
 		,[intInventoryShipmentItemId]
+		,[intLoadDetailId]
 		,[strShipmentNumber]
 		,[intRecipeItemId] 
 		,[intSalesOrderDetailId]
@@ -325,6 +326,7 @@ DECLARE
 		,[strSCInvoiceNumber]					= NULL
 		,[intSCBudgetId]						= NULL
 		,[strSCBudgetDescription]				= NULL
+		,[intInventoryShipmentItemId]			= NULL
 		,[intLoadDetailId]						= ARSI.[intInventoryShipmentItemId] 
 		,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
 		,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
