@@ -23,7 +23,7 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 	END
 
 --VALIDATE IF SO HAS ZERO TOTAL AMOUNT
-IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [dblSalesOrderTotal]  = 0)
+IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [dblSalesOrderTotal]  = 0 AND @Unship = 0)
 	BEGIN
 		RAISERROR('Cannot process Sales Order with zero(0) amount.', 16, 1)
 		RETURN;
