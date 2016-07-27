@@ -55,6 +55,7 @@ BEGIN
 		DECLARE @maxInvoiceId INT
 		
 		SELECT @maxInvoiceId = MAX(intInvoiceId) FROM tblARInvoice
+		SET @maxInvoiceId = ISNULL(@maxInvoiceId, 0)
 		
 			--================================================
 			--     Insert into tblARInvoice --AG INVOICES--
@@ -291,20 +292,22 @@ BEGIN
 
 		 			
 			UPDATE 
-				tblARInvoice 
+				IVC 
 			SET
-				tblARInvoice.strBillToAddress		= B.strAddress 
-				,tblARInvoice.strBillToCity			= B.strCity
-				,tblARInvoice.strBillToCountry		= B.strCountry
-				,tblARInvoice.strBillToLocationName	= B.strLocationName 
-				,tblARInvoice.strBillToState		= B.strState 
-				,tblARInvoice.strBillToZipCode		= B.strZipCode 
-				,tblARInvoice.strShipToAddress		= S.strAddress 
-				,tblARInvoice.strShipToCity			= S.strCity
-				,tblARInvoice.strShipToCountry		= S.strCountry
-				,tblARInvoice.strShipToLocationName	= S.strLocationName 
-				,tblARInvoice.strShipToState		= S.strState 
-				,tblARInvoice.strShipToZipCode		= S.strZipCode 
+                 IVC.intBillToLocationId    = C.intBillToId			
+				,IVC.strBillToAddress		= B.strAddress 
+				,IVC.strBillToCity			= B.strCity
+				,IVC.strBillToCountry		= B.strCountry
+				,IVC.strBillToLocationName	= B.strLocationName 
+				,IVC.strBillToState		    = B.strState 
+				,IVC.strBillToZipCode		= B.strZipCode 
+				,IVC.intShipToLocationId    = C.intShipToId
+				,IVC.strShipToAddress		= S.strAddress 
+				,IVC.strShipToCity			= S.strCity
+				,IVC.strShipToCountry		= S.strCountry
+				,IVC.strShipToLocationName	= S.strLocationName 
+				,IVC.strShipToState		    = S.strState 
+				,IVC.strShipToZipCode		= S.strZipCode 
 			FROM
 				tblARCustomer C
 			LEFT OUTER JOIN
@@ -313,9 +316,9 @@ BEGIN
 			LEFT OUTER JOIN
 				tblEMEntityLocation S
 					ON C.intShipToId = S.intEntityLocationId 													
+			INNER JOIN tblARInvoice IVC on IVC.intEntityCustomerId = C.intEntityCustomerId		
 			WHERE
 				intInvoiceId > @maxInvoiceId
-				AND tblARInvoice.intEntityCustomerId = C.intEntityCustomerId
 
 	END
 
