@@ -1889,7 +1889,6 @@
     <Build Include="dbo\Stored Procedures\uspARAddInvoice.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
-    <None Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
     <Build Include="dbo\Functions\fnGetItemPricing.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
