@@ -4,8 +4,15 @@ IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportPayments')
 	DROP PROCEDURE uspARImportPayments
 GO
 
+	DECLARE @ysnAG BIT = 0
+    DECLARE @ysnPT BIT = 0
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
+	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END
+			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
+	FROM coctlmst	
+
+
+IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agpaymst')
 BEGIN
 
 	EXEC('
@@ -54,7 +61,7 @@ IF(@Checking = 1)
 				ON P1.[agpay_acct_no] = GL.[strExternalId]
 		LEFT OUTER JOIN
 			[tblSMPaymentMethod] P
-				ON P1.[agpay_pay_type] = CAST(P.strPaymentMethodCode AS int)
+				ON P1.[agpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 		INNER JOIN
 			[tblSMCompanyLocation] CL
 				ON P1.[agpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
@@ -112,7 +119,7 @@ IF(@Checking = 1)
 				ON P1.[agpye_acct_no] = GL.[strExternalId]
 		LEFT OUTER JOIN
 			[tblSMPaymentMethod] P
-				ON P1.[agpye_pay_type] = CAST(P.strPaymentMethodCode AS int)
+				ON P1.[agpye_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 		INNER JOIN
 			[tblSMCompanyLocation] CL
 				ON P1.[agpye_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
@@ -150,6 +157,45 @@ IF(@Checking = 1)
 		SET @TotalCount = @TotalCount + @@ROWCOUNT 
 		SET @Total = @TotalCount 
     
+		--UNAPPLIED CREDITS
+		SELECT NULL
+		FROM
+			[agcrdmst] P1				--Origin Credits Table
+		INNER JOIN
+			[tblARCustomer] C
+				ON P1.[agcrd_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
+		LEFT OUTER JOIN
+			[tblGLCOACrossReference] GL
+				ON P1.[agcrd_acct_no] = GL.[strExternalId]
+		INNER JOIN
+			[tblSMCompanyLocation] CL
+				ON P1.[agcrd_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+		LEFT OUTER JOIN
+			[tblSMPaymentMethod] P
+				ON P1.[agcrd_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+		WHERE 
+			(P1.agcrd_amt - P1.agcrd_amt_used) <> 0
+			AND NOT EXISTS
+				(	SELECT NULL 
+					FROM tblARPayment a
+					WHERE
+						a.[ysnPosted] = 1
+						AND a.[intEntityCustomerId] = C.[intEntityCustomerId] 
+						AND a.[dtmDatePaid] = (CASE 
+													WHEN ISDATE(P1.[agcrd_rev_dt]) = 1 
+														THEN CONVERT(DATE, CAST(P1.[agcrd_rev_dt] AS CHAR(12)), 112) 
+													ELSE
+														NULL 
+												END)
+						AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
+						AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
+						AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[agcrd_ref_no] COLLATE Latin1_General_CI_AS					
+						AND a.dblUnappliedAmount <> 0
+				)		
+		
+		SET @TotalCount = @TotalCount + @@ROWCOUNT 
+		SET @Total = @TotalCount 
+	
 		RETURN @Total  
 	END   
 	
@@ -168,6 +214,7 @@ IF(@Checking = 1)
 		,[dblBalance]
 		,[strPaymentInfo]
 		,[strNotes]
+		,[ysnApplytoBudget]
 		,[ysnPosted]
 		,[intEntityId] 
 		,[intConcurrencyId]
@@ -190,6 +237,7 @@ IF(@Checking = 1)
 		,0													AS [dblBalance]
 		,P1.[agpay_ref_no]									AS [strPaymentInfo]
 		,P1.[agpay_ivc_no]									AS [strNotes] 
+		,0													AS [ysnApplytoBudget]		
 		,1													AS [ysnPosted]	
 		,@UserId											AS [intEntityId]										
 		,0
@@ -215,7 +263,7 @@ IF(@Checking = 1)
 			ON P1.[agpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] P
-			ON P1.[agpay_pay_type] = CAST(P.[strPaymentMethodCode] AS int)			
+			ON P1.[agpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE 
 		RTRIM(LTRIM(P1.[agpay_chk_no])) <> ''DISC''
 		AND NOT EXISTS
@@ -263,6 +311,7 @@ IF(@Checking = 1)
 		,[intAccountId]
 		,[dblInvoiceTotal]
 		,[dblDiscount]
+		,[dblDiscountAvailable]
 		,[dblAmountDue]
 		,[dblPayment]
 		,[intConcurrencyId]
@@ -280,6 +329,7 @@ IF(@Checking = 1)
 		END)						AS [intAccountId] 
 		,I.[dblInvoiceTotal]		AS [dblInvoiceTotal]  
 		,0			 				AS [dblDiscount]
+		,0			 				AS [dblDiscountAvailable]		
 		,0							AS [dblAmountDue]
 		,SUM(P1.[agpay_amt])		AS [dblPayment]
 		,0							AS [intConcurrencyId]		
@@ -310,7 +360,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[agpay_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[agpay_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[intPaymentId] > @MaxPaymentID 
 		AND RTRIM(LTRIM(P1.[agpay_chk_no])) <> ''DISC''	
@@ -381,7 +431,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[agpay_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[agpay_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[ysnPosted] = 1
 		AND P.[intPaymentId] > @MaxPaymentID 
@@ -419,7 +469,7 @@ IF(@Checking = 1)
 			ON P1.[agpay_acct_no] = GL.[strExternalId]
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
-			ON P1.[agpay_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			ON P1.[agpay_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		(P1.[agpay_note] IS NOT NULL OR P1.[agpay_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
@@ -449,6 +499,7 @@ IF(@Checking = 1)
 		,[dblBalance]
 		,[strPaymentInfo]
 		,[strNotes]
+		,[ysnApplytoBudget]		
 		,[ysnPosted]
 		,[intEntityId] 
 		,[intConcurrencyId]
@@ -471,6 +522,7 @@ IF(@Checking = 1)
 		,0													AS [dblBalance]
 		,P1.[agpye_ref_no]									AS [strPaymentInfo]
 		,P1.[agpye_inc_ref]									AS [strNotes] 
+		,0													AS [ysnApplytoBudget]						
 		,0													AS [ysnPosted]	
 		,@UserId											AS [intEntityId]										
 		,0
@@ -496,7 +548,7 @@ IF(@Checking = 1)
 			ON P1.[agpye_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] P
-			ON P1.[agpye_pay_type] = CAST(P.[strPaymentMethodCode] AS int)			
+			ON P1.[agpye_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE 
 		RTRIM(LTRIM(P1.[agpye_chk_no])) <> ''DISC''
 		AND NOT EXISTS
@@ -544,6 +596,7 @@ IF(@Checking = 1)
 		,[intAccountId]
 		,[dblInvoiceTotal]
 		,[dblDiscount]
+		,[dblDiscountAvailable]		
 		,[dblAmountDue]
 		,[dblPayment]
 		,[intConcurrencyId]
@@ -561,6 +614,7 @@ IF(@Checking = 1)
 		END)						AS [intAccountId] 
 		,I.[dblInvoiceTotal]		AS [dblInvoiceTotal]  
 		,0			 				AS [dblDiscount]
+		,0			 				AS [dblDiscountAvailable]		
 		,0							AS [dblAmountDue]
 		,SUM(P1.[agpye_amt])		AS [dblPayment]
 		,0							AS [intConcurrencyId]		
@@ -591,7 +645,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[agpye_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[agpye_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[intPaymentId] > @MaxPaymentID 
 		AND RTRIM(LTRIM(P1.[agpye_chk_no])) <> ''DISC''	
@@ -662,7 +716,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[agpye_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[agpye_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[intPaymentId] > @MaxPaymentID 
 		--AND P1.[agpye_chk_no] = ''DISC''		
@@ -699,7 +753,7 @@ IF(@Checking = 1)
 			ON P1.[agpye_acct_no] = GL.[strExternalId]
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
-			ON P1.[agpye_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			ON P1.[agpye_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		(P1.[agpye_note] IS NOT NULL OR P1.[agpye_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
@@ -739,12 +793,117 @@ IF(@Checking = 1)
 	WHERE
 		(intTermId IS NULL OR intTermId = 0)
 		AND strInvoiceOriginId IS NOT NULL
-		AND LTRIM(RTRIM(strInvoiceOriginId)) <> ''''						  				  
+		AND LTRIM(RTRIM(strInvoiceOriginId)) <> ''''	
+
+	-- INSERT UNAPPLIED PAYMENTS
+		INSERT INTO [tblARPayment]
+			([intEntityCustomerId]
+			,[intCurrencyId]
+			,[dtmDatePaid]
+			,[intAccountId]
+			,[intPaymentMethodId]
+			,[intLocationId]
+			,[dblAmountPaid]
+			,[dblUnappliedAmount]
+			,[dblOverpayment]
+			,[dblBalance]
+			,[strPaymentInfo]
+			,[strNotes]
+			,[ysnApplytoBudget]				
+			,[ysnPosted]
+			,[intEntityId] 
+			,[intConcurrencyId]
+			)
+		SELECT
+			 C.[intEntityCustomerId] 							AS [intEntityCustomerId]
+			,(select intDefaultCurrencyId from tblSMCompanyPreference) AS [intCurrencyId]
+			,(CASE 
+				WHEN ISDATE(P1.[agcrd_rev_dt]) = 1 
+					THEN CONVERT(DATE, CAST(P1.[agcrd_rev_dt]	AS CHAR(12)), 112) 
+				ELSE
+					NULL 
+			END)												AS [dtmDatePaid]
+			,ISNULL(GL.[inti21Id],0)							AS [intAccountId]
+			,ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	AS [intPaymentMethodId] 
+			,CL.[intCompanyLocationId] 							AS [intLocationId]
+			,(P1.[agcrd_amt])    								AS [dblAmountPaid]
+			,(P1.agcrd_amt - P1.agcrd_amt_used)   				AS [dblUnappliedAmount]
+			,(P1.agcrd_amt - P1.agcrd_amt_used)					AS [dblOverpayment]
+			,0													AS [dblBalance]
+			,P1.[agcrd_ref_no]									AS [strPaymentInfo]
+			,''ORIGIN''               							AS [strNotes] 
+			,0													AS [ysnApplytoBudget]						
+			,1													AS [ysnPosted]	
+			,@UserId											AS [intEntityId]										
+			,0
+
+		FROM
+			[agcrdmst] P1				--Origin Credits Table
+		INNER JOIN
+			[tblARCustomer] C
+				ON P1.[agcrd_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
+		LEFT OUTER JOIN
+			[tblGLCOACrossReference] GL
+				ON P1.[agcrd_acct_no] = GL.[strExternalId]
+		INNER JOIN
+			[tblSMCompanyLocation] CL
+				ON P1.[agcrd_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+		LEFT OUTER JOIN
+			[tblSMPaymentMethod] P
+				ON P1.[agcrd_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+		WHERE 
+			(P1.agcrd_amt - P1.agcrd_amt_used) <> 0
+			AND NOT EXISTS
+				(	SELECT NULL 
+					FROM tblARPayment a
+					WHERE
+						a.[ysnPosted] = 1
+						AND a.[intEntityCustomerId] = C.[intEntityCustomerId] 
+						AND a.[dtmDatePaid] = (CASE 
+													WHEN ISDATE(P1.[agcrd_rev_dt]) = 1 
+														THEN CONVERT(DATE, CAST(P1.[agcrd_rev_dt] AS CHAR(12)), 112) 
+													ELSE
+														NULL 
+												END)
+						AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
+						AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
+						AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[agcrd_ref_no] COLLATE Latin1_General_CI_AS					
+						AND a.dblUnappliedAmount <> 0)
+						
+	SET @TotalCount = @TotalCount + @@ROWCOUNT
+	SET @Total = @TotalCount 
+	SET NOCOUNT ON
+
+	--CREATE INVOICES FOR UNAPPLIED CREDITS
+		DECLARE @PaymentID int, @return_value int, @NewInvoiceId int
+		SET @return_value = 0
+		SELECT intPaymentId INTO #tmpagcrd FROM tblARPayment WHERE strNotes = ''ORIGIN''
+			WHILE (EXISTS(SELECT 1 FROM #tmpagcrd))
+			BEGIN
+				BEGIN TRY
+					SELECT @PaymentID = intPaymentId FROM #tmpagcrd
+						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
+								@PaymentId = @PaymentID,
+								@UserId = 1,
+								@NewInvoiceId = @NewInvoiceId OUTPUT					
+				END TRY								
+							
+				BEGIN CATCH
+					PRINT @@ERROR;
+					DELETE FROM tblARPayment WHERE intPaymentId = @PaymentId					
+					GOTO CONTINUELOOP;
+				END CATCH
+				
+				CONTINUELOOP:
+				PRINT @PaymentId
+				DELETE FROM #tmpagcrd WHERE intPaymentId = @PaymentId
+				UPDATE tblARPayment SET strNotes = NULL WHERE intPaymentId = @PaymentId
+			END 		
 END
 			')
 END
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
+IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptpaymst')
 BEGIN
 	EXEC('
 CREATE PROCEDURE uspARImportPayments 
@@ -789,7 +948,7 @@ IF(@Checking = 1)
 				ON P1.[ptpay_acct_no] = GL.[strExternalId]
 		LEFT OUTER JOIN
 			[tblSMPaymentMethod] P
-				ON P1.[ptpay_pay_type] = CAST(P.strPaymentMethodCode AS int)
+				ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 		INNER JOIN
 			[tblSMCompanyLocation] CL
 				ON P1.[ptpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
@@ -844,7 +1003,7 @@ IF(@Checking = 1)
 				ON P1.[ptpye_acct_no] = GL.[strExternalId]
 		LEFT OUTER JOIN
 			[tblSMPaymentMethod] P
-				ON P1.[ptpye_pay_type] = CAST(P.strPaymentMethodCode AS int)
+				ON P1.[ptpye_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 		INNER JOIN
 			[tblSMCompanyLocation] CL
 				ON P1.[ptpye_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
@@ -882,6 +1041,45 @@ IF(@Checking = 1)
 		SET @TotalCount = @TotalCount + @@ROWCOUNT 
 		SET @Total = @TotalCount 
     
+		--UNAPPLIED CREDITS
+		SELECT NULL
+		FROM
+			[ptcrdmst] P1				--Origin Credits Table
+		INNER JOIN
+			[tblARCustomer] C
+				ON P1.[ptcrd_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
+		LEFT OUTER JOIN
+			[tblGLCOACrossReference] GL
+				ON P1.[ptcrd_acct_no] = GL.[strExternalId]
+		INNER JOIN
+			[tblSMCompanyLocation] CL
+				ON P1.[ptcrd_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+		LEFT OUTER JOIN
+			[tblSMPaymentMethod] P
+				ON P1.[ptcrd_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+		WHERE 
+			(P1.ptcrd_amt - P1.ptcrd_amt_used) <> 0
+			AND NOT EXISTS
+				(	SELECT NULL 
+					FROM tblARPayment a
+					WHERE
+						a.[ysnPosted] = 1
+						AND a.[intEntityCustomerId] = C.[intEntityCustomerId] 
+						AND a.[dtmDatePaid] = (CASE 
+													WHEN ISDATE(P1.[ptcrd_rev_dt]) = 1 
+														THEN CONVERT(DATE, CAST(P1.[ptcrd_rev_dt] AS CHAR(12)), 112) 
+													ELSE
+														NULL 
+												END)
+						AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
+						AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
+						AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[ptcrd_invc_no] COLLATE Latin1_General_CI_AS					
+						AND a.dblUnappliedAmount <> 0
+				)		
+		
+		SET @TotalCount = @TotalCount + @@ROWCOUNT 
+		SET @Total = @TotalCount 
+
 		RETURN @Total  
 	END   
 	
@@ -900,6 +1098,7 @@ IF(@Checking = 1)
 		,[dblBalance]
 		,[strPaymentInfo]
 		,[strNotes]
+		,[ysnApplytoBudget]				
 		,[ysnPosted]
 		,[intEntityId] 
 		,[intConcurrencyId]
@@ -922,6 +1121,7 @@ IF(@Checking = 1)
 		,0													AS [dblBalance]
 		,P1.[ptpay_ref_no]									AS [strPaymentInfo]
 		,P1.[ptpay_invc_no]									AS [strNotes] 
+		,0													AS [ysnApplytoBudget]						
 		,1													AS [ysnPosted]	
 		,@UserId											AS [intEntityId]										
 		,0
@@ -944,7 +1144,7 @@ IF(@Checking = 1)
 			ON P1.[ptpay_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] P
-			ON P1.[ptpay_pay_type] = CAST(P.[strPaymentMethodCode] AS int)			
+			ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE 
 		RTRIM(LTRIM(P1.[ptpay_check_no])) <> ''DISC''
 		AND NOT EXISTS
@@ -992,6 +1192,7 @@ IF(@Checking = 1)
 		,[intAccountId]
 		,[dblInvoiceTotal]
 		,[dblDiscount]
+		,[dblDiscountAvailable]		
 		,[dblAmountDue]
 		,[dblPayment]
 		,[intConcurrencyId]
@@ -1009,6 +1210,7 @@ IF(@Checking = 1)
 		END)						AS [intAccountId] 
 		,I.[dblInvoiceTotal]		AS [dblInvoiceTotal]  
 		,0			 				AS [dblDiscount]
+		,0			 				AS [dblDiscountAvailable]		
 		,0							AS [dblAmountDue]
 		,SUM(P1.[ptpay_amt])		AS [dblPayment]
 		,0							AS [intConcurrencyId]		
@@ -1035,7 +1237,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[ptpay_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[intPaymentId] > @MaxPaymentID 
 		AND RTRIM(LTRIM(P1.[ptpay_check_no])) <> ''DISC''	
@@ -1102,7 +1304,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[ptpay_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[ysnPosted] = 1
 		AND P.[intPaymentId] > @MaxPaymentID 
@@ -1137,7 +1339,7 @@ IF(@Checking = 1)
 			ON P1.[ptpay_acct_no] = GL.[strExternalId]
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
-			ON P1.[ptpay_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			ON P1.[ptpay_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		(P1.[ptpay_note] IS NOT NULL OR P1.[ptpay_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
@@ -1167,6 +1369,7 @@ IF(@Checking = 1)
 		,[dblBalance]
 		,[strPaymentInfo]
 		,[strNotes]
+		,[ysnApplytoBudget]				
 		,[ysnPosted]
 		,[intEntityId] 
 		,[intConcurrencyId]
@@ -1189,6 +1392,7 @@ IF(@Checking = 1)
 		,0													AS [dblBalance]
 		,P1.[ptpye_ref_no]									AS [strPaymentInfo]
 		,P1.[ptpye_inc_ref]									AS [strNotes] 
+		,0													AS [ysnApplytoBudget]				
 		,0													AS [ysnPosted]	
 		,@UserId											AS [intEntityId]										
 		,0
@@ -1211,7 +1415,7 @@ IF(@Checking = 1)
 			ON P1.[ptpye_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] P
-			ON P1.[ptpye_pay_type] = CAST(P.[strPaymentMethodCode] AS int)			
+			ON P1.[ptpye_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE 
 		RTRIM(LTRIM(P1.[ptpye_check_no])) <> ''DISC''
 		AND NOT EXISTS
@@ -1259,6 +1463,7 @@ IF(@Checking = 1)
 		,[intAccountId]
 		,[dblInvoiceTotal]
 		,[dblDiscount]
+		,[dblDiscountAvailable]		
 		,[dblAmountDue]
 		,[dblPayment]
 		,[intConcurrencyId]
@@ -1276,6 +1481,7 @@ IF(@Checking = 1)
 		END)						AS [intAccountId] 
 		,I.[dblInvoiceTotal]		AS [dblInvoiceTotal]  
 		,0			 				AS [dblDiscount]
+		,0			 				AS [dblDiscountAvailable]
 		,0							AS [dblAmountDue]
 		,SUM(P1.[ptpye_amt])		AS [dblPayment]
 		,0							AS [intConcurrencyId]		
@@ -1302,7 +1508,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[ptpye_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[ptpye_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[intPaymentId] > @MaxPaymentID 
 		AND RTRIM(LTRIM(P1.[ptpye_check_no])) <> ''DISC''	
@@ -1369,7 +1575,7 @@ IF(@Checking = 1)
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
 			ON P.[intPaymentId] = PM.[intPaymentMethodID]
-			AND  P1.[ptpye_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			AND  P1.[ptpye_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		P.[intPaymentId] > @MaxPaymentID 
 		--AND P1.[ptpye_check_no] = ''DISC''		
@@ -1403,7 +1609,7 @@ IF(@Checking = 1)
 			ON P1.[ptpye_acct_no] = GL.[strExternalId]
 	LEFT OUTER JOIN
 		[tblSMPaymentMethod] PM
-			ON P1.[ptpye_pay_type] = CAST(PM.strPaymentMethodCode AS int)					
+			ON P1.[ptpye_pay_type] COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
 	WHERE
 		(P1.[ptpye_note] IS NOT NULL OR P1.[ptpye_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
@@ -1444,6 +1650,111 @@ IF(@Checking = 1)
 		(intTermId IS NULL OR intTermId = 0)
 		AND strInvoiceOriginId IS NOT NULL
 		AND LTRIM(RTRIM(strInvoiceOriginId)) <> ''''						  				  
+
+	-- INSERT UNAPPLIED PAYMENTS
+		INSERT INTO [tblARPayment]
+			([intEntityCustomerId]
+			,[intCurrencyId]
+			,[dtmDatePaid]
+			,[intAccountId]
+			,[intPaymentMethodId]
+			,[intLocationId]
+			,[dblAmountPaid]
+			,[dblUnappliedAmount]
+			,[dblOverpayment]
+			,[dblBalance]
+			,[strPaymentInfo]
+			,[strNotes]
+			,[ysnApplytoBudget]				
+			,[ysnPosted]
+			,[intEntityId] 
+			,[intConcurrencyId]
+			)
+		SELECT
+			 C.[intEntityCustomerId] 							AS [intEntityCustomerId]
+			,(select intDefaultCurrencyId from tblSMCompanyPreference) AS [intCurrencyId]
+			,(CASE 
+				WHEN ISDATE(P1.[ptcrd_rev_dt]) = 1 
+					THEN CONVERT(DATE, CAST(P1.[ptcrd_rev_dt]	AS CHAR(12)), 112) 
+				ELSE
+					NULL 
+			END)												AS [dtmDatePaid]
+			,ISNULL(GL.[inti21Id],0)							AS [intAccountId]
+			,ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	AS [intPaymentMethodId] 
+			,CL.[intCompanyLocationId] 							AS [intLocationId]
+			,(P1.[ptcrd_amt])    								AS [dblAmountPaid]
+			,(P1.ptcrd_amt - P1.ptcrd_amt_used)   				AS [dblUnappliedAmount]
+			,(P1.ptcrd_amt - P1.ptcrd_amt_used)					AS [dblOverpayment]
+			,0													AS [dblBalance]
+			,P1.[ptcrd_invc_no]									AS [strPaymentInfo]
+			,''ORIGIN''               							AS [strNotes] 
+			,0													AS [ysnApplytoBudget]						
+			,1													AS [ysnPosted]	
+			,@UserId											AS [intEntityId]										
+			,0
+
+		FROM
+			[ptcrdmst] P1				--Origin Credits Table
+		INNER JOIN
+			[tblARCustomer] C
+				ON P1.[ptcrd_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
+		LEFT OUTER JOIN
+			[tblGLCOACrossReference] GL
+				ON P1.[ptcrd_acct_no] = GL.[strExternalId]
+		INNER JOIN
+			[tblSMCompanyLocation] CL
+				ON P1.[ptcrd_loc_no] COLLATE Latin1_General_CI_AS = CL.[strLocationNumber] COLLATE Latin1_General_CI_AS
+		LEFT OUTER JOIN
+			[tblSMPaymentMethod] P
+				ON P1.[ptcrd_pay_type] COLLATE Latin1_General_CI_AS = P.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+		WHERE 
+			(P1.ptcrd_amt - P1.ptcrd_amt_used) <> 0
+			AND NOT EXISTS
+				(	SELECT NULL 
+					FROM tblARPayment a
+					WHERE
+						a.[ysnPosted] = 1
+						AND a.[intEntityCustomerId] = C.[intEntityCustomerId] 
+						AND a.[dtmDatePaid] = (CASE 
+													WHEN ISDATE(P1.[ptcrd_rev_dt]) = 1 
+														THEN CONVERT(DATE, CAST(P1.[ptcrd_rev_dt] AS CHAR(12)), 112) 
+													ELSE
+														NULL 
+												END)
+						AND a.[intAccountId] = ISNULL(GL.[inti21Id],0)
+						AND a.[intPaymentMethodId] = ISNULL(P.[intPaymentMethodID],@DefaultPaymenMethodtId)	
+						AND a.[strPaymentInfo] COLLATE Latin1_General_CI_AS = P1.[ptcrd_invc_no] COLLATE Latin1_General_CI_AS					
+						AND a.dblUnappliedAmount <> 0)
+						
+	SET @TotalCount = @TotalCount + @@ROWCOUNT
+	SET @Total = @TotalCount 
+	SET NOCOUNT ON
+
+	--CREATE INVOICES FOR UNAPPLIED CREDITS
+		DECLARE @PaymentID int, @return_value int, @NewInvoiceId int
+		SET @return_value = 0
+		SELECT intPaymentId INTO #tmpptcrd FROM tblARPayment WHERE strNotes = ''ORIGIN''
+			WHILE (EXISTS(SELECT 1 FROM #tmpptcrd))
+			BEGIN
+				BEGIN TRY
+					SELECT @PaymentID = intPaymentId FROM #tmpptcrd
+						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
+								@PaymentId = @PaymentID,
+								@UserId = 1,
+								@NewInvoiceId = @NewInvoiceId OUTPUT					
+				END TRY								
+							
+				BEGIN CATCH
+					PRINT @@ERROR;
+					DELETE FROM tblARPayment WHERE intPaymentId = @PaymentId					
+					GOTO CONTINUELOOP;
+				END CATCH
+				
+				CONTINUELOOP:
+				PRINT @PaymentId
+				DELETE FROM #tmpptcrd WHERE intPaymentId = @PaymentId
+				UPDATE tblARPayment SET strNotes = NULL WHERE intPaymentId = @PaymentId
+			END 
 END
 			')
 END
