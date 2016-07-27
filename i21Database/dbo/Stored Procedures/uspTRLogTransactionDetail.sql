@@ -63,7 +63,7 @@ BEGIN
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
 			, intTransactionId = DH.intLoadHeaderId
-			, intTransactionDetailId = DH.intLoadDistributionHeaderId
+			, intTransactionDetailId = DD.intLoadDistributionDetailId
 			, strSourceType = @SourceType_Invoice
 			, intSourceId = DH.intInvoiceId
 			, dblQuantity = DD.dblUnits

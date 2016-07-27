@@ -158,7 +158,7 @@ BEGIN
 		UNION ALL
 		SELECT strTransactionType = @TransactionType_TransportLoad
 			, intTransactionId = @LoadHeaderId
-			, intTransactionDetailId = DH.intLoadDistributionHeaderId
+			, intTransactionDetailId = DD.intLoadDistributionDetailId
 			, strSourceType = @SourceType_Invoice
 			, intSourceId = DH.intInvoiceId
 			, dblQuantity = DD.dblUnits
@@ -174,7 +174,7 @@ BEGIN
 		INSERT INTO @tblToProcess(intLoadHeaderId, intTransactionId, strTransactionType, intActivity, dblQuantity, intContractDetailId)
 
 		SELECT DISTINCT previousSnapshot.intTransactionId
-			, previousSnapshot.intSourceId
+			, previousSnapshot.intTransactionDetailId
 			, @SourceType_InventoryReceipt
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -192,7 +192,7 @@ BEGIN
 
 		-- Check and Delete Deleted Inventory Transfer line items
 		SELECT DISTINCT previousSnapshot.intTransactionId
-			, previousSnapshot.intSourceId
+			, previousSnapshot.intTransactionDetailId
 			, @SourceType_InventoryTransfer
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -210,7 +210,7 @@ BEGIN
 
 		-- Check and Delete Deleted Invoice line items
 		SELECT DISTINCT previousSnapshot.intTransactionId
-			, previousSnapshot.intSourceId
+			, previousSnapshot.intTransactionDetailId
 			, @SourceType_Invoice
 			, 3 -- Delete
 			, previousSnapshot.dblQuantity * -1
@@ -228,7 +228,7 @@ BEGIN
 
 		-- Check Added Receipts
 		SELECT currentSnapshot.intTransactionId
-			, currentSnapshot.intSourceId
+			, currentSnapshot.intTransactionDetailId
 			, currentSnapshot.strSourceType
 			, 1 --Add
 			, currentSnapshot.dblQuantity
@@ -242,7 +242,7 @@ BEGIN
 		
 		-- Check Added Transfers
 		SELECT currentSnapshot.intTransactionId
-			, currentSnapshot.intSourceId
+			, currentSnapshot.intTransactionDetailId
 			, currentSnapshot.strSourceType
 			, 1 --Add
 			, currentSnapshot.dblQuantity
@@ -256,7 +256,7 @@ BEGIN
 		
 		-- Check Added Invoices
 		SELECT currentSnapshot.intTransactionId
-			, currentSnapshot.intSourceId
+			, currentSnapshot.intTransactionDetailId
 			, currentSnapshot.strSourceType
 			, 1 --Add
 			, currentSnapshot.dblQuantity
@@ -270,7 +270,7 @@ BEGIN
 
 		-- Check Updated rows
 		SELECT previousSnapshot.intTransactionId
-			, previousSnapshot.intSourceId
+			, previousSnapshot.intTransactionDetailId
 			, previousSnapshot.strSourceType
 			, 2 --Update
 			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (previousSnapshot.dblQuantity - currentSnapshot.dblQuantity)
@@ -286,7 +286,7 @@ BEGIN
 
 		-- Add another row if there was a change on Contract Detail Id used, for the new Contract Detail Id
 		SELECT currentSnapshot.intTransactionId
-			, currentSnapshot.intSourceId
+			, currentSnapshot.intTransactionDetailId
 			, currentSnapshot.strSourceType
 			, 2 --Update
 			, currentSnapshot.dblQuantity
@@ -332,7 +332,7 @@ BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
 					, @dblQuantityToUpdate = @dblQuantity 
 					, @intUserId = @UserId 
-					, @intExternalId = @intLoadHeaderId 
+					, @intExternalId = @intTransactionId 
 					, @strScreenName = @strScreenName
 			END
 		END
