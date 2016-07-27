@@ -323,6 +323,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\030-FixSalesperson.sql
 :r .\EM\024_CleanOrphanCustomerGroup.sql
 :r .\EM\031_UpdatePhoneAreaLength.sql
+:r .\EM\032_MigrateVendorApprovalList.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
