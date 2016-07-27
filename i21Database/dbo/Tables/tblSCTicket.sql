@@ -103,7 +103,8 @@
 	[dblConvertedUOMQty] NUMERIC(38, 20) NULL,
 	[intItemUOMIdFrom] INT NULL, 
 	[intItemUOMIdTo] INT NULL,
-	[intTicketTypeId] INT NULL
+	[intTicketTypeId] INT NULL,
+	[intStorageScheduleTypeId] INT NULL
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -956,3 +957,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intItemUOMIdTo'
+	GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'List Ticket Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intTicketTypeId'
+	GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Storage Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intStorageScheduleTypeId'

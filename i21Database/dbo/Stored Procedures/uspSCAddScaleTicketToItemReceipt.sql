@@ -99,6 +99,7 @@ SELECT
 		strReceiptType				= CASE 
 										WHEN LI.strSourceTransactionId = 'SPT' THEN 'Purchase Contract'
 										WHEN LI.strSourceTransactionId = 'CNT' THEN 'Purchase Contract'
+										WHEN LI.strSourceTransactionId = 'LOD' THEN 'Purchase Contract'
 										--WHEN @strReceiptType = 'Delayed Price' THEN 'Purchase Contract' 
 										ELSE 'Direct'
 									  END
@@ -215,7 +216,7 @@ WHERE intTicketId = @intTicketId
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
 		,[intCostUOMId]						= @intTicketItemUOMId
-		,[intOtherChargeEntityVendorId]		= NULL
+		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
@@ -229,11 +230,11 @@ WHERE intTicketId = @intTicketId
 		,[intContractDetailId]				= NULL
 		,[ysnAccrue]						= CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 1
-												WHEN QM.dblDiscountAmount > 0 THEN IC.ysnAccrue
+												WHEN QM.dblDiscountAmount > 0 THEN 0
 											END
 		,[ysnPrice]							= CASE
-												WHEN QM.dblDiscountAmount < 0 THEN 1
-												WHEN QM.dblDiscountAmount > 0 THEN IC.ysnPrice
+												WHEN QM.dblDiscountAmount < 0 THEN 0
+												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
 		FROM @ReceiptStagingTable RE
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
@@ -282,7 +283,7 @@ WHERE intTicketId = @intTicketId
 												WHEN IC.strCostMethod = 'Amount' THEN 0
 											END
 		,[intCostUOMId]						= @intTicketItemUOMId
-		,[intOtherChargeEntityVendorId]		= NULL
+		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN SC.dblTicketFees
@@ -360,8 +361,8 @@ ELSE
 								,[intShipViaId]						= RE.intShipViaId
 								,[intShipFromId]					= RE.intShipFromId
 								,[intCurrencyId]  					= RE.intCurrencyId
-								,[intChargeId]						= @intFreightItemId
 								,[intCostCurrencyId]				= RE.intCurrencyId
+								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]					= 'Per Unit'
 								,[dblRate]							= RE.dblFreightRate
