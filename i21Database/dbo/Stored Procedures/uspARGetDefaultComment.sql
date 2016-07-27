@@ -108,6 +108,8 @@ IF @strDefaultComment IS NULL
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType
+			AND intEntityCustomerId IS NULL
+			AND intCompanyLocationId IS NULL
 			AND strTransactionType <> 'Statement Footer'
 		ORDER BY intCommentId DESC
 	END
