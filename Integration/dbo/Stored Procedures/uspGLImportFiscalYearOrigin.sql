@@ -422,34 +422,6 @@ set ysnAPOpen = 0
 ,ysnCMOpen = 0 
 ,ysnPROpen = 0
 where intFiscalYearId in (select intFiscalYearId from tblGLFiscalYear where  ysnStatus = 0 )
-SET IDENTITY_INSERT tblGLFiscalYearPeriod OFF
 
-DECLARE @intFiscalYearId INT , @periods INT
-SELECT TOP 1 @intFiscalYearId = intFiscalYearId FROM tblGLFiscalYear WHERE GETDATE() between dtmDateFrom AND dtmDateTo
-SELECT  @periods = COUNT(1) FROM tblGLFiscalYearPeriod p JOIN tblGLFiscalYear y on p.intFiscalYearId = y.intFiscalYearId
- where p.intFiscalYearId = @intFiscalYearId
-IF EXISTS(SELECT TOP 1 1 FROM tblGLCurrentFiscalYear)
-    UPDATE C 
-    SET
-    [intFiscalYearId] = @intFiscalYearId,
-    [dtmBeginDate]= dtmDateFrom,
-    [dtmEndDate]= dtmDateTo,
-    [dblPeriods]= @periods,
-    [ysnShowAllPeriods] = 1,
-    [ysnDuplicates] = 0
-    FROM [tblGLCurrentFiscalYear] C , 
-    tblGLFiscalYear F
-    WHERE F.intFiscalYearId = @intFiscalYearId
-ELSE
-    INSERT INTO [dbo].[tblGLCurrentFiscalYear]
-               ([intFiscalYearId]
-               ,[dtmBeginDate]
-               ,[dtmEndDate]
-               ,[dblPeriods]
-               ,[ysnShowAllPeriods]
-               ,[ysnDuplicates])
-         SELECT @intFiscalYearId,
-         dtmDateFrom, dtmDateTo,@periods,1,0 
-         FROM tblGLFiscalYear
-         WHERE intFiscalYearId = @intFiscalYearId
+SET IDENTITY_INSERT tblGLFiscalYearPeriod OFF
 END')

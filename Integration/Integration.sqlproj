@@ -339,5 +339,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryFillReportView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateWorkOrderReportView.sql" />
     <None Include="dbo\Stored Procedures\uspEMImportEmployees.sql" />
+    <None Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
   </ItemGroup>
 </Project>
