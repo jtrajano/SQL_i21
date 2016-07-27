@@ -35,6 +35,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\16_PaymentMethod.sql
 :r .\SM\DefaultData\17_Notification.sql
 :r .\SM\DefaultData\18_SecurityPolicy.sql
+:r .\SM\DefaultData\19_HomePanelDashboard.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL

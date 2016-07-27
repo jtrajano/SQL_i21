@@ -4103,6 +4103,8 @@
     <Build Include="dbo\Views\vyuHDLostRevenue.sql" />
     <Build Include="dbo\Tables\tblSMPricingLevel.sql" />
     <Build Include="dbo\Views\vyuQMContractDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\19_HomePanelDashboard.sql" />
+    <Build Include="dbo\Tables\tblSMHomePanelDashboard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
