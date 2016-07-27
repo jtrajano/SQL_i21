@@ -17,7 +17,7 @@ Create TABLE #TempHomePanels
 	[ysnDefaultPanel]			bit											NULL			DEFAULT 0,
 	[intPanelHeight]			int											NOT NULL		DEFAULT 0,
 	[intColumnIndex]			int											NOT NULL,
-	[intRowINdex]				int											NOT NULL,
+	[intRowIndex]				int											NOT NULL,
 	[strPanelStyle]				NVARCHAR(100) COllate Latin1_General_CI_AS	NULL			DEFAULT '',
 	[strChartStyle]				NVARCHAR(100) COllate Latin1_General_CI_AS	NULL			DEFAULT '',
 	[intColumn1Width]			int											NULL,
@@ -60,8 +60,8 @@ BEGIN
 	ELSE --NEW DATABASE, ADD DEFAULT
 		BEGIN
 			INSERT INTO [dbo].[tblSMHomePanelDashboard] 
-				   ([intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowINdex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName]) 
-			 SELECT [intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowINdex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName]
+				   ([intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowIndex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName]) 
+			 SELECT [intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowIndex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName]
 			 FROM #TempHomePanels 
 			 WHERE intHomePanelDashboardId = @intHomePanelDashboardId;
 		END

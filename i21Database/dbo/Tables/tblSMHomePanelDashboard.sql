@@ -7,7 +7,7 @@
 	[ysnDefaultPanel]			bit											NULL			DEFAULT 0,
 	[intPanelHeight]			int											NOT NULL		DEFAULT 0,
 	[intColumnIndex]			int											NOT NULL,
-	[intRowINdex]				int											NOT NULL,
+	[intRowIndex]				int											NOT NULL,
 	[strPanelStyle]				NVARCHAR(100) Collate Latin1_General_CI_AS	NULL			DEFAULT '',
 	[strChartStyle]				NVARCHAR(100) Collate Latin1_General_CI_AS	NULL			DEFAULT '',
 	[intColumn1Width]			int											NULL,
