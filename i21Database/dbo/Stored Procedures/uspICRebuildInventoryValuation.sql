@@ -1406,37 +1406,44 @@ BEGIN
 						,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
 						,dblCost  = CASE WHEN RebuilInvTrans.dblQty < 0 THEN 
 											CASE	WHEN Receipt.intInventoryReceiptId IS NOT NULL THEN 
-														CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
-																WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+														--CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
+																--WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
 									
-																		CASE	
-																				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
-																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
-																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																--		CASE	
+																--				-- It is an non-Lot item. 
+																--				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
+																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
+																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
 													
-																				ELSE 
-																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
-																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-																		END
+																--				-- It is a Lot item. 
+																--				ELSE 
+																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.dblUnitCost) 
+																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																--		END
 
-																-- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
-																ELSE 
+																---- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
+																--ELSE 
 
-																		CASE	
-																				-- It is an non-Lot item. 
-																				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
-																					-- Convert the Cost UOM to Item UOM. 
-																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intUnitMeasureId, ReceiptItem.dblUnitCost) 
-																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																--		CASE	
+																--				-- It is an non-Lot item. 
+																--				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
+																--					-- Convert the Cost UOM to Item UOM. 
+																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intUnitMeasureId, ReceiptItem.dblUnitCost) 
+																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
 													
-																				-- It is a Lot item. 
-																				ELSE 
-																					-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
-																					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.dblUnitCost) 
-																					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-																		END 
+																--				-- It is a Lot item. 
+																--				ELSE 
+																--					-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
+																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.dblUnitCost) 
+																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																--		END 
 
-														END
+
+														--END
+
+														dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), RebuilInvTrans.intItemUOMId, ReceiptItem.dblUnitCost) 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+
 
 													WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														dbo.fnGetItemAverageCost(
