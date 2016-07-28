@@ -4044,6 +4044,7 @@
     <Build Include="dbo\Views\vyuQMContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
     <Build Include="dbo\Functions\fnTRSearchItemId.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryReceiptDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
