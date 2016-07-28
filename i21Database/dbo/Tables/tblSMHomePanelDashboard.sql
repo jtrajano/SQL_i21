@@ -17,6 +17,6 @@
 	[intConcurrencyId]			int											NOT NULL, 
 
 	CONSTRAINT [PK_tblSMHomePanelDashboard] PRIMARY KEY CLUSTERED ([intHomePanelDashboardId] ASC),
-	CONSTRAINT [FK_tblSMHomePanelDashboard_tblSMGridLayout_intEntityId] FOREIGN KEY (intGridLayoutId) REFERENCES tblSMGridLayout([intGridLayoutId]),
-	CONSTRAINT [FK_tblSMHomePanelDashboard_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
+	CONSTRAINT [FK_tblSMHomePanelDashboard_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblSMHomePanelDashboard_tblSMGridLayout_intGridLayoutId] FOREIGN KEY (intGridLayoutId) REFERENCES tblSMGridLayout([intGridLayoutId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
