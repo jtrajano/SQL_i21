@@ -4107,6 +4107,7 @@
     <Build Include="dbo\Tables\tblSMHomePanelDashboard.sql" />
     <Build Include="dbo\Functions\fnTRSearchItemId.sql" />
     <Build Include="dbo\Tables\tblMFStageWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateContainerLinkInSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
