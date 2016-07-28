@@ -16,8 +16,7 @@ SELECT Detail.intImportRackPriceDetailId
 	, DetailItem.dblJobberPrice
 	, DetailItem.strEquation
 	, ysnValidDetailItem = DetailItem.ysnValid
-	, strStatus = CASE WHEN Detail.ysnValid = 0 THEN Detail.strSupplyPoint
-						WHEN DetailItem.ysnValid = 0 THEN DetailItem.strItemNo
+	, strStatus = CASE WHEN Detail.ysnValid = 0 OR DetailItem.ysnValid = 0 THEN 'Item ' + DetailItem.strItemNo + ' on ' + Detail.strSupplyPoint + ' was not found'
 						ELSE 'Success!' END					
 FROM tblTRImportRackPriceDetail Detail
 LEFT JOIN tblTRImportRackPriceDetailItem DetailItem ON DetailItem.intImportRackPriceDetailId = Detail.intImportRackPriceDetailId
