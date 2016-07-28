@@ -14,6 +14,7 @@
 	[intGridLayoutId]			int											NULL,
 	[strWidgetName]				NVARCHAR(100) Collate Latin1_General_CI_AS	NULL			DEFAULT '',
 	[intEntityId]				int											NOT NULL, 
+	[ysnIsCollapse]			bit											NULL,
 	[intConcurrencyId]			int											NOT NULL, 
 
 	CONSTRAINT [PK_tblSMHomePanelDashboard] PRIMARY KEY CLUSTERED ([intHomePanelDashboardId] ASC),
