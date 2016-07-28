@@ -4106,6 +4106,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\19_HomePanelDashboard.sql" />
     <Build Include="dbo\Tables\tblSMHomePanelDashboard.sql" />
     <Build Include="dbo\Functions\fnTRSearchItemId.sql" />
+    <Build Include="dbo\Tables\tblMFStageWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
