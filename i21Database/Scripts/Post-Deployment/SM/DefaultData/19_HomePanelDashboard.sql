@@ -24,14 +24,15 @@ Create TABLE #TempHomePanels
 	[intGridLayoutId]			int											NULL,
 	[strWidgetName]				NVARCHAR(100) Collate Latin1_General_CI_AS	NULL			DEFAULT '',
 	[intEntityId]				int											NOT NULL, 
+	[intConcurrencyId]			int											NOT NULL, 
 )
 
-INSERT INTO [dbo].[#TempHomePanels] VALUES (1, 'Comments',				'System', 1, 1, 500, 0, 0, 'Grid', '', NULL, NULL, 'commentsform',			1);
-INSERT INTO [dbo].[#TempHomePanels] VALUES (2, 'Recently Viewed',		'System', 1, 1, 500, 1, 0, 'Grid', '', NULL, NULL, 'recentlyviewedform',	1);
-INSERT INTO [dbo].[#TempHomePanels] VALUES (3, 'Messages',				'System', 1, 1, 500, 0, 1, 'Grid', '', NULL, NULL, 'messagesform',			1);
-INSERT INTO [dbo].[#TempHomePanels] VALUES (4, 'Audit Log History',		'System', 1, 1, 500, 1, 1, 'Grid', '', NULL, NULL, 'auditloghistoryform',	1);
-INSERT INTO [dbo].[#TempHomePanels] VALUES (5, 'Alerts',				'System', 1, 1, 500, 0, 2, 'Grid', '', NULL, NULL, 'alertsform',			1);
-INSERT INTO [dbo].[#TempHomePanels] VALUES (6, 'Online Users',			'System', 1, 1, 500, 1, 2, 'Grid', '', NULL, NULL, 'onlineusersform',		1);
+INSERT INTO [dbo].[#TempHomePanels] VALUES (1, 'Comments',				'System', 1, 1, 500, 0, 0, 'Grid', '', NULL, NULL, 'commentsform',			1, 1);
+INSERT INTO [dbo].[#TempHomePanels] VALUES (2, 'Recently Viewed',		'System', 1, 1, 500, 1, 0, 'Grid', '', NULL, NULL, 'recentlyviewedform',	1, 1);
+INSERT INTO [dbo].[#TempHomePanels] VALUES (3, 'Messages',				'System', 1, 1, 500, 0, 1, 'Grid', '', NULL, NULL, 'messagesform',			1, 1);
+INSERT INTO [dbo].[#TempHomePanels] VALUES (4, 'Audit Log History',		'System', 1, 1, 500, 1, 1, 'Grid', '', NULL, NULL, 'auditloghistoryform',	1, 1);
+INSERT INTO [dbo].[#TempHomePanels] VALUES (5, 'Alerts',				'System', 1, 1, 500, 0, 2, 'Grid', '', NULL, NULL, 'alertsform',			1, 1);
+INSERT INTO [dbo].[#TempHomePanels] VALUES (6, 'Online Users',			'System', 1, 1, 500, 1, 2, 'Grid', '', NULL, NULL, 'onlineusersform',		1, 1);
 
 DECLARE @intHomePanelDashboardId int
 
@@ -62,8 +63,8 @@ BEGIN
 	ELSE --NEW DATABASE, ADD DEFAULT
 		BEGIN
 			INSERT INTO [dbo].[tblSMHomePanelDashboard] 
-				   ([intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowIndex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName], [intEntityId]) 
-			 SELECT [intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowIndex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName], [intEntityId]
+				   ([intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowIndex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName], [intEntityId], [intConcurrencyId]) 
+			 SELECT [intHomePanelDashboardId],[strPanelName],[strType],[ysnIsVisible],[ysnDefaultPanel],[intPanelHeight],[intColumnIndex],[intRowIndex],[strPanelStyle],[strChartStyle],[intColumn1Width],[intGridLayoutId],[strWidgetName], [intEntityId], [intConcurrencyId]
 			 FROM #TempHomePanels 
 			 WHERE intHomePanelDashboardId = @intHomePanelDashboardId;
 		END
