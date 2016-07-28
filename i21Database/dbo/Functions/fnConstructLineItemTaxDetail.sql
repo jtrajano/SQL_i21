@@ -162,6 +162,7 @@ BEGIN
 			,@TotalTaxRate			NUMERIC(18,6)
 			,@RegularRate			NUMERIC(18,6)
 			,@CheckOffRate			NUMERIC(18,6)
+			,@TaxableByOtherRate	NUMERIC(18,6)
 			,@ItemPrice				NUMERIC(18,6)
 	
 	
@@ -270,19 +271,19 @@ BEGIN
 						@ItemTaxes
 					WHERE
 						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
-						AND [ysnCheckoffTax] = 0
+						--AND [ysnCheckoffTax] = 0
 						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
 
-					SELECT
-						@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
-					FROM
-						@ItemTaxes
-					WHERE
-						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
-						AND [ysnCheckoffTax] = 1
-						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
+					--SELECT
+					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+					--FROM
+					--	@ItemTaxes
+					--WHERE
+					--	[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
+					--	AND [ysnCheckoffTax] = 1
+					--	AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
 
-					SET @TaxableByOtherUnitTax = @TaxableByOtherUnitTax + ((ISNULL(@TBOTRegularRate, @ZeroDecimal) - ISNULL(@TBOTCheckOffRate, @ZeroDecimal)) * (CASE WHEN @TBOTCheckOff = 1 THEN -1 ELSE 1 END))
+					SET @TaxableByOtherUnitTax = @TaxableByOtherUnitTax + ((ISNULL(@TBOTRegularRate, @ZeroDecimal) - ISNULL(@TBOTCheckOffRate, @ZeroDecimal))) --* (CASE WHEN @TBOTCheckOff = 1 THEN -1 ELSE 1 END))
 					UPDATE @TaxableByOtherTaxUnit SET [ysnComputed] = 1 WHERE [Id] = @TBOTID
 				END
 
@@ -323,8 +324,99 @@ BEGIN
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
 				AND [ysnCheckoffTax] = 1
 				AND [ysnTaxExempt] = 0
+
+			DELETE FROM @TaxableByOtherTaxUnit
+			INSERT INTO @TaxableByOtherTaxUnit(
+				 [intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[dblRate]
+				,[dblExemptionPercent]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[intTaxAccountId]
+				,[ysnCheckoffTax]
+				,[strTaxCode]
+				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
+				,[strTaxGroup]
+				,[strNotes]
+				,[ysnTaxAdjusted]
+				,[ysnComputed]
+			)
+			SELECT
+				 [intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[dblRate]
+				,[dblExemptionPercent]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[intTaxAccountId]
+				,[ysnCheckoffTax]
+				,[strTaxCode]
+				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
+				,[strTaxGroup]
+				,[strNotes]
+				,[ysnTaxAdjusted]
+				,0
+			FROM 
+				@ItemTaxes
+			WHERE
+				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
+				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
+				AND [ysnTaxExempt] = 0
+
+			SET @TaxableByOtherRate = @ZeroDecimal
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
+				BEGIN
+					DECLARE  @TBOTIDR			INT
+							,@TBOTCheckOffR		BIT
+							,@TBOTRateR			NUMERIC(18,6)
+							,@TBOTTotalRateR		NUMERIC(18,6)
+							,@TBOTRegularRateR	NUMERIC(18,6)
+							,@TBOTCheckOffRateR	NUMERIC(18,6)
+							,@TBOTTaxCodesR		NVARCHAR(MAX)
+
+					SELECT TOP 1 
+						 @TBOTIDR		= [Id]
+						,@TBOTRateR		= ISNULL([dblRate], @ZeroDecimal)
+						,@TBOTTaxCodesR	= [strTaxableByOtherTaxes]
+						,@TBOTCheckOffR	= ISNULL([ysnCheckoffTax],0)
+					FROM
+						@TaxableByOtherTaxUnit
+					WHERE
+						[ysnComputed] = 0
+
+
+					SELECT
+						@TBOTRegularRateR = SUM((@TBOTRateR) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+					FROM
+						@ItemTaxes
+					WHERE
+						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodesR))
+						--AND [ysnCheckoffTax] = 0
+						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
+
+					--SELECT
+					--	@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+					--FROM
+					--	@ItemTaxes
+					--WHERE
+					--	[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
+					--	AND [ysnCheckoffTax] = 1
+					--	AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
+
+					SET @TaxableByOtherRate = @TaxableByOtherRate + ((ISNULL(@TBOTRegularRateR, @ZeroDecimal) - ISNULL(@TBOTCheckOffRateR, @ZeroDecimal))) --* (CASE WHEN @TBOTCheckOff = 1 THEN -1 ELSE 1 END))
+					UPDATE @TaxableByOtherTaxUnit SET [ysnComputed] = 1 WHERE [Id] = @TBOTIDR
+				END
 				
-			SET @TotalTaxRate = ISNULL(@RegularRate, @ZeroDecimal) - ISNULL(@CheckOffRate, @ZeroDecimal)
+			SET @TotalTaxRate = (ISNULL(@RegularRate, @ZeroDecimal) - ISNULL(@CheckOffRate, @ZeroDecimal)) + ISNULL(@TaxableByOtherRate, @ZeroDecimal)
 			
 			----t = pq + (pqr)
 			----t/(q + qr) = p		
