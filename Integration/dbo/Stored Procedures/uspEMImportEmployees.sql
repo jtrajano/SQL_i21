@@ -9,6 +9,7 @@ GO
 
 EXEC('
 
+
 CREATE PROCEDURE [dbo].[uspEMImportEmployees]
 	@EmployeId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
@@ -219,6 +220,7 @@ BEGIN
 	DECLARE @ysnRetirementPlan		NVARCHAR(50)
 	DECLARE @dblRegularHours		NVARCHAR(50)
 	DECLARE @dtmLastModified		NVARCHAR(50)
+	DECLARE @strType				NVARCHAR(100)
 	
 	SELECT premp_emp INTO #tmpprempmst 
 	FROM prempmst
@@ -259,18 +261,49 @@ BEGIN
 				@dtmOrigHireDate	= premp_orig_hire_dt,
 				@dtmLastHireDate	= premp_last_hire_dt,
 				@dtmBirthDate		= premp_birth_dt,
-				@strSex				= premp_sex,
-				@strMaritalStatus	= premp_marital_status,
+				@strSex				= CASE WHEN premp_sex = ''M'' THEN ''Male'' 
+										WHEN premp_sex = ''F'' THEN ''Female'' end ,
+				@strType			= Case when premp_employment = ''F'' then ''Full-Time''
+										else ''Part-Time'' end,
+				@strMaritalStatus	= CASE WHEN premp_marital_status = ''M'' then ''Married''
+										WHEN premp_marital_status = ''W'' then ''Widowed''
+										WHEN premp_marital_status = ''S'' then ''Single''
+										WHEN premp_marital_status = ''U'' then ''Other''
+										WHEN premp_marital_status = ''D'' then ''Divorced''
+										ELSE ''Other'' END,
 				@strSpouse			= premp_spouse,						
-				@strEthnicity		= premp_race,
-				@strEEOCCode		= premp_eeo_code, 
+				@strEthnicity		= CASE WHEN premp_race = ''C'' THEN ''Caucasian'' --[not int the list ]
+										WHEN premp_race = ''H'' THEN ''Hispanic or Latino''
+										WHEN premp_race = ''I'' THEN ''American Indian or Alaska Native (not Hispanic or Latino)''
+										WHEN premp_race = ''T'' THEN ''Two or More Races (not Hispanic or Latino)''
+										WHEN premp_race = ''N'' THEN ''Afro-American'' --[not int the list ]
+										WHEN premp_race = ''O'' THEN ''Oriental'' --[not int the list ]
+										WHEN premp_race = ''P'' THEN ''Pacific Islander'' --[not int the list ]									
+										END,
+				@strEEOCCode		= CASE WHEN premp_eeo_code = ''1'' THEN ''1.2 - First/Mid Level Officials & Managers''
+										WHEN premp_eeo_code = ''2'' THEN ''2 - Professionals''
+										WHEN premp_eeo_code = ''3'' THEN ''3 - Technicians''
+										WHEN premp_eeo_code = ''4'' THEN ''4 - Sales Workers''
+										WHEN premp_eeo_code = ''5'' THEN ''5 - Administrative Support Workers''
+										WHEN premp_eeo_code = ''6'' THEN ''6 - Craft Workers''
+										WHEN premp_eeo_code = ''7'' THEN ''7 - Operatives''
+										WHEN premp_eeo_code = ''8'' THEN ''8 - Laborers & Helpers''
+										WHEN premp_eeo_code = ''9'' THEN ''9 - Service Workers''
+										WHEN premp_eeo_code = ''10'' THEN ''1.1 - Executive/Senior Level Officials and Managers''				
+										END, 
 				@strSocialSecurity	= premp_ssn,
 				@dtmTerminated		= premp_term_dt,
 				@strTerminatedReason= premp_term_code,
 				@strEmergencyContact= premp_emer_contact,
 				@strEmergencyPhone	= premp_emer_phone,
 				@strEmergencyPhone2	= premp_doctor_phone,
-				@strPayPeriod		= premp_pay_cycle,
+				@strPayPeriod		= CASE WHEN premp_pay_cycle = ''W'' then ''Weekly''
+										WHEN premp_pay_cycle = ''M'' then ''Monthly''
+										WHEN premp_pay_cycle = ''Q'' then ''Quarterly''
+										WHEN premp_pay_cycle = ''B'' then ''Bi-Weekly''
+										WHEN premp_pay_cycle = ''S'' then ''Semi-Monthly''
+										WHEN premp_pay_cycle = ''A'' then ''Annual''
+										WHEN premp_pay_cycle = ''D'' then ''Daily'' end,
 				@dtmReviewDate		= premp_last_review_dt,
 				@dtmNextReview		= premp_next_review_dt,
 				@ysnRetirementPlan	= premp_pension_flag_9,
@@ -337,8 +370,8 @@ BEGIN
 			VALUES (@EntityId, ''Employee'', 0)
 		end
 		
-		insert into tblPREmployee(intEntityEmployeeId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix)
-		values(@EntityId, @originEmployee, @strPhone, 1,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix)
+		insert into tblPREmployee(intEntityEmployeeId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType)
+		values(@EntityId, @originEmployee, @strPhone, 1,@dtmOrigHireDate, @dtmLastHireDate,		 @dtmBirthDate,	 @strSex,	@strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType)
 		 
 		
 		set @Total = @Total + 1
@@ -368,6 +401,7 @@ BEGIN
 	FROM prempmst
 	where premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeOriginId from tblSMUserSecurity ) or premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)
 END
+
 
 
 ')
