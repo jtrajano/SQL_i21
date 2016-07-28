@@ -89,6 +89,9 @@ BEGIN
 			,@TaxAmount			NUMERIC(18,6)
 			
 	SET @ZeroDecimal = 0.000000
+	SET @GrossAmount = ISNULL(@GrossAmount, @ZeroDecimal)
+	SET @Quantity = ISNULL(@Quantity, @ZeroDecimal)
+	SET @Price = ISNULL(@Price, @ZeroDecimal)
 
 	DECLARE @ItemTaxes AS TABLE(
 		 [Id]							INT IDENTITY(1,1)
@@ -153,7 +156,11 @@ BEGIN
 		
 		
 	DECLARE @TotalUnitTax			NUMERIC(18,6)
-			,@TotalPercentageTax	NUMERIC(18,6)
+			,@UnitTax				NUMERIC(18,6)
+			,@CheckOffUnitTax		NUMERIC(18,6)
+			,@TotalTaxRate			NUMERIC(18,6)
+			,@RegularRate			NUMERIC(18,6)
+			,@CheckOffRate			NUMERIC(18,6)
 			,@ItemPrice				NUMERIC(18,6)
 	
 	
@@ -166,20 +173,49 @@ BEGIN
 	ELSE
 		BEGIN
 			SELECT
-				@TotalUnitTax = SUM(@Quantity * [dblRate])
+				@UnitTax = SUM(@Quantity * [dblRate])
 			FROM
 				@ItemTaxes
 			WHERE
 				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
-
-			--t = pq + (pqr)
-			--t/(q + qr) = p		
+				AND [ysnCheckoffTax] = 0
+				AND [ysnTaxExempt] = 0
+				
 			SELECT
-				@ItemPrice = (@GrossAmount - @TotalUnitTax) / (@Quantity + (@Quantity * (SUM([dblRate])/100.00)))
+				@CheckOffUnitTax = SUM(@Quantity * [dblRate])
 			FROM
 				@ItemTaxes
 			WHERE
-				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'		
+				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
+				AND [ysnCheckoffTax] = 1
+				AND [ysnTaxExempt] = 0
+				
+			SET @TotalUnitTax = ISNULL(@UnitTax, @ZeroDecimal) - ISNULL(@CheckOffUnitTax, @ZeroDecimal)
+			
+			SELECT
+				@RegularRate = SUM([dblRate])
+			FROM
+				@ItemTaxes
+			WHERE
+				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
+				AND [ysnCheckoffTax] = 0
+				AND [ysnTaxExempt] = 0
+				
+			SELECT
+				@CheckOffRate = SUM([dblRate])
+			FROM
+				@ItemTaxes
+			WHERE
+				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'
+				AND [ysnCheckoffTax] = 1
+				AND [ysnTaxExempt] = 0
+				
+			SET @TotalTaxRate = ISNULL(@RegularRate, @ZeroDecimal) - ISNULL(@CheckOffRate, @ZeroDecimal)
+			
+			----t = pq + (pqr)
+			----t/(q + qr) = p		
+			SET @ItemPrice = (@GrossAmount - @TotalUnitTax) / (@Quantity + (@Quantity * (@TotalTaxRate/100.00)))
+					
 		END		
 	
 		
