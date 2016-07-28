@@ -670,11 +670,12 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
-				WHERE	strBatchId = @strBatchId
+				WHERE	ICTrans.strBatchId = @strBatchId
 						AND (
-							strTransactionForm = 'Consume'
-							OR intTransactionTypeId = 8 
+							ICTrans.strTransactionForm = 'Consume'
+							OR ICTrans.intTransactionTypeId = 8 
 						)
+						AND ICTrans.intTransactionId = @intTransactionId
 
 				-- Check if lot is involved in an item change. 
 				-- If it is, then update the consume to the new lot id, item id, and item uom id. 
@@ -741,6 +742,7 @@ BEGIN
 										FROM	dbo.tblICInventoryTransaction 
 										WHERE	strTransactionId = @strTransactionId 
 												AND strBatchId = @strBatchId
+												AND intTransactionId = @intTransactionId
 									) 
 									, ICTrans.dblQty
 								) 
@@ -765,6 +767,7 @@ BEGIN
 							strTransactionForm = 'Produce'
 							OR intTransactionTypeId = 9
 						)
+						AND intTransactionId = @intTransactionId
 
 				EXEC dbo.uspICRepostCosting
 					@strBatchId
@@ -1404,91 +1407,56 @@ BEGIN
 						,RebuilInvTrans.dtmDate  
 						,RebuilInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty) 
-						,dblCost  = CASE WHEN RebuilInvTrans.dblQty < 0 THEN 
-											CASE	WHEN Receipt.intInventoryReceiptId IS NOT NULL THEN 
-														--CASE	-- If there is a Gross/Net UOM, then Cost UOM is relative to the Gross/Net UOM. 
-																--WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-									
-																--		CASE	
-																--				-- It is an non-Lot item. 
-																--				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
-																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
-																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-													
-																--				-- It is a Lot item. 
-																--				ELSE 
-																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.dblUnitCost) 
-																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-																--		END
-
-																---- If Gross/Net UOM is missing, then Cost UOM is related to the Item UOM. 
-																--ELSE 
-
-																--		CASE	
-																--				-- It is an non-Lot item. 
-																--				WHEN ISNULL(ReceiptItemLot.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) = 0 THEN 
-																--					-- Convert the Cost UOM to Item UOM. 
-																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intUnitMeasureId, ReceiptItem.dblUnitCost) 
-																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-													
-																--				-- It is a Lot item. 
-																--				ELSE 
-																--					-- Conver the Cost UOM to Item UOM and then to Lot UOM. 
-																--					dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.dblUnitCost) 
-																--					+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-																--		END 
-
-
-														--END
-
-														dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), RebuilInvTrans.intItemUOMId, ReceiptItem.dblUnitCost) 
-														+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-
-
-													WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-														dbo.fnGetItemAverageCost(
-															RebuilInvTrans.intItemId
-															, RebuilInvTrans.intItemLocationId
-															, RebuilInvTrans.intItemUOMId
-														) 
-													ELSE 
-														dbo.fnMultiply(
-															ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
-															,dblUOMQty
-														)
-											END 
-											
-										 WHEN (RebuilInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
-											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 1 
-
-													ELSE 
-														dbo.fnMultiply (
-															dbo.fnDivide(
-																ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
-																,AdjItemUOM.dblUnitQty
-															)
-															,ItemUOM.dblUnitQty
-														)
-											END 		
-																				
-										-- When it is a credit memo:
-										 WHEN (RebuilInvTrans.dblQty > 0 AND RebuilInvTrans.strTransactionId LIKE 'SI%') THEN 
-											
-											CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-														-- If using Average Costing, use Ave Cost.
-														dbo.fnGetItemAverageCost(
-															RebuilInvTrans.intItemId
-															, RebuilInvTrans.intItemLocationId
-															, RebuilInvTrans.intItemUOMId
-														) 
-													ELSE
-														-- Otherwise, get the last cost. 
+						,dblCost  = 
+							CASE		
+									-- Reduce stock: Get the last cost 
+									WHEN RebuilInvTrans.dblQty < 0 THEN 								
+										CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+													dbo.fnGetItemAverageCost(
+														RebuilInvTrans.intItemId
+														, RebuilInvTrans.intItemLocationId
+														, RebuilInvTrans.intItemUOMId
+													) 
+												ELSE 
+													dbo.fnMultiply(
 														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
-											END 
+														,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty)
+													)
+										END 
+							
+									-- Add stock from IR: Get the cost from the Inventory Receipt 
+									WHEN RebuilInvTrans.dblQty > 0 AND Receipt.intInventoryReceiptId IS NOT NULL THEN 
+										dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), RebuilInvTrans.intItemUOMId, ReceiptItem.dblUnitCost) 
+										+ dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
 
-										 ELSE 
-											RebuilInvTrans.dblCost
-									END 
+									-- Add stock from Credit memo: Get ave cost or last cost. 
+									WHEN RebuilInvTrans.dblQty > 0 AND RebuilInvTrans.strTransactionId LIKE 'SI%' THEN 
+											
+										CASE	WHEN dbo.fnGetCostingMethod(RebuilInvTrans.intItemId, RebuilInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+													-- On Average Costing, use Ave Cost.
+													dbo.fnGetItemAverageCost(
+														RebuilInvTrans.intItemId
+														, RebuilInvTrans.intItemLocationId
+														, RebuilInvTrans.intItemUOMId
+													) 
+												ELSE
+													-- Otherwise, get the last cost. 
+													ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuilInvTrans.intItemId and intItemLocationId = RebuilInvTrans.intItemLocationId))
+										END 
+
+									-- Add stock from Adj: Check if there is a new cost. 
+                                    WHEN (RebuilInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
+											dbo.fnMultiply (
+												dbo.fnDivide(
+													ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
+													,AdjItemUOM.dblUnitQty
+												)
+												,ISNULL(ItemUOM.dblUnitQty, RebuilInvTrans.dblUOMQty)
+											)
+
+									ELSE 
+										RebuilInvTrans.dblCost
+							END 
 						,RebuilInvTrans.dblSalesPrice  
 						,RebuilInvTrans.intCurrencyId  
 						,RebuilInvTrans.dblExchangeRate  
@@ -1639,6 +1607,7 @@ BEGIN
 
 		DELETE FROM #tmpICInventoryTransaction
 		WHERE strBatchId = @strBatchId
+				AND intTransactionId = @intTransactionId
 	END 
 END 
 
