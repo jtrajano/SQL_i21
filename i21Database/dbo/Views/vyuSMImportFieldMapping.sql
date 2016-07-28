@@ -7,6 +7,9 @@ SELECT intFieldMapId = FieldMap.intImportFileHeaderId
 	, FieldMap.strFieldDelimiter
 	, FieldMap.strXMLType
 	, FieldMap.strXMLInitiater
+	, ColumnDetail.intImportFileColumnDetailId
+	, ColumnDetail.strTable
+	, ColumnDetail.strColumnName
 	, RecordMarker.intImportFileRecordMarkerId
 	, RecordMarker.strRecordMarker
 	, RecordMarker.intRowsToSkip
@@ -16,4 +19,7 @@ SELECT intFieldMapId = FieldMap.intImportFileHeaderId
 	, RecordMarker.strFormat
 FROM tblSMImportFileHeader FieldMap
 LEFT JOIN tblSMImportFileRecordMarker RecordMarker ON RecordMarker.intImportFileHeaderId = FieldMap.intImportFileHeaderId
-WHERE FieldMap.ysnActive = 1
+LEFT JOIN tblSMImportFileColumnDetail ColumnDetail ON ColumnDetail.intImportFileRecordMarkerId = RecordMarker.intImportFileRecordMarkerId
+WHERE ISNULL(FieldMap.ysnActive, 0) = 1
+	AND ISNULL(ColumnDetail.ysnActive, 0) = 1
+	AND ISNULL(ColumnDetail.intImportFileColumnDetailId, '') <> ''
