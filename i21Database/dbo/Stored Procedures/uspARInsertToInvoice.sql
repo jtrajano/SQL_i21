@@ -60,6 +60,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dblMaintenanceAmount		NUMERIC(18,6),
 							dblDiscount					NUMERIC(18,6),
 							dblPrice					NUMERIC(18,6),
+							strPricing					NVARCHAR(250),
 							intTaxGroupId				INT,
 							intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -94,6 +95,7 @@ SELECT SI.intItemId
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , SI.dblDiscount
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , SOD.strPricing 
 	 , SI.intTaxGroupId
 	 , SI.intSalesOrderDetailId
 	 , NULL
@@ -128,6 +130,7 @@ SELECT ICSI.intItemId
 	 , @dblZeroAmount
 	 , SOD.dblDiscount
 	 , ICSI.dblUnitPrice
+	 , SOD.strPricing 
 	 , SOD.intTaxGroupId
 	 , SOD.intSalesOrderDetailId
 	 , ICSI.intInventoryShipmentItemId
@@ -159,6 +162,7 @@ SELECT ARSI.intItemId
 	 , 0 
 	 , ARSI.dblDiscount
 	 , ARSI.dblPrice 
+	 , ''
 	 , NULL
 	 , NULL
 	 , NULL
@@ -482,6 +486,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyShipped			NUMERIC(18,6),
 						@ItemDiscount			NUMERIC(18,6),
 						@ItemPrice				NUMERIC(18,6),
+						@ItemPricing			NVARCHAR(250),
 						@ItemTaxGroupId			INT,		
 						@ItemSalesOrderDetailId	INT,
 						@ItemShipmentDetailId	INT,
@@ -505,6 +510,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyShipped			= dblQtyRemaining,
 						@ItemDiscount			= dblDiscount,
 						@ItemPrice				= dblPrice,
+						@ItemPricing			= strPricing,
 						@ItemTaxGroupId			= intTaxGroupId,
 						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
 						@ItemShipmentDetailId	= intInventoryShipmentItemId,
@@ -533,6 +539,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
+							,@ItemPricing					= @ItemPricing
 							,@RefreshPrice					= 0
 							,@ItemTaxGroupId				= @ItemTaxGroupId
 							,@RecomputeTax					= 0
