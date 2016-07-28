@@ -4045,6 +4045,7 @@
     <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
     <Build Include="dbo\Functions\fnTRSearchItemId.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryReceiptDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateContainerLinkInSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
