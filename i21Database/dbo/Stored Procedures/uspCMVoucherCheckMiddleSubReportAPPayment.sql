@@ -125,6 +125,8 @@ SELECT  TOP 10
 		,BILLDETAIL.dblTotal
 		,BILLDETAIL.dblQtyOrdered
 		,BILL.intTransactionType
+		,ITEM.strItemNo
+		,ITEM.strDescription
 FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 			ON F.strTransactionId = PYMT.strPaymentRecordNum
 		INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
@@ -135,6 +137,8 @@ FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 			ON BILL.intBillId = BILLDETAIL.intBillId
 		LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
 			ON BILLDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
+		LEFT JOIN [dbo].tblICItem ITEM
+			ON BILLDETAIL.intItemId = ITEM.intItemId
 WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 		AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
 ORDER BY BILL.strBillId
