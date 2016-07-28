@@ -15,6 +15,7 @@
 
 Ext.define('Inventory.view.OriginConversionOptionViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.icoriginconversionoption'
+    alias: 'viewmodel.icoriginconversionoption',
 
+    allowOverwrite: false
 });

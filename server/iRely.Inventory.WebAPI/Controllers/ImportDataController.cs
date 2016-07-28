@@ -32,12 +32,29 @@ namespace iRely.Inventory.WebApi.Controllers
             return await ImportCsv(bl.Import);
         }
 
+        [HttpPost]
+        [ActionName("ImportOrigins")]
+        public async Task<HttpResponseMessage> ImportOrigins()
+        {
+            var type = Request.Headers.GetValues("X-Import-Type").First();
+            ImportDataResult output = await bl.ImportOrigins(type);
+            var response = new
+            {
+                success = output.Info == "success" ? true : false,
+                info = output.Description,
+                result = output
+            };
+            return Request.CreateResponse(response.success ? HttpStatusCode.OK : HttpStatusCode.BadRequest, response);
+        }
+
         private async Task<HttpResponseMessage> ImportCsv(Func<byte[], string, ImportDataResult> func)
         {
             try
             {
                 var data = await Request.Content.ReadAsByteArrayAsync();
                 var type = Request.Headers.GetValues("X-Import-Type").First();
+                GlobalSettings.Instance.AllowOverwriteOnImport = bool.Parse(Request.Headers.GetValues("X-Import-Allow-Overwrite").First());
+
                 var output = func(data, type);
                 if (output.Info == "error")
                 {
@@ -46,6 +63,7 @@ namespace iRely.Inventory.WebApi.Controllers
                         success = false,
                         info = output.Description != null ? output.Description : "Error(s) found during import.",
                         messages = output.Messages,
+                        rows = output.Rows,
                         result = output
                     };
                     return Request.CreateResponse(HttpStatusCode.BadRequest, response);
@@ -56,6 +74,7 @@ namespace iRely.Inventory.WebApi.Controllers
                     {
                         success = true,
                         messages = output.Messages,
+                        rows = output.Rows,
                         result = output
                     };
                     return Request.CreateResponse(HttpStatusCode.OK, response);

@@ -16,5 +16,4 @@
 Ext.define('Inventory.view.ImportDataFromCsvViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.icimportdatafromcsv'
-
 });

@@ -42,9 +42,24 @@ namespace iRely.Inventory.BusinessLayer
         protected byte[] data;
         protected readonly List<ImportLogItem> logs = new List<ImportLogItem>();
         protected readonly List<InvalidItem> invalidItems = new List<InvalidItem>();
+        protected readonly Dictionary<string, string> uniqueIds = new Dictionary<string, string>(new CaseInsensitiveComparer());
+
+        private class CaseInsensitiveComparer : IEqualityComparer<string>
+        {
+            public bool Equals(string x, string y)
+            {
+                return x.ToLower().Equals(y.ToLower());
+            }
+
+            public int GetHashCode(string obj)
+            {
+                return obj.ToLower().GetHashCode();
+            }
+        }
 
         public ImportDataLogic()
         {
+            
         }
 
         public ImportDataLogic(InventoryRepository context, byte[] data)
@@ -97,6 +112,28 @@ namespace iRely.Inventory.BusinessLayer
             return validCnt == requiredFields.Length;
         }
 
+        protected bool HasLocalDuplicate(ImportDataResult dr, string field, string value, int row)
+        {
+            if (string.IsNullOrEmpty(value))
+                return false;
+
+            if (uniqueIds.ContainsKey(value))
+            {
+                dr.Info = INFO_ERROR;
+                dr.Messages.Add(new ImportDataMessage()
+                {
+                    Type = TYPE_INNER_ERROR,
+                    Status = REC_SKIP,
+                    Column = field,
+                    Row = row,
+                    Message = "Duplicate record(s) found: " + value
+                });
+                return true;
+            }
+            uniqueIds.Add(value, value);
+            return false;
+        }
+        
         public ImportDataResult Import()
         {
             MemoryStream ms = new MemoryStream(data);
@@ -110,6 +147,7 @@ namespace iRely.Inventory.BusinessLayer
 
             if (!ms.CanRead)
                 throw new IOException("Please select a valid file.");
+            int row = 0;
 
             using (CsvReader csv = new CsvReader(new StreamReader(ms), true))
             {
@@ -137,17 +175,18 @@ namespace iRely.Inventory.BusinessLayer
                     return dr;
                 }
 
-                int row = 0;
+                uniqueIds.Clear();
+
                 while (csv.ReadNextRecord())
                 {
                     row++;
                    
-
                     using (var transaction = context.ContextManager.Database.BeginTransaction())
                     {
                         try
                         {
                             LogItems.Clear();
+                            dr.IsUpdate = false;
                             T entity = ProcessRow(row, fieldCount, headers, csv, dr);
                             if (entity != null)
                             {
@@ -155,7 +194,7 @@ namespace iRely.Inventory.BusinessLayer
                                 LogTransaction(ref entity, dr);
                                 dr.Messages.Add(new ImportDataMessage()
                                 {
-                                    Message = "Record import successful.",
+                                    Message = "Record " + (dr.IsUpdate ? "updated" : "imported") + " successfully.",
                                     Row = row,
                                     Status = STAT_INNER_SUCCESS,
                                     Type = TYPE_INNER_INFO
@@ -170,7 +209,7 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 dr.Messages.Add(new ImportDataMessage()
                                 {
-                                    Message = "Invalid values found. Items that were created or modified will be rolled back.",
+                                    Message = "Invalid values found. Items that were auto created or modified in this record will be rolled back.",
                                     Exception = null,
                                     Row = row,
                                     Status = "Record import failed.",
@@ -191,7 +230,7 @@ namespace iRely.Inventory.BusinessLayer
                                 message = ex.InnerException.Message;
                             dr.Messages.Add(new ImportDataMessage()
                             {
-                                Message = message + " Items that were created or modified will be rolled back.",
+                                Message = message + " Items that were auto created or modified in this record will be rolled back.",
                                 Exception = ex,
                                 Row = row,
                                 Status = REC_SKIP,
@@ -206,12 +245,14 @@ namespace iRely.Inventory.BusinessLayer
                 }
             }
 
+            dr.Rows = row;
+
             if (hasWarnings)
                 dr.Info = INFO_WARN;
 
             if (hasErrors)
                 dr.Info = INFO_ERROR;
-
+            
             return dr;
         }
 
@@ -281,6 +322,25 @@ namespace iRely.Inventory.BusinessLayer
             {
                 var entry = context.ContextManager.Entry<T>(context.GetQuery<T>().First<T>(predicate));
                 return entry.Property(idProperty).CurrentValue;
+            }
+            return null;
+        }
+
+        protected static T GetLookUpObject<T>(InventoryRepository context, Expression<Func<T, bool>> predicate) where T : class
+        {
+            if (context.GetQuery<T>().Any<T>(predicate))
+            {
+                var entry = context.ContextManager.Entry<T>(context.GetQuery<T>().First<T>(predicate));
+                return entry.Entity;
+            }
+            return null;
+        }
+
+        protected static List<T> GetLookUps<T>(InventoryRepository context, Expression<Func<T, bool>> predicate) where T : class
+        {
+            if (context.GetQuery<T>().Any<T>(predicate))
+            {
+                return context.GetQuery<T>().Where<T>(predicate).ToList<T>();
             }
             return null;
         }

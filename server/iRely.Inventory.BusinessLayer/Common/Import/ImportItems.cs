@@ -43,6 +43,7 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     case "item no":
                         valid = SetText(value, del => fc.strItemNo = del, "Item No", dr, header, row, true);
+                        valid = !HasLocalDuplicate(dr, header, value, row);
                         break;
                     case "type":
                         switch (value.Trim().ToLower())
@@ -231,7 +232,6 @@ namespace iRely.Inventory.BusinessLayer
                             e => e.intCategoryId);
                         if (lu != null)
                         {
-                            valid = true;
                             fc.intCategoryId = (int)lu;
                         }
                         else
@@ -622,6 +622,20 @@ namespace iRely.Inventory.BusinessLayer
 
             if (context.GetQuery<tblICItem>().Any(t => t.strItemNo == fc.strItemNo))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The record already exists: " + fc.strItemNo + ". The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
                 var entry = context.ContextManager.Entry<tblICItem>(context.GetQuery<tblICItem>().First(t => t.strItemNo == fc.strItemNo));
                 entry.Property(e => e.strDescription).CurrentValue = fc.strDescription;
                 entry.Property(e => e.strType).CurrentValue = fc.strType;
@@ -686,6 +700,8 @@ namespace iRely.Inventory.BusinessLayer
                 entry.Property(e => e.intPatronageCategoryDirectId).CurrentValue = fc.intPatronageCategoryDirectId;
                 entry.State = System.Data.Entity.EntityState.Modified;
                 entry.Property(e => e.strItemNo).IsModified = false;
+
+                dr.IsUpdate = true;
             }
             else
             {

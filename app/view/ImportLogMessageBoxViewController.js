@@ -54,8 +54,29 @@ Ext.define('Inventory.view.ImportLogMessageBoxViewController', {
         grid.reconfigure(store);
         store.loadData(me.formParams.data.messages);
 
+        var colType = win.down('#colType');
+        var colMessage = win.down('#colMessage');
+        var colColumn = win.down('#colColumn');
+        var colStatus = win.down('#colStatus');
+        colMessage.renderer = this.fieldRenderer;
+        colType.renderer = this.fieldRenderer;
+        colColumn.renderer = this.fieldRenderer;
+        colStatus.renderer = this.fieldRenderer;
         win.show();
         var context = me.setupContext( {window : win} );
+    },
+
+    fieldRenderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+        if(value == null)
+            return value;
+        var type = record.get("Type");
+        if (type == "Error")
+            return '<span style="color:' + "#FF0000" + ';">' + value + '</span>';
+        else if (type == "Warning")
+            return '<span style="color:' + "#296AA3" + ';"><i>' + value + '</i></span>';
+        else if (type == "Info")
+            return '<span style="color:' + "#0E7500" + ';">' + value + '</span>';
+        return value;
     },
 
     init: function() {

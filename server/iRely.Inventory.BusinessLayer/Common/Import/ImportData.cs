@@ -36,6 +36,40 @@ namespace iRely.Inventory.BusinessLayer
             }
         }
 
+        public async Task<ImportDataResult> ImportOrigins(string type)
+        {
+            var sql = string.Empty;
+            if(type == "ItemsOrigins")
+                sql = "EXEC uspICDCItemMigration";
+            else if (type == "GLAccountsOrigins")
+                sql = "uspICDCGLAcctsMigration";
+
+            var res = new ImportDataResult()
+            {
+                Description = "Import from Origins",
+                Info = "success"
+            };
+
+            try
+            {
+                await context.ContextManager.Database.ExecuteSqlCommandAsync(sql);
+            }
+            catch (Exception ex)
+            {
+                res.Info = "error";
+                res.Description = ex.Message;
+                res.Messages.Add(new ImportDataMessage()
+                {
+                    Type = "Error",
+                    Status = "Import Failed",
+                    Message = ex.Message,
+                    Exception = ex
+                });
+            }
+
+            return res;
+        }
+
         public void Dispose()
         {
             

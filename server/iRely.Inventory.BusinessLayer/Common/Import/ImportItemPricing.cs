@@ -39,10 +39,24 @@ namespace iRely.Inventory.BusinessLayer
 
                 string h = header.ToLower().Trim();
                 int? lu = null;
-                
+
                 switch (h)
                 {
                     case "item no":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
+                                Message = "Item No should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = GetLookUpId<tblICItem>(
                             context,
                             m => m.strItemNo == value,
@@ -67,6 +81,20 @@ namespace iRely.Inventory.BusinessLayer
                         }
                         break;
                     case "location":
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            valid = false;
+                            dr.Messages.Add(new ImportDataMessage()
+                            {
+                                Column = header,
+                                Row = row,
+                                Type = TYPE_INNER_ERROR,
+                                Status = REC_SKIP,
+                                Message = "Location should not be blank."
+                            });
+                            dr.Info = INFO_WARN;
+                            break;
+                        }
                         lu = GetLookUpId<vyuICGetItemLocation>(
                             context,
                             m => m.strLocationName == value && m.strItemNo == strItemNo,
@@ -111,18 +139,26 @@ namespace iRely.Inventory.BusinessLayer
                     case "pricing method":
                         switch (value.ToUpper().Trim())
                         {
-                            case "NONE": fc.strPricingMethod = "None"; break;
-                            case "FIXED DOLLAR AMOUNT": fc.strPricingMethod = "Fixed Dollar Amount"; break;
-                            case "MARKUP STANDARD COST": fc.strPricingMethod = "Markup Standard Cost"; break;
-                            case "PERCENT OF MARGIN": fc.strPricingMethod = "Percent of Margin"; break;
+                            case "NONE":
+                                fc.strPricingMethod = "None";
+                                break;
+                            case "FIXED DOLLAR AMOUNT":
+                                fc.strPricingMethod = "Fixed Dollar Amount";
+                                break;
+                            case "MARKUP STANDARD COST":
+                                fc.strPricingMethod = "Markup Standard Cost";
+                                break;
+                            case "PERCENT OF MARGIN":
+                                fc.strPricingMethod = "Percent of Margin";
+                                break;
                             default:
                                 dr.Messages.Add(new ImportDataMessage()
                                 {
                                     Column = header,
                                     Row = row,
                                     Type = TYPE_INNER_WARN,
-                                    Status = STAT_INNER_COL_SKIP,
-                                    Message = string.Format("Invalid value for Pricing Method.")
+                                    Status = STAT_INNER_DEF,
+                                    Message = string.Format("Invalid value for Pricing Method: " + value + ". Value set to default: 'None'.")
                                 });
                                 break;
                         }
@@ -135,6 +171,20 @@ namespace iRely.Inventory.BusinessLayer
 
             if (context.GetQuery<tblICItemPricing>().Any(t => t.intItemLocationId == fc.intItemLocationId && t.intItemId == fc.intItemId))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The item pricing already exists. The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
                 var entry = context.ContextManager.Entry<tblICItemPricing>(context.GetQuery<tblICItemPricing>().First(t => t.intItemLocationId == fc.intItemLocationId && t.intItemId == fc.intItemId));
                 entry.Property(e => e.intItemId).CurrentValue = fc.intItemId;
                 entry.Property(e => e.intItemLocationId).CurrentValue = fc.intItemLocationId;
@@ -145,6 +195,7 @@ namespace iRely.Inventory.BusinessLayer
                 entry.Property(e => e.dblMSRPPrice).CurrentValue = fc.dblMSRPPrice;
                 entry.Property(e => e.dblSalePrice).CurrentValue = fc.dblSalePrice;
                 entry.Property(e => e.dblStandardCost).CurrentValue = fc.dblStandardCost;
+                entry.Property(e => e.strPricingMethod).CurrentValue = fc.strPricingMethod;
                 entry.Property(e => e.intItemPricingId).IsModified = false;
             }
             else

@@ -126,6 +126,20 @@ namespace iRely.Inventory.BusinessLayer
 
             if (context.GetQuery<tblICCategory>().Any(t => t.strCategoryCode == fc.strCategoryCode))
             {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The record already exists: " + fc.strCategoryCode + ". The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
                 var entry = context.ContextManager.Entry<tblICCategory>(context.GetQuery<tblICCategory>().First(t => t.strCategoryCode == fc.strCategoryCode));
                 entry.Property(e => e.strDescription).CurrentValue = fc.strDescription;
                 entry.Property(e => e.strInventoryType).CurrentValue = fc.strInventoryType;

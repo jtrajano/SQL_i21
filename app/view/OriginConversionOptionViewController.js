@@ -29,6 +29,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var win = button.up('window');
 
         var type = null;
+        var originType = null;
         switch (button.itemId) {
             case "btnImportFuelCategories":
                 type = "FuelCategories";
@@ -90,14 +91,88 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             case "btnImportItemLocation":
                 type = "ItemLocation";
                 break;
+            case "btnImportItemPricingLevels":
+                type = "ItemPricingLevels";
+                break;
+            case "btnImportItemsOrigins":
+                originType = "ItemsOrigins";
+                break;
+            case "btnImportGLAccountsOrigins":
+                originType = "GLAccountsOrigins";
+                break;
         }
 
-        if (type != null)
+        var allowOverwrite = this.view.viewModel.getData().allowOverwrite;
+
+        if (type != null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
                 method: "POST",
-                title: button.text
+                title: button.text,
+                allowOverwrite: allowOverwrite
             });
+        }
+        else if(originType != null)
+            this.importFromOrigins(originType, win);
+    },
+
+    importFromOrigins: function(type, win) {
+        this.ajaxRequest(type, win);
+    },
+
+    ajaxRequest: function (type, win) {
+        jQuery.ajax({
+            url: '../Inventory/api/ImportData/ImportOrigins',
+            method: 'post',
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': iRely.Functions.createIdentityToken(app.UserName, app.Password, app.Company, app.UserId, app.EntityId),
+                'X-Import-Type': type
+            },
+            beforeSend: function(jqXHR, settings) {
+                iRely.Msg.showWait('Importing in progress...');
+            },
+
+            success: function(data, status, jqXHR) {
+                iRely.Msg.close();
+                var type = 'info';
+                var msg = "File imported successfully.";
+                var json = JSON.parse(jqXHR.responseText);
+                if (json.result.Info == "warning") {
+                    type = "warning";
+                    msg = "File imported successfully with warnings.";
+                }
+                if(json.result.Info == "error") {
+                    type = "warning";
+                    msg = "File imported successfully with errors.";
+                }
+
+                i21.functions.showCustomDialog(type, 'ok', msg, function() {
+                    //win.close();
+
+                    if (data.messages != null && data.messages.length > 0) {
+                        iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                            data: data
+                        });
+                    }
+                });
+            },
+            error: function(jqXHR, status, error) {
+                iRely.Msg.close();
+                var json = JSON.parse(jqXHR.responseText);
+                i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + json.info,
+                    function() {
+                        //win.close();
+
+                        if (json.messages != null && json.messages.length > 0) {
+                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                                data: json
+                            });
+                        }
+                    }
+                );
+            }
+        });
     },
 
     init: function(application) {
@@ -109,8 +184,16 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
             "icoriginconversionoption menuitem": {
                 click: this.onExportCsvTemplate
+            },
+
+            "#btnAllowOverwrite": {
+                toggle: this.onAllowOverwriteCheckChange
             }
         });
+    },
+
+    onAllowOverwriteCheckChange: function(button, state) {
+        this.view.viewModel.setData({ allowOverwrite: state });
     },
 
     onExportCsvTemplate: function(button, e, eOpts) {
@@ -255,9 +338,9 @@ function getTemplateColumns(name) {
         case "Inventory Count":
             return ["Location","Category","Commodity","Count Group","Count Date","Sub Location","Storage Location","Description",
                 "Include Zero on Hand","Include on Hand","Scanned Count Entry","Count by Lots","Count by Pallets","Recount Mismatch",
-                "External","Recount","Reference Count No","Status"];
+                "External","Recount","Reference Count No"];
         case "Item Pricing":
-            return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "End Month Cost", "Pricing Method",
+            return ["Item No", "Location", "Last Cost", "Standard Cost", "Average Cost", "Pricing Method",
                 "Amount/Percent", "Retail Price", "MSRP"];
         case "Item Location":
             return ["Item No","Location","POS Description","Vendor Id","Costing Method","Sub Location","Storage Location",
@@ -269,5 +352,8 @@ function getTemplateColumns(name) {
                 "Reorder Point","Min Order","Suggested Qty","Lead Time (Days)","Inventory Count Group","Counted","Counted Daily",
                 "Count by Serial Number","Serial Number Begin","Serial Number End","Auto Calculate Freight","Freight Rate",
                 "Freight Term","Ship Via"];
+        case "Item Pricing Levels":
+            return ["Item No", "Location", "Price Level", "UOM", "Min", "Max", "Pricing Method",
+                "Amount/Percent", "Unit Price", "Commission On", "Comm Amount/Percent"];
     }
 }
