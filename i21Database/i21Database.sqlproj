@@ -4110,6 +4110,7 @@
     <Build Include="dbo\Stored Procedures\uspQMUpdateContainerLinkInSample.sql" />
     <Build Include="dbo\Views\vyuARRestrictedChemicalsReport.sql" />
     <Build Include="dbo\Views\vyuGRGetCommodityByDiscountId.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInventoryReceiptDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
