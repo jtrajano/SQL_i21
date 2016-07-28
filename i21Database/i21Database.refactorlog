@@ -574,27 +574,6 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInventoryReceiptLotTrackingId" />
   </Operation>
-  <Operation Name="Rename Refactor" Key="f51f4f93-075e-4d13-8f31-448ca1a3b7c0" ChangeDateTime="10/09/2014 01:57:21">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[strBrand]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="strBrandCode" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="849228de-a532-47f5-bfe6-2f59bb4553e0" ChangeDateTime="10/09/2014 01:57:35">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[strDescription]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="strBrandName" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="af5736ad-ffb8-44a6-b0af-40139ae362f5" ChangeDateTime="10/09/2014 01:57:50">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[intSort]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intManufacturerId" />
-  </Operation>
   <Operation Name="Rename Refactor" Key="7d2b143c-daa1-4543-bb64-2ab921d6fc3e" ChangeDateTime="10/09/2014 05:22:10">
     <Property Name="ElementName" Value="[dbo].[tblICRinFeedStockUOM].[strRinFeedStockUOM]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
@@ -4801,48 +4780,6 @@
     <Property Name="ParentElementName" Value="[dbo].[tblTRTransactionDetailLog]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTransactionDetailLogId" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="77497fbe-deef-4742-8061-80a5a92fda86" ChangeDateTime="07/18/2016 04:26:45">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[intBrandId]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intId" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="f2743190-26e4-4dd9-b139-4fb86284b47b" ChangeDateTime="07/18/2016 04:26:49">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[strBrandCode]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intAccountId" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="99ca3972-b64a-4dd9-b80d-80a447581e65" ChangeDateTime="07/18/2016 04:26:55">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[strBrandName]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="dblDebit" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="47a1071c-f1c7-40e9-bcbf-1083edd4b316" ChangeDateTime="07/18/2016 04:27:10">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[intManufacturerId]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="dblCredit" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="6510fed3-17cc-4c75-90bd-a9d72f16ad38" ChangeDateTime="07/18/2016 04:27:16">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[intSort]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="year" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="77c4f0c1-5071-4c9f-b084-3990695fcf8b" ChangeDateTime="07/18/2016 04:27:20">
-    <Property Name="ElementName" Value="[dbo].[tblICBrand].[intConcurrencyId]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICBrand]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="month" />
   </Operation>
   <Operation Name="Rename Refactor" Key="944d5ffa-c173-44fa-9a5b-4f97ec9d2f47" ChangeDateTime="07/18/2016 04:29:04">
     <Property Name="ElementName" Value="[dbo].[tblICRebuildValuationGLSnapshot].[Id]" />
