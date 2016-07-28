@@ -13,7 +13,9 @@
 	[intColumn1Width]			int											NULL,
 	[intGridLayoutId]			int											NULL,
 	[strWidgetName]				NVARCHAR(100) Collate Latin1_General_CI_AS	NULL			DEFAULT '',
+	[intEntityId]				int											NOT NULL, 
 
 	CONSTRAINT [PK_tblSMHomePanelDashboard] PRIMARY KEY CLUSTERED ([intHomePanelDashboardId] ASC),
-	CONSTRAINT [FK_tblSMHomePanelDashboard_tblSMGridLayout_intEntityId] FOREIGN KEY (intGridLayoutId) REFERENCES tblSMGridLayout([intGridLayoutId])
+	CONSTRAINT [FK_tblSMHomePanelDashboard_tblSMGridLayout_intEntityId] FOREIGN KEY (intGridLayoutId) REFERENCES tblSMGridLayout([intGridLayoutId]),
+	CONSTRAINT [FK_tblSMHomePanelDashboard_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]) 
 )
