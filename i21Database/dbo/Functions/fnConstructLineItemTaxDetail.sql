@@ -158,6 +158,7 @@ BEGIN
 	DECLARE @TotalUnitTax			NUMERIC(18,6)
 			,@UnitTax				NUMERIC(18,6)
 			,@CheckOffUnitTax		NUMERIC(18,6)
+			,@TaxableByOtherUnitTax	NUMERIC(18,6)
 			,@TotalTaxRate			NUMERIC(18,6)
 			,@RegularRate			NUMERIC(18,6)
 			,@CheckOffRate			NUMERIC(18,6)
@@ -172,6 +173,119 @@ BEGIN
 		END
 	ELSE
 		BEGIN
+
+			DECLARE @TaxableByOtherTaxUnit AS TABLE(
+				 [Id]							INT IDENTITY(1,1)
+				,[intTaxGroupId]				INT
+				,[intTaxCodeId]					INT
+				,[intTaxClassId]				INT
+				,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
+				,[strCalculationMethod]			NVARCHAR(30)
+				,[dblRate]						NUMERIC(18,6)
+				,[dblExemptionPercent]			NUMERIC(18,6)
+				,[dblTax]						NUMERIC(18,6)
+				,[dblAdjustedTax]				NUMERIC(18,6)
+				,[intTaxAccountId]				INT
+				,[ysnCheckoffTax]				BIT
+				,[strTaxCode]					NVARCHAR(100)						
+				,[ysnTaxExempt]					BIT
+				,[ysnInvalidSetup]				BIT
+				,[strTaxGroup]					NVARCHAR(100)
+				,[strNotes]						NVARCHAR(500)
+				,[ysnTaxAdjusted]				BIT
+				,[ysnComputed]					BIT
+				)
+
+			INSERT INTO @TaxableByOtherTaxUnit(
+				 [intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[dblRate]
+				,[dblExemptionPercent]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[intTaxAccountId]
+				,[ysnCheckoffTax]
+				,[strTaxCode]
+				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
+				,[strTaxGroup]
+				,[strNotes]
+				,[ysnTaxAdjusted]
+				,[ysnComputed]
+			)
+			SELECT
+				 [intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[dblRate]
+				,[dblExemptionPercent]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[intTaxAccountId]
+				,[ysnCheckoffTax]
+				,[strTaxCode]
+				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
+				,[strTaxGroup]
+				,[strNotes]
+				,[ysnTaxAdjusted]
+				,0
+			FROM 
+				@ItemTaxes
+			WHERE
+				LEN(RTRIM(LTRIM(ISNULL([strTaxableByOtherTaxes], '')))) > 0
+				AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
+				AND [ysnTaxExempt] = 0
+
+			SET @TaxableByOtherUnitTax = @ZeroDecimal
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @TaxableByOtherTaxUnit WHERE [ysnComputed] = 0)
+				BEGIN
+					DECLARE  @TBOTID			INT
+							,@TBOTCheckOff		BIT
+							,@TBOTRate			NUMERIC(18,6)
+							,@TBOTTotalRate		NUMERIC(18,6)
+							,@TBOTRegularRate	NUMERIC(18,6)
+							,@TBOTCheckOffRate	NUMERIC(18,6)
+							,@TBOTTaxCodes		NVARCHAR(MAX)
+
+					SELECT TOP 1 
+						 @TBOTID		= [Id]
+						,@TBOTRate		= ISNULL([dblRate], @ZeroDecimal)
+						,@TBOTTaxCodes	= [strTaxableByOtherTaxes]
+						,@TBOTCheckOff	= ISNULL([ysnCheckoffTax],0)
+					FROM
+						@TaxableByOtherTaxUnit
+					WHERE
+						[ysnComputed] = 0
+
+
+					SELECT
+						@TBOTRegularRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+					FROM
+						@ItemTaxes
+					WHERE
+						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
+						AND [ysnCheckoffTax] = 0
+						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
+
+					SELECT
+						@TBOTCheckOffRate = SUM((@TBOTRate * @Quantity) * (ISNULL([dblRate], @ZeroDecimal)/100.00))
+					FROM
+						@ItemTaxes
+					WHERE
+						[intTaxCodeId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TBOTTaxCodes))
+						AND [ysnCheckoffTax] = 1
+						AND LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'	
+
+					SET @TaxableByOtherUnitTax = @TaxableByOtherUnitTax + ((ISNULL(@TBOTRegularRate, @ZeroDecimal) - ISNULL(@TBOTCheckOffRate, @ZeroDecimal)) * (CASE WHEN @TBOTCheckOff = 1 THEN -1 ELSE 1 END))
+					UPDATE @TaxableByOtherTaxUnit SET [ysnComputed] = 1 WHERE [Id] = @TBOTID
+				END
+
 			SELECT
 				@UnitTax = SUM(@Quantity * [dblRate])
 			FROM
@@ -190,7 +304,7 @@ BEGIN
 				AND [ysnCheckoffTax] = 1
 				AND [ysnTaxExempt] = 0
 				
-			SET @TotalUnitTax = ISNULL(@UnitTax, @ZeroDecimal) - ISNULL(@CheckOffUnitTax, @ZeroDecimal)
+			SET @TotalUnitTax = ((ISNULL(@UnitTax, @ZeroDecimal) - ISNULL(@CheckOffUnitTax, @ZeroDecimal)) + ISNULL(@TaxableByOtherUnitTax, @ZeroDecimal))
 			
 			SELECT
 				@RegularRate = SUM([dblRate])
