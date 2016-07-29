@@ -43,6 +43,7 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
     [intReturnCurrency] INT NULL, 
     [intDisplayCurrency] INT NULL, 
     [strMarketSymbolCode] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+	[strOptionSymbolPrefix] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED ([intFutureMarketId] ASC),
 	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])

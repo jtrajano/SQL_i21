@@ -2,45 +2,63 @@
 	@ImportRackPriceId INT OUTPUT
 AS
 
-SELECT TOP 1 @ImportRackPriceId = intImportRackPriceId
-FROM tblTRImportRackPrice
-ORDER BY intImportRackPriceId DESC
+BEGIN
 
-UPDATE tblTRImportRackPriceDetail
-SET intSupplyPointId = dbo.fnTRSearchSupplyPointId(strSupplyPoint)
-	, ysnValid = CASE WHEN ISNULL(dbo.fnTRSearchSupplyPointId(strSupplyPoint), '') <> '' THEN 1
-					ELSE 0 END
-	, ysnSelected = 0
-WHERE intImportRackPriceId = @ImportRackPriceId
+	SELECT TOP 1 @ImportRackPriceId = intImportRackPriceId
+	FROM tblTRImportRackPrice
+	ORDER BY intImportRackPriceId DESC
 
-UPDATE tblTRImportRackPriceDetail
-SET strSupplyPoint = 'Supply Point not found! - ' + strSupplyPoint
-WHERE intImportRackPriceId = @ImportRackPriceId
-	AND ysnValid = 0
+	SELECT Detail.intImportRackPriceDetailId
+		, Detail.intImportRackPriceId
+		, Detail.strSupplyPoint
+		, Detail.intSupplyPointId
+		, Detail.dtmEffectiveDate
+		, Detail.strComments
+		, Detail.ysnSelected
+		, ysnValidDetail = Detail.ysnValid
+		, DetailItem.intImportRackPriceDetailItemId
+		, DetailItem.strItemNo
+		, DetailItem.intItemId
+		, DetailItem.dblVendorPrice
+		, DetailItem.dblJobberPrice
+		, DetailItem.strEquation
+		, ysnValidDetailItem = DetailItem.ysnValid
+		, strStatus = CASE WHEN Detail.ysnValid = 0 THEN Detail.strSupplyPoint
+							WHEN DetailItem.ysnValid = 0 THEN DetailItem.strItemNo
+							ELSE 'Success!' END
+		, intKeyId = dbo.fnTRSearchItemId(Detail.strSupplyPoint, DetailItem.strItemNo)	
+	INTO #tmpRackPrice
+	FROM tblTRImportRackPriceDetail Detail
+	LEFT JOIN tblTRImportRackPriceDetailItem DetailItem ON DetailItem.intImportRackPriceDetailId = Detail.intImportRackPriceDetailId
+	WHERE Detail.intImportRackPriceId = @ImportRackPriceId
 
-UPDATE tblTRImportRackPriceDetailItem
-SET intItemId = dbo.fnTRSearchItemId(RackPriceDetail.intSupplyPointId, strItemNo)
-	, ysnValid = CASE WHEN ISNULL(dbo.fnTRSearchItemId(RackPriceDetail.intSupplyPointId, strItemNo), '') <> '' THEN 1
-					ELSE 0 END
-FROM (
-	SELECT RackPriceDetail.intImportRackPriceDetailItemId
-		, RackPrice.intSupplyPointId
-		, RackPrice.intImportRackPriceId
-	FROM tblTRImportRackPriceDetail RackPrice
-	LEFT JOIN tblTRImportRackPriceDetailItem RackPriceDetail ON RackPriceDetail.intImportRackPriceDetailId = RackPrice.intImportRackPriceDetailId
-) RackPriceDetail
-WHERE RackPriceDetail.intImportRackPriceDetailItemId = tblTRImportRackPriceDetailItem.intImportRackPriceDetailItemId
-	AND RackPriceDetail.intImportRackPriceId = @ImportRackPriceId
+	SELECT RackPrice.intImportRackPriceDetailId
+		, RackPrice.intImportRackPriceDetailItemId
+		, SearchValue.intSupplyPointId
+		, SearchValue.strSupplier
+		, SearchValue.strLocation
+		, SearchValue.intItemId
+		, SearchValue.strItemNo
+		, SearchValue.strItemDescription
+	INTO #tmpPatchTable
+	FROM #tmpRackPrice RackPrice
+	LEFT JOIN vyuTRGetSupplyPointSearchValue SearchValue ON SearchValue.intKeyId = RackPrice.intKeyId
 
-UPDATE tblTRImportRackPriceDetailItem
-SET strItemNo = 'Item not found! - ' + strItemNo
-FROM (
-	SELECT RackPriceDetail.intImportRackPriceDetailItemId
-		, RackPrice.intSupplyPointId
-		, RackPrice.intImportRackPriceId
-	FROM tblTRImportRackPriceDetail RackPrice
-	LEFT JOIN tblTRImportRackPriceDetailItem RackPriceDetail ON RackPriceDetail.intImportRackPriceDetailId = RackPrice.intImportRackPriceDetailId
-) RackPriceDetail
-WHERE RackPriceDetail.intImportRackPriceDetailItemId = tblTRImportRackPriceDetailItem.intImportRackPriceDetailItemId
-	AND RackPriceDetail.intImportRackPriceId = @ImportRackPriceId
-	AND tblTRImportRackPriceDetailItem.ysnValid = 0
+	UPDATE tblTRImportRackPriceDetail
+	SET tblTRImportRackPriceDetail.intSupplyPointId = #tmpPatchTable.intSupplyPointId
+		, tblTRImportRackPriceDetail.ysnValid = (CASE WHEN ISNULL(#tmpPatchTable.intSupplyPointId, 0) = 0 THEN 0
+				ELSE 1 END)
+	FROM #tmpPatchTable
+	WHERE tblTRImportRackPriceDetail.intImportRackPriceDetailId = #tmpPatchTable.intImportRackPriceDetailId
+
+	UPDATE tblTRImportRackPriceDetailItem
+	SET tblTRImportRackPriceDetailItem.intItemId = #tmpPatchTable.intItemId
+		, tblTRImportRackPriceDetailItem.ysnValid = (CASE WHEN ISNULL(#tmpPatchTable.intItemId, 0) = 0 THEN 0
+				ELSE 1 END)
+	FROM #tmpPatchTable
+	WHERE tblTRImportRackPriceDetailItem.intImportRackPriceDetailItemId = #tmpPatchTable.intImportRackPriceDetailItemId
+
+	DROP TABLE #tmpPatchTable
+	DROP TABLE #tmpRackPrice
+
+END

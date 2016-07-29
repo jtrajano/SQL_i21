@@ -65,6 +65,8 @@ FROM
 		,[strVendorLocation]		=	tblReceived.strVendorLocation
 		,[str1099Form]				=	D2.str1099Form			 
 		,[str1099Type]				=	D2.str1099Type
+		,[intStorageLocationId]		=	tblReceived.intStorageLocationId		 
+		,[strStorageLocationName]	=	tblReceived.strStorageLocationName
 	
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
@@ -109,6 +111,8 @@ FROM
 					  ELSE H.strCurrency 
 				 END AS strCostCurrency					   
 				,EL.strLocationName AS strVendorLocation
+				,B1.intStorageLocationId
+				,ISL.strName AS strStorageLocationName
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -125,6 +129,7 @@ FROM
 				LEFT JOIN dbo.tblSMCurrency H ON H.intCurrencyID = A1.intCurrencyId
 				LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A1.intShipFromId
 				LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A1.intCurrencyId 
+				LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B1.intStorageLocationId
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
 			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
@@ -157,6 +162,8 @@ FROM
 				,SubCurrency.intCurrencyID
 				,SubCurrency.strCurrency
 				,A1.intCurrencyId
+				,B1.intStorageLocationId
+				,ISL.strName
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -233,6 +240,8 @@ FROM
 	,[strVendorLocation]		=	EL.strLocationName
 	,[str1099Form]				=	D2.str1099Form			 
 	,[str1099Type]				=	D2.str1099Type
+	,[intStorageLocationId]		=	loc.intStorageLocationId	 
+	,[strStorageLocationName]	=	(SELECT TOP 1 strName FROM dbo.tblICStorageLocation WHERE intStorageLocationId =loc.intStorageLocationId) 
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
@@ -320,6 +329,8 @@ FROM
 	,[strVendorLocation]		=	EL.strLocationName
 	,[str1099Form]				=	D2.str1099Form			 
 	,[str1099Type]				=	D2.str1099Type
+	,[intStorageLocationId]		=	B.intStorageLocationId	 
+	,[strStorageLocationName]	=	ISL.strName
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -345,6 +356,7 @@ FROM
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+	LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B.intStorageLocationId 
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -421,8 +433,10 @@ FROM
 		,[intCostCurrencyId]						=	ISNULL(A.intCurrencyId,0)		
 		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)	
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]				=	D2.str1099Form			 
-		,[str1099Type]				=	D2.str1099Type      
+		,[str1099Form]								=	D2.str1099Form			 
+		,[str1099Type]								=	D2.str1099Type
+		,[intStorageLocationId]						=	NULL
+		,[strStorageLocationName]					=	NULL
 	FROM [vyuAPChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
 																																						   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
@@ -507,6 +521,8 @@ FROM
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
+		,[intStorageLocationId]						=	NULL
+		,[strStorageLocationName]					=	NULL
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -534,12 +550,16 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN CC.dblRate ELSE 1 END
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity) ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
-		,[dblUnitCost]								=	ISNULL(CC.dblRate,0)
+		,[dblUnitCost]								=	CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+																ELSE	ISNULL(CC.dblRate,0) 
+														END
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,0) ELSE ISNULL(G1.dblRate,0) END
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -582,6 +602,8 @@ FROM
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
+		,[intStorageLocationId]						=	NULL
+		,[strStorageLocationName]					=	NULL
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId

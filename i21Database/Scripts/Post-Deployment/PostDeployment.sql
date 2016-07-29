@@ -35,6 +35,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\16_PaymentMethod.sql
 :r .\SM\DefaultData\17_Notification.sql
 :r .\SM\DefaultData\18_SecurityPolicy.sql
+:r .\SM\DefaultData\19_HomePanelDashboard.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
@@ -322,6 +323,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\030-FixSalesperson.sql
 :r .\EM\024_CleanOrphanCustomerGroup.sql
 :r .\EM\031_UpdatePhoneAreaLength.sql
+:r .\EM\032_MigrateVendorApprovalList.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

@@ -15,6 +15,7 @@
 	[intContractHeaderId]    INT             NULL,
 	[intContractDetailId]    INT             NULL,
 	[intCustomerStorageId]    INT             NULL,
+	[intStorageLocationId] INT             NULL,
 	[intShipmentContractQtyId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,
 	[intPrepayTypeId]    INT             NULL,

@@ -255,16 +255,18 @@ BEGIN
        
 ----------------- Created Future Transaction Based on the Option Transaction ----------------------------------  
  
- SELECT @intInternalTradeNo = Max(convert(int,REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''))) + 1
-							  from tblRKFutOptTransaction group by strInternalTradeNo 
+ --SELECT @intInternalTradeNo = Max(convert(int,REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''))) + 1
+	--						  from tblRKFutOptTransaction  
 
+ SELECT @intInternalTradeNo = intNumber
+							  from tblSMStartingNumber  where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
  INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,intSelectedInstrumentTypeId,  
          dtmTransactionDate,intEntityId, intBrokerageAccountId,  
          intFutureMarketId,intInstrumentTypeId,intCommodityId,  
          intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,  
          strBrokerTradeNo,strBuySell,intNoOfContract,intFutureMonthId,intOptionMonthId,  
          strOptionType,dblPrice,strReference,strStatus,  
-         dtmFilledDate,strReserveForFix,intBookId,intSubBookId,ysnOffset)  
+         dtmFilledDate,strReserveForFix,intBookId,intSubBookId,ysnOffset,dtmCreateDateTime)  
            
 SELECT @NewFutOptTransactionHeaderId,1,1,@dtmTranDate,  
   t.intEntityId,t.intBrokerageAccountId,t.intFutureMarketId, 1,t.intCommodityId,  
@@ -273,23 +275,26 @@ SELECT @NewFutOptTransactionHeaderId,1,1,@dtmTranDate,
   t.strOptionType,isnull(t.dblStrike,0.0) as dblStrike,  
   Case when strBuySell = 'Buy'  THEN 'This futures transaction was the result of Option No. ('+@strTranNo+') being exercised on ('+ convert(nvarchar,@dtmTranDate,101) +')'   
    else 'This futures transaction was the result of Option No. ('+@strTranNo+') being assigned on ('+ convert(nvarchar,@dtmTranDate,101) +')' end strReference,  
-  t.strStatus,@dtmTranDate as dtmFilledDate,t.strReserveForFix,t.intBookId,t.intSubBookId,t.ysnOffset  
+  t.strStatus,@dtmTranDate as dtmFilledDate,t.strReserveForFix,t.intBookId,t.intSubBookId,t.ysnOffset,getdate()  
   FROM tblRKFutOptTransaction t  
   JOIN tblRKOptionsMonth om on t.intOptionMonthId=om.intOptionMonthId WHERE intFutOptTransactionId =@intFutOptTransactionId        
      
 SELECT @NewFutOptTransactionId = SCOPE_IDENTITY();  
 
-DECLARE @NewBuySell nvarchar(15)  
-SET @NewBuySell =''  
-SELECT @NewBuySell= CASE WHEN (strBuySell = 'Buy' AND strOptionType= 'Call') THEN 'Buy'   
-       WHEN (strBuySell = 'Buy' AND strOptionType= 'Put') THEN 'Sell'   
-       WHEN (strBuySell = 'Sell' AND strOptionType= 'Call') THEN 'Sell'   
-       WHEN (strBuySell = 'Sell' AND strOptionType= 'Put') THEN 'Buy' End  
-       FROM tblRKFutOptTransaction Where intFutOptTransactionId=@NewFutOptTransactionId  
-  
-UPDATE tblRKFutOptTransaction  set strBuySell=@NewBuySell,strOptionType=null,intOptionMonthId=null Where intFutOptTransactionId = @NewFutOptTransactionId   
-UPDATE tblRKOptionsPnSExercisedAssigned set intFutTransactionId= @NewFutOptTransactionId Where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId
-SELECT @mRowNumber=MIN(RowNumber) FROM @tblExercisedAssignedDetail WHERE RowNumber>@mRowNumber    
+	DECLARE @NewBuySell nvarchar(15)=''
+	DECLARE @intInternalTradeNo1 int  
+
+	SELECT @NewBuySell= CASE WHEN (strBuySell = 'Buy' AND strOptionType= 'Call') THEN 'Buy'   
+		   WHEN (strBuySell = 'Buy' AND strOptionType= 'Put') THEN 'Sell'   
+		   WHEN (strBuySell = 'Sell' AND strOptionType= 'Call') THEN 'Sell'   
+		   WHEN (strBuySell = 'Sell' AND strOptionType= 'Put') THEN 'Buy' End  
+		   FROM tblRKFutOptTransaction Where intFutOptTransactionId=@NewFutOptTransactionId  
+
+	SELECT @intInternalTradeNo1 = Max(convert(int,REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''))) + 1  from tblRKFutOptTransaction
+	UPDATE tblSMStartingNumber set intNumber = @intInternalTradeNo1 where strModule='Risk Management' and strTransactionType='FutOpt Transaction'
+	UPDATE tblRKFutOptTransaction  set strBuySell=@NewBuySell,strOptionType=null,intOptionMonthId=null Where intFutOptTransactionId = @NewFutOptTransactionId   
+	UPDATE tblRKOptionsPnSExercisedAssigned set intFutTransactionId= @NewFutOptTransactionId Where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId
+	SELECT @mRowNumber = MIN(RowNumber) FROM @tblExercisedAssignedDetail WHERE RowNumber>@mRowNumber    
 END    
      
 COMMIT TRAN    

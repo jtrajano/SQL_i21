@@ -1,49 +1,39 @@
-﻿CREATE FUNCTION [dbo].[fnTRSearchItemId]
+CREATE FUNCTION [dbo].[fnTRSearchItemId]
 (
-	@SupplyPointId AS INT,
-	 @ItemString AS NVARCHAR(100)
+	@SupplyPoint AS NVARCHAR(100),
+	@Item AS NVARCHAR(100)
 )
 RETURNS INT
 
 AS
 
 BEGIN
-	DECLARE @ItemId AS INT = NULL
-	
-	-- Check Item No match
-	IF EXISTS (SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = @ItemString)
-	BEGIN
-		SELECT TOP 1 @ItemId = intItemId FROM tblICItem WHERE strItemNo = @ItemString
-	END
-	-- Check Item Description match
-	ELSE IF EXISTS (SELECT TOP 1 1 FROM tblICItem WHERE strDescription = @ItemString)
-	BEGIN
-		SELECT TOP 1 @ItemId = intItemId FROM tblICItem WHERE strDescription = @ItemString
-	END
-	-- Check Supply Point Item Search config complete match
-	ELSE IF EXISTS (SELECT TOP 1 1 FROM tblTRSupplyPointProductSearchDetail Detail
-					LEFT JOIN tblTRSupplyPointProductSearchHeader Header ON Header.intSupplyPointProductSearchHeaderId = Detail.intSupplyPointProductSearchHeaderId
-					WHERE Detail.strSearchValue = @ItemString
-						AND Header.intSupplyPointId = @SupplyPointId)
-	BEGIN
-		SELECT TOP 1 @ItemId = Header.intItemId
-		FROM tblTRSupplyPointProductSearchDetail Detail
-		LEFT JOIN tblTRSupplyPointProductSearchHeader Header ON Header.intSupplyPointProductSearchHeaderId = Detail.intSupplyPointProductSearchHeaderId
-		WHERE Detail.strSearchValue = @ItemString
-			AND Header.intSupplyPointId = @SupplyPointId
-	END
-	-- Check Supply Point Item Search config slight match
-	ELSE IF EXISTS (SELECT TOP 1 1 FROM tblTRSupplyPointProductSearchDetail Detail
-					LEFT JOIN tblTRSupplyPointProductSearchHeader Header ON Header.intSupplyPointProductSearchHeaderId = Detail.intSupplyPointProductSearchHeaderId
-					WHERE Detail.strSearchValue LIKE '%' + @ItemString + '%'
-						AND Header.intSupplyPointId = @SupplyPointId)
-	BEGIN
-		SELECT TOP 1 @ItemId = Header.intItemId 
-		FROM tblTRSupplyPointProductSearchDetail Detail
-		LEFT JOIN tblTRSupplyPointProductSearchHeader Header ON Header.intSupplyPointProductSearchHeaderId = Detail.intSupplyPointProductSearchHeaderId
-		WHERE Detail.strSearchValue LIKE '%' + @ItemString + '%'
-			AND Header.intSupplyPointId = @SupplyPointId
-	END	
+	DECLARE @Location NVARCHAR(50)
+		, @Supplier NVARCHAR(50)
+		, @ItemNo NVARCHAR(50)
+		, @Id INT
 
-	RETURN @ItemId
+	SELECT TOP 1 @Location = SearchValue.strLocation
+		, @Supplier = SearchValue.strSupplier
+		, @ItemNo = SearchValue.strItemNo
+	FROM vyuTRGetSupplyPointSearchValue SearchValue
+	CROSS APPLY (
+		SELECT Total.strLocation, Total.strSupplier, Total.strItemNo, dblTotal = COUNT(*) FROM vyuTRGetSupplyPointSearchValue Total
+		WHERE SearchValue.strLocation = Total.strLocation
+			AND SearchValue.strSupplier = Total.strSupplier
+			AND SearchValue.strItemNo = Total.strItemNo
+		GROUP BY Total.strLocation, Total.strSupplier, Total.strItemNo
+	) Total
+	WHERE @SupplyPoint LIKE '%' + SearchValue.strSearchValue + '%'
+			OR @Item LIKE '%' + SearchValue.strSearchValue + '%'
+	GROUP BY SearchValue.strLocation, SearchValue.strSupplier, SearchValue.strItemNo, Total.dblTotal
+	HAVING COUNT(*) = Total.dblTotal
+	ORDER BY Total.dblTotal DESC
+
+	SELECT @Id = intKeyId FROM vyuTRGetSupplyPointSearchValue
+	WHERE @Location = strLocation
+		AND @Supplier = strSupplier
+		AND @ItemNo = strItemNo
+
+	RETURN @Id
 END

@@ -70,6 +70,7 @@
 	[intPrepaidAccountId] INT NULL,
 	[intUndepositedFundsId] INT NULL,
 	[intDeferredPayableId] INT NULL,
+	[intPettyCash] INT NULL,
 	[strInvoiceType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strDefaultInvoicePrinter] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPickTicketType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

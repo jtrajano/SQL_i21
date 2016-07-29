@@ -115,12 +115,30 @@ SELECT  TOP 10
 					THEN PYMTDetail.dblPayment * -1
 					ELSE PYMTDetail.dblPayment
 					END
+		,CONTRACTHEADER.strContractNumber
+		,strPPDType = CASE WHEN BILLDETAIL.intPrepayTypeId = 3
+					THEN 'Percentage'
+					WHEN BILLDETAIL.intPrepayTypeId = 2
+					THEN 'Unit'
+					ELSE 'Standard'
+					END
+		,BILLDETAIL.dblTotal
+		,BILLDETAIL.dblQtyOrdered
+		,BILL.intTransactionType
+		,ITEM.strItemNo
+		,ITEM.strDescription
 FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 			ON F.strTransactionId = PYMT.strPaymentRecordNum
 		INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
 			ON PYMT.intPaymentId = PYMTDetail.intPaymentId
 		INNER JOIN [dbo].[tblAPBill] BILL
 			ON PYMTDetail.intBillId = BILL.intBillId
+		INNER JOIN [dbo].[tblAPBillDetail] BILLDETAIL
+			ON BILL.intBillId = BILLDETAIL.intBillId
+		LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
+			ON BILLDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
+		LEFT JOIN [dbo].tblICItem ITEM
+			ON BILLDETAIL.intItemId = ITEM.intItemId
 WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 		AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
 ORDER BY BILL.strBillId

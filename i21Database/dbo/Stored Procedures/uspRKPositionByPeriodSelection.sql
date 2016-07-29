@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKPositionByPeriodSelection 
+﻿CREATE PROC [dbo].[uspRKPositionByPeriodSelection] 
 	@intCommodityId NVARCHAR(max) ,
 	@intCompanyLocationId NVARCHAR(max) ,
 	@intQuantityUOMId int,	
@@ -26,9 +26,10 @@ DECLARE @intMainCurrencyId int
 declare @intCurrencyID1 int
 SELECT @intCent=intCent,@ysnSubCurrency=ysnSubCurrency,@intMainCurrencyId=intMainCurrencyId FROM tblSMCurrency WHERE intCurrencyID=@intCurrencyID
 
+
 if (@ysnSubCurrency = 1)
 BEGIN
-SET @intCurrencyID1=@intCurrencyID
+SET @intCurrencyID1=@intMainCurrencyId
 END
 ELSE
 BEGIN
@@ -153,7 +154,8 @@ IF @strGroupings= 'Contract Terms'
 BEGIN
 
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)		
-		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
+		SELECT 		
+		strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
 		
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
@@ -184,6 +186,7 @@ BEGIN
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0))
 		end,	
+		
 		
 		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer)) 
 		FROM vyuCTContractCostEnquiryCost cv

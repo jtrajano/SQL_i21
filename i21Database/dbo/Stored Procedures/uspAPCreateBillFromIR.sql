@@ -202,7 +202,8 @@ BEGIN
 		[dblWeightUnitQty],
 		[dblCostUnitQty],
 		[dblUnitQty],
-		[intCurrencyId]
+		[intCurrencyId],
+		[intStorageLocationId]
 	)
 	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
 	SELECT
@@ -248,7 +249,8 @@ BEGIN
 		[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,0),
 		[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,0),
 		[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
-										ELSE ISNULL(A.intCurrencyId,0) END
+										ELSE ISNULL(A.intCurrencyId,0) END,
+		[intStorageLocationId]		=   B.intStorageLocationId                                       
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -307,7 +309,8 @@ BEGIN
 		[dblWeightUnitQty]			=	1,
 		[dblCostUnitQty]			=	1,
 		[dblUnitQty]				=	1,
-		[intCurrencyId]				=	ISNULL(A.intCurrencyId,0) 
+		[intCurrencyId]				=	ISNULL(A.intCurrencyId,0),
+		[intStorageLocationId]		=	NULL
 	FROM [vyuAPChargesForBilling] A
 	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
 	AND A.intInventoryReceiptId = B.intInventoryReceiptId
