@@ -24,6 +24,7 @@ DECLARE @SourceType_Scale AS INT = 1
 DECLARE @SourceType_InboundShipment AS INT = 2
 DECLARE @SourceType_Transport AS INT = 3
 
+-- Get the receipt type and source type. 
 IF (@ForDelete = 1)
 BEGIN
 	SELECT	@ReceiptType = 
@@ -32,9 +33,7 @@ BEGIN
 						WHEN intOrderType = 3 THEN @ReceiptType_TransferOrder
 						WHEN intOrderType = 4 THEN @ReceiptType_Direct
 				END
-			,@SourceType = 
-				CASE	WHEN intSourceType = 2 THEN @SourceType_InboundShipment 
-				END
+			,@SourceType = intSourceType
 	FROM	tblICTransactionDetailLog
 	WHERE	intTransactionId = @ReceiptId
 			AND strTransactionType = 'Inventory Receipt'
@@ -49,17 +48,23 @@ BEGIN
 						WHEN strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
 						WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
 				END 
-			,@SourceType = 
-				CASE	WHEN intSourceType = 2 THEN @SourceType_InboundShipment 
-				END 
+			,@SourceType = intSourceType
 	FROM	tblICInventoryReceipt
 	WHERE	intInventoryReceiptId = @ReceiptId	
 END
 	
--- Purchase Contracts
-IF (@ReceiptType = @ReceiptType_PurchaseContract) AND (ISNULL(@SourceType,0) <> @SourceType_InboundShipment)
-BEGIN
+-- Validate. 
+-- Do not proceed if receipt type is NOT a 'Purchase Contract' 
+IF	@ReceiptType <> @ReceiptType_PurchaseContract
+	GOTO _Exit;
 
+-- Do not proceed if the source type is 'Inbound Shipment' or 'Scale'. 
+-- Logistics (Inbound Shipment) and Scale (Scale Ticket) will be calling uspCTUpdateScheduleQuantity on their own. 
+IF ISNULL(@SourceType, @SourceType_None) = @SourceType_InboundShipment OR ISNULL(@SourceType, @SourceType_None) = @SourceType_Scale
+	GOTO _Exit;
+
+-- Get the deleted, new, or modified data. 
+BEGIN
 	-- Create current snapshot of Receipt Items after Save
 	SELECT	ReceiptItem.intInventoryReceiptId
 			,ReceiptItem.intInventoryReceiptItemId
@@ -259,7 +264,10 @@ BEGIN
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
 	WHERE	currentSnapshot.intLineNo IS NOT NULL
 			AND NOT EXISTS (SELECT TOP 1 1 FROM #tmpLogReceiptItems WHERE intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId)
-			
+END
+
+-- Call the integration with contracts. 
+BEGIN 
 	-- Iterate and process records
 	DECLARE @Id INT = NULL,
 			@intInventoryReceiptItemId	INT = NULL,
@@ -284,11 +292,10 @@ BEGIN
 		,@intInventoryReceiptItemId;
 
 	-----------------------------------------------------------------------------------------------------------------------------
-	-- Start of the loop
+	-- Start of the loop for the integration sp. 
 	-----------------------------------------------------------------------------------------------------------------------------
 	WHILE @@FETCH_STATUS = 0
-	BEGIN 
-		-- Call the CT sp. 
+	BEGIN 		
 		EXEC	uspCTUpdateScheduleQuantity
 				@intContractDetailId	=	@intContractDetailId,
 				@dblQuantityToUpdate	=	@dblQty,
@@ -311,8 +318,12 @@ BEGIN
 
 	DROP TABLE #tmpLogReceiptItems
 	DROP TABLE #tmpReceiptItems
-END
 
+END 
+
+_Exit: 
+
+-- Delete the data snapshot. 
 DELETE	FROM tblICTransactionDetailLog 
 WHERE	strTransactionType = 'Inventory Receipt' 
 		AND intTransactionId = @ReceiptId
