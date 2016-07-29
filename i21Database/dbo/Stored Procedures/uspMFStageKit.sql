@@ -43,6 +43,9 @@ Declare @dblRecipeQty NUMERIC(38,20)
 		,@intPickUOMId int
 		,@intItemUOMId int
 
+Declare @dblSubstituteRatio numeric(38,20)
+Declare @dblMaxSubstituteRatio numeric(38,20)
+
 Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId,@intWorkOrderId=intWorkOrderId 
 From tblMFWorkOrder Where intPickListId=@intPickListId
 Select @intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
@@ -100,6 +103,8 @@ DECLARE @tblInputItem TABLE (
 	,intConsumptionStorageLocationId INT
 	,intParentItemId INT
 	,ysnHasSubstitute BIT
+	,dblSubstituteRatio NUMERIC(38,20)
+	,dblMaxSubstituteRatio NUMERIC(38,20)
 	)
 
 Declare @tblRemainingPickedItems AS table
@@ -140,6 +145,8 @@ Begin
 		,intConsumptionMethodId
 		,intConsumptionStorageLocationId
 		,intParentItemId
+		,dblSubstituteRatio
+		,dblMaxSubstituteRatio
 		)
 	SELECT 
 		ri.intItemId
@@ -148,6 +155,8 @@ Begin
 		,ri.intConsumptionMethodId
 		,ri.intStorageLocationId
 		,0 AS intParentItemId
+		,0.0
+		,0.0
 	FROM tblMFWorkOrderRecipeItem ri
 	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
@@ -163,9 +172,11 @@ Begin
 		,ri.intConsumptionMethodId
 		,ri.intStorageLocationId
 		,ri.intItemId
+		,rs.dblSubstituteRatio
+		,rs.dblMaxSubstituteRatio
 	FROM tblMFWorkOrderRecipeSubstituteItem rs
 	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
-	JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+	JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId AND ri.intWorkOrderId=r.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND rs.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = (Select TOP 1 intWorkOrderId From tblMFWorkOrder Where intPickListId=@intPickListId)
@@ -197,7 +208,9 @@ Begin
 				Set @dblReqQty=@dblReqQty-ISNULL(@dblPickQty,0)
 
 				--Calculate Req Qty for Substitute item based on remaining qty
-				Set @dblReqQty=(@dblReqQty * (@dblQtyToProduce / @dblRecipeQty))
+				Select TOP 1 @dblSubstituteRatio=dblSubstituteRatio,@dblMaxSubstituteRatio=dblMaxSubstituteRatio 
+				From @tblInputItem Where intParentItemId=@intInputItemId AND ysnIsSubstitute=1
+				Set @dblReqQty=@dblReqQty * (@dblSubstituteRatio*@dblMaxSubstituteRatio/100)
 
 				Select @dblPickQty=ISNULL(SUM(ISNULL(dblQuantity,0)),0) From tblMFPickListDetail Where intPickListId=@intPickListId 
 				AND intItemId IN (Select intItemId From @tblInputItem Where intParentItemId=@intInputItemId)

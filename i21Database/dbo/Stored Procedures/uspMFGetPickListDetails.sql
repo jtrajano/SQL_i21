@@ -244,7 +244,7 @@ Declare @tblPickedLotsFinal AS table
 		,ri.intItemId
 	FROM tblMFWorkOrderRecipeSubstituteItem rs
 	JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
-	JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+	JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId AND ri.intWorkOrderId=r.intWorkOrderId
 	WHERE r.intRecipeId = @intRecipeId
 		AND rs.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = @intWorkOrderId

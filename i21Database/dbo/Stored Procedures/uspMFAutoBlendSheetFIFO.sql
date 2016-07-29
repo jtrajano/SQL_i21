@@ -166,6 +166,8 @@ BEGIN TRY
 		,intConsumptionMethodId INT
 		,intConsumptionStoragelocationId INT
 		,intParentItemId int
+		,dblSubstituteRatio NUMERIC(38,20)
+		,dblMaxSubstituteRatio NUMERIC(38,20)
 		)
 
 	IF OBJECT_ID('tempdb..#tblBlendSheetLot') IS NOT NULL
@@ -263,6 +265,8 @@ BEGIN TRY
 				,intConsumptionMethodId
 				,intConsumptionStoragelocationId
 				,intParentItemId
+				,dblSubstituteRatio
+				,dblMaxSubstituteRatio
 				)
 			SELECT r.intRecipeId
 				,ri.intRecipeItemId
@@ -273,6 +277,8 @@ BEGIN TRY
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
+				,0.0
+				,0.0
 			FROM tblMFWorkOrderRecipeItem ri
 			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 			WHERE r.intWorkOrderId=@intWorkOrderId
@@ -289,9 +295,11 @@ BEGIN TRY
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,ri.intItemId
+				,rs.dblSubstituteRatio
+				,rs.dblMaxSubstituteRatio
 			FROM tblMFWorkOrderRecipeSubstituteItem rs
 			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
-			JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
+			JOIN tblMFWorkOrderRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId AND ri.intWorkOrderId=r.intWorkOrderId
 			WHERE r.intWorkOrderId = @intWorkOrderId
 				AND rs.intRecipeItemTypeId = 1
 			ORDER BY ysnIsSubstitute, ysnMinorIngredient
@@ -310,6 +318,8 @@ BEGIN TRY
 				,intConsumptionMethodId
 				,intConsumptionStoragelocationId
 				,intParentItemId
+				,dblSubstituteRatio
+				,dblMaxSubstituteRatio
 				)
 			SELECT @intRecipeId
 				,ri.intRecipeItemId
@@ -320,6 +330,8 @@ BEGIN TRY
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
+				,0.0
+				,0.0
 			FROM tblMFRecipeItem ri
 			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			WHERE r.intRecipeId = @intRecipeId
@@ -348,6 +360,8 @@ BEGIN TRY
 				,1
 				,0
 				,ri.intItemId
+				,rs.dblSubstituteRatio
+				,rs.dblMaxSubstituteRatio
 			FROM tblMFRecipeSubstituteItem rs
 			JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
 			JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
@@ -386,8 +400,10 @@ BEGIN TRY
 			,intConsumptionMethodId
 			,intConsumptionStoragelocationId
 			,intParentItemId
+			,dblSubstituteRatio
+			,dblMaxSubstituteRatio
 			)
-		 Select intRecipeId,intRecipeItemId,intItemId,dblRequiredQty,ysnIsSubstitute,0,intConsumptionMethodId,intConsumptionStoragelocationId,intParentItemId
+		 Select intRecipeId,intRecipeItemId,intItemId,dblRequiredQty,ysnIsSubstitute,0,intConsumptionMethodId,intConsumptionStoragelocationId,intParentItemId,1,100
 		 FROM OPENXML(@idoc, 'root/item', 2)  
 		 WITH ( 
 			intRecipeId int, 
@@ -400,6 +416,17 @@ BEGIN TRY
 			intParentItemId int
 			) ORDER BY ysnIsSubstitute
 		IF @idoc <> 0 EXEC sp_xml_removedocument @idoc
+
+		--update substitute ratio
+		If ISNULL(@intWorkOrderId,0)>0
+			Update ti Set ti.dblSubstituteRatio=rs.dblSubstituteRatio,ti.dblMaxSubstituteRatio=rs.dblMaxSubstituteRatio 
+			From @tblInputItem ti Join tblMFWorkOrderRecipeSubstituteItem rs on ti.intItemId=rs.intSubstituteItemId AND ti.intParentItemId=rs.intItemId
+			Where rs.intWorkOrderId=@intWorkOrderId AND ti.ysnIsSubstitute=1
+		Else
+		If ISNULL(@intRecipeId,0)>0
+			Update ti Set ti.dblSubstituteRatio=rs.dblSubstituteRatio,ti.dblMaxSubstituteRatio=rs.dblMaxSubstituteRatio 
+			From @tblInputItem ti Join tblMFRecipeSubstituteItem rs on ti.intItemId=rs.intSubstituteItemId AND ti.intParentItemId=rs.intItemId
+			Where rs.intRecipeId=@intRecipeId AND ti.ysnIsSubstitute=1			
 	End
 
 	--Get the Excluded Lots From Pick List/Add Lot
@@ -1290,7 +1317,7 @@ BEGIN TRY
 					If Exists(Select 1 From @tblInputItem Where intParentItemId=@intRawItemId And ysnIsSubstitute=1)
 						Begin
 							If ISNULL(@dblRecipeQty,0)=0 SET @dblRecipeQty=1
-							Update @tblInputItem Set dblRequiredQty=(@dblRemainingRequiredQty * (@dblQtyToProduce / @dblRecipeQty)) Where intParentItemId=@intRawItemId And ysnIsSubstitute=1
+							Update @tblInputItem Set dblRequiredQty=@dblRemainingRequiredQty * (dblSubstituteRatio*dblMaxSubstituteRatio/100) Where intParentItemId=@intRawItemId And ysnIsSubstitute=1
 							Delete From @tblInputItem Where intItemId=@intRawItemId And ysnIsSubstitute=0 --Remove the main Item
 						End
 					Else --substitute does not exists then show 0 for main item
