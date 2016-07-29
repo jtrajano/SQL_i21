@@ -144,10 +144,12 @@ BEGIN
 	BEGIN
 		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
 		SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-		SET @detailAmountPaid = @amountPaid - @discount;
+		SET @detailAmountPaid = @amountPaid; --discount subtracted
 	END
-
-	SET @amountPaid = @amountPaid - @discount;
+	ELSE
+	BEGIN
+		SET @amountPaid = @amountPaid - @discount;
+	END
 
 	--Compute Withheld Here
 	--Compute only if the payment that will create is posted
@@ -255,7 +257,7 @@ BEGIN
 	 @paymentRecordNum = @paymentRecordNum,
 	 @vendorId = @vendorId,
 	 @notes = @notes,
-	 @payment = @detailAmountPaid,
+	 @payment = @amountPaid,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
 	 @paymentId = @paymentId OUTPUT;
