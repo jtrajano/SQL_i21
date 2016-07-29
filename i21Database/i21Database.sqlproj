@@ -4108,7 +4108,6 @@
     <Build Include="dbo\Functions\fnTRSearchItemId.sql" />
     <Build Include="dbo\Tables\tblMFStageWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateContainerLinkInSample.sql" />
-    <Build Include="dbo\Views\vyuGetScheduleDetail.sql" />
     <Build Include="dbo\Views\vyuARRestrictedChemicalsReport.sql" />
   </ItemGroup>
   <ItemGroup>
