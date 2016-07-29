@@ -168,6 +168,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryHistoryCallEntryView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDeviceSearchView.sql"
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql
 
 
 
