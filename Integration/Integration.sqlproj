@@ -332,5 +332,6 @@
     <None Include="dbo\Views\vyuCMBankTransaction.sql" />
     <None Include="dbo\Functions\fnGetDepositEntry.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
   </ItemGroup>
 </Project>

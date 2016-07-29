@@ -718,3 +718,28 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = N'intWillCallDispatchId'
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallRouteId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallRouteId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallDispatchId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallDispatchId])
+
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallSubstituteProductId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallSubstituteProductId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallDriverId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallDriverId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallUserId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallUserId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_strWillCallOrderNumber] ON [dbo].[tblTMDeliveryHistory] ([strWillCallOrderNumber])
+
