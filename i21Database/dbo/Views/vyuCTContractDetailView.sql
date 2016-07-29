@@ -114,7 +114,7 @@ AS
 
 			AD.intSeqCurrencyId,				AD.ysnSeqSubCurrency,			AD.intSeqPriceUOMId,
 			AD.dblSeqPrice,						AD.strSeqCurrency,				AD.strSeqPriceUOM,
-			AD.dblQtyToPriceUOMConvFactor,
+			AD.dblQtyToPriceUOMConvFactor,		AD.dblNetWtToPriceUOMConvFactor,
 
 			--Header Detail
 
