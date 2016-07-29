@@ -11,7 +11,7 @@ print('/*******************  END - Change tblSOSalesOrder strOrderStatus ''Compl
 
 
 
-print('/*******************  BEGIN - Update tblSOSalesOrder strOrderStatus NOT IN (''Closed'',''Complete'')  *******************/')
+print('/*******************  BEGIN - Update tblSOSalesOrder strOrderStatus NOT IN (''Cancelled'',''Short Closed'',''Closed'',''Complete'')  *******************/')
 GO
 
 DECLARE @OrderToUpdate TABLE (intSalesOrderId INT);
@@ -22,7 +22,7 @@ SELECT DISTINCT
 FROM
 	tblSOSalesOrder SO
 WHERE 
-	SO.strOrderStatus NOT IN ('Closed','Complete')
+	SO.strOrderStatus NOT IN ('Cancelled','Short Closed','Closed','Complete')
 	 AND strTransactionType = 'Order'
 				
 
@@ -40,4 +40,4 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)
 	END 
 
 GO
-print('/*******************  BEGIN - Update tblSOSalesOrder strOrderStatus NOT IN (''Closed'',''Complete'')  *******************/')
+print('/*******************  BEGIN - Update tblSOSalesOrder strOrderStatus NOT IN (''Cancelled'',''Short Closed'',''Closed'',''Complete'')  *******************/')
