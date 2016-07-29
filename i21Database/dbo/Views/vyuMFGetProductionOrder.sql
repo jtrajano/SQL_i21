@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuMFGetProductionOrder
 AS
-SELECT BR.intBlendRequirementId
-	,BR.strDemandNo
+SELECT IsNULL(BR.intBlendRequirementId,0) As intBlendRequirementId
+	,IsNull(BR.strDemandNo,'') As strDemandNo
 	,W.intWorkOrderId
 	,W.strWorkOrderNo
 	,W.dtmCreated
