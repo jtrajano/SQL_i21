@@ -4042,7 +4042,6 @@
     <Build Include="dbo\User Defined Types\ShipmentChargeStagingTable.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemLotStagingTable.sql" />
     <Build Include="dbo\Views\vyuQMContractDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
     <Build Include="dbo\Functions\fnTRSearchItemId.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryReceiptDelete.sql" />
   </ItemGroup>
