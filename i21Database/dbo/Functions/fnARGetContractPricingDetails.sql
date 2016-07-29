@@ -64,6 +64,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty > 0) OR ysnUnlimitedQuantity = 1)
 		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
 		AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+		AND strPricingType NOT IN ('Unit','Index')
 	ORDER BY
 		 dtmStartDate
 		,intContractSeq
@@ -104,6 +105,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		AND (((dblAvailableQty) > 0) OR ysnUnlimitedQuantity = 1)
 		AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
 		AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+		AND strPricingType NOT IN ('Unit','Index')
 	ORDER BY
 		 dtmStartDate
 		,intContractSeq
