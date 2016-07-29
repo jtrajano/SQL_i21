@@ -227,25 +227,3 @@ FROM @ShipmentItemLots l
 		AND si.intItemId = se.intItemId
 	INNER JOIN tblICItem i ON i.intItemId = si.intItemId
 WHERE i.strLotTracking <> 'No'
-
--- Insert into the reservation table.
--- Scan Headers
-DECLARE @intShipmentId INT
-
-DECLARE cur CURSOR LOCAL FAST_FORWARD
-	FOR 
-		SELECT DISTINCT intShipmentId FROM @ShipmentEntries
-
-OPEN cur
-
-FETCH NEXT FROM cur INTO @intShipmentId
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
- EXEC uspICReserveStockForInventoryShipment @intShipmentId
-	-- Get Next Header
-	FETCH NEXT FROM cur INTO @intShipmentId
-END
-
-CLOSE cur
-DEALLOCATE cur 
