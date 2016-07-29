@@ -4230,6 +4230,8 @@
     <None Include="Scripts\Post-Deployment\EM\031_UpdatePhoneAreaLength.sql" />
     <None Include="Scripts\Post-Deployment\EM\031_DefaultDateAndNumberFormat.sql" />
     <None Include="Scripts\Post-Deployment\CF\2_DataFix.sql" />
+    <None Include="Scripts\Post-Deployment\AP\MigrateVouchersForApproval.sql" />
+    <None Include="Scripts\Post-Deployment\AP\MigratePOForApprovals.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

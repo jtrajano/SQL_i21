@@ -221,6 +221,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateBillGLEntriesRecords.SQL
 :r .\AP\UpdateBillDetailCurrencies.sql
 :r .\AP\UpdateOldCost.sql
+:r .\AP\MigrateVouchersForApproval.sql
+:r .\AP\MigratePOForApproval.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 
