@@ -15,7 +15,7 @@ SELECT RH.intRackPriceHeaderId
 	, PriceEquation.strEquation
 	, RD.dblJobberRack
 FROM tblTRRackPriceHeader RH
-LEFT JOIN tblTRRackPriceDetail RD ON RH.intRackPriceHeaderId = RD.intRackPriceHeaderId
+INNER JOIN tblTRRackPriceDetail RD ON RH.intRackPriceHeaderId = RD.intRackPriceHeaderId
 LEFT JOIN vyuTRRackPriceEquation PriceEquation ON PriceEquation.intSupplyPointId = RH.intSupplyPointId AND PriceEquation.intItemId = RD.intItemId
 INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intSupplyPointId = RH.intSupplyPointId
 INNER JOIN tblEntity Entity ON SupplyPoint.intEntityVendorId = Entity.intEntityId
