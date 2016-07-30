@@ -301,6 +301,11 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
+		Insert Into tblMFWorkOrderProducedLot(intWorkOrderId,intItemId,dblQuantity,intItemUOMId,dblPhysicalCount,intPhysicalItemUOMId,dblWeightPerUnit,
+		intStorageLocationId,intBatchId,strBatchId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmProductionDate,intConcurrencyId)
+		Values(@intWorkOrderId,@intItemId,@dblQtyToProduce,@intItemUOMId,@dblIssuedQuantity,@intItemIssuedUOMId,@dblWeightPerUnit,
+		@intStorageLocationId,@intBatchId,@strRetBatchId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,1)
+
 		EXEC uspMFPostProduction 1
 			,0
 			,@intWorkOrderId
