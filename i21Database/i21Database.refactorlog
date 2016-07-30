@@ -5438,7 +5438,7 @@
     <Property Name="ParentElementName" Value="[dbo].[tblSCTicketSplit]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStorageScheduleTypeId" />
-  </Operation>	
+  </Operation>
   <Operation Name="Rename Refactor" Key="6ab5d0ec-5ea6-4ae9-903f-b7ba4171129b" ChangeDateTime="07/22/2016 03:56:55">
     <Property Name="ElementName" Value="[dbo].[tblLGAllocationHeader].[intReferenceNumber]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
@@ -5459,5 +5459,68 @@
     <Property Name="ParentElementName" Value="[dbo].[tblLGStockSalesHeader]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strStockSalesNumber]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7c0f7651-8137-49a5-8445-e62b24813148" ChangeDateTime="07/29/2016 04:16:01">
+    <Property Name="ElementName" Value="[dbo].[tblARCommentMaintenance]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblSMCommentMaintenance]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="53a0d272-694f-432a-a93f-7fb1ce9c9ea2" ChangeDateTime="07/29/2016 05:18:43">
+    <Property Name="ElementName" Value="[dbo].[PK_tblARCommentMaintenance_intCommentId]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCommentMaintenance]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblSMCommentMaintenance_intCommentId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="356f4614-0031-4c63-b3e7-8e0ae2903fe2" ChangeDateTime="07/29/2016 05:19:34">
+    <Property Name="ElementName" Value="[dbo].[FK_tblARCommentMaintenance_tblARCustomer_intEntityCustomerId]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCommentMaintenance]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblSMCommentMaintenance_tblARCustomer_intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6f3d5bfa-a93e-47fb-8965-675c8fe86ccd" ChangeDateTime="07/29/2016 05:20:39">
+    <Property Name="ElementName" Value="[dbo].[FK_tblARCommentMaintenance_tblSMCompanyLocation_intCompanyLocationId]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCommentMaintenance]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblSMCommentMaintenance_tblSMCompanyLocation_intCompanyLocationId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="98431888-bacf-4e59-a041-dffdde743848" ChangeDateTime="07/29/2016 05:23:03">
+    <Property Name="ElementName" Value="[dbo].[AK_tblARCommentMaintenance_strCommentCode]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCommentMaintenance]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[AK_tblSMCommentMaintenance_strCommentCode]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3838e1c5-3531-452b-b4bb-d4370a344766" ChangeDateTime="07/29/2016 05:48:47">
+    <Property Name="ElementName" Value="[dbo].[tblSMCommentMaintenanceComment].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCommentMaintenanceComment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCommentMaintenanceCommentId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="02084109-d051-4a84-90cf-cc475a0be467" ChangeDateTime="07/29/2016 05:57:55">
+    <Property Name="ElementName" Value="[dbo].[tblSMCommentMaintenance].[intCommentId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCommentMaintenance]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intCommentMaintenanceId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b3d99d14-e38e-4766-85f0-ab1dbcf21be9" ChangeDateTime="07/29/2016 09:05:31">
+    <Property Name="ElementName" Value="[dbo].[tblSMCommentMaintenance].[strTransactionType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCommentMaintenance]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strSource]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="80f4a5bb-2377-4ff2-ae13-3885ea30abb0" ChangeDateTime="07/30/2016 09:35:39">
+    <Property Name="ElementName" Value="[dbo].[uspARDuplicateComment]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[uspSMDuplicateCommentMaintenance]" />
   </Operation>
 </Operations>

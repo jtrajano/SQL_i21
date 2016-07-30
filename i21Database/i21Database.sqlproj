@@ -2361,9 +2361,9 @@
     <None Include="Scripts\Post-Deployment\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddInventoryTransfer.sql" />
     <Build Include="dbo\User Defined Types\InventoryTransferStagingTable.sql" />
-    <Build Include="dbo\Tables\tblARCommentMaintenance.sql" />
+    <Build Include="dbo\Tables\tblSMCommentMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetDefaultComment.sql" />
-    <Build Include="dbo\Stored Procedures\uspARDuplicateComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateCommentMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryTransfer.sql" />
     <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
@@ -3251,7 +3251,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
-    <Build Include="dbo\Tables\tblHDLineOfBusiness.sql" />
+    <Build Include="dbo\Tables\tblSMLineOfBusiness.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportTransaction.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityOverview.sql" />
     <Build Include="dbo\Tables\tblHDOpportunityOverviewConcern.sql" />
@@ -4113,6 +4113,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryReceiptDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleDetailResult.sql" />
+    <Build Include="dbo\Tables\tblSMCommentMaintenanceComment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
