@@ -35,18 +35,22 @@
   <ItemGroup>
     <Reference Include="EntityFramework">
       <HintPath>..\..\..\Resources\references\EntityFramework.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\..\..\Resources\references\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FluentValidation">
       <HintPath>..\..\..\Resources\references\FluentValidation.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Core">
       <HintPath>..\..\..\Resources\references\IdeaBlade.Core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IdeaBlade.Linq">
       <HintPath>..\..\..\Resources\references\IdeaBlade.Linq.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="iRely.Common">
       <HintPath>..\..\..\Resources\references\iRely.Common.dll</HintPath>
@@ -63,6 +67,7 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\Resources\references\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
