@@ -12,6 +12,7 @@
 	[ysnPrint] [bit] NOT NULL,
     [strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, 
 	[intItemId] [int] NULL,
+	[intCalculateQty] [int] NULL,
 	
     CONSTRAINT [PK_tblLGWarehouseRateMatrixDetail] PRIMARY KEY ([intWarehouseRateMatrixDetailId]),
     CONSTRAINT [FK_tblLGWarehouseRateMatrixDetail_tblLGWarehouseRateMatrixHeader_intWarehouseRateMatrixHeaderId] FOREIGN KEY ([intWarehouseRateMatrixHeaderId]) REFERENCES [tblLGWarehouseRateMatrixHeader]([intWarehouseRateMatrixHeaderId]) ON DELETE CASCADE, 

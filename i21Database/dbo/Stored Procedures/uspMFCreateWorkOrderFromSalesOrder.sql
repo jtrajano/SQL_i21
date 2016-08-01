@@ -45,6 +45,8 @@ Declare @ysnRequireCustomerApproval bit
 Declare @intMinWO int
 Declare @intCategoryId int
 Declare @strItemNo nvarchar(50)
+Declare @strOrderType nvarchar(50)
+Declare @intInvoiceDetailId int
 
 Declare @tblWO As table
 (
@@ -56,11 +58,13 @@ Declare @tblWO As table
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
- Select @intSalesOrderDetailId=intSalesOrderDetailId,@intLocationId=intLocationId,@intRecipeId=intRecipeId,
+ Select @intSalesOrderDetailId=intSalesOrderDetailId,@intInvoiceDetailId=intInvoiceDetailId,@strOrderType=strOrderType,@intLocationId=intLocationId,@intRecipeId=intRecipeId,
  @intItemId=intItemId,@intItemUOMId=intItemUOMId,@intUserId=intUserId
  FROM OPENXML(@idoc, 'root', 2)  
  WITH ( 
 	intSalesOrderDetailId int, 
+	intInvoiceDetailId int,
+	strOrderType nvarchar(50),
 	intLocationId int,
 	intRecipeId int,
 	intItemId int,
@@ -76,6 +80,9 @@ Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId)
 	dtmDueDate datetime,
 	intCellId int
 	)
+
+If @intSalesOrderDetailId=0 Set @intSalesOrderDetailId=NULL
+If @intInvoiceDetailId=0 Set @intInvoiceDetailId=NULL
 
 Select @intManufacturingProcessId=r.intManufacturingProcessId,@intAttributeTypeId=mp.intAttributeTypeId 
 From tblMFRecipe r Join  tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 
@@ -203,9 +210,9 @@ Begin
 		Set @intExecutionOrder=@intExecutionOrder+1
 
 		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
-		intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId,intSalesOrderLineItemId,intConcurrencyId)
+		intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId,intSalesOrderLineItemId,intInvoiceDetailId,intConcurrencyId)
 		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,@intWorkOrderStatusId,@intCellId,@intMachineId,@intLocationId,@dblBlendBinSize,@dtmDueDate,@intExecutionOrder,1,
-		@dblQuantity,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,1
+		@dblQuantity,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,@intInvoiceDetailId,1
 
 		Select @intWokrOrderId=SCOPE_IDENTITY()
 
