@@ -210,6 +210,7 @@
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\..\..\Resources\references\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FluentValidation">
       <HintPath>..\..\..\Resources\references\FluentValidation.dll</HintPath>
@@ -280,7 +281,7 @@
     </Reference>
     <Reference Include="EntityFramework">
       <HintPath>..\..\..\Resources\references\EntityFramework.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>False</Private>
