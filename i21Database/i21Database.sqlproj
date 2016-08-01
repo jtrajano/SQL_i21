@@ -4113,6 +4113,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryReceiptDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleDetailResult.sql" />
+    <Build Include="dbo\Tables\tblPRTimeOffRequest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
