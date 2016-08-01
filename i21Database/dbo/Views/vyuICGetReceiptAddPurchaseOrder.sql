@@ -25,7 +25,7 @@ FROM (
 		, intLoadToReceive = NULL
 		, dblUnitCost = dblCost
 		, dblTax
-		, dblLineTotal = dblTotal + dblTax
+		, dblLineTotal = (dblQtyOrdered - dblQtyReceived) * dblCost * (ItemUOM.dblUnitQty / CostUOM.dblUnitQty)
 		, strLotTracking
 		, intCommodityId
 		, intContainerId = NULL
