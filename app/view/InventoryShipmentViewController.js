@@ -643,6 +643,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         return win.context;
     },
+    
+    orgValueShipFrom: '',
 
     show : function(config) {
         "use strict";
@@ -709,10 +711,50 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-
+        var grdInventoryShipment = win.down('#grdInventoryShipment');
+        var grdInventoryShipmentCount = 0;
+        var grdLotTracking = win.down('#grdLotTracking');
+        
+        if (current.tblICInventoryShipmentItems()) {
+                Ext.Array.each(current.tblICInventoryShipmentItems().data.items, function(row) {
+                    if (!row.dummy) {
+                        grdInventoryShipmentCount++;
+                    }
+                });
+            }
+        
         if (current){
             if (combo.itemId === 'cboShipFromAddress'){
-                current.set('strShipFromAddress', records[0].get('strAddress'));
+                    if(Inventory.view.InventoryShipmentViewController.orgValueShipFrom !== current.get('intShipFromLocationId')) {
+                        var buttonAction = function(button) {
+                            if (button === 'yes') {  
+                                //Remove all items in Shipment Grid                   
+                                var shipmentItems = current['tblICInventoryShipmentItems'](),
+                                    shipmentItemRecords = shipmentItems ? shipmentItems.getRange() : [];
+
+                                 var i = shipmentItemRecords.length - 1;
+
+                                  for (; i >= 0; i--) {
+                                      if (!shipmentItemRecords[i].dummy)
+                                           shipmentItems.removeAt(i);
+                                  }
+
+                                 current.set('strShipFromAddress', records[0].get('strAddress'));
+                            }
+                            else {
+                               current.set('intShipFromLocationId', Inventory.view.InventoryShipmentViewController.orgValueShipFrom);
+                            }
+                        };
+                        
+                        if(grdInventoryShipmentCount > 0) {
+                                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Ship From location will clear all Items. Do you want to continue?', buttonAction);
+                            }
+                        else {
+                            current.set('strShipFromAddress', records[0].get('strAddress'));
+                        }
+                            
+                    }
+                 
             }
             else if (combo.itemId === 'cboShipToAddress'){
                 current.set('strShipToAddress', records[0].get('strAddress'));
@@ -910,9 +952,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
         else if (combo.itemId === 'cboSubLocation') {
             if (current.get('intSubLocationId') !== records[0].get('intSubLocationId')) {
-                current.set('intSubLocationId', records[0].get('intSubLocationId'));
+                current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
                 current.set('intStorageLocationId', null);
                 current.set('strStorageLocationName', null);
+                
+                 //Remove all lots in Lot Grid                   
+                 var shipmentLotItems = current['tblICInventoryShipmentItemLots'](),
+                     shipmentLotRecords = shipmentLotItems ? shipmentLotItems.getRange() : [];
+
+                      var i = shipmentLotRecords.length - 1;
+
+                      for (; i >= 0; i--) {
+                        if (!shipmentLotRecords[i].dummy)
+                            shipmentLotItems.removeAt(i);
+                      }
             }
         }
 
@@ -921,6 +974,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('intSubLocationId', records[0].get('intSubLocationId'));
                 current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
                 current.set('strSubLocationName', records[0].get('strSubLocationName'));
+                
+                 //Remove all lots in Lot Grid                   
+                 var shipmentLotItems = current['tblICInventoryShipmentItemLots'](),
+                     shipmentLotRecords = shipmentLotItems ? shipmentLotItems.getRange() : [];
+
+                      var i = shipmentLotRecords.length - 1;
+
+                      for (; i >= 0; i--) {
+                        if (!shipmentLotRecords[i].dummy)
+                            shipmentLotItems.removeAt(i);
+                      }
             }
         }
     },
@@ -954,7 +1018,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 var lotDefaultQty = shipQty > availQty ? availQty : shipQty;
 
                 current.set('dblQuantityShipped', lotDefaultQty);
-
+                
                 // Calculate the Gross Wgt based on the default lot qty.
                 //var wgtPerQty = records[0].get('dblWeightPerQty');
                 //var grossWgt;
@@ -962,6 +1026,20 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 //grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
                 //current.set('dblGrossWeight', grossWgt);
             }
+            
+                var grdInventoryShipment = win.down('#grdInventoryShipment');
+
+                var selected = grdInventoryShipment.getSelectionModel().getSelection();
+
+                if (selected) {
+                    if (selected.length > 0){
+                        var currentShipment = selected[0];
+                        if (!currentShipment.dummy)
+                            currentShipment.set('strSubLocationName', records[0].get('strSubLocationName'));
+                            currentShipment.set('strStorageLocationName', current.get('strStorageLocation'));
+                    }
+                }
+
         }
     },
 
@@ -2306,11 +2384,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
         });
     },
+    
+    onShipFromAddressBeforeSelect: function(combo, record, index, eOpts) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        
+        Inventory.view.InventoryShipmentViewController.orgValueShipFrom = current.get('intShipFromLocationId');
+    },
 
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
-                select: this.onShipLocationSelect
+                select: this.onShipLocationSelect,
+                beforeselect: this.onShipFromAddressBeforeSelect
             },
             "#cboShipToAddress": {
                 select: this.onShipLocationSelect

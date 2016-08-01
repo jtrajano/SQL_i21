@@ -17,14 +17,14 @@ namespace iRely.Inventory.Model
         public int? intSubLocationId { get;set;}
         public int? intStorageLocationId { get;set;}
         public int? intItemUnitMeasureId { get;set;}
-        public decimal dblQuantity { get;set;}
-        public decimal dblGrossWeight { get; set; }
-        public decimal dblTareWeight { get; set; }
-        public decimal dblCost { get; set; }
+        public decimal? dblQuantity { get;set;}
+        public decimal? dblGrossWeight { get; set; }
+        public decimal? dblTareWeight { get; set; }
+        public decimal? dblCost { get; set; }
         public int? intNoPallet { get;set;}
         public int? intUnitPallet { get;set;}
-        public decimal dblStatedGrossPerUnit { get; set; }
-        public decimal dblStatedTarePerUnit { get; set; }
+        public decimal? dblStatedGrossPerUnit { get; set; }
+        public decimal? dblStatedTarePerUnit { get; set; }
         public string strContainerNo { get;set;}
         public int? intEntityVendorId { get;set;}
         public string strGarden { get;set;}
@@ -42,13 +42,13 @@ namespace iRely.Inventory.Model
         public string strParentLotNumber { get;set;}
         public string strParentLotAlias { get;set;}
         public int? intSort { get;set;}
-        public decimal dblNetWeight { get;set;}
+        public decimal? dblNetWeight { get;set;}
         public string strUnitMeasure { get;set;}
         public string strUnitType { get;set;}
-        public decimal dblUnitQty { get; set; }
+        public decimal? dblUnitQty { get; set; }
         public string strItemUOM { get;set;}
         public string strWeightUOM { get;set;}
-        public decimal dblLotUOMConvFactor { get; set; }
+        public decimal? dblLotUOMConvFactor { get; set; }
         public string strStorageLocation { get;set;}
         public string strSubLocationName { get;set;}
         public string strVendorId { get;set;}
