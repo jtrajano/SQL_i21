@@ -41,6 +41,11 @@ AS
 	,D.dblCreditLimit
 	,strTerm = M.strTerm
 	,A.strInstruction
+	,strDriverId = O.strEntityNo
+	,P.strRouteId
+	,A.dblTotalCapacity
+	,A.ysnTaxable
+	,Q.strTaxGroup
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -76,5 +81,11 @@ AS
 					WHERE X.strDeviceType = 'Tank'
 				) J
 					ON A.intSiteID = J.intSiteID
+	LEFT JOIN tblEMEntity O
+		ON A.intDriverID = O.intEntityId
+	LEFT JOIN tblTMRoute P
+		ON A.intRouteId = P.intRouteId
+	LEFT JOIN tblSMTaxGroup Q
+		ON A.intTaxStateID = Q.intTaxGroupId
 	WHERE ISNULL(D.ysnActive,0) = 1
 GO
