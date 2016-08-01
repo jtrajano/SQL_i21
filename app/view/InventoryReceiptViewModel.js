@@ -687,9 +687,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         readOnlyUnitCost: function (get) {
-            switch (get('current.strReceiptType')) {
+            switch (get('current.strReceiptType')) {       
                 case 'Purchase Contract':
-                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
+                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber')) || get('grdInventoryReceipt.selection.strPricingType') === 'Unit') {
                         return false;
                     }
                     else {
