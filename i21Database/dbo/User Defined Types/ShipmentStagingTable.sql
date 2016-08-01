@@ -56,6 +56,6 @@
 	
 	-- Fields for Internal Use Only
 	intHeaderId INT NULL,
-	intShipmentId INT NULL,
-	UNIQUE (intItemLotGroup, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId)
+	intShipmentId INT NULL
+	--UNIQUE (intItemLotGroup, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId)
 )
