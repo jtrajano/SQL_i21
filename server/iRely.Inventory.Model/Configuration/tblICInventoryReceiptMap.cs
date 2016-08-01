@@ -317,6 +317,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblFranchise).HasColumnName("dblFranchise").HasPrecision(19, 6);
             this.Property(t => t.dblContainerWeightPerQty).HasColumnName("dblContainerWeightPerQty").HasPrecision(19, 6);
             this.Property(t => t.strSubCurrency).HasColumnName("strSubCurrency");
+            this.Property(t => t.strPricingType).HasColumnName("strPricingType");
         }
     }
 

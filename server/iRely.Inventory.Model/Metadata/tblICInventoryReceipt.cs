@@ -813,6 +813,25 @@ namespace iRely.Inventory.Model
                 _subSubCurrency = value;
             }
         }
+        private string _pricingType;
+        [NotMapped]
+        public string strPricingType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_pricingType))
+                    if (vyuICInventoryReceiptItemLookUp != null)
+                        return vyuICInventoryReceiptItemLookUp.strPricingType;
+                    else
+                        return null;
+                else
+                    return _pricingType;
+            }
+            set
+            {
+                _pricingType = value;
+            }
+        }
         /* private decimal _franchise;
          [NotMapped]
          public decimal dblFranchise
@@ -971,6 +990,7 @@ namespace iRely.Inventory.Model
         public decimal? dblFranchise { get; set; }
         public decimal? dblContainerWeightPerQty { get; set; }
         public string strSubCurrency { get; set; }
+        public string strPricingType { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

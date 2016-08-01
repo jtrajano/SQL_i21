@@ -69,7 +69,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'intTaxGroupId', type: 'int', allowNull: true },
         { name: 'intLoadReceive', type: 'int' },
         { name: 'ysnSubCurrency', type: 'boolean', allowNull: true },
-        { name: 'strSubCurrency', type: 'string'}
+        { name: 'strSubCurrency', type: 'string'},
+        { name: 'strPricingType', type: 'string'}
     ],
 
     validators: [
