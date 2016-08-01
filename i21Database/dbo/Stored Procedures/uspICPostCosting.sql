@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostCosting]
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
+	
 AS
 
 SET QUOTED_IDENTIFIER OFF
