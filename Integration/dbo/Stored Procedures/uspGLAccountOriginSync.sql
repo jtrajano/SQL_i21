@@ -131,12 +131,8 @@ BEGIN
 				WHERE A.glact_acct9_16 = B.glact_acct9_16
 				and C.inti21Id = @Id_update	
 			END
-					
-			--CONFORM THE External ID and Current External Id with glactmst
 			UPDATE C SET
-			strExternalId =
-				CAST(CAST(B.glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''.'' + REPLICATE(''0'',(select 8 - LEN (B.glact_acct9_16))) + CAST(CAST(B.glact_acct9_16 AS INT) AS NVARCHAR(50))  ,
-			strCurrentExternalId = 
+			strCurrentExternalId =
 				REPLICATE(''0'',8 - LEN(B.glact_acct1_8)) +
 				CAST(CAST(B.glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''-'' + REPLICATE(''0'',(select 8 - LEN (B.glact_acct9_16))) + CAST(CAST(B.glact_acct9_16 AS INT) AS NVARCHAR(50))	
 			FROM tblGLCOACrossReference C
@@ -144,6 +140,8 @@ BEGIN
 			INNER JOIN tblGLOriginAccounts B ON A.glact_acct1_8 = B.glact_acct1_8
 			WHERE A.glact_acct9_16 = B.glact_acct9_16
 			and C.inti21Id = @Id_update		
+
+			--CONFORM THE External ID and Current External Id with glactmst
 			DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update
 
 		END
