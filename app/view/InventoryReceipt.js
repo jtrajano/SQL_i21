@@ -2479,7 +2479,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colPrice',
-                                                                text: 'Price',
+                                                                text: 'Price Down',
                                                                 flex: 0.7,
                                                                 editor: {
                                                                     xtype: 'checkboxfield'

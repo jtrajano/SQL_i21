@@ -5289,7 +5289,7 @@
                                                     "userConfig": {
                                                         "flex": 0.7,
                                                         "itemId": "colPrice",
-                                                        "text": "Price"
+                                                        "text": "Price Down"
                                                     },
                                                     "name": "MyCheck5",
                                                     "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514",
