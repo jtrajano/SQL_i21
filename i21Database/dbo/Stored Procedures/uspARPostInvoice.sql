@@ -268,13 +268,28 @@ BEGIN TRY
 				, @intStorageLocationId	= intStorageLocationId
 			FROM @FinishedGoodItems 
 				  
-			EXEC dbo.uspMFAutoBlend NULL, @intInvoiceDetailId, @intItemId, @dblQuantity, @intItemUOMId, @intLocationId, @intSublocationId, @intStorageLocationId, @userId, @dblMaxQuantity OUT
+			BEGIN TRY
+				EXEC dbo.uspMFAutoBlend NULL, @intInvoiceDetailId, @intItemId, @dblQuantity, @intItemUOMId, @intLocationId, @intSublocationId, @intStorageLocationId, @userId, @dblMaxQuantity OUT
 
-			IF ISNULL(@dblMaxQuantity, 0) > 0
-				BEGIN
-					EXEC dbo.uspMFAutoBlend NULL, @intInvoiceDetailId, @intItemId, @dblMaxQuantity, @intItemUOMId, @intLocationId, @intSublocationId, @intStorageLocationId, @userId, @dblMaxQuantity OUT
-				END
-			
+				IF ISNULL(@dblMaxQuantity, 0) > 0
+					BEGIN
+						EXEC dbo.uspMFAutoBlend NULL, @intInvoiceDetailId, @intItemId, @dblMaxQuantity, @intItemUOMId, @intLocationId, @intSublocationId, @intStorageLocationId, @userId, @dblMaxQuantity OUT
+					END
+			END TRY
+			BEGIN CATCH
+				SELECT @ErrorMerssage = ERROR_MESSAGE()
+				IF @raiseError = 0
+					BEGIN
+						ROLLBACK TRANSACTION							
+						BEGIN TRANSACTION						
+						EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+						COMMIT TRANSACTION
+					END						
+				IF @raiseError = 1
+					RAISERROR(@ErrorMerssage, 11, 1)
+		
+				GOTO Post_Exit
+			END CATCH
 			UPDATE tblARInvoiceDetail SET ysnBlended = 1 WHERE intInvoiceDetailId = @intInvoiceDetailId
 
 			DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
