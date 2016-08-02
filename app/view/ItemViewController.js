@@ -3063,7 +3063,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onUpcChange: function(obj, newValue, oldValue, eOpts) {
+   /* onUpcChange: function(obj, newValue, oldValue, eOpts) {
         var grid = obj.up('grid');
         var plugin = grid.getPlugin('cepDetailUOM');
         var record = plugin.getActiveRecord();
@@ -3081,7 +3081,7 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
 
-    },
+    },*/
 
     onDuplicateClick: function(button) {
         var win = button.up('window');
@@ -3372,6 +3372,31 @@ Ext.define('Inventory.view.ItemViewController', {
 		}
     },
     
+    onUPCEnterTab: function(field, e, eOpts) {
+        var win = field.up('window');
+        var grd = field.up('grid');
+        var plugin = grd.getPlugin('cepDetailUOM');
+        var record = plugin.getActiveRecord();
+
+        if(win) {
+            if (e.getKey() == e.ENTER || e.getKey() == e.TAB) {
+               var task = new Ext.util.DelayedTask(function(){
+                     if(field.itemId === 'txtShortUPCCode') {
+                         record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')));
+                     }
+                     else if(field.itemId === 'txtFullUPCCode') {
+                        record.set('strUpcCode', i21.ModuleMgr.Inventory.getShortUPCString(record.get('strLongUPCCode')));
+                        if(record.get('strUpcCode') !== null) {
+                            record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')));
+                        }  
+                     }   
+                });
+
+                task.delay(10);
+            }  
+        }
+    },
+    
     //</editor-fold>
 
     init: function(application) {
@@ -3492,10 +3517,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 change: this.onSpecialPricingDiscountChange
             },
             "#txtShortUPCCode": {
-                change: this.onUpcChange
+                specialKey: this.onUPCEnterTab
             },
             "#txtFullUPCCode": {
-                change: this.onUpcChange
+                specialKey: this.onUPCEnterTab
             },
             "#btnDuplicate": {
                 click: this.onDuplicateClick
