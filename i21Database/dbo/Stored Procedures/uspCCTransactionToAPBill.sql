@@ -108,7 +108,7 @@ BEGIN
 		BEGIN
 			
 			DECLARE @billId	INT = NULL
-			DECLARE @isPaid BIT = NULL
+			DECLARE @paymentTrans INT = NULL
 			
 			--Find AP Info
 			SELECT @billId = C.intBillId FROM tblCCSiteHeader A 
@@ -117,12 +117,15 @@ BEGIN
 			WHERE A.intSiteHeaderId = @intSiteHeaderId
 			GROUP BY C.intBillId
 
-			SELECT @isPaid = ysnPaid FROM tblAPBill WHERE intBillId = @billId
+			--SELECT @isPaid = ysnPaid FROM tblAPBill WHERE intBillId = @billId
+			SELECT @paymentTrans = COUNT(A.intPaymentId) FROM tblAPPayment A JOIN
+			tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId 
+			WHERE intBillId = @billId
 
 			IF(@billId IS NOT NULL)
 			BEGIN
 
-				IF(@isPaid = 1)
+				IF(@paymentTrans > 0)
 					BEGIN
 						RAISERROR('Cannot unpost this transaction. There is already payment made on the associated Voucher/Invoice.', 16, 1)
 					END
