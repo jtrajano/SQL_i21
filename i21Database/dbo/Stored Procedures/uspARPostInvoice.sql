@@ -212,7 +212,7 @@ BEGIN CATCH
 		BEGIN
 			ROLLBACK TRANSACTION							
 			BEGIN TRANSACTION						
-			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param							
+			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
 			COMMIT TRANSACTION
 		END						
 	IF @raiseError = 1
@@ -221,6 +221,79 @@ BEGIN CATCH
 	GOTO Post_Exit
 END CATCH
 
+--Process Finished Good Items
+BEGIN TRY
+	DECLARE @FinishedGoodItems TABLE(intInvoiceDetailId		INT
+								   , intItemId				INT
+								   , dblQuantity			NUMERIC(18,6)
+								   , intItemUOMId			INT
+								   , intLocationId			INT
+								   , intSublocationId		INT
+								   , intStorageLocationId	INT)
+
+	INSERT INTO @FinishedGoodItems
+	SELECT ID.intInvoiceDetailId
+	     , ID.intItemId
+		 , ID.dblQtyShipped
+		 , ID.intItemUOMId
+		 , I.intCompanyLocationId
+		 , ICL.intSubLocationId
+		 , ID.intStorageLocationId 
+	FROM tblARInvoice I
+		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+		INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
+		INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
+	WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+	AND ID.ysnBlended = 0
+	AND ICI.strType = 'Finished Good'
+
+	WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
+		BEGIN
+			DECLARE @intInvoiceDetailId		INT
+			      , @intItemId				INT
+				  , @dblQuantity			NUMERIC(18,6)
+				  , @dblMaxQuantity			NUMERIC(18,6) = 0
+				  , @intItemUOMId			INT
+				  , @intLocationId			INT
+				  , @intSublocationId		INT
+				  , @intStorageLocationId	INT
+			
+			SELECT TOP 1 
+				  @intInvoiceDetailId	= intInvoiceDetailId
+				, @intItemId			= intItemId
+				, @dblQuantity			= dblQuantity				
+				, @intItemUOMId			= intItemUOMId
+				, @intLocationId		= intLocationId
+				, @intSublocationId		= intSublocationId
+				, @intStorageLocationId	= intStorageLocationId
+			FROM @FinishedGoodItems 
+				  
+			EXEC dbo.uspMFAutoBlend NULL, @intInvoiceDetailId, @intItemId, @dblQuantity, @intItemUOMId, @intLocationId, @intSublocationId, @intStorageLocationId, @userId, @dblMaxQuantity OUT
+
+			IF ISNULL(@dblMaxQuantity, 0) > 0
+				BEGIN
+					EXEC dbo.uspMFAutoBlend NULL, @intInvoiceDetailId, @intItemId, @dblMaxQuantity, @intItemUOMId, @intLocationId, @intSublocationId, @intStorageLocationId, @userId, @dblMaxQuantity OUT
+				END
+			
+			UPDATE tblARInvoiceDetail SET ysnBlended = 1 WHERE intInvoiceDetailId = @intInvoiceDetailId
+
+			DELETE FROM @FinishedGoodItems WHERE intInvoiceDetailId = @intInvoiceDetailId
+		END	
+END TRY
+BEGIN CATCH
+	SELECT @ErrorMerssage = ERROR_MESSAGE()
+	IF @raiseError = 0
+		BEGIN
+			ROLLBACK TRANSACTION							
+			BEGIN TRANSACTION						
+			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+			COMMIT TRANSACTION
+		END						
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
@@ -1005,7 +1078,8 @@ END CATCH
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intCOGSAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ARI.[strTransactionType] <> 'Debit Memo'		
-					
+					AND ARIC.strType <> 'Finished Good'
+
 				--Inventory In-Transit Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
@@ -1082,7 +1156,7 @@ END CATCH
 					AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 					AND (ISNULL(ARIA.intInventoryInTransitAccountId, 0) = 0 OR GLA.intAccountId IS NULL)
 					AND ARI.[strTransactionType] <> 'Debit Memo'																		
-					
+					AND ARIC.strType <> 'Finished Good'
 				
 				--Zero Contract Item Price	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -2381,8 +2455,8 @@ UNION ALL
 				AND ISNULL(ARID.[intShipmentPurchaseSalesContractId],0) = 0
 				AND ISNULL(ARID.[intItemId],0) <> 0
 				AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-				AND ARI.[strTransactionType] <> 'Debit Memo'	
-
+				AND ARI.[strTransactionType] <> 'Debit Memo'
+				AND ARIC.strType <> 'Finished Good'
 			
 		END TRY
 		BEGIN CATCH

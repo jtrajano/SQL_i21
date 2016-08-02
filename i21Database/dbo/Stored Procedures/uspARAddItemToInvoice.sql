@@ -4,6 +4,7 @@
 	,@ItemPrepayTypeId				INT				= 0
 	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@ItemIsInventory				BIT				= 0
+	,@ItemIsBlended					BIT				= 0
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0		
@@ -142,6 +143,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1)
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
 			,@SubCurrency					= @SubCurrency
+			,@ItemIsBlended					= @ItemIsBlended
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -194,7 +196,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[strMaintenanceType]
 				,[strFrequency]
 				,[dtmMaintenanceDate]
-				,[ysnSubCurrency])
+				,[ysnSubCurrency]
+				,[ysnBlended])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -225,6 +228,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemFrequency
 				,@ItemMaintenanceDate
 				,@SubCurrency
+				,@ItemIsBlended
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
