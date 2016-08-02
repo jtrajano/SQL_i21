@@ -15,5 +15,5 @@
     CONSTRAINT [PK_tblMBMeterAccountDetail] PRIMARY KEY ([intMeterAccountDetailId]), 
     CONSTRAINT [FK_tblMBMeterAccountDetail_tblMBMeterAccount] FOREIGN KEY ([intMeterAccountId]) REFERENCES [tblMBMeterAccount]([intMeterAccountId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblMBMeterAccountDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
-    CONSTRAINT [AK_tblMBMeterAccountDetail] UNIQUE ([strMeterKey], [intItemId])
+    CONSTRAINT [AK_tblMBMeterAccountDetail] UNIQUE ([intMeterAccountId], [strMeterKey], [intItemId])
 )
