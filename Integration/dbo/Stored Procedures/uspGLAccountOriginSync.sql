@@ -132,6 +132,8 @@ BEGIN
 				and C.inti21Id = @Id_update	
 			END
 			UPDATE C SET
+			strExternalId =
+                CAST(CAST(B.glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''.'' + REPLICATE(''0'',(select 8 - LEN (B.glact_acct9_16))) + CAST(CAST(B.glact_acct9_16 AS INT) AS NVARCHAR(50))  ,
 			strCurrentExternalId =
 				REPLICATE(''0'',8 - LEN(B.glact_acct1_8)) +
 				CAST(CAST(B.glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''-'' + REPLICATE(''0'',(select 8 - LEN (B.glact_acct9_16))) + CAST(CAST(B.glact_acct9_16 AS INT) AS NVARCHAR(50))	
