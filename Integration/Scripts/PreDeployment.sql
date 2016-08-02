@@ -169,6 +169,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateDeviceSearchView.sql"
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql"
+:r "..\Scripts\TM\AddOriginTableIndex.sql"
+
 
 
 
