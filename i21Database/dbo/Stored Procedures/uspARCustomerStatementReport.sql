@@ -435,7 +435,7 @@ BEGIN
 	(
 		SELECT [strEntityNo]		= STATEMENTREPORT.strCustomerNumber		
 			   ,[dtmAsOfDate]		= @dtmDateTo 			   
-			  ,[dblLastStatement]	= ISNULL(STATEMENTREPORT.dblTotalAmount,0)
+			  ,[dblLastStatement]	= ISNULL(STATEMENTREPORT.dblAmountDue,0)
 		FROM @temp_statement_table AS STATEMENTREPORT
 		LEFT JOIN @temp_aging_table AS AGINGREPORT 
 		ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
