@@ -23,7 +23,7 @@ BEGIN
 				ELSE intCategoryId
 				END
 			)
-		AND strCategoryCode LIKE @strProductValue + '%'
+		AND strCategoryCode LIKE '%' + @strProductValue + '%'
 	ORDER BY strCategoryCode
 
 	SELECT @intCount = COUNT(*)
@@ -35,7 +35,7 @@ BEGIN
 				ELSE intCategoryId
 				END
 			)
-		AND strCategoryCode LIKE @strProductValue + '%'
+		AND strCategoryCode LIKE '%' + @strProductValue + '%'
 END
 ELSE IF @intProductTypeId = 2
 BEGIN
@@ -51,7 +51,7 @@ BEGIN
 				ELSE intItemId
 				END
 			)
-		AND strItemNo LIKE @strProductValue + '%'
+		AND strItemNo LIKE '%' + @strProductValue + '%'
 	ORDER BY strItemNo
 
 	SELECT @intCount = COUNT(*)
@@ -64,5 +64,5 @@ BEGIN
 				ELSE intItemId
 				END
 			)
-		AND strItemNo LIKE @strProductValue + '%'
+		AND strItemNo LIKE '%' + @strProductValue + '%'
 END

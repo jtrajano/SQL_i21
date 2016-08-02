@@ -82,7 +82,12 @@ GO
 IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 5)
 BEGIN
 	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
-	VALUES(5,'Receipt Sample','Receipt Sample')
+	VALUES(5,'Inbound Sample','Inbound Sample')
+END
+ELSE
+BEGIN -- Earlier Receipt Sample. Changing to Inbound Sample
+    UPDATE tblQMControlPoint SET strControlPointName = 'Inbound Sample' WHERE intControlPointId = 5 AND strControlPointName = 'Receipt Sample'
+    UPDATE tblQMControlPoint SET strDescription = 'Inbound Sample' WHERE intControlPointId = 5 AND strDescription = 'Receipt Sample'
 END
 GO
 GO
@@ -104,6 +109,20 @@ IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 8)
 BEGIN
 	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
 	VALUES(8,'Shipping','Shipping')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 9)
+BEGIN
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(9,'Receipt Sample','Receipt Sample')
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 10)
+BEGIN
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(10,'Outbound Sample','Outbound Sample')
 END
 GO
 
@@ -770,5 +789,21 @@ GO
 IF OBJECT_ID('fnQMGetBusinessShiftId') IS NOT NULL
 BEGIN
 	DROP FUNCTION fnQMGetBusinessShiftId
+END
+GO
+
+-- Control Point Report Names
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportNameMapping WHERE intControlPointId = 5)
+BEGIN
+	INSERT INTO tblQMReportNameMapping(strReportName,intControlPointId,intConcurrencyId)
+	VALUES('ArrivalForm',5,1)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMReportNameMapping WHERE intControlPointId = 10)
+BEGIN
+	INSERT INTO tblQMReportNameMapping(strReportName,intControlPointId,intConcurrencyId)
+	VALUES('ArrivalForm',10,1)
 END
 GO
