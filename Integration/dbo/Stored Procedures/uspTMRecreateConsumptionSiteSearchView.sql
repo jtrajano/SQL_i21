@@ -19,6 +19,8 @@ BEGIN
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwtrmmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwlclmst') = 1 
+		
 	)
 	BEGIN
 		EXEC('
@@ -63,6 +65,11 @@ BEGIN
 				,dblCreditLimit = C.vwcus_cred_limit
 				,strTerm = M.vwtrm_desc
 				,A.strInstruction
+				,strDriverId = O.vwsls_slsmn_id
+				,P.strRouteId
+				,A.dblTotalCapacity
+				,A.ysnTaxable
+				,strTaxGroup = Q.vwlcl_tax_state
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -89,6 +96,13 @@ BEGIN
 								WHERE X.strDeviceType = ''Tank''
 							) J
 								ON A.intSiteID = J.intSiteID
+				LEFT JOIN vwslsmst O
+					ON A.intDriverID = O.A4GLIdentity
+				LEFT JOIN tblTMRoute P
+					ON A.intRouteId = P.intRouteId
+				LEFT JOIN vwlclmst Q
+					ON A.intTaxStateID = Q.A4GLIdentity
+				
 		')
 	END
 	ELSE
@@ -128,6 +142,11 @@ BEGIN
 				,D.dblCreditLimit
 				,strTerm = M.strTerm
 				,A.strInstruction
+				,strDriverId = O.strEntityNo
+				,P.strRouteId
+				,A.dblTotalCapacity
+				,A.ysnTaxable
+				,Q.strTaxGroup
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -163,6 +182,12 @@ BEGIN
 								WHERE X.strDeviceType = ''Tank''
 							) J
 								ON A.intSiteID = J.intSiteID
+				LEFT JOIN tblEMEntity O
+					ON A.intDriverID = O.intEntityId
+				LEFT JOIN tblTMRoute P
+					ON A.intRouteId = P.intRouteId
+				LEFT JOIN tblSMTaxGroup Q
+					ON A.intTaxStateID = Q.intTaxGroupId
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END

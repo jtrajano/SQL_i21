@@ -2018,3 +2018,7 @@ SET intBatchID = NULL
 WHERE intBlendRequirementId IS NULL
 	AND intBatchID IS NOT NULL
 Go
+UPDATE tblMFCompanyPreference
+SET ysnLotHistoryByStorageLocation = 1
+WHERE ysnLotHistoryByStorageLocation IS NULL
+Go

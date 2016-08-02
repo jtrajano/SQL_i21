@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFAutoBlend]
 	@intSalesOrderDetailId int,
+	@intInvoiceDetailId int=0,
 	@intItemId int,
 	@dblQtyToProduce numeric(38,20),
 	@intItemUOMId INT,
@@ -53,6 +54,7 @@ Declare @dblBlendLotIssuedQty NUMERIC(38,20)
 Declare @dblBlendLotWeightPerUnit NUMERIC(38,20)
 Declare @intMaxWorkOrderId INT
 Declare @intRecipeItemUOMId INT
+Declare @strOrderType nvarchar(50)
 
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY(1, 1)
@@ -111,11 +113,14 @@ DECLARE @tblWorkOrderPickedLot TABLE(
 	,intStorageLocationId INT
 )
 
-If ISNULL(@intSalesOrderDetailId,0)=0 OR NOT EXISTS (Select 1 From tblSOSalesOrderDetail Where intSalesOrderDetailId=ISNULL(@intSalesOrderDetailId,0))
-	RaisError('Sales Order Detail does not exist.',16,1)
+If (ISNULL(@intSalesOrderDetailId,0)>0 AND ISNULL(@intInvoiceDetailId,0)>0) OR (ISNULL(@intSalesOrderDetailId,0)=0 AND ISNULL(@intInvoiceDetailId,0)=0)
+	RaisError('Supply either Sales Order Detail Id or Invoice Detail Id.',16,1)
 
-If Exists (Select 1 From tblMFWorkOrder Where intSalesOrderLineItemId=ISNULL(@intSalesOrderDetailId,0))
-	RaisError('Sales Order Line is already blended.',16,1)
+If ISNULL(@intSalesOrderDetailId,0)>0
+	Set @strOrderType='SALES ORDER'
+
+If ISNULL(@intInvoiceDetailId,0)>0
+	Set @strOrderType='INVOICE'
 
 If ISNULL(@dblQtyToProduce,0)=0
 	RaisError('Quantity to produce should be greater than 0.',16,1)
@@ -126,15 +131,49 @@ If ISNULL(@intLocationId,0)=0
 If ISNULL(@intItemUOMId,0)=0
 	RaisError('Item UOM Id is not supplied.',16,1)
 
-Select @intSalesOrderLocationId=s.intCompanyLocationId,@intBlendItemId=sd.intItemId
-From tblSOSalesOrderDetail sd Join tblSOSalesOrder s on sd.intSalesOrderId=s.intSalesOrderId 
-Where intSalesOrderDetailId=@intSalesOrderDetailId
+If @strOrderType='SALES ORDER'
+Begin
+	If ISNULL(@intSalesOrderDetailId,0)=0 OR NOT EXISTS (Select 1 From tblSOSalesOrderDetail Where intSalesOrderDetailId=ISNULL(@intSalesOrderDetailId,0))
+		RaisError('Sales Order Detail does not exist.',16,1)
 
-If @intSalesOrderLocationId <> ISNULL(@intLocationId,0)
-	RaisError('Sales Order location is not same as supplied location.',16,1)
+	If Exists(Select 1 From tblMFWorkOrder Where intSalesOrderLineItemId=ISNULL(@intSalesOrderDetailId,0))
+		If Exists(Select 1 From tblMFWorkOrderProducedLot Where intWorkOrderId in 
+		(Select intWorkOrderId From tblMFWorkOrder Where intSalesOrderLineItemId=ISNULL(@intSalesOrderDetailId,0)) 
+		AND ISNULL(ysnProductionReversed,0)=0)
+			RaisError('Sales Order Line is already blended.',16,1)
 
-If @intBlendItemId <> ISNULL(@intItemId,0)
-	RaisError('Sales Order detail item is not same as supplied item.',16,1)
+	Select @intSalesOrderLocationId=s.intCompanyLocationId,@intBlendItemId=sd.intItemId
+	From tblSOSalesOrderDetail sd Join tblSOSalesOrder s on sd.intSalesOrderId=s.intSalesOrderId 
+	Where intSalesOrderDetailId=@intSalesOrderDetailId
+
+	If @intSalesOrderLocationId <> ISNULL(@intLocationId,0)
+		RaisError('Sales Order location is not same as supplied location.',16,1)
+
+	If @intBlendItemId <> ISNULL(@intItemId,0)
+		RaisError('Sales Order detail item is not same as supplied item.',16,1)
+End
+
+If @strOrderType='INVOICE'
+Begin
+	If ISNULL(@intInvoiceDetailId,0)=0 OR NOT EXISTS (Select 1 From tblARInvoiceDetail Where intInvoiceDetailId=ISNULL(@intInvoiceDetailId,0))
+		RaisError('Invoice Detail does not exist.',16,1)
+
+	If Exists (Select 1 From tblMFWorkOrder Where intInvoiceDetailId=ISNULL(@intInvoiceDetailId,0))
+		If Exists(Select 1 From tblMFWorkOrderProducedLot Where intWorkOrderId in 
+		(Select intWorkOrderId From tblMFWorkOrder Where intInvoiceDetailId=ISNULL(intInvoiceDetailId,0)) 
+		AND ISNULL(ysnProductionReversed,0)=0)
+			RaisError('Invoice Line is already blended.',16,1)
+
+	Select @intSalesOrderLocationId=iv.intCompanyLocationId,@intBlendItemId=id.intItemId
+	From tblARInvoiceDetail id Join tblARInvoice iv on id.intInvoiceId=iv.intInvoiceId
+	Where id.intInvoiceDetailId=@intInvoiceDetailId
+
+	If @intSalesOrderLocationId <> ISNULL(@intLocationId,0)
+		RaisError('Invoice location is not same as supplied location.',16,1)
+
+	If @intBlendItemId <> ISNULL(@intItemId,0)
+		RaisError('Invoice detail item is not same as supplied item.',16,1)
+End
 
 Select TOP 1 @intRecipeId=intRecipeId,@intBlendItemUOMId=intItemUOMId 
 From tblMFRecipe r Join tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 
@@ -168,16 +207,24 @@ Begin
 End
 
 If ISNULL(@intSubLocationId,0) > 0 
-If (Select intCompanyLocationId From tblSMCompanyLocationSubLocation Where intCompanyLocationSubLocationId=@intSubLocationId)<>@intLocationId
-	RaisError('Sub Location does not belong to location',16,1)
+Begin
+	If Not Exists (Select 1 From tblSMCompanyLocationSubLocation Where intCompanyLocationSubLocationId=@intSubLocationId)
+		RaisError('Invalid Sub Location',16,1)
+
+	If (Select intCompanyLocationId From tblSMCompanyLocationSubLocation Where intCompanyLocationSubLocationId=@intSubLocationId)<>@intLocationId
+		RaisError('Sub Location does not belong to location',16,1)
+End
 
 If ISNULL(@intStorageLocationId,0) > 0 
 Begin
-If ISNULL(@intSubLocationId,0) = 0
-	RaisError('Sub Location is required',16,1)
+	If Not Exists (Select 1 From tblICStorageLocation Where intStorageLocationId=@intStorageLocationId)
+		RaisError('Invalid Storage Location',16,1)
+
+	If ISNULL(@intSubLocationId,0) = 0
+		RaisError('Sub Location is required',16,1)
 	 
-If (Select intSubLocationId From tblICStorageLocation Where intStorageLocationId=@intStorageLocationId)<>@intSubLocationId
-	RaisError('Storage Location does not belong to sub location',16,1)
+	If (Select intSubLocationId From tblICStorageLocation Where intStorageLocationId=@intStorageLocationId)<>@intSubLocationId
+		RaisError('Storage Location does not belong to sub location',16,1)
 End
 
 If ISNULL(@intRecipeId,0)=0
@@ -405,6 +452,8 @@ Begin Tran
 --Create WorkOrder
 Set @strXml = '<root>'
 Set @strXml += '<intSalesOrderDetailId>' + CONVERT(VARCHAR,@intSalesOrderDetailId) + '</intSalesOrderDetailId>'
+Set @strXml += '<intInvoiceDetailId>' + CONVERT(VARCHAR,@intInvoiceDetailId) + '</intInvoiceDetailId>'
+Set @strXml += '<strOrderType>' + CONVERT(VARCHAR,@strOrderType) + '</strOrderType>'
 Set @strXml += '<intLocationId>' + CONVERT(VARCHAR,@intLocationId) + '</intLocationId>'
 Set @strXml += '<intRecipeId>' + CONVERT(VARCHAR,@intRecipeId) + '</intRecipeId>'
 Set @strXml += '<intItemId>' + CONVERT(VARCHAR,@intBlendItemId) + '</intItemId>'
@@ -431,7 +480,11 @@ Select @intMaxWorkOrderId=MAX(intWorkOrderId) From tblMFWorkOrder
 
 Exec uspMFCreateWorkOrderFromSalesOrder @strXml
 
-Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId AND intWorkOrderId>@intMaxWorkOrderId
+If @strOrderType='SALES ORDER'
+	Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId AND intWorkOrderId>@intMaxWorkOrderId
+
+If @strOrderType='INVOICE'
+	Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intInvoiceDetailId=@intInvoiceDetailId AND intWorkOrderId>@intMaxWorkOrderId
 
 While @intWorkOrderId is not null
 Begin
@@ -561,7 +614,11 @@ Begin
 
 	Exec uspMFCompleteBlendSheet @strXml,@intBlendLotId OUT,@strLotNumber OUT
 
-	Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId AND intWorkOrderId > @intWorkOrderId
+	If @strOrderType='SALES ORDER'
+		Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId AND intWorkOrderId > @intWorkOrderId
+
+	If @strOrderType='INVOICE'
+		Select @intWorkOrderId=MIN(intWorkOrderId) From tblMFWorkOrder Where intInvoiceDetailId=@intInvoiceDetailId AND intWorkOrderId > @intWorkOrderId
 End
 
 Commit Tran

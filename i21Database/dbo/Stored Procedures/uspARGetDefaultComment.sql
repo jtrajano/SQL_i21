@@ -12,25 +12,29 @@ IF (@strTransactionType = '' OR @strTransactionType IS  NULL)
 	END
 
 --1. Filter by Transaction, Location, Customer, Type
-SELECT TOP 1 @strDefaultComment = strCommentDesc
-	FROM tblARCommentMaintenance
-	WHERE strTransactionType = @strTransactionType
+SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+	FROM [tblSMCommentMaintenance] A
+	INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+				FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+	WHERE [strSource] = @strTransactionType
 	AND intCompanyLocationId = @intCompanyLocationId
 	AND intEntityCustomerId = @intEntityCustomerId
 	AND strType = @strType
-	AND strTransactionType <> 'Statement Footer'
-ORDER BY intCommentId DESC
+	AND [strSource] <> 'Statement Footer'
+ORDER BY A.[intCommentMaintenanceId] DESC
 
 --2. Filter by Transaction, Location, Customer
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType
+		SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
 			AND intEntityCustomerId = @intEntityCustomerId
-			AND strTransactionType <> 'Statement Footer'
-		ORDER BY intCommentId DESC
+			AND [strSource] <> 'Statement Footer'
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN
@@ -38,13 +42,15 @@ ELSE
 --3. Filter by Transaction, Location, Type
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType
+		SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
 			AND strType = @strType
-			AND strTransactionType <> 'Statement Footer'
-		ORDER BY intCommentId DESC
+			AND [strSource] <> 'Statement Footer'
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN
@@ -52,12 +58,14 @@ ELSE
 --4. Filter by Transaction, Location
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType
+		SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
-			AND strTransactionType <> 'Statement Footer'
-		ORDER BY intCommentId DESC
+			AND [strSource] <> 'Statement Footer'
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN
@@ -65,13 +73,15 @@ ELSE
 --5. Filter by Transaction, Customer, Type
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType
+		SELECT TOP 1 @strDefaultComment = B.strComment--strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType
 			AND intEntityCustomerId = @intEntityCustomerId
 			AND strType = @strType
-			AND strTransactionType <> 'Statement Footer'
-		ORDER BY intCommentId DESC
+			AND [strSource] <> 'Statement Footer'
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN
@@ -79,12 +89,14 @@ ELSE
 --6. Filter by Transaction, Customer
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType	
+		SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType	
 			AND intEntityCustomerId = @intEntityCustomerId
-			AND strTransactionType <> 'Statement Footer'
-		ORDER BY intCommentId DESC
+			AND [strSource] <> 'Statement Footer'
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN
@@ -92,12 +104,14 @@ ELSE
 --7. Filter by Transaction, Type
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType		
+		SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType		
 			AND strType = @strType
-			AND strTransactionType <> 'Statement Footer'
-		ORDER BY intCommentId DESC
+			AND [strSource] <> 'Statement Footer'
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN
@@ -105,11 +119,13 @@ ELSE
 --8. Filter by Transaction
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType
-			AND strTransactionType <> 'Statement Footer'
-		ORDER BY intCommentId DESC
+		SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType
+			AND [strSource] <> 'Statement Footer'
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN
@@ -117,10 +133,12 @@ ELSE
 --9. No Hiearchy
 IF @strDefaultComment IS NULL
 	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType IS NULL
-		ORDER BY intCommentId DESC
+		SELECT TOP 1 @strDefaultComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] IS NULL
+		ORDER BY A.[intCommentMaintenanceId] DESC
 	END
 ELSE
 	RETURN

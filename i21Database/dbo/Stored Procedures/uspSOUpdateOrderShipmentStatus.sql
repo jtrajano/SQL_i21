@@ -130,7 +130,8 @@ SET_ORDER_STATUS:
 	UPDATE tblSOSalesOrder
 	SET [strOrderStatus] = @OrderStatus
 	  , [dtmProcessDate] = GETDATE()
-	  , [ysnProcessed]   = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END	  
+	  , [ysnProcessed]   = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END
+	  , [ysnShipped]     = CASE WHEN @OrderStatus = 'Open' THEN 0 ELSE ysnShipped END
 	WHERE [intSalesOrderId] = @SalesOrderId
 		
 	RETURN;

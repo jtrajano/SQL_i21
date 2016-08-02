@@ -1,7 +1,7 @@
-﻿CREATE VIEW dbo.vyuMFGetProductionOrder
+﻿CREATE VIEW vyuMFGetProductionOrder
 AS
-SELECT BR.intBlendRequirementId
-	,BR.strDemandNo
+SELECT IsNULL(BR.intBlendRequirementId,0) As intBlendRequirementId
+	,IsNull(BR.strDemandNo,'') As strDemandNo
 	,W.intWorkOrderId
 	,W.strWorkOrderNo
 	,W.dtmCreated
@@ -19,32 +19,34 @@ SELECT BR.intBlendRequirementId
 	,MC.strCellName
 	,WS.strName
 	,W.strComment
-	,OH.strBOLNo
-	,OH.intOrderHeaderId
-	,OS.strOrderStatus
 	,W.intLocationId
 	,W.intConcurrencyId
+	,ISNULL(SWD.dtmPlannedStartDate, W.dtmExpectedDate) dtmPlannedDate
+	,ISNULL(Round(SWD.dblPlannedQty, 0), W.dblQuantity) dblPlannedQty
+	,S.strShiftName AS strPlannedShiftName
+	,MP.strProcessName
+	,OH.intOrderHeaderId
+	,OH.strBOLNo
+	,OS.strOrderStatus
 FROM dbo.tblMFWorkOrder W
-JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-JOIN dbo.tblMFBlendRequirement BR ON W.intBlendRequirementId = BR.intBlendRequirementId
-JOIN dbo.tblICItem I ON W.intItemId = I.intItemId
-JOIN dbo.tblICItemUOM IU ON W.intItemUOMId = IU.intItemUOMId
-JOIN dbo.tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
-JOIN dbo.tblMFManufacturingCell MC ON W.intManufacturingCellId = MC.intManufacturingCellId
-JOIN dbo.tblSMUserSecurity US ON W.intCreatedUserId = US.intEntityUserSecurityId
-LEFT JOIN dbo.tblWHOrderHeader OH ON W.intOrderHeaderId = OH.intOrderHeaderId
-LEFT JOIN dbo.tblWHOrderStatus OS ON OH.intOrderStatusId = OS.intOrderStatusId
+INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
+	AND W.intStatusId <> 13
+INNER JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
+INNER JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
+INNER JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
+INNER JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
+INNER JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+INNER JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = W.intCreatedUserId
+LEFT JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON W.intWorkOrderId = SWD.intWorkOrderId
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = SWD.intPlannedShiftId
+LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
+	AND SW.dtmPlannedDate = ISNULL(SWD.dtmPlannedStartDate, W.dtmExpectedDate)
+	AND ISNULL(SW.intPlannnedShiftId, 0) = ISNULL(SWD.intPlannedShiftId, 0)
+LEFT JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
+LEFT JOIN dbo.tblWHOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
+LEFT JOIN dbo.tblMFBlendRequirement BR ON W.intBlendRequirementId = BR.intBlendRequirementId
 WHERE W.intStatusId IN (
 		9
 		,10
 		,11
 		)
-	AND EXISTS (
-		SELECT *
-		FROM tblMFWorkOrderInputLot WI
-		JOIN tblICItem I ON WI.intItemId = I.intItemId
-			AND WI.intWorkOrderId = W.intWorkOrderId
-		JOIN tblICCategory C ON I.intCategoryId = C.intCategoryId
-			AND C.ysnWarehouseTracked = 1
-		)
-

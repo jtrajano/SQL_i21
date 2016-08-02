@@ -10,41 +10,49 @@ BEGIN
 
 	IF (@strTransactionType <> '' AND @strTransactionType IS NOT NULL)
 		BEGIN
-			SELECT TOP 1 @footerComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType
-			  AND intCompanyLocationId = @intCompanyLocationId
-			  AND intEntityCustomerId = @intEntityCustomerId
-			ORDER BY intCommentId DESC
+			SELECT TOP 1 @footerComment = B.strComment --strCommentDesc
+			FROM [tblSMCommentMaintenance] A
+			INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+						FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+			WHERE [strSource] = @strTransactionType
+				AND intCompanyLocationId = @intCompanyLocationId
+				AND intEntityCustomerId = @intEntityCustomerId
+			ORDER BY A.[intCommentMaintenanceId] DESC
 
 			IF (@footerComment IS NULL)
 				BEGIN
-					SELECT TOP 1 @footerComment = strCommentDesc
-					FROM tblARCommentMaintenance
-					WHERE strTransactionType = @strTransactionType
+					SELECT TOP 1 @footerComment = B.strComment --strCommentDesc
+					FROM [tblSMCommentMaintenance] A
+					INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+								FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+					WHERE [strSource] = @strTransactionType
 					  AND intCompanyLocationId = @intCompanyLocationId
 					  AND intEntityCustomerId IS NULL
-					ORDER BY intCommentId DESC
+					ORDER BY A.[intCommentMaintenanceId] DESC
 				END
 
 			IF (@footerComment IS NULL)
 				BEGIN
-					SELECT TOP 1 @footerComment = strCommentDesc
-					FROM tblARCommentMaintenance
-					WHERE strTransactionType = @strTransactionType
+					SELECT TOP 1 @footerComment = B.strComment --strCommentDesc
+					FROM [tblSMCommentMaintenance]	A
+					INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+								FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+					WHERE [strSource] = @strTransactionType
 					  AND intCompanyLocationId IS NULL
 					  AND intEntityCustomerId = @intEntityCustomerId
-					ORDER BY intCommentId DESC
+					ORDER BY A.[intCommentMaintenanceId] DESC
 				END
 
 			IF (@footerComment IS NULL)
 				BEGIN
-					SELECT TOP 1 @footerComment = strCommentDesc
-					FROM tblARCommentMaintenance
-					WHERE strTransactionType = @strTransactionType
+					SELECT TOP 1 @footerComment = B.strComment--strCommentDesc
+					FROM [tblSMCommentMaintenance] A
+					INNER JOIN (SELECT intCommentMaintenanceId, strComment 
+								FROM tblSMCommentMaintenanceComment) B ON A.intCommentMaintenanceId = B.intCommentMaintenanceId
+					WHERE [strSource] = @strTransactionType
 					  AND intCompanyLocationId IS NULL
 					  AND intEntityCustomerId IS NULL
-					ORDER BY intCommentId DESC
+					ORDER BY A.[intCommentMaintenanceId] DESC
 				END
 		END
 

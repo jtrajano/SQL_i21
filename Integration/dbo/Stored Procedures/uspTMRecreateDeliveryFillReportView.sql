@@ -135,6 +135,9 @@ BEGIN
 					,dblCallEntryPrice = F.dblPrice
 					,dblCallEntryMinimumQuantity = F.dblMinimumQuantity
 					,Z.strCompanyName
+					,C.intLocationId
+					,intDriverId = C.intDriverID
+					,C.intRouteId
 				FROM tblTMCustomer A 
 				INNER JOIN vwcusmst B 
 					on A.intCustomerNumber = B.A4GLIdentity 
@@ -284,6 +287,9 @@ BEGIN
 				,dblCallEntryPrice = F.dblPrice
 				,dblCallEntryMinimumQuantity = F.dblMinimumQuantity
 				,Z.strCompanyName
+				,C.intLocationId
+				,intDriverId = C.intDriverID
+				,C.intRouteId
 			FROM tblTMCustomer A 
 			INNER JOIN tblEMEntity Ent
 				ON A.intCustomerNumber = Ent.intEntityId

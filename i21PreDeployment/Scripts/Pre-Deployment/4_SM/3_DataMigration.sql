@@ -320,3 +320,24 @@ GO
 	END
 
 GO
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCommentMaintenance')
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCommentMaintenanceComment')
+		BEGIN
+			PRINT N'CREATING tblSMCommentMaintenanceComment'
+			EXEC('CREATE TABLE [dbo].[tblSMCommentMaintenanceComment]
+				 (
+					[intCommentMaintenanceCommentId] INT NOT NULL PRIMARY KEY IDENTITY, 
+					[intCommentMaintenanceId] INT NOT NULL, 
+					[intCharacterLimit] INT NOT NULL, 
+					[strComment] NVARCHAR(300) NOT NULL
+				 )')
+		END
+
+		PRINT N'MIGRATING RECORDS FROM tblSMCommentMaintenanceComment TO tblSMCommentMaintenanceComment'
+		EXEC('INSERT INTO tblSMCommentMaintenanceComment(intCommentMaintenanceId, intCharacterLimit, strComment)
+			  SELECT intCommentId, LEN(strCommentDesc) AS intCharacterLimit, strCommentDesc FROM tblARCommentMaintenance')
+	END
+
+GO

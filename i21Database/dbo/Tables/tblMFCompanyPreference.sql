@@ -21,5 +21,6 @@
 	intForecastFirstEditableMonth INT CONSTRAINT [DF_tblMFCompanyPreference_intForecastFirstEditableMonth] DEFAULT 0,
 	dblDefaultResidueQty numeric(18,6),
 	[strDefaultRecipeCost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [ysnLotHistoryByStorageLocation] BIT NULL, 
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )

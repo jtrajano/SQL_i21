@@ -171,7 +171,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, ContractView.dblAvailableQty
 		, dblFranchise = ISNULL(LogisticsView.dblFranchise, 0.00)
 		, dblContainerWeightPerQty = ISNULL(LogisticsView.dblContainerWeightPerQty, 0.00)
-
+		, ContractView.strPricingType
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

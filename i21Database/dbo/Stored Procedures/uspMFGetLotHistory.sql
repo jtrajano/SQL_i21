@@ -4,12 +4,50 @@ BEGIN
 	IF OBJECT_ID('tempdb..#tempLotHistory') IS NOT NULL
 		DROP TABLE #tempLotHistory
 
+	IF OBJECT_ID('tempdb..#tempLotHistoryFinal') IS NOT NULL
+		DROP TABLE #tempLotHistoryFinal
+
+		CREATE TABLE #tempLotHistory (
+	dtmDateTime DATETIME
+	,strLotNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strItem NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strDescription NVARCHAR(250)COLLATE Latin1_General_CI_AS
+	,strCategoryCode NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strSubLocation NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strStorageLocation NVARCHAR(50)COLLATE SQL_Latin1_General_CP1_CS_AS
+	,strTransaction NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,dblWeight NUMERIC(38, 20)
+	,dblTransactionWeight NUMERIC(38, 20)
+	,strTransactionWeightUOM NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,dblQuantity NUMERIC(38, 20)
+	,dblTransactionQty NUMERIC(38, 20)
+	,strTransactionQtyUOM NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strRelatedLotId NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strPreviousItem NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strSourceSubLocation NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strSourceStorageLocation NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strNewStatus NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strOldStatus NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strNewLotAlias NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strOldLotAlias NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,dtmNewExpiryDate DATETIME
+	,dtmOldExpiryDate DATETIME
+	,strNewVendorNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strOldVendorNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strNewVendorLotNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strOldVendorLotNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strNotes NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strUser NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	)
+
+
 	DECLARE @dblPrimaryQty NUMERIC(38, 20)
 		,@dblPrimaryWeight NUMERIC(38, 20)
 
 	SELECT @dblPrimaryQty = 0
 		,@dblPrimaryWeight = 0
 
+	INSERT INTO #tempLotHistory	
 	SELECT CASE 
 			WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, dtmCreated, 101))
 				THEN dtmCreated
@@ -80,7 +118,6 @@ BEGIN
 		,'' AS strOldVendorLotNo
 		,'' AS strNotes
 		,us.strUserName AS strUser
-	INTO #tempLotHistory
 	FROM tblICLot l
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -108,8 +145,137 @@ BEGIN
 	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
 	
-	UNION ALL
+	DECLARE @ysnLotHistoryByStorageLocation bit
+	SELECT @ysnLotHistoryByStorageLocation=ysnLotHistoryByStorageLocation FROM dbo.tblMFCompanyPreference
 	
+	DECLARE @intSplitFromLotId int,@intLotId1 int,@intInventoryTransactionId int,@intPrevLotId int
+
+	SELECT @intSplitFromLotId=NULL
+	SELECT @intSplitFromLotId=intSplitFromLotId
+	FROM dbo.tblICLot l
+	WHERE l.intLotId = @intLotId
+
+	Select @intPrevLotId=@intLotId
+
+	WHILE @intSplitFromLotId IS NOT NULL and @ysnLotHistoryByStorageLocation=0
+	BEGIN
+		SELECT @intLotId1=NULL
+		SELECT @intLotId1=@intSplitFromLotId
+		Select @intInventoryTransactionId=NULL
+
+		SELECT @intInventoryTransactionId=MIN(intInventoryTransactionId) 
+		FROM dbo.tblICInventoryTransaction 
+		WHERE intLotId=@intPrevLotId
+
+		INSERT INTO #tempLotHistory
+		SELECT CASE 
+				WHEN Convert(DATETIME, Convert(CHAR, dtmDate, 101)) = Convert(DATETIME, Convert(CHAR, dtmCreated, 101))
+					THEN dtmCreated
+				ELSE dtmDate
+				END AS dtmDateTime
+			,l.strLotNumber AS strLotNo
+			,CASE 
+				WHEN iad.intNewItemId IS NULL
+					THEN i.strItemNo
+				ELSE i1.strItemNo
+				END AS strItem
+			,CASE 
+				WHEN iad.intNewItemId IS NULL
+					THEN i.strDescription
+				ELSE i1.strDescription
+				END AS strDescription
+			,c.strCategoryCode
+			,clsl.strSubLocationName AS strSubLocation
+			,sl.strName AS strStorageLocation
+			,CASE 
+				WHEN itt.strName = 'Produce'
+					AND ilt.dblQty < 0
+					THEN 'Produce Reversal'
+				WHEN itt.strName = 'Consume'
+					AND ilt.dblQty > 0
+					THEN 'Consume Reversal'
+				ELSE itt.strName
+				END AS strTransaction
+			,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
+			,CONVERT(NUMERIC(38, 20), ilt.dblQty) AS dblTransactionWeight
+			,uwm.strUnitMeasure AS strTransactionWeightUOM
+			,CONVERT(NUMERIC(38, 20), 0.0) AS dblQuantity
+			,CONVERT(NUMERIC(38, 20), ilt.dblQty / CASE 
+					WHEN l.dblWeightPerQty = 0
+						THEN 1
+					ELSE l.dblWeightPerQty
+					END) AS dblTransactionQty
+			,um.strUnitMeasure AS strTransactionQtyUOM
+			,CASE 
+				WHEN iad.intNewLotId = @intLotId
+					THEN L1.strLotNumber
+				ELSE iad.strNewLotNumber
+				END AS strRelatedLotId
+			,CASE 
+				WHEN iad.intNewItemId IS NULL
+					THEN NULL
+				ELSE i.strItemNo
+				END AS strPreviousItem
+			,CASE 
+				WHEN iad.intNewLotId = @intLotId
+					THEN clsl2.strSubLocationName
+				ELSE clsl1.strSubLocationName
+				END AS strSourceSubLocation
+			,CASE 
+				WHEN iad.intNewLotId = @intLotId
+					THEN sl2.strName
+				ELSE sl1.strName
+				END AS strSourceStorageLocation
+			,NULL AS strNewStatus
+			,NULL AS strOldStatus
+			,NULL AS strNewLotAlias
+			,NULL AS strOldLotAlias
+			,iad.dtmNewExpiryDate AS dtmNewExpiryDate
+			,iad.dtmExpiryDate AS dtmOldExpiryDate
+			,'' AS strNewVendorNo
+			,'' AS strOldVendorNo
+			,'' AS strNewVendorLotNo
+			,'' AS strOldVendorLotNo
+			,'' AS strNotes
+			,us.strUserName AS strUser
+		FROM tblICLot l
+		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
+		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
+		LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
+		LEFT JOIN tblICItem i ON i.intItemId = ISNULL((
+					CASE 
+						WHEN ilt.intTransactionTypeId = 15
+							THEN iad.intItemId
+						ELSE ilt.intItemId
+						END
+					), ilt.intItemId)
+		JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
+		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
+		LEFT JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+		LEFT JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
+		LEFT JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
+		LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
+		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ilt.intStorageLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation clsl1 ON clsl1.intCompanyLocationSubLocationId = iad.intNewSubLocationId
+		LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation clsl2 ON clsl2.intCompanyLocationSubLocationId = iad.intSubLocationId
+		LEFT JOIN tblICStorageLocation sl2 ON sl2.intStorageLocationId = iad.intStorageLocationId
+		LEFT JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedEntityId
+		LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
+		LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
+		WHERE l.intLotId = @intLotId1 AND ilt.intInventoryTransactionId <@intInventoryTransactionId
+
+		SELECT @intSplitFromLotId=NULL
+
+		Select @intPrevLotId=@intLotId1
+
+		SELECT @intSplitFromLotId=intSplitFromLotId
+		FROM dbo.tblICLot l
+		WHERE l.intLotId = @intLotId1
+
+	End
+
+	INSERT INTO #tempLotHistory
 	SELECT ia.dtmPostedDate
 		,l.strLotNumber AS strLotNo
 		,i.strItemNo AS strItemNo
@@ -152,6 +318,7 @@ BEGIN
 		,'' AS strOldVendorLotNo
 		,'' AS strNotes
 		,us.strUserName AS strUser
+		
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
@@ -182,24 +349,54 @@ BEGIN
 			)
 	ORDER BY 1
 
-	UPDATE #tempLotHistory
-	SET @dblPrimaryQty = dblQuantity = CASE 
-			WHEN (
-					((@dblPrimaryQty + dblTransactionQty) < 0.01)
-					AND ((@dblPrimaryQty + dblTransactionQty) > 0)
-					)
-				THEN 0
-			ELSE @dblPrimaryQty + dblTransactionQty
-			END
-		,@dblPrimaryWeight = dblWeight = CASE 
-			WHEN (
-					((@dblPrimaryWeight + dblTransactionWeight) < 0.01)
-					AND ((@dblPrimaryWeight + dblTransactionWeight) > 0)
-					)
-				THEN 0
-			ELSE @dblPrimaryWeight + dblTransactionWeight
-			END
+	SELECT *INTO #tempLotHistoryFinal FROM #tempLotHistory ORDER BY dtmDateTime
 
+	Declare @strStorageLocation nvarchar(50)
+	Select @strStorageLocation=''
+
+	if @ysnLotHistoryByStorageLocation=1
+	Begin
+		UPDATE #tempLotHistoryFinal
+		SET 
+				@dblPrimaryQty = dblQuantity = CASE 
+				WHEN (
+						((@dblPrimaryQty + dblTransactionQty) < 0.01)
+						AND ((@dblPrimaryQty + dblTransactionQty) > 0) 
+						)
+					THEN 0
+				ELSE @dblPrimaryQty + dblTransactionQty
+				END
+			,@dblPrimaryWeight = dblWeight = CASE 
+				WHEN (
+						((@dblPrimaryWeight + dblTransactionWeight) < 0.01)
+						AND ((@dblPrimaryWeight + dblTransactionWeight) > 0)
+						)
+					THEN 0
+				ELSE @dblPrimaryWeight + dblTransactionWeight
+				END
+		End
+	Else
+	Begin
+		UPDATE #tempLotHistoryFinal
+		SET 
+				@dblPrimaryQty = dblQuantity = CASE 
+				WHEN (
+						((@dblPrimaryQty + dblTransactionQty) < 0.01)
+						AND ((@dblPrimaryQty + dblTransactionQty) > 0) 
+						)
+					THEN 0
+				ELSE (Case When @strStorageLocation=strStorageLocation Then @dblPrimaryQty + dblTransactionQty Else dblTransactionQty End)
+				END
+			,@dblPrimaryWeight = dblWeight = CASE 
+				WHEN (
+						((@dblPrimaryWeight + dblTransactionWeight) < 0.01)
+						AND ((@dblPrimaryWeight + dblTransactionWeight) > 0)
+						)
+					THEN 0
+				ELSE (Case When @strStorageLocation=strStorageLocation Then @dblPrimaryWeight + dblTransactionWeight Else dblTransactionWeight End)
+				END
+				,@strStorageLocation=strStorageLocation =strStorageLocation
+	end
 	SELECT *
-	FROM #tempLotHistory
+	FROM #tempLotHistoryFinal
 END

@@ -53,7 +53,8 @@ BEGIN
 			,@OriginalTransactionValue AS NUMERIC(38,20)
 			,@dblNewCalculatedCost AS NUMERIC(38,20)
 			,@CostBucketStockInQty AS NUMERIC(38,20)
-				
+			,@intLotId AS INT 
+			
 
 	DECLARE loopLotCostBucket CURSOR LOCAL FAST_FORWARD
 	FOR 
@@ -86,7 +87,7 @@ BEGIN
 	BEGIN 
 		-- Get the original cost
 		SELECT TOP 1 
-				@OriginalCost = dblCost
+				@OriginalCost = dblCost				
 		FROM	dbo.tblICInventoryLotCostAdjustmentLog
 		WHERE	intInventoryLotId = @CostBucketId
 				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
@@ -94,6 +95,7 @@ BEGIN
 		-- Get the cost at cost bucket. 
 		SELECT	@CostBucketCost = dblCost
 				,@CostBucketStockInQty = dblStockIn
+				,@intLotId = intLotId 
 		FROM	dbo.tblICInventoryLot
 		WHERE	intInventoryLotId = @CostBucketId
 
@@ -112,6 +114,12 @@ BEGIN
 		SET		dblCost = @dblNewCalculatedCost
 		FROM	tblICInventoryLot CostBucket
 		WHERE	CostBucket.intInventoryLotId = @CostBucketId
+
+		-- Update the lot's last cost
+		UPDATE	l
+		SET		dblLastCost = @dblNewCalculatedCost
+		FROM	tblICLot l
+		WHERE	l.intLotId = @intLotId
 
 		-- Mark the cost adjustment as unposted
 		UPDATE dbo.tblICInventoryLotCostAdjustmentLog

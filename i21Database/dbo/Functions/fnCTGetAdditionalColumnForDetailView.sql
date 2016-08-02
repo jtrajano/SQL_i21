@@ -5,13 +5,14 @@
 
 RETURNS	@returntable	TABLE
 (
-	intSeqCurrencyId	INT,
-	ysnSeqSubCurrency	BIT,
-	intSeqPriceUOMId	INT,
-	dblSeqPrice			NUMERIC(18,6),
-	strSeqCurrency		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strSeqPriceUOM		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	dblQtyToPriceUOMConvFactor NUMERIC(18,6)
+	intSeqCurrencyId				INT,
+	ysnSeqSubCurrency				BIT,
+	intSeqPriceUOMId				INT,
+	dblSeqPrice						NUMERIC(18,6),
+	strSeqCurrency					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strSeqPriceUOM					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	dblQtyToPriceUOMConvFactor		NUMERIC(18,6),
+	dblNetWtToPriceUOMConvFactor	NUMERIC(18,6)
 )
 
 AS
@@ -32,7 +33,8 @@ BEGIN
 				@strPriceUOM		NVARCHAR(100),
 				@strFXPriceUOM		NVARCHAR(100),
 				@intMainCurrencyId	INT,
-				@ysnUseFXPrice		BIT
+				@ysnUseFXPrice		BIT,
+				@intNetWeightUOMId	INT
 
 
 	SELECT		@dblCashPrice		=	CD.dblCashPrice,
@@ -48,7 +50,8 @@ BEGIN
 				@strCurrency		=	CY.strCurrency,
 				@strPriceUOM		=	UM.strUnitMeasure,
 				@strFXPriceUOM		=	FM.strUnitMeasure,
-				@ysnUseFXPrice		=	ysnUseFXPrice
+				@ysnUseFXPrice		=	ysnUseFXPrice,
+				@intNetWeightUOMId	=	CD.intNetWeightUOMId
 	FROM		tblCTContractDetail CD
 	LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID	= CD.intCurrencyId
 	LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId		= CD.intPriceItemUOMId
@@ -79,7 +82,8 @@ BEGIN
 				dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intPriceItemUOMId,@dblMainCashPrice) * @dblRate,
 				@strSeqCurrency,
 				@strFXPriceUOM,
-				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intFXPriceUOMId,1)
+				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intFXPriceUOMId,1),
+				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intFXPriceUOMId,1)
 	END
 	ELSE
 	BEGIN
@@ -90,7 +94,8 @@ BEGIN
 				@dblCashPrice,
 				@strCurrency,
 				@strPriceUOM,
-				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intPriceItemUOMId,1)
+				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intPriceItemUOMId,1),
+				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intPriceItemUOMId,1)
 	END
 
 	RETURN;
