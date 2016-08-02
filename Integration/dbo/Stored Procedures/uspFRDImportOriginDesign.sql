@@ -87,12 +87,14 @@ BEGIN
 		DECLARE @insertload VARCHAR(max)
 		DECLARE @glfsf_stmt_type VARCHAR(50)
 		DECLARE @@glfsf_no_to_convert VARCHAR(50)
+		DECLARE @primaryLength INT = 1
 		DECLARE @segmentLength INT = 1
 
 		SET @result = ''Successful''
 		SELECT @hdr= ''''''''+''HDR''+''''''''
 		SELECT @@glfsf_no_to_convert = @originglfsf_no				--strDescription = @glfsf_no_to_convert
 
+		SET @primaryLength = (select SUM(intLength) from tblGLAccountStructure where strType = ''Primary'')
 		SET @segmentLength = (select SUM(intLength) from tblGLAccountStructure where strType = ''Segment'')
 
 		INSERT tblFRRow (strRowName,strDescription,intMapId,intConcurrencyId)
@@ -201,24 +203,26 @@ BEGIN
 				CASE											--FULL ACCOUNT END
 					WHEN glfsf_action_type=''GRA'' THEN 
 								CASE												
-									WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)
-									ELSE CONVERT(VARCHAR(8),glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_gra_sub9_16),@segmentLength)
+									WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)									
+									WHEN glfsf_gra_sub9_16 LIKE ''%?%'' THEN CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)									
+									ELSE CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_gra_sub9_16),@segmentLength)
 								END
 					WHEN glfsf_action_type=''GRP'' THEN 
 								CASE
-									WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)
-									ELSE CONVERT(VARCHAR(8),glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_grp_sub9_16),@segmentLength)
+									WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8)) + replicate(''0'',(- len(CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)									
+									WHEN glfsf_grp_sub9_16 LIKE ''%?%'' THEN CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8)) + replicate(''0'',(- len(CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)									
+									ELSE CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_grp_sub9_16),@segmentLength)
 								END
-					WHEN glfsf_action_type=''ACA'' THEN 
-								CONVERT(VARCHAR(8),glfsf_aca1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_aca9_16),@segmentLength)
-					WHEN glfsf_action_type=''ACP'' THEN 
-								CONVERT(VARCHAR(8),glfsf_acp1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_acp9_16),@segmentLength)
+					WHEN glfsf_action_type=''ACA'' THEN 								
+								CONVERT(varchar(8),RTRIM(glfsf_aca1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_aca1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_aca9_16),@segmentLength)
+					WHEN glfsf_action_type=''ACP'' THEN 								
+								CONVERT(varchar(8),RTRIM(glfsf_acp1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_acp1_8))))) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_acp9_16),@segmentLength)
 					END,
 				CASE 
-					WHEN glfsf_gra_sub9_16 like ''%*%'' THEN ''YES''
-					WHEN glfsf_grp_sub9_16 like ''%*%'' THEN ''YES''
-					WHEN glfsf_aca9_16 like ''%*%'' THEN ''YES''
-					WHEN glfsf_acp9_16 like ''%*%'' THEN ''YES''
+					WHEN (glfsf_gra_sub9_16 like ''%*%'' OR glfsf_gra_sub9_16 like ''%?%'') THEN ''YES''
+					WHEN (glfsf_grp_sub9_16 like ''%*%'' OR glfsf_grp_sub9_16 like ''%?%'') THEN ''YES''
+					WHEN (glfsf_aca9_16 like ''%*%'' OR glfsf_aca9_16 like ''%?%'') THEN ''YES''
+					WHEN (glfsf_acp9_16 like ''%*%'' OR glfsf_acp9_16 like ''%?%'') THEN ''YES''
 					ELSE ''NO''
 					END,
 				ISNULL(RTRIM(''00000000'' + glfsf_grp_sub9_16),
@@ -229,29 +233,35 @@ BEGIN
 					ISNULL(RTRIM(''00000000'' + glfsf_net_sub9_16),''00000000'')))))),
 				glfsf_no,
 				glfsf_line_no,
-				ISNULL(RTRIM(''00000000'' + glfsf_gra_beg1_8),		--1 to 8 beginning for building 
-					ISNULL(RTRIM(''00000000'' + glfsf_grp_beg1_8),	--
-					ISNULL(RTRIM(''00000000'' + glfsf_aca1_8),
-					ISNULL(RTRIM(''00000000'' + glfsf_acp1_8),''00000000'')))),
+				ISNULL(RTRIM(CONVERT(varchar(8),RTRIM(glfsf_gra_beg1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_gra_beg1_8)))))),		--1 to 8 beginning for building 
+					ISNULL(RTRIM(CONVERT(varchar(8),RTRIM(glfsf_grp_beg1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_grp_beg1_8)))))),	--
+					ISNULL(RTRIM(CONVERT(varchar(8),RTRIM(glfsf_aca1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_aca1_8)))))),
+					ISNULL(RTRIM(CONVERT(varchar(8),RTRIM(glfsf_acp1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_acp1_8)))))),''00000000'')))),
 				CASE												--1 to 8 end for ranges
 					WHEN glfsf_action_type=''GRA'' THEN
-						CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8))
+						CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8)))))
 					WHEN glfsf_action_type=''GRP'' THEN
-						CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8))
+						CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8)))))
 					WHEN glfsf_action_type=''ACA'' THEN
-						CONVERT(varchar(8),RTRIM(glfsf_aca1_8))
+						CONVERT(varchar(8),RTRIM(glfsf_aca1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_aca1_8)))))
 					WHEN glfsf_action_type=''ACP'' THEN
-						CONVERT(varchar(8),RTRIM(glfsf_acp1_8))
+						CONVERT(varchar(8),RTRIM(glfsf_acp1_8)) + replicate(''0'',(@primaryLength - len(CONVERT(varchar(8),RTRIM(glfsf_acp1_8)))))
 					END,
 				CASE												--9 to 16 end for ranges
 					WHEN glfsf_action_type=''GRA'' THEN
 						CASE
-							WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8),''99999999'')
+							WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN 
+								CONVERT(VARCHAR(8),''99999999'')
+							WHEN glfsf_gra_sub9_16 LIKE ''%?%'' THEN 
+								CONVERT(VARCHAR(8),''99999999'')
 							ELSE CONVERT(varchar(8),ISNULL(RTRIM(glfsf_gra_sub9_16),''0''))
 						END
 					WHEN glfsf_action_type=''GRP'' THEN
 						CASE
-							WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8),''99999999'')
+							WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN 
+								CONVERT(VARCHAR(8),''99999999'')
+							WHEN glfsf_grp_sub9_16 LIKE ''%?%'' THEN 
+								CONVERT(VARCHAR(8),''99999999'')
 							ELSE CONVERT(varchar(8),ISNULL(RTRIM(glfsf_grp_sub9_16),''0''))
 						END
 					WHEN glfsf_action_type=''ACA'' THEN
@@ -305,14 +315,13 @@ BEGIN
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
-
 			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			--									GRP / GRA
 			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
 							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
 							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
+							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND (acct9_16 like '' + '''''''' + ''%*%'' + '''''' OR acct9_16 like '' + '''''''' + ''%?%'' + '''''')''
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
@@ -320,18 +329,17 @@ BEGIN
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
 							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + '''''''' 
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + ''''''''
+							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND (acct9_16 not like '' + '''''''' + ''%*%'' + '''''' AND acct9_16 not like '' + '''''''' + ''%?%'' + '''''')''
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] = '' + '''''''''''''''' + ''+'' + ''full_account+ '' + '''''''''''''''''''' + 
-							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + '''''''' + '' AND '' +		
+							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND (acct9_16 not like '' + '''''''' + ''%*%'' + '''''''' + '' AND acct9_16 not like '' + '''''''' + ''%?%'' + '''''''' + '') AND '' +	
 							+ '''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''' + '' = ''
 							+ '''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)+ '' +  ''''''''''''							
 
 			--SELECT @SQL --debug
 			EXEC (@SQL)  
-
 
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 2
@@ -371,11 +379,11 @@ BEGIN
 
 			--		SELECT @min1acctold = @min1acct
 
-			--		IF @acct9_16 LIKE ''%*%''
+			--		IF @acct9_16 LIKE ''%*%'' OR @acct9_16 LIKE ''%?%''
 			--		BEGIN
 			--			SELECT @min1acct = MIN(strAccountId) FROM tblGLAccount WHERE strAccountId > @min1acctold
 			--		END
-			--		IF @acct9_16 NOT LIKE ''%*%''
+			--		IF @acct9_16 NOT LIKE ''%*%'' AND @acct9_16 NOT LIKE ''%?%''
 			--		BEGIN
 			--			SELECT @min1acct = MIN(strAccountId) FROM tblGLAccount WHERE strAccountId > @min1acctold AND SUBSTRING(strAccountId,7,4) = RIGHT(@acct9_16,4)	--- Account Replace		
 			--		END
