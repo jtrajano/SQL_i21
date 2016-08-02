@@ -1905,7 +1905,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 Ext.Array.each(charges.data.items, function (charge) {
                     if (!charge.dummy) {
                         var amount = charge.get('dblAmount');
-                        totalCharges += amount;
+                        
+                        if (charge.get('ysnPrice') === true) {
+                            totalCharges -= amount;
+                        }
+                        else {
+                            totalCharges += amount;
+                        }
                     }
                 });
             }
