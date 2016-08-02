@@ -135,6 +135,17 @@ GO
 			WHERE strNamespace = 'RiskManagement.view.FuturesOptionsTransactions'
 		END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Payroll.view.TimeOffRequest') 
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId]) 
+			VALUES (N'Time Off Requests', N'Time Off Requests', N'Payroll.view.TimeOffRequest', N'Payroll', N'', 1,  0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET  ysnApproval = 1
+			WHERE strNamespace = 'Payroll.view.TimeOffRequest'
+		END
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO
