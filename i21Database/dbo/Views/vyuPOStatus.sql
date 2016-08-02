@@ -11,7 +11,9 @@ SELECT
 	,B.intStorageLocationId
 	,B.intItemId
 	,B.dblQtyOrdered
+	,B.dblQtyOrdered * G.dblUnitQty AS dblUnitStockOrdered
 	,B.dblQtyReceived
+	,B.dblQtyReceived * G.dblUnitQty AS dblUnitStockReceived
 	,C.strStatus
 	,D.strType
 	,E.intItemLocationId
@@ -30,6 +32,8 @@ FROM tblPOPurchase A
 		ON B.intItemId = D.intItemId
 	INNER JOIN tblICItemLocation E
 		ON A.intShipToId = E.intLocationId AND B.intItemId = E.intItemId
+	INNER JOIN tblICItemUOM G
+		ON B.intUnitOfMeasureId = G.intItemUOMId
 	OUTER APPLY (
 		SELECT 
 			SUM(dblIRItemQtyReceive) dblIRItemQtyReceive

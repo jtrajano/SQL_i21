@@ -588,13 +588,25 @@ INTO	dbo.tblICItemStock
 WITH	(HOLDLOCK) 
 AS		ItemStock	
 USING (
-		SELECT	
-			intItemId
-			,A.intItemLocationId
-			,dblOnOrder = (SUM(dblQtyOrdered) - SUM(dblQtyReceived))
-		FROM vyuPOStatus A
-		WHERE dblQtyReceived < dblQtyOrdered
-		GROUP BY A.intItemLocationId, A.intItemId
+				SELECT
+		 intItemId
+		 ,intItemLocationId
+		 ,SUM(dblOnOrder) dblOnOrder
+		 FROM (
+			SELECT	
+				B.intItemId
+				,C.intItemLocationId
+				,dblOnOrder =  (CASE WHEN dblQtyReceived > dblQtyOrdered THEN 0 ELSE dblQtyOrdered - dblQtyReceived END) * D.dblUnitQty --ItemStock should be the base qty
+			FROM tblPOPurchase A
+			INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+			INNER JOIN tblICItemLocation C
+				ON A.intShipToId = C.intLocationId AND B.intItemId = C.intItemId
+			INNER JOIN tblICItemUOM D ON B.intUnitOfMeasureId = D.intItemUOMId AND B.intItemId = D.intItemId
+			WHERE 
+			intOrderStatusId NOT IN (4, 3, 6)
+			OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
+		) ItemTransactions
+		GROUP BY intItemLocationId, intItemId
 ) AS StockToUpdate
 	ON ItemStock.intItemId = StockToUpdate.intItemId
 	AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -602,7 +614,8 @@ USING (
 -- If matched, update the unit on order qty. 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0) + StockToUpdate.dblOnOrder
+	--SET		dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0) + StockToUpdate.dblOnOrder
+	SET		dblOnOrder = StockToUpdate.dblOnOrder
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -632,15 +645,38 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM	
 USING (
-		SELECT	ItemTransactions.intItemId
-				,ItemTransactions.intUnitOfMeasureId AS intItemUOMId
-				,ItemTransactions.intItemLocationId
-				,ItemTransactions.intSubLocationId
-				,ItemTransactions.intStorageLocationId
-				,dblOnOrder = (SUM(dblQtyOrdered) - SUM(dblQtyReceived))
-		FROM	vyuPOStatus ItemTransactions
-		WHERE dblQtyReceived < dblQtyOrdered
-		GROUP BY ItemTransactions.intItemId, ItemTransactions.intUnitOfMeasureId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
+		SELECT	
+			B.intItemId
+			,B.intUnitOfMeasureId AS intItemUOMId
+			,C.intItemLocationId
+			,B.intSubLocationId
+			,B.intStorageLocationId
+			,dblOnOrder =  (CASE WHEN SUM(dblQtyReceived) > SUM(dblQtyOrdered) THEN 0 ELSE SUM(dblQtyOrdered) - SUM(dblQtyReceived) END)
+		FROM tblPOPurchase A
+		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+		INNER JOIN tblICItemLocation C
+			ON A.intShipToId = C.intLocationId AND B.intItemId = C.intItemId
+		WHERE 
+		intOrderStatusId NOT IN (4, 3, 6)
+		OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
+		GROUP BY B.intItemId,
+		 B.intUnitOfMeasureId,
+		 C.intItemLocationId,
+		 B.intSubLocationId,
+		 B.intStorageLocationId
+
+
+		--SELECT	ItemTransactions.intItemId
+		--		,ItemTransactions.intUnitOfMeasureId AS intItemUOMId
+		--		,ItemTransactions.intItemLocationId
+		--		,ItemTransactions.intSubLocationId
+		--		,ItemTransactions.intStorageLocationId
+		--		,dblOnOrder = (CASE WHEN SUM(dblQtyReceived) > SUM(dblQtyOrdered) THEN 0 ELSE SUM(dblQtyOrdered) - SUM(dblQtyReceived) END)
+		--FROM	vyuPOStatus ItemTransactions
+		--WHERE 
+		--intOrderStatusId NOT IN (4, 3, 6)
+		--OR (dblQtyOrdered < dblQtyReceived)--Handle wrong status of PO, greater qty received should be closed status
+		--GROUP BY ItemTransactions.intItemId, ItemTransactions.intUnitOfMeasureId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
 	AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
@@ -650,7 +686,8 @@ USING (
 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0) + RawStockData.dblOnOrder
+	--SET		dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0) + RawStockData.dblOnOrder
+	SET		dblOnOrder = RawStockData.dblOnOrder
 
 -- If none found, insert a new item stock record
 WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
