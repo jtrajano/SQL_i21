@@ -9945,16 +9945,15 @@
     },
     "tabState": {
         "openTabs": [
-            "467f343c-c005-4700-bed6-351559b316d7",
-            "de4dfa55-f672-4bb0-b4aa-c1168bd9ca5a"
+            "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
         ]
     },
     "canvasState": {
-        "topInstance": "de4dfa55-f672-4bb0-b4aa-c1168bd9ca5a"
+        "topInstance": "b6b8ef41-1eb1-4854-99ef-98f5a7167844"
     },
     "inspectorState": {
-        "topInstance": "de4dfa55-f672-4bb0-b4aa-c1168bd9ca5a",
-        "selectedInstance": "b1573399-0a9d-4cfa-9941-9ac96689e782"
+        "topInstance": "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
+        "selectedInstance": "58de2b34-7d00-4617-a58d-2d6fdad77514"
     },
     "editMode": "design",
     "userSettings": {
