@@ -333,5 +333,6 @@
     <None Include="dbo\Functions\fnGetDepositEntry.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
+    <None Include="Scripts\TM\AddOriginTableIndex.sql" />
   </ItemGroup>
 </Project>
