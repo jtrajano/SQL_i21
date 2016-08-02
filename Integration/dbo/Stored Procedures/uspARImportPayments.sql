@@ -884,7 +884,7 @@ IF(@Checking = 1)
 					SELECT @PaymentID = intPaymentId FROM #tmpagcrd
 						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
 								@PaymentId = @PaymentID,
-								@UserId = 1,
+								@UserId = @UserId,
 								@NewInvoiceId = @NewInvoiceId OUTPUT					
 				END TRY								
 							
@@ -1740,7 +1740,7 @@ IF(@Checking = 1)
 					SELECT @PaymentID = intPaymentId FROM #tmpptcrd
 						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
 								@PaymentId = @PaymentID,
-								@UserId = 1,
+								@UserId = @UserId,
 								@NewInvoiceId = @NewInvoiceId OUTPUT					
 				END TRY								
 							
