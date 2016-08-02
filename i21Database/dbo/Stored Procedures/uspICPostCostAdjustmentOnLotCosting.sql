@@ -372,6 +372,12 @@ BEGIN
 		WHERE	CostBucket.intInventoryLotId = @CostBucketId
 				AND CostBucket.dblStockIn > 0 
 				AND ISNULL(ysnIsUnposted, 0) = 0 
+
+		-- Update the lot's last cost
+		UPDATE	l
+		SET		dblLastCost = @dblNewCalculatedCost
+		FROM	tblICLot l
+		WHERE	l.intLotId = @intLotId
 	END 
 
 	-----------------------------------------------------------------------------------------------------------------------------
