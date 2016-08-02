@@ -3611,6 +3611,7 @@
     <Build Include="dbo\Stored Procedures\uspICCompareGLSnapshotOnRebuildInventoryValuation.sql" />
     <Build Include="dbo\Views\vyuICCompareRebuildValuationSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateShipmentItemLocations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

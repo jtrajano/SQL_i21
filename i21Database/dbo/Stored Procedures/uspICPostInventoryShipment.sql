@@ -177,6 +177,15 @@ BEGIN
 	END 
 END
 
+-- Check if locations are valid
+DECLARE @ysnValidLocation BIT
+EXEC dbo.uspICValidateShipmentItemLocations @intTransactionId, @ysnValidLocation OUTPUT
+IF @ysnValidLocation = 0
+BEGIN
+	RAISERROR(80085, 11, 1, '')  
+	GOTO Post_Exit
+END
+	
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
