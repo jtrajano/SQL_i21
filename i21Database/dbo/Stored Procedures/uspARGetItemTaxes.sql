@@ -6,10 +6,10 @@
 	,@TransactionDate		DATETIME
 	,@TaxGroupId			INT				= NULL		
 	,@SiteId				INT				= NULL
-	,@FOBPoint				NVARCHAR(150)	= NULL
+	,@FreightTermId			INT				= NULL
 AS
 
-	IF LOWER(RTRIM(LTRIM(ISNULL(@FOBPoint,'')))) <> 'origin'
+	IF LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),'')))) <> 'origin'
 		SET @CustomerLocationId = NULL
 
 	IF(ISNULL(@TaxGroupId,0) = 0)

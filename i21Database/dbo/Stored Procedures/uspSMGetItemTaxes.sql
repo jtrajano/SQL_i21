@@ -8,12 +8,12 @@
 	,@BillShipToLocationId	INT				= NULL
 	,@IncludeExemptedCodes	BIT				= NULL
 	,@SiteId				INT				= NULL
-	,@FOBPoint				NVARCHAR(150)	= NULL
+	,@FreightTermId			INT				= NULL
 AS
 
 BEGIN
 
-	IF LOWER(RTRIM(LTRIM(ISNULL(@FOBPoint,'')))) <> 'origin'
+	IF LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),'')))) <> 'origin'
 		SET @BillShipToLocationId = NULL
 
 	IF ISNULL(@TaxGroupId,0) = 0
