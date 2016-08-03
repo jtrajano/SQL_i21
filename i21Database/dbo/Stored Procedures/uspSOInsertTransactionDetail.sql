@@ -10,6 +10,7 @@ BEGIN
 		 [intTransactionDetailId]
 		,[intTransactionId]
 		,[strTransactionType]
+		,[strTransactionStatus]
 		,[intItemId]
 		,[intItemUOMId]
 		,[dblQtyOrdered]
@@ -22,21 +23,26 @@ BEGIN
 		,[intConcurrencyId]
 	)
 	SELECT
-		 [intTransactionDetailId]		= [intSalesOrderDetailId]
-		,[intTransactionId]				= [intSalesOrderId]
+		 [intTransactionDetailId]		= SOD.[intSalesOrderDetailId]
+		,[intTransactionId]				= SOD.[intSalesOrderId]
 		,[strTransactionType]			= 'Order'
-		,[intItemId]					= [intItemId] 
-		,[intItemUOMId]					= [intItemUOMId] 
-		,[dblQtyOrdered]				= [dblQtyOrdered] 
-		,[dblQtyShipped]				= [dblQtyShipped] 
-		,[dblPrice]						= [dblPrice]
+		,[strTransactionStatus]			= SO.[strOrderStatus]
+		,[intItemId]					= SOD.[intItemId] 
+		,[intItemUOMId]					= SOD.[intItemUOMId] 
+		,[dblQtyOrdered]				= SOD.[dblQtyOrdered] 
+		,[dblQtyShipped]				= SOD.[dblQtyShipped] 
+		,[dblPrice]						= SOD.[dblPrice]
 		,[intInventoryShipmentItemId]	= NULL
 		,[intSalesOrderDetailId]		= NULL
-		,[intContractHeaderId]			= [intContractHeaderId]
-		,[intContractDetailId]			= [intContractDetailId]
+		,[intContractHeaderId]			= SOD.[intContractHeaderId]
+		,[intContractDetailId]			= SOD.[intContractDetailId]
 		,[intConcurrencyId]				= 1
 	FROM
-		[tblSOSalesOrderDetail]
+		[tblSOSalesOrderDetail] SOD
+	INNER JOIN
+		[tblSOSalesOrder] SO
+			ON SOD.[intSalesOrderId] = SO.[intSalesOrderId] 
+
 	WHERE
-		[intSalesOrderId] = @SalesOrderId
+		SOD.[intSalesOrderId] = @SalesOrderId
 END

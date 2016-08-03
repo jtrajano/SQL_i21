@@ -4,6 +4,7 @@
     [intTransactionDetailId]				INT				NOT NULL,
     [intTransactionId]						INT             NOT NULL,
     [strTransactionType]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
+	[strTransactionStatus]			        NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [intItemId]								INT             NULL,
 	[intItemUOMId]							INT             NULL,
     [dblQtyOrdered]							NUMERIC (18, 6) NULL,
