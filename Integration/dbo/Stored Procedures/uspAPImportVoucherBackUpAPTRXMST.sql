@@ -136,6 +136,7 @@ BEGIN
 		[ysnInsertedToAPIVC]	=	1
 	FROM aptrxmst A
 	WHERE A.aptrx_orig_amt != 0
+	AND A.aptrx_trans_type IN ('I', 'C', 'A')
 END
 ELSE
 BEGIN
@@ -210,6 +211,7 @@ BEGIN
 	FROM aptrxmst A
 	WHERE A.aptrx_orig_amt != 0
 	AND 1 = (CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END)
+	AND A.aptrx_trans_type IN ('I', 'C', 'A')
 END
 
 IF OBJECT_ID('tempdb..#tmpUnpostedBackupId') IS NOT NULL DROP TABLE #tmpUnpostedBackupId

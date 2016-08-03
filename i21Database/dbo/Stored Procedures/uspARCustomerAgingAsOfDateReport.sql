@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
 	@dtmDateFrom		DATETIME = NULL,
 	@dtmDateTo			DATETIME = NULL,
-	@strSalesperson		NVARCHAR(100) = NULL
+	@strSalesperson		NVARCHAR(100) = NULL,
+	@intEntityCustomerId	INT = NULL
 AS
 
 IF @dtmDateFrom IS NULL
@@ -310,5 +311,10 @@ AND A.intInvoiceId		 = B.intInvoiceId
 AND A.dblInvoiceTotal	 = B.dblInvoiceTotal
 AND A.dblAmountPaid		 = B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
+
+WHERE
+	(A.intEntityCustomerId = @intEntityCustomerId AND ISNULL(@intEntityCustomerId,0) <> 0)
+	OR
+	ISNULL(@intEntityCustomerId,0) = 0
 
 GROUP BY A.strCustomerName, A.intEntityCustomerId, A.strEntityNo

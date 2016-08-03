@@ -62,19 +62,19 @@ AS
 
 BEGIN
 
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal		NUMERIC(18, 6)
-		,@EntityCustomerId	INT
-		,@CompanyLocationId	INT
-		,@InvoiceDate		DATETIME
-		,@TermDiscount		NUMERIC(18, 6)
-		,@SubCurrencyCents	INT
+DECLARE @ZeroDecimal			NUMERIC(18, 6)
+		,@EntityCustomerId		INT
+		,@CompanyLocationId		INT
+		,@InvoiceDate			DATETIME
+		,@TermDiscount			NUMERIC(18, 6)
+		,@SubCurrencyCents		INT
+		,@existingInvoiceDetail INT
 
 SET @ZeroDecimal = 0.000000
 
@@ -173,9 +173,12 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 	END	
 
 BEGIN TRY
-	DECLARE @existingInvoiceDetail INT
+	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId 
+		FROM tblARInvoiceDetail 
+		WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId 
+		  AND strSalesOrderNumber = @ItemSalesOrderNumber 
+		  AND intInvoiceId = @InvoiceId		  
 
-	SELECT TOP 1 @existingInvoiceDetail = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intSalesOrderDetailId = @ItemSalesOrderDetailId AND strSalesOrderNumber = @ItemSalesOrderNumber AND intInvoiceId = @InvoiceId
 	IF ISNULL(@existingInvoiceDetail, 0) > 0
 		BEGIN
 			UPDATE tblARInvoiceDetail 
@@ -353,7 +356,7 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
-SET @NewInvoiceDetailId = @NewId
+SET @NewInvoiceDetailId = ISNULL(@existingInvoiceDetail, @NewId)
 
 IF ISNULL(@RaiseError,0) = 0	
 	COMMIT TRANSACTION

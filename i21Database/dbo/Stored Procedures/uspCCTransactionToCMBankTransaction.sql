@@ -18,7 +18,7 @@ DECLARE @ErrorSeverity INT,
 		@ErrorNumber   INT,
 		@ErrorState INT
 
-BEGIN TRY
+BEGIN
 
 	DECLARE @BankTransaction BankTransactionTable
 	DECLARE @BankTransactionDetail BankTransactionDetailTable
@@ -149,20 +149,11 @@ BEGIN TRY
 
 					END
 					ELSE
-						RAISERROR('Bank Transaction ID is null',0,1)
+						RAISERROR('Bank Transaction ID is null', 16, 1)
 				END
 		END
 	ELSE
 		BEGIN
 			SET @success = 1
 		END
-
-END TRY
-BEGIN CATCH
-	SET @ErrorSeverity = ERROR_SEVERITY()
-	SET @ErrorNumber   = ERROR_NUMBER()
-	SET @errorMessage  = ERROR_MESSAGE()
-	SET @ErrorState    = ERROR_STATE()
-	SET	@success = 0
-	RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-END CATCH
+END

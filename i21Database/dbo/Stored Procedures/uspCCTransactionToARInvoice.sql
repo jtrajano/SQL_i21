@@ -15,7 +15,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN TRY
+BEGIN
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
@@ -136,19 +136,6 @@ BEGIN TRY
 
 		END
 		ELSE
-			RAISERROR('Invoice ID is null', 0 ,1)	
+			RAISERROR('Invoice ID is null', 16 ,1)	
 	END
-
-END TRY
-BEGIN CATCH
-	DECLARE @ErrorSeverity INT,
-			@ErrorNumber   INT,
-			@ErrorState INT,
-			@ErrorProc nvarchar(200);
-	SET @ErrorSeverity = ERROR_SEVERITY()
-	SET @ErrorNumber   = ERROR_NUMBER()
-	SET @ErrorMessage  = ERROR_MESSAGE()
-	SET @ErrorState    = ERROR_STATE()
-	SET	@success = 0
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-END CATCH
+END

@@ -15,6 +15,7 @@ DECLARE @UserEntityID INT
 		,@actionType AS NVARCHAR(50)
 		,@ForDelete BIT = 0
 --THIS IS A HICCUP		
+
 SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId),@userId) 
 SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
 SELECT @ForDelete = CASE WHEN @post = 1 THEN 0 ELSE 1 END
@@ -80,6 +81,19 @@ END
 --Contracts
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 
+
+UPDATE ARID
+SET
+	ARID.dblContractBalance = CTCD.dblBalance
+FROM
+	dbo.tblARInvoiceDetail ARID
+INNER JOIN
+	dbo.tblCTContractDetail  CTCD
+	ON ARID.intContractDetailId = CTCD.intContractDetailId
+WHERE 
+	ARID.dblContractBalance <> CTCD.dblBalance
+	AND ARID.intInvoiceId = @TransactionId
+
 --Committed QUatities
 EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId, 1
 
@@ -89,16 +103,18 @@ EXEC dbo.[uspARUpdateInTransit] @TransactionId, @post, 0
 --Sales Order Status
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId, @ForDelete
 
+DECLARE	@EntityCustomerId INT
+
+SELECT TOP 1 @EntityCustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @TransactionId
+
 --Update Total AR
-EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @TransactionId, @CustomerId = NULL
+EXEC dbo.[uspARUpdateCustomerTotalAR] @InvoiceId = @TransactionId, @CustomerId = @EntityCustomerId
 
 --Patronage
-DECLARE	@EntityCustomerId INT
-		,@successfulCount INT
+DECLARE	@successfulCount INT
 		,@invalidCount INT
 		,@success BIT
 		
-SELECT TOP 1 @EntityCustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @TransactionId
 
 EXEC [dbo].[uspPATInvoiceToCustomerVolume]
 	 @intEntityCustomerId	= @EntityCustomerId

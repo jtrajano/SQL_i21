@@ -1,9 +1,18 @@
 ﻿CREATE FUNCTION [dbo].[fnConstructLineItemTaxDetail]
 (
-	 @Quantity				NUMERIC(18,6)
-	,@GrossAmount			NUMERIC(18,6)
+	 @Quantity				NUMERIC(18,6)					= 0
+	,@GrossAmount			NUMERIC(18,6)					= 0
 	,@LineItemTaxEntries	LineItemTaxDetailStagingTable	READONLY
-	,@TransactionDate		DATE							= NULL
+	,@IsReversal			BIT								= 0	
+	,@ItemId				INT								= NULL	
+	,@EntityCustomerId		INT								= NULL
+	,@CompanyLocationId		INT								= NULL
+	,@TaxGroupId			INT								= NULL
+	,@Price					NUMERIC(18,6)					= 0	
+	,@TransactionDate		DATE							= NULL	
+	,@ShipToLocationId		INT								= NULL
+	,@IncludeExemptedCodes	BIT								= 0
+	,@SiteId				INT								= NULL
 )
 RETURNS @returntable TABLE
 (
@@ -17,11 +26,64 @@ RETURNS @returntable TABLE
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[intTaxAccountId]				INT
-	,[ysnTaxAdjusted]				BIT
 	,[ysnCheckoffTax]				BIT
+	,[ysnTaxExempt]					BIT
+	,[ysnInvalidSetup]				BIT
+	,[strNotes]						NVARCHAR(500)
 )
 AS
 BEGIN
+
+	IF ISNULL(@IsReversal,0) = 0 AND NOT EXISTS(SELECT TOP 1 NULL FROM @LineItemTaxEntries)
+		BEGIN
+			INSERT INTO @returntable(
+				 [intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[dblRate]
+				,[dblExemptionPercent]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[intTaxAccountId]
+				,[ysnCheckoffTax]
+				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
+				,[strNotes]
+			)
+			SELECT
+				 [intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[dblRate]
+				,[dblExemptionPercent]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[intTaxAccountId]
+				,[ysnCheckoffTax]
+				,[ysnTaxExempt]
+				,[ysnInvalidSetup]
+				,[strNotes]
+			FROM
+				[dbo].[fnGetItemTaxComputationForCustomer]
+					(
+						 @ItemId				--@ItemId
+						,@EntityCustomerId		--@CustomerId
+						,@TransactionDate		--@TransactionDate
+						,@Price					--@ItemPrice
+						,@Quantity				--@QtyShipped
+						,@TaxGroupId			--@TaxGroupId
+						,@CompanyLocationId		--@CompanyLocationId
+						,@ShipToLocationId		--@CustomerLocationId
+						,@IncludeExemptedCodes	--@IncludeExemptedCodes
+						,NULL					--@IsCustomerSiteTaxable
+						,@SiteId				--@SiteId
+					) 	
+			RETURN		
+		END
 
 	DECLARE @ZeroDecimal		NUMERIC(18, 6)
 			,@TaxAmount			NUMERIC(18,6)
@@ -95,22 +157,31 @@ BEGIN
 			,@ItemPrice				NUMERIC(18,6)
 	
 	
-	SELECT
-		@TotalUnitTax = SUM(@Quantity * [dblRate])
-	FROM
-		@ItemTaxes
-	WHERE
-		LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
+	
 
-		
-	--t = pq + (pqr)
-	--t/(q + qr) = p		
-	SELECT
-		@ItemPrice = (@GrossAmount - @TotalUnitTax) / (@Quantity + (@Quantity * (SUM([dblRate])/100.00)))
-	FROM
-		@ItemTaxes
-	WHERE
-		LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'		
+	IF ISNULL(@IsReversal,0) = 0
+		BEGIN
+			SET @ItemPrice = @Price
+		END
+	ELSE
+		BEGIN
+			SELECT
+				@TotalUnitTax = SUM(@Quantity * [dblRate])
+			FROM
+				@ItemTaxes
+			WHERE
+				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'unit'
+
+			--t = pq + (pqr)
+			--t/(q + qr) = p		
+			SELECT
+				@ItemPrice = (@GrossAmount - @TotalUnitTax) / (@Quantity + (@Quantity * (SUM([dblRate])/100.00)))
+			FROM
+				@ItemTaxes
+			WHERE
+				LOWER(RTRIM(LTRIM([strCalculationMethod]))) = 'percentage'		
+		END		
+	
 		
 		
 
@@ -274,8 +345,10 @@ BEGIN
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
-		,[ysnTaxAdjusted]
 		,[ysnCheckoffTax]
+		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
+		,[strNotes]
 	)
 	SELECT
 		 [intTaxGroupId]
@@ -288,8 +361,10 @@ BEGIN
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
-		,[ysnTaxAdjusted]
 		,[ysnCheckoffTax]
+		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
+		,[strNotes]
 	FROM
 		@ItemTaxes 	
 	RETURN		

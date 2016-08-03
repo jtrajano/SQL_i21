@@ -73,6 +73,8 @@ BEGIN
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--DELETE FROM #tmpPayables
+	IF OBJECT_ID('dbo.[UK_dbo.tblAPPayment_strPaymentRecordNum]', 'UQ') IS NOT NULL 
+	ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum]
 
 	--Insert new payment records
 	MERGE INTO tblAPPayment
@@ -163,6 +165,7 @@ BEGIN
 		SET A.intPaymentId  = B.intNewPaymentId
 		,A.dblPayment = A.dblPayment * -1
 		,A.dblDiscount = A.dblDiscount * -1
+		,A.dblTotal = A.dblTotal * -1
 	FROM #tmpPaymentDetail A
 		INNER JOIN #tmpPayables B
 			ON A.intPaymentId = B.intPaymentId
@@ -188,6 +191,7 @@ BEGIN
 
 	IF @isSuccessful = 0
 	BEGIN
+		ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 		RAISERROR('There was an error on reversing bank transaction.', 16, 1);
 	END
 
@@ -214,6 +218,7 @@ BEGIN
 		EXEC uspGLBookEntries @GLEntries, 1
 	END TRY
 	BEGIN CATCH
+		ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
 		RAISERROR(@error, 16, 1);
 	END CATCH
@@ -231,7 +236,10 @@ BEGIN
 
 	--Unposting Process
 	UPDATE tblAPPaymentDetail
-	SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment - B.dblInterest ELSE (B.dblAmountDue + B.dblPayment) END)
+	SET tblAPPaymentDetail.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
+												ELSE 
+											(CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment - B.dblInterest ELSE (B.dblAmountDue + B.dblPayment) END)
+											END
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
@@ -252,6 +260,8 @@ BEGIN
 				INNER JOIN tblAPBill C
 						ON B.intBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
+	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 
 	IF @transCount = 0 COMMIT TRANSACTION
 

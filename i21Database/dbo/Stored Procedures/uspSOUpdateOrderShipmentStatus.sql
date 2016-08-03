@@ -82,7 +82,7 @@ SET
 FROM
 	(
 		SELECT SOD.intSalesOrderDetailId
-			 , dblQuantity			= SUM(ISNULL(CASE WHEN ID.intItemUOMId IS NOT NULL AND SOD.intItemUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)) ELSE ISNULL(ID.dblQtyShipped,0) END, 0)) + SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, SOD.intItemUOMId, ISNULL(ISHI.dblQuantity,0)), 0))			 
+			 , dblQuantity			= SUM(ISNULL(CASE WHEN ID.intItemUOMId IS NOT NULL AND SOD.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, SOD.intItemUOMId, ISNULL(ID.dblQtyShipped,0)), ISNULL(ID.dblQtyShipped,0)) ELSE ISNULL(ID.dblQtyShipped,0) END, 0)) + SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, SOD.intItemUOMId, ISNULL(ISHI.dblQuantity,0)), 0))			 
 		FROM tblSOSalesOrderDetail SOD
 			LEFT JOIN (SELECT ID.intSalesOrderDetailId
 							, ID.intItemUOMId

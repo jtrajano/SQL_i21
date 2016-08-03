@@ -191,6 +191,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[intEntitySalespersonId]
 				,[intSalesOrderDetailId]
 				,[strSalesOrderNumber]
+				,[strMaintenanceType]
+				,[strFrequency]
+				,[dtmMaintenanceDate]
 				,[ysnSubCurrency])
 			SELECT TOP 1
 				 @InvoiceId
@@ -218,6 +221,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@EntitySalespersonId					
 				,@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber
+				,@ItemMaintenanceType
+				,@ItemFrequency
+				,@ItemMaintenanceDate
 				,@SubCurrency
 			FROM tblICItem WHERE intItemId = @ItemId
 

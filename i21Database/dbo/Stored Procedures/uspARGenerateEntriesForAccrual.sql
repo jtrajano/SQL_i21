@@ -355,8 +355,11 @@ BEGIN
 												ELSE
 													(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
 											END)
-			,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END
-			,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) ELSE 0  END
+			,dblDebit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END 
+											ELSE CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END END
+			,dblCredit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType = 'Invoice' THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
+											ELSE CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END)  END END
+
 			,dblDebitUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) END
 			,dblCreditUnit				= CASE WHEN A.strTransactionType = 'Invoice' THEN @UnitsPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @UnitsRemainder ELSE 0 END) ELSE 0 END				
 			,strDescription				= A.strComments

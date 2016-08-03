@@ -165,7 +165,7 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 													ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
 										WHERE	tblICItemUOM.intItemId = PODetail.intItemId 
 												AND tblICItemUOM.ysnStockUnit = 1 
-												AND tblICUnitMeasure.strUnitType = 'Weight'
+												AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
 												AND dbo.fnGetItemLotType(PODetail.intItemId) IN (1,2)
 									)
 		,dblUnitCost			= PODetail.dblCost

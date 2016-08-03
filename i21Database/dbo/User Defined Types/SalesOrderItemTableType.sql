@@ -8,7 +8,7 @@ CREATE TYPE [dbo].[SalesOrderItemTableType] AS TABLE
 		-- Header
 		,[intSalesOrderId]				INT             NOT NULL
 		,[strSalesOrderNumber]			NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL
-		,[intEntityCustomerId]			INT             NOT NULL
+		,[intEntityCustomerId]			INT             NULL
 		,[dtmDate]						DATETIME        NOT NULL
 		,[intCurrencyId]				INT             NOT NULL
 		,[intCompanyLocationId]			INT             NULL

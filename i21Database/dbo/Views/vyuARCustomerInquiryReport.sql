@@ -18,8 +18,8 @@ SELECT
 								FROM tblARInvoice I WHERE I.ysnPosted = 1 AND YEAR(I.dtmPostDate) =  DATEPART(year, GETDATE()) - 1 AND I.intEntityCustomerId = CAR.intEntityCustomerId)
 , dblLastPayment			= ISNULL((SELECT TOP 1 ISNULL(dblAmountPaid, 0) FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 1 ORDER BY dtmDatePaid DESC, intPaymentId DESC), 0)
 , dtmLastPaymentDate		= (SELECT TOP 1 dtmDatePaid FROM tblARPayment WHERE intEntityCustomerId = CAR.intEntityCustomerId AND ysnPosted = 1 ORDER BY dtmDatePaid DESC, intPaymentId DESC)
-, dblLastStatement			= (SELECT TOP 1 [dblLastStatement] FROM [tblARStatementOfAccount] )
-, dtmLastStatementDate		= (SELECT TOP 1 [dtmLastStatementDate] FROM [tblARStatementOfAccount] )
+, dblLastStatement			= (SELECT TOP 1 [dblLastStatement] FROM [tblARStatementOfAccount] WHERE strEntityNo = CAR.strEntityNo)
+, dtmLastStatementDate		= (SELECT TOP 1 [dtmLastStatementDate] FROM [tblARStatementOfAccount] WHERE strEntityNo = CAR.strEntityNo)
 , dtmNextPaymentDate		= CB.dtmBudgetDate
 , dblUnappliedCredits		= CAR.dblCredits
 , dblPrepaids				= CAR.dblPrepaids
@@ -43,3 +43,7 @@ FROM vyuARCustomerAgingReport CAR
 LEFT JOIN tblARCustomerBudget CB 
 	ON CAR.intEntityCustomerId = CB.intEntityCustomerId 
 	AND DATEADD(MONTH, 1, GETDATE()) BETWEEN CB.dtmBudgetDate AND DATEADD(MONTH, 1, CB.dtmBudgetDate)
+
+
+
+	

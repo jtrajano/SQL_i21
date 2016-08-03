@@ -12,6 +12,7 @@
 	,@ContractSeq			INT
 	,@OriginalQuantity		NUMERIC(18,6)
 	,@CustomerPricingOnly	BIT
+	,@ExcludeContractPricing BIT
 	,@VendorId				INT
 	,@SupplyPointId			INT
 	,@LastCost				NUMERIC(18,6)
@@ -42,6 +43,7 @@ BEGIN
 			,NULL
 			,@OriginalQuantity
 			,@CustomerPricingOnly
+			,@ExcludeContractPricing
 			,@VendorId
 			,@SupplyPointId
 			,@LastCost

@@ -1,4 +1,7 @@
-﻿CREATE VIEW vyuAPPayables
+﻿/*
+	Note: Standard amount of void payment transaction is negative. The original transaction should be positive
+*/
+CREATE VIEW vyuAPPayables
 WITH SCHEMABINDING
 AS 
 SELECT 
@@ -25,7 +28,12 @@ UNION ALL
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
 	 C.strBillId ,
-	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0 THEN B.dblPayment * -1 ELSE B.dblPayment END AS dblAmountPaid,     
+	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0
+			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId IS NULL)
+						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+			WHEN C.intTransactionType != 1 AND B.dblPayment < 0 AND E.intBankTransactionTypeId = 19
+				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
+			ELSE B.dblPayment END AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -41,6 +49,8 @@ FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityVendorId] = D2.intEntityId)
-	ON A.[intEntityVendorId] = D.[intEntityVendorId]
+ 	ON A.[intEntityVendorId] = D.[intEntityVendorId]
+LEFT JOIN dbo.tblCMBankTransaction E
+	ON A.strPaymentRecordNum = E.strTransactionId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1

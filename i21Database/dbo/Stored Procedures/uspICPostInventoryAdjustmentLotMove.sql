@@ -169,7 +169,11 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Detail.dblCost -- Cost saved in Adj is expected to come from the cost bucket. 
+			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
+										dbo.fnGetItemStockUOM(Detail.intItemId)
+										,Detail.intItemUOMId
+										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
+									)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -193,7 +197,10 @@ BEGIN
 				AND ItemUOM.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemUOM WeightUOM
 				ON WeightUOM.intItemUOMId = Detail.intWeightUOMId
-				AND WeightUOM.intItemId = Detail.intItemId				
+				AND WeightUOM.intItemId = Detail.intItemId
+			LEFT JOIN dbo.tblICItemPricing ItemPricing
+				ON ItemPricing.intItemId = Detail.intItemId
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId					
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 

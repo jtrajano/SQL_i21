@@ -245,6 +245,7 @@ BEGIN
 				,ysnPosted				= 0
 				,strActualCostId		= IntegrationData.strActualCostId
 				,intTaxGroupId			= IntegrationData.intTaxGroupId
+				,intTransferorId		= IntegrationData.intTransferorId 
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -281,6 +282,7 @@ BEGIN
 				,ysnPosted
 				,strActualCostId
 				,intTaxGroupId
+				,intTransferorId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -317,6 +319,7 @@ BEGIN
 				/*ysnPosted*/					,0
 				/*strActualCostId*/				,IntegrationData.strActualCostId
 				/*intTaxGroupId*/				,IntegrationData.intTaxGroupId
+				/*intTransferorId*/				,IntegrationData.intTransferorId 
 			)
 		;
 				

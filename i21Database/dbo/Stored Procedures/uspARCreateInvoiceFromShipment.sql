@@ -28,66 +28,20 @@ DECLARE
 	,@Type						NVARCHAR(100)
 	,@EntityCustomerId			INT
 	,@CompanyLocationId			INT
-	,@AccountId					INT
-	,@CurrencyId				INT
-	,@SubCurrencyCents			INT
-	,@TermId					INT
+	,@CurrencyId				INT	
 	,@SourceId					INT
 	,@PeriodsToAccrue			INT
 	,@Date						DATETIME
-	,@DueDate					DATETIME
 	,@ShipDate					DATETIME
 	,@PostDate					DATETIME
 	,@CalculatedDate			DATETIME
-	,@InvoiceSubtotal			NUMERIC(18, 6)
-	,@Shipping					NUMERIC(18, 6)
-	,@Tax						NUMERIC(18, 6)
-	,@InvoiceTotal				NUMERIC(18, 6)
-	,@Discount					NUMERIC(18, 6)
-	,@DiscountAvailable			NUMERIC(18, 6)
-	,@Interest					NUMERIC(18, 6)
-	,@AmountDue					NUMERIC(18, 6)
-	,@Payment					NUMERIC(18, 6)
 	,@EntitySalespersonId		INT
 	,@FreightTermId				INT
 	,@ShipViaId					INT
-	,@PaymentMethodId			INT
-	,@InvoiceOriginId			NVARCHAR(8)
 	,@PONumber					NVARCHAR(25)
 	,@BOLNumber					NVARCHAR(50)
-	,@DeliverPickup				NVARCHAR(100)
 	,@Comments					NVARCHAR(max)
-	,@FooterComments			NVARCHAR(max)
 	,@ShipToLocationId			INT
-	,@ShipToLocationName		NVARCHAR(50)
-	,@ShipToAddress				NVARCHAR(100)
-	,@ShipToCity				NVARCHAR(30)
-	,@ShipToState				NVARCHAR(50)
-	,@ShipToZipCode				NVARCHAR(12)
-	,@ShipToCountry				NVARCHAR(25)
-	,@BillToLocationId			INT
-	,@BillToLocationName		NVARCHAR(50)
-	,@BillToAddress				NVARCHAR(100)
-	,@BillToCity				NVARCHAR(30)
-	,@BillToState				NVARCHAR(50)
-	,@BillToZipCode				NVARCHAR(12)
-	,@BillToCountry				NVARCHAR(25)
-	,@Posted					BIT
-	,@Paid						BIT
-	,@Processed					BIT
-	,@Template					BIT
-	,@Forgiven					BIT
-	,@Calculated				BIT
-	,@Splitted					BIT
-	,@PaymentId					INT
-	,@SplitId					INT
-	,@DistributionHeaderId		INT
-	,@LoadDistributionHeaderId	INT
-	,@ActualCostId				NVARCHAR(50)
-	,@InboundShipmentId			INT
-	,@TransactionId				INT
-	,@OriginalInvoiceId			INT
-	
 	
 SELECT
 	 @ShipmentNumber			= ICIS.[strShipmentNumber]
@@ -95,65 +49,20 @@ SELECT
 	,@Type						= 'Standard'
 	,@EntityCustomerId			= ICIS.[intEntityCustomerId]
 	,@CompanyLocationId			= ICIS.[intShipFromLocationId]	
-	,@AccountId					= NULL
-	,@CurrencyId				= ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
-	,@SubCurrencyCents			= NULL
-	,@TermId					= NULL
+	,@CurrencyId				= ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))	
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
 	,@Date						= @DateOnly
-	,@DueDate					= NULL
 	,@ShipDate					= ICIS.[dtmShipDate]
 	,@PostDate					= @DateOnly
 	,@CalculatedDate			= @DateOnly
-	,@InvoiceSubtotal			= @ZeroDecimal
-	,@Shipping					= @ZeroDecimal
-	,@Tax						= @ZeroDecimal
-	,@InvoiceTotal				= @ZeroDecimal
-	,@Discount					= @ZeroDecimal
-	,@DiscountAvailable			= @ZeroDecimal
-	,@Interest					= @ZeroDecimal
-	,@AmountDue					= @ZeroDecimal
-	,@Payment					= @ZeroDecimal
 	,@EntitySalespersonId		= ARC.[intSalespersonId]
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
-	,@PaymentMethodId			= NULL
-	,@InvoiceOriginId			= NULL
 	,@PONumber					= SO.[strPONumber]
 	,@BOLNumber					= ICIS.[strBOLNumber]
-	,@DeliverPickup				= NULL
 	,@Comments					= ICIS.[strShipmentNumber] + ' : '	+ ICIS.[strReferenceNumber]
-	,@FooterComments			= NULL
-	,@ShipToLocationId			= NULL
-	,@ShipToLocationName		= NULL
-	,@ShipToAddress				= NULL
-	,@ShipToCity				= NULL
-	,@ShipToState				= NULL
-	,@ShipToZipCode				= NULL
-	,@ShipToCountry				= NULL
-	,@BillToLocationId			= NULL
-	,@BillToLocationName		= NULL
-	,@BillToAddress				= NULL
-	,@BillToCity				= NULL
-	,@BillToState				= NULL
-	,@BillToZipCode				= NULL
-	,@BillToCountry				= NULL
-	,@Posted					= 0
-	,@Paid						= 0
-	,@Processed					= 0
-	,@Template					= 0
-	,@Forgiven					= 0
-	,@Calculated				= 0
-	,@Splitted					= 0
-	,@PaymentId					= NULL
-	,@SplitId					= NULL
-	,@DistributionHeaderId		= NULL
-	,@LoadDistributionHeaderId	= NULL
-	,@ActualCostId				= NULL
-	,@InboundShipmentId			= NULL
-	,@TransactionId				= NULL
-	,@OriginalInvoiceId			= NULL
+	,@ShipToLocationId			= ICIS.intShipToLocationId
 FROM 
 	[tblICInventoryShipment] ICIS
 INNER JOIN
@@ -162,6 +71,7 @@ INNER JOIN
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
+WHERE ICIS.intInventoryShipmentId = @ShipmentId
 		
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		
 
@@ -269,34 +179,34 @@ SELECT
 	,[intEntityCustomerId]					= @EntityCustomerId 
 	,[intCompanyLocationId]					= @CompanyLocationId 
 	,[intCurrencyId]						= @CurrencyId 
-	,[intSubCurrencyCents]					= @SubCurrencyCents 
-	,[intTermId]							= @TermId 
+	,[intSubCurrencyCents]					= NULL 
+	,[intTermId]							= NULL 
 	,[intPeriodsToAccrue]					= @PeriodsToAccrue 
 	,[dtmDate]								= @Date 
-	,[dtmDueDate]							= @DueDate 
+	,[dtmDueDate]							= NULL
 	,[dtmShipDate]							= @ShipDate 
 	,[intEntitySalespersonId]				= @EntitySalespersonId 
 	,[intFreightTermId]						= @FreightTermId 
 	,[intShipViaId]							= @ShipViaId 
-	,[intPaymentMethodId]					= @PaymentMethodId 
-	,[strInvoiceOriginId]					= @InvoiceOriginId 
+	,[intPaymentMethodId]					= NULL 
+	,[strInvoiceOriginId]					= NULL 
 	,[strPONumber]							= @PONumber 
 	,[strBOLNumber]							= @BOLNumber 
-	,[strDeliverPickup]						= @DeliverPickup 
+	,[strDeliverPickup]						= NULL 
 	,[strComments]							= @Comments 
 	,[intShipToLocationId]					= @ShipToLocationId 
-	,[intBillToLocationId]					= @BillToLocationId
-	,[ysnTemplate]							= @Template
-	,[ysnForgiven]							= @Forgiven
-	,[ysnCalculated]						= @Calculated
-	,[ysnSplitted]							= @Splitted
-	,[intPaymentId]							= @PaymentId
-	,[intSplitId]							= @SplitId
-	,[intDistributionHeaderId]				= @DistributionHeaderId
-	,[strActualCostId]						= @ActualCostId
+	,[intBillToLocationId]					= NULL
+	,[ysnTemplate]							= 0
+	,[ysnForgiven]							= 0
+	,[ysnCalculated]						= 0
+	,[ysnSplitted]							= 0
+	,[intPaymentId]							= NULL
+	,[intSplitId]							= NULL
+	,[intDistributionHeaderId]				= NULL
+	,[strActualCostId]						= NULL
 	,[intShipmentId]						= NULL
-	,[intTransactionId]						= @TransactionId
-	,[intOriginalInvoiceId]					= @OriginalInvoiceId
+	,[intTransactionId]						= NULL
+	,[intOriginalInvoiceId]					= NULL
 	,[intEntityId]							= @UserId
 	,[ysnResetDetails]						= 0
 	,[ysnRecap]								= 0
@@ -324,7 +234,6 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
-	--,[intCompanyLocationSubLocationId]		= ARSI.[intStorageLocationId] 
 	,[ysnRecomputeTax]						= 1
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL

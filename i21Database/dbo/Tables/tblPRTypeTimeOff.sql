@@ -5,7 +5,8 @@
     [strAwardPeriod]   NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPRType__strAw__4AF11DCD] DEFAULT ((0)) NULL,
     [intSort]          INT             NULL,
     [intConcurrencyId] INT             CONSTRAINT [DF__tblPRType__intCo__4DCD8A78] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblPRTypeTimeOff] PRIMARY KEY CLUSTERED ([intTypeTimeOffId] ASC)
+    CONSTRAINT [PK_tblPRTypeTimeOff] PRIMARY KEY CLUSTERED ([intTypeTimeOffId] ASC),
+	CONSTRAINT [AK_tblPRTypeTimeOff_strTimeOff] UNIQUE ([strTimeOff])
 );
 
 
