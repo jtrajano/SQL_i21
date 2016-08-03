@@ -55,7 +55,7 @@ END
 			SELECT DISTINCT intCustomerId = CV.intCustomerPatronId,
 						   strCustomerName = ENT.strName,
 						   strStockStatus = AC.strStockStatus,
-						   dtmLastActivityDate = max(CV.dtmLastActivityDate),
+						   dtmLastActivityDate = CV.dtmLastActivityDate,
 						   TC.strTaxCode,
 						   ysnEligibleRefund = (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) AND Total.dblRefundAmount >= @dblMinimumRefund THEN 1 ELSE 0 END),
 						   dblTotalPurchases = Total.dblTotalPurchases,
@@ -69,33 +69,26 @@ END
 						   dblTotalVolume = Total.dblVolume,
 						   dblTotalRefund = Total.dblTotalRefund
 					  FROM (
-					  SELECT DISTINCT B.intCustomerPatronId AS intCustomerId,
-								dblTotalPurchases = SUM(CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END),
-								dblTotalSales = SUM(CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END),
-								(CASE WHEN SUM(RRD.dblRate * dblVolume) <= @dblMinimumRefund THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
-								SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund,
-								SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (@FWT/100)) AS dbLessFWT,
-								@LessService AS dblLessServiceFee,
-								dblVolume = SUM(dblVolume),
-								dblTotalRefund = SUM(RRD.dblRate)
-						   FROM tblPATCustomerVolume B
-					 INNER JOIN tblPATRefundRateDetail RRD
-							 ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
-					 INNER JOIN tblPATRefundRate RR
-							 ON RR.intRefundTypeId = RRD.intRefundTypeId
-					 INNER JOIN tblARCustomer AC
-							 ON AC.intEntityCustomerId = B.intCustomerPatronId
-					  LEFT JOIN tblSMTaxCode TC
-							 ON TC.intTaxCodeId = AC.intTaxCodeId
-					 INNER JOIN tblEMEntity ENT
-							 ON ENT.intEntityId = B.intCustomerPatronId
-					 INNER JOIN tblPATPatronageCategory PC
-							 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-						   WHERE B.intCustomerPatronId = B.intCustomerPatronId
-					   GROUP BY B.intCustomerPatronId
+							SELECT	B.intCustomerPatronId as intCustomerId,
+									dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN ROUND(dblVolume,2) ELSE 0 END,
+									dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN ROUND(dblVolume,2) ELSE 0 END,
+									(CASE WHEN (RRD.dblRate * ROUND(dblVolume,2)) <= @dblMinimumRefund THEN 0 ELSE (RRD.dblRate * ROUND(dblVolume,2)) END) AS dblRefundAmount,
+									(RRD.dblRate * ROUND(dblVolume,2)) * (RR.dblCashPayout/100) AS dblCashRefund,
+									(RRD.dblRate * ROUND(dblVolume,2)) * (RR.dblCashPayout/100) * (@FWT/100) AS dbLessFWT,
+									@LessService AS dblLessServiceFee,
+									dblVolume = ROUND(dblVolume,2),
+									dblTotalRefund = RRD.dblRate,
+									B.intFiscalYear
+							FROM	tblPATCustomerVolume B
+								INNER JOIN tblPATRefundRateDetail RRD
+							ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
+								INNER JOIN tblPATRefundRate RR
+							ON RR.intRefundTypeId = RRD.intRefundTypeId
+								INNER JOIN tblPATPatronageCategory PC
+							ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 						) Total
 				 INNER JOIN tblPATCustomerVolume CV
-						ON CV.intCustomerPatronId = Total.intCustomerId
+						ON CV.intCustomerPatronId = Total.intCustomerId AND CV.intFiscalYear = Total.intFiscalYear
 				 INNER JOIN tblPATRefundRateDetail RRD
 						 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
 				 INNER JOIN tblPATRefundRate RR
@@ -110,19 +103,6 @@ END
 						 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 	 
 				   WHERE CV.intFiscalYear = @intFiscalYearId AND CV.dblVolume <> 0.00
-				   GROUP BY CV.intCustomerPatronId, 
-							ENT.strName, 
-							AC.strStockStatus,
-							AC.ysnSubjectToFWT, 
-							TC.strTaxCode, 
-							dblTotalPurchases,
-							dblTotalSales,
-							dblRefundAmount,
-							dblCashRefund,
-							dbLessFWT,
-							dblLessServiceFee,
-							Total.dblVolume,
-							Total.dblTotalRefund
 		) Results
 		WHERE Results.ysnEligibleRefund = 1
 	END

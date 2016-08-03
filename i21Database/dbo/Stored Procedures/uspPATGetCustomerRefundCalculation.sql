@@ -67,10 +67,11 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 					dblCashRefund = Total.dblCashRefund,
 					dblEquityRefund = Total.dblRefundAmount - Total.dblCashRefund
 			   FROM (
-					SELECT DISTINCT intCustomerId = B.intCustomerPatronId,
-								(CASE WHEN SUM(RRD.dblRate * dblVolume) <= 10 THEN 0 ELSE SUM(RRD.dblRate * dblVolume) END) AS dblRefundAmount,
-								SUM((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund,
-								RRD.intPatronageCategoryId
+					SELECT		intCustomerId = B.intCustomerPatronId,
+								(CASE WHEN RRD.dblRate * ROUND(dblVolume,2) <= 10 THEN 0 ELSE RRD.dblRate * ROUND(dblVolume,2) END) AS dblRefundAmount,
+								(RRD.dblRate * ROUND(dblVolume,2)) * (RR.dblCashPayout/100) AS dblCashRefund,
+								RRD.intPatronageCategoryId,
+								B.intFiscalYear
 						   FROM tblPATCustomerVolume B
 					 INNER JOIN tblPATRefundRateDetail RRD
 							 ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -84,10 +85,9 @@ DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM
 							 ON ENT.intEntityId = B.intCustomerPatronId
 					 INNER JOIN tblPATPatronageCategory PC
 							 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
-					   GROUP BY B.intCustomerPatronId, RR.dblCashPayout,RRD.intPatronageCategoryId
 				  ) Total
 		 INNER JOIN tblPATCustomerVolume CV
-				ON CV.intCustomerPatronId = Total.intCustomerId AND CV.intPatronageCategoryId = Total.intPatronageCategoryId
+				ON CV.intCustomerPatronId = Total.intCustomerId AND CV.intPatronageCategoryId = Total.intPatronageCategoryId AND CV.intFiscalYear = Total.intFiscalYear
 		 INNER JOIN tblPATRefundRateDetail RRD
 				 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
 		 INNER JOIN tblPATRefundRate RR
