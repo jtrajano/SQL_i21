@@ -429,6 +429,7 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		AND intNetworkId IS NULL
+		AND intSiteId = @intSiteId
 
 		IF(@intProductId != 0)
 		BEGIN
@@ -446,6 +447,7 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		AND intSiteId IS NULL
+		AND intNetworkId = @intNetworkId
 
 		IF(@intProductId != 0)
 		BEGIN
