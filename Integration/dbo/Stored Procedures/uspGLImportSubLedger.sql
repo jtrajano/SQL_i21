@@ -208,7 +208,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			@glije_correcting,@glije_error_desc,@glije_period
     			WHILE @@FETCH_STATUS = 0
     			BEGIN
-    				SELECT @debit = 0,@credit = 0,@debitUnit = 0,@creditUnit = 0, @creditUnitInLBS = 0 , @debitUnitInLBS = 0
+    				SELECT @debit = 0,@credit = 0,@debitUnit = 0,@creditUnit = 0, @creditUnitInLBS = 0 , @debitUnitInLBS = 0, @intAccountId = NULL
     				IF NOT EXISTS (
     					SELECT * FROM tblGLCOACrossReference WHERE @glije_acct_no = strExternalId)
     				BEGIN
