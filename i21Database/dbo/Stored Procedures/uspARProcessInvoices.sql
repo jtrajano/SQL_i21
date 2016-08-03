@@ -232,7 +232,7 @@ DECLARE  @Id									INT
 		,@ClearDetailTaxes						BIT
 		,@TempDetailIdForTaxes					INT
 		,@SubCurrency							BIT			
-		
+		,@ItemIsBlended							BIT
 
 --INSERT
 BEGIN TRY
@@ -363,6 +363,7 @@ BEGIN
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
 		,@SubCurrency					= (CASE WHEN @GroupingOption = 0 THEN [ysnSubCurrency] ELSE 0 END)
+		,@ItemIsBlended					= [ysnBlended]
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -679,6 +680,7 @@ BEGIN
 					,@ClearDetailTaxes				= [ysnClearDetailTaxes]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 					,@SubCurrency					= [ysnSubCurrency]
+					,@ItemIsBlended					= [ysnBlended]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -742,6 +744,7 @@ BEGIN
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
 						,@SubCurrency					= @SubCurrency
+						,@ItemIsBlended					= @ItemIsBlended
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN

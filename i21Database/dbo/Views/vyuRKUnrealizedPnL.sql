@@ -49,7 +49,8 @@ SELECT  intFutOptTransactionId,
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId =1 
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId  
-  )t1)t1 WHERE (dblLong > 0 or dblShort > 0)  
+  )t1)t1 
+  --WHERE (dblLong > 0 or dblShort > 0)  
     
 UNION ALL
     
@@ -99,6 +100,6 @@ SELECT  intFutOptTransactionId,
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId =1  
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId  
-  )t1)t1 WHERE MatchLong = intOriginalQty or MatchShort = intOriginalQty )t
-   ORDER BY RowNum ASC
+  )t1)t1
+   WHERE MatchLong = intOriginalQty or MatchShort = intOriginalQty)t ORDER BY RowNum ASC
 

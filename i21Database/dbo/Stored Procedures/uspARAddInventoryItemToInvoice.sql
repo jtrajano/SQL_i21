@@ -58,6 +58,7 @@
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
 	,@SubCurrency					BIT				= 0
+	,@ItemIsBlended					BIT				= 0
 AS
 
 BEGIN
@@ -206,6 +207,7 @@ BEGIN TRY
 				,[dblTotalTax]
 				,[dblTotal]
 				,[ysnSubCurrency]
+				,[ysnBlended]
 				,[intAccountId]
 				,[intCOGSAccountId]
 				,[intSalesAccountId]
@@ -270,6 +272,7 @@ BEGIN TRY
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
 				,[ysnSubCurrency]					= @SubCurrency
+				,[ysnBlended]						= @ItemIsBlended
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 
 				,[intSalesAccountId]				= Acct.[intSalesAccountId]

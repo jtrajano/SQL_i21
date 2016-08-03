@@ -3,14 +3,18 @@
 	,@LocationId			INT
 	,@TransactionDate		DATETIME
 	,@TransactionType		NVARCHAR(20) -- Purchase/Sale
-	,@EntityId				INT			= NULL
-	,@TaxGroupId			INT			= NULL
-	,@BillShipToLocationId	INT			= NULL
-	,@IncludeExemptedCodes	BIT			= NULL
-	,@SiteId				INT			= NULL
+	,@EntityId				INT				= NULL
+	,@TaxGroupId			INT				= NULL
+	,@BillShipToLocationId	INT				= NULL
+	,@IncludeExemptedCodes	BIT				= NULL
+	,@SiteId				INT				= NULL
+	,@FreightTermId			INT				= NULL
 AS
 
 BEGIN
+
+	IF ISNULL(@FreightTermId,0) <> 0 AND LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),'')))) <> 'origin'
+		SET @BillShipToLocationId = NULL
 
 	IF ISNULL(@TaxGroupId,0) = 0
 		BEGIN				
