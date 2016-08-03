@@ -1035,6 +1035,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         return win.context;
     },
+    
+    orgValueLocation: '',
 
     onGridAfterLayout: function(grid) {
         "use strict";
@@ -1378,15 +1380,70 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
         var me = this;
-
+        var grdInventoryReceiptCount = 0;
+        
         if (current) {
-            current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
             if (current.tblICInventoryReceiptItems()) {
-                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
-                    current.currentReceiptItem = item;
-                    me.calculateItemTaxes();
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function(row) {
+                    if (!row.dummy) {
+                        grdInventoryReceiptCount++;
+                    }
                 });
             }
+            
+            if(Inventory.view.InventoryReceiptViewController.orgValueLocation !== current.get('intLocationId')) {
+                        var buttonAction = function(button) {
+                            if (button === 'yes') {  
+                                //Remove all Sub and Storage Locations Receipt Grid                   
+                                var receiptItems = current['tblICInventoryReceiptItems'](),
+                                    receiptItemRecords = receiptItems ? receiptItems.getRange() : [];
+
+                                 var i = receiptItemRecords.length - 1;
+
+                                  for (; i >= 0; i--) {
+                                      if (!receiptItemRecords[i].dummy) {
+                                          receiptItemRecords[i].set('intStorageLocationId', null);
+                                          receiptItemRecords[i].set('strStorageLocationName', null);
+                                          receiptItemRecords[i].set('intSubLocationId', null);
+                                          receiptItemRecords[i].set('strSubLocationName', null);
+                                      }
+
+                                    //Remove all Storage Locations in Lot Grid
+                                    var currentReceiptItem = receiptItemRecords[i];
+                                    var receiptItemLots = currentReceiptItem['tblICInventoryReceiptItemLots'](),
+                                        receiptItemLotRecords = receiptItemLots ? receiptItemLots.getRange() : [];
+
+                                        var li = receiptItemLotRecords.length - 1;
+
+                                      for (; li >= 0; li--) {
+                                          if (!receiptItemLotRecords[li].dummy)
+                                          receiptItemLotRecords[li].set('intStorageLocationId', null);
+                                          receiptItemLotRecords[li].set('strStorageLocation', null);
+                                      }
+                                  }
+                                 current.set('strLocationName', records[0].get('strLocationName'));
+                                
+                                current.set('intTaxGroupId', records[0].get('intTaxGroupId'));
+                                if (current.tblICInventoryReceiptItems()) {
+                                    Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function (item) {
+                                        current.currentReceiptItem = item;
+                                        me.calculateItemTaxes();
+                                    });
+                                }
+                            }
+                            else {
+                               current.set('intLocationId', Inventory.view.InventoryReceiptViewController.orgValueLocation);
+                            }
+                        };
+                        
+                        if(grdInventoryReceiptCount > 0) {
+                                iRely.Functions.showCustomDialog('question', 'yesno', 'Changing Location will clear ALL Sub Locations and Storage Locations. Do you want to continue?', buttonAction);
+                            }
+                        else {
+                            current.set('strLocationName', records[0].get('strLocationName'));
+                        }
+            }
+                
         }
     },
 
@@ -1501,7 +1558,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var lifetimeType = current.get('strLifeTimeType');
             var expiryDate = i21.ModuleMgr.Inventory.computeDateAdd(receiptDate, lifetime, lifetimeType);
 
-            switch (records[0].get('strLotTracking')) {
+          /*  switch (records[0].get('strLotTracking')) {
                 case 'Yes - Serial Number':
                 case 'Yes - Manual':
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
@@ -1524,7 +1581,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     });
                     current.tblICInventoryReceiptItemLots().add(newLot);
                     break;
-            }
+            }*/
         }
         else if (combo.itemId === 'cboItemUOM') {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
@@ -4607,6 +4664,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 return false;
         }
     },
+    
+    onLocationBeforeSelect: function (combo, record, index, eOpts) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        
+        Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('intLocationId');
+    },
 
     init: function (application) {
         this.control({
@@ -4617,6 +4681,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboLocation": {
                 drilldown: this.onLocationDrilldown,
+                beforeselect: this.onLocationBeforeSelect,
                 select: this.onLocationSelect
             },
             "#cboCurrency": {
