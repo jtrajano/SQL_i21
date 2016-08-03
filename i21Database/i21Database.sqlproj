@@ -3612,6 +3612,7 @@
     <Build Include="dbo\Views\vyuICCompareRebuildValuationSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateShipmentItemLocations.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
