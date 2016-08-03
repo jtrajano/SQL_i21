@@ -9,7 +9,7 @@
 	,@FreightTermId			INT				= NULL
 AS
 
-	IF LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),'')))) <> 'origin'
+	IF ISNULL(@FreightTermId,0) <> 0 AND LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),'')))) <> 'origin'
 		SET @CustomerLocationId = NULL
 
 	IF(ISNULL(@TaxGroupId,0) = 0)
