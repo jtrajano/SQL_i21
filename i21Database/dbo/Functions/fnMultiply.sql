@@ -94,6 +94,5 @@ BEGIN
 	
 	-- Excel can only handle 15 significant figures. So let's round it at the 12th decimal place. 
 	SET @product = ROUND(@product, 12) 
-
 	RETURN @product
 END
