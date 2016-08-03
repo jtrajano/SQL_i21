@@ -4306,6 +4306,7 @@
     <Build Include="dbo\Tables\tblRKSettlementPriceImport_ErrLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
