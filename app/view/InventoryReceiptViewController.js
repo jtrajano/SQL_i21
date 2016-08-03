@@ -1058,6 +1058,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         return win.context;
     },
+    
+    orgValueLocation: '',
 
     createTransaction: function(config, action) {
         var me = this,
