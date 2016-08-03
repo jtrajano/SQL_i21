@@ -214,6 +214,7 @@ BEGIN TRY
 				,[dtmDate]
 				,[dblQty]
 				,[dblUOMQty]
+				,[intCostUOMId]
 				,[dblVoucherCost]
 				,[intCurrencyId]
 				,[dblExchangeRate]
@@ -233,9 +234,10 @@ BEGIN TRY
 			SELECT [intItemId] = PL.intItemId
 				,[intItemLocationId] = L.intItemLocationId
 				,[intItemUOMId] = PL.intItemUOMId
-				,[dtmDate] = PL.dtmProductionDate
+				,[dtmDate] = Isnull(PL.dtmProductionDate,@dtmCurrentDateTime)
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
+				,[intCostUOMId]=PL.intItemUOMId
 				,[dblNewCost] = @dblNewUnitCost
 				,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
