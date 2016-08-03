@@ -4134,6 +4134,7 @@
     <Build Include="dbo\Tables\tblICRebuildValuationGLSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareGLSnapshotOnRebuildInventoryValuation.sql" />
     <Build Include="dbo\Views\vyuICCompareRebuildValuationSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRAddTimeOffToCalendar.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
