@@ -84,6 +84,8 @@ BEGIN
 	AND ysnPosted = 1 AND ysnPrinted = 1 AND ysnVoid = 0
 
 	SET @isVoidSuccessful = 1
+
+	EXEC uspSMAuditLog 'Payroll.view.Paycheck', @intPaycheckId, @intUserId, 'Voided', '', '', ''
 END
 
 -- Clean-up routines:

@@ -896,8 +896,13 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Commit:
 	SET @message_id = 10000
-	SET @isSuccessful = 1
+	SET @isSuccessful = 1	
 	COMMIT TRANSACTION
+
+	DECLARE @actionType NVARCHAR(10)
+	SELECT @actionType = CASE WHEN (@ysnPost = 1) THEN 'Posted' ELSE 'Unposted' END
+	EXEC uspSMAuditLog 'Payroll.view.Paycheck', @intPaycheckId, @intUserId, @actionType, '', '', ''
+
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
