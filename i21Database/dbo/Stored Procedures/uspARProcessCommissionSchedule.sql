@@ -153,7 +153,7 @@ AS
 										  @intActiveCommSchedId
 										, CS.intCommissionPlanId
 										, CS.strEntityIds
-										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN AL.intEntityUserSecurityId ELSE NULL END
+										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN ISNULL(AL.intEntityUserSecurityId, AL.intAlternateEntityUserSecurityId) ELSE NULL END
 										, @dtmStartDate
 										, @dtmEndDate
 										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
@@ -282,7 +282,7 @@ AS
 																  @intActiveCommSchedId
 																, @intCommissionPlanId
 																, @intEntityId
-																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN AL.intEntityUserSecurityId ELSE NULL END
+																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN ISNULL(AL.intEntityUserSecurityId, AL.intAlternateEntityUserSecurityId) ELSE NULL END
 																, @dtmStartDate
 																, @dtmEndDate
 																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
