@@ -15,14 +15,14 @@ BEGIN
 		,@strItemGroupName NVARCHAR(50)
 		,@strShowStorage NVARCHAR(50)
 		,@intBlendAttributeId INT
-		,@strBlendAttributeValue NVARCHAR(50)
+		,@strBlendAttributeValue NVARCHAR(MAX)
 		,@dtmCurrentDateTime DATETIME
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
 	SELECT @intBlendAttributeId = intAttributeId
 	FROM tblMFAttribute
-	WHERE strAttributeName = 'Blend Category'
+	WHERE strAttributeName = 'Category for Ingredient Demand Report'
 
 	SELECT @strBlendAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -276,7 +276,10 @@ BEGIN
 			,I.strDescription
 		FROM tblICItem I
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode = @strBlendAttributeValue
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 			AND strItemNo LIKE @strItemNo + '%'
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
@@ -293,7 +296,10 @@ BEGIN
 			,I.strDescription
 		FROM tblICItem I
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode = @strBlendAttributeValue
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 			--AND strItemGroupName LIKE @strItemGroupName + '%'
 	END
 	ELSE IF @strItemNo <> ''
@@ -309,7 +315,10 @@ BEGIN
 			,I.strDescription
 		FROM tblICItem I
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode = @strBlendAttributeValue
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 			AND strItemNo LIKE @strItemNo + '%'
 	END
 	ELSE
@@ -324,7 +333,10 @@ BEGIN
 			,I.strDescription
 		FROM tblICItem I
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-		WHERE C.strCategoryCode = @strBlendAttributeValue
+		WHERE C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 	END
 
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
@@ -378,7 +390,7 @@ BEGIN
 			,I.strDescription
 			,CL.intCompanyLocationId
 			,CL.strLocationName
-			,SUM(RI.dblCalculatedQuantity * Round(SWD.dblPlannedQty, 0))
+			,SUM(RI.dblCalculatedQuantity * SWD.dblPlannedQty)
 			,'' AS strName
 			,CD.dtmCalendarDate
 			,'' strWorkInstruction
@@ -397,7 +409,10 @@ BEGIN
 			AND RI.intRecipeItemTypeId = 1
 		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
-			AND C.strCategoryCode = @strBlendAttributeValue
+			AND C.strCategoryCode IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 		JOIN @tblICItem I ON I.intItemId = II.intItemId
 		--JOIN dbo.tblEMEntity E ON E.intEntityId = I.intOwnerId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
@@ -522,7 +537,11 @@ BEGIN
 	INSERT INTO @tblMFQtyOnHand
 	SELECT L.intLocationId AS intCompanyLocationId
 		,I.intItemId
-		,Sum(L.dblWeight) AS dblWeight
+		,SUM(CASE 
+				WHEN L.intWeightUOMId IS NULL
+					THEN L.dblQty
+				ELSE L.dblWeight
+				END) AS dblWeight
 	FROM @tblICItem I
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
@@ -1051,11 +1070,11 @@ BEGIN
 			,'Blend' AS strItemType
 			,a.intRowNumber
 			,a.strWorkOrderNo
-			,Convert(NVARCHAR, a.dtmPlannedDateTime, 106) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
+			,convert(VARCHAR(10), a.dtmPlannedDateTime, 120) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner
-			,Convert(DateTime, a.dtmPlannedDate, 106) AS dtmPlannedDate
+			,convert(VARCHAR(10), a.dtmPlannedDate, 120) AS dtmPlannedDate
 			,a.strComments
 			,a.intNoOfDays
 			,a.dblQuantity
@@ -1090,11 +1109,11 @@ BEGIN
 			,'Blend' AS strItemType
 			,a.intRowNumber
 			,a.strWorkOrderNo
-			,Convert(NVARCHAR, a.dtmPlannedDateTime, 106) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
+			,convert(VARCHAR(10), a.dtmPlannedDateTime, 120) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner
-			,Convert(DateTime, a.dtmPlannedDate, 106) AS dtmPlannedDate
+			,convert(VARCHAR(10), a.dtmPlannedDate, 120) AS dtmPlannedDate
 			,a.strComments
 			,a.intNoOfDays
 			,a.dblQuantity
@@ -1134,11 +1153,11 @@ BEGIN
 			,'Blend' AS strItemType
 			,a.intRowNumber
 			,a.strWorkOrderNo
-			,Convert(NVARCHAR, a.dtmPlannedDateTime, 106) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
+			,convert(VARCHAR(10), a.dtmPlannedDateTime, 120) + N' ' + CONVERT(NVARCHAR, a.dtmPlannedDateTime, 8) AS dtmPlannedDateTime
 			,a.strCompanyLocationName
 			,a.dblItemRequired
 			,a.strOwner
-			,Convert(DateTime, a.dtmPlannedDate, 106) AS dtmPlannedDate
+			,convert(VARCHAR(10), a.dtmPlannedDate, 120) AS dtmPlannedDate
 			,a.strComments
 			,a.intNoOfDays
 			,a.dblQuantity
@@ -1152,6 +1171,3 @@ BEGIN
 			,dtmPlannedDateTime
 	END
 END
-GO
-
-
