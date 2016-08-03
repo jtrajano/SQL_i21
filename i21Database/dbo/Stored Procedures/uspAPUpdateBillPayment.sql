@@ -15,7 +15,7 @@ SET ANSI_WARNINGS OFF
 IF @post = 0
 BEGIN
 	UPDATE tblAPBill
-		SET tblAPBill.dblAmountDue = (CASE WHEN C.intTransactionType !=1 THEN B.dblAmountDue * -1 ELSE B.dblAmountDue END),
+		SET tblAPBill.dblAmountDue = B.dblAmountDue, --(CASE WHEN C.intTransactionType !=1 THEN B.dblAmountDue * -1 ELSE B.dblAmountDue END),
 			tblAPBill.ysnPaid = 0,
 			tblAPBill.dblPayment = (C.dblPayment - B.dblPayment),
 			tblAPBill.dtmDatePaid = NULL,

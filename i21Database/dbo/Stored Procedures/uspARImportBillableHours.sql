@@ -16,12 +16,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal decimal(18,6)
-		,@DateOnly DATETIME
-		,@CompanyLocationId int
+DECLARE @ZeroDecimal		NUMERIC(18,6)
+	  , @DateOnly			DATETIME
+	  , @CompanyLocationId	INT
 
 SET @ZeroDecimal = 0.000000	
-SET @DateOnly = CAST(GETDATE() as date)
+SET @DateOnly = CAST(GETDATE() AS DATE)
 SET @CompanyLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)
 
 DECLARE @TicketHoursWorked TABLE(
@@ -62,6 +62,8 @@ BEGIN
 END
 
 DECLARE @NewInvoices AS TABLE (intEntityCustomerId INT, intCompanyLocationId INT)
+DECLARE @NewlyCreatedInvoices AS TABLE (intInvoiceId INT)
+
 INSERT INTO @NewInvoices
 SELECT DISTINCT
 	V.[intEntityCustomerId]
@@ -86,7 +88,6 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 				,@ErrorMessage nvarchar(250)
 				
 		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId, @ComLocationId = intCompanyLocationId FROM @NewInvoices
-				
 				
 		EXEC [dbo].[uspARCreateCustomerInvoice]
 			@EntityCustomerId = @EntityCustomerId,
@@ -153,10 +154,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		WHERE
 			V.intEntityCustomerId = @EntityCustomerId
 			AND ISNULL(V.intCompanyLocationId,@CompanyLocationId) = @ComLocationId
-			
-		
 		
 		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		
+		INSERT INTO @NewlyCreatedInvoices
+		SELECT @NewInvoiceId
 		
 		DELETE FROM @NewInvoices WHERE intEntityCustomerId = @EntityCustomerId AND intCompanyLocationId = @ComLocationId
 	END
@@ -180,40 +182,37 @@ INNER JOIN
 		                    
 IF @Post = 1
 	BEGIN
-		DECLARE	@return_value int,
-				@success bit,
-				@minId int,
-				@maxId int,
-				@batchId NVARCHAR(20),
-				@SuccessCount INT,
-				@InvCount INT
+		DECLARE	@return_value	INT,
+				@success		BIT,
+				@params			NVARCHAR(MAX),
+				@batchId		NVARCHAR(20),
+				@SuccessCount	INT,
+				@InvCount		INT
 				
-		SELECT
-			 @minId = MIN(I.[intInvoiceId])
-			,@maxId = MAX(I.[intInvoiceId])
-		FROM				
-			[tblARInvoice] I
-		INNER JOIN
-			[tblARInvoiceDetail] D
-				ON I.[intInvoiceId] = D.[intInvoiceId]
-		INNER JOIN
-			tblHDTicketHoursWorked V
-				ON D.[intTicketHoursWorkedId] = V.[intTicketHoursWorkedId]
-		INNER JOIN
-			@TicketHoursWorked HW
-				ON V.[intTicketId] = HW.[intTicketId]	
-									
+		WHILE EXISTS(SELECT TOP 1 NULL FROM @NewlyCreatedInvoices)
+			BEGIN
+				DECLARE @intInvoiceId INT
+				
+				SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @NewlyCreatedInvoices ORDER BY intInvoiceId
+				
+				IF (SELECT COUNT(*) FROM @NewlyCreatedInvoices) > 1
+					SELECT @params = ISNULL(@params, '') + intInvoiceId + ', ' FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
+				ELSE
+					SELECT @params = ISNULL(@params, '') + intInvoiceId FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
+
+				DELETE FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
+			END
+		
+		SELECT @params = intInvoiceId FROM @NewlyCreatedInvoices									
 				
 		EXEC	@return_value = [dbo].[uspARPostInvoice]
 				@batchId = NULL,
 				@post = 1,
 				@recap = 0,
-				@param = NULL,
+				@param = @params,
 				@userId = @UserId,
 				@beginDate = NULL,
 				@endDate = NULL,
-				@beginTransaction = @minId,
-				@endTransaction = @maxId,
 				@exclude = NULL,
 				@successfulCount = @SuccessCount OUTPUT,
 				@invalidCount = @InvCount OUTPUT,

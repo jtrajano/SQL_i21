@@ -360,7 +360,7 @@ SET @strmessage = 'Delete is not allowed. %s is posted.'
 EXEC sp_addmessage 80070,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80071) EXEC sp_dropmessage 80071, 'us_english'	
-SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot in item %s.'
+SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for the lot %s in item %s that was posted in %s.'
 EXEC sp_addmessage 80071,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80072) EXEC sp_dropmessage 80072, 'us_english'	
@@ -411,3 +411,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80083) EXEC sp_dropmessa
 SET @strmessage = 'The new Item Location is invalid or missing for %s.'
 EXEC sp_addmessage 80083,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80084) EXEC sp_dropmessage 80084, 'us_english'	
+SET @strmessage = 'Check the Rebuild Valuation GL Snapshot. The original GL values changed when compared against the rebuild values. To check the discrepancies, run: SELECT * FROM vyuICCompareRebuildValuationSnapshot WHERE dtmRebuildDate = ''%s'''
+EXEC sp_addmessage 80084,11,@strmessage,'us_english','False'

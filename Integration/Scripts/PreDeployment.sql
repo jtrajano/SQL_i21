@@ -171,7 +171,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryFillReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateWorkOrderReportView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateCallEntryPrintOutReportView.sql"
-
+:r "..\dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql"
 
 
 

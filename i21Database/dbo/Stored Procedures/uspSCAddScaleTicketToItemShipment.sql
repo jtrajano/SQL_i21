@@ -168,14 +168,11 @@ BEGIN
 									  END
 			,intStorageLocationId	= SC.intStorageLocationId
 			,intDiscountSchedule	= SC.intDiscountId
-	FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
-				ON ItemUOM.intItemId = SC.intItemId
-				AND ItemUOM.intItemUOMId = @intTicketItemUOMId
-			INNER JOIN dbo.tblICUnitMeasure UOM
-				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-			LEFT JOIN dbo.tblCTContractDetail CNT
-				ON CNT.intContractDetailId = LI.intTransactionDetailId
-	WHERE	SC.intTicketId = @intTicketId
+	FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
+			INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId
+			INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+	WHERE	SC.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 
 END
 

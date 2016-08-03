@@ -52,3 +52,15 @@
 	CONSTRAINT [FK_tblQMTestResult_tblQMProperty_intParentPropertyId] FOREIGN KEY ([intParentPropertyId]) REFERENCES [tblQMProperty]([intPropertyId]), 
 	CONSTRAINT [FK_tblQMTestResult_tblQMListItem] FOREIGN KEY ([intListItemId]) REFERENCES [tblQMListItem]([intListItemId]) 
 )
+
+GO
+
+CREATE INDEX [IX_tblQMTestResult_intSampleId] ON [dbo].[tblQMTestResult] ([intSampleId])
+
+GO
+
+CREATE INDEX [IX_tblQMTestResult_intPropertyId] ON [dbo].[tblQMTestResult] ([intPropertyId])
+
+GO
+
+CREATE INDEX [IX_tblQMTestResult_intSampleId_intPropertyId] ON [dbo].[tblQMTestResult] ([intSampleId], [intPropertyId])

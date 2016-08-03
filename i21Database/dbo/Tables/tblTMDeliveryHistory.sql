@@ -751,3 +751,26 @@ CREATE INDEX [IX_tblTMDeliveryHistory_intInvoiceId] ON [dbo].[tblTMDeliveryHisto
 GO
 
 CREATE INDEX [IX_tblTMDeliveryHistory_strInvoiceNumber] ON [dbo].[tblTMDeliveryHistory] ([strInvoiceNumber])
+    
+GO
+
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallDispatchId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallDispatchId])
+
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallSubstituteProductId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallSubstituteProductId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallDriverId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallDriverId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_intWillCallUserId] ON [dbo].[tblTMDeliveryHistory] ([intWillCallUserId])
+
+GO
+
+CREATE INDEX [IX_tblTMDeliveryHistory_strWillCallOrderNumber] ON [dbo].[tblTMDeliveryHistory] ([strWillCallOrderNumber])
+

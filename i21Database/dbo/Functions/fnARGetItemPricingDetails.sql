@@ -1,28 +1,29 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetItemPricingDetails]
 (
-	 @ItemId				INT
-	,@CustomerId			INT	
-	,@LocationId			INT
-	,@ItemUOMId				INT
-	,@TransactionDate		DATETIME
-	,@Quantity				NUMERIC(18,6)
-	,@ContractHeaderId		INT
-	,@ContractDetailId		INT
-	,@ContractNumber		NVARCHAR(50)
-	,@ContractSeq			INT
-	,@AvailableQuantity		NUMERIC(18,6)
-	,@UnlimitedQuantity     BIT
-	,@OriginalQuantity		NUMERIC(18,6)
-	,@CustomerPricingOnly	BIT
-	,@VendorId				INT
-	,@SupplyPointId			INT
-	,@LastCost				NUMERIC(18,6)
-	,@ShipToLocationId      INT
-	,@VendorLocationId		INT
-	,@PricingLevelId		INT
-	,@AllowQtyToExceed		BIT
-	,@InvoiceType			NVARCHAR(200)
-	,@TermId				INT
+	 @ItemId					INT
+	,@CustomerId				INT	
+	,@LocationId				INT
+	,@ItemUOMId					INT
+	,@TransactionDate			DATETIME
+	,@Quantity					NUMERIC(18,6)
+	,@ContractHeaderId			INT
+	,@ContractDetailId			INT
+	,@ContractNumber			NVARCHAR(50)
+	,@ContractSeq				INT
+	,@AvailableQuantity			NUMERIC(18,6)
+	,@UnlimitedQuantity			BIT
+	,@OriginalQuantity			NUMERIC(18,6)
+	,@CustomerPricingOnly		BIT
+	,@ExcludeContractPricing	BIT
+	,@VendorId					INT
+	,@SupplyPointId				INT
+	,@LastCost					NUMERIC(18,6)
+	,@ShipToLocationId			INT
+	,@VendorLocationId			INT
+	,@PricingLevelId			INT
+	,@AllowQtyToExceed			BIT
+	,@InvoiceType				NVARCHAR(200)
+	,@TermId					INT
 )
 RETURNS @returntable TABLE
 (
@@ -50,9 +51,12 @@ DECLARE	 @Price			NUMERIC(18,6)
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
 	IF @CustomerPricingOnly IS NULL
-		SET @CustomerPricingOnly = 0			
+		SET @CustomerPricingOnly = 0	
 		
-	IF @CustomerPricingOnly = 0
+	IF @ExcludeContractPricing IS NULL
+		SET @ExcludeContractPricing = 0				
+		
+	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1)
 	BEGIN
 		--Customer Contract Price		
 		SELECT TOP 1

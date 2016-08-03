@@ -8,7 +8,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 
 	 -- Header
 	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
-	,[intEntityVendorId] INT NOT NULL						-- The Vendor. 
+	,[intEntityVendorId] INT NULL							-- The Vendor. 
 	,[intShipFromId] INT NOT NULL						    -- The Vendor Location. 
 	,[intLocationId] INT NOT NULL                           -- Company Location	
 	,[strBillOfLadding] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL --Bill of Ladding Number
@@ -23,6 +23,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Vendor Reference No. 
 	,[intTaxGroupId] INT NULL								-- Overriding Tax Group Id, if you want to override the Tax Group that will be used from the Ship From Location setup.
 	,[intSubCurrencyCents] INT NULL DEFAULT 1
+	,[intTransferorId] INT NULL 
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 

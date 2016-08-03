@@ -15,7 +15,7 @@ SELECT
 	     when B.ysnPassedThruArCustomer = 1 then 'Company Owned Pass Thru' else 'Company Owned' 		 
 		 end strSiteType,
 	 convert(bit,0)  as ysnPostNetToArCustomer,
-	 0  as intSharedFeePercentage,
+	 0  as dblSharedFeePercentage,
 	 C.intCompanyOwnedSiteId,
 	 C.intDealerSiteId,
 	 null as intAccountId,
@@ -51,7 +51,7 @@ SELECT
 	     when E.ysnSharedFee = 1 then 'Dealer Site Shared Fees' else 'Dealer Site' 		 
 		 end strSiteType,
 	E.ysnPostNetToArCustomer,
-	E.intSharedFeePercentage,
+	E.dblSharedFeePercentage,
 	C.intCompanyOwnedSiteId,
 	C.intDealerSiteId,
 	E.intAccountId,

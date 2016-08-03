@@ -67,6 +67,7 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM	ItemUOM
 				ON ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId
 	WHERE	A.intBillId = @billId
+	AND B.intUnitOfMeasureId > 0
 
 	-- Call the stored procedure that updates the on order qty. 
 	EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty

@@ -30,9 +30,9 @@ SET @dateFrom = CAST(-53690 AS DATETIME)
 SET @dateTo = CAST(GETDATE() AS DATETIME)
 
 INSERT INTO @temp_aging_table
-EXEC uspARCustomerAgingAsOfDateReport @dateFrom, @dateTo, NULL
+EXEC uspARCustomerAgingAsOfDateReport @dateFrom, @dateTo, NULL, @CustomerId
 
-IF ISNULL(@CustomerId, 0) = 0 AND ISNULL(@InvoiceId, 0) > 0 --AFTER POST INVOICE
+IF ISNULL(@CustomerId, 0) <> 0 AND ISNULL(@InvoiceId, 0) <> 0 --AFTER POST INVOICE
 	BEGIN
 		SELECT TOP 1 @CustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
 

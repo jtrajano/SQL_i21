@@ -41,15 +41,17 @@ BEGIN
 	DECLARE @paymentId INT
 	DECLARE @vendorId INT
 	DECLARE @withHoldAccount INT
-	DECLARE @amountPaid NUMERIC(18,2) = @payment;
-	DECLARE @withholdAmount NUMERIC(18,6)
-	DECLARE @withholdPercent NUMERIC(18,6)
-	DECLARE @discountAmount NUMERIC(18,6) = 0;
+	DECLARE @amountPaid DECIMAL(18,2) = @payment;
+	DECLARE @detailAmountPaid DECIMAL(18,6);
+	DECLARE @withholdAmount DECIMAL(18,6)
+	DECLARE @withholdPercent DECIMAL(18,6)
+	DECLARE @discountAmount DECIMAL(18,6) = 0;
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
 	DECLARE @intGLBankAccountId INT;
 	DECLARE @location INT;
+	DECLARE @discount DECIMAL(18,6);
 	DECLARE @bills AS Id;
 	DECLARE @autoPay BIT = 0; --Automatically compute the payment
 	DECLARE @paymentRecordNum NVARCHAR(50)
@@ -123,6 +125,12 @@ BEGIN
 		SET dblDiscount = dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal)
 	FROM tblAPBill A
 	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+
+	SELECT
+		@discount = SUM(ISNULL(A.dblDiscount,0))
+	FROM tblAPBill A
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+
 	--Compute Interest Here
 	--UPDATE A
 	--	SET dblInterest = dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal)
@@ -136,7 +144,10 @@ BEGIN
 	BEGIN
 		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
 		SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+		SET @detailAmountPaid = @amountPaid - @discount;
 	END
+
+	SET @amountPaid = @amountPaid - @discount;
 
 	--Compute Withheld Here
 	--Compute only if the payment that will create is posted
@@ -187,7 +198,7 @@ BEGIN
 		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
-		[dblAmountPaid]			= ISNULL(@payment,0),
+		[dblAmountPaid]			= CAST(ISNULL(@payment,0) AS DECIMAL(18,2)),
 		[dblUnapplied]			= 0,
 		[ysnPosted]				= @isPost,
 		[dblWithheld]			= 0,
@@ -214,7 +225,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
 		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
-		[dblPayment]	= (CASE WHEN ISNULL(@payment,0) > 0 THEN @payment ELSE A.dblPayment END),
+		[dblPayment]	= CAST((CASE WHEN ISNULL(@paymentDetail,0) = 0 THEN A.dblAmountDue - A.dblDiscount ELSE @paymentDetail END) AS DECIMAL(18,2)),
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
@@ -244,22 +255,22 @@ BEGIN
 	 @paymentRecordNum = @paymentRecordNum,
 	 @vendorId = @vendorId,
 	 @notes = @notes,
-	 @payment = @amountPaid,
+	 @payment = @detailAmountPaid,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 
 	N'@paymentId INT,
-	@withholdPercent NUMERIC(18,6),
-	@payment NUMERIC(18,6)',
+	@withholdPercent DECIMAL(18,6),
+	@paymentDetail DECIMAL(18,6)',
 	 @paymentId = @paymentId,
 	 @withholdPercent = @withholdPercent,
-	 @payment = @amountPaid;
+	 @paymentDetail = @detailAmountPaid;
 
 	 UPDATE A
 		SET A.dblWithheld = Withheld.dblWithheld
-		,A.dblAmountPaid = A.dblAmountPaid - Withheld.dblWithheld
+		,A.dblAmountPaid = CAST((A.dblAmountPaid - Withheld.dblWithheld) AS DECIMAL(18,2))
 	 FROM tblAPPayment A
 	 CROSS APPLY 
 	 (
@@ -267,6 +278,13 @@ BEGIN
 		WHERE B.intPaymentId = A.intPaymentId
 	 ) Withheld
 	WHERE A.intPaymentId = @paymentId
+
+	--UNDO THE DISCOUNT AFTER CREATING PAYMENT AS WE ARE UPDATING THE DISCOUNT OF VOUCHER ONCE PAYMENT IS POSTED
+	UPDATE A
+		SET dblDiscount = 0
+	FROM tblAPBill A
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	AND A.ysnPaid = 0
 		 
 	 SET @createdPaymentId = @paymentId
 END
