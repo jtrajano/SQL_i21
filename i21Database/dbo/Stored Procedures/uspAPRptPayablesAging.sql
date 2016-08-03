@@ -75,6 +75,7 @@ BEGIN
 		NULL AS strVendorOrderNumber,
 		NULL AS strTerm,
 		NULL AS strCompanyName,
+		NULL AS strCompanyAddress,
 		NULL AS strAccountId,
 		NULL AS strVendorIdName,
 		NULL AS strAge,
@@ -273,6 +274,7 @@ SET @query = '
 	,A.strVendorOrderNumber
 	,T.strTerm
 	,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
+	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,A.intAccountId
 	,D.strAccountId
 	,tmpAgingSummaryTotal.dblTotal
