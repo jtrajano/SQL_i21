@@ -27,6 +27,7 @@ RETURNS @returntable TABLE
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[intTaxAccountId]				INT
 	,[ysnCheckoffTax]				BIT
+	,[strTaxCode]					NVARCHAR(100)						
 	,[ysnTaxExempt]					BIT
 	,[ysnInvalidSetup]				BIT
 	,[strNotes]						NVARCHAR(500)
@@ -34,7 +35,7 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	IF ISNULL(@IsReversal,0) = 0 AND NOT EXISTS(SELECT TOP 1 NULL FROM @LineItemTaxEntries)
+	IF NOT EXISTS(SELECT TOP 1 NULL FROM @LineItemTaxEntries)
 		BEGIN
 			INSERT INTO @returntable(
 				 [intTaxGroupId]
@@ -48,6 +49,7 @@ BEGIN
 				,[dblAdjustedTax]
 				,[intTaxAccountId]
 				,[ysnCheckoffTax]
+				,[strTaxCode]
 				,[ysnTaxExempt]
 				,[ysnInvalidSetup]
 				,[strNotes]
@@ -64,6 +66,7 @@ BEGIN
 				,[dblAdjustedTax]
 				,[intTaxAccountId]
 				,[ysnCheckoffTax]
+				,[strTaxCode]
 				,[ysnTaxExempt]
 				,[ysnInvalidSetup]
 				,[strNotes]
@@ -128,6 +131,7 @@ BEGIN
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
 		,[ysnCheckoffTax]
+		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[ysnTaxAdjusted]
 		,[ysnComputed]
@@ -146,6 +150,7 @@ BEGIN
 		,[intTaxAccountId]			= ISNULL(LITE.[intTaxAccountId], SMTC.[intSalesTaxAccountId])
 		,[ysnCheckoffTax]			= ISNULL(LITE.[ysnCheckoffTax], SMTC.[ysnCheckoffTax])
 		,[ysnTaxExempt]				= LITE.[ysnTaxExempt] 
+		,[strTaxCode]				= SMTC.[strTaxCode]
 		,[ysnTaxAdjusted]			= LITE.[ysnTaxAdjusted] 
 		,[ysnComputed]				= 0
 	FROM
