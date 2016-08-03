@@ -56,6 +56,10 @@ SELECT C.intManufacturingCellId
 	,SS.strUserName AS strSupervisor
 	,W.intBlendRequirementId
 	,MP.intAttributeTypeId
+	,W.dtmLastProducedDate
+	,SW.strComments AS strScheduleComment
+	,SL.intStorageLocationId
+	,SL.strName AS [strStorageLocation]
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	AND W.intStatusId <> 13
@@ -75,3 +79,11 @@ JOIN dbo.tblSMUserSecurity SS ON SS.[intEntityUserSecurityId] = W.intSupervisorI
 JOIN dbo.tblSMUserSecurity LM ON LM.[intEntityUserSecurityId] = W.intLastModifiedUserId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
 LEFT JOIN dbo.tblMFWorkOrder PW ON PW.intWorkOrderId = W.intParentWorkOrderId
+LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+LEFT JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
+	AND EXISTS (
+		SELECT *
+		FROM dbo.tblMFSchedule S
+		WHERE S.intScheduleId = SW.intScheduleId
+			AND S.ysnStandard = 1
+		)
