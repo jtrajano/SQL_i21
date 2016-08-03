@@ -4139,6 +4139,9 @@
     <Build Include="dbo\Stored Procedures\uspQMUpdateContainerLinkInSample.sql" />
     <Build Include="dbo\Tables\tblCFNetworkAccount.sql" />
     <Build Include="dbo\Views\vyuRKPurchaseIntransitView.sql" />
+    <Build Include="dbo\Tables\tblMFCostType.sql" />
+    <Build Include="dbo\Tables\tblMFOneLinePrint.sql" />
+    <Build Include="dbo\Tables\tblMFCommentType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

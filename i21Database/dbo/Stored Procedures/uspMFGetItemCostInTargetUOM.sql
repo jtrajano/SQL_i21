@@ -3,6 +3,7 @@
 	@intLocationId int,
 	@intToItemUOMId int,
 	@intContractDetailId int,
+	@intCostTypeId int,
 	@dblCostInTargetUOM NUMERIC(38,20) OUT
 AS
 
@@ -13,10 +14,19 @@ Declare @dblUnitQtyFrom NUMERIC(38,20)
 Declare @dblUnitQtyTo NUMERIC(38,20)
 Declare @intFromItemUOMId int
 
+If ISNULL(@intCostTypeId,0)=0
+	Set @intCostTypeId=1
+
 If ISNULL(@intContractDetailId,0)=0
 Begin
-	Select @dblCost=ISNULL(dblCost,0),@intItemStockUOMId=intStockItemUOMId 
-	From vyuMFGetItemByLocation Where intItemId=@intItemId AND intLocationId=@intLocationId
+	Select TOP 1 @dblCost=CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
+				When @intCostTypeId=3 AND ISNULL(ip.dblLastCost,0) > 0 THEN ISNULL(ip.dblLastCost,0)
+				Else ISNULL(ip.dblStandardCost,0) End
+	From tblICItemPricing ip Join tblICItemLocation il on ip.intItemLocationId=il.intItemLocationId 
+	Where ip.intItemId=@intItemId AND il.intLocationId=@intLocationId
+
+	Select TOP 1 @intItemStockUOMId=intItemUOMId
+	From tblICItemUOM Where intItemId=@intItemId AND ysnStockUnit=1
 
 	Select @dblCostInTargetUOM=dbo.fnMFConvertCostToTargetItemUOM(@intItemStockUOMId,@intToItemUOMId,@dblCost)
 

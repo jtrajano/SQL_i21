@@ -2013,6 +2013,60 @@ BEGIN
     VALUES(2,'Sales Contract')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFCostType WHERE intCostTypeId = 1)
+BEGIN
+    INSERT INTO tblMFCostType(intCostTypeId,strName)
+    VALUES(1,'Standard')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFCostType WHERE intCostTypeId = 2)
+BEGIN
+    INSERT INTO tblMFCostType(intCostTypeId,strName)
+    VALUES(2,'Average')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFCostType WHERE intCostTypeId = 3)
+BEGIN
+    INSERT INTO tblMFCostType(intCostTypeId,strName)
+    VALUES(3,'Last')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFOneLinePrint WHERE intOneLinePrintId = 1)
+BEGIN
+    INSERT INTO tblMFOneLinePrint(intOneLinePrintId,strName)
+    VALUES(1,'No')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFOneLinePrint WHERE intOneLinePrintId = 2)
+BEGIN
+    INSERT INTO tblMFOneLinePrint(intOneLinePrintId,strName)
+    VALUES(2,'Yes')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFOneLinePrint WHERE intOneLinePrintId = 3)
+BEGIN
+    INSERT INTO tblMFOneLinePrint(intOneLinePrintId,strName)
+    VALUES(3,'Yes - With Quantity')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFCommentType WHERE intCommentTypeId = 1)
+BEGIN
+    INSERT INTO tblMFCommentType(intCommentTypeId,strName)
+    VALUES(1,'General')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFCommentType WHERE intCommentTypeId = 2)
+BEGIN
+    INSERT INTO tblMFCommentType(intCommentTypeId,strName)
+    VALUES(2,'Pick List')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFCommentType WHERE intCommentTypeId = 3)
+BEGIN
+    INSERT INTO tblMFCommentType(intCommentTypeId,strName)
+    VALUES(3,'Invoice')
+END
+GO
 UPDATE dbo.tblMFWorkOrder
 SET intBatchID = NULL
 WHERE intBlendRequirementId IS NULL

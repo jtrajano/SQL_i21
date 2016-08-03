@@ -3,9 +3,10 @@
 	[intRecipeItemId] INT NOT NULL  IDENTITY(1,1), 
     [intRecipeId] INT NOT NULL, 
     [intItemId] INT NOT NULL, 
+	[strDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
 	[dblCalculatedQuantity] NUMERIC(18, 6) NOT NULL, 
-    [intItemUOMId] INT NOT NULL,
+    [intItemUOMId] INT NULL,
 	[intRecipeItemTypeId] INT NOT NULL,
 	[strItemGroupName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblMFRecipeItem_strItemGroupName] DEFAULT '', 
 	[dblUpperTolerance] NUMERIC(18, 6) NOT NULL , 
@@ -28,6 +29,7 @@
 	[intMarginById] [int] NULL,
 	[dblMargin] NUMERIC(18,6) NULL,
 	[ysnCostAppliedAtInvoice] BIT,
+	[intCommentTypeId] INT NULL,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
@@ -41,7 +43,8 @@
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFConsumptionMethod_intConsumptionMethodId] FOREIGN KEY ([intConsumptionMethodId]) REFERENCES [tblMFConsumptionMethod]([intConsumptionMethodId]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFRecipe_intRecipeId_intReferenceRecipeId] FOREIGN KEY ([intReferenceRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]),
-	CONSTRAINT [FK_tblMFRecipeItem_tblMFMarginBy_intMarginById] FOREIGN KEY ([intMarginById]) REFERENCES [tblMFMarginBy]([intMarginById]), 
+	CONSTRAINT [FK_tblMFRecipeItem_tblMFMarginBy_intMarginById] FOREIGN KEY ([intMarginById]) REFERENCES [tblMFMarginBy]([intMarginById]),
+	CONSTRAINT [FK_tblMFRecipeItem_tblMFCommentType_intCommentTypeId] FOREIGN KEY ([intCommentTypeId]) REFERENCES [tblMFCommentType]([intCommentTypeId]) 
 )
 
 GO

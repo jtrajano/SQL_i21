@@ -15,6 +15,12 @@
 	[intCustomerId] INT,
 	[intFarmId] INT,
 	[intFieldId] INT,
+	[intCostTypeId] INT NULL,
+	[intMarginById] [int] NULL,
+	[dblMargin] NUMERIC(18,6) NULL DEFAULT 0,
+	[dblDiscount] NUMERIC(18,6) NULL DEFAULT 0,
+	[intMarginUOMId] [int] NULL,
+	[intOneLinePrintId] INT NULL,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipe_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
@@ -29,6 +35,10 @@
 	CONSTRAINT [FK_tblMFRecipe_tblEMEntityFarm_intFarmFieldId_intFarmId] FOREIGN KEY ([intFarmId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblMFRecipe_tblEMEntityFarm_intFarmFieldId_intFieldId] FOREIGN KEY ([intFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblMFRecipe_tblMFRecipeType_intRecipeTypeId] FOREIGN KEY ([intRecipeTypeId]) REFERENCES [tblMFRecipeType]([intRecipeTypeId]),
+	CONSTRAINT [FK_tblMFRecipe_tblMFMarginBy_intMarginById] FOREIGN KEY ([intMarginById]) REFERENCES [tblMFMarginBy]([intMarginById]),
+	CONSTRAINT [FK_tblMFRecipe_tblMFCostType_intCostTypeId] FOREIGN KEY ([intCostTypeId]) REFERENCES [tblMFCostType]([intCostTypeId]),
+	CONSTRAINT [FK_tblMFRecipe_tblICUnitMeasure_intMarginUOMId] FOREIGN KEY ([intMarginUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblMFRecipe_tblMFOneLinePrint_intOneLinePrintId] FOREIGN KEY ([intOneLinePrintId]) REFERENCES [tblMFOneLinePrint]([intOneLinePrintId])
 )
 
 GO
