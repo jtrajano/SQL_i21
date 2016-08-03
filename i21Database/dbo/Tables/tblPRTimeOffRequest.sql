@@ -14,7 +14,7 @@
 	[dblBalance] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
     [strReason] NVARCHAR(MAX) NULL, 
     [strAddress] NVARCHAR(MAX) NULL, 
-    [strStatus] NVARCHAR(20) NULL, 
+	[ysnPostedToCalendar] BIT NULL DEFAULT ((0)),
 	[intCreatedUserId] INT NOT NULL,
 	[dtmCreated] DATETIME NOT NULL,
 	[intLastModifiedUserId] INT NOT NULL,

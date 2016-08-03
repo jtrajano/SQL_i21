@@ -4126,6 +4126,7 @@
     <Build Include="dbo\Stored Procedures\uspICDCItemMigration.sql" />
     <Build Include="dbo\Stored Procedures\uspICDCGLAcctsMigration.sql" />
     <Build Include="dbo\Tables\tblQMReportNameMapping.sql" />
+    <Build Include="dbo\Views\vyuPRTimeOffRequest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
