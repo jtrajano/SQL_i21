@@ -24,6 +24,7 @@ BEGIN
 			,@Missing_Default_Currency AS BIT OUTPUT
 			,@Missing_Cash_Account_Group AS BIT OUTPUT
 			,@Future_Clear_Date_Found AS BIT OUTPUT
+			,@Unbalance_Found AS BIT OUTPUT
 		AS
 
 		DECLARE @CASH_ACCOUNT AS NVARCHAR(20) = ''Cash Account''
@@ -104,6 +105,20 @@ BEGIN
 		FROM	apchkmst
 		WHERE	apchk_clear_rev_dt > CONVERT(VARCHAR(10),GETDATE(),112)
 
+		-- Check if balance against the running balance on GL(ERR)
+		SELECT TOP 1 @Unbalance_Found = 1 FROM(
+			SELECT 
+			strExternalId,
+			CASE WHEN  SUM(dblDebit-dblCredit) <> apcbk_bal THEN 1 ELSE 0 END AS NotBalance
+			FROM 
+			tblGLDetail INNER JOIN tblGLCOACrossReference ON tblGLDetail.intAccountId = tblGLCOACrossReference.inti21Id
+			INNER JOIN apcbkmst ON tblGLCOACrossReference.strExternalId = apcbk_gl_cash
+			AND ysnIsUnposted = 0
+			GROUP BY strExternalId, apcbk_bal
+		) AS T
+		WHERE NotBalance = 1
+
+
 		SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 				,@Invalid_GL_Account_Id_Found = ISNULL(@Invalid_GL_Account_Id_Found, 0)
 				,@Missing_GL_Account_Id = ISNULL(@Missing_GL_Account_Id,0)
@@ -111,7 +126,8 @@ BEGIN
 				,@Invalid_Bank_Account_Found = ISNULL(@Invalid_Bank_Account_Found, 0)
 				,@Missing_Default_Currency = ISNULL(@Missing_Default_Currency, 1)
 				,@Missing_Cash_Account_Group = ISNULL(@Missing_Cash_Account_Group, 0)
-				,@Future_Clear_Date_Found = ISNULL(@Future_Clear_Date_Found, 0)
+				,@Future_Clear_Date_Found = ISNULL(@Future_Clear_Date_Found, 0)	
+				,@Unbalance_Found = ISNULL(@Unbalance_Found, 0)	
 	')
 
 END
