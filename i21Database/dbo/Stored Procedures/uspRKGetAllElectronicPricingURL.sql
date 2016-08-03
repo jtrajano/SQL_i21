@@ -37,7 +37,7 @@ BEGIN TRY
 	IF @strInterfaceSystem = 'DTN'
 	BEGIN
 		IF @strPassword = ''
-		SET @strPassword = '?&Type=F'
+		SET @strPassword = '?'
 	END		
 
 

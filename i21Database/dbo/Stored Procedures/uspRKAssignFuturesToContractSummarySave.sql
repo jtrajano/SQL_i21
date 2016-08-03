@@ -42,6 +42,13 @@ SELECT
  intAssignFuturesToContractSummaryId INT,    
  [ysnDeleted] Bit    
  )    
+ if Exists(
+ select * from tblCTPriceFixationDetail where intFutOptTransactionId in(
+ SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary where intAssignFuturesToContractSummaryId in(select intAssignFuturesToContractSummaryId from @tblMatchedDelete)
+ ))
+ begin
+ raiserror('The transaction already assigned. Cannot delete the transaction.',16,1)
+ END
  
 	UPDATE tblRKFutOptTransaction set intContractDetailId = null WHERE intFutOptTransactionId in(SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary    
 	WHERE intAssignFuturesToContractSummaryId in(SELECT intAssignFuturesToContractSummaryId from @tblMatchedDelete) )

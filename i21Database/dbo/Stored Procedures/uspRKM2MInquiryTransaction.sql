@@ -246,7 +246,7 @@ END AS dblAdjustedContractPrice,
                   cd.dblRate,
                   cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId ,
-       (SELECT SUM(iv.dblPurchaseContractShippedQty)FROM vyuLGInboundShipmentView iv WHERE iv.intContractDetailId=cd.intContractDetailId
+       (SELECT SUM(iv.dblPurchaseContractShippedQty)FROM vyuRKPurchaseIntransitView iv WHERE iv.intContractDetailId=cd.intContractDetailId
        AND intContractStatusId<>3 AND CONVERT(DATETIME,CONVERT(VARCHAR, cd.dtmContractDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10)) as 
         InTransQty,  
               
@@ -573,7 +573,7 @@ convert(decimal(24,6),
                                   (SELECT SUM(ISNULL(sri.dblOpenReceive,0)) from tblICInventoryReceiptItem sri 
                                   WHERE cd.intContractDetailId=sri.intLineNo
                                   )  dblContractPQty,   
-                  (select sum(cc.dblPurchaseContractShippedQty) from vyuLGInboundShipmentView cc where cc.intContractDetailId=cd.intContractDetailId)  dblOpenQty1,
+                  (select sum(cc.dblPurchaseContractShippedQty) from vyuRKPurchaseIntransitView cc where cc.intContractDetailId=cd.intContractDetailId)  dblOpenQty1,
                              cd.dblRate,
                       cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId ,

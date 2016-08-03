@@ -4136,6 +4136,9 @@
     <Build Include="dbo\Views\vyuICCompareRebuildValuationSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\uspPRAddTimeOffToCalendar.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountId.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateContainerLinkInSample.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkAccount.sql" />
+    <Build Include="dbo\Views\vyuRKPurchaseIntransitView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
