@@ -70,13 +70,13 @@ BEGIN
 	BEGIN
 		SELECT I.strItemNo
 			,I.strDescription
-			,ri.dblCalculatedQuantity
+			,(ri.dblCalculatedQuantity / r.dblQuantity) * W.dblQuantity AS dblCalculatedQuantity
 			,UM.strUnitMeasure
 			,ri.strItemGroupName
 			,ri.dblUpperTolerance
 			,ri.dblLowerTolerance
-			,ri.dblCalculatedUpperTolerance
-			,ri.dblCalculatedLowerTolerance
+			,(ri.dblCalculatedUpperTolerance / r.dblQuantity) * W.dblQuantity AS dblCalculatedUpperTolerance
+			,(ri.dblCalculatedLowerTolerance / r.dblQuantity) * W.dblQuantity AS dblCalculatedLowerTolerance
 			,ri.dblShrinkage
 			,ri.ysnScaled
 			,CM.strName AS strConsumptionMethodName
@@ -98,6 +98,7 @@ BEGIN
 		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId
 		JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = ri.intCreatedUserId
 		JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityUserSecurityId] = ri.intLastModifiedUserId
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = r.intWorkOrderId
 		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = ri.intStorageLocationId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
@@ -115,7 +116,7 @@ BEGIN
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-		AND r.intWorkOrderId=@intWorkOrderId
+			AND r.intWorkOrderId = @intWorkOrderId
 		ORDER BY ri.intRecipeItemId
 	END
 END
