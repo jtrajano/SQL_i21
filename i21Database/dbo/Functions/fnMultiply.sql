@@ -69,7 +69,8 @@ BEGIN
 				,@shortenFactor2 AS NUMERIC(38, 20)	= LEFT(@stringFactor2, CHARINDEX('.', @stringFactor2) + 6)
 
 		DECLARE @shortenMultiply AS NUMERIC(38,20) = @shortenFactor1 * @shortenFactor2
-
+			
+		
 		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@shortenMultiply, '.', ''), '-', '')) - 1) + @rawResult +  REPLICATE('0', 5) 
 	END 	
 	
@@ -91,5 +92,8 @@ BEGIN
 
 	SET @product = ISNULL(CAST(LEFT(@rawResult, 38) AS NUMERIC(38, 20)), 0) 
 	
+	-- Excel can only handle 15 significant figures. So let's round it at the 13th decimal place. 
+	SET @product = ROUND(@product, 13) 
+
 	RETURN @product
 END
