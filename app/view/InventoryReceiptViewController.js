@@ -1655,7 +1655,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 TransactionType: 'Purchase',
                 TaxGroupId: masterRecord.get('intTaxGroupId'),
                 EntityId: masterRecord.get('intEntityVendorId'),
-                BillShipToLocationId: masterRecord.get('intShipFromId')
+                BillShipToLocationId: masterRecord.get('intShipFromId'),
+                FreightTermId: masterRecord.get('intFreightTermId')
             };
 
             if (reset)
