@@ -102,7 +102,7 @@ BEGIN
 		-- Check if there is a future clearing date (ERR)
 		SELECT	TOP 1 @Future_Clear_Date_Found = 1
 		FROM	apchkmst
-		WHERE	apchk_clear_rev_dt > Format(GETDATE(),''yyyyMMdd'') 
+		WHERE	apchk_clear_rev_dt > CONVERT(VARCHAR(10),GETDATE(),112)
 
 		SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 				,@Invalid_GL_Account_Id_Found = ISNULL(@Invalid_GL_Account_Id_Found, 0)
@@ -111,7 +111,7 @@ BEGIN
 				,@Invalid_Bank_Account_Found = ISNULL(@Invalid_Bank_Account_Found, 0)
 				,@Missing_Default_Currency = ISNULL(@Missing_Default_Currency, 1)
 				,@Missing_Cash_Account_Group = ISNULL(@Missing_Cash_Account_Group, 0)
-				,@Future_Clear_Date_Found = ISNULL(@Future_Clear_Date_Found, 0)	
+				,@Future_Clear_Date_Found = ISNULL(@Future_Clear_Date_Found, 0)
 	')
 
 END
