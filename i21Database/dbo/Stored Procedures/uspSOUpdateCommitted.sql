@@ -253,6 +253,53 @@ BEGIN
 		AND Header.strTransactionType = 'Order'
 		AND Header.strOrderStatus <> TD.strTransactionStatus				
 		AND Header.strOrderStatus IN ('Cancelled', 'Short Closed')
+
+
+	UNION ALL
+
+	--Short Closed to Partial
+	SELECT
+		[intItemId]					=	TD.intItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	TD.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped)
+		,[dblUOMQty]				=	ItemUOM.dblUnitQty
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	TD.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	TD.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblSOSalesOrderDetail Detail
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND Detail.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = TD.intItemUOMId
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON TD.intItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intSalesOrderId = @SalesOrderId
+		AND Header.strTransactionType = 'Order'
+		AND Header.strOrderStatus <> TD.strTransactionStatus				
+		AND TD.strTransactionStatus = 'Short Closed'
+		AND Header.strOrderStatus = 'Partial'
 		
 	UPDATE
 		@items
