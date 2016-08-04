@@ -14,5 +14,10 @@ namespace iRely.Inventory.Model
         public int intCompanyPreferenceId { get; set; }
         public int? intInheritSetup { get; set; }
         public int? intSort { get; set; }
+        public string strLotCondition { get; set; }
+        public string strReceiptType { get; set; }
+        public int? intReceiptSourceType { get; set; }
+        public int? intShipmentOrderType { get; set; }
+        public int? intShipmentSourceType { get; set; }
     }
 }
