@@ -226,7 +226,7 @@ BEGIN
 				,intCurrencyId			= IntegrationData.intCurrencyId
 				,intSubCurrencyCents	= IntegrationData.intSubCurrencyCents
 				,strVessel				= NULL
-				,intFreightTermId		= NULL
+				,intFreightTermId		= IntegrationData.intFreightTermId 
 				,intShiftNumber			= NULL 
 				,dblInvoiceAmount		= 0
 				,ysnInvoicePaid			= 0 
@@ -300,7 +300,7 @@ BEGIN
 				/*intCurrencyId*/				,IntegrationData.intCurrencyId
 				/*intSubCurrencyCents*/			,IntegrationData.intSubCurrencyCents
 				/*strVessel*/					,NULL
-				/*intFreightTermId*/			,NULL
+				/*intFreightTermId*/			,IntegrationData.intFreightTermId 
 				/*intShiftNumber*/				,NULL 
 				/*dblInvoiceAmount*/			,0
 				/*ysnInvoicePaid*/				,0 
@@ -753,6 +753,7 @@ BEGIN
 					,@InventoryReceiptItemId
 					,@ShipFromId
 					,@TaxGroupId
+					,@FreightTermId
 			END 
 
 			CLOSE loopReceiptItems;
