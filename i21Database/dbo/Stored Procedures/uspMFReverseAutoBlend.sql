@@ -18,6 +18,7 @@ Declare @strWorkOrderNo nvarchar(50)
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @GLEntries AS RecapTableType 
 Declare @strOrderType nvarchar(50)
+Declare @intBatchId int
 Declare @tblWO AS table
 (
 	intWorkOrderId int
@@ -75,6 +76,7 @@ Begin Transaction
 While @intWorkOrderId is not null
 Begin
 Select @strWorkOrderNo=strWorkOrderNo From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+Select TOP 1 @intBatchId=intBatchId From tblMFWorkOrderProducedLot Where intWorkOrderId=@intWorkOrderId
 
 Set @strBatchId=''
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT 
@@ -115,7 +117,7 @@ INSERT INTO @GLEntries (
 				,[dblForeignRate]
 		)
 		EXEC dbo.uspICUnpostCosting
-		 @intWorkOrderId
+		 @intBatchId
 		,@strWorkOrderNo
 		,@strBatchId
 		,@intUserId	
