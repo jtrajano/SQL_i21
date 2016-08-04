@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPRTimeOffRequest]
 (
 	[intTimeOffRequestId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [strRequestId] NVARCHAR(20) NOT NULL, 
+    [strRequestId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intEntityEmployeeId] INT NOT NULL, 
     [dtmRequestDate] DATETIME NOT NULL, 
     [intDepartmentId] INT NULL, 
@@ -12,8 +12,8 @@
 	[dblEarned] NUMERIC(18, 6) NOT NULL DEFAULT ((0)),
 	[dblUsed] NUMERIC(18, 6) NOT NULL DEFAULT ((0)),
 	[dblBalance] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
-    [strReason] NVARCHAR(MAX) NULL, 
-    [strAddress] NVARCHAR(MAX) NULL, 
+    [strReason] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+    [strAddress] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnPostedToCalendar] BIT NULL DEFAULT ((0)),
 	[intCreatedUserId] INT NOT NULL,
 	[dtmCreated] DATETIME NOT NULL,
