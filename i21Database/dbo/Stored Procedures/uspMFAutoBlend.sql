@@ -588,7 +588,7 @@ Begin
 	Set @strXml += '<intItemIssuedUOMId>' + CONVERT(VARCHAR,@intBlendLotIssuesUOMId) + '</intItemIssuedUOMId>'
 	Set @strXml += '<dblWeightPerUnit>' + CONVERT(VARCHAR,@dblBlendLotWeightPerUnit) + '</dblWeightPerUnit>'
 	Set @strXml += '<intLocationId>' + CONVERT(VARCHAR,@intLocationId) + '</intLocationId>'
-	Set @strXml += '<intStorageLocationId>' + CONVERT(VARCHAR,@intStorageLocationId) + '</intStorageLocationId>'
+	Set @strXml += '<intStorageLocationId>' + ISNULL(CONVERT(VARCHAR,@intStorageLocationId),'') + '</intStorageLocationId>'
 	Set @strXml += '<strVesselNo>' + CONVERT(VARCHAR,'') + '</strVesselNo>'
 	Set @strXml += '<intManufacturingCellId>' + CONVERT(VARCHAR,@intCellId) + '</intManufacturingCellId>'
 	Set @strXml += '<dblPlannedQuantity>' + CONVERT(VARCHAR,@dblWOQty) + '</dblPlannedQuantity>'
