@@ -14,6 +14,7 @@ DECLARE @strLocationName NVARCHAR(100)
 DECLARE @strSalespersonId NVARCHAR(100)
 DECLARE @strCurrency NVARCHAR(100)
 DECLARE @strBuySell NVARCHAR(100)
+DECLARE @strBrokerTradeNo NVARCHAR(100)
 DECLARE @strFutureMonth NVARCHAR(100)
 DECLARE @strOptionMonth NVARCHAR(100)
 DECLARE @strOptionType NVARCHAR(100)
@@ -53,11 +54,11 @@ WHILE @mRowNumber > 0
 		SET @strBook =NULL
 		SET @strSubBook =NULL
 		SET @dtmCreateDateTime = NULL
-
+		SET @strBrokerTradeNo = NULL
 		SELECT @strName = strName,@strAccountNumber=strAccountNumber,@strFutMarketName=strFutMarketName, @strInstrumentType=strInstrumentType,@strCommodityCode=strCommodityCode
-			,@strLocationName=strLocationName,@strSalespersonId=strSalespersonId,@strCurrency=strCurrency,@strBuySell=strBuySell,@strFutureMonth=strFutureMonth
-			,@strOptionMonth=strOptionMonth,@strOptionType=strOptionType,@strStatus=strStatus,@dtmFilledDate=dtmFilledDate,@strBook=strBook,@strSubBook=strSubBook,
-			@dtmCreateDateTime=dtmCreateDateTime
+			,@strLocationName=strLocationName,@strSalespersonId=strSalespersonId,@strCurrency=strCurrency,@strBrokerTradeNo=strBrokerTradeNo,@strBuySell=strBuySell,@strFutureMonth=strFutureMonth
+			,@strOptionMonth=strOptionMonth,@strOptionType=strOptionType,@strStatus=strStatus,@dtmFilledDate=convert(datetime,dtmFilledDate,@ConvertYear),@strBook=strBook,@strSubBook=strSubBook,
+			@dtmCreateDateTime=convert(datetime,dtmCreateDateTime,@ConvertYear)
 		FROM tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 		
 		SELECT @PreviousErrMsg=''
