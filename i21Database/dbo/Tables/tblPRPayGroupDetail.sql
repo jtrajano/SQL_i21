@@ -6,6 +6,7 @@
 	[intEmployeeEarningId]		INT             NOT NULL,
     [intTypeEarningId]			INT             NOT NULL,
 	[intDepartmentId]			INT             NULL,
+	[intWorkersCompensationId]	INT             NULL,
     [strCalculationType]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[dblDefaultHours]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
 	[dblHoursToProcess]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
@@ -19,7 +20,9 @@
 	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [dbo].[tblPRPayGroup] ([intPayGroupId]),
 	CONSTRAINT [FK_tblPRPayGroupDetail_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]),
 	CONSTRAINT [FK_tblPRPayGroupDetail_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [dbo].[tblPREmployeeEarning] ([intEmployeeEarningId]),
-	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId])
+	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId]),
+	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]),
+	CONSTRAINT [FK_tblPRPayGroupDetail_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [dbo].[tblPRWorkersCompensation] ([intWorkersCompensationId])
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -156,3 +159,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPayGroupDetail',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Workers Compensation Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPayGroupDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'intWorkersCompensationId'

@@ -12,6 +12,8 @@ SELECT
 	,tblPRPaycheckEarning.strCalculationType
 	,tblPRPaycheckEarning.intEmployeeDepartmentId
 	,tblPRDepartment.strDepartment
+	,tblPRPaycheckEarning.intWorkersCompensationId
+	,tblPRWorkersCompensation.strWCCode
 	,tblPRPaycheckEarning.dblHours
 	,tblPRPaycheckEarning.dblAmount
 	,tblPRPaycheckEarning.dblTotal
@@ -57,5 +59,6 @@ FROM
 	INNER JOIN tblPRPaycheck  ON tblPRPaycheck.intPaycheckId = tblPRPaycheckEarning.intPaycheckId
 	INNER JOIN tblPRTypeEarning ON tblPRPaycheckEarning.intTypeEarningId = tblPRTypeEarning.intTypeEarningId
 	LEFT JOIN tblPRDepartment ON tblPRPaycheckEarning.intEmployeeDepartmentId = tblPRDepartment.intDepartmentId
+	LEFT JOIN tblPRWorkersCompensation ON tblPRPaycheckEarning.intWorkersCompensationId = tblPRWorkersCompensation.intWorkersCompensationId
 WHERE
 	tblPRPaycheck.ysnPosted = 1 AND tblPRPaycheck.ysnVoid = 0

@@ -202,6 +202,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[dblTotal]
 			,[strW2Code]
 			,[intEmployeeDepartmentId]
+			,[intWorkersCompensationId]
 			,[intEmployeeTimeOffId]
 			,[intEmployeeEarningLinkId]
 			,[intAccountId]
@@ -221,6 +222,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,P.dblTotal
 			,E.strW2Code
 			,P.intDepartmentId
+			,P.intWorkersCompensationId
 			,E.intEmployeeTimeOffId
 			,E.intEmployeeEarningLinkId
 			,E.intAccountId

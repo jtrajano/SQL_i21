@@ -9,6 +9,7 @@
 	[dblTotal] [numeric](18, 6) NULL,
 	[strW2Code] [nvarchar](5) COLLATE Latin1_General_CI_AS NULL,
 	[intEmployeeDepartmentId] INT NULL,
+	[intWorkersCompensationId] INT NULL,
 	[intEmployeeTimeOffId] INT NULL,
 	[intEmployeeEarningLinkId] INT NULL,
 	[intAccountId] INT NOT NULL,
@@ -17,6 +18,8 @@
     CONSTRAINT [PK_tblPRPaycheckEarning] PRIMARY KEY ([intPaycheckEarningId]),
 	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId]),
+	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRDepartment] FOREIGN KEY ([intEmployeeDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]),
+	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [dbo].[tblPRWorkersCompensation] ([intWorkersCompensationId])
 ) ON [PRIMARY]
 GO
 /****** Object:  Default [DF__tblPRPayc__dblHo__244DAE7E]    Script Date: 08/14/2014 10:50:11 ******/
@@ -168,3 +171,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckEarning',
     @level2type = N'COLUMN',
     @level2name = N'intEmployeeDepartmentId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Workers Compensation Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intWorkersCompensationId'
