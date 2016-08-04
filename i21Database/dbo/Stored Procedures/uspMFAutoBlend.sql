@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFAutoBlend]
-	@intSalesOrderDetailId int,
+	@intSalesOrderDetailId int=0,
 	@intInvoiceDetailId int=0,
 	@intItemId int,
 	@dblQtyToProduce numeric(38,20),
 	@intItemUOMId INT,
 	@intLocationId int,
-	@intSubLocationId int,
-	@intStorageLocationId int,
+	@intSubLocationId int=NULL,
+	@intStorageLocationId int=NULL,
 	@intUserId int,
 	@dblMaxQtyToProduce numeric(38,20) OUT
 AS
