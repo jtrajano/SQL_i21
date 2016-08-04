@@ -42,6 +42,7 @@ IF @strDefaultComment IS NULL
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
+			AND intEntityCustomerId IS NULL
 			AND strType = @strType
 			AND strTransactionType <> 'Statement Footer'
 		ORDER BY intCommentId DESC
@@ -56,6 +57,7 @@ IF @strDefaultComment IS NULL
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
+			AND intEntityCustomerId IS NULL
 			AND strTransactionType <> 'Statement Footer'
 		ORDER BY intCommentId DESC
 	END
@@ -68,6 +70,7 @@ IF @strDefaultComment IS NULL
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType
+			AND intCompanyLocationId IS NULL
 			AND intEntityCustomerId = @intEntityCustomerId
 			AND strType = @strType
 			AND strTransactionType <> 'Statement Footer'
@@ -82,6 +85,7 @@ IF @strDefaultComment IS NULL
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType	
+			AND intCompanyLocationId IS NULL
 			AND intEntityCustomerId = @intEntityCustomerId
 			AND strTransactionType <> 'Statement Footer'
 		ORDER BY intCommentId DESC
@@ -94,7 +98,9 @@ IF @strDefaultComment IS NULL
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE strTransactionType = @strTransactionType		
+			WHERE strTransactionType = @strTransactionType
+			AND intCompanyLocationId IS NULL
+			AND intEntityCustomerId IS NULL
 			AND strType = @strType
 			AND strTransactionType <> 'Statement Footer'
 		ORDER BY intCommentId DESC
