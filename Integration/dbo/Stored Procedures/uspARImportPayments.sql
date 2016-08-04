@@ -883,21 +883,21 @@ IF(@Checking = 1)
 				BEGIN TRY
 					SELECT @PaymentID = intPaymentId FROM #tmpagcrd
 						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
-								@PaymentId = @PaymentID,
+								@PaymentID = @PaymentID,
 								@UserId = @UserId,
 								@NewInvoiceId = @NewInvoiceId OUTPUT					
 				END TRY								
 							
 				BEGIN CATCH
 					PRINT @@ERROR;
-					DELETE FROM tblARPayment WHERE intPaymentId = @PaymentId					
+					DELETE FROM tblARPayment WHERE intPaymentId = @PaymentID					
 					GOTO CONTINUELOOP;
 				END CATCH
 				
 				CONTINUELOOP:
-				PRINT @PaymentId
-				DELETE FROM #tmpagcrd WHERE intPaymentId = @PaymentId
-				UPDATE tblARPayment SET strNotes = NULL WHERE intPaymentId = @PaymentId
+				PRINT @PaymentID
+				DELETE FROM #tmpagcrd WHERE intPaymentId = @PaymentID
+				UPDATE tblARPayment SET strNotes = NULL WHERE intPaymentId = @PaymentID
 			END 		
 END
 			')
@@ -1739,21 +1739,21 @@ IF(@Checking = 1)
 				BEGIN TRY
 					SELECT @PaymentID = intPaymentId FROM #tmpptcrd
 						EXEC	@return_value = [dbo].[uspARCreatePrePayment]
-								@PaymentId = @PaymentID,
+								@PaymentID = @PaymentID,
 								@UserId = @UserId,
 								@NewInvoiceId = @NewInvoiceId OUTPUT					
 				END TRY								
 							
 				BEGIN CATCH
 					PRINT @@ERROR;
-					DELETE FROM tblARPayment WHERE intPaymentId = @PaymentId					
+					DELETE FROM tblARPayment WHERE intPaymentId = @PaymentID					
 					GOTO CONTINUELOOP;
 				END CATCH
 				
 				CONTINUELOOP:
-				PRINT @PaymentId
-				DELETE FROM #tmpptcrd WHERE intPaymentId = @PaymentId
-				UPDATE tblARPayment SET strNotes = NULL WHERE intPaymentId = @PaymentId
+				PRINT @PaymentID
+				DELETE FROM #tmpptcrd WHERE intPaymentId = @PaymentID
+				UPDATE tblARPayment SET strNotes = NULL WHERE intPaymentId = @PaymentID
 			END 
 END
 			')
