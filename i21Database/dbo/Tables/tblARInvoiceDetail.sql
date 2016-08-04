@@ -68,6 +68,7 @@
 	[intPerformerId]						INT												NULL,
 	[ysnLeaseBilling]						BIT												NULL,	
 	[ysnVirtualMeterReading]				BIT												NULL,	
+	[dblOriginalItemWeight]					NUMERIC(18, 6)									NULL DEFAULT 0,
     [intConcurrencyId]						INT												NOT NULL	CONSTRAINT [DF_tblARInvoiceDetail_intConcurrencyId] DEFAULT ((0)),    
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,

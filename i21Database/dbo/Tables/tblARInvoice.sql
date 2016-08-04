@@ -70,6 +70,7 @@
 	[intOriginalInvoiceId]			INT												NULL,        	
 	[intLoadId]						INT												NULL,        	
 	[intEntityId]					INT												NOT NULL	DEFAULT ((0)), 
+	[dblTotalWeight]				NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
