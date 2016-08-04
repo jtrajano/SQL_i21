@@ -270,10 +270,10 @@ INNER JOIN #tmpVouchersWithRecordNumber B ON A.intBillId = B.intBillId
 
 ALTER TABLE tblAPBill ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
---UPDATE THE BACK UP TABLE FOREIGN KEY
+--UPDATE THE intBillId of tblAPaptrxmst
 UPDATE A
 	SET A.intBillId = B.intBillId
-FROM tblAPapivcmst A
+FROM tblAPaptrxmst A
 INNER JOIN #tmpVoucherTransactions B ON A.intId = B.intBackupId
 
 IF @totalInsertedBill <= 0 
@@ -364,12 +364,6 @@ ORDER BY C.apegl_dist_no
 SET @totalInsertedBillDetail = @@ROWCOUNT;
 
 SET @totalDetailImported = @totalInsertedBillDetail;
-
---UPDATE THE intBillId of tblAPaptrxmst
-UPDATE A
-	SET A.intBillId = B.intBillId
-FROM tblAPaptrxmst A
-INNER JOIN #tmpVoucherTransactions B ON A.intId = B.intBackupId
 
 --GET TOTAL UNPOSTED VOUCHER
 SELECT 
