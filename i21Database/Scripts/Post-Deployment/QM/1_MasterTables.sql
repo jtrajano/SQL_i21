@@ -392,6 +392,11 @@ GO
 
 -- Report Properties
 GO
+DELETE FROM tblQMReportProperty WHERE strReportName = 'Quality Label'
+GO
+
+/*
+GO
 DECLARE @intPropertyId INT
 
 SELECT @intPropertyId = intPropertyId
@@ -546,6 +551,7 @@ BEGIN
 		,6
 END
 GO
+*/
 
 GO
 IF EXISTS (

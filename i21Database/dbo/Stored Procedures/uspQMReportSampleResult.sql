@@ -13,53 +13,28 @@ BEGIN TRY
 	SELECT TOP 1 @intNumberofDecimalPlaces = intNumberofDecimalPlaces
 	FROM tblQMCompanyPreference
 
-	BEGIN
-		IF EXISTS (
-				SELECT intPropertyId
-				FROM tblQMReportProperty
-				WHERE strReportName = 'Quality Label'
-				)
-		BEGIN
-			SELECT P.strPropertyName
-				,TR.dblMinValue
-				,TR.dblMaxValue
-				,CASE 
-					WHEN P.intDataTypeId IN (
-							1
-							,2
-							,6
-							)
-						THEN CONVERT(NVARCHAR, ROUND(ISNULL(TR.strPropertyValue, 0), @intNumberofDecimalPlaces))
-					ELSE TR.strPropertyValue
-					END AS strPropertyValue
-				,TR.strResult
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON TR.intPropertyId = P.intPropertyId
-			JOIN tblQMReportProperty RP ON RP.intPropertyId = P.intPropertyId AND RP.strReportName = 'Quality Label'
-			WHERE TR.intSampleId = @intSampleId
-			ORDER BY RP.intSequenceNo
-		END
-		ELSE
-		BEGIN
-			SELECT P.strPropertyName
-				,TR.dblMinValue
-				,TR.dblMaxValue
-				,ROUND(ISNULL(TR.strPropertyValue, 0), @intNumberofDecimalPlaces) AS strPropertyValue
-				,CASE 
-					WHEN P.intDataTypeId IN (
-							1
-							,2
-							,6
-							)
-						THEN CONVERT(NVARCHAR, ROUND(ISNULL(TR.strPropertyValue, 0), @intNumberofDecimalPlaces))
-					ELSE TR.strPropertyValue
-					END AS strPropertyValue
-				,TR.strResult
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON TR.intPropertyId = P.intPropertyId
-			WHERE TR.intSampleId = @intSampleId
-		END
-	END
+	SELECT P.strPropertyName
+		,TR.dblMinValue
+		,TR.dblMaxValue
+		,CASE 
+			WHEN P.intDataTypeId IN (
+					1
+					,2
+					,6
+					)
+				THEN CONVERT(NVARCHAR, ROUND(ISNULL(TR.strPropertyValue, 0), @intNumberofDecimalPlaces))
+			ELSE TR.strPropertyValue
+			END AS strPropertyValue
+		,TR.strResult
+	FROM tblQMTestResult TR
+	JOIN tblQMProduct PRD ON PRD.intProductId = TR.intProductId
+		AND TR.intSampleId = @intSampleId
+	JOIN tblQMProductProperty PP ON PP.intProductId = PRD.intProductId
+		AND PP.intTestId = TR.intTestId
+		AND PP.intPropertyId = TR.intPropertyId
+		AND PP.ysnPrintInLabel = 1
+	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+	ORDER BY TR.intSequenceNo
 END TRY
 
 BEGIN CATCH
