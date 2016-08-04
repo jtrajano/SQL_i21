@@ -28,6 +28,7 @@ FROM
 		,[intLineNo]				=	tblReceived.intLineNo
 		,[intInventoryReceiptItemId]=	tblReceived.intInventoryReceiptItemId
 		,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+		,[intContractChargeId]		=	NULL
 		,[dblUnitCost]				=	tblReceived.dblUnitCost
 		,[dblTax]					=	tblReceived.dblTax
 		,[dblRate]					=	tblReceived.dblRate
@@ -199,6 +200,7 @@ FROM
 	,[intLineNo]				=	B.intPurchaseDetailId
 	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
 	,[intInventoryReceiptChargeId]	= NULL
+	,[intContractChargeId]		=	NULL  
 	,[dblUnitCost]				=	B.dblCost
 	,[dblTax]					=	ISNULL(B.dblTax,0)
 	,[dblRate]					=	0
@@ -285,6 +287,7 @@ FROM
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptChargeId]	= NULL
+	,[intContractChargeId]		=	NULL
 	,[dblUnitCost]				=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
 												 THEN (CASE WHEN CD.dblCashPrice IS NOT NULL THEN CD.dblCashPrice ELSE B.dblUnitCost END)
 												 ELSE B.dblUnitCost
@@ -392,6 +395,7 @@ FROM
 		,[intLineNo]								=	A.intLineNo
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
+		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	ISNULL(A.dblTax,0)
 		,[dblRate]									=	ISNULL(G1.dblRate,0)
@@ -483,6 +487,7 @@ FROM
 		,[intLineNo]								=	A.intShipmentContractQtyId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
+		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	A.dblCashPrice
 		,[dblTax]									=	0
 		,[dblRate]									=	0
@@ -550,11 +555,12 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity) ELSE 1 END
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity),1) ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
+		,[intContractChargeId]						=	CC.intContractCostId      
 		,[dblUnitCost]								=	CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
