@@ -92,8 +92,8 @@ BEGIN
 
 	SET @product = ISNULL(CAST(LEFT(@rawResult, 38) AS NUMERIC(38, 20)), 0) 
 	
-	-- Excel can only handle 15 significant figures. So let's round it at the 13th decimal place. 
-	SET @product = ROUND(@product, 13) 
+	-- Excel can only handle 15 significant figures. So let's round it at the 12th decimal place. 
+	SET @product = ROUND(@product, 12) 
 
 	RETURN @product
 END
