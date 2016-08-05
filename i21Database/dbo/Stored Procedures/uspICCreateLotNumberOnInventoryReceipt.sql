@@ -70,7 +70,7 @@ BEGIN
 		END 
 	END 
 		
-	-- Check if the Item Receipt quantity matches the total Quantity in the Lot
+	-- Check if the Item Receipt Open Receive matches with the total Quantity from the Lots
 	SET @strItemNo = NULL 
 	SET @intItemId = NULL 
 
@@ -80,11 +80,7 @@ BEGIN
 			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
 			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
 			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
-			,@OpenReceiveQtyInItemUOM	= dbo.fnCalculateQtyBetweenUOM (
-											ReceiptItem.intUnitMeasureId
-											,ReceiptItem.intUnitMeasureId
-											,ReceiptItem.dblOpenReceive
-										)
+			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblOpenReceive
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -109,13 +105,9 @@ BEGIN
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 2) <>
-				ROUND(dbo.fnCalculateQtyBetweenUOM (
-					ReceiptItem.intUnitMeasureId
-					,ReceiptItem.intUnitMeasureId
-					,ReceiptItem.dblOpenReceive
-				), 2)
-
+			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 2) <> ReceiptItem.dblOpenReceive
+			AND ReceiptItem.intWeightUOMId IS NULL 
+			
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		IF ISNULL(@strItemNo, '') = '' 
@@ -126,6 +118,53 @@ BEGIN
 		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 		-- 'The Qty to Receive for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
+		RAISERROR(80006, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RETURN -1; 
+	END 
+
+		
+	-- Check if the Item Receipt Net qty matches with the total Net qty from the lots. 
+	SET @strItemNo = NULL 
+	SET @intItemId = NULL 
+
+	SELECT	TOP 1 
+			@strItemNo					= Item.strItemNo
+			,@intItemId					= Item.intItemId
+			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
+			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblNet
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
+			LEFT JOIN (
+				SELECT  AggregrateLot.intInventoryReceiptItemId
+						,TotalLotQtyInItemUOM = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
+							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
+							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
+				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
+				GROUP BY AggregrateLot.intInventoryReceiptItemId
+			) ItemLot
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
+	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+			AND Receipt.strReceiptNumber = @strTransactionId
+			AND ItemLot.TotalLotQtyInItemUOM <> ReceiptItem.dblNet
+			AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 
+			
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		IF ISNULL(@strItemNo, '') = '' 
+			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS MONEY), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
+		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
+
+		-- 'The Qty to Receive for {Item} is {Net Qty}. Total Lot Quantity is {Total Lot New Qty}. The difference is {Calculated difference}.'
 		RAISERROR(80006, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
 		RETURN -1; 
 	END 
