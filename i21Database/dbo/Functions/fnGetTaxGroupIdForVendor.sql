@@ -4,10 +4,15 @@
 	,@CompanyLocationId		INT
 	,@ItemId				INT
 	,@VendorLocationId		INT
+	,@FreightTermId			INT
 )
 RETURNS INT
 AS
 BEGIN
+
+
+	IF ISNULL(@FreightTermId,0) <> 0 AND LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),'')))) <> 'origin'
+		SET @VendorLocationId = NULL
 
 	DECLARE @TaxVendorId INT
 			,@ItemCategoryId INT
