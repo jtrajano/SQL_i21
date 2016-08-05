@@ -9,10 +9,10 @@
         "container|align": "stretch",
         "designer|userAlias": "iccompanypreferenceoption",
         "designer|userClassName": "CompanyPreferenceOption",
-        "height": 250,
+        "height": null,
         "layout": "vbox",
         "padding": 5,
-        "width": 400
+        "width": null
     },
     "name": "MyContainer3",
     "designerId": "9a6a2577-6d84-4750-a9b9-44a73818b4c2",
@@ -60,6 +60,7 @@
                         "designer|createAlias": "gridcombobox",
                         "displayField": "strInheritSetup",
                         "fieldLabel": "Inherit Setup",
+                        "hidden": true,
                         "itemId": "cboInheritSetup",
                         "valueField": "intInheritSetup"
                     },
@@ -73,6 +74,346 @@
                             "group": "(Custom Properties)",
                             "name": "columns",
                             "type": "string"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.tab.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "activeTab": 0,
+                        "bodyCls": [
+                            "i21-tab"
+                        ],
+                        "itemId": "tabInventory",
+                        "layout|flex": 1,
+                        "plain": true
+                    },
+                    "name": "MyTabPanel",
+                    "designerId": "cc903c7d-0255-45ac-b066-e062c98c51e2",
+                    "cn": [
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": 10,
+                                "container|align": "stretch",
+                                "itemId": "pgeInventory",
+                                "layout": "vbox",
+                                "title": "Inventory"
+                            },
+                            "name": "MyPanel6",
+                            "designerId": "f0773f70-b7dc-469d-9e33-03f818ecfcd3",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig1",
+                                    "designerId": "a7372ee3-a027-4d0c-9a81-4896e342afa1"
+                                },
+                                {
+                                    "type": "Ext.panel.Panel",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "bodyPadding": 5,
+                                        "container|align": "stretch",
+                                        "itemId": "pnlDefaults",
+                                        "layout": "vbox",
+                                        "layout|flex": 1,
+                                        "title": "Defaults"
+                                    },
+                                    "name": "MyPanel37",
+                                    "designerId": "04dc307b-af89-48c2-a38b-1f43b7f82821",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    " [",
+                                                    "                                                {",
+                                                    "                                                    dataIndex: 'strReceiptType',",
+                                                    "                                                    dataType: 'string',",
+                                                    "                                                    text: 'Shipment Order Type',",
+                                                    "                                                    flex: 1",
+                                                    "                                                },",
+                                                    "                                                {",
+                                                    "                                                    dataIndex: 'intReceiptType',",
+                                                    "                                                    dataType: 'numeric',",
+                                                    "                                                    hidden: true",
+                                                    "                                                }",
+                                                    "                                            ]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strReceiptType",
+                                                "fieldLabel": "Receipt Order Type",
+                                                "itemId": "cboReceiptOrderType",
+                                                "labelWidth": 130,
+                                                "modelValidation": null,
+                                                "valueField": "strReceiptType",
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox94",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "29113bac-db89-4507-9479-fe2f6510be5e",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "{",
+                                                    "dataIndex: 'strDescription',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Receipt Source Type',",
+                                                    "flex: 1",
+                                                    "},",
+                                                    "{",
+                                                    "dataIndex: 'intReceiptSourceType',",
+                                                    "dataType: 'numeric',",
+                                                    "hidden: true",
+                                                    "}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strDescription",
+                                                "fieldLabel": "Receipt Source Type",
+                                                "itemId": "cboReceiptSourceType",
+                                                "labelWidth": 130,
+                                                "modelValidation": null,
+                                                "valueField": "intReceiptSourceType",
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox95",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "d9e9f598-b46d-4dc1-a25f-d1521adffd4b",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "{",
+                                                    "dataIndex: 'strDescription',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Shipment Order Type',",
+                                                    "flex: 1",
+                                                    "},",
+                                                    "{",
+                                                    "dataIndex: 'intShipmentOrderType',",
+                                                    "dataType: 'numeric',",
+                                                    "hidden: true",
+                                                    "}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strDescription",
+                                                "fieldLabel": "Shipment Order Type",
+                                                "itemId": "cboShipmentOrderType",
+                                                "labelWidth": 130,
+                                                "modelValidation": null,
+                                                "valueField": "intShipmentOrderType",
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox96",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "5454ca65-6994-4ea8-8e6a-e532c1a709fe",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "{",
+                                                    "dataIndex: 'strDescription',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Shipment Source Type',",
+                                                    "flex: 1",
+                                                    "},",
+                                                    "{",
+                                                    "dataIndex: 'intShipmentSourceType',",
+                                                    "dataType: 'numeric',",
+                                                    "hidden: true",
+                                                    "}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strDescription",
+                                                "fieldLabel": "Shipment Source Type",
+                                                "itemId": "cboShipmentSourceType",
+                                                "labelWidth": 130,
+                                                "modelValidation": null,
+                                                "valueField": "intShipmentSourceType",
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox97",
+                                            "configAlternates": {
+                                                "columns": "array",
+                                                "value": "string"
+                                            },
+                                            "designerId": "7476b9cb-b546-4803-81b6-3b84ad968f5a",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    " [",
+                                                    "                                                {",
+                                                    "                                                    dataIndex: 'strLotCondition',",
+                                                    "                                                    dataType: 'string',",
+                                                    "                                                    text: 'Shipment Source Type',",
+                                                    "                                                    flex: 1",
+                                                    "                                                },",
+                                                    "                                                {",
+                                                    "                                                    dataIndex: 'intLotCondition',",
+                                                    "                                                    dataType: 'numeric',",
+                                                    "                                                    hidden: true",
+                                                    "                                                }",
+                                                    "                                            ]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strLotCondition",
+                                                "fieldLabel": "Lot Condition",
+                                                "itemId": "cboLotCondition",
+                                                "labelWidth": 130,
+                                                "modelValidation": null,
+                                                "value": null,
+                                                "valueField": "strLotCondition",
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox93",
+                                            "configAlternates": {
+                                                "value": "string",
+                                                "columns": "array"
+                                            },
+                                            "designerId": "f784cb78-3407-4013-a44a-1a037a5793e0",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|createAlias": null,
+                                "itemId": "pgeAuditLog",
+                                "layout": "fit",
+                                "title": "Audit Log"
+                            },
+                            "name": "MyPanel7",
+                            "designerId": "bd510fa2-5f76-4d47-8673-ad05f25dfce7",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig4",
+                                    "designerId": "e631dec4-b560-4aaf-895c-bc1d4306ae4b"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "auditlogtree",
+                                        "layout": null
+                                    },
+                                    "name": "MyContainer3",
+                                    "designerId": "28f08cd9-d65a-4325-ac34-1d49fb44ad47"
+                                }
+                            ]
                         }
                     ]
                 }

@@ -19,9 +19,34 @@ Ext.define('Inventory.view.CompanyPreferenceOptionViewController', {
 
     config: {
         binding: {
-            cboInheritSetup: {
+          /*  cboInheritSetup: {
                 value: '{current.intInheritSetup}',
                 store: '{inheritSetups}'
+            },*/
+            
+            cboReceiptOrderType: {
+                value: '{current.strReceiptType}',
+                store: '{receiptOrderType}'
+            },
+            
+            cboReceiptSourceType: {
+                value: '{current.intReceiptSourceType}',
+                store: '{receiptSourceType}'
+            },
+            
+            cboShipmentOrderType: {
+                value: '{current.intShipmentOrderType}',
+                store: '{shipmentOrderType}'
+            },
+            
+            cboShipmentSourceType: {
+                value: '{current.intShipmentSourceType}',
+                store: '{shipmentSourceType}'
+            },
+            
+            cboLotCondition: {
+                value: '{current.strLotCondition}',
+                store: '{lotCondition}'
             }
         }
     },
@@ -34,5 +59,7 @@ Ext.define('Inventory.view.CompanyPreferenceOptionViewController', {
             window: win,
             store: i21.ModuleMgr.Inventory.companyPreferenceStore
         });
+        
+        me.audit = Ext.create('iRely.audit.Manager', { window: win });
     }
 });
