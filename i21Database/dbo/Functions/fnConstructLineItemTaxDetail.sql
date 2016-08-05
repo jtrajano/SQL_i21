@@ -36,9 +36,32 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
+
+	DECLARE @ItemTaxes AS TABLE(
+		 [Id]							INT IDENTITY(1,1)
+		,[intTaxGroupId]				INT
+		,[intTaxCodeId]					INT
+		,[intTaxClassId]				INT
+		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
+		,[strCalculationMethod]			NVARCHAR(30)
+		,[dblRate]						NUMERIC(18,6)
+		,[dblExemptionPercent]			NUMERIC(18,6)
+		,[dblTax]						NUMERIC(18,6)
+		,[dblAdjustedTax]				NUMERIC(18,6)
+		,[intTaxAccountId]				INT
+		,[ysnCheckoffTax]				BIT
+		,[strTaxCode]					NVARCHAR(100)						
+		,[ysnTaxExempt]					BIT
+		,[ysnInvalidSetup]				BIT
+		,[strTaxGroup]					NVARCHAR(100)
+		,[strNotes]						NVARCHAR(500)
+		,[ysnTaxAdjusted]				BIT
+		,[ysnComputed]					BIT
+		)
+
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM @LineItemTaxEntries)
 		BEGIN
-			INSERT INTO @returntable(
+			INSERT INTO @ItemTaxes(
 				 [intTaxGroupId]
 				,[intTaxCodeId]
 				,[intTaxClassId]
@@ -87,7 +110,6 @@ BEGIN
 						,@SiteId				--@SiteId
 						,@FreightTermId
 					) 	
-			RETURN		
 		END
 
 	DECLARE @ZeroDecimal		NUMERIC(18, 6)
@@ -97,28 +119,6 @@ BEGIN
 	SET @GrossAmount = ISNULL(@GrossAmount, @ZeroDecimal)
 	SET @Quantity = ISNULL(@Quantity, @ZeroDecimal)
 	SET @Price = ISNULL(@Price, @ZeroDecimal)
-
-	DECLARE @ItemTaxes AS TABLE(
-		 [Id]							INT IDENTITY(1,1)
-		,[intTaxGroupId]				INT
-		,[intTaxCodeId]					INT
-		,[intTaxClassId]				INT
-		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-		,[strCalculationMethod]			NVARCHAR(30)
-		,[dblRate]						NUMERIC(18,6)
-		,[dblExemptionPercent]			NUMERIC(18,6)
-		,[dblTax]						NUMERIC(18,6)
-		,[dblAdjustedTax]				NUMERIC(18,6)
-		,[intTaxAccountId]				INT
-		,[ysnCheckoffTax]				BIT
-		,[strTaxCode]					NVARCHAR(100)						
-		,[ysnTaxExempt]					BIT
-		,[ysnInvalidSetup]				BIT
-		,[strTaxGroup]					NVARCHAR(100)
-		,[strNotes]						NVARCHAR(500)
-		,[ysnTaxAdjusted]				BIT
-		,[ysnComputed]					BIT
-		)
 
 
 	INSERT INTO @ItemTaxes(
