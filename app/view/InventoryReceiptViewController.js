@@ -1119,8 +1119,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     createRecord: function (config, action) {
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
-        record.set('strReceiptType', 'Purchase Order');
-        record.set('intSourceType', 0);
+        var defaultReceiptType = i21.ModuleMgr.Inventory.getCompanyPreference('strReceiptType');
+        var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intReceiptSourceType');
+        
+        if(defaultReceiptType !== null) {
+            record.set('strReceiptType', defaultReceiptType);
+        }
+            else {
+                record.set('strReceiptType', 'Purchase Order');
+            }
+        
+        if(defaultSourceType !== null) {
+            record.set('intSourceType', defaultSourceType);
+        }
+            else {
+                record.set('intSourceType', 0);
+            }
+        
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         if (iRely.config.Security.EntityId > 0)

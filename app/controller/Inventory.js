@@ -102,7 +102,12 @@ Ext.define('Inventory.controller.Inventory', {
         var me = this,
             record = me.companyPreferenceStore.getAt(0);
 
-        return record.get(field);
+        if(record) {
+            return record.get(field);
+        }
+        else {
+            return null;
+        }    
     },
 
     createPreferenceUI: function() {
