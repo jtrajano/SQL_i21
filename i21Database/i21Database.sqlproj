@@ -4049,6 +4049,7 @@
     <Build Include="dbo\Tables\tblCFNetworkAccount.sql" />
     <Build Include="dbo\Views\vyuRKPurchaseIntransitView.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCardLockAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

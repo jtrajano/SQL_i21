@@ -545,7 +545,7 @@ BEGIN
 				END
 
 				
-
+				
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
 				---------------------------------------------------
@@ -607,6 +607,7 @@ BEGIN
 				FROM
 				@tblCFRemoteTax
 				WHERE ysnInvalidSetup = 0
+
 
 				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 				OR @strPriceMethod = 'Import File Price' 
@@ -1415,7 +1416,7 @@ BEGIN
 			,dblRate AS 'dblTaxRate'
 			,(SELECT TOP 1 strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = T.intTaxCodeId) AS 'strTaxCode'
 			FROM @tblCFTransactionTax AS T
-			WHERE ysnInvalidSetup = 0
+			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 		END
 	ELSE
 		BEGIN
@@ -1426,7 +1427,7 @@ BEGIN
 			,dblRate AS 'dblTaxRate'
 			,(SELECT TOP 1 strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = T.intTaxCodeId) AS 'strTaxCode'
 			FROM @tblCFTransactionTax AS T
-			WHERE ysnInvalidSetup = 0
+			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 		END
 	---------------------------------------------------
 	--					TAXES OUT					 --
