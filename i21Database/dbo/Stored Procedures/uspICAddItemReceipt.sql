@@ -524,7 +524,7 @@ BEGIN
 			SELECT  ReceiptItem.intItemId
 					,Receipt.intLocationId
 					,Receipt.dtmReceiptDate
-					,Receipt.intEntityId
+					,Receipt.intEntityVendorId
 					,ReceiptItem.intInventoryReceiptItemId
 					,Receipt.intShipFromId
 					,Receipt.intTaxGroupId
