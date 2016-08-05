@@ -16,6 +16,7 @@
 	[strDistributionType]	   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
 	[dblAmount]				   NUMERIC(18, 6) NULL,
 	[intOrder]				   INT			  NULL, 
+	[strEFTType]				NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]         INT            NOT NULL,
     CONSTRAINT [PK_tblEMEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC)
 );
