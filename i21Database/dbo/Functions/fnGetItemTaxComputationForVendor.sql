@@ -9,6 +9,7 @@
 	,@CompanyLocationId		INT
 	,@VendorLocationId		INT
 	,@IncludeExemptedCodes	BIT
+	,@FreightTermId			INT
 )
 RETURNS @returntable TABLE
 (
@@ -63,7 +64,7 @@ BEGIN
 			)
 					
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @VendorLocationId)	
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @VendorLocationId, @FreightTermId)	
 					
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
