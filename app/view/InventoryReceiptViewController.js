@@ -1473,6 +1473,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) current.set('strFobPoint', records[0].get('strFobPoint'));
+
+        // Calculate the taxes
+        this.calculateItemTaxes();
     },
 
     onReceiptItemSelect: function (combo, records, eOpts) {
