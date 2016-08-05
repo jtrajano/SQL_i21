@@ -336,6 +336,8 @@ BEGIN TRY
 				on RCus.intCustomerId = CVol.intCustomerPatronId
 				inner join tblPATRefundCategory RCat
 				on RCus.intRefundCustomerId = RCat.intRefundCustomerId
+				inner join tblPATRefund Ref
+				on RCus.intRefundId = Ref.intRefundId AND CVol.intFiscalYear = Ref.intFiscalYearId
 				where intRefundCategoryId is not null
 				GROUP BY	CVol.intCustomerPatronId, 
 							PCat.strPurchaseSale,
@@ -346,7 +348,6 @@ BEGIN TRY
 			on RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId is not null
 		) CVol
 		ON RCat.intRefundCategoryId = CVol.intRefundCategoryId
-		WHERE CVol.dblVolume <> 0.00
 
 		--=====================================================================================================================================
 		-- 	UPDATE CUSTOMER VOLUME TABLE
