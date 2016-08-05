@@ -328,7 +328,7 @@ VALUES
 	[A4GLIdentity]				,
 	[ysnInsertedToAPIVC]
 )
-OUTPUT inserted.intId, SourceData.intId INTO #tmpUnpostedBackupId;
+OUTPUT inserted.intId intBackupId, SourceData.intId intId INTO #tmpUnpostedBackupId;
 
 SET @totalAPTRXMST = @@ROWCOUNT;
 
