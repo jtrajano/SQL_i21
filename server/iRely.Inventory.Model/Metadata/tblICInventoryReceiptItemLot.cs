@@ -202,6 +202,25 @@ namespace iRely.Inventory.Model
                 _grade = value;
             }
         }
+        private string _unitType;
+        [NotMapped]
+        public string strUnitType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_unitType))
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strUnitType;
+                    else
+                        return null;
+                else
+                    return _unitType;
+            }
+            set
+            {
+                _unitType = value;
+            }
+        }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
         public vyuICGetInventoryReceiptItemLot vyuICGetInventoryReceiptItemLot { get; set; }
