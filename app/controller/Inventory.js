@@ -119,6 +119,13 @@ Ext.define('Inventory.controller.Inventory', {
         return parseFloat(parseFloat(Math.round(number * 100) / 100).toFixed(precision));
     },
 
+    roundDecimalValue: function(number, precision) {
+        var factor = Math.pow(10, precision);
+        var tempNumber = number * factor;
+        var roundedTempNumber = Math.round(tempNumber);
+        return roundedTempNumber / factor;
+    },
+
     getTodayDate: function() {
         var today = new Date();
         var dd = today.getDate();

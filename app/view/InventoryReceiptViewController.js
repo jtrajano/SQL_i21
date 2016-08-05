@@ -3961,7 +3961,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.itemId === 'cboLotUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
-            me.calculateGrossNet(win.viewModel.data.currentReceiptItem);
+            current.set('strUnitType', records[0].get('strUnitType'));
+
+			//Calculate the Line Gross Net Qty. 
+            me.calculateGrossNet(win.viewModel.data.currentReceiptItem);		
             
             //Calculate Line Total
             var currentReceiptItem = win.viewModel.data.currentReceiptItem;
@@ -4379,6 +4382,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var lastNetWgt = currentLot.get('dblNetWeight'),
                 lotNetWgt = currentLot.get('dblNetWeight');
 
+            var strUnitType = currentLot.get('strUnitType');
+
             var lotCF = currentLot.get('dblLotUOMConvFactor');
             var grossCF = currentReceiptItem.get('dblWeightUOMConvFactor');
 
@@ -4388,8 +4393,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // Calculate the last qty.
             var lastQty = (convertedItemQty % lotQty) > 0 ? convertedItemQty % lotQty : lotQty;
 
+            // Initialize the target tare weight.
+            var addedTareWeight = 0.00;
+
+            // If Unit-Type is a 'Packed' type, get the ceiling value. A packaging can't have a fractional value.
+            if (strUnitType == "Packed")
+            {
+                addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
+                lastQty = Math.ceil(lastQty);
+                addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
+                addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 12);
+            }
+            else {
+                lastQty = i21.ModuleMgr.Inventory.roundDecimalValue(lastQty, 12);
+            }
+
             // Calculate how many times to loop.
             var replicaCount = (convertedItemQty - lastQty) / lotQty;
+            replicaCount = Math.ceil(replicaCount);
 
             // Calculate the last Gross and Tare weights.
             if ((replicaCount * lotQty) < convertedItemQty ) {
@@ -4401,7 +4422,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 // Compute the last net weight.
                 
                     lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
-                    lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt : 0;
+                    lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt + addedTareWeight: addedTareWeight;
                     lastNetWgt = lastGrossWgt - lastTareWgt;
                 
             }
