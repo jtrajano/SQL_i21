@@ -10,6 +10,7 @@
 	[intItemId]    INT             NULL,
 	[intInventoryReceiptItemId]    INT             NULL,
 	[intInventoryReceiptChargeId]    INT             NULL,
+	[intContractCostId]         INT            NULL,
 	[intPaycheckHeaderId]    INT             NULL,
 	[intPurchaseDetailId]    INT             NULL,
 	[intContractHeaderId]    INT             NULL,
@@ -55,7 +56,8 @@
 	--CONSTRAINT [FK_tblAPBillDetail_tblICInventoryReceiptItem_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [dbo].[tblICInventoryReceiptItem] ([intInventoryReceiptItemId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblLGShipmentContractQty_intShipmentContractQtyId] FOREIGN KEY ([intShipmentContractQtyId]) REFERENCES [dbo].[tblLGShipmentContractQty] ([intShipmentContractQtyId])
+	CONSTRAINT [FK_tblAPBillDetail_tblLGShipmentContractQty_intShipmentContractQtyId] FOREIGN KEY ([intShipmentContractQtyId]) REFERENCES [dbo].[tblLGShipmentContractQty] ([intShipmentContractQtyId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblCTContractCost] FOREIGN KEY ([intContractCostId]) REFERENCES [tblCTContractCost]([intContractCostId])
 ) ON [PRIMARY];
 
 
