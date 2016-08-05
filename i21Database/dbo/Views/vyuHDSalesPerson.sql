@@ -13,3 +13,20 @@
 	from tblARSalesperson, tblEMEntity
 	where
 		tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
+
+	union all
+
+		select
+			intEntityId = tblEMEntityToContact.intEntityContactId
+			,e.strName
+			,strSalespersonId = (case when e.strEntityNo is null then tblARSalesperson.strSalespersonId else e.strEntityNo end)
+			,tblARSalesperson.strTitle
+			,tblARSalesperson.strType
+			,e.strEmail
+			,e.strPhone
+			,ysnActiveEntity = e.ysnActive
+			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
+	from tblARSalesperson, tblEMEntity e, tblEMEntityToContact
+	where
+		e.intEntityId = tblARSalesperson.intEntitySalespersonId
+		and tblEMEntityToContact.intEntityId = e.intEntityId
