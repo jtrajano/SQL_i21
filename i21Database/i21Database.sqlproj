@@ -4048,6 +4048,7 @@
     <Build Include="dbo\Stored Procedures\uspQMUpdateContainerLinkInSample.sql" />
     <Build Include="dbo\Tables\tblCFNetworkAccount.sql" />
     <Build Include="dbo\Views\vyuRKPurchaseIntransitView.sql" />
+    <Build Include="dbo\Views\vyuTMDeliveryTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -170,9 +170,7 @@
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql"
 :r "..\Scripts\TM\AddOriginTableIndex.sql"
-
-
-
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql"
 
 
 
