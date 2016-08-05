@@ -664,6 +664,7 @@ BEGIN
 					,NULL
 					,1
 					,NULL
+					,NULL
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -712,6 +713,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
 					,NULL
 				)
 
@@ -766,6 +768,7 @@ BEGIN
 					,NULL
 					,1
 					,NULL
+					,NULL
 				)
 
 				INSERT INTO @tblCFCalculatedTax	
@@ -814,6 +817,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
 					,NULL
 				)
 
@@ -935,6 +939,7 @@ BEGIN
 					,NULL
 					,1
 					,NULL
+					,NULL
 				)
 					INSERT INTO @tblCFCalculatedTax	
 				(
@@ -982,6 +987,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
 					,NULL
 				)
 
@@ -1036,6 +1042,7 @@ BEGIN
 					,@intLocationId
 					,1
 					,NULL
+					,NULL
 				)
 					INSERT INTO @tblCFCalculatedTax	
 				(
@@ -1083,6 +1090,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,NULL
 					,NULL
 				)
 

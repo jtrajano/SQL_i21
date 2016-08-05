@@ -9,9 +9,11 @@
 RETURNS INT
 AS
 BEGIN
+	
+	DECLARE @FOB NVARCHAR(150)
+	SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
 
-
-	IF ISNULL(@FreightTermId,0) <> 0 AND LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),'')))) <> 'origin'
+	IF ISNULL(@FreightTermId,0) <> 0 AND @FOB <> 'origin'
 		SET @VendorLocationId = NULL
 
 	DECLARE @TaxVendorId INT
@@ -323,7 +325,7 @@ BEGIN
 	WHERE
 		intCompanyLocationId = @CompanyLocationId
 	
-	IF ISNULL(@TaxGroupId,0) <> 0
+	IF ISNULL(@TaxGroupId,0) <> 0 AND (@FOB = 'destination' OR LEN(@FOB) < 1)
 		RETURN @TaxGroupId;
 
 
@@ -339,7 +341,7 @@ BEGIN
 		P.[intEntityVendorId] = @VendorId
 		AND EL.[intEntityLocationId] = @VendorLocationId
 
-	IF ISNULL(@TaxGroupId,0) <> 0
+	IF ISNULL(@TaxGroupId,0) <> 0 AND (@FOB = 'origin' OR LEN(@FOB) < 1)
 		RETURN @TaxGroupId;
 
 
