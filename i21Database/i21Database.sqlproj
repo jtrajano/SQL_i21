@@ -4142,6 +4142,7 @@
     <Build Include="dbo\Tables\tblMFOneLinePrint.sql" />
     <Build Include="dbo\Tables\tblMFCommentType.sql" />
     <Build Include="dbo\tblSMDocumentMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATUpdateRefundCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
