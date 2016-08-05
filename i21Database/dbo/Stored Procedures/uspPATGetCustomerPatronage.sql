@@ -11,8 +11,8 @@ BEGIN
 						   PC.strDescription,
 						   PC.strCategoryCode,
 						   RRD.dblRate,
-						   dblVolume = SUM(CV.dblVolume),
-						   dblRefundAmount = SUM(ISNULL((RRD.dblRate * CV.dblVolume),0))
+						   dblVolume = CV.dblVolume,
+						   dblRefundAmount = ISNULL((RRD.dblRate * CV.dblVolume),0)
 					  FROM tblPATRefundRate RR
 				INNER JOIN tblPATRefundRateDetail RRD
 						ON RRD.intRefundTypeId = RR.intRefundTypeId
@@ -20,11 +20,7 @@ BEGIN
 						ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 				INNER JOIN tblPATCustomerVolume CV
 						ON CV.intPatronageCategoryId = RRD.intPatronageCategoryId
-					 WHERE CV.intCustomerPatronId = @intCustomerPatronId
-				  GROUP BY RRD.intPatronageCategoryId,
-						   PC.strCategoryCode,
-						   PC.strDescription,
-						   RRD.dblRate
+					 WHERE CV.intCustomerPatronId = @intCustomerPatronId AND CV.intFiscalYear = @intFiscalYearId
 				END
 				ELSE
 				BEGIN
@@ -66,7 +62,7 @@ BEGIN
 						ON RCatPCat.intRefundCustomerId = RCus.intRefundCustomerId
 					LEFT JOIN tblSMTaxCode TC
 						ON TC.intTaxCodeId = ARC.intTaxCodeId
-					WHERE R.intRefundId = @intRefundId AND RCus.intRefundCustomerId = @intCustomerPatronId
+					WHERE R.intRefundId = @intRefundId AND RCus.intCustomerId = @intCustomerPatronId
 				END
 END
 GO
