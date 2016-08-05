@@ -4141,6 +4141,7 @@
     <Build Include="dbo\Tables\tblMFCostType.sql" />
     <Build Include="dbo\Tables\tblMFOneLinePrint.sql" />
     <Build Include="dbo\Tables\tblMFCommentType.sql" />
+    <Build Include="dbo\tblSMDocumentMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

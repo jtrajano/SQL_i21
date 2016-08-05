@@ -5334,4 +5334,25 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[uspSMDuplicateCommentMaintenance]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d3deb3f6-0a39-4187-b2ae-7090b5813a02" ChangeDateTime="08/05/2016 07:00:36">
+    <Property Name="ElementName" Value="[dbo].[tblSMDocumentMessage].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMDocumentMessage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDocumentMessageId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b01ad776-25bc-47e4-8bc0-d209e125eaed" ChangeDateTime="08/05/2016 07:02:44">
+    <Property Name="ElementName" Value="[dbo].[tblSMDocumentMessage].[intDocumentMessage]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMDocumentMessage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDocumentMaintenanceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="81e1e2e0-4c99-46e9-89b7-e4bd5746ba64" ChangeDateTime="08/05/2016 07:03:32">
+    <Property Name="ElementName" Value="[dbo].[tblSMDocumentMessage].[[dtmDateModified]]]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMDocumentMessage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmDateModified" />
+  </Operation>
 </Operations>
