@@ -2361,9 +2361,9 @@
     <None Include="Scripts\Post-Deployment\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddInventoryTransfer.sql" />
     <Build Include="dbo\User Defined Types\InventoryTransferStagingTable.sql" />
-    <Build Include="dbo\Tables\tblSMCommentMaintenance.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetDefaultComment.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMDuplicateCommentMaintenance.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateDocumentMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryTransfer.sql" />
     <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
@@ -4121,7 +4121,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInventoryReceiptDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleDetailResult.sql" />
-    <Build Include="dbo\Tables\tblSMCommentMaintenanceComment.sql" />
+    <Build Include="dbo\Tables\tblSMDocumentMaintenanceMessage.sql" />
     <Build Include="dbo\Tables\tblPRTimeOffRequest.sql" />
     <Build Include="dbo\Stored Procedures\uspICDCItemMigration.sql" />
     <Build Include="dbo\Stored Procedures\uspICDCGLAcctsMigration.sql" />
