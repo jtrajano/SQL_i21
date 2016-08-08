@@ -2,7 +2,7 @@
 AS
 SELECT DISTINCT convert(int,row_number() OVER(ORDER BY amm.intFutureMarketId)) intRowNum, amm.intFutureMarketId,strFutMarketName,ba.intEntityId,e.strName,
 ba.intBrokerageAccountId,
-strAccountNumber,it.intInstrumentTypeId,it.strInstrumentType
+strAccountNumber,it.intInstrumentTypeId,it.strInstrumentType,cmm.intCommodityId
 FROM tblRKBrokerageAccount ba
 JOIN tblRKBrokersAccountMarketMapping amm on amm.intBrokerageAccountId=ba.intBrokerageAccountId
 JOIN vyuRKGetBrokerInstrumentType it on it.intBrokerageAccountId=ba.intBrokerageAccountId and it.intEntityId=ba.intEntityId
