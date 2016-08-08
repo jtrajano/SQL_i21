@@ -7,6 +7,8 @@ CREATE TABLE [dbo].[tblSMComment] (
 	[dtmModified]		DATETIME DEFAULT (GETDATE()) NULL,
 	[ysnInternal]		BIT NULL,
 	[intEntityId]		INT NULL,
+	[intTransactionId]	INT NULL,
 	[intConcurrencyId]	INT NOT NULL,
-    CONSTRAINT [PK_tblSMComment] PRIMARY KEY CLUSTERED ([intCommentId] ASC)
+    CONSTRAINT [PK_tblSMComment] PRIMARY KEY CLUSTERED ([intCommentId] ASC),
+	CONSTRAINT [FK_tblSMComment_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]), 
 );
