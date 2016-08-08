@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFAutoBlend]
-	@intSalesOrderDetailId int,
+	@intSalesOrderDetailId int=0,
 	@intInvoiceDetailId int=0,
 	@intItemId int,
 	@dblQtyToProduce numeric(38,20),
 	@intItemUOMId INT,
 	@intLocationId int,
-	@intSubLocationId int,
-	@intStorageLocationId int,
+	@intSubLocationId int=NULL,
+	@intStorageLocationId int=NULL,
 	@intUserId int,
 	@dblMaxQtyToProduce numeric(38,20) OUT
 AS
@@ -588,7 +588,7 @@ Begin
 	Set @strXml += '<intItemIssuedUOMId>' + CONVERT(VARCHAR,@intBlendLotIssuesUOMId) + '</intItemIssuedUOMId>'
 	Set @strXml += '<dblWeightPerUnit>' + CONVERT(VARCHAR,@dblBlendLotWeightPerUnit) + '</dblWeightPerUnit>'
 	Set @strXml += '<intLocationId>' + CONVERT(VARCHAR,@intLocationId) + '</intLocationId>'
-	Set @strXml += '<intStorageLocationId>' + CONVERT(VARCHAR,@intStorageLocationId) + '</intStorageLocationId>'
+	Set @strXml += '<intStorageLocationId>' + ISNULL(CONVERT(VARCHAR,@intStorageLocationId),'') + '</intStorageLocationId>'
 	Set @strXml += '<strVesselNo>' + CONVERT(VARCHAR,'') + '</strVesselNo>'
 	Set @strXml += '<intManufacturingCellId>' + CONVERT(VARCHAR,@intCellId) + '</intManufacturingCellId>'
 	Set @strXml += '<dblPlannedQuantity>' + CONVERT(VARCHAR,@dblWOQty) + '</dblPlannedQuantity>'
