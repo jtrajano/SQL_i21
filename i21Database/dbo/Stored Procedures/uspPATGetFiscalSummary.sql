@@ -99,7 +99,7 @@ SELECT DISTINCT CV.intFiscalYear,
 					(CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL((RRD.dblRate * dblVolume),0) ELSE 0 END) AS dblRefundAmount,
 					(CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL((RRD.dblRate * dblVolume),0) ELSE 0 END) AS dblNonRefundAmount,
 					((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) AS dblCashRefund,
-					(CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE (((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) * (12/100)) END) AS dbLessFWT
+					(CASE WHEN AC.ysnSubjectToFWT = 0 THEN 0 ELSE (((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) * (@FWT/100)) END) AS dbLessFWT
 			   FROM tblPATCustomerVolume B
 		 INNER JOIN tblPATRefundRateDetail RRD
 				 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
@@ -115,7 +115,7 @@ SELECT DISTINCT CV.intFiscalYear,
 				 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 			   WHERE B.intFiscalYear = CV.intFiscalYear
 	 ) Total
-		  WHERE CV.intFiscalYear = 1
+		  WHERE CV.intFiscalYear = @intFiscalYearId
 	   GROUP BY CV.intCustomerPatronId, 
 				ENT.strName, 
 				AC.strStockStatus, 

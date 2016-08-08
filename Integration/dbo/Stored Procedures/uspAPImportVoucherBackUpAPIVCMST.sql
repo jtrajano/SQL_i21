@@ -42,7 +42,7 @@ CREATE TABLE tmp_apivcmstImport(
 	[apivc_ivc_no] [char](18) NOT NULL,
 	[apivc_status_ind] [char](1) NOT NULL,
 	[apivc_cbk_no] [char](2) NOT NULL,
-	[apivc_chk_no] [char](8) NOT NULL,
+	[apivc_chk_no] [char](50) NOT NULL,
 	[apivc_trans_type] [char](1) NULL,
 	[apivc_pay_ind] [char](1) NULL,
 	[apivc_ap_audit_no] [smallint] NULL,
@@ -119,7 +119,9 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	A.[apivc_chk_no]		,
+		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL 
+										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
+									ELSE A.[apivc_chk_no] END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
 		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
 		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
@@ -201,7 +203,9 @@ BEGIN
 		[apivc_ivc_no]			=	A.[apivc_ivc_no]		,
 		[apivc_status_ind]		=	A.[apivc_status_ind]	,
 		[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
-		[apivc_chk_no]			=	A.[apivc_chk_no]		,
+		[apivc_chk_no]			=	CASE WHEN PaymentInfo.A4GLIdentity IS NULL 
+										THEN dbo.fnTrim(A.apivc_vnd_no) + '-' + dbo.fnTrim(A.apivc_ivc_no) + '-' + dbo.fnTrim(A.apivc_cbk_no)
+									ELSE A.[apivc_chk_no] END,
 		[apivc_trans_type]		=	A.[apivc_trans_type]	,
 		[apivc_pay_ind]			=	A.[apivc_pay_ind]		,
 		[apivc_ap_audit_no]		=	A.[apivc_ap_audit_no]	,
@@ -357,7 +361,7 @@ VALUES
 	[A4GLIdentity]				,
 	[apchk_A4GLIdentity]	
 )
-OUTPUT inserted.intId, SourceData.intId INTO #tmpPostedBackupId;
+OUTPUT inserted.intId intBackupId, SourceData.intId intId INTO #tmpPostedBackupId;
 
 SET @totalAPIVCMST = @@ROWCOUNT;
 

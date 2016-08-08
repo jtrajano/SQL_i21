@@ -111,6 +111,7 @@ BEGIN
 																	,1
 																	,A.ysnTaxable
 																	,A.intSiteID
+																	,Loc.intFreightTermId
 																)
 				,intSiteId = A.intSiteID
 				,M.strDeliveryTicketFormat

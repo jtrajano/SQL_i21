@@ -248,7 +248,7 @@ VALUES
 	[intCurrencyId],
 	[ysnOrigin]
 )
-OUTPUT inserted.intBillId, SourceData.intBackupId INTO #tmpVoucherTransactions;
+OUTPUT inserted.intBillId intBillId, SourceData.intBackupId intBackupId INTO #tmpVoucherTransactions;
 
 SET @totalInsertedBill = @@ROWCOUNT;
 

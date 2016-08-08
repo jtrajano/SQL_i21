@@ -65,7 +65,7 @@ SELECT dtmStartDate,
 		strPriceWeightUOM = U2.strUnitMeasure,
 		strPriceUOM = CU.strCurrency
 FROM tblCTContractHeader CH
-JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractStatusId <> 5
 JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId --AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 LEFT JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intPContractDetailId = CD.intContractDetailId

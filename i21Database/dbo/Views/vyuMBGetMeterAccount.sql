@@ -23,6 +23,7 @@ SELECT MA.intMeterAccountId
 	, ConGroup.strConsignmentGroup
 	, MA.intCompanyLocationId
 	, strCompanyLocation = Location.strLocationName
+	, EntityLocation.intTaxGroupId
 	, MA.intSort
 FROM tblMBMeterAccount MA
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityCustomerId = MA.intEntityCustomerId

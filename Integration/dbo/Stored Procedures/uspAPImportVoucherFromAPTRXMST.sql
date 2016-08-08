@@ -227,7 +227,7 @@ VALUES
 	[intCurrencyId],
 	[ysnOrigin]
 )
-OUTPUT inserted.intBillId, SourceData.intBackupId INTO #tmpVoucherTransactions;
+OUTPUT inserted.intBillId intBillId, SourceData.intBackupId intBackupId INTO #tmpVoucherTransactions;
 
 SET @totalInsertedBill = @@ROWCOUNT
 
@@ -300,14 +300,6 @@ CROSS APPLY (
 	SELECT MAX(intRecordNumber) AS dblTotalDebitMemo FROM #tmpVouchersWithRecordNumber WHERE intTransactionType =3
 ) totalDebitMemo
 WHERE A.intStartingNumberId = 18
-
-UPDATE A
-	SET A.intNumber = ISNULL(totalPrepay.dblTotalPrepay + 1, A.intNumber)
-FROM tblSMStartingNumber A
-CROSS APPLY (
-	SELECT MAX(intRecordNumber) AS dblTotalPrepay FROM #tmpVouchersWithRecordNumber WHERE intTransactionType = 2
-) totalPrepay
-WHERE A.intStartingNumberId = 20
 
 SET @totalHeaderImported = @totalInsertedBill;
 
