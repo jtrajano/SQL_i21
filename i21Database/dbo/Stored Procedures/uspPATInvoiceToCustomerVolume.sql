@@ -33,11 +33,6 @@ BEGIN
 												FROM tblARInvoice 
 												WHERE intInvoiceId = @intInvoiceId) 
 										BETWEEN dtmDateFrom AND dtmDateTo)
-		
-		IF(@intFiscalYear IS NULL)
-		BEGIN -- INVALID
-			RETURN;
-		END
 
 		SELECT AR.intEntityCustomerId,
 			   IC.intPatronageCategoryId,
