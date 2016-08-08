@@ -37,6 +37,7 @@
     [dtmCreated]               DATETIME         NULL,
     [intLastModifiedUserId]    INT              NULL,
     [dtmLastModified]          DATETIME         NULL,
+	[ysnRecurring]			   BIT              DEFAULT 0 NOT NULL,
 	[ysnDelete]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
