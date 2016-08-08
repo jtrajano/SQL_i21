@@ -17,7 +17,35 @@ GO
 		B.intConcurrencyId
 	FROM tblSMScreen A LEFT OUTER JOIN tblSMCustomField B
 		ON A.strScreenName = B.strScreen 
-	WHERE ISNULL(strTableName, '') <> '' AND B.ysnBuild = 1
+	WHERE ISNULL(strTableName, '') <> '' AND ysnBuild = 1 
+
+	-- INSERT 'Id' for each Custom Field
+	INSERT INTO tblSMCustomFieldDetail (
+		intCustomFieldId,
+		intSort,
+		strFieldName,
+		strControlType,
+		strFieldSize,
+		strLabelName,
+		strFieldType,
+		strLocation,
+		ysnBuild,
+		ysnModified,
+		intConcurrencyId
+	) 
+	SELECT
+		intCustomFieldId,
+		1,
+		'Id',
+		'Integer',
+		'0',
+		'Id',
+		'Integer',
+		'Column 1',
+		ysnBuild,
+		1,
+		1
+	FROM tblSMCustomField 
 
 	-- INSERT to tblSMCustomTabDetail from tblSMCustomFieldDetail
 	INSERT INTO tblSMCustomTabDetail (
@@ -92,7 +120,6 @@ GO
 		LEFT OUTER JOIN tblSMCustomField B ON A.strScreenName = B.strScreen 
 		INNER JOIN tblSMCustomTab C ON C.intScreenId = A.intScreenId
 	WHERE ISNULL(strTableName, '') <> '' AND B.ysnBuild = 1 
-		AND C.strTabName = 'Custom' --Remove this, only for testing
 
 	WHILE EXISTS(SELECT TOP (1) 1 FROM @ScreenTemp)
 	BEGIN
@@ -140,24 +167,26 @@ GO
 					 @query AS NVARCHAR(MAX)
 
 			SELECT @columnsOnly = STUFF((
-				SELECT '','' + QUOTENAME(
-					A.name)
+				SELECT '','' + REPLACE(QUOTENAME(
+					A.name), ''intId'', ''Id'') 
 				FROM sys.columns A 
 					INNER JOIN sys.tables B ON A.object_id = B.object_id
-				WHERE B.name = ''' + @tableName + ''' AND A.name <> ''intId''
+				WHERE B.name = ''' + @tableName + ''' --AND A.name <> ''intId''
 				FOR XML PATH('''')) , 1, 1, '''')	
 		
 			SELECT @columnsWithCast = STUFF((
 				SELECT 
 					'',ISNULL(CAST('' + QUOTENAME(
 					A.name) + CASE WHEN LEFT(A.name, 3) = ''str'' THEN '' COLLATE SQL_Latin1_General_CP1_CS_AS '' ELSE '''' END +
-					'' AS NVARCHAR(255)), '''''''') AS '' + QUOTENAME(
-					A.name)
+					'' AS NVARCHAR(255)), '''''''') AS '' + REPLACE(QUOTENAME(
+				A.name), ''intId'', ''Id'')
 				FROM sys.columns A 
 					INNER JOIN sys.tables B ON A.object_id = B.object_id
-				WHERE B.name = ''' + @tableName + '''
+				
+				WHERE B.name = ''' + @tableName + ''' 
 				FOR XML PATH('''')) , 1, 1, '''')	
 
+			SET @columnsWithCast = ''intId,'' + @columnsWithCast 
 			SET @query = 
 				   ''INSERT INTO tblSMFieldValue (
 						intTabRowId,
@@ -181,7 +210,7 @@ GO
 						value
 						FOR field IN ('' + @columnsOnly + '')
 					 ) B
-					 INNER JOIN tblSMCustomTabDetail C ON B.field COLLATE SQL_Latin1_General_CP1_CS_AS = C.strFieldName
+					 INNER JOIN tblSMCustomTabDetail C ON B.field COLLATE SQL_Latin1_General_CP1_CS_AS = C.strFieldName AND C.intCustomTabId = ' + @customTabId + '
 					 INNER JOIN tblSMTransaction D ON B.intId = CAST(D.strRecordNo AS INT) AND D.intScreenId = ' + @screenId + '
 					 INNER JOIN tblSMTabRow E ON D.intTransactionId = E.intTransactionId AND E.intCustomTabId = ' + @customTabId + '
 				   ''
