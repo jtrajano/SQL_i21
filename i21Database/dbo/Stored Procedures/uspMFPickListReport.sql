@@ -58,6 +58,7 @@ Declare @intSalesOrderId INT
 Declare @dblTotalCost NUMERIC(38,20)
 Declare @strUOM nvarchar(50)
 Declare @strSONo nvarchar(50)
+Declare @strShipTo nvarchar(max)
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -217,6 +218,47 @@ Begin
 End
 Else
 Begin --Sales Order Pick List
+
+	Declare @tblItems AS TABLE
+	(
+		[strPickListNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strBlendItemNoDesc] [varchar](max) COLLATE Latin1_General_CI_AS NULL,
+		[strWorkOrderNo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+		[strLotNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strLotAlias] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strStorageLocationName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strItemNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strDescription] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
+		[dblPickQuantity] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strPickUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strGarden] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[intWorkOrderCount] [int] NULL,
+		[strParentLotNumber] [varchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[dblReqQty] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[dblTotalPickQty] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[dblQuantity] [numeric](38, 20) NULL,
+		[dblCost] [numeric](38, 20) NULL,
+		[dblTotalCost] [numeric](38, 20) NULL,
+		[strCompanyName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strCompanyAddress] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strCompanyCityStateZip] [nvarchar](92) COLLATE Latin1_General_CI_AS NULL,
+		[strCompanyCountry] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
+		[strCustomerName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strLocationName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strBOLNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strSalespersonName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strShipVia] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strFreightTerm] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strPONumber] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
+		[strTerm] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strOrderStatus] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
+		[dtmDate] [datetime] NULL,
+		[dtmDueDate] [datetime] NULL,
+		[strSOComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+		[strShipTo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+		[strPhone] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL
+	)
+
 	Select TOP 1 @strUOM = um.strUnitMeasure 
 	From tblMFPickListDetail pld Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId 
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where pld.intPickListId=@intPickListId
@@ -255,6 +297,15 @@ Begin --Sales Order Pick List
 
 	Set @dblTotalCost=@dblTotalCost + (Select ISNULL(SUM(dblLineTotal),0) From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId))
 
+	Select @strShipTo= ISNULL(RTRIM(el.strAddress) + CHAR(13) + char(10), '')
+					 + ISNULL(RTRIM(el.strCity), '')
+					 + ISNULL(', ' + RTRIM(el.strState), '')
+					 + ISNULL(', ' + RTRIM(el.strZipCode), '') + CHAR(13)
+					 + ISNULL(RTRIM(el.strCountry), '')
+	From tblSOSalesOrder so Join tblEMEntityLocation el on so.intShipToLocationId=el.intEntityLocationId
+	Where intSalesOrderId=@intSalesOrderId
+
+	INSERT INTO @tblItems
 	SELECT pl.strPickListNo ,  
 			''  AS strBlendItemNoDesc,  
 			pl.strWorkOrderNo,  
@@ -262,7 +313,7 @@ Begin --Sales Order Pick List
 			l.strLotAlias,
 			sl.strName AS strStorageLocationName,
 			i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
-			i.strDescription COLLATE Latin1_General_CI_AS AS strDescription,
+			ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
 			dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
 			um.strUnitMeasure AS strPickUOM,
 			l.strGarden,
@@ -289,6 +340,20 @@ Begin --Sales Order Pick List
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 			,@strCountry AS strCompanyCountry
+			,c.strName AS strCustomerName
+			,cl.strLocationName
+			,so.strBOLNumber
+			,sp.strName AS strSalespersonName
+			,sv.strShipVia
+			,ft.strFreightTerm
+			,so.strPONumber
+			,tm.strTerm
+			,so.strOrderStatus
+			,so.dtmDate
+			,so.dtmDueDate
+			,so.strComments AS strSOComments
+			,@strShipTo AS strShipTo
+			,c.strPhone
 	FROM tblMFPickList pl  
 	JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 	JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -297,8 +362,17 @@ Begin --Sales Order Pick List
 	Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Left Join @tblRecipeInputItem ri on pld.intItemId=ri.intItemId
+	Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
+	Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+	Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+	Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
+	Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+	Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
+	Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 	WHERE pl.intPickListId=@intPickListId 
-	UNION ALL
+	ORDER BY dblQuantity
+	
+	INSERT INTO @tblItems
 	Select @strPickListNo strPickListNo,  
 			''  AS strBlendItemNoDesc,  
 			@strSONo strWorkOrderNo,  
@@ -321,6 +395,8 @@ Begin --Sales Order Pick List
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 			,@strCountry AS strCompanyCountry 
+			,'','','','','','','','','',null,null,'','',''
 	From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
-	ORDER BY dblQuantity
+	
+	Select * from @tblItems
 End
