@@ -3,7 +3,6 @@
 	@ysnPosted BIT = NULL,
 	@intUserId INT = NULL,
 	@intAPClearingId INT = NULL,
-	@intFiscalYearId INT = NULL,
 	@successfulCount INT = 0 OUTPUT,
 	@invalidCount INT = 0 OUTPUT,
 	@success BIT = 0 OUTPUT 
@@ -82,7 +81,7 @@ INNER JOIN tblARCustomer ARC
 ON RCus.intCustomerId = ARC.intEntityCustomerId
 INNER JOIN
 (
-	SELECT
+	select
 		Cus.intCustomerId,
 		Cus.dblPurchaseVolume,
 		Cus.dblSaleVolume,
@@ -93,31 +92,33 @@ INNER JOIN
 		RCus.dblCashPayout,
 		RCus.dblRefundAmount,
 		Cus.intRefundCategoryId
-	FROM tblPATRefundCustomer RCus
-	INNER JOIN
+	from tblPATRefundCustomer RCus
+	inner join
 	(
-		SELECT	CVol.intCustomerPatronId AS intCustomerId,
-				dblPurchaseVolume = CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (ROUND(CVol.dblVolume,2) * (CASE WHEN RRD.strPurchaseSale = 'Purchase' THEN RRD.dblRate ELSE 0.00 END))ELSE 0 END,
-				dblSaleVolume = CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (ROUND(CVol.dblVolume,2) * (CASE WHEN RRD.strPurchaseSale = 'Sale' THEN RRD.dblRate ELSE 0.00 END)) ELSE 0 END,
-				dblRate = RRD.dblRate,
-				intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END) THEN RCat.intRefundCategoryId ELSE NULL END),
-				intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END),
-				CVol.intFiscalYear
-		FROM tblPATCustomerVolume CVol
-		INNER JOIN tblPATPatronageCategory PCat
-		ON CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
-		INNER JOIN tblPATRefundRateDetail RRD
-		ON PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
-		INNER JOIN tblPATRefundCustomer RCus
-		ON RCus.intCustomerId = CVol.intCustomerPatronId
-		INNER JOIN tblPATRefundCategory RCat
-		ON RCus.intRefundCustomerId = RCat.intRefundCustomerId
-		WHERE intRefundCategoryId IS NOT NULL AND CVol.intFiscalYear = @intFiscalYearId
+		select distinct CVol.intCustomerPatronId AS intCustomerId,
+						dblPurchaseVolume = SUM(CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (CVol.dblVolume * (case when RRD.strPurchaseSale = 'Purchase' then RRD.dblRate else 0.00 end))ELSE 0 END),
+						dblSaleVolume = SUM(CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (CVol.dblVolume * (case when RRD.strPurchaseSale = 'Sale' then RRD.dblRate else 0.00 end)) ELSE 0 END),
+						dblRate = SUM(RRD.dblRate),
+						intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END) THEN RCat.intRefundCategoryId ELSE null END),
+						intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE null END)
+		from tblPATCustomerVolume CVol
+		inner join tblPATPatronageCategory PCat
+		on CVol.intPatronageCategoryId = PCat.intPatronageCategoryId
+		inner join tblPATRefundRateDetail RRD
+		on PCat.intPatronageCategoryId = RRD.intPatronageCategoryId
+		inner join tblPATRefundCustomer RCus
+		on RCus.intCustomerId = CVol.intCustomerPatronId
+		inner join tblPATRefundCategory RCat
+		on RCus.intRefundCustomerId = RCat.intRefundCustomerId
+		where intRefundCategoryId is not null
+		GROUP BY	CVol.intCustomerPatronId, 
+					PCat.strPurchaseSale,
+					RCat.dblRefundAmount,
+					RCus.intRefundCustomerId,RCus.intRefundTypeId,RRD.intRefundTypeId,RCat.intRefundCategoryId,RCat.intRefundCustomerId
 	) Cus
-	ON RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId IS NOT NULL
+	on RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId is not null
 ) Total
-ON CVol.intCustomerPatronId = Total.intCustomerId AND Total.intRefundCategoryId IS NOT NULL AND RCat.intRefundCategoryId = Total.intRefundCategoryId
-WHERE Ref.intRefundId = @intRefundId AND CVol.intFiscalYear = @intFiscalYearId
+ON CVol.intCustomerPatronId = Total.intCustomerId AND Total.intRefundCategoryId is not null AND RCat.intRefundCategoryId = Total.intRefundCategoryId
 GROUP BY
 		Ref.intRefundId, 
 		Ref.intFiscalYearId, 
@@ -335,6 +336,8 @@ BEGIN TRY
 				on RCus.intCustomerId = CVol.intCustomerPatronId
 				inner join tblPATRefundCategory RCat
 				on RCus.intRefundCustomerId = RCat.intRefundCustomerId
+				inner join tblPATRefund Ref
+				on RCus.intRefundId = Ref.intRefundId AND CVol.intFiscalYear = Ref.intFiscalYearId
 				where intRefundCategoryId is not null
 				GROUP BY	CVol.intCustomerPatronId, 
 							PCat.strPurchaseSale,
@@ -345,7 +348,6 @@ BEGIN TRY
 			on RCus.intRefundCustomerId = Cus.intRefundCustomerId AND Cus.intRefundCustomerId is not null
 		) CVol
 		ON RCat.intRefundCategoryId = CVol.intRefundCategoryId
-		WHERE CVol.dblVolume <> 0.00
 
 		--=====================================================================================================================================
 		-- 	UPDATE CUSTOMER VOLUME TABLE
