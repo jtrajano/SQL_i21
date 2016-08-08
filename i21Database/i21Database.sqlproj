@@ -4148,6 +4148,7 @@
     <Build Include="dbo\Views\vyuPRReportWorkersCompensation.sql" />
     <Build Include="dbo\Views\vyuHDCustomerProspectVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspMBRecalculateMeterReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
