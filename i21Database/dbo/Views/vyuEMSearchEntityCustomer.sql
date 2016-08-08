@@ -14,7 +14,7 @@
 		b.strFederalTaxId
 	from tblEMEntity b			
 		join tblARCustomer c
-			on c.intEntityCustomerId =b.intEntityId and c.ysnActive = 1
+			on c.intEntityCustomerId =b.intEntityId --and c.ysnActive = 1
 		left join [tblEMEntityLocation] e  
 			on ( ysnDefaultLocation = 1 )AND b.intEntityId = e.intEntityId
 		left join [tblEMEntityToContact] f  

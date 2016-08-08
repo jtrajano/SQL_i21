@@ -12,9 +12,11 @@ BEGIN
 		,@intPackagingCategoryId INT
 		,@strPackagingCategory NVARCHAR(50)
 		,@intCategoryId INT
+		,@intItemCategoryId INT
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = intLocationId
+		,@intItemId = intItemId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -28,13 +30,10 @@ BEGIN
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
-	SELECT @intItemId = intItemId
-	FROM tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
-
 	SELECT @strItemNo = strItemNo
 		,@strDescription = strDescription
 		,@strType = strType
+		,@intItemCategoryId = intCategoryId
 	FROM tblICItem
 	WHERE intItemId = @intItemId
 
@@ -76,10 +75,17 @@ BEGIN
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblConsumedQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
+			,C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription As strCategoryDescription
 		FROM dbo.tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = @intItemCategoryId
 		WHERE intWorkOrderId = @intWorkOrderId
+		GROUP BY C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription
 		
 		UNION
 		
@@ -102,15 +108,22 @@ BEGIN
 					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
+			,C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
 			AND I.intItemId <> @intItemId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		WHERE intWorkOrderId = @intWorkOrderId
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
 			,I.strType
+			,C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription
 	END
 	ELSE
 	BEGIN
@@ -133,10 +146,17 @@ BEGIN
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
+			,C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = @intItemCategoryId
 		WHERE intWorkOrderId = @intWorkOrderId
+		GROUP BY C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription
 		
 		UNION
 		
@@ -159,14 +179,21 @@ BEGIN
 					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
+			,C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
 			AND I.intItemId <> @intItemId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		WHERE intWorkOrderId = @intWorkOrderId
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
 			,I.strType
+			,C.intCategoryId
+			,C.strCategoryCode
+			,C.strDescription
 	END
 END

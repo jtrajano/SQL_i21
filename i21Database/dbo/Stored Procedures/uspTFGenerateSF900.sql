@@ -200,7 +200,14 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 				ELSE IF @SmrySummaryItemId = 'SF-900-Summary-011'
 					BEGIN
 					--11. Total special fuel tax due (Line 8 minus Line 9 plus or minus Line 10)
-						SET @SmryQuery  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @SmryScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @SmryScheduleCode + ''')'
+						DECLARE @value NUMERIC(18, 6)
+						DECLARE @strvalue NVARCHAR(20)
+						DECLARE @val1 NUMERIC(18, 6) = (SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN ('8','9')) - (a.strColumnValue)) FROM tblTFTaxReportSummary a WHERE a.intItemNumber IN ('8','9'))
+						DECLARE @val2 NUMERIC(18, 6) = (select strColumnValue FROM tblTFTaxReportSummary WHERE intItemNumber IN ('10'))
+						SET @value = (CASE WHEN SIGN(@val1)=SIGN(@val2) THEN @val1 + @val2 ELSE @val1 - @val2 END)
+						SET @strvalue = (CONVERT(NVARCHAR(30), @value))
+
+						SET @SmryQuery  = 'SELECT' + @strvalue
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
