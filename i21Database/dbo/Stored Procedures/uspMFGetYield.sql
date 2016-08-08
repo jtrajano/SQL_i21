@@ -77,7 +77,7 @@ BEGIN
 				END AS dblYieldPercentage
 			,C.intCategoryId
 			,C.strCategoryCode
-			,C.strDescription
+			,C.strDescription As strCategoryDescription
 		FROM dbo.tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
@@ -110,7 +110,7 @@ BEGIN
 				END AS dblYieldPercentage
 			,C.intCategoryId
 			,C.strCategoryCode
-			,C.strDescription
+			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
@@ -148,7 +148,7 @@ BEGIN
 				END AS dblYieldPercentage
 			,C.intCategoryId
 			,C.strCategoryCode
-			,C.strDescription
+			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
@@ -181,7 +181,7 @@ BEGIN
 				END AS dblYieldPercentage
 			,C.intCategoryId
 			,C.strCategoryCode
-			,C.strDescription
+			,C.strDescription As strCategoryDescription
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
 			AND I.intCategoryId <> @intCategoryId
