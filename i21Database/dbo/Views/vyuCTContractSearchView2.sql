@@ -55,7 +55,14 @@ AS
 			CH.ysnExported,
 			CH.dtmExported,
 			CH.strCropYear,
-			CH.ysnLoad
+			CH.ysnLoad,
+			CASE	WHEN	CH.strStatuses LIKE '%Open%'
+					THEN	'Open'
+					WHEN	CH.strStatuses LIKE '%Complete%'
+					THEN	'Complete'
+					ELSE	CH.strStatuses
+			END		strStatuses
+
 	FROM	vyuCTContractHeaderView2 CH	LEFT
 	JOIN
 	 (
