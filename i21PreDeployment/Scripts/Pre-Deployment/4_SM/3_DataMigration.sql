@@ -320,24 +320,45 @@ GO
 	END
 
 GO
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCommentMaintenanceComment')
+	BEGIN
+		EXEC('ALTER TABLE tblSMCommentMaintenanceComment ADD strHeaderFooter NVARCHAR(25)  COLLATE Latin1_General_CI_AS NULL')
+
+		EXEC('UPDATE Comment SET strHeaderFooter = CASE WHEN Maintenance.strSource LIKE ''%Footer%'' THEN ''Footer'' ELSE ''Header'' END
+			FROM tblSMCommentMaintenance Maintenance
+			INNER JOIN tblSMCommentMaintenanceComment Comment ON Maintenance.intCommentMaintenanceId = Comment.intCommentMaintenanceId')
+
+		EXEC('sp_rename ''tblSMCommentMaintenanceComment.intCommentMaintenanceId'',''intDocumentMaintenanceId'', ''COLUMN''')
+
+		EXEC('sp_rename ''tblSMCommentMaintenanceComment'',''tblSMDocumentMaintenanceMessage''')
+
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCommentMaintenance')
+	BEGIN
+		EXEC('sp_rename ''tblSMCommentMaintenance.intCommentMaintenanceId'',''intDocumentMaintenanceId'', ''COLUMN''')
+		EXEC('sp_rename ''tblSMCommentMaintenance'',''tblSMDocumentMaintenance''')
+	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCommentMaintenance')
 	BEGIN
-		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCommentMaintenanceComment')
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMDocumentMaintenanceMessage')
 		BEGIN
-			PRINT N'CREATING tblSMCommentMaintenanceComment'
-			EXEC('CREATE TABLE [dbo].[tblSMCommentMaintenanceComment]
+			PRINT N'CREATING tblSMDocumentMaintenanceMessage'
+			EXEC('CREATE TABLE [dbo].[tblSMDocumentMaintenanceMessage]
 				 (
-					[intCommentMaintenanceCommentId] INT NOT NULL PRIMARY KEY IDENTITY, 
-					[intCommentMaintenanceId] INT NOT NULL, 
+					[intDocumentMaintenanceCommentId] INT NOT NULL PRIMARY KEY IDENTITY, 
+					[intDocumentMaintenanceId] INT NOT NULL, 
+					[strHeaderFooter] NVARCHAR(25)  COLLATE Latin1_General_CI_AS NULL,
 					[intCharacterLimit] INT NOT NULL, 
-					[strComment] NVARCHAR(300) NOT NULL
+					[strMessage] NVARCHAR(300) NOT NULL
 				 )')
+
+			PRINT N'MIGRATING RECORDS FROM tblSMDocumentMaintenance TO tblSMDocumentMaintenanceMessage'
+			EXEC('INSERT INTO tblSMDocumentMaintenanceMessage(intDocumentMaintenanceId, strHeaderFooter, intCharacterLimit, strMessage)
+	     		  SELECT intCommentId, CASE WHEN strTransactionType LIKE ''%Footer%'' THEN ''Footer'' ELSE ''Header'' END, LEN(strCommentDesc) AS intCharacterLimit, strCommentDesc FROM tblARCommentMaintenance')
 		END
 
-		PRINT N'MIGRATING RECORDS FROM tblSMCommentMaintenanceComment TO tblSMCommentMaintenanceComment'
-		EXEC('INSERT INTO tblSMCommentMaintenanceComment(intCommentMaintenanceId, intCharacterLimit, strComment)
-			  SELECT intCommentId, LEN(strCommentDesc) AS intCharacterLimit, strCommentDesc FROM tblARCommentMaintenance')
 	END
 
 GO
