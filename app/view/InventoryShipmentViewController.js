@@ -679,11 +679,27 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     createRecord: function(config, action) {
         var today = new Date();
         var record = Ext.create('Inventory.model.Shipment');
+        var defaultShipmentType = i21.ModuleMgr.Inventory.getCompanyPreference('intShipmentOrderType');
+        var defaultSourceType = i21.ModuleMgr.Inventory.getCompanyPreference('intShipmentSourceType');
+        
         if (app.DefaultLocation > 0)
             record.set('intShipFromLocationId', app.DefaultLocation);
         record.set('dtmShipDate', today);
-        record.set('intOrderType', 2);
-        record.set('intSourceType', 0);
+
+        if(defaultShipmentType !== null) {
+            record.set('intOrderType', defaultShipmentType);
+        }
+            else {
+                record.set('intOrderType', 2);
+            }
+        
+        if(defaultSourceType !== null) {
+            record.set('intSourceType', defaultSourceType);
+        }
+            else {
+                record.set('intSourceType', 0);
+            }
+        
         action(record);
     },
 
