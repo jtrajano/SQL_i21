@@ -4145,6 +4145,7 @@
     <Build Include="dbo\Stored Procedures\uspPATUpdateRefundCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspCMRecurTransaction.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\20_CustomFieldMigration.sql" />
+    <Build Include="dbo\Views\vyuPRReportWorkersCompensation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
