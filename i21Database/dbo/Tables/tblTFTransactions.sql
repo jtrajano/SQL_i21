@@ -27,6 +27,7 @@
 	[dblQtyShipped] [numeric](18, 6) NULL,
 	[strPONumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strBOLNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strTerminalControlNumber] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDate] [datetime] NULL,
 	[strShipToCity] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strShipToState] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
