@@ -4051,6 +4051,7 @@
     <Build Include="dbo\Views\vyuTMDeliveryTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCardLockAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspPATUpdateRefundCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBRecalculateMeterReading.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
