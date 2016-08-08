@@ -153,6 +153,7 @@ Type the overview for the table here.
 		[ysnUsedForEnergyTracExport] BIT NULL , 
 		[strInvoiceComments] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
 		[strPickListComments] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
+        [intLotStatusId] INT NULL, 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
@@ -171,7 +172,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]), 
 		CONSTRAINT [FK_tblICItem_tblSMModule] FOREIGN KEY ([intModuleId]) REFERENCES [tblSMModule]([intModuleId]),		
 		CONSTRAINT [FK_tblICItem_tblMFBuyingGroup] FOREIGN KEY ([intBuyingGroupId]) REFERENCES [tblMFBuyingGroup]([intBuyingGroupId]), 
-		CONSTRAINT [FK_tblICItem_tblEMEntity] FOREIGN KEY ([intAccountManagerId]) REFERENCES tblEMEntity([intEntityId])
+		CONSTRAINT [FK_tblICItem_tblEMEntity] FOREIGN KEY ([intAccountManagerId]) REFERENCES tblEMEntity([intEntityId]),
+		CONSTRAINT [FK_tblICItem_tblICLotStatus] FOREIGN KEY (intLotStatusId) REFERENCES tblICLotStatus([intLotStatusId])
 	);
 	GO
 
