@@ -175,9 +175,26 @@ BEGIN TRY
 	SELECT WI.intWorkOrderId
 		,WI.intItemId
 		,WI.intLotId
-		,Case When (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))> WI.dblQuantity Then WI.dblQuantity Else (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) End
+		,CASE 
+			WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
+				THEN WI.dblQuantity
+			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
+			END
 		,WI.intItemUOMId
-		,(Case When (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))> WI.dblQuantity Then WI.dblQuantity Else (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) End)/(Case When L.intWeightUOMId IS NULL OR L.dblWeightPerQty=0 then 1 else L.dblWeightPerQty  end)
+		,(
+			CASE 
+				WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
+					THEN WI.dblQuantity
+				ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
+				END
+			) / (
+			CASE 
+				WHEN L.intWeightUOMId IS NULL
+					OR L.dblWeightPerQty = 0
+					THEN 1
+				ELSE L.dblWeightPerQty
+				END
+			)
 		,WI.intItemIssuedUOMId
 		,@intBatchId
 		,WI.intSequenceNo
@@ -192,7 +209,7 @@ BEGIN TRY
 	JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
-	JOIN dbo.tblICLot L on L.intLotId=WI.intLotId
+	JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
@@ -210,6 +227,58 @@ BEGIN TRY
 		AND ri.intConsumptionMethodId = 1
 		AND WI.intWorkOrderId = @intWorkOrderId
 		AND WI.ysnConsumptionReversed = 0
+
+	MERGE tblMFProductionSummary AS target
+	USING (
+		SELECT intWorkOrderId
+			,intItemId
+			,SUM(dblQuantity)
+		FROM tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intBatchId = @intBatchId
+		GROUP BY intWorkOrderId
+			,intItemId
+		) AS source(intWorkOrderId, intItemId, dblQuantity)
+		ON (
+				target.intWorkOrderId = source.intWorkOrderId
+				AND target.intItemId = source.intItemId
+				)
+	WHEN MATCHED
+		THEN
+			UPDATE
+			SET dblConsumedQuantity = dblConsumedQuantity + source.dblQuantity
+	WHEN NOT MATCHED
+		THEN
+			INSERT (
+				intWorkOrderId
+				,intItemId
+				,dblOpeningQuantity
+				,dblOpeningOutputQuantity
+				,dblOpeningConversionQuantity
+				,dblInputQuantity
+				,dblConsumedQuantity
+				,dblOutputQuantity
+				,dblOutputConversionQuantity
+				,dblCountQuantity
+				,dblCountOutputQuantity
+				,dblCountConversionQuantity
+				,dblCalculatedQuantity
+				)
+			VALUES (
+				source.intWorkOrderId
+				,source.intItemId
+				,0
+				,0
+				,0
+				,0
+				,source.dblQuantity
+				,0
+				,0
+				,0
+				,0
+				,0
+				,0
+				);
 
 	INSERT INTO @tblItem (
 		intItemId
@@ -1409,7 +1478,7 @@ BEGIN TRY
 							OR WC.intItemId = SI.intSubstituteItemId
 							)
 						AND WC.intWorkOrderId = @intWorkOrderId
-						AND IsNULL(WC.intBatchId,@intBatchId)=@intBatchId
+						AND IsNULL(WC.intBatchId, @intBatchId) = @intBatchId
 					)
 			)
 	BEGIN
@@ -1441,7 +1510,7 @@ BEGIN TRY
 						OR WC.intItemId = SI.intSubstituteItemId
 						)
 					AND WC.intWorkOrderId = @intWorkOrderId
-					AND IsNULL(WC.intBatchId,@intBatchId)=@intBatchId
+					AND IsNULL(WC.intBatchId, @intBatchId) = @intBatchId
 				)
 
 		SELECT @strItemNo = strItemNo
