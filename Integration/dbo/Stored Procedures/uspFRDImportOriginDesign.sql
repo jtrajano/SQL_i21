@@ -158,6 +158,7 @@ BEGIN
 					WHEN glfsf_action_type=''TOT'' THEN ''Row Calculation''
 					WHEN glfsf_action_type=''DL'' THEN ''Double Underscore''
 					WHEN glfsf_action_type=''BLN'' THEN ''None''
+					WHEN glfsf_action_type=''CLR'' THEN ''None''
 					WHEN glfsf_action_type=''UL'' THEN ''Underscore''
 					WHEN glfsf_action_type=''LGN'' THEN ''Column Name''
 					ELSE NULL END AS strRowType,
@@ -972,6 +973,7 @@ BEGIN
 			UPDATE tblFRRowDesign SET strAccountsType = '''' WHERE strAccountsType IS NULL
 			UPDATE tblFRRowDesign SET ysnPrintEach = 0 WHERE ysnPrintEach IS NULL
 			UPDATE tblFRRowDesign SET ysnPrintEach = 1 WHERE intRefNo IN (SELECT intRefNo FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''GRP'' AND glfsf_grp_printall_yn = ''Y'') AND intRowId = @introwiddet
+			UPDATE tblFRRowDesign SET strRowType = ''None'', ysnHidden = 1 WHERE intRefNo IN (SELECT intRefNo FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''CLR'') AND intRowId = @introwiddet
  
 			SELECT * INTO #TempRowDesign FROM tblFRRowDesign where intRowId = @introwiddet order by intRefNo
  
