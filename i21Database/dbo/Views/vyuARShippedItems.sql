@@ -539,7 +539,7 @@ SELECT
 	,[intSplitId]						= NULL
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
-	,[ysnBlended]						= 0
+	,[ysnBlended]						= NULL
 FROM
 	tblICInventoryShipmentItem ICISI
 INNER JOIN
@@ -701,7 +701,7 @@ SELECT
 	,[intSplitId]						= NULL
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
-	,[ysnBlended]						= 0
+	,[ysnBlended]						= NULL
 FROM
 	tblICInventoryShipmentCharge ICISC
 INNER JOIN
@@ -806,7 +806,7 @@ SELECT
 	,[intSplitId]						= NULL
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= NULL
-	,[ysnBlended]						= 0
+	,[ysnBlended]						= NULL
 FROM
 	vyuARShippedItemDetail ARSID
 INNER JOIN
@@ -922,7 +922,7 @@ SELECT
 	,[intSplitId]						= SO.[intSplitId]
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
-	,[ysnBlended]						= 0
+	,[ysnBlended]						= NULL
 FROM
 	tblSOSalesOrder SO
 CROSS APPLY
@@ -1036,7 +1036,7 @@ SELECT DISTINCT
 	,[intSplitId]						= NULL
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
-	,[ysnBlended]						= 0
+	,[ysnBlended]						= NULL
 FROM
 	tblICInventoryShipmentItem ICISI
 CROSS APPLY
@@ -1148,7 +1148,7 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[intSplitId]						= NULL
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
-	,[ysnBlended]						= 0
+	,[ysnBlended]						= NULL
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId  = LD.intLoadId
 JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
