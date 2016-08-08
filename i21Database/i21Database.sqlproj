@@ -4170,6 +4170,10 @@
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspARErrorMessages.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
+    <Build Include="dbo\Tables\tblSOSalesOrderDetailComponent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
