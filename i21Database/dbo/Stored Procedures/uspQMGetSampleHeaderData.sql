@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMGetSampleHeaderData]
-     @intProductTypeId INT
+	@intProductTypeId INT
 	,@intProductValueId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -10,7 +10,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @intInventoryReceiptId INT
 DECLARE @intWorkOrderId INT
-DECLARE @strReceiptWONo NVARCHAR(50)
+DECLARE @strReceiptNumber NVARCHAR(50)
 DECLARE @strLotNumber NVARCHAR(50)
 
 IF @intProductTypeId = 2 -- Item  
@@ -132,7 +132,7 @@ BEGIN
 
 	-- Inventory Receipt / Work Order No
 	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
-		,@strReceiptWONo = R.strReceiptNumber
+		,@strReceiptNumber = R.strReceiptNumber
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
@@ -143,7 +143,6 @@ BEGIN
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
 	BEGIN
 		SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
-			,@strReceiptWONo = W.strWorkOrderNo
 		FROM tblMFWorkOrderProducedLot WPL
 		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 		JOIN tblICLot L ON L.intLotId = WPL.intLotId
@@ -169,7 +168,7 @@ BEGIN
 		,CA.strDescription AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
-		,@strReceiptWONo AS strReceiptWONo
+		,@strReceiptNumber AS strReceiptNumber
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -195,7 +194,7 @@ BEGIN
 
 	-- Inventory Receipt / Work Order No
 	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
-		,@strReceiptWONo = R.strReceiptNumber
+		,@strReceiptNumber = R.strReceiptNumber
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
@@ -206,7 +205,6 @@ BEGIN
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
 	BEGIN
 		SELECT TOP 1 @intWorkOrderId = WPL.intWorkOrderId
-			,@strReceiptWONo = W.strWorkOrderNo
 		FROM tblMFWorkOrderProducedLot WPL
 		JOIN tblMFWorkOrder W ON W.intWorkOrderId = WPL.intWorkOrderId
 		JOIN tblICLot L ON L.intLotId = WPL.intLotId
@@ -226,9 +224,23 @@ BEGIN
 		,CA.strDescription AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
-		,@strReceiptWONo AS strReceiptWONo
+		,@strReceiptNumber AS strReceiptNumber
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	WHERE PL.intParentLotId = @intProductValueId
+END
+ELSE IF @intProductTypeId = 12 -- Work Order
+BEGIN
+	SELECT @intProductTypeId AS intProductTypeId
+		,@intProductValueId AS intProductValueId
+		,WO.intWorkOrderId
+		,I.intItemId
+		,I.strDescription
+		,I.intOriginId AS intCountryId
+		,CA.strDescription AS strCountry
+	FROM tblMFWorkOrder WO
+	JOIN tblICItem I ON I.intItemId = WO.intItemId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	WHERE WO.intWorkOrderId = @intProductValueId
 END

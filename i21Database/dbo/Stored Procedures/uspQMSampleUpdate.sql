@@ -77,6 +77,7 @@ BEGIN TRY
 		,intCompanyLocationSubLocationId = x.intCompanyLocationSubLocationId
 		,strCountry = x.strCountry
 		,intItemBundleId = x.intItemBundleId
+		,intWorkOrderId = x.intWorkOrderId
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -120,6 +121,7 @@ BEGIN TRY
 			,intCompanyLocationSubLocationId INT
 			,strCountry NVARCHAR(100)
 			,intItemBundleId INT
+			,intWorkOrderId INT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)

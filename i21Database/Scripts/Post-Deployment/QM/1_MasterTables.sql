@@ -125,7 +125,13 @@ BEGIN
 	VALUES(10,'Outbound Sample','Outbound Sample')
 END
 GO
-
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 11)
+BEGIN
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(11,'Line Sample','Line Sample')
+END
+GO
 -- Analysis Type
 GO
 IF NOT EXISTS(SELECT 1 FROM tblQMAnalysisType WHERE strAnalysisTypeName = 'Physical')
@@ -381,7 +387,13 @@ BEGIN
 	VALUES(11,'Parent Lot','Parent Lot',0)
 END
 GO
-
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 12)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(12,'Work Order','Work Order',0)
+END
+GO
 -- Drop unwanted tables
 GO
 IF EXISTS(SELECT * FROM sysobjects where xtype = 'U' and name = 'tblQMDocumentFile')
