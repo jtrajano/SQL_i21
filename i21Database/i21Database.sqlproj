@@ -4150,6 +4150,8 @@
     <Build Include="dbo\Stored Procedures\uspMBRecalculateMeterReading.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContract.sql" />
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
+    <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
+    <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
