@@ -4168,6 +4168,8 @@
     <Build Include="dbo\Stored Procedures\uspMFCreatePickTask.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTask.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateTask.sql" />
+    <Build Include="dbo\Views\vyuMFItemDetails.sql" />
+    <Build Include="dbo\Views\vyuMFStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
