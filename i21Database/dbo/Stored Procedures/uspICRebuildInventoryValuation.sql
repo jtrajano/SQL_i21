@@ -1556,7 +1556,8 @@ BEGIN
 					@strBatchId
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
-					,@strGLDescription					
+					,@strGLDescription
+					,@intItemId							
 
 				IF @intReturnId <> 0 
 				BEGIN 
