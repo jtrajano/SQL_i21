@@ -2,8 +2,9 @@
 	@strBatchId AS NVARCHAR(20)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
-	,@strGLDescription AS NVARCHAR(255) = NULL 
+	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@intContraInventory_ItemLocationId AS INT = NULL 
+	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -51,6 +52,7 @@ FROM	(
 					intItemId, intItemLocationId, intTransactionTypeId
 			FROM	dbo.tblICInventoryTransaction TRANS 
 			WHERE	TRANS.strBatchId = @strBatchId
+					AND TRANS.intItemId = ISNULL(@intRebuildItemId, TRANS.intItemId) 
 		) Query
 
 -- Validate the GL Accounts
@@ -117,6 +119,7 @@ BEGIN
 							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 				WHERE	TRANS.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
+						AND TRANS.intItemId = ISNULL(@intRebuildItemId, TRANS.intItemId) 
 						AND TRANS.intItemId = Item.intItemId
 						AND TRANS.dblQty * TRANS.dblCost + TRANS.dblValue <> 0
 			)
@@ -165,6 +168,7 @@ FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactio
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 WHERE	TRANS.strBatchId = @strBatchId
+		AND TRANS.intItemId = ISNULL(@intRebuildItemId, TRANS.intItemId) 
 ;
 
 -- Generate the G/L Entries here: 
@@ -208,6 +212,7 @@ AS
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	TRANS.strBatchId = @strBatchId
+			AND TRANS.intItemId = ISNULL(@intRebuildItemId, TRANS.intItemId) 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 

@@ -545,6 +545,7 @@ BEGIN
 			,@ysnPost AS BIT 
 			,@dblQty AS NUMERIC(38, 20)
 			,@intTransactionTypeId AS INT
+			,@intTransferorId AS INT 
 
 	DECLARE @AVERAGECOST AS INT = 1
 			,@FIFO AS INT = 2
@@ -599,6 +600,18 @@ BEGIN
 								ELSE 
 									NULL 
 						END
+
+			-- Get the transferor id
+			SET		@intTransferorId = NULL 
+
+			SELECT	@intTransferorId = InTransitSourceLocation.intItemLocationId
+			FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
+						ON r.intInventoryReceiptId = ri.intInventoryReceiptId 
+					LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
+						ON InTransitSourceLocation.intItemId = ri.intItemId 
+						AND InTransitSourceLocation.intLocationId = r.intTransferorId
+			WHERE	r.strReceiptNumber = @strTransactionId
+					AND r.intInventoryReceiptId = @intTransactionId
 
 			-- Clear the data on @ItemsToPost
 			DELETE FROM @ItemsToPost
@@ -1555,7 +1568,9 @@ BEGIN
 					@strBatchId
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
-					,@strGLDescription					
+					,@strGLDescription
+					,@intTransferorId 
+					,@intItemId							
 
 				IF @intReturnId <> 0 
 				BEGIN 
