@@ -4163,6 +4163,8 @@
     <Build Include="dbo\Tables\tblMFTaskState.sql" />
     <Build Include="dbo\Tables\tblMFTaskType.sql" />
     <Build Include="dbo\Tables\tblMFTask.sql" />
+    <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
+    <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
