@@ -4165,6 +4165,9 @@
     <Build Include="dbo\Tables\tblMFTask.sql" />
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
