@@ -4058,6 +4058,7 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
     <Build Include="dbo\Tables\tblCFProductAuthDetail.sql" />
     <Build Include="dbo\Tables\tblCFProductAuth.sql" />
+    <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

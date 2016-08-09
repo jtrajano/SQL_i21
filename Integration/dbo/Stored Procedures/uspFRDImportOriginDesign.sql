@@ -980,6 +980,8 @@ BEGIN
 			UPDATE tblFRRowDesign SET strAccountsType = '''' WHERE strAccountsType IS NULL
 			UPDATE tblFRRowDesign SET ysnPrintEach = 0 WHERE ysnPrintEach IS NULL
 			UPDATE tblFRRowDesign SET ysnPrintEach = 1 WHERE intRefNo IN (SELECT intRefNo FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''GRP'' AND glfsf_grp_printall_yn = ''Y'') AND intRowId = @introwiddet
+			UPDATE tblFRRowDesign SET strDateOverride = ''First Activity'' WHERE intRefNo IN (SELECT intRefNo FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''GRP'' AND glfsf_action_crl = ''F'') AND intRowId = @introwiddet
+			UPDATE tblFRRowDesign SET strDateOverride = ''Last Activity'' WHERE intRefNo IN (SELECT intRefNo FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''GRP'' AND glfsf_action_crl = ''L'') AND intRowId = @introwiddet
  
 			SELECT * INTO #TempRowDesign FROM tblFRRowDesign where intRowId = @introwiddet order by intRefNo
  
