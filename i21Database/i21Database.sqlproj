@@ -4056,6 +4056,8 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrderDetailComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
+    <Build Include="dbo\Tables\tblCFProductAuthDetail.sql" />
+    <Build Include="dbo\Tables\tblCFProductAuth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
