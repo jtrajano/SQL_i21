@@ -11,6 +11,14 @@ SELECT
 		,WMD.ysnPrint
 		,WMD.strComments
 		,WMD.intItemId
+		,WMD.intCalculateQty
+		,strCalculateQty = CASE WMD.intCalculateQty 
+							WHEN 1 THEN 'By Shipped Wt'
+							WHEN 2 THEN 'By Received Wt'
+							WHEN 3 THEN 'By Delivered Wt'
+							WHEN 4 THEN 'By Quantity'
+							WHEN 5 THEN 'Manual Entry' 
+						   END
 		,Item.strItemNo
 		,WMH.intWarehouseRateMatrixHeaderId
 		,WMH.strServiceContractNo
