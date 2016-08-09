@@ -56,7 +56,8 @@ SELECT	CH.intContractHeaderId,
 		UE.strName					AS	strLastModifiedBy,	
 		CH.ysnExported,
 		CH.dtmExported,
-		YR.strCropYear
+		YR.strCropYear,
+		dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
 JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId

@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE uspMFGetProductCountByProcess (
 	@intManufacturingProcessId INT
 	,@intLocationID INT
-	,@strItemNo nvarchar(50)='%'
-	,@intItemId int=0
+	,@strItemNo NVARCHAR(50) = '%'
+	,@intItemId INT = 0
 	)
 AS
 BEGIN
@@ -10,12 +10,18 @@ BEGIN
 	FROM dbo.tblMFRecipe R
 	JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+		AND IU.intUnitMeasureId = I.intWeightUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		AND R.intLocationId = @intLocationID
 		AND R.ysnActive = 1
 		AND R.intManufacturingProcessId = @intManufacturingProcessId
-		AND IU.ysnStockUnit=1
-		AND I.strStatus='Active'
-		AND I.strItemNo LIKE @strItemNo+'%' 
-		AND I.intItemId =(Case When @intItemId >0 then @intItemId else I.intItemId end)
+		AND I.strStatus = 'Active'
+		AND I.strItemNo LIKE @strItemNo + '%'
+		AND I.intItemId = (
+			CASE 
+				WHEN @intItemId > 0
+					THEN @intItemId
+				ELSE I.intItemId
+				END
+			)
 END

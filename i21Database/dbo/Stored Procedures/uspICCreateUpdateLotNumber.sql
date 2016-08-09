@@ -284,7 +284,8 @@ BEGIN
 	END 
 
 	-- Setup the Lot Status
-	SET @intLotStatusId_ItemLotTable = ISNULL(ISNULL(@intLotStatusId, @intLotStatusId_ItemLotTable), @Active) 
+	  --SET @intLotStatusId_ItemLotTable = ISNULL(ISNULL(@intLotStatusId, @intLotStatusId_ItemLotTable), @Active) 
+	  SET @intLotStatusId_ItemLotTable = ISNULL((SELECT intLotStatusId FROM tblICItem WHERE intItemId=@intItemId), @Active) 
 
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  

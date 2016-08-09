@@ -1,12 +1,11 @@
 ﻿CREATE VIEW vyuRKGetFutureMonthAndYears
 
 AS
-select CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutureMonthId)) AS intRow,* from (
-SELECT top 100 percent 
+SELECT top 100 percent CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutureMonthId)) AS intRow,
 LEFT(strFutureMonth,3) strFutureMonth,replace(strFutureMonth,' ','('+strSymbol+') ' ) strFutureMonthYear, intFutureMonthId,dtmFirstNoticeDate,
 dtmLastTradingDate as dtmLastTradingDate,
 strFutureMonth strFutureMonthYearWOSymbol,
 ysnExpired,
-intFutureMarketId 
+intFutureMarketId,CONVERT(DATETIME,'01 '+strFutureMonth) as dtmMonthYear 
 FROM tblRKFuturesMonth  
-ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC)t  
+ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC 
