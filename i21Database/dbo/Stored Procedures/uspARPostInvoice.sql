@@ -245,6 +245,7 @@ BEGIN TRY
 		INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
 	WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 	AND ID.ysnBlended = 0
+	AND ICI.ysnAutoBlend = 1
 	AND ICI.strType = 'Finished Good'
 
 	WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
