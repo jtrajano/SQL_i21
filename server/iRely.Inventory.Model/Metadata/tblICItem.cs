@@ -150,6 +150,7 @@ namespace iRely.Inventory.Model
         public bool? ysnItemUsedInDiscountCode { get; set; }
         public string strInvoiceComments { get; set; }
         public string strPickListComments { get; set; }
+        public int? intLotStatusId { get; set; }
 
         private string _manufacturer;
         [NotMapped]

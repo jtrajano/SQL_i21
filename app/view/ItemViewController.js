@@ -539,6 +539,10 @@ Ext.define('Inventory.view.ItemViewController', {
             chkRequireApproval: '{current.ysnRequireCustomerApproval}',
             cboAssociatedRecipe: '{current.intRecipeId}',
             chkSanitizationRequired: '{current.ysnSanitationRequired}',
+            cboReceiveLotStatus: {
+                value: '{current.intLotStatusId}',
+                store: '{lotStatus}'
+            },
             txtLifeTime: '{current.intLifeTime}',
             cboLifetimeType: {
                 value: '{current.strLifeTimeType}',

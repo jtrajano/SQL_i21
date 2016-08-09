@@ -4123,12 +4123,58 @@
                                                                                     "userConfig": {
                                                                                         "boxLabel": null,
                                                                                         "fieldLabel": "Sanitization Required",
+                                                                                        "hidden": true,
                                                                                         "itemId": "chkSanitizationRequired",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": null
                                                                                     },
                                                                                     "name": "MyCheckbox24",
                                                                                     "designerId": "63209349-518c-404f-836f-5be9792f0edb"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.field.ComboBox",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "columns": [
+                                                                                            "[",
+                                                                                            "                                                                {",
+                                                                                            "                                                                    dataIndex: 'intLotStatusId',",
+                                                                                            "                                                                    dataType: 'numeric',",
+                                                                                            "                                                                    text: 'Lot Status Id',",
+                                                                                            "                                                                    hidden: true",
+                                                                                            "                                                                },",
+                                                                                            "                                                                {",
+                                                                                            "                                                                    dataIndex: 'strSecondaryStatus',",
+                                                                                            "                                                                    dataType: 'string',",
+                                                                                            "                                                                    text: 'Lot Status',",
+                                                                                            "                                                                    flex: 1",
+                                                                                            "                                                                }",
+                                                                                            "                                                            ]"
+                                                                                        ],
+                                                                                        "designer|createAlias": "gridcombobox",
+                                                                                        "displayField": "strSecondaryStatus",
+                                                                                        "fieldLabel": "Received Lot Status",
+                                                                                        "itemId": "cboReceiveLotStatus",
+                                                                                        "labelWidth": 125,
+                                                                                        "layout|flex": null,
+                                                                                        "valueField": "intLotStatusId"
+                                                                                    },
+                                                                                    "name": "MyComboBox9",
+                                                                                    "configAlternates": {
+                                                                                        "columns": "array"
+                                                                                    },
+                                                                                    "designerId": "de6bb256-2922-4a8f-9e98-17661c3ff833",
+                                                                                    "customConfigs": [
+                                                                                        {
+                                                                                            "group": "(Custom Properties)",
+                                                                                            "name": "columns",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    ]
                                                                                 }
                                                                             ]
                                                                         },

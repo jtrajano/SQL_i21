@@ -27,6 +27,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedSeasonAttribute',
         'Inventory.store.BufferedGradeAttribute',
         'Inventory.store.BufferedCategory',
+        'Inventory.store.BufferedLotStatus',
         'EntityManagement.store.VendorBuffered',
         'EntityManagement.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
@@ -834,9 +835,29 @@ Ext.define('Inventory.view.ItemViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        
+        lotStatus: {
+            type: 'icbufferedlotstatus',
+            proxy: {
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/LotStatus/Get'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            },
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
         }
-
     },
+    
 
     formulas: {
         checkLotTracking: function (get) {
@@ -1169,6 +1190,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Manufacturing':
                 case 'Finished Good' :
                 case 'Raw Material':
+                    if (get('current.intLotStatusId') === null) {
+                      this.data.current.set('intLotStatusId', 1);  
+                    }
                     return false;
                     break;
 

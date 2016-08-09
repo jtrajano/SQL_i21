@@ -150,6 +150,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnItemUsedInDiscountCode).HasColumnName("ysnItemUsedInDiscountCode");
             this.Property(t => t.strInvoiceComments).HasColumnName("strInvoiceComments");
             this.Property(t => t.strPickListComments).HasColumnName("strPickListComments");
+            this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)

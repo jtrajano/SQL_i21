@@ -1916,9 +1916,32 @@ Ext.define('Inventory.view.Item', {
                                                                                             },
                                                                                             {
                                                                                                 xtype: 'checkboxfield',
+                                                                                                hidden: true,
                                                                                                 itemId: 'chkSanitizationRequired',
                                                                                                 fieldLabel: 'Sanitization Required',
                                                                                                 labelWidth: 125
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'gridcombobox',
+                                                                                                columns: [
+                                                                                                    {
+                                                                                                        dataIndex: 'intLotStatusId',
+                                                                                                        dataType: 'numeric',
+                                                                                                        text: 'Lot Status Id',
+                                                                                                        hidden: true
+                                                                                                    },
+                                                                                                    {
+                                                                                                        dataIndex: 'strSecondaryStatus',
+                                                                                                        dataType: 'string',
+                                                                                                        text: 'Lot Status',
+                                                                                                        flex: 1
+                                                                                                    }
+                                                                                                ],
+                                                                                                itemId: 'cboReceiveLotStatus',
+                                                                                                fieldLabel: 'Received Lot Status',
+                                                                                                labelWidth: 125,
+                                                                                                displayField: 'strSecondaryStatus',
+                                                                                                valueField: 'intLotStatusId'
                                                                                             }
                                                                                         ]
                                                                                     },
