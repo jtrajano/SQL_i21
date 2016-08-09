@@ -11,6 +11,7 @@
 	,@IncludeExemptedCodes	BIT
 	,@IsCustomerSiteTaxable	BIT
 	,@SiteId				INT
+	,@FreightTermId			INT
 )
 RETURNS @returntable TABLE
 (
@@ -68,7 +69,7 @@ BEGIN
 			
 			
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @CustomerLocationId, @SiteId)		
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId)		
 		
 	IF ISNULL(@SiteId,0) <> 0 AND  ISNULL(@TaxGroupId, 0) <> 0
 		SELECT 	@IsCustomerSiteTaxable = ysnTaxable FROM tblTMSite WHERE intSiteID = @SiteId

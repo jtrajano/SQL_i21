@@ -2,7 +2,7 @@
 DECLARE @screenId INT;
 SELECT TOP 1 @screenId = intScreenId FROM tblSMScreen WHERE strScreenName = 'Voucher' AND strModule = 'Accounts Payable';
 
-IF EXISTS(SELECT 1 FROM tblAPBill A WHERE ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL
+IF EXISTS(SELECT 1 FROM tblAPBill A WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
 				AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intBillId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId))
 BEGIN
 
@@ -28,7 +28,7 @@ BEGIN
 	INSERT INTO #tmpVouchersApproval
 	SELECT intBillId
 	FROM tblAPBill A 
-	WHERE ysnApproved = 1 OR ysnForApproval = 1
+	WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
 	AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intBillId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId)
 
 	MERGE INTO tblSMTransaction as destination

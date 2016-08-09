@@ -21,6 +21,7 @@ DECLARE  @CustomerId				INT
 		,@DistributionHeaderId		INT
 		,@CustomerLocationId		INT
 		,@SubCurrencyCents			INT
+		,@FreightTermId				INT
 						
 SELECT
 	@CustomerId				= I.[intEntityCustomerId]
@@ -29,6 +30,7 @@ SELECT
 	,@DistributionHeaderId	= I.[intDistributionHeaderId]
 	,@CustomerLocationId	= (CASE WHEN ISNULL(F.[strFobPoint],'Destination') = 'Origin ' THEN I.[intBillToLocationId] ELSE I.[intShipToLocationId] END)
 	,@SubCurrencyCents		= ISNULL(I.[intSubCurrencyCents],1)
+	,@FreightTermId			= I.[intFreightTermId] 
 FROM
 	tblARInvoice I
 LEFT OUTER JOIN
@@ -143,7 +145,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[strNotes] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId)
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, NULL, @SiteId, @FreightTermId)
 		
 		SELECT @TotalItemTax = SUM([dblAdjustedTax]) FROM [tblARInvoiceDetailTax] WHERE [intInvoiceDetailId] = @InvoiceDetailId
 								

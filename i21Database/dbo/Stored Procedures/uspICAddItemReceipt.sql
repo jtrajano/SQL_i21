@@ -493,6 +493,7 @@ BEGIN
 					,@InventoryReceiptItemId INT
 					,@ShipFromId		INT 
 					,@TaxGroupId		INT
+					,@FreightTermId		INT
 
 			DECLARE @Taxes AS TABLE (
 				--id						INT
@@ -523,10 +524,11 @@ BEGIN
 			SELECT  ReceiptItem.intItemId
 					,Receipt.intLocationId
 					,Receipt.dtmReceiptDate
-					,Receipt.intEntityId
+					,Receipt.intEntityVendorId
 					,ReceiptItem.intInventoryReceiptItemId
 					,Receipt.intShipFromId
 					,Receipt.intTaxGroupId
+					,Receipt.intFreightTermId 
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
@@ -542,6 +544,7 @@ BEGIN
 				,@InventoryReceiptItemId
 				,@ShipFromId
 				,@TaxGroupId
+				,@FreightTermId
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
@@ -571,14 +574,18 @@ BEGIN
 					,[strTaxGroup]
 					,[strNotes]
 				)
-				EXEC dbo.uspSMGetItemTaxes 
-					@ItemId
-					,@LocationId
-					,@TransactionDate
-					,@TransactionType
-					,@EntityId
-					,@TaxGroupId
-					,@ShipFromId
+				EXEC dbo.uspSMGetItemTaxes
+					 @ItemId				= @ItemId
+					,@LocationId			= @LocationId
+					,@TransactionDate		= @TransactionDate
+					,@TransactionType		= @TransactionType
+					,@EntityId				= @EntityId
+					,@TaxGroupId			= @TaxGroupId
+					,@BillShipToLocationId	= @ShipFromId
+					,@IncludeExemptedCodes	= NULL
+					,@SiteId				= NULL
+					,@FreightTermId			= @FreightTermId
+
 
 				DECLARE	@Amount	NUMERIC(38,20) 
 						,@Qty	NUMERIC(38,20)
@@ -630,7 +637,7 @@ BEGIN
 						,[strTaxCode]					= [strTaxCode]
 						,[intSort]						= 1
 						,[intConcurrencyId]				= 1
-				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0)
+				FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId)
 
 				--Compute the tax
 				BEGIN 

@@ -2,7 +2,7 @@
 DECLARE @screenId INT;
 SELECT TOP 1 @screenId = intScreenId FROM tblSMScreen WHERE strScreenName = 'Purchase Order' AND strModule = 'Accounts Payable';
 
-IF EXISTS(SELECT 1 FROM tblPOPurchase A WHERE ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL
+IF EXISTS(SELECT 1 FROM tblPOPurchase A WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
 				AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intPurchaseId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId))
 BEGIN
 
@@ -28,7 +28,7 @@ BEGIN
 	INSERT INTO #tmpPOApproval
 	SELECT intPurchaseId
 	FROM tblPOPurchase A 
-	WHERE ysnApproved = 1 OR ysnForApproval = 1
+	WHERE (ysnApproved = 1 OR ysnForApproval = 1 OR dtmApprovalDate IS NOT NULL)
 	AND NOT EXISTS(SELECT 1 FROM tblSMTransaction B WHERE A.intPurchaseId = CAST(B.strRecordNo AS INT) AND B.intScreenId = @screenId)
 
 	MERGE INTO tblSMTransaction as destination

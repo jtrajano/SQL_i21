@@ -1,16 +1,16 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemTaxes]
-	 @ItemId				INT			= NULL
+	 @ItemId				INT				= NULL
 	,@LocationId			INT
-	,@CustomerId			INT			= NULL	
-	,@CustomerLocationId	INT			= NULL	
+	,@CustomerId			INT				= NULL	
+	,@CustomerLocationId	INT				= NULL	
 	,@TransactionDate		DATETIME
-	,@TaxGroupId			INT			= NULL		
-	,@SiteId				INT			= NULL
+	,@TaxGroupId			INT				= NULL		
+	,@SiteId				INT				= NULL
+	,@FreightTermId			INT				= NULL
 AS
 
-
 	IF(ISNULL(@TaxGroupId,0) = 0)
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId)			
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @LocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId)			
 
 	DECLARE @IsCustomerSiteTaxable	BIT
 
