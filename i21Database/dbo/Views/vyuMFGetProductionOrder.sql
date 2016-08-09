@@ -28,6 +28,7 @@ SELECT IsNULL(BR.intBlendRequirementId,0) As intBlendRequirementId
 	,OH.intOrderHeaderId
 	,OH.strBOLNo
 	,OS.strOrderStatus
+	,ROW_NUMBER() OVER(ORDER BY W.intWorkOrderId DESC) As intRecordId 
 FROM dbo.tblMFWorkOrder W
 INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	AND W.intStatusId <> 13
