@@ -4152,6 +4152,17 @@
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
+    <Build Include="dbo\Tables\tblMFPickPreference.sql" />
+    <Build Include="dbo\Tables\tblMFOrderType.sql" />
+    <Build Include="dbo\Tables\tblMFOrderStatus.sql" />
+    <Build Include="dbo\Tables\tblMFOrderDirection.sql" />
+    <Build Include="dbo\Tables\tblMFOrderHeader.sql" />
+    <Build Include="dbo\Tables\tblMFOrderDetail.sql" />
+    <Build Include="dbo\Tables\tblMFOrderManifest.sql" />
+    <Build Include="dbo\Tables\tblMFTaskPriority.sql" />
+    <Build Include="dbo\Tables\tblMFTaskState.sql" />
+    <Build Include="dbo\Tables\tblMFTaskType.sql" />
+    <Build Include="dbo\Tables\tblMFTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
