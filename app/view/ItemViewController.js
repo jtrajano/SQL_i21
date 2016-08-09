@@ -400,6 +400,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colGLAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
+                        store: '{accountId}',
                         defaultFilters: [{
                             column: 'intAccountCategoryId',
                             value: '{grdGlAccounts.selection.intAccountCategoryId}',
