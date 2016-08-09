@@ -59,7 +59,6 @@ BEGIN
 			, NULL
 			, 1
 			, NULL
-			, NULL
 		)
 
 		SELECT @TaxTotal = SUM(dblTax)
