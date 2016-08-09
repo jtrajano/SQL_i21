@@ -60,6 +60,7 @@ SELECT C.intManufacturingCellId
 	,SW.strComments AS strScheduleComment
 	,SL.intStorageLocationId
 	,SL.strName AS [strStorageLocation]
+	,WS.strBackColorName 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	AND W.intStatusId <> 13
