@@ -10,6 +10,8 @@
 	[strStatus] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strFilter] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmDate] DATETIME NOT NULL,
+	[intActivityId] INT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_tblSMEmail_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId])
+    CONSTRAINT [FK_tblSMEmail_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblSMEmail_tblSMActivity] FOREIGN KEY ([intActivityId]) REFERENCES [tblSMActivity]([intActivityId])
 )

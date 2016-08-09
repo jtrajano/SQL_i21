@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[tblSMComment] (
 	[dtmAdded]			DATETIME DEFAULT (GETDATE()) NULL,
 	[dtmModified]		DATETIME DEFAULT (GETDATE()) NULL,
 	[ysnInternal]		BIT NULL,
+	[ysnEdited]			BIT NULL,
 	[intEntityId]		INT NULL,
 	[intTransactionId]	INT NULL,
 	[intConcurrencyId]	INT NOT NULL,
