@@ -152,7 +152,6 @@ BEGIN
 			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotalSS, 0)) + (ISNULL(MONTH1.dblMonthTotalMed, 0)) + (ISNULL(MONTH1.dblMonthTotalFIT, 0))
 			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotalSS, 0)) + (ISNULL(MONTH2.dblMonthTotalMed, 0)) + (ISNULL(MONTH2.dblMonthTotalFIT, 0))
 			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotalSS, 0)) + (ISNULL(MONTH3.dblMonthTotalMed, 0)) + (ISNULL(MONTH3.dblMonthTotalFIT, 0))
-						+ dblAdjustFractionCents + dblAdjustSickPay + dblAdjustTips
 		FROM (SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) FIT,
 			 (SELECT dblMonthTotalSS = SUM(dblLiabilitySS) + SUM(dblTaxTotalSS), 
 					 dblMonthTotalMed = SUM(dblLiabilityMed) + SUM(dblTaxTotalMed), 
