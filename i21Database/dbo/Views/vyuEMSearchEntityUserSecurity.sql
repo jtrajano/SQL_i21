@@ -5,7 +5,8 @@ SELECT
         a.intEntityId,   
         a.strEntityNo, 
         a.strName,  
-        g.strPhone,  
+        strPhone = i.strPhone,  
+		g.strEmail,
         e.strAddress,  
         e.strCity,  
         e.strState,  
@@ -29,6 +30,8 @@ SELECT
             on f.intEntityContactId = g.intEntityId  
 		left join tblSMUserRole h
 			on h.intUserRoleID = c.intUserRoleID
+		left join tblEMEntityPhoneNumber i
+			on i.intEntityId = g.intEntityId
 		outer apply 
 		(
 			SELECT TOP 1 dtmDate FROM tblSMUserLogin u WHERE u.intEntityId = c.intEntityUserSecurityId ORDER BY dtmDate DESC
