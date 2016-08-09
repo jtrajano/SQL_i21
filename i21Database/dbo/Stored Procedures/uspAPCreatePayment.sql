@@ -119,7 +119,7 @@ BEGIN
 
 	--Compute Discount Here
 	UPDATE A
-		SET dblDiscount = dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal)
+		SET dblDiscount = CAST(dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal) AS DECIMAL(18,2))
 	FROM tblAPBill A
 	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
 	--Compute Interest Here
