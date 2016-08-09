@@ -14,14 +14,22 @@ BEGIN
 		ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
 		WHERE EmpEarning.intTypeEarningId = @intTypeEarningId
 
+	--Insert Employee Earnings to Temp Table
+	SELECT intEmployeeEarningId 
+	  INTO #tmpEmployeeEarning
+	  FROM tblPREmployeeEarning 
+	  WHERE intTypeEarningId = @intTypeEarningId
+
 	--Delete Earning Taxes
 	DELETE FROM tblPREmployeeEarningTax 
-		 WHERE intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId 
-										     FROM tblPREmployeeEarning 
-										    WHERE intTypeEarningId = @intTypeEarningId)
+		 WHERE intEmployeeEarningId IN (SELECT intEmployeeEarningId 
+										     FROM #tmpEmployeeEarning)
 
-	IF EXISTS(SELECT intEmployeeEarningId FROM tblPREmployeeEarning WHERE intTypeEarningId = @intTypeEarningId)
+	DECLARE @intEmployeeEarningId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeEarning)
 	BEGIN
+		SELECT TOP 1 @intEmployeeEarningId = intEmployeeEarningId FROM #tmpEmployeeEarning
+
 		--Reinsert Earning Taxes
 		INSERT INTO tblPREmployeeEarningTax
 					(intEmployeeEarningId,
@@ -29,13 +37,16 @@ BEGIN
 					intSort,
 					intConcurrencyId)
 			 SELECT
-					(SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intTypeEarningId = @intTypeEarningId),
+					@intEmployeeEarningId,
 					intTypeTaxId,
 					intSort,
 					intConcurrencyId
 			  FROM tblPRTypeEarningTax
 			 WHERE intTypeEarningId = @intTypeEarningId
+
+		DELETE FROM #tmpEmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId
 	END
+
 
 	--Update Template Earning 
 	UPDATE tblPRTemplateEarning
@@ -48,14 +59,22 @@ BEGIN
 		ON Earning.intTypeEarningId = EmpEarning.intTypeEarningId
 		WHERE EmpEarning.intTypeEarningId = @intTypeEarningId
 
+	--Insert Template Earnings to Temp Table
+	SELECT intTemplateEarningId 
+	  INTO #tmpTemplateEarning
+	  FROM tblPRTemplateEarning 
+	  WHERE intTypeEarningId = @intTypeEarningId
+
 	--Delete Template Earning Taxes
 	DELETE FROM tblPRTemplateEarningTax 
-		 WHERE intTemplateEarningId = (SELECT TOP 1 intTemplateEarningId 
-										     FROM tblPRTemplateEarning 
-										    WHERE intTypeEarningId = @intTypeEarningId)
+		 WHERE intTemplateEarningId IN (SELECT intTemplateEarningId 
+										     FROM #tmpTemplateEarning)
 
-	IF EXISTS(SELECT intTemplateEarningId FROM tblPRTemplateEarning WHERE intTypeEarningId = @intTypeEarningId)
+	DECLARE @intTemplateEarningId INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTemplateEarning)
 	BEGIN
+		SELECT TOP 1 @intTemplateEarningId = intTemplateEarningId FROM #tmpTemplateEarning
+
 		--Reinsert Template Earning Taxes
 		INSERT INTO tblPRTemplateEarningTax
 					(intTemplateEarningId,
@@ -63,12 +82,17 @@ BEGIN
 					intSort,
 					intConcurrencyId)
 			 SELECT
-					(SELECT TOP 1 intTemplateEarningId FROM tblPRTemplateEarning WHERE intTypeEarningId = @intTypeEarningId),
+					@intTemplateEarningId,
 					intTypeTaxId,
 					intSort,
 					intConcurrencyId
 			  FROM tblPRTypeEarningTax
 			 WHERE intTypeEarningId = @intTypeEarningId
+
+		DELETE FROM #tmpTemplateEarning WHERE intTemplateEarningId = @intTemplateEarningId
 	END
+
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeEarning')) DROP TABLE #tmpEmployeeEarning
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTemplateEarning')) DROP TABLE #tmpTemplateEarning
 END
 GO
