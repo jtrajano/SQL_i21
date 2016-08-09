@@ -4151,6 +4151,7 @@
     <Build Include="dbo\Views\vyuHDCustomerProspectVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspMBRecalculateMeterReading.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContract.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\21_CommentMigration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
