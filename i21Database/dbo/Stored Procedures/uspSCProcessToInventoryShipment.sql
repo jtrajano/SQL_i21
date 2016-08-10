@@ -283,7 +283,8 @@ BEGIN TRY
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	END
 	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	IF @strLotTracking != 'Yes - Manual'
+	IF @strLotTracking = 'No' -- temporary fixes for 16.2
+	--IF @strLotTracking != 'Yes - Manual'
 		BEGIN
 			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 		END
