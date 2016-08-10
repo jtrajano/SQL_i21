@@ -94,6 +94,7 @@ RETURN (
 							LEFT JOIN dbo.tblICItemStockUOM StockUOM
 								ON StockUOM.intItemId = Item.intItemId
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
+								AND StockUOM.intItemUOMId = @intItemUOMId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblUnitStorage, 0)  < 0
@@ -143,6 +144,7 @@ RETURN (
 							INNER JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
+								AND Lot.intItemUOMId = @intItemUOMId
 					WHERE	Item.intItemId = @intItemId
 							AND Location.intItemLocationId = @intItemLocationId							
 							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
