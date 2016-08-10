@@ -471,8 +471,9 @@ namespace iRely.Inventory.BusinessLayer
             if (ReceiptType == "Transfer Order")
             {
                 // Get the Transfer Orders
+                // Note: VendorId becomes a location id when receipt type is a "Transfer Order"
                 var query = _db.GetQuery<vyuICGetReceiptAddTransferOrder>()
-                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intLocationId == VendorId)
                     .Filter(param, true);
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();

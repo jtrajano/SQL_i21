@@ -4123,12 +4123,58 @@
                                                                                     "userConfig": {
                                                                                         "boxLabel": null,
                                                                                         "fieldLabel": "Sanitization Required",
+                                                                                        "hidden": true,
                                                                                         "itemId": "chkSanitizationRequired",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": null
                                                                                     },
                                                                                     "name": "MyCheckbox24",
                                                                                     "designerId": "63209349-518c-404f-836f-5be9792f0edb"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.field.ComboBox",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "columns": [
+                                                                                            "[",
+                                                                                            "                                                                {",
+                                                                                            "                                                                    dataIndex: 'intLotStatusId',",
+                                                                                            "                                                                    dataType: 'numeric',",
+                                                                                            "                                                                    text: 'Lot Status Id',",
+                                                                                            "                                                                    hidden: true",
+                                                                                            "                                                                },",
+                                                                                            "                                                                {",
+                                                                                            "                                                                    dataIndex: 'strSecondaryStatus',",
+                                                                                            "                                                                    dataType: 'string',",
+                                                                                            "                                                                    text: 'Lot Status',",
+                                                                                            "                                                                    flex: 1",
+                                                                                            "                                                                }",
+                                                                                            "                                                            ]"
+                                                                                        ],
+                                                                                        "designer|createAlias": "gridcombobox",
+                                                                                        "displayField": "strSecondaryStatus",
+                                                                                        "fieldLabel": "Received Lot Status",
+                                                                                        "itemId": "cboReceiveLotStatus",
+                                                                                        "labelWidth": 125,
+                                                                                        "layout|flex": null,
+                                                                                        "valueField": "intLotStatusId"
+                                                                                    },
+                                                                                    "name": "MyComboBox9",
+                                                                                    "configAlternates": {
+                                                                                        "columns": "array"
+                                                                                    },
+                                                                                    "designerId": "de6bb256-2922-4a8f-9e98-17661c3ff833",
+                                                                                    "customConfigs": [
+                                                                                        {
+                                                                                            "group": "(Custom Properties)",
+                                                                                            "name": "columns",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    ]
                                                                                 }
                                                                             ]
                                                                         },
@@ -8158,7 +8204,7 @@
                                                 "container|align": "stretch",
                                                 "itemId": "pgeOthers",
                                                 "layout": "hbox",
-                                                "title": "Others"
+                                                "title": "Other"
                                             },
                                             "name": "MyPanel10",
                                             "designerId": "60f38216-64c0-42ee-9e49-30047c23d83a",
@@ -8187,7 +8233,8 @@
                                                         "container|align": "stretch",
                                                         "designer|displayName": "container",
                                                         "layout": "vbox",
-                                                        "layout|flex": 1
+                                                        "layout|flex": 1,
+                                                        "margin": "0 5 0 0"
                                                     },
                                                     "name": "MyContainer27",
                                                     "designerId": "ec20827f-687c-42c1-8af5-391cab615cc9",
@@ -8200,10 +8247,111 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "bodyPadding": 5,
+                                                                "container|align": "stretch",
+                                                                "itemId": "pnlComments",
+                                                                "layout": "vbox",
+                                                                "layout|flex": 1,
+                                                                "margin": null,
+                                                                "title": "Comments"
+                                                            },
+                                                            "name": "MyPanel35",
+                                                            "designerId": "9bd2ab67-f357-4e43-b983-d0866fd61e23",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.TextArea",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": null,
+                                                                        "designer|createAlias": null,
+                                                                        "fieldLabel": "Invoice Comments",
+                                                                        "itemId": "txtInvoiceComments",
+                                                                        "labelWidth": 116,
+                                                                        "layout|flex": 1,
+                                                                        "padding": null,
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyTextArea1",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "61758094-4542-420e-955a-b52b2532d108",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.TextArea",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": null,
+                                                                        "designer|createAlias": null,
+                                                                        "fieldLabel": "Pick List Comments",
+                                                                        "itemId": "txtPickListComments",
+                                                                        "labelWidth": 116,
+                                                                        "layout|flex": 1,
+                                                                        "padding": null,
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyTextArea2",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "f63f64a6-ea91-4f37-aed9-7b8b826caec2",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": 1
+                                                    },
+                                                    "name": "MyContainer30",
+                                                    "designerId": "56a2072a-e43d-46a4-95a1-a6f5a66c90ac",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": 5,
                                                                 "container|align": "stretch",
                                                                 "itemId": "pnlTankManagment",
                                                                 "layout": "vbox",
                                                                 "layout|flex": null,
+                                                                "margin": "0 0 5 0",
                                                                 "title": "Tank Management"
                                                             },
                                                             "name": "MyPanel3",
@@ -8222,7 +8370,7 @@
                                                                         "itemId": "chkTankRequired",
                                                                         "labelWidth": 110,
                                                                         "layout|flex": null,
-                                                                        "padding": "5 5 0 5"
+                                                                        "padding": null
                                                                     },
                                                                     "name": "MyCheckbox6",
                                                                     "designerId": "3a9d5e7a-a7ba-47d1-8165-50be51c5b6c5"
@@ -8240,7 +8388,7 @@
                                                                         "itemId": "chkAvailableForTm",
                                                                         "labelWidth": 110,
                                                                         "layout|flex": null,
-                                                                        "padding": "0 5 0 5"
+                                                                        "padding": null
                                                                     },
                                                                     "name": "MyCheckbox7",
                                                                     "designerId": "0258b273-bd2c-4db7-8869-9da3d1cf826d"
@@ -8260,7 +8408,7 @@
                                                                         "itemId": "txtDefaultPercentFull",
                                                                         "labelWidth": 110,
                                                                         "layout|flex": null,
-                                                                        "padding": "0 5 10 5",
+                                                                        "padding": null,
                                                                         "width": null
                                                                     },
                                                                     "name": "MyNumberField12",
@@ -8276,11 +8424,12 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "bodyPadding": 5,
                                                                 "container|align": "stretch",
                                                                 "itemId": "pnlPatronage",
                                                                 "layout": "vbox",
                                                                 "layout|flex": null,
-                                                                "margin": "5 0 0 0",
+                                                                "margin": "0 0 5 0",
                                                                 "title": "Patronage"
                                                             },
                                                             "name": "MyPanel34",
@@ -8322,7 +8471,7 @@
                                                                         "itemId": "cboPatronage",
                                                                         "labelWidth": 116,
                                                                         "layout|flex": null,
-                                                                        "padding": "5 5 0 5 ",
+                                                                        "padding": null,
                                                                         "valueField": "intPatronageCategoryId",
                                                                         "width": null
                                                                     },
@@ -8375,7 +8524,7 @@
                                                                         "itemId": "cboPatronageDirect",
                                                                         "labelWidth": 116,
                                                                         "layout|flex": null,
-                                                                        "padding": "0 5 10 5",
+                                                                        "padding": null,
                                                                         "valueField": "intPatronageCategoryId",
                                                                         "width": null
                                                                     },
@@ -8395,22 +8544,6 @@
                                                             ]
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "type": "Ext.container.Container",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 1
-                                                    },
-                                                    "name": "MyContainer30",
-                                                    "designerId": "56a2072a-e43d-46a4-95a1-a6f5a66c90ac"
                                                 }
                                             ]
                                         }

@@ -13,11 +13,11 @@ Ext.define('Inventory.view.LotDetailViewController', {
                 { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
                 { dataIndex: 'strStorageLocation', text: 'Storage Location', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewStorageLocation' },
                 { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
-                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblQty', text: 'Quantity', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblWeight', text: 'Weight', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblQty', text: 'Quantity', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblWeight', text: 'Weight', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
                 { dataIndex: 'strItemUOM', text: 'UOM', flex: 1, dataType: 'string' },
-                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblWeightPerQty', text: 'Weight Per Qty', flex: 1, dataType: 'float' },
-                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float' }
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblWeightPerQty', text: 'Weight Per Qty', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.number(value, '#,##0.00'); } },
+                { xtype: 'numbercolumn', format: '#,##0.0000', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float', renderer: function(value) { return Ext.util.Format.usMoney(value); } }
             ],
             showNew: false,
             showOpenSelected: false,
