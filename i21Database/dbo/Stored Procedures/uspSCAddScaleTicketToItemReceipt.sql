@@ -145,7 +145,7 @@ SELECT
 										ELSE SC.dblGrossWeight
 									END
 		,dblNet						= CASE 
-										WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(10,9,LI.dblQty)
+										WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
 										ELSE SC.dblGrossWeight - SC.dblTareWeight
 									END
 		,intSourceId				= SC.intTicketId
