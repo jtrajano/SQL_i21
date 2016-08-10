@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOUpdateItemComponent]
 	 @SalesOrderId	INT
-	--,@UserId	INT = NULL
+	,@Delete	BIT = 0
 AS
 BEGIN
 
@@ -10,26 +10,32 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 				
-		
-	DELETE SOSODC
-	FROM			
-		tblSOSalesOrderDetailComponent SOSODC
-	INNER JOIN
-		tblSOSalesOrderDetail SOSOD
-			ON SOSODC.[intSalesOrderDetailId] = SOSOD.[intSalesOrderDetailId]
-	INNER JOIN
-		tblSOSalesOrder SO
-			ON SOSOD.intSalesOrderId = SO.intSalesOrderId
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId 
-			AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
-	WHERE 
-		SO.intSalesOrderId = @SalesOrderId
-		AND SOSOD.intItemId <> ARTD.intItemId		
-	
-		
+	IF ISNULL(@Delete,0) <> 0
+		BEGIN
+			DELETE SOSODC
+			FROM			
+				tblSOSalesOrderDetailComponent SOSODC
+			INNER JOIN
+				tblSOSalesOrderDetail SOSOD
+					ON SOSODC.[intSalesOrderDetailId] = SOSOD.[intSalesOrderDetailId]
+			INNER JOIN
+				tblSOSalesOrder SO
+					ON SOSOD.intSalesOrderId = SO.intSalesOrderId
+			INNER JOIN
+				tblARTransactionDetail ARTD
+					ON SOSOD.intSalesOrderDetailId = ARTD.intTransactionDetailId 
+					AND SOSOD.intSalesOrderId = ARTD.intTransactionId 
+			INNER JOIN
+				tblICItem ICI
+					ON ARTD.[intItemId] = ICI.[intItemId]
+			WHERE 
+				SO.intSalesOrderId = @SalesOrderId
+				AND SOSOD.intItemId <> ARTD.intItemId
+				AND ICI.strType = 'Bundle'			
 
+			RETURN
+		END		
+			
 	--New
 	INSERT INTO [tblSOSalesOrderDetailComponent]
 		([intSalesOrderDetailId]
@@ -103,8 +109,7 @@ BEGIN
 		SO.[intSalesOrderId] = @SalesOrderId
 		AND SOSOD.[intItemId] <> ARTD.[intItemId]
 		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0	
-		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')	
-						
+		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')					
 	 
 END
 

@@ -12,8 +12,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF  
 
 
-EXEC dbo.[uspSOUpdateItemComponent] @SalesOrderId
+EXEC dbo.[uspSOUpdateItemComponent] @SalesOrderId, 0
 EXEC dbo.[uspSOUpdateCommitted] @SalesOrderId, @ForDelete
+EXEC dbo.[uspSOUpdateItemComponent] @SalesOrderId, 1
 EXEC dbo.[uspSOUpdateContractOnSalesOrder] @SalesOrderId, @ForDelete, @UserId
 
 IF @ForDelete = 1 OR @ForUnship = 1

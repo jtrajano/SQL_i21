@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARTransactionDetail]
 (
 	[intId]									INT				IDENTITY (1, 1) NOT NULL,
-    [intTransactionDetailId]				INT				NOT NULL,
+    [intTransactionDetailId]				INT				NOT NULL,	
     [intTransactionId]						INT             NOT NULL,
     [strTransactionType]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionStatus]			        NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
