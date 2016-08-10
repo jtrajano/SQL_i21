@@ -281,7 +281,8 @@ BEGIN TRY
 				SELECT @ErrorMerssage = ERROR_MESSAGE()
 				IF @raiseError = 0
 					BEGIN
-						ROLLBACK TRANSACTION							
+						IF (XACT_STATE()) = -1
+							ROLLBACK TRANSACTION							
 						BEGIN TRANSACTION						
 						EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
 						COMMIT TRANSACTION
@@ -300,7 +301,8 @@ BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()
 	IF @raiseError = 0
 		BEGIN
-			ROLLBACK TRANSACTION							
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION							
 			BEGIN TRANSACTION						
 			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
 			COMMIT TRANSACTION
@@ -1306,7 +1308,8 @@ END CATCH
 					SELECT @ErrorMerssage = ERROR_MESSAGE()					
 					IF @raiseError = 0
 						BEGIN
-							ROLLBACK TRANSACTION							
+							IF (XACT_STATE()) = -1
+								ROLLBACK TRANSACTION						
 							BEGIN TRANSACTION
 							--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 							--SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
