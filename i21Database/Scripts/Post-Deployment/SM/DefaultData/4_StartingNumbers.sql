@@ -4,6 +4,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Delivery Notice'
 	WHERE strModule = 'Logistics' AND strTransactionType = 'Weight Claims'
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Document Maintenance'
+	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
+
 GO
 	PRINT N'BEGIN DELETE OF TRANSACTION'
 
@@ -598,13 +601,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Vendor Overpayment')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 67
-			,[strTransactionType]	= N'Comment Maintenance'
-			,[strPrefix]			= N'COM-'
+			,[strTransactionType]	= N'Document Maintenance'
+			,[strPrefix]			= N'DOC-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Comment Maintenance')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Document Maintenance')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 68
 			,[strTransactionType]	= N'Pick List Number'
@@ -983,6 +986,13 @@ GO
 		SET [strPrefix] = 'DN-'
 		WHERE strTransactionType = N'Delivery Notice'
 	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Document Maintenance')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET [strPrefix] = 'DOC-'
+		WHERE strTransactionType = N'Document Maintenance'
+	END  
 GO
 	PRINT N'BEGIN RENAME S'
 
