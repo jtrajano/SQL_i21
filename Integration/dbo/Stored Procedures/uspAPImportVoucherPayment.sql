@@ -273,23 +273,6 @@ END
 IF OBJECT_ID('tempdb..#tmpPaymentsWithRecordNumber') IS NOT NULL DROP TABLE #tmpPaymentsWithRecordNumber
 
 --UPDATE THE PAYMENT METHOD FOR THOSE VOUCHERS THAT HAS BEEN PAID BUT NO PAYMENT RECORD ASSOCIATED
-----UPDATE THE AMOUNT PAID FOR NO CHECK NUMBER OR NO PAYMENT THAT WE GROUPED IN ONE PAYMENT PER VENDOR AND CHECK DATE
---UPDATE A
---	SET A.dblAmountPaid = NoCheckCreated.dblPayment
---FROM tblAPPayment A
---INNER JOIN #tmpPaymentCreated B ON A.intPaymentId = B.intPaymentId
---INNER JOIN (
---	SELECT
---		SUM(CASE WHEN C.apivc_trans_type = 'I' AND C.apivc_net_amt > 0 THEN C.apivc_net_amt --VOUCHER
---										WHEN C.apivc_trans_type = 'O' AND C.apivc_net_amt > 0 THEN C.apivc_net_amt --VOUCHER
---									WHEN C.apivc_trans_type = 'A' OR C.apivc_trans_type = 'C'
---										 THEN (CASE WHEN C.apivc_net_amt > 0 THEN C.apivc_net_amt * -1 ELSE C.apivc_net_amt END)
---									ELSE 0 END) AS dblPayment,
---		C.apivc_chk_no
---	FROM tmp_apivcmstImport C
---	WHERE C.apchk_A4GLIdentity IS NULL
---	GROUP BY C.apivc_chk_no
---) NoCheckCreated ON B.apivc_chk_no = NoCheckCreated.apivc_chk_no
 
 --UPDATE strPaymentRecordNumber
 CREATE TABLE #tmpPaymentsWithRecordNumber
