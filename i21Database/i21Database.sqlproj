@@ -4060,6 +4060,7 @@
     <Build Include="dbo\Tables\tblCFProductAuth.sql" />
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
     <Build Include="dbo\Views\vyuMBSearchMeterReading.sql" />
+    <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
