@@ -1,5 +1,3 @@
--- exec uspSCProcessToInventoryShipment 79, 'SalesOrder', 1, 524.893, 4.44, 3610, NULL, 'SPT', 0
-
 CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	 @intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
@@ -44,6 +42,7 @@ DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
+DECLARE @totalShipment AS INT
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -190,43 +189,39 @@ BEGIN TRY
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 1
 				FROM	dbo.tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM
-							ON ScaleTicket.intItemId = ItemUOM.intItemId
-							AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-						INNER JOIN dbo.tblICItemLocation ItemLocation
-							ON ScaleTicket.intItemId = ItemLocation.intItemId
-							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId 
+						AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
 				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 
 			-- Validate the items to shipment 
 			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
-			---- Add the items into inventory shipment > sales order type. 
-			BEGIN 
-				EXEC dbo.uspSCAddScaleTicketToItemShipment 
-					  @intTicketId
-					 ,@intUserId
-					 ,@ItemsForItemShipment
-					 ,@intEntityId
-					 ,4
-					 ,@InventoryShipmentId OUTPUT;
-			END
+			------ Add the items into inventory shipment > sales order type. 
+			--BEGIN 
+			--	EXEC dbo.uspSCAddScaleTicketToItemShipment 
+			--		  @intTicketId
+			--		 ,@intUserId
+			--		 ,@ItemsForItemShipment
+			--		 ,@intEntityId
+			--		 ,4
+			--		 ,@InventoryShipmentId OUTPUT;
+			--END
 
-			BEGIN 
-			SELECT	@strTransactionId = ship.strShipmentNumber
-			FROM	dbo.tblICInventoryShipment ship	        
-			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
-			END
-			SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-			IF @strLotTracking = 'No'
-				BEGIN
-					EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
-				END
+			--BEGIN 
+			--SELECT	@strTransactionId = ship.strShipmentNumber
+			--FROM	dbo.tblICInventoryShipment ship	        
+			--WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+			--END
+			--SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
+			--IF @strLotTracking = 'No'
+			--	BEGIN
+			--		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+			--	END
 		END
-		IF (@dblRemainingUnits = @dblNetUnits)
-		RETURN
-		DELETE FROM @ItemsForItemShipment
+		--IF (@dblRemainingUnits = @dblNetUnits)
+		--RETURN
+		--DELETE FROM @ItemsForItemShipment
 		UPDATE @LineItems set intTicketId = @intTicketId
 		END
 	-- Get the items to process
@@ -261,20 +256,16 @@ BEGIN TRY
 		,@strDistributionOption
 		,@LineItems
 
-		--select * from @ItemsForItemShipment
+	select @totalShipment = COUNT(*) from @ItemsForItemShipment
+	IF @totalShipment = 0
+		RETURN
 
 	-- Validate the items to shipment 
 	EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
 	---- Add the items into inventory shipment > sales order type. 
 	BEGIN 
-		EXEC dbo.uspSCAddScaleTicketToItemShipment 
-			  @intTicketId
-			 ,@intUserId
-			 ,@ItemsForItemShipment
-			 ,@intEntityId
-			 ,@intOrderId
-			 ,@InventoryShipmentId OUTPUT;
+		EXEC dbo.uspSCAddScaleTicketToItemShipment @intTicketId ,@intUserId ,@ItemsForItemShipment ,@intEntityId ,@intOrderId ,@InventoryShipmentId OUTPUT;
 	END
 
 	BEGIN 
@@ -306,9 +297,4 @@ BEGIN CATCH
 		@ErrorState -- State.
 	);
 END CATCH
-
-
-
 GO
-
-
