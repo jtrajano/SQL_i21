@@ -14,6 +14,7 @@ SELECT dtmStartDate,
 	strFinalPrice,
 	strPriceWeightUOM,
 	strPriceUOM,
+	dblHeaderQuantity,
 	dblQuantity,
 	strQuantityUOM,
 	dblWeight,
@@ -39,6 +40,7 @@ SELECT dtmStartDate,
 		strContractBasis			=	CB.strDescription,
 		strFixationStatus			=	CASE PT.strPricingType WHEN 'Cash' THEN 'OT' WHEN 'Priced' THEN 'FX' ELSE 'UF' END,  
 		strFinalPrice				=	CD.dblCashPrice,
+		dblHeaderQuantity			=	CH.dblQuantity,
 		dblQuantity					=	CD.dblQuantity,  
 		strQuantityUOM				=	U1.strUnitMeasure,
 		dblWeight					=	dbo.fnRemoveTrailingZeroes (round(IsNull(dbo.fnCalculateQtyBetweenUOM (CD.intNetWeightUOMId,
@@ -66,7 +68,7 @@ SELECT dtmStartDate,
 		strPriceUOM = CU.strCurrency
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractStatusId <> 5
-JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId --AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
 LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 LEFT JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intPContractDetailId = CD.intContractDetailId
 LEFT JOIN tblICItem	IM ON IM.intItemId = CD.intItemId
@@ -85,5 +87,5 @@ LEFT JOIN tblQMAttribute SampAtt ON SampAtt.intAttributeId = SampDetail.intAttri
 INNER JOIN tblCTPosition Pos on Pos.intPositionId=CH.intPositionId and Pos.strPosition='Spot'
 ) gc
 group by  dtmStartDate,dtmEndDate,strPosition,strContractNumber,strCustomerContract,strEntityName,strItemNo,strItemDescription,strContractBasis,
-strFixationStatus,strFinalPrice,dblQuantity,strQuantityUOM,dblWeight,dblShippedWeight,intNoOfSequence,dblBasis,strInternalComment,intContractSeq,
+strFixationStatus,strFinalPrice,dblHeaderQuantity, dblQuantity,strQuantityUOM,dblWeight,dblShippedWeight,intNoOfSequence,dblBasis,strInternalComment,intContractSeq,
 intNoOfReweigh,strPriceWeightUOM,strPriceUOM 
