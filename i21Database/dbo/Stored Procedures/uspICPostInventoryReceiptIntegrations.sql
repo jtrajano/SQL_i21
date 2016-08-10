@@ -62,11 +62,11 @@ BEGIN
 		,[intLoadReceive]
 	)
 	EXEC dbo.uspICGetItemsFromItemReceipt
-		@intReceiptId = @intTransactionId
+		@intReceiptId = @intTransactionId		
 
-	UPDATE @ItemsFromInventoryReceipt
-	SET		dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
-			,intLoadReceive = intLoadReceive * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
+	UPDATE	@ItemsFromInventoryReceipt
+	SET		dblQty = CASE WHEN @ysnPost = 1 THEN dblQty ELSE -dblQty END 
+			,intLoadReceive = CASE WHEN @ysnPost = 1 THEN intLoadReceive ELSE -intLoadReceive END 
 END
 
 -- Get the receipt-type and source-type from tblICInventoryReceipt
@@ -91,7 +91,75 @@ BEGIN
 	-- Update the received quantities back to the Purchasing
 	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
 	BEGIN 
-		EXEC dbo.uspPOReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+		DECLARE @ItemsFromIRForPO AS dbo.ReceiptItemTableType
+
+		-- Do not include the 'return' items (with negative qty)
+		INSERT INTO @ItemsFromIRForPO (
+				-- Header
+				[intInventoryReceiptId] 
+				,[strInventoryReceiptId] 
+				,[strReceiptType] 
+				,[intSourceType] 
+				,[dtmDate] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				-- Detail 
+				,[intInventoryReceiptDetailId] 
+				,[intItemId] 
+				,[intLotId] 
+				,[strLotNumber] 
+				,[intLocationId] 
+				,[intItemLocationId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[intItemUOMId] 
+				,[intWeightUOMId] 
+				,[dblQty] 
+				,[dblUOMQty] 
+				,[dblNetWeight] 
+				,[dblCost] 
+				,[intContainerId] 
+				,[intOwnershipType] 
+				,[intOrderId] 
+				,[intSourceId] 
+				,[intLineNo] 
+				,[intLoadReceive]
+		)
+		SELECT 
+				-- Header
+				[intInventoryReceiptId] 
+				,[strInventoryReceiptId] 
+				,[strReceiptType] 
+				,[intSourceType] 
+				,[dtmDate] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				-- Detail 
+				,[intInventoryReceiptDetailId] 
+				,[intItemId] 
+				,[intLotId] 
+				,[strLotNumber] 
+				,[intLocationId] 
+				,[intItemLocationId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[intItemUOMId] 
+				,[intWeightUOMId] 
+				,[dblQty] 
+				,[dblUOMQty] 
+				,[dblNetWeight] 
+				,[dblCost] 
+				,[intContainerId] 
+				,[intOwnershipType] 
+				,[intOrderId] 
+				,[intSourceId] 
+				,[intLineNo] 
+				,[intLoadReceive]
+		FROM	@ItemsFromInventoryReceipt
+		WHERE	(@ysnPost = 0 AND dblQty < 0)
+				OR (@ysnPost = 1 AND dblQty > 0) 
+
+		EXEC dbo.uspPOReceived @ItemsFromIRForPO, @intEntityUserSecurityId
 	END
 
 	-- Update the In-Transit for Transfer Orders 

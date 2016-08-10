@@ -153,7 +153,7 @@ AS
 										  @intActiveCommSchedId
 										, CS.intCommissionPlanId
 										, CS.strEntityIds
-										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN AL.intEntityUserSecurityId ELSE NULL END
+										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN (SELECT TOP 1 ISNULL(AL.intEntityUserSecurityId, AL.intAlternateEntityUserSecurityId) FROM tblSMApprovalListUserSecurity AL WHERE intApprovalListId = CP.intApprovalListId ORDER BY intApproverLevel) ELSE NULL END
 										, @dtmStartDate
 										, @dtmEndDate
 										, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
@@ -167,7 +167,6 @@ AS
 										, 1
 									FROM tblARCommissionSchedule CS
 										LEFT JOIN tblARCommissionPlan CP ON CS.intCommissionPlanId = CP.intCommissionPlanId
-										LEFT JOIN (SELECT TOP 1 * FROM tblSMApprovalListUserSecurity ORDER BY intApproverLevel) AL ON AL.intApprovalListId = CP.intApprovalListId
 									WHERE CS.intCommissionScheduleId = @intActiveCommSchedId
 
 									SET @intNewCommissionRecapId = SCOPE_IDENTITY()
@@ -282,7 +281,7 @@ AS
 																  @intActiveCommSchedId
 																, @intCommissionPlanId
 																, @intEntityId
-																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN AL.intEntityUserSecurityId ELSE NULL END
+																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN (SELECT TOP 1 ISNULL(AL.intEntityUserSecurityId, AL.intAlternateEntityUserSecurityId) FROM tblSMApprovalListUserSecurity AL WHERE intApprovalListId = CP.intApprovalListId ORDER BY intApproverLevel) ELSE NULL END
 																, @dtmStartDate
 																, @dtmEndDate
 																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
@@ -296,7 +295,6 @@ AS
 																, 1
 															FROM tblARCommissionSchedule CS
 																LEFT JOIN tblARCommissionPlan CP ON CP.intCommissionPlanId = @intCommissionPlanId
-																LEFT JOIN (SELECT TOP 1 * FROM tblSMApprovalListUserSecurity ORDER BY intApproverLevel) AL ON AL.intApprovalListId = CP.intApprovalListId
 															WHERE CS.intCommissionScheduleId = @intActiveCommSchedId
 
 															SET @intNewCommissionRecapId = SCOPE_IDENTITY()
