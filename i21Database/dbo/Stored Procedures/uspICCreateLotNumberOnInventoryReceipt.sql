@@ -38,10 +38,12 @@ BEGIN
 	DECLARE @LotQty AS NUMERIC(38,20)
 	DECLARE @OpenReceiveQtyInItemUOM AS NUMERIC(38,20)
 	DECLARE @LotQtyInItemUOM AS NUMERIC(38,20)
+	DECLARE @ReceiptItemNet  AS NUMERIC(38,20)
 
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
 	DECLARE @FormattedLotQty AS NVARCHAR(50)
 	DECLARE @FormattedDifference AS NVARCHAR(50)
+	DECLARE @FormattedReceiptItemNet AS NVARCHAR(50)
 
 	-- Check if the unit quantities on the UOM table are valid. 
 	BEGIN 
@@ -115,7 +117,7 @@ BEGIN
 					,ReceiptItem.intUnitMeasureId
 					,ReceiptItem.dblOpenReceive
 				), 2)
-
+				
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		IF ISNULL(@strItemNo, '') = '' 
@@ -127,6 +129,51 @@ BEGIN
 
 		-- 'The Qty to Receive for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
 		RAISERROR(80006, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RETURN -1; 
+	END 
+
+		
+-- Check if the Item Receipt Net qty matches with the total Net qty from the lots. 
+	SELECT	TOP 1 
+			@strItemNo					= Item.strItemNo
+			,@intItemId					= Item.intItemId
+			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			,@ReceiptItemNet			= ReceiptItem.dblNet
+			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
+			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblNet
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = ReceiptItem.intItemId
+			LEFT JOIN (
+				SELECT  AggregrateLot.intInventoryReceiptItemId
+						,TotalLotQtyInItemUOM = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
+							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
+							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
+				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
+				GROUP BY AggregrateLot.intInventoryReceiptItemId
+			) ItemLot
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
+	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+			AND Receipt.strReceiptNumber = @strTransactionId
+			AND ItemLot.TotalLotQtyInItemUOM <> ReceiptItem.dblNet
+			AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 
+			
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		IF ISNULL(@strItemNo, '') = '' 
+			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+		SET @FormattedReceiptItemNet =  CONVERT(NVARCHAR, CAST(@ReceiptItemNet AS MONEY), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
+		SET @FormattedDifference =  CAST(ABS(@ReceiptItemNet - @LotQtyInItemUOM) AS NVARCHAR(50))
+		
+		-- 'Net quantity mistmatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
+		RAISERROR(80081, 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
 		RETURN -1; 
 	END 
 END
