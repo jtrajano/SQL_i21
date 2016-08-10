@@ -17,6 +17,7 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MR.strInvoiceComment
 	, MR.intInvoiceId
 	, MR.strInvoiceNumber
+	, MADetail.intConsignmentGroupId
 	, MADetail.strPriceType
 	, MADetail.intTaxGroupId
 	, MADetail.intItemId
@@ -33,15 +34,8 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MRDetail.dblLastDollars
 	, MRDetail.dblCurrentDollars
 	, dblDollarsSold = ISNULL(MRDetail.dblCurrentDollars, 0) - ISNULL(MRDetail.dblLastDollars, 0)
-	, dblUnitCost = 0.000000
-	, dblTotalCost = 0.000000
 	, MRDetail.dblDollarsOwed
 	, dblDifference = ISNULL(MRDetail.dblDollarsOwed, 0) - (ISNULL(MRDetail.dblCurrentDollars, 0) - ISNULL(MRDetail.dblLastDollars, 0))
-	, dblTotalTax = 0.000000
-	, dblJobberMargin = 0.000000
-	, dblJobberProfit = 0.000000
-	, dblDealerMargin = 0.000000
-	, dblDealerProfit = 0.000000
 	, MR.ysnPosted
 	, MR.dtmPostedDate
 	, MRDetail.intSort
