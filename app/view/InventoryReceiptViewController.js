@@ -2100,6 +2100,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
         
+        if(ysnCalculatedInLot === 1) {
+            if (record.get('dblGross') === 0 && record.get('dblNet') === 0) {
+                record.set('dblGross', totalGross);
+                record.set('dblNet', totalNet);
+            }
+            else {
+                ysnCalculatedInLot = 0;
+            }
+        }
+            
+        
         //Use this calculation if the item has no lot
         if(ysnCalculatedInLot === 0)
             {
@@ -2120,10 +2131,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     
                  }    
                 totalNet = totalGross;
+                
+                record.set('dblGross', totalGross);
+                record.set('dblNet', totalNet);
             }
-
-        record.set('dblGross', totalGross);
-        record.set('dblNet', totalNet);
     },
 
     onViewReceiptNo: function (value, record) {
@@ -2757,6 +2768,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         vw.data.currentReceiptItem = context.record;
         if (context.field === 'dblGross' || context.field === 'dblNet') {
             me.validateWeightLoss(win)
+            
+            if (context.field === 'dblGross') {
+                 var receiptItemQty = context.record.get('dblOpenReceive');
+                 var receiptUOMCF = context.record.get('dblItemUOMConvFactor');
+                 var weightUOMCF = context.record.get('dblWeightUOMConvFactor');
+
+                 if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
+                 if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
+                 if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
+
+                 // If there is no Gross/Net UOM, do not calculate the lot gross and net.
+                 if (context.record.get('intWeightUOMId') === null || context.record.get('intWeightUOMId') === '') {
+                    totalGross = 0;
+                 }
+                else {
+                    totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; 
+                 }    
+                
+                if(context.record.get('dblGross') !== totalGross) {
+                    var task = new Ext.util.DelayedTask(function () {
+                        iRely.Functions.showErrorDialog('Received Quantity and Gross should be equal.');
+                        context.record.set('dblGross', totalGross);
+                    });
+
+                    task.delay(10);
+                }
+            }
         }
 
         // Calculate the taxes and line totals.
@@ -2796,8 +2834,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         // Call this function to auto-calculate the Gross and Net at the item grid.
-        me.calculateGrossNet(receiptItem);
-        
+        if (receiptItem.get('dblGross') === 0 && receiptItem.get('dblNet') === 0) {
+            me.calculateGrossNet(receiptItem);
+        }
+
         //Calculate Line Total
         var currentReceipt  = win.viewModel.data.current;
         receiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, receiptItem));
