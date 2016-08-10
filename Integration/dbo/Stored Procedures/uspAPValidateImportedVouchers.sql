@@ -91,9 +91,12 @@ FROM (
 			SELECT 
 			A.intPaymentId
 			,A.strPaymentRecordNum
-			,A.dblAmountPaid i21Total
-			,ISNULL((CASE WHEN C.intTransactionType != 1 AND A.ysnPrepay = 0 THEN B.dblPayment * -1 ELSE B.dblPayment END),0) i21DetailTotal
+			,(CASE WHEN LOWER(PM.strPaymentMethod) = 'deposit' THEN A.dblAmountPaid * -1 ELSE A.dblAmountPaid END) i21Total
+			,ISNULL((CASE WHEN C.intTransactionType != 1 AND (A.ysnPrepay = 0 OR LOWER(PM.strPaymentMethod) = 'deposit')
+						THEN B.dblPayment * -1 
+						ELSE B.dblPayment END),0) i21DetailTotal
 			FROM tblAPPayment A
+			INNER JOIN tblSMPaymentMethod PM ON A.intPaymentMethodId = PM.intPaymentMethodID
 			LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			LEFT JOIN tblAPBill C ON B.intBillId = C.intBillId
 			LEFT JOIN tblGLDetail D ON D.intTransactionId = A.intPaymentId AND D.strTransactionId = A.strPaymentRecordNum
