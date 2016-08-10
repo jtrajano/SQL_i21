@@ -22,7 +22,7 @@ SELECT SO.intSalesOrderId
 	 , strOrderStatus			= SO.strOrderStatus
 	 , strSalesOrderNumber		= SO.strSalesOrderNumber
 	 , strPONumber				= SO.strPONumber
-	 , strShipVia				= SV.strShipVia
+	 , strShipVia				= ESV.strName
 	 , strTerm					= T.strTerm
 	 , dtmDueDate				= SO.dtmDueDate
 	 , strFreightTerm			= FT.strFreightTerm
@@ -85,7 +85,8 @@ LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocati
 LEFT JOIN tblSMCurrency CUR ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
 	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId
-LEFT JOIN tblSMShipVia SV ON SO.intShipViaId = SV.intEntityShipViaId
+LEFT JOIN (tblSMShipVia SV
+	INNER JOIN tblEMEntity ESV ON SV.intEntityShipViaId = ESV.intEntityId) ON SO.intShipViaId = SV.intEntityShipViaId
 LEFT JOIN tblSMTerm T ON SO.intTermId = T.intTermID
 LEFT JOIN tblEMEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId

@@ -29,7 +29,7 @@ SELECT INV.intInvoiceId
 											THEN INV.strBOLNumber
 										ELSE SO.strBOLNumber
 									END)
-	 , SV.strShipVia
+	 , strShipVia				= ESV.strName
 	 , T.strTerm
 	 , INV.dtmShipDate
 	 , INV.dtmDueDate
@@ -79,7 +79,8 @@ INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLoca
 LEFT JOIN tblSMCurrency CUR ON INV.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
 	INNER JOIN tblEMEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.intEntitySalespersonId
-LEFT JOIN tblSMShipVia SV ON INV.intShipViaId = SV.intEntityShipViaId
+LEFT JOIN (tblSMShipVia SV 
+	INNER JOIN tblEMEntity ESV ON SV.intEntityShipViaId = ESV.intEntityId) ON INV.intShipViaId = SV.intEntityShipViaId
 INNER JOIN tblSMTerm T ON INV.intTermId = T.intTermID
 LEFT JOIN tblSMFreightTerms FT ON INV.intFreightTermId = FT.intFreightTermId
 
