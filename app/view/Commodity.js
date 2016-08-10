@@ -214,7 +214,6 @@ Ext.define('Inventory.view.Commodity', {
                                                                 ],
                                                                 enableDrillDown: 'true',
                                                                 flex: 1,
-                                                                enableDrillDown: true,
                                                                 itemId: 'cboFutureMarket',
                                                                 fieldLabel: 'Default Future Market',
                                                                 labelWidth: 140,
@@ -286,6 +285,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        hidden: true,
                                                                         itemId: 'txtCheckoffTaxDesc',
                                                                         width: 280,
                                                                         fieldLabel: 'Checkoff Tax Desc',
@@ -294,6 +294,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
+                                                                        hidden: true,
                                                                         itemId: 'cboCheckoffTaxAllStates',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'All States',
@@ -313,6 +314,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        hidden: true,
                                                                         itemId: 'txtInsuranceTaxDesc',
                                                                         width: 280,
                                                                         fieldLabel: 'Insurance Tax Desc',
@@ -321,6 +323,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
+                                                                        hidden: true,
                                                                         itemId: 'cboInsuranceTaxAllStates',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'All States',
