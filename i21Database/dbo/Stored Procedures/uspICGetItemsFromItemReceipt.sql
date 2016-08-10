@@ -29,7 +29,7 @@ SELECT
 		,[intStorageLocationId]			= ItemLot.intStorageLocationId
 		,[intItemUOMId]					= ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId)
 		,[intWeightUOMId]				= ReceiptItem.intWeightUOMId		
-		,[dblQty]						= ISNULL(ItemLot.dblQuantity, ReceiptItem.dblOpenReceive)
+		,[dblQty]						= ISNULL(ItemLot.dblQuantity, ReceiptItem.dblOpenReceive) 
 		,[dblUOMQty]					= ISNULL(LotItemtUOM.dblUnitQty, ItemUOM.dblUnitQty)
 		,[dblNetWeight]					= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0)
 		,[dblCost]						= ReceiptItem.dblUnitCost
@@ -52,4 +52,4 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 		LEFT JOIN dbo.tblICItemUOM LotItemtUOM
 			ON LotItemtUOM.intItemUOMId = ItemLot.intItemUnitMeasureId
-WHERE	Receipt.intInventoryReceiptId = @intReceiptId
+WHERE	Receipt.intInventoryReceiptId = @intReceiptId		

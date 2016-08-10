@@ -95,8 +95,8 @@ BEGIN
 			,intItemUOMId			= ReceiptItems.intItemUOMId
 			,intSubLocationId		= ReceiptItems.intSubLocationId
 			--IC send this data as is, posted or unposted, they are the one doing the logic if on order will be deducted or added
-			--NOTE: logic here that we will increase the on order or deduct was on IC, we just need to make here negative
-			,dblQty					= ReceiptItems.dblQty * -1
+			--NOTE: logic here that we will increase the on order or deduct was on IC, negate the qty to reduce the On Order Qty. 
+			,dblQty					= -ReceiptItems.dblQty 
 			,dblUOMQty				= ReceiptItems.dblUOMQty
 			,intTransactionId		= ReceiptItems.intInventoryReceiptId
 			,intTransactionDetailId = ReceiptItems.intInventoryReceiptDetailId
@@ -115,7 +115,7 @@ END
 -- Update the PO receive Qty
 BEGIN 
 	UPDATE	PODetail
-		SET		dblQtyReceived = PODetail.dblQtyReceived + dbo.fnCalculateQtyBetweenUOM(Items.intItemUOMId, PODetail.intUnitOfMeasureId, Items.dblTotalQty)
+	SET		dblQtyReceived = PODetail.dblQtyReceived + dbo.fnCalculateQtyBetweenUOM(Items.intItemUOMId, PODetail.intUnitOfMeasureId, Items.dblTotalQty)
 	FROM	tblPOPurchaseDetail PODetail 
 	CROSS APPLY ( 
 	
