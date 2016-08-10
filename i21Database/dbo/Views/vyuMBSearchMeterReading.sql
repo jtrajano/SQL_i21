@@ -49,19 +49,19 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MRDetail.ysnPosted
 	, MRDetail.dtmPostedDate
 	, MRDetail.intSort
+	, MRDetail.intConsignmentGroupId
 FROM vyuMBGetMeterReadingDetail MRDetail
 LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = MRDetail.intInvoiceId
 LEFT JOIN tblICInventoryTransaction ICTransaction ON ICTransaction.intTransactionId = Invoice.intInvoiceId
 	AND ICTransaction.strTransactionForm = 'Invoice'
 	AND ICTransaction.intItemId = MRDetail.intItemId
 	AND ISNULL(ICTransaction.ysnIsUnposted, 0) = 0
-CROSS APPLY (
-	SELECT ConDetail.intConsignmentRateId, ConDetail.dtmEffectiveDate FROM vyuMBGetConsignmentRateDetail ConDetail
-	WHERE ConDetail.intConsignmentGroupId = MRDetail.intConsignmentGroupId
-		AND ConDetail.dtmEffectiveDate <= MRDetail.dtmTransaction
-		AND ConDetail.intItemId = MRDetail.intItemId
-	GROUP BY ConDetail.intConsignmentRateId, ConDetail.dtmEffectiveDate
+LEFT JOIN (
+	SELECT ConDetail.intConsignmentGroupId, ConDetail.intConsignmentRateId, ConDetail.intItemId, ConDetail.dtmEffectiveDate FROM vyuMBGetConsignmentRateDetail ConDetail
+	GROUP BY ConDetail.intConsignmentGroupId, ConDetail.intConsignmentRateId, ConDetail.intItemId, ConDetail.dtmEffectiveDate
 	HAVING MAX(ConDetail.dtmEffectiveDate) = ConDetail.dtmEffectiveDate
-) ConRate
+) ConRate ON ConRate.intConsignmentGroupId = MRDetail.intConsignmentGroupId
+		AND MRDetail.dtmTransaction >= ConRate.dtmEffectiveDate
+		AND ConRate.intItemId = MRDetail.intItemId
 LEFT JOIN tblMBConsignmentRateDetail ConRateDetail ON ConRateDetail.intConsignmentRateId = ConRate.intConsignmentRateId
 	AND ConRateDetail.intItemId = MRDetail.intItemId
