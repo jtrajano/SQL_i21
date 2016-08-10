@@ -6,29 +6,27 @@ BEGIN
 	SELECT @TransactionType = [strTransactionType] FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = @TransactionType
 
-	INSERT INTO [tblARTransactionDetail]
-	(
-			[intTransactionDetailId]
-           ,[intTransactionId]
-           ,[strTransactionType]
-           ,[intItemId]
-           ,[intItemUOMId]
-           ,[dblQtyOrdered]
-           ,[dblQtyShipped]
-           ,[dblPrice]
-           ,[intInventoryShipmentItemId]
-           ,[intSalesOrderDetailId]
-           ,[intContractHeaderId]
-           ,[intContractDetailId]
-           ,[intShipmentId]
-           ,[intShipmentPurchaseSalesContractId]
-           ,[intTicketId]
-           ,[intTicketHoursWorkedId]
-		   ,[intOriginalInvoiceDetailId]
-           ,[intSiteId]
-	)
+	INSERT INTO [tblARTransactionDetail](
+		 [intTransactionDetailId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQtyOrdered]
+		,[dblQtyShipped]
+		,[dblPrice]
+		,[intInventoryShipmentItemId]
+		,[intSalesOrderDetailId]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intShipmentId]
+		,[intShipmentPurchaseSalesContractId]
+		,[intTicketId]
+		,[intTicketHoursWorkedId]
+		,[intOriginalInvoiceDetailId]
+		,[intSiteId])
 	SELECT
-		 [intTransactionDetailId]				= [intInvoiceDetailId] 
+		 [intTransactionDetailId]				= [intInvoiceDetailId]
 		,[intTransactionId]						= [intInvoiceId] 
 		,[strTransactionType]					= @TransactionType
 		,[intItemId]							= [intItemId] 
@@ -51,4 +49,5 @@ BEGIN
 		[tblARInvoiceDetail]
 	WHERE
 		[intInvoiceId] = @InvoiceId
+	
 END

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateItemComponent]
 	 @InvoiceId	INT
-	--,@UserId	INT = NULL
+	,@Delete	BIT = 0
 AS
 BEGIN
 
@@ -10,26 +10,31 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 				
-		
-	DELETE ARIDC
-	FROM			
-		tblARInvoiceDetailComponent ARIDC
-	INNER JOIN
-		tblARInvoiceDetail ARID
-			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-			AND ARID.intInvoiceId = ARTD.intTransactionId 
-	WHERE 
-		ARI.intInvoiceId = @InvoiceId
-		AND ARID.intItemId <> ARTD.intItemId		
-		AND ISNULL(ARTD.intInventoryShipmentItemId, 0) = 0
-		AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0		
-	
+	IF ISNULL(@Delete,0) <> 0
+	BEGIN
+		DELETE ARIDC
+		FROM			
+			tblARInvoiceDetailComponent ARIDC
+		INNER JOIN
+			tblARInvoiceDetail ARID
+				ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+		INNER JOIN
+			tblARInvoice ARI
+				ON ARID.intInvoiceId = ARI.intInvoiceId
+		INNER JOIN
+			tblARTransactionDetail ARTD
+				ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+				AND ARID.intInvoiceId = ARTD.intTransactionId
+		INNER JOIN
+			tblICItem ICI
+				ON ARTD.[intItemId] = ICI.[intItemId]
+		WHERE 
+			ARI.intInvoiceId = @InvoiceId
+			AND ARID.intItemId <> ARTD.intItemId
+			AND ICI.strType = 'Bundle'			
+
+		RETURN
+	END		
 		
 
 	--New

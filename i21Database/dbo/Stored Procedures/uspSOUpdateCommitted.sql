@@ -73,6 +73,54 @@ BEGIN
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
 		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](Detail.intItemId) = 1
+		AND Header.strTransactionType = 'Order'
+		AND Detail.intItemId = TD.intItemId		
+		AND (Detail.intItemUOMId <> TD.intItemUOMId OR ((Detail.dblQtyOrdered - Detail.dblQtyShipped) <> (TD.dblQtyOrdered - TD.dblQtyShipped)))
+		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+
+	UNION ALL
+
+	--Quantity/UOM Changed	--Component
+	SELECT
+		[intItemId]					=	SOSODC.intComponentItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	Detail.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	(CASE WHEN @Negate = 1 THEN (Detail.dblQtyShipped * -1) ELSE (CASE WHEN @QuantityToPost IS NULL OR @QuantityToPost = 0 THEN ((Detail.dblQtyOrdered - Detail.dblQtyShipped) - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, (TD.dblQtyOrdered - TD.dblQtyShipped))) ELSE @QuantityToPost END) END) * SOSODC.dblQuantity 
+		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	Detail.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	Detail.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblSOSalesOrderDetailComponent SOSODC
+	INNER JOIN 
+		tblSOSalesOrderDetail Detail
+			ON SOSODC.intSalesOrderDetailId = Detail.intSalesOrderDetailId 
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND Detail.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON SOSODC.intComponentItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](SOSODC.intComponentItemId) = 1
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId = TD.intItemId		
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR ((Detail.dblQtyOrdered - Detail.dblQtyShipped) <> (TD.dblQtyOrdered - TD.dblQtyShipped)))
@@ -119,6 +167,54 @@ BEGIN
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
 		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](TD.intItemId) = 1
+		AND Header.strTransactionType = 'Order'
+		AND Detail.intItemId <> TD.intItemId				
+		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+
+
+	UNION ALL
+
+	--Item Changed		--Component
+	SELECT
+		[intItemId]					=	SOSODC.intComponentItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	SOSODC.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	((TD.dblQtyOrdered - TD.dblQtyShipped) * -1) * SOSODC.dblQuantity 
+		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	TD.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	TD.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblSOSalesOrderDetailComponent SOSODC
+	INNER JOIN 
+		tblSOSalesOrderDetail Detail
+			ON SOSODC.intSalesOrderDetailId = Detail.intSalesOrderDetailId 
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND Detail.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON SOSODC.intComponentItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](SOSODC.intComponentItemId) = 1
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intItemId <> TD.intItemId				
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
@@ -159,6 +255,49 @@ BEGIN
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
 		TD.intTransactionId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](TD.intItemId) = 1
+		AND TD.strTransactionType = 'Order'
+		AND (TD.intInventoryShipmentItemId IS NULL OR TD.intInventoryShipmentItemId = 0)
+		AND TD.intTransactionDetailId NOT IN (SELECT intSalesOrderDetailId FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId)
+		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+
+	UNION ALL
+
+	--Deleted Item		--Component
+	SELECT
+		[intItemId]					=	SOSODC.intComponentItemId 
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	SOSODC.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	((TD.dblQtyOrdered - TD.dblQtyShipped) * -1) * SOSODC.dblQuantity 
+		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	TD.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	TD.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblSOSalesOrderDetailComponent SOSODC
+	INNER JOIN 
+		tblARTransactionDetail TD
+			ON SOSODC.intSalesOrderDetailId = TD.intTransactionDetailId 
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON TD.intTransactionId = Header.intSalesOrderId							
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON SOSODC.intComponentItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		TD.intTransactionId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](SOSODC.intComponentItemId) = 1
 		AND TD.strTransactionType = 'Order'
 		AND (TD.intInventoryShipmentItemId IS NULL OR TD.intInventoryShipmentItemId = 0)
 		AND TD.intTransactionDetailId NOT IN (SELECT intSalesOrderDetailId FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId)
@@ -204,9 +343,54 @@ BEGIN
 			ON Detail.intSalesOrderDetailId = ISHI.intLineNo
 	WHERE 
 		Detail.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](Detail.intItemId) = 1
 		AND Header.strTransactionType = 'Order'
 		AND Detail.intSalesOrderDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @SalesOrderId AND strTransactionType = 'Order')
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+
+
+	UNION ALL	
+		
+	--Added Item		--Component
+	SELECT
+		[intItemId]					=	SOSODC.intComponentItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	SOSODC.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	(CASE WHEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),0) > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),(CASE WHEN Detail.dblQtyShipped > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE Detail.dblQtyOrdered - Detail.dblQtyShipped END)) END) * SOSODC.dblQuantity 
+		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	Detail.dblPrice 
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	Detail.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblSOSalesOrderDetailComponent SOSODC
+	INNER JOIN 
+		tblSOSalesOrderDetail Detail
+			ON SOSODC.intSalesOrderDetailId = Detail.intSalesOrderDetailId 
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId							
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON SOSODC.intComponentItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	LEFT JOIN 
+		tblICInventoryShipmentItem ISHI 
+			ON Detail.intSalesOrderDetailId = ISHI.intLineNo
+	WHERE 
+		Detail.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](SOSODC.intComponentItemId) = 1
+		AND Header.strTransactionType = 'Order'
+		AND Detail.intSalesOrderDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @SalesOrderId AND strTransactionType = 'Order')
 
 
 	UNION ALL
@@ -250,13 +434,59 @@ BEGIN
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
 		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](TD.intItemId) = 1
 		AND Header.strTransactionType = 'Order'
 		AND Header.strOrderStatus <> TD.strTransactionStatus				
 		AND Header.strOrderStatus IN ('Cancelled', 'Short Closed')
 
 
 	UNION ALL
+	--Cancelled & Short Closed		--Component
+	SELECT
+		[intItemId]					=	SOSODC.intComponentItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	SOSODC.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	((TD.dblQtyOrdered - TD.dblQtyShipped) * -1) * SOSODC.dblQuantity 
+		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	TD.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	TD.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblSOSalesOrderDetailComponent SOSODC
+	INNER JOIN 
+		tblSOSalesOrderDetail Detail
+			ON SOSODC.intSalesOrderDetailId = Detail.intSalesOrderDetailId 
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND Detail.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON SOSODC.intComponentItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](SOSODC.intComponentItemId) = 1
+		AND Header.strTransactionType = 'Order'
+		AND Header.strOrderStatus <> TD.strTransactionStatus				
+		AND Header.strOrderStatus IN ('Cancelled', 'Short Closed')
 
+
+	UNION ALL
 	--Short Closed to Partial
 	SELECT
 		[intItemId]					=	TD.intItemId
@@ -296,6 +526,53 @@ BEGIN
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
 		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](TD.intItemId) = 1
+		AND Header.strTransactionType = 'Order'
+		AND Header.strOrderStatus <> TD.strTransactionStatus				
+		AND TD.strTransactionStatus = 'Short Closed'
+		AND Header.strOrderStatus = 'Partial'
+
+	UNION ALL
+	--Short Closed to Partial		--Component
+	SELECT
+		[intItemId]					=	SOSODC.intComponentItemId
+		,[intItemLocationId]		=	IST.intItemLocationId
+		,[intItemUOMId]				=	SOSODC.intItemUOMId
+		,[dtmDate]					=	Header.dtmDate
+		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped) * SOSODC.dblQuantity 
+		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
+		,[dblCost]					=	IST.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	TD.dblPrice
+		,[intCurrencyId]			=	Header.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionDetailId]	=	TD.intSalesOrderDetailId
+		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblSOSalesOrderDetailComponent SOSODC
+	INNER JOIN 
+		tblSOSalesOrderDetail Detail
+			ON SOSODC.intSalesOrderDetailId = Detail.intSalesOrderDetailId 
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND Detail.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	LEFT OUTER JOIN
+		vyuICGetItemStock IST
+			ON SOSODC.intComponentItemId = IST.intItemId 
+			AND Header.intCompanyLocationId = IST.intLocationId 
+	WHERE 
+		Header.intSalesOrderId = @SalesOrderId
+		AND [dbo].[fnIsStockTrackingItem](SOSODC.intComponentItemId) = 1
 		AND Header.strTransactionType = 'Order'
 		AND Header.strOrderStatus <> TD.strTransactionStatus				
 		AND TD.strTransactionStatus = 'Short Closed'
