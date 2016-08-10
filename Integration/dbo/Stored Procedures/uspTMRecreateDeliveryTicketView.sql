@@ -56,6 +56,7 @@ BEGIN
 				,strSiteState = A.strState
 				,strSiteZipCode = A.strZipCode
 				,dblRequestedQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+				,K.intRouteId
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -119,6 +120,7 @@ BEGIN
 				,strSiteState = A.strState
 				,strSiteZipCode = A.strZipCode
 				,dblRequestedQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+				,K.intRouteId
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
