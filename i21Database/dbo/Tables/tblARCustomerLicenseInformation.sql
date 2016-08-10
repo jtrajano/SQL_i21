@@ -5,6 +5,7 @@
 	[intEntityCustomerId]				INT NOT NULL,
 	[strCompanyId]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intNumberOfUser]					INT NOT NULL,
+	[intNumberOfAdmin]					INT NOT NULL DEFAULT(1),
 	[strDescription]					NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intNumberOfSite]					INT NOT NULL,
 	[dtmDateIssued]						DATETIME NOT NULL DEFAULT(GETDATE()),

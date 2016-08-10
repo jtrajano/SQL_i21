@@ -59,6 +59,8 @@ Declare @dblTotalCost NUMERIC(38,20)
 Declare @strUOM nvarchar(50)
 Declare @strSONo nvarchar(50)
 Declare @strShipTo nvarchar(max)
+Declare @strCustomerComments nvarchar(max)
+Declare @ysnShowCostInSalesOrderPickList bit
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -91,6 +93,55 @@ DECLARE @tblRecipeInputItem TABLE (
 	intMarginById INT,
 	dblMargin NUMERIC(38,20)
 )
+
+Declare @tblItems AS TABLE
+(
+	[strPickListNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strBlendItemNoDesc] [varchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strWorkOrderNo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strLotNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strLotAlias] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strStorageLocationName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strItemNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[dblPickQuantity] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strPickUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strGarden] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[intWorkOrderCount] [int] NULL,
+	[strParentLotNumber] [varchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[dblReqQty] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[dblTotalPickQty] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[dblQuantity] [numeric](38, 20) NULL,
+	[dblCost] [numeric](38, 20) NULL,
+	[dblTotalCost] [numeric](38, 20) NULL,
+	[strCompanyName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strCompanyAddress] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strCompanyCityStateZip] [nvarchar](92) COLLATE Latin1_General_CI_AS NULL,
+	[strCompanyCountry] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
+	[strCustomerName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strLocationName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strBOLNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strSalespersonName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strShipVia] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strFreightTerm] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strPONumber] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
+	[strTerm] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strOrderStatus] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
+	[dtmDate] [datetime] NULL,
+	[dtmDueDate] [datetime] NULL,
+	[strSOComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strShipTo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strPhone] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strCustomerComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[ysnShowCostInSalesOrderPickList] bit null default 0,
+	[ysnLotTracking] bit null default 0
+)
+
+If ISNULL(@xmlParam,'')=''
+Begin
+	Select * from @tblItems
+	Return
+End
 
 Select @intLocationId=intLocationId,@strPickListNo=strPickListNo,@strWorkOrderNo=strWorkOrderNo,@intSalesOrderId=ISNULL(intSalesOrderId,0) from tblMFPickList Where intPickListId=@intPickListId
 Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId,@intKitStatusId=intKitStatusId,
@@ -218,46 +269,7 @@ Begin
 End
 Else
 Begin --Sales Order Pick List
-
-	Declare @tblItems AS TABLE
-	(
-		[strPickListNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strBlendItemNoDesc] [varchar](max) COLLATE Latin1_General_CI_AS NULL,
-		[strWorkOrderNo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
-		[strLotNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strLotAlias] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strStorageLocationName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strItemNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strDescription] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
-		[dblPickQuantity] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strPickUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strGarden] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[intWorkOrderCount] [int] NULL,
-		[strParentLotNumber] [varchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[dblReqQty] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[dblTotalPickQty] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[dblQuantity] [numeric](38, 20) NULL,
-		[dblCost] [numeric](38, 20) NULL,
-		[dblTotalCost] [numeric](38, 20) NULL,
-		[strCompanyName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[strCompanyAddress] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[strCompanyCityStateZip] [nvarchar](92) COLLATE Latin1_General_CI_AS NULL,
-		[strCompanyCountry] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
-		[strCustomerName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[strLocationName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strBOLNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[strSalespersonName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[strShipVia] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[strFreightTerm] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[strPONumber] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
-		[strTerm] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-		[strOrderStatus] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
-		[dtmDate] [datetime] NULL,
-		[dtmDueDate] [datetime] NULL,
-		[strSOComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
-		[strShipTo] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
-		[strPhone] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL
-	)
+	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnShowCostInSalesOrderPickList,0) From tblMFCompanyPreference
 
 	Select TOP 1 @strUOM = um.strUnitMeasure 
 	From tblMFPickListDetail pld Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId 
@@ -304,6 +316,12 @@ Begin --Sales Order Pick List
 					 + ISNULL(RTRIM(el.strCountry), '')
 	From tblSOSalesOrder so Join tblEMEntityLocation el on so.intShipToLocationId=el.intEntityLocationId
 	Where intSalesOrderId=@intSalesOrderId
+
+	Select @strCustomerComments=COALESCE(@strCustomerComments, '') + dm.strMessage + CHAR(13)
+	From tblSMDocumentMaintenanceMessage dm 
+	Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
+	Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+	AND dm.ysnPickList=1
 
 	INSERT INTO @tblItems
 	SELECT pl.strPickListNo ,  
@@ -354,6 +372,9 @@ Begin --Sales Order Pick List
 			,so.strComments AS strSOComments
 			,@strShipTo AS strShipTo
 			,c.strPhone
+			,@strCustomerComments
+			,@ysnShowCostInSalesOrderPickList
+			,0
 	FROM tblMFPickList pl  
 	JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 	JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -372,31 +393,39 @@ Begin --Sales Order Pick List
 	WHERE pl.intPickListId=@intPickListId 
 	ORDER BY dblQuantity
 	
-	INSERT INTO @tblItems
-	Select @strPickListNo strPickListNo,  
-			''  AS strBlendItemNoDesc,  
-			@strSONo strWorkOrderNo,  
-			'' strLotNumber,
-			'' strLotAlias,
-			'' AS strStorageLocationName,
-			strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
-			strDescription COLLATE Latin1_General_CI_AS AS strDescription,
-			NULL AS dblPickQuantity,
-			'' AS strPickUOM,
-			'' strGarden,
-			@intWorkOrderCount AS intWorkOrderCount,
-			'' strParentLotNumber,
-			NULL AS dblReqQty,
-			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
-			NULL AS dblQuantity,
-			dblLineTotal AS dblCost,
-			@dblTotalCost AS dblTotalCost
-			,@strCompanyName AS strCompanyName
-			,@strCompanyAddress AS strCompanyAddress
-			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
-			,@strCountry AS strCompanyCountry 
-			,'','','','','','','','','',null,null,'','',''
-	From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
+	--Other Charge
+	If @ysnShowCostInSalesOrderPickList=1
+		INSERT INTO @tblItems
+		Select @strPickListNo strPickListNo,  
+				''  AS strBlendItemNoDesc,  
+				@strSONo strWorkOrderNo,  
+				'' strLotNumber,
+				'' strLotAlias,
+				'' AS strStorageLocationName,
+				strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
+				strDescription COLLATE Latin1_General_CI_AS AS strDescription,
+				NULL AS dblPickQuantity,
+				'' AS strPickUOM,
+				'' strGarden,
+				@intWorkOrderCount AS intWorkOrderCount,
+				'' strParentLotNumber,
+				NULL AS dblReqQty,
+				dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
+				NULL AS dblQuantity,
+				dblLineTotal AS dblCost,
+				@dblTotalCost AS dblTotalCost
+				,@strCompanyName AS strCompanyName
+				,@strCompanyAddress AS strCompanyAddress
+				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+				,@strCountry AS strCompanyCountry 
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0
+		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
 	
+	If Exists (Select 1 From @tblItems Where ISNULL(LTRIM(RTRIM(strLotNumber)),'')<>'')
+		Update @tblItems set ysnLotTracking=1
+
+	If @ysnShowCostInSalesOrderPickList=0 
+		Update @tblItems set dblTotalCost=null
+
 	Select * from @tblItems
 End

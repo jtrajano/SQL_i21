@@ -340,6 +340,7 @@ GO
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMDocumentMaintenance')
 		BEGIN
+			EXEC('UPDATE tblARCommentMaintenance SET strCommentCode = REPLACE(strCommentCode, ''COM'', ''DOM'')')
 			EXEC('sp_rename ''tblSMCommentMaintenance.intCommentMaintenanceId'',''intDocumentMaintenanceId'', ''COLUMN''')
 			EXEC('sp_rename ''tblSMCommentMaintenance'',''tblSMDocumentMaintenance''')
 		END

@@ -23,3 +23,53 @@
     UNIQUE NONCLUSTERED ([strBankName] ASC)
 );
 
+GO
+CREATE TRIGGER trgInsteadOfUpdateCMBank
+   ON  dbo.tblCMBank
+   INSTEAD OF UPDATE
+AS 
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+    UPDATE tblCMBank SET
+    --strBankName           = i.strBankName
+    strContact              = i.strContact
+    ,strAddress              = i.strAddress
+    ,strZipCode              = i.strZipCode
+    ,strCity              = i.strCity
+    ,strState              = i.strState
+    ,strCountry              = i.strCountry
+    ,strPhone              = i.strPhone
+    ,strFax                  = i.strFax
+    ,strWebsite              = i.strWebsite
+    ,strEmail              = i.strEmail
+    ,strRTN                  = i.strRTN
+    ,intCreatedUserId      = i.intCreatedUserId
+    ,dtmCreated              = i.dtmCreated
+    ,intLastModifiedUserId= i.intLastModifiedUserId
+    ,dtmLastModified      = i.dtmLastModified
+    ,ysnDelete              = i.ysnDelete
+    ,dtmDateDeleted          = i.dtmDateDeleted
+    ,intConcurrencyId      = i.intConcurrencyId
+    FROM inserted i
+    WHERE tblCMBank.intBankId = i.intBankId
+
+    UPDATE tblCMBankAccount SET
+    strContact =  i.strContact
+    ,strAddress = i.strAddress
+    ,strZipCode = i.strZipCode
+    ,strCity    = i.strCity
+    ,strState   = i.strState
+    ,strCountry = i.strCountry
+    ,strPhone   = i.strPhone
+    ,strFax       = i.strFax
+    ,strWebsite = i.strWebsite
+    ,strEmail   = i.strEmail
+    FROM inserted i
+    WHERE tblCMBankAccount.intBankId = i.intBankId
+
+END
+GO
+

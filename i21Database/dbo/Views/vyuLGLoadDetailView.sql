@@ -15,6 +15,7 @@ SELECT LoadDetail.intLoadDetailId
 		,LoadDetail.dblDeliveredGross
 		,LoadDetail.dblDeliveredTare
 		,LoadDetail.dblDeliveredNet
+		,LoadDetail.intPSubLocationId
 		,PCLSL.strSubLocationName AS strPSubLocationName
 		,SCLSL.strSubLocationName AS strSSubLocationName
 		,strWeightItemUOM = WeightUOM.strUnitMeasure

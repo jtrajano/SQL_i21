@@ -8,6 +8,7 @@ SELECT MADetail.intMeterAccountDetailId
 	, MA.strCustomerNumber
 	, MA.intEntityLocationId
 	, MA.strCustomerLocation
+	, MA.intTaxGroupId
 	, MA.strAddress
 	, MA.strCity
 	, MA.strState

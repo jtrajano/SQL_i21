@@ -7,6 +7,7 @@ SELECT
 	,LC.intLoadContainerId
 	,L.intPurchaseSale
 	,L.strLoadNumber
+	,LD.intPSubLocationId
 	,LD.intPContractDetailId
 	,CT.intContractHeaderId
 	,CT.intContractSeq

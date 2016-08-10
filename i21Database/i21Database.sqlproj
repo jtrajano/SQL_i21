@@ -4153,6 +4153,13 @@
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContract.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\21_CommentMigration.sql" />
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
+    <Build Include="dbo\Views\vyuMBSearchMeterReading.sql" />
+    <Build Include="dbo\Tables\tblCFProductAuthDetail.sql" />
+    <Build Include="dbo\Tables\tblCFProductAuth.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCardLockAuditLog.sql" />
+    <Build Include="dbo\Views\vyuLGLoadCostForVendor.sql" />
+    <Build Include="dbo\Views\vyuLGLoadCostForCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

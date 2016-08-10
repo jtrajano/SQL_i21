@@ -4423,8 +4423,8 @@ BEGIN
 		VALUES (@MasterPk, N'dblBillQty', N'Billed Gals', N'', N'No', 0, @ScheduleFieldTemplateMasterPk, 0)
 		--END
 
-		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType])
-		VALUES(@intTaxAuthorityId, 'EDI',	'Electronic file', '', 'IN EDI file', '', 800, '')
+		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType],[strSPInventory],[strSPInvoice],[strSPRunReport])
+		VALUES(@intTaxAuthorityId, 'EDI',	'Electronic file', '', 'IN EDI file', NULL, 800, 'EDI',NULL, 'uspTFGetInventoryTax', 'uspTFGetInvoiceTax', 'uspTFRunTax')
 		SELECT @MasterPk  = SCOPE_IDENTITY();
 		INSERT INTO [tblTFFilingPacket]([intTaxAuthorityId],[intReportingComponentId],[ysnStatus],[intFrequency])
 		VALUES(@intTaxAuthorityId, @MasterPk,1,2)

@@ -1187,7 +1187,7 @@ BEGIN
 				SELECT @intCreatedRecordKey = RecordKey FROM @tblTaxCodeRecord
 				SELECT @intCreatedInvoiceId = CAST(Record AS INT) FROM @tblTaxCodeRecord WHERE RecordKey = @intCreatedRecordKey
 				
-				IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
+				IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping WHERE (intTaxCodeId = @intCreatedInvoiceId)  AND (strState = @strTaxState OR strState IS NULL OR strState = '')) != 0)
 				--IF ((SELECT COUNT(*) FROM @tblNetworkTaxMapping ) != 0)
 				BEGIN 
 					INSERT INTO @tblTaxTable
@@ -1240,13 +1240,17 @@ BEGIN
 				END
 				ELSE
 				BEGIN
+					DECLARE @taxcode NVARCHAR(MAX)
+					SELECT TOP 1 @taxcode = strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = @intCreatedInvoiceId
 					INSERT INTO @tblTaxTable(
-						 [ysnInvalidSetup]
+						 [strTaxCode]
+						,[ysnInvalidSetup]
 						,[strReason]
 					)
 					VALUES(
-						 1
-						,'Unable to find match for ' + @strTaxState + ' state tax'
+						@taxcode
+						,1
+						,'Unable to find match ' + @taxcode + ' in network tax setup'
 					)
 				END
 

@@ -33,7 +33,12 @@ BEGIN
 												FROM tblAPBill 
 												WHERE intBillId = @intBillId) 
 										BETWEEN dtmDateFrom AND dtmDateTo)
-
+							
+		IF(@intFiscalYear IS NULL)
+		BEGIN -- INVALID
+			RETURN;
+		END
+		
 		-- CHECK IF ITEM IS LINKED TO PATRONAGE CATEGORY
 		SELECT AB.intEntityVendorId,
 			   IC.intPatronageCategoryId,

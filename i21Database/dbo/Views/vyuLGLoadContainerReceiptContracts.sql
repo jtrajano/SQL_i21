@@ -8,6 +8,7 @@ SELECT
 	,intPContractHeaderId
 	,intPContractSeq
 	,strPContractNumber
+	,intPSubLocationId
 	,intPCommodityId
 	,intItemId
 	,intPLifeTime
@@ -73,6 +74,7 @@ SELECT
 	,intContractHeaderId
 	,intContractSeq
 	,strContractNumber COLLATE Latin1_General_CI_AS
+	,intPSubLocationId
 	,intCommodityId
 	,intItemId
 	,intLifeTime

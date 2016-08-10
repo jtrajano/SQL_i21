@@ -627,5 +627,145 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON CC.intVendorId = D1.intEntityVendorId  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL
+	UNION ALL
+		 SELECT
+		 [intEntityVendorId]							=	A.intVendorEntityId
+		,[dtmDate]									=	A.dtmPostedDate
+		,[strReference]								=	''
+		,[strSourceNumber]							=	LTRIM(A.strLoadNumber)
+		,[strPurchaseOrderNumber]					=	NULL
+		,[intPurchaseDetailId]						=	NULL
+		,[intItemId]								=	A.intItemId
+		,[strMiscDescription]						=	A.strItemDescription
+		,[strItemNo]								=	A.strItemNo
+		,[strDescription]							=	A.strItemDescription
+		,[intPurchaseTaxGroupId]					=	NULL
+		,[dblOrderQty]								=	A.dblQuantity
+		,[dblPOOpenReceive]							=	0
+		,[dblOpenReceive]							=	A.dblQuantity
+		,[dblQuantityToBill]						=	A.dblQuantity
+		,[dblQuantityBilled]						=	0
+		,[intLineNo]								=	A.intLoadDetailId
+		,[intInventoryReceiptItemId]				=	NULL
+		,[intInventoryReceiptChargeId]				=	NULL
+		,[intContractChargeId]						=	NULL
+		,[dblUnitCost]								=	A.dblCashPrice
+		,[dblTax]									=	0
+		,[dblRate]									=	0
+		,[ysnSubCurrency]							=	0
+		,[intSubCurrencyCents]						=	0
+		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[strName]									=	A.strVendor
+		,[strVendorId]								=	LTRIM(A.intVendorEntityId)
+		,[strShipVia]								=	NULL
+		,[strTerm]									=	NULL
+		,[strContractNumber]						=	A.strContractNumber
+		,[strBillOfLading]							=	A.strBLNumber
+		,[intContractHeaderId]						=	A.intContractHeaderId
+		,[intContractDetailId]						=	A.intPContractDetailId
+		,[intScaleTicketId]							=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
+		,[intShipmentId]							=	A.intLoadId
+		,[intShipmentContractQtyId]					=	A.intLoadDetailId
+		,[intUnitMeasureId]							=	A.intItemUOMId
+		,[strUOM]									=	UOM.strUnitMeasure
+		,[intWeightUOMId]							=	A.intWeightItemUOMId
+		,[intCostUOMId]								=	A.intPriceItemUOMId
+		,[dblNetWeight]								=	ISNULL(A.dblNet,0)      
+		,[strCostUOM]								=	A.strPriceUOM
+		,[strgrossNetUOM]							=	A.strWeightUOM
+		--,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
+		,[dblWeightUnitQty]							=	ISNULL(ItemWeightUOM.dblUnitQty,1)
+		,[dblCostUnitQty]							=	ISNULL(ItemCostUOM.dblUnitQty,1)
+		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
+		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)
+		,[strCurrency]								=	A.strCurrency
+		,[intCostCurrencyId]						=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = A.strCurrency)		
+		,[strCostCurrency]							=	A.strCurrency
+		,[strVendorLocation]						=	NULL
+		,[str1099Form]								=	D2.str1099Form			 
+		,[str1099Type]								=	D2.str1099Type 
+		,[intStorageLocationId]						=	NULL
+		,[strStorageLocationName]					=	NULL
+	FROM vyuLGLoadPurchaseContracts A
+	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = A.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intCostUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+	WHERE A.ysnDirectShipment = 1 AND A.intLoadDetailId NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblAPBillDetail) AND A.dtmPostedDate IS NOT NULL 
+	UNION ALL
+	SELECT 
+		 [intEntityVendorId]						=	CV.intEntityVendorId
+		,[dtmDate]									=	CV.dtmProcessDate
+		,[strReference]								=	''
+		,[strSourceNumber]							=	LTRIM(CV.strLoadNumber)
+		,[strPurchaseOrderNumber]					=	NULL
+		,[intPurchaseDetailId]						=	NULL
+		,[intItemId]								=	CV.intItemId
+		,[strMiscDescription]						=	CV.strItemDescription
+		,[strItemNo]								=	CV.strItemNo
+		,[strDescription]							=	CV.strItemDescription
+		,[intPurchaseTaxGroupId]					=	NULL
+		,[dblOrderQty]								=	CV.dblTotal
+		,[dblPOOpenReceive]							=	0
+		,[dblOpenReceive]							=	CV.dblTotal
+		,[dblQuantityToBill]						=	CV.dblTotal
+		,[dblQuantityBilled]						=	0
+		,[intLineNo]								=	CV.intLoadDetailId
+		,[intInventoryReceiptItemId]				=	NULL
+		,[intInventoryReceiptChargeId]				=	NULL
+		,[intContractChargeId]						=	NULL
+		,[dblUnitCost]								=	CV.dblTotal
+		,[dblTax]									=	0
+		,[dblRate]									=	0
+		,[ysnSubCurrency]							=	0
+		,[intSubCurrencyCents]						=	0
+		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CV.intItemId, IL.intItemLocationId, 'AP Clearing')
+		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CV.intItemId, IL.intItemLocationId, 'AP Clearing'))
+		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CV.intItemId, IL.intItemLocationId, 'AP Clearing'))
+		,[strName]									=	V.strVendorId
+		,[strVendorId]								=	LTRIM(CV.intEntityVendorId)
+		,[strShipVia]								=	NULL
+		,[strTerm]									=	NULL
+		,[strContractNumber]						=	CV.strContractNumber
+		,[strBillOfLading]							=	NULL
+		,[intContractHeaderId]						=	CV.intContractHeaderId
+		,[intContractDetailId]						=	CV.intContractDetailId
+		,[intScaleTicketId]							=	NULL
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
+		,[intShipmentId]							=	CV.intLoadId
+		,[intShipmentContractQtyId]					=	CV.intLoadDetailId
+		,[intUnitMeasureId]							=	CV.intItemUOMId
+		,[strUOM]									=	UOM.strUnitMeasure
+		,[intWeightUOMId]							=	CV.intWeightItemUOMId
+		,[intCostUOMId]								=	CV.intPriceItemUOMId
+		,[dblNetWeight]								=	ISNULL(CV.dblNet,0)      
+		,[strCostUOM]								=	CV.strPriceUOM
+		,[strgrossNetUOM]							=	CV.strPriceUOM
+		,[dblWeightUnitQty]							=	ISNULL(WIU.dblUnitQty,1)
+		,[dblCostUnitQty]							=	NULL
+		,[dblUnitQty]								=	NULL
+		,[intCurrencyId]							=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = CV.strCurrency)
+		,[strCurrency]								=	CV.strCurrency
+		,[intCostCurrencyId]						=	(SELECT TOP 1 ISNULL(intCurrencyID,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) FROM dbo.tblSMCurrency WHERE strCurrency = CV.strCurrency)		
+		,[strCostCurrency]							=	CV.strCurrency
+		,[strVendorLocation]						=	NULL
+		,[str1099Form]								=	CV.str1099Form			 
+		,[str1099Type]								=	CV.str1099Type 	
+		,[intStorageLocationId]						=	NULL
+		,[strStorageLocationName]					=	NULL
+	FROM vyuLGLoadCostForVendor CV
+	JOIN tblAPVendor V ON CV.intEntityVendorId = V.intEntityVendorId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = CV.intItemUOMId 
+	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN tblICItemUOM WIU ON WIU.intItemUOMId = CV.intWeightItemUOMId
+	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = WIU.intUnitMeasureId
+	LEFT JOIN tblICItemLocation IL ON IL.intItemId = CV.intItemId
 ) Items
 GO
