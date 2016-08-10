@@ -17,6 +17,9 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MR.strInvoiceComment
 	, MR.intInvoiceId
 	, MR.strInvoiceNumber
+	, MADetail.intConsignmentGroupId
+	, MADetail.strPriceType
+	, MADetail.intTaxGroupId
 	, MADetail.intItemId
 	, MADetail.strItemNo
 	, MADetail.strItemDescription
@@ -27,10 +30,12 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MADetail.strMeterKey
 	, MRDetail.dblLastReading
 	, MRDetail.dblCurrentReading
-	, dblQuantitySold = MRDetail.dblCurrentReading - MRDetail.dblLastReading
+	, dblQuantitySold = ISNULL(MRDetail.dblCurrentReading, 0) - ISNULL(MRDetail.dblLastReading, 0)
 	, MRDetail.dblLastDollars
 	, MRDetail.dblCurrentDollars
-	, dblDollarsSold = MRDetail.dblCurrentDollars - MRDetail.dblLastDollars
+	, dblDollarsSold = ISNULL(MRDetail.dblCurrentDollars, 0) - ISNULL(MRDetail.dblLastDollars, 0)
+	, MRDetail.dblDollarsOwed
+	, dblDifference = ISNULL(MRDetail.dblDollarsOwed, 0) - (ISNULL(MRDetail.dblCurrentDollars, 0) - ISNULL(MRDetail.dblLastDollars, 0))
 	, MR.ysnPosted
 	, MR.dtmPostedDate
 	, MRDetail.intSort

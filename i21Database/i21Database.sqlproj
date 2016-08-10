@@ -4148,28 +4148,7 @@
     <Build Include="dbo\Views\vyuPRReportWorkersCompensation.sql" />
     <Build Include="dbo\Views\vyuHDCustomerProspectVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspMBRecalculateMeterReading.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContract.sql" />
-    <Build Include="dbo\Views\vyuARItemWUOM.sql" />
-    <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
-    <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
-    <Build Include="dbo\Tables\tblMFPickPreference.sql" />
-    <Build Include="dbo\Tables\tblMFOrderType.sql" />
-    <Build Include="dbo\Tables\tblMFOrderStatus.sql" />
-    <Build Include="dbo\Tables\tblMFOrderDirection.sql" />
-    <Build Include="dbo\Tables\tblMFOrderHeader.sql" />
-    <Build Include="dbo\Tables\tblMFOrderDetail.sql" />
-    <Build Include="dbo\Tables\tblMFOrderManifest.sql" />
-    <Build Include="dbo\Tables\tblMFTaskPriority.sql" />
-    <Build Include="dbo\Tables\tblMFTaskState.sql" />
-    <Build Include="dbo\Tables\tblMFTaskType.sql" />
-    <Build Include="dbo\Tables\tblMFTask.sql" />
-    <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
-    <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFCreatePickTask.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTask.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGenerateTask.sql" />
-    <Build Include="dbo\Views\vyuMFItemDetails.sql" />
-    <Build Include="dbo\Views\vyuMFStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuMBSearchMeterReading.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

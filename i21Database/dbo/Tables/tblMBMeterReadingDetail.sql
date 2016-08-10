@@ -9,6 +9,7 @@
     [dblCurrentReading] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblLastDollars] NUMERIC(18, 6) NULL DEFAULT ((0)),
     [dblCurrentDollars] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblDollarsOwed] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblMBMeterReadingDetail] PRIMARY KEY ([intMeterReadingDetailId]), 
