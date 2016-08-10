@@ -12,6 +12,10 @@ SELECT
  ,R.strFromSubLocation
  ,Rte.intDispatchID
  ,Rte.intLoadDetailId
+ ,Rte.intCustomerID
+ ,Rte.intSiteID
+ ,Rte.intEntityLocationId
+ ,Rte.intEntityTypeId
  ,Rte.intSequence
  ,Rte.dblToLatitude
  ,Rte.dblToLongitude
@@ -43,6 +47,10 @@ SELECT
           THEN LD.strCustomer
          WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery'
           THEN TMH.strCustomerName
+         WHEN IsNull(Rte.intCustomerID, 0) <> 0 
+          THEN TMSite.strName
+         WHEN IsNull(Rte.intEntityLocationId, 0) <> 0
+          THEN EN.strName
          END Collate Latin1_General_CI_AS
  
  ,strOrderStatus =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
@@ -89,6 +97,10 @@ SELECT
           THEN CompLoc.strAddress + ', ' + CompLoc.strCity + ', ' + CompLoc.strStateProvince + ' ' + CompLoc.strZipPostalCode
          WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery' 
           THEN TMH.strSiteAddress + ', ' + TMH.strSiteCity + ', ' + TMH.strSiteState + ' ' + TMH.strSiteZipCode 
+         WHEN IsNull(Rte.intCustomerID, 0) <> 0 
+          THEN TMSite.strName-- + ', ' + TMSite.strSiteCity + ', ' + TMSite.strSiteState + ' ' + TMSite.strSiteZipCode 
+         WHEN IsNull(Rte.intEntityLocationId, 0) <> 0 
+          THEN EL.strAddress + ', ' + EL.strCity + ', ' + EL.strState + ' ' + EL.strZipCode 
         END Collate Latin1_General_CI_AS
  ,strLocationName =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0
           THEN TMO.strCompanyLocationName
@@ -104,11 +116,17 @@ SELECT
         ELSE 
          ''
         END
+ ,intLoadId = LD.intLoadId
+ ,strEntityType = ET.strType
 FROM tblLGRouteOrder Rte
 JOIN vyuLGRoute R ON R.intRouteId = Rte.intRouteId
 LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = Rte.intDispatchID
 LEFT JOIN vyuTMDeliveryHistoryCallEntry TMH ON TMH.intDispatchId = Rte.intDispatchID
 LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = Rte.intLoadDetailId
 LEFT JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Rte.intEntityLocationId
+LEFT JOIN tblEMEntityType ET ON ET.intEntityTypeId = Rte.intEntityTypeId
+LEFT JOIN tblEMEntity EN ON EN.intEntityId = EL.intEntityId
+LEFT JOIN vyuTMSiteCustomer TMSite ON TMSite.intCustomerID = Rte.intCustomerID and TMSite.intSiteID = Rte.intSiteID
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = Rte.intCompanyLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubCompLoc ON SubCompLoc.intCompanyLocationSubLocationId = Rte.intCompanyLocationSubLocationId

@@ -7,6 +7,7 @@ SELECT
 	,intOrderId = TMO.intDispatchId
 	,intEntityId = NULL
 	,intEntityLocationId = NULL
+	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
 	,intSiteID = TMO.intSiteID
 	,intCustomerID = NULL --TMO.intCustomerID
@@ -56,6 +57,7 @@ SELECT
 	,intOrderId = LGLD.intLoadDetailId
 	,intEntityId = LGLD.intCustomerEntityId
 	,intEntityLocationId = LGLD.intCustomerEntityLocationId
+	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
 	,intSiteID = NULL
 	,intCustomerID = NULL
@@ -107,6 +109,7 @@ SELECT
 	,intOrderId = LGLD.intLoadDetailId
 	,intEntityId = LGLD.intVendorEntityId
 	,intEntityLocationId = LGLD.intVendorEntityLocationId
+	,intEntityTypeId = NULL
 	,strEntityType = 'Vendor'
 	,intSiteID = NULL
 	,intCustomerID = NULL
@@ -158,6 +161,7 @@ SELECT
 	,intOrderId = TMO.intSiteID
 	,intEntityId = NULL
 	,intEntityLocationId = NULL
+	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
 	,intSiteID = TMO.intSiteID
 	,intCustomerID = TMO.intCustomerID
@@ -203,11 +207,12 @@ WHERE TMO.ysnActive = 1
 
 UNION ALL
 
-SELECT DISTINCT 
+SELECT  
 	intSourceType = 5
 	,intOrderId = EN.intEntityId
 	,intEntityId = EN.intEntityId
 	,intEntityLocationId = EL.intEntityLocationId
+	,intEntityTypeId = ET.intEntityTypeId
 	,strEntityType = ET.strType
 	,intSiteID = NULL
 	,intCustomerID = NULL
@@ -248,6 +253,6 @@ SELECT DISTINCT
 
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntity EN ON EN.intEntityId = EL.intEntityId
-JOIN tblEMEntityType ET ON ET.intEntityId = EN.intEntityId AND ET.strType = 'Vendor' Or ET.strType = 'Customer' Or ET.strType='Prospect'
-
+JOIN tblEMEntityType ET ON ET.intEntityId = EN.intEntityId
+WHERE ET.strType = 'Vendor' Or ET.strType = 'Customer' Or ET.strType='Prospect'
 ) t1

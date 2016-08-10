@@ -10,6 +10,10 @@ SELECT
 								'TM Orders'
 						  WHEN Rte.intSourceType = 3 THEN
 								'LG Loads - Outbound'
+						  WHEN Rte.intSourceType = 4 THEN
+								'TM Sites'
+						  WHEN Rte.intSourceType = 5 THEN
+								'Entities'
 						END
 	,Rte.intDriverEntityId
 	,strDriver = Driver.strName
