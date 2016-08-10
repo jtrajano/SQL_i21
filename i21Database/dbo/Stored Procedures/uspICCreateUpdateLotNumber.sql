@@ -398,8 +398,9 @@ BEGIN
 										  END
 				-- Allow update on the following fields if dblQty is zero.  
 				,dblWeightPerQty		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
-														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN 
-																	dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) 
+														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
+																	CASE WHEN LotToUpdate.intWeightUOMId = LotToUpdate.intItemUOMId THEN 1 ELSE
+																	dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) END
 																ELSE 0 
 														END 
 													ELSE 
@@ -596,8 +597,9 @@ BEGIN
 				,@intLotStatusId_ItemLotTable
 				,0 -- (keep at zero. We only need to create the lot record)
 				,@intWeightUOMId
-				,CASE WHEN ISNULL(@intWeightUOMId, 0) <> 0 THEN 
-						dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) -- (though, we need to know immediately the weight per qty). 
+				,CASE WHEN ISNULL(@intWeightUOMId, 0) <> 0 THEN
+						CASE WHEN @intWeightUOMId = @intItemUOMId THEN 1 ELSE
+						dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) END -- (though, we need to know immediately the weight per qty). 
 					  ELSE
 						0.00
 				END 
