@@ -5,8 +5,14 @@ SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intSourceType)) 
 SELECT 
 	intSourceType = 2
 	,intOrderId = TMO.intDispatchId
+	,intEntityId = NULL
+	,intEntityLocationId = NULL
+	,strEntityType = 'Customer'
+	,intSiteID = TMO.intSiteID
+	,intCustomerID = NULL --TMO.intCustomerID
 	,intDispatchID = TMO.intDispatchId
 	,intLoadDetailId = NULL
+	,intLoadId = NULL
 	,intSequence = -1
 	,strOrderNumber = TMO.strOrderNumber
 	,strLocationName = TMO.strCompanyLocationName
@@ -48,8 +54,14 @@ UNION ALL
 SELECT
 	intSourceType = 1
 	,intOrderId = LGLD.intLoadDetailId
+	,intEntityId = LGLD.intCustomerEntityId
+	,intEntityLocationId = LGLD.intCustomerEntityLocationId
+	,strEntityType = 'Customer'
+	,intSiteID = NULL
+	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = LGLD.intLoadDetailId
+	,intLoadId = LGLD.intLoadId
 	,intSequence = -1
 	,strOrderNumber = LGLD.strLoadNumber
 	,strLocationName = LGLD.strSLocationName
@@ -93,8 +105,14 @@ UNION ALL
 SELECT
 	intSourceType = 3
 	,intOrderId = LGLD.intLoadDetailId
+	,intEntityId = LGLD.intVendorEntityId
+	,intEntityLocationId = LGLD.intVendorEntityLocationId
+	,strEntityType = 'Vendor'
+	,intSiteID = NULL
+	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = LGLD.intLoadDetailId
+	,intLoadId = LGLD.intLoadId
 	,intSequence = -1
 	,strOrderNumber = LGLD.strLoadNumber
 	,strLocationName = LGLD.strPLocationName
@@ -132,4 +150,104 @@ JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intPCompanyLocationId
 JOIN tblEMEntityLocation EML ON EML.intEntityLocationId = LGLD.intVendorEntityLocationId
 WHERE LGL.intPurchaseSale = 1 AND LGL.intShipmentStatus = 1 AND IsNull(LGLD.intLoadDetailId, 0) NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblLGRouteOrder)
+
+UNION ALL
+
+SELECT 
+	intSourceType = 4
+	,intOrderId = TMO.intSiteID
+	,intEntityId = NULL
+	,intEntityLocationId = NULL
+	,strEntityType = 'Customer'
+	,intSiteID = TMO.intSiteID
+	,intCustomerID = TMO.intCustomerID
+	,intDispatchID = NULL
+	,intLoadDetailId = NULL
+	,intLoadId = NULL
+	,intSequence = -1
+	,strOrderNumber = NULL
+	,strLocationName = CompLoc.strLocationName
+	,intLocationId = TMO.intLocationId
+	,strLocationAddress = CompLoc.strAddress
+	,strLocationCity = CompLoc.strCity
+	,strLocationZipCode = CompLoc.strZipPostalCode
+	,strLocationState = CompLoc.strStateProvince
+	,strLocationCountry = CompLoc.strCountry
+	,dblFromLongitude = CompLoc.dblLongitude
+	,dblFromLatitude = CompLoc.dblLatitude
+	,dtmScheduledDate = NULL
+	,strEntityName = Site.strName
+	,strToAddress = TMO.strSiteAddress
+	,strToCity = TMO.strCity
+	,strToZipCode = TMO.strZipCode
+	,strToState = TMO.strState
+	,strToCountry = TMO.strCountry
+	,strDestination = TMO.strSiteAddress + ', ' + TMO.strCity + ', ' + TMO.strState + ' ' + TMO.strZipCode 
+	,dblToLongitude = TMO.dblLongitude
+	,dblToLatitude = TMO.dblLatitude
+	,strOrderStatus = NULL
+	,strDriver = NULL
+	,strItemNo = NULL
+	,dblQuantity = NULL
+	,strCustomerReference = ''
+	,strOrderComments = TMO.strComment
+	,strLocationType = 'Delivery'
+	,intDaysPassed = 0
+	,strOrderType = ''
+	,intPriority = -1
+
+FROM tblTMSite TMO
+JOIN vyuTMSiteCustomer Site ON Site.intSiteID = TMO.intSiteID
+LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intLocationId
+WHERE TMO.ysnActive = 1
+
+UNION ALL
+
+SELECT DISTINCT 
+	intSourceType = 5
+	,intOrderId = EN.intEntityId
+	,intEntityId = EN.intEntityId
+	,intEntityLocationId = EL.intEntityLocationId
+	,strEntityType = ET.strType
+	,intSiteID = NULL
+	,intCustomerID = NULL
+	,intDispatchID = NULL
+	,intLoadDetailId = NULL
+	,intLoadId = NULL
+	,intSequence = -1
+	,strOrderNumber = NULL
+	,strLocationName = NULL
+	,intLocationId = NULL
+	,strLocationAddress = NULL
+	,strLocationCity = NULL
+	,strLocationZipCode = NULL
+	,strLocationState = NULL
+	,strLocationCountry = NULL
+	,dblFromLongitude = NULL
+	,dblFromLatitude = NULL
+	,dtmScheduledDate = NULL
+	,strEntityName = EN.strName
+	,strToAddress = EL.strAddress
+	,strToCity = EL.strCity
+	,strToZipCode = EL.strZipCode
+	,strToState = EL.strState
+	,strToCountry = EL.strCountry
+	,strDestination = EL.strAddress + ', ' + EL.strCity + ', ' + EL.strState + ' ' + EL.strZipCode 
+	,dblToLongitude = EL.dblLongitude
+	,dblToLatitude = EL.dblLatitude
+	,strOrderStatus = NULL
+	,strDriver = NULL
+	,strItemNo = NULL
+	,dblQuantity = NULL
+	,strCustomerReference = ''
+	,strOrderComments = ''
+	,strLocationType = 'Delivery'
+	,intDaysPassed = 0
+	,strOrderType = ''
+	,intPriority = -1
+
+FROM tblEMEntityLocation EL
+JOIN vyuEMEntity EN ON EN.intEntityId = EL.intEntityId
+JOIN tblEMEntityType ET ON ET.intEntityId = EN.intEntityId AND ET.strType = 'Vendor' Or ET.strType = 'Customer' Or ET.strType='Prospect'
+
 ) t1
