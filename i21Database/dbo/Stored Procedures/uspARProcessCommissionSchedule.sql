@@ -281,7 +281,7 @@ AS
 																  @intActiveCommSchedId
 																, @intCommissionPlanId
 																, @intEntityId
-																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN (SELECT TOP 1 ISNULL(AL.intEntityUserSecurityId, AL.intAlternateEntityUserSecurityId) FROM tblSMApprovalListUserSecurity WHERE intApprovalListId = CP.intApprovalListId ORDER BY intApproverLevel) ELSE NULL END
+																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN (SELECT TOP 1 ISNULL(intEntityUserSecurityId, intAlternateEntityUserSecurityId) FROM tblSMApprovalListUserSecurity WHERE intApprovalListId = CP.intApprovalListId ORDER BY intApproverLevel) ELSE NULL END
 																, @dtmStartDate
 																, @dtmEndDate
 																, CASE WHEN CP.strBasis = @BASIS_CONDITIONAL THEN 1 ELSE 0 END
