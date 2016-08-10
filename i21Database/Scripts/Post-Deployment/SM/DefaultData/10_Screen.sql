@@ -146,6 +146,12 @@ GO
 			SET  ysnApproval = 1
 			WHERE strNamespace = 'Payroll.view.TimeOffRequest'
 		END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.Activity') 
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId]) 
+			VALUES (N'Activity', N'Activity', N'GlobalComponentEngine.view.Activity', N'System Manager', N'', NULL,  0)
+		END
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'
 GO
