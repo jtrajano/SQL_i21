@@ -78,8 +78,6 @@ INSERT INTO @log
 SELECT
 	strPaymentRecordNum + CASE WHEN i21Total <> i21DetailTotal 
 							THEN ' total do not match. Header: ' + CAST(i21Total AS NVARCHAR) + ' Detail:' +  CAST(i21DetailTotal AS NVARCHAR)
-							WHEN i21Total < 0
-							THEN ' total amount is negative.'
 							END AS strPaymentRecordNum
 FROM (
 	SELECT DISTINCT
@@ -113,7 +111,7 @@ FROM (
 	,strPaymentRecordNum
 	,i21Total
 	) Summary
-WHERE i21Total <> i21DetailTotal OR i21Total < 0
+WHERE i21Total <> i21DetailTotal
 
 INSERT INTO tblAPImportVoucherLog
 (
