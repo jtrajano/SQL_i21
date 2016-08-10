@@ -114,38 +114,59 @@ IF(@CFPriceOut IS NOT NULL)
 
 	IF(@CFPricingOut = 'Inventory - Standard Pricing')
 
-		BEGIN 
-			IF (@CFOriginalPrice IS NOT NULL AND @CFOriginalPrice > 0)
-				BEGIN 
-					SET @CFStandardPrice = @CFOriginalPrice  
-					SET @CFPricingOut = 'Import File Price'
+	BEGIN 
+		IF (@CFOriginalPrice IS NOT NULL AND @CFOriginalPrice > 0)
+			BEGIN 
+				SET @CFStandardPrice = @CFOriginalPrice  
+				SET @CFPricingOut = 'Import File Price'
 
-					IF (@CFCreditCard = 1)
-					BEGIN -- ALWAYS USE IMPORT FILE PRICE ON CREDIT CARD TRANSACTION
-						SET @CFPriceOut = @CFStandardPrice
-						RETURN
-					END
+				IF (@CFCreditCard = 1)
+				BEGIN -- ALWAYS USE IMPORT FILE PRICE ON CREDIT CARD TRANSACTION
+					SET @CFPriceOut = @CFStandardPrice
+					RETURN
+				END
 
 					
-				END 
-			ELSE
-				BEGIN
-					SET @CFStandardPrice = @CFPriceOut
-					SET @CFPricingOut = 'Inventory - Standard Pricing'
-				END
-		END
+			END 
+		ELSE
+			BEGIN
+				SET @CFStandardPrice = @CFPriceOut
+				SET @CFPricingOut = 'Inventory - Standard Pricing'
+			END
+	END
 
 	ELSE
 
-		BEGIN 
+	BEGIN 
 
-			SET @CFPricingOut = @CFPricingOut
+		SET @CFPricingOut = @CFPricingOut
 
-			RETURN 1
+		RETURN 1
 
-		END
+	END
 
    END    
+ELSE
+   BEGIN
+		IF (@CFOriginalPrice IS NOT NULL AND @CFOriginalPrice > 0)
+			BEGIN 
+				SET @CFStandardPrice = @CFOriginalPrice  
+				SET @CFPricingOut = 'Import File Price'
+
+				IF (@CFCreditCard = 1)
+				BEGIN -- ALWAYS USE IMPORT FILE PRICE ON CREDIT CARD TRANSACTION
+					SET @CFPriceOut = @CFStandardPrice
+					RETURN
+				END
+
+					
+			END 
+		ELSE
+			BEGIN
+				SET @CFStandardPrice = @CFPriceOut
+				SET @CFPricingOut = 'Inventory - Standard Pricing'
+			END
+   END
 
 ---***SPECIAL PRICING***---
 

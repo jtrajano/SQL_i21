@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿
+CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
 ,@CardId				INT				
@@ -83,7 +84,7 @@ BEGIN
 	IF(@IsImporting = 1)
 	BEGIN
 
-		IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPricingType') = 1)
+	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPricingType') = 1)
 	BEGIN
 		DROP TABLE ##tblCFTransactionPricingType
 	END
@@ -120,7 +121,7 @@ BEGIN
 		,ysnDuplicate					BIT
 	);
 
-		IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
+	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
 	BEGIN
 		DROP TABLE ##tblCFTransactionTaxType
 	END
@@ -130,9 +131,9 @@ BEGIN
 		,[intTaxCodeId]					INT
 		,[dblTaxRate]					NUMERIC(18,6)
 		,[strTaxCode]					NVARCHAR(MAX)
-	)
+	);
 
-		IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
+	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
 	BEGIN
 		DROP TABLE ##tblCFTransactionPriceType
 	END
@@ -140,7 +141,7 @@ BEGIN
 		 [strTransactionPriceId]		NVARCHAR(MAX)
 		,[dblTaxOriginalAmount]			NUMERIC(18,6)
 		,[dblTaxCalculatedAmount]		NUMERIC(18,6)
-	)
+	);
 
 	END
 
@@ -289,8 +290,11 @@ BEGIN
 	WHERE intSiteGroupId = @intSiteGroupId
 
 
-	-- TAX TABLE --
-	DECLARE @tblTransactionTaxOut	TABLE
+	---------------------------------------------------
+	--				TAX COMPUTATION					 --
+	---------------------------------------------------
+	
+	DECLARE @tblCFOriginalTax		TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -320,7 +324,7 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblTransactionTax		TABLE
+	DECLARE @tblCFCalculatedTax		TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -347,901 +351,839 @@ BEGIN
 		,[strReason]						NVARCHAR(MAX)
 		,[strNotes]							NVARCHAR(MAX)
 		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblTaxRateTable		TABLE
+	DECLARE @tblCFTransactionTax	TABLE
 	(
-		 [intTransactionDetailTaxId]	INT
-		,[intTransactionDetailId]		INT
-		,[intTaxGroupMasterId]			INT
-		,[intTaxGroupId]				INT
-		,[intTaxCodeId]					INT
-		,[intTaxClassId]				INT
-		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-		,[strCalculationMethod]			NVARCHAR(30)
-		,[dblRate]						NUMERIC(18,6)
-		,[dblTax]						NUMERIC(18,6)
-		,[dblAdjustedTax]				NUMERIC(18,6)
-		,[intTaxAccountId]				INT
-		,[ysnSeparateOnInvoice]			BIT
-		,[ysnCheckoffTax]				BIT
-		,[strTaxCode]					NVARCHAR(100)						
-		,[ysnTaxExempt]					BIT
-		,[ysnInvalidSetup]				BIT
-		,[strTaxGroup]					NVARCHAR(100)
-		,[strReason]					NVARCHAR(MAX)
-		,[strNotes]						NVARCHAR(MAX)
-		,[strTaxExemptReason]			NVARCHAR(MAX)
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblTaxUnitTable		TABLE
+	DECLARE @tblCFBackoutTax		TABLE
 	(
-		 [intTransactionDetailTaxId]	INT
-		,[intTransactionDetailId]		INT
-		,[intTaxGroupMasterId]			INT
-		,[intTaxGroupId]				INT
-		,[intTaxCodeId]					INT
-		,[intTaxClassId]				INT
-		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-		,[strCalculationMethod]			NVARCHAR(30)
-		,[dblRate]						NUMERIC(18,6)
-		,[dblTax]						NUMERIC(18,6)
-		,[dblAdjustedTax]				NUMERIC(18,6)
-		,[intTaxAccountId]				INT
-		,[ysnSeparateOnInvoice]			BIT
-		,[ysnCheckoffTax]				BIT
-		,[strTaxCode]					NVARCHAR(100)						
-		,[ysnTaxExempt]					BIT
-		,[ysnInvalidSetup]				BIT
-		,[strTaxGroup]					NVARCHAR(100)
-		,[strReason]					NVARCHAR(MAX)
-		,[strNotes]						NVARCHAR(MAX)
-		,[strTaxExemptReason]			NVARCHAR(MAX)
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
 	)
+	DECLARE @tblCFRemoteTax			TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
+	DECLARE @LineItemTaxDetailStagingTable LineItemTaxDetailStagingTable
 
 	DECLARE @strTaxCodes			VARCHAR(MAX) 
-	DECLARE @dblOPTotalTax		NUMERIC(18,6) = 0
-	DECLARE @dblCPTotalTax		NUMERIC(18,6) = 0
-	DECLARE @intLoopTaxGroupID	INT
-	DECLARE @intLoopTaxCodeID	INT
-	DECLARE @intLoopTaxClassID	INT
-	DECLARE	@strLoopTaxCode		NVARCHAR(MAX)
-	DECLARE @QxOP				NUMERIC(18,6) = 0
-	DECLARE @QxCP				NUMERIC(18,6) = 0
-	DECLARE @QxT				NUMERIC(18,6) = 0
-	DECLARE @OPTax				NUMERIC(18,6) = 0		
-	DECLARE @CPTax				NUMERIC(18,6) = 0	
-	DECLARE @Rate				NUMERIC(18,6)
-	DECLARE @CalculationMethod  NVARCHAR(MAX)
-	DECLARE @ysnLoopTaxExempt	BIT
-	DECLARE @ysnLoopTaxCheckOff	BIT
-
-	DECLARE @strTaxExemptReason		NVARCHAR(MAX)
-	DECLARE @strNote				NVARCHAR(MAX)
-	DECLARE @strReason				NVARCHAR(MAX)
-	DECLARE @ysnCheckoffTax			BIT
-	DECLARE @ysnTaxExempt			NVARCHAR(MAX)
-	DECLARE @ysnInvalidSetup		NVARCHAR(MAX)
-	DECLARE @strTaxCode				NVARCHAR(MAX)
 
 	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
 	BEGIN
-
-	IF (LOWER(@strTransactionType) like '%remote%')
-	BEGIN
-
-		IF (@intTransactionId is not null)
-		BEGIN
-			SELECT @strTaxCodes = COALESCE(@strTaxCodes + ', ', '') + CONVERT(varchar(10), intTaxCodeId)
-			FROM tblCFTransactionTax
-			WHERE intTransactionId = @intTransactionId
-
-			IF(@IsImporting = 0)
-			BEGIN
-				--GET TAX STATE FROM SITE
-				SET @TaxState = (SELECT TOP 1 strTaxState from tblCFSite where intSiteId = @intSiteId)
-			END
-		END	
-
-		INSERT INTO @tblTransactionTax(
-		 [intTransactionDetailTaxId]	
-		,[intTransactionDetailId]  		
-		,[intTaxGroupMasterId]			
-		,[intTaxGroupId]				
-		,[intTaxCodeId]					
-		,[intTaxClassId]				
-		,[strTaxableByOtherTaxes]		
-		,[strCalculationMethod]			
-		,[dblRate]						
-		,[dblTax]						
-		,[dblAdjustedTax]				
-		,[intTaxAccountId]    			
-		,[ysnSeparateOnInvoice]			
-		,[ysnCheckoffTax]				
-		,[strTaxCode]					
-		,[ysnTaxExempt]			
-		,[strTaxGroup]					
-		,[ysnInvalidSetup]					
-		,[strReason]					
-		,[strTaxExemptReason]			
-		)	
-		EXEC dbo.[uspCFGetItemTaxes] 
-		@intNetworkId					=@intNetworkId
-		,@intARItemId					=@intItemId
-		,@intARItemLocationId			=@intLocationId
-		,@intCustomerLocationId			=@intLocationId
-		,@dtmTransactionDate			=@dtmTransactionDate
-		,@intCustomerId					=@intCustomerId
-		,@strTaxCodeId					=@strTaxCodes
-		,@TaxState						=@TaxState
-		,@FederalExciseTaxRate        	=@FederalExciseTaxRate        	
-		,@StateExciseTaxRate1         	=@StateExciseTaxRate1         	
-		,@StateExciseTaxRate2         	=@StateExciseTaxRate2         	
-		,@CountyExciseTaxRate         	=@CountyExciseTaxRate         	
-		,@CityExciseTaxRate           	=@CityExciseTaxRate           	
-		,@StateSalesTaxPercentageRate 	=@StateSalesTaxPercentageRate 	
-		,@CountySalesTaxPercentageRate	=@CountySalesTaxPercentageRate		
-		,@CitySalesTaxPercentageRate  	=@CitySalesTaxPercentageRate  		
-		,@OtherSalesTaxPercentageRate 	=@OtherSalesTaxPercentageRate 		
-
-		IF(@IsImporting = 0)
-		BEGIN
-			SELECT * 
-			INTO #ItemTax
-			FROM @tblTransactionTax
-			WHERE (strCalculationMethod != '' OR strCalculationMethod IS NOT NULL)
-			AND	  (ysnInvalidSetup = 0)
-
-			WHILE exists (SELECT * FROM #ItemTax)
-			BEGIN
-				SELECT TOP 1 
-					 @intLoopTaxGroupID = intTaxGroupId
-					,@intLoopTaxCodeID = intTaxCodeId
-					,@intLoopTaxClassID = intTaxClassId
-				FROM #ItemTax
-
-
-				UPDATE @tblTransactionTax 
-				SET dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
-				WHERE intTaxGroupId = @intLoopTaxGroupID
-				AND intTaxClassId = @intLoopTaxClassID
-				AND intTaxCodeId = @intLoopTaxCodeID
-
-				DELETE #ItemTax
-				WHERE intTaxGroupId = @intLoopTaxGroupID
-				AND intTaxClassId = @intLoopTaxClassID
-				AND intTaxCodeId = @intLoopTaxCodeID
-
-			END
-
-			DROP TABLE #ItemTax
-		END
-	END
-	ELSE
-	BEGIN 
-		INSERT INTO @tblTransactionTax(
-			 [intTransactionDetailTaxId]	
-			,[intInvoiceDetailId]  		
-			,[intTaxGroupMasterId]			
-			,[intTaxGroupId]				
-			,[intTaxCodeId]					
-			,[intTaxClassId]				
-			,[strTaxableByOtherTaxes]		
-			,[strCalculationMethod]			
-			,[dblRate]			
-			,[dblExemptionPercent]			
-			,[dblTax]						
-			,[dblAdjustedTax]				
-			,[intSalesTaxAccountId]    			
-			,[ysnSeparateOnInvoice]			
-			,[ysnCheckoffTax]				
-			,[strTaxCode]					
-			,[ysnTaxExempt]			
-			,[ysnInvalidSetup]				
-			,[strTaxGroup]					
-			,[strNotes]				
-		)	
-		EXEC uspARGetItemTaxes 
-		 @ItemId			=@intItemId
-		,@LocationId		=@intLocationId
-		,@TransactionDate	=@dtmTransactionDate
-		,@TaxGroupId		=@intTaxGroupId
-		,@CustomerId		=@intCustomerId
-	END
-
-	IF (@intTransactionId is not null)
-		BEGIN
-			INSERT INTO tblCFTransactionNote (
-			intTransactionId
-			,strProcess
-			,dtmProcessDate
-			,strNote
-			,strGuid
-		)
-		SELECT 
-		 @intTransactionId
-		,'Calculation'
-		,@runDate
-		,ISNULL(strTaxExemptReason,ISNULL(strNotes,ISNULL(strReason,'Invalid Setup -' + strTaxCode)))
-		,@guid
-		FROM @tblTransactionTax
-		WHERE (intTaxGroupId =0 OR intTaxGroupId IS NULL) 
-		AND	  (intTaxClassId =0 OR intTaxClassId IS NULL)
-		AND	  (intTaxCodeId =0 OR intTaxCodeId IS NULL)
-		AND	  (strCalculationMethod ='' OR strCalculationMethod IS NULL)
-		AND	  (ysnInvalidSetup =1)
-	END
-
-
-	INSERT INTO @tblTaxRateTable	
-	SELECT 
-	 [intTransactionDetailTaxId]
-	,[intTransactionDetailId]  AS [intInvoiceDetailId]
-	,[intTaxGroupMasterId]
-	,[intTaxGroupId]
-	,[intTaxCodeId]
-	,[intTaxClassId]
-	,[strTaxableByOtherTaxes]
-	,[strCalculationMethod]
-	,[dblRate]
-	,[dblTax]
-	,[dblAdjustedTax]
-	,[intTaxAccountId]    AS [intSalesTaxAccountId]
-	,[ysnSeparateOnInvoice]
-	,[ysnCheckoffTax]
-	,[strTaxCode]
-	,[ysnTaxExempt]
-	,[ysnInvalidSetup]
-	,[strTaxGroup]
-	,[strReason]					
-	,[strNotes]						
-	,[strTaxExemptReason]								
-	FROM @tblTransactionTax
-	WHERE LOWER(strCalculationMethod) = 'percentage'
-
-	INSERT INTO @tblTaxUnitTable	
-	SELECT 
-	[intTransactionDetailTaxId]
-	,[intTransactionDetailId]  AS [intInvoiceDetailId]
-	,[intTaxGroupMasterId]
-	,[intTaxGroupId]
-	,[intTaxCodeId]
-	,[intTaxClassId]
-	,[strTaxableByOtherTaxes]
-	,[strCalculationMethod]
-	,[dblRate]
-	,[dblTax]
-	,[dblAdjustedTax]
-	,[intTaxAccountId]    AS [intSalesTaxAccountId]
-	,[ysnSeparateOnInvoice]
-	,[ysnCheckoffTax]
-	,[strTaxCode]
-	,[ysnTaxExempt]
-	,[ysnInvalidSetup]
-	,[strTaxGroup]
-	,[strReason]		
-	,[strNotes]			
-	,[strTaxExemptReason]
-	FROM @tblTransactionTax
-	WHERE LOWER(strCalculationMethod) = 'unit'
-
-	--TAX CALCULATION--
-	
-	SET @QxOP = @dblQuantity * @dblOriginalPrice
-	SET @QxCP = @dblQuantity * @dblPrice
-
-	WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxUnitTable))
-	BEGIN
 		
-		-- SET LOOP VARIABLE--
-		SELECT TOP 1
-		 @strLoopTaxCode = strTaxCode
-		,@Rate = dblRate
-		,@CalculationMethod = strCalculationMethod
-		,@ysnLoopTaxExempt = ysnCheckoffTax
-		,@ysnLoopTaxExempt = ysnTaxExempt
-		,@intLoopTaxGroupID = intTaxGroupId
-		,@intLoopTaxCodeID = intTaxCodeId
-		,@intLoopTaxClassID = intTaxClassId
-		,@strTaxExemptReason	= strTaxExemptReason
-		,@strNote				= strNotes
-		,@strReason				= strReason
-		,@ysnCheckoffTax		= ysnCheckoffTax
-		,@ysnTaxExempt			= ysnTaxExempt
-		,@ysnInvalidSetup		= ysnInvalidSetup
-		,@strTaxCode			= strTaxCode
-		FROM @tblTaxUnitTable
-
-		IF(@ysnInvalidSetup = 0)
-		BEGIN
-			IF (@ysnTaxExempt = 1)
-				BEGIN
-
+		-- GET REMOTE TAXES FROM EXISTING TRANSACTION TAX -- 
+		IF (LOWER(@strTransactionType) like '%remote%')
+			BEGIN
 				IF (@intTransactionId is not null)
 				BEGIN
-					INSERT INTO tblCFTransactionNote 
-				(
-					 intTransactionId
-					,strProcess
-					,dtmProcessDate
-					,strNote
-					,strGuid
-				)
-				VALUES
-				(
-					@intTransactionId
-					, 'Calculation'
-					, @runDate
-					, ISNULL(@strTaxExemptReason,ISNULL(@strNote,ISNULL(@strReason,'Tax Exempt -' + @strTaxCode)))
-					, @guid
-				)
+					SELECT @strTaxCodes = COALESCE(@strTaxCodes + ', ', '') + CONVERT(varchar(10), intTaxCodeId)
+					FROM tblCFTransactionTax
+					WHERE intTransactionId = @intTransactionId
+
+					IF(@IsImporting = 0)
+					BEGIN
+						--GET TAX STATE FROM SITE
+						SET @TaxState = (SELECT TOP 1 strTaxState from tblCFSite where intSiteId = @intSiteId)
+					END
+				END	
+
+				INSERT INTO @tblCFRemoteTax(
+				 [intTransactionDetailTaxId]	
+				,[intTransactionDetailId]  		
+				,[intTaxGroupMasterId]			
+				,[intTaxGroupId]				
+				,[intTaxCodeId]					
+				,[intTaxClassId]				
+				,[strTaxableByOtherTaxes]		
+				,[strCalculationMethod]			
+				,[dblRate]						
+				,[dblTax]						
+				,[dblAdjustedTax]				
+				,[intTaxAccountId]    			
+				,[ysnSeparateOnInvoice]			
+				,[ysnCheckoffTax]				
+				,[strTaxCode]					
+				,[ysnTaxExempt]			
+				,[strTaxGroup]					
+				,[ysnInvalidSetup]					
+				,[strReason]					
+				,[strTaxExemptReason]			
+				)	
+				EXEC dbo.[uspCFGetItemTaxes] 
+				@intNetworkId					=@intNetworkId
+				,@intARItemId					=@intItemId
+				,@intARItemLocationId			=@intLocationId
+				,@intCustomerLocationId			=@intLocationId
+				,@dtmTransactionDate			=@dtmTransactionDate
+				,@intCustomerId					=@intCustomerId
+				,@strTaxCodeId					=@strTaxCodes
+				,@TaxState						=@TaxState
+				,@FederalExciseTaxRate        	=@FederalExciseTaxRate        	
+				,@StateExciseTaxRate1         	=@StateExciseTaxRate1         	
+				,@StateExciseTaxRate2         	=@StateExciseTaxRate2         	
+				,@CountyExciseTaxRate         	=@CountyExciseTaxRate         	
+				,@CityExciseTaxRate           	=@CityExciseTaxRate           	
+				,@StateSalesTaxPercentageRate 	=@StateSalesTaxPercentageRate 	
+				,@CountySalesTaxPercentageRate	=@CountySalesTaxPercentageRate		
+				,@CitySalesTaxPercentageRate  	=@CitySalesTaxPercentageRate  		
+				,@OtherSalesTaxPercentageRate 	=@OtherSalesTaxPercentageRate 		
+
+				IF(@IsImporting = 0)
+				BEGIN
+					DECLARE @intLoopTaxGroupID 	  INT
+					DECLARE @intLoopTaxCodeID 	  INT
+					DECLARE @intLoopTaxClassID	  INT
+
+					SELECT * 
+					INTO #ItemTax
+					FROM @tblCFRemoteTax
+					WHERE (strCalculationMethod != '' OR strCalculationMethod IS NOT NULL)
+					AND	  (ysnInvalidSetup = 0)
+
+					WHILE exists (SELECT * FROM #ItemTax)
+					BEGIN
+						SELECT TOP 1 
+							 @intLoopTaxGroupID = intTaxGroupId
+							,@intLoopTaxCodeID = intTaxCodeId
+							,@intLoopTaxClassID = intTaxClassId
+						FROM #ItemTax
+
+
+						UPDATE @tblCFRemoteTax 
+						SET dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
+						WHERE intTaxGroupId = @intLoopTaxGroupID
+						AND intTaxClassId = @intLoopTaxClassID
+						AND intTaxCodeId = @intLoopTaxCodeID
+
+						DELETE #ItemTax
+						WHERE intTaxGroupId = @intLoopTaxGroupID
+						AND intTaxClassId = @intLoopTaxClassID
+						AND intTaxCodeId = @intLoopTaxCodeID
+
+					END
+
+					DROP TABLE #ItemTax
 				END
 
-				INSERT INTO @tblTransactionTaxOut
-				(
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,[dblCalculatedTax]	
-					,[dblOriginalTax]	
-				)
-				SELECT TOP 1
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId] 	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,NULL
-					,@QxT
-				FROM @tblTransactionTax
-				WHERE intTaxGroupId = @intLoopTaxGroupID
-				AND intTaxClassId = @intLoopTaxClassID
-				AND intTaxCodeId = @intLoopTaxCodeID
-			END
-			ELSE IF(@ysnCheckoffTax = 1)
-				BEGIN
-
+				
+				
+				---------------------------------------------------
+				--				LOG INVALID TAX SETUP			 --
+				---------------------------------------------------
 				IF (@intTransactionId is not null)
 				BEGIN
-					INSERT INTO tblCFTransactionNote 
-				(
-					 intTransactionId
-					,strProcess
-					,dtmProcessDate
-					,strNote
-					,strGuid
-				)
-				VALUES
-				(
-					@intTransactionId
-					, 'Calculation'
-					, @runDate
-					, ISNULL(@strTaxExemptReason,ISNULL(@strNote,ISNULL(@strReason,'Check Off -' + @strTaxCode)))
-					, @guid
-				)
-				END
-
-				INSERT INTO @tblTransactionTaxOut
-				(
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,[dblCalculatedTax]	
-					,[dblOriginalTax]	
-				)
-				SELECT TOP 1
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,NULL
-					,@QxT
-				FROM @tblTransactionTax
-				WHERE intTaxGroupId = @intLoopTaxGroupID
-				AND intTaxClassId = @intLoopTaxClassID
-				AND intTaxCodeId = @intLoopTaxCodeID
-			END
-			ELSE
-				BEGIN
-					SELECT TOP 1
-					 @QxT = ROUND (@dblQuantity * dblRate,2)
-					,@QxOP = @QxOP - (@dblQuantity * dblRate)
-					,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * dblRate)
-					,@dblCPTotalTax = @dblCPTotalTax + (@dblQuantity * dblRate)
-					FROM @tblTaxUnitTable
-
-					INSERT INTO @tblTransactionTaxOut
-					(
-						 [intTransactionDetailTaxId]
-						,[intInvoiceDetailId]		
-						,[intTransactionDetailId]  	
-						,[intTaxGroupMasterId]		
-						,[intTaxGroupId]			
-						,[intTaxCodeId]				
-						,[intTaxClassId]			
-						,[strTaxableByOtherTaxes]	
-						,[strCalculationMethod]		
-						,[dblRate]					
-						,[dblTax]					
-						,[dblAdjustedTax]			
-						,[dblExemptionPercent]		
-						,[intSalesTaxAccountId]    	
-						,[intTaxAccountId]    		
-						,[ysnSeparateOnInvoice]		
-						,[ysnCheckoffTax]			
-						,[strTaxCode]				
-						,[ysnTaxExempt]		
-						,[strTaxGroup]				
-						,[ysnInvalidSetup]				
-						,[strReason]				
-						,[strNotes]					
-						,[strTaxExemptReason]		
-						,[dblCalculatedTax]	
-						,[dblOriginalTax]	
+					INSERT INTO tblCFTransactionNote (
+						intTransactionId
+						,strProcess
+						,dtmProcessDate
+						,strNote
+						,strGuid
 					)
-					SELECT TOP 1
-						 [intTransactionDetailTaxId]
-						,[intInvoiceDetailId]		
-						,[intTransactionDetailId]  	
-						,[intTaxGroupMasterId]		
-						,[intTaxGroupId]			
-						,[intTaxCodeId]				
-						,[intTaxClassId]			
-						,[strTaxableByOtherTaxes]	
-						,[strCalculationMethod]		
-						,[dblRate]					
-						,[dblTax]					
-						,[dblAdjustedTax]			
-						,[dblExemptionPercent]		
-						,[intSalesTaxAccountId]    	
-						,[intTaxAccountId]    		
-						,[ysnSeparateOnInvoice]		
-						,[ysnCheckoffTax]			
-						,[strTaxCode]				
-						,[ysnTaxExempt]		
-						,[strTaxGroup]				
-						,[ysnInvalidSetup]				
-						,[strReason]				
-						,[strNotes]					
-						,[strTaxExemptReason]		
-						,@QxT
-						,@QxT
-					FROM @tblTransactionTax
-					WHERE intTaxGroupId = @intLoopTaxGroupID
-					AND intTaxClassId = @intLoopTaxClassID
-					AND intTaxCodeId = @intLoopTaxCodeID
+					SELECT 
+						 @intTransactionId
+						,'Calculation'
+						,@runDate
+						,ISNULL(strTaxExemptReason,ISNULL(strNotes,ISNULL(strReason,'Invalid Setup -' + strTaxCode)))
+						,@guid
+					FROM @tblCFRemoteTax
+					WHERE (ysnInvalidSetup =1)
 				END
-		END
-		ELSE
-		BEGIN
-			IF (@intTransactionId is not null)
-			BEGIN
-				INSERT INTO tblCFTransactionNote (
-				 intTransactionId
-				,strProcess
-				,dtmProcessDate
-				,strNote
-				,strGuid
-			)
-			VALUES
-			(
-				@intTransactionId
-				, 'Calculation'
-				, @runDate
-				, ISNULL(@strTaxExemptReason,ISNULL(@strNote,ISNULL(@strReason,'Invalid Setup -' + @strTaxCode)))
-				, @guid
-			)
-			END
-		END
+				---------------------------------------------------
+				--				LOG INVALID TAX SETUP			 --
+				---------------------------------------------------
 
-		DELETE FROM @tblTaxUnitTable 
-		WHERE intTaxGroupId = @intLoopTaxGroupID
-		AND intTaxClassId = @intLoopTaxClassID
-		AND intTaxCodeId = @intLoopTaxCodeID
+				INSERT INTO @LineItemTaxDetailStagingTable(
+					 [intDetailTaxId]	
+					,[intDetailId]  		
+					,[intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intTaxAccountId]    			
+					,[ysnSeparateOnInvoice]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]			
+					,[strNotes]				
+				)	
+				SELECT 
+					 [intTransactionDetailTaxId]
+					,[intInvoiceDetailId]  		
+					,[intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]			
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intSalesTaxAccountId]    	
+					,[ysnSeparateOnInvoice]		
+					,[ysnCheckoffTax]			
+					,[ysnTaxExempt]			
+					,[strNotes]  				
+				FROM
+				@tblCFRemoteTax
+				WHERE ysnInvalidSetup = 0
+
+
+				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+				OR @strPriceMethod = 'Import File Price' 
+				OR @strPriceMethod = 'Credit Card' 
+				OR @strPriceMethod = 'Posted Trans from CSV'
+				OR @strPriceMethod = 'Origin History'
+				OR @strPriceMethod = 'Network Cost')
+				BEGIN
+
+				INSERT INTO @tblCFOriginalTax	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblOriginalPrice
+					,@LineItemTaxDetailStagingTable
+					,1
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,NULL
+					,@dblOriginalPrice
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+				)
+
+				INSERT INTO @tblCFCalculatedTax	
+			(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblPrice
+					,@LineItemTaxDetailStagingTable
+					,1
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,NULL
+					,@dblPrice
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+				)
+
+				END
+				ELSE
+				BEGIN
+
+				INSERT INTO @tblCFOriginalTax	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblOriginalPrice
+					,@LineItemTaxDetailStagingTable
+					,0
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,NULL
+					,@dblOriginalPrice
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+				)
+
+				INSERT INTO @tblCFCalculatedTax	
+			(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblPrice
+					,@LineItemTaxDetailStagingTable
+					,0
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,NULL
+					,@dblPrice
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+				)
+
+				END
+
+				INSERT INTO @tblCFTransactionTax
+				(
+					 [intTransactionDetailTaxId]	
+					,[intInvoiceDetailId]  		
+					,[intTaxGroupMasterId]			
+					,[intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnSeparateOnInvoice]			
+					,[ysnCheckoffTax]				
+					,[strTaxCode]					
+					,[ysnTaxExempt]			
+					,[ysnInvalidSetup]				
+					,[strTaxGroup]					
+					,[strNotes]			
+					,[dblCalculatedTax]
+					,[dblOriginalTax]	
+				)	
+				SELECT 
+					 originalTax.intTransactionDetailTaxId
+					,originalTax.intTransactionDetailId
+					,originalTax.intTaxGroupMasterId
+					,originalTax.intTaxGroupId
+					,originalTax.intTaxCodeId
+					,originalTax.intTaxClassId
+					,originalTax.strTaxableByOtherTaxes
+					,originalTax.strCalculationMethod
+					,originalTax.dblRate
+					,originalTax.dblExemptionPercent
+					,originalTax.dblTax
+					,originalTax.dblAdjustedTax
+					,originalTax.intTaxAccountId
+					,originalTax.ysnSeparateOnInvoice
+					,originalTax.ysnCheckoffTax
+					,originalTax.strTaxCode
+					,originalTax.ysnTaxExempt
+					,originalTax.ysnInvalidSetup
+					,originalTax.strTaxGroup
+					,originalTax.strNotes
+					,calculatedTax.dblTax
+					,originalTax.dblTax
+				FROM @tblCFOriginalTax as originalTax
+				INNER JOIN @tblCFCalculatedTax as calculatedTax
+				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+
+
+
+			END
+		-- GET REMOTE TAXES FROM EXISTING TRANSACTION TAX -- 
+		ELSE
+			BEGIN
+
+				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+				OR @strPriceMethod = 'Import File Price' 
+				OR @strPriceMethod = 'Credit Card' 
+				OR @strPriceMethod = 'Posted Trans from CSV'
+				OR @strPriceMethod = 'Origin History'
+				OR @strPriceMethod = 'Network Cost')
+				BEGIN
+
+					INSERT INTO @tblCFOriginalTax	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblOriginalPrice
+					,@LineItemTaxDetailStagingTable
+					,1
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,@intTaxGroupId
+					,@dblOriginalPrice
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+				)
+					INSERT INTO @tblCFCalculatedTax	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblPrice
+					,@LineItemTaxDetailStagingTable
+					,1
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,@intTaxGroupId
+					,@dblPrice
+					,@dtmTransactionDate
+					,NULL
+					,1
+					,NULL
+					,NULL
+				)
+
+				END
+				ELSE
+				BEGIN
+
+					INSERT INTO @tblCFOriginalTax	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]						
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblOriginalPrice
+					,@LineItemTaxDetailStagingTable
+					,0
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,@intTaxGroupId
+					,@dblOriginalPrice
+					,@dtmTransactionDate
+					,@intLocationId
+					,1
+					,NULL
+					,NULL
+				)
+					INSERT INTO @tblCFCalculatedTax	
+				(
+					 [intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				)	
+				SELECT 
+					 [intTaxGroupId]			
+					,[intTaxCodeId]				
+					,[intTaxClassId]			
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[dblExemptionPercent]		
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[intTaxAccountId]			
+					,[ysnCheckoffTax]				
+					,[ysnTaxExempt]					
+					,[ysnInvalidSetup]				
+					,[strNotes]							
+				FROM [fnConstructLineItemTaxDetail] 
+				(
+					 @dblQuantity
+					,@dblPrice
+					,@LineItemTaxDetailStagingTable
+					,0
+					,@intItemId
+					,@intCustomerId
+					,@intLocationId
+					,@intTaxGroupId
+					,@dblPrice
+					,@dtmTransactionDate
+					,@intLocationId
+					,1
+					,NULL
+					,NULL
+				)
+
+				END
+			
+				INSERT INTO @tblCFTransactionTax
+				(
+					 [intTransactionDetailTaxId]	
+					,[intInvoiceDetailId]  		
+					,[intTaxGroupMasterId]			
+					,[intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnSeparateOnInvoice]			
+					,[ysnCheckoffTax]				
+					,[strTaxCode]					
+					,[ysnTaxExempt]			
+					,[ysnInvalidSetup]				
+					,[strTaxGroup]					
+					,[strNotes]			
+					,[dblCalculatedTax]
+					,[dblOriginalTax]	
+				)	
+				SELECT 
+					 originalTax.intTransactionDetailTaxId
+					,originalTax.intTransactionDetailId
+					,originalTax.intTaxGroupMasterId
+					,originalTax.intTaxGroupId
+					,originalTax.intTaxCodeId
+					,originalTax.intTaxClassId
+					,originalTax.strTaxableByOtherTaxes
+					,originalTax.strCalculationMethod
+					,originalTax.dblRate
+					,originalTax.dblExemptionPercent
+					,originalTax.dblTax
+					,originalTax.dblAdjustedTax
+					,originalTax.intTaxAccountId
+					,originalTax.ysnSeparateOnInvoice
+					,originalTax.ysnCheckoffTax
+					,originalTax.strTaxCode
+					,originalTax.ysnTaxExempt
+					,originalTax.ysnInvalidSetup
+					,originalTax.strTaxGroup
+					,originalTax.strNotes
+					,calculatedTax.dblTax
+					,originalTax.dblTax
+				FROM @tblCFOriginalTax as originalTax
+				INNER JOIN @tblCFCalculatedTax as calculatedTax
+				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+			END
+
+
+
+
 
 	END
-	
-	WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxRateTable))
-	BEGIN
-		
-		-- SET LOOP VARIABLE--
-		SELECT TOP 1
-		 @strLoopTaxCode = strTaxCode
-		,@Rate = dblRate
-		,@CalculationMethod = strCalculationMethod
-		,@ysnLoopTaxExempt = ysnCheckoffTax
-		,@ysnLoopTaxExempt = ysnTaxExempt
-		,@intLoopTaxGroupID = intTaxGroupId
-		,@intLoopTaxCodeID = intTaxCodeId
-		,@intLoopTaxClassID = intTaxClassId
-		,@strTaxExemptReason	= strTaxExemptReason
-		,@strNote				= strNotes
-		,@strReason				= strReason
-		,@ysnCheckoffTax		= ysnCheckoffTax
-		,@ysnTaxExempt			= ysnTaxExempt
-		,@ysnInvalidSetup		= ysnInvalidSetup
-		,@strTaxCode			= strTaxCode
-		FROM @tblTaxRateTable
 
-		IF(@ysnInvalidSetup = 0)
-		BEGIN
+	---------------------------------------------------
+	--				TAX COMPUTATION					 --
+	---------------------------------------------------
 
-			IF (@ysnTaxExempt = 1)
-				BEGIN
-				IF (@intTransactionId is not null)
-				BEGIN
-					INSERT INTO tblCFTransactionNote 
-				(
-					 intTransactionId
-					,strProcess
-					,dtmProcessDate
-					,strNote
-					,strGuid
-				)
-				VALUES
-				(
-					@intTransactionId
-					, 'Calculation'
-					, @runDate
-					, ISNULL(@strTaxExemptReason,ISNULL(@strNote,ISNULL(@strReason,'Tax Exempt -' + @strTaxCode)))
-					, @guid
-				)
-				END
 
-				INSERT INTO @tblTransactionTaxOut
-				(
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,[dblCalculatedTax]	
-					,[dblOriginalTax]	
-				)
-				SELECT TOP 1
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,NULL
-					,@OPTax	
-				FROM @tblTransactionTax
-				WHERE intTaxGroupId = @intLoopTaxGroupID
-				AND intTaxClassId = @intLoopTaxClassID
-				AND intTaxCodeId = @intLoopTaxCodeID
-			END
-			ELSE IF(@ysnCheckoffTax = 1)
-				BEGIN
-				IF (@intTransactionId is not null)
-				BEGIN
-					INSERT INTO tblCFTransactionNote 
-				(
-					 intTransactionId
-					,strProcess
-					,dtmProcessDate
-					,strNote
-					,strGuid
-				)
-				VALUES
-				(
-					@intTransactionId
-					, 'Calculation'
-					, @runDate
-					, ISNULL(@strTaxExemptReason,ISNULL(@strNote,ISNULL(@strReason,'Check Off -' + @strTaxCode)))
-					, @guid
-				)
-				END
-				INSERT INTO @tblTransactionTaxOut
-				(
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,[dblCalculatedTax]	
-					,[dblOriginalTax]	
-				)
-				SELECT TOP 1
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,NULL
-					,@OPTax	
-				FROM @tblTransactionTax
-				WHERE intTaxGroupId = @intLoopTaxGroupID
-				AND intTaxClassId = @intLoopTaxClassID
-				AND intTaxCodeId = @intLoopTaxCodeID
-			END
-			ELSE
-				BEGIN
 
-					IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
-					OR @strPriceMethod = 'Import File Price' 
-					OR @strPriceMethod = 'Credit Card' 
-					OR @strPriceMethod = 'Posted Trans from CSV'
-					OR @strPriceMethod = 'Origin History'
-					OR @strPriceMethod = 'Network Cost')
-					BEGIN
-						SELECT TOP 1 
-						 @OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
-						,@CPTax = ROUND (((@QxCP / (dblRate/100 +1 )) * (dblRate/100)),2)
-						,@dblOPTotalTax = @dblOPTotalTax + ((@QxOP / (dblRate/100 +1 )) * (dblRate/100))
-						,@dblCPTotalTax = @dblCPTotalTax + ((@QxCP / (dblRate/100 +1 )) * (dblRate/100))
-						FROM @tblTaxRateTable
-					END
-					ELSE
-					BEGIN
-						SELECT TOP 1 
-						 @OPTax = ROUND (((@QxOP / (dblRate/100 +1 )) * (dblRate/100)),2)
-						,@CPTax = ROUND ((@QxCP * (dblRate/100)),2)
-						,@dblOPTotalTax = @dblOPTotalTax + ((@QxOP / (dblRate/100 +1 )) * (dblRate/100))
-						,@dblCPTotalTax = @dblCPTotalTax + ((@QxCP / (dblRate/100 +1 )) * (dblRate/100))
-						FROM @tblTaxRateTable
-					END
 
-					
-
-				INSERT INTO @tblTransactionTaxOut
-				(
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,[dblCalculatedTax]	
-					,[dblOriginalTax]	
-				)
-				SELECT TOP 1
-					 [intTransactionDetailTaxId]
-					,[intInvoiceDetailId]		
-					,[intTransactionDetailId]  	
-					,[intTaxGroupMasterId]		
-					,[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[dblExemptionPercent]		
-					,[intSalesTaxAccountId]    	
-					,[intTaxAccountId]    		
-					,[ysnSeparateOnInvoice]		
-					,[ysnCheckoffTax]			
-					,[strTaxCode]				
-					,[ysnTaxExempt]		
-					,[strTaxGroup]				
-					,[ysnInvalidSetup]				
-					,[strReason]				
-					,[strNotes]					
-					,[strTaxExemptReason]		
-					,@CPTax
-					,@OPTax
-				FROM @tblTransactionTax
-				WHERE intTaxGroupId = @intLoopTaxGroupID
-				AND intTaxClassId = @intLoopTaxClassID
-				AND intTaxCodeId = @intLoopTaxCodeID
-			END
-		END
-		ELSE
-		BEGIN
-			IF (@intTransactionId is not null)
-			BEGIN
-				INSERT INTO tblCFTransactionNote (
-				 intTransactionId
-				,strProcess
-				,dtmProcessDate
-				,strNote
-				,strGuid
-			)
-			VALUES
-			(
-				@intTransactionId
-				, 'Calculation'
-				, @runDate
-				, ISNULL(@strTaxExemptReason,ISNULL(@strNote,ISNULL(@strReason,'Invalid Setup -' + @strTaxCode)))
-				, @guid
-			)
-			END
-		END
-
-		DELETE FROM @tblTaxRateTable 
-		WHERE intTaxGroupId = @intLoopTaxGroupID
-		AND intTaxClassId = @intLoopTaxClassID
-		AND intTaxCodeId = @intLoopTaxCodeID
-
-	END
 
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
-	END
+	DECLARE @totalCalculatedTax NUMERIC(18,6)
+	DECLARE @totalOriginalTax	NUMERIC(18,6)
 
+	SELECT 
+	 @totalCalculatedTax = ISNULL(SUM(dblCalculatedTax),0)
+	,@totalOriginalTax = ISNULL(SUM(dblOriginalTax),0)
+	FROM
+	@tblCFTransactionTax
 
 	DECLARE @tblTransactionPrice TABLE(
 		 strTransactionPriceId		NVARCHAR(MAX)
 		,dblOriginalAmount			NUMERIC(18,6)
 		,dblCalculatedAmount		NUMERIC(18,6)
 	)
-	
+
 	IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 	OR @strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
@@ -1250,26 +1192,26 @@ BEGIN
 	OR @strPriceMethod = 'Network Cost')
 		BEGIN
 			INSERT INTO @tblTransactionPrice (
-		 strTransactionPriceId	
-		,dblOriginalAmount		
-		,dblCalculatedAmount	
-		)
+				 strTransactionPriceId	
+				,dblOriginalAmount		
+				,dblCalculatedAmount	
+			)
 		VALUES
-		(
-			 'Gross Price'
-			,@dblOriginalPrice
-			,@dblPrice
-		),
-		(
-			 'Net Price'
-			,@dblOriginalPrice - (@dblOPTotalTax / @dblQuantity)
-			,@dblPrice - (@dblCPTotalTax / @dblQuantity)
-		),
-		(
-			 'Total Amount'
-			,@dblOriginalPrice * @dblQuantity
-			,@dblPrice * @dblQuantity
-		)
+			(
+				 'Gross Price'
+				,@dblOriginalPrice
+				,@dblPrice
+			),
+			(
+				 'Net Price'
+				,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+				,@dblPrice - (@totalCalculatedTax / @dblQuantity)
+			),
+			(
+				 'Total Amount'
+				,@dblOriginalPrice * @dblQuantity
+				,@dblPrice * @dblQuantity
+			)
 		END
 	ELSE
 		BEGIN
@@ -1282,23 +1224,28 @@ BEGIN
 		(
 			 'Gross Price'
 			,@dblOriginalPrice
-			,@dblPrice + (@dblCPTotalTax / @dblQuantity) 
+			,@dblPrice + (@totalCalculatedTax / @dblQuantity) 
 		),
 		(
 			 'Net Price'
-			,@dblOriginalPrice - (@dblOPTotalTax / @dblQuantity)
+			,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
 			,@dblPrice
 		),
 		(
 			 'Total Amount'
 			,@dblOriginalPrice * @dblQuantity
-			,(@dblPrice + (@dblCPTotalTax / @dblQuantity)) * @dblQuantity
+			,(@dblPrice + (@totalCalculatedTax / @dblQuantity)) * @dblQuantity
 		)
 		END
+	---------------------------------------------------
+	--				 PRICE CALCULATION				 --
+	---------------------------------------------------
 
-END
-	
 
+
+	---------------------------------------------------
+	--				MARGIN COMPUTATION				 --
+	---------------------------------------------------
 	DECLARE @dblMargin NUMERIC(18,6)
 
 	SELECT @dblMargin = dblMargin , @dblTransferCost = dblCost
@@ -1311,13 +1258,19 @@ END
 	,@dblTransferCost	
 	,@strTransactionType
 	)
+	---------------------------------------------------
+	--				MARGIN COMPUTATION				 --
+	---------------------------------------------------
 
 
+
+	---------------------------------------------------
+	--				LOG DUPLICATE TRANS				 --
+	---------------------------------------------------
 	DECLARE @intDupTransCount INT = 0
 	DECLARE @ysnDuplicate BIT = 0
 	DECLARE @ysnInvalid	BIT = 0
 
-	-- DUPLICATE CHECK -- 
 	SELECT @intDupTransCount = COUNT(*)
 	FROM tblCFTransaction
 	WHERE intNetworkId = @intNetworkId
@@ -1338,9 +1291,14 @@ END
 			VALUES ('Import',GETDATE(),NEWID(), @intTransactionId, 'Duplicate transaction history found.')
 		END
 	END
+	---------------------------------------------------
+	--				LOG DUPLICATE TRANS				 --
+	---------------------------------------------------
 
-	--PRICING OUT--
-	--if @IsImporting is true then save pricing to global temp table
+
+	---------------------------------------------------
+	--					PRICING OUT					 --
+	---------------------------------------------------
 	IF(@IsImporting = 1)
 		BEGIN
 			INSERT INTO ##tblCFTransactionPricingType
@@ -1442,50 +1400,71 @@ END
 			,@dblMargin					AS dblMargin	
 			,@ysnDuplicate				AS ysnDuplicate
 		END
+	---------------------------------------------------
+	--					PRICING OUT					 --
+	---------------------------------------------------
 
-IF(@IsImporting = 1)
-BEGIN
-	INSERT INTO ##tblCFTransactionTaxType
-	(
-	 dblTaxCalculatedAmount
-	,dblTaxOriginalAmount
-	,intTaxCodeId
-	,dblTaxRate 
-	,strTaxCode 
-	)
-	SELECT 
-	dblCalculatedTax AS 'dblTaxCalculatedAmount'
-	,dblOriginalTax AS 'dblTaxOriginalAmount'
-	,intTaxCodeId
-	,dblRate AS 'dblTaxRate'
-	,strTaxCode AS 'strTaxCode'
-	FROM @tblTransactionTaxOut
-END
-ELSE
-BEGIN
-	SELECT 
-	 dblCalculatedTax AS 'dblTaxCalculatedAmount'
-	,dblOriginalTax AS 'dblTaxOriginalAmount'
-	,intTaxCodeId
-	,dblRate AS 'dblTaxRate'
-	,strTaxCode AS 'strTaxCode'
-	FROM @tblTransactionTaxOut
-END
-IF(@IsImporting = 1)
-BEGIN
-	INSERT INTO ##tblCFTransactionPriceType
-	(
-	 [strTransactionPriceId]
-	,[dblTaxOriginalAmount]	
-	,[dblTaxCalculatedAmount]
-	)
-	SELECT 
-	 [strTransactionPriceId]
-	,[dblOriginalAmount]	
-	,[dblCalculatedAmount]
-	FROM @tblTransactionPrice
-END
-ELSE
-BEGIN
-	SELECT * FROM @tblTransactionPrice
-END
+
+	---------------------------------------------------
+	--					TAXES OUT					 --
+	---------------------------------------------------
+	IF(@IsImporting = 1)
+		BEGIN
+			INSERT INTO ##tblCFTransactionTaxType
+			(
+			 dblTaxCalculatedAmount
+			,dblTaxOriginalAmount
+			,intTaxCodeId
+			,dblTaxRate 
+			,strTaxCode
+			)
+			SELECT 
+			dblCalculatedTax AS 'dblTaxCalculatedAmount'
+			,dblOriginalTax AS 'dblTaxOriginalAmount'
+			,intTaxCodeId
+			,dblRate AS 'dblTaxRate'
+			,(SELECT TOP 1 strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = T.intTaxCodeId) AS 'strTaxCode'
+			FROM @tblCFTransactionTax AS T
+			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+		END
+	ELSE
+		BEGIN
+			SELECT 
+			 dblCalculatedTax AS 'dblTaxCalculatedAmount'
+			,dblOriginalTax AS 'dblTaxOriginalAmount'
+			,intTaxCodeId
+			,dblRate AS 'dblTaxRate'
+			,(SELECT TOP 1 strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = T.intTaxCodeId) AS 'strTaxCode'
+			FROM @tblCFTransactionTax AS T
+			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+		END
+	---------------------------------------------------
+	--					TAXES OUT					 --
+	---------------------------------------------------
+
+	---------------------------------------------------
+	--					PRICE OUT					 --
+	---------------------------------------------------
+	IF(@IsImporting = 1)
+	BEGIN
+		INSERT INTO ##tblCFTransactionPriceType
+		(
+		 [strTransactionPriceId]
+		,[dblTaxOriginalAmount]	
+		,[dblTaxCalculatedAmount]
+		)
+		SELECT 
+		 [strTransactionPriceId]
+		,[dblOriginalAmount]	
+		,[dblCalculatedAmount]
+		FROM @tblTransactionPrice
+	END
+	ELSE
+	BEGIN
+		SELECT * FROM @tblTransactionPrice
+	END
+	---------------------------------------------------
+	--					PRICE OUT					 --
+	---------------------------------------------------
+	
+	END

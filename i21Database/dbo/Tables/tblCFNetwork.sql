@@ -28,13 +28,18 @@
     [ysnExemptLCOnRemotes]             BIT             NULL,
     [strExemptLCCode]                  NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intImportMapperId]                INT             NULL,
+    [strIso]                           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strLinkNetwork]                   NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [intCardLength]                    INT             NULL,
+    [intAccountLength]                 INT             NULL,
     [intConcurrencyId]                 INT             CONSTRAINT [DF_tblCFNetwork_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
     CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblCFNetwork_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCFNetwork_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId])
 );
+
+
 
 
 
