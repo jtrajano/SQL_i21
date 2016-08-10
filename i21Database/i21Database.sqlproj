@@ -4155,6 +4155,7 @@
     <Build Include="dbo\Stored Procedures\uspCFCardLockAuditLog.sql" />
     <Build Include="dbo\Views\vyuLGLoadCostForVendor.sql" />
     <Build Include="dbo\Views\vyuLGLoadCostForCustomer.sql" />
+    <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
