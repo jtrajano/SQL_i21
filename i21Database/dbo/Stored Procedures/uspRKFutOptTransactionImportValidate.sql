@@ -57,7 +57,7 @@ WHILE @mRowNumber > 0
 		SET @strBrokerTradeNo = NULL
 		SELECT @strName = strName,@strAccountNumber=strAccountNumber,@strFutMarketName=strFutMarketName, @strInstrumentType=strInstrumentType,@strCommodityCode=strCommodityCode
 			,@strLocationName=strLocationName,@strSalespersonId=strSalespersonId,@strCurrency=strCurrency,@strBrokerTradeNo=strBrokerTradeNo,@strBuySell=strBuySell,@strFutureMonth=strFutureMonth
-			,@strOptionMonth=strOptionMonth,@strOptionType=strOptionType,@strStatus=strStatus,@dtmFilledDate=convert(datetime,dtmFilledDate,@ConvertYear),@strBook=strBook,@strSubBook=strSubBook,
+			,@strOptionMonth=strOptionMonth,@strOptionType=strOptionType,@strStatus=strStatus,@dtmFilledDate=convert(datetime,dtmCreateDateTime,@ConvertYear),@strBook=strBook,@strSubBook=strSubBook,
 			@dtmCreateDateTime=convert(datetime,dtmCreateDateTime,@ConvertYear)
 		FROM tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 		
