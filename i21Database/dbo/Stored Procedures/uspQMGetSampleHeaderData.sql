@@ -82,6 +82,7 @@ BEGIN
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 		,S.strMarks
+		,S.intPSubLocationId AS intCompanyLocationSubLocationId
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentBLContainerContractId = @intProductValueId
