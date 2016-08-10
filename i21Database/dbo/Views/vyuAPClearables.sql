@@ -13,7 +13,6 @@ SELECT DISTINCT
 	, 0 AS dblAmountPaid 
 	, Receipt.dblLineTotal AS dblTotal
 	, CASE WHEN Bill.intTransactionType != 1 AND Bill.dblAmountDue > 0 THEN Bill.dblAmountDue * -1 ELSE Bill.dblAmountDue END AS dblAmountDue 
-	--, (Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) dblQtyToVoucher
 	, dblVoucherAmount = 
 	  CASE
 		WHEN Receipt.dblQtyToReceive = 0
@@ -30,6 +29,15 @@ SELECT DISTINCT
 	, Bill.ysnPaid
 	, Bill.strTerm
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	,Receipt.dblQtyToReceive
+	,dblQtyVouchered = ISNULL(Bill.dblQtyReceived,ISNULL(Receipt.dblBillQty,0))
+	,(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) dblQtyToVoucher
+	,dblAmountToVoucher =
+	  CASE
+		WHEN Receipt.dblQtyToReceive = 0
+		THEN 0
+		ELSE (Receipt.dblLineTotal/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0))
+	  END
 	
 FROM vyuICGetInventoryReceiptItem Receipt
 	LEFT JOIN (
@@ -39,6 +47,7 @@ FROM vyuICGetInventoryReceiptItem Receipt
 			, Header.dtmDueDate
 			, intInventoryReceiptItemId
 			, Detail.intBillId
+			, Detail.dblQtyReceived
 			, dblAmountDue
 			, intTransactionType
 			, ysnPaid
@@ -117,6 +126,10 @@ SELECT
 	, C.ysnPaid
 	, T.strTerm
 	, (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	,0 AS dblQtyToReceive
+	,0 AS dblQtyVouchered
+	,0 AS dblQtyToVoucher
+	,0 AS dblAmountToVoucher
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
