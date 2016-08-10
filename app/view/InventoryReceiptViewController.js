@@ -4487,6 +4487,66 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 replicaCount -= 1;
             }
 
+            if (replicaCount == 0) {
+                iRely.Msg.showQuestion('The lots for ' + currentReceiptItem.get('strItemNo') +
+                    ' is fully replicated. Are you sure you want to continue?',
+                    function(p) {
+                        if (p === 'no') {
+                            grdLotTracking.resumeEvents(true);
+                            return;
+                        } else {
+                            var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
+                                strUnitMeasure: currentLot.get('strUnitMeasure'),
+                                intItemUnitMeasureId: currentLot.get('intItemUnitMeasureId'),
+                                dblNetWeight: lotNetWgt,
+                                dblStatedNetPerUnit: currentLot.get('dblStatedNetPerUnit'),
+                                dblPhyVsStated: currentLot.get('dblPhyVsStated'),
+                                strOrigin: currentLot.get('strOrigin'),
+                                intSubLocationId: currentLot.get('intSubLocationId'),
+                                intStorageLocationId: currentLot.get('intStorageLocationId'),
+                                dblQuantity: lotQty,
+                                dblGrossWeight: lotGrossWgt,
+                                dblTareWeight: lotTareWgt,
+                                dblCost: currentLot.get('dblCost'),
+                                intUnitPallet: currentLot.get('intUnitPallet'),
+                                dblStatedGrossPerUnit: currentLot.get('dblStatedGrossPerUnit'),
+                                dblStatedTarePerUnit: currentLot.get('dblStatedTarePerUnit'),
+                                strContainerNo: currentLot.get('strContainerNo'),
+                                intEntityVendorId: currentLot.get('intEntityVendorId'),
+                                strGarden: currentLot.get('strGarden'),
+                                strMarkings: currentLot.get('strMarkings'),
+                                strGrade: currentLot.get('strGrade'),
+                                intOriginId: currentLot.get('intOriginId'),
+                                intSeasonCropYear: currentLot.get('intSeasonCropYear'),
+                                strVendorLotId: currentLot.get('strVendorLotId:'),
+                                dtmManufacturedDate: currentLot.get('dtmManufacturedDate'),
+                                strRemarks: currentLot.get('strRemarks'),
+                                strCondition: currentLot.get('strCondition'),
+                                dtmCertified: currentLot.get('dtmCertified'),
+                                dtmExpiryDate: currentLot.get('dtmExpiryDate'),
+                                intSort: currentLot.get('intSor:'),
+                                strWeightUOM: currentLot.get('strWeightUOM'),
+                                intParentLotId: currentLot.get('intParentLotId'),
+                                strParentLotNumber: currentLot.get('strParentLotNumber'),
+                                strParentLotAlias: currentLot.get('strParentLotAlias'),
+                                strStorageLocation: currentLot.get('strStorageLocation'),
+                                strSubLocationName: currentLot.get('strSubLocationName'),
+                                dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
+                            });
+
+                            grdLotTracking.suspendEvents(true);
+                            currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                            grdLotTracking.resumeEvents(true);
+                            //Calculate Gross/Net
+                            me.calculateGrossNet(currentReceiptItem);
+
+                            //Calculate Line Total
+                            var currentReceipt  = win.viewModel.data.current;
+                            currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
+                        }
+                    }, Ext.MessageBox.YESNO, win);
+            }
+
             // Show a progress message box.
             Ext.MessageBox.show({
                     title: "Please wait.",
@@ -4512,6 +4572,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             };
 
             // This function will do a loop to replicate the lots.
+
             var doReplicateLot = function (){
                 for (var ctr = 0; ctr <= replicaCount - 1; ctr++) {
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
@@ -4552,8 +4613,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strSubLocationName: currentLot.get('strSubLocationName'),
                         dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor')
                     });
+
                     grdLotTracking.suspendEvents(true);
-                    currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+
+                    var totalLotQty = 0;
+
+                    currentReceiptItem.tblICInventoryReceiptItemLots().each(function(lot) {
+                        totalLotQty += lot.get('dblQuantity');
+                    });
+
+                    totalLotQty += (ctr === replicaCount - 1 ? lastQty : lotQty);
+
+                    if (totalLotQty > lineItemQty) {
+                        var itemNo = currentReceiptItem.get('strItemNo');
+                        iRely.Msg.showQuestion('The lots for ' + itemNo + ' is fully replicated. Are you sure you want to continue?',
+                            function(p) {
+                                if (p === 'no') {
+                                    grdLotTracking.resumeEvents(true);
+                                    return;
+                                } else {
+                                    currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                                }
+                            }, Ext.MessageBox.YESNO, win);
+                    } else {
+                        currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
+                    }
 
                     // call f function from above within a setTimeout.
                     setTimeout(f(ctr, replicaCount), (ctr + 1) * 25);
@@ -4562,13 +4646,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         grdLotTracking.resumeEvents(true);
                         //Calculate Gross/Net
                         me.calculateGrossNet(currentReceiptItem);
-                        
+
                         //Calculate Line Total
                         var currentReceipt  = win.viewModel.data.current;
                         currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
                     }
                 }
-
             };
 
             // Call doReplicateLot in a setTimeout to give chance for the msg box to appear.
