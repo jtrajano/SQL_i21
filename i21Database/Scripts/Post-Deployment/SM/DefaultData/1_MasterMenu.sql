@@ -1605,66 +1605,66 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Aging Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)	
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES ( N'Customer Aging Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Aging Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Customer Aging Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Customer Aging Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Aging Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=CustomerAging&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Customer Aging Report&direct=true' WHERE strMenuName = 'Customer Aging Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId	
+	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=CustomerAging&direct=true' WHERE strMenuName = 'Customer Aging Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId	
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Contact List' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.controller.CustomerContactList' WHERE strMenuName = 'Customer Contact List' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Inquiry Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Customer Inquiry Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Inquiry Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Customer Inquiry Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Customer Inquiry Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Inquiry Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=CustomerInquiry&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Customer Inquiry Report&direct=true' WHERE strMenuName = 'Customer Inquiry Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId	
+	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=CustomerInquiry&direct=true' WHERE strMenuName = 'Customer Inquiry Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId	
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Statements Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Customer Statements Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Statements Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Statement of Account Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Customer Statements Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Statements Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=StatementOfAccount&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Statement of Account Report&direct=true' WHERE strMenuName = 'Customer Statements Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=StatementOfAccount&direct=true' WHERE strMenuName = 'Customer Statements Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payment History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Payment History Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Payment History Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Payment History Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Payment History Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Payment History Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Payment History Report&direct=true' WHERE strMenuName = 'Payment History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=PaymentHistory&direct=true' WHERE strMenuName = 'Payment History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unapplied Credits Register Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Unapplied Credits Register Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Unapplied Credits Register Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Unapplied Credits Register Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Unapplied Credits Register Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Unapplied Credits Register Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=UnappliedCreditsRegister&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Unapplied Credits Register Report&direct=true' WHERE strMenuName = 'Unapplied Credits Register Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=UnappliedCreditsRegister&direct=true' WHERE strMenuName = 'Unapplied Credits Register Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Statements Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Customer Statements Detail Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Statements Detail Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Customer Statements Detail Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Customer Statements Detail Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Statements Detail Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=CustomerStatementDetail&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Customer Statements Detail Report&direct=true' WHERE strMenuName = 'Customer Statements Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=CustomerStatementDetail&direct=true' WHERE strMenuName = 'Customer Statements Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Invoice History Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Invoice History Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Invoice History Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Invoice History Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Invoice History Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=InvoiceHistory&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=Invoice History Report&direct=true' WHERE strMenuName = 'Invoice History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=InvoiceHistory&direct=true' WHERE strMenuName = 'Invoice History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Tax Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Tax Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Tax Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Tax Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Tax Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Tax&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Sales&report=Tax Report&direct=true' WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Sales&report=Tax&direct=true' WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Aging Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Customer Aging Detail Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Aging Detail Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Customer Aging Detail Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Customer Aging Detail Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Customer Aging Detail Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=CustomerAgingDetail&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Sales&report=Customer Aging Detail Report&direct=true' WHERE strMenuName = 'Customer Aging Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Sales&report=CustomerAgingDetail&direct=true' WHERE strMenuName = 'Customer Aging Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Restricted Chemicals Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Restricted Chemicals Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Restricted Chemicals Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=Restricted Chemicals Report&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES ( N'Restricted Chemicals Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Restricted Chemicals Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=RestrictedChemical&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Sales&report=Restricted Chemicals Report&direct=true' WHERE strMenuName = 'Restricted Chemicals Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Sales&report=RestrictedChemical&direct=true' WHERE strMenuName = 'Restricted Chemicals Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 /* START OF DELETING */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Memos' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
