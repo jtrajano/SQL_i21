@@ -2,7 +2,7 @@
 AS
 BEGIN TRY
 DECLARE @tblRKFutOptTransactionHeaderId int 
-Declare @ErrMsg nvarchar(Max)
+DECLARE @ErrMsg nvarchar(Max)
 
 DECLARE @mRowNumber INT
 DECLARE @strName NVARCHAR(50)
@@ -64,6 +64,7 @@ WHILE @mRowNumber > 0
 		SELECT @PreviousErrMsg=''
 		IF NOT EXISTS(SELECT * FROM tblEMEntity WHERE strName=@strName)
 		BEGIN
+
 			IF NOT EXISTS(SELECT * FROM tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber )
 				BEGIN
 					INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
@@ -80,6 +81,54 @@ WHILE @mRowNumber > 0
 					UPDATE tblRKFutOptTransactionImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Invalid Broker.' WHERE intFutOptTransactionId = @mRowNumber
 				END
 		END
+	
+		IF EXISTS(SELECT * FROM tblEMEntity WHERE strName=@strName)
+		BEGIN
+		--- Broker Trader Number Exists -- in existing record
+		DECLARE @intEntityId INT = NULL
+		SELECT @intEntityId=intEntityId from tblEMEntity WHERE strName=@strName
+
+		
+		IF EXISTS(SELECT * FROM tblRKFutOptTransaction WHERE strBrokerTradeNo=@strBrokerTradeNo and intEntityId=@intEntityId and isnull(strBrokerTradeNo,'')<>'' and isnull(intSelectedInstrumentTypeId,1) = 1)
+		BEGIN
+			IF NOT EXISTS(SELECT * FROM tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber )
+				BEGIN
+					INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
+																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime)
+					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Broker trade number already exists ('+@strName+').',convert(datetime,dtmCreateDateTime,@ConvertYear)
+					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
+				END
+				ELSE
+				BEGIN					
+					SELECT @PreviousErrMsg=strErrorMsg from tblRKFutOptTransactionImport_ErrLog WHERE intFutOptTransactionId = @mRowNumber  
+					update tblRKFutOptTransactionImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Broker trade number already exists ('+@strName+').' WHERE intFutOptTransactionId = @mRowNumber
+				END
+			END
+			--- Broker Trader Number Exists -- in current Batch
+			IF EXISTS(SELECT COUNT(strBrokerTradeNo) FROM tblRKFutOptTransactionImport WHERE strBrokerTradeNo=@strBrokerTradeNo 
+						AND strName=@strName and isnull(strBrokerTradeNo,'')<>'' HAVING COUNT(strBrokerTradeNo) > 1)
+		BEGIN
+			IF NOT EXISTS(SELECT * FROM tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber )
+				BEGIN
+					INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
+																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime)
+					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Morethan one transaction with the same broker trader number (' +@strName+ ') exists in this upload file. Please check. Broker trade number already exists ('+@strName+').',convert(datetime,dtmCreateDateTime,@ConvertYear)
+					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
+				END
+				ELSE
+				BEGIN					
+					SELECT @PreviousErrMsg=strErrorMsg from tblRKFutOptTransactionImport_ErrLog WHERE intFutOptTransactionId = @mRowNumber  
+					update tblRKFutOptTransactionImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Morethan one transaction with the same broker trader number (' +@strName+ ') exists in this upload file. Please check. Broker trade number already exists ('+@strName+').' WHERE intFutOptTransactionId = @mRowNumber
+				END
+			END
+		 END
+	
 
 		IF NOT EXISTS(SELECT * FROM tblRKBrokerageAccount WHERE strAccountNumber=@strAccountNumber)
 		BEGIN
@@ -117,7 +166,7 @@ WHILE @mRowNumber > 0
 					SELECT @PreviousErrMsg=strErrorMsg from tblRKFutOptTransactionImport_ErrLog WHERE intFutOptTransactionId = @mRowNumber  
 					update tblRKFutOptTransactionImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Invalid Market.' WHERE intFutOptTransactionId = @mRowNumber
 				END
-		END
+		 END
 
 -- Instrument Type
 		IF @strInstrumentType not in('Futures','Options')
