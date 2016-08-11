@@ -60,7 +60,7 @@ Declare @strUOM nvarchar(50)
 Declare @strSONo nvarchar(50)
 Declare @strShipTo nvarchar(max)
 Declare @strCustomerComments nvarchar(max)
-Declare @ysnShowCostInSalesOrderPickList bit
+Declare @ysnShowCostInSalesOrderPickList bit=0
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -269,7 +269,8 @@ Begin
 End
 Else
 Begin --Sales Order Pick List
-	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnShowCostInSalesOrderPickList,0) From tblMFCompanyPreference
+	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnPrintPriceOnPrintTicket,0) From tblARCustomer 
+	Where intEntityCustomerId=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 
 	Select TOP 1 @strUOM = um.strUnitMeasure 
 	From tblMFPickListDetail pld Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId 

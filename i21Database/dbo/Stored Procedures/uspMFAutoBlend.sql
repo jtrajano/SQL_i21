@@ -188,9 +188,7 @@ Select TOP 1 @dblBlendBinSize=mp.dblMachineCapacity
 From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
 Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
 Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
-Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
-Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
-And mc.intManufacturingCellId=@intCellId
+Where mc.intManufacturingCellId=@intCellId
 
 If ISNULL(@dblBlendBinSize,0)=0
 	RaisError('Blend bin size is not defined',16,1)
