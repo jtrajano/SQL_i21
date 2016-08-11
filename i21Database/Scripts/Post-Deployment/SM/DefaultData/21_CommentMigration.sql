@@ -115,20 +115,24 @@ GO
 	--UPDATE tblSMComment intTransactionId to be equal to newly inserted transaction from activities
 	UPDATE tblSMComment
 	SET tblSMComment.intTransactionId = C.intTransactionId,
+		tblSMComment.intActivityId = B.intActivityId,
 		strScreen = '',
 		strRecordNo = ''
 	FROM tblSMComment A 
 		INNER JOIN tblSMActivity B ON A.intTransactionId = B.intTransactionId
 		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.strRecordNo = CAST(B.intActivityId AS NVARCHAR(50))
+	WHERE ISNULL(A.strScreen, '') <> '' AND ISNULL(A.strRecordNo, '') <> ''
 
 	--UPDATE tblSMCommentWatcher intTransactionId to be equal to newly inserted transaction from activities
 	UPDATE tblSMCommentWatcher
 	SET tblSMCommentWatcher.intTransactionId = C.intTransactionId,
+		tblSMCommentWatcher.intActivityId = B.intActivityId,
 		strScreen = '',
 		strRecordNo = ''
 	FROM tblSMCommentWatcher A 
 		INNER JOIN tblSMActivity B ON A.intTransactionId = B.intTransactionId
 		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.strRecordNo = CAST(B.intActivityId AS NVARCHAR(50))
+	WHERE ISNULL(A.strScreen, '') <> '' AND ISNULL(A.strRecordNo, '') <> ''
 GO
 	PRINT N'Comments Migration'
 GO
