@@ -601,6 +601,28 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								WHERE
 									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
 
+
+								INSERT INTO tblARInvoiceDetailComponent
+									([intInvoiceDetailId]
+									,[intComponentItemId]
+									,[strComponentType]
+									,[intItemUOMId]
+									,[dblQuantity]
+									,[dblUnitQuantity]
+									,[intConcurrencyId])
+								SELECT 
+									 [intInvoiceDetailId]	= @NewDetailId
+									,[intComponentItemId]	= [intComponentItemId]
+									,[strComponentType]		= [strComponentType]
+									,[intItemUOMId]			= [intItemUOMId]
+									,[dblQuantity]			= [dblQuantity]
+									,[dblUnitQuantity]		= [dblUnitQuantity]
+									,[intConcurrencyId]		= 1
+								FROM
+									tblSOSalesOrderDetailComponent
+								WHERE
+									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
+
 								DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId
 						END
 					END
