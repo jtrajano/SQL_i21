@@ -4162,6 +4162,7 @@
     <Build Include="dbo\Views\vyuLGLoadCostForCustomer.sql" />
     <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
+    <Build Include="dbo\Functions\fnStripHtml.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

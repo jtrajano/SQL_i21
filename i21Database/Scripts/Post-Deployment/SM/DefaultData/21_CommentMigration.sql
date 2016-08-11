@@ -61,7 +61,7 @@ GO
 	;WITH CTE AS
 	(
 	   SELECT *,
-			 ROW_NUMBER() OVER (PARTITION BY intTransactionId ORDER BY dtmAdded DESC) AS RowNumber
+			 ROW_NUMBER() OVER (PARTITION BY intTransactionId ORDER BY dtmAdded ASC) AS RowNumber
 	   FROM tblSMComment 
 	   WHERE ISNULL(strScreen, '') <> '' AND ISNULL(strRecordNo, '') <> ''
 	)
@@ -81,7 +81,13 @@ GO
 		intTransactionId, 
 		@activityPrefix + CAST((CAST(ROW_NUMBER() OVER (ORDER BY intTransactionId) AS INT) + @activityNo) AS NVARCHAR(50)) strActivityNo,
 		'Comment' strType,
-		'Comment' strSubject,
+		SUBSTRING(
+			REPLACE(
+				REPLACE(
+					REPLACE(dbo.fnStripHtml(REPLACE(strComment, '?', '#$%^')),
+				'&nbsp;', ' '), 
+			'?',''), '#$%^', '?'), 
+		0, 99) strSubject,
 		dtmAdded dtmStart,
 		dtmAdded dtmCreated,
 		intEntityId intCreatedBy,
