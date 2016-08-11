@@ -43,6 +43,7 @@ BEGIN TRY
 		INSERT	INTO @tblToProcess (intInventoryShipmentItemId,intContractDetailId,intItemUOMId,dblQty)
 		SELECT 	intInventoryShipmentItemId,intLineNo,intItemUOMId,dblQty
 		FROM	@ItemsFromInventoryShipment
+		WHERE	ISNULL(intLineNo,0) > 0
 	END
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
