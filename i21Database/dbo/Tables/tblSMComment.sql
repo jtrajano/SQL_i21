@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblSMComment] (
 	[strRecordNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmAdded]			DATETIME DEFAULT (GETDATE()) NULL,
 	[dtmModified]		DATETIME DEFAULT (GETDATE()) NULL,
-	[ysnInternal]		BIT NULL,
+	[ysnPublic]			BIT NULL,
 	[ysnEdited]			BIT NULL,
 	[intEntityId]		INT NULL,
 	[intTransactionId]	INT NULL,
