@@ -66,7 +66,7 @@ LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.
 LEFT JOIN vyuEMSalesperson Driver ON Driver.strType = 'Driver' AND Driver.intEntitySalespersonId = TL.intDriverId
 LEFT JOIN tblICItem Item ON Item.intItemId = DD.intItemId
 LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DH.intInvoiceId
-LEFT JOIN vyuEMEntity CS ON CS.intEntityId = DH.intEntityCustomerId
+LEFT JOIN vyuEMEntity CS ON CS.intEntityId = DH.intEntityCustomerId AND CS.strType = 'Customer'
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = DH.intCompanyLocationId
 LEFT JOIN(
