@@ -8,6 +8,5 @@
     [dblQuantity]						NUMERIC (18, 6) NULL,
 	[dblUnitQuantity]					NUMERIC (18, 6) NULL,
     [intConcurrencyId]					INT CONSTRAINT [DF_tblSOSalesOrderDetailComponent_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-	CONSTRAINT [PK_tblSOSalesOrderDetailComponent_intSalesOrderDetailComponentId] PRIMARY KEY CLUSTERED ([intSalesOrderDetailComponentId] ASC),
-	CONSTRAINT [FK_tblSOSalesOrderDetailComponent_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [dbo].[tblSOSalesOrderDetail] ([intSalesOrderDetailId]) ON DELETE CASCADE	
+	CONSTRAINT [PK_tblSOSalesOrderDetailComponent_intSalesOrderDetailComponentId] PRIMARY KEY CLUSTERED ([intSalesOrderDetailComponentId] ASC)	
 )

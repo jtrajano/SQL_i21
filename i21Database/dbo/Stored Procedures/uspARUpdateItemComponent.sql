@@ -31,7 +31,17 @@ BEGIN
 		WHERE 
 			ARI.intInvoiceId = @InvoiceId
 			AND ARID.intItemId <> ARTD.intItemId
-			AND ICI.strType = 'Bundle'			
+			AND ICI.strType = 'Bundle'		
+			
+			
+		DELETE ARIDC
+		FROM			
+			tblARInvoiceDetailComponent ARIDC
+		LEFT OUTER JOIN
+			tblARInvoiceDetail ARID
+				ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+		WHERE 
+			ISNULL(ARID.[intInvoiceDetailId],0) = 0
 
 		RETURN
 	END		

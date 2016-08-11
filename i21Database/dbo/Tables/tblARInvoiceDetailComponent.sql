@@ -8,6 +8,5 @@
     [dblQuantity]					NUMERIC (18, 6) NULL,
 	[dblUnitQuantity]				NUMERIC (18, 6) NULL,
     [intConcurrencyId]				INT CONSTRAINT [DF_tblARInvoiceDetailComponent_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-	CONSTRAINT [PK_tblARInvoiceDetailComponent_intInvoiceDetailComponentId] PRIMARY KEY CLUSTERED ([intInvoiceDetailComponentId] ASC),
-	CONSTRAINT [FK_tblARInvoiceDetailComponent_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY ([intInvoiceDetailId]) REFERENCES [dbo].[tblARInvoiceDetail] ([intInvoiceDetailId]) ON DELETE CASCADE	
+	CONSTRAINT [PK_tblARInvoiceDetailComponent_intInvoiceDetailComponentId] PRIMARY KEY CLUSTERED ([intInvoiceDetailComponentId] ASC)
 )
