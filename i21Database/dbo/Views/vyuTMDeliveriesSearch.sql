@@ -3,7 +3,7 @@ AS
 	SELECT 
 		strCustomerNumber = B.strEntityNo
 		,strCustomerName = B.strName
-		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(3)),3)
+		,strSiteNumber = RIGHT('0000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
 		,F.dtmInvoiceDate
 		,F.strBulkPlantNumber
 		,strProductDelivered = I.strItemNo
@@ -19,6 +19,7 @@ AS
 		,intSiteID = C.intSiteID
 		,F.intDeliveryHistoryID
 		,intLocationId = C.intLocationId
+		,F.strInvoiceNumber
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID
