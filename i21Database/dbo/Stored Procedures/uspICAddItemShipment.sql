@@ -71,6 +71,14 @@ SELECT	@intEntityId = intEntityUserSecurityId
 FROM	dbo.tblSMUserSecurity 
 WHERE	intEntityUserSecurityId = @intUserId
 
+-- Create the temp table if it does not exists. 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
+BEGIN 
+	CREATE TABLE #tmpAddItemShipmentResult (
+		intInventoryShipmentId INT
+	)
+END 
+
 DECLARE @Header TABLE (
 	intId INT IDENTITY(1,1) PRIMARY KEY CLUSTERED,
 	intOrderType INT NOT NULL,
@@ -156,6 +164,10 @@ BEGIN
 
 	-- Get Inserted Shipment ID
 	SET @CurrentShipmentId = SCOPE_IDENTITY()
+
+	-- Insert results to temp table
+	INSERT INTO #tmpAddItemShipmentResult(intInventoryShipmentId)
+	VALUES(@CurrentShipmentId)
 
 	-- Update Shipment ID of shipment items
 	UPDATE @ShipmentEntries
