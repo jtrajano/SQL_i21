@@ -67,6 +67,7 @@ BEGIN
     ,strFax       = i.strFax
     ,strWebsite = i.strWebsite
     ,strEmail   = i.strEmail
+	,strRTN		= i.strRTN
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 
