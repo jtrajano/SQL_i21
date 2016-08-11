@@ -1496,6 +1496,30 @@ Ext.define('Inventory.view.ItemViewController', {
 
     validateRecord: function(config, action) {
         var win = config.window;
+
+        var pricings = config.viewModel.data.current.tblICItemPricings();
+        if(pricings) {
+            var items = pricings.data.items;
+            for(var i = 0; i < items.length; i++) {
+                var p = items[i];
+
+                if((iRely.Functions.isEmpty(p.data.strLocationName, false) || p.data.intItemLocationId === null
+                    || iRely.Functions.isEmpty(p.data.strPricingMethod, false)) && !p.dummy) {
+                    var tabItem = win.down('#tabItem');
+                    tabItem.setActiveTab('pgePricing');
+                    var grid = win.down('#grdPricing');
+                     var gridColumns = grid.headerCt.getGridColumns();
+                    for (var i = 0; i < gridColumns.length; i++) {
+                        if (gridColumns[i].itemId == 'colPricingLocation' || gridColumns[i].itemId == 'colPricingMethod') {
+                            grid.columnManager.columns[i].setVisible(true);
+                        }
+                    }
+                    action(false);
+                    //iRely.Msg.showError('The Location in Pricing must not be blank.', Ext.MessageBox.OK, win);
+                    //return;
+                }
+            }
+        }
         this.validateRecord(config, function (result) {
             if (result) {
                 action(true);
@@ -2075,7 +2099,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
-            search.url = '../i21/api/CompanyLocation/SearchCompanyLocations';
+            search.url = '../i21/api/CompanyLocation/Search';
             search.columns = [
                 { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
                 { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
