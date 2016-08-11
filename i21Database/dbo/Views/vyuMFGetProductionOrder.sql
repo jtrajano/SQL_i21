@@ -23,7 +23,9 @@ SELECT IsNULL(BR.intBlendRequirementId,0) As intBlendRequirementId
 	,W.intConcurrencyId
 	,ISNULL(SWD.dtmPlannedStartDate, W.dtmExpectedDate) dtmPlannedDate
 	,ISNULL(Round(SWD.dblPlannedQty, 0), W.dblQuantity) dblPlannedQty
+	,S.intShiftId 
 	,S.strShiftName AS strPlannedShiftName
+	,MP.intManufacturingProcessId 
 	,MP.strProcessName
 	,OH.intOrderHeaderId
 	,OH.strBOLNo

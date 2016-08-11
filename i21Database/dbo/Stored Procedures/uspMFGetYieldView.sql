@@ -42,18 +42,15 @@ BEGIN TRY
 		,@dtmToDate DATETIME
 		,@ysnIncludeIngredientItem BIT
 		,@intInputItemId INT
+		,@intRecipeId INT
+		,@intYieldId INT
+		,@dtmDate DATETIME
+		,@intShiftId INT
 
-	SELECT @ysnIncludeIngredientItem = 1
+	SELECT @ysnIncludeIngredientItem = ysnShowInputItemInYieldView
+	FROM dbo.tblMFCompanyPreference
 
 	SELECT @dblDecimal = 2
-
-	SELECT @strDestinationUOMName = strUnitMeasure
-		,@intDestinationUOMId = intUnitMeasureId
-	FROM dbo.tblICUnitMeasure
-	WHERE strUnitMeasure IN (
-			'pound'
-			,'LB'
-			)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -71,8 +68,8 @@ BEGIN TRY
 			,intLocationId INT
 			)
 
-	SELECT @strIFormula = strInputFormula
-		,@strOFormula = strOutputFormula
+	SELECT @strIFormula = Replace(strInputFormula, '+Count Quantity', '-Count Quantity')
+		,@strOFormula = Replace(strOutputFormula, '+Count Quantity', '-Count Quantity')
 	FROM dbo.tblMFYield
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 
@@ -80,169 +77,127 @@ BEGIN TRY
 		DROP TABLE ##tblMFTransaction
 
 	CREATE TABLE ##tblMFTransaction (
-		intTransactionTypeId INT
-		,dtmProductionDate DATETIME
-		,strShiftName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,dtmTransactionDate DATETIME
+		dtmDate DATETIME
+		,intShiftId INT
 		,strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,intTransactionId INT
-		,intItemId INT
-		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,strDescription NVARCHAR(150) COLLATE Latin1_General_CI_AS
-		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,dblTransactionQuantity NUMERIC(18, 6)
-		,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,intUnitMeasureId INT
+		,intInputItemId INT
+		,dblQuantity NUMERIC(18, 6)
+		,intItemUOMId INT
 		,intWorkOrderId INT
-		,strProcess NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,ysnIncluded BIT
+		,intItemId INT
 		)
 
-	SELECT @strSQL = 
-		'
-		SELECT 3 AS intTransactionTypeId
-			,WI.dtmProductionDate
-			,S.strShiftName
-			,WI.dtmBusinessDate AS dtmTransactionDate
-			,''INPUT'' COLLATE Latin1_General_CI_AS AS strTransactionType
-			,WI.intWorkOrderInputLotId AS intTransactionId
-			,I.intItemId
-			,I.strItemNo
-			,I.strDescription
-			,L.strLotNumber
-			,WI.dblQuantity AS dblTransactionQuantity
-			,UM.strUnitMeasure
-			,UM.intUnitMeasureId
-			,WI.intWorkOrderId
-			,''Yes'' COLLATE Latin1_General_CI_AS AS strProcess
-			,CAST(1 AS BIT) AS IsIncluded
-		FROM dbo.tblMFWorkOrderInputLot WI
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
-		JOIN dbo.tblMFManufacturingProcess P ON P.intManufacturingProcessId = W.intManufacturingProcessId
-		JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
-		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
-		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WI.intItemUOMId
-		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		LEFT JOIN dbo.tblMFShift S on S.intShiftId=WI.intShiftId
-		WHERE W.intManufacturingProcessId = ' 
-		+ ltrim(@intManufacturingProcessId) + '
-			AND WI.dtmProductionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
-				AND ''' + ltrim(@dtmToDate) + 
-		'''
-		UNION
-		SELECT 4 AS intTransactionTypeId
-			,WP.dtmProductionDate
-			,S.strShiftName
-			,WP.dtmProductionDate AS dtmTransactionDate
-			,''OUTPUT'' COLLATE Latin1_General_CI_AS AS strTransactionType
-			,WP.intWorkOrderProducedLotId AS intTransactionId
-			,I.intItemId
-			,I.strItemNo
-			,I.strDescription
-			,L.strLotNumber
-			,WP.dblQuantity AS dblTransactionQuantity
-			,UM.strUnitMeasure
-			,UM.intUnitMeasureId
-			,WP.intWorkOrderId
-			,''Yes'' COLLATE Latin1_General_CI_AS AS strProcess
-			,CAST(1 AS BIT) AS IsIncluded
-		FROM dbo.tblMFWorkOrderProducedLot WP
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
-		JOIN dbo.tblMFManufacturingProcess P ON P.intManufacturingProcessId = W.intManufacturingProcessId
-		JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
-		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
-		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WP.intItemUOMId
-		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		LEFT JOIN dbo.tblMFShift S on S.intShiftId=WP.intShiftId
-		WHERE W.intManufacturingProcessId = ' 
-		+ ltrim(@intManufacturingProcessId) + '
-			AND WP.dtmProductionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
-				AND ''' + ltrim(@dtmToDate) + 
-		'''
-		UNION
+	INSERT INTO ##tblMFTransaction (
+		dtmDate
+		,intShiftId
+		,strTransactionType
+		,intTransactionId
+		,intInputItemId
+		,dblQuantity
+		,intItemUOMId
+		,intWorkOrderId
+		,intItemId
+		)
+	SELECT WI.dtmProductionDate
+		,WI.intShiftId
+		,'INPUT' COLLATE Latin1_General_CI_AS AS strTransactionType
+		,WI.intWorkOrderInputLotId AS intTransactionId
+		,WI.intItemId
+		,WI.dblQuantity AS dblQuantity
+		,WI.intItemUOMId
+		,WI.intWorkOrderId
+		,W.intItemId
+	FROM dbo.tblMFWorkOrderInputLot WI
+	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
+	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
+		AND WI.dtmProductionDate BETWEEN @dtmFromDate
+			AND @dtmToDate
 
-		SELECT 36 AS intTransactionTypeId
-			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
-			,NULL strShiftName
-			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate) AS dtmTransactionDate
-			,strTransactionType
-			,intProductionSummaryId AS intTransactionId
-			,UnPvt.intItemId
-			,I.strItemNo
-			,I.strDescription
-			,NULL strLotNumber
-			,UnPvt.dblTransactionQuantity
-			,NULL strUnitMeasure
-			,NULL intUnitMeasureId
-			,UnPvt.intWorkOrderId
-			,''Yes'' COLLATE Latin1_General_CI_AS AS strProcess
-			,CAST(1 AS BIT) AS IsIncluded
-		FROM dbo.tblMFProductionSummary
-		UNPIVOT(dblTransactionQuantity FOR strTransactionType IN (
-					dblOpeningQuantity
-					,dblCountQuantity
-					,dblOpeningOutputQuantity
-					,dblCountOutputQuantity
-					)) AS UnPvt
+	INSERT INTO ##tblMFTransaction (
+		dtmDate
+		,intShiftId
+		,strTransactionType
+		,intTransactionId
+		,intInputItemId
+		,dblQuantity
+		,intItemUOMId
+		,intWorkOrderId
+		,intItemId
+		)
+	SELECT WP.dtmProductionDate
+		,WP.intShiftId
+		,'OUTPUT' COLLATE Latin1_General_CI_AS AS strTransactionType
+		,WP.intWorkOrderProducedLotId AS intTransactionId
+		,WP.intItemId
+		,WP.dblQuantity
+		,WP.intItemUOMId
+		,WP.intWorkOrderId
+		,W.intItemId
+	FROM dbo.tblMFWorkOrderProducedLot WP
+	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
+	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
+		AND WP.dtmProductionDate BETWEEN @dtmFromDate
+			AND @dtmToDate
 
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = UnPvt.intWorkOrderId
-		JOIN dbo.tblMFManufacturingProcess P ON P.intManufacturingProcessId = W.intManufacturingProcessId
-		JOIN dbo.tblICItem I ON I.intItemId=UnPvt.intItemId
-		WHERE dblTransactionQuantity>0 and W.intManufacturingProcessId = ' 
-		+ ltrim(@intManufacturingProcessId) + '
-			AND ISNULL(W.dtmPlannedDate,W.dtmExpectedDate) BETWEEN ''' + ltrim(@dtmFromDate) + '''
-				AND ''' + ltrim(@dtmToDate) + 
-		'''
-		UNION
+	INSERT INTO ##tblMFTransaction (
+		dtmDate
+		,intShiftId
+		,strTransactionType
+		,intTransactionId
+		,intInputItemId
+		,dblQuantity
+		,intItemUOMId
+		,intWorkOrderId
+		,intItemId
+		)
+	SELECT ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
+		,NULL intShiftId
+		,strTransactionType
+		,intProductionSummaryId AS intTransactionId
+		,UnPvt.intItemId
+		,UnPvt.dblQuantity
+		,NULL intItemUOMId
+		,UnPvt.intWorkOrderId
+		,W.intItemId
+	FROM dbo.tblMFProductionSummary
+	UNPIVOT(dblQuantity FOR strTransactionType IN (
+				dblOpeningQuantity
+				,dblCountQuantity
+				,dblOpeningOutputQuantity
+				,dblCountOutputQuantity
+				)) AS UnPvt
+	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = UnPvt.intWorkOrderId
+		AND UnPvt.dblQuantity > 0
+	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
+		AND ISNULL(W.dtmPlannedDate, W.dtmExpectedDate) BETWEEN @dtmFromDate
+			AND @dtmToDate
 
-		SELECT 
-			intTransactionTypeId
-			,ISNULL(W.dtmPlannedDate,W.dtmExpectedDate)
-			,S.strShiftName
-			,WLT.dtmTransactionDate
-			,strTransactionType
-			,WLT.intWorkOrderProducedLotTransactionId AS intTransactionId
-			,I.intItemId
-			,I.strItemNo
-			,I.strDescription
-			,L.strLotNumber
-			,WLT.dblQuantity AS dblTransactionQuantity
-			,UM.strUnitMeasure
-			,UM.intUnitMeasureId
-			,WLT.intWorkOrderId
-			,''No'' COLLATE Latin1_General_CI_AS AS strProcess
-			,CAST(1 AS BIT) AS IsIncluded
-		FROM tblMFWorkOrderProducedLotTransaction WLT
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
-		JOIN dbo.tblICLot L ON L.intLotId = WLT.intLotId
-		JOIN dbo.tblICItem I on I.intItemId=L.intItemId
-		JOIN dbo.tblICItemUOM IU on IU.intItemUOMId=WLT.intItemUOMId
-		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFShift S on S.intShiftId=WLT.intShiftId
-		JOIN dbo.tblMFManufacturingProcess P ON P.intManufacturingProcessId = W.intManufacturingProcessId
-		WHERE W.intManufacturingProcessId = ' 
-		+ ltrim(@intManufacturingProcessId) + '
-			AND WLT.dtmTransactionDate BETWEEN ''' + ltrim(@dtmFromDate) + '''
-				AND ''' + ltrim(@dtmToDate) + '''
-		ORDER BY 4
-		'
-
-	--Select @strSQL
-	INSERT INTO ##tblMFTransaction
-	EXEC (@strSQL)
-
-	SELECT @intAttributeId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Time based production'
-
-	SELECT @strTimeBasedProduction = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND intAttributeId = @intAttributeId
-
-	IF @strTimeBasedProduction IS NULL
-		SELECT @strTimeBasedProduction = 'False'
+	INSERT INTO ##tblMFTransaction (
+		dtmDate
+		,intShiftId
+		,strTransactionType
+		,intTransactionId
+		,intInputItemId
+		,dblQuantity
+		,intItemUOMId
+		,intWorkOrderId
+		,intItemId
+		)
+	SELECT ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
+		,WLT.intShiftId
+		,strTransactionType
+		,WLT.intWorkOrderProducedLotTransactionId AS intTransactionId
+		,WLT.intItemId
+		,WLT.dblQuantity
+		,WLT.intItemUOMId
+		,WLT.intWorkOrderId
+		,W.intItemId
+	FROM tblMFWorkOrderProducedLotTransaction WLT
+	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
+	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
+		AND ISNULL(W.dtmPlannedDate, W.dtmExpectedDate) BETWEEN @dtmFromDate
+			AND @dtmToDate
 
 	IF @strMode = 'Run'
 		AND @ysnIncludeIngredientItem = 0
@@ -251,143 +206,99 @@ BEGIN TRY
 			DROP TABLE ##tblMFYield
 
 		SELECT DISTINCT TR.intWorkOrderId
-			,I.strItemNo
-			,I.strDescription
-			,CAST('' AS NVARCHAR(50)) AS strRunNo
-			,CAST(NULL AS DATETIME) AS dtmRunDate
-			,CAST('' AS NVARCHAR(50)) AS strShift
+			,W.strWorkOrderNo
+			,W.intItemId
+			,TR.dtmDate
+			,TR.intShiftId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
+			,W.intItemUOMId
 		INTO ##tblMFYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 
-		--Select *from ##tblMFTransaction
 		SELECT @intWorkOrderId = MIN(intWorkOrderId)
 		FROM ##tblMFYield
 
 		WHILE ISNULL(@intWorkOrderId, 0) > 0
 		BEGIN
-			SELECT @strRunNo = NULL
-				,@dtmRunDate = NULL
-				,@strShiftName = NULL
-				,@dblInput = NULL
+			SELECT @dblInput = NULL
 				,@dblOutput = NULL
 				,@dblInputCC = NULL
 				,@dblInputOB = NULL
 				,@dblOutputCC = NULL
 				,@dblOutputOB = NULL
-				,@intItemId = NULL
 				,@dblTInput = NULL
 				,@dblTOutput = NULL
 				,@dblQueuedQtyAdj = NULL
 				,@dblCycleCountAdj = NULL
 				,@dblEmptyOutAdj = NULL
 
-			SELECT @strRunNo = strWorkOrderNo
-				,@intItemId = intItemId
-				,@dtmRunDate = ISNULL(dtmPlannedDate, dtmExpectedDate)
-				,@intManufacturingProcessId = intManufacturingProcessId
-			FROM tblMFWorkOrder
+			SELECT @intItemId = intItemId
+			FROM ##tblMFYield
 			WHERE intWorkOrderId = @intWorkOrderId
 
-			SELECT @strShiftName = MAX(strShiftName)
-			FROM ##tblMFTransaction
-			WHERE intWorkOrderId = @intWorkOrderId
-
-			SELECT @dblInput = SUM(dblTransactionQuantity)
+			SELECT @dblInput = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'Input'
 
-			SELECT @dblOutput = SUM(dblTransactionQuantity)
+			SELECT @dblOutput = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'Output'
 
-			SELECT @dblInputCC = SUM(dblTransactionQuantity)
+			SELECT @dblInputCC = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'dblCountQuantity'
 
-			SELECT @dblInputOB = SUM(dblTransactionQuantity)
+			SELECT @dblInputOB = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'dblOpeningQuantity'
 
 			--SELECT @dblInputOB
-			SELECT @dblOutputCC = SUM(dblTransactionQuantity)
+			SELECT @dblOutputCC = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'dblCountOutputQuantity'
 
-			SELECT @dblOutputOB = SUM(dblTransactionQuantity)
+			SELECT @dblOutputOB = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'dblOpeningOutputQuantity'
 
-			SELECT @dblQueuedQtyAdj = SUM(dblTransactionQuantity)
+			SELECT @dblQueuedQtyAdj = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'Queued Qty Adj'
 
-			SELECT @dblCycleCountAdj = SUM(dblTransactionQuantity)
+			SELECT @dblCycleCountAdj = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'Cycle Count Adj'
 
-			SELECT @dblEmptyOutAdj = SUM(dblTransactionQuantity)
+			SELECT @dblEmptyOutAdj = SUM(dblQuantity)
 			FROM ##tblMFTransaction
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND strTransactionType = 'Empty Out Adj'
 
-			IF @strTimeBasedProduction = 'True'
-			BEGIN
-				SELECT @dblCalculatedQuantity = 100 * (
-						SELECT TOP 1 dblCalculatedQuantity
-						FROM dbo.tblMFWorkOrderRecipeItem
-						WHERE intWorkOrderId = @intWorkOrderId
-							AND intRecipeItemTypeId = 2
-							AND intItemId = @intItemId
-						) / (
-						SELECT SUM(dblCalculatedQuantity)
-						FROM dbo.tblMFWorkOrderRecipeItem
-						WHERE intWorkOrderId = @intWorkOrderId
-							AND intRecipeItemTypeId = 1
-						)
-			END
-			ELSE
-			BEGIN
-				SELECT @dblCalculatedQuantity = (
-						SELECT TOP 1 dblCalculatedQuantity
-						FROM dbo.tblMFRecipeItem
-						WHERE intRecipeId = R.intRecipeId
-							AND intRecipeItemTypeId = 2
-							AND intItemId = @intItemId
-						) * CASE 
-						WHEN C2.strCategoryCode = 'FINISHED GOODS'
-							THEN MAX(I2.dblNetWeight)
-						ELSE 1
-						END / SUM(dblCalculatedQuantity) * 100
-				FROM dbo.tblMFRecipe R
-				JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-				JOIN dbo.tblICItem I1 ON I1.intItemId = RI.intItemId
-				JOIN dbo.tblICCategory C1 ON C1.intCategoryId = I1.intCategoryId
-					AND C1.strCategoryCode <> 'PACK MATERIAL'
-				JOIN dbo.tblICItem I2 ON I2.intItemId = R.intItemId
-				JOIN dbo.tblICCategory C2 ON C2.intCategoryId = I2.intCategoryId
-				WHERE R.intItemId = @intItemId
-					AND R.intLocationId = @intLocationId
-					AND R.ysnActive = 1
-					AND RI.intRecipeItemTypeId = 1
-				GROUP BY R.intRecipeId
-					,C1.strCategoryCode
-					,C2.strCategoryCode
-			END
+			SELECT @dblCalculatedQuantity = 100 * (
+					SELECT TOP 1 dblQuantity
+					FROM dbo.tblMFWorkOrderRecipeItem
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intRecipeItemTypeId = 2
+						AND intItemId = @intItemId
+					) / (
+					SELECT SUM(dblCalculatedQuantity)
+					FROM dbo.tblMFWorkOrderRecipeItem
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intRecipeItemTypeId = 1
+					)
 
 			SET @strCFormula = ''
 
@@ -412,10 +323,7 @@ BEGIN TRY
 					END
 
 			UPDATE ##tblMFYield
-			SET strRunNo = @strRunNo
-				,dtmRunDate = @dtmRunDate
-				,strShift = @strShiftName
-				,dblActualYield = @dblYieldP * 100
+			SET dblActualYield = @dblYieldP * 100
 				,dblTotalInput = @dblTInput
 				,dblTotalOutput = @dblTOutput
 				,dblStandardYield = @dblCalculatedQuantity
@@ -438,21 +346,28 @@ BEGIN TRY
 		FROM ##tblMFYield
 
 		SELECT CONVERT(INT, ROW_NUMBER() OVER (
-					ORDER BY dtmRunDate
+					ORDER BY Y.dtmDate
 					)) AS intRowId
 			,@intManufacturingProcessId AS intManufacturingProcessId
-			,strItemNo
-			,strDescription
-			,strRunNo
-			,dtmRunDate
-			,strShift
-			,ROUND(dblTotalOutput, @dblDecimal) dblTotalOutput
-			,ROUND(dblTotalInput, @dblDecimal) dblTotalInput
-			,@strDestinationUOMName strUnitMeasure
-			,ROUND(dblActualYield, 2) dblActualYield
-			,ROUND(dblStandardYield, 2) dblStandardYield
-			,ROUND(dblActualYield - dblStandardYield, 2) dblVariance
-		FROM ##tblMFYield
+			,I.strItemNo
+			,I.strDescription
+			,Y.strWorkOrderNo AS strRunNo
+			,Y.dtmDate AS dtmRunDate
+			,S.strShiftName AS strShift
+			,'' AS strInputItemNo
+			,'' AS strInputItemDescription
+			,ROUND(Y.dblTotalOutput, @dblDecimal) dblTotalOutput
+			,ROUND(Y.dblTotalInput, @dblDecimal) dblTotalInput
+			,ROUND(0, @dblDecimal) dblRequiredQty
+			,U.strUnitMeasure
+			,ROUND(Y.dblActualYield, 2) dblActualYield
+			,ROUND(Y.dblStandardYield, 2) dblStandardYield
+			,ROUND(Y.dblActualYield - Y.dblStandardYield, 2) dblVariance
+		FROM ##tblMFYield Y
+		JOIN dbo.tblICItem I ON I.intItemId = Y.intItemId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = Y.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = Y.intShiftId
 	END
 
 	IF @strMode = 'Run'
@@ -462,12 +377,11 @@ BEGIN TRY
 			DROP TABLE ##tblMFInputItemYield
 
 		SELECT DISTINCT TR.intWorkOrderId
-			,I.strItemNo
-			,I.strDescription
-			,CAST('' AS NVARCHAR(50)) AS strRunNo
-			,CAST(NULL AS DATETIME) AS dtmRunDate
-			,CAST('' AS NVARCHAR(50)) AS strShift
-			,TR.intItemId AS intInputItemId
+			,W.strWorkOrderNo
+			,TR.intItemId
+			,TR.dtmDate
+			,TR.intShiftId
+			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
 			,CAST(W.dblQuantity * RI.dblCalculatedQuantity / (
 					CASE 
@@ -480,13 +394,13 @@ BEGIN TRY
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
+			,RI.intItemUOMId
 		INTO ##tblMFInputItemYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
 			AND RI.intWorkOrderId = W.intWorkOrderId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeItem R ON R.intItemId = W.intItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
 			AND R.intWorkOrderId = W.intWorkOrderId
 			AND R.intRecipeId = RI.intRecipeId
 
@@ -503,85 +417,112 @@ BEGIN TRY
 
 			WHILE ISNULL(@intInputItemId, 0) > 0
 			BEGIN
-				SELECT @strRunNo = NULL
-					,@dtmRunDate = NULL
-					,@strShiftName = NULL
-					,@dblInput = NULL
+				SELECT @dblInput = NULL
 					,@dblOutput = NULL
 					,@dblInputCC = NULL
 					,@dblInputOB = NULL
 					,@dblOutputCC = NULL
 					,@dblOutputOB = NULL
-					,@intItemId = NULL
 					,@dblTInput = NULL
 					,@dblTOutput = NULL
 					,@dblQueuedQtyAdj = NULL
 					,@dblCycleCountAdj = NULL
 					,@dblEmptyOutAdj = NULL
 
-				SELECT @strRunNo = strWorkOrderNo
-					,@intItemId = intItemId
-					,@dtmRunDate = ISNULL(dtmPlannedDate, dtmExpectedDate)
-					,@intManufacturingProcessId = intManufacturingProcessId
-				FROM tblMFWorkOrder
+				SELECT @intItemId = intItemId
+				FROM ##tblMFInputItemYield
 				WHERE intWorkOrderId = @intWorkOrderId
 
-				SELECT @strShiftName = MAX(strShiftName)
+				SELECT @dblInput = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-
-				SELECT @dblInput = SUM(dblTransactionQuantity)
-				FROM ##tblMFTransaction
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'Input'
 
-				SELECT @dblOutput = SUM(dblTransactionQuantity)
+				SELECT @dblOutput = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'Output'
 
-				SELECT @dblInputCC = SUM(dblTransactionQuantity)
+				SELECT @dblInputCC = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'dblCountQuantity'
 
-				SELECT @dblInputOB = SUM(dblTransactionQuantity)
+				SELECT @dblInputOB = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'dblOpeningQuantity'
 
-				SELECT @dblOutputCC = SUM(dblTransactionQuantity)
+				SELECT @dblOutputCC = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'dblCountOutputQuantity'
 
-				SELECT @dblOutputOB = SUM(dblTransactionQuantity)
+				SELECT @dblOutputOB = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'dblOpeningOutputQuantity'
 
-				SELECT @dblQueuedQtyAdj = SUM(dblTransactionQuantity)
+				SELECT @dblQueuedQtyAdj = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intItemId = (
+						CASE 
+							WHEN @intInputItemId = @intItemId
+								THEN intItemId
+							ELSE @intInputItemId
+							END
+						)
 					AND strTransactionType = 'Queued Qty Adj'
 
-				SELECT @dblCycleCountAdj = SUM(dblTransactionQuantity)
+				SELECT @dblCycleCountAdj = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'Cycle Count Adj'
 
-				SELECT @dblEmptyOutAdj = SUM(dblTransactionQuantity)
+				SELECT @dblEmptyOutAdj = SUM(dblQuantity)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
-					AND intItemId = (Case When @intInputItemId = @intItemId Then intItemId Else @intInputItemId End)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
 					AND strTransactionType = 'Empty Out Adj'
 
 				IF @intInputItemId = @intItemId
@@ -637,18 +578,15 @@ BEGIN TRY
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intInputItemId = @intInputItemId
 
-					SET @dblYieldP = @dblRequiredQty / CASE 
-							WHEN ISNULL(@dblTInput, 0) = 0
+					SET @dblYieldP = @dblTInput / CASE 
+							WHEN ISNULL(@dblRequiredQty, 0) = 0
 								THEN 1
-							ELSE @dblTInput
+							ELSE @dblRequiredQty
 							END
 				END
 
 				UPDATE ##tblMFInputItemYield
-				SET strRunNo = @strRunNo
-					,dtmRunDate = @dtmRunDate
-					,strShift = @strShiftName
-					,dblActualYield = @dblYieldP * 100
+				SET dblActualYield = @dblYieldP * 100
 					,dblTotalInput = @dblTInput
 					,dblTotalOutput = @dblTOutput
 					,dblStandardYield = @dblCalculatedQuantity
@@ -676,187 +614,72 @@ BEGIN TRY
 			,ROUND(AVG(dblActualYield), 2) dblActualYield
 			,CONVERT(INT, 1) AS intConcurrencyId
 		FROM ##tblMFInputItemYield
+		WHERE intInputItemId = intItemId
 
 		SELECT CONVERT(INT, ROW_NUMBER() OVER (
-					ORDER BY IY.dtmRunDate
+					ORDER BY IY.dtmDate
 					)) AS intRowId
 			,@intManufacturingProcessId AS intManufacturingProcessId
-			,IY.strItemNo
-			,IY.strDescription
-			,IY.strRunNo
-			,IY.dtmRunDate
-			,IY.strShift
 			,I.strItemNo
 			,I.strDescription
+			,IY.strWorkOrderNo AS strRunNo
+			,IY.dtmDate AS dtmRunDate
+			,S.strShiftName AS strShift
+			,II.strItemNo AS strInputItemNo
+			,II.strDescription AS strInputItemDescription
 			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
-			,@strDestinationUOMName strUnitMeasure
+			,U.strUnitMeasure
 			,ROUND(IY.dblActualYield, 2) dblActualYield
 			,ROUND(IY.dblStandardYield, 2) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
 		FROM ##tblMFInputItemYield IY
-		JOIN dbo.tblICItem I ON I.intItemId = IY.intInputItemId
+		JOIN dbo.tblICItem I ON I.intItemId = IY.intItemId
+		JOIN dbo.tblICItem II ON II.intItemId = IY.intInputItemId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = IY.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IY.intShiftId
 	END
 
 	IF @strMode = 'Date'
-		OR @strMode = 'Both'
+		AND @ysnIncludeIngredientItem = 0
 	BEGIN
-		IF OBJECT_ID('tempdb..##tblMFTransactionByDate') IS NOT NULL
-			DROP TABLE ##tblMFTransactionByDate
-
-		CREATE TABLE ##tblMFTransactionByDate (
-			intRowNum INT
-			,strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,strItemNo NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-			,strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-			,dtmTransactionDate DATETIME
-			,dblTransactionQuantity NUMERIC(18, 6)
-			,dblStandardYield NUMERIC(18, 6)
-			)
-
-		IF @strTimeBasedProduction = 'True'
-		BEGIN
-			INSERT INTO ##tblMFTransactionByDate
-			SELECT DENSE_RANK() OVER (
-					ORDER BY ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-						,W.intItemId
-					) intRowNum
-				,strTransactionType
-				,I.strItemNo
-				,I.strDescription
-				,ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-				,CASE 
-					WHEN strTransactionType = 'Output'
-						THEN SUM(dblTransactionQuantity)
-					ELSE SUM(dblTransactionQuantity)
-					END dblTransactionQuantity
-				,100 * (
-					SELECT TOP 1 dblCalculatedQuantity
-					FROM tblMFWorkOrderRecipeItem
-					WHERE intWorkOrderId = W.intWorkOrderId
-						AND intRecipeItemTypeId = 2
-						AND intRecipeItemId = W.intItemId
-					) / (
-					SELECT SUM(dblCalculatedQuantity)
-					FROM tblMFWorkOrderRecipeItem
-					WHERE intWorkOrderId = W.intWorkOrderId
-						AND intRecipeItemId = 1
-					)
-			FROM ##tblMFTransaction TR
-			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-			JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-			JOIN (
-				SELECT WRI.intWorkOrderId
-					,SUM(dblCalculatedQuantity) dblCalculatedQuantity
-				FROM dbo.tblMFWorkOrderRecipeItem WRI
-				WHERE intRecipeItemTypeId = 1
-				GROUP BY WRI.intWorkOrderId
-				) BM ON BM.intWorkOrderId = W.intWorkOrderId
-			GROUP BY ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-				,I.strItemNo
-				,I.strDescription
-				,W.intItemId
-				,strTransactionType
-				,W.intWorkOrderId
-				,dblCalculatedQuantity
-		END
-		ELSE
-		BEGIN
-			INSERT INTO ##tblMFTransactionByDate
-			SELECT DENSE_RANK() OVER (
-					ORDER BY ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-						,W.intItemId
-					) intRowNum
-				,strTransactionType
-				,I.strItemNo
-				,I.strDescription
-				,ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-				,CASE 
-					WHEN strTransactionType = 'Output'
-						THEN SUM(dblTransactionQuantity)
-					ELSE SUM(dblTransactionQuantity)
-					END dblTransactionQuantity
-				,100 * (
-					SELECT dblCalculatedQuantity * CASE 
-							WHEN C.strCategoryCode = 'FINISHED GOODS'
-								THEN I.dblNetWeight
-							ELSE 1
-							END
-					FROM tblMFRecipeItem RI
-					JOIN tblICItem I ON I.intItemId = RI.intItemId
-					JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
-					WHERE RI.intRecipeId = BM.intRecipeId
-						AND RI.intRecipeItemTypeId = 2
-						AND RI.intItemId = W.intItemId
-					) / dblCalculatedQuantity
-			FROM ##tblMFTransaction TR
-			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-			JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
-			JOIN (
-				SELECT R.intRecipeId
-					,R.intItemId
-					,SUM(RI.dblCalculatedQuantity) dblCalculatedQuantity
-				FROM dbo.tblMFRecipe R
-				JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-				JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
-				JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
-					AND C.strCategoryCode <> 'PACK MATERIAL'
-				WHERE R.intLocationId = @intLocationId
-					AND R.ysnActive = 1
-					AND intRecipeItemTypeId = 1
-				GROUP BY R.intRecipeId
-					,R.intItemId
-				) BM ON BM.intItemId = W.intItemId
-			GROUP BY BM.intRecipeId
-				,ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-				,W.intItemId
-				,I.strItemNo
-				,I.strDescription
-				,I.intItemId
-				,strTransactionType
-				,W.intWorkOrderId
-				,dblCalculatedQuantity
-		END
-
 		IF OBJECT_ID('tempdb..##tblMFYieldByDate') IS NOT NULL
 			DROP TABLE ##tblMFYieldByDate
 
-		SELECT intRowNum
-			,TD.strItemNo
-			,strDescription
-			,CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS AS strRunNo
-			,dtmTransactionDate AS dtmRunDate
-			,CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS AS strShift
-			,CAST(0.0 AS DECIMAL(24, 10)) AS dblTotalInput
-			,CAST(0.0 AS DECIMAL(24, 10)) AS dblTotalOutput
-			,CAST(0.0 AS DECIMAL(24, 2)) AS dblActualYield
-			,dblStandardYield AS dblStandardYield
-			,CAST(0.0 AS DECIMAL(24, 2)) AS dblVariance
+		SELECT DISTINCT Dense_Rank() OVER (
+				ORDER BY TR.intItemId
+					,TR.dtmDate
+					,TR.intShiftId
+				) AS intYieldId
+			,TR.intItemId
+			,TR.dtmDate
+			,TR.intShiftId
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblRequiredQty
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
+			,W.intItemUOMId
 		INTO ##tblMFYieldByDate
-		FROM ##tblMFTransactionByDate TD
-		GROUP BY intRowNum
-			,dtmTransactionDate
-			,TD.strItemNo
-			,strDescription
-			,dblStandardYield
+		FROM ##tblMFTransaction TR
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 
-		SELECT @intRowNum = MIN(intRowNum)
+		SELECT @intYieldId = MIN(intYieldId)
 		FROM ##tblMFYieldByDate
 
-		WHILE ISNULL(@intRowNum, 0) > 0
+		WHILE ISNULL(@intYieldId, 0) > 0
 		BEGIN
-			SELECT @strRunNo = NULL
-				,@dtmRunDate = NULL
-				,@strShiftName = NULL
+			SELECT @dtmDate = NULL
+				,@intShiftId = NULL
 				,@dblInput = NULL
 				,@dblOutput = NULL
 				,@dblInputCC = NULL
 				,@dblInputOB = NULL
 				,@dblOutputCC = NULL
 				,@dblOutputOB = NULL
-				--,@intProductionTypeId = NULL
-				--,@intProductionId = NULL
 				,@intItemId = NULL
 				,@dblTInput = NULL
 				,@dblTOutput = NULL
@@ -864,50 +687,95 @@ BEGIN TRY
 				,@dblCycleCountAdj = NULL
 				,@dblEmptyOutAdj = NULL
 
-			SELECT @dblInput = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @intItemId = intItemId
+				,@dtmDate = dtmDate
+				,@intShiftId = intShiftId
+			FROM ##tblMFYieldByDate
+			WHERE intYieldId = @intYieldId
+
+			SELECT @dblInput = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'Input'
 
-			SELECT @dblOutput = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblOutput = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'Output'
 
-			SELECT @dblInputCC = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblInputCC = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'dblCountQuantity'
 
-			SELECT @dblInputOB = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblInputOB = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'dblOpeningQuantity'
 
-			SELECT @dblOutputCC = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblOutputCC = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'dblCountOutputQuantity'
 
-			SELECT @dblOutputOB = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblOutputOB = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'dblOpeningOutputQuantity'
 
-			SELECT @dblQueuedQtyAdj = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblQueuedQtyAdj = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'Queued Qty Adj'
 
-			SELECT @dblCycleCountAdj = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblCycleCountAdj = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'Cycle Count Adj'
 
-			SELECT @dblEmptyOutAdj = SUM(dblTransactionQuantity)
-			FROM ##tblMFTransactionByDate
-			WHERE intRowNum = @intRowNum
+			SELECT @dblEmptyOutAdj = SUM(dblQuantity)
+			FROM ##tblMFTransaction
+			WHERE intItemId = @intItemId
+				AND dtmDate = @dtmDate
+				AND intShiftId = IsNULL(@intShiftId, intShiftId)
 				AND strTransactionType = 'Empty Out Adj'
+
+			SELECT @intRecipeId = NULL
+
+			SELECT @intRecipeId = intRecipeId
+			FROM dbo.tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+
+			SELECT @dblCalculatedQuantity = 100 * (
+					SELECT TOP 1 dblQuantity
+					FROM dbo.tblMFRecipeItem
+					WHERE intRecipeId = @intRecipeId
+						AND intRecipeItemTypeId = 2
+						AND intItemId = @intItemId
+					) / (
+					SELECT SUM(dblCalculatedQuantity)
+					FROM dbo.tblMFRecipeItem
+					WHERE intRecipeId = @intRecipeId
+						AND intRecipeItemTypeId = 1
+					)
 
 			SET @strCFormula = ''
 
@@ -922,7 +790,7 @@ BEGIN TRY
 			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
 			EXEC sp_executesql @strCFormula
-				,N'@strYieldValue DECIMAL(24,10) OUTPUT'
+				,N'@strYieldValue Numeric(18, 6) OUTPUT'
 				,@strYieldValue = @dblTInput OUTPUT
 
 			SET @dblYieldP = @dblTOutput / CASE 
@@ -935,11 +803,12 @@ BEGIN TRY
 			SET dblActualYield = @dblYieldP * 100
 				,dblTotalInput = @dblTInput
 				,dblTotalOutput = @dblTOutput
-			WHERE intRowNum = @intRowNum
+				,dblStandardYield = @dblCalculatedQuantity
+			WHERE intYieldId = @intYieldId
 
-			SELECT @intRowNum = MIN(intRowNum)
+			SELECT @intYieldId = MIN(intYieldId)
 			FROM ##tblMFYieldByDate
-			WHERE intRowNum > @intRowNum
+			WHERE intYieldId > @intYieldId
 		END
 
 		SELECT @dtmFromDate AS dtmFromDate
@@ -954,22 +823,344 @@ BEGIN TRY
 		FROM ##tblMFYieldByDate
 
 		SELECT CONVERT(INT, ROW_NUMBER() OVER (
-					ORDER BY dtmRunDate
+					ORDER BY IY.dtmDate
 					)) AS intRowId
 			,@intManufacturingProcessId AS intManufacturingProcessId
-			,strItemNo
-			,strDescription
-			,CAST('' AS NVARCHAR(50)) AS strRunNo
-			,dtmRunDate
-			,CAST('' AS NVARCHAR(50)) AS strShift
-			,ROUND(dblTotalOutput, @dblDecimal) dblTotalOutput
-			,ROUND(dblTotalInput, @dblDecimal) dblTotalInput
-			,@strDestinationUOMName strUnitMeasure
-			,ROUND(dblActualYield, 2) dblActualYield
-			,ROUND(dblStandardYield, 2) dblStandardYield
-			,ROUND(dblActualYield - dblStandardYield, 2) dblVariance
-		FROM ##tblMFYieldByDate
+			,I.strItemNo
+			,I.strDescription
+			,'' AS strRunNo
+			,IY.dtmDate AS dtmRunDate
+			,S.strShiftName AS strShift
+			,'' AS strInputItemNo
+			,'' AS strInputItemDescription
+			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
+			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
+			,ROUND(0, @dblDecimal) dblRequiredQty
+			,U.strUnitMeasure
+			,ROUND(IY.dblActualYield, 2) dblActualYield
+			,ROUND(IY.dblStandardYield, 2) dblStandardYield
+			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+		FROM ##tblMFYieldByDate IY
+		JOIN dbo.tblICItem I ON I.intItemId = IY.intItemId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = IY.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IY.intShiftId
 	END
+
+	IF @strMode = 'Date'
+		AND @ysnIncludeIngredientItem = 1
+	BEGIN
+		IF OBJECT_ID('tempdb..##tblMFInputItemYieldByDate') IS NOT NULL
+			DROP TABLE ##tblMFInputItemYieldByDate
+
+		SELECT DISTINCT Dense_Rank() OVER (
+				ORDER BY TR.intItemId
+					,TR.dtmDate
+					,TR.intShiftId
+				) AS intYieldId
+			,TR.intItemId
+			,TR.dtmDate
+			,TR.intShiftId
+			,TR.intInputItemId
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
+			,CAST(W.dblQuantity * RI.dblCalculatedQuantity / (
+					CASE 
+						WHEN R.dblQuantity = 0
+							THEN 1
+						ELSE R.dblQuantity
+						END
+					) AS NUMERIC(18, 6)) AS dblRequiredQty
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
+			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
+			,RI.intItemUOMId
+		INTO ##tblMFInputItemYieldByDate
+		FROM ##tblMFTransaction TR
+		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = TR.intInputItemId
+			AND RI.intWorkOrderId = TR.intWorkOrderId
+		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
+			AND R.intWorkOrderId = TR.intWorkOrderId
+			AND R.intRecipeId = RI.intRecipeId
+
+		SELECT @intYieldId = MIN(intYieldId)
+		FROM ##tblMFInputItemYieldByDate
+
+		WHILE ISNULL(@intYieldId, 0) > 0
+		BEGIN
+			SELECT @dtmDate = NULL
+				,@intShiftId = NULL
+
+			SELECT @intItemId = intItemId
+				,@dtmDate = dtmDate
+				,@intShiftId = intShiftId
+			FROM ##tblMFInputItemYieldByDate
+			WHERE intYieldId = @intYieldId
+
+			SELECT @intInputItemId = NULL
+
+			SELECT @intInputItemId = MIN(intInputItemId)
+			FROM ##tblMFInputItemYieldByDate
+			WHERE intYieldId = @intYieldId
+
+			WHILE ISNULL(@intInputItemId, 0) > 0
+			BEGIN
+				SELECT @dblInput = NULL
+					,@dblOutput = NULL
+					,@dblInputCC = NULL
+					,@dblInputOB = NULL
+					,@dblOutputCC = NULL
+					,@dblOutputOB = NULL
+					,@dblTInput = NULL
+					,@dblTOutput = NULL
+					,@dblQueuedQtyAdj = NULL
+					,@dblCycleCountAdj = NULL
+					,@dblEmptyOutAdj = NULL
+
+				SELECT @dblInput = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'Input'
+
+				SELECT @dblOutput = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'Output'
+
+				SELECT @dblInputCC = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'dblCountQuantity'
+
+				SELECT @dblInputOB = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'dblOpeningQuantity'
+
+				SELECT @dblOutputCC = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'dblCountOutputQuantity'
+
+				SELECT @dblOutputOB = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'dblOpeningOutputQuantity'
+
+				SELECT @dblQueuedQtyAdj = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'Queued Qty Adj'
+
+				SELECT @dblCycleCountAdj = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = CASE 
+						WHEN @intInputItemId = @intItemId
+							THEN intInputItemId
+						ELSE @intInputItemId
+						END
+					AND strTransactionType = 'Cycle Count Adj'
+
+				SELECT @dblEmptyOutAdj = SUM(dblQuantity)
+				FROM ##tblMFTransaction
+				WHERE intItemId = @intItemId
+					AND dtmDate = @dtmDate
+					AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					AND intInputItemId = @intInputItemId
+					AND strTransactionType = 'Empty Out Adj'
+
+				IF @intInputItemId = @intItemId
+				BEGIN
+					SELECT @intRecipeId = NULL
+
+					SELECT @intRecipeId = intRecipeId
+					FROM dbo.tblMFRecipe
+					WHERE intItemId = @intItemId
+						AND intLocationId = @intLocationId
+						AND ysnActive = 1
+
+					SELECT @dblCalculatedQuantity = 100 * (
+							SELECT TOP 1 dblQuantity
+							FROM dbo.tblMFRecipeItem
+							WHERE intRecipeId = @intRecipeId
+								AND intRecipeItemTypeId = 2
+								AND intItemId = @intItemId
+							) / (
+							SELECT SUM(dblCalculatedQuantity)
+							FROM dbo.tblMFRecipeItem
+							WHERE intRecipeId = @intRecipeId
+								AND intRecipeItemTypeId = 1
+							)
+				END
+				ELSE
+				BEGIN
+					SELECT @dblCalculatedQuantity = 100
+				END
+
+				SET @strCFormula = ''
+
+				SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+
+				EXEC sp_executesql @strCFormula
+					,N'@strYieldValue Numeric(18, 6) OUTPUT'
+					,@strYieldValue = @dblTOutput OUTPUT
+
+				SET @strCFormula = ''
+
+				SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+
+				EXEC sp_executesql @strCFormula
+					,N'@strYieldValue Numeric(18, 6) OUTPUT'
+					,@strYieldValue = @dblTInput OUTPUT
+
+				IF @intInputItemId = @intItemId
+				BEGIN
+					SET @dblYieldP = @dblTOutput / CASE 
+							WHEN ISNULL(@dblTInput, 0) = 0
+								THEN 1
+							ELSE @dblTInput
+							END
+				END
+				ELSE
+				BEGIN
+					SELECT @dblRequiredQty = 0
+
+					SELECT @dblRequiredQty = dblRequiredQty
+					FROM ##tblMFInputItemYieldByDate
+					WHERE intYieldId = @intYieldId
+						AND intInputItemId = @intInputItemId
+
+					SET @dblYieldP = @dblTInput / CASE 
+							WHEN ISNULL(@dblRequiredQty, 0) = 0
+								THEN 1
+							ELSE @dblRequiredQty
+							END
+				END
+
+				UPDATE ##tblMFInputItemYieldByDate
+				SET dblActualYield = @dblYieldP * 100
+					,dblTotalInput = @dblTInput
+					,dblTotalOutput = @dblTOutput
+					,dblStandardYield = @dblCalculatedQuantity
+				WHERE intYieldId = @intYieldId
+					AND intInputItemId = @intInputItemId
+
+				SELECT @intInputItemId = MIN(intInputItemId)
+				FROM ##tblMFInputItemYieldByDate
+				WHERE intYieldId = @intYieldId
+					AND intInputItemId > @intInputItemId
+			END
+
+			SELECT @intYieldId = MIN(intYieldId)
+			FROM ##tblMFInputItemYieldByDate
+			WHERE intYieldId > @intYieldId
+		END
+
+		SELECT @dtmFromDate AS dtmFromDate
+			,@dtmToDate AS dtmToDate
+			,@intManufacturingProcessId AS intManufacturingProcessId
+			,@intLocationId AS intLocationId
+			,ROUND(SUM(dblTotalOutput), @dblDecimal) dblTotalOutput
+			,ROUND(SUM(dblTotalInput), @dblDecimal) dblTotalInput
+			,ROUND(ABS(SUM(dblTotalInput) - SUM(dblTotalOutput)), @dblDecimal) dblDifference
+			,ROUND(AVG(dblActualYield), 2) dblActualYield
+			,CONVERT(INT, 1) AS intConcurrencyId
+		FROM ##tblMFInputItemYieldByDate
+		WHERE intInputItemId = intItemId
+
+		SELECT CONVERT(INT, ROW_NUMBER() OVER (
+					ORDER BY IY.dtmDate
+					)) AS intRowId
+			,@intManufacturingProcessId AS intManufacturingProcessId
+			,I.strItemNo
+			,I.strDescription
+			,'' AS strRunNo
+			,IY.dtmDate AS dtmRunDate
+			,S.strShiftName AS strShift
+			,II.strItemNo
+			,II.strDescription
+			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
+			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
+			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
+			,U.strUnitMeasure
+			,ROUND(IY.dblActualYield, 2) dblActualYield
+			,ROUND(IY.dblStandardYield, 2) dblStandardYield
+			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+		FROM ##tblMFInputItemYieldByDate IY
+		JOIN dbo.tblICItem I ON I.intItemId = IY.intItemId
+		JOIN dbo.tblICItem II ON II.intItemId = IY.intInputItemId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = IY.intItemUOMId
+		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IY.intShiftId
+	END
+
+	IF OBJECT_ID('tempdb..##tblMFTransaction') IS NOT NULL
+		DROP TABLE ##tblMFTransaction
+
+	IF OBJECT_ID('tempdb..##tblMFYield') IS NOT NULL
+		DROP TABLE ##tblMFYield
+
+	IF OBJECT_ID('tempdb..##tblMFInputItemYield') IS NOT NULL
+		DROP TABLE ##tblMFInputItemYield
+
+	IF OBJECT_ID('tempdb..##tblMFYieldByDate') IS NOT NULL
+		DROP TABLE ##tblMFYieldByDate
+
+	IF OBJECT_ID('tempdb..##tblMFInputItemYieldByDate') IS NOT NULL
+		DROP TABLE ##tblMFInputItemYieldByDate
 END TRY
 
 BEGIN CATCH

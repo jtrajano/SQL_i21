@@ -2076,3 +2076,7 @@ UPDATE tblMFCompanyPreference
 SET ysnLotHistoryByStorageLocation = 1
 WHERE ysnLotHistoryByStorageLocation IS NULL
 Go
+UPDATE tblMFCompanyPreference
+SET ysnShowInputItemInYieldView = 0
+WHERE ysnShowInputItemInYieldView IS NULL
+Go
