@@ -31,7 +31,17 @@ BEGIN
 			WHERE 
 				SO.intSalesOrderId = @SalesOrderId
 				AND SOSOD.intItemId <> ARTD.intItemId
-				AND ICI.strType = 'Bundle'			
+				AND ICI.strType = 'Bundle'		
+				
+				
+			DELETE SOSODC
+			FROM			
+				tblSOSalesOrderDetailComponent SOSODC
+			LEFT OUTER JOIN
+				tblSOSalesOrderDetail SOSOD
+					ON SOSODC.[intSalesOrderDetailId] = SOSOD.[intSalesOrderDetailId]
+			WHERE 
+				ISNULL(SOSOD.[intSalesOrderDetailId],0) = 0
 
 			RETURN
 		END		
