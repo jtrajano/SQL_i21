@@ -4157,6 +4157,7 @@
     <Build Include="dbo\Views\vyuLGLoadCostForCustomer.sql" />
     <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
+    <Build Include="dbo\Views\vyuARDocumentMaintenanceMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
