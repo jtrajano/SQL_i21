@@ -28,8 +28,8 @@
         "lockUrlPrefix": false,
         "installStatus": "Not Installed"
     },
-    "xdsVersion": "3.2.0",
-    "xdsBuild": 75,
+    "xdsVersion": "3.5.1",
+    "xdsBuild": 348,
     "schemaVersion": 1,
     "upgradeVersion": 310000000001,
     "framework": "ext50",
