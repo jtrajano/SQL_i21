@@ -129,6 +129,16 @@ Ext.define('Inventory.view.OriginConversionOption', {
                             },
                             {
                                 xtype: 'menuitem',
+                                itemId: 'mnuAccountCategories',
+                                text: 'Item GL Account Categories'
+                            },
+                            {
+                                xtype: 'menuitem',
+                                itemId: 'mnuItemUOM',
+                                text: 'Item UOM'
+                            },
+                            {
+                                xtype: 'menuitem',
                                 itemId: 'mnuAccounts',
                                 text: 'Item GL Accounts'
                             },
@@ -713,6 +723,76 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                         {
                                             xtype: 'label',
                                             text: 'Import Items from CSV'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntImportItemAccountCategories',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnImportItemAccountCategories',
+                                    text: 'Import Item GL Account Categories'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
+                                    height: 40,
+                                    padding: 10,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            text: 'Import Item GL Account Categories from CSV'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntImportItemUOM',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnImportItemUOM',
+                                    text: 'Import Item UOM'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
+                                    height: 40,
+                                    padding: 10,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            text: 'Import Item UOM from CSV'
                                         }
                                     ]
                                 }

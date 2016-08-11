@@ -309,6 +309,34 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "itemId": "mnuAccountCategories",
+                                        "text": "Item GL Account Categories"
+                                    },
+                                    "name": "MyMenuItem21",
+                                    "designerId": "0b6733f8-2f78-4b58-ba20-7d914915d33f"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "mnuItemUOM",
+                                        "text": "Item UOM"
+                                    },
+                                    "name": "MyMenuItem22",
+                                    "designerId": "80d66195-8021-4ad7-98b2-50a7aa3d5739"
+                                },
+                                {
+                                    "type": "Ext.menu.Item",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
                                         "itemId": "mnuAccounts",
                                         "text": "Item GL Accounts"
                                     },
@@ -1483,6 +1511,142 @@
                                             },
                                             "name": "MyLabel9",
                                             "designerId": "4e26cb31-15ec-413c-8de7-5e1021fd96cd"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportItemAccountCategories",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer22",
+                            "designerId": "6d42f244-6e39-4164-b01d-fb46a7963890",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItemAccountCategories",
+                                        "layout|flex": 1,
+                                        "text": "Import Item GL Account Categories"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "bb82dbec-cfaa-4f60-867a-d2653172f057"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "98594a2a-8b06-48b9-ad59-9d01147a3a30",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Item GL Account Categories from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "d4430512-14a5-4094-b981-a613f9ff01f8"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportItemUOM",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer23",
+                            "designerId": "b0b653c6-f374-4d42-9656-0b6bf7ba22dd",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItemUOM",
+                                        "layout|flex": 1,
+                                        "text": "Import Item UOM"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "3de6676e-0b0d-446f-9681-0fc409c1bbe0"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "c6d06a9c-f51a-4a72-aac0-c4ee145c1333",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Item UOM from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "1d5ecd34-5f6f-4fd3-a76d-e439c25a63f5"
                                         }
                                     ]
                                 }

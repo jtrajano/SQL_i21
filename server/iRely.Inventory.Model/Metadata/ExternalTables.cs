@@ -49,10 +49,29 @@ namespace iRely.Inventory.Model
         
     }
 
+    public class tblGLAccountGroup
+    {
+        public int intAccountGroupId { get; set; }
+        public string strAccountGroup { get; set; }
+        public string strAccountType { get; set; }
+        public int? intParentGroupId { get; set; }
+        public int? intGroup { get; set; }
+        public int? intSort { get; set; }
+        public int? intAccountBegin { get; set; }
+        public int? intAccountEnd { get; set; }
+        public string strAccountGroupNamespace { get; set; }
+        public int? intEntityIdLastModified { get; set; }
+        public int? intAccountCategoryId { get;set;}
+        public int? intAccountRangeId { get; set; }
+    }
+
     public class tblGLAccountCategory
     {
         public int intAccountCategoryId { get; set; }
         public string strAccountCategory { get; set; }
+        public string strAccountGroupFilter { get; set; }
+        public bool ysnRestricted { get; set; }
+        public int intConcurrencyId { get; set; }
         
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }

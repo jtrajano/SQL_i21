@@ -43,6 +43,29 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblGLAccountGroupMap : EntityTypeConfiguration<tblGLAccountGroup>
+    {
+        public tblGLAccountGroupMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intAccountGroupId);
+
+            // Table & Column Mappings
+            this.ToTable("tblGLAccountGroup");
+            this.Property(t => t.intAccountGroupId).HasColumnName("intAccountGroupId");
+            this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
+            this.Property(t => t.strAccountGroupNamespace).HasColumnName("strAccountGroupNamespace");
+            this.Property(t => t.intAccountBegin).HasColumnName("intAccountBegin");
+            this.Property(t => t.intAccountEnd).HasColumnName("intAccountEnd");
+            this.Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
+            this.Property(t => t.intAccountRangeId).HasColumnName("intAccountRangeId");
+            this.Property(t => t.intEntityIdLastModified).HasColumnName("intEntityIdLastModified");
+            this.Property(t => t.intGroup).HasColumnName("intGroup");
+            this.Property(t => t.intParentGroupId).HasColumnName("intParentGroupId");
+            this.Property(t => t.strAccountType).HasColumnName("strAccountType");
+        }
+    }
+
     public class tblGLAccountCategoryMap : EntityTypeConfiguration<tblGLAccountCategory>
     {
         public tblGLAccountCategoryMap()
@@ -54,6 +77,9 @@ namespace iRely.Inventory.Model
             this.ToTable("tblGLAccountCategory");
             this.Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
             this.Property(t => t.strAccountCategory).HasColumnName("strAccountCategory");
+            this.Property(t => t.strAccountGroupFilter).HasColumnName("strAccountGroupFilter");
+            this.Property(t => t.ysnRestricted).HasColumnName("ysnRestricted");
+            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
         }
     }
 

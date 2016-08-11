@@ -144,6 +144,7 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
             modelBuilder.Configurations.Add(new tblGLAccountMap());
+            modelBuilder.Configurations.Add(new tblGLAccountGroupMap());
             modelBuilder.Configurations.Add(new tblGLAccountCategoryMap());
             modelBuilder.Configurations.Add(new vyuAPVendorMap());
             modelBuilder.Configurations.Add(new tblARCustomerMap());
