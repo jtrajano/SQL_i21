@@ -259,9 +259,9 @@ DECLARE
 		,[intTempDetailIdForTaxes]
 		,[ysnSubCurrency])
 	SELECT
-		 [strSourceTransaction]					= 'Load Schedule'
-		,[intSourceId]							= @intLoadId
-		,[strSourceId]							= @ShipmentNumber
+		 [strSourceTransaction]					= 'Load/Shipment Schedules'
+		,[intSourceId]							= NULL
+		,[strSourceId]							= ''
 		,[intInvoiceId]							= NULL
 		,[intEntityCustomerId]					= @EntityCustomerId 
 		,[intCompanyLocationId]					= @CompanyLocationId 
