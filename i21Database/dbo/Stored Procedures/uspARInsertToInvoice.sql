@@ -666,7 +666,7 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		EXEC dbo.[uspARReComputeInvoiceAmounts] @NewInvoiceId
 		
 		UPDATE
 			tblSOSalesOrder
