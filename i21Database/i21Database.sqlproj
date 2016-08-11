@@ -4149,6 +4149,8 @@
     <Build Include="dbo\Views\vyuHDCustomerProspectVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspMBRecalculateMeterReading.sql" />
     <Build Include="dbo\Views\vyuMBSearchMeterReading.sql" />
+    <Build Include="dbo\Tables\tblARLead.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityLead.sql" />
     <Build Include="dbo\Tables\tblCFProductAuthDetail.sql" />
     <Build Include="dbo\Tables\tblCFProductAuth.sql" />
     <Build Include="dbo\Tables\tblCFNetworkAccount.sql" />
