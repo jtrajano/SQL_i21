@@ -6,6 +6,8 @@
 	[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[intDataTypeId] INT NOT NULL, 
 	[intListId] INT, 
+	[strAttributeValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	[intListItemId] INT, 
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMAttribute_dtmCreated] DEFAULT GetDate(),
@@ -15,5 +17,6 @@
 	CONSTRAINT [PK_tblQMAttribute] PRIMARY KEY ([intAttributeId]), 
 	CONSTRAINT [AK_tblQMAttribute_strAttributeName] UNIQUE ([strAttributeName]), 
 	CONSTRAINT [FK_tblQMAttribute_tblQMAttributeDataType] FOREIGN KEY ([intDataTypeId]) REFERENCES [tblQMAttributeDataType]([intDataTypeId]), 
-	CONSTRAINT [FK_tblQMAttribute_tblQMList] FOREIGN KEY ([intListId]) REFERENCES [tblQMList]([intListId]) 
+	CONSTRAINT [FK_tblQMAttribute_tblQMList] FOREIGN KEY ([intListId]) REFERENCES [tblQMList]([intListId]),
+	CONSTRAINT [FK_tblQMAttribute_tblQMListItem] FOREIGN KEY ([intListItemId]) REFERENCES [tblQMListItem]([intListItemId]) 
 )
