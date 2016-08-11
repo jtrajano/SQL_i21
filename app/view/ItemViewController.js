@@ -1411,7 +1411,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
         if (cepPricingLevel){
             cepPricingLevel.on({
-                validateedit: me.onEditPricingLevel,
+                edit: me.onEditPricingLevel,
                 scope: me
             });
         }
@@ -1419,7 +1419,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var cepPricing = grdPricing.getPlugin('cepPricing');
         if (cepPricing){
             cepPricing.on({
-                validateedit: me.onEditPricing,
+                edit: me.onEditPricing,
                 scope: me
             });
         }
