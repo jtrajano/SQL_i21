@@ -125,8 +125,8 @@
 	   tblGRStorageScheduleRule.strScheduleId,
 	   tblICInventoryReceipt.intInventoryReceiptId,
 	   tblICInventoryReceipt.strReceiptNumber,
-	   vyuICGetInventoryShipmentItem.intInventoryShipmentId,
-	   vyuICGetInventoryShipmentItem.strShipmentNumber
+	   tblICInventoryShipment.intInventoryShipmentId,
+	   tblICInventoryShipment.strShipmentNumber
   from ((tblSCTicket tblSCTicket
 	left join tblEMEntity tblEMEntity
        on (tblEMEntity.intEntityId = tblSCTicket.intEntityId)
@@ -152,5 +152,5 @@
        on tblGRStorageScheduleRule.intStorageScheduleRuleId = tblSCTicket.intStorageScheduleId
 	left join tblICInventoryReceipt tblICInventoryReceipt
 	   on  tblICInventoryReceipt.intInventoryReceiptId = tblSCTicket.intInventoryReceiptId
-	left join vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem
-	   on  vyuICGetInventoryShipmentItem.intSourceId = tblSCTicket.intTicketId
+	left join tblICInventoryShipment tblICInventoryShipment
+	   on  tblICInventoryShipment.intInventoryShipmentId = tblSCTicket.intInventoryShipmentId
