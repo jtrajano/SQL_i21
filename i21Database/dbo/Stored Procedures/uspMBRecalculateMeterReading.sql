@@ -15,7 +15,6 @@ BEGIN
 		, @LocationId INT
 		, @TaxGroupId INT
 		, @TransactionDate DATETIME
-		, @Quantity	NUMERIC(18,6)
 		, @Amount NUMERIC(18,6)
 		, @Price NUMERIC(18,6)
 		, @IsReversal BIT
@@ -31,8 +30,6 @@ BEGIN
 			, @CustomerId = intEntityCustomerId
 			, @LocationId = intCompanyLocationId
 			, @TransactionDate = dtmTransaction
-			, @Quantity = (CASE WHEN strPriceType = 'Gross' THEN dblQuantitySold
-							ELSE 1 END)
 			, @TaxGroupId = intTaxGroupId
 			, @Amount = (CASE WHEN strPriceType = 'Gross' THEN dblGrossPrice
 							ELSE dblNetPrice END)
@@ -46,7 +43,7 @@ BEGIN
 		SELECT *
 		INTO #tmpTaxes
 		FROM dbo.fnConstructLineItemTaxDetail (
-			@Quantity
+			1
 			, @Amount
 			, @LineItems
 			, @IsReversal
