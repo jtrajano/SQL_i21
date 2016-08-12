@@ -2401,11 +2401,27 @@ UNION ALL
 				,dblUOMQty					= ItemUOM.dblUnitQty
 				-- If item is using average costing, it must use the average cost. 
 				-- Otherwise, it must use the last cost value of the item. 
-				,dblCost					= ISNULL(dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
-																				ELSE 
-																					IST.dblLastCost  
-																		END 
+				,dblCost					= ISNULL(dbo.fnMultiply (	CASE WHEN IST.strType = 'Finished Good' AND Detail.ysnBlended = 1 
+																			THEN (
+																				SELECT SUM(ICIT.[dblCost]) 
+																				FROM
+																					tblICInventoryTransaction ICIT
+																				INNER JOIN
+																					tblMFWorkOrder MFWO
+																						ON ICIT.[strTransactionId] = MFWO.[strWorkOrderNo]
+																						AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
+																				WHERE
+																					MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.intWorkOrderId)FROM tblMFWorkOrder WHERE tblMFWorkOrder.intInvoiceDetailId = Detail.intInvoiceDetailId)
+																					AND ICIT.[ysnIsUnposted] = 0
+																					AND ICIT.[strTransactionForm] = 'Produce'
+																			)
+																			ELSE
+																				CASE	WHEN dbo.fnGetCostingMethod(Detail.intItemId, IST.intItemLocationId) = @AVERAGECOST THEN 
+																							dbo.fnGetItemAverageCost(Detail.intItemId, IST.intItemLocationId, Detail.intItemUOMId) 
+																						ELSE 
+																							IST.dblLastCost  
+																				END 
+																		END
 																		,ItemUOM.dblUnitQty
 																	),@ZeroDecimal)
 				,dblSalesPrice				= Detail.dblPrice 
