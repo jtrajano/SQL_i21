@@ -4,7 +4,7 @@
     [strCardNumber]              NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strCardDescription]         NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]               INT            NOT NULL,
-    [intAuthCode]                INT            NULL,
+    [intProductAuthId]           INT            NULL,
     [intEntryCode]               INT            NULL,
     [strCardXReference]          NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strCardForOwnUse]           NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
@@ -44,6 +44,7 @@
     CONSTRAINT [FK_tblCFCard_tblCFCardType] FOREIGN KEY ([intCardTypeId]) REFERENCES [dbo].[tblCFCardType] ([intCardTypeId]),
     CONSTRAINT [FK_tblCFCard_tblCFDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblCFDepartment] ([intDepartmentId]),
     CONSTRAINT [FK_tblCFCard_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
+    CONSTRAINT [FK_tblCFCard_tblCFProductAuth] FOREIGN KEY ([intProductAuthId]) REFERENCES [dbo].[tblCFProductAuth] ([intProductAuthId]),
     CONSTRAINT [FK_tblCFCard_tblCFVehicle] FOREIGN KEY ([intDefaultFixVehicleNumber]) REFERENCES [dbo].[tblCFVehicle] ([intVehicleId]),
     CONSTRAINT [FK_tblCFCard_tblICItem] FOREIGN KEY ([intExpenseItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
