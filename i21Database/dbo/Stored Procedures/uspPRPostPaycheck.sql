@@ -151,12 +151,12 @@ BEGIN
 		,C.strDepartment
 		,C.intProfitCenter 
 	FROM (
-		SELECT intPaycheckId, intEmployeeEarningId, intTypeEarningId, intEmployeeDepartmentId, dblTotal FROM tblPRPaycheckEarning) A 
+		SELECT intPaycheckId, intEmployeeEarningId, intTypeEarningId, strCalculationType, intEmployeeDepartmentId, dblTotal FROM tblPRPaycheckEarning) A 
 		LEFT JOIN tblPREmployeeEarningDistribution B
 				ON A.intEmployeeEarningId = B.intEmployeeEarningId
 		LEFT JOIN tblPRDepartment C 
 	ON A.intEmployeeDepartmentId = C.intDepartmentId
-	WHERE A.dblTotal > 0
+	WHERE A.dblTotal > 0 AND A.strCalculationType <> 'Fringe Benefit'
 	AND intPaycheckId = @intPaycheckId
 		
 	--Place Earning to Temporary Table to Validate Earning GL Distribution
