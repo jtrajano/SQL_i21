@@ -223,25 +223,25 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateOldCost.sql
 
 -- Inventory 
-:r .\IC\00_RequiredDataFix.sql 
+--:r .\IC\00_RequiredDataFix.sql 
 :r .\IC\01_InventoryTransactionTypes.sql 
 :r .\IC\02_MaterialNMFC.sql 
 :r .\IC\03_DefaultData.sql 
 :r .\IC\04_CostingMethods.sql 
 :r .\IC\05_LotStatus.sql
-:r .\IC\06_FixBlankLotNumber.sql
+--:r .\IC\06_FixBlankLotNumber.sql
 :r .\IC\07_Status.sql
 :r .\IC\08_InventoryTransactionPostingIntegration.sql
 :r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
-:r .\IC\10_RemoveCommodityItems.sql
-:r .\IC\11_RemoveOtherChargesAsset.sql
-:r .\IC\12_UpdateExistingInventoryTransactionForm.sql
-:r .\IC\13_MoveCommodityAttributes.sql
+--:r .\IC\10_RemoveCommodityItems.sql
+--:r .\IC\11_RemoveOtherChargesAsset.sql
+--:r .\IC\12_UpdateExistingInventoryTransactionForm.sql
+--:r .\IC\13_MoveCommodityAttributes.sql
 :r .\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql
-:r .\IC\PatchFor_1510_to_1520.sql
-:r .\GL\InventoryCategoryFix.sql
+--:r .\IC\PatchFor_1510_to_1520.sql
+--:r .\GL\InventoryCategoryFix.sql
 :r .\IC\15_InventoryCostAdjustmentTypes.sql
-:r .\IC\PopulateTransDetailIdOnCostBuckets.sql
+--:r .\IC\PopulateTransDetailIdOnCostBuckets.sql
 :r .\IC\16_Fix_Allow_Negative_Stock_Option.sql
 :r .\IC\17_Update_Blank_Description_tblICItem.sql
 

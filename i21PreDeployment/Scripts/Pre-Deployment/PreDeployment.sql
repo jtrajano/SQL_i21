@@ -90,14 +90,7 @@
 :r .\10_RPT\1_1430_to_1430.sql
 
 -- IC
-:r .\11_IC\Fix_References_to_Foreign_Keys.sql
-:r .\11_IC\Account_Category_Change_14_4.sql
-:r .\11_IC\1510_to_1512.sql
-:r .\11_IC\StatusImplementation.sql
-:r .\11_IC\SourceType_Implementations.sql
-:r .\11_IC\1520_to_1530.sql
-:r .\11_IC\Fix_Location_on_Reservation_Table.sql
-:r .\11_IC\1530_to_1540.sql
+:r .\11_IC\1610_to_1620.sql
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql

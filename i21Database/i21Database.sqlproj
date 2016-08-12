@@ -4061,6 +4061,7 @@
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
     <Build Include="dbo\Views\vyuMBSearchMeterReading.sql" />
     <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
+    <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
