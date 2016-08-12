@@ -12,8 +12,10 @@ BEGIN
 	 
 	SELECT	@dblTotalQty = SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)) 
 			,@dblTotalInventoryValue = SUM(
-					dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)
-					* dbo.fnCalculateStockUnitQty(dblCost, dblUOMQty)
+					dbo.fnMultiply(
+						dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)
+						,dbo.fnCalculateUnitCost(dblCost, dblUOMQty)
+					)
 					+ ISNULL(dblValue, 0)			
 				)
 	FROM	dbo.tblICInventoryTransaction
