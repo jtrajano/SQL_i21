@@ -470,117 +470,152 @@ BEGIN TRY
 			PRINT 'Call Lot Adjust routine.'
 		END
 
-		SELECT TOP 1 @intDestinationLotId = intLotId
-			,@strDestinationLotNumber = strLotNumber
-		FROM dbo.tblICLot
-		WHERE intStorageLocationId = @intConsumptionStorageLocationId
-			AND intItemId = @intInputItemId
-			AND intLotId <> @intInputLotId
-			AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-			AND intLotStatusId = 1
-		ORDER BY dtmDateCreated DESC
+		--SELECT TOP 1 @intDestinationLotId = intLotId
+		--	,@strDestinationLotNumber = strLotNumber
+		--FROM dbo.tblICLot
+		--WHERE intStorageLocationId = @intConsumptionStorageLocationId
+		--	AND intItemId = @intInputItemId
+		--	AND intLotId <> @intInputLotId
+		--	AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+		--	AND intLotStatusId = 1
+		--ORDER BY dtmDateCreated DESC
 
-		IF @intDestinationLotId IS NULL --There is no lot in the destination location
-		BEGIN
-			IF @dblNewWeight = @dblWeight --It is a full qty staging.
-			BEGIN
-				IF @intStorageLocationId <> @intConsumptionStorageLocationId --Checking whether the lot is not in the staging location.
-				BEGIN
-					PRINT 'Call Lot Move routine.'
+		--IF @intDestinationLotId IS NULL --There is no lot in the destination location
+		--BEGIN
+		--	IF @dblNewWeight = @dblWeight --It is a full qty staging.
+		--	BEGIN
+		--		IF @intStorageLocationId <> @intConsumptionStorageLocationId --Checking whether the lot is not in the staging location.
+		--		BEGIN
+		--			PRINT 'Call Lot Move routine.'
 
-					SELECT @dblAdjustByQuantity = - @dblNewWeight / (
-							CASE 
-								WHEN @intWeightUOMId IS NULL
-									THEN 1
-								ELSE @dblWeightPerQty
-								END
-							)
+		--			SELECT @dblAdjustByQuantity = - @dblNewWeight / (
+		--					CASE 
+		--						WHEN @intWeightUOMId IS NULL
+		--							THEN 1
+		--						ELSE @dblWeightPerQty
+		--						END
+		--					)
 
-					EXEC uspICInventoryAdjustment_CreatePostLotMove
-						-- Parameters for filtering:
-						@intItemId = @intInputItemId
-						,@dtmDate = @dtmCurrentDateTime
-						,@intLocationId = @intLocationId
-						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
-						,@strLotNumber = @strLotNumber
-						-- Parameters for the new values: 
-						,@intNewLocationId = @intLocationId
-						,@intNewSubLocationId = @intConsumptionSubLocationId
-						,@intNewStorageLocationId = @intConsumptionStorageLocationId
-						,@strNewLotNumber = @strLotNumber
-						,@dblMoveQty = @dblAdjustByQuantity
-						,@intItemUOMId = @intNewItemUOMId
-						-- Parameters used for linking or FK (foreign key) relationships
-						,@intSourceId = 1
-						,@intSourceTransactionTypeId = 8
-						,@intEntityUserSecurityId = @intUserId
-						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-				END
-			END
-			ELSE
-			BEGIN
-				--EXEC dbo.uspSMGetStartingNumber 55
-				--	,@strDestinationLotNumber OUTPUT
-				DECLARE @intCategoryId INT
+		--			EXEC uspICInventoryAdjustment_CreatePostLotMove
+		--				-- Parameters for filtering:
+		--				@intItemId = @intInputItemId
+		--				,@dtmDate = @dtmCurrentDateTime
+		--				,@intLocationId = @intLocationId
+		--				,@intSubLocationId = @intSubLocationId
+		--				,@intStorageLocationId = @intStorageLocationId
+		--				,@strLotNumber = @strLotNumber
+		--				-- Parameters for the new values: 
+		--				,@intNewLocationId = @intLocationId
+		--				,@intNewSubLocationId = @intConsumptionSubLocationId
+		--				,@intNewStorageLocationId = @intConsumptionStorageLocationId
+		--				,@strNewLotNumber = @strLotNumber
+		--				,@dblMoveQty = @dblAdjustByQuantity
+		--				,@intItemUOMId = @intNewItemUOMId
+		--				-- Parameters used for linking or FK (foreign key) relationships
+		--				,@intSourceId = 1
+		--				,@intSourceTransactionTypeId = 8
+		--				,@intEntityUserSecurityId = @intUserId
+		--				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		--		END
+		--	END
+		--	ELSE
+		--	BEGIN
+		--		--EXEC dbo.uspSMGetStartingNumber 55
+		--		--	,@strDestinationLotNumber OUTPUT
+		--		DECLARE @intCategoryId INT
 
-				SELECT @intCategoryId = intCategoryId
-				FROM tblICItem
-				WHERE intItemId = @intItemId
+		--		SELECT @intCategoryId = intCategoryId
+		--		FROM tblICItem
+		--		WHERE intItemId = @intItemId
 
-				EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-					,@intItemId = @intItemId
-					,@intManufacturingId = @intManufacturingCellId
-					,@intSubLocationId = @intSubLocationId
-					,@intLocationId = @intLocationId
-					,@intOrderTypeId = NULL
-					,@intBlendRequirementId = NULL
-					,@intPatternCode = 55
-					,@ysnProposed = 0
-					,@strPatternString = @strDestinationLotNumber OUTPUT
+		--		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+		--			,@intItemId = @intItemId
+		--			,@intManufacturingId = @intManufacturingCellId
+		--			,@intSubLocationId = @intSubLocationId
+		--			,@intLocationId = @intLocationId
+		--			,@intOrderTypeId = NULL
+		--			,@intBlendRequirementId = NULL
+		--			,@intPatternCode = 55
+		--			,@ysnProposed = 0
+		--			,@strPatternString = @strDestinationLotNumber OUTPUT
 
-				PRINT '1.Call Lot Merge routine.'
+		--		PRINT '1.Call Lot Merge routine.'
 
-				SELECT @dblAdjustByQuantity = - @dblNewWeight / (
-						CASE 
-							WHEN @intWeightUOMId IS NULL
-								THEN 1
-							ELSE @dblWeightPerQty
-							END
-						)
+		--		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
+		--				CASE 
+		--					WHEN @intWeightUOMId IS NULL
+		--						THEN 1
+		--					ELSE @dblWeightPerQty
+		--					END
+		--				)
 
-				EXEC uspICInventoryAdjustment_CreatePostLotMerge
-					-- Parameters for filtering:
-					@intItemId = @intInputItemId
-					,@dtmDate = @dtmCurrentDateTime
-					,@intLocationId = @intLocationId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = @strLotNumber
-					-- Parameters for the new values: 
-					,@intNewLocationId = @intLocationId
-					,@intNewSubLocationId = @intConsumptionSubLocationId
-					,@intNewStorageLocationId = @intConsumptionStorageLocationId
-					,@strNewLotNumber = @strDestinationLotNumber
-					,@dblAdjustByQuantity = @dblAdjustByQuantity
-					,@dblNewSplitLotQuantity = 0
-					,@dblNewWeight = NULL
-					,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
-					,@intNewWeightUOMId = NULL
-					,@dblNewUnitCost = NULL
-					,@intItemUOMId = @intNewItemUOMId
-					-- Parameters used for linking or FK (foreign key) relationships
-					,@intSourceId = 1
-					,@intSourceTransactionTypeId = 8
-					,@intEntityUserSecurityId = @intUserId
-					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			END
-		END
-		ELSE
-		BEGIN
-			PRINT '2.Call Lot Merge routine.'
+		--		EXEC uspICInventoryAdjustment_CreatePostLotMerge
+		--			-- Parameters for filtering:
+		--			@intItemId = @intInputItemId
+		--			,@dtmDate = @dtmCurrentDateTime
+		--			,@intLocationId = @intLocationId
+		--			,@intSubLocationId = @intSubLocationId
+		--			,@intStorageLocationId = @intStorageLocationId
+		--			,@strLotNumber = @strLotNumber
+		--			-- Parameters for the new values: 
+		--			,@intNewLocationId = @intLocationId
+		--			,@intNewSubLocationId = @intConsumptionSubLocationId
+		--			,@intNewStorageLocationId = @intConsumptionStorageLocationId
+		--			,@strNewLotNumber = @strDestinationLotNumber
+		--			,@dblAdjustByQuantity = @dblAdjustByQuantity
+		--			,@dblNewSplitLotQuantity = 0
+		--			,@dblNewWeight = NULL
+		--			,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
+		--			,@intNewWeightUOMId = NULL
+		--			,@dblNewUnitCost = NULL
+		--			,@intItemUOMId = @intNewItemUOMId
+		--			-- Parameters used for linking or FK (foreign key) relationships
+		--			,@intSourceId = 1
+		--			,@intSourceTransactionTypeId = 8
+		--			,@intEntityUserSecurityId = @intUserId
+		--			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		--	END
+		--END
+		--ELSE
+		--BEGIN
+		--	PRINT '2.Call Lot Merge routine.'
 
-			SELECT @dblAdjustByQuantity = - @dblNewWeight / (
+		--	SELECT @dblAdjustByQuantity = - @dblNewWeight / (
+		--			CASE 
+		--				WHEN @intWeightUOMId IS NULL
+		--					THEN 1
+		--				ELSE @dblWeightPerQty
+		--				END
+		--			)
+
+		--	EXEC uspICInventoryAdjustment_CreatePostLotMerge
+		--		-- Parameters for filtering:
+		--		@intItemId = @intInputItemId
+		--		,@dtmDate = @dtmCurrentDateTime
+		--		,@intLocationId = @intLocationId
+		--		,@intSubLocationId = @intSubLocationId
+		--		,@intStorageLocationId = @intStorageLocationId
+		--		,@strLotNumber = @strLotNumber
+		--		-- Parameters for the new values: 
+		--		,@intNewLocationId = @intLocationId
+		--		,@intNewSubLocationId = @intConsumptionSubLocationId
+		--		,@intNewStorageLocationId = @intConsumptionStorageLocationId
+		--		,@strNewLotNumber = @strDestinationLotNumber
+		--		,@dblAdjustByQuantity = @dblAdjustByQuantity
+		--		,@dblNewSplitLotQuantity = NULL
+		--		,@dblNewWeight = NULL
+		--		,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
+		--		,@intNewWeightUOMId = NULL
+		--		,@dblNewUnitCost = NULL
+		--		,@intItemUOMId = @intNewItemUOMId
+		--		-- Parameters used for linking or FK (foreign key) relationships
+		--		,@intSourceId = 1
+		--		,@intSourceTransactionTypeId = 8
+		--		,@intEntityUserSecurityId = @intUserId
+		--		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		--END
+
+		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
 					CASE 
 						WHEN @intWeightUOMId IS NULL
 							THEN 1
@@ -600,7 +635,7 @@ BEGIN TRY
 				,@intNewLocationId = @intLocationId
 				,@intNewSubLocationId = @intConsumptionSubLocationId
 				,@intNewStorageLocationId = @intConsumptionStorageLocationId
-				,@strNewLotNumber = @strDestinationLotNumber
+				,@strNewLotNumber = @strLotNumber
 				,@dblAdjustByQuantity = @dblAdjustByQuantity
 				,@dblNewSplitLotQuantity = NULL
 				,@dblNewWeight = NULL
@@ -613,7 +648,6 @@ BEGIN TRY
 				,@intSourceTransactionTypeId = 8
 				,@intEntityUserSecurityId = @intUserId
 				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-		END
 	END
 
 	IF @intConsumptionMethodId = 2
