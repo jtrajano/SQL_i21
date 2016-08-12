@@ -4161,6 +4161,7 @@
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
     <Build Include="dbo\Views\vyuARDocumentMaintenanceMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessToInventoryShipment.sql" />
+    <Build Include="dbo\Views\vyuSMDocumentMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
