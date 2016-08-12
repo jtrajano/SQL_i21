@@ -4166,8 +4166,8 @@
     <Build Include="dbo\Views\vyuTRGetSupplyPointSearchValue.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateStagingOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateStagingOrderDetail.sql" />
-    <Build Include="dbo\User Defined Types\OrderDetailInformation_1.sql" />
-    <Build Include="dbo\User Defined Types\OrderHeaderInformation_1.sql" />
+    <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
+    <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
