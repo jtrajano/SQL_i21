@@ -2471,43 +2471,88 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var context = win.context;
         var current = win.viewModel.data.current;
+        var btnReceive = win.down('#btnReceive');
 
-        var doPost = function () {
-            var strReceiptNumber = current.get('strReceiptNumber');
-            var posted = current.get('ysnPosted');
+        var postReceipt = function() {
+            var doPost = function () {
+                        var strReceiptNumber = current.get('strReceiptNumber');
+                        var posted = current.get('ysnPosted');
 
-            var options = {
-                postURL: '../Inventory/api/InventoryReceipt/Receive',
-                strTransactionId: strReceiptNumber,
-                isPost: !posted,
-                isRecap: false,
-                callback: me.onAfterReceive,
-                scope: me
-            };
+                        var options = {
+                            postURL: '../Inventory/api/InventoryReceipt/Receive',
+                            strTransactionId: strReceiptNumber,
+                            isPost: !posted,
+                            isRecap: false,
+                            callback: me.onAfterReceive,
+                            scope: me
+                        };
 
-            CashManagement.common.BusinessRules.callPostRequest(options);
-        };
+                        CashManagement.common.BusinessRules.callPostRequest(options);
+                    };
 
-        var isValid = true;
+                    var isValid = true;
+                    if (current) {
+                        if (current.tblICInventoryReceiptItems()) {
+                            if (current.tblICInventoryReceiptItems().data.items) {
+
+                            }
+                        }
+                    }
+                    // If there is no data change, do the post.
+                    if (!context.data.hasChanges()) {
+                        doPost();
+                        return;
+                    }
+
+                    // Save has data changes first before doing the post.
+                    context.data.saveRecord({
+                        successFn: function () {
+                            doPost();
+                        }
+                    });
+        }
+        
         if (current) {
-            if (current.tblICInventoryReceiptItems()) {
-                if (current.tblICInventoryReceiptItems().data.items) {
-
+					
+            var buttonAction = function(button) {
+                if (button === 'yes') {  
+				    postReceipt();
                 }
             }
-        }
-        // If there is no data change, do the post.
-        if (!context.data.hasChanges()) {
-            doPost();
-            return;
-        }
 
-        // Save has data changes first before doing the post.
-        context.data.saveRecord({
-            successFn: function () {
-                doPost();
+            var ReceivedGrossDiscrepancyItems = '';
+            
+            if (current.tblICInventoryReceiptItems()) {
+                Ext.Array.each(current.tblICInventoryReceiptItems().data.items, function(row) {
+                    if (!row.dummy) {
+                        //If there is Gross, check if the value is equivalent to Received Quantity
+                        if(row.get('intWeightUOMId') !== null) {
+                            var receiptItemQty = row.get('dblOpenReceive');
+                            var receiptUOMCF = row.get('dblItemUOMConvFactor');
+                            var weightUOMCF = row.get('dblWeightUOMConvFactor');
+
+                            if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
+                            if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
+                            if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
+
+                            var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; 
+
+                            if(row.get('dblGross') !== totalGross) {                                
+                                ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
+                            }
+                        }
+                        
+                    }
+                });
             }
-        });
+
+            if(ReceivedGrossDiscrepancyItems !== '' && btnReceive.text === 'Post') {
+                iRely.Functions.showCustomDialog('question', 'yesno', 'Received and Gross quantities are not equal for the following item/s: <br/> <br/>' + ReceivedGrossDiscrepancyItems + '<br/>. Do you want to continue?', buttonAction);
+            }
+            else {
+                postReceipt();
+            }
+        }   
     },
 
     onRecapClick: function (button, e, eOpts) {
@@ -2791,34 +2836,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Validate the gross and net variance.
         vw.data.currentReceiptItem = context.record;
         if (context.field === 'dblGross' || context.field === 'dblNet') {
-            me.validateWeightLoss(win)
-            
-            if (context.field === 'dblGross') {
-                 var receiptItemQty = context.record.get('dblOpenReceive');
-                 var receiptUOMCF = context.record.get('dblItemUOMConvFactor');
-                 var weightUOMCF = context.record.get('dblWeightUOMConvFactor');
-
-                 if (iRely.Functions.isEmpty(receiptItemQty)) receiptItemQty = 0.00;
-                 if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
-                 if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
-
-                 // If there is no Gross/Net UOM, do not calculate the lot gross and net.
-                 if (context.record.get('intWeightUOMId') === null || context.record.get('intWeightUOMId') === '') {
-                    totalGross = 0;
-                 }
-                else {
-                    totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; 
-                 }    
-                
-                if(context.record.get('dblGross') !== totalGross) {
-                    var task = new Ext.util.DelayedTask(function () {
-                        iRely.Functions.showErrorDialog('Received Quantity and Gross should be equal.');
-                        context.record.set('dblGross', totalGross);
-                    });
-
-                    task.delay(10);
-                }
-            }
+            me.validateWeightLoss(win) 
         }
 
         // Calculate the taxes and line totals.
