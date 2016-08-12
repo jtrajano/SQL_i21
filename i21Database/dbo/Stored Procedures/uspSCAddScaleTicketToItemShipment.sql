@@ -119,7 +119,7 @@ BEGIN
 									  END
 		,dblQuantity				= LI.dblQty
 		,dblUnitPrice				= LI.dblCost
-		,intWeightUOMId				= UOM.intUnitMeasureId
+		,intWeightUOMId				= SC.intItemUOMIdFrom
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,intItemUOMId				= LI.intItemUOMId
@@ -513,6 +513,11 @@ EXEC dbo.uspICAddItemShipment
 SELECT @InventoryShipmentId = intInventoryShipmentId  FROM tblICInventoryShipmentItem
 where intSourceId = @intTicketId
 ORDER BY intInventoryShipmentId DESC
+
+UPDATE	SC
+SET		SC.intInventoryShipmentId = addResult.intInventoryShipmentId
+FROM	dbo.tblSCTicket SC INNER JOIN tblICInventoryShipmentItem addResult
+			ON SC.intTicketId = addResult.intSourceId
 
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]

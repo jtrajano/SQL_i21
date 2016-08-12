@@ -97,6 +97,7 @@
     [ysnHasGeneratedTicketNumber] BIT NULL, 
     [intInventoryTransferId] INT NULL, 
     [intInventoryReceiptId] INT NULL, 
+    [intInventoryShipmentId] INT NULL, 
     [dblGross] DECIMAL(13, 3) NULL, 
     [dblShrink] DECIMAL(13, 3) NULL,
 	[dblScheduleQty] DECIMAL(13, 3) NULL,
