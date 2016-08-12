@@ -414,3 +414,7 @@ EXEC sp_addmessage 80083,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80084) EXEC sp_dropmessage 80084, 'us_english'	
 SET @strmessage = 'Check the Rebuild Valuation GL Snapshot. The original GL values changed when compared against the rebuild values. To check the discrepancies, run: SELECT * FROM vyuICCompareRebuildValuationSnapshot WHERE dtmRebuildDate = ''%s'''
 EXEC sp_addmessage 80084,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80085) EXEC sp_dropmessage 80085, 'us_english'	
+SET @strmessage = 'Each lotted item for %s that is going to be transferred should have a lot number specified.'
+EXEC sp_addmessage 80085,11,@strmessage,'us_english','False'
