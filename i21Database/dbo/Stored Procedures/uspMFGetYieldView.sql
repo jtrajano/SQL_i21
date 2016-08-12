@@ -1130,8 +1130,8 @@ BEGIN TRY
 			,'' AS strRunNo
 			,IY.dtmDate AS dtmRunDate
 			,S.strShiftName AS strShift
-			,II.strItemNo
-			,II.strDescription
+			,II.strItemNo As strInputItemNo
+			,II.strDescription As strInputItemDescription
 			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
