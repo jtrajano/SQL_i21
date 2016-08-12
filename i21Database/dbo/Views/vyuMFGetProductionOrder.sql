@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuMFGetProductionOrder
 AS
-SELECT IsNULL(BR.intBlendRequirementId,0) As intBlendRequirementId
-	,IsNull(BR.strDemandNo,'') As strDemandNo
+SELECT IsNULL(BR.intBlendRequirementId, 0) AS intBlendRequirementId
+	,IsNull(BR.strDemandNo, '') AS strDemandNo
 	,W.intWorkOrderId
 	,W.strWorkOrderNo
 	,W.dtmCreated
@@ -23,14 +23,17 @@ SELECT IsNULL(BR.intBlendRequirementId,0) As intBlendRequirementId
 	,W.intConcurrencyId
 	,ISNULL(SWD.dtmPlannedStartDate, W.dtmExpectedDate) dtmPlannedDate
 	,ISNULL(Round(SWD.dblPlannedQty, 0), W.dblQuantity) dblPlannedQty
-	,S.intShiftId 
+	,S.intShiftId
 	,S.strShiftName AS strPlannedShiftName
-	,MP.intManufacturingProcessId 
+	,MP.intManufacturingProcessId
 	,MP.strProcessName
 	,OH.intOrderHeaderId
 	,OH.strBOLNo
 	,OS.strOrderStatus
-	,ROW_NUMBER() OVER(ORDER BY W.intWorkOrderId DESC) As intRecordId 
+	,ROW_NUMBER() OVER (
+		ORDER BY W.intWorkOrderId DESC
+		) AS intRecordId
+	,SW1.strComments AS strScheduleComments
 FROM dbo.tblMFWorkOrder W
 INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	AND W.intStatusId <> 13
@@ -41,6 +44,9 @@ INNER JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 INNER JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 INNER JOIN dbo.tblSMUserSecurity US ON US.intEntityUserSecurityId = W.intCreatedUserId
 LEFT JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON W.intWorkOrderId = SWD.intWorkOrderId
+LEFT JOIN dbo.tblMFScheduleWorkOrder SW1 ON SW1.intScheduleWorkOrderId = SWD.intScheduleWorkOrderId
+LEFT JOIN dbo.tblMFSchedule S1 ON S1.intScheduleId = SW1.intScheduleId
+	AND S1.ysnStandard = 1
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = SWD.intPlannedShiftId
 LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 	AND SW.dtmPlannedDate = ISNULL(SWD.dtmPlannedStartDate, W.dtmExpectedDate)
