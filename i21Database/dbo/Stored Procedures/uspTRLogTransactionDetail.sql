@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRLogTransactionDetail]
 	@TransactionType NVARCHAR(50),
-	@TransactionId int
+	@TransactionId int,
+	@ForDelete BIT = 0
 AS
 	SET QUOTED_IDENTIFIER OFF  
 	SET ANSI_NULLS ON  
@@ -75,6 +76,26 @@ BEGIN
 		WHERE DH.intLoadHeaderId = @TransactionId
 			AND ISNULL(DH.intInvoiceId, '') <> ''
 
+		IF (@ForDelete = 1)
+		BEGIN
+
+			UPDATE tblLGLoad
+			SET intLoadHeaderId = NULL
+				, ysnInProgress = 0
+				, intConcurrencyId	= intConcurrencyId + 1
+			WHERE intLoadHeaderId = @TransactionId
+			
+			UPDATE tblTRLoadDistributionHeader
+			SET intInvoiceId = NULL
+			WHERE intLoadHeaderId = @TransactionId
+
+			UPDATE tblARInvoice
+			SET intLoadDistributionHeaderId = NULL
+			WHERE intLoadDistributionHeaderId = (SELECT intLoadDistributionHeaderId 
+												FROM tblTRLoadDistributionHeader
+												WHERE intLoadHeaderId = @TransactionId)
+
+		END
 	END
 
 END
