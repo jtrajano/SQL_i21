@@ -339,7 +339,7 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
 					(A.dblAmountPaid) < 0
-					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment', 'Prepayment'))
+					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment', 'Customer Prepayment'))
 
 				--Fiscal Year
 				INSERT INTO 
@@ -927,7 +927,7 @@ SET @batchIdUsed = @batchId
 					tblARInvoice I
 						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
 				WHERE
-					I.strTransactionType = 'Prepayment'					
+					I.strTransactionType = 'Customer Prepayment'					
 					
 			END
 		

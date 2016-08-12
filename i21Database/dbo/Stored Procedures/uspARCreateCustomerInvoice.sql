@@ -144,7 +144,7 @@ ELSE
 	SET @ARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@TransactionType, @CompanyLocationId)
 
 
-IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Prepayment', 'Cash', 'Cash Refund')
+IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 	BEGIN
 		SET @ErrorMessage = 'There is no setup for AR Account in the Company Configuration.';
 		IF ISNULL(@RaiseError,0) = 1
@@ -152,7 +152,7 @@ IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Prepayment', 'Cash', 'Cash
 		RETURN 0;
 	END
 
-IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Prepayment', 'Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @ARAccountId)
+IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @ARAccountId)
 	BEGIN
 		SET @ErrorMessage = 'There account id provided is not a valid account of category "AR Account".';
 		IF ISNULL(@RaiseError,0) = 1
@@ -179,7 +179,7 @@ IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND 
 	END
 
 
-IF @ARAccountId IS NULL AND @TransactionType = 'Prepayment'
+IF @ARAccountId IS NULL AND @TransactionType = 'Customer Prepayment'
 	BEGIN		
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
 		SET @ErrorMessage = 'There is no Customer Prepaid account setup under Company Location - ' + @CompanyLocation + '.';
@@ -188,7 +188,7 @@ IF @ARAccountId IS NULL AND @TransactionType = 'Prepayment'
 		RETURN 0;
 	END
 
-IF  @TransactionType = 'Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @ARAccountId)
+IF  @TransactionType = 'Customer Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @ARAccountId)
 	BEGIN
 		SET @ErrorMessage = 'There account id provided is not a valid account of category "Customer Prepayments".';
 		IF ISNULL(@RaiseError,0) = 1
@@ -259,7 +259,7 @@ IF ISNULL(@DefaultCurrency,0) = 0
 		RETURN 0;
 	END
 
-IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Prepayment'))
+IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment'))
 	BEGIN
 		SET @ErrorMessage = @TransactionType + ' is not a valid transaction type!'
 		IF ISNULL(@RaiseError,0) = 1
@@ -396,7 +396,7 @@ BEGIN TRY
 		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
 		,[strImportFormat]				= @ImportFormat
-		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Prepayment') THEN @Posted ELSE 0 END)
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') THEN @Posted ELSE 0 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 

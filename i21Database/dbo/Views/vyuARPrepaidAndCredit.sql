@@ -94,7 +94,7 @@ FROM
 INNER JOIN
 	tblARInvoice ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-		AND ARI.[strTransactionType] = 'Prepayment'
+		AND ARI.[strTransactionType] = 'Customer Prepayment'
 INNER JOIN
 	tblARPayment ARP
 		ON ARI.[intPaymentId] = ARP.[intPaymentId]
@@ -212,7 +212,7 @@ INNER JOIN
 INNER JOIN
 	tblARInvoice ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-		AND ARI.[strTransactionType] = 'Prepayment'
+		AND ARI.[strTransactionType] = 'Customer Prepayment'
 INNER JOIN
 	tblARPayment ARP
 		ON ARI.[intPaymentId] = ARP.[intPaymentId]

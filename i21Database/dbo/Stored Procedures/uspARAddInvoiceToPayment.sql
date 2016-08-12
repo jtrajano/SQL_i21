@@ -49,7 +49,7 @@ IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId)
 		RETURN 0;
 	END
 	
-IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND (([ysnPosted] = 1 AND [strTransactionType] <> 'Prepayment') OR ([ysnPosted] = 0 AND [strTransactionType] = 'Prepayment')))
+IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND (([ysnPosted] = 1 AND [strTransactionType] <> 'Customer Prepayment') OR ([ysnPosted] = 0 AND [strTransactionType] = 'Prepayment')))
 	BEGIN
 		SET @ErrorMessage = 'The invoice provided is not yet posted!'
 		IF ISNULL(@RaiseError,0) = 1
@@ -93,8 +93,8 @@ WHERE
 
 
 SELECT
-	 @InvoiceTotal		= [dblInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Prepayment') THEN -1 ELSE 1 END)
-	,@InvoiceAmountDue	= [dblAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Prepayment') THEN -1 ELSE 1 END)
+	 @InvoiceTotal		= [dblInvoiceTotal] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
+	,@InvoiceAmountDue	= [dblAmountDue] * (CASE WHEN [strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
 	,@TermDiscount		= ROUND(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,@InvoiceNumber		= [strInvoiceNumber]
 	,@TransactionType	= [strTransactionType]
@@ -132,7 +132,7 @@ IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) < @AmountPaid
 		RETURN 0;
 	END
 
-IF @TransactionType IN ('Credit Memo','Overpayment','Prepayment') AND @Payment > 0
+IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment') AND @Payment > 0
 	BEGIN
 		SET @ErrorMessage = 'Positive payment amount is not allowed for invoice of type ' + @TransactionType + '.'
 		IF ISNULL(@RaiseError,0) = 1
@@ -140,7 +140,7 @@ IF @TransactionType IN ('Credit Memo','Overpayment','Prepayment') AND @Payment >
 		RETURN 0;
 	END
 
-IF @TransactionType IN ('Credit Memo','Overpayment','Prepayment')
+IF @TransactionType IN ('Credit Memo','Overpayment','Customer Prepayment')
 	BEGIN
 		SET @Discount = @ZeroDecimal 
 		SET @Interest = @ZeroDecimal

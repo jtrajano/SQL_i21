@@ -28,8 +28,8 @@ SELECT
 	,[intInvoiceId]			= ARI.[intInvoiceId]
 	,[strInvoiceNumber]		= ARI.[strInvoiceNumber]
 	,[strInvoiceType]		= ARI.[strTransactionType]
-	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN 1 ELSE 0 END
-	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN -1 ELSE 1 END)
+	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Customer Prepayment') THEN 1 ELSE 0 END
+	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00) * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
 	,[dtmDueDate]			= ARI.[dtmDueDate]
 	,[dblInterest]			= ISNULL(ARPD.[dblInterest], 0.00)
 	,[dblDiscount]			= ISNULL(ARPD.[dblDiscount], 0.00)
@@ -137,7 +137,7 @@ SELECT
 	,[intInvoiceId]			= ARI.[intInvoiceId]
 	,[strInvoiceNumber]		= ARI.[strInvoiceNumber]
 	,[strInvoiceType]		= ARI.[strTransactionType]
-	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Prepayment') THEN 1 ELSE 0 END
+	,[ysnIsCredit]			= CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Cash Refund','Overpayment','Customer Prepayment') THEN 1 ELSE 0 END
 	,[dblInvoiceTotal]		= ISNULL(ARI.[dblInvoiceTotal], 0.00)
 	,[dtmDueDate]			= ARI.[dtmDueDate]
 	,[dblInterest]			= ISNULL(ARI.[dblInterest], 0.00)

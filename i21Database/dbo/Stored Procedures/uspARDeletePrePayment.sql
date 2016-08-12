@@ -25,7 +25,7 @@ WHILE EXISTS(
 					ON I.strComments = P.strRecordNumber				
 					AND I.intPaymentId = P.intPaymentId
 			WHERE
-				I.strTransactionType = 'Prepayment'
+				I.strTransactionType = 'Customer Prepayment'
 				AND P.intPaymentId = @PaymentId
 			)
 	BEGIN
@@ -41,7 +41,7 @@ WHILE EXISTS(
 				ON I.strComments = P.strRecordNumber
 				AND I.intPaymentId = P.intPaymentId			
 		WHERE
-			I.strTransactionType = 'Prepayment'
+			I.strTransactionType = 'Customer Prepayment'
 			AND P.intPaymentId = @PaymentId
 
 		--IF @UnPost = 1
@@ -66,7 +66,7 @@ WHILE EXISTS(
 		--				@success = @success OUTPUT,
 		--				@batchIdUsed = NULL,
 		--				@recapId = NULL,
-		--				@transType = N'Prepayment'
+		--				@transType = N'Customer Prepayment'
 		--	END 
 
 		DELETE FROM tblARInvoiceDetail 
