@@ -182,6 +182,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[dblQtyShipped]
 				,[dblDiscount]
 				,[dblPrice]
+				,[strPricing]
 				,[intSiteId]
 				,[strBillingBy]
 				,[dblNewMeterReading]
@@ -212,7 +213,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemDiscount
-				,@ItemPrice	
+				,@ItemPrice
+				,@ItemPricing
 				,@ItemSiteId
 				,@ItemBillingBy
 				,@ItemNewMeterReading
