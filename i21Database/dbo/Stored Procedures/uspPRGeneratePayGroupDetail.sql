@@ -47,16 +47,16 @@ BEGIN
 			,intConcurrencyId)
 		SELECT 
 			@intPayGroupId
-			,intEntityEmployeeId
+			,EMP.intEntityEmployeeId
 			,intEmployeeEarningId
 			,intTypeEarningId
-			,(SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = tblPREmployeeEarning.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
+			,(SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = EE.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
 			,strCalculationType
 			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblDefaultHours END					
 			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END
 			,dblRateAmount
 			,dblTotal = CASE WHEN (strCalculationType IN ('Rate Factor', 'Overtime') AND intEmployeeEarningLinkId IS NOT NULL) THEN 
-							CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
+							CASE WHEN ((SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE intTypeEarningId = EE.intEmployeeEarningLinkId) = 'Hourly Rate') THEN
 								CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE dblHoursToProcess END * dblRateAmount
 							ELSE
 								dblRateAmount
@@ -70,7 +70,9 @@ BEGIN
 			,NULL
 			,intSort
 			,1
-		FROM tblPREmployeeEarning
+		FROM tblPREmployeeEarning EE LEFT JOIN (SELECT intEntityEmployeeId, ysnActive FROM tblPREmployee) EMP
+			ON EE.intEntityEmployeeId = EMP.intEntityEmployeeId 
+			AND EMP.ysnActive = 1
 		WHERE intPayGroupId = @intPayGroupId
 			AND (ysnDefault = 1 OR dblDefaultHours > 0)
 			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail WHERE intPayGroupId = @intPayGroupId)
