@@ -66,7 +66,6 @@ BEGIN
 				,strSiteCountry = B.strCountry
 				,dblLongitude = B.dblLongitude
 				,dblLatitude = B.dblLatitude
-				,intCustomerId = B.intCustomerID
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -130,7 +129,6 @@ BEGIN
 				,strSiteCountry = B.strCountry
 				,dblLongitude = B.dblLongitude
 				,dblLatitude = B.dblLatitude
-				,intCustomerId = B.intCustomerID
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
