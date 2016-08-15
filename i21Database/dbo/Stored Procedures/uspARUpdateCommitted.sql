@@ -988,9 +988,9 @@ BEGIN
 	SELECT
 		[intItemId]					=	ARID.intItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARID.intItemUOMId
+		,[intItemUOMId]				=	SOTD.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	ARID.dblQtyShipped
+		,[dblQty]					=	SOTD.dblQtyOrdered
 		,[dblUOMQty]				=	ICIUOM.dblUnitQty
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
@@ -1010,11 +1010,11 @@ BEGIN
 		tblARInvoice ARI
 			ON ARID.intInvoiceId = ARI.intInvoiceId
 	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
-	INNER JOIN
 		tblSOSalesOrderDetail SOTD
-			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 			
+	INNER JOIN
+		tblICItemUOM ICIUOM 
+			ON ICIUOM.intItemUOMId = SOTD.intItemUOMId
 	LEFT OUTER JOIN
 		vyuICGetItemStock ICGIS
 			ON ARID.intItemId = ICGIS.intItemId 
@@ -1024,7 +1024,7 @@ BEGIN
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.dblQtyShipped = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND SOTD.dblQtyOrdered = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 
@@ -1037,7 +1037,7 @@ BEGIN
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
 		,[intItemUOMId]				=	ARIDC.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	ARID.dblQtyShipped * ARIDC.dblQuantity 
+		,[dblQty]					=	SOTD.dblQtyOrdered * ARIDC.dblQuantity 
 		,[dblUOMQty]				=	ARIDC.dblUnitQuantity
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
@@ -1071,7 +1071,7 @@ BEGIN
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.dblQtyShipped = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND SOTD.dblQtyOrdered = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 
@@ -1118,7 +1118,7 @@ BEGIN
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND SOTD.dblQtyOrdered < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 
@@ -1163,7 +1163,7 @@ BEGIN
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND SOTD.dblQtyOrdered < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 				
@@ -1172,9 +1172,9 @@ BEGIN
 	SELECT
 		[intItemId]					=	ARID.intItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARID.intItemUOMId
+		,[intItemUOMId]				=	SOTD.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) - ARID.dblQtyShipped
+		,[dblQty]					=	SOTD.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)
 		,[dblUOMQty]				=	ICIUOM.dblUnitQty
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
@@ -1194,11 +1194,11 @@ BEGIN
 		tblARInvoice ARI
 			ON ARID.intInvoiceId = ARI.intInvoiceId
 	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
-	INNER JOIN
 		tblSOSalesOrderDetail SOTD
 			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	INNER JOIN
+		tblICItemUOM ICIUOM 
+			ON ICIUOM.intItemUOMId = SOTD.intItemUOMId	
 	LEFT OUTER JOIN
 		vyuICGetItemStock ICGIS
 			ON ARID.intItemId = ICGIS.intItemId 
@@ -1208,7 +1208,7 @@ BEGIN
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.dblQtyShipped < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND SOTD.dblQtyOrdered > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 
@@ -1220,7 +1220,7 @@ BEGIN
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
 		,[intItemUOMId]				=	ARIDC.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	(dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) - ARID.dblQtyShipped) * ARIDC.dblQuantity 
+		,[dblQty]					=	(SOTD.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)) * ARIDC.dblQuantity 
 		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
@@ -1254,7 +1254,7 @@ BEGIN
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
 		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.dblQtyShipped < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND SOTD.dblQtyOrdered > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 	
