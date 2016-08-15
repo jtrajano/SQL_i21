@@ -34,6 +34,12 @@ RETURN (
 				--REGION @ysnPost = 1
 				UNION
 				SELECT DISTINCT A.intJournalId,
+					'You cannot post a journal that is already posted' AS strMessage
+					FROM tblGLJournal A 
+					WHERE 1 = ysnPosted
+					  AND A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND @ysnPost = 1 
+				UNION
+				SELECT DISTINCT A.intJournalId,
 					'Unable to find an open accounting period to match the reverse date.' AS strMessage
 					FROM tblGLJournal A 
 					WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE ISNULL([dbo].isOpenAccountingDate(A.dtmReverseDate), 0) END 
