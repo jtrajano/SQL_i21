@@ -96,7 +96,7 @@ BEGIN
 			,intContractDetailId	= PODetail.intPurchaseDetailId -- As intLineNo. Link between PO Detail id and IR detail. 
 			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 			,intShipViaId			= PO.intShipViaId
-			,dblQty					= PODetail.dblQtyOrdered
+			,dblQty					= ISNULL(PODetail.dblQtyOrdered,0) - ISNULL(PODetail.dblQtyReceived,0)
 			,intGrossNetUOMId		= NULL 
 			,dblGross				= PODetail.dblQtyOrdered
 			,dblNet					= PODetail.dblQtyOrdered
