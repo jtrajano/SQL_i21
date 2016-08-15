@@ -4175,6 +4175,8 @@
     <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrderDetailComponent.sql" />
     <Build Include="dbo\Views\vyuTMCustomerConsumptionSiteInfo.sql" />
+    <Build Include="dbo\Views\vyuARGetRecipeDetailReport.sql" />
+    <Build Include="dbo\Views\vyuARGetRecipeReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
