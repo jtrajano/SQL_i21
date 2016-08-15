@@ -139,6 +139,12 @@ GO
 		INNER JOIN tblSMActivity B ON A.intTransactionId = B.intTransactionId
 		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.strRecordNo = CAST(B.intActivityId AS NVARCHAR(50))
 	WHERE ISNULL(A.strScreen, '') <> '' AND ISNULL(A.strRecordNo, '') <> ''
+
+	UPDATE tblSMNotification
+	SET tblSMNotification.intActivityId = B.intActivityId
+	FROM tblSMNotification A 
+		INNER JOIN tblSMComment B ON A.intCommentId = B.intCommentId
+
 GO
 	PRINT N'Comments Migration'
 GO
