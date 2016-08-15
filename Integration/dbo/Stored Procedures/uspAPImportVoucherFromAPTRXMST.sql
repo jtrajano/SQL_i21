@@ -118,7 +118,18 @@ SELECT
 										WHEN A.aptrx_trans_type = 'O' AND A.aptrx_orig_amt > 0 THEN 1
 									WHEN A.aptrx_trans_type = 'A' THEN 2
 									WHEN A.aptrx_trans_type = 'C' OR A.aptrx_orig_amt < 0 THEN 3
-									ELSE 0 END,
+									ELSE 
+										CASE WHEN A.aptrx_orig_amt = 0 THEN 
+											CASE A.aptrx_trans_type 
+												WHEN 'I' THEN 1
+												WHEN 'O' THEN 1
+												WHEN 'A' THEN 2
+												WHEN 'C' THEN 3
+											ELSE 1
+											END
+										ELSE 1
+										END
+									END,
 	[dblDiscount]				=	ISNULL(A.aptrx_disc_amt,0),
 	[dblWithheld]				=	A.aptrx_wthhld_amt,
 	[intShipToId]				=	@userLocation,
