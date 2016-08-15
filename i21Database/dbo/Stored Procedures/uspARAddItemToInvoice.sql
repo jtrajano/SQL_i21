@@ -72,14 +72,23 @@ SET ANSI_WARNINGS OFF
 	
 DECLARE  @ZeroDecimal NUMERIC(18, 6)
 		,@NewDetailId INT
-		,@AddDetailError NVARCHAR(MAX)		
+		,@AddDetailError NVARCHAR(MAX)
+		,@CompanyLocationId		INT	
 
+		 
 SET @ZeroDecimal = 0.000000
+
+SELECT 
+	 @CompanyLocationId = [intCompanyLocationId]	
+FROM
+	tblARInvoice
+WHERE
+	intInvoiceId = @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
 
-IF (ISNULL(@ItemIsInventory,0) = 1)
+IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 1
 	BEGIN
 		BEGIN TRY
 		EXEC [dbo].[uspARAddInventoryItemToInvoice]
@@ -204,7 +213,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemDescription
 				,@ItemDocumentNumber
 				,@OrderUOMId
-				,@ItemUOMId
+				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
 				,@ItemQtyOrdered
