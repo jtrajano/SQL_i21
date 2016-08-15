@@ -4174,6 +4174,7 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrderDetailComponent.sql" />
+    <Build Include="dbo\Views\vyuTMCustomerConsumptionSiteInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
