@@ -4169,6 +4169,7 @@
     <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspARErrorMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
