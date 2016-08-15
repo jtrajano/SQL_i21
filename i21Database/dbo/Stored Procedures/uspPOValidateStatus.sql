@@ -46,7 +46,7 @@ BEGIN
 		--Allow to open if no item receipt or bill or from cancelled or short closed status
 		IF ((@hasItemReceipt = 1 OR
 			 @hasBill = 1) AND
-			 @currentStatus NOT IN (1, 4, 6))
+			 @currentStatus NOT IN (1, 4, 6, 2))
 		BEGIN
 			SET @success = 0;
 			SET @errorMsg = 'You cannot open a purchase order with created item receipt or Voucher.';
