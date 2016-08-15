@@ -135,7 +135,18 @@ SELECT
 										WHEN A.apivc_trans_type = 'O' AND A.apivc_orig_amt > 0 THEN 1
 									WHEN A.apivc_trans_type = 'A' THEN 2
 									WHEN A.apivc_trans_type = 'C' OR A.apivc_orig_amt < 0 THEN 3
-									ELSE 0 END),
+									ELSE 
+										CASE WHEN A.apivc_orig_amt = 0 THEN 
+											CASE A.apivc_trans_type 
+												WHEN 'I' THEN 1
+												WHEN 'O' THEN 1
+												WHEN 'A' THEN 2
+												WHEN 'C' THEN 3
+											ELSE 1
+											END
+										ELSE 1
+										END
+									END),
 	[dblDiscount]			=	ISNULL(A.apivc_disc_taken,0),
 	[dblWithheld]			=	A.apivc_wthhld_amt,
 	[intShipToId]			=	@userLocation,
