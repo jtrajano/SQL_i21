@@ -21,11 +21,8 @@ DECLARE @CurrentErrorMessage NVARCHAR(250)
 		,@ZeroDecimal NUMERIC(18, 6)
 		
 SET @ZeroDecimal = 0.000000
-
 		
-IF ISNULL(@RaiseError,0) = 0
-	BEGIN TRANSACTION
-	
+BEGIN TRANSACTION
 
 DECLARE	 @OriginalInvoiceId			INT
 		,@CreatedInvoiceId			INT
@@ -120,22 +117,16 @@ WHERE
 --VALIDATE INVOICE TYPES
 IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standard', 'Credit Memo')
 	BEGIN			
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = 'Unable to duplicate ' + @Type + ' Invoice Type.'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1)
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction
+		RAISERROR(120072, 16, 1, @Type)
+		GOTO _ExitTransaction
 	END
 
 IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 	BEGIN	
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = 'Duplicating of Transport Delivery Invoice type is not allowed.'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1)
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction		
+		RAISERROR(120037, 16, 1)
+		GOTO _ExitTransaction
 	END
 
 --VALIDATE INVOICES THAT HAS CONTRACTS
@@ -146,12 +137,9 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 				AND CH.ysnUnlimitedQuantity = 0
 				AND ISNULL(CD.dblBalance, @ZeroDecimal) - ID.dblQtyShipped < @ZeroDecimal)
 	BEGIN
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = 'There are items that will exceed the contract quantity.'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1)
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction		
+		RAISERROR(120038, 16, 1)
+		GOTO _ExitTransaction
 	END
 
 --VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Inventory Shipment
@@ -166,12 +154,9 @@ IF EXISTS(	SELECT
 				ARID.intInvoiceId = @InvoiceId
 				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(ICISI.dblQuantity, @ZeroDecimal))
 	BEGIN
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = 'There are items that will exceed the shipped quantity.'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1)
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction		
+		RAISERROR(120039, 16, 1)
+		GOTO _ExitTransaction
 	END
 
 --VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Sales Order
@@ -187,14 +172,10 @@ IF EXISTS(	SELECT
 				ARID.intInvoiceId = @InvoiceId
 				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(SOSOD.dblQtyOrdered - SOSOD.dblQtyShipped, @ZeroDecimal))
 	BEGIN
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = 'There are items that will exceed the ordered quantity.'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1)
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction		
+		RAISERROR(120040, 16, 1)
+		GOTO _ExitTransaction
 	END
-
 
 BEGIN TRY
 	EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -235,8 +216,7 @@ BEGIN TRY
 		,@ShipmentId							= @ShipmentId
 		,@TransactionId							= @TransactionId
 		,@OriginalInvoiceId						= @OriginalInvoiceId
-		,@PeriodsToAccrue						= @PeriodsToAccrue
-		
+		,@PeriodsToAccrue						= @PeriodsToAccrue		
 		,@ItemId								= NULL
 		,@ItemIsInventory						= 0
 		,@ItemDocumentNumber					= NULL			
@@ -284,12 +264,9 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = @CurrentErrorMessage
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 END CATCH
 
 
@@ -436,12 +413,9 @@ BEGIN TRY
 		[intInvoiceId] = @InvoiceId
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 END CATCH
 
 
@@ -517,12 +491,9 @@ BEGIN TRY
 				
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 END CATCH
 
 BEGIN TRY
@@ -531,17 +502,21 @@ BEGIN TRY
 	WHERE intInvoiceId = @NewInvoiceId
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = @CurrentErrorMessage
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 END CATCH
 
-IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION 
-	
-RETURN 1;
+IF @@ERROR = 0 GOTO _CommitTransaction
+
+_RollBackTransaction:
+ROLLBACK TRANSACTION
+GOTO _ExitTransaction
+
+_CommitTransaction: 
+COMMIT TRANSACTION
+GOTO _ExitTransaction
+
+_ExitTransaction:
 
 END
