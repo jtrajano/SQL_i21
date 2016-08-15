@@ -171,7 +171,7 @@ DECLARE @tblTempTransaction TABLE (
 						 WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
 						 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 						 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-						 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation=''True'')'
+						 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation=''True'') AND tblICInventoryReceipt.ysnPosted = 1'
 			
 		DELETE FROM @tblTempTransaction
 		INSERT INTO @tblTempTransaction
