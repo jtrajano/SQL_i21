@@ -735,18 +735,21 @@ BEGIN
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
 						,dblCost = 							
 							ISNULL (
-								dbo.fnDivide(
-									(	SELECT SUM (
-													-- Round the values of each of the items. 
-													- ROUND(CAST(dbo.fnMultiply(dblQty, dblCost) + dblValue AS NUMERIC(18, 6)) ,2)
-												)												
-										FROM	dbo.tblICInventoryTransaction 
-										WHERE	strTransactionId = @strTransactionId 
-												AND strBatchId = @strBatchId
-												AND intTransactionId = @intTransactionId
+								ROUND(
+									dbo.fnDivide(
+										(	SELECT SUM (
+														-- Round the values of each of the items. 
+														- ROUND(CAST(dbo.fnMultiply(dblQty, dblCost) + dblValue AS NUMERIC(18, 6)) ,2)
+													)												
+											FROM	dbo.tblICInventoryTransaction 
+											WHERE	strTransactionId = @strTransactionId 
+													AND strBatchId = @strBatchId
+													AND intTransactionId = @intTransactionId
+										) 
+										, ICTrans.dblQty
 									) 
-									, ICTrans.dblQty
-								) 
+									, 6
+								)
 								, 0
 							)
 						,ICTrans.dblSalesPrice  
