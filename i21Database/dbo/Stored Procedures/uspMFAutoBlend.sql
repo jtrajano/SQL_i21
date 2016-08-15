@@ -160,7 +160,7 @@ Begin
 
 	If Exists (Select 1 From tblMFWorkOrder Where intInvoiceDetailId=ISNULL(@intInvoiceDetailId,0))
 		If Exists(Select 1 From tblMFWorkOrderProducedLot Where intWorkOrderId in 
-		(Select intWorkOrderId From tblMFWorkOrder Where intInvoiceDetailId=ISNULL(intInvoiceDetailId,0)) 
+		(Select intWorkOrderId From tblMFWorkOrder Where intInvoiceDetailId=ISNULL(@intInvoiceDetailId,0)) 
 		AND ISNULL(ysnProductionReversed,0)=0)
 			RaisError('Invoice Line is already blended.',16,1)
 
