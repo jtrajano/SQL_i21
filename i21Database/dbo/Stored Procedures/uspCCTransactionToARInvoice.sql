@@ -135,7 +135,6 @@ BEGIN
 				WHERE A.intSiteHeaderId = @intSiteHeaderId)
 
 		END
-		ELSE
-			RAISERROR('Invoice ID is null', 16 ,1)	
+
 	END
 END
