@@ -53,7 +53,9 @@ Declare @tblWO As table
 	intRowNo int IDENTITY,
 	dblQuantity numeric(18,6),
 	dtmDueDate datetime,
-	intCellId int
+	intCellId int,
+	intMachineId int,
+	dblMachineCapacity numeric(18,6)
 )
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
@@ -72,17 +74,21 @@ EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
 	intUserId int
 	)
 
-Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId)
- Select dblQuantity,dtmDueDate,intCellId
+Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId,intMachineId,dblMachineCapacity)
+ Select dblQuantity,dtmDueDate,intCellId,intMachineId,dblMachineCapacity
  FROM OPENXML(@idoc, 'root/wo', 2)  
  WITH ( 
 	dblQuantity numeric(18,6), 
 	dtmDueDate datetime,
-	intCellId int
+	intCellId int,
+	intMachineId int,
+	dblMachineCapacity numeric(18,6)
 	)
 
 If @intSalesOrderDetailId=0 Set @intSalesOrderDetailId=NULL
 If @intInvoiceDetailId=0 Set @intInvoiceDetailId=NULL
+
+Select @intItemUOMId=intItemUOMId From tblMFRecipe Where intRecipeId=@intRecipeId
 
 Select @intManufacturingProcessId=r.intManufacturingProcessId,@intAttributeTypeId=mp.intAttributeTypeId 
 From tblMFRecipe r Join  tblMFManufacturingProcess mp on r.intManufacturingProcessId=mp.intManufacturingProcessId 
@@ -105,15 +111,14 @@ Begin
 
 	While(@intMinWO is not null)
 	Begin
-		Select @dblQuantity=dblQuantity,@intCellId=intCellId From @tblWO Where intRowNo=@intMinWO
+		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@intMachineId=intMachineId,@dblBlendBinSize=dblMachineCapacity From @tblWO Where intRowNo=@intMinWO
 
-		Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
-		From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
-		Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
-		Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
-		Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
-		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
-		And mc.intManufacturingCellId=@intCellId
+		If ISNULL(@intMachineId,0)=0
+			Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
+			From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
+			Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
+			Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
+			Where mc.intManufacturingCellId=@intCellId
 
 		If ISNULL(@intMachineId,0) =0
 			RaisError('Machine is not defined for the Manufacturing Cell',16,1)
@@ -182,15 +187,14 @@ Begin
 
 	While(@intMinWO is not null)
 	Begin
-		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@dtmDueDate=dtmDueDate From @tblWO Where intRowNo=@intMinWO
+		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@dtmDueDate=dtmDueDate,@intMachineId=intMachineId,@dblBlendBinSize=dblMachineCapacity From @tblWO Where intRowNo=@intMinWO
 
-		Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
-		From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
-		Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
-		Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
-		Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
-		Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
-		And mc.intManufacturingCellId=@intCellId
+		If ISNULL(@intMachineId,0)=0
+			Select TOP 1 @intMachineId=m.intMachineId,@dblBlendBinSize=mp.dblMachineCapacity 
+			From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
+			Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
+			Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
+			Where mc.intManufacturingCellId=@intCellId
 
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 		,@intItemId = @intItemId

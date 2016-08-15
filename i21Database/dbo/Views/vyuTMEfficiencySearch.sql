@@ -42,5 +42,5 @@ AS
 		ON E.intCustomerNumber = B.intEntityId
 	LEFT JOIN tblTMFillMethod F
 		ON C.intFillMethodId = F.intFillMethodId
-	CROSS APPLY (SELECT * FROM [fnTMGetSiteEfficiencyTable](C.intSiteID)) I
+	OUTER APPLY (SELECT * FROM [fnTMGetSiteEfficiencyTable](C.intSiteID)) I
 GO

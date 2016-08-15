@@ -137,6 +137,7 @@ BEGIN
 	SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
 	FROM tblSMStartingNumber 
 	WHERE strTransactionType = CASE WHEN @strTransactionType = 'Prepayment' THEN 'Customer Prepayment' 
+									WHEN @strTransactionType = 'Customer Prepayment' THEN 'Customer Prepayment' 
 									WHEN @strTransactionType = 'Overpayment' THEN 'Customer Overpayment'
 									WHEN @strTransactionType = 'Invoice' AND @strType = 'Service Charge' THEN 'Service Charge'
 									ELSE 'Invoice' END
@@ -149,7 +150,7 @@ BEGIN
 			BEGIN
 				SET @InvoiceNumber = NULL
 				DECLARE @intStartIndex INT = 4
-				IF @strTransactionType = 'Prepayment' OR @strTransactionType = 'Overpayment'
+				IF (@strTransactionType = 'Prepayment' OR @strTransactionType = 'Customer Prepayment') OR @strTransactionType = 'Overpayment'
 					SET @intStartIndex = 5
 				
 				SELECT @intMaxCount = MAX(CONVERT(INT, SUBSTRING(strInvoiceNumber, @intStartIndex, 10))) FROM tblARInvoice WHERE strTransactionType = @strTransactionType

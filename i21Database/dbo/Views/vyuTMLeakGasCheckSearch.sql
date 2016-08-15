@@ -9,7 +9,7 @@ AS
 		,dblTankCapacity = I.dblTankCapacity
 		,strTankType = J.strTankType
 		,dtmLastLeakCheck = G.dtmLastLeakCheck
-		,dtmLastGasCheck = G.dtmLastLeakCheck
+		,dtmLastGasCheck = G.dtmLastGasCheck
 		,intSiteID = A.intSiteID
 		,intCustomerID = A.intCustomerID
 		,intLocationId = A.intLocationId

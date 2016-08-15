@@ -4154,6 +4154,8 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\21_CommentMigration.sql" />
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
     <Build Include="dbo\Views\vyuMBSearchMeterReading.sql" />
+    <Build Include="dbo\Tables\tblARLead.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityLead.sql" />
     <Build Include="dbo\Tables\tblCFProductAuthDetail.sql" />
     <Build Include="dbo\Tables\tblCFProductAuth.sql" />
     <Build Include="dbo\Tables\tblCFNetworkAccount.sql" />
@@ -4163,6 +4165,17 @@
     <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
     <Build Include="dbo\Functions\fnStripHtml.sql" />
+    <Build Include="dbo\Views\vyuARDocumentMaintenanceMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessToInventoryShipment.sql" />
+    <Build Include="dbo\Views\vyuSMDocumentMessage.sql" />
+    <Build Include="dbo\Tables\tblARLeadSourceList.sql" />
+    <Build Include="dbo\Views\vyuTRGetSupplyPointSearchValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateStagingOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateStagingOrderDetail.sql" />
+    <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
+    <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
+    <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspARErrorMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

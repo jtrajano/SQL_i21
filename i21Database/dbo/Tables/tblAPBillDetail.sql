@@ -17,7 +17,7 @@
 	[intContractDetailId]    INT             NULL,
 	[intCustomerStorageId]    INT             NULL,
 	[intStorageLocationId] INT             NULL,
-	[intShipmentContractQtyId]    INT             NULL,
+	[intLoadDetailId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,
 	[intPrepayTypeId]    INT             NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
@@ -60,7 +60,7 @@
 	--CONSTRAINT [FK_tblAPBillDetail_tblICInventoryReceiptItem_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [dbo].[tblICInventoryReceiptItem] ([intInventoryReceiptItemId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
-	CONSTRAINT [FK_tblAPBillDetail_tblLGShipmentContractQty_intShipmentContractQtyId] FOREIGN KEY ([intShipmentContractQtyId]) REFERENCES [dbo].[tblLGShipmentContractQty] ([intShipmentContractQtyId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [dbo].[tblLGLoadDetail] ([intLoadDetailId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCCSiteDetail_intCCSiteDetailId] FOREIGN KEY ([intCCSiteDetailId]) REFERENCES [dbo].[tblCCSiteDetail] ([intSiteDetailId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractCost] FOREIGN KEY ([intContractCostId]) REFERENCES [tblCTContractCost]([intContractCostId])
 ) ON [PRIMARY];

@@ -123,7 +123,7 @@ BEGIN TRY
 		,@DatePaid			= ARI.[dtmPostDate]
 		,@AccountId			= NULL
 		,@BankAccountId		= NULL
-		,@AmountPaid		= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Prepayment') THEN -1 ELSE 1 END)
+		,@AmountPaid		= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
 		,@PaymentMethodId	= ISNULL(ARI.[intPaymentMethodId], (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod ORDER BY [ysnActive] DESC, [strPaymentMethod]))
 		,@PaymentInfo		= ''
 		,@ApplytoBudget		= 0
@@ -131,7 +131,7 @@ BEGIN TRY
 		,@Notes				= ''
 		,@AllowPrepayment	= 0
 		,@AllowOverpayment	= 0
-		,@Payment			= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Prepayment') THEN -1 ELSE 1 END)
+		,@Payment			= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
 		,@ApplyTermDiscount	= @ZeroDecimal
 		,@Discount			= @ZeroDecimal
 		,@Interest			= @ZeroDecimal

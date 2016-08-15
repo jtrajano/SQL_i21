@@ -155,7 +155,7 @@ IF(@exclude IS NOT NULL)
 --				ON GL.intTransactionId = I.intInvoiceId 
 --				AND GL.strTransactionId = I.strTransactionId
 --		WHERE
---			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
+--			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Customer Prepayment')
 --			AND	GL.strModuleName = @MODULE_NAME
 --	END
 

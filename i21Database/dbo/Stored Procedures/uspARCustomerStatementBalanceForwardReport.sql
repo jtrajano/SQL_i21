@@ -160,14 +160,14 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
       , I.dtmDate
       , I.dtmDueDate
 	  , I.dtmShipDate
-	  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END
+	  , dblInvoiceTotal		= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END
 	  , intPaymentId		= ISNULL(P.intPaymentId, PCREDITS.intPaymentId)
 	  , strRecordNumber		= ISNULL(P.strRecordNumber, PCREDITS.strRecordNumber)
 	  , strTransactionType  = I.strTransactionType
 	  , strPaymentInfo	    = ''PAYMENT REF: '' + P.strPaymentInfo
 	  , dtmDatePaid			= ISNULL(P.dtmDatePaid, PCREDITS.dtmDatePaid)
 	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
-	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
+	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
 	  , strSalespersonName  = ESP.strName
 	  , strFullAddress		= [dbo].fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strCompanyName		= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)

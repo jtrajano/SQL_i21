@@ -115,6 +115,20 @@ FROM	tblICInventoryTransferDetail Detail	INNER JOIN tblICInventoryTransfer Heade
 WHERE	Detail.intInventoryTransferId = @intTransactionId 
 		AND ISNULL(dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId), -1) = -1
 		 
+-- Check if all details with lotted items have lot numbers assigned.
+IF EXISTS(
+	SELECT TOP 1 1
+	FROM tblICInventoryTransfer tf
+		INNER JOIN tblICInventoryTransferDetail tfd ON tfd.intInventoryTransferId = tf.intInventoryTransferId
+		INNER JOIN tblICItem i ON i.intItemId = tfd.intItemId
+	WHERE tf.intInventoryTransferId = @intTransactionId
+		AND tfd.intLotId IS NULL
+		AND ISNULL(i.strLotTracking, 'No') <> 'No')
+BEGIN
+	RAISERROR(80085, 11, 1, @strTransactionId)
+	GOTO Post_Exit
+END
+
 IF EXISTS(SELECT TOP 1 1 FROM #tempValidateItemLocation)
 BEGIN
 	DECLARE @ItemId NVARCHAR(100),

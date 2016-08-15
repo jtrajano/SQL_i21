@@ -361,4 +361,116 @@
 			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
 			WHERE [strReminder] = N'Process' AND [strType] = N'Sales Order' 
 		END
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transfer')
+		BEGIN
+			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			SELECT [strReminder]        =        N'Process',
+				   [strType]        	=        N'Bank Transfer',
+				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
+				   [strQuery]  			=        N'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bank Transfer'' ' +
+												  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'UNION ' +
+												  'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bank Transfer'' ' +
+												  'AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
+												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
+				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [intSort]            =        1
+
+		END
+	ELSE
+		BEGIN
+			UPDATE [dbo].[tblSMReminderList]
+			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
+			WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transfer' 
+		END
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transaction')
+		BEGIN
+			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			SELECT [strReminder]        =        N'Process',
+				   [strType]        	=        N'Bank Transaction',
+				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
+				   [strQuery]  			=        N'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bank Transaction'' ' +
+												  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'UNION ' +
+												  'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bank Transaction'' ' +
+												  'AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
+												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
+				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [intSort]            =        1
+
+		END
+	ELSE
+		BEGIN
+			UPDATE [dbo].[tblSMReminderList]
+			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
+			WHERE [strReminder] = N'Process' AND [strType] = N'Bank Transaction' 
+		END
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Bank Deposit')
+		BEGIN
+			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			SELECT [strReminder]        =        N'Process',
+				   [strType]        	=        N'Bank Deposit',
+				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
+				   [strQuery]  			=        N'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bank Deposit'' ' +
+												  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'UNION ' +
+												  'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Bank Deposit'' ' +
+												  'AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
+												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
+				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [intSort]            =        1
+
+		END
+	ELSE
+		BEGIN
+			UPDATE [dbo].[tblSMReminderList]
+			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
+			WHERE [strReminder] = N'Process' AND [strType] = N'Bank Deposit' 
+		END
+
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Misc Checks')
+		BEGIN
+			INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+			SELECT [strReminder]        =        N'Process',
+				   [strType]        	=        N'Misc Checks',
+				   [strMessage]			=        N'{0} {1} {2} unprocessed.',
+				   [strQuery]  			=        N'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Misc Checks'' ' +
+												  'AND GETDATE() >= dtmNextProcess AND dtmNextProcess >= dtmStartDate AND dtmNextProcess <= dtmEndDate AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'UNION ' +
+												  'SELECT intRecurringId ' +
+												  'FROM tblSMRecurringTransaction WHERE strTransactionType = ''Misc Checks'' ' +
+												  'AND ysnActive = 1 ' +
+												  'AND intEntityId = {0} ' +
+												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
+												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
+				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [intSort]            =        1
+
+		END
+	ELSE
+		BEGIN
+			UPDATE [dbo].[tblSMReminderList]
+			SET	[strMessage] = N'{0} {1} {2} unprocessed.'
+			WHERE [strReminder] = N'Process' AND [strType] = N'Misc Checks' 
+		END
 GO

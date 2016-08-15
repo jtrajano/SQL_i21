@@ -15,7 +15,8 @@ SELECT
 		c.strUserName,
 		h.intUserRoleID,
 		strDefaultUserRole = h.strName,
-		dtmLastLogin = u.dtmDate
+		dtmLastLogin = u.dtmDate,
+		ysnHasSMTP = Cast( case when isnull(j.intSMTPInformationId, 0) > 0 then 1 else 0 end as bit)
     FROM         
             tblEMEntity a
         join [tblEMEntityType] b
@@ -32,6 +33,8 @@ SELECT
 			on h.intUserRoleID = c.intUserRoleID
 		left join tblEMEntityPhoneNumber i
 			on i.intEntityId = g.intEntityId
+		left join tblEMEntitySMTPInformation j
+			on g.intEntityId = j.intEntityId
 		outer apply 
 		(
 			SELECT TOP 1 dtmDate FROM tblSMUserLogin u WHERE u.intEntityId = c.intEntityUserSecurityId ORDER BY dtmDate DESC

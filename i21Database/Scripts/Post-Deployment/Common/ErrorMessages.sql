@@ -5,3 +5,4 @@ EXEC dbo.uspCMErrorMessages
 EXEC dbo.uspICErrorMessages
 EXEC dbo.uspMFGErrorMessages
 EXEC dbo.uspCTErrorMessages
+EXEC dbo.uspARErrorMessages

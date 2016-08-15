@@ -121,7 +121,7 @@ SELECT TOP 1
 	,@DueDate							= ARP.dtmDatePaid
 	,@ShipDate							= ARP.dtmDatePaid
 	,@PostDate							= ARP.dtmDatePaid
-	,@TransactionType					= 'Prepayment'
+	,@TransactionType					= 'Customer Prepayment'
 	,@Type								= 'Standard'
 	,@EntitySalespersonId				= NULL				
 	,@FreightTermId						= NULL

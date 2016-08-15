@@ -12,7 +12,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Cash"
 																											-- "Cash Refund"
 																											-- "Overpayment"
-																											-- "Prepayment"
+																											-- "Customer Prepayment"
 	,[strType]								NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values 
 																											-- "Standard" - Default
 																											-- "Software"
@@ -68,7 +68,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnForgiven]							BIT												NULL		
 	,[ysnCalculated]						BIT												NULL		
 	,[ysnSplitted]							BIT												NULL	
-	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Prepayment/Overpayment) 
+	,[intPaymentId]							INT												NULL		-- Key Value from tblARPayment (Customer Prepayment/Overpayment) 
 	,[intSplitId]							INT												NULL		-- Key Value from tblEMEntitySplit (Customer Split) 
 	,[intLoadDistributionHeaderId]			INT												NULL		-- Key Value from tblTRLoadDistributionHeader (Transport Load-New Screen) 
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing

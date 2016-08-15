@@ -12,7 +12,7 @@ INNER JOIN
 		ON I.strComments = P.strRecordNumber
 WHERE
 	intInvoiceId = I.intInvoiceId
-	AND I.strTransactionType IN ('Overpayment', 'Prepayment') 
+	AND I.strTransactionType IN ('Overpayment', 'Prepayment', 'Customer Prepayment') 
 	AND (I.intPaymentId IS NULL OR I.intPaymentId NOT IN (SELECT intPaymentId FROM tblARPayment))
 
 GO

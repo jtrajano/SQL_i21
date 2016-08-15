@@ -188,9 +188,7 @@ Select TOP 1 @dblBlendBinSize=mp.dblMachineCapacity
 From tblMFMachine m Join tblMFMachinePackType mp on m.intMachineId=mp.intMachineId 
 Join tblMFManufacturingCellPackType mcp on mp.intPackTypeId=mcp.intPackTypeId 
 Join tblMFManufacturingCell mc on mcp.intManufacturingCellId=mc.intManufacturingCellId
-Join tblMFPackType pk on mp.intPackTypeId=pk.intPackTypeId 
-Where pk.intPackTypeId=(Select intPackTypeId From tblICItem Where intItemId=@intItemId)
-And mc.intManufacturingCellId=@intCellId
+Where mc.intManufacturingCellId=@intCellId
 
 If ISNULL(@dblBlendBinSize,0)=0
 	RaisError('Blend bin size is not defined',16,1)
@@ -451,14 +449,14 @@ Begin Tran
 
 --Create WorkOrder
 Set @strXml = '<root>'
-Set @strXml += '<intSalesOrderDetailId>' + CONVERT(VARCHAR,@intSalesOrderDetailId) + '</intSalesOrderDetailId>'
-Set @strXml += '<intInvoiceDetailId>' + CONVERT(VARCHAR,@intInvoiceDetailId) + '</intInvoiceDetailId>'
+Set @strXml += '<intSalesOrderDetailId>' + ISNULL(CONVERT(VARCHAR,@intSalesOrderDetailId),'') + '</intSalesOrderDetailId>'
+Set @strXml += '<intInvoiceDetailId>' + ISNULL(CONVERT(VARCHAR,@intInvoiceDetailId),'') + '</intInvoiceDetailId>'
 Set @strXml += '<strOrderType>' + CONVERT(VARCHAR,@strOrderType) + '</strOrderType>'
 Set @strXml += '<intLocationId>' + CONVERT(VARCHAR,@intLocationId) + '</intLocationId>'
 Set @strXml += '<intRecipeId>' + CONVERT(VARCHAR,@intRecipeId) + '</intRecipeId>'
 Set @strXml += '<intItemId>' + CONVERT(VARCHAR,@intBlendItemId) + '</intItemId>'
 Set @strXml += '<intItemUOMId>' + CONVERT(VARCHAR,@intBlendItemUOMId) + '</intItemUOMId>'
-Set @strXml += '<intUserId>' + CONVERT(VARCHAR,@intUserId) + '</intUserId>'
+Set @strXml += '<intUserId>' + ISNULL(CONVERT(VARCHAR,@intUserId),'') + '</intUserId>'
 
 While (@dblQtyToProduce>0)
 Begin
@@ -592,7 +590,7 @@ Begin
 	Set @strXml += '<strVesselNo>' + CONVERT(VARCHAR,'') + '</strVesselNo>'
 	Set @strXml += '<intManufacturingCellId>' + CONVERT(VARCHAR,@intCellId) + '</intManufacturingCellId>'
 	Set @strXml += '<dblPlannedQuantity>' + CONVERT(VARCHAR,@dblWOQty) + '</dblPlannedQuantity>'
-	Set @strXml += '<intUserId>' + CONVERT(VARCHAR,@intUserId) + '</intUserId>'
+	Set @strXml += '<intUserId>' + ISNULL(CONVERT(VARCHAR,@intUserId),'') + '</intUserId>'
 	
 	Select @strWorkOrderConsumedLotsXml=COALESCE(@strWorkOrderConsumedLotsXml, '') + '<lot>' +  '<intWorkOrderId>' + convert(varchar,@intWorkOrderId) + '</intWorkOrderId>' + 
 	'<intWorkOrderConsumedLotId>' + convert(varchar,wc.intWorkOrderConsumedLotId) + '</intWorkOrderConsumedLotId>' + 

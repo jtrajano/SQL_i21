@@ -64,7 +64,7 @@ SET
 	,dblTax		 		= ROUND(ISNULL(dblTax,0),2)
 WHERE	
 	ysnPosted = 0
-	OR (ysnPosted = 1 AND strTransactionType IN ('Prepayment','Overpayment'))
+	OR (ysnPosted = 1 AND strTransactionType IN ('Prepayment','Overpayment', 'Customer Prepayment'))
 
 GO
 print('/*******************  END Update NULL numeric fields in tblARPayment with zero  *******************/')

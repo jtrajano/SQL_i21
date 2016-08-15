@@ -5390,4 +5390,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmDateModified" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b1caa5f0-91ac-41a8-8bfe-378e7e9a7ead" ChangeDateTime="08/11/2016 11:17:45">
+    <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[intShipmentContractQtyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBillDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intLoadDetailId]" />
+  </Operation>
 </Operations>

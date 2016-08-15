@@ -178,16 +178,23 @@ BEGIN
 		,[intLineNo]			=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 		,[intTaxGroupId]		=	NULL			
 	FROM 
-		(SELECT intVendorId = TT.intVendorId, intAccountId = PT.intExpenseAccountId, strItem = TT.strTax, dblTotal = SUM(PT.dblTotal)
+		(SELECT 
+			intVendorId = TT.intVendorId, 
+			intAccountId = CASE WHEN (PT.strPaidBy = 'Company') THEN PT.intAccountId ELSE PT.intExpenseAccountId END, 
+			strItem = TT.strTax, dblTotal = SUM(PT.dblTotal)
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
 			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL
 			  AND TT.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
 			GROUP BY TT.intVendorId, PT.intExpenseAccountId, TT.strTax
 		 UNION ALL
-		 SELECT intVendorId = TD.intVendorId, intAccountId = PD.intExpenseAccountId, strItem = TD.strDeduction, dblTotal = SUM(PD.dblTotal)
+		 SELECT 
+			intVendorId = TD.intVendorId, 
+			intAccountId = CASE WHEN (PD.strPaidBy = 'Company') THEN PD.intAccountId ELSE PD.intExpenseAccountId END,
+			strItem = TD.strDeduction, 
+			dblTotal = SUM(PD.dblTotal)
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
 			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL
-			  AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
+				AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
 			GROUP BY TD.intVendorId, PD.intExpenseAccountId, TD.strDeduction
 		) A
 		INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId

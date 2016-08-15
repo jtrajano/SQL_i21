@@ -1682,9 +1682,16 @@ BEGIN
 	SELECT 9
 		,'Count Quantity'
 		,1
-		,1
+		,0
 END
-GO
+ELSE
+
+BEGIN
+	UPDATE tblMFYieldTransaction
+	SET ysnInputTransaction = 0
+	WHERE intYieldTransactionId = 9
+END
+
 GO
 
 IF NOT EXISTS (
@@ -2075,4 +2082,8 @@ Go
 UPDATE tblMFCompanyPreference
 SET ysnLotHistoryByStorageLocation = 1
 WHERE ysnLotHistoryByStorageLocation IS NULL
+Go
+UPDATE tblMFCompanyPreference
+SET ysnShowInputItemInYieldView = 0
+WHERE ysnShowInputItemInYieldView IS NULL
 Go
