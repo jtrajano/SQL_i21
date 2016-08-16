@@ -4177,6 +4177,7 @@
     <Build Include="dbo\Views\vyuTMCustomerConsumptionSiteInfo.sql" />
     <Build Include="dbo\Views\vyuARGetRecipeDetailReport.sql" />
     <Build Include="dbo\Views\vyuARGetRecipeReport.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
