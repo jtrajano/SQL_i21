@@ -333,7 +333,8 @@ BEGIN TRY
 		,[intPerformerId]
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
-		,[intConcurrencyId])
+		,[intConcurrencyId]
+		,[dblOriginalItemWeight])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
@@ -400,6 +401,7 @@ BEGIN TRY
 		,[ysnLeaseBilling]				= 0
 		,[ysnVirtualMeterReading]		= 0
 		,[intConcurrencyId]				= 1
+		,[dblOriginalItemWeight]		= ARID.dblOriginalItemWeight
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN
