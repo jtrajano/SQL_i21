@@ -4196,6 +4196,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTask.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateTask.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStagedLot.sql" />
+    <Build Include="dbo\Functions\fnLGGetDefaultWeightItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
