@@ -43,7 +43,13 @@ BEGIN
 	INSERT INTO #statusTable VALUES ('Voting');
 END
 
-DECLARE @dblMinimumRefund NUMERIC(18,6) = (SELECT DISTINCT dblMinimumRefund FROM tblPATCompanyPreference)
+DECLARE @dblMinimumRefund NUMERIC(18,6) = NULL
+SET @dblMinimumRefund = (SELECT DISTINCT dblMinimumRefund FROM tblPATCompanyPreference)
+
+IF(@dblMinimumRefund is null)
+BEGIN
+	SET @dblMinimumRefund = 0.00
+END
 
 	IF (@intRefundId <= 0)
 	BEGIN
