@@ -4063,6 +4063,7 @@
     <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
     <Build Include="dbo\Views\vyuTRGetSupplyPointSearchValue.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
