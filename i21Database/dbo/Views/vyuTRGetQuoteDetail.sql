@@ -9,6 +9,7 @@ SELECT Header.intQuoteHeaderId
 	, Header.strQuoteStatus
 	, Customer.strCustomerNumber
 	, strCustomerName = Customer.strName
+	, ShipToLocation.strLocationName
 	, Detail.intQuoteDetailId
 	, Detail.intItemId
 	, Item.strItemNo
