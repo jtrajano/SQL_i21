@@ -1,40 +1,39 @@
 ﻿GO
 
---Set default Dashboard Role to all users
-UPDATE tblSMUserSecurity
-SET strDashboardRole = 'User'
-WHERE ISNULL(strDashboardRole, '') = ''
+	--Set default Dashboard Role to all users
+	UPDATE tblSMUserSecurity
+	SET strDashboardRole = 'User'
+	WHERE ISNULL(strDashboardRole, '') = ''
 
 GO
 
-
--- Add the SQL Server custom messages
-EXEC dbo.uspSMErrorMessages
-EXEC dbo.uspICErrorMessages
+	-- Add the SQL Server custom messages
+	EXEC dbo.uspSMErrorMessages
+	EXEC dbo.uspICErrorMessages
 GO
 
--- Update User Role and User Security Menus
-DECLARE @currentRow INT
-DECLARE @totalRows INT
+	-- Update User Role and User Security Menus
+	DECLARE @currentRow INT
+	DECLARE @totalRows INT
 
-SET @currentRow = 1
-SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE strRoleType NOT IN ('Contact Admin', 'Contact') AND intUserRoleID <> 999
+	SET @currentRow = 1
+	SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE strRoleType NOT IN ('Contact Admin', 'Contact') AND intUserRoleID <> 999
 
-WHILE (@currentRow <= @totalRows)
-BEGIN
+	WHILE (@currentRow <= @totalRows)
+	BEGIN
 
-Declare @roleId INT
-SELECT @roleId = intUserRoleID FROM (  
-	SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
-	FROM [tblSMUserRole] WHERE strRoleType NOT IN ('Contact Admin', 'Contact') AND intUserRoleID <> 999
-) a
-WHERE ROWID = @currentRow
+	Declare @roleId INT
+	SELECT @roleId = intUserRoleID FROM (  
+		SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
+		FROM [tblSMUserRole] WHERE strRoleType NOT IN ('Contact Admin', 'Contact') AND intUserRoleID <> 999
+	) a
+	WHERE ROWID = @currentRow
 
-PRINT N'Executing uspSMUpdateUserRoleMenus'
-Exec uspSMUpdateUserRoleMenus @roleId, 1, 0
+	PRINT N'Executing uspSMUpdateUserRoleMenus'
+	Exec uspSMUpdateUserRoleMenus @roleId, 1, 0
 
-SET @currentRow = @currentRow + 1
-END
+	SET @currentRow = @currentRow + 1
+	END
 
 GO
 	-- Reset Demo User Roles and permissions
@@ -129,29 +128,34 @@ GO
 	EXEC uspSMMigrateUserPreference
 GO
 
--- Update User Preference
-DECLARE @currentRow INT
-DECLARE @totalRows INT
+	-- Update User Preference
+	DECLARE @currentRow INT
+	DECLARE @totalRows INT
 
-SET @currentRow = 1
-SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserSecurity]
+	SET @currentRow = 1
+	SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserSecurity]
 
-WHILE (@currentRow <= @totalRows)
-BEGIN
+	WHILE (@currentRow <= @totalRows)
+	BEGIN
 
-Declare @userId INT
-SELECT @userId = [intEntityUserSecurityId] FROM (  
-	SELECT ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID', *
-	FROM [dbo].[tblSMUserSecurity]
-) a
-WHERE ROWID = @currentRow
+	Declare @userId INT
+	SELECT @userId = [intEntityUserSecurityId] FROM (  
+		SELECT ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID', *
+		FROM [dbo].[tblSMUserSecurity]
+	) a
+	WHERE ROWID = @currentRow
 
-PRINT N'Executing uspSMUpdateUserPreferenceEntry'
-Exec uspSMUpdateUserPreferenceEntry @userId
+	PRINT N'Executing uspSMUpdateUserPreferenceEntry'
+	Exec uspSMUpdateUserPreferenceEntry @userId
 
+	SET @currentRow = @currentRow + 1
+	END
 
-SET @currentRow = @currentRow + 1
-END
+GO
+
+	PRINT N'DELETE INVALID USER PREFERENCES'
+	DELETE FROM tblSMUserPreference 
+	WHERE intEntityUserSecurityId NOT IN (SELECT intEntityUserSecurityId FROM tblSMUserSecurity)
 
 GO
 --	-- INSERT DEFAULT LOCATION
