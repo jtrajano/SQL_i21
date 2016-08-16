@@ -181,21 +181,21 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strDescription: 'Unit'
+                    strAllocatePriceBy: 'Unit'
                 },
                 {
-                    strDescription: 'Stock Unit'
+                    strAllocatePriceBy: 'Stock Unit'
                 },
                 {
-                    strDescription: 'Cost'
+                    strAllocatePriceBy: 'Price'
                 },
                 {
-                    strDescription: ''
+                    strAllocatePriceBy: ''
                 }
             ],
             fields: [
                 {
-                    name: 'strDescription'
+                    name: 'strAllocatePriceBy'
                 }
             ]
         },
@@ -417,7 +417,14 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             else {
                 return true;
             }
-        }
+        },
+        checkInventoryPrice: function (get) {
+            if (get('grdCharges.selection.ysnPrice')) {
+                return false;
+            }
+            else
+                return true;
+        },
     }
 
 });
