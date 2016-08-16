@@ -24,11 +24,11 @@ BEGIN
 	,'<p><strong>Time Off Type:</strong> ' + TTO.strTimeOff +'</p>' 
 		+ '<p><strong>Reason:</strong> </br>' + TOR.strReason +'</p>'
 		+ '<p><strong>Address while on Time Off:</strong></br>' + TOR.strAddress +'</p>'
-	,'{"allDay":true,"drillDown":{"enabled":true,"url":"#/PR/TimeOffRequest?routeId=' + CAST(intTimeOffRequestId AS NVARCHAR(20))+'%7C%5E%7C&activeTab=Details","text":"View Time Off Request "},"title":"Time Off - ' + REPLACE(ENT.strName, '', '''') + '"}'
+	,'{"drillDown":{"enabled":true,"url":"#/PR/TimeOffRequest?routeId=' + CAST(intTimeOffRequestId AS NVARCHAR(20))+'%7C%5E%7C&activeTab=Details","text":"View Time Off Request "},"title":"Time Off - ' + REPLACE(ENT.strName, '', '''') + '"}'
 	,'Payroll.view.TimeOffRequest'
 	,CAST(TOR.intTimeOffRequestId AS NVARCHAR(100))
-	,CAST(FLOOR(CAST(TOR.dtmDateFrom AS FLOAT)) AS DATETIME)
-	,DATEADD(MS,-3, DATEADD(day, 1, DATEADD(DD, DATEDIFF(DD, 0, TOR.dtmDateTo), 0)))
+	,DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), CAST(FLOOR(CAST(TOR.dtmDateFrom AS FLOAT)) AS DATETIME))
+	,DATEADD(hh, -(DATEDIFF(hh, GETDATE(), GETUTCDATE())), DATEADD(MS,-3, DATEADD(day, 1, DATEADD(DD, DATEDIFF(DD, 0, TOR.dtmDateTo), 0))))
 	,GETDATE()
 	,GETDATE()
 	,1

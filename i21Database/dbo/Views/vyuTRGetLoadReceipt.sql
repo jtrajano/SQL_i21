@@ -36,6 +36,7 @@ SELECT Receipt.intLoadReceiptId
 	, Receipt.strReceiptLine
 	, Receipt.intLoadDetailId
 	, LoadSchedule.strLoadNumber
+	, strZipCode = ISNULL(SupplyPoint.strZipCode, CompanyLocation.strZipPostalCode)
 FROM tblTRLoadReceipt Receipt
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = Receipt.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = Receipt.intTerminalId

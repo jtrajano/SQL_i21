@@ -4176,6 +4176,15 @@
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspARErrorMessages.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
+    <Build Include="dbo\Tables\tblSOSalesOrderDetailComponent.sql" />
+    <Build Include="dbo\Views\vyuTMCustomerConsumptionSiteInfo.sql" />
+    <Build Include="dbo\Views\vyuARGetRecipeDetailReport.sql" />
+    <Build Include="dbo\Views\vyuARGetRecipeReport.sql" />
+    <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
+    <Build Include="dbo\Views\vyuEMEntityContactLOB.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -179,7 +179,10 @@ BEGIN
 	               ,[dblLicenseAmount]
 				   ,[intContractHeaderId]
 				   ,[intContractDetailId]
-				   ,[intTaxGroupId] 	
+				   ,[intTaxGroupId] 
+				   ,[dblItemWeight]	
+				   ,[dblOriginalItemWeight]
+				   ,[intItemWeightUOMId]	
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -208,7 +211,10 @@ BEGIN
 	               ,[dblLicenseAmount]
 				   ,[intContractHeaderId]
 				   ,[intContractDetailId]
-				   ,[intTaxGroupId] 	
+				   ,[intTaxGroupId]
+				   ,[dblItemWeight]	
+				   ,[dblOriginalItemWeight]
+				   ,[intItemWeightUOMId] 	
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

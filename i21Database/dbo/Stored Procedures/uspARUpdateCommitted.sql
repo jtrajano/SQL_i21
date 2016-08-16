@@ -64,7 +64,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
+			AND ARTD.strTransactionType = ARI.[strTransactionType] 
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -74,10 +74,61 @@ BEGIN
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARI.strTransactionType = 'Invoice'
 		AND ARID.intItemId = ARTD.intItemId		
 		AND (ARID.intItemUOMId <> ARTD.intItemUOMId OR ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped))
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0
+
+
+	UNION ALL
+
+	--Quantity/UOM Changed -- Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	(ARID.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)) * ARIDC.[dblQuantity]
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN
+		tblARTransactionDetail ARTD
+			ON ARID.[intInvoiceDetailId] = ARTD.intTransactionDetailId 
+			AND ARID.intInvoiceId = ARTD.intTransactionId 
+			AND ARTD.strTransactionType = ARI.[strTransactionType] 
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
+		AND ARID.intItemId = ARTD.intItemId		
+		AND (ARID.intItemUOMId <> ARTD.intItemUOMId OR (ARID.dblQtyShipped * ARIDC.[dblQuantity]) <> (dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped) * ARIDC.[dblQuantity]))
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0
 				
@@ -112,7 +163,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
+			AND ARTD.strTransactionType = ARI.[strTransactionType]
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
@@ -122,8 +173,58 @@ BEGIN
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARTD.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARI.strTransactionType = 'Invoice'
+		AND ARID.intItemId <> ARTD.intItemId		
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0		
+
+
+	UNION ALL
+
+	--Item Changed -old -- Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	(ARTD.dblQtyShipped * ARIDC.dblQuantity) * -1
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARTD.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARTD.intTransactionDetailId
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN
+		tblARTransactionDetail ARTD
+			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+			AND ARID.intInvoiceId = ARTD.intTransactionId 
+			AND ARTD.strTransactionType = ARI.[strTransactionType]
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0		
@@ -159,7 +260,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
+			AND ARTD.strTransactionType = ARI.[strTransactionType]
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -169,8 +270,57 @@ BEGIN
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARI.strTransactionType = 'Invoice'
+		AND ARID.intItemId <> ARTD.intItemId		
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0
+
+	UNION ALL
+
+	--Item Changed +new  --Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	ARID.dblQtyShipped * ARIDC.dblQuantity 
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN
+		tblARTransactionDetail ARTD
+			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+			AND ARID.intInvoiceId = ARTD.intTransactionId 
+			AND ARTD.strTransactionType = ARI.[strTransactionType]
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0
@@ -211,9 +361,54 @@ BEGIN
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType IN ('Invoice', 'Cash'))	
+		AND ARI.strTransactionType = 'Invoice'
+		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
+
+
+	UNION ALL
+
+	--Added Item --Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	ARID.dblQtyShipped * ARIDC.dblQuantity 
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity  
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
+		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 
@@ -253,231 +448,24 @@ BEGIN
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARTD.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARI.strTransactionType = 'Invoice'
 		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
 		AND ISNULL(ARTD.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0
-		
-	UNION ALL
-	
-	--SO/IS
-	--Quantity & UOM Changed ++
-	SELECT
-		[intItemId]					=	ARID.intItemId
-		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARID.intItemUOMId
-		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	ARID.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped) - (ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered))
-		,[dblUOMQty]				=	ICIUOM.dblUnitQty
-		,[dblCost]					=	ICGIS.dblLastCost
-		,[dblValue]					=	0
-		,[dblSalesPrice]			=	ARID.dblPrice
-		,[intCurrencyId]			=	ARI.intCurrencyId
-		,[dblExchangeRate]			=	0
-		,[intTransactionId]			=	ARI.intInvoiceId
-		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
-		,[strTransactionId]			=	ARI.strInvoiceNumber
-		,[intTransactionTypeId]		=	7
-		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
-	FROM 
-		tblARInvoiceDetail ARID
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
-	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
-	INNER JOIN
-		tblSOSalesOrderDetail SOTD
-			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
-	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
-			ON ARID.intItemId = ICGIS.intItemId 
-			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
-	WHERE 
-		ISNULL(@FromPosting,0) = 0
-		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.intItemId = ARTD.intItemId		
-		AND ARID.intItemUOMId <> ARTD.intItemUOMId 
-		AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
-		AND ARID.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
-		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
-		
-	UNION ALL
-	
-	--Quantity++
-	SELECT
-		[intItemId]					=	ARID.intItemId
-		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARID.intItemUOMId
-		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	ARID.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered)
-		,[dblUOMQty]				=	ICIUOM.dblUnitQty
-		,[dblCost]					=	ICGIS.dblLastCost
-		,[dblValue]					=	0
-		,[dblSalesPrice]			=	ARID.dblPrice
-		,[intCurrencyId]			=	ARI.intCurrencyId
-		,[dblExchangeRate]			=	0
-		,[intTransactionId]			=	ARI.intInvoiceId
-		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
-		,[strTransactionId]			=	ARI.strInvoiceNumber
-		,[intTransactionTypeId]		=	7
-		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
-	FROM 
-		tblARInvoiceDetail ARID
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
-	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
-	INNER JOIN
-		tblSOSalesOrderDetail SOTD
-			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
-	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
-			ON ARID.intItemId = ICGIS.intItemId 
-			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
-	WHERE 
-		ISNULL(@FromPosting,0) = 0
-		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.intItemId = ARTD.intItemId		
-		AND ARID.intItemUOMId = ARTD.intItemUOMId 
-		AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
-		AND ARID.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
-		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
-		
-	UNION ALL
-	
-	--Quantity/UOM Changed --
-	SELECT
-		[intItemId]					=	ARTD.intItemId
-		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARTD.intItemUOMId
-		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	(ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)) * -1
-		,[dblUOMQty]				=	ICIUOM.dblUnitQty
-		,[dblCost]					=	ICGIS.dblLastCost
-		,[dblValue]					=	0
-		,[dblSalesPrice]			=	ARID.dblPrice
-		,[intCurrencyId]			=	ARI.intCurrencyId
-		,[dblExchangeRate]			=	0
-		,[intTransactionId]			=	ARI.intInvoiceId
-		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
-		,[strTransactionId]			=	ARI.strInvoiceNumber
-		,[intTransactionTypeId]		=	7
-		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
-	FROM 
-		tblARInvoiceDetail ARID
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
-	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
-	INNER JOIN
-		tblSOSalesOrderDetail SOTD
-			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
-	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
-			ON ARID.intItemId = ICGIS.intItemId 
-			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
-	WHERE 
-		ISNULL(@FromPosting,0) = 0
-		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.intItemId = ARTD.intItemId		
-		AND ARID.intItemUOMId <> ARTD.intItemUOMId 
-		AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
-		AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered) 
-		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
-		
-	UNION ALL
-	
-	--Quantity --
-	SELECT
-		[intItemId]					=	ARTD.intItemId
-		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARTD.intItemUOMId
-		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	(ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)) * -1
-		,[dblUOMQty]				=	ICIUOM.dblUnitQty
-		,[dblCost]					=	ICGIS.dblLastCost
-		,[dblValue]					=	0
-		,[dblSalesPrice]			=	ARID.dblPrice
-		,[intCurrencyId]			=	ARI.intCurrencyId
-		,[dblExchangeRate]			=	0
-		,[intTransactionId]			=	ARI.intInvoiceId
-		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
-		,[strTransactionId]			=	ARI.strInvoiceNumber
-		,[intTransactionTypeId]		=	7
-		,[intLotId]					=	NULL
-		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	NULL
-	FROM 
-		tblARInvoiceDetail ARID
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
-	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
-	INNER JOIN
-		tblSOSalesOrderDetail SOTD
-			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
-	LEFT OUTER JOIN
-		vyuICGetItemStock ICGIS
-			ON ARID.intItemId = ICGIS.intItemId 
-			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
-	WHERE 
-		ISNULL(@FromPosting,0) = 0
-		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.intItemId = ARTD.intItemId		
-		AND ARID.intItemUOMId = ARTD.intItemUOMId 
-		AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
-		AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered) 
-		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
-		
+
+
 	UNION ALL
 
-	--Item Changed -old
+	--Deleted Item	--Component
 	SELECT
-		[intItemId]					=	ARTD.intItemId
+		[intItemId]					=	ARIDC.intComponentItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARTD.intItemUOMId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	(ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)) * -1
-		,[dblUOMQty]				=	ICIUOM.dblUnitQty
+		,[dblQty]					=	(ARTD.dblQtyShipped * ARIDC.dblQuantity) * -1
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	ARTD.dblPrice
@@ -491,34 +479,286 @@ BEGIN
 		,[intSubLocationId]			=	NULL
 		,[intStorageLocationId]		=	NULL
 	FROM 
-		tblARInvoiceDetail ARID
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARTransactionDetail ARTD
+			ON ARIDC.[intInvoiceDetailId] = ARTD.intTransactionDetailId
 	INNER JOIN
 		tblARInvoice ARI
-			ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN
-		tblARTransactionDetail ARTD
-			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
-			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
-	INNER JOIN
-		tblSOSalesOrderDetail SOTD
-			ON ARTD.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 			
-	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
+			ON ARTD.intTransactionId = ARI.intInvoiceId
 	LEFT OUTER JOIN
 		vyuICGetItemStock ICGIS
-			ON ARTD.intItemId = ICGIS.intItemId 
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.intItemId <> ARTD.intItemId	
-		AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)
-		AND (ISNULL(ARTD.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARTD.intSalesOrderDetailId, 0) <> 0)		
-	
+		AND ARI.strTransactionType = 'Invoice'
+		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
+		AND ISNULL(ARTD.intInventoryShipmentItemId, 0) = 0
+		AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0
+		
 	UNION ALL
+	
+	--SO/IS
+	--Quantity & UOM Changed ++
+	--SELECT
+	--	[intItemId]					=	ARID.intItemId
+	--	,[intItemLocationId]		=	ICGIS.intItemLocationId
+	--	,[intItemUOMId]				=	ARID.intItemUOMId
+	--	,[dtmDate]					=	ARI.dtmDate
+	--	,[dblQty]					=	ARID.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped) - (ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered))
+	--	,[dblUOMQty]				=	ICIUOM.dblUnitQty
+	--	,[dblCost]					=	ICGIS.dblLastCost
+	--	,[dblValue]					=	0
+	--	,[dblSalesPrice]			=	ARID.dblPrice
+	--	,[intCurrencyId]			=	ARI.intCurrencyId
+	--	,[dblExchangeRate]			=	0
+	--	,[intTransactionId]			=	ARI.intInvoiceId
+	--	,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+	--	,[strTransactionId]			=	ARI.strInvoiceNumber
+	--	,[intTransactionTypeId]		=	7
+	--	,[intLotId]					=	NULL
+	--	,[intSubLocationId]			=	NULL
+	--	,[intStorageLocationId]		=	NULL
+	--FROM 
+	--	tblARInvoiceDetail ARID
+	--INNER JOIN
+	--	tblARInvoice ARI
+	--		ON ARID.intInvoiceId = ARI.intInvoiceId
+	--INNER JOIN
+	--	tblARTransactionDetail ARTD
+	--		ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+	--		AND ARID.intInvoiceId = ARTD.intTransactionId 
+	--		AND ARTD.strTransactionType = 'Invoice'
+	--INNER JOIN
+	--	tblICItemUOM ICIUOM 
+	--		ON ICIUOM.intItemUOMId = ARID.intItemUOMId
+	--INNER JOIN
+	--	tblSOSalesOrderDetail SOTD
+	--		ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	--LEFT OUTER JOIN
+	--	vyuICGetItemStock ICGIS
+	--		ON ARID.intItemId = ICGIS.intItemId 
+	--		AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	--WHERE 
+	--	ISNULL(@FromPosting,0) = 0
+	--	AND ARI.intInvoiceId = @InvoiceId
+	--	AND ARI.strTransactionType = 'Invoice'
+	--	AND ARID.intItemId = ARTD.intItemId		
+	--	AND ARID.intItemUOMId <> ARTD.intItemUOMId 
+	--	AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
+	--	AND ARID.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+	--	AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
+		
+	--UNION ALL
+	
+	--Quantity++
+	--SELECT
+	--	[intItemId]					=	ARID.intItemId
+	--	,[intItemLocationId]		=	ICGIS.intItemLocationId
+	--	,[intItemUOMId]				=	ARID.intItemUOMId
+	--	,[dtmDate]					=	ARI.dtmDate
+	--	,[dblQty]					=	ARID.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered)
+	--	,[dblUOMQty]				=	ICIUOM.dblUnitQty
+	--	,[dblCost]					=	ICGIS.dblLastCost
+	--	,[dblValue]					=	0
+	--	,[dblSalesPrice]			=	ARID.dblPrice
+	--	,[intCurrencyId]			=	ARI.intCurrencyId
+	--	,[dblExchangeRate]			=	0
+	--	,[intTransactionId]			=	ARI.intInvoiceId
+	--	,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+	--	,[strTransactionId]			=	ARI.strInvoiceNumber
+	--	,[intTransactionTypeId]		=	7
+	--	,[intLotId]					=	NULL
+	--	,[intSubLocationId]			=	NULL
+	--	,[intStorageLocationId]		=	NULL
+	--FROM 
+	--	tblARInvoiceDetail ARID
+	--INNER JOIN
+	--	tblARInvoice ARI
+	--		ON ARID.intInvoiceId = ARI.intInvoiceId
+	--INNER JOIN
+	--	tblARTransactionDetail ARTD
+	--		ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+	--		AND ARID.intInvoiceId = ARTD.intTransactionId 
+	--		AND ARTD.strTransactionType = 'Invoice'
+	--INNER JOIN
+	--	tblICItemUOM ICIUOM 
+	--		ON ICIUOM.intItemUOMId = ARID.intItemUOMId
+	--INNER JOIN
+	--	tblSOSalesOrderDetail SOTD
+	--		ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	--LEFT OUTER JOIN
+	--	vyuICGetItemStock ICGIS
+	--		ON ARID.intItemId = ICGIS.intItemId 
+	--		AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	--WHERE 
+	--	ISNULL(@FromPosting,0) = 0
+	--	AND ARI.intInvoiceId = @InvoiceId
+	--	AND ARI.strTransactionType = 'Invoice'
+	--	AND ARID.intItemId = ARTD.intItemId		
+	--	AND ARID.intItemUOMId = ARTD.intItemUOMId 
+	--	AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
+	--	AND ARID.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+	--	AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
+		
+	--UNION ALL
+	
+	--Quantity/UOM Changed --
+	--SELECT
+	--	[intItemId]					=	ARTD.intItemId
+	--	,[intItemLocationId]		=	ICGIS.intItemLocationId
+	--	,[intItemUOMId]				=	ARTD.intItemUOMId
+	--	,[dtmDate]					=	ARI.dtmDate
+	--	,[dblQty]					=	(ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)) * -1
+	--	,[dblUOMQty]				=	ICIUOM.dblUnitQty
+	--	,[dblCost]					=	ICGIS.dblLastCost
+	--	,[dblValue]					=	0
+	--	,[dblSalesPrice]			=	ARID.dblPrice
+	--	,[intCurrencyId]			=	ARI.intCurrencyId
+	--	,[dblExchangeRate]			=	0
+	--	,[intTransactionId]			=	ARI.intInvoiceId
+	--	,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+	--	,[strTransactionId]			=	ARI.strInvoiceNumber
+	--	,[intTransactionTypeId]		=	7
+	--	,[intLotId]					=	NULL
+	--	,[intSubLocationId]			=	NULL
+	--	,[intStorageLocationId]		=	NULL
+	--FROM 
+	--	tblARInvoiceDetail ARID
+	--INNER JOIN
+	--	tblARInvoice ARI
+	--		ON ARID.intInvoiceId = ARI.intInvoiceId
+	--INNER JOIN
+	--	tblARTransactionDetail ARTD
+	--		ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+	--		AND ARID.intInvoiceId = ARTD.intTransactionId 
+	--		AND ARTD.strTransactionType = 'Invoice'
+	--INNER JOIN
+	--	tblICItemUOM ICIUOM 
+	--		ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
+	--INNER JOIN
+	--	tblSOSalesOrderDetail SOTD
+	--		ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	--LEFT OUTER JOIN
+	--	vyuICGetItemStock ICGIS
+	--		ON ARID.intItemId = ICGIS.intItemId 
+	--		AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	--WHERE 
+	--	ISNULL(@FromPosting,0) = 0
+	--	AND ARI.intInvoiceId = @InvoiceId
+	--	AND ARI.strTransactionType = 'Invoice'
+	--	AND ARID.intItemId = ARTD.intItemId		
+	--	AND ARID.intItemUOMId <> ARTD.intItemUOMId 
+	--	AND ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped)
+	--	AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered) 
+	--	AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
+		
+	--UNION ALL
+	
+	--Quantity --
+	--SELECT
+	--	[intItemId]					=	ARTD.intItemId
+	--	,[intItemLocationId]		=	ICGIS.intItemLocationId
+	--	,[intItemUOMId]				=	ARTD.intItemUOMId
+	--	,[dtmDate]					=	ARI.dtmDate
+	--	,[dblQty]					=	(ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)) * -1
+	--	,[dblUOMQty]				=	ICIUOM.dblUnitQty
+	--	,[dblCost]					=	ICGIS.dblLastCost
+	--	,[dblValue]					=	0
+	--	,[dblSalesPrice]			=	ARID.dblPrice
+	--	,[intCurrencyId]			=	ARI.intCurrencyId
+	--	,[dblExchangeRate]			=	0
+	--	,[intTransactionId]			=	ARI.intInvoiceId
+	--	,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+	--	,[strTransactionId]			=	ARI.strInvoiceNumber
+	--	,[intTransactionTypeId]		=	7
+	--	,[intLotId]					=	NULL
+	--	,[intSubLocationId]			=	NULL
+	--	,[intStorageLocationId]		=	NULL
+	--FROM 
+	--	tblARInvoiceDetail ARID
+	--INNER JOIN
+	--	tblARInvoice ARI
+	--		ON ARID.intInvoiceId = ARI.intInvoiceId
+	--INNER JOIN
+	--	tblARTransactionDetail ARTD
+	--		ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+	--		AND ARID.intInvoiceId = ARTD.intTransactionId 
+	--		AND ARTD.strTransactionType = 'Invoice'
+	--INNER JOIN
+	--	tblICItemUOM ICIUOM 
+	--		ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
+	--INNER JOIN
+	--	tblSOSalesOrderDetail SOTD
+	--		ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	--LEFT OUTER JOIN
+	--	vyuICGetItemStock ICGIS
+	--		ON ARID.intItemId = ICGIS.intItemId 
+	--		AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	--WHERE 
+	--	ISNULL(@FromPosting,0) = 0
+	--	AND ARI.intInvoiceId = @InvoiceId
+	--	AND ARI.strTransactionType = 'Invoice'
+	--	AND ARID.intItemId = ARTD.intItemId		
+	--	AND ARID.intItemUOMId = ARTD.intItemUOMId 
+	--	AND ARID.dblQtyShipped <> ARTD.dblQtyShipped
+	--	AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered) 
+	--	AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)
+		
+	--UNION ALL
+
+	--Item Changed -old
+	--SELECT
+	--	[intItemId]					=	ARTD.intItemId
+	--	,[intItemLocationId]		=	ICGIS.intItemLocationId
+	--	,[intItemUOMId]				=	ARTD.intItemUOMId
+	--	,[dtmDate]					=	ARI.dtmDate
+	--	,[dblQty]					=	(ARTD.dblQtyShipped - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)) * -1
+	--	,[dblUOMQty]				=	ICIUOM.dblUnitQty
+	--	,[dblCost]					=	ICGIS.dblLastCost
+	--	,[dblValue]					=	0
+	--	,[dblSalesPrice]			=	ARTD.dblPrice
+	--	,[intCurrencyId]			=	ARI.intCurrencyId
+	--	,[dblExchangeRate]			=	0
+	--	,[intTransactionId]			=	ARI.intInvoiceId
+	--	,[intTransactionDetailId]	=	ARTD.intTransactionDetailId
+	--	,[strTransactionId]			=	ARI.strInvoiceNumber
+	--	,[intTransactionTypeId]		=	7
+	--	,[intLotId]					=	NULL
+	--	,[intSubLocationId]			=	NULL
+	--	,[intStorageLocationId]		=	NULL
+	--FROM 
+	--	tblARInvoiceDetail ARID
+	--INNER JOIN
+	--	tblARInvoice ARI
+	--		ON ARID.intInvoiceId = ARI.intInvoiceId
+	--INNER JOIN
+	--	tblARTransactionDetail ARTD
+	--		ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+	--		AND ARID.intInvoiceId = ARTD.intTransactionId 
+	--		AND ARTD.strTransactionType = 'Invoice'
+	--INNER JOIN
+	--	tblSOSalesOrderDetail SOTD
+	--		ON ARTD.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 			
+	--INNER JOIN
+	--	tblICItemUOM ICIUOM 
+	--		ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
+	--LEFT OUTER JOIN
+	--	vyuICGetItemStock ICGIS
+	--		ON ARTD.intItemId = ICGIS.intItemId 
+	--		AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	--WHERE 
+	--	ISNULL(@FromPosting,0) = 0
+	--	AND ARI.intInvoiceId = @InvoiceId
+	--	AND ARI.strTransactionType = 'Invoice'
+	--	AND ARID.intItemId <> ARTD.intItemId	
+	--	AND ARTD.dblQtyShipped > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARTD.intItemUOMId, SOTD.dblQtyOrdered)
+	--	AND (ISNULL(ARTD.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARTD.intSalesOrderDetailId, 0) <> 0)		
+	
+	--UNION ALL
 
 	--Item Changed +new
 	SELECT
@@ -549,7 +789,7 @@ BEGIN
 		tblARTransactionDetail ARTD
 			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
 			AND ARID.intInvoiceId = ARTD.intTransactionId 
-			AND ARTD.strTransactionType IN ('Invoice', 'Cash')
+			AND ARTD.strTransactionType = ARI.[strTransactionType]
 	INNER JOIN
 		tblICItemUOM ICIUOM 
 			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
@@ -559,57 +799,105 @@ BEGIN
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARI.strTransactionType = 'Invoice'
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)							
 
 	UNION ALL
 
-	--Deleted Item
+	--Item Changed +new		--Component
 	SELECT
-		[intItemId]					=	ARTD.intItemId
+		[intItemId]					=	ARIDC.intComponentItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARTD.intItemUOMId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	(dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, SOTD.intItemUOMId, ARTD.dblQtyShipped) - SOTD.dblQtyOrdered) * -1
-		,[dblUOMQty]				=	ICIUOM.dblUnitQty
+		,[dblQty]					=	ARID.dblQtyShipped * ARIDC.dblQuantity 
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
-		,[dblSalesPrice]			=	ARTD.dblPrice
+		,[dblSalesPrice]			=	ARID.dblPrice
 		,[intCurrencyId]			=	ARI.intCurrencyId
 		,[dblExchangeRate]			=	0
 		,[intTransactionId]			=	ARI.intInvoiceId
-		,[intTransactionDetailId]	=	ARTD.intTransactionDetailId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId
 		,[strTransactionId]			=	ARI.strInvoiceNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
 		,[intSubLocationId]			=	NULL
 		,[intStorageLocationId]		=	NULL
-	FROM 
-		tblARTransactionDetail ARTD
+	FROM
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
 	INNER JOIN
 		tblARInvoice ARI
-			ON ARTD.intTransactionId = ARI.intInvoiceId
+			ON ARID.intInvoiceId = ARI.intInvoiceId
 	INNER JOIN
-		tblSOSalesOrderDetail SOTD
-			ON ARTD.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 			
-	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
+		tblARTransactionDetail ARTD
+			ON ARID.intInvoiceDetailId = ARTD.intTransactionDetailId 
+			AND ARID.intInvoiceId = ARTD.intTransactionId 
+			AND ARTD.strTransactionType = ARI.[strTransactionType]
 	LEFT OUTER JOIN
 		vyuICGetItemStock ICGIS
-			ON ARTD.intItemId = ICGIS.intItemId 
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 0
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
-		AND dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, SOTD.intItemUOMId, ARTD.dblQtyShipped) > SOTD.dblQtyOrdered 	
-		AND (ISNULL(ARTD.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARTD.intSalesOrderDetailId, 0) <> 0)		
-	
+		AND ARI.strTransactionType = 'Invoice'
+		AND ARID.intItemId <> ARTD.intItemId		
+		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)							
+
 	UNION ALL
+
+	----Deleted Item
+	--SELECT
+	--	[intItemId]					=	ARTD.intItemId
+	--	,[intItemLocationId]		=	ICGIS.intItemLocationId
+	--	,[intItemUOMId]				=	ARTD.intItemUOMId
+	--	,[dtmDate]					=	ARI.dtmDate
+	--	,[dblQty]					=	(dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, SOTD.intItemUOMId, ARTD.dblQtyShipped) - SOTD.dblQtyOrdered) * -1
+	--	,[dblUOMQty]				=	ICIUOM.dblUnitQty
+	--	,[dblCost]					=	ICGIS.dblLastCost
+	--	,[dblValue]					=	0
+	--	,[dblSalesPrice]			=	ARTD.dblPrice
+	--	,[intCurrencyId]			=	ARI.intCurrencyId
+	--	,[dblExchangeRate]			=	0
+	--	,[intTransactionId]			=	ARI.intInvoiceId
+	--	,[intTransactionDetailId]	=	ARTD.intTransactionDetailId
+	--	,[strTransactionId]			=	ARI.strInvoiceNumber
+	--	,[intTransactionTypeId]		=	7
+	--	,[intLotId]					=	NULL
+	--	,[intSubLocationId]			=	NULL
+	--	,[intStorageLocationId]		=	NULL
+	--FROM 
+	--	tblARTransactionDetail ARTD
+	--INNER JOIN
+	--	tblARInvoice ARI
+	--		ON ARTD.intTransactionId = ARI.intInvoiceId
+	--INNER JOIN
+	--	tblSOSalesOrderDetail SOTD
+	--		ON ARTD.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 			
+	--INNER JOIN
+	--	tblICItemUOM ICIUOM 
+	--		ON ICIUOM.intItemUOMId = ARTD.intItemUOMId
+	--LEFT OUTER JOIN
+	--	vyuICGetItemStock ICGIS
+	--		ON ARTD.intItemId = ICGIS.intItemId 
+	--		AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	--WHERE 
+	--	ISNULL(@FromPosting,0) = 0
+	--	AND ARI.intInvoiceId = @InvoiceId
+	--	AND ARI.strTransactionType = 'Invoice'
+	--	AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
+	--	AND dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, SOTD.intItemUOMId, ARTD.dblQtyShipped) > SOTD.dblQtyOrdered 	
+	--	AND (ISNULL(ARTD.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARTD.intSalesOrderDetailId, 0) <> 0)		
+	
+	--UNION ALL
 
 	--POSTING
 	--Direct
@@ -646,8 +934,51 @@ BEGIN
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARI.strTransactionType = 'Invoice'
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
+		
+	UNION ALL
+
+	--Direct	--Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	ARID.dblQtyShipped * ARIDC.dblQuantity 
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.intInvoiceDetailId = ARID.intInvoiceDetailId 
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 		
@@ -657,9 +988,9 @@ BEGIN
 	SELECT
 		[intItemId]					=	ARID.intItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARID.intItemUOMId
+		,[intItemUOMId]				=	SOTD.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	ARID.dblQtyShipped
+		,[dblQty]					=	SOTD.dblQtyOrdered
 		,[dblUOMQty]				=	ICIUOM.dblUnitQty
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
@@ -679,31 +1010,171 @@ BEGIN
 		tblARInvoice ARI
 			ON ARID.intInvoiceId = ARI.intInvoiceId
 	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
-	INNER JOIN
 		tblSOSalesOrderDetail SOTD
-			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 			
+	INNER JOIN
+		tblICItemUOM ICIUOM 
+			ON ICIUOM.intItemUOMId = SOTD.intItemUOMId
 	LEFT OUTER JOIN
 		vyuICGetItemStock ICGIS
 			ON ARID.intItemId = ICGIS.intItemId 
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.dblQtyShipped = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND ARI.strTransactionType = 'Invoice'
+		AND SOTD.dblQtyOrdered = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-		
+
+
+	UNION ALL
+	
+	--SO shipped = ordered		--Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	SOTD.dblQtyOrdered * ARIDC.dblQuantity 
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.intInvoiceDetailId = ARID.intInvoiceDetailId 
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN
+		tblSOSalesOrderDetail SOTD
+			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
+		AND SOTD.dblQtyOrdered = dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+
+
+	UNION ALL
+	
+	--SO shipped > ordered
+	SELECT
+		[intItemId]					=	ARID.intItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	SOTD.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	SOTD.dblQtyOrdered
+		,[dblUOMQty]				=	ICIUOM.dblUnitQty
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetail ARID
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN
+		tblSOSalesOrderDetail SOTD
+			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	INNER JOIN
+		tblICItemUOM ICIUOM 
+			ON ICIUOM.intItemUOMId = SOTD.intItemUOMId	
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON SOTD.intItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
+		AND SOTD.dblQtyOrdered < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+
+	UNION ALL
+	--SO shipped > ordered		--Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	SOTD.dblQtyOrdered * ARIDC.dblQuantity 
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.intInvoiceDetailId = ARID.intInvoiceDetailId 
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN
+		tblSOSalesOrderDetail SOTD
+			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
+		AND SOTD.dblQtyOrdered < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+				
 	UNION ALL
 	--SO shipped < ordered
 	SELECT
 		[intItemId]					=	ARID.intItemId
 		,[intItemLocationId]		=	ICGIS.intItemLocationId
-		,[intItemUOMId]				=	ARID.intItemUOMId
+		,[intItemUOMId]				=	SOTD.intItemUOMId
 		,[dtmDate]					=	ARI.dtmDate
-		,[dblQty]					=	dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) - ARID.dblQtyShipped
+		,[dblQty]					=	SOTD.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)
 		,[dblUOMQty]				=	ICIUOM.dblUnitQty
 		,[dblCost]					=	ICGIS.dblLastCost
 		,[dblValue]					=	0
@@ -723,20 +1194,67 @@ BEGIN
 		tblARInvoice ARI
 			ON ARID.intInvoiceId = ARI.intInvoiceId
 	INNER JOIN
-		tblICItemUOM ICIUOM 
-			ON ICIUOM.intItemUOMId = ARID.intItemUOMId
-	INNER JOIN
 		tblSOSalesOrderDetail SOTD
 			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	INNER JOIN
+		tblICItemUOM ICIUOM 
+			ON ICIUOM.intItemUOMId = SOTD.intItemUOMId	
 	LEFT OUTER JOIN
 		vyuICGetItemStock ICGIS
 			ON ARID.intItemId = ICGIS.intItemId 
 			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
 	WHERE 
 		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType IN ('Invoice', 'Cash')
-		AND ARID.dblQtyShipped < dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, SOTD.dblQtyOrdered) 
+		AND ARI.strTransactionType = 'Invoice'
+		AND SOTD.dblQtyOrdered > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)
+		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
+		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
+
+
+	UNION ALL
+	--SO shipped < ordered		--Component
+	SELECT
+		[intItemId]					=	ARIDC.intComponentItemId
+		,[intItemLocationId]		=	ICGIS.intItemLocationId
+		,[intItemUOMId]				=	ARIDC.intItemUOMId
+		,[dtmDate]					=	ARI.dtmDate
+		,[dblQty]					=	(SOTD.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped)) * ARIDC.dblQuantity 
+		,[dblUOMQty]				=	ARIDC.dblUnitQuantity 
+		,[dblCost]					=	ICGIS.dblLastCost
+		,[dblValue]					=	0
+		,[dblSalesPrice]			=	ARID.dblPrice
+		,[intCurrencyId]			=	ARI.intCurrencyId
+		,[dblExchangeRate]			=	0
+		,[intTransactionId]			=	ARI.intInvoiceId
+		,[intTransactionDetailId]	=	ARID.intInvoiceDetailId 
+		,[strTransactionId]			=	ARI.strInvoiceNumber
+		,[intTransactionTypeId]		=	7
+		,[intLotId]					=	NULL
+		,[intSubLocationId]			=	NULL
+		,[intStorageLocationId]		=	NULL
+	FROM 
+		tblARInvoiceDetailComponent ARIDC
+	INNER JOIN 
+		tblARInvoiceDetail ARID
+			ON ARIDC.intInvoiceDetailId = ARID.intInvoiceDetailId 
+	INNER JOIN
+		tblARInvoice ARI
+			ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN
+		tblSOSalesOrderDetail SOTD
+			ON ARID.intSalesOrderDetailId = SOTD.intSalesOrderDetailId 
+	LEFT OUTER JOIN
+		vyuICGetItemStock ICGIS
+			ON ARIDC.intComponentItemId = ICGIS.intItemId 
+			AND ARI.intCompanyLocationId = ICGIS.intLocationId 
+	WHERE 
+		ISNULL(@FromPosting,0) = 1
+		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
+		AND ARI.intInvoiceId = @InvoiceId
+		AND ARI.strTransactionType = 'Invoice'
+		AND SOTD.dblQtyOrdered > dbo.fnCalculateQtyBetweenUOM(SOTD.intItemUOMId, ARID.intItemUOMId, ARID.dblQtyShipped) 
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 	

@@ -18,7 +18,7 @@ SELECT
 	isnull(d.strEmail,'') strEmail,
 	isnull(d.strPhone2,'') strPhone2,
 	isnull(d.strMobile,'') strMobile,
-	isnull(d.strTimezone,'') strTimezone,
+	isnull(e.strTimezone,'') strTimezone,
 	isnull(b.strWebsite,'') strWebsite,
 	isnull(d.strPhone,'') strPhone,
 	isnull(d.strName,'') strContactName,
