@@ -119,6 +119,7 @@
 :r .\12_EM\12_UpdateCustomerFreightNullLocation.sql
 :r .\12_EM\15_DropSMUserSecurityTrigger.sql
 :r .\12_EM\18_FixDuplicateLocationEntry.sql
+:r .\12_EM\19_CleanEntityPhoneNumber.sql
 
 --RK
 :r .\13_RK\01_DropTableScript.sql
