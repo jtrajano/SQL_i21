@@ -4179,6 +4179,8 @@
     <Build Include="dbo\Views\vyuARGetRecipeReport.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
     <Build Include="dbo\Views\vyuEMEntityContactLOB.sql" />
+    <Build Include="dbo\Views\vyuEMUserAdmin.sql" />
+    <None Include="Scripts\Post-Deployment\EM\033_UpdateUserSecurityAdmin.sql" />
     <Build Include="dbo\Tables\tblMFOrderDetail.sql" />
     <Build Include="dbo\Tables\tblMFOrderDirection.sql" />
     <Build Include="dbo\Tables\tblMFOrderHeader.sql" />
