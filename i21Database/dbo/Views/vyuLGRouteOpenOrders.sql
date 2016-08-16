@@ -10,7 +10,7 @@ SELECT
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
 	,intSiteID = TMO.intSiteID
-	,intCustomerID = NULL --TMO.intCustomerID
+	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = TMO.intDispatchId
 	,intLoadDetailId = NULL
 	,intLoadId = NULL
@@ -158,35 +158,35 @@ UNION ALL
 
 SELECT 
 	intSourceType = 4
-	,intOrderId = TMO.intSiteID
+	,intOrderId = TMO.intSiteId
 	,intEntityId = NULL
 	,intEntityLocationId = NULL
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
-	,intSiteID = TMO.intSiteID
-	,intCustomerID = TMO.intCustomerID
+	,intSiteID = TMO.intSiteId
+	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
 	,intLoadId = NULL
 	,intSequence = -1
 	,strOrderNumber = NULL
-	,strLocationName = CompLoc.strLocationName
-	,intLocationId = TMO.intLocationId
-	,strLocationAddress = CompLoc.strAddress
-	,strLocationCity = CompLoc.strCity
-	,strLocationZipCode = CompLoc.strZipPostalCode
-	,strLocationState = CompLoc.strStateProvince
-	,strLocationCountry = CompLoc.strCountry
-	,dblFromLongitude = CompLoc.dblLongitude
-	,dblFromLatitude = CompLoc.dblLatitude
+	,strLocationName = TMO.strCompanyLocationName
+	,intLocationId = TMO.intCompanyLocationId
+	,strLocationAddress = ''
+	,strLocationCity = ''
+	,strLocationZipCode = ''
+	,strLocationState = ''
+	,strLocationCountry = ''
+	,dblFromLongitude = 0.0
+	,dblFromLatitude = 0.0
 	,dtmScheduledDate = NULL
-	,strEntityName = Site.strName
+	,strEntityName = TMO.strCustomerName
 	,strToAddress = TMO.strSiteAddress
-	,strToCity = TMO.strCity
-	,strToZipCode = TMO.strZipCode
-	,strToState = TMO.strState
-	,strToCountry = TMO.strCountry
-	,strDestination = TMO.strSiteAddress + ', ' + TMO.strCity + ', ' + TMO.strState + ' ' + TMO.strZipCode 
+	,strToCity = TMO.strSiteCity
+	,strToZipCode = TMO.strSiteZip
+	,strToState = TMO.strSiteState
+	,strToCountry = ''
+	,strDestination = TMO.strSiteAddress + ', ' + TMO.strSiteCity + ', ' + TMO.strSiteState + ' ' + TMO.strSiteZip 
 	,dblToLongitude = TMO.dblLongitude
 	,dblToLatitude = TMO.dblLatitude
 	,strOrderStatus = NULL
@@ -194,16 +194,13 @@ SELECT
 	,strItemNo = NULL
 	,dblQuantity = NULL
 	,strCustomerReference = ''
-	,strOrderComments = TMO.strComment
+	,strOrderComments = ''
 	,strLocationType = 'Delivery'
 	,intDaysPassed = 0
 	,strOrderType = ''
 	,intPriority = -1
 
-FROM tblTMSite TMO
-JOIN vyuTMSiteCustomer Site ON Site.intSiteID = TMO.intSiteID
-LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intLocationId
-WHERE TMO.ysnActive = 1
+FROM vyuTMCustomerConsumptionSiteInfo TMO
 
 UNION ALL
 
