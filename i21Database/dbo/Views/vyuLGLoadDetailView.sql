@@ -45,8 +45,8 @@ SELECT LoadDetail.intLoadDetailId
 		,strPLifeTimeType = PDetail.strLifeTimeType
 		,strVendorContract = PDetail.strCustomerContract
 		,dblPCashPrice = PDetail.dblCashPrice
-		,strPCostUOM = PDetail.strPriceUOM
-  	    ,intPCostUOMId = PDetail.intPriceItemUOMId
+		,strPCostUOM = PDetail.strSeqPriceUOM
+  	    ,intPCostUOMId = PDetail.intSeqPriceUOMId
 		,dblPCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = PDetail.intPriceItemUOMId),0)
 		,ysnPLoad = PDetail.ysnLoad
 		,dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
@@ -55,9 +55,9 @@ SELECT LoadDetail.intLoadDetailId
         ,strPStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId)
 		,strPStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId)
         ,dblPStockUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId),0)
-		,strPCurrency = PDetail.strCurrency
+		,strPCurrency = PDetail.strSeqCurrency
 	    ,strPMainCurrency = PDetail.strMainCurrency
-	    ,ysnPSubCurrency = PDetail.ysnSubCurrency
+	    ,ysnPSubCurrency = PDetail.ysnSeqSubCurrency
 	    ,dblPMainCashPrice = PDetail.dblMainCashPrice
 	    ,dblPFranchise = CASE WHEN PWG.dblFranchise > 0 THEN PWG.dblFranchise / 100 ELSE 0 END
 
