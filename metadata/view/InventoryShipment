@@ -3803,7 +3803,7 @@
                                             "userConfig": {
                                                 "flex": 1,
                                                 "itemId": "colCostMethod",
-                                                "text": "Cost Method"
+                                                "text": "Price Method"
                                             },
                                             "name": "MyColumn11",
                                             "designerId": "1dcffb56-9aa7-4cb4-9c68-21b043708bc3",
@@ -4196,6 +4196,58 @@
                                             "codeClass": null,
                                             "name": "MyCheckboxSelectionModel12",
                                             "designerId": "4c3edbb7-9d52-4154-b525-6470c3a77921"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "colAllocatePriceBy",
+                                                "text": "Allocate Price By"
+                                            },
+                                            "name": "MyColumn",
+                                            "designerId": "bfd3d180-b9ed-43d0-ba31-53d787a9907e",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "{",
+                                                            "dataIndex: 'strAllocatePriceBy',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Allocate Cost By',",
+                                                            "flex: 1",
+                                                            "}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strAllocatePriceBy",
+                                                        "itemId": "cboAllocatePriceBy",
+                                                        "valueField": "strAllocatePriceBy"
+                                                    },
+                                                    "name": "MyComboBox9",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "284f17e7-24e7-4424-8150-3ded8cd3d837",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

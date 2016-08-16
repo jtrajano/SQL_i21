@@ -569,6 +569,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colChargeAmount: 'dblAmount',
+                colAllocatePriceBy: {
+                    dataIndex: 'strAllocatePriceBy',
+                    editor: {
+                        readOnly: '{checkInventoryPrice}',
+                        store: '{allocateBy}'
+                    }
+                },
                 colAccrue: {
                     dataIndex: 'ysnAccrue'
                 },
@@ -633,7 +640,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     key: 'tblICInventoryShipmentCharges',
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdCharges,
-                        deleteButton: grdCharges.down('#btnRemoveCharge')
+                        deleteButton: grdCharges.down('#btnRemoveCharge'),
+                        createRecord: me.onChargeCreateRecord
                     })
                 }
             ]
@@ -709,6 +717,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var record = Ext.create('Inventory.model.ShipmentItemLot');
         // record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
         record.set('dblQuantityShipped', config.dummy.get('dblQuantityShipped'));
+        action(record);
+    },
+    
+    onChargeCreateRecord: function (config, action) {
+        var win = config.grid.up('window');
+        var record = Ext.create('Inventory.model.ShipmentCharge');
+        record.set('strAllocatePriceBy', 'Unit');
         action(record);
     },
 
@@ -2304,7 +2319,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                             intCostUOMId: otherCharge.intItemUOMId,
                                                             intEntityVendorId: otherCharge.intVendorId,
                                                             dblAmount: 0,
-                                                            strAllocateCostBy: '',
+                                                            strAllocatePriceBy: 'Unit',
                                                             ysnAccrue: otherCharge.ysnAccrue,
                                                             ysnPrice: otherCharge.ysnPrice,
                                                             strItemNo: otherCharge.strItemNo,

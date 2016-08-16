@@ -35,12 +35,14 @@ Ext.define('Inventory.model.ShipmentCharge', {
         { name: 'dblExchangeRate', type: 'float' },
         { name: 'intCostUOMId', type: 'int', allowNull: true },
         { name: 'dblAmount', type: 'float' },
+        { name: 'strAllocatePriceBy', type: 'string' },
         { name: 'strCostBilledBy', type: 'string' },
         { name: 'intEntityVendorId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true }
     ],
 
     validators: [
-        {type: 'presence', field: 'strItemNo'}
+        {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strAllocatePriceBy'}
     ]
 });
