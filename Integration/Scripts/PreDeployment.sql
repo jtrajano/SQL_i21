@@ -174,7 +174,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveriesSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateEfficiencySearchView.sql"
-:r "..\dbo\Stored Procedures\uspTMRecreateCustomerConsumptionSiteInfoView"
+:r "..\dbo\Stored Procedures\uspTMRecreateCustomerConsumptionSiteInfoView.sql"
 
 
 
