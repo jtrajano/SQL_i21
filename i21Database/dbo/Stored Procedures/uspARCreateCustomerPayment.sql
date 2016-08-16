@@ -16,8 +16,7 @@
 	,@AllowOverpayment	BIT				= 0
 	,@RaiseError		BIT				= 0
 	,@ErrorMessage		NVARCHAR(250)	= NULL			OUTPUT
-	,@NewPaymentId		INT				= NULL			OUTPUT 	
-	
+	,@NewPaymentId		INT				= NULL			OUTPUT 		
 	,@InvoiceId			INT				= NULL
 	,@Payment			NUMERIC(18,6)	= 0.000000
 	,@ApplyTermDiscount	BIT				= 1
@@ -26,7 +25,6 @@
 AS
 
 BEGIN
-
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -47,85 +45,63 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 	
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId)
-	BEGIN
-		SET @ErrorMessage = 'The customer Id provided does not exists!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
-	END
+BEGIN
+	RAISERROR(120025, 16, 1);
+	GOTO _ExitTransaction
+END
 
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND ysnActive = 1)
-	BEGIN
-		SET @ErrorMessage = 'The customer provided is not active!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
-	END	
+BEGIN
+	RAISERROR(120026, 16, 1);
+	GOTO _ExitTransaction
+END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId)
-	BEGIN
-		SET @ErrorMessage = 'The payment method Id provided does not exists!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END
-
+BEGIN
+	RAISERROR(120032, 16, 1);		
+	GOTO _ExitTransaction
+END
 
 IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId AND [ysnActive] = 1)
-	BEGIN
-		SET @ErrorMessage = 'The payment method provided is not active!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END	
+BEGIN
+	RAISERROR(120070, 16, 1);		
+	GOTO _ExitTransaction
+END	
 		
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
-	BEGIN
-		SET @ErrorMessage = 'The company location Id provided does not exists!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END	
+BEGIN		
+	RAISERROR(120027, 16, 1);		
+	GOTO _ExitTransaction
+END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId AND [ysnLocationActive] = 1)
-	BEGIN
-		SET @ErrorMessage = 'The company location provided is not active!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END	
+BEGIN
+	RAISERROR(120028, 16, 1);		
+	GOTO _ExitTransaction
+END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId)
-	BEGIN
-		SET @ErrorMessage = 'The entity Id provided does not exists!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END
+BEGIN
+	RAISERROR(120029, 16, 1);		
+	GOTO _ExitTransaction
+END
 
 
 IF @AllowPrepayment = 0 AND @InvoiceId IS NULL AND @AmountPaid > @ZeroDecimal
-	BEGIN
-		SET @ErrorMessage = 'This will create a prepayment which has not been allowed!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END	
+BEGIN
+	RAISERROR(120035, 16, 1);		
+	GOTO _ExitTransaction
+END	
 
 IF @AllowOverpayment = 0 AND @ApplyTermDiscount = 0 AND @InvoiceId IS NOT NULL AND @AmountPaid > (@Payment + @Discount - @Interest)
-	BEGIN
-		SET @ErrorMessage = 'This will create a overpayment which has not been allowed!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
-		RETURN 0;
-	END
-
+BEGIN		
+	RAISERROR(120071, 16, 1);		
+	GOTO _ExitTransaction
+END
 
 SET @AmountPaid = ROUND(@AmountPaid, [dbo].[fnARGetDefaultDecimal]())
-
 	
-IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION
+BEGIN TRANSACTION
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -176,12 +152,9 @@ BEGIN TRY
 	
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 END CATCH
 
 
@@ -208,32 +181,30 @@ BEGIN
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
-					IF ISNULL(@RaiseError,0) = 0
-						ROLLBACK TRANSACTION
-					SET @ErrorMessage = @AddDetailError;
-					IF ISNULL(@RaiseError,0) = 1
-						RAISERROR(@ErrorMessage, 16, 1);
-					RETURN 0;
+					IF @@ERROR <> 0	GOTO _RollBackTransaction
+					SET @ErrorMessage = ERROR_MESSAGE()  
+					RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 				END
 	END TRY
 	BEGIN CATCH
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = ERROR_MESSAGE();
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction
+		SET @ErrorMessage = ERROR_MESSAGE()  
+		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 	END CATCH
 END
 
-
-	
-
 SET @NewPaymentId = @NewId
 
-IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION
-SET @ErrorMessage = NULL;
-RETURN 1;
+IF @@ERROR = 0 GOTO _CommitTransaction
+
+_RollBackTransaction:
+ROLLBACK TRANSACTION
+GOTO _ExitTransaction
+
+_CommitTransaction: 
+COMMIT TRANSACTION
+GOTO _ExitTransaction
+
+_ExitTransaction:
 	
 END

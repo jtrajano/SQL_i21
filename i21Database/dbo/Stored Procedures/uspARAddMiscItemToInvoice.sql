@@ -35,12 +35,10 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 SET @ZeroDecimal = 0.000000
 
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
-	BEGIN
-		SET @ErrorMessage = 'Invoice does not exists!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
-	END
+BEGIN	
+	RAISERROR(120001, 16, 1);
+	GOTO _ExitTransaction
+END
 
 SELECT 
 	 @EntityCustomerId	= [intEntityCustomerId]
@@ -53,10 +51,8 @@ WHERE
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN
-		SET @ErrorMessage = 'The company location from the target Invoice does not exists!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
+		RAISERROR(120003, 16, 1);
+		GOTO _ExitTransaction
 	END	
 	
 SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
@@ -65,9 +61,8 @@ SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblA
 --		SET @ErrorMessage = 'The Service Charge account in the Company Preferences was not set.'
 --		RETURN 0;
 --	END	
-		
-IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION		
+
+BEGIN TRANSACTION		
 
 BEGIN TRY
 	INSERT INTO [tblARInvoiceDetail]
@@ -171,12 +166,9 @@ BEGIN TRY
 			
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0	
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 END CATCH
 	
 DECLARE @NewId INT
@@ -187,20 +179,23 @@ EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId
 
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0	
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
 END CATCH
 
 SET @NewInvoiceDetailId = @NewId
 
-IF ISNULL(@RaiseError,0) = 0	
-	COMMIT TRANSACTION
-SET @ErrorMessage = NULL;
-RETURN 1;
+IF @@ERROR = 0 GOTO _CommitTransaction
 	
+_RollBackTransaction:
+ROLLBACK TRANSACTION
+GOTO _ExitTransaction
+
+_CommitTransaction: 
+COMMIT TRANSACTION
+GOTO _ExitTransaction
+
+_ExitTransaction: 
 	
 END

@@ -158,7 +158,7 @@ DECLARE @tblTempTransaction TABLE (
 									WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
 									AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''' 
 									' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-									' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation = ''True'')'
+									' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation = ''True'') AND tblICInventoryReceipt.ysnPosted = 1'
 
 	     DECLARE @HasCriteria INT = (SELECT TOP 1 tblTFTaxCriteria.intTaxCategoryId FROM tblTFTaxCriteria INNER JOIN tblTFReportingComponentDetail ON tblTFTaxCriteria.intReportingComponentDetailId = tblTFReportingComponentDetail.intReportingComponentDetailId WHERE (tblTFTaxCriteria.intReportingComponentDetailId = @RCId))
 		 IF(@HasCriteria IS NOT NULL)
@@ -195,7 +195,7 @@ DECLARE @tblTempTransaction TABLE (
 					   WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
 							 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation=''True'')'
+							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation=''True'') AND tblICInventoryReceipt.ysnPosted = 1'
 			END
 		ELSE
 			BEGIN
@@ -230,7 +230,7 @@ DECLARE @tblTempTransaction TABLE (
 					   WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
 							 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation=''True'')'
+							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation=''True'') AND tblICInventoryReceipt.ysnPosted = 1'
 			END
 			
 		DELETE FROM @tblTempTransaction

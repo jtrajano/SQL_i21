@@ -8,7 +8,6 @@ AS
 
 BEGIN
 
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -18,22 +17,16 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
 
-	
-IF ISNULL(@RaiseError,0) = 0	
-	BEGIN TRANSACTION
-	
+BEGIN TRANSACTION
 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [intPaymentId] = @PaymentId) AND EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId)
 BEGIN
 	IF EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId AND [ysnPosted] = 1)
 		BEGIN
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = 'Cannot delete posted payment!'
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
-	END
+			IF @@ERROR <> 0	GOTO _RollBackTransaction			
+			RAISERROR(120045, 16, 1)
+			GOTO _ExitTransaction
+		END
 	
 	BEGIN TRY
 		UPDATE
@@ -45,24 +38,18 @@ BEGIN
 			[intInvoiceId] = @InvoiceId
 	END TRY
 	BEGIN CATCH
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = ERROR_MESSAGE();
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction
+		SET @ErrorMessage = ERROR_MESSAGE()  
+		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
 	END CATCH
 	
 	BEGIN TRY
 		DELETE FROM tblARPaymentDetail WHERE [intPaymentId] = @PaymentId
 	END TRY
 	BEGIN CATCH
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = ERROR_MESSAGE();
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction
+		SET @ErrorMessage = ERROR_MESSAGE()  
+		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
 	END CATCH
 
 
@@ -70,12 +57,9 @@ BEGIN
 		DELETE FROM tblARPayment WHERE [intPaymentId] = @PaymentId
 	END TRY
 	BEGIN CATCH
-		IF ISNULL(@RaiseError,0) = 0
-			ROLLBACK TRANSACTION
-		SET @ErrorMessage = ERROR_MESSAGE();
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
+		IF @@ERROR <> 0	GOTO _RollBackTransaction
+		SET @ErrorMessage = ERROR_MESSAGE()  
+		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
 	END CATCH
 		
 	
@@ -86,12 +70,9 @@ END
 
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [intPaymentId] IS NOT NULL)
 BEGIN
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = 'Payment has already been created for this Invoice!'
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction	
+	RAISERROR(120046, 16, 1)
+	GOTO _ExitTransaction
 END
 
 
@@ -141,12 +122,9 @@ BEGIN TRY
 		ARI.[intInvoiceId] = @InvoiceId
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
 END CATCH
 
 
@@ -181,21 +159,15 @@ BEGIN TRY
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
-				IF ISNULL(@RaiseError,0) = 0
-					ROLLBACK TRANSACTION
-				SET @ErrorMessage = @AddDetailError;
-				IF ISNULL(@RaiseError,0) = 1
-					RAISERROR(@ErrorMessage, 16, 1);
-				RETURN 0;
+				IF @@ERROR <> 0	GOTO _RollBackTransaction
+				SET @ErrorMessage = ERROR_MESSAGE()  
+				RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
 			END
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
+	IF @@ERROR <> 0	GOTO _RollBackTransaction
+	SET @ErrorMessage = ERROR_MESSAGE()  
+	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
 END CATCH
 
 
@@ -208,9 +180,17 @@ WHERE
 		  
 SET @PaymentId = @NewId		                 
 
-IF ISNULL(@RaiseError,0) = 0
-	COMMIT TRANSACTION
-	SET @ErrorMessage = NULL;
+IF @@ERROR = 0 GOTO _CommitTransaction
 RETURN @NewId
+GOTO _ExitTransaction
+
+_RollBackTransaction:
+ROLLBACK TRANSACTION
+GOTO _ExitTransaction
+
+_CommitTransaction: 
+COMMIT TRANSACTION
+
+_ExitTransaction:
 
 END
