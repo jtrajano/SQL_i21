@@ -116,7 +116,11 @@ AS
 
 			AD.intSeqCurrencyId,				AD.ysnSeqSubCurrency,			AD.intSeqPriceUOMId,
 			AD.dblSeqPrice,						AD.strSeqCurrency,				AD.strSeqPriceUOM,
-			AD.dblQtyToPriceUOMConvFactor,		AD.dblNetWtToPriceUOMConvFactor,
+			AD.dblQtyToPriceUOMConvFactor,		AD.dblCostUnitQty,				AD.dblNetWtToPriceUOMConvFactor,
+
+			ISNULL(WU.dblUnitQty,1)	AS dblWeightUnitQty,
+			ISNULL(IU.dblUnitQty,1)	AS dblUnitQty,
+			
 
 			--Header Detail
 
