@@ -41,7 +41,7 @@ END
 GO
 IF EXISTS(SELECT 1 FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink')
 BEGIN
-	DELETE tblGRShrinkCalculationOption WHERE strDisplayField = 'Price Shrink'	
+	UPDATE tblGRShrinkCalculationOption SET strDisplayField = 'Gross Weight' WHERE strDisplayField = 'Price Shrink'	
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strDisplayField = 'Gross Weight')
