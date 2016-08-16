@@ -4238,6 +4238,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCreateVoucher.sql" />
     <Build Include="dbo\Views\vyuTRGetRackPriceHeader.sql" />
     <Build Include="dbo\Views\vyuTMBEExportDispatch.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportConsumptionSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
