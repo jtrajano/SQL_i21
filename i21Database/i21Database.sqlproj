@@ -4207,6 +4207,8 @@
     <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
     <Build Include="dbo\Views\vyuTMDeliveryTicket.sql" />
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
+    <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
+    <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
