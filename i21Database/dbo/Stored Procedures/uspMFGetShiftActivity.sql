@@ -66,6 +66,7 @@ BEGIN
 			,AT.dtmShiftEndTime
 			,S.intShiftId
 			,AT.intManufacturingCellId
+			,MC.ysnIncludeSchedule
 		FROM #tmp_ActualTable AT
 		JOIN dbo.tblMFManufacturingCell MC ON AT.intManufacturingCellId = MC.intManufacturingCellId
 			AND MC.intLocationId = @intLocationId
@@ -92,6 +93,7 @@ BEGIN
 			,COUNT(DISTINCT (SAM.intMachineId)) AS intNoOfMachines
 			,(SA.intScheduledRuntime / 60) AS intScheduledRuntime
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		FROM dbo.tblMFShiftActivity SA
 		JOIN dbo.tblMFManufacturingCell MC ON SA.intManufacturingCellId = MC.intManufacturingCellId
 			AND MC.intLocationId = @intLocationId
@@ -120,6 +122,7 @@ BEGIN
 			,DATEDIFF(mi, SCD.dtmShiftStartTime, SCD.dtmShiftEndTime)
 			,SA.intScheduledRuntime
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		ORDER BY MC.strCellName
 			,SA.dtmShiftDate
 			,SA.dtmShiftStartTime
@@ -160,6 +163,7 @@ BEGIN
 						END
 					), 2) AS dblEfficiencyPercent
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		FROM dbo.tblMFShiftActivity SA
 		JOIN dbo.tblMFManufacturingCell MC ON SA.intManufacturingCellId = MC.intManufacturingCellId
 			AND MC.intLocationId = @intLocationId
@@ -187,6 +191,7 @@ BEGIN
 			,SA.dblTargetEfficiency
 			,SA.dblStdCapacity
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		ORDER BY MC.strCellName
 			,SA.dtmShiftDate
 			,SA.dtmShiftStartTime
