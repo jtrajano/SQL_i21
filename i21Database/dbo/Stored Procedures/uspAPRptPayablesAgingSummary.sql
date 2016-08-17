@@ -67,6 +67,7 @@ BEGIN
 		NULL AS strVendorOrderNumber,
 		NULL AS strTerm,
 		NULL AS strCompanyName,
+		NULL AS strCompanyAddress,
 		NULL AS strAccountId,
 		NULL AS strVendorIdName,
 		NULL AS strAge,
@@ -177,6 +178,7 @@ SET @query = '
 		intEntityVendorId
 		,strVendorId
 		,strVendorIdName
+		,strCompanyAddress
 		,SUM(dblCurrent) dblCurrent
 		,SUM(dbl1) dbl1
 		,SUM(dbl30) dbl30
@@ -204,6 +206,7 @@ SET @query = '
 		,tmpAgingSummaryTotal.dblInterest
 		,tmpAgingSummaryTotal.dblAmountDue
 		,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
+		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
 				ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
 		,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
@@ -250,6 +253,7 @@ SET @query = '
 		intEntityVendorId
 		,strVendorId
 		,strVendorIdName
+		,strCompanyAddress
 	) MainQuery
 '
 

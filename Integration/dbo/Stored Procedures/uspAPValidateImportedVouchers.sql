@@ -36,10 +36,24 @@ FROM (
 			,C.strBillId
 			,C.dblTotal i21Total
 			,ISNULL(B.dblTotal,0) i21DetailTotal
-			FROM tblAPBill C 
+			FROM tmp_apivcmstImport C2
+				INNER JOIN tblAPapivcmst C3 ON C2.intBackupId = C3.intId
+				INNER JOIN tblAPBill C ON C3.intBillId = C.intBillId
 				INNER JOIN tblAPBillDetail B ON C.intBillId = B.intBillId
 				INNER JOIN tblGLDetail D ON C.strBillId = D.strTransactionId AND C.intBillId = D.intTransactionId
 			WHERE C.ysnOrigin = 1 AND D.intGLDetailId IS NULL
+			UNION ALL
+			SELECT 
+			E.intBillId
+			,E.strBillId
+			,E.dblTotal i21Total
+			,ISNULL(F.dblTotal,0) i21DetailTotal
+			FROM tmp_aptrxmstImport E2
+				INNER JOIN tblAPaptrxmst E3 ON E2.intBackupId = E3.intId
+				INNER JOIN tblAPBill E ON E3.intBillId = E.intBillId
+				INNER JOIN tblAPBillDetail F ON E.intBillId = F.intBillId
+				INNER JOIN tblGLDetail G ON E.strBillId = G.strTransactionId AND E.intBillId = G.intTransactionId
+			WHERE E.ysnOrigin = 1 AND G.intGLDetailId IS NULL
 			) ImportedBills
 	GROUP BY 
 	intBillId
@@ -52,7 +66,9 @@ WHERE i21Total <> i21DetailTotal --Verify if total and detail total are equal
 INSERT INTO @log
 SELECT
 	C.strBillId + ' has been paid but do not have payment created.' AS strBillId
-FROM tblAPBill C
+FROM tmp_apivcmstImport C2
+INNER JOIN tblAPapivcmst C3 ON C2.intBackupId = C3.intId
+INNER JOIN tblAPBill C ON C3.intBillId = C.intBillId
 LEFT JOIN tblAPPaymentDetail D ON C.intBillId = D.intBillId
 LEFT JOIN tblGLDetail E ON E.intTransactionId = C.intBillId AND E.strTransactionId = C.strBillId
 WHERE C.ysnPaid = 1 AND D.intPaymentDetailId IS NULL AND C.ysnOrigin = 1 AND C.ysnPosted = 1 AND E.intGLDetailId IS NULL
@@ -62,8 +78,6 @@ INSERT INTO @log
 SELECT
 	strPaymentRecordNum + CASE WHEN i21Total <> i21DetailTotal 
 							THEN ' total do not match. Header: ' + CAST(i21Total AS NVARCHAR) + ' Detail:' +  CAST(i21DetailTotal AS NVARCHAR)
-							WHEN i21Total < 0
-							THEN ' total amount is negative.'
 							END AS strPaymentRecordNum
 FROM (
 	SELECT DISTINCT
@@ -75,20 +89,29 @@ FROM (
 			SELECT 
 			A.intPaymentId
 			,A.strPaymentRecordNum
-			,A.dblAmountPaid i21Total
-			,ISNULL((CASE WHEN C.intTransactionType != 1 AND A.ysnPrepay = 0 THEN B.dblPayment * -1 ELSE B.dblPayment END),0) i21DetailTotal
+			,(CASE WHEN LOWER(PM.strPaymentMethod) = 'deposit' THEN A.dblAmountPaid * -1 ELSE A.dblAmountPaid END) i21Total
+			,ISNULL((CASE WHEN C.intTransactionType != 1 AND (A.ysnPrepay = 0 OR LOWER(PM.strPaymentMethod) = 'deposit')
+						THEN B.dblPayment * -1 
+						ELSE B.dblPayment END),0) i21DetailTotal
 			FROM tblAPPayment A
+			INNER JOIN tblSMPaymentMethod PM ON A.intPaymentMethodId = PM.intPaymentMethodID
 			LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			LEFT JOIN tblAPBill C ON B.intBillId = C.intBillId
 			LEFT JOIN tblGLDetail D ON D.intTransactionId = A.intPaymentId AND D.strTransactionId = A.strPaymentRecordNum
 			WHERE A.ysnOrigin = 1 AND D.intGLDetailId IS NULL
+			AND B.intBillId  IN (
+				SELECT 
+					V2.intBillId
+				FROM tmp_apivcmstImport V
+				INNER JOIN tblAPapivcmst  V2 ON V.intBackupId = V2.intId
+			)
 			) ImportedBills
 	GROUP BY 
 	intPaymentId
 	,strPaymentRecordNum
 	,i21Total
 	) Summary
-WHERE i21Total <> i21DetailTotal OR i21Total < 0
+WHERE i21Total <> i21DetailTotal
 
 INSERT INTO tblAPImportVoucherLog
 (

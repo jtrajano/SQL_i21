@@ -170,6 +170,7 @@ INSERT INTO @EntriesForInvoice
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
 	,[ysnSubCurrency]
+	,[ysnBlended]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -265,6 +266,7 @@ SELECT
 	,[ysnClearDetailTaxes]					= 0
 	,[intTempDetailIdForTaxes]				= NULL
 	,[ysnSubCurrency]						= 0
+	,[ysnBlended]							= ARSI.[ysnBlended]
 FROM
 	vyuARShippedItems ARSI
 WHERE

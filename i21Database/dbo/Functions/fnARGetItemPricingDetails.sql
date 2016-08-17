@@ -182,6 +182,8 @@ DECLARE	 @Price			NUMERIC(18,6)
 		);		
 	
 	--Item Standard Pricing
+	IF ISNULL(@UOMQuantity,0) = 0
+		SET @UOMQuantity = 1
 	SET @Price = @UOMQuantity *	
 						( 
 							SELECT

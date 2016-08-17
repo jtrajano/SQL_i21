@@ -176,6 +176,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateEfficiencySearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerConsumptionSiteInfoView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOriginDegreeOptionView.sql"
+:r "..\Scripts\TM\AddOriginTableIndex.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql"
 
 
 

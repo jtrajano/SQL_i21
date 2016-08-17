@@ -147,6 +147,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnClearDetailTaxes]					BIT												NULL		-- Indicate whether to clear tax details before inserting tax details from LineItemTaxDetailStagingTable
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id for linking line item detail taxes (LineItemTaxDetailStagingTable) which are also fro processing
 	,[ysnSubCurrency]						BIT												NULL		-- Indicates whether the line item price is on sub currency
+	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
 )

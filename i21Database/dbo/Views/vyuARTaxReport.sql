@@ -23,28 +23,28 @@ SELECT TC.intTaxCodeId
 	 , E.strName
 	 , dblUnitPrice     = (SELECT TOP 1 dblPrice FROM tblARInvoiceDetail IID 
 									 INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
-							WHERE intInvoiceId = I.intInvoiceId)
+							WHERE intInvoiceId = I.intInvoiceId AND IID.dblTotalTax > 0)
 	 , strCompanyName	= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 	 , strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
 	 , intItemId        = (SELECT TOP 1 IID.intItemId FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId									
-							WHERE intInvoiceId = I.intInvoiceId)
+							WHERE intInvoiceId = I.intInvoiceId AND IID.dblTotalTax > 0)
 	 , strItemNo        = (SELECT TOP 1 ICI.strItemNo FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
-							WHERE intInvoiceId = I.intInvoiceId)
+							WHERE intInvoiceId = I.intInvoiceId AND IID.dblTotalTax > 0)
 	 , dblQtyShipped	= (SELECT TOP 1 dblQtyShipped FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
-							WHERE intInvoiceId = I.intInvoiceId)
+							WHERE intInvoiceId = I.intInvoiceId AND IID.dblTotalTax > 0)
 	 , intCategoryId    = (SELECT TOP 1 ICI.intCategoryId FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
-							WHERE intInvoiceId = I.intInvoiceId)
+							WHERE intInvoiceId = I.intInvoiceId AND IID.dblTotalTax > 0)
 	 , strItemCategory  = (SELECT TOP 1 ICC.strCategoryCode FROM tblARInvoiceDetail IID 
 									INNER JOIN tblARInvoiceDetailTax IIDT ON IID.intInvoiceDetailId = IIDT.intInvoiceDetailId AND IIDT.intTaxCodeId = TC.intTaxCodeId
 									LEFT JOIN tblICItem ICI ON IID.intItemId = ICI.intItemId
 									LEFT JOIN tblICCategory ICC ON ICI.intCategoryId = ICC.intCategoryId
-							WHERE intInvoiceId = I.intInvoiceId)
+							WHERE intInvoiceId = I.intInvoiceId AND IID.dblTotalTax > 0)
 	 , dblTaxDifference = CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo')
 								THEN SUM(IDT.dblAdjustedTax - IDT.dblTax) * -1 
 								ELSE SUM(IDT.dblAdjustedTax - IDT.dblTax) 

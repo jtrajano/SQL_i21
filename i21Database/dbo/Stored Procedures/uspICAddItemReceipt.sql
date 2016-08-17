@@ -160,7 +160,7 @@ BEGIN
 				,@strSourceScreenName = RawData.strSourceScreenName
 				,@strSourceId = RawData.strSourceId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
-					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
 					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
 					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
@@ -198,7 +198,7 @@ BEGIN
 			SELECT	TOP 1 
 					RawData.*
 			FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
-						ON RawHeaderData.Vendor = RawData.intEntityVendorId 
+						ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
 						AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
 						AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
@@ -226,7 +226,7 @@ BEGIN
 				,intCurrencyId			= IntegrationData.intCurrencyId
 				,intSubCurrencyCents	= IntegrationData.intSubCurrencyCents
 				,strVessel				= NULL
-				,intFreightTermId		= NULL
+				,intFreightTermId		= IntegrationData.intFreightTermId 
 				,intShiftNumber			= NULL 
 				,dblInvoiceAmount		= 0
 				,ysnInvoicePaid			= 0 
@@ -300,7 +300,7 @@ BEGIN
 				/*intCurrencyId*/				,IntegrationData.intCurrencyId
 				/*intSubCurrencyCents*/			,IntegrationData.intSubCurrencyCents
 				/*strVessel*/					,NULL
-				/*intFreightTermId*/			,NULL
+				/*intFreightTermId*/			,IntegrationData.intFreightTermId 
 				/*intShiftNumber*/				,NULL 
 				/*dblInvoiceAmount*/			,0
 				/*ysnInvoicePaid*/				,0 
@@ -411,7 +411,7 @@ BEGIN
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0) 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
-					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
 					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
 					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
@@ -468,7 +468,7 @@ BEGIN
 				,[intCurrencyId]			= RawData.intCostCurrencyId
 				,[intCent]					= CostCurrency.intCent
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
-					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
+					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
@@ -753,6 +753,7 @@ BEGIN
 					,@InventoryReceiptItemId
 					,@ShipFromId
 					,@TaxGroupId
+					,@FreightTermId
 			END 
 
 			CLOSE loopReceiptItems;

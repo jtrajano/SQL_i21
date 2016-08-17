@@ -12,8 +12,9 @@ CREATE FUNCTION [dbo].[fnCalculateLotWeight](
 RETURNS NUMERIC(38, 20)
 AS 
 BEGIN
-
-	RETURN 
+	DECLARE @calculatedValue AS NUMERIC(38, 20)
+	
+	SET @calculatedValue =  
 			CASE	WHEN ISNULL(@intLotWeightUOMId, 0) = @intCostingItemUOMId AND @intLotItemUOMId <> @intCostingItemUOMId THEN
 						-- @dblCostingQty is in Weight 
 						ISNULL(@dblLotWeight, 0) + @dblCostingQty
@@ -27,4 +28,8 @@ BEGIN
 							)
 						) 
 			END
+
+	SET @calculatedValue = ROUND(@calculatedValue, 12) 
+
+	RETURN @calculatedValue
 END
