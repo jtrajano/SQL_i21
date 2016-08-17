@@ -171,6 +171,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql"
 :r "..\Scripts\TM\AddOriginTableIndex.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateOriginDegreeOptionView.sql"
+
 
 
 
