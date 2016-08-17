@@ -15,7 +15,8 @@
 	,@NewInvoiceId					INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0			
-	,@EntitySalespersonId			INT				= NULL				
+	,@EntitySalespersonId			INT				= NULL
+	,@EntityContactId				INT				= NULL				
 	,@FreightTermId					INT				= NULL
 	,@ShipViaId						INT				= NULL
 	,@PaymentMethodId				INT				= NULL
@@ -129,9 +130,10 @@ IF @Comment IS NULL
 					@DocumentMaintenanceId = @DocumentMaintenanceId
 	END
 
-
-	
-
+IF ISNULL(@EntityContactId, 0) = 0
+	BEGIN
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
+	END
 
 IF ISNULL(@TransactionType, '') = ''
 	SET @TransactionType = 'Invoice'
@@ -274,6 +276,7 @@ BEGIN TRY
 		,[dblAmountDue]
 		,[dblPayment]
 		,[intEntitySalespersonId]
+		,[intEntityContactId]
 		,[intFreightTermId]
 		,[intShipViaId]
 		,[intPaymentMethodId]
@@ -340,6 +343,7 @@ BEGIN TRY
 		,[dblPayment]					= @ZeroDecimal
 		
 		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
+		,[intEntityContactId]			= @EntityContactId
 		,[intFreightTermId]				= @FreightTermId
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
 		,[intPaymentMethodId]			= @PaymentMethodId
@@ -415,7 +419,7 @@ BEGIN TRY
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
-			ON C.intBillToId = BL1.intEntityLocationId
+			ON C.intBillToId = BL1.intEntityLocationId	
 	WHERE C.[intEntityCustomerId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()

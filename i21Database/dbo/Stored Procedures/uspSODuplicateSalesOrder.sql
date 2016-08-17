@@ -59,6 +59,7 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,[intEntityId]
+		   ,[intEntityContactId]
 		   ,[intQuoteTemplateId]
 		   ,[ysnPreliminaryQuote]
 		   ,[ysnQuote]
@@ -119,6 +120,7 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,@UserId
+		   ,[intEntityContactId]
 		   ,[intQuoteTemplateId]
 		   ,[ysnPreliminaryQuote]
 		   ,[ysnQuote]

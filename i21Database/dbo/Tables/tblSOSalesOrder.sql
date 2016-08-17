@@ -57,6 +57,7 @@
     [strLostQuoteReason]	NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL,
 	[strQuoteType]			NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,     
 	[dblTotalWeight]		NUMERIC(18, 6)	NULL DEFAULT 0,
+	[intEntityContactId]	INT				NULL,
     CONSTRAINT [PK_tblSOSalesOrder] PRIMARY KEY CLUSTERED ([intSalesOrderId] ASC),
     CONSTRAINT [FK_tblSOSalesOrder_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblSOSalesOrder_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
