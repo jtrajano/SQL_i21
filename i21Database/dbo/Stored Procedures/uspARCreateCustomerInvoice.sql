@@ -96,6 +96,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@SubCurrency					BIT				= 0
+	,@DocumentMaintenanceId			INT				= NULL
 AS
 
 BEGIN
@@ -124,8 +125,12 @@ IF @Comment IS NULL
 					@intEntityCustomerId = @EntityCustomerId,
 					@strTransactionType = @TransactionType,
 					@strType = @Type,
-					@strDefaultComment = @Comment OUTPUT
+					@strDefaultComment = @Comment OUTPUT,
+					@DocumentMaintenanceId = @DocumentMaintenanceId
 	END
+
+
+	
 
 
 IF ISNULL(@TransactionType, '') = ''
@@ -342,7 +347,7 @@ BEGIN TRY
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
 		,[strDeliverPickup]				= @DeliverPickUp
-		,[strComments]					= @Comment
+		,[strComments]					= CASE WHEN (@Comment IS NULL OR @Comment = '') THEN (SELECT TOP 1 strMessage FROM tblSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = @DocumentMaintenanceId AND strHeaderFooter NOT IN ('Footer')) ELSE @Comment END
 		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.intEntityCustomerId, 'Invoice Footer')
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
