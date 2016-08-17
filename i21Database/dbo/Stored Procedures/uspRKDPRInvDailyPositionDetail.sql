@@ -192,13 +192,13 @@ BEGIN
 			AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end					
 		) t
 
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strTicket,strCustomerReference,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
 	SELECT 4 AS intSeqId,'Sales In-Transit',@strDescription
 		,'Sales In-Transit' AS [strType]
-		,ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemName,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
+		,ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemName,strTicket,strCustomerReference,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
 		SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(i.intUnitMeasureId,@intCommodityUnitMeasureId,isnull(i.dblBalanceToInvoice, 0)) as ReserveQty,
-				i.strLocationName,i.strItemName,strContractNumber
+				i.strLocationName,i.strItemName,strContractNumber,strTicket,strCustomerReference
 				FROM vyuRKGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
 			    AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end	
@@ -530,16 +530,16 @@ BEGIN
 			AND i.intEntityId= @intVendorId 					
 		) t
 
-	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
+	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strTicket,strCustomerReference,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId)
 	SELECT 4 AS intSeqId,'Sales In-Transit',@strDescription
 		,'Sales In-Transit' AS [strType]
-		,ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemName,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
+		,ISNULL(ReserveQty, 0) AS dblTotal,strLocationName,strItemName,strTicket,strCustomerReference,strContractNumber,@intCommodityId,@intCommodityUnitMeasureId
 	FROM (
 		SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(i.intUnitMeasureId,@intCommodityUnitMeasureId,isnull(i.dblBalanceToInvoice, 0)) as ReserveQty,
-				i.strLocationName,i.strItemName,strContractNumber
+				i.strLocationName,i.strItemName,strContractNumber,strTicket,strCustomerReference
 				FROM vyuRKGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
-			    AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end
+			    AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end	
 				AND i.intEntityId= @intVendorId 	
 		) t
 
