@@ -63,8 +63,9 @@ as	select tblSCTicket.intTicketId, (CASE WHEN
 	tblSCTicket.ysnUseDestinationWeight,
 	tblSCTicket.ysnUseDestinationGrades,
 	tblSCTicket.ysnHasGeneratedTicketNumber,
-	tblSCTicket.intInventoryTransferId, tblSCTicket.dblGross,
-	tblSCTicket.dblShrink, tblSCTicket.dblConvertedUOMQty,
+	tblSCTicket.intInventoryTransferId,
+	tblSCTicket.dblShrink,
+	tblSCTicket.dblConvertedUOMQty,
 	tblEMEntity.strName, tblSCListTicketTypes.strTicketType,
 	tblSMCompanyLocation.strLocationName,
 	tblSMCompanyLocationSubLocation.strSubLocationName, ISNULL
