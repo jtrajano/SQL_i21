@@ -4324,6 +4324,14 @@
     <Build Include="dbo\Views\vyuLGStockSaleSearch.sql" />
     <Build Include="dbo\Views\vyuLGStockSalesAllocation.sql" />
     <Build Include="dbo\Views\vyuTMForPrintDeliveryTicket.sql" />
+    <Build Include="dbo\Functions\fnLGGetDefaultWeightItemUOM.sql" />
+    <Build Include="dbo\Views\vyuICExportProduct.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailCost.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailQty.sql" />
+    <Build Include="dbo\Views\vyuAPClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateClaim.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailClaim.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
