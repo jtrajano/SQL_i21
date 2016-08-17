@@ -185,7 +185,7 @@ BEGIN
 			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
 			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL
 			  AND TT.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
-			GROUP BY TT.intVendorId, PT.intExpenseAccountId, TT.strTax
+			GROUP BY TT.intVendorId, PT.intExpenseAccountId, PT.intAccountId, TT.strTax, PT.strPaidBy
 		 UNION ALL
 		 SELECT 
 			intVendorId = TD.intVendorId, 
@@ -195,7 +195,7 @@ BEGIN
 			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
 			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL
 				AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
-			GROUP BY TD.intVendorId, PD.intExpenseAccountId, TD.strDeduction
+			GROUP BY TD.intVendorId, PD.intExpenseAccountId, PD.intAccountId, TD.strDeduction, PD.strPaidBy
 		) A
 		INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
 		INNER JOIN tblEMEntity C ON B.intEntityVendorId = C.intEntityId
