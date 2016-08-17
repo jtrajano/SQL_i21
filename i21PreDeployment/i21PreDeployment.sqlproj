@@ -255,4 +255,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\1610_to_1620.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\12_EM\16_CleanCustomerProductVersion.sql" />
+  </ItemGroup>
 </Project>
