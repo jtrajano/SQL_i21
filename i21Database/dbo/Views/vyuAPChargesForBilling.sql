@@ -16,7 +16,7 @@ SELECT
 	,[dblQuantityToBill]						=	1
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
-	,[intInventoryReceiptItemId]				=	NULL 
+	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN (ReceiptCharge.dblAmount * 100) ELSE ReceiptCharge.dblAmount END
 	,[dblTax]									=	0
@@ -99,6 +99,12 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblICUnitMeasure CostUOM 
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
+	OUTER APPLY (
+		SELECT
+			A.intInventoryReceiptItemId
+		FROM tblICInventoryReceiptItem A
+		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	) ReceiptItem 
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
@@ -125,7 +131,7 @@ SELECT
 	,[dblQuantityToBill]						=	1
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
-	,[intInventoryReceiptItemId]				=	NULL 
+	,[intInventoryReceiptItemId]				=	ReceiptItem.intInventoryReceiptItemId  --add for strSource reference
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	CASE WHEN ReceiptCharge.ysnSubCurrency > 0 THEN -1 * (ReceiptCharge.dblAmount * 100)  ELSE -1 * ReceiptCharge.dblAmount /* Negate the amount if other charge is set as price*/  END 
 	,[dblTax]									=	0
@@ -208,6 +214,12 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblICUnitMeasure CostUOM 
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
+	OUTER APPLY (
+		SELECT
+			A.intInventoryReceiptItemId
+		FROM tblICInventoryReceiptItem A
+		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	) ReceiptItem
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
