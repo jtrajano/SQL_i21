@@ -264,4 +264,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\19_CleanEntityPhoneNumber.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\12_EM\16_CleanCustomerProductVersion.sql" />
+  </ItemGroup>
 </Project>
