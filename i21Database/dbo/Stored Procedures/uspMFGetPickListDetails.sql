@@ -314,7 +314,7 @@ Begin
 	ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
 	pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
 	pld.intStageLotId,(ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0))/ (Case When ISNULL(l.dblWeightPerQty,0)=0 Then 1 Else l.dblWeightPerQty End) AS dblAvailableUnit,
-	um2.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId=@intKitStagingLocationId Then 'Staged' Else 'Picking' End AS strStatus
+	um2.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId IN (@intKitStagingLocationId,@intBlendStagingLocationId) Then 'Staged' Else 'Picking' End AS strStatus
 	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId 
 	Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 
 	Join tblICItem i on l.intItemId=i.intItemId

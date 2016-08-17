@@ -337,6 +337,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				WHERE intSalesOrderId = @SalesOrderId
 
 				SET @SoftwareInvoiceId = SCOPE_IDENTITY()
+				SET @NewInvoiceId = @SoftwareInvoiceId
 			END		
 	
 		--INSERT TO RECURRING INVOICE DETAIL AND INVOICE DETAIL TAX						
@@ -416,6 +417,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN ('Maintenance Only', 'SaaS'))
 	BEGIN
 		DELETE FROM @tblItemsToInvoice WHERE strMaintenanceType IN ('Maintenance Only', 'SaaS')
+		SET @NewInvoiceId = NULL
 
 		--INSERT INVOICE HEADER
 		BEGIN TRY
@@ -601,6 +603,28 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								WHERE
 									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
 
+
+								INSERT INTO tblARInvoiceDetailComponent
+									([intInvoiceDetailId]
+									,[intComponentItemId]
+									,[strComponentType]
+									,[intItemUOMId]
+									,[dblQuantity]
+									,[dblUnitQuantity]
+									,[intConcurrencyId])
+								SELECT 
+									 [intInvoiceDetailId]	= @NewDetailId
+									,[intComponentItemId]	= [intComponentItemId]
+									,[strComponentType]		= [strComponentType]
+									,[intItemUOMId]			= [intItemUOMId]
+									,[dblQuantity]			= [dblQuantity]
+									,[dblUnitQuantity]		= [dblUnitQuantity]
+									,[intConcurrencyId]		= 1
+								FROM
+									tblSOSalesOrderDetailComponent
+								WHERE
+									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
+
 								DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId
 						END
 					END
@@ -630,7 +654,7 @@ IF ISNULL(@RaiseError,0) = 0
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	
 		EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-		EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
+		EXEC dbo.[uspARReComputeInvoiceAmounts] @NewInvoiceId
 		
 		UPDATE
 			tblSOSalesOrder
@@ -656,7 +680,9 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 				UPDATE tblARInvoice SET strType = 'Software' WHERE intInvoiceId = @NewInvoiceId
 
 				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice'
-			END			
+			END
+
+		SET @NewInvoiceId = ISNULL(@NewInvoiceId, @SoftwareInvoiceId)
 	END
 
 --COMMIT TRANSACTION

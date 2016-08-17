@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFGetShiftActivity
-	@dtmFromDate DATETIME
+     @dtmFromDate DATETIME
 	,@dtmToDate DATETIME
 	,@intShiftActivityStatusId INT
 	,@intLocationId INT
@@ -121,6 +121,8 @@ BEGIN
 			,SA.intScheduledRuntime
 			,SA.strComments
 		ORDER BY MC.strCellName
+			,SA.dtmShiftDate
+			,SA.dtmShiftStartTime
 	END
 
 	IF @intShiftActivityStatusId = 3
@@ -144,17 +146,19 @@ BEGIN
 			,(SA.intTotalDowntime / 60) AS intTotalDowntime
 			,SA.dblTotalProducedQty AS dblTotalProducedQty
 			,SA.dblTargetEfficiency AS dblTargetEfficiency
-			,ROUND((CASE 
-				WHEN ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity)) = 0
-					THEN 0
-				ELSE (
-						ISNULL(SA.dblTotalProducedQty, 0) / CASE 
-							WHEN ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity)) = 0
-								THEN 1
-							ELSE ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity))
-							END
-						) * 100
-				END),2) AS dblEfficiencyPercent
+			,ROUND((
+					CASE 
+						WHEN ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity)) = 0
+							THEN 0
+						ELSE (
+								ISNULL(SA.dblTotalProducedQty, 0) / CASE 
+									WHEN ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity)) = 0
+										THEN 1
+									ELSE ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL(SA.intReduceAvailableTime * 60, 0)) / 60) * SA.dblStdCapacity))
+									END
+								) * 100
+						END
+					), 2) AS dblEfficiencyPercent
 			,SA.strComments
 		FROM dbo.tblMFShiftActivity SA
 		JOIN dbo.tblMFManufacturingCell MC ON SA.intManufacturingCellId = MC.intManufacturingCellId
@@ -184,6 +188,7 @@ BEGIN
 			,SA.dblStdCapacity
 			,SA.strComments
 		ORDER BY MC.strCellName
-			,SA.intShiftActivityId
+			,SA.dtmShiftDate
+			,SA.dtmShiftStartTime
 	END
 END

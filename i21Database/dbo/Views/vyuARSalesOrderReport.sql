@@ -69,7 +69,9 @@ SELECT SO.intSalesOrderId
 	 , intDetailCount			= (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
 	 , ysnHasEmailSetup			= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + CASE WHEN SO.ysnQuote = 1 THEN 'Quote Order' ELSE 'Sales Order' END + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , strQuoteType
-	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')	 
+	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
+	 , intRecipeId				= SD.intRecipeId
+	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId
@@ -78,7 +80,8 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
-	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId) ON SO.intSalesOrderId = SD.intSalesOrderId
+	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId
+	LEFT JOIN tblMFRecipe MFR ON SD.intRecipeId = MFR.intRecipeId) ON SO.intSalesOrderId = SD.intSalesOrderId
 LEFT JOIN (tblARCustomer C 
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId

@@ -22,7 +22,7 @@ SELECT
 	,dblGrossWt = (LC.dblGrossWt / LC.dblQuantity) * LDCL.dblQuantity
 	,dblTareWt = (LC.dblTareWt / LC.dblQuantity) * LDCL.dblQuantity
 	,dblNetWt = (LC.dblNetWt / LC.dblQuantity) * LDCL.dblQuantity
-	,dblCost = CT.dblCashPrice
+	,dblCost = CT.dblSeqPrice
 	,intWeightUOMId = L.intWeightUnitMeasureId
 	,WTUOM.strUnitMeasure AS strWeightUOM
 	,intEntityVendorId = LD.intVendorEntityId
@@ -79,17 +79,17 @@ SELECT
 	,LC.strOtherMarks
 	,LC.strSealNumber
 	,ContType.strContainerType
-	,intCostUOMId = CT.intPriceItemUOMId
-	,strCostUOM = CT.strPriceUOM
+	,intCostUOMId = CT.intSeqPriceUOMId
+	,strCostUOM = CT.strSeqPriceUOM
 	,dblCostUOMCF = ISNULL((
 			SELECT TOP 1 dblUnitQty
 			FROM tblICItemUOM ItemUOM
 			WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId
 			), 0)
 	,intWeightItemUOMId = (SELECT WeightItem.intItemUOMId FROM tblICItemUOM WeightItem WHERE WeightItem.intItemId=LD.intItemId AND WeightItem.intUnitMeasureId=L.intWeightUnitMeasureId)
-	,CT.strCurrency
+	,strCurrency = CT.strSeqCurrency
 	,CT.strMainCurrency
-	,CT.ysnSubCurrency
+	,ysnSubCurrency = CT.ysnSeqSubCurrency
 	,CT.dblMainCashPrice
 	,dblFranchise = CASE WHEN WG.dblFranchise > 0 THEN WG.dblFranchise / 100 ELSE 0 END
 	,dblContainerWeightPerQty = (LC.dblNetWt / LC.dblQuantity)

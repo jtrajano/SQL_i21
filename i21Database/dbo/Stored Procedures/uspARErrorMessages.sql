@@ -219,7 +219,7 @@ SET @strmessage = 'Shipping Failed. There is no shippable item on this sales ord
 EXEC sp_addmessage 120054,16,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120055) EXEC sp_dropmessage 120055, 'us_english'	
-SET @strmessage = 'Shipping Failed. There is no shippable item on this sales order.'
+SET @strmessage = 'Failed to unship Sales Order. Unpost this Shipment Record first: %s'
 EXEC sp_addmessage 120055,16,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120056) EXEC sp_dropmessage 120056, 'us_english'	
@@ -289,3 +289,11 @@ EXEC sp_addmessage 120071,16,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120072) EXEC sp_dropmessage 120072, 'us_english'	
 SET @strmessage = 'Unable to duplicate %s Invoice Type.'
 EXEC sp_addmessage 120072,16,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120073) EXEC sp_dropmessage 120073, 'us_english'	
+SET @strmessage = 'Cannot process Sales Order with zero(0) amount.'
+EXEC sp_addmessage 120073,16,@strmessage,'us_english','False'
+
+ 
+
+

@@ -16,6 +16,7 @@ SELECT R.intRecipeId
 	 , strItemType				= I.strType
 	 , strType					= 'Finished Good'
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	 
+	 , dblUnitQty				= UM.dblUnitQty 
 FROM vyuICGetItemStock I 
 INNER JOIN (tblMFRecipe R INNER JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId) ON I.intItemId = RI.intItemId
 INNER JOIN vyuARItemUOM UM ON RI.[intItemUOMId] = UM.intItemUOMId
@@ -39,7 +40,8 @@ SELECT intRecipeId				= NULL
 	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(IB.intBundleItemId, IB.intItemUnitMeasureId, 1) * I.dblSalePrice
 	 , strItemType				= 'Inventory'
 	 , strType					= 'Bundle'
-	 , ysnAllowNegativeStock	= CONVERT(BIT, 0)	 
+	 , ysnAllowNegativeStock	= CONVERT(BIT, 0)
+	 , dblUnitQty				= UOM.dblUnitQty
 FROM tblICItemBundle IB
 INNER JOIN vyuICGetItemStock I ON IB.intBundleItemId = I.intItemId
 INNER JOIN vyuARItemUOM UOM ON IB.intItemUnitMeasureId = UOM.intItemUOMId

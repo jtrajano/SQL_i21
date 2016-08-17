@@ -36,8 +36,7 @@ BEGIN TRY
 		,intItemUOMId
 		,dblWeight
 		,intWeightUOMId
-		,dblWeightPerUnit
-		,intWeightPerUnitUOMId
+		,dblWeightPerQty
 		,intLotId
 		,strLotAlias
 		,intUnitsPerLayer
@@ -60,7 +59,6 @@ BEGIN TRY
 		,dblWeight
 		,intWeightUOMId
 		,dblWeightPerUnit
-		,intWeightPerUnitUOMId
 		,intLotId
 		,strLotAlias
 		,intUnitsPerLayer

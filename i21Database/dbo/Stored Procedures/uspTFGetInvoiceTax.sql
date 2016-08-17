@@ -228,7 +228,7 @@ DECLARE @tblTempTransaction TABLE (
 							 WHERE (tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ')) 
 							 AND dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblARInvoice.intFreightTermId <> 3 OR tblARInvoice.intFreightTermId IS NULL)'
+							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblARInvoice.intFreightTermId <> 3 OR tblARInvoice.intFreightTermId IS NULL) AND tblARInvoice.ysnPosted = 1'
 				--UNION	 
 				SET @QueryInvoicePickup	 = ' UNION SELECT DISTINCT
                              tblARInvoiceDetail.intInvoiceDetailId,tblTFReportingComponent.intTaxAuthorityId,tblTFReportingComponent.strFormCode, 
@@ -256,7 +256,7 @@ DECLARE @tblTempTransaction TABLE (
 							 WHERE (tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ')) 
 							 AND dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-							 ' + @IncludeLocationState + ' ' + @ExcludeLocationState + ' AND tblARInvoice.intFreightTermId = 3'
+							 ' + @IncludeLocationState + ' ' + @ExcludeLocationState + ' AND tblARInvoice.intFreightTermId = 3 AND tblARInvoice.ysnPosted = 1'
 
 				SET @QueryInvoice = @QueryInvoiceNonPickup + @QueryInvoicePickup
 
@@ -293,7 +293,7 @@ DECLARE @tblTempTransaction TABLE (
 						 WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + '))
 						 AND dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblARInvoice.intFreightTermId <> 3 OR tblARInvoice.intFreightTermId IS NULL)'
+							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblARInvoice.intFreightTermId <> 3 OR tblARInvoice.intFreightTermId IS NULL) AND tblARInvoice.ysnPosted = 1'
 
 				--UNION	 
 				SET @QueryInvoicePickup	 = ' UNION SELECT DISTINCT 
@@ -326,7 +326,7 @@ DECLARE @tblTempTransaction TABLE (
 						 WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + '))
 						 AND dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
-							 ' + @IncludeLocationState + ' ' + @ExcludeLocationState + ' AND tblARInvoice.intFreightTermId = 3'
+							 ' + @IncludeLocationState + ' ' + @ExcludeLocationState + ' AND tblARInvoice.intFreightTermId = 3 AND tblARInvoice.ysnPosted = 1'
 
 				SET @QueryInvoice = @QueryInvoiceNonPickup + @QueryInvoicePickup
 			END
