@@ -71,7 +71,11 @@ BEGIN
 		0 AS dbl30,
 		0 AS dbl60,
 		0 AS dbl90,
-		0 AS intAging
+		0 AS intAging,
+		0 AS dblQtyToReceive,
+		0 AS dblQtyVouchered,
+		0 AS dblQtyToVoucher,
+		0 AS dblAmountToVoucher
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -122,6 +126,10 @@ SET @innerQuery = 'SELECT
 						,dblInterest
 						,dtmDate
 						,dtmDueDate
+						,dblQtyToReceive
+						,dblQtyVouchered
+						,dblQtyToVoucher
+						,dblAmountToVoucher
 				  FROM dbo.vyuAPClearables'
 
 IF @dateFrom IS NOT NULL
@@ -264,28 +272,32 @@ SET @query = '
 		ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 
 		THEN 0
-		ELSE DATEDIFF(dayofyear,A.dtmDueDate,GETDATE()) END AS intAging
+		ELSE ISNULL(DATEDIFF(dayofyear,A.dtmDueDate,GETDATE()),0) END AS intAging
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 
 		THEN tmpAgingSummaryTotal.dblAmountDue 
 		ELSE 0 END AS dblCurrent
-	 ,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
-		THEN tmpAgingSummaryTotal.dblAmountDue 
-		ELSE 0 END AS dbl1
-	 ,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
-		THEN tmpAgingSummaryTotal.dblAmountDue 
-		ELSE 0 END AS dbl30
-	 ,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
-		THEN tmpAgingSummaryTotal.dblAmountDue 
-		ELSE 0 END AS dbl60
-	 ,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
-		THEN tmpAgingSummaryTotal.dblAmountDue 
-		ELSE 0 END AS dbl90
-	 ,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN ''Current''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN ''01 - 30 Days''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN ''31 - 60 Days'' 
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN ''61 - 90 Days''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN ''Over 90'' 
-			ELSE ''Current'' END AS strAge
+	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
+		--THEN tmpAgingSummaryTotal.dblAmountDue 
+		--ELSE 0 END AS dbl1
+	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
+		--THEN tmpAgingSummaryTotal.dblAmountDue 
+		--ELSE 0 END AS dbl30
+	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
+		--THEN tmpAgingSummaryTotal.dblAmountDue 
+		--ELSE 0 END AS dbl60
+	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
+		--THEN tmpAgingSummaryTotal.dblAmountDue 
+		--ELSE 0 END AS dbl90
+	 --,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN ''Current''
+		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN ''01 - 30 Days''
+		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN ''31 - 60 Days'' 
+		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN ''61 - 90 Days''
+		--	WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN ''Over 90'' 
+		--	ELSE ''Current'' END AS strAge
+	 ,tmpAgingSummaryTotal.dblQtyToReceive
+	 ,tmpAgingSummaryTotal.dblQtyVouchered
+	 ,tmpAgingSummaryTotal.dblQtyToVoucher
+	 ,tmpAgingSummaryTotal.dblAmountToVoucher
 	FROM  
 	(
 		SELECT 
@@ -295,6 +307,10 @@ SET @query = '
 		,SUM(tmpAPClearables.dblTotal) AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
 		,SUM(tmpAPClearables.dblAmountDue) AS dblAmountDue
+		,SUM(tmpAPClearables.dblQtyToReceive) AS dblQtyToReceive
+		,SUM(tmpAPClearables.dblQtyVouchered) AS dblQtyVouchered
+		,SUM(tmpAPClearables.dblQtyToVoucher) AS dblQtyToVoucher
+		,SUM(tmpAPClearables.dblAmountToVoucher) AS dblAmountToVoucher
 		FROM ('
 				+ @innerQuery + 
 			 ') tmpAPClearables 

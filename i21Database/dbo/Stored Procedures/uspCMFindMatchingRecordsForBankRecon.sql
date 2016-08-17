@@ -40,6 +40,7 @@ DECLARE @BANK_DEPOSIT INT = 1
         ,@IMPORT_STATUS_UNPROCESSED AS INT = 0
         ,@IMPORT_STATUS_MATCHFOUND AS INT = 1
         ,@IMPORT_STATUS_NOMATCHFOUND AS INT = 2
+		,@IMPORT_STATUS_MULTIPLEENTRY AS INT = 3
         
         -- This is the buffer period to search for the transactions. 
 		,@BETWEEN_DAYS AS INT = 19 -- +/- 19 DAYS
@@ -136,28 +137,28 @@ BEGIN
 
 	IF @dblAmount < 1
 	BEGIN
-		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE ABS(dblAmount) = ABS(@dblAmount) AND intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
+		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE ABS(dblAmount) = ABS(@dblAmount) AND intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@BANK_TRANSACTION,@ORIGIN_WITHDRAWAL, @BANK_TRANSFER_WD)
 	END
 	ELSE
-		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE ABS(dblAmount) = ABS(@dblAmount) AND intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT, @BANK_TRANSACTION)
-
-
-	IF (@strPayee IS NULL OR @strPayee = '') AND (@strReferenceNumber IS NULL OR @strReferenceNumber = '') AND @Count <> 1
 	BEGIN
-		DELETE FROM #tmp_list_of_imported_record
-		WHERE intBankStatementImportId = @intBankStatementImportId
-		IF @@ERROR <> 0	GOTO _ROLLBACK
+		SELECT @Count = Count(intTransactionId) FROM #tmp_list_of_transactions WHERE dblAmount = @dblAmount AND intBankTransactionTypeId IN (@BANK_TRANSACTION,@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
+	END
+
+	IF (@strPayee IS NULL OR @strPayee = '') AND (@strReferenceNumber IS NULL OR @strReferenceNumber = '') AND @Count > 1
+	BEGIN
+		--DELETE FROM #tmp_list_of_imported_recor
+		--WHERE intBankStatementImportId = @intBankStatementImportId
+		--IF @@ERROR <> 0	GOTO _ROLLBACK
+
+		-- Update the status of the Bank Statement Import
+			UPDATE	dbo.tblCMBankStatementImport
+			SET		intImportStatus = @IMPORT_STATUS_MULTIPLEENTRY
+			WHERE	intBankStatementImportId = @intBankStatementImportId
+			IF @@ERROR <> 0	GOTO _ROLLBACK		
+
 	END
 	ELSE
-		--WHILE EXISTS (SELECT TOP 1 1 FROM #tmp_list_of_transactions WHERE ysnTagged = 0 AND @intBankStatementImportId IS NOT NULL) 
-		--BEGIN 
-		--SELECT	TOP 1 
-		--		@intTransactionId = intTransactionId
-		--FROM	#tmp_list_of_transactions
-		--WHERE	ysnTagged = 0 
-		--ORDER BY dtmDate
-		--IF @@ERROR <> 0	GOTO _ROLLBACK
-		
+	BEGIN	
 		SET @ysnMatchFound = 0
 		IF @@ERROR <> 0	GOTO _ROLLBACK
 	
@@ -170,28 +171,39 @@ BEGIN
 				AND 1 = CASE WHEN(@strReferenceNumber <> '') THEN
 									CASE WHEN (LTRIM(RTRIM(ISNULL(SUBSTRING(A.strReferenceNo, PATINDEX('%[^0 ]%', A.strReferenceNo + ' '), LEN(A.strReferenceNo)), ''))) = LTRIM(RTRIM(ISNULL(SUBSTRING(@strReferenceNumber, PATINDEX('%[^0 ]%', @strReferenceNumber + ' '), LEN(@strReferenceNumber)), '')))) THEN 1 ELSE 0 END
 								ELSE 1 END
-				AND 1 =	CASE	WHEN A.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT) THEN
-									CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 							
-								WHEN A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK) THEN
-									CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 
-								WHEN A.intBankTransactionTypeId IN (@BANK_TRANSACTION) THEN 
-									CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 
-									--CASE WHEN EXISTS (	SELECT	1 
-									--					FROM	tblCMBankTransactionDetail C 
-									--					WHERE	C.intTransactionId = A.intTransactionId
-									--					HAVING	(
-									--								(ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount > 0)
-									--								OR (ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount < 0)
-									--							)
+				--AND 1 =	CASE	WHEN A.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT) THEN
+				--					CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 							
+				--				WHEN A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK) THEN
+				--					CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 
+				--				WHEN A.intBankTransactionTypeId IN (@BANK_TRANSACTION) THEN 
+				--					CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 
+				--					--CASE WHEN EXISTS (	SELECT	1 
+				--					--					FROM	tblCMBankTransactionDetail C 
+				--					--					WHERE	C.intTransactionId = A.intTransactionId
+				--					--					HAVING	(
+				--					--								(ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount > 0)
+				--					--								OR (ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount < 0)
+				--					--							)
 																
-									--				) THEN 1 
-									--	ELSE 0
-									--END								
-								ELSE 0
-						END 
+				--					--				) THEN 1 
+				--					--	ELSE 0
+				--					--END								
+				--				ELSE 0
+				--		END 
+							 --WITHDRAWAL ENTRY
+				AND 1 = CASE WHEN @dblAmount < 0 AND A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@BANK_TRANSACTION,@ORIGIN_WITHDRAWAL, @BANK_TRANSFER_WD)THEN
+							CASE WHEN A.intBankTransactionTypeId = @BANK_TRANSFER_WD AND ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 --Bank Transfer WD has a (+) value so need to make it absolute
+								 WHEN A.dblAmount = @dblAmount THEN 1 
+								 ELSE 0 END
+							--DEPOSIT ENTRY
+							WHEN  @dblAmount > 0 AND  A.intBankTransactionTypeId IN (@BANK_TRANSACTION,@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK) THEN
+									CASE WHEN A.dblAmount = @dblAmount THEN 1 ELSE 0 END 	
+						ELSE 0
+						END
+
 		IF @@ERROR <> 0	GOTO _ROLLBACK
 					
-		IF (@ysnMatchFound = 1)
+		IF (@ysnMatchFound = 1 AND @intTransactionId IS NOT NULL)
 		BEGIN 	
 			-- Link the transaction to the imported bank statement. 
 			-- Set the ysnClr to true		
@@ -215,12 +227,12 @@ BEGIN
 			WHERE intTransactionId = @intTransactionId		
 			IF @@ERROR <> 0	GOTO _ROLLBACK
 
-			DELETE FROM #tmp_list_of_imported_record
-			WHERE intBankStatementImportId = @intBankStatementImportId
-			IF @@ERROR <> 0	GOTO _ROLLBACK
+			--DELETE FROM #tmp_list_of_imported_record
+			--WHERE intBankStatementImportId = @intBankStatementImportId
+			--IF @@ERROR <> 0	GOTO _ROLLBACK
 			
-			SET @intBankStatementImportId = NULL
-			IF @@ERROR <> 0	GOTO _ROLLBACK
+			--SET @intBankStatementImportId = NULL
+			--IF @@ERROR <> 0	GOTO _ROLLBACK
 		END
 		ELSE 
 		BEGIN 
@@ -236,11 +248,14 @@ BEGIN
 	--	WHERE	intTransactionId = @intTransactionId
 	--	IF @@ERROR <> 0	GOTO _ROLLBACK
 	--END
-		DELETE FROM #tmp_list_of_imported_record
-		WHERE intBankStatementImportId = @intBankStatementImportId
-		IF @@ERROR <> 0	GOTO _ROLLBACK
+		
 	
 
+	END
+
+	DELETE FROM #tmp_list_of_imported_record
+	WHERE intBankStatementImportId = @intBankStatementImportId
+	IF @@ERROR <> 0	GOTO _ROLLBACK
 END
 
 _COMMIT:

@@ -345,5 +345,7 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateCustomerConsumptionSiteInfoView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOriginDegreeOptionView.sql" />
+    <None Include="Scripts\TM\AddOriginTableIndex.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql" />
   </ItemGroup>
 </Project>

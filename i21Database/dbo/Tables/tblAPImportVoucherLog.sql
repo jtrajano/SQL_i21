@@ -8,3 +8,7 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblAPImportVoucherLog] PRIMARY KEY ([intImportLogId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_strLogKey]
+    ON [dbo].[tblAPImportVoucherLog]([strLogKey] ASC);
+GO

@@ -412,6 +412,17 @@ BEGIN
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
+
+	-- Move reservation to in-transit outbound
+	DECLARE @InTransitTableType InTransitTableType
+	INSERT INTO @InTransitTableType(intItemId, intItemLocationId, intItemUOMId,
+		intLotId, intSubLocationId, intStorageLocationId, dblQty, intTransactionId,
+		strTransactionId, intTransactionTypeId)
+	SELECT ip.intItemId, ip.intItemLocationId, ip.intItemUOMId, ip.intLotId, ip.intSubLocationId,
+		ip.intStorageLocationId, ABS(ip.dblQty), ip.intTransactionId, ip.strTransactionId, ip.intTransactionTypeId
+	FROM @ItemsForPost ip
+
+	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransitTableType
 END   
 
 --------------------------------------------------------------------------------------------  

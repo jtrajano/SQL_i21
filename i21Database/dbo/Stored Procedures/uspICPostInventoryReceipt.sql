@@ -725,10 +725,19 @@ BEGIN
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
 				,intItemUOMId = 
-							-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
-							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
-									ELSE DetailItem.intUnitMeasureId 
-							END
+							-- New Hierarchy:
+							-- 1. Use the Gross/Net UOM (intWeightUOMId) 
+							-- 2. If there is no Gross/Net UOM, then check the lot. 
+								-- 2.1. If it is a Lot, use the Lot UOM. 
+								-- 2.2. If it is not a Lot, use the Item UOM. 
+							ISNULL( 
+								DetailItem.intWeightUOMId, 
+								CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
+											DetailItemLot.intItemUnitMeasureId
+										ELSE 
+											DetailItem.intUnitMeasureId
+								END 
+							)
 				,dtmDate = Header.dtmReceiptDate  
 				,dblQty =						
 							-- New Hierarchy:
@@ -1069,6 +1078,100 @@ BEGIN
 				AND Receipt.strReceiptNumber = @strTransactionId				
 	END 
 END   
+
+-- Update the In-Transit Outbound for Transfer Order
+IF @ysnRecap = 0
+BEGIN 
+	DECLARE		@InTransit_Outbound AS InTransitTableType
+
+	INSERT INTO @InTransit_Outbound (
+		[intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[dblQty]
+		,[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+	)
+	SELECT	[intItemId]				= ri.intItemId
+			,[intItemLocationId]	= il.intItemLocationId
+			,[intItemUOMId]			= 
+						-- New Hierarchy:
+						-- 1. Use the Gross/Net UOM (intWeightUOMId) 
+						-- 2. If there is no Gross/Net UOM, then check the lot. 
+							-- 2.1. If it is a Lot, use the Lot UOM. 
+							-- 2.2. If it is not a Lot, use the Item UOM. 
+						ISNULL( 
+							ri.intWeightUOMId, 
+							CASE	WHEN ISNULL(ril.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(ri.intItemId) <> 0 THEN 
+										ril.intItemUnitMeasureId
+									ELSE 
+										ri.intUnitMeasureId
+							END 
+						)
+			,[intLotId]				= ril.intLotId
+			,[intSubLocationId]		= ri.intSubLocationId
+			,[intStorageLocationId]	= ri.intStorageLocationId
+			,[dblQty]				= 
+						-- New Hierarchy:
+						-- 1. If there is a Gross/Net UOM, use the Net Qty. 
+							-- 2.1. If it is not a Lot, use the item's Net Qty. 
+							-- 2.2. If it is a Lot, use the Lot's Net Qty. 
+						-- 2. If there is no Gross/Net UOM, use the item or lot qty. 
+							-- 2.1. If it is not a Lot, use the item Qty. 
+							-- 2.2. If it is a Lot, use the lot qty. 
+						CASE		-- Use the Gross/Net Qty if there is a Gross/Net UOM. 
+									WHEN ri.intWeightUOMId IS NOT NULL THEN 									
+										CASE	-- When item is NOT a Lot, receive it by the item's net qty. 
+												WHEN ISNULL(ril.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ri.intItemId) = 0 THEN 
+													ISNULL(ri.dblNet, 0)
+													
+												-- When item is a LOT, get the net qty from the Lot record. 
+												-- 1. If Net Qty is not provided, convert the Lot Qty into Gross/Net UOM. 
+												-- 2. Else, get the Net Qty by using this formula: Gross Weight - Tare Weight. 
+												ELSE 
+															-- When Net Qty is missing, then convert the Lot Qty to Gross/Net UOM. 
+													CASE	WHEN  ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0) = 0 THEN 
+																dbo.fnCalculateQtyBetweenUOM(ril.intItemUnitMeasureId, ri.intWeightUOMId, ril.dblQuantity)
+															-- Calculate the Net Qty
+															ELSE 
+																ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0)
+													END 
+										END 
+
+								-- If Gross/Net UOM is missing, then get the item/lot qty. 
+								ELSE 
+									CASE	-- When item is NOT a Lot, receive it by the item qty.
+											WHEN ISNULL(ril.intLotId, 0) = 0 AND dbo.fnGetItemLotType(ri.intItemId) = 0 THEN 
+												ri.dblOpenReceive
+												
+											-- When item is a LOT, receive it by the Lot Qty. 
+											ELSE 
+												ISNULL(ril.dblQuantity, 0)
+									END 								
+
+						END 
+			,[intTransactionId]		= r.intInventoryReceiptId
+			,[strTransactionId]		= r.strReceiptNumber
+			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
+	FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot ril
+				ON ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId				
+			INNER JOIN dbo.tblICItemLocation il 
+				ON il.intItemId = ri.intItemId
+				AND il.intLocationId = r.intTransferorId
+	WHERE	r.intInventoryReceiptId = @intTransactionId	
+			AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+
+	UPDATE @InTransit_Outbound
+	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
+	
+	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
+END
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 

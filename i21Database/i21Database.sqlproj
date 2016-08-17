@@ -4199,6 +4199,9 @@
     <Build Include="dbo\Functions\fnLGGetDefaultWeightItemUOM.sql" />
     <Build Include="dbo\Views\vyuSMDocumentMessageMaintenanceOption.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDocumentMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
+    <Build Include="dbo\Views\vyuTMDeliveryTicket.sql" />
+    <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

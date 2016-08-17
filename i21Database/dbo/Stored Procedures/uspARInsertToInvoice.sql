@@ -51,6 +51,7 @@ DECLARE @EntityCustomerId		INT,
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
 							ysnIsInventory				BIT,
+							ysnBlended					BIT,
 							strItemDescription			NVARCHAR(100),
 							intItemUOMId				INT,
 							intContractHeaderId			INT,
@@ -60,6 +61,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dblMaintenanceAmount		NUMERIC(18,6),
 							dblDiscount					NUMERIC(18,6),
 							dblPrice					NUMERIC(18,6),
+							strPricing					NVARCHAR(250),
 							intTaxGroupId				INT,
 							intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -85,6 +87,7 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 INSERT INTO @tblItemsToInvoice
 SELECT SI.intItemId
 	 , dbo.fnIsStockTrackingItem(SI.intItemId)
+	 , SOD.ysnBlended
 	 , SI.strItemDescription
 	 , SI.intItemUOMId
 	 , SOD.intContractHeaderId
@@ -94,6 +97,7 @@ SELECT SI.intItemId
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , SI.dblDiscount
 	 , CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , SOD.strPricing 
 	 , SI.intTaxGroupId
 	 , SI.intSalesOrderDetailId
 	 , NULL
@@ -119,6 +123,7 @@ WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 INSERT INTO @tblItemsToInvoice
 SELECT ICSI.intItemId
 	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
+	 , SOD.ysnBlended
 	 , SOD.strItemDescription
 	 , ICSI.intItemUOMId
 	 , SOD.intContractHeaderId
@@ -128,6 +133,7 @@ SELECT ICSI.intItemId
 	 , @dblZeroAmount
 	 , SOD.dblDiscount
 	 , ICSI.dblUnitPrice
+	 , SOD.strPricing 
 	 , SOD.intTaxGroupId
 	 , SOD.intSalesOrderDetailId
 	 , ICSI.intInventoryShipmentItemId
@@ -150,6 +156,7 @@ AND ICS.ysnPosted = 1
 INSERT INTO @tblItemsToInvoice
 SELECT ARSI.intItemId
 	 , dbo.fnIsStockTrackingItem(ARSI.intItemId)
+	 , ARSI.ysnBlended
 	 , ARSI.strItemDescription
 	 , ARSI.intItemUOMId
 	 , ARSI.intContractHeaderId
@@ -159,6 +166,7 @@ SELECT ARSI.intItemId
 	 , 0 
 	 , ARSI.dblDiscount
 	 , ARSI.dblPrice 
+	 , ''
 	 , NULL
 	 , NULL
 	 , NULL
@@ -474,6 +482,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 				DECLARE @intItemToInvoiceId		INT,
 						@ItemId					INT,
 						@ItemIsInventory		BIT,
+						@ItemIsBlended			BIT,
 						@NewDetailId			INT,
 						@ItemDescription		NVARCHAR(100),
 						@OrderUOMId				INT,
@@ -484,6 +493,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyShipped			NUMERIC(18,6),
 						@ItemDiscount			NUMERIC(18,6),
 						@ItemPrice				NUMERIC(18,6),
+						@ItemPricing			NVARCHAR(250),
 						@ItemTaxGroupId			INT,		
 						@ItemSalesOrderDetailId	INT,
 						@ItemShipmentDetailId	INT,
@@ -498,6 +508,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@intItemToInvoiceId		= intItemToInvoiceId,
 						@ItemId					= intItemId,
 						@ItemIsInventory		= ysnIsInventory,
+						@ItemIsBlended			= ysnBlended,
 						@ItemDescription		= strItemDescription,
 						@OrderUOMId				= intItemUOMId,	
 						@ItemUOMId				= intItemUOMId,
@@ -507,6 +518,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyShipped			= dblQtyRemaining,
 						@ItemDiscount			= dblDiscount,
 						@ItemPrice				= dblPrice,
+						@ItemPricing			= strPricing,
 						@ItemTaxGroupId			= intTaxGroupId,
 						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
 						@ItemShipmentDetailId	= intInventoryShipmentItemId,
@@ -515,13 +527,14 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemShipmentNumber		= strShipmentNumber,
 						@ItemMaintenanceType	= strMaintenanceType,
 						@ItemFrequency			= strFrequency,
-						@ItemMaintenanceDate	= dtmMaintenanceDate
+						@ItemMaintenanceDate	= dtmMaintenanceDate						
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
 							 @InvoiceId						= @NewInvoiceId	
 							,@ItemId						= @ItemId
 							,@ItemIsInventory				= @ItemIsInventory
+							,@ItemIsBlended					= @ItemIsBlended
 							,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
 							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
 							,@RaiseError					= @RaiseError
@@ -535,6 +548,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
+							,@ItemPricing					= @ItemPricing
 							,@RefreshPrice					= 0
 							,@ItemTaxGroupId				= @ItemTaxGroupId
 							,@RecomputeTax					= 0

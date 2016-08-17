@@ -2,7 +2,8 @@
 	  @intCommissionId		INT
     , @intApprovalListId	INT
 	, @intApproverEntityId	INT
-	, @strReason			NVARCHAR(MAX) = NULL	
+	, @strReason			NVARCHAR(MAX) = NULL
+	, @nextApproverId		INT			  = NULL OUTPUT
 AS
 
 IF ISNULL(@intCommissionId, 0) = 0
@@ -48,7 +49,8 @@ IF @intMaxApproverLevel = @intCurrentApproverLevel
 ELSE
 	BEGIN
 		SELECT TOP 1
-			@intNextApproverId = intEntityUserSecurityId
+			@intNextApproverId	= intEntityUserSecurityId
+		  , @nextApproverId		= intEntityUserSecurityId
 		FROM tblSMApprovalListUserSecurity
 		WHERE intApprovalListId = @intApprovalListId
 		AND intApproverLevel = @intCurrentApproverLevel + 1
