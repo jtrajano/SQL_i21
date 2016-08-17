@@ -4199,6 +4199,11 @@
     <Build Include="dbo\Functions\fnLGGetDefaultWeightItemUOM.sql" />
     <Build Include="dbo\Views\vyuSMDocumentMessageMaintenanceOption.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDocumentMessage.sql" />
+    <Build Include="dbo\Views\vyuRKFutureMatchedChart.sql" />
+    <Build Include="dbo\Views\vyuRKOptionTransactionChart.sql" />
+    <Build Include="dbo\Views\vyuRKFutureTransactionChart.sql" />
+    <Build Include="dbo\Views\vyuRKGetBalanceToReceipt.sql" />
+    <Build Include="dbo\Views\vyuRKGetSalesIntransitWOPickLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
