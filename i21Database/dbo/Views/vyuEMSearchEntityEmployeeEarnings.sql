@@ -9,7 +9,8 @@
 			a.strName,  
 			e.strEarning,
 			d.dblRateAmount,
-			f.strPayGroup
+			f.strPayGroup,
+			c.intRank
 
 		FROM 		
 				tblEMEntity a

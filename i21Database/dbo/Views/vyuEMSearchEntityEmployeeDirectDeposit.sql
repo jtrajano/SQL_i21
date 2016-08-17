@@ -8,12 +8,14 @@
 			a.strEntityNo, 
 			a.strName,  
 			d.strBankName,
-			d.strAccountNumber
-
+			d.strAccountNumber,
+			c.intRank
 		FROM 		
 				tblEMEntity a
 			join [tblEMEntityType] b
-				on b.intEntityId = a.intEntityId and b.strType = 'Employee'		
+				on b.intEntityId = a.intEntityId and b.strType = 'Employee'
+			join tblPREmployee c
+				on a.intEntityId = c.intEntityEmployeeId
 			join tblEMEntityEFTInformation d
 				on d.intEntityId = a.intEntityId
 		

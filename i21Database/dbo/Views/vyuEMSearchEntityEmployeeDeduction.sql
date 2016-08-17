@@ -7,7 +7,8 @@
 			a.strEntityNo, 
 			a.strName,  
 			e.strDeduction,
-			d.dblAmount
+			d.dblAmount,
+			c.intRank
 
 		FROM 		
 				tblEMEntity a
