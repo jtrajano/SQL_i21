@@ -38,7 +38,7 @@ SELECT DISTINCT intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocat
 	, dblUnitPrice = ISNULL(dblCashPrice, 0)
 	, CAST(0 AS NUMERIC(18, 6)) dblDiscount
 	, CAST(0 AS NUMERIC(18, 6)) dblTotal
-	, dblQtyToShip = ISNULL(dblDetailQuantity, 0)
+	, dblQtyToShip = ISNULL(dblAvailableQty, 0)
 	, dblPrice = ISNULL(dblCashPrice, 0)
 	, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblCashPrice, 0)
 	, intGradeId = NULL
