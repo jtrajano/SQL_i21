@@ -31,6 +31,8 @@ BEGIN
 					
 		SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @qtyToPost = dblQuantity FROM @OrderToUpdate ORDER BY intSalesOrderId        
 
+		EXEC [dbo].[uspSOInsertTransactionDetail] @intSalesOrderId
+
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 0, @isDelete
 
 		EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnPost ,@qtyToPost
