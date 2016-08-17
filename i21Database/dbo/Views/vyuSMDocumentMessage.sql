@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuSMDocumentMaintenanceMessage]
 AS 
-SELECT intDocumentMaintenanceId
+
+SELECT 
+intDocumentMaintenanceId
 ,strTitle
 ,intCompanyLocationId
 ,intLineOfBusinessId
@@ -9,37 +11,63 @@ SELECT intDocumentMaintenanceId
 ,strType
 ,ysnCopyAll
 ,strCode
-,MAX(intHeaderCharacterLimit) AS intHeaderCharacterLimit
-,MAX(strHeader) AS strHeader
-,MAX(intFooterCharacterLimit) AS intFooterCharacterLimit
-,MAX(strFooter) AS strFooter
+,intHeaderCharacterLimit = NULL
+,intFooterCharacterLimit= NULL
+,Header AS strHeader
+,Footer as strFooter
 ,strOptionName
-FROM (
-		SELECT unpvt.intDocumentMaintenanceId
-		,ac.strTitle AS strTitle 
-		,ac.intCompanyLocationId AS intCompanyLocationId 
-		,ac.intLineOfBusinessId AS intLineOfBusinessId 
-		,ac.intEntityCustomerId AS intEntityCustomerId 
-		,ac.strSource AS strSource 
-		,ac.strType AS strType 
-		,ac.ysnCopyAll AS ysnCopyAll 
-		,ac.strCode AS strCode 
-		,ad.intCharacterLimit AS intHeaderCharacterLimit
-		,ad.strMessage AS strHeader
-		,ae.intCharacterLimit AS intFooterCharacterLimit
-		,ae.strMessage AS strFooter
-		,REPLACE(strProcess, 'ysn', '') AS strOptionName
-		FROM tblSMDocumentMaintenanceMessage a
-		UNPIVOT
-		(
-			ysnValue FOR strProcess IN (ysnRecipe, ysnQuote, ysnSalesOrder, ysnPickList, ysnBOL, ysnInvoice, ysnScaleTicket)
-		) AS unpvt
-		CROSS APPLY (SELECT strTitle, intCompanyLocationId, intLineOfBusinessId, intEntityCustomerId, strSource, strType, ysnCopyAll, strCode FROM tblSMDocumentMaintenance WHERE intDocumentMaintenanceId = unpvt.intDocumentMaintenanceId) ac
-		CROSS APPLY (SELECT intCharacterLimit, strMessage FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Header' AND intDocumentMaintenanceId = unpvt.intDocumentMaintenanceId) ad
-		CROSS APPLY (SELECT intCharacterLimit, strMessage FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Footer' AND intDocumentMaintenanceId = unpvt.intDocumentMaintenanceId) ae
-		WHERE ysnValue = 1
-) B
-GROUP BY intDocumentMaintenanceId, strTitle, intCompanyLocationId, intLineOfBusinessId, intEntityCustomerId, strSource, strType, ysnCopyAll, strCode, strOptionName
+FROM
+(
+ SELECT A.intDocumentMaintenanceId, A.strTitle, A.intCompanyLocationId, A.intLineOfBusinessId, A.intEntityCustomerId, A.strSource, A.strType, A.ysnCopyAll, A.strCode, B.strHeaderFooter, B.strMessage, C.strOptionName FROM tblSMDocumentMaintenance A JOIN tblSMDocumentMaintenanceMessage B 
+ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId 
+JOIN vyuSMDocumentMessageMaintenanceOption C ON C.intDocumentMaintenanceMessageId = B.intDocumentMaintenanceMessageId and C.ysnValue =1
+) d
+pivot
+(
+ MAX(strMessage)
+ FOR strHeaderFooter in (Header, Footer)
+) piv
+
+--SELECT intDocumentMaintenanceId
+--,strTitle
+--,intCompanyLocationId
+--,intLineOfBusinessId
+--,intEntityCustomerId
+--,strSource
+--,strType
+--,ysnCopyAll
+--,strCode
+--,MAX(intHeaderCharacterLimit) AS intHeaderCharacterLimit
+--,MAX(strHeader) AS strHeader
+--,MAX(intFooterCharacterLimit) AS intFooterCharacterLimit
+--,MAX(strFooter) AS strFooter
+--,strOptionName
+--FROM (
+--		SELECT unpvt.intDocumentMaintenanceId
+--		,ac.strTitle AS strTitle 
+--		,ac.intCompanyLocationId AS intCompanyLocationId 
+--		,ac.intLineOfBusinessId AS intLineOfBusinessId 
+--		,ac.intEntityCustomerId AS intEntityCustomerId 
+--		,ac.strSource AS strSource 
+--		,ac.strType AS strType 
+--		,ac.ysnCopyAll AS ysnCopyAll 
+--		,ac.strCode AS strCode 
+--		,ad.intCharacterLimit AS intHeaderCharacterLimit
+--		,ad.strMessage AS strHeader
+--		,ae.intCharacterLimit AS intFooterCharacterLimit
+--		,ae.strMessage AS strFooter
+--		,REPLACE(strProcess, 'ysn', '') AS strOptionName
+--		FROM tblSMDocumentMaintenanceMessage a
+--		UNPIVOT
+--		(
+--			ysnValue FOR strProcess IN (ysnRecipe, ysnQuote, ysnSalesOrder, ysnPickList, ysnBOL, ysnInvoice, ysnScaleTicket)
+--		) AS unpvt
+--		CROSS APPLY (SELECT strTitle, intCompanyLocationId, intLineOfBusinessId, intEntityCustomerId, strSource, strType, ysnCopyAll, strCode FROM tblSMDocumentMaintenance WHERE intDocumentMaintenanceId = unpvt.intDocumentMaintenanceId) ac
+--		CROSS APPLY (SELECT intCharacterLimit, strMessage FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Header' AND intDocumentMaintenanceId = unpvt.intDocumentMaintenanceId) ad
+--		CROSS APPLY (SELECT intCharacterLimit, strMessage FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Footer' AND intDocumentMaintenanceId = unpvt.intDocumentMaintenanceId) ae
+--		WHERE ysnValue = 1
+--) B
+--GROUP BY intDocumentMaintenanceId, strTitle, intCompanyLocationId, intLineOfBusinessId, intEntityCustomerId, strSource, strType, ysnCopyAll, strCode, strOptionName
 
 --SELECT intDocumentMaintenanceId
 --,strTitle
