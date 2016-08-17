@@ -23,6 +23,5 @@
 	[strDefaultRecipeCost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [ysnLotHistoryByStorageLocation] BIT NULL, 
 	[ysnShowCostInSalesOrderPickList] BIT NULL DEFAULT 0, 
-	ysnShowInputItemInYieldView bit NULL Default 0,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),  
 )

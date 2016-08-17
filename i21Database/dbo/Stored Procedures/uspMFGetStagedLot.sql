@@ -23,14 +23,13 @@ BEGIN
 		,UM.intUnitMeasureId
 		,UM.strUnitMeasure
 		,L.dblWeight
-		,UM1.intUnitMeasureId
-		,UM1.strUnitMeasure
+		,UM1.intUnitMeasureId As intWeightUnitMeasureId
+		,UM1.strUnitMeasure As strWeightUnitMeasure
 		,L.dblWeightPerQty
 		,L.dtmDateCreated
-		,L.strLotAlias
 		,L.dtmExpiryDate
 		,LS.intLotStatusId
-		,LS.strPrimaryStatus
+		,LS.strSecondaryStatus as strLotStatus
 		,E.intEntityId
 		,E.strName strOwnerName
 		,OH.intOrderHeaderId
@@ -88,7 +87,7 @@ BEGIN
 		,L.strLotAlias
 		,L.dtmExpiryDate
 		,LS.intLotStatusId
-		,LS.strPrimaryStatus
+		,LS.strSecondaryStatus
 		,E.intEntityId
 		,E.strName
 		,OH.intOrderHeaderId
