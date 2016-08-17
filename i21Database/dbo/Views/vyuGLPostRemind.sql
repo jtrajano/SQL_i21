@@ -21,8 +21,5 @@ SELECT intJournalId,intEntityId,dtmDate,Remind.DateLimit1,Remind.DateLimit2 FROM
 			CASE WHEN PostRemind_BeforeAfter = 'After' THEN DateLimit2 ELSE DateLimit1 END DateLimit1,
 			CASE WHEN PostRemind_BeforeAfter = 'After' THEN DateLimit1 ELSE DateLimit2 END DateLimit2
 			FROM cte2) Remind
-	WHERE ysnPosted = 0
-	AND 
-		(GETDATE() BETWEEN Remind.DateLimit1 AND Remind.DateLimit2
-		AND J.dtmDate BETWEEN Remind.DateLimit1 AND DateLimit2) 
+	WHERE ysnPosted = 0 AND J.dtmDate BETWEEN Remind.DateLimit1 AND DateLimit2
 GO
