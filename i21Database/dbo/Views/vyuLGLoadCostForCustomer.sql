@@ -36,6 +36,7 @@ AS
 			,[intCOGSAccountId] = ARIA.[intCOGSAccountId]
 			,[intSalesAccountId] = ARIA.[intSalesAccountId]
 			,[intInventoryAccountId] = ARIA.[intInventoryAccountId]
+			,[ysnPosted] = L.ysnPosted
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
@@ -57,4 +58,4 @@ AS
 			 CD.intShipViaId,ICI.intItemId,CD.intItemUOMId,CD.dblQuantity,
 			 LD.dblQuantity,CH.intContractHeaderId,CD.intContractDetailId,
 			 LC.dblRate,LD.[intWeightItemUOMId],ARIA.[intAccountId],
-			 ARIA.[intCOGSAccountId],ARIA.[intSalesAccountId],ARIA.[intInventoryAccountId],LC.[intCurrencyId]
+			 ARIA.[intCOGSAccountId],ARIA.[intSalesAccountId],ARIA.[intInventoryAccountId],LC.[intCurrencyId],L.ysnPosted
