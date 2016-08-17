@@ -344,5 +344,6 @@
     <None Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateCustomerConsumptionSiteInfoView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateOriginDegreeOptionView.sql" />
   </ItemGroup>
 </Project>
