@@ -11,6 +11,3 @@
 	, 0 preOp
 	, 0 postOp
 FROM tblICItem item
-	LEFT OUTER JOIN tblICRinFuelCategory ftc ON ftc.intRinFuelCategoryId = item.intRINFuelTypeId
-	LEFT OUTER JOIN tblICFuelType ft ON ft.intRinFuelCategoryId = ft.intRinFuelCategoryId
-	LEFT OUTER JOIN tblICRinFuel rf ON rf.intRinFuelId = ft.intRinFuelId
