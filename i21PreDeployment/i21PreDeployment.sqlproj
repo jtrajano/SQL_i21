@@ -260,4 +260,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\7_DropView.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\12_EM\16_CleanCustomerProductVersion.sql" />
+  </ItemGroup>
 </Project>
