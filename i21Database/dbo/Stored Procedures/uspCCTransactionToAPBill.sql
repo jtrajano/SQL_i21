@@ -89,7 +89,7 @@ BEGIN
 					,@shipTo = @shipTo
 					,@vendorOrderNumber = @ccdReference
 					,@voucherDate = @dtmDate
-					,@voucherDetaiCC = @voucherDetailCC
+					,@voucherDetailCC = @voucherDetailCC
 					,@billId = @createdBillId OUTPUT
 
 				UPDATE tblAPBill SET strComment = @ccdReference WHERE intBillId = @createdBillId

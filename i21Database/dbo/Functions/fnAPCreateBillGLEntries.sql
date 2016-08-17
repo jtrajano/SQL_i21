@@ -58,7 +58,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
+		[dblCredit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3, 11) AND A.dblAmountDue > 0 THEN A.dblAmountDue * -1 
 												  WHEN A.intTransactionType IN (1) AND Rate.dblRate > 0 THEN A.dblAmountDue / (CASE WHEN @SYSTEM_CURRENCY != A.intCurrencyId THEN Rate.dblRate ELSE 1 END)
 											 ELSE A.dblAmountDue END) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
@@ -155,7 +155,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1)
+		[dblDebit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3, 11) THEN B.dblTotal * (-1)
 												  --WHEN A.intTransactionType IN (1) AND B.dblRate > 0 AND B.ysnSubCurrency = 0 THEN B.dblTotal / B.dblRate 
 												  --WHEN A.intTransactionType IN (1) AND B.ysnSubCurrency > 0 THEN B.dblTotal + CAST(ISNULL(Taxes.dblTotalICTax, 0) AS DECIMAL(18,2)) 
 												ELSE 
@@ -199,6 +199,9 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 11 THEN 'Claim'
+												WHEN intTransactionType = 8 THEN 'Overpayment'
+												WHEN intTransactionType = 9 THEN '1099 Adjustment'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,

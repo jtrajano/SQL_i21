@@ -193,6 +193,9 @@ BEGIN
 		[dblCost],
 		[dblOldCost],
 		[dblNetWeight],
+		[dblNetShippedWeight],
+		[dblWeightLoss],
+		[dblFranchiseWeight],
 		[intContractDetailId],
 		[intContractHeaderId],
 		[intUnitOfMeasureId],
@@ -235,6 +238,9 @@ BEGIN
 										END,
 		[dblOldCost]				=	NULL,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
+		[dblNetShippedWeight]		=	B.dblNet,
+		[dblWeightLoss]				=	B.dblGross - B.dblNet,
+		[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN B.dblGross * (J.dblFranchise / 100) ELSE 0 END,
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
 											ELSE NULL END,
@@ -273,6 +279,7 @@ BEGIN
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+	LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
 	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
@@ -300,6 +307,9 @@ BEGIN
 		[dblCost]					=	A.dblUnitCost,
 		[dblOldCost]				=	0,
 		[dblNetWeight]				=	0,
+		[dblNetShippedWeight]		=	0,
+		[dblWeightLoss]				=	0,
+		[dblFranchiseWeight]		=	0,
 		[intContractDetailId]		=	A.intContractDetailId,
 		[intContractHeaderId]		=	A.intContractHeaderId,
 		[intUnitOfMeasureId]		=	NULL,
