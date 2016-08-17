@@ -4185,6 +4185,26 @@
     <Build Include="dbo\Views\vyuARGetRecipeReport.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
     <Build Include="dbo\Views\vyuEMEntityContactLOB.sql" />
+    <Build Include="dbo\Views\vyuEMUserAdmin.sql" />
+    <None Include="Scripts\Post-Deployment\EM\033_UpdateUserSecurityAdmin.sql" />
+    <Build Include="dbo\Tables\tblMFOrderDetail.sql" />
+    <Build Include="dbo\Tables\tblMFOrderDirection.sql" />
+    <Build Include="dbo\Tables\tblMFOrderHeader.sql" />
+    <Build Include="dbo\Tables\tblMFOrderStatus.sql" />
+    <Build Include="dbo\Tables\tblMFOrderType.sql" />
+    <Build Include="dbo\Tables\tblMFOrderManifest.sql" />
+    <Build Include="dbo\Tables\tblMFPickPreference.sql" />
+    <Build Include="dbo\Tables\tblMFTask.sql" />
+    <Build Include="dbo\Tables\tblMFTaskPriority.sql" />
+    <Build Include="dbo\Tables\tblMFTaskState.sql" />
+    <Build Include="dbo\Tables\tblMFTaskType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateSplitAndPickTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStagedLot.sql" />
+    <Build Include="dbo\Functions\fnLGGetDefaultWeightItemUOM.sql" />
+    <Build Include="dbo\Views\vyuSMDocumentMessageMaintenanceOption.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDocumentMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

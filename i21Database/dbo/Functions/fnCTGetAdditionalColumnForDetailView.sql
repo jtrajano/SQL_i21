@@ -12,7 +12,8 @@ RETURNS	@returntable	TABLE
 	strSeqCurrency					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strSeqPriceUOM					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	dblQtyToPriceUOMConvFactor		NUMERIC(18,6),
-	dblNetWtToPriceUOMConvFactor	NUMERIC(18,6)
+	dblNetWtToPriceUOMConvFactor	NUMERIC(18,6),
+	dblCostUnitQty					NUMERIC(18,6)
 )
 
 AS
@@ -34,8 +35,9 @@ BEGIN
 				@strFXPriceUOM		NVARCHAR(100),
 				@intMainCurrencyId	INT,
 				@ysnUseFXPrice		BIT,
-				@intNetWeightUOMId	INT
-
+				@intNetWeightUOMId	INT,
+				@dblCostUnitQty		NUMERIC(18,6),
+				@dblFXCostUnitQty	NUMERIC(18,6)
 
 	SELECT		@dblCashPrice		=	CD.dblCashPrice,
 				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(intCent,1) ELSE 1 END,
@@ -51,7 +53,10 @@ BEGIN
 				@strPriceUOM		=	UM.strUnitMeasure,
 				@strFXPriceUOM		=	FM.strUnitMeasure,
 				@ysnUseFXPrice		=	ysnUseFXPrice,
-				@intNetWeightUOMId	=	CD.intNetWeightUOMId
+				@intNetWeightUOMId	=	CD.intNetWeightUOMId,
+				@dblCostUnitQty		=	ISNULL(IU.dblUnitQty,1),
+				@dblFXCostUnitQty	=	ISNULL(FU.dblUnitQty,1)
+
 	FROM		tblCTContractDetail CD
 	LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID	= CD.intCurrencyId
 	LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId		= CD.intPriceItemUOMId
@@ -83,7 +88,8 @@ BEGIN
 				@strSeqCurrency,
 				@strFXPriceUOM,
 				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intFXPriceUOMId,1),
-				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intFXPriceUOMId,1)
+				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intFXPriceUOMId,1),
+				@dblFXCostUnitQty
 	END
 	ELSE
 	BEGIN
@@ -95,7 +101,8 @@ BEGIN
 				@strCurrency,
 				@strPriceUOM,
 				dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intPriceItemUOMId,1),
-				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intPriceItemUOMId,1)
+				dbo.fnCTConvertQtyToTargetItemUOM(@intNetWeightUOMId,@intPriceItemUOMId,1),
+				@dblCostUnitQty
 	END
 
 	RETURN;

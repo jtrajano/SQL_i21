@@ -35,6 +35,8 @@ Declare @intItemUOMId int
 Declare @intItemIssuedUOMId int
 DECLARE @strInActiveLots NVARCHAR(MAX) 
 Declare @intPickListDetailId int
+Declare @ysnDirectTransferToBlendFloor bit=0
+
 Declare @strBulkItemXml nvarchar(max)
 		,@dblPickQuantity numeric(38,20)
 		,@intPickUOMId int
@@ -49,7 +51,18 @@ From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttri
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLoggedOnLocationId 
 and at.strAttributeName='Kit Staging Location'
 
-If ISNULL(@intKitStagingLocationId ,0)=0
+SELECT @ysnDirectTransferToBlendFloor = CASE 
+		WHEN UPPER(pa.strAttributeValue) = 'TRUE'
+			THEN 1
+		ELSE 0
+		END
+FROM tblMFManufacturingProcessAttribute pa
+JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId
+	AND intLocationId = @intLoggedOnLocationId
+	AND at.strAttributeName = 'Direct Transfer To Blend Floor'
+
+If ISNULL(@intKitStagingLocationId ,0)=0 AND @ysnDirectTransferToBlendFloor=0
 	RaisError('Kit Staging Location is not defined.',16,1)
 
 If ISNULL(@intBlendStagingLocationId ,0)=0
@@ -115,7 +128,7 @@ Begin
 	RaisError(@ErrMsg,16,1)
 End
 
-If (Select intKitStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) <> 12 
+If (Select intKitStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId) <> 12 AND @ysnDirectTransferToBlendFloor=0
 Begin
 	Set @ErrMsg='The Blend Sheet is not staged.'
 	RaisError(@ErrMsg,16,1)
@@ -140,6 +153,10 @@ Begin Try
 		Set @ErrMsg='Lots ' + @strInActiveLots + ' are not active. Unable to perform transfer operation.'
 		RaisError(@ErrMsg,16,1)
 	End
+	
+	--validate shortage of inventory if direct transfer
+	If @ysnDirectTransferToBlendFloor=1
+		Exec uspMFValidateTransferKit @intWorkOrderId,0,1
 
 	Begin Tran
 
@@ -154,6 +171,7 @@ Begin Try
 	'<dblQuantity>' + convert(varchar,sr.dblQty) + '</dblQuantity>' + '</lot>'
 	From tblICStockReservation sr 
 	Where sr.intTransactionId=@intPickListId AND sr.intInventoryTransactionType=34 AND ISNULL(sr.intLotId,0)=0
+	AND sr.intItemId NOT IN (Select intItemId From tblMFPickListDetail Where intPickListId=@intPickListId)
 
 	Set @strBulkItemXml=@strBulkItemXml+'</root>'
 
@@ -181,16 +199,28 @@ Begin Try
 
 	--Get the child Lots attached to Pick List
 	Delete From @tblChildLot
-	Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId,intPickListDetailId)
-	Select l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
-	CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId,pld.intPickListDetailId
-	From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
-	Where pld.intPickListId=@intPickListId
-	UNION --Non Lot Tracked
-	Select 0,'',pld.intItemId,0,pld.intItemUOMId,pld.intItemIssuedUOMId,1,
-	pld.dblQuantity,pld.intPickUOMId,pld.intPickListDetailId
-	From tblMFPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId 
-	Where pld.intPickListId=@intPickListId AND i.strLotTracking='No'
+	If ISNULL(@ysnDirectTransferToBlendFloor,0)=0
+		Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId,intPickListDetailId)
+		Select l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
+		CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId,pld.intPickListDetailId
+		From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
+		Where pld.intPickListId=@intPickListId
+		UNION --Non Lot Tracked
+		Select 0,'',pld.intItemId,0,pld.intItemUOMId,pld.intItemIssuedUOMId,1,
+		pld.dblQuantity,pld.intPickUOMId,pld.intPickListDetailId
+		From tblMFPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId 
+		Where pld.intPickListId=@intPickListId AND i.strLotTracking='No'
+	Else
+		Insert Into @tblChildLot(intStageLotId,strStageLotNumber,intItemId,dblAvailableQty,intItemUOMId,intItemIssuedUOMId,dblWeightPerUnit,dblPickQuantity,intPickUOMId,intPickListDetailId)
+		Select l.intLotId,l.strLotNumber,l.intItemId,pld.dblQuantity,pld.intItemUOMId,pld.intItemIssuedUOMId,
+		CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END AS dblWeightPerQty,pld.dblPickQuantity,pld.intPickUOMId,pld.intPickListDetailId
+		From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId
+		Where pld.intPickListId=@intPickListId AND pld.intLotId=pld.intStageLotId
+		UNION --Non Lot Tracked
+		Select 0,'',pld.intItemId,0,pld.intItemUOMId,pld.intItemIssuedUOMId,1,
+		pld.dblQuantity,pld.intPickUOMId,pld.intPickListDetailId
+		From tblMFPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId 
+		Where pld.intPickListId=@intPickListId AND i.strLotTracking='No'
 
 	Select @intMinChildLot=Min(intRowNo) from @tblChildLot
 
@@ -254,9 +284,21 @@ Begin Try
 			@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
 			From @tblChildLot where intRowNo = @intMinChildLot
 
+		If @ysnDirectTransferToBlendFloor=1
+			Update tblMFPickListDetail set intStageLotId=@intNewLotId Where intPickListDetailId=@intPickListDetailId
+
 		NEXT_RECORD:
 		Select @intMinChildLot=Min(intRowNo) from @tblChildLot where intRowNo>@intMinChildLot
 	End --End Loop Child Lots
+
+	--If all the lots are staged from handheld individually then only add it to Consume lot table
+	If Not Exists (Select 1 From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId) AND @ysnDirectTransferToBlendFloor=1
+		Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+		dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
+		Select @intWorkOrderId,pld.intStageLotId,pld.intItemId,pld.dblQuantity,pld.intItemUOMId,
+		pld.dblIssuedQuantity,pld.intItemIssuedUOMId,null,
+		@dtmCurrentDateTime,@intUserId,@dtmCurrentDateTime,@intUserId,null
+		From tblMFPickListDetail pld where intPickListId = @intPickListId
 
 	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=0,@strBulkItemXml=@strBulkItemXml
 

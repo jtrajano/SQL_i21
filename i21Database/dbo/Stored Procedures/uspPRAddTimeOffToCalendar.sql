@@ -3,6 +3,9 @@
 	,@intUserId INT
 AS
 BEGIN
+
+	DECLARE @udtSMEventsIn TABLE(intEventId INT)
+
 	INSERT INTO tblSMEvents
 	(intEntityId
 	,intCalendarId
@@ -17,6 +20,10 @@ BEGIN
 	,dtmModified
 	,ysnActive
 	,intConcurrencyId)
+	OUTPUT
+		Inserted.intEventId
+	INTO 
+		@udtSMEventsIn 
 	SELECT
 	@intUserId
 	,NULL
@@ -40,8 +47,10 @@ BEGIN
 	
 	IF (@@ERROR = 0) 
 	BEGIN
+	
 		UPDATE tblPRTimeOffRequest 
-		SET ysnPostedToCalendar = 1 
+		SET ysnPostedToCalendar = 1
+			,intEventId = (SELECT TOP 1 intEventId FROM @udtSMEventsIn)
 		WHERE intTimeOffRequestId = @intTransactionId
 		
 		IF EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning EE INNER JOIN tblPRTimeOffRequest TOR
