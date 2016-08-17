@@ -2038,9 +2038,9 @@ IF @post = 1
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
-UNION ALL 
+			UNION ALL 
 
-		--Credit Discount
+			--Credit Discount
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchId
@@ -2085,7 +2085,7 @@ UNION ALL
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId					
 			WHERE
-				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
+				(CASE WHEN A.intPeriodsToAccrue > 1 THEN CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END ELSE 0 END) <> @ZeroDecimal
 
 			UNION ALL 
 			--DEBIT COGS - SHIPPED
