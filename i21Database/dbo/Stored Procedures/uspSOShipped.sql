@@ -56,6 +56,7 @@ BEGIN
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId
 	END
 
-	EXEC dbo.uspARUpdateInTransit @intTransactionId, @ysnPost, 1
+	--IC-2198: Commented the code below. In-Transit Outbound should be updated by IC-Shipment Posting. 
+	--EXEC dbo.uspARUpdateInTransit @intTransactionId, @ysnPost, 1
 
 END

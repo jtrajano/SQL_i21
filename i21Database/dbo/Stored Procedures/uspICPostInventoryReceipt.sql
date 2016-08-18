@@ -1159,11 +1159,11 @@ BEGIN
 			,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
 	FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			LEFT JOIN dbo.tblICInventoryReceiptItemLot ril
-				ON ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId				
 			INNER JOIN dbo.tblICItemLocation il 
 				ON il.intItemId = ri.intItemId
 				AND il.intLocationId = r.intTransferorId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot ril
+				ON ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId				
 	WHERE	r.intInventoryReceiptId = @intTransactionId	
 			AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 
