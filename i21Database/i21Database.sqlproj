@@ -4211,6 +4211,7 @@
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
     <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
+    <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
