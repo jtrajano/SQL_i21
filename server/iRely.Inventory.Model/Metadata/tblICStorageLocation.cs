@@ -333,18 +333,25 @@ namespace iRely.Inventory.Model
         public int intCompanyLocationSubLocationId { get; set; }
         public int? intCommodityId { get; set; }
         public int intCompanyLocationId { get; set; }
-        public int intItemUOMId { get; set; }
+        public string strCommodityCode { get; set; }
         public string strItemDescription { get; set; }
         public string strItemNo { get; set; }
         public string strUOM { get; set; }
         public string strSubLocation { get; set; }
         public string strLocation { get; set; }
         public string strStorageLocation { get; set; }
-        public string strCommodityCode { get; set; }
-        public decimal dblCapacity { get; set; }
-        public decimal dblStock { get; set; }
-        public decimal dblAvailable { get; set; }
-        public decimal dblEffectiveDepth { get; set; }
+        public string strDiscountCode { get; set; }
+        public string strDiscountDescription { get; set; }
+        public DateTime? dtmReadingDate { get; set; }
+        public decimal? dblAirSpaceReading { get; set; }
+        public decimal? dblPhysicalReading { get; set; }
+        public decimal? dblStockVariance { get; set; }
+        public decimal? dblCapacity { get; set; }
+        public decimal? dblStock { get; set; }
+        public decimal? dblAvailable { get; set; }
+        public decimal? dblEffectiveDepth { get; set; }
+        public decimal? dblPackFactor { get; set; }
+        public decimal? dblUnitPerFoot { get; set; }
     }
 
     public class vyuICGetStorageBinMeasurementReading

@@ -192,7 +192,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
-            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
             this.Property(t => t.intCompanyLocationSubLocationId).HasColumnName("intCompanyLocationSubLocationId");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
@@ -201,8 +201,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strLocation).HasColumnName("strLocation");
-            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
+            this.Property(t => t.strDiscountCode).HasColumnName("strDiscountCode");
+            this.Property(t => t.strDiscountDescription).HasColumnName("strDiscountDescription");
+            this.Property(t => t.dtmReadingDate).HasColumnName("dtmReadingDate");
             this.Property(t => t.dblCapacity).HasColumnName("dblCapacity").HasPrecision(18, 6);
+            this.Property(t => t.dblAirSpaceReading).HasColumnName("dblAirSpaceReading").HasPrecision(18, 6);
+            this.Property(t => t.dblPhysicalReading).HasColumnName("dblPhysicalReading").HasPrecision(18, 6);
+            this.Property(t => t.dblStockVariance).HasColumnName("dblStockVariance").HasPrecision(18, 6);
             this.Property(t => t.dblAvailable).HasColumnName("dblAvailable").HasPrecision(18, 6);
             this.Property(t => t.dblStock).HasColumnName("dblStock").HasPrecision(18, 6);
             this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth").HasPrecision(18, 6);
@@ -277,6 +282,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
             this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
         }
     }
 }

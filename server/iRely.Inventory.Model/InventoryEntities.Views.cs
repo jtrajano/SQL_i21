@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsfe2c57b312824ca3eeea6609ffd6411d4697f5c8126beb4acc9b7fcd3d1cc4ca))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets45ae82beb4ed0cb11ecdda787011cd4b9467f5f898caeedc7526eda989850e73))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsfe2c57b312824ca3eeea6609ffd6411d4697f5c8126beb4acc9b7fcd3d1cc4ca : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets45ae82beb4ed0cb11ecdda787011cd4b9467f5f898caeedc7526eda989850e73 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "fe2c57b312824ca3eeea6609ffd6411d4697f5c8126beb4acc9b7fcd3d1cc4ca"; }
+            get { return "45ae82beb4ed0cb11ecdda787011cd4b9467f5f898caeedc7526eda989850e73"; }
         }
 
         /// <summary>
@@ -12335,7 +12335,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageBinDetails
-        [CodeFirstDatabaseSchema.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationSubLocationId, T1.vyuICGetStorageBinDetails_intCommodityId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_intItemUOMId, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strSubLocation, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth)
+        [CodeFirstDatabaseSchema.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationSubLocationId, T1.vyuICGetStorageBinDetails_intCommodityId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strSubLocation, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strDiscountCode, T1.vyuICGetStorageBinDetails_strDiscountDescription, T1.vyuICGetStorageBinDetails_dtmReadingDate, T1.vyuICGetStorageBinDetails_dblAirSpaceReading, T1.vyuICGetStorageBinDetails_dblPhysicalReading, T1.vyuICGetStorageBinDetails_dblStockVariance, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth, T1.vyuICGetStorageBinDetails_dblPackFactor, T1.vyuICGetStorageBinDetails_dblUnitPerFoot)
     FROM (
         SELECT 
             T.intItemLocationId AS vyuICGetStorageBinDetails_intItemLocationId, 
@@ -12344,18 +12344,25 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCompanyLocationSubLocationId AS vyuICGetStorageBinDetails_intCompanyLocationSubLocationId, 
             T.intCommodityId AS vyuICGetStorageBinDetails_intCommodityId, 
             T.intCompanyLocationId AS vyuICGetStorageBinDetails_intCompanyLocationId, 
-            T.intItemUOMId AS vyuICGetStorageBinDetails_intItemUOMId, 
+            T.strCommodityCode AS vyuICGetStorageBinDetails_strCommodityCode, 
             T.strItemDescription AS vyuICGetStorageBinDetails_strItemDescription, 
             T.strItemNo AS vyuICGetStorageBinDetails_strItemNo, 
             T.strUOM AS vyuICGetStorageBinDetails_strUOM, 
             T.strSubLocation AS vyuICGetStorageBinDetails_strSubLocation, 
             T.strLocation AS vyuICGetStorageBinDetails_strLocation, 
             T.strStorageLocation AS vyuICGetStorageBinDetails_strStorageLocation, 
-            T.strCommodityCode AS vyuICGetStorageBinDetails_strCommodityCode, 
+            T.strDiscountCode AS vyuICGetStorageBinDetails_strDiscountCode, 
+            T.strDiscountDescription AS vyuICGetStorageBinDetails_strDiscountDescription, 
+            T.dtmReadingDate AS vyuICGetStorageBinDetails_dtmReadingDate, 
+            T.dblAirSpaceReading AS vyuICGetStorageBinDetails_dblAirSpaceReading, 
+            T.dblPhysicalReading AS vyuICGetStorageBinDetails_dblPhysicalReading, 
+            T.dblStockVariance AS vyuICGetStorageBinDetails_dblStockVariance, 
             T.dblCapacity AS vyuICGetStorageBinDetails_dblCapacity, 
             T.dblStock AS vyuICGetStorageBinDetails_dblStock, 
             T.dblAvailable AS vyuICGetStorageBinDetails_dblAvailable, 
             T.dblEffectiveDepth AS vyuICGetStorageBinDetails_dblEffectiveDepth, 
+            T.dblPackFactor AS vyuICGetStorageBinDetails_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetStorageBinDetails_dblUnitPerFoot, 
             True AS _from0
         FROM InventoryEntities.vyuICGetStorageBinDetails AS T
     ) AS T1");
@@ -12369,7 +12376,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageBinDetails
-        [iRely.Inventory.Model.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationSubLocationId, T1.vyuICGetStorageBinDetails_intCommodityId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_intItemUOMId, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strSubLocation, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth)
+        [iRely.Inventory.Model.vyuICGetStorageBinDetails](T1.vyuICGetStorageBinDetails_intItemLocationId, T1.vyuICGetStorageBinDetails_intItemId, T1.vyuICGetStorageBinDetails_intStorageLocationId, T1.vyuICGetStorageBinDetails_intCompanyLocationSubLocationId, T1.vyuICGetStorageBinDetails_intCommodityId, T1.vyuICGetStorageBinDetails_intCompanyLocationId, T1.vyuICGetStorageBinDetails_strCommodityCode, T1.vyuICGetStorageBinDetails_strItemDescription, T1.vyuICGetStorageBinDetails_strItemNo, T1.vyuICGetStorageBinDetails_strUOM, T1.vyuICGetStorageBinDetails_strSubLocation, T1.vyuICGetStorageBinDetails_strLocation, T1.vyuICGetStorageBinDetails_strStorageLocation, T1.vyuICGetStorageBinDetails_strDiscountCode, T1.vyuICGetStorageBinDetails_strDiscountDescription, T1.vyuICGetStorageBinDetails_dtmReadingDate, T1.vyuICGetStorageBinDetails_dblAirSpaceReading, T1.vyuICGetStorageBinDetails_dblPhysicalReading, T1.vyuICGetStorageBinDetails_dblStockVariance, T1.vyuICGetStorageBinDetails_dblCapacity, T1.vyuICGetStorageBinDetails_dblStock, T1.vyuICGetStorageBinDetails_dblAvailable, T1.vyuICGetStorageBinDetails_dblEffectiveDepth, T1.vyuICGetStorageBinDetails_dblPackFactor, T1.vyuICGetStorageBinDetails_dblUnitPerFoot)
     FROM (
         SELECT 
             T.intItemLocationId AS vyuICGetStorageBinDetails_intItemLocationId, 
@@ -12378,18 +12385,25 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCompanyLocationSubLocationId AS vyuICGetStorageBinDetails_intCompanyLocationSubLocationId, 
             T.intCommodityId AS vyuICGetStorageBinDetails_intCommodityId, 
             T.intCompanyLocationId AS vyuICGetStorageBinDetails_intCompanyLocationId, 
-            T.intItemUOMId AS vyuICGetStorageBinDetails_intItemUOMId, 
+            T.strCommodityCode AS vyuICGetStorageBinDetails_strCommodityCode, 
             T.strItemDescription AS vyuICGetStorageBinDetails_strItemDescription, 
             T.strItemNo AS vyuICGetStorageBinDetails_strItemNo, 
             T.strUOM AS vyuICGetStorageBinDetails_strUOM, 
             T.strSubLocation AS vyuICGetStorageBinDetails_strSubLocation, 
             T.strLocation AS vyuICGetStorageBinDetails_strLocation, 
             T.strStorageLocation AS vyuICGetStorageBinDetails_strStorageLocation, 
-            T.strCommodityCode AS vyuICGetStorageBinDetails_strCommodityCode, 
+            T.strDiscountCode AS vyuICGetStorageBinDetails_strDiscountCode, 
+            T.strDiscountDescription AS vyuICGetStorageBinDetails_strDiscountDescription, 
+            T.dtmReadingDate AS vyuICGetStorageBinDetails_dtmReadingDate, 
+            T.dblAirSpaceReading AS vyuICGetStorageBinDetails_dblAirSpaceReading, 
+            T.dblPhysicalReading AS vyuICGetStorageBinDetails_dblPhysicalReading, 
+            T.dblStockVariance AS vyuICGetStorageBinDetails_dblStockVariance, 
             T.dblCapacity AS vyuICGetStorageBinDetails_dblCapacity, 
             T.dblStock AS vyuICGetStorageBinDetails_dblStock, 
             T.dblAvailable AS vyuICGetStorageBinDetails_dblAvailable, 
             T.dblEffectiveDepth AS vyuICGetStorageBinDetails_dblEffectiveDepth, 
+            T.dblPackFactor AS vyuICGetStorageBinDetails_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetStorageBinDetails_dblUnitPerFoot, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetStorageBinDetails AS T
     ) AS T1");

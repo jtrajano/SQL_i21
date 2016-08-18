@@ -1,7 +1,10 @@
 Ext.define('Inventory.view.StockDetailViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icstockdetail',
-
+    require: [
+        //'Inventory.custom.ux.grid.SubTable',
+        'Inventory.view.BinVisualization'
+    ],
     config: {
         searchConfig: {
             title: 'Stock Details',
@@ -45,18 +48,28 @@ Ext.define('Inventory.view.StockDetailViewController', {
                         { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
                         { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, flex: 1, hidden: true },
                         { dataIndex: 'intCompanyLocationId', text: 'Company Location Id', width: 100, flex: 1, hidden: true },
-                        { dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },
-                        { dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },
+                        /*{ dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },*/
+                        /*{ dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },*/
+                        { dataIndex: 'strCommodityCode', text: 'Commodity', width: 100, flex: 1, hidden: false },
                         { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
                         { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
                         { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinLocation' },
-                        { dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },
+                        /*{ dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },*/
                         { dataIndex: 'strStorageLocation', text: 'Storage Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
                         { dataIndex: 'dblStock', text: 'Stock', xtype: 'numbercolumn', summaryType: 'sum', width: 100, flex: 1 },
+                        { dataIndex: 'dblAirSpaceReading',  xtype: 'numbercolumn', text: 'Air Space Reading', width: 100, flex: 1, summaryType: 'sum' },
+                        { dataIndex: 'dblPhysicalReading',  xtype: 'numbercolumn', text: 'Physical Reading', width: 100, flex: 1, summaryType: 'sum' },
+                        { dataIndex: 'dblStockVariance',  xtype: 'numbercolumn', text: 'Stock Variance', width: 100, flex: 1, summaryType: 'sum' },
                         { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
                         { dataIndex: 'strCommodityCode', text: 'Commodity', width: 100, flex: 1, hidden: true },
+                        { dataIndex: 'dtmReadingDate', xtype: 'datecolumn', dataType: 'date', text: 'Reading Date', width: 100, flex: 1, hidden: false },
+                        { dataIndex: 'dblCapacity',  xtype: 'numbercolumn', text: 'Capacity', width: 100, flex: 1, summaryType: 'sum' },
                         { dataIndex: 'dblAvailable', xtype: 'numbercolumn', summaryType: 'sum', text: 'Space Available', width: 100, flex: 1 },
-                        { dataIndex: 'dblEffectiveDepth', xtype: 'numbercolumn', summaryType: 'sum', text: 'Effective Depth', width: 100, flex: 1, hidden: true }
+                        { dataIndex: 'dblEffectiveDepth', xtype: 'numbercolumn', summaryType: 'sum', text: 'Effective Depth', width: 100, flex: 1, hidden: true },
+                        { dataIndex: 'dblPackFactor', xtype: 'numbercolumn', summaryType: 'sum', text: 'Pack Factor', width: 100, flex: 1, hidden: true },
+                        { dataIndex: 'dblUnitPerFoot', xtype: 'numbercolumn', summaryType: 'sum', text: 'Unit Per Foot', width: 100, flex: 1, hidden: true },
+                        { dataIndex: 'strDiscountCode', text: 'Discount Schedule Id', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
+                        { dataIndex: 'strDiscountDescription', text: 'Discount Schedule', width: 100, flex: 1, drillDownText: 'Discount Codes', drillDownClick: 'onViewDiscountCodes' },
                     ],
                     buttons: [
                         {
@@ -69,16 +82,22 @@ Ext.define('Inventory.view.StockDetailViewController', {
                     ],
                     chart: {
                         url: '../Inventory/api/StorageLocation/GetStorageBins',
+                        type: 'serial',
+                        startEffect: 'elastic',
+                        mouseWheelZoomEnabled: true,
+                        mouseWheelScrollEnabled: true,
+                        mouseWheelScrollEnabled: true,
                         valueAxes: [
                             {
                                 id: 'axis',
                                 position: 'left',
                                 title: 'Stock',
-                                stackType: "regular"
+                                stackType: "100%"
                             }
                         ],
                         graphs: [
                             {
+                                id: 'stockGraph',
                                 balloonText: "[[title]] of [[category]]:[[value]]",
                                 type: 'column',
                                 title: 'Stock',
@@ -87,15 +106,20 @@ Ext.define('Inventory.view.StockDetailViewController', {
                                 topRadius: 1,
                                 fillAlphas: 0.8,
                                 fillColors: "#FCD202",
+                                //fillColorsField: "strColor",
+                                //alphaField: "strLocation",
+                                //labelText: '[[value]]',
                                 lineAlpha: 0.5,
                                 lineColor: "#FFFFFF",
                                 lineThickness: 1
                             },
                             {
+                                id: 'spaceGraph',
                                 balloonText: "[[title]] storage for [[category]]:[[value]]",
                                 type: 'column',
                                 title: 'Available',
                                 valueField: 'dblAvailable',
+                                labelText: '[[value]]',
                                 valueAxis: 'axis',
                                 topRadius: 1,
                                 fillAlphas: 0.7,
@@ -106,20 +130,165 @@ Ext.define('Inventory.view.StockDetailViewController', {
                             }
                         ],
                         legend: {
-                            enabled: true,
-                            useGraphSettings: true
+                            enabled: false,
+                            useGraphSettings: true,
+                            position: 'right'
                         },
+                        autoMarginOffset: 24,
                         angle: 30,
                         depth3D: 30,
                         categoryAxis: {
                             title: 'Storage Location',
-                            labelRotation: 45
+                            labelRotation: 45,
+                            boldLabels: true,
+                            gridPosition: 'start',
+                            /*type: 'serial',*/
+                            gridPosition: 'start'
                         },
-                        categoryField: 'strStorageLocation'
+                        categoryField: 'strStorageLocation',
+                        listeners: [
+                            {
+                                //event: 'clickGraphItem',
+                                method: function(event) {
+                                    var containerChart = iRely.Functions.getComponentByQuery('#searchTabPanel');
+
+                                    var tab = containerChart.getActiveTab();
+                                    var gridTab = tab.down('grid');
+
+                                    var gridStore = Ext.create('Ext.data.Store', {
+                                        fields: [
+                                            { name: 'intStorageLocationId', type: 'int' },
+                                            { name: 'strLocation', type: 'string' },
+                                            { name: 'strStorageLocation', type: 'string' }
+                                        ],
+                                        autoLoad: true,
+                                        proxy: {
+                                            type: 'rest',
+                                            api: {
+                                                read: '../Inventory/api/StorageLocation/GetStorageBinDetails'
+                                            },
+                                            reader: {
+                                                type: 'json',
+                                                rootProperty: 'data',
+                                                messageProperty: 'message'
+                                            },
+                                            writer: {
+                                                type: 'json',
+                                                allowSingle: false
+                                            }
+                                        },
+                                    });
+
+                                    var discountSchedules = Ext.create('Ext.data.Store', {
+                                        fields: [
+                                            { name: 'intStorageLocationId', type: 'int' },
+                                            { name: 'strLocation', type: 'string' },
+                                            { name: 'strStorageLocation', type: 'string' }
+                                        ],
+                                        autoLoad: true,
+                                        proxy: {
+                                            type: 'rest',
+                                            api: {
+                                                read: '../Inventory/api/StorageLocation/GetStorageBins'
+                                            },
+                                            reader: {
+                                                type: 'json',
+                                                rootProperty: 'data',
+                                                messageProperty: 'message'
+                                            },
+                                            writer: {
+                                                type: 'json',
+                                                allowSingle: false
+                                            }
+                                        },
+                                    });
+
+                                    var plugin = Ext.create('Inventory.custom.ux.grid.SubTable', {
+                                        headerWidth: 24,
+                                        columns: [{
+                                            text: 'Discount Code',
+                                            dataIndex: 'strStorageLocation',
+                                            width: 100
+                                        }, {
+                                            width: 100,
+                                            text: 'Reading',
+                                            dataIndex: 'strLocation'
+                                        }],
+                                        getAssociatedRecords: function(record) {
+                                            var result = Ext.Array.filter(
+                                                discountSchedules.data.items,
+                                                function(r) { return 1 == 1 }
+                                            );
+                                            return result;
+                                        }
+                                    });
+
+                                    var grid = Ext.create('GlobalComponentEngine.view.AdvanceSearchGrid', {
+                                        collapsible: true,
+                                        maximizable: false,
+                                        split: true,
+                                        store: gridStore,
+                                        columns: [
+                                            { dataIndex: 'intItemId', text: 'Item Id', width: 100, flex: 1, hidden: true, key: true },
+                                            { dataIndex: 'intStorageLocationId', text: 'Storage Location Id', width: 100, flex: 1, hidden: true },
+                                            { dataIndex: 'intCompanyLocationId', text: 'Company Location Id', width: 100, flex: 1, hidden: true },
+                                            /*{ dataIndex: 'intCompanyLocationSubLocationId', text: 'Company Sub Location Id', width: 100, flex: 1, hidden: true },*/
+                                            /*{ dataIndex: 'intCommodityId', text: 'Commodity Id', width: 100, flex: 1, hidden: true },*/
+                                            { dataIndex: 'strItemNo', text: 'Item No', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewItem' },
+                                            { dataIndex: 'strItemDescription', text: 'Item Description', width: 100, flex: 1 },
+                                            { dataIndex: 'strLocation', text: 'Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinLocation' },
+                                            /*{ dataIndex: 'strSubLocation', text: 'Sub Location', width: 100, flex: 1 },*/
+                                            { dataIndex: 'strStorageLocation', text: 'Storage Location', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinStorageLocation' },
+                                            { dataIndex: 'dblStock', text: 'Stock', xtype: 'numbercolumn', summaryType: 'sum', width: 100, flex: 1 },
+                                            { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
+                                            { dataIndex: 'dblCapacity',  xtype: 'numbercolumn', text: 'Capacity', width: 100, flex: 1, summaryType: 'sum' },
+                                            { dataIndex: 'dblAvailable', xtype: 'numbercolumn', summaryType: 'sum', text: 'Space Available', width: 100, flex: 1 },
+                                            { dataIndex: 'dblEffectiveDepth', xtype: 'numbercolumn', summaryType: 'sum', text: 'Effective Depth', width: 100, flex: 1, hidden: true },
+                                            { dataIndex: 'dblPackFactor', xtype: 'numbercolumn', summaryType: 'sum', text: 'Pack Factor', width: 100, flex: 1, hidden: true },
+                                            { dataIndex: 'dblUnitPerFoot', xtype: 'numbercolumn', summaryType: 'sum', text: 'Unit Per Foot', width: 100, flex: 1, hidden: true }
+                                        ],
+                                        plugins: [
+                                            {
+                                                ptype: 'subtable',
+                                                headerWidth: 24,
+                                                columns: [{
+                                                    text: 'Discount Code',
+                                                    dataIndex: 'strStorageLocation',
+                                                    width: 100
+                                                }, {
+                                                    width: 100,
+                                                    text: 'Reading',
+                                                    dataIndex: 'strLocation'
+                                                }],
+                                                getAssociatedRecords: function(record) {
+                                                    var result = Ext.Array.filter(
+                                                        discountSchedules.data.items,
+                                                        function(r) { return 1 == 1 }
+                                                    );
+                                                    return result;
+                                                }
+                                            }
+                                        ]
+                                    });
+
+                                    event.chart.events.clickGraphItem = [];
+                                    event.chart.addListener("clickGraphItem", Ext.bind(function(event) {
+                                        alert(this.grid);
+                                    }, { grid: grid }));
+                                }
+                            }
+                        ]
                     }
                 }
             ]
         }
+    },
+
+    init : function(o) {
+        var me = this,
+            win = this.getView();
+
+        console.log(win);
     },
 
     show: function(config){
@@ -187,6 +356,13 @@ Ext.define('Inventory.view.StockDetailViewController', {
     onViewBinUOM: function(value, record) {
         var locationName = record.get('strUOM');
         i21.ModuleMgr.Inventory.showScreen(locationName, 'UOM');
+    },
+
+    onViewDiscountCodes: function(value, record) {
+        iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', {
+            strSourceType: 'Storage Measurement Reading',
+            intTicketFileId: record.get('intStorageMeasurementReadingConversionId')
+        });
     },
 
     onViewMeasurementReading: function(button, e, opts) {
