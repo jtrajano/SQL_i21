@@ -126,9 +126,11 @@ BEGIN TRY
 		,@CurrencyId		= ARI.[intCurrencyId]
 		,@DatePaid			= ARI.[dtmPostDate]
 		,@AccountId			= NULL
-		,@BankAccountId		= NULL
+		,@BankAccountId		= CASE WHEN ARI.[strTransactionType] = 'Customer Prepayment' THEN 
+									(SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId IN (SELECT TOP 1 intDepositAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = ARI.intCompanyLocationId))
+								ELSE NULL END
 		,@AmountPaid		= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-		,@PaymentMethodId	= ISNULL(ARI.[intPaymentMethodId], (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod ORDER BY [ysnActive] DESC, [strPaymentMethod]))
+		,@PaymentMethodId	=  ISNULL(ARI.[intPaymentMethodId], (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod ORDER BY [ysnActive] DESC, [strPaymentMethod]))
 		,@PaymentInfo		= ''
 		,@ApplytoBudget		= 0
 		,@ApplyOnAccount	= 0

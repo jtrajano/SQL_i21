@@ -36,12 +36,14 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@DateOnly DATETIME
 		,@DefaultCurrency INT
 		,@ARAccountId INT
+		,@TransactionType NVARCHAR(50)
 		
 
 SET @ZeroDecimal = 0.000000	
 SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
+SELECT @TransactionType = strTransactionType FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
 
 	
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId)
@@ -145,7 +147,7 @@ BEGIN TRY
 		,[dtmDatePaid]					= @DatePaid
 		,[intAccountId]					= @AccountId
 		,[intBankAccountId]				= @BankAccountId
-		,[intPaymentMethodId]			= @PaymentMethodId
+		,[intPaymentMethodId]			= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 0 ELSE @PaymentMethodId END
 		,[intLocationId]				= @CompanyLocationId
 		,[dblAmountPaid]				= @AmountPaid
 		,[dblUnappliedAmount]			= @AmountPaid
