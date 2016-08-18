@@ -89,17 +89,6 @@ BEGIN
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
 			AND ISNULL(ItemTrans.dblQty, 0) <> 0 
-
-	-- Decrease in-transit outbound
-	DECLARE @InTransitTableType InTransitTableType
-	INSERT INTO @InTransitTableType(intItemId, intItemLocationId, intItemUOMId,
-		intLotId, intSubLocationId, intStorageLocationId, dblQty, intTransactionId,
-		strTransactionId, intTransactionTypeId)
-	SELECT ip.intItemId, ip.intItemLocationId, ip.intItemUOMId, ip.intLotId, ip.intSubLocationId,
-		ip.intStorageLocationId, -1 * ABS(ip.dblQty), @intTransactionId, @strTransactionId, 5
-	FROM @ItemsToUnpost ip
-	
-	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransitTableType
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
