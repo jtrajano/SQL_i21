@@ -4209,6 +4209,7 @@
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
     <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
+    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
