@@ -51,7 +51,12 @@ SELECT
 	,[dblMaintenanceAmount]         = ID.[dblMaintenanceAmount]         
 	,[dblLicenseAmount]             = ID.[dblLicenseAmount]             
 	,[intContractDetailId]			= ID.[intContractDetailId]			
-	,[intTicketId]					= ID.[intTicketId]					
+	,[intTicketId]					= ID.[intTicketId]
+	,[intTicketHoursWorkedId]		= ID.[intTicketHoursWorkedId]
+	,[intCustomerStorageId]			= ID.[intCustomerStorageId]
+	,[intSiteDetailId]				= ID.[intSiteDetailId]
+	,[intLoadDetailId]				= ID.[intLoadDetailId]
+	,[intOriginalInvoiceDetailId]	= ID.[intOriginalInvoiceDetailId]
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
 FROM
 	tblARInvoice I
