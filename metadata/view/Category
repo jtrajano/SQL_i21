@@ -714,204 +714,233 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.grid.Panel",
+                                                    "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columnLines": true,
-                                                        "designer|createAlias": "frmadvancesearchgrid",
-                                                        "forceFit": true,
-                                                        "header": false,
-                                                        "itemId": "grdTax",
-                                                        "layout|flex": 1,
-                                                        "margin": null,
-                                                        "title": "Taxes"
+                                                        "container|align": "stretch",
+                                                        "container|padding": "5 0 0 0",
+                                                        "designer|displayName": "container",
+                                                        "height": 154,
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1
                                                     },
-                                                    "name": "MyGridPanel4",
-                                                    "designerId": "bab1776a-26d5-4a4e-a456-8d3a43cf563b",
+                                                    "name": "MyContainer25",
+                                                    "designerId": "e7a40b97-d5b0-40a9-8d3a-f25d1be59f88",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.toolbar.Toolbar",
+                                                            "type": "Ext.grid.Panel",
                                                             "reference": {
-                                                                "name": "dockedItems",
+                                                                "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "componentCls": "i21-toolbar-grid",
-                                                                "container|padding": "0 0 0 1",
-                                                                "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "columnLines": true,
+                                                                "designer|createAlias": "frmadvancesearchgrid",
+                                                                "flex": null,
+                                                                "forceFit": true,
+                                                                "header": false,
+                                                                "height": 178,
+                                                                "itemId": "grdTax",
+                                                                "layout|flex": 1,
+                                                                "margin": null,
+                                                                "title": "Taxes"
                                                             },
-                                                            "name": "MyToolbar14",
-                                                            "designerId": "0ee8fb4a-de92-4c85-b6ec-ce84ddbb36cc",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.button.Button",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "icon": null,
-                                                                        "iconCls": "small-insert",
-                                                                        "itemId": "btnInsertTax",
-                                                                        "layout|flex": null,
-                                                                        "tabIndex": -1,
-                                                                        "text": "Insert"
-                                                                    },
-                                                                    "name": "MyButton13",
-                                                                    "designerId": "404a8351-80c2-4b7c-89e6-41d21b1217fc"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.button.Button",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "icon": null,
-                                                                        "iconCls": "small-remove",
-                                                                        "itemId": "btnDeleteTax",
-                                                                        "layout|flex": null,
-                                                                        "tabIndex": -1,
-                                                                        "text": "Remove"
-                                                                    },
-                                                                    "name": "MyButton24",
-                                                                    "designerId": "9bbd6fb5-8cbf-4403-9547-438a1857c04d"
-                                                                },
-                                                                {
-                                                                    "type": "linkedinstance",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "filter15",
-                                                                    "designerId": "71ba6869-8472-4cc0-b05f-12081a55f44d",
-                                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "intUnitMeasureId",
-                                                                "flex": 2,
-                                                                "headerDrillDownClick": "onTaxClassHeaderClick",
-                                                                "headerDrillDownText": "Open Tax Class",
-                                                                "itemId": "colTaxClass",
-                                                                "minWidth": 95,
-                                                                "text": "Tax Class"
-                                                            },
-                                                            "name": "MyColumn",
-                                                            "designerId": "d721145f-1c3e-4e31-88c1-a28e40c7585e",
+                                                            "name": "MyGridPanel4",
+                                                            "designerId": "bab1776a-26d5-4a4e-a456-8d3a43cf563b",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
-                                                                    "name": "headerDrillDownText",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "headerDrillDownClick",
+                                                                    "name": "flex",
                                                                     "type": "string"
                                                                 }
                                                             ],
                                                             "cn": [
                                                                 {
-                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "type": "Ext.toolbar.Toolbar",
                                                                     "reference": {
-                                                                        "name": "editor",
+                                                                        "name": "dockedItems",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "componentCls": "i21-toolbar-grid",
+                                                                        "container|padding": "0 0 0 1",
+                                                                        "dock": "top",
+                                                                        "itemId": "tlbGridOptions"
+                                                                    },
+                                                                    "name": "MyToolbar14",
+                                                                    "designerId": "0ee8fb4a-de92-4c85-b6ec-ce84ddbb36cc",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-insert",
+                                                                                "itemId": "btnInsertTax",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Insert"
+                                                                            },
+                                                                            "name": "MyButton13",
+                                                                            "designerId": "404a8351-80c2-4b7c-89e6-41d21b1217fc"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-remove",
+                                                                                "itemId": "btnDeleteTax",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Remove"
+                                                                            },
+                                                                            "name": "MyButton24",
+                                                                            "designerId": "9bbd6fb5-8cbf-4403-9547-438a1857c04d"
+                                                                        },
+                                                                        {
+                                                                            "type": "linkedinstance",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "layout|flex": null
+                                                                            },
+                                                                            "name": "filter15",
+                                                                            "designerId": "71ba6869-8472-4cc0-b05f-12081a55f44d",
+                                                                            "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "intUnitMeasureId",
+                                                                        "flex": 2,
+                                                                        "headerDrillDownClick": "onTaxClassHeaderClick",
+                                                                        "headerDrillDownText": "Open Tax Class",
+                                                                        "itemId": "colTaxClass",
+                                                                        "minWidth": 95,
+                                                                        "text": "Tax Class"
+                                                                    },
+                                                                    "name": "MyColumn",
+                                                                    "designerId": "d721145f-1c3e-4e31-88c1-a28e40c7585e",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownText",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "headerDrillDownClick",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "    {",
+                                                                                    "        dataIndex: 'intTaxClassId',",
+                                                                                    "        dataType: 'numeric',",
+                                                                                    "        hidden: true",
+                                                                                    "    },",
+                                                                                    "    {",
+                                                                                    "        dataIndex: 'strTaxClass',",
+                                                                                    "        dataType: 'string',",
+                                                                                    "        text: 'Tax Class',",
+                                                                                    "        flex: 1",
+                                                                                    "    }",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strTaxClass",
+                                                                                "itemId": "cboTaxClass",
+                                                                                "valueField": "strTaxClass"
+                                                                            },
+                                                                            "name": "MyComboBox1",
+                                                                            "configAlternates": {
+                                                                                "columns": "array"
+                                                                            },
+                                                                            "designerId": "e9d91857-0f12-422a-9e87-debb72abe50c",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.View",
+                                                                    "reference": {
+                                                                        "name": "viewConfig",
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "    {",
-                                                                            "        dataIndex: 'intTaxClassId',",
-                                                                            "        dataType: 'numeric',",
-                                                                            "        hidden: true",
-                                                                            "    },",
-                                                                            "    {",
-                                                                            "        dataIndex: 'strTaxClass',",
-                                                                            "        dataType: 'string',",
-                                                                            "        text: 'Tax Class',",
-                                                                            "        flex: 1",
-                                                                            "    }",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strTaxClass",
-                                                                        "itemId": "cboTaxClass",
-                                                                        "valueField": "strTaxClass"
+                                                                        "itemId": "gvwTax"
                                                                     },
-                                                                    "name": "MyComboBox1",
-                                                                    "configAlternates": {
-                                                                        "columns": "array"
+                                                                    "name": "MyGridView",
+                                                                    "designerId": "89d2a922-79b4-43a9-b05d-bc50054b02f7"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                                    "reference": {
+                                                                        "name": "plugins",
+                                                                        "type": "array"
                                                                     },
-                                                                    "designerId": "e9d91857-0f12-422a-9e87-debb72abe50c",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "clicksToEdit": 1,
+                                                                        "designer|displayName": "cepTax",
+                                                                        "pluginId": "cepTax"
+                                                                    },
+                                                                    "name": "MyCellEditingPlugin",
+                                                                    "designerId": "ea0e9ac8-cb25-424e-9a68-2c6e9ae4d1c1"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.selection.CheckboxModel",
+                                                                    "reference": {
+                                                                        "name": "selModel",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "name": "MyCheckboxSelectionModel26",
+                                                                    "designerId": "47a6e176-c4b9-4947-8374-ed77d9578f6c"
                                                                 }
                                                             ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.View",
-                                                            "reference": {
-                                                                "name": "viewConfig",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "itemId": "gvwTax"
-                                                            },
-                                                            "name": "MyGridView",
-                                                            "designerId": "89d2a922-79b4-43a9-b05d-bc50054b02f7"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.plugin.CellEditing",
-                                                            "reference": {
-                                                                "name": "plugins",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "clicksToEdit": 1,
-                                                                "designer|displayName": "cepTax",
-                                                                "pluginId": "cepTax"
-                                                            },
-                                                            "name": "MyCellEditingPlugin",
-                                                            "designerId": "ea0e9ac8-cb25-424e-9a68-2c6e9ae4d1c1"
-                                                        },
-                                                        {
-                                                            "type": "Ext.selection.CheckboxModel",
-                                                            "reference": {
-                                                                "name": "selModel",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "name": "MyCheckboxSelectionModel26",
-                                                            "designerId": "47a6e176-c4b9-4947-8374-ed77d9578f6c"
                                                         }
                                                     ]
                                                 }
