@@ -40,23 +40,23 @@ SELECT
 	,strPaymentMethod				= P.strPaymentMethod
 	,strShipVia						= SV.strShipVia
 	,strSalesPerson					= SE.strName
-	,strCustomerEmail				= E.strEmail
+	,strCustomerEmail				= EC.strEmail
 	,strCurrency					= CUR.strCurrency
 	,intEntredById					= I.intEntityId
 	,strEnteredBy					= EB.strName
 	,dtmBatchDate					= GL.dtmDate
 	,strBatchId						= GL.strBatchId
-	,strUserEntered					= GL.strName	
-	,ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	,strUserEntered					= GL.strName
+	,intEntityContactId				= I.intEntityContactId
+	,strContactName					= EC.strName
+	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = I.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM         
 	dbo.tblARInvoice AS I 
 INNER JOIN
 	dbo.tblARCustomer AS C 
 		ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 LEFT OUTER JOIN
-	dbo.[tblEMEntityToContact] AS EC ON C.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
-LEFT OUTER JOIN
-	dbo.tblEMEntity AS E ON EC.intEntityContactId = E.intEntityId	
+	dbo.vyuEMEntityContact AS EC ON I.intEntityContactId = EC.intEntityContactId	
 INNER JOIN
 	dbo.tblEMEntity AS CE 
 		ON C.[intEntityCustomerId] = CE.intEntityId 
