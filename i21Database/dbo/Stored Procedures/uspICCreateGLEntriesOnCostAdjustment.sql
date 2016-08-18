@@ -736,11 +736,17 @@ FROM	ForGLEntries_CTE
 WHERE	ForGLEntries_CTE.intTransactionTypeId  = @INV_TRANS_TYPE_Cost_Adjustment
 
 
------------------------------------------------------------------------------------
--- This part is for Revalue WIP
--- WIP (Asset/Inventory) .............. Debit
--- Inventory (Asset/Inventory) ................. Credit
------------------------------------------------------------------------------------
+/*----------------------------------------------------------------------------------
+	This part is for Revalue WIP
+
+	If value is positive: 
+	Inventory (Asset/Inventory) ........ Debit
+	WIP (Asset/Inventory) ....................... Credit
+
+	If value is negative: 
+	WIP (Asset/Inventory) .............. Debit
+	Inventory (Asset/Inventory) ................. Credit
+-----------------------------------------------------------------------------------*/
 UNION ALL  
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -780,7 +786,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intRevalueWIP
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
@@ -827,7 +833,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+			ON tblGLAccount.intAccountId = GLAccounts.intRevalueWIP
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
