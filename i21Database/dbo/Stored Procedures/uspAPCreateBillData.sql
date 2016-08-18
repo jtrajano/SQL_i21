@@ -138,7 +138,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SET @billId = SCOPE_IDENTITY()
 
 	--Add details
-	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO, @voucherDetailNonInvContract, @voucherDetaiCC, @voucherDetailStorage
+	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails, @voucherNonInvDetails, @voucherDetailReceiptPO, @voucherDetailNonInvContract, @voucherDetailCC, @voucherDetailStorage
 	--EXEC uspAPUpdateVoucherTax @billId
 	--EXEC uspAPUpdateVoucherContract @billId
 
