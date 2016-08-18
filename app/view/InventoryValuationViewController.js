@@ -124,7 +124,9 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
             case 'Sales Order':
                 transactionType = 'SONumber';
                 break;
-
+            case 'Invoice':
+                transactionType = 'Invoice';
+                break;
             default:
                 iRely.Functions.showInfoDialog('This transaction is not viewable on a screen.');
                 break;
