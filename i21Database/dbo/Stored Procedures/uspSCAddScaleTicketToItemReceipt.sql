@@ -139,15 +139,15 @@ SELECT
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
-		,dblGross					=
-									CASE 
+		,dblGross					= CASE 
 										WHEN SC.strDistributionOption = 'SPL' THEN @dblTicketGross
-										ELSE SC.dblGrossWeight
-									END
-		,dblNet						= CASE 
-										WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
 										ELSE SC.dblGrossWeight - SC.dblTareWeight
 									END
+		,dblNet						= dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
+		--,dblNet						= CASE 
+		--								WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
+		--								ELSE SC.dblGrossWeight - SC.dblTareWeight
+		--							END
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
