@@ -5,8 +5,6 @@
     [strNamespace]     NVARCHAR (150) COLLATE Latin1_General_CI_AS NOT NULL,
     [strModule]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strTableName]     NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-	[strRecordNoField] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-	[strEntityField]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnApproval]	   BIT NULL,
 	[ysnCustomTab]	   BIT NULL,
     [intConcurrencyId] INT CONSTRAINT [DF__tblSMScre__intCo__381B131F] DEFAULT ((1)) NOT NULL,
