@@ -44,7 +44,7 @@ SELECT LoadDetail.intLoadDetailId
 		,intPLifeTime = PDetail.intLifeTime
 		,strPLifeTimeType = PDetail.strLifeTimeType
 		,strVendorContract = PDetail.strCustomerContract
-		,dblPCashPrice = PDetail.dblCashPrice
+		,dblPCashPrice = PDetail.dblSeqPrice
 		,strPCostUOM = PDetail.strSeqPriceUOM
   	    ,intPCostUOMId = PDetail.intSeqPriceUOMId
 		,dblPCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = PDetail.intPriceItemUOMId),0)
@@ -97,7 +97,7 @@ SELECT LoadDetail.intLoadDetailId
 		,intSLifeTime = SDetail.intLifeTime
 		,strSLifeTimeType = SDetail.strLifeTimeType
 		,strCustomerContract = SDetail.strCustomerContract
-		,dblSCashPrice = SDetail.dblCashPrice
+		,dblSCashPrice = SDetail.dblSeqPrice
 		,strSCostUOM = SDetail.strPriceUOM
   	    ,intSCostUOMId = SDetail.intPriceItemUOMId
 		,dblSCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = SDetail.intPriceItemUOMId),0)
