@@ -336,5 +336,6 @@
     <None Include="Scripts\TM\AddOriginTableIndex.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOriginDegreeOptionView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateCategoryFromOrigin.sql" />
   </ItemGroup>
 </Project>
