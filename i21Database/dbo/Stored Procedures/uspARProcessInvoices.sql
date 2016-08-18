@@ -205,6 +205,13 @@ DECLARE  @Id									INT
 		,@ItemInventoryShipmentItemId			INT
 		,@ItemShipmentNumber					NVARCHAR(50)
 		,@ItemRecipeItemId						INT
+		,@ItemRecipeId							INT
+		,@ItemSublocationId						INT
+		,@ItemCostTypeId						INT
+		,@ItemMarginById						INT
+		,@ItemCommentTypeId						INT
+		,@ItemMargin							NUMERIC(18,6)
+		,@ItemRecipeQty							NUMERIC(18,6)
 		,@ItemSalesOrderDetailId				INT
 		,@ItemSalesOrderNumber					NVARCHAR(25)		
 		,@ItemContractDetailId					INT
@@ -337,7 +344,14 @@ BEGIN
 		,@ItemSCInvoiceNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSCInvoiceNumber] ELSE NULL END)
 		,@ItemInventoryShipmentItemId	= (CASE WHEN @GroupingOption = 0 THEN [intInventoryShipmentItemId] ELSE NULL END)
 		,@ItemShipmentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strShipmentNumber] ELSE NULL END)
-		,@ItemRecipeItemId				= (CASE WHEN @GroupingOption = 0 THEN [intRecipeItemId] ELSE NULL END)		
+		,@ItemRecipeItemId				= (CASE WHEN @GroupingOption = 0 THEN [intRecipeItemId] ELSE NULL END)
+		,@ItemRecipeId					= (CASE WHEN @GroupingOption = 0 THEN [intRecipeId] ELSE NULL END)
+		,@ItemSublocationId				= (CASE WHEN @GroupingOption = 0 THEN [intSubLocationId] ELSE NULL END)
+		,@ItemCostTypeId				= (CASE WHEN @GroupingOption = 0 THEN [intCostTypeId] ELSE NULL END)
+		,@ItemMarginById				= (CASE WHEN @GroupingOption = 0 THEN [intMarginById] ELSE NULL END)
+		,@ItemCommentTypeId				= (CASE WHEN @GroupingOption = 0 THEN [intCommentTypeId] ELSE NULL END)
+		,@ItemMargin					= (CASE WHEN @GroupingOption = 0 THEN [dblMargin] ELSE NULL END)
+		,@ItemRecipeQty					= (CASE WHEN @GroupingOption = 0 THEN [dblRecipeQuantity] ELSE NULL END)
 		,@ItemSalesOrderDetailId		= (CASE WHEN @GroupingOption = 0 THEN [intSalesOrderDetailId] ELSE NULL END)
 		,@ItemSalesOrderNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSalesOrderNumber] ELSE NULL END)		
 		,@ItemContractDetailId			= (CASE WHEN @GroupingOption = 0 THEN [intContractDetailId] ELSE NULL END)
@@ -530,7 +544,14 @@ BEGIN
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 			,@ItemShipmentNumber			= @ItemShipmentNumber
-			,@ItemRecipeItemId				= @ItemRecipeItemId			
+			,@ItemRecipeItemId				= @ItemRecipeItemId
+			,@ItemRecipeId					= @ItemRecipeId
+			,@ItemSublocationId				= @ItemSublocationId
+			,@ItemCostTypeId				= @ItemCostTypeId
+			,@ItemMarginById				= @ItemMarginById
+			,@ItemCommentTypeId				= @ItemCommentTypeId
+			,@ItemMargin					= @ItemMargin
+			,@ItemRecipeQty					= @ItemRecipeQty			
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 			,@ItemContractHeaderId			= @ContractHeaderId
@@ -652,6 +673,13 @@ BEGIN
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
 					,@ItemRecipeItemId				= [intRecipeItemId]
+					,@ItemRecipeId					= [intRecipeId]
+					,@ItemSublocationId				= [intSubLocationId]
+					,@ItemCostTypeId				= [intCostTypeId]
+					,@ItemMarginById				= [intMarginById]
+					,@ItemCommentTypeId				= [intCommentTypeId]
+					,@ItemMargin					= [dblMargin]
+					,@ItemRecipeQty					= [dblRecipeQuantity]
 					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 					,@ContractHeaderId				= [intContractHeaderId]
@@ -717,7 +745,14 @@ BEGIN
 						,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 						,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 						,@ItemShipmentNumber			= @ItemShipmentNumber
-						,@ItemRecipeItemId				= @ItemRecipeItemId						
+						,@ItemRecipeItemId				= @ItemRecipeItemId
+						,@ItemRecipeId					= @ItemRecipeId
+						,@ItemSublocationId				= @ItemSublocationId
+						,@ItemCostTypeId				= @ItemCostTypeId
+						,@ItemMarginById				= @ItemMarginById
+						,@ItemCommentTypeId				= @ItemCommentTypeId
+						,@ItemMargin					= @ItemMargin
+						,@ItemRecipeQty					= @ItemRecipeQty						
 						,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 						,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 						,@ItemContractHeaderId			= @ContractHeaderId
@@ -1228,6 +1263,13 @@ BEGIN TRY
 						,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 						,@ItemShipmentNumber			= [strShipmentNumber]						
 						,@ItemRecipeItemId				= [intRecipeItemId]
+						,@ItemRecipeId					= [intRecipeId]
+						,@ItemSublocationId				= [intSubLocationId]
+						,@ItemCostTypeId				= [intCostTypeId]
+						,@ItemMarginById				= [intMarginById]
+						,@ItemCommentTypeId				= [intCommentTypeId]
+						,@ItemMargin					= [dblMargin]
+						,@ItemRecipeQty					= [dblRecipeQuantity]
 						,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 						,@ContractHeaderId				= [intContractHeaderId]
@@ -1291,7 +1333,14 @@ BEGIN TRY
 							,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 							,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 							,@ItemShipmentNumber			= @ItemShipmentNumber
-							,@ItemRecipeItemId				= @ItemRecipeItemId							
+							,@ItemRecipeItemId				= @ItemRecipeItemId
+							,@ItemRecipeId					= @ItemRecipeId
+							,@ItemSublocationId				= @ItemSublocationId
+							,@ItemCostTypeId				= @ItemCostTypeId
+							,@ItemMarginById				= @ItemMarginById
+							,@ItemCommentTypeId				= @ItemCommentTypeId
+							,@ItemMargin					= @ItemMargin
+							,@ItemRecipeQty					= @ItemRecipeQty							
 							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 							,@ItemContractHeaderId			= @ContractHeaderId
@@ -1454,7 +1503,14 @@ BEGIN TRY
 					,@ItemSCInvoiceNumber			= [strSCInvoiceNumber]
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
-					,@ItemRecipeItemId				= [intRecipeItemId]					
+					,@ItemRecipeItemId				= [intRecipeItemId]	
+					,@ItemRecipeId					= [intRecipeId]
+					,@ItemSublocationId				= [intSubLocationId]
+					,@ItemCostTypeId				= [intCostTypeId]
+					,@ItemMarginById				= [intMarginById]
+					,@ItemCommentTypeId				= [intCommentTypeId]
+					,@ItemMargin					= [dblMargin]
+					,@ItemRecipeQty					= [dblRecipeQuantity]				
 					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 					,@ContractHeaderId				= [intContractHeaderId]
@@ -1559,7 +1615,14 @@ BEGIN TRY
 						,[strSCInvoiceNumber]					= @ItemSCInvoiceNumber				
 						,[intInventoryShipmentItemId]			= @ItemInventoryShipmentItemId			
 						,[strShipmentNumber]					= @ItemShipmentNumber	
-						,[intRecipeItemId]						= @ItemRecipeItemId									
+						,[intRecipeItemId]						= @ItemRecipeItemId
+						,[intRecipeId]							= @ItemRecipeId
+						,[intSubLocationId]						= @ItemSublocationId
+						,[intCostTypeId]						= @ItemCostTypeId
+						,[intMarginById]						= @ItemMarginById
+						,[intCommentTypeId]						= @ItemCommentTypeId
+						,[dblMargin]							= @ItemMargin
+						,[dblRecipeQuantity]					= @ItemRecipeQty									
 						,[intSalesOrderDetailId]				= @ItemSalesOrderDetailId			
 						,[strSalesOrderNumber]					= @ItemSalesOrderNumber		
 						,[intContractHeaderId]					= @ContractHeaderId			

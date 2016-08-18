@@ -122,6 +122,13 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intInventoryShipmentItemId]			INT												NULL		-- Key Value from tblICInventoryShipmentItem (Inventory Shipment)
 	,[strShipmentNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Inventory Shipment Number (Inventory Shipment)
 	,[intRecipeItemId]						INT												NULL		-- Key Value from tblMFRecipeItem (Manufacturing Cost)
+	,[intRecipeId]							INT												NULL
+	,[intSubLocationId]						INT												NULL
+	,[intCostTypeId]						INT												NULL
+	,[intMarginById]						INT												NULL
+	,[intCommentTypeId]						INT												NULL
+	,[dblMargin]							NUMERIC(18,6)									NULL
+	,[dblRecipeQuantity]					NUMERIC(18,6)									NULL
 	,[intSalesOrderDetailId]				INT												NULL		-- Key Value from tblSOSalesOrderDetail (Sales Order)
 	,[strSalesOrderNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Sales Order Number (Sales Order)
 	,[intContractDetailId]					INT												NULL		-- Key Value from tblCTContractDetail (Sales Contract)

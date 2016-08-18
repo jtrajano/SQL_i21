@@ -71,6 +71,13 @@ SELECT
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= SOD.[ysnBlended]
+	,[intRecipeId]						= SOD.[intRecipeId]
+	,[intSubLocationId]					= SOD.[intSubLocationId]
+	,[intCostTypeId]					= SOD.[intCostTypeId]
+	,[intMarginById]					= SOD.[intMarginById]
+	,[intCommentTypeId]					= SOD.[intCommentTypeId]
+	,[dblMargin]						= SOD.[dblMargin]
+	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -205,6 +212,13 @@ SELECT
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= SOD.[ysnBlended]
+	,[intRecipeId]						= SOD.[intRecipeId]
+	,[intSubLocationId]					= SOD.[intSubLocationId]
+	,[intCostTypeId]					= SOD.[intCostTypeId]
+	,[intMarginById]					= SOD.[intMarginById]
+	,[intCommentTypeId]					= SOD.[intCommentTypeId]
+	,[dblMargin]						= SOD.[dblMargin]
+	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -334,6 +348,13 @@ SELECT
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= SOD.[ysnBlended]
+	,[intRecipeId]						= SOD.[intRecipeId]
+	,[intSubLocationId]					= SOD.[intSubLocationId]
+	,[intCostTypeId]					= SOD.[intCostTypeId]
+	,[intMarginById]					= SOD.[intMarginById]
+	,[intCommentTypeId]					= SOD.[intCommentTypeId]
+	,[dblMargin]						= SOD.[dblMargin]
+	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -540,6 +561,13 @@ SELECT
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
 	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM
 	tblICInventoryShipmentItem ICISI
 INNER JOIN
@@ -702,6 +730,13 @@ SELECT
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
 	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM
 	tblICInventoryShipmentCharge ICISC
 INNER JOIN
@@ -807,6 +842,13 @@ SELECT
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= NULL
 	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM
 	vyuARShippedItemDetail ARSID
 INNER JOIN
@@ -923,6 +965,13 @@ SELECT
 	,[intEntitySalespersonId]			= SO.[intEntitySalespersonId]
 	,[strSalespersonName]				= ESP.[strName]
 	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM
 	tblSOSalesOrder SO
 CROSS APPLY
@@ -1037,6 +1086,13 @@ SELECT DISTINCT
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
 	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM
 	tblICInventoryShipmentItem ICISI
 CROSS APPLY
@@ -1149,6 +1205,13 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[intEntitySalespersonId]			= NULL
 	,[strSalespersonName]				= ''
 	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId  = LD.intLoadId
 JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
@@ -1174,150 +1237,164 @@ WHERE
 
 UNION
 		
-SELECT  [strTransactionType] = 'Load Schedule'
-	,[strTransactionNumber] = [strLoadNumber]
-	,[strShippedItemId] = 'lgis:' + CAST(LWS.intLoadDetailId AS NVARCHAR(250))
-	,[intEntityCustomerId] = [intEntityCustomerId]
-	,[strCustomerName] = [strCustomerName]
-	,[intCurrencyId] = [intCurrencyId]
-	,[intSalesOrderId] = NULL
-	,[intSalesOrderDetailId] = NULL
-	,[strSalesOrderNumber] = ''
-	,[dtmProcessDate] = [dtmProcessDate]
-	,[intInventoryShipmentId] = NULL
-	,[intInventoryShipmentItemId] = NULL
-	,[intInventoryShipmentChargeId] = NULL
-	,[strInventoryShipmentNumber] = NULL
-	,[intShipmentId] = NULL
-	,[strShipmentNumber] = NULL
-	,intLoadId = intLoadId
-	,intLoadDetailId = LWS.intLoadDetailId
-	,strLoadNumber = strLoadNumber
-	,[intRecipeItemId] = NULL
-	,[intContractHeaderId] = LWS.[intContractHeaderId]
-	,[strContractNumber] = [strContractNumber]
-	,[intContractDetailId] = LWS.[intContractDetailId]
-	,[intContractSeq] = [intContractSeq]
-	,[intCompanyLocationId] = [intCompanyLocationId]
-	,[strLocationName] = [strLocationName]
-	,[intShipToLocationId] = 0 --ICIS.[intShipToLocationId]
-	,[intFreightTermId] = NULL
-	,[intItemId] = LWS.[intItemId]
-	,[strItemNo] = [strItemNo]
-	,[strItemDescription] = LWS.[strItemDescription]
-	,[intItemUOMId] = NULL
-	,[strUnitMeasure] = NULL
-	,[intOrderUOMId] = NULL
-	,[strOrderUnitMeasure] = NULL
-	,[intShipmentItemUOMId] = NULL
-	,[strShipmentUnitMeasure] = NULL
-	,[dblQtyShipped] = NULL
-	,[dblQtyOrdered] = NULL
-	,[dblShipmentQuantity] = NULL 
-	,[dblShipmentQtyShippedTotal] = NULL
-	,[dblQtyRemaining] = NULL
-	,[dblDiscount] = 0
-	,[dblPrice] = LWS.[dblPrice]
-	,[dblShipmentUnitPrice] = [dblShipmentUnitPrice]
-	,[dblTotalTax] = 0
-	,[dblTotal] = LWS.[dblTotal]
-	,[intStorageLocationId] = NULL
-	,[strStorageLocationName] = NULL
-	,[intTermID] = NULL
-	,[strTerm] = ''
-	,[intEntityShipViaId] = NULL
-	,[strShipVia] = ''
-	,[strTicketNumber] = ''
-	,[intTicketId] = NULL
-	,[intTaxGroupId] = NULL 
-	,[strTaxGroup] = NULL 
-	,[dblWeight] = NULL
-	,[intWeightUOMId] = NULL
-	,[strWeightUnitMeasure] = NULL
-	,[dblGrossWt] = NULL
-	,[dblTareWt] = NULL
-	,[dblNetWt] = NULL
-	,[strPONumber] = ''
-	,[strBOLNumber] = ''
-	,[intSplitId] = NULL
-	,[intEntitySalespersonId] = NULL
-	,[strSalespersonName] = ''
-	,[ysnBlended] = NULL
+SELECT  [strTransactionType]			= 'Load Schedule'
+	,[strTransactionNumber]				= [strLoadNumber]
+	,[strShippedItemId]					= 'lgis:' + CAST(LWS.intLoadDetailId AS NVARCHAR(250))
+	,[intEntityCustomerId]				= [intEntityCustomerId]
+	,[strCustomerName]					= [strCustomerName]
+	,[intCurrencyId]					= [intCurrencyId]
+	,[intSalesOrderId]					= NULL
+	,[intSalesOrderDetailId]			= NULL
+	,[strSalesOrderNumber]				= ''
+	,[dtmProcessDate]					= [dtmProcessDate]
+	,[intInventoryShipmentId]			= NULL
+	,[intInventoryShipmentItemId]		= NULL
+	,[intInventoryShipmentChargeId]		= NULL
+	,[strInventoryShipmentNumber]		= NULL
+	,[intShipmentId]					= NULL
+	,[strShipmentNumber]				= NULL
+	,[intLoadId]						= intLoadId
+	,[intLoadDetailId]					= LWS.intLoadDetailId
+	,[strLoadNumber]					= strLoadNumber
+	,[intRecipeItemId]					= NULL
+	,[intContractHeaderId]				= LWS.[intContractHeaderId]
+	,[strContractNumber]				= [strContractNumber]
+	,[intContractDetailId]				= LWS.[intContractDetailId]
+	,[intContractSeq]					= [intContractSeq]
+	,[intCompanyLocationId]				= [intCompanyLocationId]
+	,[strLocationName]					= [strLocationName]
+	,[intShipToLocationId]				= 0 --ICIS.[intShipToLocationId]
+	,[intFreightTermId]					= NULL
+	,[intItemId]						= LWS.[intItemId]
+	,[strItemNo]						= [strItemNo]
+	,[strItemDescription]				= LWS.[strItemDescription]
+	,[intItemUOMId]						= NULL
+	,[strUnitMeasure]					= NULL
+	,[intOrderUOMId]					= NULL
+	,[strOrderUnitMeasure]				= NULL
+	,[intShipmentItemUOMId]				= NULL
+	,[strShipmentUnitMeasure]			= NULL
+	,[dblQtyShipped]					= NULL
+	,[dblQtyOrdered]					= NULL
+	,[dblShipmentQuantity]				= NULL 
+	,[dblShipmentQtyShippedTotal]		= NULL
+	,[dblQtyRemaining]					= NULL
+	,[dblDiscount]						= 0
+	,[dblPrice]							= LWS.[dblPrice]
+	,[dblShipmentUnitPrice]				= [dblShipmentUnitPrice]
+	,[dblTotalTax]						= 0
+	,[dblTotal]							= LWS.[dblTotal]
+	,[intStorageLocationId]				= NULL
+	,[strStorageLocationName]			= NULL
+	,[intTermID]						= NULL
+	,[strTerm]							= ''
+	,[intEntityShipViaId]				= NULL
+	,[strShipVia]						= ''
+	,[strTicketNumber]					= ''
+	,[intTicketId]						= NULL
+	,[intTaxGroupId]					= NULL 
+	,[strTaxGroup]						= NULL 
+	,[dblWeight]						= NULL
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= NULL
+	,[dblGrossWt]						= NULL
+	,[dblTareWt]						= NULL
+	,[dblNetWt]							= NULL
+	,[strPONumber]						= ''
+	,[strBOLNumber]						= ''
+	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= ''
+	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM vyuLGLoadWarehouseServicesForInvoice LWS
 LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LWS.[intLoadDetailId]
 WHERE LWS.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0 AND ISNULL(LWS.intItemId,0) <> 0
 
 UNION
 		
-SELECT  [strTransactionType] = 'Load Schedule'
-	,[strTransactionNumber] = [strLoadNumber]
-	,[strShippedItemId] = 'lgis:' + CAST(LC.intLoadDetailId AS NVARCHAR(250))
-	,[intEntityCustomerId] = [intEntityCustomerId]
-	,[strCustomerName] = [strCustomerName]
-	,[intCurrencyId] = [intCurrencyId]
-	,[intSalesOrderId] = NULL
-	,[intSalesOrderDetailId] = NULL
-	,[strSalesOrderNumber] = ''
-	,[dtmProcessDate] = [dtmProcessDate]
-	,[intInventoryShipmentId] = NULL
-	,[intInventoryShipmentItemId] = NULL
-	,[intInventoryShipmentChargeId] = NULL
-	,[strInventoryShipmentNumber] = NULL
-	,[intShipmentId] = NULL
-	,[strShipmentNumber] = NULL
-	,intLoadId = intLoadId
-	,intLoadDetailId = LC.intLoadDetailId
-	,strLoadNumber = strLoadNumber
-	,[intRecipeItemId] = NULL
-	,[intContractHeaderId] = LC.[intContractHeaderId]
-	,[strContractNumber] = [strContractNumber]
-	,[intContractDetailId] = LC.[intContractDetailId]
-	,[intContractSeq] = [intContractSeq]
-	,[intCompanyLocationId] = [intCompanyLocationId]
-	,[strLocationName] = [strLocationName]
-	,[intShipToLocationId] = 0 --ICIS.[intShipToLocationId]
-	,[intFreightTermId] = NULL
-	,[intItemId] = LC.[intItemId]
-	,[strItemNo] = [strItemNo]
-	,[strItemDescription] = LC.[strItemDescription]
-	,[intItemUOMId] = NULL
-	,[strUnitMeasure] = NULL
-	,[intOrderUOMId] = NULL
-	,[strOrderUnitMeasure] = NULL
-	,[intShipmentItemUOMId] = NULL
-	,[strShipmentUnitMeasure] = NULL
-	,[dblQtyShipped] = NULL
-	,[dblQtyOrdered] = NULL
-	,[dblShipmentQuantity] = NULL 
-	,[dblShipmentQtyShippedTotal] = NULL
-	,[dblQtyRemaining] = NULL
-	,[dblDiscount] = 0
-	,[dblPrice] = LC.[dblPrice]
-	,[dblShipmentUnitPrice] = [dblShipmentUnitPrice]
-	,[dblTotalTax] = 0
-	,[dblTotal] = LC.[dblTotal]
-	,[intStorageLocationId] = NULL
-	,[strStorageLocationName] = NULL
-	,[intTermID] = NULL
-	,[strTerm] = ''
-	,[intEntityShipViaId] = NULL
-	,[strShipVia] = ''
-	,[strTicketNumber] = ''
-	,[intTicketId] = NULL
-	,[intTaxGroupId] = NULL 
-	,[strTaxGroup] = NULL 
-	,[dblWeight] = NULL
-	,[intWeightUOMId] = NULL
-	,[strWeightUnitMeasure] = NULL
-	,[dblGrossWt] = NULL
-	,[dblTareWt] = NULL
-	,[dblNetWt] = NULL
-	,[strPONumber] = ''
-	,[strBOLNumber] = ''
-	,[intSplitId] = NULL
-	,[intEntitySalespersonId] = NULL
-	,[strSalespersonName] = ''
-	,[ysnBlended] = NULL
+SELECT  [strTransactionType]			= 'Load Schedule'
+	,[strTransactionNumber]				= [strLoadNumber]
+	,[strShippedItemId]					= 'lgis:' + CAST(LC.intLoadDetailId AS NVARCHAR(250))
+	,[intEntityCustomerId]				= [intEntityCustomerId]
+	,[strCustomerName]					= [strCustomerName]
+	,[intCurrencyId]					= [intCurrencyId]
+	,[intSalesOrderId]					= NULL
+	,[intSalesOrderDetailId]			= NULL
+	,[strSalesOrderNumber]				= ''
+	,[dtmProcessDate]					= [dtmProcessDate]
+	,[intInventoryShipmentId]			= NULL
+	,[intInventoryShipmentItemId]		= NULL
+	,[intInventoryShipmentChargeId]		= NULL
+	,[strInventoryShipmentNumber]		= NULL
+	,[intShipmentId]					= NULL
+	,[strShipmentNumber]				= NULL
+	,[intLoadId]						= intLoadId
+	,[intLoadDetailId]					= LC.intLoadDetailId
+	,[strLoadNumber]					= strLoadNumber
+	,[intRecipeItemId]					= NULL
+	,[intContractHeaderId]				= LC.[intContractHeaderId]
+	,[strContractNumber]				= [strContractNumber]
+	,[intContractDetailId]				= LC.[intContractDetailId]
+	,[intContractSeq]					= [intContractSeq]
+	,[intCompanyLocationId]				= [intCompanyLocationId]
+	,[strLocationName]					= [strLocationName]
+	,[intShipToLocationId]				= 0 --ICIS.[intShipToLocationId]
+	,[intFreightTermId]					= NULL
+	,[intItemId]						= LC.[intItemId]
+	,[strItemNo]						= [strItemNo]
+	,[strItemDescription]				= LC.[strItemDescription]
+	,[intItemUOMId]						= NULL
+	,[strUnitMeasure]					= NULL
+	,[intOrderUOMId]					= NULL
+	,[strOrderUnitMeasure]				= NULL
+	,[intShipmentItemUOMId]				= NULL
+	,[strShipmentUnitMeasure]			= NULL
+	,[dblQtyShipped]					= NULL
+	,[dblQtyOrdered]					= NULL
+	,[dblShipmentQuantity]				= NULL 
+	,[dblShipmentQtyShippedTotal]		= NULL
+	,[dblQtyRemaining]					= NULL
+	,[dblDiscount]						= 0
+	,[dblPrice]							= LC.[dblPrice]
+	,[dblShipmentUnitPrice]				= [dblShipmentUnitPrice]
+	,[dblTotalTax]						= 0
+	,[dblTotal]							= LC.[dblTotal]
+	,[intStorageLocationId]				= NULL
+	,[strStorageLocationName]			= NULL
+	,[intTermID]						= NULL
+	,[strTerm]							= ''
+	,[intEntityShipViaId]				= NULL
+	,[strShipVia]						= ''
+	,[strTicketNumber]					= ''
+	,[intTicketId]						= NULL
+	,[intTaxGroupId]					= NULL 
+	,[strTaxGroup]						= NULL 
+	,[dblWeight]						= NULL
+	,[intWeightUOMId]					= NULL
+	,[strWeightUnitMeasure]				= NULL
+	,[dblGrossWt]						= NULL
+	,[dblTareWt]						= NULL
+	,[dblNetWt]							= NULL
+	,[strPONumber]						= ''
+	,[strBOLNumber]						= ''
+	,[intSplitId]						= NULL
+	,[intEntitySalespersonId]			= NULL
+	,[strSalespersonName]				= ''
+	,[ysnBlended]						= NULL
+	,[intRecipeId]						= NULL
+	,[intSubLocationId]					= NULL
+	,[intCostTypeId]					= NULL
+	,[intMarginById]					= NULL
+	,[intCommentTypeId]					= NULL
+	,[dblMargin]						= NULL
+	,[dblRecipeQuantity]				= NULL
 FROM vyuLGLoadCostForCustomer LC
 LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0

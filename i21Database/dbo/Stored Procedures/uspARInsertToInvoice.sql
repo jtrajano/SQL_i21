@@ -66,6 +66,13 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
 							intRecipeItemId				INT,
+							intRecipeId					INT,
+							intSubLocationId			INT,
+							intCostTypeId				INT,
+							intMarginById				INT,
+							intCommentTypeId			INT,
+							dblMargin					NUMERIC(18,6),
+							dblRecipeQuantity			NUMERIC(18,6),
 							strMaintenanceType			NVARCHAR(100),
 							strFrequency				NVARCHAR(100),
 							dtmMaintenanceDate			DATETIME,
@@ -85,29 +92,36 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 
 --GET ITEMS FROM SALES ORDER
 INSERT INTO @tblItemsToInvoice
-SELECT SI.intItemId
-	 , dbo.fnIsStockTrackingItem(SI.intItemId)
-	 , SOD.ysnBlended
-	 , SI.strItemDescription
-	 , SI.intItemUOMId
-	 , SOD.intContractHeaderId
-	 , SOD.intContractDetailId
-	 , SI.dblQtyOrdered
-	 , CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
-	 , CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
-	 , SI.dblDiscount
-	 , CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
-	 , SOD.strPricing 
-	 , SI.intTaxGroupId
-	 , SI.intSalesOrderDetailId
-	 , NULL
-	 , NULL
-	 , SOD.strMaintenanceType
-	 , SOD.strFrequency
-	 , SOD.dtmMaintenanceDate
-	 , I.strType
-	 , SI.strSalesOrderNumber
-	 , NULL
+SELECT intItemId					= SI.intItemId
+	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(SI.intItemId)
+	 , ysnBlended					= SOD.ysnBlended
+	 , strItemDescription			= SI.strItemDescription
+	 , intItemUOMId					= SI.intItemUOMId
+	 , intContractHeaderId			= SOD.intContractHeaderId
+	 , intContractDetailId			= SOD.intContractDetailId
+	 , dblQtyOrdered				= SI.dblQtyOrdered
+	 , dblQtyRemaining				= CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
+	 , dblMaintenanceAmount			= CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
+	 , dblDiscount					= SI.dblDiscount
+	 , dblPrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , strPricing					= SOD.strPricing 
+	 , intTaxGroupId				= SI.intTaxGroupId
+	 , intSalesOrderDetailId		= SI.intSalesOrderDetailId
+	 , intInventoryShipmentItemId	= NULL
+	 , intRecipeItemId				= NULL
+	 , intRecipeId					= SOD.intRecipeId
+	 , intSubLocationId				= SOD.intSubLocationId
+	 , intCostTypeId				= SOD.intCostTypeId
+	 , intMarginById				= SOD.intMarginById
+	 , intCommentTypeId				= SOD.intCommentTypeId
+	 , dblMargin					= SOD.dblMargin
+	 , dblRecipeQuantity			= SOD.dblRecipeQuantity
+	 , strMaintenanceType			= SOD.strMaintenanceType
+	 , strFrequency					= SOD.strFrequency
+	 , dtmMaintenanceDate			= SOD.dtmMaintenanceDate
+	 , strItemType					= I.strType
+	 , strSalesOrderNumber			= SI.strSalesOrderNumber
+	 , strShipmentNumber			= NULL
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -119,31 +133,74 @@ WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
 	AND (ISNULL(SI.intRecipeItemId, 0) = 0)	
 
+--GET COMMENT ITEMS FROM SALES ORDER
+INSERT INTO @tblItemsToInvoice
+SELECT intItemId					= SOD.intItemId
+	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(SOD.intItemId)
+	 , ysnBlended					= SOD.ysnBlended
+	 , strItemDescription			= SOD.strItemDescription
+	 , intItemUOMId					= NULL
+	 , intContractHeaderId			= SOD.intContractHeaderId
+	 , intContractDetailId			= SOD.intContractDetailId
+	 , dblQtyOrdered				= 0
+	 , dblQtyRemaining				= 0
+	 , dblMaintenanceAmount			= 0
+	 , dblDiscount					= 0
+	 , dblPrice						= 0
+	 , strPricing					= NULL 
+	 , intTaxGroupId				= NULL
+	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
+	 , intInventoryShipmentItemId	= NULL
+	 , intRecipeItemId				= NULL
+	 , intRecipeId					= SOD.intRecipeId
+	 , intSubLocationId				= SOD.intSubLocationId
+	 , intCostTypeId				= SOD.intCostTypeId
+	 , intMarginById				= SOD.intMarginById
+	 , intCommentTypeId				= SOD.intCommentTypeId
+	 , dblMargin					= SOD.dblMargin
+	 , dblRecipeQuantity			= SOD.dblRecipeQuantity
+	 , strMaintenanceType			= NULL
+	 , strFrequency					= NULL
+	 , dtmMaintenanceDate			= NULL
+	 , strItemType					= 'Comment'
+	 , strSalesOrderNumber			= NULL
+	 , strShipmentNumber			= NULL 
+FROM tblSOSalesOrderDetail SOD
+WHERE intSalesOrderId = @SalesOrderId 
+AND ISNULL(intCommentTypeId, 0) <> 0
+
 --GET ITEMS FROM POSTED SHIPMENT
 INSERT INTO @tblItemsToInvoice
-SELECT ICSI.intItemId
-	 , dbo.fnIsStockTrackingItem(ICSI.intItemId)
-	 , SOD.ysnBlended
-	 , SOD.strItemDescription
-	 , ICSI.intItemUOMId
-	 , SOD.intContractHeaderId
-	 , SOD.intContractDetailId
-	 , SOD.dblQtyOrdered
-	 , ICSI.dblQuantity
-	 , @dblZeroAmount
-	 , SOD.dblDiscount
-	 , ICSI.dblUnitPrice
-	 , SOD.strPricing 
-	 , SOD.intTaxGroupId
-	 , SOD.intSalesOrderDetailId
-	 , ICSI.intInventoryShipmentItemId
-	 , NULL
-	 , SOD.strMaintenanceType
-	 , SOD.strFrequency
-	 , SOD.dtmMaintenanceDate
-	 , ICI.strType
-	 , SO.strSalesOrderNumber
-	 , ICS.strShipmentNumber
+SELECT intItemId					= ICSI.intItemId
+	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(ICSI.intItemId)
+	 , ysnBlended					= SOD.ysnBlended
+	 , strItemDescription			= SOD.strItemDescription
+	 , intItemUOMId					= ICSI.intItemUOMId
+	 , intContractHeaderId			= SOD.intContractHeaderId
+	 , intContractDetailId			= SOD.intContractDetailId
+	 , dblQtyOrdered				= SOD.dblQtyOrdered
+	 , dblQtyRemaining				= ICSI.dblQuantity
+	 , dblMaintenanceAmount			= @dblZeroAmount
+	 , dblDiscount					= SOD.dblDiscount
+	 , dblPrice						= ICSI.dblUnitPrice
+	 , strPricing					= SOD.strPricing 
+	 , intTaxGroupId				= SOD.intTaxGroupId
+	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
+	 , intInventoryShipmentItemId	= ICSI.intInventoryShipmentItemId
+	 , intRecipeItemId				= NULL
+	 , intRecipeId					= SOD.intRecipeId
+	 , intSubLocationId				= SOD.intSubLocationId
+	 , intCostTypeId				= SOD.intCostTypeId
+	 , intMarginById				= SOD.intMarginById
+	 , intCommentTypeId				= SOD.intCommentTypeId
+	 , dblMargin					= SOD.dblMargin
+	 , dblRecipeQuantity			= SOD.dblRecipeQuantity
+	 , strMaintenanceType			= SOD.strMaintenanceType
+	 , strFrequency					= SOD.strFrequency
+	 , dtmMaintenanceDate			= SOD.dtmMaintenanceDate
+	 , strItemType					= ICI.strType
+	 , strSalesOrderNumber			= SO.strSalesOrderNumber
+	 , strShipmentNumber			= ICS.strShipmentNumber
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -154,29 +211,36 @@ AND ICS.ysnPosted = 1
 
 --GET ITEMS FROM Manufacturing - Other Charges
 INSERT INTO @tblItemsToInvoice
-SELECT ARSI.intItemId
-	 , dbo.fnIsStockTrackingItem(ARSI.intItemId)
-	 , ARSI.ysnBlended
-	 , ARSI.strItemDescription
-	 , ARSI.intItemUOMId
-	 , ARSI.intContractHeaderId
-	 , ARSI.intContractDetailId
-	 , 0
-	 , ARSI.dblQtyRemaining  
-	 , 0 
-	 , ARSI.dblDiscount
-	 , ARSI.dblPrice 
-	 , ''
-	 , NULL
-	 , NULL
-	 , NULL
-	 , NULL
-	 , ''
-	 , NULL
-	 , NULL
-	 , I.strType
-	 , ARSI.strSalesOrderNumber
-	 , ARSI.strShipmentNumber
+SELECT intItemId					= ARSI.intItemId
+	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(ARSI.intItemId)
+	 , ysnBlended					= ARSI.ysnBlended
+	 , strItemDescription			= ARSI.strItemDescription
+	 , intItemUOMId					= ARSI.intItemUOMId
+	 , intContractHeaderId			= ARSI.intContractHeaderId
+	 , intContractDetailId			= ARSI.intContractDetailId
+	 , dblQtyOrdered				= 0
+	 , dblQtyRemaining				= ARSI.dblQtyRemaining  
+	 , dblMaintenanceAmount			= 0 
+	 , dblDiscount					= ARSI.dblDiscount
+	 , dblPrice						= ARSI.dblPrice 
+	 , strPricing					= ''
+	 , intTaxGroupId				= NULL
+	 , intSalesOrderDetailId		= NULL
+	 , intInventoryShipmentItemId	= NULL
+	 , intRecipeItemId				= NULL
+	 , intRecipeId					= NULL
+	 , intSubLocationId				= NULL
+	 , intCostTypeId				= NULL
+	 , intMarginById				= NULL
+	 , intCommentTypeId				= NULL
+	 , dblMargin					= NULL
+	 , dblRecipeQuantity			= NULL
+	 , strMaintenanceType			= ''
+	 , strFrequency					= NULL
+	 , dtmMaintenanceDate			= NULL
+	 , strItemType					= I.strType
+	 , strSalesOrderNumber			= ARSI.strSalesOrderNumber
+	 , strShipmentNumber			= ARSI.strShipmentNumber
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -211,7 +275,6 @@ SELECT TOP 1
 		@CurrencyId				=	intCurrencyId,
 		@TermId					=	intTermId,
 		@EntityId				=	@UserId,
-		--@Date					=	dtmDate,
 		@Date					=	@DateOnly,
 		@DueDate				=	dtmDueDate,
 		@EntitySalespersonId	=	intEntitySalespersonId,
@@ -502,7 +565,14 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemShipmentNumber		NVARCHAR(100),
 						@ItemMaintenanceType	NVARCHAR(100),
 						@ItemFrequency			NVARCHAR(100),
-						@ItemMaintenanceDate	DATETIME
+						@ItemMaintenanceDate	DATETIME,
+						@ItemRecipeId			INT,
+						@ItemSublocationId		INT,
+						@ItemCostTypeId			INT,
+						@ItemMarginById			INT,
+						@ItemCommentTypeId		INT,
+						@ItemMargin				NUMERIC(18,6),
+						@ItemRecipeQty			NUMERIC(18,6)
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -523,12 +593,19 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
 						@ItemShipmentDetailId	= intInventoryShipmentItemId,
 						@ItemRecipeItemId		= intRecipeItemId,
+						@ItemRecipeId			= intRecipeId,
+						@ItemSublocationId		= intSublocationId,
+						@ItemCostTypeId			= intCostTypeId,
+						@ItemMarginById			= intMarginById,
+						@ItemCommentTypeId		= intCommentTypeId,
+						@ItemMargin				= dblMargin,
+						@ItemRecipeQty			= dblRecipeQuantity,
 						@ItemSalesOrderNumber	= strSalesOrderNumber,
 						@ItemShipmentNumber		= strShipmentNumber,
 						@ItemMaintenanceType	= strMaintenanceType,
 						@ItemFrequency			= strFrequency,
 						@ItemMaintenanceDate	= dtmMaintenanceDate						
-				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
+				FROM @tblItemsToInvoice ORDER BY intSalesOrderDetailId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
 							 @InvoiceId						= @NewInvoiceId	
@@ -555,6 +632,13 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId							
 							,@ItemInventoryShipmentItemId	= @ItemShipmentDetailId
 							,@ItemRecipeItemId				= @ItemRecipeItemId
+							,@ItemRecipeId					= @ItemRecipeId
+							,@ItemSublocationId				= @ItemSublocationId
+							,@ItemCostTypeId				= @ItemCostTypeId
+							,@ItemMarginById				= @ItemMarginById
+							,@ItemCommentTypeId				= @ItemCommentTypeId
+							,@ItemMargin					= @ItemMargin
+							,@ItemRecipeQty					= @ItemRecipeQty
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 							,@ItemShipmentNumber			= @ItemShipmentNumber
 							,@EntitySalespersonId			= @EntitySalespersonId

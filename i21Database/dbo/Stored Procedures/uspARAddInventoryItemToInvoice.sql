@@ -29,6 +29,13 @@
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemRecipeItemId				INT				= NULL
+	,@ItemRecipeId					INT				= NULL
+	,@ItemSublocationId				INT				= NULL
+	,@ItemCostTypeId				INT				= NULL
+	,@ItemMarginById				INT				= NULL
+	,@ItemCommentTypeId				INT				= NULL
+	,@ItemMargin					NUMERIC(18,6)	= NULL
+	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
@@ -222,6 +229,13 @@ BEGIN TRY
 				,[intInventoryShipmentItemId]
 				,[strShipmentNumber]
 				,[intRecipeItemId] 
+				,[intRecipeId]
+				,[intSubLocationId]
+				,[intCostTypeId]
+				,[intMarginById]
+				,[intCommentTypeId]
+				,[dblMargin]
+				,[dblRecipeQuantity]
 				,[intSalesOrderDetailId]
 				,[strSalesOrderNumber]
 				,[intContractHeaderId]
@@ -248,7 +262,7 @@ BEGIN TRY
 				,[intPerformerId]
 				,[ysnLeaseBilling]
 				,[ysnVirtualMeterReading]
-				,[intEntitySalespersonId]
+				,[intEntitySalespersonId]				
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -287,6 +301,13 @@ BEGIN TRY
 				,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 
 				,[strShipmentNumber]				= @ItemShipmentNumber 
 				,[intRecipeItemId]					= @ItemRecipeItemId 
+				,[intRecipeId]						= @ItemRecipeId
+				,[intSubLocationId]					= @ItemSublocationId
+				,[intCostTypeId]					= @ItemCostTypeId
+				,[intMarginById]					= @ItemMarginById
+				,[intCommentTypeId]					= @ItemCommentTypeId	
+				,[dblMargin]						= @ItemMargin
+				,[dblRecipeQuantity]				= @ItemRecipeQty
 				,[intSalesOrderDetailId]			= @ItemSalesOrderDetailId 
 				,[strSalesOrderNumber]				= @ItemSalesOrderNumber 
 				,[intContractHeaderId]				= @ItemContractHeaderId

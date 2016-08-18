@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddMiscItemToInvoice]
 	 @InvoiceId						INT
+	,@ItemId						INT				= NULL
 	,@ItemPrepayTypeId				INT				= 0
 	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
@@ -15,6 +16,14 @@
 	,@ItemTaxGroupId				INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
 	,@SubCurrency					BIT				= 0
+	,@ItemRecipeItemId				INT				= NULL
+	,@ItemRecipeId					INT				= NULL
+	,@ItemSublocationId				INT				= NULL
+	,@ItemCostTypeId				INT				= NULL
+	,@ItemMarginById				INT				= NULL
+	,@ItemCommentTypeId				INT				= NULL
+	,@ItemMargin					NUMERIC(18,6)	= NULL
+	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 AS
 
 BEGIN
@@ -116,10 +125,18 @@ BEGIN TRY
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
 		,[intEntitySalespersonId]
+		,[intRecipeItemId]
+		,[intRecipeId]
+		,[intSubLocationId]
+		,[intCostTypeId]
+		,[intMarginById]
+		,[intCommentTypeId]
+		,[dblMargin]
+		,[dblRecipeQuantity]
 		,[intConcurrencyId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
-		,[intItemId]						= NULL
+		,[intItemId]						= @ItemId
 		,[intPrepayTypeId]					= @ItemPrepayTypeId 
 		,[dblPrepayRate]					= @ItemPrepayRate 
 		,[strItemDescription]				= ISNULL(@ItemDescription, '')
@@ -165,6 +182,14 @@ BEGIN TRY
 		,[ysnLeaseBilling]					= NULL
 		,[ysnVirtualMeterReading]			= NULL
 		,[intEntitySalespersonId]			= @EntitySalespersonId
+		,[intRecipeItemId]					= @ItemRecipeItemId
+		,[intRecipeId]						= @ItemRecipeId
+		,[intSubLocationId]					= @ItemSublocationId
+		,[intCostTypeId]					= @ItemCostTypeId
+		,[intMarginById]					= @ItemMarginById
+		,[intCommentTypeId]					= @ItemCommentTypeId
+		,[dblMargin]						= @ItemMargin
+		,[dblRecipeQuantity]				= @ItemRecipeQty
 		,[intConcurrencyId]					= 0
 			
 END TRY
