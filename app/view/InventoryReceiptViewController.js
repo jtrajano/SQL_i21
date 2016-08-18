@@ -1151,6 +1151,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var record = Ext.create('Inventory.model.ReceiptItemLot');
+        var me = this;
+
         record.set('strUnitMeasure', currentReceiptItem.get('strUnitMeasure'));
         record.set('intItemUnitMeasureId', currentReceiptItem.get('intUnitMeasureId'));
         record.set('dblLotUOMConvFactor', currentReceiptItem.get('dblItemUOMConvFactor'));
@@ -1204,7 +1206,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 grossQty = qty;
             }
             else if (weightCF !== 0){
-                grossQty = (lotCF * qty) / weightCF;
+				grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, qty);
             }
             
         }
@@ -1498,6 +1500,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onReceiptItemSelect: function (combo, records, eOpts) {
+        var me = this;
+
         if (records.length <= 0)
             return;
 
@@ -1614,7 +1618,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var ordered = current.get('dblOrderQty');
             var qtyToReceive = ordered - received;
             if (origCF > 0 && newCF > 0) {
-                qtyToReceive = (qtyToReceive * origCF) / newCF;
+                //qtyToReceive = (qtyToReceive * origCF) / newCF;
+                qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive);
                 current.set('dblOpenReceive', qtyToReceive);
             }
 
@@ -2038,7 +2043,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             ,totalNet = 0
             ,lotGross = 0
             ,lotTare = 0
-            ,ysnCalculatedInLot = 0;
+            ,ysnCalculatedInLot = 0
+            ,me = this;
 
         //Calculate based on Lot
         if (record.tblICInventoryReceiptItemLots()) {
@@ -2067,7 +2073,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                         grossQty = lotQty;
                                                 }
                                                 else if (weightCF !== 0){
-                                                        grossQty = (lotCF * lotQty) / weightCF;
+                                                        //grossQty = (lotCF * lotQty) / weightCF;
+                                                        grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
                                                 }
                                         
                                         lot.set('dblGrossWeight', grossQty);
@@ -2127,8 +2134,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     totalGross = 0;
                  }
                 else {
-                    totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; 
-                    
+                    //totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; // TODO: fix this part
+                    totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
                  }    
                 totalNet = totalGross;
                 
@@ -2511,7 +2518,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             if (iRely.Functions.isEmpty(receiptUOMCF)) receiptUOMCF = 0.00;
                             if (iRely.Functions.isEmpty(weightUOMCF)) weightUOMCF = 0.00;
 
-                            var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF; 
+                            //var totalGross = (receiptItemQty * receiptUOMCF) / weightUOMCF;
+                            var totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
 
                             if(row.get('dblGross') !== totalGross) {                                
                                 ReceivedGrossDiscrepancyItems = ReceivedGrossDiscrepancyItems + row.get('strItemNo') + '<br/>'
