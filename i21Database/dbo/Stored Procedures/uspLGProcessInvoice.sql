@@ -3,11 +3,12 @@
 		@intEntityUserSecurityId INT,
 		@intNewInvoiceId INT OUTPUT
 AS	
-BEGIN
+BEGIN TRY
 	DECLARE @intPurchaseSale INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ysnUnShip BIT
 	DECLARE @NewInvoiceId INT
+	DECLARE @strErrMsg NVARCHAR(MAX)
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		,@strLoadNumber = strLoadNumber
@@ -30,4 +31,11 @@ BEGIN
 	END
 
 	SELECT @intNewInvoiceId = @NewInvoiceId
-END
+END TRY
+BEGIN CATCH  
+  
+ IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
+ SET @strErrMsg = ERROR_MESSAGE()      
+ RAISERROR(@strErrMsg, 16, 1, 'WITH NOWAIT')     
+  
+END CATCH 
