@@ -151,8 +151,8 @@ BEGIN
 		,[dblAdjustedTax]			= LITE.[dblAdjustedTax]
 		,[intTaxAccountId]			= ISNULL(LITE.[intTaxAccountId], SMTC.[intSalesTaxAccountId])
 		,[ysnCheckoffTax]			= ISNULL(LITE.[ysnCheckoffTax], SMTC.[ysnCheckoffTax])
-		,[ysnTaxExempt]				= LITE.[ysnTaxExempt] 
 		,[strTaxCode]				= SMTC.[strTaxCode]
+		,[ysnTaxExempt]				= LITE.[ysnTaxExempt] 		
 		,[ysnTaxAdjusted]			= LITE.[ysnTaxAdjusted] 
 		,[ysnComputed]				= 0
 	FROM
