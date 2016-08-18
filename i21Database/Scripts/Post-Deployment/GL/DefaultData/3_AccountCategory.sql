@@ -335,49 +335,5 @@ GO
 GO
 	PRINT 'Finished converting account group to category'
 GO
-	PRINT 'Start updating Account Category for AR/Inventory Conversion'
-GO
-	DECLARE @ptitmmst BIT= 0, @ptclsmst BIT = 0, @ptmglmst BIT = 0
 	
-	SELECT top 1 @ptitmmst = 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'ptitmmst'
-	SELECT top 1 @ptclsmst = 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'ptclsmst'
-	SELECT top 1 @ptmglmst = 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'ptmglmst'
-	
-	IF @ptitmmst = 1 AND @ptclsmst = 1 AND @ptmglmst = 1
-	BEGIN
-		DECLARE @sql NVARCHAR(MAX) 
-		SET @sql = 'DECLARE @length INT
-		DECLARE @tbl TABLE(code VARCHAR(20), cat varchar(50))
-		SELECT TOP 1 @length= intLength FROM tblGLAccountStructure WHERE strType = ''Primary''
-		;WITH cogs AS (
-		select distinct(left(CAST(ptitm_pur_acct AS VARCHAR),@length)) code,''Cost of Goods'' cat from ptitmmst  
-		),sales as
-		---Sales Account Category
-		(select distinct(left(CAST(ptitm_sls_acct AS VARCHAR),@length))code,''Sales Account''cat from ptitmmst ),
-		inv as(
-		---Inventory Category
-		select distinct(left(CAST(ptcls_inv_acct_no AS VARCHAR),@length))code, ''Inventory'' cat from ptclsmst),
-		ap as(
-		---AP Clearing Category
-		select distinct(left(CAST(ptmgl_ap AS VARCHAR),@length))code ,''AP Clearing'' cat from ptmglmst),
-		auto_v as (
-		select distinct(LEFT(CAST(ptmgl_pur_variance AS VARCHAR),@length)) code, ''Auto-Variance'' cat from ptmglmst  
-		)
-		INSERT INTO @tbl
-		(
-			code,
-			cat
-		)
-		SELECT code , cat FROM cogs UNION 
-		SELECT code , cat FROM sales UNION
-		SELECT code , cat FROM inv UNION
-		SELECT code , cat FROM ap UNION
-		SELECT code , cat FROM auto_v 
-		UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
-		FROM dbo.tblGLAccountSegment tgs  JOIN @tbl t ON tgs.strCode = t.code  COLLATE SQL_Latin1_General_CP1_CS_AS
-		JOIN dbo.tblGLAccountCategory tgc ON t.cat  COLLATE SQL_Latin1_General_CP1_CS_AS = tgc.strAccountCategory'
-		EXEC sp_executesql @sql
-	END
-GO
-
 
