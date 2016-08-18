@@ -121,6 +121,12 @@ FROM (
 		WHERE A.ysnPosted = 1 
 		AND D.intSourceType = 2 --Inbound Shipment
 		AND E.intContractStatusId = 5
+		AND NOT EXISTS (
+			--MAKE SURE THERE WAS NO CLAIM CREATED YET
+			SELECT 1 FROM tblAPBill N 
+			INNER JOIN tblAPBillDetail N2 ON N.intBillId = N2.intBillId
+			WHERE B.intContractDetailId = N2.intContractDetailId AND B.intContractHeaderId = N2.intContractHeaderId AND N.intTransactionType = 11
+		)
 	) tmpClaim
 	GROUP BY dblCost,
 		dblCostUnitQty,
