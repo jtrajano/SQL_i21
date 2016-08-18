@@ -163,7 +163,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		DELETE FROM #poContractDetails WHERE intPurchaseDetailId = @purchaseDetailId
 	END
 
-	EXEC uspPOUpdateOnOrder @poId, 0
+	EXEC uspPOUpdateOnOrder @poIdCreated, 0
 
 	IF @transCount = 0 COMMIT TRANSACTION
 
