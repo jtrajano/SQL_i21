@@ -272,7 +272,8 @@ BEGIN
 		
 				EXEC uspGLBuildOriginAccount  0
 				EXEC uspGLBuildAccount 0			
-				EXEC uspGLConvertAccountGroupToCategory				
+				EXEC uspGLConvertAccountGroupToCategory		
+				EXEC uspGLUpdateCategoryFromOrigin		
 			END	
 			SET @result = ''SUCCESSFULLY IMPORTED''
 			
