@@ -16,7 +16,8 @@ Declare @tblRecipeItemCostWithMargin AS table
 	intRecipeItemId int,
 	dblQuantity NUMERIC(38,20),
 	dblCost NUMERIC(38,20),
-	dblCostWithMargin NUMERIC(38,20)
+	dblCostWithMargin NUMERIC(38,20),
+	dblUnitMargin NUMERIC(38,20)
 )
  
 Select @dblRecipeQty=dblQuantity From tblMFRecipe Where intRecipeId=@intRecipeId
@@ -60,7 +61,7 @@ Begin
 	Begin
 		Select @dblUnitMargin=@dblMargin/@dblQty
 
-		Update @tblRecipeItemCostWithMargin Set dblCostWithMargin=dblCost + @dblUnitMargin
+		Update @tblRecipeItemCostWithMargin Set dblCostWithMargin=dblCost + @dblUnitMargin,dblUnitMargin=@dblUnitMargin
 	End
 	Else
 	Begin
@@ -68,7 +69,7 @@ Begin
 
 		Select @dblUnitMargin=((@dblTotalCost * @dblMargin)/100)/@dblQty
 
-		Update @tblRecipeItemCostWithMargin Set dblCostWithMargin=dblCost + @dblUnitMargin
+		Update @tblRecipeItemCostWithMargin Set dblCostWithMargin=dblCost + @dblUnitMargin,dblUnitMargin=@dblUnitMargin
 	End
 End
 
@@ -78,6 +79,7 @@ Select ri.intRecipeId,ri.intRecipeItemId,ri.intItemId,i.strItemNo,i.strDescripti
 ri.dblCalculatedQuantity * (@dblQuantity/@dblRecipeQty) AS dblQuantity,
 ri.dblCalculatedQuantity,
 ri.intItemUOMId,um.strUnitMeasure AS strUOM,ri.intMarginById,mg.strName AS strMarginBy,ISNULL(ri.dblMargin,0) AS dblMargin,
+CASE WHEN ISNULL(sd.intContractDetailId,0)=0 THEN
 CASE When @dblMargin = 0 Then
 ISNULL(dbo.fnMFConvertCostToTargetItemUOM(iu.intItemUOMId,ri.intItemUOMId,
 CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
@@ -86,6 +88,7 @@ Else ISNULL(ip.dblStandardCost,0) End
 ),0) 
 Else
 cm.dblCostWithMargin End
+ELSE sd.dblPrice End
 AS dblCost,
 CASE WHEN ISNULL(sd.intContractDetailId,0)=0 THEN 1 ELSE 2 END AS intCostSourceId,
 CASE WHEN ISNULL(sd.intContractDetailId,0)=0 THEN 'Item' ELSE 'Sales Contract' END AS strCostSource,
@@ -95,7 +98,8 @@ ri.dblCalculatedLowerTolerance * (@dblQuantity/@dblRecipeQty) AS dblCalculatedLo
 ri.dblCalculatedUpperTolerance * (@dblQuantity/@dblRecipeQty) AS dblCalculatedUpperTolerance,
 ri.dblLowerTolerance,ri.dblUpperTolerance,
 0 intCommentTypeId,'' strCommentType,
-sd.intContractHeaderId,sd.intContractDetailId,cv.strContractNumber,cv.intContractSeq,cv.strSequenceNumber
+sd.intContractHeaderId,sd.intContractDetailId,cv.strContractNumber,cv.intContractSeq,cv.strSequenceNumber,ISNULL(ip.dblStandardCost,0.0) AS dblStandardCost,
+ISNULL(cm.dblUnitMargin,0.0) AS dblUnitMargin
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId AND iu.ysnStockUnit=1
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -113,7 +117,7 @@ i.strType AS strItemType,0 dblQuantity,0 dblCalculatedQuantity,
 0 AS dblCost,0 AS intCostSourceId,'' AS strCostSource,0.0 AS dblRetailPrice,
 0 dblUnitQty,0 dblCalculatedLowerTolerance,0 dblCalculatedUpperTolerance,0 dblLowerTolerance,0 dblUpperTolerance,
 ri.intCommentTypeId,ct.strName strCommentType,
-null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber
+null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber,0.0 AS dblStandardCost,0.0 AS dblUnitMargin
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Join tblMFCommentType ct on ri.intCommentTypeId=ct.intCommentTypeId
 Left Join tblSOSalesOrderDetail sd on sd.intRecipeItemId=ri.intRecipeItemId AND sd.intRecipeId=@intRecipeId AND sd.intSalesOrderId=@intSalesOrderId
