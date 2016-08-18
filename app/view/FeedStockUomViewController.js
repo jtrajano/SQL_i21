@@ -38,7 +38,7 @@ Ext.define('Inventory.view.FeedStockUomViewController', {
                             columns: [
                                 {
                                     dataIndex: 'intUnitMeasureId',
-                                    dataType: 'numeric',
+                                    dataType: 'int',
                                     text: 'Unit Of Measure Id',
                                     hidden: true
                                 },
@@ -62,7 +62,7 @@ Ext.define('Inventory.view.FeedStockUomViewController', {
                                 store: '{unitMeasure}'
                             },
                             listeners: {
-                                select: 'onCboUOMSelect'
+                                select: this.onCboUOMSelect
                             }
                         }
                     },

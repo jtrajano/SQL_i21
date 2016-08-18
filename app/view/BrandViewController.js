@@ -57,7 +57,7 @@ Ext.define('Inventory.view.BrandViewController', {
                             columns: [
                                 {
                                     dataIndex: 'intManufacturerId',
-                                    dataType: 'numeric',
+                                    dataType: 'int',
                                     text: 'Manufacturer ID',
                                     hidden: true
                                 },
@@ -75,7 +75,7 @@ Ext.define('Inventory.view.BrandViewController', {
                                 store: '{manufacturer}'
                             },
                             listeners: {
-                                select: 'onCboManufacturerSelect'
+                                select: this.onCboManufacturerSelect
                             }
                         }
                     }
