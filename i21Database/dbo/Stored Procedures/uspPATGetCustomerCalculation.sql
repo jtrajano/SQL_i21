@@ -70,13 +70,13 @@ END
 						   dblTotalRefund = Total.dblTotalRefund
 					  FROM (
 							SELECT	B.intCustomerPatronId as intCustomerId,
-									dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN ROUND(dblVolume,2) ELSE 0 END,
-									dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN ROUND(dblVolume,2) ELSE 0 END,
-									(CASE WHEN (RRD.dblRate * ROUND(dblVolume,2)) <= @dblMinimumRefund THEN 0 ELSE (RRD.dblRate * ROUND(dblVolume,2)) END) AS dblRefundAmount,
-									(RRD.dblRate * ROUND(dblVolume,2)) * (RR.dblCashPayout/100) AS dblCashRefund,
-									(RRD.dblRate * ROUND(dblVolume,2)) * (RR.dblCashPayout/100) * (@FWT/100) AS dbLessFWT,
+									dblTotalPurchases = CASE WHEN PC.strPurchaseSale = 'Purchase' THEN dblVolume ELSE 0 END,
+									dblTotalSales = CASE WHEN PC.strPurchaseSale = 'Sale' THEN dblVolume ELSE 0 END,
+									(CASE WHEN (RRD.dblRate * dblVolume) <= @dblMinimumRefund THEN 0 ELSE (RRD.dblRate * dblVolume) END) AS dblRefundAmount,
+									(RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) AS dblCashRefund,
+									(RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) * (@FWT/100) AS dbLessFWT,
 									@LessService AS dblLessServiceFee,
-									dblVolume = ROUND(dblVolume,2),
+									dblVolume = dblVolume,
 									dblTotalRefund = RRD.dblRate,
 									B.intFiscalYear
 							FROM	tblPATCustomerVolume B

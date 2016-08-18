@@ -13,7 +13,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @intCustomerId INT
-	DECLARE @dblCheckAmount DECIMAL
+	DECLARE @dblCheckAmount DECIMAL(18,2)
 
 	DECLARE the_cursor CURSOR FAST_FORWARD
 	FOR SELECT intCustomerId, dblCheckAmount
