@@ -21,8 +21,11 @@ DECLARE @CurrentErrorMessage NVARCHAR(250)
 		,@ZeroDecimal NUMERIC(18, 6)
 		
 SET @ZeroDecimal = 0.000000
+
 		
-BEGIN TRANSACTION
+IF ISNULL(@RaiseError,0) = 0
+	BEGIN TRANSACTION
+	
 
 DECLARE	 @OriginalInvoiceId			INT
 		,@CreatedInvoiceId			INT
@@ -117,16 +120,20 @@ WHERE
 --VALIDATE INVOICE TYPES
 IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standard', 'Credit Memo')
 	BEGIN			
-		IF @@ERROR <> 0	GOTO _RollBackTransaction
-		RAISERROR(120072, 16, 1, @Type)
-		GOTO _ExitTransaction
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120072, 16, 1, @Type)
+		RETURN 0;
 	END
 
 IF ISNULL(@LoadDistributionHeaderId, 0) > 0 OR @Type = 'Transport Delivery'
 	BEGIN	
-		IF @@ERROR <> 0	GOTO _RollBackTransaction		
-		RAISERROR(120037, 16, 1)
-		GOTO _ExitTransaction
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120037, 16, 1)
+		RETURN 0;
 	END
 
 --VALIDATE INVOICES THAT HAS CONTRACTS
@@ -137,9 +144,11 @@ IF EXISTS(SELECT NULL FROM tblARInvoiceDetail ID
 				AND CH.ysnUnlimitedQuantity = 0
 				AND ISNULL(CD.dblBalance, @ZeroDecimal) - ID.dblQtyShipped < @ZeroDecimal)
 	BEGIN
-		IF @@ERROR <> 0	GOTO _RollBackTransaction		
-		RAISERROR(120038, 16, 1)
-		GOTO _ExitTransaction
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120038, 16, 1)
+		RETURN 0;
 	END
 
 --VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Inventory Shipment
@@ -154,9 +163,11 @@ IF EXISTS(	SELECT
 				ARID.intInvoiceId = @InvoiceId
 				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(ICISI.dblQuantity, @ZeroDecimal))
 	BEGIN
-		IF @@ERROR <> 0	GOTO _RollBackTransaction		
-		RAISERROR(120039, 16, 1)
-		GOTO _ExitTransaction
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120039, 16, 1)
+		RETURN 0;
 	END
 
 --VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Sales Order
@@ -172,10 +183,13 @@ IF EXISTS(	SELECT
 				ARID.intInvoiceId = @InvoiceId
 				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(SOSOD.dblQtyOrdered - SOSOD.dblQtyShipped, @ZeroDecimal))
 	BEGIN
-		IF @@ERROR <> 0	GOTO _RollBackTransaction		
-		RAISERROR(120040, 16, 1)
-		GOTO _ExitTransaction
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120040, 16, 1)
+		RETURN 0;
 	END
+
 
 BEGIN TRY
 	EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -264,9 +278,12 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = @CurrentErrorMessage
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 
@@ -415,9 +432,12 @@ BEGIN TRY
 		[intInvoiceId] = @InvoiceId
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 
@@ -493,9 +513,12 @@ BEGIN TRY
 				
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 BEGIN TRY
@@ -504,21 +527,20 @@ BEGIN TRY
 	WHERE intInvoiceId = @NewInvoiceId
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = @CurrentErrorMessage
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
-IF @@ERROR = 0 GOTO _CommitTransaction
-
-_RollBackTransaction:
-ROLLBACK TRANSACTION
-GOTO _ExitTransaction
-
-_CommitTransaction: 
-COMMIT TRANSACTION
-GOTO _ExitTransaction
-
-_ExitTransaction:
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION 
+	
+RETURN 1;
 
 END
+GO
+
+

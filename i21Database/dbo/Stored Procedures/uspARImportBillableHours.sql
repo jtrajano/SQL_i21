@@ -58,7 +58,7 @@ WHERE
 
 IF EXISTS(SELECT * FROM @NullTermsTable)
 BEGIN
-	RAISERROR('Some of the customers doesn''t have Terms setup.', 11, 1) 
+	RAISERROR(120042, 16, 1) 
 	RETURN 0
 END
 

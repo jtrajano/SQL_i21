@@ -9,13 +9,13 @@ AS
 	--VALIDATE DATES
 	IF @dtmStartDate IS NULL
 		BEGIN
-			RAISERROR('Start Date is Required', 16, 1);
+			RAISERROR(120043, 16, 1);
 			RETURN 0;
 		END
 
 	IF @dtmEndDate IS NULL
 		BEGIN
-			RAISERROR('End Date is Required', 16, 1);
+			RAISERROR(120044, 16, 1);
 			RETURN 0;
 		END
 

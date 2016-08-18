@@ -294,6 +294,5 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120073) EXEC sp_dropmess
 SET @strmessage = 'Cannot process Sales Order with zero(0) amount.'
 EXEC sp_addmessage 120073,16,@strmessage,'us_english','False'
 
+
  
-
-

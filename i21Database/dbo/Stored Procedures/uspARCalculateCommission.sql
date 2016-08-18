@@ -9,13 +9,13 @@ AS
 
 IF ISNULL(@intCommissionPlanId, 0) = 0
 	BEGIN
-		RAISERROR('Commission Plan is required.', 16, 1);
+		RAISERROR(120018, 16, 1);
 		RETURN 0;
 	END
 
 IF ISNULL(@intCommissionRecapId, 0) = 0
 	BEGIN
-		RAISERROR('Commission Recap ID is required.', 16, 1);
+		RAISERROR(120019, 16, 1);
 		RETURN 0;
 	END
 

@@ -76,13 +76,14 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@TermDiscount			NUMERIC(18, 6)
 		,@SubCurrencyCents		INT
 		,@existingInvoiceDetail INT
-		 
+
 SET @ZeroDecimal = 0.000000
 
 IF NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
-	BEGIN					
-		RAISERROR(120001, 16, 1)
-		GOTO _ExitTransaction
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120001, 16, 1);
+		RETURN 0;
 	END
 
 SELECT 
@@ -97,26 +98,32 @@ WHERE
 	
 	
 IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
-BEGIN					
-	RAISERROR(120002, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120002, 16, 1);
+		RETURN 0;
+	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
-BEGIN		
-	RAISERROR(120003, 16, 1);
-	GOTO _ExitTransaction
-END		
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120003, 16, 1);
+		RETURN 0;
+	END		
 	
 IF NOT EXISTS(	SELECT NULL 
 				FROM tblICItem IC INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
 				WHERE IC.[intItemId] = @ItemId AND IL.[intLocationId] = @CompanyLocationId)
-BEGIN		
-	RAISERROR(120004, 16, 1);
-	GOTO _ExitTransaction
-END
-
-BEGIN TRANSACTION
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120004, 16, 1);
+		RETURN 0;
+	END
+	
+IF ISNULL(@RaiseError,0) = 0	
+	BEGIN TRANSACTION
+	
+	
 IF (ISNULL(@RefreshPrice,0) = 1)
 	BEGIN
 		DECLARE  @ContractNumber	INT
@@ -155,8 +162,10 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			,@TermId					= @TermId
 		END TRY
 		BEGIN CATCH
-			SET @ErrorMessage = ERROR_MESSAGE()  
-			RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+			SET @ErrorMessage = ERROR_MESSAGE();
+			IF ISNULL(@RaiseError,0) = 1
+				RAISERROR(@ErrorMessage, 16, 1);
+			RETURN 0;
 		END CATCH
 	END	
 
@@ -322,9 +331,12 @@ BEGIN TRY
 			
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+	IF ISNULL(@RaiseError,0) = 0	
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 	
 DECLARE @NewId INT
@@ -335,24 +347,23 @@ BEGIN TRY
 		EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+	IF ISNULL(@RaiseError,0) = 0	
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 SET @NewInvoiceDetailId = ISNULL(@existingInvoiceDetail, @NewId)
 
-IF @@ERROR = 0 GOTO _CommitTransaction
-
-_RollBackTransaction:
-ROLLBACK TRANSACTION
-GOTO _ExitTransaction
-
-_CommitTransaction: 
-COMMIT TRANSACTION
-GOTO _ExitTransaction
-
-_ExitTransaction: 
+IF ISNULL(@RaiseError,0) = 0	
+	COMMIT TRANSACTION
+SET @ErrorMessage = NULL;
+RETURN 1;
+	
 	
 END
+GO
+
 
