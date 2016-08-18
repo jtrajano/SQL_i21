@@ -45,63 +45,76 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 	
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId)
-BEGIN
-	RAISERROR(120025, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120025, 16, 1);
+		RETURN 0;
+	END
 
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND ysnActive = 1)
-BEGIN
-	RAISERROR(120026, 16, 1);
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120026, 16, 1);
+		RETURN 0;
+	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId)
-BEGIN
-	RAISERROR(120032, 16, 1);		
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(120032,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
+		RETURN 0;
+	END
+
 
 IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId AND [ysnActive] = 1)
-BEGIN
-	RAISERROR(120070, 16, 1);		
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120070, 16, 1);		
+		RETURN 0;
+	END	
 		
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
-BEGIN		
-	RAISERROR(120027, 16, 1);		
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120027, 16, 1);		
+		RETURN 0;
+	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId AND [ysnLocationActive] = 1)
-BEGIN
-	RAISERROR(120028, 16, 1);		
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120028, 16, 1);		
+		RETURN 0;
+	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE [intEntityId] = @EntityId)
-BEGIN
-	RAISERROR(120029, 16, 1);		
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120029, 16, 1);		
+		RETURN 0;
+	END
 
 
 IF @AllowPrepayment = 0 AND @InvoiceId IS NULL AND @AmountPaid > @ZeroDecimal
-BEGIN
-	RAISERROR(120035, 16, 1);		
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120035, 16, 1);		
+		RETURN 0;
+	END	
 
 IF @AllowOverpayment = 0 AND @ApplyTermDiscount = 0 AND @InvoiceId IS NOT NULL AND @AmountPaid > (@Payment + @Discount - @Interest)
-BEGIN		
-	RAISERROR(120071, 16, 1);		
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120071, 16, 1);		
+		RETURN 0;
+	END
+
 
 SET @AmountPaid = ROUND(@AmountPaid, [dbo].[fnARGetDefaultDecimal]())
+
 	
-BEGIN TRANSACTION
+IF ISNULL(@RaiseError,0) = 0	
+	BEGIN TRANSACTION
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -152,9 +165,12 @@ BEGIN TRY
 	
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 
@@ -181,30 +197,29 @@ BEGIN
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
-					IF @@ERROR <> 0	GOTO _RollBackTransaction
-					SET @ErrorMessage = ERROR_MESSAGE()  
-					RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+					IF ISNULL(@RaiseError,0) = 0
+						ROLLBACK TRANSACTION
+					SET @ErrorMessage = @AddDetailError;
+					IF ISNULL(@RaiseError,0) = 1
+						RAISERROR(@ErrorMessage, 16, 1);
+					RETURN 0;
 				END
 	END TRY
 	BEGIN CATCH
-		IF @@ERROR <> 0	GOTO _RollBackTransaction
-		SET @ErrorMessage = ERROR_MESSAGE()  
-		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = ERROR_MESSAGE();
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
 	END CATCH
-END
+END	
 
 SET @NewPaymentId = @NewId
 
-IF @@ERROR = 0 GOTO _CommitTransaction
-
-_RollBackTransaction:
-ROLLBACK TRANSACTION
-GOTO _ExitTransaction
-
-_CommitTransaction: 
-COMMIT TRANSACTION
-GOTO _ExitTransaction
-
-_ExitTransaction:
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION
+SET @ErrorMessage = NULL;
+RETURN 1;
 	
 END
