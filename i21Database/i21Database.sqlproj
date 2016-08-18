@@ -4078,6 +4078,7 @@
     <Build Include="dbo\Views\vyuRKFutureTransactionChart.sql" />
     <Build Include="dbo\Views\vyuRKGetBalanceToReceipt.sql" />
     <Build Include="dbo\Views\vyuRKGetSalesIntransitWOPickLot.sql" />
+    <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
