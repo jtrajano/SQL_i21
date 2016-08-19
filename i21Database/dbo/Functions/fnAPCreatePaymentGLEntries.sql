@@ -256,6 +256,7 @@ BEGIN
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
+	AND B.intInvoiceId IS NULL
 	GROUP BY A.[strPaymentRecordNum],
 	A.intPaymentId,
 	B.intBillId,
@@ -267,6 +268,60 @@ BEGIN
 	A.dblAmountPaid,
 	B.intAccountId
 		
+	--INVOICE
+	IF EXISTS(SELECT 1 FROM tblAPPaymentDetail A WHERE A.intInvoiceId > 0 AND A.intPaymentId IN (SELECT intId FROM @paymentIds))
+	BEGIN
+		INSERT INTO @returntable
+		SELECT	
+			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
+			[strBatchId]				=	@batchId,
+			[intAccountId]				=	B.intAccountId,
+			[dblDebit]                  =   SUM(B.dblPayment * -1),
+			[dblCredit]					=	0,
+			[dblDebitUnit]				=	0,
+			[dblCreditUnit]				=	0,
+			[strDescription]			=	'Posted Receivables',
+			[strCode]					=	'AP',
+			[strReference]				=	A.strNotes,
+			[intCurrencyId]				=	A.intCurrencyId,
+			[dblExchangeRate]			=	1,
+			[dtmDateEntered]			=	GETDATE(),
+			[dtmTransactionDate]		=	NULL,
+			[strJournalLineDescription]	=	(SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId),
+			[intJournalLineNo]			=	B.intPaymentDetailId,
+			[ysnIsUnposted]				=	0,
+			[intUserId]					=	@intUserId,
+			[intEntityId]				=	@intUserId,
+			[strTransactionId]			=	A.strPaymentRecordNum,
+			[intTransactionId]			=	A.intPaymentId,
+			[strTransactionType]		=	@SCREEN_NAME,
+			[strTransactionForm]		=	@SCREEN_NAME,
+			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0
+		FROM	[dbo].tblAPPayment A 
+				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND B.dblPayment <> 0
+		AND B.intInvoiceId IS NOT NULL
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		B.intInvoiceId,
+		D.strVendorId,
+		A.dtmDatePaid,
+		A.intCurrencyId,
+		A.strNotes,
+		B.intPaymentDetailId,
+		A.dblAmountPaid,
+		B.intAccountId
+	END
+
 	--Interest
 	IF (@applyInterest = 1 AND @InterestAccount IS NOT NULL AND @InterestAccount > 0)
 	BEGIN
