@@ -26,10 +26,11 @@ AS
 			SELECT @sql += '
 				,ap as(
 				---AP Clearing Category
-				select distinct(left(CAST({0}mgl_ap AS VARCHAR),@length))code ,''AP Clearing'' cat from {0}mglmst),
-				auto_v as (
-				select distinct(LEFT(CAST({0}mgl_pur_variance AS VARCHAR),@length)) code, ''Auto-Variance'' cat from {0}mglmst  
-				)'
+				select distinct(left(CAST(ptmgl_ap AS VARCHAR),@length))code ,''AP Clearing'' cat from ptmglmst)'
+			IF @tablePrefix = 'ag'
+			SELECT @sql += '
+				,ap as(
+				select distinct(LEFT(CAST(agcgl_pend_ap AS VARCHAR),@length)) code, ''AP Clearing'' cat from agctlmst)'
 			SELECT @sql +='
 				INSERT INTO @tbl
 				(
@@ -38,12 +39,8 @@ AS
 				)
 				SELECT code , cat FROM cogs  
 				UNION SELECT code , cat FROM sales 
-				UNION SELECT code , cat FROM inv'
-			IF @tablePrefix = 'pt'
-			SELECT @sql += '
-				UNION SELECT code , cat FROM ap 
-				UNION SELECT code , cat FROM auto_v'
-
+				UNION SELECT code , cat FROM inv
+				UNION SELECT code , cat FROM ap'
 			SELECT @sql +='
 				UPDATE tgs SET intAccountCategoryId = tgc.intAccountCategoryId
 				FROM dbo.tblGLAccountSegment tgs  JOIN @tbl t ON tgs.strCode = t.code  COLLATE SQL_Latin1_General_CP1_CS_AS

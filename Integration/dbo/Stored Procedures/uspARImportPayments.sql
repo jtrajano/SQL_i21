@@ -19,7 +19,8 @@ BEGIN
 CREATE PROCEDURE uspARImportPayments 
 	 @Checking	BIT = 0  
 	,@UserId	INT = 0 
-	,@Total		INT = 0		OUTPUT  
+	,@Total		INT = 0		OUTPUT
+	,@Posted	BIT = NULL
 AS  
 BEGIN  
 
@@ -909,7 +910,8 @@ BEGIN
 CREATE PROCEDURE uspARImportPayments 
 	 @Checking	BIT = 0  
 	,@UserId	INT = 0 
-	,@Total		INT = 0		OUTPUT  
+	,@Total		INT = 0		OUTPUT 
+	,@Posted	BIT = NULL 
 AS  
 BEGIN  
 

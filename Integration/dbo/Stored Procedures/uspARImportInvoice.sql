@@ -7,8 +7,8 @@ CREATE PROCEDURE uspARImportInvoice
 	@UserId INT = 0,
 	@Total INT = 0 OUTPUT,
 	@StartDate DATETIME = NULL,
-	@EndDate DATETIME = NULL
-
+	@EndDate DATETIME = NULL,
+	@Posted BIT = NULL
 	AS
 BEGIN
 	--================================================

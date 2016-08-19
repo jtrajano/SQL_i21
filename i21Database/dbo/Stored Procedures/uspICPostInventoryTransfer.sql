@@ -506,6 +506,7 @@ BEGIN
 			SET		intStatusId = 1 -- Status: Open
 			WHERE	strTransferNo = @strTransactionId
 		END
+
 	-- If shipment required, then update the in-transit quantities. 
 	IF @ysnShipmentRequired = 1
 	BEGIN 

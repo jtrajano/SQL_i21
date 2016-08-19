@@ -74,10 +74,10 @@ END
 					 ON PC.intPatronageCategoryId = RRD.intPatronageCategoryId
 			CROSS APPLY (
 						SELECT DISTINCT B.intCustomerPatronId AS intCustomerId,
-							   (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN SUM(ROUND(dblVolume,2)) ELSE 0 END) AS dblVolume,
-							   (CASE WHEN (RRD.dblRate * SUM(ROUND(dblVolume,2))) <= @dblMinimumRefund THEN 0 ELSE (RRD.dblRate * SUM(ROUND(dblVolume,2))) END) AS dblRefundAmount,
+							   (CASE WHEN AC.strStockStatus IN (SELECT strStockStatus FROM #statusTable) THEN SUM(dblVolume) ELSE 0 END) AS dblVolume,
+							   (CASE WHEN (RRD.dblRate * SUM(dblVolume)) <= @dblMinimumRefund THEN 0 ELSE (RRD.dblRate * SUM(dblVolume)) END) AS dblRefundAmount,
 							   (CASE WHEN AC.strStockStatus NOT IN (SELECT strStockStatus FROM #statusTable) THEN ISNULL(SUM(RRD.dblRate),0) ELSE 0 END) AS dblNonRefundAmount,
-							   (RRD.dblRate * SUM(ROUND(dblVolume,2))) * (RR.dblCashPayout/100) AS dblCashRefund
+							   (RRD.dblRate * SUM(dblVolume)) * (RR.dblCashPayout/100) AS dblCashRefund
 						  FROM tblPATCustomerVolume B
 					INNER JOIN tblPATRefundRateDetail RRD
 							ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
