@@ -201,9 +201,9 @@ IF @Post = 1
 				SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @NewlyCreatedInvoices ORDER BY intInvoiceId
 				
 				IF (SELECT COUNT(*) FROM @NewlyCreatedInvoices) > 1
-					SELECT @params = ISNULL(@params, '') + intInvoiceId + ', ' FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
+					SELECT @params = ISNULL(@params, '') + CONVERT(NVARCHAR(50), intInvoiceId) + ', ' FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
 				ELSE
-					SELECT @params = ISNULL(@params, '') + intInvoiceId FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
+					SELECT @params = ISNULL(@params, '') + CONVERT(NVARCHAR(50), intInvoiceId) FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
 
 				DELETE FROM @NewlyCreatedInvoices WHERE intInvoiceId = @intInvoiceId
 			END
