@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets45ae82beb4ed0cb11ecdda787011cd4b9467f5f898caeedc7526eda989850e73))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetseb433a6fd949cae897a7b1aeccad9af34685a7484d08a3acf9fda70b6ce066c4))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets45ae82beb4ed0cb11ecdda787011cd4b9467f5f898caeedc7526eda989850e73 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetseb433a6fd949cae897a7b1aeccad9af34685a7484d08a3acf9fda70b6ce066c4 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "45ae82beb4ed0cb11ecdda787011cd4b9467f5f898caeedc7526eda989850e73"; }
+            get { return "eb433a6fd949cae897a7b1aeccad9af34685a7484d08a3acf9fda70b6ce066c4"; }
         }
 
         /// <summary>
@@ -11355,7 +11355,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryValuation
-        [CodeFirstDatabaseSchema.vyuICGetInventoryValuation](T1.vyuICGetInventoryValuation_intInventoryValuationKeyId, T1.vyuICGetInventoryValuation_intInventoryTransactionId, T1.vyuICGetInventoryValuation_intItemId, T1.vyuICGetInventoryValuation_strItemNo, T1.vyuICGetInventoryValuation_strItemDescription, T1.vyuICGetInventoryValuation_intCategoryId, T1.vyuICGetInventoryValuation_strCategory, T1.vyuICGetInventoryValuation_intItemLocationId, T1.vyuICGetInventoryValuation_strLocationName, T1.vyuICGetInventoryValuation_intSubLocationId, T1.vyuICGetInventoryValuation_strSubLocationName, T1.vyuICGetInventoryValuation_intStorageLocationId, T1.vyuICGetInventoryValuation_strStorageLocationName, T1.vyuICGetInventoryValuation_dtmDate, T1.vyuICGetInventoryValuation_strTransactionType, T1.vyuICGetInventoryValuation_strTransactionForm, T1.vyuICGetInventoryValuation_strTransactionId, T1.vyuICGetInventoryValuation_dblBeginningQtyBalance, T1.vyuICGetInventoryValuation_dblQuantity, T1.vyuICGetInventoryValuation_dblRunningQtyBalance, T1.vyuICGetInventoryValuation_dblCost, T1.vyuICGetInventoryValuation_dblBeginningBalance, T1.vyuICGetInventoryValuation_dblValue, T1.vyuICGetInventoryValuation_dblRunningBalance, T1.vyuICGetInventoryValuation_strBatchId, T1.vyuICGetInventoryValuation_strCostingMethod, T1.vyuICGetInventoryValuation_strUOM)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryValuation](T1.vyuICGetInventoryValuation_intInventoryValuationKeyId, T1.vyuICGetInventoryValuation_intInventoryTransactionId, T1.vyuICGetInventoryValuation_intItemId, T1.vyuICGetInventoryValuation_strItemNo, T1.vyuICGetInventoryValuation_strItemDescription, T1.vyuICGetInventoryValuation_intCategoryId, T1.vyuICGetInventoryValuation_strCategory, T1.vyuICGetInventoryValuation_intItemLocationId, T1.vyuICGetInventoryValuation_strLocationName, T1.vyuICGetInventoryValuation_intSubLocationId, T1.vyuICGetInventoryValuation_strSubLocationName, T1.vyuICGetInventoryValuation_intStorageLocationId, T1.vyuICGetInventoryValuation_strStorageLocationName, T1.vyuICGetInventoryValuation_dtmDate, T1.vyuICGetInventoryValuation_strTransactionType, T1.vyuICGetInventoryValuation_strTransactionForm, T1.vyuICGetInventoryValuation_strTransactionId, T1.vyuICGetInventoryValuation_dblBeginningQtyBalance, T1.vyuICGetInventoryValuation_dblQuantity, T1.vyuICGetInventoryValuation_dblRunningQtyBalance, T1.vyuICGetInventoryValuation_dblCost, T1.vyuICGetInventoryValuation_dblBeginningBalance, T1.vyuICGetInventoryValuation_dblValue, T1.vyuICGetInventoryValuation_dblRunningBalance, T1.vyuICGetInventoryValuation_strBatchId, T1.vyuICGetInventoryValuation_strCostingMethod, T1.vyuICGetInventoryValuation_strUOM, T1.vyuICGetInventoryValuation_strStockUOM, T1.vyuICGetInventoryValuation_dblQuantityInStockUOM, T1.vyuICGetInventoryValuation_dblCostInStockUOM)
     FROM (
         SELECT 
             T.intInventoryValuationKeyId AS vyuICGetInventoryValuation_intInventoryValuationKeyId, 
@@ -11385,6 +11385,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strBatchId AS vyuICGetInventoryValuation_strBatchId, 
             T.strCostingMethod AS vyuICGetInventoryValuation_strCostingMethod, 
             T.strUOM AS vyuICGetInventoryValuation_strUOM, 
+            T.strStockUOM AS vyuICGetInventoryValuation_strStockUOM, 
+            T.dblQuantityInStockUOM AS vyuICGetInventoryValuation_dblQuantityInStockUOM, 
+            T.dblCostInStockUOM AS vyuICGetInventoryValuation_dblCostInStockUOM, 
             True AS _from0
         FROM InventoryEntities.vyuICGetInventoryValuations AS T
     ) AS T1");
@@ -11398,7 +11401,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryValuations
-        [iRely.Inventory.Model.vyuICGetInventoryValuation](T1.vyuICGetInventoryValuation_intInventoryValuationKeyId, T1.vyuICGetInventoryValuation_intInventoryTransactionId, T1.vyuICGetInventoryValuation_intItemId, T1.vyuICGetInventoryValuation_strItemNo, T1.vyuICGetInventoryValuation_strItemDescription, T1.vyuICGetInventoryValuation_intCategoryId, T1.vyuICGetInventoryValuation_strCategory, T1.vyuICGetInventoryValuation_intItemLocationId, T1.vyuICGetInventoryValuation_strLocationName, T1.vyuICGetInventoryValuation_intSubLocationId, T1.vyuICGetInventoryValuation_strSubLocationName, T1.vyuICGetInventoryValuation_intStorageLocationId, T1.vyuICGetInventoryValuation_strStorageLocationName, T1.vyuICGetInventoryValuation_dtmDate, T1.vyuICGetInventoryValuation_strTransactionType, T1.vyuICGetInventoryValuation_strTransactionForm, T1.vyuICGetInventoryValuation_strTransactionId, T1.vyuICGetInventoryValuation_dblBeginningQtyBalance, T1.vyuICGetInventoryValuation_dblQuantity, T1.vyuICGetInventoryValuation_dblRunningQtyBalance, T1.vyuICGetInventoryValuation_dblCost, T1.vyuICGetInventoryValuation_dblBeginningBalance, T1.vyuICGetInventoryValuation_dblValue, T1.vyuICGetInventoryValuation_dblRunningBalance, T1.vyuICGetInventoryValuation_strBatchId, T1.vyuICGetInventoryValuation_strCostingMethod, T1.vyuICGetInventoryValuation_strUOM)
+        [iRely.Inventory.Model.vyuICGetInventoryValuation](T1.vyuICGetInventoryValuation_intInventoryValuationKeyId, T1.vyuICGetInventoryValuation_intInventoryTransactionId, T1.vyuICGetInventoryValuation_intItemId, T1.vyuICGetInventoryValuation_strItemNo, T1.vyuICGetInventoryValuation_strItemDescription, T1.vyuICGetInventoryValuation_intCategoryId, T1.vyuICGetInventoryValuation_strCategory, T1.vyuICGetInventoryValuation_intItemLocationId, T1.vyuICGetInventoryValuation_strLocationName, T1.vyuICGetInventoryValuation_intSubLocationId, T1.vyuICGetInventoryValuation_strSubLocationName, T1.vyuICGetInventoryValuation_intStorageLocationId, T1.vyuICGetInventoryValuation_strStorageLocationName, T1.vyuICGetInventoryValuation_dtmDate, T1.vyuICGetInventoryValuation_strTransactionType, T1.vyuICGetInventoryValuation_strTransactionForm, T1.vyuICGetInventoryValuation_strTransactionId, T1.vyuICGetInventoryValuation_dblBeginningQtyBalance, T1.vyuICGetInventoryValuation_dblQuantity, T1.vyuICGetInventoryValuation_dblRunningQtyBalance, T1.vyuICGetInventoryValuation_dblCost, T1.vyuICGetInventoryValuation_dblBeginningBalance, T1.vyuICGetInventoryValuation_dblValue, T1.vyuICGetInventoryValuation_dblRunningBalance, T1.vyuICGetInventoryValuation_strBatchId, T1.vyuICGetInventoryValuation_strCostingMethod, T1.vyuICGetInventoryValuation_strUOM, T1.vyuICGetInventoryValuation_strStockUOM, T1.vyuICGetInventoryValuation_dblQuantityInStockUOM, T1.vyuICGetInventoryValuation_dblCostInStockUOM)
     FROM (
         SELECT 
             T.intInventoryValuationKeyId AS vyuICGetInventoryValuation_intInventoryValuationKeyId, 
@@ -11428,6 +11431,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strBatchId AS vyuICGetInventoryValuation_strBatchId, 
             T.strCostingMethod AS vyuICGetInventoryValuation_strCostingMethod, 
             T.strUOM AS vyuICGetInventoryValuation_strUOM, 
+            T.strStockUOM AS vyuICGetInventoryValuation_strStockUOM, 
+            T.dblQuantityInStockUOM AS vyuICGetInventoryValuation_dblQuantityInStockUOM, 
+            T.dblCostInStockUOM AS vyuICGetInventoryValuation_dblCostInStockUOM, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryValuation AS T
     ) AS T1");

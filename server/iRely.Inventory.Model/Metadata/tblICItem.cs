@@ -696,6 +696,9 @@ namespace iRely.Inventory.Model
         public string strBatchId { get; set; }
         public string strCostingMethod { get; set; }
         public string strUOM { get; set; }
+        public string strStockUOM { get; set; }
+        public decimal? dblQuantityInStockUOM { get; set; }
+        public decimal? dblCostInStockUOM { get; set; }
     }
 
     public class vyuICGetInventoryValuationSummary
