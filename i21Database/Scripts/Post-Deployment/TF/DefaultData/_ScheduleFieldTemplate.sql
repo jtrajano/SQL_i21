@@ -46,7 +46,7 @@
 		,(0, N'dblBillQty', 0)
 		,(0, N'strInvoiceNumber', 0)
 		,(0, N'strPONumber', 0)
-		,(0, N'strBOLNumber', 0)
+		--,(0, N'strBOLNumber', 0)
 		,(0, N'strSupplierName', 0)
 		,(0, N'strTaxCode', 0)
 		,(0, N'dtmDate', 0)
