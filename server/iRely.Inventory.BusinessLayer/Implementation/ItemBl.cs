@@ -419,11 +419,138 @@ namespace iRely.Inventory.BusinessLayer
         //    };
         //}
 
+        // TODO: Remove as soon the change for IC-2421 is stable enough. 
+        //public async Task<SearchResult> GetInventoryValuation(GetParameter param)
+        //{
+        //    // Setup the default sort. 
+        //    List<SearchSort> addDefaultSortList = new List<SearchSort>();
+        //    var defaultLocationSort = new SearchSort() { property = "strLocationName", direction = "ASC" }; 
+        //    var defaultItemSort = new SearchSort() { property = "strItemNo", direction = "ASC" };
+        //    var defaultInventoryTransactionId = new SearchSort() { property = "intInventoryTransactionId", direction = "ASC" };
+
+        //    foreach (var ps in param.sort)
+        //    {
+        //        // Use the direction specified by the caller. 
+        //        if (ps.property.ToLower() == "strlocationname")
+        //        {
+        //            defaultLocationSort.direction = ps.direction;
+        //        }
+
+        //        // Use the direction specified by the caller. 
+        //        else if (ps.property.ToLower() == "stritemno")
+        //        {
+        //            defaultItemSort.direction = ps.direction;
+        //        }
+
+        //        // Add any additional sorting specified by the caller. 
+        //        else
+        //        {
+        //            addDefaultSortList.Add(
+        //                new SearchSort()
+        //                {
+        //                    direction = ps.direction,
+        //                    property = ps.property
+        //                }
+        //            );
+        //        }                
+        //    }
+
+        //    // Make sure item, location and inv transaction id are the first in the sorting order.
+        //    addDefaultSortList.Insert(0, defaultInventoryTransactionId);
+        //    addDefaultSortList.Insert(0, defaultLocationSort);
+        //    addDefaultSortList.Insert(0, defaultItemSort);
+            
+        //    IEnumerable<SearchSort> enDefaultSort = addDefaultSortList;
+        //    var sort = ExpressionBuilder.GetSortSelector(enDefaultSort);
+        //    param.sort = addDefaultSortList;
+                              
+        //    // Create a reverse sort
+        //    List<SearchSort> reverseSortList = new List<SearchSort>();
+        //    foreach (var x in enDefaultSort)
+        //    {
+        //        reverseSortList.Add(
+        //            new SearchSort() { 
+        //                direction = x.direction.ToLower() == "asc" ? "DESC" : "ASC", 
+        //                property = x.property
+        //            }
+        //        ); 
+        //    }
+        //    IEnumerable<SearchSort> enReverseSort = reverseSortList;
+        //    var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort); 
+        //    var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
+            
+        //    // Assemble the query. 
+        //    var query = (
+        //        from v in _db.GetQuery<vyuICGetInventoryValuation>()
+        //        select v
+        //    ).Filter(param, true);                     
+
+        //    // Initialize the beginning and running balances.     
+        //    decimal? dblBeginningBalance = 0;
+        //    decimal? dblRunningBalance = 0;
+        //    decimal? dblBeginningQty = 0;
+        //    decimal? dblRunningQty = 0;
+        //    string locationFromPreviousPage = ""; 
+
+        //    // If it is not the starting page, retrieve the previous page data. 
+        //    if (param.start > 0)
+        //    {
+        //        // Get the last location used from the previous page. 
+        //        var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault(); 
+        //        locationFromPreviousPage = previousPage.strLocationName;
+
+        //        // Get the beginning qty and balances
+        //        dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblValue);
+        //        dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblQuantity);
+        //    }
+
+        //    // Get the page. Convert it into a list for the loop below. 
+        //    var paged_data = await query.PagingBySelector(param).ToListAsync();
+
+        //    // Loop thru the List, calculate, and assign the running qty and balance for each record. 
+        //    string currentLocation = locationFromPreviousPage;
+        //    string lastLocation = locationFromPreviousPage; 
+        //    foreach (var row in paged_data)
+        //    {
+        //        if (row.intInventoryTransactionId != 0)
+        //        {
+        //            // Check if we need to rest the beginning qty and balance. It will reset if the location changed. 
+        //            currentLocation = row.strLocationName;
+        //            if (lastLocation != currentLocation)
+        //            {
+        //                // Reset the qty and balances back to zero. 
+        //                dblBeginningBalance = 0;
+        //                dblBeginningQty = 0;
+        //                lastLocation = currentLocation;
+        //            }
+
+        //            // Calculate beginning and running balance
+        //            row.dblBeginningBalance = dblBeginningBalance;
+        //            dblRunningBalance = dblBeginningBalance + row.dblValue;
+        //            row.dblRunningBalance = Convert.ToDecimal(Math.Round(Convert.ToDouble(dblRunningBalance), 2));
+        //            dblBeginningBalance = dblRunningBalance;
+
+        //            // Calculate the beginning and running quantity
+        //            row.dblBeginningQtyBalance = dblBeginningQty;
+        //            dblRunningQty = dblBeginningQty + row.dblQuantity;
+        //            row.dblRunningQtyBalance = dblRunningQty;
+        //            dblBeginningQty = dblRunningQty;                
+        //        }
+        //    }
+            
+        //    return new SearchResult()
+        //    {
+        //        data = paged_data.AsQueryable().Select(selector),
+        //        total = await query.CountAsync()
+        //    };
+        //}
+
+
         public async Task<SearchResult> GetInventoryValuation(GetParameter param)
         {
             // Setup the default sort. 
             List<SearchSort> addDefaultSortList = new List<SearchSort>();
-            var defaultLocationSort = new SearchSort() { property = "strLocationName", direction = "ASC" }; 
+            var defaultLocationSort = new SearchSort() { property = "strLocationName", direction = "ASC" };
             var defaultItemSort = new SearchSort() { property = "strItemNo", direction = "ASC" };
             var defaultInventoryTransactionId = new SearchSort() { property = "intInventoryTransactionId", direction = "ASC" };
 
@@ -451,56 +578,57 @@ namespace iRely.Inventory.BusinessLayer
                             property = ps.property
                         }
                     );
-                }                
+                }
             }
 
             // Make sure item, location and inv transaction id are the first in the sorting order.
             addDefaultSortList.Insert(0, defaultInventoryTransactionId);
             addDefaultSortList.Insert(0, defaultLocationSort);
             addDefaultSortList.Insert(0, defaultItemSort);
-            
+
             IEnumerable<SearchSort> enDefaultSort = addDefaultSortList;
             var sort = ExpressionBuilder.GetSortSelector(enDefaultSort);
             param.sort = addDefaultSortList;
-                              
+
             // Create a reverse sort
             List<SearchSort> reverseSortList = new List<SearchSort>();
             foreach (var x in enDefaultSort)
             {
                 reverseSortList.Add(
-                    new SearchSort() { 
-                        direction = x.direction.ToLower() == "asc" ? "DESC" : "ASC", 
+                    new SearchSort()
+                    {
+                        direction = x.direction.ToLower() == "asc" ? "DESC" : "ASC",
                         property = x.property
                     }
-                ); 
+                );
             }
             IEnumerable<SearchSort> enReverseSort = reverseSortList;
-            var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort); 
+            var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort);
             var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuation>() : ExpressionBuilder.GetSelector(param.columns);
-            
+
             // Assemble the query. 
             var query = (
                 from v in _db.GetQuery<vyuICGetInventoryValuation>()
                 select v
-            ).Filter(param, true);                     
+            ).Filter(param, true);
 
             // Initialize the beginning and running balances.     
             decimal? dblBeginningBalance = 0;
             decimal? dblRunningBalance = 0;
             decimal? dblBeginningQty = 0;
             decimal? dblRunningQty = 0;
-            string locationFromPreviousPage = ""; 
+            string locationFromPreviousPage = "";
 
             // If it is not the starting page, retrieve the previous page data. 
             if (param.start > 0)
             {
                 // Get the last location used from the previous page. 
-                var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault(); 
+                var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault();
                 locationFromPreviousPage = previousPage.strLocationName;
 
                 // Get the beginning qty and balances
                 dblBeginningBalance += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblValue);
-                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblQuantity);
+                dblBeginningQty += query.OrderBySelector(sort).Skip(0).Take(param.start.Value).Where(w => w.strLocationName == locationFromPreviousPage).Sum(s => s.dblQuantityInStockUOM); // Calculate the Qty using the Stokc Qty. 
             }
 
             // Get the page. Convert it into a list for the loop below. 
@@ -508,7 +636,7 @@ namespace iRely.Inventory.BusinessLayer
 
             // Loop thru the List, calculate, and assign the running qty and balance for each record. 
             string currentLocation = locationFromPreviousPage;
-            string lastLocation = locationFromPreviousPage; 
+            string lastLocation = locationFromPreviousPage;
             foreach (var row in paged_data)
             {
                 if (row.intInventoryTransactionId != 0)
@@ -531,12 +659,12 @@ namespace iRely.Inventory.BusinessLayer
 
                     // Calculate the beginning and running quantity
                     row.dblBeginningQtyBalance = dblBeginningQty;
-                    dblRunningQty = dblBeginningQty + row.dblQuantity;
+                    dblRunningQty = dblBeginningQty + row.dblQuantityInStockUOM; // Calculate the Qty using the Stokc Qty. 
                     row.dblRunningQtyBalance = dblRunningQty;
-                    dblBeginningQty = dblRunningQty;                
+                    dblBeginningQty = dblRunningQty;
                 }
             }
-            
+
             return new SearchResult()
             {
                 data = paged_data.AsQueryable().Select(selector),

@@ -777,6 +777,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strBatchId).HasColumnName("strBatchId");
             this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
             this.Property(t => t.strUOM).HasColumnName("strUOM");
+            this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
+            this.Property(t => t.dblQuantityInStockUOM).HasColumnName("dblQuantityInStockUOM");
+            this.Property(t => t.dblCostInStockUOM).HasColumnName("dblCostInStockUOM");
         }
     }
 
