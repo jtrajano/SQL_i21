@@ -92,7 +92,7 @@ BEGIN
 			,1	
 		)
 	;
-END
+END		
 
 BEGIN 
 	MERGE	
@@ -107,11 +107,13 @@ BEGIN
 						,intStorageLocationId 
 						,Qty = ROUND(SUM(Qty), 6)
 				FROM (
+
 					-------------------------------------------
 					-- Item is NOT a Lot. 
 					-------------------------------------------
 					-- Get the Qty as it is. 
-					SELECT	intItemId = @intItemId
+					SELECT	[subQueryId] = 1
+							,intItemId = @intItemId
 							,intItemUOMId = @intItemUOMId
 							,intItemLocationId = @intItemLocationId					
 							,intSubLocationId = @intSubLocationId 
@@ -121,7 +123,8 @@ BEGIN
 
 					-- Convert the Qty to stock Unit. 
 					UNION ALL 
-					SELECT	intItemId = @intItemId
+					SELECT	[subQueryId] = 2
+							,intItemId = @intItemId
 							,intItemUOMId = StockUOM.intItemUOMId
 							,intItemLocationId = @intItemLocationId					
 							,intSubLocationId = @intSubLocationId 
@@ -152,7 +155,8 @@ BEGIN
 
 					-- Get the Pack Qty (Lot.intItemUOMId) 
 					UNION ALL 
-					SELECT	intItemId = @intItemId					
+					SELECT	[subQueryId] = 3
+							,intItemId = @intItemId					
 							,intItemUOMId =	Lot.intItemUOMId 
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
@@ -169,7 +173,8 @@ BEGIN
 					
 					-- Get the Weight Qty (Lot.intWeightUOMId) 
 					UNION ALL 
-					SELECT	intItemId = @intItemId					
+					SELECT	[subQueryId] = 4
+							,intItemId = @intItemId					
 							,intItemUOMId =	Lot.intWeightUOMId
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
@@ -177,16 +182,18 @@ BEGIN
 							,Qty =	@dblQty
 					FROM	dbo.tblICLot Lot 
 					WHERE	Lot.intLotId = @intLotId
+							AND Lot.intWeightUOMId = @intItemUOMId
 							AND Lot.intItemLocationId = @intItemLocationId
 							AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 							AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 							AND Lot.intWeightUOMId IS NOT NULL 
-							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0		
+							AND ISNULL(Lot.dblWeightPerQty, 0) <> 0					
 							AND Lot.intItemUOMId <> Lot.intWeightUOMId 
 
 					-- Convert the pack uom to weight uom 
 					UNION ALL 
-					SELECT	intItemId = @intItemId					
+					SELECT	[subQueryId] = 5
+							,intItemId = @intItemId					
 							,intItemUOMId =	Lot.intWeightUOMId 
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
@@ -210,7 +217,8 @@ BEGIN
 
 					-- Convert the weight uom to pack uom 
 					UNION ALL 
-					SELECT	intItemId = @intItemId					
+					SELECT	[subQueryId] = 6
+							,intItemId = @intItemId					
 							,intItemUOMId =	Lot.intItemUOMId 
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
@@ -234,7 +242,8 @@ BEGIN
 
 					-- Convert weight to stock unit. 
 					UNION ALL 
-					SELECT	intItemId = @intItemId					
+					SELECT	[subQueryId] = 7
+							,intItemId = @intItemId					
 							,intItemUOMId =	LotStockUOM.intItemUOMId -- Stock UOM Id
 							,intItemLocationId = @intItemLocationId
 							,intSubLocationId = @intSubLocationId 
@@ -248,7 +257,7 @@ BEGIN
 
 					FROM	dbo.tblICLot Lot LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
 								ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
-							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
+							INNER JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
 								AND LotStockUOM.intItemUOMId <> Lot.intItemUOMId 
@@ -265,7 +274,8 @@ BEGIN
 					---------------------------------------------
 					-- Get the Pack Qty (intItemUOMId) 
 					UNION ALL 
-					SELECT	intItemId = @intItemId
+					SELECT	[subQueryId] = 8
+							,intItemId = @intItemId
 							,intItemUOMId = @intItemUOMId
 							,intItemLocationId = @intItemLocationId					
 							,intSubLocationId = @intSubLocationId 
@@ -280,7 +290,8 @@ BEGIN
 					-- If incoming Lot has a no weight, then convert the lot item UOM to stock unit Qty
 					--------------------------------------------------------------------------------------
 					UNION ALL 
-					SELECT	intItemId = @intItemId
+					SELECT	[subQueryId] = 9
+							,intItemId = @intItemId
 							,intItemUOMId =	LotStockUOM.intItemUOMId
 							,intItemLocationId = @intItemLocationId					
 							,intSubLocationId = @intSubLocationId 
@@ -296,7 +307,7 @@ BEGIN
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intItemLocationId = @intItemLocationId
 							AND Lot.intWeightUOMId IS NULL 
-							AND Lot.intItemUOMId <> LotStockUOM.intItemUOMId				
+							AND Lot.intItemUOMId <> LotStockUOM.intItemUOMId			
 				) Query
 				GROUP BY intItemId 
 						,intItemUOMId 
