@@ -1,19 +1,17 @@
-﻿GO
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glarcmst]') AND type IN (N'U')) 
-BEGIN
-EXEC(
-'IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportOriginHistoricalJournalCLOSED'' and type = ''P'')
-	DROP PROCEDURE [dbo].[uspGLImportOriginHistoricalJournalCLOSED];')
-EXEC
-('CREATE PROCEDURE [dbo].[uspGLImportOriginHistoricalJournalCLOSED]
+﻿CREATE PROCEDURE [dbo].uspGLImportOriginHistoricalJournalCLOSED
 	@intEntityId INT,
-	@result NVARCHAR(MAX) = '''' OUTPUT
+	@result NVARCHAR(MAX)  OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
-	
+IF EXISTS (SELECT TOP 1 1 FROM SYS.OBJECTS WHERE object_id = OBJECT_ID(N'[dbo].[glarcmst]') AND type IN (N'U')) 
+BEGIN
+DECLARE @sql NVARCHAR(MAX)
+DECLARE @ParmDefinition NVARCHAR(100)
+	SET @ParmDefinition = N'@intEntityId INT, @resultOut NVARCHAR(MAX) OUTPUT';  
+	SET @sql ='
 DELETE h FROM glhstmst h
 INNER JOIN (SELECT MAX(glarc_period) AS period FROM glarcmst GROUP BY SUBSTRING( CONVERT(VARCHAR(10), glarc_period),1,4)) g
 ON h.glhst_period = g.period
@@ -27,15 +25,15 @@ DECLARE @inti21Id int
 SELECT @inti21Id = 1 FROM glarcmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16 WHERE inti21Id IS NULL
 IF (SELECT isnull(@inti21Id, 0)) > 0
 BEGIN
- SET @result = ''There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.''
+ SET @resultOut = ''There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.''
 END
 ELSE IF (EXISTS(SELECT TOP 1 1 FROM (SELECT SUBSTRING(dtmDate,5,2)+''/01/''+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glarc_src_id) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),MAX(glarc_period)) AS strJournalId, CONVERT(VARCHAR(12),MAX(glarc_period)) AS dtmDate FROM glarcmst GROUP BY glarc_period, glarc_src_id, glarc_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
 BEGIN
- SET @result = ''There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.''
+ SET @resultOut = ''There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.''
 END
 ELSE IF (EXISTS(SELECT TOP 1 1 FROM glarcmst where LEN(glarc_trans_dt) <> 8))
 BEGIN
- SET @result = ''There are invalid dates on Historical Transaction Details. <br/> Kindly verify at Origin.''
+ SET @resultOut = ''There are invalid dates on Historical Transaction Details. <br/> Kindly verify at Origin.''
 END
 ELSE
 BEGIN
@@ -353,7 +351,7 @@ INSERT tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,
 
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
     
- SET @result = ''SUCCESS '' + CAST(@intImportLogId AS NVARCHAR(40))
+ SET @resultOut = ''SUCCESS '' + CAST(@intImportLogId AS NVARCHAR(40))
    
 END
    
@@ -364,11 +362,15 @@ COMMIT_INSERT:
  GOTO IMPORT_EXIT
    
 ROLLBACK_INSERT:
- SELECT @result =  ''One Time Closed Year Conversion error :'' + ERROR_MESSAGE()
+ SELECT @resultOut =  ''One Time Closed Year Conversion error :'' + ERROR_MESSAGE()
  GOTO IMPORT_EXIT
 
 IMPORT_EXIT:
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
- IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail')
+ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail'
+ EXEC sp_executesql @sql, @ParmDefinition,@resultOut = @result OUTPUT
 END
+SELECT @result = ISNULL(@result,'')
+
+
  
