@@ -83,14 +83,14 @@ DECLARE @ARAccount INT
 		
 DECLARE @totalInvalid INT
 DECLARE @totalRecords INT
-
+DECLARE @intWriteOff INT
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 		
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPreference WHERE intWriteOffAccountId IS NOT NULL AND intWriteOffAccountId <> 0)
 SET @IncomeInterestAccount = (SELECT TOP 1 intInterestIncomeAccountId FROM tblARCompanyPreference WHERE intInterestIncomeAccountId IS NOT NULL AND intInterestIncomeAccountId <> 0)
-		
+
 
 DECLARE @UserEntityID int
 SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
@@ -1126,18 +1126,40 @@ IF @post = 1
 		--WHERE EXISTS(SELECT * FROM @ZeroPayment B WHERE A.intPaymentId = B.intPaymentId)
 		
 	BEGIN TRY
-		UPDATE 
-			tblARPayment
-		SET 
-			intAccountId = C.intUndepositedFundsId
-		FROM
-			tblARPayment P								
-		INNER JOIN 
-			tblSMCompanyLocation C
-				ON P.intLocationId = C.intCompanyLocationId
-		WHERE
-			P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-			AND ISNULL(C.intUndepositedFundsId,0) <> 0					
+
+	SET @intWriteOff = (SELECT TOP 1 intPaymentMethodId FROM tblARPayment WHERE intPaymentMethodId IN (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Write Off') AND intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData) )		
+
+	IF (@WriteOffAccount IS NOT NULL)
+		BEGIN
+			UPDATE 
+				tblARPayment
+			SET 
+				intAccountId = @WriteOffAccount
+			FROM
+				tblARPayment P								
+			INNER JOIN 
+				tblSMCompanyLocation C
+					ON P.intLocationId = C.intCompanyLocationId
+			WHERE
+				P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+		END
+	ELSE
+		BEGIN
+			UPDATE 
+				tblARPayment
+			SET 
+				intAccountId = C.intUndepositedFundsId
+			FROM
+				tblARPayment P								
+			INNER JOIN 
+				tblSMCompanyLocation C
+					ON P.intLocationId = C.intCompanyLocationId
+			WHERE
+				P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+				AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+		END
+					
 	END TRY
 	BEGIN CATCH	
 		SELECT @ErrorMerssage = ERROR_MESSAGE()										

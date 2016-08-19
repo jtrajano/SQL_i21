@@ -66,3 +66,6 @@ Type the overview for the table here.
 		@level1name = N'tblICRinFeedStockUOM',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+
+CREATE UNIQUE INDEX [IX_tblICRinFeedStockUOM_intUnitMeasureId] ON [dbo].[tblICRinFeedStockUOM] ([intUnitMeasureId])

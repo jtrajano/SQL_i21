@@ -544,3 +544,17 @@ UPDATE tblFRRowDesign SET strDateOverride = 'None' WHERE strRowType IN ('Filter 
 GO
 	PRINT N'DEFAULT Date Override (strDateOverride) to NONE'
 GO
+
+--=====================================================================================================================================
+-- 	REPORT BUILDER: DEFAULT Rounding Option (ysnRoundingOption) to 0
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'DEFAULT Rounding Option (ysnRoundingOption) to 0'
+GO
+
+UPDATE tblFRReport SET ysnRoundingOption = 0 WHERE ysnRoundingOption IS NULL
+
+GO
+	PRINT N'DEFAULT Rounding Option (ysnRoundingOption) to 0'
+GO

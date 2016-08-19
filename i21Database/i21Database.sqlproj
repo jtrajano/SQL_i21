@@ -4178,6 +4178,7 @@
     <Build Include="dbo\Views\vyuARGetRecipeDetailReport.sql" />
     <Build Include="dbo\Views\vyuARGetRecipeReport.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
+    <Build Include="dbo\Views\vyuCFAccountCreditThreshold.sql" />
     <Build Include="dbo\Views\vyuEMEntityContactLOB.sql" />
     <Build Include="dbo\Views\vyuEMUserAdmin.sql" />
     <None Include="Scripts\Post-Deployment\EM\033_UpdateUserSecurityAdmin.sql" />
@@ -4211,6 +4212,7 @@
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
     <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
+    <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

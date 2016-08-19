@@ -93,7 +93,7 @@ BEGIN
 			END AS strSection
 		,YT.intYieldTransactionId
 		,ISNULL(YD.ysnSelect, 0) AS ysnSelect
-		,CASE 
+		,Convert(bit,CASE 
 			WHEN YT.strYieldTransactionName IN (
 					'Empty Out Adj'
 					,'Cycle Count Adj'
@@ -101,7 +101,7 @@ BEGIN
 					)
 				THEN 0
 			ELSE 1
-			END ysnLock
+			END) ysnLock
 	FROM dbo.tblMFYieldTransaction YT
 	LEFT JOIN dbo.tblMFYieldDetail YD ON YD.intYieldTransactionId = YT.intYieldTransactionId
 		AND intYieldId = @intYieldId

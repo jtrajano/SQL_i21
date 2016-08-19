@@ -409,8 +409,12 @@ convert(decimal(24,6),
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice1,
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,                              
                   CONVERT(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
-                  (SELECT SUM(ISNULL(sri.dblOpenReceive,0)) from tblICInventoryReceiptItem sri 
-                                         WHERE ir.intInventoryReceiptId=sri.intInventoryReceiptId AND cd.intContractDetailId=sri.intLineNo
+                  (SELECT  SUM(ISNULL(sri.dblOpenReceive,0))-
+					(-isnull((select sum(ad.dblAdjustByQuantity) dblAdjustByQuantity from tblICInventoryAdjustmentDetail ad where  ad.intLotId=il.intLotId),0)) dblAdjustByQuantity
+					FROM tblICInventoryReceiptItem sri
+					JOIN tblICInventoryReceiptItemLot il on sri.intInventoryReceiptItemId=il.intInventoryReceiptItemId 
+					
+                                         WHERE ir.intInventoryReceiptId=sri.intInventoryReceiptId AND cd.intContractDetailId=sri.intLineNo group by il.intLotId
                                          )  dblOpenQty1,                  
                   cd.dblRate,
                   cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
