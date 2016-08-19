@@ -5,7 +5,7 @@
 RETURNS @returntable TABLE
 (
 	[intCustomerId]				INT		NULL,
-	[dblCheckAmount]			DECIMAL	NULL
+	[dblCheckAmount]			NUMERIC(18,2)	NULL
 )
 AS
 BEGIN

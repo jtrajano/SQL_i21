@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATRefundVoucherToAPBill]
 	 @intRefundId					INT
 	,@intPatronId					INT
-	,@dblRefundAmount				DECIMAL
+	,@dblRefundAmount				NUMERIC(18,2)
 	,@intUserId						INT
 	,@intPaymentItemId				INT	
 	,@intBillId						INT = 0
