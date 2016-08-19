@@ -52,15 +52,16 @@ FROM (
 		intEntityVendorId,
 		intShipToId,
 		intAccountId,
-		strBankAccountNo,
-		strBankName,
-		strBankAddress,
-		strNotes,
+		--strBankAccountNo,
+		--strBankName,
+		--strBankAddress,
+		--strNotes,
 		strContainerNumber,
-		strWeightGradeDesc
+		strWeightGradeDesc,
+		strComment
 	FROM (
 		SELECT
-			 P.intBillId 
+			 BillClaim.intBillId 
 			,Receipts.dblNetQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
 			,B.dblCost
@@ -95,16 +96,17 @@ FROM (
 			,M2.str1099Form
 			,M2.str1099Type
 			,G.strDescription
-			,A.strVendorOrderNumber
-			,A.dtmDueDate
-			,A.dtmDate
+			,BillClaim.strVendorOrderNumber
+			,BillClaim.dtmDueDate
+			,BillClaim.dtmDate
+			,ISNULL(BillClaim.strComment, 'N/A') AS strComment
 			,D.strBillOfLading
 			,N.strCurrency
-			,Payments.strBankAccountNo
-			,Payments.strBankName
-			,Payments.strBankAddress
-			,ISNULL(Payments.strNotes, 'N/A') AS strNotes
 			,I.strWeightGradeDesc
+			--,Payments.strBankAccountNo
+			--,Payments.strBankName
+			--,Payments.strBankAddress
+			--,ISNULL(Payments.strNotes, 'N/A') AS strNotes
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN (tblICItemUOM IUOM INNER JOIN tblICUnitMeasure UM ON IUOM.intUnitMeasureId = UM.intUnitMeasureId) ON B.intCostUOMId = IUOM.intItemUOMId
@@ -117,7 +119,6 @@ FROM (
 		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
 		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
 		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
-		
 		LEFT JOIN dbo.tblSMCurrency N ON A.intCurrencyId = N.intCurrencyID
 		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
 					AND B.intItemId = L.intItemId 
@@ -143,7 +144,7 @@ FROM (
 			FROM tblICInventoryReceiptItem C 
 			WHERE C.intLineNo = IRI.intLineNo AND C.intOrderId = IRI.intOrderId AND B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
 		) Receipts
-		CROSS APPLY (
+		/*CROSS APPLY (
 			SELECT 
 				TOP 1 strBankAccountNo,
 				strBankName,
@@ -154,7 +155,7 @@ FROM (
 			INNER JOIN dbo.tblCMBankAccount CBA ON CBA.intBankAccountId = P.intBankAccountId
 			INNER JOIN dbo.tblCMBank CB ON CB.intBankId = CBA.intBankId
 			WHERE PD.intBillId = K.intBillId
-		) Payments
+		) Payments*/
 		WHERE A.ysnPosted = 1 
 		AND D.intSourceType = 2 --Inbound Shipment
 		AND E.intContractStatusId = 5
@@ -195,12 +196,13 @@ FROM (
 		strVendorOrderNumber,
 		strBillOfLading,		
 		strCurrency,
-		strBankAccountNo,
-		strBankName,
-		strBankAddress,
+		--strBankAccountNo,
+		--strBankName,
+		--strBankAddress,		
+		--strNotes,
 		strContainerNumber,
-		strNotes,
-		strWeightGradeDesc
+		strWeightGradeDesc,
+		strComment
 ) Claim
 WHERE dblQtyBillCreated = dblContractItemQty --make sure we fully billed the contract item
 AND dblWeightLoss > dblFranchiseWeight -- Make sure the weight loss is greater then the tolerance
