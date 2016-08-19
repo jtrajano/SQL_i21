@@ -32,6 +32,8 @@ namespace iRely.Inventory.BusinessLayer
                     case "manufacturer":
                         if (!SetText(value, del => fc.strManufacturer = del, "Manufacturer", dr, header, row, true))
                             valid = false;
+                        if (HasLocalDuplicate(dr, header, value, row))
+                            valid = false;
                         break;
                 }
             }

@@ -32,5 +32,15 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
         #endregion
+
+        public override async Task<BusinessResult<tblICManufacturer>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.UniqueViolation)
+            {
+                result.message.statusText = "Manufacturer must be unique.";
+            }
+            return result;
+        }
     }
 }
