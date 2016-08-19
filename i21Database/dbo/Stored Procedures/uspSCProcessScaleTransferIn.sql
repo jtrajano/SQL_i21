@@ -106,11 +106,11 @@ BEGIN TRY
 	SELECT 
 			strReceiptType				= 'Transfer Order'
 			,intEntityVendorId			= @intUserId
-			,intTransferorId			= @intProcessingLocationId
+			,intTransferorId			= SC.intProcessingLocationId
 			,strBillOfLadding			= NULL
 			,intCurrencyId				= SC.intCurrencyId
-			,intLocationId				= SC.intProcessingLocationId
-			,intShipFromId				= @intProcessingLocationId
+			,intLocationId				= @intProcessingLocationId
+			,intShipFromId				= SC.intProcessingLocationId
 			,intShipViaId				= SC.intFreightCarrierId
 			,intDiscountSchedule		= SC.intDiscountId
 
