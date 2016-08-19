@@ -32,6 +32,8 @@ namespace iRely.Inventory.BusinessLayer
                     case "fuel category":
                         if (!SetText(value, del => fc.strRinFuelCategoryCode = del, "Fuel Category", dr, header, row, true))
                             valid = false;
+                        if (HasLocalDuplicate(dr, header, value, row))
+                            valid = false;
                         break;
                     case "description":
                         fc.strDescription = value;

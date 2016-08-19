@@ -44,5 +44,15 @@ namespace iRely.Inventory.BusinessLayer
             };
 
         }
+
+        public override async Task<BusinessResult<tblICRinFeedStockUOM>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.OtherException && result.message.statusText.ToString().Contains("Cannot insert duplicate key"))
+            {
+                result.message.statusText = "Feed Stock UOM must be unique.";
+            }
+            return result;
+        }
     }
 }

@@ -35,6 +35,8 @@ namespace iRely.Inventory.BusinessLayer
                     case "code":
                         if (!SetText(value, del => fc.strRinFeedStockUOMCode = del, "Code", dr, header, row, true))
                             valid = false;
+                        if (HasLocalDuplicate(dr, header, value, row))
+                            valid = false;
                         break;
                     case "unit of measure":
                         lu = InsertAndOrGetLookupId<tblICUnitMeasure>(
@@ -92,7 +94,35 @@ namespace iRely.Inventory.BusinessLayer
             if (!valid)
                 return null;
 
-            context.AddNew<tblICRinFeedStockUOM>(fc);
+            if (context.GetQuery<tblICRinFeedStockUOM>().Any(t => t.intUnitMeasureId == fc.intUnitMeasureId))
+            {
+                if (!GlobalSettings.Instance.AllowOverwriteOnImport)
+                {
+                    dr.Info = INFO_ERROR;
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Type = TYPE_INNER_ERROR,
+                        Status = REC_SKIP,
+                        Column = headers[0],
+                        Row = row,
+                        Message = "The record already exists: " + fc.strUnitMeasure + ". The system does not allow existing records to be modified."
+                    });
+                    return null;
+                }
+
+                var entry = context.ContextManager.Entry<tblICRinFeedStockUOM>(
+                    context.GetQuery<tblICRinFeedStockUOM>().First(t => t.intUnitMeasureId == fc.intUnitMeasureId));
+                entry.Property(e => e.strRinFeedStockUOMCode).CurrentValue = fc.strRinFeedStockUOMCode;
+
+                entry.State = System.Data.Entity.EntityState.Modified;
+                entry.Property(e => e.intUnitMeasureId).IsModified = false;
+
+                dr.IsUpdate = true;
+            }
+            else
+            {
+                context.AddNew<tblICRinFeedStockUOM>(fc);
+            }
             return fc;
         }
 

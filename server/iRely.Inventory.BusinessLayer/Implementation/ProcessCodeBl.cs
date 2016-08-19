@@ -18,5 +18,14 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+        public override async Task<BusinessResult<tblICRinProcess>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.UniqueViolation)
+            {
+                result.message.statusText = "Production Process must be unique.";
+            }
+            return result;
+        }
     }
 }

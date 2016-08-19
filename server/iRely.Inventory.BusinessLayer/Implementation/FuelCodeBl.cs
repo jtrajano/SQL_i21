@@ -19,30 +19,14 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
-
         public override async Task<BusinessResult<tblICRinFuel>> SaveAsync(bool continueOnConflict)
         {
-            SaveResult result = new SaveResult();
-
-            result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
-            if (result.HasError)
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.UniqueViolation)
             {
-                if(result.Exception.Message.Contains("{0} already exists!"))
-                {
-                    result.HasError = true;
-                    result.Exception = new ServerException(new Exception("Fuel Code must be unique"));
-                }
+                result.message.statusText = "Fuel Code must be unique.";
             }
-            return new BusinessResult<tblICRinFuel>()
-            {
-                success = !result.HasError,
-                message = new MessageResult()
-                {
-                    statusText = result.Exception.Message,
-                    status = result.Exception.Error,
-                    button = result.Exception.Button.ToString()
-                }
-            };
+            return result;
         }
     }
 }
