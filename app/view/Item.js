@@ -248,6 +248,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: 'true',
                                                                 itemId: 'cboManufacturer',
                                                                 fieldLabel: 'Manufacturer',
                                                                 displayField: 'strManufacturer',
@@ -290,6 +291,7 @@ Ext.define('Inventory.view.Item', {
                                                                         hidden: true
                                                                     }
                                                                 ],
+                                                                enableDrillDown: 'true',
                                                                 itemId: 'cboCommodity',
                                                                 fieldLabel: 'Commodity',
                                                                 displayField: 'strCommodityCode',
@@ -334,6 +336,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                enableDrillDown: 'true',
                                                                 itemId: 'cboBrand',
                                                                 fieldLabel: 'Brand',
                                                                 labelWidth: 116,
@@ -383,6 +386,7 @@ Ext.define('Inventory.view.Item', {
                                                                         hidden: true
                                                                     }
                                                                 ],
+                                                                enableDrillDown: 'true',
                                                                 itemId: 'cboCategory',
                                                                 fieldLabel: 'Category',
                                                                 labelWidth: 116,
@@ -469,6 +473,8 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        headerDrillDownText: 'Open Inventory UOM',
+                                                        headerDrillDownClick: 'onUOMHeaderClick',
                                                         itemId: 'colDetailUnitMeasure',
                                                         minWidth: 95,
                                                         width: 100,
@@ -1211,6 +1217,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: 'true',
                                                                                 itemId: 'cboFuelCategory',
                                                                                 fieldLabel: 'Fuel Category',
                                                                                 labelWidth: 125,
@@ -1296,6 +1303,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: 'true',
                                                                                 itemId: 'cboMedicationTag',
                                                                                 fieldLabel: 'Medication Tag',
                                                                                 labelWidth: 125,
@@ -1324,6 +1332,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: 'true',
                                                                                 itemId: 'cboIngredientTag',
                                                                                 fieldLabel: 'Ingredient Tag',
                                                                                 labelWidth: 125,
@@ -1718,6 +1727,8 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownClick: 'onCategoryHeaderClick',
+                                                                                headerDrillDownText: 'Open Category',
                                                                                 itemId: 'colPOSCategoryName',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Category Name',
@@ -2802,6 +2813,8 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownText: 'Open Country',
+                                                                        headerDrillDownClick: 'onCountryHeaderClick',
                                                                         itemId: 'colContractOrigin',
                                                                         dataIndex: 'string',
                                                                         text: 'Origin',
@@ -2959,6 +2972,8 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownClick: 'onDocumentHeaderClick',
+                                                                                headerDrillDownText: 'Open Contract Document',
                                                                                 itemId: 'colDocument',
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
@@ -3046,6 +3061,8 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                headerDrillDownText: 'Open Certification Program',
+                                                                                headerDrillDownClick: 'onCertificationHeaderClick',
                                                                                 itemId: 'colCertification',
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
@@ -3922,6 +3939,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: 'true',
                                                                                 itemId: 'cboPatronage',
                                                                                 fieldLabel: 'Patronage Category',
                                                                                 labelWidth: 116,
@@ -3950,6 +3968,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1
                                                                                     }
                                                                                 ],
+                                                                                enableDrillDown: 'true',
                                                                                 itemId: 'cboPatronageDirect',
                                                                                 fieldLabel: 'Direct Sale',
                                                                                 labelWidth: 116,
@@ -6113,6 +6132,8 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownText: 'Open Manufacturing Cell',
+                                                                        headerDrillDownClick: 'onManufacturingCellHeaderClick',
                                                                         itemId: 'colCellName',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Cell Name',
@@ -6215,6 +6236,8 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        headerDrillDownClick: 'onCustomerHeaderClick',
+                                                                        headerDrillDownText: 'Open Customer',
                                                                         itemId: 'colOwner',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Owner',
