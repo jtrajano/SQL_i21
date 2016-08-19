@@ -91,7 +91,7 @@ BEGIN
 
 			UPDATE tblARInvoice
 			SET intLoadDistributionHeaderId = NULL
-			WHERE intLoadDistributionHeaderId = (SELECT intLoadDistributionHeaderId 
+			WHERE intLoadDistributionHeaderId IN (SELECT DISTINCT intLoadDistributionHeaderId 
 												FROM tblTRLoadDistributionHeader
 												WHERE intLoadHeaderId = @TransactionId)
 
