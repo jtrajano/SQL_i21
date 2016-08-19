@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿
+
+CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
 ,@CardId				INT				
@@ -66,6 +68,7 @@ BEGIN
 	DECLARE	@runDate						DATETIME
 
 	DECLARE @intPriceProfileId				INT
+	DECLARE @intPriceProfileDetailId		INT
 	DECLARE @intPriceIndexId 				INT
 	DECLARE @intSiteGroupId 				INT
 
@@ -195,12 +198,10 @@ BEGIN
 		WHERE cfCard.intCardId = @intCardId
 	END
 	
-	
-
-
 	--GET COMPANY LOCATION ID--
 	SELECT TOP 1
-		@intLocationId = intARLocationId
+		@intLocationId = intARLocationId,
+		@intSiteGroupId = intAdjustmentSiteGroupId
 	FROM tblCFSite as cfSite
 	WHERE cfSite.intSiteId = @intSiteId
 
@@ -256,8 +257,9 @@ BEGIN
 	@CFPostedOrigin				=	@ysnPostedOrigin,      
 	@CFPostedCSV				=	@ysnPostedCSV,      
 	@CFPriceProfileId			=	@intPriceProfileId		output,
+	@CFPriceProfileDetailId		=	@intPriceProfileDetailId		output,
 	@CFPriceIndexId				=	@intPriceIndexId 		output,
-	@CFSiteGroupId				= 	@intSiteGroupId 		output
+	@CFSiteGroupId				= 	@intSiteGroupId 		
 
 	SELECT TOP 1 
 	@strPriceProfileId = cfPriceProfile.strPriceProfile
@@ -266,6 +268,7 @@ BEGIN
 	INNER JOIN tblCFPriceProfileDetail AS cfPriceProfileDetail 
 	ON cfPriceProfile.intPriceProfileHeaderId = cfPriceProfileDetail.intPriceProfileHeaderId
 	WHERE cfPriceProfile.intPriceProfileHeaderId = @intPriceProfileId
+	AND cfPriceProfileDetail.intPriceProfileDetailId = @intPriceProfileDetailId
 
 	SELECT TOP 1
 	@strPriceIndexId = strPriceIndex
@@ -544,7 +547,7 @@ BEGIN
 					DROP TABLE #ItemTax
 				END
 
-				
+		
 				
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
@@ -562,10 +565,10 @@ BEGIN
 						 @intTransactionId
 						,'Calculation'
 						,@runDate
-						,ISNULL(strTaxExemptReason,ISNULL(strNotes,ISNULL(strReason,'Invalid Setup -' + strTaxCode)))
+						,ISNULL(strReason,'Invalid Setup -' + strTaxCode)
 						,@guid
 					FROM @tblCFRemoteTax
-					WHERE (ysnInvalidSetup =1)
+					WHERE (ysnInvalidSetup =1 AND LOWER(strReason) NOT LIKE '%item category%')
 				END
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
@@ -720,6 +723,7 @@ BEGIN
 				END
 				ELSE
 				BEGIN
+
 
 				INSERT INTO @tblCFOriginalTax	
 				(
@@ -991,6 +995,10 @@ BEGIN
 					,NULL
 				)
 
+				
+
+					--SELECT * FROM @tblCFOriginalTax
+
 				END
 				ELSE
 				BEGIN
@@ -1093,6 +1101,10 @@ BEGIN
 					,NULL
 					,NULL
 				)
+
+				
+
+				--	SELECT * FROM @tblCFOriginalTax
 
 				END
 			
