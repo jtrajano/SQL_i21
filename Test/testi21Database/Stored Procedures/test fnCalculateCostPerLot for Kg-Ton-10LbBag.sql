@@ -17,7 +17,7 @@ BEGIN
 			,@dblCostPerItemUOMId AS NUMERIC(38, 20) = 13.35
 
 	DECLARE @result AS NUMERIC(38, 20)
-	DECLARE @expected AS NUMERIC(38, 20) = 60.5546534096579
+	DECLARE @expected AS NUMERIC(38, 20) = 60.554653409658 -- 60.5546534096579
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostPerLot(
