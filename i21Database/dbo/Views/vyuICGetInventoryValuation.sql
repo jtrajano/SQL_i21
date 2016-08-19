@@ -2,55 +2,62 @@ CREATE VIEW [dbo].[vyuICGetInventoryValuation]
 AS
 
 SELECT	intInventoryValuationKeyId  = 
-			CASE 	WHEN [Transaction].intInventoryTransactionId IS NULL THEN 
-						CAST(ROW_NUMBER() OVER (ORDER BY [Transaction].intInventoryTransactionId) AS INT)
+			CASE 	WHEN t.intInventoryTransactionId IS NULL THEN 
+						CAST(ROW_NUMBER() OVER (ORDER BY t.intInventoryTransactionId) AS INT)
 					ELSE 
-						[Transaction].intInventoryTransactionId
+						t.intInventoryTransactionId
 			END 
-		,[Transaction].intInventoryTransactionId
-		,[Transaction].intItemId
-		,strItemNo = Item.strItemNo
-		,strItemDescription = Item.strDescription
-		,Item.intCategoryId
-		,strCategory = Category.strCategoryCode
-		,[Transaction].intItemLocationId
-		,Location.strLocationName
-		,[Transaction].intSubLocationId
-		,SubLocation.strSubLocationName
-		,[Transaction].intStorageLocationId
-		,strStorageLocationName = StorageLocation.strName
-		,dtmDate = dbo.fnRemoveTimeOnDate([Transaction].dtmDate)
-		,strTransactionType = TransactionType.strName
-		,[Transaction].strTransactionForm
-		,[Transaction].strTransactionId
-		,dblBeginningQtyBalance = CAST(0 AS NUMERIC(38, 20)) 
-		,dblQuantity = [Transaction].dblQty 
-		,dblRunningQtyBalance = CAST(0 AS NUMERIC(38, 20))
-		,dblCost = [Transaction].dblCost
-		,dblBeginningBalance = CAST(0 AS NUMERIC(38, 20))
-		,dblValue = ROUND(dbo.fnMultiply(ISNULL([Transaction].dblQty, 0), ISNULL([Transaction].dblCost, 0)) + ISNULL([Transaction].dblValue, 0), 2) 
-		,dblRunningBalance = CAST(0 AS NUMERIC(38, 20))
+		,t.intInventoryTransactionId
+		,t.intItemId
+		,strItemNo				= i.strItemNo
+		,strItemDescription		= i.strDescription
+		,i.intCategoryId
+		,strCategory			= c.strCategoryCode
+		,t.intItemLocationId
+		,cl.strLocationName
+		,t.intSubLocationId
+		,subLoc.strSubLocationName
+		,t.intStorageLocationId
+		,strStorageLocationName		= strgLoc.strName
+		,dtmDate					= dbo.fnRemoveTimeOnDate(t.dtmDate)
+		,strTransactionType			= ty.strName
+		,t.strTransactionForm
+		,t.strTransactionId
+		,dblBeginningQtyBalance		= CAST(0 AS NUMERIC(38, 20)) 
+		,dblQuantity				= t.dblQty 
+		,dblRunningQtyBalance		= CAST(0 AS NUMERIC(38, 20))
+		,dblCost					= t.dblCost
+		,dblBeginningBalance		= CAST(0 AS NUMERIC(38, 20))
+		,dblValue					= ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2) 
+		,dblRunningBalance			= CAST(0 AS NUMERIC(38, 20))
 		,strBatchId
 		,CostingMethod.strCostingMethod
-		,strUOM = StockUOM.strUnitMeasure
-FROM 	tblICItem Item  LEFT JOIN tblICItemUOM StockUnit
-			ON StockUnit.intItemId = Item.intItemId
-			AND StockUnit.ysnStockUnit = 1
-		LEFT JOIN tblICUnitMeasure StockUOM
-			ON StockUOM.intUnitMeasureId = StockUnit.intUnitMeasureId
-		LEFT JOIN tblICCategory Category 
-			ON Category.intCategoryId = Item.intCategoryId
-		LEFT JOIN tblICInventoryTransaction [Transaction] 
-			ON Item.intItemId = [Transaction].intItemId
-		LEFT JOIN tblICItemLocation ItemLocation 
-			ON ItemLocation.intItemLocationId = [Transaction].intItemLocationId
+		,strUOM						= umTransUOM.strUnitMeasure
+		,strStockUOM				= umStock.strUnitMeasure
+		,dblQuantityInStockUOM		= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty) 
+		,dblCostInStockUOM			= dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblCost) 
+FROM 	tblICItem i LEFT JOIN tblICItemUOM iuStock
+			ON iuStock.intItemId = i.intItemId
+			AND iuStock.ysnStockUnit = 1
+		LEFT JOIN tblICUnitMeasure umStock
+			ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
+		LEFT JOIN tblICCategory c 
+			ON c.intCategoryId = i.intCategoryId
+		LEFT JOIN tblICInventoryTransaction t 
+			ON i.intItemId = t.intItemId
+		LEFT JOIN tblICItemUOM iuTransUOM
+			ON iuTransUOM.intItemUOMId = t.intItemUOMId
+		LEFT JOIN tblICUnitMeasure umTransUOM
+			ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId		
+		LEFT JOIN tblICItemLocation il 
+			ON il.intItemLocationId = t.intItemLocationId
 		LEFT JOIN tblICCostingMethod CostingMethod
-			ON CostingMethod.intCostingMethodId = [Transaction].intCostingMethod
-		LEFT JOIN tblSMCompanyLocation Location 
-			ON Location.intCompanyLocationId = ItemLocation.intLocationId
-		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
-			ON SubLocation.intCompanyLocationSubLocationId = [Transaction].intSubLocationId
-		LEFT JOIN tblICStorageLocation StorageLocation 
-			ON StorageLocation.intStorageLocationId = [Transaction].intStorageLocationId
-		LEFT JOIN tblICInventoryTransactionType TransactionType 
-			ON TransactionType.intTransactionTypeId = [Transaction].intTransactionTypeId
+			ON CostingMethod.intCostingMethodId = t.intCostingMethod
+		LEFT JOIN tblSMCompanyLocation cl 
+			ON cl.intCompanyLocationId = il.intLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation subLoc 
+			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
+		LEFT JOIN tblICStorageLocation strgLoc 
+			ON strgLoc.intStorageLocationId = t.intStorageLocationId
+		LEFT JOIN tblICInventoryTransactionType ty 
+			ON ty.intTransactionTypeId = t.intTransactionTypeId
