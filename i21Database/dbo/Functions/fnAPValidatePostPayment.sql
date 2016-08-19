@@ -66,15 +66,15 @@ BEGIN
 		FROM tblAPPayment A 
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND @userLocation IS NULL
-		AND A.intPaymentId IN (SELECT A.intPaymentId FROM tblAPPayment A
-								INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-								INNER JOIN tblAPVendor C ON A.intEntityVendorId = C.intEntityVendorId
-								WHERE (A.dblUnapplied > 0 --Overpayment
-								OR C.ysnWithholding = 1 --Withhold
-								OR B.dblDiscount <> 0 --Discount
-								OR B.dblInterest <> 0) --Interest
-								AND A.intPaymentId IN (SELECT intId FROM @paymentIds)
-							)
+		--AND A.intPaymentId IN (SELECT A.intPaymentId FROM tblAPPayment A
+		--						INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+		--						INNER JOIN tblAPVendor C ON A.intEntityVendorId = C.intEntityVendorId
+		--						WHERE (A.dblUnapplied > 0 --Overpayment
+		--						OR C.ysnWithholding = 1 --Withhold
+		--						OR B.dblDiscount <> 0 --Discount
+		--						OR B.dblInterest <> 0) --Interest
+		--						AND A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		--					)
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
@@ -250,31 +250,42 @@ BEGIN
 		--BILL(S) ALREADY PAID IN FULL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			C.strBillId + ' already paid in full.',
+			(CASE WHEN B.intBillId > 0 THEN C.strBillId  WHEN B.intInvoiceId > 0 THEN D.strInvoiceNumber END) + ' already paid in full.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A
 			INNER JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
-			INNER JOIN tblAPBill C
+			LEFT JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
+			LEFT JOIN tblARInvoice D
+				ON B.intInvoiceId = D.intInvoiceId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-			AND C.ysnPaid = 1 AND B.dblPayment <> 0
+			AND ((B.intBillId > 0 AND C.ysnPaid = 1) OR (B.intInvoiceId IS NOT NULL AND D.ysnPaid = 1))
 				
+		--MAKE SURE YOU WILL NOT PAY OVER ON THE AMOUNT DUE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'Payment on ' + C.strBillId + ' is over the transaction''s amount due',
+			'Payment on ' + (CASE WHEN B.intBillId > 0 THEN C.strBillId  WHEN B.intInvoiceId > 0 THEN D.strInvoiceNumber END) + ' is over the transaction''s amount due',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A
 			INNER JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
-			INNER JOIN tblAPBill C
+			LEFT JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
+			LEFT JOIN tblARInvoice D
+				ON B.intInvoiceId = D.intInvoiceId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2)))
+		AND 
+		(
+			(B.intBillId > 0 AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2))))
+			OR
+			(B.intInvoiceId > 0 AND B.dblPayment <> 0 AND D.ysnPaid = 0 AND D.dblAmountDue < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2))))
+		)
+
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
