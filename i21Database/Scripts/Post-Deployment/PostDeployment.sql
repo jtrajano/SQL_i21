@@ -38,6 +38,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\19_HomePanelDashboard.sql
 :r .\SM\DefaultData\20_CustomFieldMigration.sql
 :r .\SM\DefaultData\21_CommentMigration.sql
+:r .\SM\DefaultData\22_TypeValue.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL

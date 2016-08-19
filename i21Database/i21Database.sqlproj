@@ -4206,6 +4206,9 @@
     <Build Include="dbo\Views\vyuSMDocumentMessageMaintenanceOption.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDocumentMessage.sql" />
     <Build Include="dbo\Views\vyuSMTransaction.sql" />
+    <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
+    <Build Include="dbo\Tables\tblSMTypeValue.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\22_TypeValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
