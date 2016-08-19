@@ -12,7 +12,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 	BEGIN
 		/* Cancel Time Off */
 		UPDATE tblPRTimeOffRequest 
-			SET ysnPostedToCalendar = 0 
+			SET ysnPostedToCalendar = 0
 				,intEventId = NULL
 		WHERE intTimeOffRequestId = @intTimeOffRequestId
 		
@@ -36,6 +36,16 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			WHERE tblPREmployeeTimeOff.intTypeTimeOffId = tblTimeOffRequest.intTypeTimeOffId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = tblTimeOffRequest.intEntityEmployeeId
 				AND tblTimeOffRequest.intTimeOffRequestId = @intTimeOffRequestId
+
+			UPDATE tblPRTimeOffRequest 
+				SET dblEarned = tblPREmployeeTimeOff.dblHoursEarned
+					,dblUsed = tblPREmployeeTimeOff.dblHoursUsed
+					,dblBalance = tblPREmployeeTimeOff.dblHoursEarned - tblPREmployeeTimeOff.dblHoursUsed
+			FROM tblPRTimeOffRequest 
+				INNER JOIN tblPREmployeeTimeOff 
+				ON tblPRTimeOffRequest.intEntityEmployeeId = tblPREmployeeTimeOff.intEntityEmployeeId
+				AND tblPRTimeOffRequest.intTypeTimeOffId = tblPREmployeeTimeOff.intTypeTimeOffId
+			WHERE intTimeOffRequestId = @intTimeOffRequestId
 		END
 		ELSE
 		BEGIN
