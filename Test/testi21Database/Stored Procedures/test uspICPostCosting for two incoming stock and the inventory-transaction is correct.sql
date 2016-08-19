@@ -254,26 +254,6 @@ BEGIN
 				,intCreatedEntityId = 1
 				,intConcurrencyId = 1
 				,intCostingMethod = 1 -- Average Costing
-		UNION ALL 
-		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @WetGrains_BushelUOMId
-				,intItemUOMId = NULL 
-				,dtmDate = 'November 14, 2014'
-				,dblQty = 0
-				,dblUOMQty = 0
-				,dblCost = 0
-				,dblValue = -0.00000000000005 -- (18.06818181818181818182 * 275) - (100.0 * 22.0) - (100.0 * 14.0) - (75.0 * 18.25)
-				,dblSalesPrice = 0 
-				,intCurrencyId = @USD
-				,dblExchangeRate = 1
-				,intTransactionId = 1
-				,strTransactionId = 'PURCHASE-000001'
-				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @AUTO_NEGATIVE
-				,intLotId = NULL
-				,intCreatedUserId = 1
-				,intConcurrencyId = 1
-				,intCostingMethod = 1 -- Average Costing
 	END 
 
 	-- Act
