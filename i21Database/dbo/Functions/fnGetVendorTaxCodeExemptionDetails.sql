@@ -2,6 +2,7 @@
 ( 
 	 @VendorId				INT
 	,@TransactionDate		DATETIME
+	,@TaxGroupId			INT
 	,@TaxCodeId				INT
 	,@TaxClassId			INT
 	,@TaxState				NVARCHAR(100)
@@ -29,7 +30,7 @@ BEGIN
 		,@TaxExempt			= TED.[ysnTaxExempt] 
 		,@InvalidSetup		= TED.[ysnInvalidSetup]  
 	FROM
-		[dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, @TaxCodeId, @TaxClassId, @TaxState, @ItemId, @ItemCategoryId, @ShipFromLocationId)	TED
+		[dbo].[fnGetVendorTaxCodeExemption](@VendorId, @TransactionDate, @TaxGroupId, @TaxCodeId, @TaxClassId, @TaxState, @ItemId, @ItemCategoryId, @ShipFromLocationId)	TED
 	
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
