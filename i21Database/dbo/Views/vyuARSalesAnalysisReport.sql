@@ -144,7 +144,7 @@ FROM
 				 , ICISI.intLineNo
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
-				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(ICIT.dblCost))
+				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS
@@ -163,7 +163,7 @@ FROM
 			INNER JOIN tblICLot ICL
 				ON ICIT.intLotId = ICL.intLotId
 				AND ICISI.intItemUOMId = ICL.intItemUOMId
-			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId, ICIT.intItemUOMId) AS LOTTED
+			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
 					ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 					AND ARID.intItemId					= LOTTED.intItemId
 					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
@@ -280,7 +280,7 @@ FROM
 			 , ICISI.intLineNo
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
-			 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(ICIT.dblCost))
+			 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -298,7 +298,7 @@ FROM
 		INNER JOIN tblICLot ICL
 			ON ICIT.intLotId = ICL.intLotId
 			AND ICISI.intItemUOMId = ICL.intItemUOMId
-		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId, ICIT.intItemUOMId) AS LOTTED
+		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo
