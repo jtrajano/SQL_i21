@@ -187,8 +187,8 @@ BEGIN
 			dtmDate						= 'January 17, 2014'
 			,strBatchId					= 'BATCH-000001'
 			,intAccountId				= @Inventory_Default
-			,dblDebit					= 0
-			,dblCredit					= 16.50
+			,dblDebit					= 16.50
+			,dblCredit					= 0.00
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription 
@@ -216,8 +216,8 @@ BEGIN
 			dtmDate						= 'January 17, 2014'
 			,strBatchId					= 'BATCH-000001'
 			,intAccountId				= @WorkInProgress_Default
-			,dblDebit					= 16.50
-			,dblCredit					= 0
+			,dblDebit					= 0.00
+			,dblCredit					= 16.50
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription
