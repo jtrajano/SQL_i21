@@ -284,13 +284,6 @@ Ext.define('Inventory.view.StockDetailViewController', {
         }
     },
 
-    init : function(o) {
-        var me = this,
-            win = this.getView();
-
-        console.log(win);
-    },
-
     show: function(config){
         var me = this,
             win = this.getView();
