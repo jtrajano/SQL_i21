@@ -74,7 +74,7 @@ END
 					dblEquityRefund = Total.dblRefundAmount - Total.dblCashRefund
 			   FROM (
 					SELECT		intCustomerId = B.intCustomerPatronId,
-								(CASE WHEN RRD.dblRate * dblVolume <= 10 THEN 0 ELSE RRD.dblRate * dblVolume END) AS dblRefundAmount,
+								(CASE WHEN RRD.dblRate * dblVolume <= @dblMinimumRefund THEN 0 ELSE RRD.dblRate * dblVolume END) AS dblRefundAmount,
 								(RRD.dblRate * dblVolume) * (RR.dblCashPayout/100) AS dblCashRefund,
 								RRD.intPatronageCategoryId,
 								B.intFiscalYear

@@ -37,7 +37,7 @@ BEGIN
 		SELECT AR.intEntityCustomerId,
 			   IC.intPatronageCategoryId,
 			   AR.ysnPosted,
-			   dblVolume =	sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN ARD.dblPrice ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
+			   dblVolume =	sum (CASE WHEN PC.strUnitAmount = 'Amount' THEN (CASE WHEN ARD.dblQtyShipped <= 0 THEN 0 ELSE (ARD.dblQtyShipped * ARD.dblPrice) END)
 							ELSE (CASE WHEN ICU.dblUnitQty <= 0 THEN ARD.dblQtyShipped ELSE (ARD.dblQtyShipped * ICU.dblUnitQty) END ) END),
 			   @intFiscalYear as fiscalYear
 		  INTO #tempItem

@@ -228,6 +228,43 @@ IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
 		SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId)
+	
+	--check out of balance 
+	--offset discrepancy
+	declare @dblDiff numeric(18,6)
+	select @dblDiff = sum(dblDebit) - sum(dblCredit) from @GLEntries
+	declare @intAdjustmentId int
+	-- long term, there has to be a setup for adjustment
+	-- for now, we adjust by force :)
+	IF @dblDiff <> 0
+	BEGIN
+		IF @dblDiff <0 -- credit is higher than debit
+			BEGIN
+				WITH UpdateListView as (
+					select top 1 *
+					from @GLEntries 
+					where strTransactionType = 'General Reserve' 
+					and dblDebit >0
+				)
+				update UpdateListView
+				set dblDebit = dblDebit + abs(@dblDiff)
+				
+			END
+		ELSE -- debit is higher than credit
+			BEGIN
+				WITH UpdateListView as (
+					select top 1 *
+					from @GLEntries 
+					where strTransactionType = 'Undistributed Equity' 
+					and dblCredit > 0
+				)
+				update UpdateListView
+				set dblCredit = dblCredit + abs(@dblDiff)
+				
+			END
+
+	END
+
 END
 ELSE
 BEGIN
