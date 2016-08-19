@@ -2,6 +2,7 @@
 ( 
 	 @CustomerId			INT
 	,@TransactionDate		DATETIME
+	,@TaxGroupId			INT
 	,@TaxCodeId				INT
 	,@TaxClassId			INT
 	,@TaxState				NVARCHAR(100)
@@ -84,6 +85,7 @@ BEGIN
 	WHERE 
 		SMTGCE.intCategoryId = @ItemCategoryId
 		AND SMTGC.[intTaxCodeId] = @TaxCodeId
+		AND SMTGC.[intTaxGroupId] = @TaxGroupId
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0
 		BEGIN
@@ -221,16 +223,6 @@ BEGIN
 			RETURN 	
 		END					
 	
-	IF (@TaxExempt = 0)
-	BEGIN
-		IF EXISTS(SELECT TOP 1 intCategoryId FROM tblSMTaxGroupCodeCategoryExemption 
-					WHERE intTaxGroupCodeId IN (SELECT intTaxGroupCodeId FROM [tblSMTaxGroupCode] WHERE intTaxCodeId = @TaxCodeId) AND intCategoryId = @ItemCategoryId
-		)
-		BEGIN
-			SET @TaxExempt = 1
-		END
-	END
-
 	INSERT INTO @returntable
 	SELECT 
 		[ysnTaxExempt] = @TaxExempt
