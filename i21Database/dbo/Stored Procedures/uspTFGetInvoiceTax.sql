@@ -5,7 +5,8 @@
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
 @FormReport NVARCHAR(50),
-@isMainForm NVARCHAR(5)
+@isMainForm NVARCHAR(5),
+@Refresh NVARCHAR(5)
 
 AS
 
@@ -88,6 +89,11 @@ DECLARE @tblTempTransaction TABLE (
 		 )
 
 	IF (@isMainForm != 'true')
+		BEGIN
+			DELETE FROM tblTFTransactions
+		END
+
+	IF @Refresh = 'true'
 		BEGIN
 			DELETE FROM tblTFTransactions
 		END
@@ -198,7 +204,7 @@ DECLARE @tblTempTransaction TABLE (
 								   WHERE tblTFReportingComponentDetail.intReportingComponentDetailId IN(' + @RCId + ') 
 								   AND tblARInvoice.dtmDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''' 
 									' + @IncludeOriginState + ' ' + @ExcludeOriginState + ' 
-									' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ''
+									' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND tblARInvoice.ysnPosted = 1'
 
 		 DECLARE @HasCriteria INT = (SELECT TOP 1 tblTFTaxCriteria.intTaxCategoryId FROM tblTFTaxCriteria INNER JOIN tblTFReportingComponentDetail ON tblTFTaxCriteria.intReportingComponentDetailId = tblTFReportingComponentDetail.intReportingComponentDetailId WHERE (tblTFTaxCriteria.intReportingComponentDetailId = @RCId))
 		 IF(@HasCriteria IS NOT NULL)
@@ -376,7 +382,6 @@ DECLARE @tblTempTransaction TABLE (
 																			AND (tblARInvoiceDetailTax.intTaxCodeId = ''' + @TaxCodeId + ''')
 																			AND (tblARInvoiceDetailTax.dblTax ' + @TaxCriteria + ')'
 
-										   
 									DELETE FROM @tblTempInvoiceDetail
 									INSERT INTO @tblTempInvoiceDetail
 									EXEC(@QueryrInvoiceDetailId)
@@ -491,3 +496,11 @@ DECLARE @tblTempTransaction TABLE (
 			BEGIN
 				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 			END
+
+			DECLARE @CountTrans NVARCHAR(250)
+			SET @CountTrans = (SELECT COUNT(intReportingComponentDetailId) FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
+
+			IF(@Refresh = 'false' AND @CountTrans > 1) --EDI SELECTION
+				BEGIN
+					DELETE FROM tblTFTransactions WHERE strProductCode = 'No record found.' AND uniqTransactionGuid = @Guid
+				END

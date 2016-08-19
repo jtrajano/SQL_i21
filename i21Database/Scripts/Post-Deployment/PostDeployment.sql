@@ -353,6 +353,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_OriginDestinationState.sql
 :r .\TF\DefaultData\_TaxCategory.sql
 :r .\TF\DefaultData\_ScheduleFieldTemplate.sql
+:r .\TF\DefaultData\tblTFTaxReportSProc.sql
 
 --Transports
 :R .\TR\01_OldTransportLoadConversion.sql

@@ -1,12 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFGT103RunTax]
 
 @Guid NVARCHAR(250),
-@ScheduleCodeParam NVARCHAR(250)
+@FormCode NVARCHAR(50),
+@ScheduleCodeParam NVARCHAR(250),
+@Refresh NVARCHAR(5)
 
 AS
 
 DECLARE @TA INT
-DECLARE @FormCode NVARCHAR(50)
+--DECLARE @FormCode NVARCHAR(50)
 
 --SUMMARY VARIABLES
 DECLARE @SmryTempSummaryId NVARCHAR(MAX)
@@ -31,7 +33,10 @@ DECLARE @tblTempSummaryItem TABLE (
 		Id INT IDENTITY(1,1),
 		TaxReportSummaryItemId INT)
 
-DELETE FROM tblTFTaxReportSummary
+IF @Refresh = 'true'
+		BEGIN
+			DELETE FROM tblTFTaxReportSummary
+		END
 
 -- ======================== HEADER ==============================
 
@@ -42,11 +47,11 @@ DECLARE @DateEnd DATETIME
 DECLARE @TaxID NVARCHAR(50)
 DECLARE @EIN NVARCHAR(50)
 
-SET @FormCode = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
-SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
+--SET @FormCode = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
+SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
 SET @TaxID = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strSummaryFormCode = @FormCode AND intTaxReportSummaryItemId = 'TID')
 SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 
@@ -82,14 +87,14 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 				IF @SmryTemplateItemId = 'GT-103-Summary-001'
 					BEGIN
 				--1. Total Gallons Sold for Period
-						SET @SmryQuery = 'SELECT SUM(dblQtyShipped) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''''  
+						SET @SmryQuery = 'SELECT SUM(dblQtyShipped) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCode + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
 					ELSE IF @SmryTemplateItemId = 'GT-103-Summary-002'
 					BEGIN
 				--2. Total Exempt Gallons Sold for Period
-						SET @SmryQuery = 'SELECT SUM(dblTaxExempt) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''''  
+						SET @SmryQuery = 'SELECT SUM(dblTaxExempt) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryScheduleCodeParam + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCode + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@SmryQuery)
 					END
@@ -210,14 +215,14 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 				--11. Total Amount Due. (Add Lines 6 through 8, subtract Line 9, add Line 10).
 						SET @SmryQuery = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @SmryScheduleCodeParam + ''') AND uniqGuid = ''' + @Guid + '''' 
 						DECLARE @Value NVARCHAR(MAX) = ''
-						SET @Value = ((SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN('6','7','8')) - (SELECT strColumnValue FROM tblTFTaxReportSummary WHERE intItemNumber IN('9'))) + (SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN('10'))
+						SET @Value = ((SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN('6','7','8') AND strFormCode = @FormCode) - (SELECT strColumnValue FROM tblTFTaxReportSummary WHERE intItemNumber IN('9') AND strFormCode = @FormCode)) + (SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN('10') AND strFormCode = @FormCode)
 			
 						INSERT INTO @tblTempSummaryTotal(dbLColumnValue)values(@Value)
 						EXEC(@SmryQuery)
 					END
 		
 
-				SET @SmryTempTotal = (SELECT ISNULL(dbLColumnValue, 0) FROM @tblTempSummaryTotal)
+				SET @SmryTempTotal = (SELECT TOP 1 ISNULL(dbLColumnValue, 0) FROM @tblTempSummaryTotal)
 				PRINT @SmryTempTotal
 
 					INSERT INTO tblTFTaxReportSummary
@@ -312,16 +317,16 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 									BEGIN
 										IF(@Type = 'Total Gallons of Fuel Sold')
 											BEGIN
-												SET @TotalGallonsSold = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid)
-												SET @TotalExemptGallonsSold = (SELECT ISNULL(SUM(dblTaxExempt), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid)
-												SET @GasolineUseTaxCollected = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid)
+												SET @TotalGallonsSold = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+												SET @TotalExemptGallonsSold = (SELECT ISNULL(SUM(dblTaxExempt), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+												SET @GasolineUseTaxCollected = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
 
 											END
 										ELSE
 											BEGIN
-												SET @TotalGallonsSold = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid)
-												SET @TotalExemptGallonsSold = (SELECT ISNULL(SUM(dblTaxExempt), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid)
-												SET @GasolineUseTaxCollected = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid)
+												SET @TotalGallonsSold = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+												SET @TotalExemptGallonsSold = (SELECT ISNULL(SUM(dblTaxExempt), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+												SET @GasolineUseTaxCollected = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
 											END
 
 											INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strSection,strDescription, dtmDateRun)		
@@ -336,15 +341,16 @@ SELECT TOP 1 @Guid, @TA, @FormCode, '', 'Header', @DatePeriod,@DateBegin,@DateEn
 							--Receipts - Schedule 1
 							IF(@TemplateSection = 'Receipts - Schedule 1')
 								BEGIN
+							
 									IF(@Type = 'Total Gallons of Fuel Purchased')
 										BEGIN
-											SET @ReceiptTotalGallsPurchased = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid)
-											SET @GasolineUseTaxPaid = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid)
+											SET @ReceiptTotalGallsPurchased = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+											SET @GasolineUseTaxPaid = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
 										END
 									ELSE
 										BEGIN
-											SET @ReceiptTotalGallsPurchased = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid)
-											SET @GasolineUseTaxPaid = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid)
+											SET @ReceiptTotalGallsPurchased = (SELECT ISNULL(SUM(dblGross), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
+											SET @GasolineUseTaxPaid = (SELECT ISNULL(SUM(dblTax), 0) FROM tblTFTransactions WHERE strScheduleCode = @paramTempScheduleCode AND strType = @Type AND uniqTransactionGuid = @Guid AND strFormCode = @FormCode)
 										END
 
 										INSERT INTO tblTFTaxReportSummary (uniqGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strTaxType, strColumn,strProductCode,strColumnValue, strSection,strDescription, dtmDateRun)		

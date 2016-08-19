@@ -5,7 +5,8 @@
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
 @FormReport NVARCHAR(50),
-@isMainForm NVARCHAR(5)
+@isMainForm NVARCHAR(5),
+@Refresh NVARCHAR(5)
 
 AS
 
@@ -90,6 +91,11 @@ DECLARE @tblTempTransaction TABLE (
 		 )
 
 	IF (@isMainForm != 'true')
+		BEGIN
+			DELETE FROM tblTFTransactions
+		END
+		
+	IF @Refresh = 'true'
 		BEGIN
 			DELETE FROM tblTFTransactions
 		END

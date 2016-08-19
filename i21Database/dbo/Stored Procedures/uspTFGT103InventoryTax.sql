@@ -4,7 +4,8 @@
 @ReportingComponentId NVARCHAR(20),
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
-@FormReport NVARCHAR(50)
+@FormReport NVARCHAR(50),
+@Refresh NVARCHAR(5)
 
 AS
 
@@ -31,8 +32,11 @@ DECLARE @ExcludeOriginState NVARCHAR(250)
 DECLARE @IncludeDestinationState NVARCHAR(250)
 DECLARE @ExcludeDestinationState NVARCHAR(250)
 
-DELETE FROM tblTFTransactions
-
+IF @Refresh = 'true'
+	BEGIN
+		DELETE FROM tblTFTransactions
+	END
+	
 DECLARE @tblTempReportingComponent TABLE (
 			intId INT IDENTITY(1,1),
 			intReportingComponentId INT

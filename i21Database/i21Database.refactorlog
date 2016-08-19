@@ -5397,4 +5397,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intLoadDetailId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b59a792f-1350-4114-a6c5-c1a1fd1a26a4" ChangeDateTime="08/19/2016 14:22:02">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportSProc].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportSProc]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSPId" />
+  </Operation>
 </Operations>

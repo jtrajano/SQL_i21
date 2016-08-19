@@ -4,7 +4,8 @@
 @ReportingComponentId NVARCHAR(20),
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
-@FormReport NVARCHAR(50) = ''
+@FormReport NVARCHAR(50) = '',
+@Refresh NVARCHAR(5)
 
 AS
 
@@ -30,7 +31,10 @@ DECLARE @ExcludeOriginState NVARCHAR(250)
 DECLARE @IncludeDestinationState NVARCHAR(250)
 DECLARE @ExcludeDestinationState NVARCHAR(250)
 
-DELETE FROM tblTFTransactions
+IF @Refresh = 'true'
+	BEGIN
+		DELETE FROM tblTFTransactions
+	END
 
 DECLARE @tblTempReportingComponent TABLE (
 			intId INT IDENTITY(1,1),
@@ -232,7 +236,6 @@ DECLARE @tblTempTransaction TABLE (
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
 							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblEMEntityLocation.ysnDefaultLocation=''True'') AND tblICInventoryReceipt.ysnPosted = 1'
 			END
-			
 		DELETE FROM @tblTempTransaction
 		INSERT INTO @tblTempTransaction
 		EXEC(@QueryInvReceiptRecord)
@@ -294,7 +297,6 @@ DECLARE @tblTempTransaction TABLE (
 								 END
 						SET @Count = @Count - 1
 				END
-			
 				IF (@ReportingComponentId <> '' AND @FormReport = '')
 					BEGIN
 						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
@@ -388,3 +390,11 @@ DECLARE @tblTempTransaction TABLE (
 			BEGIN
 				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 			END
+
+			DECLARE @CountTrans NVARCHAR(250)
+			SET @CountTrans = (SELECT COUNT(intReportingComponentDetailId) FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid)
+
+			IF(@Refresh = 'false' AND @CountTrans > 1) --EDI SELECTION
+				BEGIN
+					DELETE FROM tblTFTransactions WHERE strProductCode = 'No record found.' AND uniqTransactionGuid = @Guid
+				END
