@@ -4215,6 +4215,8 @@
     <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
     <Build Include="dbo\tblTFTaxReportSProc.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRefresh.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
