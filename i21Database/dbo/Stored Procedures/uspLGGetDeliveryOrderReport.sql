@@ -158,9 +158,21 @@ BEGIN
 						)
 			ELSE EL.strZipCode
 			END AS strCustomerLocationCityStateZip
+		  ,(SELECT AC.strFLOId
+			FROM tblARCustomer AC
+			WHERE AC.intEntityCustomerId= EM.intEntityId
+			) strFLOId		  
+		  ,(SELECT ETCN.strName
+			FROM tblEMEntity EM1 
+			JOIN tblEMEntityToContact ETC ON ETC.intEntityId = EM1.intEntityId
+			JOIN tblEMEntity ETCN ON ETCN.intEntityId = ETC.intEntityContactId
+			WHERE EM.intEntityId = EM1.intEntityId
+			)strContactName
 		  ,L.dtmScheduledDate
 		  ,LW.dtmPickupDate
 		  ,LW.dtmDeliveryDate AS dtmDODate
+		  ,(SELECT TOP 1 CH.strCustomerContract FROM tblCTContractDetail CD JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId WHERE CD.intContractDetailId = LD.intSContractDetailId) AS strBuyersPONo
+		  ,(SELECT ECN.strContactNumber FROM tblEMEntity ECN WHERE ECN.intEntityId = EM.intEntityId) strCustomerContactNumber
 		  ,@strCompanyName AS strCompanyName
 		  ,@strCompanyAddress AS strCompanyAddress
 		  ,@strContactName AS strCompanyContactName 
