@@ -147,6 +147,8 @@ namespace iRely.Inventory.Model
         public string strRegProdCode { get; set; }
         public string strRegProdDesc { get; set; }
         public string strRegProdComment { get; set; }
+
+        public ICollection<vyuICGetItemLocation> vyuICGetItemLocation { get; set; }
     }
 
     public class tblSTPaidOut : BaseEntity
