@@ -20,8 +20,11 @@ FROM (
 		dblQtyReceived,
 		dblCostUnitQty,
 		dblWeightUnitQty,
+		dblUnitQty,
 		intCostUOMId,
+		strCostUOM,
 		intWeightUOMId,
+		strgrossNetUOM,
 		intUnitOfMeasureId,
 		strUnitMeasure AS strUOM,
 		strItemNo,
@@ -48,15 +51,19 @@ FROM (
 			Loads.dblNetShippedWeight
 			,Receipts.dblNetQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
-			,B.dblCost
+			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
+					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
 			,B.dblQtyReceived
 			,B.dblQtyOrdered AS dblQtyBillCreated
-			,B.intCostUOMId AS intUnitOfMeasureId
-			,B3.strUnitMeasure
+			,B.intUnitOfMeasureId
+			,UOM.strUnitMeasure
 			,B.intCostUOMId
+			,CostUOM.strUnitMeasure AS strCostUOM
 			,B.intWeightUOMId
-			,B.dblCostUnitQty
-			,B.dblWeightUnitQty
+			,WeightUOM.strUnitMeasure AS strgrossNetUOM
+			,ISNULL(B.dblCostUnitQty,1) AS dblCostUnitQty
+			,ISNULL(B.dblWeightUnitQty,1) AS dblWeightUnitQty 
+			,ISNULL(B.dblUnitQty,1) AS dblUnitQty 
 			,G.strItemNo
 			,G.intItemId
 			,E.intContractDetailId
@@ -80,7 +87,7 @@ FROM (
 			,G.strDescription
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON B.intCostUOMId = B2.intItemUOMId
+		INNER JOIN (tblICItemUOM B2 INNER JOIN tblICUnitMeasure B3 ON B2.intUnitMeasureId = B3.intUnitMeasureId) ON (CASE WHEN B.dblNetWeight > 0 THEN B.intWeightUOMId WHEN B.intCostUOMId > 0 THEN B.intCostUOMId ELSE B.intUnitOfMeasureId END) = B2.intItemUOMId
 		INNER JOIN (tblAPVendor M INNER JOIN tblEMEntity M2 ON M.intEntityVendorId = M2.intEntityId LEFT JOIN tblGLAccount M3 ON M.intGLAccountExpenseId = M3.intAccountId) ON A.intEntityVendorId = M.intEntityVendorId
 		INNER JOIN tblICInventoryReceiptItem C2 ON B.intInventoryReceiptItemId = C2.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt D ON C2.intInventoryReceiptId = D.intInventoryReceiptId
@@ -89,6 +96,12 @@ FROM (
 		INNER JOIN tblCTWeightGrade I ON H.intWeightId = I.intWeightGradeId
 		INNER JOIN tblICItem G ON B.intItemId = G.intItemId
 		INNER JOIN tblAPAppliedPrepaidAndDebit J ON J.intContractHeaderId = E.intContractHeaderId AND B.intBillDetailId = J.intBillDetailApplied
+		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
+		LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
+		LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = C2.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		INNER JOIN tblAPBill K ON J.intTransactionId = K.intBillId
 		INNER JOIN tblAPBillDetail L ON K.intBillId = L.intBillId 
 					AND B.intItemId = L.intItemId 
@@ -112,7 +125,10 @@ FROM (
 	GROUP BY dblCost,
 		dblCostUnitQty,
 		dblWeightUnitQty,
+		dblUnitQty,
 		dblQtyReceived,
+		strCostUOM,
+		strgrossNetUOM,
 		intCostUOMId,
 		intWeightUOMId,
 		intUnitOfMeasureId,
