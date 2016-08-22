@@ -361,6 +361,17 @@ BEGIN
 
 	--UPDATE 1099 Information
 	EXEC [uspAPUpdateBill1099] @param
+	
+	--UPDATE INVOICES
+	DECLARE @invoices Id
+	INSERT INTO @invoices
+	SELECT 
+		B.intPaymentDetailId
+	FROM @payments A
+	INNER JOIN tblAPPaymentDetail B
+		ON A.intId = B.intPaymentId
+	WHERE B.intInvoiceId > 0
+	EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @userId, @post = @post
 
 	DECLARE @strDescription AS NVARCHAR(100),@actionType AS NVARCHAR(50),@PaymentId AS NVARCHAR(50);
 	DECLARE @paymentCounter INT = 0;
