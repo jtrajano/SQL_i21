@@ -4213,7 +4213,6 @@
     <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
     <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
-    <Build Include="dbo\tblTFTaxReportSProc.sql" />
     <Build Include="dbo\Stored Procedures\uspTFRefresh.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
@@ -4225,6 +4224,9 @@
     <Build Include="dbo\User Defined Types\VoucherDetailClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderInstructionReport.sql" />
+    <Build Include="dbo\Tables\tblTFTaxReportSProc.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSProc.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4347,7 +4349,6 @@
     <None Include="Scripts\Post-Deployment\CF\2_DataFix.sql" />
     <None Include="Scripts\Post-Deployment\AP\MigrateVouchersForApproval.sql" />
     <None Include="Scripts\Post-Deployment\AP\MigratePOForApprovals.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSProc.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
