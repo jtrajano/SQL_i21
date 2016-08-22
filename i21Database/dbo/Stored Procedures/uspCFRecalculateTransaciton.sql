@@ -1,6 +1,4 @@
 ﻿
-
-
 CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
@@ -1300,7 +1298,7 @@ BEGIN
 		BEGIN
 			SET @ysnInvalid = 1
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',GETDATE(),NEWID(), @intTransactionId, 'Duplicate transaction history found.')
+			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Duplicate transaction history found.')
 		END
 	END
 	---------------------------------------------------
@@ -1453,6 +1451,31 @@ BEGIN
 	---------------------------------------------------
 	--					TAXES OUT					 --
 	---------------------------------------------------
+
+
+	---------------------------------------------------
+	--					ZERO PRICING				 --
+	---------------------------------------------------
+	DECLARE @dblCalculatedPricing NUMERIC(18,6)
+	SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+	IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
+	END
+
+	
+	DECLARE @dblOriginalPricing NUMERIC(18,6)
+	SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+	IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+	END
+	---------------------------------------------------
+	--					ZERO PRICING				 --
+	---------------------------------------------------
+
 
 	---------------------------------------------------
 	--					PRICE OUT					 --
