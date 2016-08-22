@@ -122,6 +122,12 @@ BEGIN
 	LEFT JOIN tblCMBankAccount B
 		ON A.apchk_cbk_no = B.strCbkNo COLLATE Latin1_General_CS_AS
 	WHERE B.strCbkNo IS NULL
+	UNION ALL
+	SELECT DISTINCT
+		'Check book number ' + CAST(C.apivc_cbk_no AS NVARCHAR)  + ' is not exists in apchkmst.'
+	FROM apivcmst C 
+	LEFT JOIN apchkmst A ON A.apchk_cbk_no = C.apivc_cbk_no
+	WHERE A.apchk_cbk_no IS NULL
 END
 ELSE
 BEGIN
