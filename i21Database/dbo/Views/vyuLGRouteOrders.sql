@@ -118,6 +118,13 @@ SELECT
         END
  ,intLoadId = LD.intLoadId
  ,strEntityType = ET.strType
+ ,ysnLeakCheckRequired =   CASE WHEN IsNull(TMO.intDispatchId, 0) <> 0 
+          THEN TMO.ysnLeakCheckRequired 
+         WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery' 
+          THEN TMH.ysnLeakCheckRequired
+		 ELSE
+			Cast (0 as Bit)	
+         END
 FROM tblLGRouteOrder Rte
 JOIN vyuLGRoute R ON R.intRouteId = Rte.intRouteId
 LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = Rte.intDispatchID
