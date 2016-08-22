@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
 ,@CardId				INT				
@@ -1450,6 +1449,19 @@ BEGIN
 		END
 	---------------------------------------------------
 	--					TAXES OUT					 --
+	---------------------------------------------------
+
+	
+	---------------------------------------------------
+	--					INDEX PRICING				 --
+	---------------------------------------------------
+	IF((@intPriceIndexId > 0 AND @intPriceIndexId IS NOT NULL) AND (@strPriceIndexId IS NOT NULL) AND (@dblPriceIndexRate <=0 OR @dblPriceIndexRate IS NULL))
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'No index price found.')
+	END
+	---------------------------------------------------
+	--					INDEX PRICING				 --
 	---------------------------------------------------
 
 
