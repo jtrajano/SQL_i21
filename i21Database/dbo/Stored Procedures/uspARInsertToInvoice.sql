@@ -594,7 +594,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemShipmentDetailId	= intInventoryShipmentItemId,
 						@ItemRecipeItemId		= intRecipeItemId,
 						@ItemRecipeId			= intRecipeId,
-						@ItemSublocationId		= intSublocationId,
+						@ItemSublocationId		= intSubLocationId,
 						@ItemCostTypeId			= intCostTypeId,
 						@ItemMarginById			= intMarginById,
 						@ItemCommentTypeId		= intCommentTypeId,
