@@ -4217,6 +4217,7 @@
     <Build Include="dbo\Stored Procedures\uspTFRefresh.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
+    <Build Include="dbo\Views\vyuCFSearchIndexPricingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
