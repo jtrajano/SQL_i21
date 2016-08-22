@@ -66,6 +66,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.dtmExportedDate
 	, ReceiptItemSource.dblFranchise
 	, ReceiptItemSource.dblContainerWeightPerQty
+	, Receipt.strVendorRefNo
+	, Receipt.strShipFrom
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
