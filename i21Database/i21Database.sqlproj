@@ -4232,6 +4232,7 @@
     <Build Include="dbo\User Defined Types\BankTransactionBatchDetailTable.sql" />
     <Build Include="dbo\Views\vyuCMBankTransactionBatchDetail.sql" />
     <Build Include="dbo\Tables\tblLGRouteDirection.sql" />
+    <Build Include="dbo\Views\vyuTMDYMOCustomerLabelReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
