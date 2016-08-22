@@ -951,6 +951,8 @@ namespace iRely.Inventory.Model
         public decimal? dblContainerWeightPerQty { get; set; }
         public bool? ysnSubCurrency { get; set; }
         public string strSubCurrency { get; set; }
+        public string strVendorRefNo { get; set; }
+        public string strShipFrom { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
