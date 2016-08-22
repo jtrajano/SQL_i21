@@ -4224,6 +4224,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateClaim.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderInstructionReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
