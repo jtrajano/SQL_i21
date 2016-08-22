@@ -18,7 +18,7 @@ BEGIN
 		  ,LDL.dblNet AS dblWeight
 		  ,WU.strUnitMeasure AS strWeightUOM
 		  ,IRIL.strContainerNo AS strContainerNumber
-		  ,L.strMarks
+		  ,LC.strMarks
 		  ,LW.strDeliveryNoticeNumber
 		  ,CLSL.strSubLocationName
 		  ,LDL.strWarehouseCargoNumber
@@ -36,5 +36,7 @@ BEGIN
 	JOIN tblICUnitMeasure WU ON WU.intUnitMeasureId = WUOM.intUnitMeasureId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LOT.intLotId
+	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
+	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
 	WHERE strLoadNumber = @strLoadNumber 
 END
