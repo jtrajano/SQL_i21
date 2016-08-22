@@ -10,6 +10,7 @@
 			,tblEMEntity.strPhone
 			,ysnActiveEntity = tblEMEntity.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
+			,strSalesPersonType = 'Sales Rep Entity'
 	from tblARSalesperson, tblEMEntity
 	where
 		tblEMEntity.intEntityId = tblARSalesperson.intEntitySalespersonId
@@ -26,6 +27,7 @@
 			,e.strPhone
 			,ysnActiveEntity = e.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
+			,strSalesPersonType = 'Sales Rep Contact'
 	from tblARSalesperson, tblEMEntity e, tblEMEntityToContact
 	where
 		e.intEntityId = tblARSalesperson.intEntitySalespersonId
