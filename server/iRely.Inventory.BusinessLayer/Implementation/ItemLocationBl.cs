@@ -38,7 +38,9 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetItemLocationViews(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemLocation>()
+                .Include(p => p.tblSTSubcategoryRegProd)
                 .Filter(param, true);
+
             var data = await query.ToListAsync();
 
             return new SearchResult()

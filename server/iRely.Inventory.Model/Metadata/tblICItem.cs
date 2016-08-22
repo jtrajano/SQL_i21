@@ -504,7 +504,6 @@ namespace iRely.Inventory.Model
         public int? intClassId { get; set; }
         public string strClass { get; set; }
         public int? intProductCodeId { get; set; }
-        public string strRegProdCode { get; set; }
         public string strPassportFuelId1 { get; set; }
         public string strPassportFuelId2 { get; set; }
         public string strPassportFuelId3 { get; set; }
@@ -558,6 +557,7 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
 
         public tblICItemLocation tblICItemLocation { get; set; }
+        public tblSTSubcategoryRegProd tblSTSubcategoryRegProd { get; set; }
     }
 
     public class vyuICGetItemAccount
