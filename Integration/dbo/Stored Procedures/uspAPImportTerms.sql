@@ -60,10 +60,10 @@ BEGIN
 						[strTerm] = CASE WHEN ISNULL(RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))),'''') = '''' 
 									THEN  (
 										CASE WHEN ssvnd_terms_type = ''P'' 
-												THEN dbo.fnTrim(CAST(ssvnd_terms_disc_pct AS NVARCHAR)) + '' '' +
+												THEN dbo.fnTrim(CAST(ssvnd_terms_disc_pct AS NVARCHAR)) + ''% '' +
 													 dbo.fnTrim(CAST(ssvnd_terms_disc_day AS NVARCHAR)) + 
 													 '' Net '' + (CAST(ssvnd_terms_due_day AS NVARCHAR)) + ''th''
-												ELSE dbo.fnTrim(CAST(ssvnd_terms_disc_pct AS NVARCHAR)) + '' '' +
+												ELSE dbo.fnTrim(CAST(ssvnd_terms_disc_pct AS NVARCHAR)) + ''% '' +
 													 dbo.fnTrim(CAST(ssvnd_terms_disc_day AS NVARCHAR)) +  
 													''Net '' + (CAST(ssvnd_terms_due_day AS NVARCHAR))
 											END
