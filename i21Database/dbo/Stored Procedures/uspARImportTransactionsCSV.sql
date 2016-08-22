@@ -1,11 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspARImportTransactionsCSV]
-	 @ImportLogId		INT
-	,@ImportFormat      NVARCHAR(50)
-	,@ImportItemId		INT = NULL
-	,@ImportLocationId  INT = NULL
-	,@IsTank			BIT = 0
-	,@IsFromOldVersion	BIT = 0	
-	,@UserEntityId		INT	= NULL
+	 @ImportLogId			INT
+	,@ImportFormat			NVARCHAR(50)
+	,@ImportItemId			INT = NULL
+	,@ImportLocationId		INT = NULL
+	,@ConversionAccountId	INT = NULL
+	,@IsTank				BIT = 0
+	,@IsFromOldVersion		BIT = 0	
+	,@UserEntityId			INT	= NULL
 AS
 
 BEGIN
@@ -765,6 +766,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						WHERE [intImportLogDetailId] = @ImportLogDetailId
 					END			
 			END
+
+		UPDATE tblARImportLogDetail SET [intConversionAccountId] = @ConversionAccountId  WHERE intImportLogDetailId = @ImportLogDetailId
 		
 		DELETE FROM @InvoicesForImport WHERE [intImportLogDetailId] = @ImportLogDetailId
 
