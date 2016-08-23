@@ -45,7 +45,7 @@ BEGIN TRY
 												THEN 1
 												ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
 											ELSE 0 END),
-			intSort = intMenuID FROM tblSMMasterMenu Menu
+			intSort = intSort FROM tblSMMasterMenu Menu --intSort = intMenuID FROM tblSMMasterMenu Menu
 			WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
 		END
 		ELSE
@@ -57,7 +57,7 @@ BEGIN TRY
 												THEN 1
 												ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
 											ELSE 0 END),
-			intSort = intMenuID FROM tblSMMasterMenu Menu
+			intSort = intSort FROM tblSMMasterMenu Menu --intSort = intMenuID FROM tblSMMasterMenu Menu
 			INNER JOIN tblSMContactMenu ContactMenu ON Menu.intMenuID = ContactMenu.intMasterMenuId
 			WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
 		END
