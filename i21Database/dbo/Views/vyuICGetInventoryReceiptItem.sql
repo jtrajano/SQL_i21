@@ -36,8 +36,10 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId
 	, SubLocation.strSubLocationName
+	, SubLocation.strSubLocationDescription
 	, ReceiptItem.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
+	, StorageUnitType.strStorageUnitType
 	, strOrderUOM = ReceiptItemSource.strUnitMeasure
 	, dblOrderUOMConvFactor = ISNULL(ReceiptItemSource.dblUnitQty, 0)
 	, strUnitMeasure = UOM.strUnitMeasure
@@ -83,3 +85,4 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItem.intGradeId
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ReceiptItem.intDiscountSchedule
 	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = Receipt.intCurrencyId
+	LEFT JOIN tblICStorageUnitType StorageUnitType ON StorageUnitType.intStorageUnitTypeId = StorageLocation.intStorageUnitTypeId
