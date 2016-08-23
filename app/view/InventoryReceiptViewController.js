@@ -361,7 +361,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 disabled: '{current.ysnOrigin}'
             },
             lblWeightLossMsg: {
-                hidden: false,
                 text: '{getWeightLossText}'
             },
             lblWeightLossMsgValue: {
