@@ -4083,6 +4083,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
     <Build Include="dbo\Views\vyuCFAccountCreditThreshold.sql" />
     <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportDispatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
