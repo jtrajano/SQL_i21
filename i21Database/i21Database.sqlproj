@@ -4242,6 +4242,7 @@
     <Build Include="dbo\Views\vyuTMBEExportConsumptionSite.sql" />
     <Build Include="dbo\Tables\tblSMFileDownloadDetail.sql" />
     <Build Include="dbo\Tables\tblSMFileDownload.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
