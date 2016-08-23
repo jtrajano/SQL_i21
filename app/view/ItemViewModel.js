@@ -202,18 +202,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
 
         copyLocation: {
-            type: 'icbuffereditemlocation',
-            proxy: {
-                type: 'rest',
-                api: {
-                    read: '../Inventory/api/ItemLocation/GetItemLocationViews'
-                },
-                reader: {
-                    type: 'json',
-                    rootProperty: 'data',
-                    messageProperty: 'message'
-                }
-            }
+            type: 'icbuffereditemlocation'
         },
 
         patronage: {
