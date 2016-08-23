@@ -8,7 +8,7 @@ describe("Brand View Controller", function() {
     var view;
 
     beforeEach(function() {
-        view = Ext.create('Inventory.view.Brand', { controller : 'brand' });
+        view = Ext.create('Inventory.view.Brand', { controller : 'icbrand' });
         controller = view.getController();
     });
 
