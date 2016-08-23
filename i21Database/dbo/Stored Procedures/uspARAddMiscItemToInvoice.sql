@@ -13,6 +13,7 @@
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
 	,@ItemSalesOrderDetailId		INT				= NULL	
 	,@ItemTaxGroupId				INT				= NULL
+	,@ItemConversionAccountId		INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
 	,@SubCurrency					BIT				= 0
 AS
@@ -57,8 +58,16 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
-	END	
-	
+	END
+
+IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'General' AND [strAccountType] = 'Asset' AND [intAccountId] = @ItemConversionAccountId)
+	BEGIN
+		SET @ErrorMessage = 'Invalid Conversion Account Id! Must be of type ''Asset'' and of category ''General'''
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+		
 SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
 --IF ISNULL(@ServiceChargesAccountId,0) = 0
 --	BEGIN
@@ -118,6 +127,7 @@ BEGIN TRY
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
 		,[intEntitySalespersonId]
+		,[intConversionAccountId]
 		,[intConcurrencyId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
@@ -167,6 +177,7 @@ BEGIN TRY
 		,[ysnLeaseBilling]					= NULL
 		,[ysnVirtualMeterReading]			= NULL
 		,[intEntitySalespersonId]			= @EntitySalespersonId
+		,[intConversionAccountId]			= @ItemConversionAccountId
 		,[intConcurrencyId]					= 0
 			
 END TRY

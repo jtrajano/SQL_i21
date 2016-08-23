@@ -58,6 +58,7 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
+	,@ItemConversionAccountId		INT				= NULL
 	,@EntitySalespersonId			INT				= NULL
 	,@SubCurrency					BIT				= 0
 AS
@@ -277,6 +278,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
 			,@SubCurrency					= @SubCurrency
+			,@ItemConversionAccountId		= @ItemConversionAccountId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

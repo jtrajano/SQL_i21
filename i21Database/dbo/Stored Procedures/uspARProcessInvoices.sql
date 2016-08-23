@@ -233,6 +233,7 @@ DECLARE  @Id									INT
 		,@TempDetailIdForTaxes					INT
 		,@SubCurrency							BIT			
 		,@ItemIsBlended							BIT
+		,@ItemConversionAccountId				INT
 
 --INSERT
 BEGIN TRY
@@ -364,6 +365,7 @@ BEGIN
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
 		,@SubCurrency					= (CASE WHEN @GroupingOption = 0 THEN [ysnSubCurrency] ELSE 0 END)
 		,@ItemIsBlended					= [ysnBlended]
+		,@ItemConversionAccountId		= (CASE WHEN @GroupingOption = 0 THEN [intConversionAccountId] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -556,6 +558,7 @@ BEGIN
 			,@ItemPerformerId				= @ItemPerformerId
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
+			,@ItemConversionAccountId		= @ItemConversionAccountId
 			,@SubCurrency					= @SubCurrency
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -679,6 +682,7 @@ BEGIN
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 					,@ClearDetailTaxes				= [ysnClearDetailTaxes]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+					,@ItemConversionAccountId		= [intConversionAccountId]
 					,@SubCurrency					= [ysnSubCurrency]
 					,@ItemIsBlended					= [ysnBlended]
 				FROM
@@ -743,6 +747,7 @@ BEGIN
 						,@ItemConversionFactor			= @ItemConversionFactor
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
+						,@ItemConversionAccountId		= @ItemConversionAccountId
 						,@SubCurrency					= @SubCurrency
 						,@ItemIsBlended					= @ItemIsBlended
 
@@ -1254,6 +1259,7 @@ BEGIN TRY
 						,@ItemLeaseBilling				= [ysnLeaseBilling]
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+						,@ItemConversionAccountId		= [intConversionAccountId]
 						,@SubCurrency					= [ysnSubCurrency]
 					FROM
 						@InvoiceEntries
@@ -1312,6 +1318,7 @@ BEGIN TRY
 							,@ItemConversionFactor			= @ItemConversionFactor
 							,@ItemPerformerId				= @ItemPerformerId
 							,@ItemLeaseBilling				= @ItemLeaseBilling
+							,@ItemConversionAccountId		= @ItemConversionAccountId
 							,@SubCurrency					= @SubCurrency
 							,@ItemWeightUOMId				= @ItemWeightUOMId
 							,@ItemWeight					= @ItemWeight
@@ -1481,6 +1488,7 @@ BEGIN TRY
 					,@ItemLeaseBilling				= [ysnLeaseBilling]
 					,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
+					,@ItemConversionAccountId		= [intConversionAccountId]
 					,@SubCurrency					= [ysnSubCurrency]
 				FROM
 					@InvoiceEntries
@@ -1586,6 +1594,7 @@ BEGIN TRY
 						,[intPerformerId]						= @ItemPerformerId
 						,[ysnLeaseBilling]						= @ItemLeaseBilling
 						,[ysnVirtualMeterReading]				= @ItemVirtualMeterReading
+						,[intConversionAccountId]				= @ItemConversionAccountId
 						,[ysnSubCurrency]						= @SubCurrency
 						,[intConcurrencyId]						= [intConcurrencyId] + 1
 					WHERE
