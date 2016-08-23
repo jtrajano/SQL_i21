@@ -4084,6 +4084,7 @@
     <Build Include="dbo\Views\vyuCFAccountCreditThreshold.sql" />
     <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
     <Build Include="dbo\Views\vyuTMBEExportDispatch.sql" />
+    <Build Include="dbo\Views\vyuEMBEExportCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
