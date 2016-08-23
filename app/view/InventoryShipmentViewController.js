@@ -198,7 +198,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             cboCustomer: {
                 value: '{current.intEntityCustomerId}',
                 store: '{customer}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{current.ysnPosted}',
+                defaultFilters: [{
+                    column: 'ysnActive',
+                    value: true
+                }]
             },
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
