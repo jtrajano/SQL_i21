@@ -4286,6 +4286,7 @@
     <Build Include="dbo\Views\vyuMFOrderManifest.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MInquiryTransactionChart.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertReverseGLEntry.sql" />
+    <Build Include="dbo\Views\vyuARBEExportCustomerAccounting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
