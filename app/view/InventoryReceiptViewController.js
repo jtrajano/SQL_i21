@@ -107,7 +107,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string'},
 
                         { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', format: '0,000.000##', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float'},
                         { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float'},
                         { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float'},
 
