@@ -57,6 +57,7 @@
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
+	,@ItemConversionAccountId		INT				= NULL
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
@@ -330,6 +331,7 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemCommentTypeId				= @ItemCommentTypeId
 			,@ItemMargin					= @ItemMargin
 			,@ItemRecipeQty					= @ItemRecipeQty
+			,@ItemConversionAccountId		= @ItemConversionAccountId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
