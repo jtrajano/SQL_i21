@@ -12,19 +12,19 @@ AS
 		SELECT	SY.intAssignFuturesToContractSummaryId,
 	
 				CD.intContractHeaderId,
-				CD.strContractNumber,
-				CD.strSequenceNumber,
-				CD.strFutMarketName,
-				CD.strFutureMonth,
+				CH.strContractNumber,
+				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber,
+				MA.strFutMarketName,
+				MO.strFutureMonth,
 				CD.dblBasis,
 				CD.dblFutures,
 				CD.dblCashPrice,
-				CD.strPriceUOM,
-				CD.strCurrency,
-				CD.dtmContractDate,
+				PM.strUnitMeasure strPriceUOM,
+				CY.strCurrency,
+				CH.dtmContractDate,
 				CD.intNumberOfContainers,
 				CD.dblNoOfLots,
-				CD.strItemNo,
+				IM.strItemNo,
 			
 				'Long' AS strDirectAssociation,
 
@@ -112,11 +112,18 @@ AS
 				FL.ysnSwap						AS	ysnLongSwap,
 				FL.dblHedgeQty					AS	dblLongHedgeQty
 
-		FROM tblRKAssignFuturesToContractSummary	SY
-		JOIN vyuCTContractDetailView	CD		ON	CD.intContractDetailId		=	SY.intContractDetailId
-		JOIN tblRKMatchFuturesPSDetail	MD		ON	MD.intLFutOptTransactionId	=	SY.intFutOptTransactionId
-		JOIN vyuRKFutOptTransaction		FL		ON	FL.intFutOptTransactionId	=	SY.intFutOptTransactionId
-		JOIN vyuRKFutOptTransaction		FS		ON	FS.intFutOptTransactionId	=	MD.intSFutOptTransactionId
+		FROM	tblRKAssignFuturesToContractSummary	SY
+		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	SY.intContractDetailId
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
+		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId
+		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId
+		JOIN	tblICItem					IM	ON	IM.intItemId				=	CD.intItemId
+		JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId
+		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId			=	PU.intUnitMeasureId
+		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID			=	CD.intCurrencyId
+		JOIN	tblRKMatchFuturesPSDetail	MD	ON	MD.intLFutOptTransactionId	=	SY.intFutOptTransactionId
+		JOIN	vyuRKFutOptTransaction		FL	ON	FL.intFutOptTransactionId	=	SY.intFutOptTransactionId
+		JOIN	vyuRKFutOptTransaction		FS	ON	FS.intFutOptTransactionId	=	MD.intSFutOptTransactionId
 
 		UNION ALL
 
@@ -124,19 +131,19 @@ AS
 		SELECT	SY.intAssignFuturesToContractSummaryId,
 				
 				CD.intContractHeaderId,
-				CD.strContractNumber,
-				CD.strSequenceNumber,
-				CD.strFutMarketName,
-				CD.strFutureMonth,
+				CH.strContractNumber,
+				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber,
+				MA.strFutMarketName,
+				MO.strFutureMonth,
 				CD.dblBasis,
 				CD.dblFutures,
 				CD.dblCashPrice,
-				CD.strPriceUOM,
-				CD.strCurrency,
-				CD.dtmContractDate,
+				PM.strUnitMeasure strPriceUOM,
+				CY.strCurrency,
+				CH.dtmContractDate,
 				CD.intNumberOfContainers,
 				CD.dblNoOfLots,
-				CD.strItemNo,
+				IM.strItemNo,
 
 				'Short' AS strDirectAssociation,
 
@@ -224,11 +231,18 @@ AS
 				FL.ysnSwap						AS	ysnLongSwap,
 				FL.dblHedgeQty					AS	dblLongHedgeQty
 
-		FROM tblRKAssignFuturesToContractSummary	SY
-		JOIN vyuCTContractDetailView	CD		ON	CD.intContractDetailId		=	SY.intContractDetailId
-		JOIN tblRKMatchFuturesPSDetail	MD		ON	MD.intSFutOptTransactionId	=	SY.intFutOptTransactionId
-		JOIN vyuRKFutOptTransaction		FS		ON	FS.intFutOptTransactionId	=	SY.intFutOptTransactionId
-		JOIN vyuRKFutOptTransaction		FL		ON	FL.intFutOptTransactionId	=	MD.intLFutOptTransactionId
+		FROM	tblRKAssignFuturesToContractSummary	SY
+		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	SY.intContractDetailId
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
+		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId
+		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId
+		JOIN	tblICItem					IM	ON	IM.intItemId				=	CD.intItemId
+		JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId
+		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId			=	PU.intUnitMeasureId
+		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID			=	CD.intCurrencyId
+		JOIN	tblRKMatchFuturesPSDetail	MD	ON	MD.intSFutOptTransactionId	=	SY.intFutOptTransactionId
+		JOIN	vyuRKFutOptTransaction		FS	ON	FS.intFutOptTransactionId	=	SY.intFutOptTransactionId
+		JOIN	vyuRKFutOptTransaction		FL	ON	FL.intFutOptTransactionId	=	MD.intLFutOptTransactionId
 	)OI
 	JOIN	(
 				SELECT	DO.intContractHeaderId, 
