@@ -4085,6 +4085,7 @@
     <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
     <Build Include="dbo\Views\vyuTMBEExportDispatch.sql" />
     <Build Include="dbo\Views\vyuEMBEExportCustomer.sql" />
+    <Build Include="dbo\Views\vyuARBEExportCustomerAccounting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
