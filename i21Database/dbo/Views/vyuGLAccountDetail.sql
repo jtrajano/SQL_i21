@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGLAccountDetail]
 AS
-	SELECT      TOP 1000000  dbo.tblGLAccount.strAccountId, dbo.tblGLAccount.strDescription, dbo.tblGLAccountGroup.strAccountGroup, dbo.tblGLAccountGroup.strAccountType, dbo.tblGLAccountCategory.strAccountCategory, 
+	SELECT      TOP 1000000  dbo.tblGLAccount.strAccountId,replace(dbo.tblGLAccount.strAccountId,'-','') strAccountId1, dbo.tblGLAccount.strDescription, dbo.tblGLAccountGroup.strAccountGroup, dbo.tblGLAccountGroup.strAccountType, dbo.tblGLAccountCategory.strAccountCategory, 
                          dbo.tblGLAccount.strComments, dbo.tblGLAccount.strCashFlow, dbo.tblGLAccount.ysnActive, dbo.tblGLAccount.ysnSystem, dbo.tblGLAccount.ysnRevalue, dbo.tblGLAccountUnit.intAccountUnitId, 
                          dbo.tblGLAccountUnit.strUOMCode, dbo.tblGLAccount.intAccountId, dbo.tblGLAccount.intCurrencyID, dbo.tblGLAccount.intCurrencyExchangeRateTypeId, dbo.tblGLAccount.strNote, dbo.tblSMCurrency.strCurrency, 
                          dbo.tblSMCurrencyExchangeRateType.strCurrencyExchangeRateType, dbo.tblGLAccount.intAccountGroupId, dbo.tblGLAccountSegment.intAccountCategoryId,
