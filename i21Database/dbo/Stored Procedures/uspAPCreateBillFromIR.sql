@@ -238,9 +238,9 @@ BEGIN
 										END,
 		[dblOldCost]				=	NULL,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
-		[dblNetShippedWeight]		=	B.dblNet,
-		[dblWeightLoss]				=	B.dblGross - B.dblNet,
-		[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN B.dblGross * (J.dblFranchise / 100) ELSE 0 END,
+		[dblNetShippedWeight]		=	ISNULL(B.dblNet,0),
+		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
+		[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END,
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
 											ELSE NULL END,
