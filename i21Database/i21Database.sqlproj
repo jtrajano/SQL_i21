@@ -4215,6 +4215,7 @@
     <Build Include="dbo\Stored Procedures\uspTFRefresh.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
+    <Build Include="dbo\Views\vyuEMBEExportCustomer.sql" />
     <Build Include="dbo\Views\vyuCFSearchIndexPricingDetail.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailCost.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailQty.sql" />
