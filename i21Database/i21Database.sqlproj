@@ -4086,6 +4086,7 @@
     <Build Include="dbo\Views\vyuTMBEExportDispatch.sql" />
     <Build Include="dbo\Views\vyuEMBEExportCustomer.sql" />
     <Build Include="dbo\Views\vyuARBEExportCustomerAccounting.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityChart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
