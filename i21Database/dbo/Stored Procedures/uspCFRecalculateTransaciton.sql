@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
 ,@CardId				INT				
@@ -694,14 +692,14 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,(@dblOriginalPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,NULL
-					,@dblOriginalPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
@@ -744,14 +742,14 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,(@dblPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,NULL
-					,@dblPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
@@ -799,7 +797,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
@@ -849,7 +847,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
@@ -970,14 +968,14 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,(@dblOriginalPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,@intTaxGroupId
-					,@dblOriginalPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
@@ -1019,14 +1017,14 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,(@dblPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,@intTaxGroupId
-					,@dblPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
@@ -1077,7 +1075,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
@@ -1126,7 +1124,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
