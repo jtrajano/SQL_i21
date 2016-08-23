@@ -67,6 +67,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@EntityId					INT
 		,@OldInvoiceRecurring		BIT
 		,@IsImpactInventory			BIT
+		,@TotalWeight				NUMERIC(18,6)
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -111,11 +112,11 @@ SELECT
 	,@EntityId						= @UserId
 	,@OldInvoiceRecurring			= [ysnRecurring]
 	,@IsImpactInventory				= [ysnImpactInventory]
+	,@TotalWeight					= [dblTotalWeight]
 FROM
 	tblARInvoice
 WHERE
 	[intInvoiceId] = @InvoiceId
-	
 	
 --VALIDATE INVOICE TYPES
 IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standard', 'Credit Memo')
@@ -523,7 +524,7 @@ END CATCH
 
 BEGIN TRY
 	UPDATE tblARInvoice SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END, 
-	ysnImpactInventory = @IsImpactInventory
+	ysnImpactInventory = @IsImpactInventory, dblTotalWeight = @TotalWeight
 	WHERE intInvoiceId = @NewInvoiceId
 END TRY
 BEGIN CATCH
