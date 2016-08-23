@@ -14,4 +14,4 @@ SELECT DISTINCT Item.intItemId
 FROM tblICItem Item
 LEFT JOIN vyuICGetItemLocation ItemLocation ON Item.intItemId = ItemLocation.intItemId
 LEFT JOIN vyuTRRackPriceEquation SupplyPointEquation ON SupplyPointEquation.intItemId = Item.intItemId
-LEFT JOIN vyuTRRackPrice RackPriceDetail ON RackPriceDetail.intSupplyPointId = SupplyPointEquation.intSupplyPointId AND RackPriceDetail.intItemId = Item.intItemId
+LEFT JOIN vyuTRGetRackPriceDetail RackPriceDetail ON RackPriceDetail.intSupplyPointId = SupplyPointEquation.intSupplyPointId AND RackPriceDetail.intItemId = Item.intItemId
