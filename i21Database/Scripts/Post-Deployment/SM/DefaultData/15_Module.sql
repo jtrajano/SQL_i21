@@ -24,6 +24,9 @@
 
 	ALTER TABLE tblHDModule CHECK CONSTRAINT FK_tblHDModule_tblSMModule_intSMModuleId
 
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE intModuleId = 15 AND strModule = 'Grain')
+	UPDATE tblSMModule SET strModule = N'Ticket Management' WHERE intModuleId = 15 AND strModule = 'Grain'
+
 GO
 	SET IDENTITY_INSERT [dbo].[tblSMModule] ON
 
@@ -153,11 +156,11 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		14
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Grain')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Ticket Management')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId], [strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort])
 	SELECT [intModuleId]					=		15,
 		   [strApplicationName]				=		N'i21',		  
-		   [strModule]						=		N'Grain',
+		   [strModule]						=		N'Ticket Management',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
 	       [intSort]						=		15
@@ -1021,5 +1024,9 @@ GO
 	       [intSort]						=		110
 
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
+
+GO
+	-- SCALE
+	DELETE FROM tblSMModule WHERE intModuleId = 92
 
 GO

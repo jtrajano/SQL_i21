@@ -157,6 +157,7 @@
     <None Include="Scripts\Pre-Deployment\15_GR\1_ConstraintDropQuery.sql" />
     <None Include="Scripts\Pre-Deployment\18_IU\1_DataCleanUp.sql" />
     <None Include="Scripts\Pre-Deployment\20_CF\FixeDataWithContraints.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\6_TicketManagement.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />
