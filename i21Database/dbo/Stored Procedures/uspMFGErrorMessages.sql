@@ -96,3 +96,7 @@ EXEC sp_addmessage 90019,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90020) EXEC sp_dropmessage 90020, 'us_english'	
 SET @strmessage = 'The destination storage location is already used by other item'
 EXEC sp_addmessage 90020,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90021) EXEC sp_dropmessage 90021, 'us_english'	
+SET @strmessage = 'You do not have enough permission(s) to change the lot status to Active. Please contact your local system administrator.'
+EXEC sp_addmessage 90021,11,@strmessage,'us_english','False'
