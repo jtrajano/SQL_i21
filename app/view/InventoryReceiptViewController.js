@@ -1663,8 +1663,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblUnitRetail', dblCost);
             }
             
-            //Set Default Value for Gross/Net UOM
-            if (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')
+            //Set Default Value for Gross/Net UOM if Receipt Unit Type is Weight or Volume and Gross/Net UOM has no current value
+            if ((records[0].get('strUnitType') === 'Weight' || records[0].get('strUnitType') === 'Volume') && 
+                (current.get('strWeightUOM') === null || current.get('strWeightUOM') === ''))
                 {
                     current.set('strWeightUOM', records[0].get('strUnitMeasure'));
                     current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
