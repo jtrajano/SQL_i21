@@ -72,7 +72,7 @@ SELECT * FROM(
    AND cv.intFutureMarketId=@intFutureMarketId   
       
   UNION    
-  SELECT DISTINCT case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
+  SELECT DISTINCT CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)
 end) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  

@@ -4243,6 +4243,7 @@
     <Build Include="dbo\Tables\tblSMFileDownloadDetail.sql" />
     <Build Include="dbo\Tables\tblSMFileDownload.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityChart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
