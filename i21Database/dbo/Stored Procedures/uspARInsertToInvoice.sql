@@ -78,7 +78,9 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dtmMaintenanceDate			DATETIME,
 							strItemType					NVARCHAR(100),
 							strSalesOrderNumber			NVARCHAR(100),
-							strShipmentNumber			NVARCHAR(100))
+							strShipmentNumber			NVARCHAR(100),
+							dblContractBalance			INT,
+							dblContractAvailable		INT)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -122,6 +124,8 @@ SELECT intItemId					= SI.intItemId
 	 , strItemType					= I.strType
 	 , strSalesOrderNumber			= SI.strSalesOrderNumber
 	 , strShipmentNumber			= NULL
+	 , dblContractBalance			= SOD.dblContractBalance
+	 , dblContractAvailable			= SOD.dblContractAvailable
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -165,6 +169,8 @@ SELECT intItemId					= SOD.intItemId
 	 , strItemType					= 'Comment'
 	 , strSalesOrderNumber			= NULL
 	 , strShipmentNumber			= NULL 
+	 , dblContractBalance			= SOD.dblContractBalance
+	 , dblContractAvailable			= SOD.dblContractAvailable
 FROM tblSOSalesOrderDetail SOD
 WHERE intSalesOrderId = @SalesOrderId 
 AND ISNULL(intCommentTypeId, 0) <> 0
@@ -201,6 +207,8 @@ SELECT intItemId					= ICSI.intItemId
 	 , strItemType					= ICI.strType
 	 , strSalesOrderNumber			= SO.strSalesOrderNumber
 	 , strShipmentNumber			= ICS.strShipmentNumber
+	 , dblContractBalance			= SOD.dblContractBalance
+	 , dblContractAvailable			= SOD.dblContractAvailable
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -241,6 +249,8 @@ SELECT intItemId					= ARSI.intItemId
 	 , strItemType					= I.strType
 	 , strSalesOrderNumber			= ARSI.strSalesOrderNumber
 	 , strShipmentNumber			= ARSI.strShipmentNumber
+	 , dblContractBalance			= 0
+	 , dblContractAvailable			= 0
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -470,7 +480,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,0							--[dblLicenseAmount]
 					,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
 					,[intTaxGroupId]			--[intTaxGroupId]
-					,0							--[intConcurrencyId]
+					,0
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -572,7 +582,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemMarginById			INT,
 						@ItemCommentTypeId		INT,
 						@ItemMargin				NUMERIC(18,6),
-						@ItemRecipeQty			NUMERIC(18,6)
+						@ItemRecipeQty			NUMERIC(18,6),
+						@ContractBalance		INT,
+						@ContractAvailable		INT
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -604,7 +616,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemShipmentNumber		= strShipmentNumber,
 						@ItemMaintenanceType	= strMaintenanceType,
 						@ItemFrequency			= strFrequency,
-						@ItemMaintenanceDate	= dtmMaintenanceDate						
+						@ItemMaintenanceDate	= dtmMaintenanceDate,
+						@ContractBalance		= dblContractBalance,
+						@ContractAvailable		= dblContractAvailable												
 				FROM @tblItemsToInvoice ORDER BY intSalesOrderDetailId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -645,6 +659,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
 							,@ItemMaintenanceDate			= @ItemMaintenanceDate
+
+				UPDATE tblARInvoiceDetail SET dblContractBalance = @ContractBalance, dblContractAvailable = @ContractAvailable
+				FROM @tblItemsToInvoice WHERE intInvoiceId = @NewInvoiceId
+
 				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 					BEGIN
 						IF ISNULL(@RaiseError,0) = 0
