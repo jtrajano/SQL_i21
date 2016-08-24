@@ -42,7 +42,7 @@ SELECT INV.intInvoiceId
 	 , dblTax					= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblTotalTax, 0) * -1 ELSE ISNULL(ID.dblTotalTax, 0) END
 	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) END
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
-	 , I.strItemNo
+	 , strItemNo				= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN I.strItemNo ELSE NULL END
 	 , ID.intInvoiceDetailId
 	 , dblContractBalance		= CASE WHEN ID.dblContractBalance = 0 THEN NULL ELSE ID.dblContractBalance END
 	 , CH.strContractNumber
@@ -64,6 +64,7 @@ SELECT INV.intInvoiceId
 	 , ysnHasEmailSetup			= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = INV.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + INV.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , intRecipeId				= ID.intRecipeId
 	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
+	 , strInvoiceComments		= I.strInvoiceComments
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 
 	LEFT JOIN tblICItem I ON ID.intItemId = I.intItemId 
@@ -75,7 +76,7 @@ LEFT JOIN (tblARInvoiceDetail ID
 									   AND IDT.dblAdjustedTax <> 0.000000
 	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
-	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId
+	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId AND ID.intCommentTypeId <> 2
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId

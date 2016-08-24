@@ -1,25 +1,27 @@
 ﻿CREATE VIEW [dbo].[vyuARGetRecipeDetailReport]
 AS 
 SELECT RECIPEITEMS.* 
-	 , intOneLinePrintId = ISNULL(R.intOneLinePrintId, 1)
+	 , intOneLinePrintId			= ISNULL(R.intOneLinePrintId, 1)
 	 , R.strName
 	 , R.ysnActive
-	 , I.strItemNo
+	 , strItemNo					= CASE WHEN ISNULL(RECIPEITEMS.intCommentTypeId, 0) = 0 THEN I.strItemNo ELSE NULL END
+	 , I.strInvoiceComments
 	 , UOM.strUnitMeasure 
 FROM
 	(SELECT strTransactionType		= 'Sales Order'
 		  , intTransactionId		= intSalesOrderId
 		  , intTransactionDetailId	= intSalesOrderDetailId
+		  , intCommentTypeId
 		  , intRecipeId
 		  , intItemId
 		  , intItemUOMId
 		  , strItemDescription
-		  , dblQtyOrdered
-		  , dblQtyShipped	 
-		  , dblDiscount
-		  , dblTotalTax
-		  , dblPrice
-		  , dblTotal
+		  , dblQtyOrdered			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyOrdered ELSE NULL END
+		  , dblQtyShipped			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyShipped ELSE NULL END
+		  , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblDiscount ELSE NULL END
+		  , dblTotalTax				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotalTax ELSE NULL END
+		  , dblPrice				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblPrice ELSE NULL END
+		  , dblTotal				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotal ELSE NULL END
 	FROM tblSOSalesOrderDetail
 		WHERE ISNULL(intRecipeId, 0) <> 0
 
@@ -28,18 +30,20 @@ FROM
 	SELECT strTransactionType		= 'Invoice'
 		 , intTransactionId			= intInvoiceId
 		 , intTransactionDetailId	= intInvoiceDetailId
-		 , intRecipeId
+		 , intCommentTypeId
+		 , intRecipeId		 
 		 , intItemId
 		 , intItemUOMId
 		 , strItemDescription
-		 , dblQtyOrdered
-		 , dblQtyShipped	 
-		 , dblDiscount
-		 , dblTotalTax
-		 , dblPrice
-		 , dblTotal
+		 , dblQtyOrdered			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyOrdered ELSE NULL END
+		 , dblQtyShipped			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyShipped ELSE NULL END
+		 , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblDiscount ELSE NULL END
+		 , dblTotalTax				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotalTax ELSE NULL END
+		 , dblPrice					= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblPrice ELSE NULL END
+		 , dblTotal					= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotal ELSE NULL END
 	FROM tblARInvoiceDetail
-		WHERE ISNULL(intRecipeId, 0) <> 0) AS RECIPEITEMS
+		WHERE ISNULL(intRecipeId, 0) <> 0 
+		  AND intCommentTypeId <> 2) AS RECIPEITEMS
 INNER JOIN 
 	tblMFRecipe R 
 		ON RECIPEITEMS.intRecipeId = R.intRecipeId
