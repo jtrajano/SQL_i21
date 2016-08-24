@@ -539,7 +539,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intClassId).HasColumnName("intClassId");
             this.Property(t => t.strClass).HasColumnName("strClass");
             this.Property(t => t.intProductCodeId).HasColumnName("intProductCodeId");
-            this.Property(t => t.strRegProdCode).HasColumnName("strRegProdCode");
             this.Property(t => t.strPassportFuelId1).HasColumnName("strPassportFuelId1");
             this.Property(t => t.strPassportFuelId2).HasColumnName("strPassportFuelId2");
             this.Property(t => t.strPassportFuelId3).HasColumnName("strPassportFuelId3");
@@ -591,6 +590,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnCountedDaily).HasColumnName("ysnCountedDaily");
             this.Property(t => t.ysnLockedInventory).HasColumnName("ysnLockedInventory");
             this.Property(t => t.intSort).HasColumnName("intSort");
+
+            this.HasOptional(p => p.tblSTSubcategoryRegProd)
+               .WithMany(p => p.vyuICGetItemLocation)
+               .HasForeignKey(p => p.intProductCodeId);
         }
     }
 
@@ -777,6 +780,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strBatchId).HasColumnName("strBatchId");
             this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
             this.Property(t => t.strUOM).HasColumnName("strUOM");
+            this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
+            this.Property(t => t.dblQuantityInStockUOM).HasColumnName("dblQuantityInStockUOM");
+            this.Property(t => t.dblCostInStockUOM).HasColumnName("dblCostInStockUOM");
         }
     }
 

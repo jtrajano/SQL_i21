@@ -55,6 +55,7 @@ namespace iRely.Inventory.Model
         public bool? ysnPosted { get; set; }
         public int? intCreatedUserId { get; set; }
         public int? intEntityId { get; set; }
+        public bool? ysnOrigin { get; set; }
 
         private string _vendorName;
         [NotMapped]

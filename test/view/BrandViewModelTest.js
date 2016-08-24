@@ -15,7 +15,7 @@ describe("Brand View Model", function() {
         });
 
         it("and alias is " + storeAlias, function() {
-            storeAlias.should.equal('store.inventorybufferedmanufacturer');
+            storeAlias.should.equal('store.icbufferedmanufacturer');
         });
     });
 

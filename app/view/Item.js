@@ -520,6 +520,7 @@ Ext.define('Inventory.view.Item', {
                                                             validateOnChange: false,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true,
+                                                            decimalPrecision: 20,
                                                             minValue: 0.000001
                                                         }
                                                     },

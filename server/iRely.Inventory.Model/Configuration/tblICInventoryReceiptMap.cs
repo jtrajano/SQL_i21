@@ -48,6 +48,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.ysnOrigin).HasColumnName("ysnOrigin");
 
             this.HasOptional(p => p.vyuICInventoryReceiptLookUp)
                 .WithRequired(p => p.tblICInventoryReceipt);

@@ -37,7 +37,96 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<SearchResult> GetItemLocationViews(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetItemLocation>()
+            var query = (
+                from ItemLocation in _db.GetQuery<vyuICGetItemLocation>()
+                join RegProd in _db.GetQuery<tblSTSubcategoryRegProd>()
+                on ItemLocation.intProductCodeId equals RegProd.intStoreId
+                into tempTableLeftJoin
+                from leftJoin in tempTableLeftJoin.DefaultIfEmpty()
+                select new GetItemLocationVM
+                    {
+                        intItemLocationId = ItemLocation.intItemLocationId,
+                        intItemId = ItemLocation.intItemId,
+                        strItemNo = ItemLocation.strItemNo,
+                        strItemDescription = ItemLocation.strItemDescription,
+                        intLocationId = ItemLocation.intLocationId,
+                        strLocationName = ItemLocation.strLocationName,
+                        strLocationType = ItemLocation.strLocationType,
+                        intVendorId = ItemLocation.intVendorId,
+                        strVendorId = ItemLocation.strVendorId,
+                        strVendorName = ItemLocation.strVendorName,
+                        strDescription = ItemLocation.strDescription,
+                        intCostingMethod = ItemLocation.intCostingMethod,
+                        strCostingMethod = ItemLocation.strCostingMethod,
+                        intAllowNegativeInventory = ItemLocation.intAllowNegativeInventory,
+                        strAllowNegativeInventory = ItemLocation.strAllowNegativeInventory,
+                        intSubLocationId = ItemLocation.intSubLocationId,
+                        strSubLocationName = ItemLocation.strSubLocationName,
+                        intStorageLocationId = ItemLocation.intStorageLocationId,
+                        strStorageLocationName = ItemLocation.strStorageLocationName,
+                        intIssueUOMId = ItemLocation.intIssueUOMId,
+                        strIssueUOM = ItemLocation.strIssueUOM,
+                        intReceiveUOMId = ItemLocation.intReceiveUOMId,
+                        strReceiveUOM = ItemLocation.strReceiveUOM,
+                        intFamilyId = ItemLocation.intFamilyId,
+                        strFamily = ItemLocation.strFamily,
+                        intClassId = ItemLocation.intClassId,
+                        strClass = ItemLocation.strClass,
+                        intProductCodeId = ItemLocation.intProductCodeId,
+                        strPassportFuelId1 = ItemLocation.strPassportFuelId1,
+                        strPassportFuelId2 = ItemLocation.strPassportFuelId2,
+                        strPassportFuelId3 = ItemLocation.strPassportFuelId3,
+                        ysnTaxFlag1 = ItemLocation.ysnTaxFlag1,
+                        ysnTaxFlag2 = ItemLocation.ysnTaxFlag2,
+                        ysnTaxFlag3 = ItemLocation.ysnTaxFlag3,
+                        ysnTaxFlag4 = ItemLocation.ysnTaxFlag4,
+                        ysnPromotionalItem = ItemLocation.ysnPromotionalItem,
+                        intMixMatchId = ItemLocation.intMixMatchId,
+                        strPromoItemListId = ItemLocation.strPromoItemListId,
+                        ysnDepositRequired = ItemLocation.ysnDepositRequired,
+                        intDepositPLUId = ItemLocation.intDepositPLUId,
+                        strDepositPLU = ItemLocation.strDepositPLU,
+                        intBottleDepositNo = ItemLocation.intBottleDepositNo,
+                        ysnSaleable = ItemLocation.ysnSaleable,
+                        ysnQuantityRequired = ItemLocation.ysnQuantityRequired,
+                        ysnScaleItem = ItemLocation.ysnScaleItem,
+                        ysnFoodStampable = ItemLocation.ysnFoodStampable,
+                        ysnReturnable = ItemLocation.ysnReturnable,
+                        ysnPrePriced = ItemLocation.ysnPrePriced,
+                        ysnOpenPricePLU = ItemLocation.ysnOpenPricePLU,
+                        ysnLinkedItem = ItemLocation.ysnLinkedItem,
+                        strVendorCategory = ItemLocation.strVendorCategory,
+                        ysnCountBySINo = ItemLocation.ysnCountBySINo,
+                        strSerialNoBegin = ItemLocation.strSerialNoBegin,
+                        strSerialNoEnd = ItemLocation.strSerialNoEnd,
+                        ysnIdRequiredLiquor = ItemLocation.ysnIdRequiredLiquor,
+                        ysnIdRequiredCigarette = ItemLocation.ysnIdRequiredCigarette,
+                        intMinimumAge = ItemLocation.intMinimumAge,
+                        ysnApplyBlueLaw1 = ItemLocation.ysnApplyBlueLaw1,
+                        ysnApplyBlueLaw2 = ItemLocation.ysnApplyBlueLaw2,
+                        ysnCarWash = ItemLocation.ysnCarWash,
+                        intItemTypeCode = ItemLocation.intItemTypeCode,
+                        strItemTypeCode = ItemLocation.strItemTypeCode,
+                        intItemTypeSubCode = ItemLocation.intItemTypeSubCode,
+                        ysnAutoCalculateFreight = ItemLocation.ysnAutoCalculateFreight,
+                        intFreightMethodId = ItemLocation.intFreightMethodId,
+                        strFreightTerm = ItemLocation.strFreightTerm,
+                        dblFreightRate = ItemLocation.dblFreightRate,
+                        intShipViaId = ItemLocation.intShipViaId,
+                        strShipVia = ItemLocation.strShipVia,
+                        dblReorderPoint = ItemLocation.dblReorderPoint,
+                        dblMinOrder = ItemLocation.dblMinOrder,
+                        dblSuggestedQty = ItemLocation.dblSuggestedQty,
+                        dblLeadTime = ItemLocation.dblLeadTime,
+                        strCounted = ItemLocation.strCounted,
+                        intCountGroupId = ItemLocation.intCountGroupId,
+                        strCountGroup = ItemLocation.strCountGroup,
+                        ysnCountedDaily = ItemLocation.ysnCountedDaily,
+                        ysnLockedInventory = ItemLocation.ysnLockedInventory,
+                        intSort = ItemLocation.intSort,
+                        strRegProdCode = leftJoin.strRegProdCode
+                    } 
+                )
                 .Filter(param, true);
             var data = await query.ToListAsync();
 

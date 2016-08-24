@@ -746,7 +746,6 @@ namespace iRely.Inventory.BusinessLayer
                 
                 entry.Property(e => e.intItemId).IsModified = false;
                 entry.Property(e => e.intItemLocationId).IsModified = false;
-                entry.Property(e => e.intItemLocationId).IsModified = false;
             }
             else
             {

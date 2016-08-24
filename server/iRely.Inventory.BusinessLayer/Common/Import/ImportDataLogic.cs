@@ -469,6 +469,45 @@ namespace iRely.Inventory.BusinessLayer
             }
         }
 
+        public static bool SetNonZeroDecimal(string value, Action<decimal> decimalDelegate, string caption, ImportDataResult dr, string header, int row)
+        {
+            if (string.IsNullOrEmpty(value))
+                return false;
+
+            try
+            {
+                decimal val = decimal.Parse(value);
+                if (val <= 0)
+                {
+                    dr.Messages.Add(new ImportDataMessage()
+                    {
+                        Column = header,
+                        Row = row,
+                        Type = TYPE_INNER_ERROR,
+                        Status = STAT_INNER_COL_SKIP,
+                        Message = string.Format("Invalid value for {0}. {1}", caption, "Should be greater than zero.")
+                    });
+                    dr.Info = INFO_WARN;
+                    return false;
+                }
+                decimalDelegate(decimal.Parse(value));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                dr.Messages.Add(new ImportDataMessage()
+                {
+                    Column = header,
+                    Row = row,
+                    Type = TYPE_INNER_ERROR,
+                    Status = STAT_INNER_COL_SKIP,
+                    Message = string.Format("Invalid value for {0}. {1}", caption, ex.Message)
+                });
+                dr.Info = INFO_WARN;
+                return false;
+            }
+        }
+
         public static bool SetDecimal(string value, Action<decimal> decimalDelegate, string caption, ImportDataResult dr, string header, int row)
         {
             if (string.IsNullOrEmpty(value))

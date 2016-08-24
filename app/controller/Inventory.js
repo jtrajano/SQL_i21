@@ -393,6 +393,10 @@ Ext.define('Inventory.controller.Inventory', {
                 screenName = 'Store.view.SubCategory';
                 columnName = 'strSubcategoryType';
                 break;
+            case 'Invoice':
+                screenName = 'AccountsReceivable.view.Invoice';
+                columnName = 'strInvoiceNumber';
+                break;
         }
 
         var filter = [];

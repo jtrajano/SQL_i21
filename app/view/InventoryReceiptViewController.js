@@ -107,7 +107,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         {dataIndex: 'strUnitMeasure', text: 'Receipt UOM', flex: 1, dataType: 'string'},
 
                         { xtype: 'numbercolumn', dataIndex: 'dblQtyToReceive', text: 'Qty to Receive', flex: 1, dataType: 'float'},
-                        { xtype: 'numbercolumn', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float'},
+                        { xtype: 'numbercolumn', format: '0,000.000##', dataIndex: 'dblUnitCost', text: 'Cost', flex: 1, dataType: 'float'},
                         { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float'},
                         { xtype: 'numbercolumn', dataIndex: 'dblLineTotal', text: 'Line Total', flex: 1, dataType: 'float'},
 
@@ -185,57 +185,72 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 title: 'Inventory Receipt - {current.strReceiptNumber}'
             },
             btnSave: {
-                disabled: '{current.ysnPosted}'
+                disabled: '{isReceiptReadonly}'
             },
             btnDelete: {
-                disabled: '{current.ysnPosted}'
+                disabled: '{isReceiptReadonly}'
             },
             btnUndo: {
-                disabled: '{current.ysnPosted}'
+                disabled: '{isReceiptReadonly}'
             },
             btnReceive: {
+                disabled: '{current.ysnOrigin}',
                 text: '{getReceiveButtonText}',
                 hidden: '{checkTransportPosting}'
             },
+            btnRecap: {
+                disabled: '{current.ysnOrigin}'
+            },
+            btnVendor: {
+                disabled: '{current.ysnOrigin}'
+            },
             btnAddOrders: {
-                hidden: '{checkHiddenAddOrders}'
+                hidden: '{checkHiddenAddOrders}',
+                disabled: '{current.ysnOrigin}'
             },
 
             cboReceiptType: {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',
-                readOnly: '{checkReadOnlyWithOrder}'
+                readOnly: '{checkReadOnlyWithOrder}',
+                disabled: '{current.ysnOrigin}'
             },
             cboSourceType: {
                 value: '{current.intSourceType}',
                 store: '{sourceTypes}',
                 readOnly: '{disableSourceType}',
-                defaultFilters: '{filterSourceByType}'
+                defaultFilters: '{filterSourceByType}',
+                disabled: '{current.ysnOrigin}'
             },
             cboVendor: {
                 value: '{current.intEntityVendorId}',
                 store: '{vendor}',
                 readOnly: '{checkReadOnlyWithOrder}',
-                hidden: '{checkHiddenInTransferOrder}'
+                hidden: '{checkHiddenInTransferOrder}',
+                disabled: '{current.ysnOrigin}'
             },
             cboTransferor: {
                 value: '{current.intTransferorId}',
                 store: '{transferor}',
-                hidden: '{checkHiddenIfNotTransferOrder}'
+                hidden: '{checkHiddenIfNotTransferOrder}',
+                readOnly: '{current.ysnOrigin}',
+                disabled: '{current.ysnOrigin}'
             },
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
-                readOnly: '{checkReadOnlyWithOrder}'
+                readOnly: '{checkReadOnlyWithOrder}',
+                disabled: '{current.ysnOrigin}'
             },
             dtmReceiptDate: {
                 value: '{current.dtmReceiptDate}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             cboCurrency: {
                 value: '{current.intCurrencyId}',
+                disabled: '{current.ysnOrigin}',
                 store: '{currency}',
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{isReceiptReadonly}',
                 defaultFilters: [
                     {
                         column: 'ysnSubCurrency',
@@ -248,20 +263,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             txtBlanketReleaseNumber: {
                 value: '{current.intBlanketRelease}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtVendorRefNumber: {
                 value: '{current.strVendorRefNo}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtBillOfLadingNumber: {
                 value: '{current.strBillOfLading}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             cboShipVia: {
                 value: '{current.intShipViaId}',
                 store: '{shipvia}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             cboShipFrom: {
                 value: '{current.intShipFromId}',
@@ -272,16 +287,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         value: '{current.intEntityVendorId}'
                     }
                 ],
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             cboReceiver: {
                 value: '{current.intReceiverId}',
                 store: '{users}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtVessel: {
                 value: '{current.strVessel}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             cboFreightTerms: {
                 value: '{current.intFreightTermId}',
@@ -292,56 +307,60 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         value: 'true'
                     }
                 ],
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtFobPoint: {
                 value: '{current.strFobPoint}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             cboTaxGroup: {
                 value: '{current.intTaxGroupId}',
                 store: '{taxGroup}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}',
+                disabled: '{current.ysnOrigin}'
             },
             txtShiftNumber: {
                 value: '{current.intShiftNumber}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             btnInsertInventoryReceipt: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnRemoveInventoryReceipt: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnInsertLot: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnRemoveLot: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnReplicateBalanceLots: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnPrintLabel: {
                 hidden: '{!current.ysnPosted}'
             },
             btnInsertCharge: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnRemoveCharge: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnCalculateCharges: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{isReceiptReadonly}'
             },
             btnshowOtherCharges: {
                 hidden: '{current.ysnPosted}'
             },
             btnBill: {
-                hidden: '{!current.ysnPosted}'
+                hidden: '{!current.ysnPosted}',
+                disabled: '{current.ysnOrigin}'
+            },
+            btnQuality: {
+                disabled: '{current.ysnOrigin}'
             },
             lblWeightLossMsg: {
-                hidden: false,
                 text: '{getWeightLossText}'
             },
             lblWeightLossMsgValue: {
@@ -567,7 +586,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 hidden: '{hasItemSelection}'
             },*/
             grdLotTracking: {
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{isReceiptReadonly}',
                 colLotId: {
                     dataIndex: 'strLotNumber',
                     editor: {
@@ -734,7 +753,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // ---- Charge and Invoice Tab
             grdCharges: {
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{isReceiptReadonly}',
                 colContract: {
                     hidden: '{hideContractColumn}',
                     dataIndex: 'strContractNumber',
@@ -838,16 +857,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 //            txtCalculatedAmount: '{current.strMessage}',
             txtInvoiceAmount: {
                 value: '{current.dblInvoiceAmount}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
 //            txtDifference: '{current.strMessage}',
             chkPrepaid: {
                 value: '{current.ysnPrepaid}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             chkInvoicePaid: {
                 value: '{current.ysnInvoicePaid}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtCheckNo: {
                 value: '{current.intCheckNo}',
@@ -863,32 +882,32 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboTrailerType: {
                 value: '{current.intTrailerTypeId}',
                 store: '{equipmentLength}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtTrailerArrivalDate: {
                 value: '{current.dtmTrailerArrivalDate}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtTrailerArrivalTime: {
                 value: '{current.dtmTrailerArrivalTime}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtSealNo: {
                 value: '{current.strSealNo}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             cboSealStatus: {
                 value: '{current.strSealStatus}',
                 store: '{sealStatuses}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtReceiveTime: {
                 value: '{current.dtmReceiveTime}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             },
             txtActualTempReading: {
                 value: '{current.dblActualTempReading}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{isReceiptReadonly}'
             }
 
         }
@@ -1643,8 +1662,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblUnitRetail', dblCost);
             }
             
-            //Set Default Value for Gross/Net UOM
-            if (current.get('strWeightUOM') === null || current.get('strWeightUOM') === '')
+            //Set Default Value for Gross/Net UOM if Receipt Unit Type is Weight or Volume and Gross/Net UOM has no current value
+            if ((records[0].get('strUnitType') === 'Weight' || records[0].get('strUnitType') === 'Volume') && 
+                (current.get('strWeightUOM') === null || current.get('strWeightUOM') === ''))
                 {
                     current.set('strWeightUOM', records[0].get('strUnitMeasure'));
                     current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
