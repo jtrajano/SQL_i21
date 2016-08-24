@@ -8,6 +8,7 @@ SELECT
 	Item.strDescription,
 	Item.intVendorId,
 	Item.strVendorId,
+	Item.strShortName,
 	strVendorName = Vendor.strName,
 	ItemUOM.strUpcCode,
 	ItemUOM.strLongUPCCode,
