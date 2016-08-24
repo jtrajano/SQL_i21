@@ -23,7 +23,8 @@ DECLARE @DateOnly				DATETIME,
 		@dblZeroAmount			NUMERIC(18, 6),
 		@RaiseError				BIT,
 		@ErrorMessage			NVARCHAR(MAX),
-		@CurrentErrorMessage	NVARCHAR(MAX)
+		@CurrentErrorMessage	NVARCHAR(MAX) 
+		 
 
 --VARIABLES FOR INVOICE HEADER
 DECLARE @EntityCustomerId		INT,
@@ -661,7 +662,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemMaintenanceDate			= @ItemMaintenanceDate
 
 				UPDATE tblARInvoiceDetail SET dblContractBalance = @ContractBalance, dblContractAvailable = @ContractAvailable
-				FROM @tblItemsToInvoice WHERE intInvoiceId = @NewInvoiceId
+				FROM @tblItemsToInvoice 
+				WHERE intInvoiceId = @NewInvoiceId AND tblARInvoiceDetail.intItemId = @ItemId AND tblARInvoiceDetail.intContractHeaderId = @ItemContractHeaderId AND tblARInvoiceDetail.intContractDetailId = @ItemContractDetailId
 
 				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 					BEGIN
@@ -800,6 +802,36 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 
 		SET @NewInvoiceId = ISNULL(@NewInvoiceId, @SoftwareInvoiceId)
 	END
+
+IF (@SalesOrderNumber IS NULL OR @SalesOrderNumber = '')
+BEGIN
+	SELECT @SalesOrderNumber = strSalesOrderNumber FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+END
+
+IF (@SalesOrderNumber IS NOT NULL)
+BEGIN
+	UPDATE tblARInvoice SET dblTotalWeight = CopySO.dblTotalWeight
+	FROM(
+		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight FROM tblSOSalesOrder SO 
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId 
+					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
+		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
+		WHERE strSalesOrderNumber = @SalesOrderNumber
+	) CopySO
+	WHERE intInvoiceId = @NewInvoiceId
+
+	UPDATE tblARInvoiceDetail SET intItemWeightUOMId = CopySO.intItemWeightUOMId, dblItemWeight = CopySO.dblItemWeight, dblOriginalItemWeight = CopySO.dblOriginalItemWeight
+	FROM(
+		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight FROM tblSOSalesOrder SO 
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId 
+					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
+		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
+		WHERE strSalesOrderNumber = @SalesOrderNumber
+	) CopySO
+	WHERE intInvoiceId = @NewInvoiceId AND tblARInvoiceDetail.intItemId = CopySO.intItemId AND tblARInvoiceDetail.intItemUOMId = CopySO.intItemUOMId AND tblARInvoiceDetail.strSalesOrderNumber = CopySO.strSalesOrderNumber
+END
+
+ 
 
 --COMMIT TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
