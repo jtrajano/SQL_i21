@@ -97,8 +97,8 @@ INNER JOIN
 	INNER JOIN
 	(
 		SELECT	CVol.intCustomerPatronId AS intCustomerId,
-				dblPurchaseVolume = CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (ROUND(CVol.dblVolume,2) * (CASE WHEN RRD.strPurchaseSale = 'Purchase' THEN RRD.dblRate ELSE 0.00 END))ELSE 0 END,
-				dblSaleVolume = CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (ROUND(CVol.dblVolume,2) * (CASE WHEN RRD.strPurchaseSale = 'Sale' THEN RRD.dblRate ELSE 0.00 END)) ELSE 0 END,
+				dblPurchaseVolume = CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Purchase' THEN RRD.dblRate ELSE 0.00 END))ELSE 0 END,
+				dblSaleVolume = CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Sale' THEN RRD.dblRate ELSE 0.00 END)) ELSE 0 END,
 				dblRate = RRD.dblRate,
 				intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END) THEN RCat.intRefundCategoryId ELSE NULL END),
 				intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END),
