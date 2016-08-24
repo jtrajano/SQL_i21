@@ -22,6 +22,16 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        public override async Task<BusinessResult<tblICFuelType>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await base.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            if (result.message.status == Error.OtherException && result.message.statusText.ToString().Contains("Cannot insert duplicate key"))
+            {
+                result.message.statusText = "Fuel Type must be unique.";
+            }
+            return result;
+        }
+
         public override async Task<SearchResult> Search(GetParameter param)
         {
             var query = _db.GetQuery<tblICFuelType>()
