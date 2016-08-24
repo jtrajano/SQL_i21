@@ -1575,7 +1575,73 @@ BEGIN
         ,'Production Staging Location'
         ,5
         ,1
+        ,0
+        ,'SELECT intStorageLocationId AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PROD_STAGING'''
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 76
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 76
+        ,'Staging Location'
+        ,5
         ,1
-        ,'SELECT intStorageLocationId AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PRODUCTION STAGING'''
+        ,0
+        ,'SELECT intStorageLocationId AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''STAGING'''
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 77
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 77
+        ,'Staging Location Type'
+        ,5
+        ,1
+        ,0
+        ,'SELECT ''Alternate Staging Location'' AS ValueMember,''Alternate Staging Location'' AS DisplayMember UNION SELECT ''Staging Location'' AS ValueMember,''Staging Location'' AS DisplayMember UNION SELECT ''Production Staging Location'' AS ValueMember,''Production Staging Location'' AS DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 78
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 78
+        ,'Category for Ingredient Demand Report'
+        ,5
+        ,1
+        ,1
+        ,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
 END
 GO
