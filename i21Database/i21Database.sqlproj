@@ -4245,6 +4245,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSetLotInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityChart.sql" />
     <Build Include="dbo\Tables\tblMFUserRoleEventMap.sql" />
+    <Build Include="dbo\Functions\fnConvertToBaseCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
