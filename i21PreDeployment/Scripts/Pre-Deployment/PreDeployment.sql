@@ -94,6 +94,7 @@
 -- IC
 :r .\11_IC\1610_to_1620.sql
 :r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
+:r .\11_IC\01_Delete_Charges_No_Shipment.sql
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql
