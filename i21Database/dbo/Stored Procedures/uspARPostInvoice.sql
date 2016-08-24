@@ -1239,7 +1239,7 @@ END CATCH
 				--Contract Item Price not Equal to Contract Sequence Cash Price
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * ISNULL(CT.dblCashPrice,@ZeroDecimal)) AS MONEY),2) + ').',
+					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST((ISNULL([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * [dbo].[fnConvertToBaseCurrency](CT.[intSeqCurrencyId], CT.[dblCashPrice]), CT.[dblCashPrice])) AS MONEY),2) + ').',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -1261,7 +1261,7 @@ END CATCH
 						AND D.intContractDetailId = CT.intContractDetailId 		 				
 				WHERE
 					D.dblPrice <> @ZeroDecimal				
-					AND CAST(([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * ISNULL(CT.dblCashPrice,0)) AS MONEY) <> CAST(ISNULL(D.dblPrice,0) AS MONEY)
+					AND CAST((ISNULL([dbo].[fnCalculateQtyBetweenUOM](CT.[intItemUOMId],CT.[intPriceItemUOMId],1) * [dbo].[fnConvertToBaseCurrency](CT.[intSeqCurrencyId], CT.[dblCashPrice]), CT.[dblCashPrice])) AS MONEY) <> CAST(ISNULL(D.dblPrice,0) AS MONEY)
 					AND CT.strPricingType <> 'Index'
 
 
