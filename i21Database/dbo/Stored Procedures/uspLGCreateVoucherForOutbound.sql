@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspLGCreateVoucherForOutbound
+﻿CREATE PROCEDURE uspLGCreateVoucherForOutbound 
 	 @intLoadId INT
 	,@intEntityUserSecurityId INT
 	,@intBillId INT OUTPUT
@@ -7,25 +7,36 @@ BEGIN TRY
 	DECLARE @strErrorMessage NVARCHAR(4000);
 	DECLARE @intErrorSeverity INT;
 	DECLARE @intErrorState INT;
-	DECLARE @voucherDetailNonInvContract AS VoucherDetailNonInvContract
 	DECLARE @total AS INT
 	DECLARE @intVendorEntityId AS INT;
+	DECLARE @intMinRecord AS INT
+	DECLARE @voucherDetailNonInvContract AS VoucherDetailNonInvContract
 
+	DECLARE @voucherDetailData TABLE 
+		(intItemRecordId INT Identity(1, 1)
+		,intVendorEntityId INT
+		,intContractHeaderId INT
+		,intContractDetailId INT
+		,intItemId INT
+		,intAccountId INT
+		,dblQtyReceived NUMERIC(18, 6)
+		,dblCost NUMERIC(18, 6))
 
-	SELECT TOP 1 @intVendorEntityId = intVendorEntityId
-	FROM tblLGWarehouseRateMatrixHeader WRMH
-	JOIN tblLGLoadWarehouse LW ON LW.intWarehouseRateMatrixHeaderId = WRMH.intWarehouseRateMatrixHeaderId
-	WHERE LW.intLoadId = @intLoadId
+	DECLARE @distinctVendor TABLE 
+		(intRecordId INT Identity(1, 1)
+		,intVendorEntityId INT)
 
-	INSERT INTO @voucherDetailNonInvContract (
-		intContractHeaderId
+	INSERT INTO @voucherDetailData (
+		intVendorEntityId
+		,intContractHeaderId
 		,intContractDetailId
 		,intItemId
 		,intAccountId
 		,dblQtyReceived
 		,dblCost
 		)
-	SELECT CH.intContractHeaderId
+	SELECT WRMH.intVendorEntityId
+		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,Item.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -43,6 +54,7 @@ BEGIN TRY
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
+	JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 	JOIN tblICItem Item ON Item.intItemId = LWS.intItemId
 	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = Item.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SLCL ON SLCL.intCompanyLocationSubLocationId = LW.intSubLocationId
@@ -50,6 +62,7 @@ BEGIN TRY
 	WHERE L.intLoadId = @intLoadId
 		AND LWS.dblActualAmount > 0
 	GROUP BY LWS.intLoadWarehouseServicesId
+		,WRMH.intVendorEntityId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,Item.intItemId
@@ -58,16 +71,11 @@ BEGIN TRY
 		,L.intLoadId
 		,L.strLoadNumber
 		,LD.intLoadDetailId
-
-	INSERT INTO @voucherDetailNonInvContract (
-		intContractHeaderId
-		,intContractDetailId
-		,intItemId
-		,intAccountId
-		,dblQtyReceived
-		,dblCost
-		)
-	SELECT CH.intContractHeaderId
+	
+	UNION ALL
+	
+	SELECT V.intEntityVendorId
+		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,V.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
@@ -89,7 +97,8 @@ BEGIN TRY
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = V.intItemId
 	WHERE V.intLoadId = @intLoadId
-	GROUP BY CH.intContractHeaderId
+	GROUP BY V.intEntityVendorId
+		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,V.intItemId
 		,ItemLoc.intItemLocationId
@@ -97,8 +106,12 @@ BEGIN TRY
 		,V.strLoadNumber
 		,V.dblNet
 
+	INSERT INTO @distinctVendor
+	SELECT DISTINCT intVendorEntityId
+	FROM @voucherDetailData
+
 	SELECT @total = COUNT(*)
-	FROM @voucherDetailNonInvContract;
+	FROM @voucherDetailData;
 
 	IF (@total = 0)
 	BEGIN
@@ -106,13 +119,44 @@ BEGIN TRY
 		RETURN;
 	END
 
-	--SELECT * FROM @voucherDetailNonInvContract
-	EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
-		,@vendorId = @intVendorEntityId
-		,@voucherDetailNonInvContract = @voucherDetailNonInvContract
-		,@billId = @intBillId OUTPUT
+	SELECT @intMinRecord = MIN(intRecordId) FROM @distinctVendor
+	WHILE ISNULL(@intMinRecord, 0) <> 0
+	BEGIN
+		SET @intVendorEntityId = NULL
 
-	SELECT @intBillId
+		SELECT @intVendorEntityId = intVendorEntityId
+		FROM @distinctVendor
+		WHERE intRecordId = @intMinRecord
+
+		INSERT INTO @voucherDetailNonInvContract (
+			intContractHeaderId
+			,intContractDetailId
+			,intItemId
+			,intAccountId
+			,dblQtyReceived
+			,dblCost
+			)
+		SELECT intContractHeaderId
+			,intContractDetailId
+			,intItemId
+			,intAccountId
+			,dblQtyReceived
+			,dblCost
+		FROM @voucherDetailData
+		WHERE intVendorEntityId = @intVendorEntityId
+
+		EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
+			,@vendorId = @intVendorEntityId
+			,@voucherDetailNonInvContract = @voucherDetailNonInvContract
+			,@billId = @intBillId OUTPUT
+
+		DELETE
+		FROM @voucherDetailNonInvContract
+
+		SELECT @intMinRecord = MIN(intRecordId)
+		FROM @distinctVendor
+		WHERE intRecordId > @intMinRecord
+	END
 END TRY
 
 BEGIN CATCH
