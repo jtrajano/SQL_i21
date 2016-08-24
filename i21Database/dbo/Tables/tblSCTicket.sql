@@ -105,6 +105,7 @@
 	[intItemUOMIdFrom] INT NULL, 
 	[intItemUOMIdTo] INT NULL,
 	[intTicketTypeId] INT NULL,
+	[intStorageScheduleTypeId] INT NULL,
 	[strFreightSettlement]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
