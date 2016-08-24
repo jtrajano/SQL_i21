@@ -135,7 +135,8 @@ Declare @tblItems AS TABLE
 	[strCustomerComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[ysnShowCostInSalesOrderPickList] bit null default 0,
 	[ysnLotTracking] bit null default 0,
-	[intSalesOrderDetailId] int null
+	[intSalesOrderDetailId] int null,
+	[strItemType] nvarchar(50) null
 )
 
 If ISNULL(@xmlParam,'')=''
@@ -344,6 +345,7 @@ Begin --Sales Order Pick List
 					,@ysnShowCostInSalesOrderPickList
 					,0
 					,sd.intSalesOrderDetailId
+					,i.strType
 			FROM tblMFPickList pl  
 			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 			JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -404,6 +406,7 @@ Begin --Sales Order Pick List
 			,@ysnShowCostInSalesOrderPickList
 			,0
 			,sd.intSalesOrderDetailId
+			,i.strType
 			FROM tblSOSalesOrderDetail sd  
 			JOIN tblICItem i on sd.intItemId=i.intItemId
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
@@ -419,8 +422,8 @@ Begin --Sales Order Pick List
 		End
 
 	--Get Comments From SO	
-	INSERT INTO @tblItems(strItemNo,strDescription,intSalesOrderDetailId)
-	Select '',sd.strItemDescription,sd.intSalesOrderDetailId
+	INSERT INTO @tblItems(strItemNo,strDescription,intSalesOrderDetailId,strItemType)
+	Select '',sd.strItemDescription,sd.intSalesOrderDetailId,i.strType
 	From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId
 	Where sd.intSalesOrderId=@intSalesOrderId AND sd.intCommentTypeId IN (1,2)
 
@@ -439,7 +442,7 @@ Begin --Sales Order Pick List
 		Select @intMaxOtherChargeId=MAX(intSalesOrderDetailId) + 1 From tblSOSalesOrderDetail
 
 		INSERT INTO @tblItems
-		Select @strPickListNo strPickListNo,  
+		Select ISNULL(@strPickListNo,@strSONo) strPickListNo,  
 				''  AS strBlendItemNoDesc,  
 				@strSONo strWorkOrderNo,  
 				'' strLotNumber,
@@ -461,7 +464,7 @@ Begin --Sales Order Pick List
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
-				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge'
 		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
 		End
 
