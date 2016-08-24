@@ -160,3 +160,6 @@ Type the overview for the table here.
 		@level1name = N'tblICFuelType',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+
+CREATE UNIQUE INDEX [IX_tblICFuelType_Unique] ON [dbo].[tblICFuelType] ([intRinFeedStockId], [intRinProcessId], [intRinFeedStockUOMId], [intRinFuelCategoryId], [intRinFuelId])
