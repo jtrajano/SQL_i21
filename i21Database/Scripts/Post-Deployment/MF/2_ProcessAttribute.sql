@@ -189,17 +189,20 @@ BEGIN
 		,intAttributeDataTypeId
 		,intAttributeTypeId
 		,strSQL
+		,ysnMultiSelect
 		)
 	SELECT 9
 		,'Item Types Excluded From Cycle Count'
 		,5
 		,4
-		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
+		,1
 END
 Else
 Begin
 	Update tblMFAttribute
-	Set strSQL='Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+	Set strSQL='Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
+		,ysnMultiSelect=1
 	Where intAttributeId = 9
 End
 GO
@@ -1105,8 +1108,15 @@ BEGIN
 		,'Item Types Excluded From Cycle Count'
 		,5
 		,5
-		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
 END
+Else
+Begin
+	Update tblMFAttribute
+	Set strSQL='Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
+		,ysnMultiSelect=1
+	Where intAttributeId = 53
+end
 
 GO
 
