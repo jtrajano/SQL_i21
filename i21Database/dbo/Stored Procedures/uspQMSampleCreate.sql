@@ -24,22 +24,18 @@ BEGIN TRY
 	DECLARE @intInventoryReceiptId INT
 	DECLARE @intWorkOrderId INT
 	DECLARE @ysnEnableParentLot BIT
-	DECLARE @intProductValueId INT
-	DECLARE @intLotStatusId INT
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
 		,@intInventoryReceiptId = intInventoryReceiptId
 		,@intWorkOrderId = intWorkOrderId
-		,@intProductValueId = intProductValueId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
 			,intLocationId INT
 			,intInventoryReceiptId INT
 			,intWorkOrderId INT
-			,intProductValueId INT
 			)
 
 	IF (
@@ -167,28 +163,6 @@ BEGIN TRY
 		END
 	END
 
-	-- Lot Status
-	IF ISNULL(@strLotNumber, '') <> ''
-	BEGIN
-		SET @intLotStatusId = NULL
-
-		SELECT @ysnEnableParentLot = ysnEnableParentLot
-		FROM tblQMCompanyPreference
-
-		IF @ysnEnableParentLot = 0 -- Lot
-		BEGIN
-			SELECT @intLotStatusId = intLotStatusId
-			FROM tblICLot
-			WHERE intLotId = @intProductValueId
-		END
-		ELSE -- Parent Lot
-		BEGIN
-			SELECT @intLotStatusId = intLotStatusId
-			FROM tblICParentLot
-			WHERE intParentLotId = @intProductValueId
-		END
-	END
-
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -264,7 +238,7 @@ BEGIN TRY
 		,intLoadDetailId
 		,intCountryID
 		,ysnIsContractCompleted
-		,@intLotStatusId
+		,intLotStatusId
 		,intEntityId
 		,strShipmentNumber
 		,strLotNumber
@@ -314,6 +288,7 @@ BEGIN TRY
 			,intLoadDetailId INT
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
+			,intLotStatusId INT
 			,intEntityId INT
 			,strShipmentNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
