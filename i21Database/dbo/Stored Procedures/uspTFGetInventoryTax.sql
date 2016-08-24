@@ -89,7 +89,7 @@ DECLARE @tblTempTransaction TABLE (
 			strHeaderFederalTaxID NVARCHAR(50),
 			strOriginState NVARCHAR(250),
 			strDestinationState NVARCHAR(250),
-			strTerminalControlNumber INT
+			strTerminalControlNumber NVARCHAR(30)
 		 )
 
 		SELECT @QueryRC = 'SELECT ''' + REPLACE (@ReportingComponentId,',',''' UNION SELECT ''') + ''''
