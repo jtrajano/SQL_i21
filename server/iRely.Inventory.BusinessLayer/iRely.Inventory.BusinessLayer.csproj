@@ -123,7 +123,10 @@
     <Compile Include="Implementation\CommodityUOMBl.cs" />
     <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\CategoryTaxBl.cs" />
+    <Compile Include="Implementation\MeasurementBl.cs" />
+    <Compile Include="Implementation\InventoryReceiptItemLotBl.cs" />
     <Compile Include="Implementation\ParentLotBl.cs" />
+    <Compile Include="Implementation\ReadingPointBl.cs" />
     <Compile Include="Implementation\RestrictionBl.cs" />
     <Compile Include="Implementation\ItemMotorFuelTaxBl.cs" />
     <Compile Include="Implementation\InventoryCountBl.cs" />
@@ -151,7 +154,10 @@
     <Compile Include="Implementation\StorageUnitTypeBl.cs" />
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
+    <Compile Include="Interface\IMeasurementBl.cs" />
+    <Compile Include="Interface\IInventoryReceiptItemLotBl.cs" />
     <Compile Include="Interface\IParentLotBl.cs" />
+    <Compile Include="Interface\IReadingPointBl.cs" />
     <Compile Include="Interface\IRestrictionBl.cs" />
     <Compile Include="Interface\ICategoryTaxBl.cs" />
     <Compile Include="Interface\IInventoryCountBl.cs" />

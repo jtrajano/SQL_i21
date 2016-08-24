@@ -207,7 +207,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
-                        store: '{orderNumbers}',
+                        store: '{fromSubLocation}',
                         origValueField: 'intSubLocationId',
                         origUpdateField: 'intSubLocationId',
                         defaultFilters: [
@@ -239,7 +239,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 colStorageLocation: {
                     dataIndex: 'strStorageLocationName',
                     editor: {
-                        store: '{orderNumbers}',
+                        store: '{fromStorageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
                         defaultFilters: [
@@ -271,7 +271,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'strLotNumber',
                     hidden: '{!current.ysnCountByLots}',
                     editor: {
-                        store: '{compactItem}',
+                        store: '{lot}',
                         origValueField: 'intLotId',
                         origUpdateField: 'intLotId',
                         defaultFilters: [
@@ -313,9 +313,32 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     dataIndex: 'dblQtyPerPallet',
                     hidden: '{!current.ysnCountByPallets}'
                 },
-                colPhysicalCount: 'dblPhysicalCount',
+                colPhysicalCount: {
+                    dataIndex: 'dblPhysicalCount',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
                 colUOM: {
-                    dataIndex: 'strUnitMeasure'
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUOMId',
+                        store: '{itemUOM}',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdPhysicalCount.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
                 },
                 colPhysicalCountStockUnit: 'dblPhysicalCountStockUnit',
                 colVariance: 'dblVariance',
@@ -394,7 +417,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
     createLineItemRecord: function (config, action) {
         var record = Ext.create('Inventory.model.InventoryCountDetail');
-        var strCountLine = 'test';
+        var strCountLine = '';
 
         record.set('strCountLine', strCountLine);
         record.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
@@ -439,7 +462,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
                     filter.push({
                         column: 'intCategoryId',
@@ -447,7 +470,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
                     filter.push({
                         column: 'intCommodityId',
@@ -455,7 +478,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intCountGroupId'))) {
                     filter.push({
                         column: 'intCountGroupId',
@@ -463,7 +486,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intSubLocationId'))) {
                     filter.push({
                         column: 'intSubLocationId',
@@ -471,7 +494,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
+                
                 if (!iRely.Functions.isEmpty(current.get('intStorageLocationId'))) {
                     filter.push({
                         column: 'intStorageLocationId',
@@ -479,8 +502,16 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         conjunction: 'and'
                     });
                 }
-                ;
-
+               
+                if(current.get('ysnIncludeZeroOnHand') === false){
+                        filter.push({
+                        column: 'dblOnHand',
+                        value: 0,
+                        condition: 'gt',
+                        conjunction: 'and'
+                    });
+                }
+                
                 if (current.get('ysnCountByLots')) {
                     itemList = vm.storeInfo.itemListByLot;
                 }
@@ -535,19 +566,20 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var me = win.controller;
         var vm = win.getViewModel();
         var current = vm.data.current;
-        var filters = [
+        var CountId = current.get('intInventoryCountId');
+     /*   var filters = [
             {
                 column: 'intInventoryCountId',
                 value: current.get('intInventoryCountId')
             }
-        ];
-
+        ];*/
+        
         if (current) {
             var showAddScreen = function () {
                 var search = i21.ModuleMgr.Search;
                 search.scope = me;
-                search.url = '../Inventory/api/InventoryCount/GetCountSheets';
-                search.filter = filters;
+                search.url = '../Inventory/api/InventoryCount/GetCountSheets?CountId=' + CountId;
+               // search.filter = filters;
 
                 if (current.get('ysnIncludeOnHand')) {
                     search.columns = [
@@ -566,14 +598,14 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
                         { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
-                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric' },
-                        { dataIndex: 'dblPallets', text: 'No of Pallets', dataType: 'numeric' },
-                        { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
-                        { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'dblPalletsBlank', text: 'No of Pallets', dataType: 'numeric' },
+                        { dataIndex: 'dblQtyPerPalletBlank', text: 'Qty Per Pallet', dataType: 'numeric' },
+                        { dataIndex: 'dblPhysicalCountBlank', text: 'Physical Count', dataType: 'numeric' },
                         { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
                         { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
-                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric' },
-                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string' }
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
                     ];
                 }
                 else {
@@ -592,26 +624,128 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                         { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
                         { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
                         { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
-                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric' },
-                        { dataIndex: 'dblPallets', text: 'No of Pallets', dataType: 'numeric' },
-                        { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
-                        { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'dblPalletsBlank', text: 'No of Pallets', dataType: 'numeric' },
+                        { dataIndex: 'dblQtyPerPalletBlank', text: 'Qty Per Pallet', dataType: 'numeric' },
+                        { dataIndex: 'dblPhysicalCountBlank', text: 'Physical Count', dataType: 'numeric' },
                         { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
-                        { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
-                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric' },
-                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string' }
+                       // { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true },
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
                     ];
                 }
 
                 search.title = "Print Count Sheets";
                 search.showNew = false;
+                search.showOpenSelected = false;
+                search.showExport = true;
                 search.multi = false;
                 search.show();
             };
             if (button.itemId === 'btnPrintCountSheets') {
                 current.set('intStatus', 2);
             }
-            showAddScreen();
+           
+            //Save the record first before showing the Print Count Sheets screen
+            win.context.data.saveRecord ({
+            successFn: function () {
+                showAddScreen();
+                }
+            });
+        }
+    },
+    
+    onPrintVarianceClick: function (button) {
+        var win = button.up('window');
+        var me = win.controller;
+        var vm = win.getViewModel();
+        var current = vm.data.current;
+        var CountId = current.get('intInventoryCountId');
+     /*   var filters = [
+            {
+                column: 'intInventoryCountId',
+                value: current.get('intInventoryCountId')
+            }
+        ];*/
+        
+        if (current) {
+            var showAddScreen = function () {
+                var search = i21.ModuleMgr.Search;
+                search.scope = me;
+                search.url = '../Inventory/api/InventoryCount/GetCountSheets?CountId=' + CountId;
+               // search.filter = filters;
+
+                if (current.get('ysnIncludeOnHand')) {
+                    search.columns = [
+                        { dataIndex: 'intInventoryCountDetailId', text: 'Inventory Count Detail Id', dataType: 'numeric', defaultSort: true, hidden: true, key: true},
+                        { dataIndex: 'strLocationName', text: 'Location Name', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCategory', text: 'Category', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCommodity', text: 'Commodity', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCountNo', text: 'Count No', dataType: 'string', hidden: true },
+                        { dataIndex: 'dtmCountDate', text: 'Count Date', dataType: 'date', xtype: 'datecolumn', hidden: true },
+
+                        { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
+                        { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
+                        { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
+                        { dataIndex: 'dblSystemCount', text: 'System Count', dataType: 'numeric' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'dblPallets', text: 'No of Pallets', dataType: 'numeric' },
+                        { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
+                        { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
+                        { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
+                        { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
+                    ];
+                }
+                else {
+                    search.columns = [
+                        { dataIndex: 'intInventoryCountDetailId', text: 'Inventory Count Detail Id', dataType: 'numeric', defaultSort: true, hidden: true, key: true},
+                        { dataIndex: 'strLocationName', text: 'Location Name', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCategory', text: 'Category', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCommodity', text: 'Commodity', dataType: 'string', hidden: true },
+                        { dataIndex: 'strCountNo', text: 'Count No', dataType: 'string', hidden: true },
+                        { dataIndex: 'dtmCountDate', text: 'Count Date', dataType: 'date', xtype: 'datecolumn', hidden: true },
+
+                        { dataIndex: 'strCountLine', text: 'Count Line No', dataType: 'string' },
+                        { dataIndex: 'strItemNo', text: 'Item No', dataType: 'string' },
+                        { dataIndex: 'strItemDescription', text: 'Description', dataType: 'string' },
+                        { dataIndex: 'strSubLocationName', text: 'Sub Location', dataType: 'string' },
+                        { dataIndex: 'strStorageLocationName', text: 'Storage Location', dataType: 'string' },
+                        { dataIndex: 'strLotNumber', text: 'Lot Name', dataType: 'string' },
+                        { dataIndex: 'strLotAlias', text: 'Lot Alias', dataType: 'string' },
+                        { dataIndex: 'dblLastCost', text: 'Last Cost', dataType: 'numeric', hidden:true},
+                        { dataIndex: 'dblPallets', text: 'No of Pallets', dataType: 'numeric' },
+                        { dataIndex: 'dblQtyPerPallet', text: 'Qty Per Pallet', dataType: 'numeric' },
+                        { dataIndex: 'dblPhysicalCount', text: 'Physical Count', dataType: 'numeric' },
+                        { dataIndex: 'strUnitMeasure', text: 'UOM', dataType: 'string' },
+                       // { dataIndex: 'dblPhysicalCountStockUnit', text: 'Physical Count in Stock Unit', dataType: 'numeric'},
+                        { dataIndex: 'dblVariance', text: 'Variance', dataType: 'numeric', hidden:true },
+                        { dataIndex: 'strUserName', text: 'Entered By', dataType: 'string', hidden:true }
+                    ];
+                }
+
+                search.title = "Print Variance";
+                search.showNew = false;
+                search.showOpenSelected = false;
+                search.showExport = true;
+                search.multi = false;
+                search.show();
+            };
+            if (button.itemId === 'btnPrintCountSheets') {
+                current.set('intStatus', 2);
+            }
+            
+            //Save the record first before showing the Print Count Sheets screen
+            win.context.data.saveRecord ({
+            successFn: function () {
+                showAddScreen();
+                }
+            });
         }
     },
 
@@ -660,6 +794,13 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var me = this;
         var win = button.up('window');
         var context = win.context;
+        
+        var currentCountItems = win.viewModel.data.current;
+        var countDetail = currentCountItems.tblICInventoryCountDetails().data.items;
+        var countItemsToPost = 0;  
+        var countItemsNotPosted = 0;
+        var itemIndex = 0; 
+        var itemsNotPosted = new Array();
 
         var doPost = function () {
             var strCountNo = win.viewModel.data.current.get('strCountNo');
@@ -676,18 +817,68 @@ Ext.define('Inventory.view.InventoryCountViewController', {
 
             CashManagement.common.BusinessRules.callPostRequest(options);
         };
+        
+        var validatePost = function() {
+            Ext.Array.each(currentCountItems.tblICInventoryCountDetails().data.items, function (item) {
+                        
+                    itemIndex++;
+                        
+                    if (item.get('ysnRecount') === false)
+                        {
+                            if (!item.dummy)
+                                {
+                                     countItemsToPost++;
+                                }        
+                        }
+                        
+                    else
+                        {
+                            if (!item.dummy)
+                                {
+                                    itemsNotPosted[countItemsNotPosted] = item.get('strItemNo');
+                                    countItemsNotPosted++;
+                                }    
+                        }
+                        
+                    if(itemIndex === countDetail.length)
+                        {
+                            if(countItemsNotPosted > 0)
+                                {
+                                        if(countItemsNotPosted === 1) {
+                                            iRely.Functions.showCustomDialog('Warning','ok','Item ' + itemsNotPosted[0] + ' cannot be processed since it is subject for recounting.');
+                                        }
+                                        
+                                        if(countItemsNotPosted > 1)
+                                            {
+                                                var listItems = '<br><br>';
+                                                
+                                                for (var i=0; i<= countItemsNotPosted-1; i++)
+                                                    {
+                                                        listItems = listItems + itemsNotPosted[i] + '<br>';
+                                                    }
+                                                
+                                                iRely.Functions.showCustomDialog('Warning','ok','The following items cannot be processed since they are subject for recounting:' + listItems);
+                                            }
+                                }
+                            
+                            if(countItemsToPost > 0)
+                                {
+                                        doPost();
+                                }
+                        }
+             });   
+        };
 
         // If there is no data change, do the post.
         if (!context.data.hasChanges()) {
-            doPost();
-            return;
+             validatePost();
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function () {
-                doPost();
-            }
+                validatePost();
+           }
         });
     },
 
@@ -771,8 +962,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     },
 
     onViewCategory: function (value, record) {
-        var categoryId = record.get('intCategoryId');
-        i21.ModuleMgr.Inventory.showScreen(categoryId, 'CategoryId');
+        var category = record.get('strCategory');
+        i21.ModuleMgr.Inventory.showScreen(category, 'Category');
     },
 
     onInventoryCountDetailSelect: function (combo, records, eOpts) {
@@ -789,6 +980,45 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('strItemDescription', records[0].get('strDescription'));
                     current.set('intCategoryId', records[0].get('intCategoryId'));
                     current.set('strCategory', records[0].get('strCategoryCode'));
+                    current.set('strStorageLocationName', null);
+                    current.set('intStorageLocationId', null);
+                    current.set('strSubLocationName', null);
+                    current.set('intSubLocationId', null);
+                    current.set('dblSystemCount', null);
+                    
+                    if(current.get('strCountLine') === '' || current.get('strCountLine') === null)
+                        {
+                            var win = combo.up('window');
+                            var currentItems = win.viewModel.data.current;
+                            var countDetail = currentItems.tblICInventoryCountDetails().data.items;
+                            var count = countDetail.length;
+                            var strCountLine = currentItems.get('strCountNo') + '-' + count;
+                            var countLength = 0;
+                            
+                            if (count === 1)
+                                {
+                                    current.set('strCountLine', strCountLine);
+                                }
+                            
+                            if(count > 1)
+                                {
+                                   Ext.Array.each(currentItems.tblICInventoryCountDetails().data.items, function (item) {
+                                            if (!item.dummy) {
+                                                 countLength++;
+                                                    if(countLength == count -1)
+                                                        {
+                                                            var itemCountLine =  item.get('strCountLine') + '';
+                                                            var strCountLineSplit = itemCountLine.split('-');
+                                                            count = parseInt(strCountLineSplit[2]) + 1;
+                                                            strCountLine = currentItems.get('strCountNo') + '-' + count;
+                                                            current.set('strCountLine', strCountLine);
+                                                        }
+                                                }
+                                            
+                                    });   
+                                }
+                            
+                        }
                     break;
                 case 'cboSubLocation':
                     current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
@@ -796,6 +1026,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
                 case 'cboStorageLocation':
+                    current.set('strSubLocationName', records[0].get('strSubLocationName'));
+                    current.set('intSubLocationId', records[0].get('intSubLocationId'));
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
                 case 'cboLot':
@@ -803,7 +1035,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     current.set('dblSystemCount', records[0].get('dblOnHand'));
                     break;
             }
-            ;
         }
     },
 
@@ -830,6 +1061,21 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     onCountGroupClick: function () {
         iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { action: 'new', viewConfig: { modal: true }});
     },
+    
+    onGrdPhysicalClick: function(view, record, cellIndex, e, eOpts) {
+         var win = view.up('window');    
+         var current = win.viewModel.data.current;
+         var grid = view.up('grid');
+        
+        //Check if column is Item 
+        if(cellIndex === 1)
+            {
+               if(current.get('strCountNo') === null || current.get('strCountNo') === '')
+                {
+                    win.context.data.saveRecord ();
+                }
+            }
+    },
 
     init: function (application) {
         this.control({
@@ -846,7 +1092,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 click: this.onPrintCountSheetsClick
             },
             "#btnPrintVariance": {
-                click: this.onPrintCountSheetsClick
+                click: this.onPrintVarianceClick
             },
             "#btnLockInventory": {
                 click: this.onLockInventoryClick
@@ -855,7 +1101,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 click: this.onPostClick
             },
             "#btnRecap": {
-                click: this.onPostClick
+                click: this.onRecapClick
             },
             "#cboItem": {
                 select: this.onInventoryCountDetailSelect
@@ -868,6 +1114,9 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#cboLot": {
                 select: this.onInventoryCountDetailSelect
+            },
+            "#grdPhysicalCount": {
+                cellclick: this.onGrdPhysicalClick
             }
         });
     }

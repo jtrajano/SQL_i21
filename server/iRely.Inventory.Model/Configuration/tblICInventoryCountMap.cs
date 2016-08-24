@@ -208,6 +208,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnCountByPallets).HasColumnName("ysnCountByPallets");
             this.Property(t => t.ysnIncludeOnHand).HasColumnName("ysnIncludeOnHand");
             this.Property(t => t.ysnIncludeZeroOnHand).HasColumnName("ysnIncludeZeroOnHand");
+            this.Property(t => t.dblPalletsBlank).HasColumnName("dblPalletsBlank");
+            this.Property(t => t.dblQtyPerPalletBlank).HasColumnName("dblQtyPerPalletBlank");
+            this.Property(t => t.dblPhysicalCountBlank).HasColumnName("dblPhysicalCountBlank");    
         }
     }
 

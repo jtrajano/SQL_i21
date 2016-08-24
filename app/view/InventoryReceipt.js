@@ -295,7 +295,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         flex: 1,
                                                         itemId: 'cboTransferor',
                                                         margin: '0 5 0 0',
-                                                        fieldLabel: 'Transferor',
+                                                        fieldLabel: 'From Location',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strLocationName',

@@ -25,7 +25,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
         'Ext.form.Label'
     ],
 
-    height: 1291,
+    height: 1368,
 
     items: [
         {
@@ -187,11 +187,15 @@ Ext.define('Inventory.view.OriginConversionOption', {
         {
             xtype: 'panel',
             border: false,
-            height: 1273,
+            height: 1380,
             itemId: 'pnlImportOrigin',
             margin: '0 0 5 0',
             bodyPadding: 10,
             title: 'Inventory Data Import',
+            layout: {
+                type: 'vbox',
+                align: 'stretch'
+            },
             items: [
                 {
                     xtype: 'container',
@@ -614,7 +618,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                 },
                 {
                     xtype: 'panel',
-                    height: 429,
+                    height: 521,
                     padding: '15 0 0 0',
                     animCollapse: true,
                     bodyPadding: 10,
@@ -972,12 +976,47 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            xtype: 'container',
+                            itemId: 'cntImportItemPricingLevels',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'middle',
+                                padding: ''
+                            },
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    flex: 1,
+                                    height: 40,
+                                    itemId: 'btnImportItemPricingLevels',
+                                    text: 'Import Item Pricing Levels'
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
+                                    height: 40,
+                                    padding: 10,
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'middle'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'label',
+                                            text: 'Import Item Pricing Levels from CSV'
+                                        }
+                                    ]
+                                }
+                            ]
                         }
                     ]
                 },
                 {
                     xtype: 'panel',
-                    height: 100,
+                    height: 104,
                     padding: '15 0 0 0',
                     bodyPadding: 10,
                     title: 'Inventory',
@@ -1021,7 +1060,7 @@ Ext.define('Inventory.view.OriginConversionOption', {
                 },
                 {
                     xtype: 'panel',
-                    height: 151,
+                    height: 152,
                     padding: '15 0 0 0',
                     bodyPadding: 10,
                     title: 'Origins',

@@ -586,8 +586,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             }
         },
+        isReceiptReadonly: function(get) {
+            return  get('current.ysnOrigin') || get('current.ysnPosted');
+        },
+
         readOnlyReceiptItemGrid: function (get) {
-            if (get('current.ysnPosted')) {
+            if (get('current.ysnPosted') || get('current.ysnOrigin')) {
                 return true;
             }
             else if (iRely.Functions.isEmpty(get('current.intEntityVendorId')) || iRely.Functions.isEmpty(get('current.intLocationId'))) {

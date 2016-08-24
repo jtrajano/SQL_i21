@@ -114,7 +114,9 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                         store: '{readingPoint}'
                     }
                 },
-                colActive: ''
+                colActive: {
+                    dataIndex: 'ysnActive'
+                }
             },
 
             grdItemCategoryAllowed: {

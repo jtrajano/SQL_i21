@@ -23,9 +23,9 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
-        public async Task<HttpResponseMessage> GetCountSheets(GetParameter param)
+        public async Task<HttpResponseMessage> GetCountSheets(GetParameter param, int CountId)
         {
-            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetCountSheets(param));
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetCountSheets(param, CountId));
         }
 
         [HttpPost]

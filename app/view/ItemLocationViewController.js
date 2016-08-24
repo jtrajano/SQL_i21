@@ -251,37 +251,156 @@ Ext.define('Inventory.view.ItemLocationViewController', {
     },
 
     onVendorDrilldown: function(combo) {
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        
         if (iRely.Functions.isEmpty(combo.getValue())) {
             iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', { action: 'new', viewConfig: { modal: true }});
         }
         else {
-            iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', combo.getValue());
+             iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityVendor', {
+                action: 'view',
+                filters: [
+                    {
+                        column: 'intEntityId',
+                        value: current.get('intVendorId')
+                    }
+                ],
+                 
+                 viewConfig: { modal: true }
+            });
         }
     },
 
     onLocationDrilldown: function(combo) {
-        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'LocationName');
+        var win = combo.up('window');
+        
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('i21.view.CompanyLocation', { 
+                filters: [
+                    {
+                        column: 'strLocationName',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
     },
 
     onStorageLocationDrilldown: function(combo) {
-        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'StorageLocation');
+        var win = combo.up('window');
+        
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('Inventory.view.StorageUnit', { 
+                filters: [
+                    {
+                        column: 'strName',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
     },
 
     onCountGroupDrilldown: function(combo) {
-        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'CountGroup');
+        var win = combo.up('window');
+        
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('Inventory.view.InventoryCountGroup', { 
+                filters: [
+                    {
+                        column: 'strCountGroup',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
     },
 
     onSubCategoryDrilldown: function(combo) {
-        iRely.Functions.openScreen('Store.view.SubCategory');
-//        i21.ModuleMgr.Inventory.showScreen(null, 'SubCategory');
+        var win = combo.up('window');
+        
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Store.view.SubCategory', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('Store.view.SubCategory', { 
+                filters: [
+                    {
+                        column: 'strSubcategoryId',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
     },
 
     onProductCodeDrilldown: function(combo) {
-        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'ProductCode');
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Store.view.Store', { 
+                activeTab: 'Register Product',
+                action: 'new',
+            });
+        }
+        
+        else {      
+            iRely.Functions.openScreen('Store.view.Store', { 
+                activeTab: 'Register Product',
+                filters: [
+                    {
+                         column: 'intStoreNo',
+                         value: combo.getValue(),
+                         conjunction: 'and'
+                    },
+                    {
+                         column: 'intCompanyLocationId',
+                         value: current.get('intLocationId'),
+                         conjunction: 'and'
+                    }  
+                ],
+                
+            });
+        }
     },
 
     onPromotionalDrilldown: function(combo) {
-        i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'PromotionalItem');
+        var win = combo.up('window');
+        
+        if (iRely.Functions.isEmpty(combo.getValue())) {
+            iRely.Functions.openScreen('Store.view.PromotionSales', { action: 'new', viewConfig: { modal: true }});
+        }
+        
+        else {
+            iRely.Functions.openScreen('Store.view.PromotionSales', { 
+                filters: [
+                    {
+                        column: 'intPromoSalesId',
+                        value: combo.getRawValue()
+                    }
+                ],
+                viewConfig: { modal: true } 
+            });
+        }
     },
 
     onDepositPLUDrilldown: function(combo) {
@@ -356,7 +475,6 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             "#cboInventoryGroupField": {
                 drilldown: this.onCountGroupDrilldown
             },
-            
             "#cboCostingMethod": {
                 select: this.onCostingMethodSelect
             }

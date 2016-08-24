@@ -34,7 +34,6 @@ Ext.define('Inventory.view.ItemLocation', {
     layout: 'fit',
     collapsible: true,
     title: 'Item Location',
-    modal: true,
 
     items: [
         {
@@ -212,7 +211,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                     margin: '0 5',
                                                                     fieldLabel: 'Vendor',
                                                                     labelWidth: 50,
-                                                                    displayField: 'strVendorId',
+                                                                    displayField: 'strName',
                                                                     valueField: 'intEntityVendorId'
                                                                 }
                                                             ]
@@ -500,6 +499,12 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'intStoreNo',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Product Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'strRegProdCode',
                                                                                     dataType: 'string',
                                                                                     text: 'Product',
@@ -517,7 +522,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                             fieldLabel: 'Product Code',
                                                                             labelWidth: 105,
                                                                             displayField: 'strRegProdCode',
-                                                                            valueField: 'intRegProdId'
+                                                                            valueField: 'intStoreNo'
                                                                         },
                                                                         {
                                                                             xtype: 'textfield',

@@ -198,7 +198,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             cboCustomer: {
                 value: '{current.intEntityCustomerId}',
                 store: '{customer}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{current.ysnPosted}',
+                defaultFilters: [{
+                    column: 'ysnActive',
+                    value: true
+                }]
             },
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
@@ -296,9 +300,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             btnRemoveItem: {
                 hidden: '{readOnlyOnPickLots}'
-            },
-            btnQuality: {
-                hidden: '{current.ysnPosted}'
             },
             grdInventoryShipment: {
                 readOnly: '{readOnlyOnPickLots}',
@@ -1880,14 +1881,41 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onQualityClick: function(button, e, eOpts) {
         var grid = button.up('grid');
-
         var selected = grid.getSelectionModel().getSelection();
+        
+        var win = button.up('window');
+        var vm = win.viewModel;
+        var currentShipmentItem = vm.data.current;
 
         if (selected) {
             if (selected.length > 0){
                 var current = selected[0];
                 if (!current.dummy)
-                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
+                    if(currentShipmentItem.get('ysnPosted') === true)
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', 
+                                { 
+                                    strSourceType: 'Inventory Shipment', 
+                                    intTicketFileId: current.get('intInventoryShipmentItemId'),
+                                    viewConfig:{
+                                        modal: true, 
+                                        listeners:
+                                        {
+                                            show: function(win) {
+                                                Ext.defer(function(){
+                                                    win.context.screenMgr.securityMgr.screen.setViewOnlyAccess();
+                                                }, 100);
+                                            }
+                                        }
+                                    }
+                                }
+                            );
+                            
+                        }
+                    else
+                        {
+                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
+                        }
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');

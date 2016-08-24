@@ -368,7 +368,10 @@
     <Compile Include="Controllers\CommodityUOMController.cs" />
     <Compile Include="Controllers\CompanyPreferenceController.cs" />
     <Compile Include="Controllers\ImportDataController.cs" />
+    <Compile Include="Controllers\InventoryReceiptItemLotController.cs" />
+    <Compile Include="Controllers\MeasurementController.cs" />
     <Compile Include="Controllers\ParentLotController.cs" />
+    <Compile Include="Controllers\ReadingPointController.cs" />
     <Compile Include="Controllers\RestrictionController.cs" />
     <Compile Include="Controllers\ItemMotorFuelTaxController.cs" />
     <Compile Include="Controllers\InventoryCountController.cs" />
@@ -501,6 +504,7 @@
     <Content Include="Global.asax" />
     <None Include="Properties\PublishProfiles\1530.pubxml" />
     <None Include="Properties\PublishProfiles\1540.pubxml" />
+    <None Include="Properties\PublishProfiles\1620.pubxml" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />
     <Content Include="Scripts\jquery-1.7.1.min.js" />

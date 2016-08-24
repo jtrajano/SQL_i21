@@ -19,6 +19,7 @@ namespace iRely.Inventory.BusinessLayer
         public InventoryReceiptBl(IRepository db) : base(db)
         {
             _db = db;
+            _db.ContextManager.Database.CommandTimeout = 180000;
         }
         #endregion
         public static int DefaultUserId;
@@ -63,7 +64,6 @@ namespace iRely.Inventory.BusinessLayer
 
         public override void Add(tblICInventoryReceipt entity)
         {
-            entity.strReceiptNumber = Common.GetStartingNumber(Common.StartingNumber.InventoryReceipt);
             entity.intCreatedUserId = iRely.Common.Security.GetUserId();
             entity.intEntityId = iRely.Common.Security.GetEntityId();
             base.Add(entity);
@@ -95,61 +95,168 @@ namespace iRely.Inventory.BusinessLayer
         //    base.Update(entity);
         //}
 
+        //public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
+        //{
+        //    SaveResult result = new SaveResult();
+
+        //    using (var transaction = _db.ContextManager.Database.BeginTransaction())
+        //    {
+        //        var connection = _db.ContextManager.Database.Connection;
+        //        try
+        //        {
+        //            int? ReceiptId = null;
+        //            bool ysnDeleted = false;
+        //            foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
+        //            {
+        //                ReceiptId = receipt.intInventoryReceiptId;
+        //                if (receipt.strReceiptType == "Purchase Order")
+        //                {
+        //                    var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
+        //                    var openStatus = new SqlParameter("ysnOpenStatus", true);
+        //                    _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
+        //                }
+        //            }
+        //            var deletedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(p => p.State == EntityState.Deleted).ToList();
+        //            foreach (var receipt in deletedReceipts)
+        //            {
+        //                ReceiptId = receipt.Entity.intInventoryReceiptId;
+        //                ysnDeleted = true;
+        //                if (receipt.Entity.strReceiptType == "Purchase Order")
+        //                {
+        //                    var idParameter = new SqlParameter("intReceiptNo", receipt.Entity.intInventoryReceiptId);
+        //                    var openStatus = new SqlParameter("ysnOpenStatus", true);
+        //                    _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
+        //                }
+        //            }
+
+        //            _db.ContextManager.Database.ExecuteSqlCommand("uspICLogTransactionDetail @TransactionType, @TransactionId", new SqlParameter("TransactionType", 1), new SqlParameter("TransactionId", ReceiptId));
+
+        //            result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+
+        //            foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
+        //            {
+        //                ReceiptId = receipt.intInventoryReceiptId;
+        //                var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
+        //                _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
+
+        //                //if (receipt.strReceiptType == "Purchase Order")
+        //                //{
+        //                //    var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
+        //                //    _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
+        //                //}
+
+
+        //                _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
+        //            }
+
+        //            foreach (var receipt in deletedReceipts)
+        //            {
+        //                ReceiptId = receipt.Entity.intInventoryReceiptId;
+        //                ysnDeleted = true;
+        //                _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
+        //            }
+
+        //            if (result.HasError)
+        //            {
+        //                throw result.BaseException;
+        //            }
+        //            transaction.Commit();
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            result.BaseException = ex;
+        //            result.Exception = new ServerException(ex);
+        //            result.HasError = true;
+        //            //transaction.Rollback();
+        //        }
+        //    }
+
+        //    return new BusinessResult<tblICInventoryReceipt>()
+        //    {
+        //        success = !result.HasError,
+        //        message = new MessageResult()
+        //        {
+        //            statusText = result.Exception.Message,
+        //            status = result.Exception.Error,
+        //            button = result.Exception.Button.ToString()
+        //        }
+        //    };
+        //}
+
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
         {
             SaveResult result = new SaveResult();
+
+            var addedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(w => w.State == EntityState.Added);
+            foreach (var receipt in addedReceipts) {
+                receipt.Entity.strReceiptNumber = await Common.GetStartingNumberAsync(Common.StartingNumber.InventoryReceipt);
+            }
 
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
                 try
                 {
-                    int? ReceiptId = null;
-                    bool ysnDeleted = false;
+                    // Get the deleted receipt records
+                    var deletedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(p => p.State == EntityState.Deleted).ToList();
+
+                    // Log the original data. 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
-                        ReceiptId = receipt.intInventoryReceiptId;
-                        if (receipt.strReceiptType == "Purchase Order")
-                        {
-                            var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
-                            var openStatus = new SqlParameter("ysnOpenStatus", true);
-                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
-                        }
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICLogTransactionDetail @TransactionType, @TransactionId", 
+                            new SqlParameter("TransactionType", 1),
+                            new SqlParameter("TransactionId", receipt.intInventoryReceiptId)
+                        );
                     }
-                    var changedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(p => p.State == EntityState.Deleted).ToList();
-                    foreach (var receipt in changedReceipts)
+
+                    // Log the original data from the deleted receipts.
+                    foreach (var receipt in deletedReceipts)
                     {
-                        ReceiptId = receipt.Entity.intInventoryReceiptId;
-                        ysnDeleted = true;
-                        if (receipt.Entity.strReceiptType == "Purchase Order")
-                        {
-                            var idParameter = new SqlParameter("intReceiptNo", receipt.Entity.intInventoryReceiptId);
-                            var openStatus = new SqlParameter("ysnOpenStatus", true);
-                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
-                        }
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICLogTransactionDetail @TransactionType, @TransactionId",
+                            new SqlParameter("TransactionType", 1),
+                            new SqlParameter("TransactionId", receipt.Entity.intInventoryReceiptId)
+                        );
+
+                        // Update the PO or Scale status from deleted shipment records.
+                        // Usually, deleted records will "open" the status of the PO or Scale Ticket.
+                        // Call this sp before the _db.SaveAsync because uspICUpdateStatusOnShipmentSave is not reading it from the log table. 
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICUpdateStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus",
+                            new SqlParameter("intReceiptNo", receipt.Entity.intInventoryReceiptId),
+                            new SqlParameter("ysnOpenStatus", true)
+                        );                    
                     }
 
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspICLogTransactionDetail @TransactionType, @TransactionId", new SqlParameter("TransactionType", 1), new SqlParameter("TransactionId", ReceiptId));
-
+                    // Save the data
                     result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
 
+                    // Process the deleted receipts. 
+                    foreach (var receipt in deletedReceipts)
+                    {
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId",
+                            new SqlParameter("ReceiptId", receipt.Entity.intInventoryReceiptId), 
+                            new SqlParameter("ForDelete", true), 
+                            new SqlParameter("UserId", DefaultUserId)
+                        );
+                    }                   
+
+                    // Process the newly saved data. 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
-                        ReceiptId = receipt.intInventoryReceiptId;
-                        if (receipt.strReceiptType == "Purchase Order")
-                        {
-                            var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
-                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
-                        }
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICUpdateStatusOnReceiptSave @intReceiptNo"
+                            , new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId)
+                        );
 
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
-                    }
-
-                    foreach (var receipt in changedReceipts)
-                    {
-                        ReceiptId = receipt.Entity.intInventoryReceiptId;
-                        ysnDeleted = true;
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", DefaultUserId));
+                        await _db.ContextManager.Database.ExecuteSqlCommandAsync(
+                            "uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId",
+                            new SqlParameter("ReceiptId", receipt.intInventoryReceiptId), 
+                            new SqlParameter("ForDelete", false), 
+                            new SqlParameter("UserId", DefaultUserId)
+                        );
                     }
 
                     if (result.HasError)
@@ -178,6 +285,7 @@ namespace iRely.Inventory.BusinessLayer
                 }
             };
         }
+
 
         public SaveResult ProcessBill(int receiptId, out int? newBill)
         {
@@ -360,16 +468,67 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<SearchResult> GetAddOrders(GetParameter param, int VendorId, string ReceiptType, int SourceType, int CurrencyId)
         {
-            var query = _db.GetQuery<vyuICGetReceiptAddOrder>()
-                .Where(p => p.intEntityVendorId == VendorId && p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId)
-                .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
-
-            return new SearchResult()
+            if (ReceiptType == "Transfer Order")
             {
-                data = data.AsQueryable(),
-                total = await query.CountAsync()
-            };
+                // Get the Transfer Orders
+                // Note: VendorId becomes a location id when receipt type is a "Transfer Order"
+                var query = _db.GetQuery<vyuICGetReceiptAddTransferOrder>()
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intLocationId == VendorId)
+                    .Filter(param, true);
+
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+            else if (ReceiptType == "Purchase Contract" && SourceType == 0)
+            {
+                // Get Contracts that are "Purchase" type. 
+                var query = _db.GetQuery<vyuICGetReceiptAddPurchaseContract>()
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
+                    .Filter(param, true);
+
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult() {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+            else if (ReceiptType == "Purchase Contract" && SourceType == 2)
+            {
+                // Get Purchase Contracts that are linked with Logistic's Inbound Shipments 
+                var query = _db.GetQuery<vyuICGetReceiptAddLGInboundShipment>()
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
+                    .Filter(param, true);
+
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+            else 
+            {
+                // Get the Purchase Orders
+                var query = _db.GetQuery<vyuICGetReceiptAddPurchaseOrder>()
+                    .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
+                    .Filter(param, true);
+
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+
         }
 
         public async Task<SearchResult> GetReceiptVouchers(GetParameter param)
@@ -413,7 +572,8 @@ namespace iRely.Inventory.BusinessLayer
             return new SearchResult()
             {
                 data = data.AsQueryable(),
-                total = await query.CountAsync()
+                total = await query.CountAsync(),
+                summaryData = query.ToAggregate(param.aggregates)
             };
         }
     }

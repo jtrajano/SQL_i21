@@ -8,7 +8,7 @@
     "userConfig": {
         "designer|userAlias": "icoriginconversionoption",
         "designer|userClassName": "OriginConversionOption",
-        "height": 1291,
+        "height": 1368,
         "layout": null,
         "width": null
     },
@@ -461,9 +461,10 @@
             "userConfig": {
                 "bodyPadding": 10,
                 "border": false,
-                "height": 1273,
+                "container|align": "stretch",
+                "height": 1380,
                 "itemId": "pnlImportOrigin",
-                "layout": null,
+                "layout": "vbox",
                 "margin": "0 0 5 0",
                 "title": "Inventory Data Import"
             },
@@ -1301,7 +1302,7 @@
                         "bodyPadding": 10,
                         "collapsed": false,
                         "collapsible": true,
-                        "height": 429,
+                        "height": 521,
                         "layout": null,
                         "margin": null,
                         "padding": "15 0 0 0",
@@ -1991,6 +1992,74 @@
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "middle",
+                                "container|padding": "",
+                                "itemId": "cntImportItemPricingLevels",
+                                "layout": "hbox",
+                                "margin": "0 0 5 0"
+                            },
+                            "name": "MyContainer16",
+                            "designerId": "d20f407e-94be-46f8-94a7-23f1237b23bb",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "height": 40,
+                                        "itemId": "btnImportItemPricingLevels",
+                                        "layout|flex": 1,
+                                        "text": "Import Item Pricing Levels"
+                                    },
+                                    "name": "MyButton25",
+                                    "designerId": "793e67ce-43c8-47be-a61b-74450ffb2c62"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "middle",
+                                        "height": 40,
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 10
+                                    },
+                                    "name": "MyContainer13",
+                                    "designerId": "431870b3-f897-49ed-8bc3-5652833753ef",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.Label",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": null,
+                                                "text": "Import Item Pricing Levels from CSV"
+                                            },
+                                            "name": "MyLabel9",
+                                            "designerId": "0e4605d6-7697-4805-8191-62a9b27ac187"
+                                        }
+                                    ]
+                                }
+                            ]
                         }
                     ]
                 },
@@ -2003,7 +2072,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "bodyPadding": 10,
-                        "height": 100,
+                        "height": 104,
                         "padding": "15 0 0 0",
                         "title": "Inventory"
                     },
@@ -2089,7 +2158,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "bodyPadding": 10,
-                        "height": 151,
+                        "height": 152,
                         "padding": "15 0 0 0",
                         "title": "Origins"
                     },
