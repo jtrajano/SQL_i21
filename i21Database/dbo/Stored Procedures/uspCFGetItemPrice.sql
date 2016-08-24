@@ -1,5 +1,4 @@
 ﻿
-
 CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
 
  @CFItemId				INT    
@@ -683,15 +682,15 @@ BEGIN
 
 
 
---DECLARE @ValidSiteItem INT
+DECLARE @ValidSiteItem INT
 
---SET @ValidSiteItem = (SELECT TOP 1 intARItemId FROM @cfSiteItem)
+SET @ValidSiteItem = (SELECT TOP 1 intARItemId FROM @cfSiteItem)
 
 
 
---IF(@ValidSiteItem IS NOT NULL) 
+IF(@ValidSiteItem IS NOT NULL) 
 
---BEGIN
+BEGIN
 
 	DECLARE @Rate NUMERIC(18,6)
 	DECLARE @SiteGroupId INT
@@ -1299,7 +1298,7 @@ BEGIN
 		
 	END
 	
---END
+END
 
 ---***PRICE PROFILE***---
 
