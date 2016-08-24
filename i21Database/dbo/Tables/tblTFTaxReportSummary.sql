@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFTaxReportSummary](
-	[intTaxReportSummary] [int] IDENTITY(1,1) NOT NULL,
-	[uniqGuid] [uniqueidentifier] NOT NULL,
+	[intReportSummaryId] [int] IDENTITY(1,1) NOT NULL,
+	[strSummaryGuid] [uniqueidentifier] NOT NULL,
 	[intTaxAuthorityId] [int] NOT NULL,
 	[strTaxAuthority] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strFormCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -11,7 +11,7 @@
 	[strScheduleCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strColumn] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strColumnValue] [numeric](18, 2) NULL,
-	[strTaxType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strSegment] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strProductCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxClass] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateRun] [datetime] NOT NULL,
@@ -33,7 +33,7 @@
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblTFTaxReportSummary] PRIMARY KEY CLUSTERED 
 (
-	[intTaxReportSummary] ASC
+	[intReportSummaryId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
