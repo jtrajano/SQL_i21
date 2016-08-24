@@ -26,7 +26,8 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'RiskManagement.store.FutureMarketBuffered',
         'Grain.store.BufferedStorageSchedule',
         'Grain.store.BufferedDiscountId',
-        'Grain.store.BufferedDistributions'
+        'Grain.store.BufferedDistributions',
+        'Grain.store.BufferedUniqueStorageSchedule'
     ],
 
     stores: {
@@ -113,7 +114,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
             type: 'companylocationbuffered'
         },
         scheduleStore: {
-            type: 'grbufferedstorageschedule'
+            type: 'grbuffereduniquestorageschedule'
         },
         scheduleDiscount: {
             type: 'grbuffereddiscountid'
