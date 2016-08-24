@@ -418,6 +418,14 @@ UPDATE tblSMMasterMenu SET strModuleName = 'System Manager' WHERE strMenuName = 
 
 /* End of Remodule*/
 
+/* Start File Download Screen */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'File Downloads' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'File Downloads', N'System Manager', @UtilitiesParentMenuId, N'File Downloads', N'Maintenance', N'Screen', N'i21.view.FileDownloads', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.FileDownloads' WHERE strMenuName = 'File Downloads' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
+/* End File Download Screen*/
+
 /* Start Move */
 DECLARE @CommonInfoMenuId INT
 SELECT @CommonInfoMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND intParentMenuID = 0

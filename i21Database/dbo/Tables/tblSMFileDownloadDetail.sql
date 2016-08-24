@@ -2,7 +2,7 @@
 (
 	[intFileDownloadDetailId] INT NOT NULL IDENTITY,
 	[intFileDownloadId] INT NOT NULL,
-	[strFile] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strFile] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intSize] INT NULL,
 	[dtmDateAdded] DATETIME NOT NULL,
