@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMSampleUpdate]
-	@strXml NVARCHAR(Max)
+     @strXml NVARCHAR(Max)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -15,9 +15,19 @@ BEGIN TRY
 		,@strXml
 
 	DECLARE @intSampleId INT
+	DECLARE @strLotNumber NVARCHAR(50)
+	DECLARE @ysnEnableParentLot BIT
+	DECLARE @intProductValueId INT
+	DECLARE @intLotStatusId INT
 
 	SELECT @intSampleId = intSampleId
-	FROM OPENXML(@idoc, 'root', 2) WITH (intSampleId INT)
+		,@strLotNumber = strLotNumber
+		,@intProductValueId = intProductValueId
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intSampleId INT
+			,strLotNumber NVARCHAR(50)
+			,intProductValueId INT
+			)
 
 	IF NOT EXISTS (
 			SELECT *
@@ -32,10 +42,32 @@ BEGIN TRY
 				)
 	END
 
+	-- Lot Status
+	IF ISNULL(@strLotNumber, '') <> ''
+	BEGIN
+		SET @intLotStatusId = NULL
+
+		SELECT @ysnEnableParentLot = ysnEnableParentLot
+		FROM tblQMCompanyPreference
+
+		IF @ysnEnableParentLot = 0 -- Lot
+		BEGIN
+			SELECT @intLotStatusId = intLotStatusId
+			FROM tblICLot
+			WHERE intLotId = @intProductValueId
+		END
+		ELSE -- Parent Lot
+		BEGIN
+			SELECT @intLotStatusId = intLotStatusId
+			FROM tblICParentLot
+			WHERE intParentLotId = @intProductValueId
+		END
+	END
+
 	BEGIN TRAN
 
 	-- Sample Header Update
-	UPDATE dbo.tblQMSample
+	UPDATE tblQMSample
 	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intSampleTypeId = x.intSampleTypeId
 		,intProductTypeId = x.intProductTypeId
@@ -55,7 +87,7 @@ BEGIN TRY
 		,intLoadDetailId = x.intLoadDetailId
 		,intCountryID = x.intCountryID
 		,ysnIsContractCompleted = x.ysnIsContractCompleted
-		,intLotStatusId = x.intLotStatusId
+		,intLotStatusId = @intLotStatusId
 		,intEntityId = x.intEntityId
 		,strShipmentNumber = x.strShipmentNumber
 		,strLotNumber = x.strLotNumber
@@ -99,7 +131,6 @@ BEGIN TRY
 			,intLoadDetailId INT
 			,intCountryID INT
 			,ysnIsContractCompleted BIT
-			,intLotStatusId INT
 			,intEntityId INT
 			,strShipmentNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)

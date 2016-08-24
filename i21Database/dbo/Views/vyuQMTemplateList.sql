@@ -7,6 +7,8 @@ SELECT DISTINCT P.intProductId
 	,IC.strDescription
 	,P.intProductValueId
 	,P.ysnActive
+	,LS.strSecondaryStatus AS strApprovalLotStatus
+	,LS1.strSecondaryStatus AS strRejectionLotStatus
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -26,6 +28,8 @@ JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 JOIN tblQMControlPoint CP ON CP.intControlPointId = PC.intControlPointId
 JOIN tblQMProductType PT ON PT.intProductTypeId = P.intProductTypeId
 JOIN tblICCategory IC ON IC.intCategoryId = P.intProductValueId
+LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = P.intApprovalLotStatusId
+LEFT JOIN tblICLotStatus LS1 ON LS1.intLotStatusId = P.intRejectionLotStatusId
 WHERE P.intProductTypeId = 1
 
 UNION ALL
@@ -37,6 +41,8 @@ SELECT DISTINCT P.intProductId
 	,II.strDescription
 	,P.intProductValueId
 	,P.ysnActive
+	,LS.strSecondaryStatus AS strApprovalLotStatus
+	,LS1.strSecondaryStatus AS strRejectionLotStatus
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -57,6 +63,8 @@ JOIN tblQMControlPoint CP ON CP.intControlPointId = PC.intControlPointId
 JOIN tblQMProductType PT ON PT.intProductTypeId = P.intProductTypeId
 JOIN tblICItem II ON II.intItemId = P.intProductValueId
 	AND II.strStatus = 'Active'
+LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = P.intApprovalLotStatusId
+LEFT JOIN tblICLotStatus LS1 ON LS1.intLotStatusId = P.intRejectionLotStatusId
 WHERE P.intProductTypeId = 2
 
 UNION ALL
@@ -68,6 +76,8 @@ SELECT DISTINCT P.intProductId
 	,'' --PT1.strDescription
 	,P.intProductValueId
 	,P.ysnActive
+	,'' AS strApprovalLotStatus
+	,'' AS strRejectionLotStatus
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -98,6 +108,8 @@ SELECT DISTINCT P.intProductId
 	,'' --PT1.strDescription
 	,P.intProductValueId
 	,P.ysnActive
+	,'' AS strApprovalLotStatus
+	,'' AS strRejectionLotStatus
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
@@ -128,6 +140,8 @@ SELECT DISTINCT P.intProductId
 	,'' --PT1.strDescription
 	,P.intProductValueId
 	,P.ysnActive
+	,'' AS strApprovalLotStatus
+	,'' AS strRejectionLotStatus
 	,(
 		Stuff((
 				SELECT ',' + strControlPointName
