@@ -34,6 +34,11 @@ BEGIN TRY
 		,@intMaxExecutionOrder int
 		,@intDepartmentId int
 		,@intTransactionCount INT
+		,@intBlendRequirementId int
+		,@intUnitMeasureId int
+		,@dtmCurrentDate DATETIME
+
+	SELECT @dtmCurrentDate = GETDATE()
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -112,7 +117,7 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @intPrevExecutionOrder = intExecutionOrder,@intConcurrencyId=ISNULL(intConcurrencyId,0)+1
+	SELECT @intPrevExecutionOrder = intExecutionOrder,@intConcurrencyId=ISNULL(intConcurrencyId,0)+1,@intBlendRequirementId = intBlendRequirementId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -189,7 +194,7 @@ BEGIN TRY
 		,intCustomerId = @intCustomerId
 		,ysnIngredientAvailable=@ysnIngredientAvailable
 		,intDepartmentId=@intDepartmentId
-		,dtmLastModified = GetDate()
+		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId=@intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -232,6 +237,24 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (intWorkOrderProductSpecificationId INT,strRowState nvarchar(50)) x
 			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='DELETE'
 			)
+
+	If @intBlendRequirementId is not null
+	Begin
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intItemUOMId
+
+		UPDATE tblMFBlendRequirement
+		SET intItemId = @intItemId
+			,dblQuantity = @dblQuantity
+			,intUOMId = @intUnitMeasureId
+			,dtmDueDate = @dtmExpectedDate
+			,intLocationId = @intLocationId
+			,dblIssuedQty = @dblQuantity
+			,intLastModifiedUserId = @intUserId
+			,dtmLastModified = @dtmCurrentDate
+		WHERE intBlendRequirementId = @intBlendRequirementId
+	End
 	
 	IF @intTransactionCount = 0
 	COMMIT TRANSACTION

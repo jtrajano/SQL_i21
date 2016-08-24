@@ -1472,7 +1472,6 @@ BEGIN
 		,'Select strName As ValueMember, strName As DisplayMember From tblMFWorkOrderStatus Where intStatusId in (1,9,10)'
 END
 GO
-GO
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFAttribute
@@ -1536,5 +1535,47 @@ BEGIN
         ,1
         ,0
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 74
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 74
+		,'Pick List Enabled'
+		,5
+		,1
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 75
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 75
+        ,'Production Staging Location'
+        ,5
+        ,1
+        ,1
+        ,'SELECT intStorageLocationId AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PRODUCTION STAGING'''
 END
 GO
