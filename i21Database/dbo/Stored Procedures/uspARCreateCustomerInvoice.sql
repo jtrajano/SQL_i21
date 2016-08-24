@@ -126,7 +126,7 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE)
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
 	SET @DeliverPickUp = ISNULL((SELECT TOP 1 strDeliverPickupDefault FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
 	
-IF @Comment IS NULL
+IF ISNULL(@Comment, '') = ''
 	BEGIN
 		EXEC	[dbo].[uspARGetDefaultComment]
 					@intCompanyLocationId = @CompanyLocationId,

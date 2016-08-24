@@ -297,11 +297,14 @@ SELECT TOP 1
 		@SalesOrderNumber		=	strSalesOrderNumber,
 		@ShipToLocationId		=	intShipToLocationId,
 		@BillToLocationId		=	intBillToLocationId,
-		@SplitId				=	intSplitId
+		@SplitId				=	intSplitId,
+		@InvoiceComment			=   strComments
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
-EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
+
+IF ISNULL(@InvoiceComment, '') = ''
+	EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
 
 --BEGIN TRANSACTION
 IF ISNULL(@RaiseError,0) = 0

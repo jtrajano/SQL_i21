@@ -20,8 +20,8 @@ FROM
 		  , dblQtyShipped			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyShipped ELSE NULL END
 		  , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblDiscount ELSE NULL END
 		  , dblTotalTax				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotalTax ELSE NULL END
-		  , dblPrice				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblPrice ELSE NULL END
-		  , dblTotal				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotal ELSE NULL END
+		  , dblPrice				= NULL
+		  , dblTotal				= NULL
 	FROM tblSOSalesOrderDetail
 		WHERE ISNULL(intRecipeId, 0) <> 0
 
@@ -39,8 +39,8 @@ FROM
 		 , dblQtyShipped			= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblQtyShipped ELSE NULL END
 		 , dblDiscount				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblDiscount ELSE NULL END
 		 , dblTotalTax				= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotalTax ELSE NULL END
-		 , dblPrice					= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblPrice ELSE NULL END
-		 , dblTotal					= CASE WHEN ISNULL(intCommentTypeId, 0) = 0 THEN dblTotal ELSE NULL END
+		 , dblPrice					= NULL
+		 , dblTotal					= NULL
 	FROM tblARInvoiceDetail
 		WHERE ISNULL(intRecipeId, 0) <> 0 
 		  AND intCommentTypeId <> 2) AS RECIPEITEMS

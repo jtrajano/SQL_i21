@@ -10,6 +10,7 @@ SELECT RECIPEITEMS.strTransactionType
 	 , dblDiscount		 = SUM(RECIPEITEMS.dblDiscount)
 	 , dblTotalTax		 = SUM(RECIPEITEMS.dblTotalTax)
 	 , dblTotalPrice	 = SUM(RECIPEITEMS.dblTotal)
+	 , UOM.strUnitMeasure
 FROM
 (SELECT strTransactionType		= 'Sales Order'
 	 , intTransactionId			= intSalesOrderId	 
@@ -39,8 +40,13 @@ FROM tblARInvoiceDetail
 INNER JOIN 
 	tblMFRecipe R 
 		ON RECIPEITEMS.intRecipeId = R.intRecipeId
+LEFT JOIN
+	vyuARItemUOM UOM
+		ON R.intItemUOMId = UOM.intItemUOMId
+		AND R.intItemId = UOM.intItemId
 GROUP BY RECIPEITEMS.strTransactionType
 	   , RECIPEITEMS.intTransactionId
 	   , RECIPEITEMS.intRecipeId
 	   , R.intOneLinePrintId
 	   , R.strName
+	   , UOM.strUnitMeasure
