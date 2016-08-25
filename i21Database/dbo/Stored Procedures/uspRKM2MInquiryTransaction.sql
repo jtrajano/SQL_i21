@@ -184,7 +184,7 @@ END AS dblAdjustedContractPrice,
                         FROM tblCTContractDetail  cdv
                         JOIN tblCTPriceFixation pf on cdv.intContractDetailId=pf.intContractDetailId and cdv.intContractHeaderId=pf.intContractHeaderId
                                                 AND cdv.intContractHeaderId=cd.intContractHeaderId AND cd.intContractDetailId=cdv.intContractDetailId 
-												 and cdv.intContractStatusId <> 3
+                                                                                   and cdv.intContractStatusId <> 3
                         LEFT JOIN tblCTPriceFixationDetail pfd on pf.intPriceFixationId=pfd.intPriceFixationId and intPricingTypeId<>1
                         and cdv.intFutureMarketId= pfd.intFutureMarketId and cdv.intFutureMonthId=pfd.intFutureMonthId
                         AND convert(datetime,convert(varchar, dtmFixationDate, 101),101) <= left(convert(varchar, @dtmTransactionDateUpTo, 101),10))t) end
@@ -409,13 +409,7 @@ convert(decimal(24,6),
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice1,
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,                              
                   CONVERT(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
-                  (SELECT  SUM(ISNULL(sri.dblOpenReceive,0))-
-					(-isnull((select sum(ad.dblAdjustByQuantity) dblAdjustByQuantity from tblICInventoryAdjustmentDetail ad where  ad.intLotId=il.intLotId),0)) dblAdjustByQuantity
-					FROM tblICInventoryReceiptItem sri
-					JOIN tblICInventoryReceiptItemLot il on sri.intInventoryReceiptItemId=il.intInventoryReceiptItemId 
-					
-                                         WHERE ir.intInventoryReceiptId=sri.intInventoryReceiptId AND cd.intContractDetailId=sri.intLineNo group by il.intLotId
-                                         )  dblOpenQty1,                  
+                   (SELECT sum(OpenQty)OpenQty from vyuRKGetInventoryAdjustQty aq where cd.intContractDetailId=aq.intContractDetailId)  dblOpenQty1,                  
                   cd.dblRate,
                   cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId,
@@ -982,5 +976,4 @@ SELECT DISTINCT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) 
 strFutureMonth,dblOpenQty,strCommodityCode,intCommodityId,intItemId,strItemNo,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,intPricingTypeId,strPricingType,
 dblContractBasis,dblFutures,dblCash,dblCosts,dblMarketBasis,dblFuturePrice,intContractTypeId,dblAdjustedContractPrice,dblCashPrice,dblMarketPrice,dblResult,dblResultBasis,
 dblMarketFuturesResult,dblResultCash,dblContractPrice from #Temp where dblOpenQty > 0
-
 GO
