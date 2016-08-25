@@ -920,7 +920,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         "use strict";
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.Receipt', { pageSize: 1, window: options.window });
+            store = Ext.create('Inventory.store.Receipt', { pageSize: 1});
 
         var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
             grdIncomingInspection = win.down('#grdIncomingInspection'),
