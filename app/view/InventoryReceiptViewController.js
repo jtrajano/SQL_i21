@@ -2951,6 +2951,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         //Calculate Line Total
         var currentReceipt  = win.viewModel.data.current;
         receiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, receiptItem));
+        
+        if(context.field === 'dblQuantity') {
+            me.calculateGrossNet(receiptItem);
+        }
     },
 
     onChargeValidateEdit: function (editor, context, eOpts) {
