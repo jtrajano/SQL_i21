@@ -4247,6 +4247,9 @@
     <Build Include="dbo\Tables\tblMFUserRoleEventMap.sql" />
     <Build Include="dbo\Functions\fnConvertToBaseCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateRequirement.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddSalesContractPickLot.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddSalesContract.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddSalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
