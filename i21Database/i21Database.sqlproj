@@ -4250,6 +4250,7 @@
     <Build Include="dbo\Views\vyuICGetShipmentAddSalesContractPickLot.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentAddSalesContract.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentAddSalesOrder.sql" />
+    <Build Include="dbo\Views\vyuMFItemDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
