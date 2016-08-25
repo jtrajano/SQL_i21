@@ -4251,6 +4251,8 @@
     <Build Include="dbo\Views\vyuICGetShipmentAddSalesContract.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentAddSalesOrder.sql" />
     <Build Include="dbo\Views\vyuMFItemDetails.sql" />
+    <Build Include="dbo\Views\vyuMFTaskDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCompleteTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
