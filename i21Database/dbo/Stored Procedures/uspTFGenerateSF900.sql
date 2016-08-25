@@ -6,6 +6,11 @@
 @Refresh NVARCHAR(5)
 
 AS
+
+DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE strFormCode = @FormCodeParam)
+IF (@FCode IS NOT NULL)
+BEGIN
+
 --HEADER
 DECLARE @TA INT
 DECLARE @TPName NVARCHAR(250)
@@ -41,7 +46,7 @@ DECLARE @tblTempSummaryItem TABLE (
 
 IF @Refresh = 'true'
 		BEGIN
-			DELETE FROM tblTFTaxReportSummary
+			DELETE FROM tblTFTaxReportSummary --WHERE strSummaryGuid = @Guid
 		END
 	-- ======================== HEADER ==============================
 DECLARE @DatePeriod DATETIME
@@ -453,3 +458,4 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				BEGIN
 					UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
 				END
+END

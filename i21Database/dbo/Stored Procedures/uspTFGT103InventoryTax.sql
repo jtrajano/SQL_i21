@@ -4,7 +4,7 @@
 @ReportingComponentId NVARCHAR(20),
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
-@FormReport NVARCHAR(50),
+@IsEdi NVARCHAR(10),
 @Refresh NVARCHAR(5)
 
 AS
@@ -34,7 +34,7 @@ DECLARE @ExcludeDestinationState NVARCHAR(250)
 
 IF @Refresh = 'true'
 	BEGIN
-		DELETE FROM tblTFTransactions
+		DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
 	END
 	
 DECLARE @tblTempReportingComponent TABLE (
@@ -197,7 +197,7 @@ DECLARE @tblTempTransaction TABLE (
 						SET @Count = @Count - 1
 				END
 
-				IF (@ReportingComponentId <> '' AND @FormReport = '')
+				IF (@ReportingComponentId <> '')
 					BEGIN
 						INSERT INTO tblTFTransactions (uniqTransactionGuid, 
 																	   intItemId, 
@@ -264,14 +264,15 @@ DECLARE @tblTempTransaction TABLE (
 					END
 				ELSE
 					BEGIN
-						INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, @FormReport, 0, 1)
+						INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, leaf)VALUES(@Guid, 0, '', 0, 1)
 					END
 			SET @CountRC = @CountRC - 1
 		END
 
 		DECLARE @HasResult INT
 		SELECT TOP 1 @HasResult = intId from @tblTempTransaction
-		IF(@HasResult IS NULL)
+		IF(@HasResult IS NULL AND @IsEdi = 'false')
 			BEGIN
-				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
+				INSERT INTO tblTFTransactions (uniqTransactionGuid, intTaxAuthorityId, strFormCode, intProductCodeId, strProductCode, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, leaf)
+				VALUES(@Guid, 0, (SELECT TOP 1 strFormCode from tblTFReportingComponent WHERE intReportingComponentId = @RCId), 0,'No record found.',GETDATE(), @DateFrom, @DateTo, 1)
 			END

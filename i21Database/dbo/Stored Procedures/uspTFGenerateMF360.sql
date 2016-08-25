@@ -7,9 +7,12 @@
 
 AS
 
+DECLARE @FCode NVARCHAR(5) = (SELECT TOP 1 strFormCode FROM tblTFTransactions WHERE strFormCode = @FormCodeParam AND uniqTransactionGuid = @Guid)
+IF (@FCode IS NOT NULL)
+BEGIN
+
 DECLARE @TA INT
 DECLARE @TACode NVARCHAR(5)
-
 --SUMMARY VARIABLES
 DECLARE @ParamId NVARCHAR(MAX)
 DECLARE @ScheduleCode NVARCHAR(MAX)
@@ -48,7 +51,7 @@ DECLARE @tblSchedule TABLE (
 		)
 IF @Refresh = 'true'
 		BEGIN
-			DELETE FROM tblTFTaxReportSummary
+			DELETE FROM tblTFTaxReportSummary --WHERE strSummaryGuid = @Guid
 		END
 	-- ======================== HEADER ==============================
 DECLARE @DatePeriod DATETIME
@@ -121,26 +124,26 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'MF-360-Summary-004'
 					BEGIN
 					--SET @Query = 'SELECT SUM(dblGross) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @SmryReportingComponentId + ''')' 
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''')'
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 
 				ELSE IF @TemplateItemId = 'MF-360-Summary-005'
 					BEGIN
-						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''')'  
+						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-006'
 					BEGIN
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''')'
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-007'
 					BEGIN
-						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''')'  
+						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -152,7 +155,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-009'
 					BEGIN
-						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''')'  
+						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -179,14 +182,14 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-013'
 					BEGIN
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''')'
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 		
 				ELSE IF @TemplateItemId = 'MF-360-Summary-014'
 					BEGIN
-						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''')'  
+						SET @Query = 'SELECT strColumnValue * ' + @TemplateConfiguration + ' FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -198,13 +201,13 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-016'
 					BEGIN
-						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''')'  
+						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-017'
 					BEGIN
-						SET @Query = 'SELECT SUM(strColumnValue)  FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''')'  
+						SET @Query = 'SELECT SUM(strColumnValue)  FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -223,7 +226,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-020'
 					BEGIN
-						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''')'  
+						SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTaxReportSummary WHERE intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
@@ -236,7 +239,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 				ELSE IF @TemplateItemId = 'MF-360-Summary-022'
 					BEGIN
-						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''')) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''')'
+						SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN (''' + @ScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -432,3 +435,5 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				BEGIN
 					UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
 				END
+
+END
