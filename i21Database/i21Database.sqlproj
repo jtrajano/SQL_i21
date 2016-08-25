@@ -4089,6 +4089,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityChart.sql" />
     <Build Include="dbo\Functions\fnConvertToBaseCurrency.sql" />
     <Build Include="dbo\Views\vyuICBEExportProductPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMSettlementReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
