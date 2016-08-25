@@ -85,6 +85,7 @@ SELECT
 	,strTermDescription = I.strTerm
 	,strTermId = CAST(I.intTermID AS NVARCHAR(8)) 
 	,Z.strCompanyName
+	,strPriceLevelName = Q.strPricingLevelName
 FROM tblTMCustomer A 
 INNER JOIN vyuTMCustomerEntityView B 
 	ON A.intCustomerNumber = B.A4GLIdentity 
@@ -112,6 +113,8 @@ LEFT JOIN tblTMFillMethod O
 	ON C.intFillMethodId = O.intFillMethodId
 LEFT JOIN tblTMRoute P
 	ON C.intRouteId = P.intRouteId
+LEFT JOIN tblSMCompanyLocationPricingLevel Q
+	ON C.intCompanyLocationPricingLevelId = Q.intCompanyLocationPricingLevelId
 ,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 WHERE H.strCurrentSeason IS NOT NULL 
 	AND vwcus_active_yn = 'Y' 
