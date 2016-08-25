@@ -23,7 +23,7 @@ SELECT
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
 	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
-WHERE A.ysnPosted = 1 AND intTransactionType != 7
+WHERE A.ysnPosted = 1 AND A.intTransactionType != 7
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
@@ -54,3 +54,27 @@ LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
+	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
+--PREPAYMENT
+UNION ALL
+SELECT
+	A.dtmDate
+	,B.intTransactionId
+	,C.strBillId
+	,B.dblAmountApplied
+	,0 AS dblTotal
+	,0 AS dblAmountDue
+	,0 AS dblWithheld
+	,0 AS dblDiscount
+	,0 AS dblInterest
+	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	,D.strVendorId
+	,A.dtmDueDate
+	,A.ysnPosted
+	,C.ysnPaid
+	,C.intAccountId
+FROM dbo.tblAPBill A
+INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+INNER JOIN dbo.tblAPBill C ON B.intTransactionId = B.intBillId
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityVendorId
+WHERE A.ysnPosted = 1
