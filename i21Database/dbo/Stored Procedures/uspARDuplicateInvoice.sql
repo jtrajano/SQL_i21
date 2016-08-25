@@ -68,6 +68,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@OldInvoiceRecurring		BIT
 		,@IsImpactInventory			BIT
 		,@TotalWeight				NUMERIC(18,6)
+		,@EntityContactId			INT
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -113,6 +114,7 @@ SELECT
 	,@OldInvoiceRecurring			= [ysnRecurring]
 	,@IsImpactInventory				= [ysnImpactInventory]
 	,@TotalWeight					= [dblTotalWeight]
+	,@EntityContactId				= [intEntityContactId]
 FROM
 	tblARInvoice
 WHERE
@@ -276,6 +278,7 @@ BEGIN TRY
 		,@ItemLeaseBilling						= 0
 		,@ItemVirtualMeterReading				= 0
 		,@SubCurrency							= 0
+		,@EntityContactId						= @EntityContactId
 
 END TRY
 BEGIN CATCH

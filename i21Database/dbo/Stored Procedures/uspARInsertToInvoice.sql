@@ -47,7 +47,8 @@ DECLARE @EntityCustomerId		INT,
 		@SalesOrderNumber		NVARCHAR(100),
 		@ShipToLocationId		INT,
 		@BillToLocationId		INT,
-		@SplitId				INT
+		@SplitId				INT,
+		@EntityContactId		INT
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -81,7 +82,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							strSalesOrderNumber			NVARCHAR(100),
 							strShipmentNumber			NVARCHAR(100),
 							dblContractBalance			INT,
-							dblContractAvailable		INT)
+							dblContractAvailable		INT,
+							intEntityContactId			INT)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -127,6 +129,7 @@ SELECT intItemId					= SI.intItemId
 	 , strShipmentNumber			= NULL
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
+	 , intEntityContactId			= SO.intEntityContactId
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -172,8 +175,10 @@ SELECT intItemId					= SOD.intItemId
 	 , strShipmentNumber			= NULL 
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
+	 , intEntityContactId			= SO.intEntityContactId
 FROM tblSOSalesOrderDetail SOD
-WHERE intSalesOrderId = @SalesOrderId 
+INNER JOIN (SELECT intSalesOrderId, intEntityContactId FROM tblSOSalesOrder) SO ON SOD.intSalesOrderId = SOD.intSalesOrderId
+WHERE SO.intSalesOrderId = @SalesOrderId 
 AND ISNULL(intCommentTypeId, 0) <> 0
 
 --GET ITEMS FROM POSTED SHIPMENT
@@ -210,6 +215,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , strShipmentNumber			= ICS.strShipmentNumber
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
+	 , intEntityContactId			= SO.intEntityContactId
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -252,6 +258,8 @@ SELECT intItemId					= ARSI.intItemId
 	 , strShipmentNumber			= ARSI.strShipmentNumber
 	 , dblContractBalance			= 0
 	 , dblContractAvailable			= 0
+	 , intEntityCustomerId			= NULL
+	
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -298,7 +306,8 @@ SELECT TOP 1
 		@ShipToLocationId		=	intShipToLocationId,
 		@BillToLocationId		=	intBillToLocationId,
 		@SplitId				=	intSplitId,
-		@InvoiceComment			=   strComments
+		@InvoiceComment			=   strComments,
+		@EntityContactId		=	intEntityContactId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
@@ -374,6 +383,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strBillToCountry]
 					,[ysnRecurring]
 					,[ysnPosted]
+					,[intEntityContactId]
 				)
 				SELECT
 					[intEntityCustomerId]
@@ -417,6 +427,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strBillToCountry]
 					,1
 					,1
+					,[intEntityContactId]
 				FROM
 				tblSOSalesOrder
 				WHERE intSalesOrderId = @SalesOrderId
@@ -533,6 +544,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@ShipToLocationId				= @ShipToLocationId
 					,@BillToLocationId				= @BillToLocationId
 					,@SplitId						= @SplitId
+					,@EntityContactId				= @EntityContactId
 
 			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0 
 				BEGIN
@@ -622,7 +634,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemFrequency			= strFrequency,
 						@ItemMaintenanceDate	= dtmMaintenanceDate,
 						@ContractBalance		= dblContractBalance,
-						@ContractAvailable		= dblContractAvailable												
+						@ContractAvailable		= dblContractAvailable,	
+						@EntityContactId		= intEntityContactId											
 				FROM @tblItemsToInvoice ORDER BY intSalesOrderDetailId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
