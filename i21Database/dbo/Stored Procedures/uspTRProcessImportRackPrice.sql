@@ -10,6 +10,10 @@ BEGIN
 	WHERE intImportRackPriceId = @ImportRackPriceId
 		AND ysnValid = 1
 
+	DECLARE @COUNT INT
+
+	SELECT @COUNT = COUNT(*) FROM #tmpValidRackPrices
+
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpValidRackPrices)
 	BEGIN	
 		DECLARE @ImportRackPriceDetailId INT
@@ -41,6 +45,7 @@ BEGIN
 		BEGIN		
 			SELECT intImportRackPriceId = @RackPriceId
 				, RackPriceDetail.intImportRackPriceDetailItemId
+				, RackPriceDetail.intImportRackPriceDetailId
 				, RackPriceDetail.intItemId
 				, RackPriceDetail.dblVendorPrice
 			INTO #tmpRackPriceDetails
@@ -48,6 +53,8 @@ BEGIN
 			LEFT JOIN tblTRImportRackPriceDetail RackPrice ON RackPrice.intImportRackPriceDetailId = RackPriceDetail.intImportRackPriceDetailId
 			WHERE RackPrice.intImportRackPriceDetailId = @ImportRackPriceDetailId
 				AND RackPriceDetail.ysnValid = 1
+
+			SELECT @COUNT = COUNT(*) FROM #tmpRackPriceDetails
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRackPriceDetails)
 			BEGIN
@@ -67,6 +74,8 @@ BEGIN
 				WHERE intSupplyPointId = @SupplyPointId
 					AND intItemId = @ItemId
 				ORDER BY intSupplyPointRackPriceEquationId
+
+				SELECT @COUNT = COUNT(*) FROM #tmpEquations
 
 				DECLARE @counter INT
 					, @operator NVARCHAR(10)
@@ -115,8 +124,12 @@ BEGIN
 					, @JobberPrice
 				)
 
-				DELETE FROM #tmpRackPriceDetails WHERE intImportRackPriceDetailItemId = @RackPriceDetailId
+				DELETE FROM #tmpRackPriceDetails WHERE intImportRackPriceDetailId = @RackPriceDetailId
+
+				DROP TABLE #tmpEquations
 			END
+
+			DROP TABLE #tmpRackPriceDetails
 		END
 
 		DELETE FROM #tmpValidRackPrices
@@ -125,4 +138,6 @@ BEGIN
 
 	DELETE FROM tblTRImportRackPrice
 	WHERE intImportRackPriceId = @ImportRackPriceId
+
+	DROP TABLE #tmpValidRackPrices
 END
