@@ -14,6 +14,7 @@ DECLARE @dblRequiredQty numeric(38,20)
 DECLARE @intBlendItemId INT
 DECLARE @intBlendRequirementId INT
 DECLARE @strWorkOrderIds nvarchar(max)
+DECLARE @strWorkOrderNos nvarchar(max)
 DECLARE @id NVARCHAR(50)
 DECLARE @index INT
 DECLARE @intWorkOrderId INT
@@ -244,20 +245,22 @@ INSERT INTO @tblPickListDetail(
 
 Select TOP 1 @intPickListId=intPickListId From @tblPickList
 
-Select @strWorkOrderIds=strWorkOrderNo From @tblPickList 
+Select @strWorkOrderNos=strWorkOrderNo From @tblPickList 
 
 --Get the Comma Separated Work Order Ids into a table
-SET @index = CharIndex(',',@strWorkOrderIds)
+SET @index = CharIndex(',',@strWorkOrderNos)
 WHILE @index > 0
 BEGIN
-        SET @id = SUBSTRING(@strWorkOrderIds,1,@index-1)
-        SET @strWorkOrderIds = SUBSTRING(@strWorkOrderIds,@index+1,LEN(@strWorkOrderIds)-@index)
+        SET @id = SUBSTRING(@strWorkOrderNos,1,@index-1)
+        SET @strWorkOrderNos = SUBSTRING(@strWorkOrderNos,@index+1,LEN(@strWorkOrderNos)-@index)
 
         INSERT INTO @tblWorkOrder Select intWorkOrderId From tblMFWorkOrder Where strWorkOrderNo=@id
-        SET @index = CharIndex(',',@strWorkOrderIds)
+        SET @index = CharIndex(',',@strWorkOrderNos)
 END
-SET @id=@strWorkOrderIds
+SET @id=@strWorkOrderNos
 INSERT INTO @tblWorkOrder Select intWorkOrderId From tblMFWorkOrder Where strWorkOrderNo=@id
+
+Select @strWorkOrderIds=COALESCE(@strWorkOrderIds, '') + convert(varchar,intWorkOrderId) + ',' From @tblWorkOrder
 
 Select TOP 1 @intWorkOrderId=intWorkOrderId From @tblWorkOrder
 Select @intLocationId=intLocationId,@intBlendItemId=intItemId,@intBlendRequirementId=intBlendRequirementId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
@@ -385,7 +388,7 @@ Begin
 	Set @strXmlLot = @strXmlLot + '</root>'
 
 	Insert Into @tblPickedLots
-	Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXmlItem,1,@strXmlLot
+	Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXmlItem,1,@strXmlLot,@strWorkOrderIds
 
 	--Remaining Lots to Pick
 	Insert Into @tblRemainingPickedLots

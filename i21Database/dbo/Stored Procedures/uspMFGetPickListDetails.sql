@@ -30,8 +30,10 @@ Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId,@intWorkOrderI
 From tblMFWorkOrder Where intPickListId=@intPickListId
 
 Select @intKitStatusId=intKitStatusId,@intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
-Select TOP 1 @intBlendItemId=intItemId,@intBlendRequirementId=intBlendRequirementId,@strWorkOrderIds=convert(varchar,intWorkOrderId) 
+Select TOP 1 @intBlendItemId=intItemId,@intBlendRequirementId=intBlendRequirementId
 From tblMFWorkOrder Where intPickListId=@intPickListId
+
+Select @strWorkOrderIds=COALESCE(@strWorkOrderIds, '') + convert(varchar,intWorkOrderId) + ',' From tblMFWorkOrder Where intPickListId=@intPickListId
 
 Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
 
@@ -447,7 +449,7 @@ Begin
 		Set @strXml = @strXml + '</root>'
 
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1,'',@strWorkOrderIds
 
 		--Remaining Lots to Pick
 		Insert Into @tblRemainingPickedLots
@@ -629,7 +631,7 @@ Begin
 		Set @strXml = @strXml + '</root>'
 
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1,'',@strWorkOrderIds
 
 		--Remaining Lots to Pick
 		Insert Into @tblRemainingPickedLots
