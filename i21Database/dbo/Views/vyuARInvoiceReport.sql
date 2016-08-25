@@ -65,6 +65,7 @@ SELECT INV.intInvoiceId
 	 , intRecipeId				= ID.intRecipeId
 	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
 	 , strInvoiceComments		= I.strInvoiceComments
+	 , INV.dblTotalWeight
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 
 	LEFT JOIN tblICItem I ON ID.intItemId = I.intItemId 
