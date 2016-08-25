@@ -177,7 +177,7 @@ SELECT intItemId					= SOD.intItemId
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
 FROM tblSOSalesOrderDetail SOD
-INNER JOIN (SELECT intSalesOrderId, intEntityContactId FROM tblSOSalesOrder) SO ON SOD.intSalesOrderId = SOD.intSalesOrderId
+INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
 AND ISNULL(intCommentTypeId, 0) <> 0
 
