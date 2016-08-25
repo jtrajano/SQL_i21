@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿
+CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -29,6 +30,16 @@
 	,@dblOriginalNetPrice			NUMERIC(18,6)	= 0.000000
 	,@dblCalculatedPumpPrice		NUMERIC(18,6)	= 0.000000
 	,@dblOriginalPumpPrice			NUMERIC(18,6)	= 0.000000
+	,@FederalExciseTax1				NUMERIC(18,6)	= 0.000000
+	,@FederalExciseTax2				NUMERIC(18,6)	= 0.000000
+	,@StateExciseTax1				NUMERIC(18,6)	= 0.000000
+	,@StateExciseTax2				NUMERIC(18,6)	= 0.000000
+	,@StateExciseTax3				NUMERIC(18,6)	= 0.000000
+	,@CountyTax1					NUMERIC(18,6)	= 0.000000
+	,@CityTax1						NUMERIC(18,6)	= 0.000000
+	,@StateSalesTax					NUMERIC(18,6)	= 0.000000
+	,@CountySalesTax				NUMERIC(18,6)	= 0.000000
+	,@CitySalesTax					NUMERIC(18,6)	= 0.000000
 
 	-------------SITE RELATED-------------
 	,@strSiteId						NVARCHAR(MAX)
@@ -105,8 +116,6 @@ BEGIN
 
 	--LOGS--
 	DECLARE @ysnSiteCreated				BIT = 0
-	DECLARE @ysnSiteItemUsed			BIT = 0
-	DECLARE @ysnNetworkItemUsed			BIT = 0
 	DECLARE @ysnSiteAcceptCreditCard	BIT = 0
 	--LOGS--
 
@@ -401,6 +410,18 @@ BEGIN
 				END
 			END
 		END
+		ELSE
+		BEGIN
+			BEGIN
+				SELECT TOP 1 
+					 @intCardId = C.intCardId
+					,@intCustomerId = A.intCustomerId
+				FROM tblCFCard C
+				INNER JOIN tblCFAccount A
+				ON C.intAccountId = A.intAccountId
+				WHERE C.strCardNumber = @strCardId
+			END
+		END
 	END
 	ELSE
 	BEGIN
@@ -420,7 +441,6 @@ BEGIN
 		SET @intCardId = NULL
 	END
 
-	--FIND IN SITE ITEM--
 	IF(@intProductId = 0)
 	BEGIN
 		SELECT TOP 1 
@@ -428,33 +448,9 @@ BEGIN
 			,@intARItemId = intARItemId
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
-		AND intNetworkId IS NULL
-		AND intSiteId = @intSiteId
-
-		IF(@intProductId != 0)
-		BEGIN
-			SET @ysnSiteItemUsed = 1
-			SET @ysnNetworkItemUsed = 0
-		END
-	END
-
-	--FIND IN NETWORK ITEM--
-	IF(@intProductId = 0)
-	BEGIN
-		SELECT TOP 1 
-			 @intProductId = intItemId
-			,@intARItemId = intARItemId
-		FROM tblCFItem 
-		WHERE strProductNumber = @strProductId
-		AND intSiteId IS NULL
 		AND intNetworkId = @intNetworkId
-
-		IF(@intProductId != 0)
-		BEGIN
-			SET @ysnSiteItemUsed = 0
-			SET @ysnNetworkItemUsed = 1
-		END
-
+		AND intSiteId = @intSiteId
+		
 	END
 
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
@@ -671,9 +667,9 @@ BEGIN
 		IF(@intARItemId = 0 OR @intARItemId IS NULL)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 site item list')
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 
-			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 site item list')
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 		END
 		IF((@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL) AND @strTransactionType != 'Foreign Sale')
 		BEGIN
@@ -731,20 +727,7 @@ BEGIN
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid quantity - ' + @dblQuantity)
 		END
-		IF(@ysnSiteItemUsed = 0 AND @ysnNetworkItemUsed = 1)
-		BEGIN
-			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Network item ' + @strProductId + ' has been used')
-
-			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Network item ' + @strProductId + ' has been used')
-		END
-		ELSE IF(@ysnSiteItemUsed = 1 AND @ysnNetworkItemUsed = 0)
-		BEGIN 
-			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Site item ' + @strProductId + ' has been used')
-
-			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site item ' + @strProductId + ' has been used')
-		END
+		
 		
 
 		------------------------------------------------------------
@@ -775,6 +758,18 @@ BEGIN
 		,@CountySalesTaxPercentageRate	=	@CountySalesTaxPercentageRate
 		,@CitySalesTaxPercentageRate  	=	@CitySalesTaxPercentageRate  
 		,@OtherSalesTaxPercentageRate	=	@OtherSalesTaxPercentageRate 
+		,@FederalExciseTax1				=   @FederalExciseTax1	
+		,@FederalExciseTax2				=   @FederalExciseTax2	
+		,@StateExciseTax1				=   @StateExciseTax1	
+		,@StateExciseTax2				=   @StateExciseTax2	
+		,@StateExciseTax3				=   @StateExciseTax3	
+		,@CountyTax1					=   @CountyTax1		
+		,@CityTax1						=   @CityTax1			
+		,@StateSalesTax					=   @StateSalesTax		
+		,@CountySalesTax				=   @CountySalesTax	
+		,@CitySalesTax					=   @CitySalesTax		
+		,@strGUID						=   @strGUID		
+		,@strProcessDate				=	@strProcessDate
 
 		------------------------------------------------------------
 		--			UPDATE TRANSACTION DEPENDS ON PRICING		  --
@@ -806,12 +801,12 @@ BEGIN
 		,@ysnDuplicate					= ysnDuplicate
 		FROM ##tblCFTransactionPricingType
 
-		IF(@ysnDuplicate = 1)
-		BEGIN
-			SET @ysnInvalid = 1
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
-		END
+		--IF(@ysnDuplicate = 1)
+		--BEGIN
+		--	SET @ysnInvalid = 1
+		--	INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		--	VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
+		--END
 
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
 		BEGIN

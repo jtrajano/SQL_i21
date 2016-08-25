@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
+﻿
+
+CREATE PROCEDURE [dbo].[uspCFProcessTransactionToInvoice]
 	 @TransactionId		INT
 	,@UserId			INT	
 	,@Post				BIT	= NULL
@@ -291,7 +293,7 @@ BEGIN
 
 END
 
-SELECT * FROM @EntriesForInvoice
+--SELECT * FROM @EntriesForInvoice
 EXEC [dbo].[uspARProcessInvoices]
 		 @InvoiceEntries	= @EntriesForInvoice
 		,@LineItemTaxEntries = @TaxDetails
