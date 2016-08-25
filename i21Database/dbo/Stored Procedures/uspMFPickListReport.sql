@@ -66,6 +66,7 @@ Declare @strUOM nvarchar(50)
 Declare @strSONo nvarchar(50)
 Declare @strShipTo nvarchar(max)
 Declare @strCustomerComments nvarchar(max)
+Declare @strFooterComments nvarchar(max)
 Declare @ysnShowCostInSalesOrderPickList bit=0
 Declare @intMaxOtherChargeId int
 
@@ -136,7 +137,8 @@ Declare @tblItems AS TABLE
 	[ysnShowCostInSalesOrderPickList] bit null default 0,
 	[ysnLotTracking] bit null default 0,
 	[intSalesOrderDetailId] int null,
-	[strItemType] nvarchar(50) null
+	[strItemType] nvarchar(50) null,
+	[strFooterComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL
 )
 
 If ISNULL(@xmlParam,'')=''
@@ -294,8 +296,28 @@ Begin --Sales Order Pick List
 	Select @strCustomerComments=COALESCE(@strCustomerComments, '') + dm.strMessage + CHAR(13)
 	From tblSMDocumentMaintenanceMessage dm 
 	Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
-	Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
-	AND dm.ysnPickList=1
+	Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId) AND d.intCompanyLocationId=@intLocationId
+	AND dm.ysnPickList=1 AND dm.strHeaderFooter='Header'
+
+	If ISNULL(@strCustomerComments,'')=''
+		Select @strCustomerComments=COALESCE(@strCustomerComments, '') + dm.strMessage + CHAR(13)
+		From tblSMDocumentMaintenanceMessage dm 
+		Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
+		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Header'
+
+	Select @strFooterComments=COALESCE(@strFooterComments, '') + dm.strMessage + CHAR(13)
+	From tblSMDocumentMaintenanceMessage dm 
+	Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
+	Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId) AND d.intCompanyLocationId=@intLocationId
+	AND dm.ysnPickList=1 AND dm.strHeaderFooter='Footer'
+
+	If ISNULL(@strFooterComments,'')=''
+		Select @strFooterComments=COALESCE(@strFooterComments, '') + dm.strMessage + CHAR(13)
+		From tblSMDocumentMaintenanceMessage dm 
+		Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
+		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Footer'
 
 	Select @dblTotalCost=ISNULL(SUM(dblQtyOrdered * ISNULL(dblPrice,0)),0) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
 	
@@ -346,6 +368,7 @@ Begin --Sales Order Pick List
 					,0
 					,sd.intSalesOrderDetailId
 					,i.strType
+					,@strFooterComments
 			FROM tblMFPickList pl  
 			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 			JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -407,6 +430,7 @@ Begin --Sales Order Pick List
 			,0
 			,sd.intSalesOrderDetailId
 			,i.strType
+			,@strFooterComments
 			FROM tblSOSalesOrderDetail sd  
 			JOIN tblICItem i on sd.intItemId=i.intItemId
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
@@ -432,7 +456,8 @@ Begin --Sales Order Pick List
 	ti.strCompanyCityStateZip=t.strCompanyCityStateZip,ti.strCompanyCountry=t.strCompanyCountry,ti.strCustomerName=t.strCustomerName,ti.strLocationName=t.strLocationName,
 	ti.strBOLNumber=t.strBOLNumber,ti.strSalespersonName=t.strSalespersonName,ti.strShipVia=t.strShipVia,ti.strFreightTerm=t.strFreightTerm,ti.strPONumber=t.strPONumber,
 	ti.strTerm=t.strTerm,ti.strOrderStatus=t.strOrderStatus,ti.dtmDate=t.dtmDate,ti.dtmDueDate=t.dtmDueDate,ti.strSOComments=t.strSOComments,ti.strShipTo=t.strShipTo,
-	ti.strPhone=t.strPhone,ti.strCustomerComments=t.strCustomerComments,ti.ysnShowCostInSalesOrderPickList=t.ysnShowCostInSalesOrderPickList,ti.ysnLotTracking=t.ysnLotTracking
+	ti.strPhone=t.strPhone,ti.strCustomerComments=t.strCustomerComments,ti.ysnShowCostInSalesOrderPickList=t.ysnShowCostInSalesOrderPickList,ti.ysnLotTracking=t.ysnLotTracking,
+	ti.strFooterComments=t.strFooterComments
 	From @tblItems ti Cross Join (Select TOP 1 * From @tblItems) t
 	Where ISNULL(ti.strPickListNo,'')=''
 
@@ -464,7 +489,7 @@ Begin --Sales Order Pick List
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
-				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge'
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments
 		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
 		End
 
