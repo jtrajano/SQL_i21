@@ -8,7 +8,7 @@ DECLARE @FormCode NVARCHAR(100)
 		IF (@FormCode IS NOT NULL)
 			BEGIN
 				INSERT [dbo].[tblTFTaxReportSProc] ([strSPFormCode], [strSPInventory], [strSPInvoice], [strSPGenerateReport], [intConcurrencyId]) 
-				VALUES (N'MF-360', N'uspTFGetInventoryTax', N'uspTFGetInvoiceTax', N'uspTFRunTax', 0)
+				VALUES (N'MF-360', N'uspTFGetInventoryTax', N'uspTFGetInvoiceTax', N'uspTFGenerateMF360', 0)
 			END
 
 	SELECT TOP 1 @FormCode = strFormCode FROM tblTFReportingComponent WHERE strFormCode = 'SF-900'
@@ -22,7 +22,7 @@ DECLARE @FormCode NVARCHAR(100)
 		IF (@FormCode IS NOT NULL)
 			BEGIN
 				INSERT [dbo].[tblTFTaxReportSProc] ([strSPFormCode], [strSPInventory], [strSPInvoice], [strSPGenerateReport], [intConcurrencyId]) 
-				VALUES (N'GT-103', N'uspTFGT103InventoryTax', N'uspTFGT103InvoiceTax', N'uspTFGT103RunTax', 0)
+				VALUES (N'GT-103', N'uspTFGT103InventoryTax', N'uspTFGT103InvoiceTax', N'uspTFGenerateGT103', 0)
 			END
 
 GO
