@@ -73,9 +73,10 @@ LEFT OUTER JOIN
 		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
 		
+DECLARE @UnsortedEntriesForInvoice AS InvoiceIntegrationStagingTable
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		
 
-INSERT INTO @EntriesForInvoice
+INSERT INTO @UnsortedEntriesForInvoice
 	([strSourceTransaction]
 	,[intSourceId]
 	,[strSourceId]
@@ -285,10 +286,328 @@ FROM
 	vyuARShippedItems ARSI
 WHERE
 	ARSI.[strTransactionType] = 'Inventory Shipment'
-	--AND ARSI.[strTransactionNumber] = @ShipmentNumber
 	AND ARSI.[intInventoryShipmentId] = @ShipmentId
 
+UNION ALL
 
+SELECT 
+	 [strSourceTransaction]					= 'Inventory Shipment'
+	,[intSourceId]							= @ShipmentId
+	,[strSourceId]							= @ShipmentNumber
+	,[intInvoiceId]							= NULL
+	,[intEntityCustomerId]					= @EntityCustomerId 
+	,[intCompanyLocationId]					= @CompanyLocationId 
+	,[intCurrencyId]						= @CurrencyId 
+	,[intSubCurrencyCents]					= NULL 
+	,[intTermId]							= NULL 
+	,[intPeriodsToAccrue]					= @PeriodsToAccrue 
+	,[dtmDate]								= @Date 
+	,[dtmDueDate]							= NULL
+	,[dtmShipDate]							= @ShipDate 
+	,[intEntitySalespersonId]				= @EntitySalespersonId 
+	,[intFreightTermId]						= @FreightTermId 
+	,[intShipViaId]							= @ShipViaId 
+	,[intPaymentMethodId]					= NULL 
+	,[strInvoiceOriginId]					= NULL 
+	,[strPONumber]							= @PONumber 
+	,[strBOLNumber]							= @BOLNumber 
+	,[strDeliverPickup]						= NULL 
+	,[strComments]							= @Comments 
+	,[intShipToLocationId]					= @ShipToLocationId 
+	,[intBillToLocationId]					= NULL
+	,[ysnTemplate]							= 0
+	,[ysnForgiven]							= 0
+	,[ysnCalculated]						= 0
+	,[ysnSplitted]							= 0
+	,[intPaymentId]							= NULL
+	,[intSplitId]							= NULL
+	,[intDistributionHeaderId]				= NULL
+	,[strActualCostId]						= NULL
+	,[intShipmentId]						= NULL
+	,[intTransactionId]						= NULL
+	,[intOriginalInvoiceId]					= NULL
+	,[intEntityId]							= @UserId
+	,[ysnResetDetails]						= 0
+	,[ysnRecap]								= 0
+	,[ysnPost]								= 0
+
+	,[intInvoiceDetailId]					= NULL
+	,[intItemId]							= SOD.intItemId
+	,[ysnInventory]							= 0
+	,[strDocumentNumber]					= SO.strSalesOrderNumber 
+	,[strItemDescription]					= SOD.strItemDescription
+	,[intOrderUOMId]						= NULL
+	,[dblQtyOrdered]						= @ZeroDecimal
+	,[intItemUOMId]							= NULL
+	,[dblQtyShipped]						= @ZeroDecimal
+	,[dblDiscount]							= @ZeroDecimal
+	,[dblItemWeight]						= @ZeroDecimal
+	,[intItemWeightUOMId]					= @ZeroDecimal
+	,[dblPrice]								= @ZeroDecimal
+	,[strPricing]							= NULL
+	,[ysnRefreshPrice]						= 0
+	,[strMaintenanceType]					= NULL
+	,[strFrequency]							= NULL
+	,[dtmMaintenanceDate]					= NULL
+	,[dblMaintenanceAmount]					= @ZeroDecimal 
+	,[dblLicenseAmount]						= @ZeroDecimal
+	,[intTaxGroupId]						= NULL
+	,[intStorageLocationId]					= NULL
+	,[ysnRecomputeTax]						= 0
+	,[intSCInvoiceId]						= NULL
+	,[strSCInvoiceNumber]					= NULL
+	,[intSCBudgetId]						= NULL
+	,[strSCBudgetDescription]				= NULL
+	,[intInventoryShipmentItemId]			= NULL 
+	,[strShipmentNumber]					= ICIS.strShipmentNumber
+	,[intRecipeItemId]						= SOD.intRecipeItemId 
+	,[intRecipeId]							= SOD.intRecipeId
+	,[intSubLocationId]						= NULL
+	,[intCostTypeId]						= NULL
+	,[intMarginById]						= NULL
+	,[intCommentTypeId]						= SOD.intCommentTypeId
+	,[dblMargin]							= @ZeroDecimal
+	,[dblRecipeQuantity]					= @ZeroDecimal
+	,[intSalesOrderDetailId]				= SOD.intSalesOrderDetailId
+	,[strSalesOrderNumber]					= SO.strSalesOrderNumber 
+	,[intContractHeaderId]					= NULL
+	,[intContractDetailId]					= NULL
+	,[intShipmentPurchaseSalesContractId]	= NULL
+	,[dblShipmentGrossWt]					= @ZeroDecimal 
+	,[dblShipmentTareWt]					= @ZeroDecimal
+	,[dblShipmentNetWt]						= @ZeroDecimal
+	,[intTicketId]							= NULL
+	,[intTicketHoursWorkedId]				= NULL
+	,[intOriginalInvoiceDetailId]			= NULL
+	,[intSiteId]							= NULL
+	,[strBillingBy]							= NULL
+	,[dblPercentFull]						= NULL
+	,[dblNewMeterReading]					= @ZeroDecimal
+	,[dblPreviousMeterReading]				= @ZeroDecimal
+	,[dblConversionFactor]					= @ZeroDecimal
+	,[intPerformerId]						= NULL
+	,[ysnLeaseBilling]						= 0
+	,[ysnVirtualMeterReading]				= 0
+	,[ysnClearDetailTaxes]					= 0
+	,[intTempDetailIdForTaxes]				= NULL
+	,[ysnSubCurrency]						= 0
+	,[ysnBlended]							= 0
+FROM 
+	tblICInventoryShipment ICIS
+	INNER JOIN tblSOSalesOrder SO 
+		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
+	INNER JOIN tblSOSalesOrderDetail SOD 
+		ON SO.intSalesOrderId = SOD.intSalesOrderId 
+		AND SOD.intCommentTypeId IN (0,1)
+WHERE 
+	ICIS.intInventoryShipmentId = @ShipmentId
+
+INSERT INTO @EntriesForInvoice
+([strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intSubCurrencyCents]
+	,[intTermId]
+	,[intPeriodsToAccrue]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strDeliverPickup]
+	,[strComments]
+	,[intShipToLocationId]
+	,[intBillToLocationId]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intOriginalInvoiceId]
+	,[intEntityId]
+	,[ysnResetDetails]
+	,[ysnRecap]
+	,[ysnPost]
+																																																		
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[ysnInventory]
+	,[strDocumentNumber]
+	,[strItemDescription]
+	,[intOrderUOMId]
+	,[dblQtyOrdered]
+	,[intItemUOMId]
+	,[dblQtyShipped]
+	,[dblDiscount]
+	,[dblItemWeight]
+	,[intItemWeightUOMId]
+	,[dblPrice]
+	,[strPricing]
+	,[ysnRefreshPrice]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[intTaxGroupId]
+	,[intStorageLocationId]
+	,[ysnRecomputeTax]
+	,[intSCInvoiceId]
+	,[strSCInvoiceNumber]
+	,[intSCBudgetId]
+	,[strSCBudgetDescription]
+	,[intInventoryShipmentItemId]
+	,[strShipmentNumber]
+	,[intRecipeItemId]
+	,[intRecipeId]		
+	,[intSubLocationId]	
+	,[intCostTypeId]	
+	,[intMarginById]	
+	,[intCommentTypeId]	
+	,[dblMargin]		
+	,[dblRecipeQuantity] 
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intShipmentPurchaseSalesContractId]
+	,[dblShipmentGrossWt]
+	,[dblShipmentTareWt]
+	,[dblShipmentNetWt]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intOriginalInvoiceDetailId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+	,[ysnClearDetailTaxes]
+	,[intTempDetailIdForTaxes]
+	,[ysnSubCurrency]
+	,[ysnBlended])
+SELECT 
+	 [strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intSubCurrencyCents]
+	,[intTermId]
+	,[intPeriodsToAccrue]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strDeliverPickup]
+	,[strComments]
+	,[intShipToLocationId]
+	,[intBillToLocationId]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intOriginalInvoiceId]
+	,[intEntityId]
+	,[ysnResetDetails]
+	,[ysnRecap]
+	,[ysnPost]
+																																																		
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[ysnInventory]
+	,[strDocumentNumber]
+	,[strItemDescription]
+	,[intOrderUOMId]
+	,[dblQtyOrdered]
+	,[intItemUOMId]
+	,[dblQtyShipped]
+	,[dblDiscount]
+	,[dblItemWeight]
+	,[intItemWeightUOMId]
+	,[dblPrice]
+	,[strPricing]
+	,[ysnRefreshPrice]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[intTaxGroupId]
+	,[intStorageLocationId]
+	,[ysnRecomputeTax]
+	,[intSCInvoiceId]
+	,[strSCInvoiceNumber]
+	,[intSCBudgetId]
+	,[strSCBudgetDescription]
+	,[intInventoryShipmentItemId]
+	,[strShipmentNumber]
+	,[intRecipeItemId]
+	,[intRecipeId]		
+	,[intSubLocationId]	
+	,[intCostTypeId]	
+	,[intMarginById]	
+	,[intCommentTypeId]	
+	,[dblMargin]		
+	,[dblRecipeQuantity] 
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intShipmentPurchaseSalesContractId]
+	,[dblShipmentGrossWt]
+	,[dblShipmentTareWt]
+	,[dblShipmentNetWt]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intOriginalInvoiceDetailId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+	,[ysnClearDetailTaxes]
+	,[intTempDetailIdForTaxes]
+	,[ysnSubCurrency]
+	,[ysnBlended]
+ FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId
+	
 IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
 BEGIN
 	SELECT TOP 1
