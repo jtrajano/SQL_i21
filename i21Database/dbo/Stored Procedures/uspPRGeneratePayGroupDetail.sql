@@ -70,9 +70,8 @@ BEGIN
 			,NULL
 			,intSort
 			,1
-		FROM tblPREmployeeEarning EE LEFT JOIN (SELECT intEntityEmployeeId, ysnActive FROM tblPREmployee) EMP
+		FROM tblPREmployeeEarning EE INNER JOIN (SELECT intEntityEmployeeId, ysnActive FROM tblPREmployee WHERE ysnActive = 1) EMP
 			ON EE.intEntityEmployeeId = EMP.intEntityEmployeeId 
-			AND EMP.ysnActive = 1
 		WHERE intPayGroupId = @intPayGroupId
 			AND (ysnDefault = 1 OR dblDefaultHours > 0)
 			AND intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail WHERE intPayGroupId = @intPayGroupId)
