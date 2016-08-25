@@ -82,7 +82,7 @@ WHERE I.ysnPosted = 1
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
-  AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) > 0
+  AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
   AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
   AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 
@@ -131,7 +131,7 @@ WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
- AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) > 0
+ AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
       
@@ -184,7 +184,7 @@ FROM tblARPayment P
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE P.ysnPosted = 1  
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-  AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) > 0
+  AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
   AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')  
 
 UNION ALL      
@@ -232,7 +232,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo 
- AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) > 0
+ AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))) AS A    
 
@@ -290,7 +290,7 @@ WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
- AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) > 0
+ AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 
@@ -323,7 +323,7 @@ WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
- AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) > 0
+ AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 						      
@@ -360,7 +360,7 @@ FROM tblARPayment P
     LEFT JOIN (tblARSalesperson SP INNER JOIN tblEMEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 WHERE P.ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo    
-  AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) > 0
+  AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
   AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
 
 UNION ALL      
@@ -393,7 +393,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted  = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFrom AND @dtmDateTo 
- AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) > 0
+ AND I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
  AND (@strSalesperson IS NULL OR ES.strName LIKE '%'+@strSalesperson+'%')
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))) AS TBL) AS B    
 
