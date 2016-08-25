@@ -10,7 +10,7 @@ SELECT RECIPEITEMS.strTransactionType
 	 , dblDiscount		 = SUM(RECIPEITEMS.dblDiscount)
 	 , dblTotalTax		 = SUM(RECIPEITEMS.dblTotalTax)
 	 , dblTotalPrice	 = SUM(RECIPEITEMS.dblTotal)
-	 , UOM.strUnitMeasure
+	 , strUnitMeasure	 = ISNULL(UOM.strUnitMeasure, RUOM.strUnitMeasure)
 FROM
 (SELECT strTransactionType		= 'Sales Order'
 	 , intTransactionId			= intSalesOrderId	 
@@ -44,9 +44,13 @@ LEFT JOIN
 	vyuARItemUOM UOM
 		ON R.intItemUOMId = UOM.intItemUOMId
 		AND R.intItemId = UOM.intItemId
+LEFT JOIN
+	tblICUnitMeasure RUOM
+		ON R.intMarginUOMId = RUOM.intUnitMeasureId
 GROUP BY RECIPEITEMS.strTransactionType
 	   , RECIPEITEMS.intTransactionId
 	   , RECIPEITEMS.intRecipeId
 	   , R.intOneLinePrintId
 	   , R.strName
 	   , UOM.strUnitMeasure
+	   , RUOM.strUnitMeasure
