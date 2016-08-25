@@ -294,7 +294,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 			RETURN 0;
 		END CATCH
 	END
-ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecimal) <> 0 ) OR ISNULL(@ItemCommentTypeId, 0) <> 0
+ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecimal) <> 0 )) AND (ISNULL(@ItemCommentTypeId, 0) IN (0,1))
 	BEGIN
 		SET @ItemId = CASE WHEN (ISNULL(@ItemCommentTypeId, 0) <> 0) THEN @ItemId ELSE NULL END
 		

@@ -77,7 +77,7 @@ LEFT JOIN (tblARInvoiceDetail ID
 									   AND IDT.dblAdjustedTax <> 0.000000
 	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
-	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId AND ID.intCommentTypeId <> 2
+	LEFT JOIN tblMFRecipe MFR ON ID.intRecipeId = MFR.intRecipeId) ON INV.intInvoiceId = ID.intInvoiceId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId
