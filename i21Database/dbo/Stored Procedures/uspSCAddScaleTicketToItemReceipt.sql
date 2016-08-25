@@ -92,8 +92,8 @@ INSERT into @ReceiptStagingTable(
 		,intStorageLocationId
 		,ysnIsStorage
 		,dblFreightRate
-		,dblGross
-		,dblNet
+		--,dblGross
+		--,dblNet
 		,intSourceId
 		,intSourceType	
 		,strSourceScreenName
@@ -118,12 +118,13 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
-											FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
-												ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
-											WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
-												AND ItemUOM.intItemId = SC.intItemId
-									 )
+		,intGrossNetUOMId			= 0
+		--,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
+		--									FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
+		--										ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
+		--									WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
+		--										AND ItemUOM.intItemId = SC.intItemId
+		--							 )
 		,intCostUOMId				= (select intPriceItemUOMId from tblCTContractDetail  where intContractDetailId = LI.intTransactionDetailId)	   
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
@@ -139,11 +140,11 @@ SELECT
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
-		,dblGross					= CASE 
-										WHEN SC.strDistributionOption = 'SPL' THEN @dblTicketGross
-										ELSE SC.dblGrossWeight - SC.dblTareWeight
-									END
-		,dblNet						= dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
+		--,dblGross					= CASE 
+		--								WHEN SC.strDistributionOption = 'SPL' THEN @dblTicketGross
+		--								ELSE SC.dblGrossWeight - SC.dblTareWeight
+		--							END
+		--,dblNet						= dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
 		--,dblNet						= CASE 
 		--								WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
 		--								ELSE SC.dblGrossWeight - SC.dblTareWeight
