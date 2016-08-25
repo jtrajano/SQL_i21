@@ -182,15 +182,28 @@ WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 		ELSE 1 END)
 
 --DO NOT ALLOW TO IMPORT IF THERE ARE CHECK NO 00000000 AND IT IS PREPAYMENT
-INSERT INTO @log
+IF OBJECT_ID('tempdb..#tmpZeroCheckNumber') IS NOT NULL DROP TABLE #tmpZeroCheckNumber
+
 SELECT DISTINCT
-	'Please fix the payment for check # ''00000000'' and for vendor ' + dbo.fnTrim(A.apivc_vnd_no)
+	'Please fix the check # ''00000000'' of invoice # ' + A.apivc_ivc_no + ' and for vendor ' + dbo.fnTrim(A.apivc_vnd_no) AS strDescription
+INTO #tmpZeroCheckNumber
 FROM apivcmst A
 WHERE A.apivc_chk_no = '00000000' AND A.apivc_trans_type = 'A'
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 					THEN
 						CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 					ELSE 1 END)
+
+					
+IF(EXISTS(SELECT 1 FROM #tmpZeroCheckNumber))
+BEGIN
+	INSERT INTO @log
+	SELECT 'Invalid check number 00000000 found in invoice history (apivcmst).  Please find matching check number from origin check history (apchkmst) and update the origin table (apivcmst).'
+END
+
+INSERT INTO @log
+SELECT * FROM #tmpZeroCheckNumber
+
 
 INSERT INTO tblAPImportVoucherLog
 (
