@@ -314,16 +314,59 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<SearchResult> GetAddOrders(GetParameter param, int CustomerId, string OrderType, string SourceType)
         {
-            var query = _db.GetQuery<vyuICGetShipmentAddOrder>()
-                .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
-                .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
-
-            return new SearchResult()
+            if (OrderType == "Sales Order" && SourceType == "None")
             {
-                data = data.AsQueryable(),
-                total = await query.CountAsync()
-            };
+                var query = _db.GetQuery<vyuICGetShipmentAddSalesOrder>()
+                    .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
+                    .Filter(param, true);
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+            else if (OrderType == "Sales Contract" && SourceType == "None")
+            {
+                var query = _db.GetQuery<vyuICGetShipmentAddSalesContract>()
+                    .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
+                    .Filter(param, true);
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+            else if (OrderType == "Sales Contract" && SourceType == "Pick Lot")
+            {
+                var query = _db.GetQuery<vyuICGetShipmentAddSalesContractPickLot>()
+                    .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
+                    .Filter(param, true);
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+            }
+            else
+            {
+                var query = _db.GetQuery<vyuICGetShipmentAddOrder>()
+                       .Where(p => p.intEntityCustomerId == CustomerId && p.strOrderType == OrderType && p.strSourceType == SourceType)
+                       .Filter(param, true);
+                var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
+
+                return new SearchResult()
+                {
+                    data = data.AsQueryable(),
+                    total = await query.CountAsync()
+                };
+
+            }
         }
     }
 }
