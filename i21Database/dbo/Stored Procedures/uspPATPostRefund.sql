@@ -312,8 +312,6 @@ END
 
 END
 
-select * from @GLEntries
-
 BEGIN TRY
 	EXEC uspGLBookEntries @GLEntries, @ysnPosted
 END TRY
