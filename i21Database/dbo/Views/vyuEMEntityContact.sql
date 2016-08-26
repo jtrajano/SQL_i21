@@ -28,7 +28,14 @@ SELECT
 	D.strContactType,
 	D.strEmailDistributionOption,
 	B.imgPhoto,
-	papit = g.strPassword
+	papit = g.strPassword,
+	strPhoneCountry = isnull(h.strCountryCode,i.strCountryCode),
+	strFormatCountry = isnull(h.strCountryFormat,i.strCountryFormat),
+	strFormatArea = isnull(h.strAreaCityFormat,i.strAreaCityFormat),
+	strFormatLocal = isnull(h.strLocalNumberFormat,i.strLocalNumberFormat),
+	intAreaCityLength= isnull(h.intAreaCityLength,i.intAreaCityLength),
+	intCountryId = isnull(h.intCountryID,i.intCountryID)
+
 FROM dbo.tblEMEntity AS B 			
 	INNER JOIN dbo.[tblEMEntityToContact] AS C 
 			ON B.[intEntityId] = C.[intEntityId] 
@@ -43,5 +50,8 @@ FROM dbo.tblEMEntity AS B
 	JOIN vyuEMSearch F
 		ON F.intEntityId = B.intEntityId
 	LEFT JOIN [tblEMEntityCredential] g
-		on g.intEntityId = D.intEntityId
+		on g.intEntityId = D.intEntityId			
+	LEFT JOIN tblSMCountry h
+		on h.strCountry = E.strCountry
+	cross apply (select * from tblSMCountry where intCountryID in(select top 1 intDefaultCountryId from tblSMCompanyPreference)) i
 
