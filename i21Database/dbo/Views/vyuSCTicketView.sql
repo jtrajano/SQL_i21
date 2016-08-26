@@ -128,7 +128,8 @@
 	   tblICInventoryReceipt.intInventoryReceiptId,
 	   tblICInventoryReceipt.strReceiptNumber,
 	   tblICInventoryShipment.intInventoryShipmentId,
-	   tblICInventoryShipment.strShipmentNumber
+	   tblICInventoryShipment.strShipmentNumber,
+	   tblEMEntityFarm.strFarmDescription
   from ((tblSCTicket tblSCTicket
 	left join tblEMEntity tblEMEntity
        on (tblEMEntity.intEntityId = tblSCTicket.intEntityId)
@@ -156,3 +157,5 @@
 	   on  tblICInventoryReceipt.intInventoryReceiptId = tblSCTicket.intInventoryReceiptId
 	left join tblICInventoryShipment tblICInventoryShipment
 	   on  tblICInventoryShipment.intInventoryShipmentId = tblSCTicket.intInventoryShipmentId
+	left join tblEMEntityFarm tblEMEntityFarm
+	   on tblEMEntityFarm.intFarmFieldId = tblSCTicket.intFarmFieldId
