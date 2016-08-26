@@ -225,6 +225,13 @@ FROM @BankTransactionBatchDetailEntries
 
 			END
 
+			IF @strRowState = 'Delete'
+			BEGIN
+
+				DELETE FROM [dbo].[tblCMBankTransaction] WHERE intTransactionId = @intTransactionId AND ysnPosted = 0
+
+			END
+
 			DELETE FROM #tmpBankTransactionBatchDetailEntries WHERE intTransactionId =  @intTransactionId
 
 		END
