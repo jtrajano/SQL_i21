@@ -15,23 +15,23 @@ BEGIN TRY
 	WHERE [intEntityUserSecurityId] = @intUserId
 
 	SELECT @strType= CASE 
-							 WHEN @strSourceType = 'SalesOrder' THEN 'Reduced By Sales Order'
+							 WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
 							 WHEN @strSourceType = 'Scale'      THEN 'Reduced By Scale'
 					 END
 
-    IF @strType='Reduced By Sales Order'
+    IF @strType='Reduced By Inventory Shipment'
 	BEGIN
 		UPDATE CS
 		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
 		FROM tblGRCustomerStorage CS
-		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intSalesOrderId=@IntSourceKey AND SH.strType=@strType
+		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType
 		
 		INSERT INTO [dbo].[tblGRStorageHistory] 
 		(
 			 [intConcurrencyId]
 			,[intCustomerStorageId]
 			,[intTicketId]
-			,[intSalesOrderId]
+			,[intInventoryShipmentId]
 			,[dblUnits]
 			,[dtmHistoryDate]
 			,[dblPaidAmount]
@@ -42,13 +42,13 @@ BEGIN TRY
 			 [intConcurrencyId] = 1
 			,[intCustomerStorageId] = intCustomerStorageId
 			,[intTicketId] = intTicketId
-			,[intSalesOrderId] = intSalesOrderId
+			,[intInventoryShipmentId] = intInventoryShipmentId
 			,[dblUnits] = dblUnits
 			,[dtmHistoryDate] = GetDATE()
 			,[dblPaidAmount] = NULL 
-			,[strType] = 'Reverse By Sales Order'
+			,[strType] = 'Reverse By Inventory Shipment'
 			,[strUserName] = @strUserName
-		FROM tblGRStorageHistory WHERE intSalesOrderId=@IntSourceKey AND strType=@strType
+		FROM tblGRStorageHistory WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType
 
 	END
 	ELSE IF  @strType='Reduced By Scale'
@@ -63,7 +63,7 @@ BEGIN TRY
 			 [intConcurrencyId]
 			,[intCustomerStorageId]
 			,[intTicketId]
-			,[intSalesOrderId]
+			,[intInventoryShipmentId]
 			,[dblUnits]
 			,[dtmHistoryDate]
 			,[dblPaidAmount]
@@ -74,7 +74,7 @@ BEGIN TRY
 			 [intConcurrencyId] = 1
 			,[intCustomerStorageId] = intCustomerStorageId
 			,[intTicketId] = intTicketId
-			,[intSalesOrderId] = intSalesOrderId
+			,[intInventoryShipmentId] = intInventoryShipmentId
 			,[dblUnits] = dblUnits
 			,[dtmHistoryDate] = GetDATE()
 			,[dblPaidAmount] = NULL 
