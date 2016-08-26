@@ -70,6 +70,7 @@ SELECT W.intWorkOrderId
 	,S.strShiftName
 	,WI.dtmProductionDate
 	,1 AS intSequenceNo
+	,'' AS strBatchId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -164,6 +165,7 @@ SELECT W.intWorkOrderId
 	,S.strShiftName
 	,WP.dtmProductionDate
 	,1 AS intSequenceNo
+	,WI.strBatchId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intBatchId = WI.intBatchId
@@ -185,14 +187,6 @@ LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
---WHERE NOT EXISTS (
---		SELECT *
---		FROM tblMFWorkOrder W1
---		JOIN tblMFWorkOrderInputLot WI1 ON W1.intWorkOrderId = WI1.intWorkOrderId
---			AND W1.intManufacturingProcessId = W.intManufacturingProcessId
---		)
---THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
---JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WI.intLastModifiedUserId
 
 UNION
 
@@ -266,6 +260,7 @@ SELECT W.intWorkOrderId
 	,S.strShiftName
 	,WI.dtmProductionDate
 	,2 AS intSequenceNo
+	,'' AS strBatchId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -360,6 +355,7 @@ SELECT W.intWorkOrderId
 	,ISNULL(S.strShiftName, '') AS strShiftName
 	,WP.dtmProductionDate
 	,3 AS intSequenceNo
+	,WP.strBatchId 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -381,8 +377,6 @@ LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
 WHERE WP.ysnProductionReversed = 0
----THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
---JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WP.intLastModifiedUserId
 
 UNION
 
@@ -456,6 +450,7 @@ SELECT W.intWorkOrderId
 	,ISNULL(S.strShiftName, '') AS strShiftName
 	,WP.dtmProductionDate
 	,4 AS intSequenceNo
+	,WP.strBatchId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
