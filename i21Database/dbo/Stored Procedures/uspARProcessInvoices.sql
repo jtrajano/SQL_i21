@@ -1569,7 +1569,8 @@ BEGIN TRY
 							--,@AvailableQuantity			= NULL OUTPUT
 							--,@UnlimitedQuantity			= 0    OUTPUT
 							--,@OriginalQuantity			= NULL
-							--,@CustomerPricingOnly		= 0
+							--,@CustomerPricingOnly			= 0
+							--,@ItemPricingOnly				= 0
 							--,@VendorId					= NULL
 							--,@SupplyPointId				= NULL
 							--,@LastCost					= NULL

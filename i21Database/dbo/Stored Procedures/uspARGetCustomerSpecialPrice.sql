@@ -38,6 +38,7 @@ AS
 			,NULL
 			,0
 			,1
+			,0
 			,NULL
 			,@VendorId
 			,@SupplyPointId

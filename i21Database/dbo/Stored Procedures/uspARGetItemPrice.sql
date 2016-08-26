@@ -17,6 +17,7 @@
 	,@TermDiscount				NUMERIC(18,6)	= NULL OUTPUT
 	,@OriginalQuantity			NUMERIC(18,6)	= NULL
 	,@CustomerPricingOnly		BIT				= 0
+	,@ItemPricingOnly			BIT				= 0
 	,@ExcludeContractPricing	BIT				= 0
 	,@VendorId					INT				= NULL
 	,@SupplyPointId				INT				= NULL
@@ -58,6 +59,7 @@ AS
 			,@UnlimitedQuantity
 			,@OriginalQuantity
 			,@CustomerPricingOnly
+			,@ItemPricingOnly
 			,@ExcludeContractPricing
 			,@VendorId
 			,@SupplyPointId
