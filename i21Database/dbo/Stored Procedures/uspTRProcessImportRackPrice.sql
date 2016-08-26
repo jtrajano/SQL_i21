@@ -58,12 +58,12 @@ BEGIN
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRackPriceDetails)
 			BEGIN
-				DECLARE @RackPriceDetailId INT
+				DECLARE @RackPriceDetailItemId INT
 					, @ItemId INT
 					, @VendorPrice NUMERIC(18, 6)
 					, @JobberPrice NUMERIC(18, 6)
 
-				SELECT TOP 1 @RackPriceDetailId = intImportRackPriceDetailId, @ItemId = intItemId, @VendorPrice = dblVendorPrice, @JobberPrice = dblVendorPrice FROM #tmpRackPriceDetails
+				SELECT TOP 1 @RackPriceDetailItemId = intImportRackPriceDetailItemId, @ItemId = intItemId, @VendorPrice = dblVendorPrice, @JobberPrice = dblVendorPrice FROM #tmpRackPriceDetails
 
 				SELECT
 					intId = intSupplyPointRackPriceEquationId
@@ -124,7 +124,7 @@ BEGIN
 					, @JobberPrice
 				)
 
-				DELETE FROM #tmpRackPriceDetails WHERE intImportRackPriceDetailId = @RackPriceDetailId
+				DELETE FROM #tmpRackPriceDetails WHERE intImportRackPriceDetailItemId = @RackPriceDetailItemId
 
 				DROP TABLE #tmpEquations
 			END
