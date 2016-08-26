@@ -20,6 +20,11 @@ DECLARE @LotType_No AS INT = 0
 		-- Value of 1: Yes - Manual
 		-- Value of 2: Yes - Serial Number
 
+DECLARE @Ownership_Own AS INT = 1
+		,@Ownership_Storage AS INT = 2
+		,@Ownership_Consigned AS INT = 3
+
+
 -- Check if Source Type is Pick Lot
 IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intTransactionId AND intOrderType = 1 AND intSourceType = 3)
 BEGIN
@@ -54,6 +59,7 @@ BEGIN
 			,intTransactionTypeId
 			,intSubLocationId
 			,intStorageLocationId
+			,intOwnershipTypeId
 	)
 	-- Non-Lot Tracked Items
 	SELECT	intItemId = ShipmentItems.intItemId
@@ -66,6 +72,7 @@ BEGIN
 			,intTransactionTypeId = @intInventoryTransactionType
 			,intSubLocationId = ISNULL(ShipmentItems.intSubLocationId, StorageLocation.intSubLocationId) 
 			,intStorageLocationId = ShipmentItems.intStorageLocationId
+			,intOwnershipTypeId = ShipmentItems.intOwnershipType
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItems
 				ON Shipment.intInventoryShipmentId = ShipmentItems.intInventoryShipmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -77,6 +84,7 @@ BEGIN
 				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 			AND dbo.fnGetItemLotType(ShipmentItems.intItemId) = @LotType_No
+			AND ShipmentItems.intOwnershipType = @Ownership_Own
 
 	-- Lot Tracked items 
 	UNION ALL 
@@ -90,6 +98,7 @@ BEGIN
 			,intTransactionTypeId = @intInventoryTransactionType
 			,intSubLocationId = ISNULL(ShipmentItems.intSubLocationId, StorageLocation.intSubLocationId) 
 			,intStorageLocationId = ShipmentItems.intStorageLocationId
+			,intOwnershipTypeId = ShipmentItems.intOwnershipType
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItems
 				ON Shipment.intInventoryShipmentId = ShipmentItems.intInventoryShipmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -104,6 +113,7 @@ BEGIN
 			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
 				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
+			AND ShipmentItems.intOwnershipType = @Ownership_Own
 END
 
 -- Do the reservations
