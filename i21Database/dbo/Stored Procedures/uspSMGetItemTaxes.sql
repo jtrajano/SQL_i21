@@ -9,6 +9,8 @@
 	,@IncludeExemptedCodes	BIT				= NULL
 	,@SiteId				INT				= NULL
 	,@FreightTermId			INT				= NULL
+	,@CardId				INT				= NULL
+	,@VehicleId				INT				= NULL
 AS
 
 BEGIN
@@ -45,7 +47,7 @@ BEGIN
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, NULL)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, NULL, @CardId, @VehicleId)
 					
 			RETURN 1
 		END

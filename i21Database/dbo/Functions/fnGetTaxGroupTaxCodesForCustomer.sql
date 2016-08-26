@@ -7,6 +7,8 @@
 	,@ShipToLocationId		INT
 	,@IncludeExemptedCodes	BIT
 	,@IsCustomerSiteTaxable	BIT
+	,@CardId				INT
+	,@VehicleId				INT
 )
 RETURNS @returntable TABLE
 (
@@ -89,7 +91,7 @@ BEGIN
 		tblSMTaxGroup TG
 			ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 	CROSS APPLY
-		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable) E
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId) E
 	CROSS APPLY
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R			
 	WHERE

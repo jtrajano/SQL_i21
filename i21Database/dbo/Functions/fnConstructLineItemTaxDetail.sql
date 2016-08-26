@@ -13,7 +13,9 @@
 	,@ShipToLocationId		INT								= NULL
 	,@IncludeExemptedCodes	BIT								= 0
 	,@SiteId				INT								= NULL
-	,@FreightTermId			INT
+	,@FreightTermId			INT								= NULL
+	,@CardId				INT								= NULL
+	,@VehicleId				INT								= NULL
 )
 RETURNS @returntable TABLE
 (
@@ -109,6 +111,8 @@ BEGIN
 						,NULL					--@IsCustomerSiteTaxable
 						,@SiteId				--@SiteId
 						,@FreightTermId
+						,@CardId
+						,@VehicleId
 					) 	
 		END
 

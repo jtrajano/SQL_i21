@@ -32,6 +32,8 @@ SELECT
                                                         ,A.ysnTaxable
                                                         ,A.intSiteID
 														,Loc.intFreightTermId
+														,NULL
+														,NULL
                                                     )
 	,intSiteId = A.intSiteID
 	,M.strDeliveryTicketFormat

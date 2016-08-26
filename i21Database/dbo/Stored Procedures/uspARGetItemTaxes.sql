@@ -7,6 +7,8 @@
 	,@TaxGroupId			INT				= NULL		
 	,@SiteId				INT				= NULL
 	,@FreightTermId			INT				= NULL
+	,@CardId				INT				= NULL
+	,@VehicleId				INT				= NULL
 AS
 
 	IF(ISNULL(@TaxGroupId,0) = 0)
@@ -43,7 +45,7 @@ AS
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, @IsCustomerSiteTaxable)
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1, @IsCustomerSiteTaxable, @CardId, @VehicleId)
 				
 			RETURN 1
 		END
