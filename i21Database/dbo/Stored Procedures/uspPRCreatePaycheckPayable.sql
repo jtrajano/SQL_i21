@@ -66,164 +66,159 @@ DECLARE @intStartingNumberId INT
 /* Loop through each vendor and create Vouchers */
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmpVendors)
 BEGIN
-	BEGIN TRY
-		SELECT TOP 1 @intVendorEntityId = intVendorId FROM #tmpVendors
+	SELECT TOP 1 @intVendorEntityId = intVendorId FROM #tmpVendors
 
-		SET @intStartingNumberId = CASE WHEN (@ysnVoid = 1) THEN 18 ELSE 9 END
-		EXEC uspSMGetStartingNumber @intStartingNumberId, @billRecordNumber OUTPUT
+	SET @intStartingNumberId = CASE WHEN (@ysnVoid = 1) THEN 18 ELSE 9 END
+	EXEC uspSMGetStartingNumber @intStartingNumberId, @billRecordNumber OUTPUT
 	
-		/* Get Voucher Header */
-		SELECT 
-			[intTermsId]			=	A.[intTermsId],
-			[dtmDueDate]			=	A.[dtmDueDate],
-			[intAccountId]			=	A.[intAccountId],
-			[intEntityId]			=	A.[intEntityId],
-			[intEntityVendorId]		=	A.[intEntityVendorId],
-			[intTransactionType]	=	A.[intTransactionType],
-			[strBillId]				=	@billRecordNumber,
-			[strShipToAttention]	=	A.[strShipToAttention],
-			[strShipToAddress]		=	A.[strShipToAddress],
-			[strShipToCity]			=	A.[strShipToCity],
-			[strShipToState]		=	A.[strShipToState],
-			[strShipToZipCode]		=	A.[strShipToZipCode],
-			[strShipToCountry]		=	A.[strShipToCountry],
-			[strShipToPhone]		=	A.[strShipToPhone],
-			[strShipFromAttention]	=	A.[strShipFromAttention],
-			[strShipFromAddress]	=	A.[strShipFromAddress],
-			[strShipFromCity]		=	A.[strShipFromCity],
-			[strShipFromState]		=	A.[strShipFromState],
-			[strShipFromZipCode]	=	A.[strShipFromZipCode],
-			[strShipFromCountry]	=	A.[strShipFromCountry],
-			[strShipFromPhone]		=	A.[strShipFromPhone],
-			[intShipFromId]			=	A.[intShipFromId],
-			[intShipToId]			=	A.[intShipToId],
-			[intShipViaId]			=	A.[intShipViaId],
-			[intContactId]			=	A.[intContactId],
-			[intOrderById]			=	A.[intOrderById],
-			[intCurrencyId]			=	A.[intCurrencyId]
-		INTO #tmpBillData
-		FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, DEFAULT, DEFAULT, NULL) A
+	/* Get Voucher Header */
+	SELECT 
+		[intTermsId]			=	A.[intTermsId],
+		[dtmDueDate]			=	A.[dtmDueDate],
+		[intAccountId]			=	A.[intAccountId],
+		[intEntityId]			=	A.[intEntityId],
+		[intEntityVendorId]		=	A.[intEntityVendorId],
+		[intTransactionType]	=	A.[intTransactionType],
+		[strBillId]				=	@billRecordNumber,
+		[strShipToAttention]	=	A.[strShipToAttention],
+		[strShipToAddress]		=	A.[strShipToAddress],
+		[strShipToCity]			=	A.[strShipToCity],
+		[strShipToState]		=	A.[strShipToState],
+		[strShipToZipCode]		=	A.[strShipToZipCode],
+		[strShipToCountry]		=	A.[strShipToCountry],
+		[strShipToPhone]		=	A.[strShipToPhone],
+		[strShipFromAttention]	=	A.[strShipFromAttention],
+		[strShipFromAddress]	=	A.[strShipFromAddress],
+		[strShipFromCity]		=	A.[strShipFromCity],
+		[strShipFromState]		=	A.[strShipFromState],
+		[strShipFromZipCode]	=	A.[strShipFromZipCode],
+		[strShipFromCountry]	=	A.[strShipFromCountry],
+		[strShipFromPhone]		=	A.[strShipFromPhone],
+		[intShipFromId]			=	A.[intShipFromId],
+		[intShipToId]			=	A.[intShipToId],
+		[intShipViaId]			=	A.[intShipViaId],
+		[intContactId]			=	A.[intContactId],
+		[intOrderById]			=	A.[intOrderById],
+		[intCurrencyId]			=	A.[intCurrencyId]
+	INTO #tmpBillData
+	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, DEFAULT, DEFAULT, NULL) A
 
-		/* Insert Voucher Header */
-		INSERT INTO tblAPBill
-		(
-			[intTermsId]			
-			,[dtmDueDate]			
-			,[intAccountId]			
-			,[intEntityId]			
-			,[intEntityVendorId]		
-			,[intTransactionType]	
-			,[strBillId]				
-			,[strShipToAttention]	
-			,[strShipToAddress]		
-			,[strShipToCity]			
-			,[strShipToState]		
-			,[strShipToZipCode]		
-			,[strShipToCountry]		
-			,[strShipToPhone]		
-			,[strShipFromAttention]	
-			,[strShipFromAddress]	
-			,[strShipFromCity]		
-			,[strShipFromState]		
-			,[strShipFromZipCode]	
-			,[strShipFromCountry]	
-			,[strShipFromPhone]		
-			,[intShipFromId]			
-			,[intShipToId]			
-			,[intShipViaId]			
-			,[intContactId]			
-			,[intOrderById]			
-			,[intCurrencyId]			
-		)
-		SELECT * FROM #tmpBillData
-		SET @intBillId = SCOPE_IDENTITY()
+	/* Insert Voucher Header */
+	INSERT INTO tblAPBill
+	(
+		[intTermsId]			
+		,[dtmDueDate]			
+		,[intAccountId]			
+		,[intEntityId]			
+		,[intEntityVendorId]		
+		,[intTransactionType]	
+		,[strBillId]				
+		,[strShipToAttention]	
+		,[strShipToAddress]		
+		,[strShipToCity]			
+		,[strShipToState]		
+		,[strShipToZipCode]		
+		,[strShipToCountry]		
+		,[strShipToPhone]		
+		,[strShipFromAttention]	
+		,[strShipFromAddress]	
+		,[strShipFromCity]		
+		,[strShipFromState]		
+		,[strShipFromZipCode]	
+		,[strShipFromCountry]	
+		,[strShipFromPhone]		
+		,[intShipFromId]			
+		,[intShipToId]			
+		,[intShipViaId]			
+		,[intContactId]			
+		,[intOrderById]			
+		,[intCurrencyId]			
+	)
+	SELECT * FROM #tmpBillData
+	SET @intBillId = SCOPE_IDENTITY()
 
-		/* Update Voucher Invoice Number */
-		UPDATE tblAPBill SET 
-			strVendorOrderNumber = @strInvoiceNo
-		WHERE intBillId = @intBillId 
+	/* Update Voucher Invoice Number */
+	UPDATE tblAPBill SET 
+		strVendorOrderNumber = @strInvoiceNo
+	WHERE intBillId = @intBillId 
 
-		INSERT INTO @intBillIds (intId) SELECT @intBillId
-	
-		/* Generate Voucher Details */
-		INSERT INTO tblAPBillDetail(
-			[intBillId]						
-			,[intAccountId]					
-			,[intItemId]						
-			,[strMiscDescription]			
-			,[dblTotal]						
-			,[dblQtyOrdered]					
-			,[dblQtyReceived]				
-			,[dblDiscount]					
-			,[dblCost]						
-			,[int1099Form]					
-			,[int1099Category]				
-			,[intLineNo]						
-			,[intTaxGroupId]		
-		)
-		SELECT
-			[intBillId]				=	@intBillId
-			,[intAccountId]			=	A.intAccountId
-			,[intItemId]			=	NULL
-			,[strMiscDescription]	=	A.strItem
-			,[dblTotal]				=	A.dblTotal
-			,[dblQtyOrdered]		=	1
-			,[dblQtyReceived]		=	1
-			,[dblDiscount]			=	0
-			,[dblCost]				=	A.dblTotal
-			,[int1099Form]			=	(CASE WHEN C.str1099Form = '1099-MISC' THEN 1
-													WHEN C.str1099Form = '1099-INT' THEN 2
-													WHEN C.str1099Form = '1099-B' THEN 3
-												ELSE 0 END)
-			,[int1099Category]		=	ISNULL(D.int1099CategoryId, 0)
-			,[intLineNo]			=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-			,[intTaxGroupId]		=	NULL			
-		FROM 
-			(SELECT intVendorId = TT.intVendorId, intAccountId = ET.intExpenseAccountId, strItem = TT.strTax, dblTotal = SUM(PT.dblTotal)
-				FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
-					INNER JOIN tblPRPaycheck PC ON PC.intPaycheckId = PT.intPaycheckId
-					INNER JOIN tblPREmployeeTax ET ON ET.intTypeTaxId = PT.intTypeTaxId AND ET.intEntityEmployeeId = PC.intEntityEmployeeId
-				WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL
-					AND TT.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
-				GROUP BY TT.intVendorId, ET.intExpenseAccountId, TT.strTax
-				UNION ALL
-				SELECT intVendorId = TD.intVendorId, intAccountId = ED.intExpenseAccountId, strItem = TD.strDeduction, dblTotal = SUM(PD.dblTotal)
-				FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
-					INNER JOIN tblPRPaycheck PC ON PC.intPaycheckId = PD.intPaycheckId
-					INNER JOIN tblPREmployeeDeduction ED ON ED.intTypeDeductionId = PD.intTypeDeductionId AND ED.intEntityEmployeeId = PC.intEntityEmployeeId
-				WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL
-					AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
-				GROUP BY TD.intVendorId, ED.intExpenseAccountId, TD.strDeduction
-			) A
-			INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
-			INNER JOIN tblEMEntity C ON B.intEntityVendorId = C.intEntityId
-			LEFT JOIN tblAP1099Category D ON C.str1099Type = D.strCategory
-	
-		/* Update Voucher Total */
-		IF EXISTS (SELECT TOP 1 1 FROM @intBillIds) 
-			EXEC uspAPUpdateVoucherTotal @intBillIds
+	INSERT INTO @intBillIds (intId) SELECT @intBillId
 
-		/* Update Paycheck Taxes Bill Id */
-		UPDATE tblPRPaycheckTax SET intBillId = @intBillId 
-		FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax ON TT.intTypeTaxId = tblPRPaycheckTax.intTypeTaxId
-		WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL AND TT.intVendorId = @intVendorEntityId
-		  AND ((@isVoid = 0 AND tblPRPaycheckTax.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckTax.intBillId IS NOT NULL))
+	/* Generate Voucher Details */
+	INSERT INTO tblAPBillDetail(
+		[intBillId]						
+		,[intAccountId]					
+		,[intItemId]						
+		,[strMiscDescription]			
+		,[dblTotal]						
+		,[dblQtyOrdered]					
+		,[dblQtyReceived]				
+		,[dblDiscount]					
+		,[dblCost]						
+		,[int1099Form]					
+		,[int1099Category]				
+		,[intLineNo]						
+		,[intTaxGroupId]		
+	)
+	SELECT
+		[intBillId]				=	@intBillId
+		,[intAccountId]			=	A.intAccountId
+		,[intItemId]			=	NULL
+		,[strMiscDescription]	=	A.strItem
+		,[dblTotal]				=	A.dblTotal
+		,[dblQtyOrdered]		=	1
+		,[dblQtyReceived]		=	1
+		,[dblDiscount]			=	0
+		,[dblCost]				=	A.dblTotal
+		,[int1099Form]			=	(CASE WHEN C.str1099Form = '1099-MISC' THEN 1
+												WHEN C.str1099Form = '1099-INT' THEN 2
+												WHEN C.str1099Form = '1099-B' THEN 3
+											ELSE 0 END)
+		,[int1099Category]		=	ISNULL(D.int1099CategoryId, 0)
+		,[intLineNo]			=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+		,[intTaxGroupId]		=	NULL			
+	FROM 
+		(SELECT 
+			intVendorId = TT.intVendorId, 
+			intAccountId = CASE WHEN (PT.strPaidBy = 'Company') THEN PT.intAccountId ELSE PT.intExpenseAccountId END, 
+			strItem = TT.strTax, dblTotal = SUM(PT.dblTotal)
+			FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax PT ON TT.intTypeTaxId = PT.intTypeTaxId
+			WHERE PT.dblTotal > 0 AND PT.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL
+			  AND TT.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PT.intBillId IS NULL) OR (@isVoid = 1 AND PT.intBillId IS NOT NULL))
+			GROUP BY TT.intVendorId, PT.intExpenseAccountId, PT.intAccountId, TT.strTax, PT.strPaidBy
+		 UNION ALL
+		 SELECT 
+			intVendorId = TD.intVendorId, 
+			intAccountId = CASE WHEN (PD.strPaidBy = 'Company') THEN PD.intAccountId ELSE PD.intExpenseAccountId END,
+			strItem = TD.strDeduction, 
+			dblTotal = SUM(PD.dblTotal)
+			FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction PD ON TD.intTypeDeductionId = PD.intTypeDeductionId
+			WHERE PD.dblTotal > 0 AND PD.intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL
+				AND TD.intVendorId = @intVendorEntityId AND ((@isVoid = 0 AND PD.intBillId IS NULL) OR (@isVoid = 1 AND PD.intBillId IS NOT NULL))
+			GROUP BY TD.intVendorId, PD.intExpenseAccountId, PD.intAccountId, TD.strDeduction, PD.strPaidBy
+		) A
+		INNER JOIN tblAPVendor B ON A.intVendorId = B.intEntityVendorId
+		INNER JOIN tblEMEntity C ON B.intEntityVendorId = C.intEntityId
+		LEFT JOIN tblAP1099Category D ON C.str1099Type = D.strCategory
 
-		/* Update Paycheck Deductions Bill Id */
-		UPDATE tblPRPaycheckDeduction SET intBillId = @intBillId 
-		FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction ON TD.intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId
-		WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL AND TD.intVendorId = @intVendorEntityId
-		  AND ((@isVoid = 0 AND tblPRPaycheckDeduction.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckDeduction.intBillId IS NOT NULL))
+	/* Update Voucher Total */
+	IF EXISTS (SELECT TOP 1 1 FROM @intBillIds) 
+		EXEC uspAPUpdateVoucherTotal @intBillIds
 
-		DELETE FROM #tmpVendors WHERE intVendorId = @intVendorEntityId
-		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillData')) DROP TABLE #tmpBillData
-	END TRY
-	BEGIN CATCH
-		SELECT @strMsg = ERROR_MESSAGE()
-		RAISERROR(@strMsg, 11, 1)
-		DELETE FROM tblAPBill WHERE intBillId = @intBillId
-		GOTO Process_Exit
-	END CATCH
+	/* Update Paycheck Taxes Bill Id */
+	UPDATE tblPRPaycheckTax SET intBillId = @intBillId 
+	FROM tblPRTypeTax TT INNER JOIN tblPRPaycheckTax ON TT.intTypeTaxId = tblPRPaycheckTax.intTypeTaxId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TT.intExpenseAccountId IS NOT NULL AND TT.intVendorId = @intVendorEntityId
+	  AND ((@isVoid = 0 AND tblPRPaycheckTax.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckTax.intBillId IS NOT NULL))
+
+	/* Update Paycheck Deductions Bill Id */
+	UPDATE tblPRPaycheckDeduction SET intBillId = @intBillId 
+	FROM tblPRTypeDeduction TD INNER JOIN tblPRPaycheckDeduction ON TD.intTypeDeductionId = tblPRPaycheckDeduction.intTypeDeductionId
+	WHERE dblTotal > 0 AND intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks) AND TD.intExpenseAccountId IS NOT NULL AND TD.intVendorId = @intVendorEntityId
+	  AND ((@isVoid = 0 AND tblPRPaycheckDeduction.intBillId IS NULL) OR (@isVoid = 1 AND tblPRPaycheckDeduction.intBillId IS NOT NULL))
+
+	DELETE FROM #tmpVendors WHERE intVendorId = @intVendorEntityId
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillData')) DROP TABLE #tmpBillData
 END
 
 Process_Exit:
