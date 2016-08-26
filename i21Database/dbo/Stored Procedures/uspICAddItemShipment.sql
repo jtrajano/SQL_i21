@@ -109,27 +109,29 @@ FROM @ShipmentEntries se
 -- Merge shipment items
 MERGE INTO @ShipmentEntries s
 	USING @Header h
-		ON h.intOrderType = s.intOrderType
-			AND h.intSourceType = s.intSourceType
-			AND h.intEntityCustomerId = s.intEntityCustomerId
-			AND h.dtmShipDate = s.dtmShipDate
-			AND h.intShipFromLocationId = s.intShipFromLocationId
-			AND h.intShipToLocationId = s.intShipToLocationId
-			AND h.intFreightTermId = s.intFreightTermId
+		ON ISNULL(h.intOrderType, 0) = ISNULL(s.intOrderType, 0)
+			AND ISNULL(h.intSourceType, 0) = ISNULL(s.intSourceType, 0)
+			AND ISNULL(h.intEntityCustomerId, 0) = ISNULL(s.intEntityCustomerId, 0)
+			AND ISNULL(h.dtmShipDate, 0) = ISNULL(s.dtmShipDate, 0)
+			AND ISNULL(h.intShipFromLocationId, 0) = ISNULL(s.intShipFromLocationId, 0)
+			AND ISNULL(h.intShipToLocationId, 0) = ISNULL(s.intShipToLocationId, 0)
+			AND ISNULL(h.intFreightTermId, 0) = ISNULL(s.intFreightTermId, 0)
 WHEN MATCHED THEN
 	UPDATE
 	SET s.intHeaderId = h.intId;
 
+SELECT * FROM @Header
+SELECT * FROM @ShipmentEntries
 -- Merge shipment charges
 MERGE INTO @ShipmentCharges s
 	USING @Header h
-		ON h.intOrderType = s.intOrderType
-			AND h.intSourceType = s.intSourceType
-			AND h.intEntityCustomerId = s.intEntityCustomerId
-			AND h.dtmShipDate = s.dtmShipDate
-			AND h.intShipFromLocationId = s.intShipFromLocationId
-			AND h.intShipToLocationId = s.intShipToLocationId
-			AND h.intFreightTermId = s.intFreightTermId
+		ON ISNULL(h.intOrderType, 0) = ISNULL(s.intOrderType, 0)
+			AND ISNULL(h.intSourceType, 0) = ISNULL(s.intSourceType, 0)
+			AND ISNULL(h.intEntityCustomerId, 0) = ISNULL(s.intEntityCustomerId, 0)
+			AND ISNULL(h.dtmShipDate, 0) = ISNULL(s.dtmShipDate, 0)
+			AND ISNULL(h.intShipFromLocationId, 0) = ISNULL(s.intShipFromLocationId, 0)
+			AND ISNULL(h.intShipToLocationId, 0) = ISNULL(s.intShipToLocationId, 0)
+			AND ISNULL(h.intFreightTermId, 0) = ISNULL(s.intFreightTermId, 0)
 WHEN MATCHED THEN
 	UPDATE
 	SET s.intHeaderId = h.intId 
