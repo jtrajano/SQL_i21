@@ -351,23 +351,23 @@ BEGIN
 			dblCustomerPrice = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
-								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
+								FROM vyuTRGetRackPriceDetail INNER JOIN tblTRSupplyPoint 
+									ON vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
 								WHERE tblTRSupplyPoint.intEntityLocationId = intVendorLocationId 
-									AND vyuTRRackPrice.intItemId = intRackItemId
-									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
-									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
+									AND vyuTRGetRackPriceDetail.intItemId = intRackItemId
+									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC) + dblDeviation
 			,dblPriceBasis = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
-								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId)
+								FROM vyuTRGetRackPriceDetail INNER JOIN tblTRSupplyPoint 
+									ON vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId)
 								WHERE tblTRSupplyPoint.intEntityLocationId = intVendorLocationId 
-									AND vyuTRRackPrice.intItemId = intRackItemId
-									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
-									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
+									AND vyuTRGetRackPriceDetail.intItemId = intRackItemId
+									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'R'
 			AND intItemId = @ItemId
@@ -381,21 +381,21 @@ BEGIN
 			dblCustomerPrice = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
-								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
-								WHERE vyuTRRackPrice.intItemId = @ItemId
-									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
-									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
+								FROM vyuTRGetRackPriceDetail INNER JOIN tblTRSupplyPoint 
+									ON vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
+								WHERE vyuTRGetRackPriceDetail.intItemId = @ItemId
+									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC) + dblDeviation
 			,dblPriceBasis = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
 											  END 
-								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
-								WHERE vyuTRRackPrice.intItemId = @ItemId
-									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
-									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)									
+								FROM vyuTRGetRackPriceDetail INNER JOIN tblTRSupplyPoint 
+									ON vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
+								WHERE vyuTRGetRackPriceDetail.intItemId = @ItemId
+									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'O'
 			AND intItemId = @ItemId
