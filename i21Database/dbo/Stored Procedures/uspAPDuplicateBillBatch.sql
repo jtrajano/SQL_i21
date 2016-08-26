@@ -11,6 +11,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @createdBillId INT;
+DECLARE @generatedBillBatchRecordId NVARCHAR(50);
 DECLARE @billId INT, @vendorId INT;
 DECLARE @generatedBillBatchRecordId NVARCHAR(50);
 DECLARE @shipFromId INT, @shipToId INT;
