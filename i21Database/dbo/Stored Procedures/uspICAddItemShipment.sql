@@ -120,8 +120,6 @@ WHEN MATCHED THEN
 	UPDATE
 	SET s.intHeaderId = h.intId;
 
-SELECT * FROM @Header
-SELECT * FROM @ShipmentEntries
 -- Merge shipment charges
 MERGE INTO @ShipmentCharges s
 	USING @Header h
