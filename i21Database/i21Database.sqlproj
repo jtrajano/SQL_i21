@@ -4253,6 +4253,7 @@
     <Build Include="dbo\Views\vyuMFItemDetails.sql" />
     <Build Include="dbo\Views\vyuMFTaskDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCompleteTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMSettlementReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
