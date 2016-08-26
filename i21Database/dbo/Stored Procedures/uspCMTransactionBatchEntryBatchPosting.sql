@@ -25,5 +25,5 @@ EXEC uspCMBatchPosting @ysnPost,@ysnRecap,@TransactionId,@strTransactionType,@in
 
 If @successfulCount = @transactionCount
 BEGIN
-	UPDATE tblCMBankTransactionBatch SET ysnPosted = 1 WHERE strBankTransactionBatchId = @BatchId
+	UPDATE tblCMBankTransactionBatch SET ysnPosted = @ysnPost WHERE strBankTransactionBatchId = @BatchId
 END
