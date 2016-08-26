@@ -34,3 +34,4 @@ GO
 --System Manager
 :r "..\Scripts\SM\FixCompanyLocationNumber.sql"
 :r "..\Scripts\SM\SetDefaultValues.sql"
+:r "..\Scripts\SM\InsertOriginTaxClassXRef.sql"
