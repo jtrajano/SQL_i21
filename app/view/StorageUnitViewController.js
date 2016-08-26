@@ -288,7 +288,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
         }
         else {
-            iRely.Functions.openScreen('i21.view.CompanyLocation', combo.getValue());
+            i21.ModuleMgr.Inventory.showScreen(combo.getRawValue(), 'LocationName');
         }
     },
 
@@ -298,15 +298,22 @@ Ext.define('Inventory.view.StorageUnitViewController', {
 
         if (current) {
             if (iRely.Functions.isEmpty(current.get('intLocationId'))) {
-                iRely.Functions.showErrorMessage('Location must be specified.');
+                iRely.Functions.showErrorDialog('Location must be specified.');
                 return;
             }
 
-            if (iRely.Functions.isEmpty(combo.getValue())) {
-                iRely.Functions.openScreen('i21.view.CompanyLocation', { action: 'new', viewConfig: { modal: true }});
-            }
             else {
-                iRely.Functions.openScreen('i21.view.CompanyLocation', current.get('intLocationId'));
+                iRely.Functions.openScreen('i21.view.CompanyLocation', { 
+                    action: 'edit',
+                    filters: [
+                        {
+                             column: 'intCompanyLocationId',
+                             value: current.get('intLocationId'),
+                             conjunction: 'and'
+                        }  
+                    ],
+                    activeTab: 'Sub Location'
+                });
             }
         }
     },
