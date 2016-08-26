@@ -403,8 +403,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        origValueField: 'intItemUOMId',
-                        origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
                         defaultFilters: [
                             {
