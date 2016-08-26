@@ -29,7 +29,7 @@ BEGIN
 	
 	SELECT TOP 1 @RackPrice = CASE WHEN @strRackPriceToUse = 'Vendor' THEN RP.dblVendorRack
 								WHEN @strRackPriceToUse = 'Jobber' THEN RP.dblJobberRack END
-	FROM vyuTRRackPrice RP
+	FROM vyuTRGetRackPriceDetail RP
 	WHERE RP.intSupplyPointId = @intRackSupplyPointId
 		AND RP.intItemId = @intItemId
 		AND RP.dtmEffectiveDateTime <= @dtmEffectiveDateTime
