@@ -83,7 +83,7 @@ SELECT
 	, strFillGroupCode = ISNULL( I.strFillGroupCode,'')
 	, strFillGroupDescription = I.strDescription
 	, ysnFillGroupActive = I.ysnActive
-	, intFillGroupCodeId = CAST(C.intFillGroupId AS INT)
+	, intFillGroupId = CAST(ISNULL(C.intFillGroupId,0) AS INT)
 	, strDriverName = J.strName  
 	, strDriverId = J.strEntityNo
 	, F.dtmRequestedDate
