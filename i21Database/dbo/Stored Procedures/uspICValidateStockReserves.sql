@@ -11,6 +11,10 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @AllowNegativeInventory_NoOption AS INT = 3
+
+DECLARE @Ownership_Own AS INT = 1
+		,@Ownership_Storage AS INT = 2
+		,@Ownership_Consigned AS INT = 3
 		
 DECLARE @dblReservedQty AS NUMERIC(38,20)
 		,@dblOnHandQty AS NUMERIC(38,20)
@@ -38,6 +42,7 @@ FROM	(
 					,intTransactionTypeId
 			FROM	@ItemsToValidate	
 			WHERE	ISNULL(intLotId, 0) = 0 
+					AND ISNULL(intOwnershipTypeId, @Ownership_Own) = @Ownership_Own
 			GROUP BY 
 				intItemId
 				,intItemLocationId
@@ -73,7 +78,8 @@ FROM	(
 						AND tblICStockReservation.intTransactionId <> ValidateItems.intTransactionId
 						AND tblICStockReservation.strTransactionId <> ValidateItems.strTransactionId
 			WHERE	ISNULL(tblICStockReservation.intLotId, 0) = 0 
-					AND ISNULL(tblICStockReservation.ysnPosted, 0) = 0				
+					AND ISNULL(tblICStockReservation.ysnPosted, 0) = 0		
+					AND ISNULL(intOwnershipTypeId, @Ownership_Own) = @Ownership_Own		
 			GROUP BY 
 				tblICStockReservation.intItemId
 				,tblICStockReservation.intItemLocationId
@@ -121,6 +127,7 @@ FROM	(
 					,intTransactionTypeId
 			FROM	@ItemsToValidate	
 			WHERE	ISNULL(intLotId, 0) <> 0 
+					AND ISNULL(intOwnershipTypeId, @Ownership_Own) = @Ownership_Own
 			GROUP BY 
 				intItemId
 				,intItemLocationId
@@ -162,6 +169,7 @@ FROM	(
 						tblICStockReservation.intTransactionId = ValidateItems.intTransactionId
 						AND tblICStockReservation.intTransactionId = ValidateItems.intTransactionTypeId
 					)
+					AND ISNULL(intOwnershipTypeId, @Ownership_Own) = @Ownership_Own
 
 			GROUP BY 
 				tblICStockReservation.intItemId

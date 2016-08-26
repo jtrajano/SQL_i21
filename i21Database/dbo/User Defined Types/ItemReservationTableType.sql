@@ -14,4 +14,5 @@ CREATE TYPE [dbo].[ItemReservationTableType] AS TABLE
     ,[intTransactionId] INT NOT NULL			-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
 	,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL		-- The string id of the source transaction. 
 	,[intTransactionTypeId] INT NOT NULL											-- The transaction type. Source table for the types are found in tblICInventoryTransactionType	
+	,[intOwnershipTypeId] INT NULL DEFAULT 1	-- Ownership type of the item.  
 )
