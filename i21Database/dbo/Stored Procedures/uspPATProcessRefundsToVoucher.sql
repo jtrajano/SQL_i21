@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPATProcessRefundsToVoucher]
 	 @intUserId						INT
 	,@intRefundId					INT
-	,@intPaymentItemId				INT
+	,@intPaymentItemId				INT = NULL
 	,@strErrorMessage				NVARCHAR(MAX) = NULL OUTPUT
 AS
 
