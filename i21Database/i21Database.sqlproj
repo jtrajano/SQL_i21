@@ -4255,6 +4255,7 @@
     <Build Include="dbo\Stored Procedures\uspCMSettlementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseTicketOpenBalance.sql" />
     <Build Include="dbo\Functions\fnICGetCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWastage_LotCreate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
