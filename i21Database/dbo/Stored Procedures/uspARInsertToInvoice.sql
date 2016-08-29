@@ -737,7 +737,6 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								WHERE
 									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
 
-
 								INSERT INTO tblARInvoiceDetailComponent
 									([intInvoiceDetailId]
 									,[intComponentItemId]
@@ -757,10 +756,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								FROM
 									tblSOSalesOrderDetailComponent
 								WHERE
-									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
-
-								DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId
+									[intSalesOrderDetailId] = @ItemSalesOrderDetailId								
 						END
+
+						DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId
 					END
 			END	
 	END
