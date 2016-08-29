@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGenerateEntriesForAccrual]
 	 @Invoices					Id READONLY
 	,@DeferredRevenueAccountId	INT
-	,@ServiceChargesAccountId	INT
 	,@BatchId					NVARCHAR(40)
 	,@Code						NVARCHAR(25)
 	,@UserId					INT
