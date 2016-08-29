@@ -6,6 +6,7 @@
     [intGLAccountId]            INT             NOT NULL,
     [strAccountId]              NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL,
     [strDescription]            NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
+	[strName]		            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [dblCredit]                 DECIMAL (18, 6) DEFAULT ((0)) NOT NULL,
     [dblDebit]                  DECIMAL (18, 6) DEFAULT ((0)) NOT NULL,
     [ysnPosted]                 BIT             NULL,

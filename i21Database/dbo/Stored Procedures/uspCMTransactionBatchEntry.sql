@@ -27,6 +27,7 @@ DECLARE @intTransactionId INT
 		,@dtmDate DATETIME
 		,@intGLAccountId INT
 		,@strDescriptionDetail NVARCHAR(250)
+		,@strName NVARCHAR(50)
 		,@dblDebit DECIMAL(18,6)
 		,@dblCredit DECIMAL(18,6)
 		,@strRowState NVARCHAR(20)
@@ -48,6 +49,7 @@ FROM @BankTransactionBatchDetailEntries
 				,@dtmDate				= dtmDate
 				,@intGLAccountId		= intGLAccountId
 				,@strDescriptionDetail	= strDescription
+				,@strName				= strName
 				,@dblDebit				= dblDebit
 				,@dblCredit				= dblCredit
 				,@strRowState			= strRowState
@@ -111,7 +113,7 @@ FROM @BankTransactionBatchDetailEntries
 					,@intCurrencyId--[intCurrencyId]
 					,1--[dblExchangeRate]
 					,@dtmBatchDate--[dtmDate]
-					,''--[strPayee]
+					,@strName--[strPayee]
 					,NULL--[intPayeeId]
 					,NULL--[strAddress]
 					,NULL--[strZipCode]
@@ -198,6 +200,7 @@ FROM @BankTransactionBatchDetailEntries
 						,[intBankAccountId] = @intBankAccountId
 						,[intCurrencyId] = @intCurrencyId
 						,[dtmDate] = @dtmBatchDate
+						,[strPayee] = @strName
 						,[dblAmount] = @dblCredit
 						,[strAmountInWords] = dbo.fnConvertNumberToWord(@dblCredit)
 						,[strMemo] = @strDescription
