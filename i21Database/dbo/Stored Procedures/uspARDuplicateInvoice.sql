@@ -69,6 +69,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@IsImpactInventory			BIT
 		,@TotalWeight				NUMERIC(18,6)
 		,@EntityContactId			INT
+		,@TotalTermDiscount			NUMERIC(18,6)
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -115,6 +116,7 @@ SELECT
 	,@IsImpactInventory				= [ysnImpactInventory]
 	,@TotalWeight					= [dblTotalWeight]
 	,@EntityContactId				= [intEntityContactId]
+	,@TotalTermDiscount				= [dblTotalTermDiscount]
 FROM
 	tblARInvoice
 WHERE

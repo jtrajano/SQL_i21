@@ -67,6 +67,7 @@ BEGIN
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
 		   ,[dblTotalWeight]
+		   ,[dblTotalTermDiscount]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -129,6 +130,7 @@ BEGIN
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
 		   ,[dblTotalWeight]
+		   ,[dblTotalTermDiscount]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
