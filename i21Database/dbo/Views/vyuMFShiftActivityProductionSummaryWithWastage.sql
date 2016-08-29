@@ -2,6 +2,7 @@
 AS
 SELECT SA.intShiftActivityId
 	,MC.intLocationId
+	,SA.strShiftActivityNumber
 	,MC.strCellName
 	,SA.dtmShiftDate
 	,S.strShiftName

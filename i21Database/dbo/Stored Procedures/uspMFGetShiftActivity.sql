@@ -83,6 +83,7 @@ BEGIN
 	IF @intShiftActivityStatusId = 2
 	BEGIN
 		SELECT DISTINCT SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,MC.strCellName
 			,SA.intManufacturingCellId
 			,SA.intShiftId
@@ -111,6 +112,7 @@ BEGIN
 				AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
 			AND SA.intShiftActivityStatusId = @intShiftActivityStatusId
 		GROUP BY SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,MC.strCellName
 			,SA.intManufacturingCellId
 			,SA.dtmShiftDate
@@ -131,6 +133,7 @@ BEGIN
 	IF @intShiftActivityStatusId = 3
 	BEGIN
 		SELECT SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,SA.intShiftId
 			,SA.intManufacturingCellId
 			,MC.strCellName
@@ -175,6 +178,7 @@ BEGIN
 			AND CONVERT(DATETIME, CONVERT(CHAR, SA.dtmShiftDate, 101)) BETWEEN CONVERT(DATETIME, CONVERT(CHAR, @dtmFromDate, 101))
 				AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
 		GROUP BY SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,SA.intShiftId
 			,SA.intManufacturingCellId
 			,MC.strCellName
