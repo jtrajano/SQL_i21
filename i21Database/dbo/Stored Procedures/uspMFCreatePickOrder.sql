@@ -21,6 +21,13 @@ BEGIN TRY
 		,@strPackagingCategory NVARCHAR(50)
 		,@intManufacturingProcessId INT
 		,@intDayOfYear INT
+		,@intStageLocationTypeId int
+		,@strStageLocationType nvarchar(50)
+		,@intProductionStagingId int
+		,@intProductionStageLocationId int
+		,@intStagingId int
+		,@intStageLocationId int
+
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -109,6 +116,36 @@ BEGIN TRY
 
 	DECLARE @tblMFOrderHeader TABLE (intOrderHeaderId INT)
 
+	SELECT @intStageLocationTypeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Staging Location Type'
+
+	SELECT @strStageLocationType = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intStageLocationTypeId
+
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
+
+	SELECT @intStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intStagingId
+
 	BEGIN TRANSACTION
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
@@ -129,11 +166,13 @@ BEGIN TRY
 		,2
 		,@strBOLNo
 		,''
-		,@intBlendProductionStagingUnitId
+		,Case When @strStageLocationType='Alternate Staging Location' Then NULL
+				When @strStageLocationType='Production Staging Location' Then @intProductionStageLocationId
+				Else @intStageLocationId End
 		,''
 		,@dtmCurrentDate
 		,@strUserName
-
+		
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
 

@@ -6,7 +6,7 @@
 		,[intOrderDirectionId] INT NOT NULL
 		,[strOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 		,[strReferenceNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,[intStagingLocationId] INT NOT NULL
+		,[intStagingLocationId] INT NULL
 		,[strComment] NVARCHAR(2048) COLLATE Latin1_General_CI_AS NULL
 		,[dtmOrderDate] DATETIME NULL
 		,[intCreatedById] INT NULL
