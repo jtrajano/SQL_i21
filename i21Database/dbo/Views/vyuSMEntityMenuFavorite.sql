@@ -22,6 +22,8 @@ INNER JOIN
 	SELECT DISTINCT ISNULL(UserLocationRole.intEntityId, UserSecurity.intEntityUserSecurityId) AS intEntityUserSecurityId, ISNULL(UserLocationRole.intUserRoleId, UserSecurity.intUserRoleID) AS intUserRoleId, UserLocationRole.intCompanyLocationId AS intCompanyLocationId 
 	FROM tblSMUserSecurity UserSecurity 
 	LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission UserLocationRole ON UserLocationRole.intEntityId = UserSecurity.intEntityUserSecurityId
+	UNION ALL
+	SELECT intEntityContactId AS intEntityUserSecurityId, intEntityRoleId AS intUserRoleId, NULL AS intCompanyLocationId FROM tblEMEntityToContact WHERE intEntityRoleId IS NOT NULL
 ) UserSecurityCompanyLocationRolePermission ON Favorite.intEntityId = UserSecurityCompanyLocationRolePermission.intEntityUserSecurityId --AND ISNULL(UserSecurityCompanyLocationRolePermission.intCompanyLocationId, 0) = ISNULL(Favorite.intCompanyLocationId, 0)
 LEFT JOIN tblSMUserRoleMenu RoleMenu ON UserSecurityCompanyLocationRolePermission.intUserRoleId = RoleMenu.intUserRoleId and Favorite.intMenuId = RoleMenu.intMenuId
 LEFT JOIN tblSMMasterMenu MasterMenu ON Favorite.intMenuId = MasterMenu.intMenuID
