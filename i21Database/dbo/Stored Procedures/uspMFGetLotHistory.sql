@@ -38,6 +38,7 @@ BEGIN
 	,strOldVendorLotNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
 	,strNotes NVARCHAR(50)COLLATE Latin1_General_CI_AS
 	,strUser NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strBatchId nvarchar(50)COLLATE Latin1_General_CI_AS
 	)
 
 
