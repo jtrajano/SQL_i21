@@ -11,7 +11,7 @@
 	[strDescription] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strScheduleCode] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strConfiguration] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[ysnDynamicConfiguration] BIT COLLATE Latin1_General_CI_AS NULL,
+	[ysnDynamicConfiguration] BIT NOT NULL,
 	[strLastIndexOf] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strSegment] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConfigurationSequence] [int] NULL,
