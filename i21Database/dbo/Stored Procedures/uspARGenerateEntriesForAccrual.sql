@@ -352,7 +352,7 @@ BEGIN
 												THEN
 													IST.intOtherChargeIncomeAccountId
 												ELSE
-													(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
+													ISNULL(ISNULL(B.intServiceChargeAccountId, B.intSalesAccountId), SMCL.intSalesAccount)
 											END)
 			,dblDebit					= CASE WHEN @AccrualPeriod > 1 THEN CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END 
 											ELSE CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END END
@@ -394,7 +394,10 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
-				AND A.intCompanyLocationId = ICIS.intLocationId 	
+				AND A.intCompanyLocationId = ICIS.intLocationId
+		LEFT OUTER JOIN
+			tblSMCompanyLocation SMCL
+				ON A.intCompanyLocationId = SMCL.intCompanyLocationId 	
 		WHERE
 			A.intInvoiceId = @InvoiceId
 			AND B.intInvoiceDetailId = @InvoiceDetailId 
