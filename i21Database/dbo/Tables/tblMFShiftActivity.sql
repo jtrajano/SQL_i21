@@ -2,6 +2,7 @@
 (
 	intShiftActivityId INT NOT NULL IDENTITY,
 	intConcurrencyId INT NULL CONSTRAINT DF_tblMFShiftActivity_intConcurrencyId DEFAULT 0,
+	strShiftActivityNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intManufacturingCellId INT NOT NULL,
 	dtmShiftDate DATETIME NOT NULL,
 	intShiftId INT NOT NULL,

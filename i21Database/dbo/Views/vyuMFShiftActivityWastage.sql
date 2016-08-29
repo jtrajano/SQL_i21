@@ -8,6 +8,7 @@ SELECT CONVERT(INT,ROW_NUMBER() OVER (
 			,strWastageTypeName
 		)) AS intRowNo
 	,dtmShiftDate
+	,strShiftActivityNumber
 	,strShiftName
 	,strCellName
 	,dblTotalWeightofProducedQty
@@ -23,6 +24,7 @@ SELECT CONVERT(INT,ROW_NUMBER() OVER (
 	,intLocationId
 FROM (
 	SELECT DISTINCT SA.dtmShiftDate
+		,SA.strShiftActivityNumber
 		,SH.strShiftName
 		,MC.strCellName
 		,ISNULL(SA.dblTotalWeightofProducedQty, 0) AS dblTotalWeightofProducedQty
@@ -42,6 +44,7 @@ FROM (
 	JOIN dbo.tblMFShift SH ON SH.intShiftId = SA.intShiftId
 	) t
 GROUP BY dtmShiftDate
+	,strShiftActivityNumber
 	,strCellName
 	,strShiftName
 	,dblTotalSKUProduced
