@@ -11,6 +11,12 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@strUserName NVARCHAR(50)
 		,@strOrderNo nvarchar(50) 
+		,@intStageLocationTypeId int
+		,@strStageLocationType nvarchar(50)
+		,@intProductionStagingId int
+		,@intProductionStageLocationId int
+		,@intStagingId int
+		,@intStageLocationId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -45,6 +51,33 @@ BEGIN TRY
 		,@ysnProposed = 0
 		,@strPatternString = @strOrderNo OUTPUT
 
+	SELECT @intStageLocationTypeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Staging Location Type'
+
+	SELECT @strStageLocationType = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intLocationId = @intLocationId
+		AND intAttributeId = @intStageLocationTypeId
+
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
+
+	SELECT @intStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intLocationId = @intLocationId
+		AND intAttributeId = @intStagingId
+
 	BEGIN TRANSACTION
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
@@ -66,7 +99,9 @@ BEGIN TRY
 		,1
 		,@strOrderNo
 		,''
-		,@intBlendProductionStagingUnitId
+		,Case When @strStageLocationType='Alternate Staging Location' Then NULL
+				When @strStageLocationType='Production Staging Location' Then @intProductionStageLocationId
+				Else @intStageLocationId End
 		,''
 		,@dtmCurrentDate
 		,@strUserName
