@@ -210,7 +210,6 @@ DECLARE @tblTempTransaction TABLE (
 							 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
 							 ' + @IncludeDestinationState + ' ' + @ExcludeDestinationState + ' AND (tblARInvoice.intFreightTermId <> 3 OR tblARInvoice.intFreightTermId IS NULL) AND tblARInvoice.ysnPosted = 1'
 
-				--UNION	 
 				SET @QueryInvoicePickup	 = ' UNION SELECT DISTINCT 0,
                              tblARInvoiceDetail.intInvoiceDetailId,tblTFReportingComponent.intTaxAuthorityId,tblTFReportingComponent.strFormCode, 
 							 tblTFReportingComponentDetail.intReportingComponentDetailId,tblTFReportingComponent.strScheduleCode,tblTFReportingComponent.strType,tblTFValidProductCode.intProductCode,tblTFValidProductCode.strProductCode, 
@@ -276,7 +275,7 @@ DECLARE @tblTempTransaction TABLE (
 									  INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId 
 									  INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetailTax.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId 
 									  INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
-						WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId AND (tblTFTaxCategory.strTaxCategory = 'IN Excise Tax') AND tblARInvoiceDetailTax.dblTax = 0)
+						WHERE tblARInvoiceDetailTax.intInvoiceDetailId = @InvoiceDetailId AND (tblTFTaxCategory.strTaxCategory = 'IN Gasoline Use Tax (GUT)') AND tblARInvoiceDetailTax.dblTax = 0)
 
 						UPDATE @tblTempTransaction SET dblTaxExempt = ISNULL(@TaxExempt, 0), strTaxCategory = @ExemptGallSold WHERE intInvoiceDetailId = @InvoiceDetailId
 						SET @Count = @Count - 1
