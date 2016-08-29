@@ -1418,6 +1418,59 @@ END CATCH
 				WHERE  
 					A.ysnPosted = 0
 
+				--Don't allow Imported Invoice from Origin to be unposted
+				DECLARE @IsAG BIT = 0
+				DECLARE @IsPT BIT = 0
+
+				IF EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'coctlmst')
+					SELECT TOP 1 
+						@IsAG	= CASE WHEN ISNULL(coctl_ag, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst') THEN 1 ELSE 0 END
+						,@IsPT	= CASE WHEN ISNULL(coctl_pt, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst') THEN 1 ELSE 0 END 
+					FROM
+						coctlmst
+
+				IF @IsAG = 1
+				BEGIN					
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						ARI.strInvoiceNumber + ' was imported from origin. Unpost is not allowed!',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						tblARInvoice ARI 
+					INNER JOIN 
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					INNER JOIN
+						agivcmst OI
+							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.agivc_ivc_no COLLATE Latin1_General_CI_AS
+					WHERE  
+						ARI.ysnPosted = 1
+				END
+
+				IF @IsPT = 1
+				BEGIN					
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						ARI.strInvoiceNumber + ' was imported from origin. Unpost is not allowed!',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						tblARInvoice ARI 
+					INNER JOIN 
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					INNER JOIN
+						ptivcmst OI
+							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.ptivc_invc_no COLLATE Latin1_General_CI_AS
+					WHERE  
+						ARI.ysnPosted = 1
+				END
+
 			END			
 		
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
