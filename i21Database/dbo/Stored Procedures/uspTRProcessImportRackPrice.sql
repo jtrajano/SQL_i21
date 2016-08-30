@@ -28,20 +28,26 @@ BEGIN
 			, @Comments = strComments
 		FROM #tmpValidRackPrices
 
-		INSERT INTO tblTRRackPriceHeader (
-			intSupplyPointId
-			, dtmEffectiveDateTime
-			, strComments
-		)
-		VALUES (
-			@SupplyPointId
-			, @EffectiveDate
-			, @Comments
-		)
+		SELECT TOP 1 @RackPriceId = intRackPriceHeaderId FROM tblTRRackPriceHeader WHERE intSupplyPointId = @SupplyPointId AND dtmEffectiveDateTime = @EffectiveDate
 
-		SELECT @RackPriceId = SCOPE_IDENTITY()
 
-		IF EXISTS(SELECT * FROM tblTRRackPriceHeader WHERE intRackPriceHeaderId = @RackPriceId)
+		IF (ISNULL(@RackPriceId, '') = '')
+		BEGIN
+			INSERT INTO tblTRRackPriceHeader (
+				intSupplyPointId
+				, dtmEffectiveDateTime
+				, strComments
+			)
+			VALUES (
+				@SupplyPointId
+				, @EffectiveDate
+				, @Comments
+			)
+
+			SELECT @RackPriceId = SCOPE_IDENTITY()	
+		END		
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblTRRackPriceHeader WHERE intRackPriceHeaderId = @RackPriceId)
 		BEGIN		
 			SELECT intImportRackPriceId = @RackPriceId
 				, RackPriceDetail.intImportRackPriceDetailItemId
@@ -111,18 +117,27 @@ BEGIN
 					DELETE FROM #tmpEquations WHERE intId = @counter
 				END
 
-				INSERT INTO tblTRRackPriceDetail(
-					intRackPriceHeaderId
-					, intItemId
-					, dblVendorRack
-					, dblJobberRack
-				)
-				VALUES (
-					@RackPriceId
-					, @ItemId
-					, @VendorPrice
-					, @JobberPrice
-				)
+				IF EXISTS(SELECT TOP 1 1 FROM tblTRRackPriceDetail WHERE intRackPriceHeaderId = @RackPriceId AND intItemId = @ItemId)
+				BEGIN
+					UPDATE tblTRRackPriceDetail
+					SET dblVendorRack = @VendorPrice
+						, dblJobberRack = @JobberPrice
+				END
+				ELSE
+				BEGIN
+					INSERT INTO tblTRRackPriceDetail(
+						intRackPriceHeaderId
+						, intItemId
+						, dblVendorRack
+						, dblJobberRack
+					)
+					VALUES (
+						@RackPriceId
+						, @ItemId
+						, @VendorPrice
+						, @JobberPrice
+					)
+				END
 
 				DELETE FROM #tmpRackPriceDetails WHERE intImportRackPriceDetailItemId = @RackPriceDetailItemId
 
