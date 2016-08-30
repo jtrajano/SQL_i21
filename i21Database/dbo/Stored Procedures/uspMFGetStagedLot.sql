@@ -1,13 +1,18 @@
 ﻿CREATE PROCEDURE [dbo].uspMFGetStagedLot (@intLocationId INT)
 AS
 BEGIN
-	DECLARE @intSanitizationStagingUnitId INT
-		,@intBlendProductionStagingUnitId INT
 
-	SELECT @intSanitizationStagingUnitId = intSanitizationStagingUnitId
-		,@intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
-	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId = @intLocationId
+Declare 	@intProductionStagingId int
+		,@intProductionStageLocationId int
+
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
 
 	SELECT L.intLotId
 		,L.strLotNumber
@@ -39,7 +44,7 @@ BEGIN
 		,MIN(W.dtmExpectedDate) AS dtmRequiredDate
 		,MIN(WC.dblIssuedQuantity) AS dblRequiredQty
 	FROM dbo.tblICLot L
-	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId and L.dblQty>0
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemId = I.intItemId
 		AND IO1.ysnActive = 1
@@ -49,10 +54,7 @@ BEGIN
 	JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 	JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
 	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-		AND SL.intStorageLocationId IN (
-			@intSanitizationStagingUnitId
-			,@intBlendProductionStagingUnitId
-			)
+		AND SL.intStorageLocationId =@intProductionStageLocationId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
 	LEFT JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WC.intWorkOrderId
