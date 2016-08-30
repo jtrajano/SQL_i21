@@ -150,20 +150,20 @@ BEGIN TRY
 				)
 	END
 
-	IF NOT EXISTS (
-			SELECT *
-			FROM dbo.tblICItemUOM
-			WHERE intItemId = @intItemId
-				AND intItemUOMId in (@intItemUOMId,@intItemUnitCountUOMId) and ysnStockUnit=1
-			)
-	BEGIN
+	--IF NOT EXISTS (
+	--		SELECT *
+	--		FROM dbo.tblICItemUOM
+	--		WHERE intItemId = @intItemId
+	--			AND intItemUOMId in (@intItemUOMId,@intItemUnitCountUOMId) and ysnStockUnit=1
+	--		)
+	--BEGIN
 
-		RAISERROR (
-				51094
-				,11
-				,1
-				)
-	END
+	--	RAISERROR (
+	--			51094
+	--			,11
+	--			,1
+	--			)
+	--END
 
 	IF NOT EXISTS (
 			SELECT *
