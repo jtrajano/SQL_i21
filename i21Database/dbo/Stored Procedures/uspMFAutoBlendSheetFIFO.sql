@@ -5,6 +5,7 @@
 	,@ysnFromPickList bit = 0
 	,@strExcludedLotXml NVARCHAR(MAX) = NULL
 	,@strWorkOrderIds nvarchar(max) = NULL
+	,@intItemId int = null
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -92,6 +93,16 @@ BEGIN TRY
 	WHERE br.intBlendRequirementId = @intBlendRequirementId
 
 	SET @intNoOfSheets = @intEstNoOfSheets
+
+	If ISNULL(@intBlendRequirementId,0)=0
+	Begin
+		Select @intBlendItemId=intItemId,@strBlendItemNo=strItemNo
+		From tblICItem Where intItemId=@intItemId
+
+		Set @intEstNoOfSheets=1
+		Set @intNoOfSheets=1
+		Set @dtmDueDate=GETDATE()
+	End
 
 	SELECT @intRecipeId = intRecipeId
 		,@intManufacturingProcessId = intManufacturingProcessId
