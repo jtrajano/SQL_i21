@@ -1,7 +1,8 @@
 ﻿CREATE PROC uspRKSummaryPnL
     @dtmToDate datetime,
 	@intCommodityId int = null,
-	@ysnExpired bit
+	@ysnExpired bit,
+	@intFutureMarketId int = null
  AS  
   
 if isnull(@ysnExpired,'False' ) = 'False'
@@ -68,7 +69,10 @@ FROM (
 				,MatchLong
 				,MatchShort
 				,NetPnL,ysnExpired
-			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end and ysnExpired=@ysnExpired
+			FROM vyuRKUnrealizedPnL 
+			where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
+			and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
+			and ysnExpired=@ysnExpired
 			) t
 		) u
 	GROUP BY intFutureMonthId
@@ -142,6 +146,7 @@ ELSE
 				,MatchShort
 				,NetPnL,ysnExpired
 			FROM vyuRKUnrealizedPnL where intCommodityId= case when isnull(@intCommodityId,0)=0 then intCommodityId else @intCommodityId end 
+			and intFutureMarketId= case when isnull(@intFutureMarketId,0)=0 then intFutureMarketId else @intFutureMarketId end 
 			) t
 		) u
 	GROUP BY intFutureMonthId
