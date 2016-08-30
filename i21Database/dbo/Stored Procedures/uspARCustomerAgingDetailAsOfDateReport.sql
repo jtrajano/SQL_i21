@@ -405,4 +405,4 @@ AND A.dblAmountPaid		 = B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
 AND A.intPaymentId		 = B.intPaymentId
 
-WHERE A.dblInvoiceTotal - B.dblAmountPaid <> 0
+WHERE B.dblTotalDue - B.dblAvailableCredit <> 0
