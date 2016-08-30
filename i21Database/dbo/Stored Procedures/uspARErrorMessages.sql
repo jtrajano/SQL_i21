@@ -294,5 +294,8 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120073) EXEC sp_dropmess
 SET @strmessage = 'Cannot process Sales Order with zero(0) amount.'
 EXEC sp_addmessage 120073,16,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 120074) EXEC sp_dropmessage 120074, 'us_english'	
+SET @strmessage = 'Commission Schedule %s was already calculated for this date.'
+EXEC sp_addmessage 120074,16,@strmessage,'us_english','False'
 
  
