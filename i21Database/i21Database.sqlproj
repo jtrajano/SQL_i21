@@ -4258,6 +4258,7 @@
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotCreate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
+    <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
