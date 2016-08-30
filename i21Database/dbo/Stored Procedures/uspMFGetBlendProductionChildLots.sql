@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductionChildLots] @intWorkOrderId INT
+﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductionChildLots] @intWorkOrderId INT,@intLocationId INT = NULL,@intItemId INT = NULL,@dblQtyToProduce NUMERIC(38,20)
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -6,9 +6,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intLocationId INT
-DECLARE @intItemId INT
+--DECLARE @intLocationId INT
+--DECLARE @intItemId INT
 
+If ISNULL(@intWorkOrderId,0)>0
 SELECT @intLocationId = intLocationId, @intItemId=intItemId
 FROM tblMFWorkOrder
 WHERE intWorkOrderId = @intWorkOrderId
@@ -18,6 +19,8 @@ DECLARE @tblReservedQty TABLE (
 	,dblReservedQty NUMERIC(38,20)
 	)
 
+If ISNULL(@intWorkOrderId,0)>0
+Begin
 INSERT INTO @tblReservedQty
 SELECT cl.intLotId
 	,Sum(cl.dblQuantity) AS dblReservedQty
@@ -27,17 +30,6 @@ JOIN tblICLot l ON l.intLotId = cl.intLotId
 WHERE w.intWorkOrderId = @intWorkOrderId
 	AND w.intStatusId <> 13
 GROUP BY cl.intLotId
-
---DECLARE @intStorageLocationId INT
---	,@strBlendProductionStagingLocation NVARCHAR(50)
-
---SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
---FROM dbo.tblMFCompanyPreference
-
---SELECT @intStorageLocationId = intStorageLocationId
---FROM dbo.tblICStorageLocation
---WHERE strName = @strBlendProductionStagingLocation
---	AND intLocationId = @intLocationId
 
 DECLARE @tblMFStagedLot TABLE (
 	intLotId INT
@@ -223,3 +215,80 @@ LEFT JOIN tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
 LEFT JOIN tblSMCompanyLocationSubLocation CSL ON wcl.intSubLocationId=CSL.intCompanyLocationSubLocationId
 JOIN tblSMCompanyLocation CL ON W.intLocationId=CL.intCompanyLocationId
 WHERE wcl.intWorkOrderId = @intWorkOrderId
+End
+Else
+Begin
+	Declare @tblPickedLots AS table
+	( 
+		intWorkOrderInputLotId int,
+		intLotId int,
+		strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
+		strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
+		strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
+		dblQuantity numeric(38,20),
+		intItemUOMId int,
+		strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
+		dblIssuedQuantity numeric(38,20),
+		intItemIssuedUOMId int,
+		strIssuedUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
+		intItemId int,
+		intRecipeItemId int,
+		dblUnitCost numeric(38,20),
+		dblDensity numeric(38,20),
+		dblRequiredQtyPerSheet numeric(38,20),
+		dblWeightPerUnit numeric(38,20),
+		dblRiskScore numeric(38,20),
+		intStorageLocationId int,
+		strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+		strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+		intLocationId int,
+		strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+		intSubLocationId int,
+		strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
+		ysnParentLot bit,
+		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
+	)
+
+	Insert Into @tblPickedLots
+	Exec uspMFAutoBlendSheetFIFO @intLocationId,0,@dblQtyToProduce,'',0,'','',@intItemId
+
+	Select tpl.intWorkOrderInputLotId AS intWorkOrderConsumedLotId,
+	0 AS intWorkOrderId,
+	tpl.intLotId,
+	tpl.strLotNumber,
+	tpl.intItemId,
+	tpl.strItemNo,
+	tpl.strDescription,
+	tpl.dblQuantity,
+	tpl.intItemUOMId,
+	tpl.strUOM,
+	tpl.dblIssuedQuantity,
+	tpl.intItemIssuedUOMId,
+	tpl.strIssuedUOM,
+	tpl.strStorageLocationName,
+	tpl.dblRiskScore,
+	CAST (0 AS BIT) AS ysnStaged,
+	CASE WHEN i.strLotTracking = 'No' THEN (Select TOP 1 ISNULL(sd.dblAvailableQty,0.0) 
+		From vyuMFGetItemStockDetail sd 
+		Where sd.intItemId=tpl.intItemId 
+		AND sd.intLocationId=@intLocationId 
+		AND ISNULL(sd.intSubLocationId,0)=ISNULL(tpl.intSubLocationId,0) 
+		AND ISNULL(sd.intStorageLocationId,0)=ISNULL(tpl.intStorageLocationId,0)
+		AND sd.ysnStockUnit = 1)
+	Else (ISNULL(l.dblWeight, 0) - ISNULL((Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=tpl.intLotId AND ysnPosted=0), 0)) 
+	End AS dblAvailableQty,
+	CASE WHEN tpl.intItemUOMId=tpl.intItemIssuedUOMId THEN 1 ELSE ISNULL(tpl.dblWeightPerUnit, 1) END AS dblWeightPerUnit,
+	tpl.intRecipeItemId,
+	l.intParentLotId,
+	pl.strParentLotNumber,
+	0.0 AS dblStagedQty,
+	ls.strSecondaryStatus AS strLotStatus,
+	tpl.strSubLocationName,
+	tpl.strLocationName,
+	i.strLotTracking
+	From @tblPickedLots tpl 
+	Left Join tblICLot l on tpl.intLotId=l.intLotId
+	Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
+	Left Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
+	Join tblICItem i on tpl.intItemId=i.intItemId
+End
