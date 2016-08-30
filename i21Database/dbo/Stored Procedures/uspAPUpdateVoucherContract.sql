@@ -42,7 +42,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 					WHEN CompanyPref.strRackPriceToUse = 'Jobber'
 					THEN RP.dblJobberRack
 					END) + ISNULL(C.dblAdjustment,0) AS dblIndexPrice
-	   FROM vyuTRRackPrice RP 	   
+	   FROM vyuTRGetRackPriceDetail RP 	   
 	   WHERE RP.intSupplyPointId = D.intSupplyPointId 
 	     AND RP.intItemId = A.intItemId
 	     AND RP.dtmEffectiveDateTime <= B.dtmDate
