@@ -1065,7 +1065,7 @@ ELSE
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
-								,[strCostMethod]					= 'Per Unit'
+								,[strCostMethod]                    = ContractCost.strCostMethod
 								,[dblRate]							= RE.dblFreightRate
 								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
@@ -1117,7 +1117,7 @@ ELSE
 								,[intCostCurrencyId]				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
-								,[strCostMethod]					= 'Per Unit'
+                                ,[strCostMethod]                    = ContractCost.strCostMethod
 								,[dblRate]							= RE.dblFreightRate
 								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId

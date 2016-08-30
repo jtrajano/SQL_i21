@@ -106,7 +106,8 @@
 	[intItemUOMIdTo] INT NULL,
 	[intTicketTypeId] INT NULL,
 	[intStorageScheduleTypeId] INT NULL,
-	[strFreightSettlement]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	[strFreightSettlement]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strCostMethod]  NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -977,3 +978,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'strFreightSettlement'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Freight Settlement Cost Method',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strCostMethod'
