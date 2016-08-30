@@ -2187,19 +2187,19 @@ END
 GO
 IF NOT EXISTS(SELECT 1 FROM tblMFPickPreference WHERE strPickPreference = 'EXACT')
 BEGIN 
-	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,blnIsDefault)
+	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,ysnIsDefault)
 	VALUES(1,'EXACT',0)
 END
 GO
 IF NOT EXISTS(SELECT 1 FROM tblMFPickPreference WHERE strPickPreference = 'PARTIAL')
 BEGIN 
-	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,blnIsDefault)
+	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,ysnIsDefault)
 	VALUES(1,'PARTIAL',0)
 END
 GO
 IF NOT EXISTS(SELECT 1 FROM tblMFPickPreference WHERE strPickPreference = 'BEST MATCH')
 BEGIN 
-	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,blnIsDefault)
+	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,ysnIsDefault)
 	VALUES(1,'BEST MATCH',1)
 END
 GO
