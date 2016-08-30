@@ -352,5 +352,9 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateDYMOCustomerLabelReportView.sql" />
     <Build Include="dbo\Tables\tblSMTaxClassXref.sql" />
     <Build Include="dbo\Tables\tblSMTaxXRef.sql" />
+    <Build Include="dbo\Tables\tblARImportInvoiceLog.sql" />
+    <Build Include="dbo\Tables\tblARptticmst.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceFromPTTICMST.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceBackupPTTICMST.sql" />
   </ItemGroup>
 </Project>

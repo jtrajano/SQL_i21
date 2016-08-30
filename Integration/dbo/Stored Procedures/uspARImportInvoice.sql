@@ -7,8 +7,8 @@ CREATE PROCEDURE uspARImportInvoice
 	@UserId INT = 0,
 	@Total INT = 0 OUTPUT,
 	@StartDate DATETIME = NULL,
-	@EndDate DATETIME = NULL
-
+	@EndDate DATETIME = NULL,
+	@Posted INT = 0
 	AS
 BEGIN
 	--================================================
@@ -34,9 +34,19 @@ BEGIN
 	SELECT TOP 1 @ysnAG = CASE WHEN ISNULL(coctl_ag, '') = 'Y' THEN 1 ELSE 0 END
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
 	FROM coctlmst	
-
 	
-	IF(@Checking = 0) 
+	IF(@Checking = 0 and @Posted = 0)
+	BEGIN
+		IF @ysnPT		= 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
+		BEGIN
+			DECLARE @totalptticmst int
+			EXEC [uspARImportInvoiceBackupPTTICMST] @StartDate ,@EndDate ,@totalptticmst OUTPUT
+			DECLARE @totalDetailImported int
+			EXEC [uspARImportInvoiceFromPTTICMST] @UserId ,@StartDate ,@EndDate ,@Total OUTPUT ,@totalDetailImported OUTPUT 			
+		END
+	END
+	
+	IF(@Checking = 0 and @Posted = 1)
 	BEGIN
 		
 		DECLARE @Sucess BIT
@@ -351,7 +361,7 @@ BEGIN
 	--     GET TO BE IMPORTED RECORDS
 	--	This is checking if there are still records need to be import	
 	--================================================
-	IF(@Checking = 1) 
+	IF(@Checking = 1 AND @Posted = 1)
 	BEGIN
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst')
 		 BEGIN
