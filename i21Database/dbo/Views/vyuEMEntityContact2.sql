@@ -13,7 +13,7 @@ SELECT
 	strPhoneLookup = phone.strPhoneLookUp,
 	strMobile = mob.strPhone,
 	strMobileLookup = mob.strPhoneLookUp,
-	D.strTimezone,
+	E.strTimezone,
 	D.strTitle,
 	C.ysnPortalAccess,
 	D.ysnActive,
