@@ -116,17 +116,16 @@ BEGIN TRY
 			RAISERROR('The stock UOM of the commodity must exist in the conversion table of the item', 16, 1);
 			RETURN;
 		END
-		BEGIN 
-			SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId
-			FROM    dbo.tblICItemUOM ItemUOM
-			WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
-		END
 
 		SET @dblUnits = @dblNetUnits * -1
 		SELECT @intStorageEntityId = SC.intEntityId, @intStorageCommodityId = SC.intCommodityId,
 		@intStorageLocationId =  SC.intProcessingLocationId , @intItemId = SC.intItemId
 		FROM dbo.tblSCTicket SC
 		WHERE SC.intTicketId = @intTicketId
+
+		SELECT  @intTicketItemUOMId = ItemUOM.intItemUOMId
+		FROM    dbo.tblICItemUOM ItemUOM
+		WHERE   ItemUOM.intItemId = @intItemId AND ItemUOM.ysnStockUnit = 1
 
 		SELECT @intStorageTypeId = ST.intStorageScheduleTypeId
 		FROM dbo.tblGRStorageType ST
@@ -352,7 +351,36 @@ BEGIN TRY
 				,NULL
 				,@intUserId
 				,0
-			UPDATE @LineItems set intTicketId = @intTicketId
+			BEGIN
+				DECLARE @intLoopContractId INT;
+				DECLARE @dblLoopContractUnits NUMERIC(12,4);
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intContractDetailId, dblUnitsDistributed
+				FROM @LineItems;
+
+				OPEN intListCursor;
+
+				-- Initial fetch attempt
+				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+				   -- Here we do some kind of action that requires us to 
+				   -- process the table variable row-by-row. This example simply
+				   -- uses a PRINT statement as that action (not a very good
+				   -- example).
+				   IF	ISNULL(@intLoopContractId,0) != 0
+				   --EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale'
+				   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+				   
+				   -- Attempt to fetch next row from cursor
+				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				END;
+
+				CLOSE intListCursor;
+				DEALLOCATE intListCursor;
+			END
 			SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
 			IF(@dblRemainingUnits IS NULL)
 			BEGIN
@@ -360,59 +388,38 @@ BEGIN TRY
 			END
 			IF(@dblRemainingUnits != @dblUnits)
 			BEGIN
-					INSERT INTO @ItemsForItemShipmentContract (
-						intItemId
-						,intItemLocationId
-						,intItemUOMId
-						,dtmDate
-						,dblQty
-						,dblUOMQty
-						,dblCost
-						,dblSalesPrice
-						,intCurrencyId
-						,dblExchangeRate
-						,intTransactionId
-						,strTransactionId
-						,intTransactionTypeId
-						,intTransactionDetailId
-						,intLotId
-						,intSubLocationId
-						,intStorageLocationId 
-						,ysnIsStorage
-					)
-					EXEC dbo.uspSCGetScaleItemForItemShipment
-						@intTicketId
-						,@strSourceType
-						,@intUserId
-						,@dblRemainingUnits
-						,0
-						,@intEntityId
-						,NULL
-						,'CNT'
-						,@LineItems
-
-					-- Validate the items to shipment 
-					EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipmentContract; 
-
-					---- Add the items into inventory shipment > sales order type. 
-					BEGIN 
-						EXEC dbo.uspSCAddScaleTicketToItemShipment 
-								@intTicketId
-								,@intUserId
-								,@ItemsForItemShipmentContract
-								,@intEntityId
-								,1
-								,@InventoryShipmentId OUTPUT;
-					END
-
-					BEGIN 
-					SELECT	@strTransactionId = ship.strShipmentNumber
-					FROM	dbo.tblICInventoryShipment ship	        
-					WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
-					END
-
-					EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intEntityId;
-				END
+				UPDATE @LineItems set intTicketId = @intTicketId
+				INSERT INTO @ItemsForItemShipment (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,strTransactionId
+					,intTransactionTypeId
+					,intTransactionDetailId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId 
+					,ysnIsStorage
+				)
+				EXEC dbo.uspSCGetScaleItemForItemShipment
+					@intTicketId
+					,@strSourceType
+					,@intUserId
+					,@dblRemainingUnits
+					,0
+					,@intEntityId
+					,NULL
+					,'CNT'
+					,@LineItems
+			END
 			IF(@dblRemainingUnits > 0)
 			BEGIN
 				INSERT INTO @ItemsForItemShipment (
