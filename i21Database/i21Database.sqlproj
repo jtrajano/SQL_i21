@@ -4260,6 +4260,7 @@
     <Build Include="dbo\Tables\tblPRElectronicFilingW2.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
