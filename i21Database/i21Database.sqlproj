@@ -4257,6 +4257,7 @@
     <Build Include="dbo\Functions\fnICGetCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotCreate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRGetRackPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
