@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFGenerateGT103]
 
 @Guid NVARCHAR(250),
-@FormCodeParam NVARCHAR(50),
-@ScheduleCodeParam NVARCHAR(250),
+@FormCodeParam NVARCHAR(MAX),
+@ScheduleCodeParam NVARCHAR(MAX),
 @Refresh NVARCHAR(5)
 
 AS
