@@ -190,7 +190,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 						SET @value = (CASE WHEN sign(@val1)=sign(@val2) THEN @val1 + @val2 ELSE @val1 - @val2 END)
 						SET @strvalue = (convert(NVARCHAR(30), @value))
 
-						SET @Query  = 'SELECT' + @strvalue
+						SET @Query  = 'SELECT ' + @strvalue
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END

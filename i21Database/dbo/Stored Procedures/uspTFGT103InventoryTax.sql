@@ -36,6 +36,7 @@ IF @Refresh = 'true'
 	BEGIN
 		DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
 	END
+	DELETE FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 	
 DECLARE @tblTempReportingComponent TABLE (
 			intId INT IDENTITY(1,1),

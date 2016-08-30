@@ -93,6 +93,7 @@ DECLARE @tblTempTransaction TABLE (
 		BEGIN
 			DELETE FROM tblTFTransactions --WHERE uniqTransactionGuid = @Guid
 		END
+		DELETE FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strProductCode = 'No record found.'
 
 	SELECT @QueryRC = 'SELECT ''' + REPLACE (@ReportingComponentId,',',''' UNION SELECT ''') + ''''
 	
