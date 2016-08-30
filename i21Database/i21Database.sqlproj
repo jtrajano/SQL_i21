@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -4257,13 +4257,7 @@
     <Build Include="dbo\Functions\fnICGetCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotCreate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
-    <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
-    <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
-    <Build Include="dbo\Functions\fnGetInterestBasedOnTerm.sql" />
-    <Build Include="dbo\Functions\fnIsDue.sql" />
-    <Build Include="dbo\Functions\fnGetDueDate.sql" />
-    <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRGetRackPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
