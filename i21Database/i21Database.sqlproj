@@ -4258,6 +4258,7 @@
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotCreate.sql" />
     <Build Include="dbo\Tables\tblPRIRSCountryCode.sql" />
     <Build Include="dbo\Tables\tblPRElectronicFilingW2.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
