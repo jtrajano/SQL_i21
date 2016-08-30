@@ -360,4 +360,10 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					
 						SET @CountTemplateItem = @CountTemplateItem - 1
 					END
+			DECLARE @isTransactionEmpty NVARCHAR(20)
+			SET @isTransactionEmpty = (SELECT TOP 1 strProductCode FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
+			IF(@isTransactionEmpty = 'No record found.')
+				BEGIN
+					UPDATE tblTFTaxReportSummary SET strColumnValue = 0 WHERE strFormCode = @FormCodeParam
+				END
 END
