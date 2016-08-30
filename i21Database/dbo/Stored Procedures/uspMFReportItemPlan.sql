@@ -27,6 +27,7 @@ BEGIN
 	SELECT @strBlendAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intBlendAttributeId
+		AND strAttributeValue <> ''
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -1081,6 +1082,15 @@ BEGIN
 			,a.intDays
 			,a.strQtyType
 			,a.intDisplayOrder
+			,CASE 
+				WHEN a.strQtyType = 'Inventory'
+					THEN 0.0
+				ELSE SUM(a.dblItemRequired) OVER (
+						PARTITION BY a.strWorkOrderNo
+						,convert(VARCHAR(10), a.dtmPlannedDate, 120)
+						,a.strItemNo
+						)
+				END AS strGrandTotal
 		FROM @tblMFFinalWIPItem a
 		WHERE a.strCompanyLocationName <> 'WD'
 			AND a.strItemNo IN (
@@ -1120,6 +1130,15 @@ BEGIN
 			,a.intDays
 			,a.strQtyType
 			,a.intDisplayOrder
+			,CASE 
+				WHEN a.strQtyType = 'Inventory'
+					THEN 0.0
+				ELSE SUM(a.dblItemRequired) OVER (
+						PARTITION BY a.strWorkOrderNo
+						,convert(VARCHAR(10), a.dtmPlannedDate, 120)
+						,a.strItemNo
+						)
+				END AS strGrandTotal
 		FROM @tblMFFinalWIPItem a
 		WHERE a.strCompanyLocationName <> 'WD'
 			AND (
@@ -1164,6 +1183,15 @@ BEGIN
 			,a.intDays
 			,a.strQtyType
 			,a.intDisplayOrder
+			,CASE 
+				WHEN a.strQtyType = 'Inventory'
+					THEN 0.0
+				ELSE SUM(a.dblItemRequired) OVER (
+						PARTITION BY a.strWorkOrderNo
+						,convert(VARCHAR(10), a.dtmPlannedDate, 120)
+						,a.strItemNo
+						)
+				END AS strGrandTotal
 		FROM @tblMFFinalWIPItem a
 		WHERE a.strCompanyLocationName <> 'WD'
 		ORDER BY strItemNo
