@@ -1,11 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspARImportBillableHours]
-	 @HoursWorkedIDs	AS NVARCHAR(MAX)	= 'all'
-	,@Post				AS BIT				= 0	
-	,@UserId			AS INT				= 1
-	,@IsSuccess			AS BIT				= 0		OUTPUT
-	,@BatchIdUsed		AS NVARCHAR(20)		= NULL	OUTPUT
-	,@SuccessfulCount	AS INT				= 0		OUTPUT
-	,@InvalidCount		AS INT				= 0		OUTPUT
+	 @HoursWorkedIDs		AS NVARCHAR(MAX)	= 'all'
+	,@Post					AS BIT				= 0	
+	,@UserId				AS INT				= 1
+	,@IsSuccess				AS BIT				= 0		OUTPUT
+	,@BatchIdUsed			AS NVARCHAR(20)		= NULL	OUTPUT
+	,@SuccessfulCount		AS INT				= 0		OUTPUT
+	,@InvalidCount			AS INT				= 0		OUTPUT
+	,@DocumentMaintenanceId AS INT				= NULL
 AS
 
 BEGIN
@@ -57,7 +58,7 @@ WHERE
 
 IF EXISTS(SELECT * FROM @NullTermsTable)
 BEGIN
-	RAISERROR('Some of the customers doesn''t have Terms setup.', 11, 1) 
+	RAISERROR(120042, 16, 1) 
 	RETURN 0
 END
 
@@ -88,6 +89,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 				,@ErrorMessage nvarchar(250)
 				
 		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId, @ComLocationId = intCompanyLocationId FROM @NewInvoices
+ 
+ 
+
 				
 		EXEC [dbo].[uspARCreateCustomerInvoice]
 			@EntityCustomerId = @EntityCustomerId,
@@ -95,7 +99,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			@CompanyLocationId = @ComLocationId,
 			@EntityId = @UserId,
 			@NewInvoiceId = @NewInvoiceId OUTPUT,
-			@ErrorMessage = @ErrorMessage OUTPUT
+			@ErrorMessage = @ErrorMessage OUTPUT,
+			@DocumentMaintenanceId = @DocumentMaintenanceId
 			
 		IF @NewInvoiceId IS NULL 
 		BEGIN

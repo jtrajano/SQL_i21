@@ -45,6 +45,7 @@ SELECT
 	,intDaysPassed = DATEDIFF (day, TMO.dtmRequestedDate, GetDate())
 	,strOrderType = 'Outbound'
 	,intPriority = TMO.intPriority
+	,ysnLeakCheckRequired = TMO.ysnLeakCheckRequired
 
 FROM vyuTMGeneratedCallEntry TMO 
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
@@ -95,6 +96,7 @@ SELECT
 	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
 	,strOrderType = 'Outbound'
 	,intPriority = -1
+	,ysnLeakCheckRequired = Cast(0 as Bit)
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
@@ -147,6 +149,7 @@ SELECT
 	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
 	,strOrderType = 'Inbound'
 	,intPriority = -1
+	,ysnLeakCheckRequired = Cast(0 as Bit)
 
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
@@ -199,6 +202,7 @@ SELECT
 	,intDaysPassed = 0
 	,strOrderType = ''
 	,intPriority = -1
+	,ysnLeakCheckRequired = Cast(0 as Bit)
 
 FROM vyuTMCustomerConsumptionSiteInfo TMO
 
@@ -247,6 +251,7 @@ SELECT
 	,intDaysPassed = 0
 	,strOrderType = ''
 	,intPriority = -1
+	,ysnLeakCheckRequired = Cast(0 as Bit)
 
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntity EN ON EN.intEntityId = EL.intEntityId

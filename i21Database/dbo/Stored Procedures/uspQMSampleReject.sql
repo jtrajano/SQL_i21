@@ -27,7 +27,6 @@ BEGIN TRY
 	DECLARE @intStorageLocationId INT
 	DECLARE @intCurrentLotStatusId INT
 	DECLARE @intLotId INT
-	DECLARE @intRejectLotStatusId INT
 	DECLARE @intContractDetailId INT
 	DECLARE @intLoadDetailContainerLinkId INT
 
@@ -45,9 +44,6 @@ BEGIN TRY
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			)
-
-	SELECT @intRejectLotStatusId = ISNULL(intRejectLotStatus, @intLotStatusId)
-	FROM dbo.tblQMCompanyPreference
 
 	BEGIN TRAN
 
@@ -88,10 +84,10 @@ BEGIN TRY
 		FROM dbo.tblICLot
 		WHERE intLotId = @intProductValueId
 
-		IF @intCurrentLotStatusId <> @intRejectLotStatusId
+		IF @intCurrentLotStatusId <> @intLotStatusId
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
-				,@intNewLotStatusId = @intRejectLotStatusId
+				,@intNewLotStatusId = @intLotStatusId
 				,@intUserId = @intLastModifiedUserId
 		END
 	END
@@ -144,10 +140,10 @@ BEGIN TRY
 			FROM @ParentLotData
 			WHERE intSeqNo = @intSeqNo
 
-			IF @intCurrentLotStatusId <> @intRejectLotStatusId
+			IF @intCurrentLotStatusId <> @intLotStatusId
 			BEGIN
 				EXEC uspMFSetLotStatus @intLotId = @intLotId
-					,@intNewLotStatusId = @intRejectLotStatusId
+					,@intNewLotStatusId = @intLotStatusId
 					,@intUserId = @intLastModifiedUserId
 			END
 

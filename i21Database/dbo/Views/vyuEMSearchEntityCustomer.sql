@@ -15,6 +15,8 @@
 	from tblEMEntity b			
 		join tblARCustomer c
 			on c.intEntityCustomerId =b.intEntityId --and c.ysnActive = 1
+		join vyuEMEntityType d
+			on d.intEntityId = b.intEntityId and Customer = 1
 		left join [tblEMEntityLocation] e  
 			on ( ysnDefaultLocation = 1 )AND b.intEntityId = e.intEntityId
 		left join [tblEMEntityToContact] f  

@@ -51,7 +51,7 @@ DECLARE @tblInputItem TABLE (
 
 Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId)
 Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
-Where intSalesOrderId=@intSalesOrderId Group By sd.intItemId,sd.intItemUOMId
+Where intSalesOrderId=@intSalesOrderId AND i.strType NOT IN ('Comment','Other Charge') Group By sd.intItemId,sd.intItemUOMId
 
 Select @intMinSalesOrderItem=MIN(intRowNo) From @tblInputItem
 

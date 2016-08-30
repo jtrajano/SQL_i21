@@ -1,56 +1,147 @@
 ﻿CREATE PROCEDURE [dbo].[uspPOProcessItemReceipt]
-	@poId INT,
-	@userId INT,
-	@receiptNumber NVARCHAR(50) OUTPUT
+	@poId INT
+	,@userId INT
+	,@receiptNumber NVARCHAR(50) OUTPUT
 AS
-BEGIN
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
- 
-DECLARE @itemReceiptId INT, @itemReceiptNumber NVARCHAR(50);
--- Implement your code that validates the transaction you need to process.
 
---Purchase order already closed.
-IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND intOrderStatusId = 3)
-BEGIN
-	RAISERROR(51036, 16, 1)
-	RETURN;
-END
+-- Validations
+BEGIN 
+	--Purchase order already closed.
+	IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND intOrderStatusId = 3)
+	BEGIN
+		RAISERROR(51036, 16, 1)
+		RETURN;
+	END
 
-IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
-BEGIN
-	RAISERROR(51039, 16, 1)
-	RETURN;
-END
+	IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
+	BEGIN
+		RAISERROR(51039, 16, 1)
+		RETURN;
+	END
 
-IF NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail A
-				INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-				WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') AND intPurchaseId = @poId)
-BEGIN
-	RAISERROR('There is no receivable item on this purchase order.', 16, 1);
-	RETURN;
-END
+	IF NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail A
+					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+					WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') AND intPurchaseId = @poId)
+	BEGIN
+		RAISERROR('There is no receivable item on this purchase order.', 16, 1);
+		RETURN;
+	END
+END 
 
--- Add code to lock-out editing of the purchase order after it has been processed.
-  
--- Call inventory stored procedure to process your transaction into "Item Receipt"
-EXEC dbo.uspICProcessToItemReceipt
-	@intSourceTransactionId = @poId
-	,@strSourceType = 'Purchase Order'
-	,@intEntityUserSecurityId = @userId
-	,@InventoryReceiptId = @itemReceiptId OUTPUT
+-- Process the PO to IR 
+BEGIN 
+	DECLARE @ReceiptStagingTable	ReceiptStagingTable,
+			@OtherCharges			ReceiptOtherChargesTableType
 
-IF @@ERROR > 0 
-	RETURN;
+	DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
+			,@intInventoryReceiptId AS INT 
 
-SELECT @itemReceiptNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @itemReceiptId
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+	BEGIN 
+		CREATE TABLE #tmpAddItemReceiptResult 
+		(
+			intSourceId INT,
+			intInventoryReceiptId INT
+		)
+	END 
 
-EXEC dbo.uspPOUpdateStatus @poId
+	INSERT INTO	@ReceiptStagingTable
+	(
+			strReceiptType
+			,intEntityVendorId
+			,intShipFromId
+			,intLocationId
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intContractHeaderId
+			,intContractDetailId
+			,dtmDate
+			,intShipViaId
+			,dblQty
+			,intGrossNetUOMId
+			,dblGross
+			,dblNet
+			,dblCost
+			,intCostUOMId
+			,intCurrencyId
+			,intSubCurrencyCents 
+			,dblExchangeRate
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,ysnIsStorage
+			,intSourceId	
+			,intSourceType		 	
+			,strSourceId
+			,strSourceScreenName
+			,ysnSubCurrency
+			,strVendorRefNo
+			,intFreightTermId
+	)
+	SELECT	
+			strReceiptType			= @ReceiptType_PurchaseOrder
+			,intEntityVendorId		= PO.intEntityVendorId
+			,intShipFromId			= PO.intShipFromId
+			,intLocationId			= PO.intShipToId
+			,intItemId				= PODetail.intItemId
+			,intItemLocationId		= ItemLocation.intItemLocationId
+			,intItemUOMId			= ItemUOM.intItemUOMId
+			,intContractHeaderId	= PODetail.intPurchaseId -- Shown in the Order Id column. 
+			,intContractDetailId	= PODetail.intPurchaseDetailId -- As intLineNo. Link between PO Detail id and IR detail. 
+			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
+			,intShipViaId			= PO.intShipViaId
+			,dblQty					= PODetail.dblQtyOrdered
+			,intGrossNetUOMId		= NULL 
+			,dblGross				= PODetail.dblQtyOrdered
+			,dblNet					= PODetail.dblQtyOrdered
+			,dblCost				= PODetail.dblCost
+			,intCostUOMId			= ItemUOM.intItemUOMId
+			,intCurrencyId			= PO.intCurrencyId
+			,intSubCurrencyCents	= NULL 
+			,dblExchangeRate		= ISNULL(PO.dblExchangeRate, 1) 
+			,intLotId				= NULL 
+			,intSubLocationId		= PODetail.intSubLocationId
+			,intStorageLocationId	= PODetail.intStorageLocationId
+			,ysnIsStorage			= 0
+			,intSourceId			= NULL 
+			,intSourceType		 	= 0 -- None 
+			,strSourceId			= PO.strPurchaseOrderNumber
+			,strSourceScreenName	= @ReceiptType_PurchaseOrder
+			,ysnSubCurrency			= 0 
+			,strVendorRefNo			= PO.strReference
+			,intFreightTermId		= PO.intFreightTermId
 
-SET @receiptNumber = @itemReceiptNumber;
+	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
+				ON PO.intPurchaseId = PODetail.intPurchaseId
+			INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON PODetail.intItemId = ItemUOM.intItemId
+				AND PODetail.intUnitOfMeasureId = ItemUOM.intItemUOMId
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON PODetail.intItemId = ItemLocation.intItemId
+				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+				AND PO.intShipToId = ItemLocation.intLocationId
+	WHERE	PODetail.intPurchaseId = @poId
+			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+			AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
 
-END
+	-- Call this sp to Process the PO to IR. 
+	EXEC dbo.uspICAddItemReceipt 
+			@ReceiptStagingTable
+			,@OtherCharges
+			,@userId;
+
+	-- Get the receipt number generated by uspICAddItemReceipt
+	SELECT	TOP 1 
+			@receiptNumber = strReceiptNumber 
+	FROM	tblICInventoryReceipt r INNER JOIN #tmpAddItemReceiptResult tempR
+				ON r.intInventoryReceiptId = tempR.intInventoryReceiptId
+
+	-- Update the PO Status 
+	EXEC dbo.uspPOUpdateStatus @poId
+END 

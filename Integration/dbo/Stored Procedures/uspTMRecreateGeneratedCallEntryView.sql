@@ -67,6 +67,7 @@ BEGIN
 				,dblLongitude = B.dblLongitude
 				,dblLatitude = B.dblLatitude
 				,intCustomerId = B.intCustomerID
+				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -131,6 +132,7 @@ BEGIN
 				,dblLongitude = B.dblLongitude
 				,dblLatitude = B.dblLatitude
 				,intCustomerId = B.intCustomerID
+				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID

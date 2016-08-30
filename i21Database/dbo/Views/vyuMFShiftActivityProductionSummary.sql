@@ -2,6 +2,7 @@
 AS
 SELECT SA.intShiftActivityId
 	,MC.intLocationId
+	,SA.strShiftActivityNumber
 	,MC.strCellName
 	,SA.dtmShiftDate
 	,S.strShiftName
@@ -20,15 +21,23 @@ SELECT SA.intShiftActivityId
 	,SA.dblTotalProducedQty AS dblTotalProducedQty
 	,ISNULL(((SA.intScheduledRuntime / 60) * SA.dblStdCapacity), 0) AS dblTargetQty
 	,SA.dblTargetEfficiency
-	,CASE 
+	,CASE -- Setting NULL then only average exclude the count
 		WHEN ((((ISNULL(SA.intScheduledRuntime, 0) - ISNULL((SA.intReduceAvailableTime * 60), 0)) / 60) * ISNULL(SA.dblStdCapacity, 0))) = 0
-			THEN 0
-		ELSE ROUND((ISNULL(SA.dblTotalProducedQty, 0) / (((ISNULL(SA.intScheduledRuntime, 0) - ISNULL((SA.intReduceAvailableTime * 60), 0)) / 60) * ISNULL(SA.dblStdCapacity, 0))) * 100, 4)
+			THEN NULL
+		ELSE CASE 
+				WHEN (ROUND((ISNULL(SA.dblTotalProducedQty, 0) / (((ISNULL(SA.intScheduledRuntime, 0) - ISNULL((SA.intReduceAvailableTime * 60), 0)) / 60) * ISNULL(SA.dblStdCapacity, 0))) * 100, 4)) = 0
+					THEN NULL
+				ELSE ROUND((ISNULL(SA.dblTotalProducedQty, 0) / (((ISNULL(SA.intScheduledRuntime, 0) - ISNULL((SA.intReduceAvailableTime * 60), 0)) / 60) * ISNULL(SA.dblStdCapacity, 0))) * 100, 4)
+				END
 		END AS dblEfficiencyPercentage
-	,CASE 
+	,CASE -- Setting NULL then only average exclude the count
 		WHEN ((ISNULL(SA.intScheduledRuntime, 0) / 60) * ISNULL(SA.dblStdCapacity, 0)) = 0
-			THEN 0
-		ELSE ROUND((ISNULL(SA.dblTotalProducedQty, 0) / ((ISNULL(SA.intScheduledRuntime, 0) / 60) * ISNULL(SA.dblStdCapacity, 0))) * 100, 4)
+			THEN NULL
+		ELSE CASE 
+				WHEN (ROUND((ISNULL(SA.dblTotalProducedQty, 0) / ((ISNULL(SA.intScheduledRuntime, 0) / 60) * ISNULL(SA.dblStdCapacity, 0))) * 100, 4)) = 0
+					THEN NULL
+				ELSE ROUND((ISNULL(SA.dblTotalProducedQty, 0) / ((ISNULL(SA.intScheduledRuntime, 0) / 60) * ISNULL(SA.dblStdCapacity, 0))) * 100, 4)
+				END
 		END AS dblEfficiencyWithOutDowntimePercentage
 FROM dbo.tblMFShiftActivity SA
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = SA.intManufacturingCellId

@@ -36,6 +36,8 @@
     [intContractId] INT NULL, 
     [ysnLockPrice] BIT NOT NULL DEFAULT 0, 
     [intRouteId] INT NULL, 
+    [ysnReceived] BIT NOT NULL DEFAULT 0, 
+    [ysnLeakCheckRequired] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])
@@ -394,3 +396,22 @@ CREATE INDEX [IX_tblTMDispatch_intSubstituteProductID] ON [dbo].[tblTMDispatch] 
 GO
 
 CREATE INDEX [IX_tblTMDispatch_intDriverID] ON [dbo].[tblTMDispatch] ([intDriverID])
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Received Flag',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnReceived'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Leak Check Required Flag',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnLeakCheckRequired'

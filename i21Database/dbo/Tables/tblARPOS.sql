@@ -16,7 +16,9 @@
     [intInvoiceId]         INT             NULL,
     [ysnHold]              BIT             CONSTRAINT [DF_tblARPOS_ysnHold] DEFAULT ((0)) NOT NULL,
     [intEntityUserId]      INT             NOT NULL,
+	[intPOSLogId]		   INT             NOT NULL,
     [intConcurrencyId]     INT             NOT NULL,
-    CONSTRAINT [PK_tblARPOS] PRIMARY KEY CLUSTERED ([intPOSId] ASC)
+    CONSTRAINT [PK_tblARPOS] PRIMARY KEY CLUSTERED ([intPOSId] ASC),
+	CONSTRAINT [FK_tblARPOSLog] FOREIGN KEY ([intPOSLogId]) REFERENCES [dbo].[tblARPOSLog] ([intPOSLogId]) 
 );
 

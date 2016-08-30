@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT    
 ,@CardId				INT				
@@ -30,6 +29,19 @@ CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton]
 ,@CountySalesTaxPercentageRate		NUMERIC(18,6)	= 0.000000
 ,@CitySalesTaxPercentageRate  		NUMERIC(18,6)	= 0.000000
 ,@OtherSalesTaxPercentageRate 		NUMERIC(18,6)	= 0.000000
+,@FederalExciseTax1					NUMERIC(18,6)	= 0.000000
+,@FederalExciseTax2					NUMERIC(18,6)	= 0.000000
+,@StateExciseTax1					NUMERIC(18,6)	= 0.000000
+,@StateExciseTax2					NUMERIC(18,6)	= 0.000000
+,@StateExciseTax3					NUMERIC(18,6)	= 0.000000
+,@CountyTax1						NUMERIC(18,6)	= 0.000000
+,@CityTax1							NUMERIC(18,6)	= 0.000000
+,@StateSalesTax						NUMERIC(18,6)	= 0.000000
+,@CountySalesTax					NUMERIC(18,6)	= 0.000000
+,@CitySalesTax						NUMERIC(18,6)	= 0.000000
+
+,@strGUID							NVARCHAR(MAX)	= ''
+,@strProcessDate					NVARCHAR(MAX)	= ''
 
 AS
 
@@ -67,6 +79,7 @@ BEGIN
 	DECLARE	@runDate						DATETIME
 
 	DECLARE @intPriceProfileId				INT
+	DECLARE @intPriceProfileDetailId		INT
 	DECLARE @intPriceIndexId 				INT
 	DECLARE @intSiteGroupId 				INT
 
@@ -145,8 +158,24 @@ BEGIN
 
 	END
 
-	SET @guid		= NEWID()
-	SET	@runDate	= GETDATE()
+	
+	IF(@strGUID IS NULL OR @strGUID = '')
+	BEGIN
+		SET @guid		= NEWID()
+	END
+	ELSE
+	BEGIN
+		SET @guid		= @strGUID
+	END
+
+	IF(@strProcessDate IS NULL OR @strProcessDate = '')
+	BEGIN
+		SET @runDate		= GETDATE()
+	END
+	ELSE
+	BEGIN
+		SET @runDate		= @strProcessDate
+	END
 
 	 
 	SET @ysnPostedOrigin	= @PostedOrigin
@@ -196,12 +225,10 @@ BEGIN
 		WHERE cfCard.intCardId = @intCardId
 	END
 	
-	
-
-
 	--GET COMPANY LOCATION ID--
 	SELECT TOP 1
-		@intLocationId = intARLocationId
+		@intLocationId = intARLocationId,
+		@intSiteGroupId = intAdjustmentSiteGroupId
 	FROM tblCFSite as cfSite
 	WHERE cfSite.intSiteId = @intSiteId
 
@@ -257,8 +284,9 @@ BEGIN
 	@CFPostedOrigin				=	@ysnPostedOrigin,      
 	@CFPostedCSV				=	@ysnPostedCSV,      
 	@CFPriceProfileId			=	@intPriceProfileId		output,
+	@CFPriceProfileDetailId		=	@intPriceProfileDetailId		output,
 	@CFPriceIndexId				=	@intPriceIndexId 		output,
-	@CFSiteGroupId				= 	@intSiteGroupId 		output
+	@CFSiteGroupId				= 	@intSiteGroupId 		
 
 	SELECT TOP 1 
 	@strPriceProfileId = cfPriceProfile.strPriceProfile
@@ -267,6 +295,7 @@ BEGIN
 	INNER JOIN tblCFPriceProfileDetail AS cfPriceProfileDetail 
 	ON cfPriceProfile.intPriceProfileHeaderId = cfPriceProfileDetail.intPriceProfileHeaderId
 	WHERE cfPriceProfile.intPriceProfileHeaderId = @intPriceProfileId
+	AND cfPriceProfileDetail.intPriceProfileDetailId = @intPriceProfileDetailId
 
 	SELECT TOP 1
 	@strPriceIndexId = strPriceIndex
@@ -447,6 +476,9 @@ BEGIN
 	DECLARE @LineItemTaxDetailStagingTable LineItemTaxDetailStagingTable
 
 	DECLARE @strTaxCodes			VARCHAR(MAX) 
+	DECLARE @intLoopTaxGroupID 	  INT
+	DECLARE @intLoopTaxCodeID 	  INT
+	DECLARE @intLoopTaxClassID	  INT
 
 	IF((@ysnPostedCSV IS NULL OR @ysnPostedCSV = 0 ) AND (@ysnPostedOrigin = 0 OR @ysnPostedCSV IS NULL))
 	BEGIN
@@ -506,13 +538,20 @@ BEGIN
 				,@StateSalesTaxPercentageRate 	=@StateSalesTaxPercentageRate 	
 				,@CountySalesTaxPercentageRate	=@CountySalesTaxPercentageRate		
 				,@CitySalesTaxPercentageRate  	=@CitySalesTaxPercentageRate  		
-				,@OtherSalesTaxPercentageRate 	=@OtherSalesTaxPercentageRate 		
+				,@OtherSalesTaxPercentageRate 	=@OtherSalesTaxPercentageRate 	
+				,@FederalExciseTax1				=@FederalExciseTax1	
+				,@FederalExciseTax2				=@FederalExciseTax2	
+				,@StateExciseTax1				=@StateExciseTax1	
+				,@StateExciseTax2				=@StateExciseTax2	
+				,@StateExciseTax3				=@StateExciseTax3	
+				,@CountyTax1					=@CountyTax1		
+				,@CityTax1						=@CityTax1			
+				,@StateSalesTax					=@StateSalesTax		
+				,@CountySalesTax				=@CountySalesTax	
+				,@CitySalesTax					=@CitySalesTax		
 
 				IF(@IsImporting = 0)
 				BEGIN
-					DECLARE @intLoopTaxGroupID 	  INT
-					DECLARE @intLoopTaxCodeID 	  INT
-					DECLARE @intLoopTaxClassID	  INT
 
 					SELECT * 
 					INTO #ItemTax
@@ -545,7 +584,7 @@ BEGIN
 					DROP TABLE #ItemTax
 				END
 
-				
+		
 				
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
@@ -563,10 +602,10 @@ BEGIN
 						 @intTransactionId
 						,'Calculation'
 						,@runDate
-						,ISNULL(strTaxExemptReason,ISNULL(strNotes,ISNULL(strReason,'Invalid Setup -' + strTaxCode)))
+						,ISNULL(strReason,'Invalid Setup -' + strTaxCode)
 						,@guid
 					FROM @tblCFRemoteTax
-					WHERE (ysnInvalidSetup =1)
+					WHERE (ysnInvalidSetup =1 AND LOWER(strReason) NOT LIKE '%item category%')
 				END
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
@@ -653,17 +692,19 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,(@dblOriginalPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,NULL
-					,@dblOriginalPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
+					,NULL
 					,NULL
 					,NULL
 				)
@@ -703,17 +744,19 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,(@dblPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,NULL
-					,@dblPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
+					,NULL
 					,NULL
 					,NULL
 				)
@@ -721,6 +764,7 @@ BEGIN
 				END
 				ELSE
 				BEGIN
+
 
 				INSERT INTO @tblCFOriginalTax	
 				(
@@ -757,7 +801,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
@@ -768,6 +812,8 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
+					,NULL
 					,NULL
 					,NULL
 				)
@@ -807,7 +853,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
@@ -818,6 +864,8 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
+					,NULL
 					,NULL
 					,NULL
 				)
@@ -928,17 +976,19 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,(@dblOriginalPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,@intTaxGroupId
-					,@dblOriginalPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,NULL
+					,NULL
 					,NULL
 					,NULL
 				)
@@ -977,20 +1027,26 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,(@dblPrice * @dblQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
 					,@intCustomerId
 					,@intLocationId
 					,@intTaxGroupId
-					,@dblPrice
+					,0
 					,@dtmTransactionDate
 					,NULL
 					,1
 					,NULL
 					,NULL
+					,NULL
+					,NULL
 				)
+
+				
+
+					--SELECT * FROM @tblCFOriginalTax
 
 				END
 				ELSE
@@ -1031,7 +1087,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblOriginalPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
@@ -1042,6 +1098,8 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,NULL
+					,NULL
 					,NULL
 					,NULL
 				)
@@ -1080,7 +1138,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 					 @dblQuantity
-					,@dblPrice
+					,0
 					,@LineItemTaxDetailStagingTable
 					,0
 					,@intItemId
@@ -1093,7 +1151,13 @@ BEGIN
 					,1
 					,NULL
 					,NULL
+					,NULL
+					,NULL
 				)
+
+				
+
+				--	SELECT * FROM @tblCFOriginalTax
 
 				END
 			
@@ -1152,11 +1216,141 @@ BEGIN
 				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
 			END
 
-
-
-
-
 	END
+	ELSE
+	BEGIN
+				--POSTED TRANSACTION--
+
+				INSERT INTO @tblCFRemoteTax(
+				 [intTransactionDetailTaxId]	
+				,[intTransactionDetailId]  		
+				,[intTaxGroupMasterId]			
+				,[intTaxGroupId]				
+				,[intTaxCodeId]					
+				,[intTaxClassId]				
+				,[strTaxableByOtherTaxes]		
+				,[strCalculationMethod]			
+				,[dblRate]						
+				,[dblTax]						
+				,[dblAdjustedTax]				
+				,[intTaxAccountId]    			
+				,[ysnSeparateOnInvoice]			
+				,[ysnCheckoffTax]				
+				,[strTaxCode]					
+				,[ysnTaxExempt]			
+				,[strTaxGroup]					
+				,[ysnInvalidSetup]					
+				,[strReason]					
+				,[strTaxExemptReason]			
+				)	
+				EXEC dbo.[uspCFGetItemTaxes] 
+				 @intNetworkId					=@intNetworkId
+				,@intARItemId					=@intItemId
+				,@intARItemLocationId			=@intLocationId
+				,@intCustomerLocationId			=@intLocationId
+				,@dtmTransactionDate			=@dtmTransactionDate
+				,@intCustomerId					=@intCustomerId
+				,@strTaxCodeId					=@strTaxCodes
+				,@TaxState						=@TaxState
+				,@FederalExciseTaxRate        	=@FederalExciseTaxRate        	
+				,@StateExciseTaxRate1         	=@StateExciseTaxRate1         	
+				,@StateExciseTaxRate2         	=@StateExciseTaxRate2         	
+				,@CountyExciseTaxRate         	=@CountyExciseTaxRate         	
+				,@CityExciseTaxRate           	=@CityExciseTaxRate           	
+				,@StateSalesTaxPercentageRate 	=@StateSalesTaxPercentageRate 	
+				,@CountySalesTaxPercentageRate	=@CountySalesTaxPercentageRate		
+				,@CitySalesTaxPercentageRate  	=@CitySalesTaxPercentageRate  		
+				,@OtherSalesTaxPercentageRate 	=@OtherSalesTaxPercentageRate 		
+				,@FederalExciseTax1				=@FederalExciseTax1	
+				,@FederalExciseTax2				=@FederalExciseTax2	
+				,@StateExciseTax1				=@StateExciseTax1	
+				,@StateExciseTax2				=@StateExciseTax2	
+				,@StateExciseTax3				=@StateExciseTax3	
+				,@CountyTax1					=@CountyTax1		
+				,@CityTax1						=@CityTax1			
+				,@StateSalesTax					=@StateSalesTax		
+				,@CountySalesTax				=@CountySalesTax	
+				,@CitySalesTax					=@CitySalesTax
+
+				INSERT INTO @tblCFTransactionTax
+				(
+					 [intTransactionDetailTaxId]	
+					,[intInvoiceDetailId]  		
+					,[intTaxGroupMasterId]			
+					,[intTaxGroupId]				
+					,[intTaxCodeId]					
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]		
+					,[strCalculationMethod]			
+					,[dblRate]			
+					,[dblExemptionPercent]			
+					,[dblTax]						
+					,[dblAdjustedTax]				
+					,[intSalesTaxAccountId]    			
+					,[ysnSeparateOnInvoice]			
+					,[ysnCheckoffTax]				
+					,[strTaxCode]					
+					,[ysnTaxExempt]			
+					,[ysnInvalidSetup]				
+					,[strTaxGroup]					
+					,[strNotes]			
+					,[dblCalculatedTax]
+					,[dblOriginalTax]	
+				)	
+				SELECT 
+					 intTransactionDetailTaxId
+					,intTransactionDetailId
+					,intTaxGroupMasterId
+					,intTaxGroupId
+					,intTaxCodeId
+					,intTaxClassId
+					,strTaxableByOtherTaxes
+					,strCalculationMethod
+					,0
+					,dblExemptionPercent
+					,dblTax
+					,dblAdjustedTax
+					,intTaxAccountId
+					,ysnSeparateOnInvoice
+					,ysnCheckoffTax
+					,strTaxCode
+					,ysnTaxExempt
+					,0
+					,strTaxGroup
+					,strNotes
+					,dblRate
+					,dblRate
+				FROM @tblCFRemoteTax
+				WHERE (intTaxClassId IS NOT NULL AND intTaxClassId > 0)
+				AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+
+
+				SELECT * FROM @tblCFRemoteTax
+				
+				---------------------------------------------------
+				--				LOG INVALID TAX SETUP			 --
+				---------------------------------------------------
+				IF (@intTransactionId is not null)
+				BEGIN
+					INSERT INTO tblCFTransactionNote (
+						intTransactionId
+						,strProcess
+						,dtmProcessDate
+						,strNote
+						,strGuid
+					)
+					SELECT 
+						 @intTransactionId
+						,'Importing'
+						,@runDate
+						,ISNULL(strReason,'Invalid Setup -' + strTaxCode)
+						,@guid
+					FROM @tblCFRemoteTax
+					WHERE (intTaxClassId IS NULL OR intTaxClassId = 0)
+				AND (intTaxCodeId IS NULL OR intTaxCodeId = 0)
+				END
+	END
+	
 
 	---------------------------------------------------
 	--				TAX COMPUTATION					 --
@@ -1288,7 +1482,7 @@ BEGIN
 		BEGIN
 			SET @ysnInvalid = 1
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',GETDATE(),NEWID(), @intTransactionId, 'Duplicate transaction history found.')
+			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Duplicate transaction history found.')
 		END
 	END
 	---------------------------------------------------
@@ -1441,6 +1635,44 @@ BEGIN
 	---------------------------------------------------
 	--					TAXES OUT					 --
 	---------------------------------------------------
+
+	
+	---------------------------------------------------
+	--					INDEX PRICING				 --
+	---------------------------------------------------
+	IF((@intPriceIndexId > 0 AND @intPriceIndexId IS NOT NULL) AND (@strPriceIndexId IS NOT NULL) AND (@dblPriceIndexRate <=0 OR @dblPriceIndexRate IS NULL))
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'No index price found.')
+	END
+	---------------------------------------------------
+	--					INDEX PRICING				 --
+	---------------------------------------------------
+
+
+	---------------------------------------------------
+	--					ZERO PRICING				 --
+	---------------------------------------------------
+	DECLARE @dblCalculatedPricing NUMERIC(18,6)
+	SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+	IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
+	END
+
+	
+	DECLARE @dblOriginalPricing NUMERIC(18,6)
+	SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+	IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+	END
+	---------------------------------------------------
+	--					ZERO PRICING				 --
+	---------------------------------------------------
+
 
 	---------------------------------------------------
 	--					PRICE OUT					 --

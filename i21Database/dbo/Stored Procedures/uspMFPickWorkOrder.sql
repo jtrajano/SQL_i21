@@ -63,6 +63,7 @@ BEGIN TRY
 		,@intCategoryId INT
 		,@intItemIssuedUOMId INT
 		,@intStorageLocationId1 NUMERIC(18, 6)
+		,@intRecipeItemUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -114,6 +115,7 @@ BEGIN TRY
 		intItemRecordId INT Identity(1, 1)
 		,intItemId INT
 		,dblReqQty NUMERIC(18, 6)
+		,intItemUOMId int
 		,intStorageLocationId INT
 		,intConsumptionMethodId INT
 		,strLotTracking NVARCHAR(50)
@@ -283,6 +285,7 @@ BEGIN TRY
 	INSERT INTO @tblItem (
 		intItemId
 		,dblReqQty
+		,intItemUOMId 
 		,intStorageLocationId
 		,intConsumptionMethodId
 		,strLotTracking
@@ -297,6 +300,7 @@ BEGIN TRY
 				THEN CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS NUMERIC(38, 20))
 			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
 			END AS RequiredQty
+			,ri.intItemUOMId 
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 		,I.strLotTracking
@@ -348,6 +352,7 @@ BEGIN TRY
 				ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
+			,ri.intItemUOMId
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 		,I.strLotTracking
@@ -433,6 +438,7 @@ BEGIN TRY
 
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
+			,@intRecipeItemUOMId=intItemUOMId
 			,@intStorageLocationId = intStorageLocationId
 			,@intConsumptionMethodId = intConsumptionMethodId
 			,@strLotTracking = strLotTracking

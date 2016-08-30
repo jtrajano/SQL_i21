@@ -142,6 +142,9 @@
     <None Include="Scripts\Pre-Deployment\12_EM\16_Drop_tblEntity_related_constraints.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\18_FixDuplicateLocationEntry.sql" />
     <None Include="Scripts\Pre-Deployment\16_HD\OpportunitySourceDataFix.sql" />
+    <None Include="stroh1620.publish.xml" />
+    <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\01_Delete_Charges_No_Shipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -155,6 +158,7 @@
     <None Include="Scripts\Pre-Deployment\15_GR\1_ConstraintDropQuery.sql" />
     <None Include="Scripts\Pre-Deployment\18_IU\1_DataCleanUp.sql" />
     <None Include="Scripts\Pre-Deployment\20_CF\FixeDataWithContraints.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\6_TicketManagement.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />
@@ -263,5 +267,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\19_CleanEntityPhoneNumber.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\12_EM\16_CleanCustomerProductVersion.sql" />
   </ItemGroup>
 </Project>

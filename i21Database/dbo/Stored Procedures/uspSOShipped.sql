@@ -31,6 +31,8 @@ BEGIN
 					
 		SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @qtyToPost = dblQuantity FROM @OrderToUpdate ORDER BY intSalesOrderId        
 
+		EXEC [dbo].[uspSOInsertTransactionDetail] @intSalesOrderId
+
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId, 0, @isDelete
 
 		EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnPost ,@qtyToPost
@@ -54,6 +56,7 @@ BEGIN
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId
 	END
 
-	EXEC dbo.uspARUpdateInTransit @intTransactionId, @ysnPost, 1
+	--IC-2198: Commented the code below. In-Transit Outbound should be updated by IC-Shipment Posting. 
+	--EXEC dbo.uspARUpdateInTransit @intTransactionId, @ysnPost, 1
 
 END

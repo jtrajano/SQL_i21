@@ -32,7 +32,7 @@ BEGIN
 	LEFT JOIN tblTRImportRackPriceDetailItem DetailItem ON DetailItem.intImportRackPriceDetailId = Detail.intImportRackPriceDetailId
 	WHERE Detail.intImportRackPriceId = @ImportRackPriceId
 
-	SELECT RackPrice.intImportRackPriceDetailId
+	SELECT DISTINCT RackPrice.intImportRackPriceDetailId
 		, RackPrice.intImportRackPriceDetailItemId
 		, SearchValue.intSupplyPointId
 		, SearchValue.strSupplier
@@ -43,6 +43,7 @@ BEGIN
 	INTO #tmpPatchTable
 	FROM #tmpRackPrice RackPrice
 	LEFT JOIN vyuTRGetSupplyPointSearchValue SearchValue ON SearchValue.intKeyId = RackPrice.intKeyId
+	WHERE ISNULL(SearchValue.intSupplyPointId, '') <> 0 AND ISNULL(SearchValue.intItemId, '') <> ''
 
 	UPDATE tblTRImportRackPriceDetail
 	SET tblTRImportRackPriceDetail.intSupplyPointId = #tmpPatchTable.intSupplyPointId

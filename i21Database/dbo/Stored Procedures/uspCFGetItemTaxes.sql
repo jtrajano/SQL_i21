@@ -16,6 +16,16 @@
 	,@CountySalesTaxPercentageRate	NUMERIC(18,6)	= 0.000000
 	,@CitySalesTaxPercentageRate  	NUMERIC(18,6)	= 0.000000
 	,@OtherSalesTaxPercentageRate 	NUMERIC(18,6)	= 0.000000
+	,@FederalExciseTax1				NUMERIC(18,6)	= 0.000000
+	,@FederalExciseTax2				NUMERIC(18,6)	= 0.000000
+	,@StateExciseTax1				NUMERIC(18,6)	= 0.000000
+	,@StateExciseTax2				NUMERIC(18,6)	= 0.000000
+	,@StateExciseTax3				NUMERIC(18,6)	= 0.000000
+	,@CountyTax1					NUMERIC(18,6)	= 0.000000
+	,@CityTax1						NUMERIC(18,6)	= 0.000000
+	,@StateSalesTax					NUMERIC(18,6)	= 0.000000
+	,@CountySalesTax				NUMERIC(18,6)	= 0.000000
+	,@CitySalesTax					NUMERIC(18,6)	= 0.000000
 AS    
 		
 SELECT
@@ -51,7 +61,17 @@ FROM
 	,@StateSalesTaxPercentageRate 	
 	,@CountySalesTaxPercentageRate		
 	,@CitySalesTaxPercentageRate  		
-	,@OtherSalesTaxPercentageRate 	
+	,@OtherSalesTaxPercentageRate 
+	,@FederalExciseTax1	
+	,@FederalExciseTax2	
+	,@StateExciseTax1	
+	,@StateExciseTax2	
+	,@StateExciseTax3	
+	,@CountyTax1		
+	,@CityTax1			
+	,@StateSalesTax		
+	,@CountySalesTax	
+	,@CitySalesTax			
 	,@intNetworkId
 	,@intARItemId				
 	,@intARItemLocationId			

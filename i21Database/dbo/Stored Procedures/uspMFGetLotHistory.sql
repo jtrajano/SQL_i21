@@ -38,6 +38,7 @@ BEGIN
 	,strOldVendorLotNo NVARCHAR(50)COLLATE Latin1_General_CI_AS
 	,strNotes NVARCHAR(50)COLLATE Latin1_General_CI_AS
 	,strUser NVARCHAR(50)COLLATE Latin1_General_CI_AS
+	,strBatchId nvarchar(50)COLLATE Latin1_General_CI_AS
 	)
 
 
@@ -118,6 +119,7 @@ BEGIN
 		,'' AS strOldVendorLotNo
 		,'' AS strNotes
 		,us.strUserName AS strUser
+		,ilt.strBatchId 
 	FROM tblICLot l
 	LEFT JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -238,6 +240,7 @@ BEGIN
 			,'' AS strOldVendorLotNo
 			,'' AS strNotes
 			,us.strUserName AS strUser
+			,ilt.strBatchId 
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		LEFT JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -318,7 +321,7 @@ BEGIN
 		,'' AS strOldVendorLotNo
 		,'' AS strNotes
 		,us.strUserName AS strUser
-		
+		,ia.strAdjustmentNo  As strBatchId
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId

@@ -132,7 +132,7 @@ SELECT
 								''
 							  END
 	,[dblCustomerARBalance]	= ARC.[dblARBalance]
-	,[dblPendingInvoice]	= ISNULL((SELECT SUM(ISNULL(tblARInvoice.[dblInvoiceTotal], 0.00)) FROM tblARInvoice WHERE tblARInvoice.[intEntityCustomerId] = ARP.[intEntityCustomerId] AND tblARInvoice.[ysnPosted] = 0), 0.00)
+	,[dblPendingInvoice]	= ISNULL((SELECT SUM(ISNULL(tblARInvoice.[dblInvoiceTotal], 0.00)) FROM tblARInvoice WHERE tblARInvoice.[intEntityCustomerId] = ARP.[intEntityCustomerId] AND tblARInvoice.[ysnPosted] = 0 AND ((tblARInvoice.strType = 'Service Charge' AND tblARInvoice.ysnForgiven = 0) OR ((tblARInvoice.strType <> 'Service Charge' AND tblARInvoice.ysnForgiven = 1) OR (tblARInvoice.strType <> 'Service Charge' AND tblARInvoice.ysnForgiven = 0)))), 0.00)
 	,[dblPendingPayment]	= ISNULL((SELECT SUM(ISNULL(tblARPayment.[dblAmountPaid], 0.00)) FROM tblARPayment WHERE tblARPayment.[intEntityCustomerId] = ARP.[intEntityCustomerId] AND tblARPayment.[ysnPosted] = 0), 0.00)
 	,[intInvoiceId]			= ARI.[intInvoiceId]
 	,[strInvoiceNumber]		= ARI.[strInvoiceNumber]

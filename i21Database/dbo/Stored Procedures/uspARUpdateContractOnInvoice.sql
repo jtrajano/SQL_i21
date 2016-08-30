@@ -15,52 +15,53 @@ SET ANSI_WARNINGS OFF
 -- Get the details from the invoice 
 BEGIN TRY
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
-	INSERT INTO @ItemsFromInvoice (
-		-- Header
-		 [intInvoiceId]
-		,[strInvoiceNumber]
-		,[intEntityCustomerId]
-		,[dtmDate]
-		,[intCurrencyId]
-		,[intCompanyLocationId]
-		,[intDistributionHeaderId]
+	INSERT INTO @ItemsFromInvoice 
+	--(
+	--	-- Header
+	--	 [intInvoiceId]
+	--	,[strInvoiceNumber]
+	--	,[intEntityCustomerId]
+	--	,[dtmDate]
+	--	,[intCurrencyId]
+	--	,[intCompanyLocationId]
+	--	,[intDistributionHeaderId]
 
-		-- Detail 
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strItemNo]
-		,[strItemDescription]
-		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
-		,[intItemUOMId]
-		,[dblQtyOrdered]
-		,[dblQtyShipped]
-		,[dblDiscount]
-		,[dblPrice]
-		,[dblTotalTax]
-		,[dblTotal]
-		,[intServiceChargeAccountId]
-		,[intInventoryShipmentItemId]
-		,[intSalesOrderDetailId]
-		,[intShipmentPurchaseSalesContractId]
-		,[intSiteId]
-		,[strBillingBy]
-		,[dblPercentFull]
-		,[dblNewMeterReading]
-		,[dblPreviousMeterReading]
-		,[dblConversionFactor]
-		,[intPerformerId]
-		,[intContractHeaderId]
-		,[strContractNumber]
-		,[strMaintenanceType]
-		,[strFrequency]
-		,[dtmMaintenanceDate]
-		,[dblMaintenanceAmount]
-		,[dblLicenseAmount]
-		,[intContractDetailId]
-		,[intTicketId]
-		,[ysnLeaseBilling]
-	)
+	--	-- Detail 
+	--	,[intInvoiceDetailId]
+	--	,[intItemId]
+	--	,[strItemNo]
+	--	,[strItemDescription]
+	--	,[intSCInvoiceId]
+	--	,[strSCInvoiceNumber]
+	--	,[intItemUOMId]
+	--	,[dblQtyOrdered]
+	--	,[dblQtyShipped]
+	--	,[dblDiscount]
+	--	,[dblPrice]
+	--	,[dblTotalTax]
+	--	,[dblTotal]
+	--	,[intServiceChargeAccountId]
+	--	,[intInventoryShipmentItemId]
+	--	,[intSalesOrderDetailId]
+	--	,[intShipmentPurchaseSalesContractId]
+	--	,[intSiteId]
+	--	,[strBillingBy]
+	--	,[dblPercentFull]
+	--	,[dblNewMeterReading]
+	--	,[dblPreviousMeterReading]
+	--	,[dblConversionFactor]
+	--	,[intPerformerId]
+	--	,[intContractHeaderId]
+	--	,[strContractNumber]
+	--	,[strMaintenanceType]
+	--	,[strFrequency]
+	--	,[dtmMaintenanceDate]
+	--	,[dblMaintenanceAmount]
+	--	,[dblLicenseAmount]
+	--	,[intContractDetailId]
+	--	,[intTicketId]
+	--	,[ysnLeaseBilling]
+	--)
 	EXEC dbo.[uspARGetItemsFromInvoice]
 			@intInvoiceId = @TransactionId
 
@@ -120,6 +121,7 @@ BEGIN TRY
 		AND D.[intItemId] = TD.[intItemId]
 		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
+		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
 		
 	UNION ALL
 
@@ -153,6 +155,7 @@ BEGIN TRY
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
+		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
 		
 	UNION ALL
 
@@ -186,6 +189,7 @@ BEGIN TRY
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
+		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
 		
 	UNION ALL
 		
@@ -218,6 +222,7 @@ BEGIN TRY
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
+		AND (ISNULL(D.intLoadDetailId, 0) = 0 AND ISNULL(H.intLoadId, 0) = 0)
 		
 	UNION ALL	
 
@@ -244,6 +249,7 @@ BEGIN TRY
 		AND TD.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
+		AND ISNULL(H.intLoadId, 0) = 0
 		
 	UNION ALL
 		
@@ -270,6 +276,7 @@ BEGIN TRY
 		AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
 		AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)
+		AND (ISNULL(Detail.intLoadDetailId, 0) = 0 AND ISNULL(Header.intLoadId, 0) = 0)
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess

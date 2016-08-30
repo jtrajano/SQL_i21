@@ -4,6 +4,7 @@
 	,@ItemPrepayTypeId				INT				= 0
 	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
 	,@ItemIsInventory				BIT				= 0
+	,@ItemIsBlended					BIT				= 0
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0		
@@ -31,6 +32,13 @@
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
+	,@ItemRecipeId					INT				= NULL
+	,@ItemSublocationId				INT				= NULL
+	,@ItemCostTypeId				INT				= NULL
+	,@ItemMarginById				INT				= NULL
+	,@ItemCommentTypeId				INT				= NULL
+	,@ItemMargin					NUMERIC(18,6)	= NULL
+	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
@@ -122,6 +130,13 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 			,@ItemRecipeItemId				= @ItemRecipeItemId
+			,@ItemRecipeId					= @ItemRecipeId
+			,@ItemSublocationId				= @ItemSublocationId
+			,@ItemCostTypeId				= @ItemCostTypeId
+			,@ItemMarginById				= @ItemMarginById
+			,@ItemCommentTypeId				= @ItemCommentTypeId
+			,@ItemMargin					= @ItemMargin
+			,@ItemRecipeQty					= @ItemRecipeQty
 			,@ItemShipmentNumber			= @ItemShipmentNumber
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
@@ -151,6 +166,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
 			,@SubCurrency					= @SubCurrency
+			,@ItemIsBlended					= @ItemIsBlended
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -171,7 +187,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			RETURN 0;
 		END CATCH
 	END
-ELSE IF ISNULL(@ItemId, 0) > 0
+ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 	BEGIN
 		BEGIN TRY
 			INSERT INTO tblARInvoiceDetail
@@ -204,7 +220,15 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[strMaintenanceType]
 				,[strFrequency]
 				,[dtmMaintenanceDate]
-				,[ysnSubCurrency])
+				,[ysnSubCurrency]
+				,[ysnBlended]
+				,[intRecipeId]
+				,[intSubLocationId]
+				,[intCostTypeId]
+				,[intMarginById]
+				,[intCommentTypeId]
+				,[dblMargin]
+				,[dblRecipeQuantity])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -236,6 +260,14 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemFrequency
 				,@ItemMaintenanceDate
 				,@SubCurrency
+				,@ItemIsBlended
+				,@ItemRecipeId
+				,@ItemSublocationId
+				,@ItemCostTypeId
+				,@ItemMarginById
+				,@ItemCommentTypeId
+				,@ItemMargin
+				,@ItemRecipeQty
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -262,11 +294,14 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 			RETURN 0;
 		END CATCH
 	END
-ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecimal) <> 0 )
+ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecimal) <> 0 )) AND (ISNULL(@ItemCommentTypeId, 0) IN (0,1,3))
 	BEGIN
+		SET @ItemId = CASE WHEN (ISNULL(@ItemCommentTypeId, 0) <> 0) THEN @ItemId ELSE NULL END
+		
 		BEGIN TRY
 		EXEC [dbo].[uspARAddMiscItemToInvoice]
 			 @InvoiceId						= @InvoiceId
+			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
 			,@ItemPrepayRate				= @ItemPrepayRate
 			,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
@@ -282,6 +317,14 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
 			,@SubCurrency					= @SubCurrency
+			,@ItemRecipeItemId				= @ItemRecipeItemId
+			,@ItemRecipeId					= @ItemRecipeId
+			,@ItemSublocationId				= @ItemSublocationId
+			,@ItemCostTypeId				= @ItemCostTypeId
+			,@ItemMarginById				= @ItemMarginById
+			,@ItemCommentTypeId				= @ItemCommentTypeId
+			,@ItemMargin					= @ItemMargin
+			,@ItemRecipeQty					= @ItemRecipeQty
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

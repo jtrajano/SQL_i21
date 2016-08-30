@@ -142,3 +142,7 @@ BEGIN
 	JOIN tblICCommodityUnitMeasure b ON b.intCommodityId=a.intCommodityId AND b.ysnStockUnit=1   
 END
 GO
+IF EXISTS(SELECT intStorageScheduleTypeId FROM tblSCDistributionOption)
+BEGIN
+	update tblSCDistributionOption set intStorageScheduleTypeId = (SELECT intStorageScheduleTypeId  from tblGRStorageType WHERE strStorageTypeCode = strDistributionOption)
+END

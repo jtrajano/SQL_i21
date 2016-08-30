@@ -16,6 +16,8 @@ SET ANSI_WARNINGS OFF
 DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
+DECLARE @dblTicketGross AS DECIMAL (38, 20)
+DECLARE @dblTicketTare AS DECIMAL (38, 20)
 DECLARE @intScaleStationId AS INT
 --DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
@@ -58,8 +60,9 @@ BEGIN
 		,intInventoryReceiptId INT
 	)
 END 
-
-
+SELECT TOP 1 @dblTicketGross = ((SCS.dblSplitPercent * SC.dblGrossWeight) / 100) , @dblTicketTare = ((SCS.dblSplitPercent * SC.dblTareWeight) / 100)  FROM tblSCTicket SC
+INNER JOIN tblSCTicketSplit SCS ON SCS.intTicketId = SC.intTicketId AND SCS.intCustomerId = 8
+order by intTicketSplitId desc
 -- Insert Entries to Stagging table that needs to processed to Transport Load
 INSERT into @ReceiptStagingTable(
 		-- Header
@@ -136,18 +139,22 @@ SELECT
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
 		,dblFreightRate				= SC.dblFreightRate
-		,dblGross					= SC.dblGrossWeight
-		,dblNet						= SC.dblGrossWeight - SC.dblTareWeight
+		,dblGross					=
+									CASE 
+										WHEN SC.strDistributionOption = 'SPL' THEN @dblTicketGross
+										ELSE SC.dblGrossWeight
+									END
+		,dblNet						= CASE 
+										WHEN SC.strDistributionOption = 'SPL' THEN dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,LI.dblQty)
+										ELSE SC.dblGrossWeight - SC.dblTareWeight
+									END
 		,intSourceId				= SC.intTicketId
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
-FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
-			ON ItemUOM.intItemId = SC.intItemId
-			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
-			INNER JOIN dbo.tblICUnitMeasure UOM
-			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-			LEFT JOIN dbo.tblCTContractDetail CNT
-			ON CNT.intContractDetailId = LI.intTransactionDetailId
+FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
+		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
+		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 
@@ -1058,7 +1065,7 @@ ELSE
 								,[intCostCurrencyId]  				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
-								,[strCostMethod]					= 'Per Unit'
+								,[strCostMethod]                    = ContractCost.strCostMethod
 								,[dblRate]							= RE.dblFreightRate
 								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
@@ -1110,7 +1117,7 @@ ELSE
 								,[intCostCurrencyId]				= RE.intCurrencyId
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
-								,[strCostMethod]					= 'Per Unit'
+                                ,[strCostMethod]                    = ContractCost.strCostMethod
 								,[dblRate]							= RE.dblFreightRate
 								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId

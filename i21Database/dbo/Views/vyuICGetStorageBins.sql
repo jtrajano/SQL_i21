@@ -15,3 +15,4 @@ FROM tblICStorageLocation storageLocation
 		GROUP BY storageLocation.intStorageLocationId
 	) summary ON summary.intStorageLocationId = storageLocation.intStorageLocationId
 	INNER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = storageLocation.intLocationId
+WHERE summary.dblStock <> 0

@@ -35,7 +35,6 @@ BEGIN TRY
 		,@intCurTransactionsCount INT
 		,@intAttributeId INT
 		,@intManufacturingProcessId INT
-		,@strTimeBasedProduction NVARCHAR(50)
 		,@strSQL NVARCHAR(MAX)
 		,@strMode NVARCHAR(50)
 		,@dtmFromDate DATETIME
@@ -46,9 +45,7 @@ BEGIN TRY
 		,@intYieldId INT
 		,@dtmDate DATETIME
 		,@intShiftId INT
-
-	SELECT @ysnIncludeIngredientItem = ysnShowInputItemInYieldView
-	FROM dbo.tblMFCompanyPreference
+		,@strAttributeValue NVARCHAR(50)
 
 	SELECT @dblDecimal = 2
 
@@ -72,6 +69,19 @@ BEGIN TRY
 		,@strOFormula = strOutputFormula
 	FROM dbo.tblMFYield
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
+
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Show Input Item In Yield View'
+
+	SELECT @ysnIncludeIngredientItem = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @ysnIncludeIngredientItem IS NULL
+		SELECT @ysnIncludeIngredientItem = 0
 
 	IF OBJECT_ID('tempdb..##tblMFTransaction') IS NOT NULL
 		DROP TABLE ##tblMFTransaction
@@ -110,6 +120,7 @@ BEGIN TRY
 		,W.intItemId
 	FROM dbo.tblMFWorkOrderInputLot WI
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
+		AND intStatusId = 13
 	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
 		AND WI.dtmProductionDate BETWEEN @dtmFromDate
 			AND @dtmToDate
@@ -136,6 +147,7 @@ BEGIN TRY
 		,W.intItemId
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
+		AND intStatusId = 13
 	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
 		AND WP.dtmProductionDate BETWEEN @dtmFromDate
 			AND @dtmToDate
@@ -152,7 +164,7 @@ BEGIN TRY
 		,intItemId
 		)
 	SELECT ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
-		,W.intPlannedShiftId As intShiftId
+		,W.intPlannedShiftId AS intShiftId
 		,strTransactionType
 		,intProductionSummaryId AS intTransactionId
 		,UnPvt.intItemId
@@ -168,6 +180,7 @@ BEGIN TRY
 				,dblCountOutputQuantity
 				)) AS UnPvt
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = UnPvt.intWorkOrderId
+		AND intStatusId = 13
 		AND UnPvt.dblQuantity > 0
 	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
 		AND ISNULL(W.dtmPlannedDate, W.dtmExpectedDate) BETWEEN @dtmFromDate
@@ -195,6 +208,7 @@ BEGIN TRY
 		,W.intItemId
 	FROM tblMFWorkOrderProducedLotTransaction WLT
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
+		AND intStatusId = 13
 	WHERE W.intManufacturingProcessId = @intManufacturingProcessId
 		AND ISNULL(W.dtmPlannedDate, W.dtmExpectedDate) BETWEEN @dtmFromDate
 			AND @dtmToDate
@@ -302,19 +316,19 @@ BEGIN TRY
 
 			SET @strCFormula = ''
 
-				SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
-				EXEC sp_executesql @strCFormula
-					,N'@strYieldValue Numeric(18, 6) OUTPUT'
-					,@strYieldValue = @dblTOutput OUTPUT
+			EXEC sp_executesql @strCFormula
+				,N'@strYieldValue Numeric(18, 6) OUTPUT'
+				,@strYieldValue = @dblTOutput OUTPUT
 
-				SET @strCFormula = ''
+			SET @strCFormula = ''
 
-				SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
-				EXEC sp_executesql @strCFormula
-					,N'@strYieldValue Numeric(18, 6) OUTPUT'
-					,@strYieldValue = @dblTInput OUTPUT
+			EXEC sp_executesql @strCFormula
+				,N'@strYieldValue Numeric(18, 6) OUTPUT'
+				,@strYieldValue = @dblTInput OUTPUT
 
 			SET @dblYieldP = @dblTOutput / CASE 
 					WHEN ISNULL(@dblTInput, 0) = 0
@@ -358,11 +372,12 @@ BEGIN TRY
 			,'' AS strInputItemDescription
 			,ROUND(Y.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(Y.dblTotalInput, @dblDecimal) dblTotalInput
-			,ROUND(0, @dblDecimal) dblRequiredQty
+			,ROUND(0.0, @dblDecimal) dblRequiredQty
 			,U.strUnitMeasure
 			,ROUND(Y.dblActualYield, 2) dblActualYield
 			,ROUND(Y.dblStandardYield, 2) dblStandardYield
 			,ROUND(Y.dblActualYield - Y.dblStandardYield, 2) dblVariance
+			,'Output' AS strTransaction
 		FROM ##tblMFYield Y
 		JOIN dbo.tblICItem I ON I.intItemId = Y.intItemId
 		JOIN tblICItemUOM IU ON IU.intItemUOMId = Y.intItemUOMId
@@ -383,7 +398,7 @@ BEGIN TRY
 			,TR.intShiftId
 			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,CAST(W.dblProducedQuantity  * RI.dblCalculatedQuantity / (
+			,CAST(W.dblProducedQuantity * RI.dblCalculatedQuantity / (
 					CASE 
 						WHEN R.dblQuantity = 0
 							THEN 1
@@ -528,8 +543,14 @@ BEGIN TRY
 				IF @intInputItemId = @intItemId
 				BEGIN
 					SELECT @dblCalculatedQuantity = 100 * (
-							SELECT TOP 1 dblQuantity
-							FROM dbo.tblMFWorkOrderRecipeItem
+							SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, (
+										SELECT TOP 1 intItemUOMId
+										FROM dbo.tblICItemUOM IU 
+										JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+											AND UM.strUnitType = 'Weight'
+										WHERE IU.intItemId = RI.intItemId
+										), dblQuantity)
+							FROM dbo.tblMFWorkOrderRecipeItem RI
 							WHERE intWorkOrderId = @intWorkOrderId
 								AND intRecipeItemTypeId = 2
 								AND intItemId = @intItemId
@@ -579,9 +600,9 @@ BEGIN TRY
 						AND intInputItemId = @intInputItemId
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
-							WHEN ISNULL((@dblTInput-@dblTOutput), 0) = 0
+							WHEN ISNULL((@dblTInput - @dblTOutput), 0) = 0
 								THEN 1
-							ELSE (@dblTInput-@dblTOutput)
+							ELSE (@dblTInput - @dblTOutput)
 							END
 				END
 
@@ -625,8 +646,8 @@ BEGIN TRY
 			,IY.strWorkOrderNo AS strRunNo
 			,IY.dtmDate AS dtmRunDate
 			,S.strShiftName AS strShift
-			,II.strItemNo AS strInputItemNo
-			,II.strDescription AS strInputItemDescription
+			,Case When I.strItemNo=II.strItemNo Then '' Else II.strItemNo End AS strInputItemNo
+			,Case When I.strDescription=II.strDescription Then '' Else II.strDescription End AS strInputItemDescription
 			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
@@ -634,6 +655,7 @@ BEGIN TRY
 			,ROUND(IY.dblActualYield, 2) dblActualYield
 			,ROUND(IY.dblStandardYield, 2) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+			,Case When I.strItemNo=II.strItemNo Then 'Output' Else 'Input' End AS strTransaction
 		FROM ##tblMFInputItemYield IY
 		JOIN dbo.tblICItem I ON I.intItemId = IY.intItemId
 		JOIN dbo.tblICItem II ON II.intItemId = IY.intInputItemId
@@ -779,19 +801,19 @@ BEGIN TRY
 
 			SET @strCFormula = ''
 
-				SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strOFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
-				EXEC sp_executesql @strCFormula
-					,N'@strYieldValue Numeric(18, 6) OUTPUT'
-					,@strYieldValue = @dblTOutput OUTPUT
+			EXEC sp_executesql @strCFormula
+				,N'@strYieldValue Numeric(18, 6) OUTPUT'
+				,@strYieldValue = @dblTOutput OUTPUT
 
-				SET @strCFormula = ''
+			SET @strCFormula = ''
 
-				SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
+			SELECT @strCFormula = 'SELECT @strYieldValue = ' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strIFormula, 'Output Opening Quantity', ' ' + ISNULL(LTRIM(@dblOutputOB), '0')), 'Output Count Quantity', ' ' + ISNULL(LTRIM(@dblOutputCC), '0')), 'Opening Quantity', ' ' + ISNULL(LTRIM(@dblInputOB), '0')), 'Count Quantity', ' ' + ISNULL(LTRIM(@dblInputCC), '0')), 'Output', ' ' + ISNULL(LTRIM(@dblOutput), '0')), 'Input', ' ' + ISNULL(LTRIM(@dblInput), '0')), 'Queued Qty Adj', ' ' + ISNULL(LTRIM(@dblQueuedQtyAdj), '0')), 'Cycle Count Adj', ' ' + ISNULL(LTRIM(@dblCycleCountAdj), '0')), 'Empty Out Adj', ' ' + ISNULL(LTRIM(@dblEmptyOutAdj), '0'))
 
-				EXEC sp_executesql @strCFormula
-					,N'@strYieldValue Numeric(18, 6) OUTPUT'
-					,@strYieldValue = @dblTInput OUTPUT
+			EXEC sp_executesql @strCFormula
+				,N'@strYieldValue Numeric(18, 6) OUTPUT'
+				,@strYieldValue = @dblTInput OUTPUT
 
 			SET @dblYieldP = @dblTOutput / CASE 
 					WHEN ISNULL(@dblTInput, 0) = 0
@@ -835,11 +857,12 @@ BEGIN TRY
 			,'' AS strInputItemDescription
 			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
-			,ROUND(0, @dblDecimal) dblRequiredQty
+			,ROUND(0.0, @dblDecimal) dblRequiredQty
 			,U.strUnitMeasure
 			,ROUND(IY.dblActualYield, 2) dblActualYield
 			,ROUND(IY.dblStandardYield, 2) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+			,'Output' AS strTransaction
 		FROM ##tblMFYieldByDate IY
 		JOIN dbo.tblICItem I ON I.intItemId = IY.intItemId
 		JOIN tblICItemUOM IU ON IU.intItemUOMId = IY.intItemUOMId
@@ -863,7 +886,7 @@ BEGIN TRY
 			,TR.intShiftId
 			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,CAST(W.dblProducedQuantity  * RI.dblCalculatedQuantity / (
+			,CAST(W.dblProducedQuantity * RI.dblCalculatedQuantity / (
 					CASE 
 						WHEN R.dblQuantity = 0
 							THEN 1
@@ -1033,8 +1056,14 @@ BEGIN TRY
 						AND ysnActive = 1
 
 					SELECT @dblCalculatedQuantity = 100 * (
-							SELECT TOP 1 dblQuantity
-							FROM dbo.tblMFRecipeItem
+							SELECT TOP 1 dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, (
+										SELECT TOP 1 intItemUOMId
+										FROM dbo.tblICItemUOM IU 
+										JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+											AND UM.strUnitType = 'Weight'
+										WHERE IU.intItemId = RI.intItemId
+										), dblQuantity)
+							FROM dbo.tblMFRecipeItem RI
 							WHERE intRecipeId = @intRecipeId
 								AND intRecipeItemTypeId = 2
 								AND intItemId = @intItemId
@@ -1084,9 +1113,9 @@ BEGIN TRY
 						AND intInputItemId = @intInputItemId
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
-							WHEN ISNULL((@dblTInput-@dblTOutput), 0) = 0
+							WHEN ISNULL((@dblTInput - @dblTOutput), 0) = 0
 								THEN 1
-							ELSE (@dblTInput-@dblTOutput)
+							ELSE (@dblTInput - @dblTOutput)
 							END
 				END
 
@@ -1130,8 +1159,8 @@ BEGIN TRY
 			,'' AS strRunNo
 			,IY.dtmDate AS dtmRunDate
 			,S.strShiftName AS strShift
-			,II.strItemNo As strInputItemNo
-			,II.strDescription As strInputItemDescription
+			,Case When I.strItemNo=II.strItemNo Then '' Else II.strItemNo End AS strInputItemNo
+			,Case When I.strDescription=II.strDescription Then '' Else II.strDescription End AS strInputItemDescription
 			,ROUND(IY.dblTotalOutput, @dblDecimal) dblTotalOutput
 			,ROUND(IY.dblTotalInput, @dblDecimal) dblTotalInput
 			,ROUND(dblRequiredQty, @dblDecimal) dblRequiredQty
@@ -1139,6 +1168,7 @@ BEGIN TRY
 			,ROUND(IY.dblActualYield, 2) dblActualYield
 			,ROUND(IY.dblStandardYield, 2) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, 2) dblVariance
+			,Case When I.strItemNo=II.strItemNo Then 'Output' Else 'Input' End AS strTransaction
 		FROM ##tblMFInputItemYieldByDate IY
 		JOIN dbo.tblICItem I ON I.intItemId = IY.intItemId
 		JOIN dbo.tblICItem II ON II.intItemId = IY.intInputItemId

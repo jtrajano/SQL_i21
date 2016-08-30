@@ -1,0 +1,48 @@
+﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesContract]
+AS
+-- intKey - intLocationId, intEntityCustomerId, intLineNo
+SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityId, intContractDetailId) AS INT)
+	, strOrderType = 'Sales Contract'
+	, strSourceType = 'None'
+	, intLocationId = intCompanyLocationId
+	, strShipFromLocation = strLocationName
+	, intEntityCustomerId = intEntityId
+	, strCustomerNumber = strEntityNumber
+	, strCustomerName = strEntityName
+	, intLineNo = intContractDetailId
+	, intOrderId = intContractHeaderId
+	, strOrderNumber = strContractNumber
+	, intSourceId = NULL
+	, strSourceNumber = NULL
+	, intItemId
+	, strItemNo
+	, strItemDescription
+	, strLotTracking
+	, intCommodityId
+	, intSubLocationId = intCompanyLocationSubLocationId
+	, strSubLocationName
+	, intStorageLocationId
+	, strStorageLocationName = strStorageLocationName
+	, intOrderUOMId = intItemUOMId
+	, strOrderUOM = strItemUOM
+	, dblOrderUOMConvFactor = dblItemUOMCF
+	, intItemUOMId
+	, strItemUOM = strItemUOM
+	, dblItemUOMConv = dblItemUOMCF
+	, intWeightUOMId = intItemUOMId
+	, strWeightUOM = strItemUOM
+	, dblWeightItemUOMConv = dblItemUOMCF
+	, dblQtyOrdered = CASE WHEN ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
+	, dblQtyAllocated = ISNULL(dblAllocatedQty, 0)
+	, dblQtyShipped = 0
+	, dblUnitPrice = ISNULL(dblSeqPrice, 0)
+	, dblDiscount = 0
+	, dblTotal = 0
+	, dblQtyToShip = ISNULL(dblDetailQuantity, 0)
+	, dblPrice = ISNULL(dblSeqPrice, 0)
+	, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblSeqPrice, 0)
+	, intGradeId = NULL
+	, strGrade = NULL
+FROM vyuCTContractDetailView ContractView
+WHERE ysnAllowedToShow = 1
+	AND strContractType = 'Sale'

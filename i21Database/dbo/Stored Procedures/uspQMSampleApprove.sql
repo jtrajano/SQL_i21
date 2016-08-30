@@ -27,7 +27,6 @@ BEGIN TRY
 	DECLARE @intStorageLocationId INT
 	DECLARE @intCurrentLotStatusId INT
 	DECLARE @intLotId INT
-	DECLARE @intApproveLotStatusId INT
 	DECLARE @ysnChangeLotStatusOnApproveforPreSanitizeLot BIT
 	DECLARE @intContractDetailId INT
 	DECLARE @intLoadDetailContainerLinkId INT
@@ -49,9 +48,6 @@ BEGIN TRY
 			)
 
 	SELECT @ysnChangeLotStatusOnApproveforPreSanitizeLot = ysnChangeLotStatusOnApproveforPreSanitizeLot
-	FROM dbo.tblQMCompanyPreference
-
-	SELECT @intApproveLotStatusId = ISNULL(intApproveLotStatus, @intLotStatusId)
 	FROM dbo.tblQMCompanyPreference
 
 	BEGIN TRAN
@@ -98,13 +94,13 @@ BEGIN TRY
 		IF @intCurrentLotStatusId = 4 -- Pre-Sanitized
 		BEGIN
 			IF @ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
-				SET @intApproveLotStatusId = @intCurrentLotStatusId
+				SET @intLotStatusId = @intCurrentLotStatusId
 		END
 
-		IF @intCurrentLotStatusId <> @intApproveLotStatusId
+		IF @intCurrentLotStatusId <> @intLotStatusId
 		BEGIN
 			EXEC uspMFSetLotStatus @intLotId = @intProductValueId
-				,@intNewLotStatusId = @intApproveLotStatusId
+				,@intNewLotStatusId = @intLotStatusId
 				,@intUserId = @intLastModifiedUserId
 		END
 	END
@@ -160,13 +156,13 @@ BEGIN TRY
 			IF @intCurrentLotStatusId = 4 -- Pre-Sanitized
 			BEGIN
 				IF @ysnChangeLotStatusOnApproveforPreSanitizeLot = 0
-					SET @intApproveLotStatusId = @intCurrentLotStatusId
+					SET @intLotStatusId = @intCurrentLotStatusId
 			END
 
-			IF @intCurrentLotStatusId <> @intApproveLotStatusId
+			IF @intCurrentLotStatusId <> @intLotStatusId
 			BEGIN
 				EXEC uspMFSetLotStatus @intLotId = @intLotId
-					,@intNewLotStatusId = @intApproveLotStatusId
+					,@intNewLotStatusId = @intLotStatusId
 					,@intUserId = @intLastModifiedUserId
 			END
 

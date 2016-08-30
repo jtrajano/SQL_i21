@@ -66,6 +66,7 @@ BEGIN
 			,AT.dtmShiftEndTime
 			,S.intShiftId
 			,AT.intManufacturingCellId
+			,MC.ysnIncludeSchedule
 		FROM #tmp_ActualTable AT
 		JOIN dbo.tblMFManufacturingCell MC ON AT.intManufacturingCellId = MC.intManufacturingCellId
 			AND MC.intLocationId = @intLocationId
@@ -82,6 +83,7 @@ BEGIN
 	IF @intShiftActivityStatusId = 2
 	BEGIN
 		SELECT DISTINCT SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,MC.strCellName
 			,SA.intManufacturingCellId
 			,SA.intShiftId
@@ -92,6 +94,7 @@ BEGIN
 			,COUNT(DISTINCT (SAM.intMachineId)) AS intNoOfMachines
 			,(SA.intScheduledRuntime / 60) AS intScheduledRuntime
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		FROM dbo.tblMFShiftActivity SA
 		JOIN dbo.tblMFManufacturingCell MC ON SA.intManufacturingCellId = MC.intManufacturingCellId
 			AND MC.intLocationId = @intLocationId
@@ -109,6 +112,7 @@ BEGIN
 				AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
 			AND SA.intShiftActivityStatusId = @intShiftActivityStatusId
 		GROUP BY SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,MC.strCellName
 			,SA.intManufacturingCellId
 			,SA.dtmShiftDate
@@ -120,6 +124,7 @@ BEGIN
 			,DATEDIFF(mi, SCD.dtmShiftStartTime, SCD.dtmShiftEndTime)
 			,SA.intScheduledRuntime
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		ORDER BY MC.strCellName
 			,SA.dtmShiftDate
 			,SA.dtmShiftStartTime
@@ -128,6 +133,7 @@ BEGIN
 	IF @intShiftActivityStatusId = 3
 	BEGIN
 		SELECT SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,SA.intShiftId
 			,SA.intManufacturingCellId
 			,MC.strCellName
@@ -160,6 +166,7 @@ BEGIN
 						END
 					), 2) AS dblEfficiencyPercent
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		FROM dbo.tblMFShiftActivity SA
 		JOIN dbo.tblMFManufacturingCell MC ON SA.intManufacturingCellId = MC.intManufacturingCellId
 			AND MC.intLocationId = @intLocationId
@@ -171,6 +178,7 @@ BEGIN
 			AND CONVERT(DATETIME, CONVERT(CHAR, SA.dtmShiftDate, 101)) BETWEEN CONVERT(DATETIME, CONVERT(CHAR, @dtmFromDate, 101))
 				AND CONVERT(DATETIME, CONVERT(CHAR, @dtmToDate, 101))
 		GROUP BY SA.intShiftActivityId
+			,SA.strShiftActivityNumber
 			,SA.intShiftId
 			,SA.intManufacturingCellId
 			,MC.strCellName
@@ -187,6 +195,7 @@ BEGIN
 			,SA.dblTargetEfficiency
 			,SA.dblStdCapacity
 			,SA.strComments
+			,MC.ysnIncludeSchedule
 		ORDER BY MC.strCellName
 			,SA.dtmShiftDate
 			,SA.dtmShiftStartTime

@@ -49,8 +49,8 @@ BEGIN
 					SELECT 
 						intCustomerId = C.intCustomerID
 						,strContractNumber = A.vwcnt_cnt_no COLLATE Latin1_General_CI_AS 
-						,dblUnitBalance = A.vwcnt_un_bal
-						,dblUnitPrice =  A.vwcnt_un_prc
+						,dblUnitBalance = ISNULL(A.vwcnt_un_bal,0.0)
+						,dblUnitPrice =  ISNULL(A.vwcnt_un_prc,0.0)
 					FROM vwcntmst A
 					INNER JOIN vwcusmst B
 						ON A.vwcnt_cus_no = B.vwcus_key
@@ -73,8 +73,8 @@ BEGIN
 				SELECT 
 					intCustomerId = C.intCustomerID
 					,strContractNumber = A.strContractNumber
-					,dblUnitBalance = B.dblBalance
-					,dblUnitPrice =  B.dblCashPrice
+					,dblUnitBalance = ISNULL(B.dblBalance,0.0)
+					,dblUnitPrice =  ISNULL(B.dblCashPrice,0.0)
 				FROM tblCTContractHeader A
 				INNER JOIN tblCTContractDetail B
 					ON A.intContractHeaderId = B.intContractHeaderId

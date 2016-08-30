@@ -26,7 +26,7 @@ SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreferen
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
 	BEGIN			
-		RAISERROR('There is no setup for AR Account in the Company Configuration.', 11, 1) 
+		RAISERROR(120005, 16, 1) 
 		RETURN 0
 	END
 
@@ -443,7 +443,7 @@ IF ISNULL(@intFreightItemId, 0) > 0
 
 		IF ISNULL(@intFreightItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblFreightRate, @ZeroDecimal) > @ZeroDecimal)
 			BEGIN
-				RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+				RAISERROR(120006, 16, 1) 
 				RETURN 0
 			END
 	END
@@ -459,7 +459,7 @@ IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
 
 		IF ISNULL(@intSurchargeItemUOMId, 0) = 0 AND EXISTS(SELECT TOP 1 1 FROM @InvoiceEntries WHERE ISNULL(dblSurcharge, @ZeroDecimal) > @ZeroDecimal)
 			BEGIN
-				RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 11, 1) 
+				RAISERROR(120007, 16, 1) 
 				RETURN 0
 			END
 	END

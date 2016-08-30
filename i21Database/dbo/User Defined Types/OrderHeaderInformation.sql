@@ -3,11 +3,11 @@
 	,[intOrderStatusId]					INT
 	,[intOrderTypeId]					INT
 	,[intOrderDirectionId]				INT
-	,[strOrderNo]						INT
-	,[strReferenceNo]					INT
+	,[strOrderNo]						NVARCHAR(50)
+	,[strReferenceNo]					NVARCHAR(50)
 	,[intStagingLocationId]				INT
 	,[intWorkOrderId]					NVARCHAR(MAX)
 	,[strComment]						INT NULL
-	,[dtmOrderDate]						INT NULL
+	,[dtmOrderDate]						DateTime NULL
 	,[strLastUpdateBy]					NVARCHAR(100)
 	)

@@ -28,7 +28,7 @@ CREATE TYPE [dbo].[InventoryTransferStagingTable] AS TABLE
     ,[intToSubLocationId]		INT NULL										-- Target sub location of the item. 
     ,[intFromStorageLocationId]	INT NULL										-- Source storage location id of the item.
     ,[intToStorageLocationId]	INT NULL										-- Target storage location id of the item.
-	,[intOwnershipType] INT NULL DEFAULT ((1))									-- Ownership Type. Default to 1 (Own)
+	,[intOwnershipType] INT NULL DEFAULT ((1))									-- Ownership Type. 1 = Own, 2 = Storage, 3 = Consigned Purchase; Default to 1;
 
 	-- Integration Field
 	,[intInventoryTransferId] INT NULL											-- Existing id of an Inventory Transfer

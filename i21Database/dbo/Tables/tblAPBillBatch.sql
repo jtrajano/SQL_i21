@@ -18,39 +18,4 @@
 );
 
 GO
-CREATE TRIGGER trgBillBatchRecordNumber
-ON tblAPBillBatch
-AFTER INSERT
-AS
-
-DECLARE @inserted TABLE(intBillBatchId INT)
-DECLARE @count INT = 0
-DECLARE @intBillBatchId INT
-DECLARE @BillBatchId NVARCHAR(50)
-
-INSERT INTO @inserted
-SELECT intBillBatchId FROM INSERTED ORDER BY intBillBatchId
-
-WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
-BEGIN
-
-	EXEC uspAPFixStartingNumbers 7
-	EXEC uspSMGetStartingNumber 7, @BillBatchId OUT
-
-	SELECT TOP 1 @intBillBatchId = intBillBatchId FROM @inserted
-
-	IF(@BillBatchId IS NOT NULL)
-	BEGIN
-		UPDATE tblAPBillBatch
-			SET tblAPBillBatch.strBillBatchNumber = @BillBatchId
-		FROM tblAPBillBatch A
-		WHERE A.intBillBatchId = @intBillBatchId
-	END
-
-	DELETE FROM @inserted
-	WHERE intBillBatchId = @intBillBatchId
-
-END
-GO
-
 CREATE INDEX [IX_tblAPBillBatch_strBillBatchNumber] ON [dbo].[tblAPBillBatch] ([strBillBatchNumber])

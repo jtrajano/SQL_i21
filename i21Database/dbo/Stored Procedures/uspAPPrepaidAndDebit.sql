@@ -61,7 +61,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -109,7 +109,7 @@ CROSS APPLY
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE C2.intContractHeaderId = C.intContractHeaderId and intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -153,7 +153,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+											ELSE ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -201,7 +201,7 @@ CROSS APPLY
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and intBillId = @billId
 	) Total
 	WHERE intBillId = @billId 
@@ -245,7 +245,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/O ITEM                                          
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -293,7 +293,7 @@ CROSS APPLY
 	FROM tblAPBillDetail C
 	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE /*C2.intContractHeaderId = C.intContractHeaderId and*/ intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -337,7 +337,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) --B.dblQtyReceived < CurrentBill.dblQtyReceived 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+											ELSE ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION W/ ITEM 
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal) /*OR (B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal))*/   --VALIDATE USED PREPAID
@@ -386,7 +386,7 @@ CROSS APPLY
 	FROM tblAPBillDetail C
 	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE /*C2.intContractHeaderId = C.intContractHeaderId AND C2.intItemId = C.intItemId and*/ intBillId = @billId
 	) Total
 	WHERE intBillId = @billId 
@@ -463,7 +463,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION              
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
@@ -506,7 +506,7 @@ CROSS APPLY
 		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE  intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -554,7 +554,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION              
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
@@ -597,7 +597,7 @@ CROSS APPLY
 		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE  intBillId = @billId
 	) Total
 	WHERE intBillId = @billId
@@ -646,7 +646,7 @@ SELECT
 									WHEN 2 THEN 
 										CASE WHEN (A.dblAmountDue < A.dblTotal) 
 											THEN  (A.dblAmountDue * CurrentBill.allocatedAmount)
-											ELSE  ((B.dblCost * B.dblQtyReceived) * CurrentBill.allocatedAmount) END
+											ELSE  ((dbo.fnAPGetVoucherDetailCost(B.intBillDetailId) * dbo.fnAPGetVoucherDetailQty(B.intBillDetailId)) * CurrentBill.allocatedAmount) END
 									--PERCENTAGE ALLOCATION COMPUTATION                                  
 									WHEN 3 THEN
 										CASE WHEN (A.dblAmountDue < A.dblTotal)
@@ -690,7 +690,7 @@ INNER JOIN
 		,C.dblTotal / Total.dblDetailTotal AS allocatedAmount
 	FROM tblAPBillDetail C
 	CROSS APPLY (
-		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dblQtyReceived) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
+		SELECT SUM(dblTotal) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
 		WHERE  intBillId = @billId
 	) Total
 	WHERE intBillId = @billId

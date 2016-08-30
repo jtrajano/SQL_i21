@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuMFShiftActivityDowntime
 AS
 SELECT DM.intDowntimeMachineId
+	,SA.strShiftActivityNumber
 	,MC.strCellName
 	,SA.dtmShiftDate
 	,S.strShiftName

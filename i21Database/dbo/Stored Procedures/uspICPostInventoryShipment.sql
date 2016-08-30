@@ -476,6 +476,65 @@ BEGIN
 	END 
 END   
 
+IF @ysnRecap = 0 
+BEGIN 
+	-- Update the in-transit outbound
+	DECLARE @InTransit_Outbound InTransitTableType
+
+	INSERT INTO @InTransit_Outbound (
+			intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intLotId
+			, intSubLocationId
+			, intStorageLocationId
+			, dblQty
+			, intTransactionId
+			, strTransactionId
+			, intTransactionTypeId
+	)
+	SELECT	
+			intItemId				= si.intItemId
+			,intItemLocationId		= il.intItemLocationId
+			,intItemUOMId = 
+				CASE	WHEN l.intLotId IS NULL THEN 
+							iu.intItemUOMId
+						ELSE
+							lotPackUOM.intItemUOMId
+				END
+			,intLotId				= sil.intLotId
+			,intSubLocationId		= si.intSubLocationId
+			,intStorageLocationId	= si.intStorageLocationId
+			,dblQty	=	
+				CASE	WHEN  l.intLotId IS NULL THEN 
+							-ISNULL(si.dblQuantity, 0) 
+						ELSE
+							-ISNULL(sil.dblQuantityShipped, 0)
+				END	
+			,intTransactionId		= s.intInventoryShipmentId
+			,strTransactionId		= s.strShipmentNumber
+			,intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+	FROM    tblICInventoryShipment s INNER JOIN  tblICInventoryShipmentItem si
+				ON s.intInventoryShipmentId = si.intInventoryShipmentId    
+			INNER JOIN tblICItemLocation il
+				ON il.intItemId = si.intItemId
+				AND il.intLocationId = s.intShipFromLocationId
+			INNER JOIN tblICItemUOM iu 
+				ON iu.intItemUOMId = si.intItemUOMId
+			LEFT JOIN tblICInventoryShipmentItemLot sil
+				ON sil.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			LEFT JOIN tblICLot l
+				ON l.intLotId = sil.intLotId            
+			LEFT JOIN tblICItemUOM lotPackUOM
+				ON lotPackUOM.intItemUOMId = l.intItemUOMId            			
+	WHERE   s.intInventoryShipmentId = @intTransactionId
+
+	UPDATE @InTransit_Outbound
+	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END
+
+	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
+END 
+
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
 -- 1.	Store all the GL entries in a holding table. It will be used later as data  

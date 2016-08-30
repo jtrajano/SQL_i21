@@ -56,7 +56,7 @@ BEGIN
 	SET @counter += 1
 	SELECT TOP 1 @singleValue = [strCardNumber] FROM #tmpCardNumbers
 
-	SET @children += '{' + '"change":' +  @singleValue + ', "iconCls": "small-gear"}'
+	SET @children += '{' + '"change":' +'"'+ @singleValue +'"'+ ', "iconCls": "small-gear"}'
 	IF(@counter != @count)
 	BEGIN
 	SET @children += ','
@@ -67,7 +67,7 @@ END
 
 DROP TABLE #tmpCardNumbers
 
-SET @jsonData = '{"action":"' + @action + ' ' + CONVERT(NVARCHAR(MAX),@count)  + ' cards' + '","change":"' + @action + ' ' + CONVERT(NVARCHAR(MAX),@count) + ' cards' + '","iconCls":"' + 'small-gear' + '","children":['+ @children +']}'
+SET @jsonData = '{"action":"' + @action  + '","change":"' + @action + ' ' + CONVERT(NVARCHAR(MAX),@count) + ' cards' + '","iconCls":"' + 'small-gear' + '","children":['+ @children +']}'
 INSERT INTO tblSMAuditLog (
 		strActionType,
 		strDescription,

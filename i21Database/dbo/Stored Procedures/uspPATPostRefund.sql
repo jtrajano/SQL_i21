@@ -97,8 +97,8 @@ INNER JOIN
 	INNER JOIN
 	(
 		SELECT	CVol.intCustomerPatronId AS intCustomerId,
-				dblPurchaseVolume = CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (ROUND(CVol.dblVolume,2) * (CASE WHEN RRD.strPurchaseSale = 'Purchase' THEN RRD.dblRate ELSE 0.00 END))ELSE 0 END,
-				dblSaleVolume = CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (ROUND(CVol.dblVolume,2) * (CASE WHEN RRD.strPurchaseSale = 'Sale' THEN RRD.dblRate ELSE 0.00 END)) ELSE 0 END,
+				dblPurchaseVolume = CASE WHEN PCat.strPurchaseSale = 'Purchase' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Purchase' THEN RRD.dblRate ELSE 0.00 END))ELSE 0 END,
+				dblSaleVolume = CASE WHEN PCat.strPurchaseSale = 'Sale' THEN (CVol.dblVolume * (CASE WHEN RRD.strPurchaseSale = 'Sale' THEN RRD.dblRate ELSE 0.00 END)) ELSE 0 END,
 				dblRate = RRD.dblRate,
 				intRefundCategoryId = (CASE WHEN RCat.intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END) THEN RCat.intRefundCategoryId ELSE NULL END),
 				intRefundCustomerId = (CASE WHEN RCus.intRefundTypeId = RRD.intRefundTypeId THEN RCus.intRefundCustomerId ELSE NULL END),
@@ -224,15 +224,92 @@ SELECT DISTINCT @validRefundIds = COALESCE(@validRefundIds + ',', '') +  CONVERT
 FROM #tmpRefundDataCombined
 ORDER BY 1
 
+DECLARE @dblDiff NUMERIC(18,6)
+DECLARE @intAdjustmentId INT
+
 IF ISNULL(@ysnPosted,0) = 1
 BEGIN
 	INSERT INTO @GLEntries
-		SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId)
+	SELECT * FROM dbo.fnPATCreateRefundGLEntries(@validRefundIds, @intUserId, @intAPClearingId)
+
+---------------------FORCE BALANCING------------------------------------------------
+--check out of balance 
+--offset discrepancy
+SELECT @dblDiff = SUM(dblDebit) - SUM(dblCredit) FROM @GLEntries
+-- long term, there has to be a setup for adjustment
+-- for now, we adjust by force :)
+IF @dblDiff <> 0
+BEGIN
+	IF @dblDiff <0 -- credit is higher than debit
+		BEGIN
+			WITH UpdateListView AS (
+				SELECT TOP 1 *
+				FROM @GLEntries 
+				WHERE strTransactionType = 'General Reserve' 
+				AND dblDebit >0
+			)
+			UPDATE UpdateListView
+			SET dblDebit = dblDebit + ABS(@dblDiff)
+				
+		END
+	ELSE -- debit is higher than credit
+		BEGIN
+			WITH UpdateListView AS (
+				SELECT TOP 1 *
+				FROM @GLEntries 
+				WHERE strTransactionType = 'Undistributed Equity' 
+				AND dblCredit > 0
+			)
+			UPDATE UpdateListView
+			SET dblCredit = dblCredit + ABS(@dblDiff)
+				
+		END
+
+END
+----------------------------------------------------------------------------------
+
 END
 ELSE
 BEGIN
 	INSERT INTO @GLEntries
 	SELECT * FROM dbo.fnPATReverseGLRefundEntries(@validRefundIds, DEFAULT, @intUserId)
+
+---------------------FORCE BALANCING REVERSE--------------------------------------
+--check out of balance 
+--offset discrepancy
+SELECT @dblDiff = SUM(dblCredit) - SUM(dblDebit) FROM @GLEntries
+-- long term, there has to be a setup for adjustment
+-- for now, we adjust by force :)
+IF @dblDiff <> 0
+BEGIN
+	IF @dblDiff <0 -- debit is higher than debit
+		BEGIN
+			WITH UpdateListView AS (
+				SELECT TOP 1 *
+				FROM @GLEntries 
+				WHERE strTransactionType = 'General Reserve' 
+				AND dblCredit > 0
+			)
+			UPDATE UpdateListView
+			SET dblCredit = dblCredit + ABS(@dblDiff)
+				
+		END
+	ELSE -- credit is higher than credit
+		BEGIN
+			WITH UpdateListView AS (
+				SELECT TOP 1 *
+				FROM @GLEntries 
+				WHERE strTransactionType = 'Undistributed Equity' 
+				AND dblDebit >0
+			)
+			UPDATE UpdateListView
+			SET dblDebit = dblDebit + ABS(@dblDiff)
+				
+		END
+
+END
+----------------------------------------------------------------------------------
+
 END
 
 BEGIN TRY

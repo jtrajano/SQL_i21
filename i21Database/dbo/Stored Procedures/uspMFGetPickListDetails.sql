@@ -30,8 +30,10 @@ Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId,@intWorkOrderI
 From tblMFWorkOrder Where intPickListId=@intPickListId
 
 Select @intKitStatusId=intKitStatusId,@intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
-Select TOP 1 @intBlendItemId=intItemId,@intBlendRequirementId=intBlendRequirementId,@strWorkOrderIds=convert(varchar,intWorkOrderId) 
+Select TOP 1 @intBlendItemId=intItemId,@intBlendRequirementId=intBlendRequirementId
 From tblMFWorkOrder Where intPickListId=@intPickListId
+
+Select @strWorkOrderIds=COALESCE(@strWorkOrderIds, '') + convert(varchar,intWorkOrderId) + ',' From tblMFWorkOrder Where intPickListId=@intPickListId
 
 Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
 
@@ -69,7 +71,7 @@ DECLARE @tblPickList TABLE (
 	strParentLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intItemId int,
 	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
-	strDescription nvarchar(50) COLLATE Latin1_General_CI_AS,
+	strDescription nvarchar(250) COLLATE Latin1_General_CI_AS,
 	intStorageLocationId int,
 	strStorageLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
 	dblQuantity numeric(38,20),
@@ -116,7 +118,7 @@ Declare @tblRemainingPickedLots AS table
 	intLotId int,
 	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
-	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
+	strDescription nvarchar(250) COLLATE Latin1_General_CI_AS,
 	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -149,7 +151,7 @@ Declare @tblPickedLots AS table
 	intLotId int,
 	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
-	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
+	strDescription nvarchar(250) COLLATE Latin1_General_CI_AS,
 	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -180,7 +182,7 @@ Declare @tblPickedLotsFinal AS table
 	intLotId int,
 	strLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strItemNo nvarchar(50) COLLATE Latin1_General_CI_AS,
-	strDescription nvarchar(200) COLLATE Latin1_General_CI_AS,
+	strDescription nvarchar(250) COLLATE Latin1_General_CI_AS,
 	dblQuantity numeric(38,20),
 	intItemUOMId int,
 	strUOM nvarchar(50) COLLATE Latin1_General_CI_AS,
@@ -447,7 +449,7 @@ Begin
 		Set @strXml = @strXml + '</root>'
 
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1,'',@strWorkOrderIds
 
 		--Remaining Lots to Pick
 		Insert Into @tblRemainingPickedLots
@@ -629,7 +631,7 @@ Begin
 		Set @strXml = @strXml + '</root>'
 
 		Insert Into @tblPickedLots
-		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1
+		Exec uspMFAutoBlendSheetFIFO @intLocationId,@intBlendRequirementId,0,@strXml,1,'',@strWorkOrderIds
 
 		--Remaining Lots to Pick
 		Insert Into @tblRemainingPickedLots

@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
+﻿
+CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
 
  @CFItemId				INT    
 ,@CFCustomerId			INT     
@@ -24,8 +25,9 @@
 ,@CFPostedOrigin		BIT				= 0
 ,@CFPostedCSV			BIT				= 0
 ,@CFPriceProfileId		INT				= NULL OUTPUT
+,@CFPriceProfileDetailId INT				= NULL OUTPUT
 ,@CFPriceIndexId		INT				= NULL OUTPUT
-,@CFSiteGroupId			INT				= NULL OUTPUT
+,@CFSiteGroupId			INT				= NULL
 
 AS
 
@@ -693,6 +695,7 @@ BEGIN
 	DECLARE @Rate NUMERIC(18,6)
 	DECLARE @SiteGroupId INT
 	DECLARE @PriceIndexId INT
+	DECLARE @ItemId INT
 	DECLARE @TransactionSiteGroup INT
 	DECLARE @cfMatchProfileSkip INT
 	DECLARE @cfMatchProfileCount INT
@@ -803,6 +806,7 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intSiteId = @CFSiteId
 			AND intNetworkId = @CFNetworkId
+			AND intItemId IS NULL                ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -845,6 +849,7 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intSiteId = @CFSiteId
 			AND intNetworkId = @CFNetworkId 
+			AND intItemId IS NULL                ------ADDED------
 		END
 	----------------------------------------------
 
@@ -914,6 +919,7 @@ BEGIN
 			SELECT @cfMatchProfileCount = Count(*) 
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @TransactionSiteGroup
+			AND intItemId IS NULL                ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -955,13 +961,14 @@ BEGIN
 				strType		
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @TransactionSiteGroup
+			AND intItemId IS NULL                ------ADDED------
 		END
 	----------------------------------------------
 
 	----------------------------------------------
 	--   SITE | SITE GROUP | PRODUCT | NETWORK  --
 	----------------------------------------------
-	--   N/A  |	   N/A     |    1	 |     1    --
+	--   ALL  |	   N/A     |    1	 |     1    --
 	----------------------------------------------
 	IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -969,6 +976,7 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
 			AND intNetworkId = @CFNetworkId
+			AND intSiteId IS NULL                ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -1011,19 +1019,21 @@ BEGIN
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
 			AND intNetworkId = @CFNetworkId
+			AND intSiteId IS NULL                ------ADDED------
 		END
 	----------------------------------------------
 
 	----------------------------------------------
 	--   SITE | SITE GROUP | PRODUCT | NETWORK  --
 	----------------------------------------------
-	--   N/A  |	   N/A     |    1	 |    N/A   --
+	--   ALL  |	   N/A     |    1	 |    N/A   --
 	----------------------------------------------
 	IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
 			SELECT @cfMatchProfileCount = Count(*) 
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
+			AND intSiteId IS NULL                ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -1065,18 +1075,21 @@ BEGIN
 				strType		
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
+			AND intSiteId IS NULL                ------ADDED------
 		END
 	----------------------------------------------
 
 	----------------------------------------------
 	--   SITE | SITE GROUP | PRODUCT | NETWORK  --
 	----------------------------------------------
-	--   N/A  |	   N/A     |   ALL	 |    N/A   --
+	--   ALL  |	   N/A     |   ALL	 |    N/A   --
 	----------------------------------------------
 	IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
 			SELECT @cfMatchProfileCount = Count(*) 
 			FROM @cfPriceProfile 
+			WHERE intItemId IS NULL                ------ADDED------
+			AND intSiteId IS NULL                ------ADDED------
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -1117,6 +1130,8 @@ BEGIN
 				strBasis,				
 				strType		
 			FROM @cfPriceProfile 
+			WHERE intItemId IS NULL                ------ADDED------
+			AND intSiteId IS NULL                ------ADDED------
 		END
 	----------------------------------------------
 
@@ -1130,12 +1145,18 @@ BEGIN
 	
 	--SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
 
+	--SELECT * FROM @cfMatchPriceProfile
+
 	SELECT TOP 1
 	 @Rate = dblRate
 	,@CFPriceProfileId = intPriceProfileHeaderId
+	,@CFPriceProfileDetailId = intPriceProfileDetailId
 	,@CFPriceIndexId = intLocalPricingIndex
-	,@CFSiteGroupId = intSiteGroupId
+	--,@CFSiteGroupId = intSiteGroupId
 	FROM @cfMatchPriceProfile
+
+	--SELECT @CFSiteGroupId = intAdjustmentSiteGroupId
+	--FROM tblCFSite WHERE intSiteId = @CFSiteId
 
 	
 	SET @CFPriceBasis = (SELECT TOP 1 strBasis FROM @cfMatchPriceProfile)
@@ -1150,24 +1171,22 @@ BEGIN
 			END
 		ELSE IF(@CFPriceBasis IS NOT NULL)
 			BEGIN 
-				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
-									FROM @cfMatchPriceProfile 
-									WHERE intCustomerId = @CFCustomerId 
-									AND intSiteId = @CFSiteId 
-									AND intItemId = @CFItemId) 
+				--SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
+				--					FROM @cfMatchPriceProfile) 
 
 				SET @PriceIndexId = (SELECT TOP 1 intLocalPricingIndex 
-									 FROM @cfMatchPriceProfile 
-									 WHERE intCustomerId = @CFCustomerId 
-									 AND intSiteId = @CFSiteId 
-									 AND intItemId = @CFItemId) 
+									 FROM @cfMatchPriceProfile) 
+
+				--SET @ItemId = (SELECT TOP 1 intItemId 
+				--					 FROM @cfMatchPriceProfile) 
 
 				SET @CFStandardPrice = (SELECT TOP 1 dblIndexPrice
 										FROM tblCFIndexPricingBySiteGroupHeader IPH
 										INNER JOIN tblCFIndexPricingBySiteGroup IPD
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
-										AND IPH.intSiteGroupId = @SiteGroupId)
+										AND IPH.intSiteGroupId = @CFSiteGroupId
+										AND IPD.intARItemID = @CFItemId)
 
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
@@ -1184,24 +1203,22 @@ BEGIN
 		IF(@CFPriceBasis = 'Remote Pricing Index')
 			BEGIN
 				
-				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
-									FROM @cfMatchPriceProfile 
-									WHERE intCustomerId = @CFCustomerId 
-									AND intSiteId = @CFSiteId 
-									AND intItemId = @CFItemId) 
+				--SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
+				--					FROM @cfMatchPriceProfile) 
 
 				SET @PriceIndexId = (SELECT TOP 1 intLocalPricingIndex 
-									 FROM @cfMatchPriceProfile 
-									 WHERE intCustomerId = @CFCustomerId 
-									 AND intSiteId = @CFSiteId 
-									 AND intItemId = @CFItemId) 
+									 FROM @cfMatchPriceProfile) 
+
+				--SET @ItemId = (SELECT TOP 1 intItemId 
+				--					 FROM @cfMatchPriceProfile) 
 
 				SET @CFStandardPrice = (SELECT TOP 1 dblIndexPrice
 										FROM tblCFIndexPricingBySiteGroupHeader IPH
 										INNER JOIN tblCFIndexPricingBySiteGroup IPD
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
-										AND IPH.intSiteGroupId = @SiteGroupId)
+										AND IPH.intSiteGroupId = @CFSiteGroupId
+										AND IPD.intARItemID = @CFItemId)
 
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
@@ -1252,24 +1269,22 @@ BEGIN
 			END
 		ELSE IF(@CFPriceBasis IS NOT NULL)
 			BEGIN
-				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
-										FROM @cfMatchPriceProfile 
-										WHERE intCustomerId = @CFCustomerId 
-										AND intSiteId = @CFSiteId 
-										AND intItemId = @CFItemId) 
+				--SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
+				--						FROM @cfMatchPriceProfile) 
 
 				SET @PriceIndexId = (SELECT TOP 1 intLocalPricingIndex 
-										FROM @cfMatchPriceProfile 
-										WHERE intCustomerId = @CFCustomerId 
-										AND intSiteId = @CFSiteId 
-										AND intItemId = @CFItemId) 
+										FROM @cfMatchPriceProfile) 
+
+				--SET @ItemId = (SELECT TOP 1 intItemId 
+				--					 FROM @cfMatchPriceProfile) 
 
 				SET @CFStandardPrice = (SELECT TOP 1 dblIndexPrice
 										FROM tblCFIndexPricingBySiteGroupHeader IPH
 										INNER JOIN tblCFIndexPricingBySiteGroup IPD
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
-										AND IPH.intSiteGroupId = @SiteGroupId)
+										AND IPH.intSiteGroupId = @CFSiteGroupId
+										AND IPD.intARItemID = @CFItemId)
 
 				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN

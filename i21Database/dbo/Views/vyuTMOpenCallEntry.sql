@@ -27,6 +27,7 @@ AS
 		,intCustomerID = B.intCustomerID
 		,intLocationId = B.intLocationId
 		,strLocation = B.strLocation
+		,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID

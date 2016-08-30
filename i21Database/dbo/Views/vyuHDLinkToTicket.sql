@@ -10,6 +10,7 @@
 		,tblHDTicketStatus.strBackColor
 		,tblHDTicketStatus.strFontColor
 		,tblHDTicketStatus.strIcon
+		,tblHDTicket.strType
 	from
 		tblHDTicket
 		,tblEMEntity

@@ -36,3 +36,4 @@ FROM
 	LEFT JOIN tblPRDepartment DEP ON DEP.intDepartmentId = PE.intEmployeeDepartmentId 
 WHERE 
 	PE.intWorkersCompensationId IS NOT NULL
+	AND PC.ysnPosted = 1 AND PC.ysnVoid = 0

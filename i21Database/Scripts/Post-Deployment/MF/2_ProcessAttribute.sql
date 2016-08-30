@@ -189,17 +189,20 @@ BEGIN
 		,intAttributeDataTypeId
 		,intAttributeTypeId
 		,strSQL
+		,ysnMultiSelect
 		)
 	SELECT 9
 		,'Item Types Excluded From Cycle Count'
 		,5
 		,4
-		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
+		,1
 END
 Else
 Begin
 	Update tblMFAttribute
-	Set strSQL='Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+	Set strSQL='Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
+		,ysnMultiSelect=1
 	Where intAttributeId = 9
 End
 GO
@@ -1105,8 +1108,15 @@ BEGIN
 		,'Item Types Excluded From Cycle Count'
 		,5
 		,5
-		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
 END
+Else
+Begin
+	Update tblMFAttribute
+	Set strSQL='Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember UNION Select ''Other Charge'' as ValueMember,''Other Charge'' as DisplayMember'
+		,ysnMultiSelect=1
+	Where intAttributeId = 53
+end
 
 GO
 
@@ -1472,7 +1482,6 @@ BEGIN
 		,'Select strName As ValueMember, strName As DisplayMember From tblMFWorkOrderStatus Where intStatusId in (1,9,10)'
 END
 GO
-GO
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFAttribute
@@ -1513,5 +1522,136 @@ BEGIN
         ,2
         ,0
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 73
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 73
+        ,'Show Input Item In Yield View'
+        ,5
+        ,1
+        ,0
+        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 74
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 74
+		,'Pick List Enabled'
+		,5
+		,1
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 75
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 75
+        ,'Production Staging Location'
+        ,5
+        ,1
+        ,0
+        ,'SELECT intStorageLocationId AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''PROD_STAGING'''
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 76
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 76
+        ,'Staging Location'
+        ,5
+        ,1
+        ,0
+        ,'SELECT intStorageLocationId AS ValueMember,strName AS DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId WHERE UT.strInternalCode = ''STAGING'''
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 77
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 77
+        ,'Staging Location Type'
+        ,5
+        ,1
+        ,0
+        ,'SELECT ''Alternate Staging Location'' AS ValueMember,''Alternate Staging Location'' AS DisplayMember UNION SELECT ''Staging Location'' AS ValueMember,''Staging Location'' AS DisplayMember UNION SELECT ''Production Staging Location'' AS ValueMember,''Production Staging Location'' AS DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 78
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 78
+        ,'Category for Ingredient Demand Report'
+        ,5
+        ,1
+        ,1
+        ,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
 END
 GO

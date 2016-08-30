@@ -141,6 +141,7 @@ BEGIN
 					,strTermDescription = I.vwtrm_desc
 					,strTermId = I.vwtrm_key_n 
 					,Z.strCompanyName
+					,strPriceLevelName = CAST(B.vwcus_prc_lvl AS NVARCHAR(50))
 				FROM tblTMCustomer A 
 				INNER JOIN vwcusmst B 
 					ON A.intCustomerNumber = B.A4GLIdentity 
@@ -272,6 +273,7 @@ BEGIN
 					,strTermDescription = I.strTerm
 					,strTermId = CAST(I.intTermID AS NVARCHAR(8)) 
 					,Z.strCompanyName
+					,strPriceLevelName = Q.strPricingLevelName
 				FROM tblTMCustomer A 
 				INNER JOIN vyuTMCustomerEntityView B 
 					ON A.intCustomerNumber = B.A4GLIdentity 
@@ -299,6 +301,8 @@ BEGIN
 					ON C.intFillMethodId = O.intFillMethodId
 				LEFT JOIN tblTMRoute P
 					ON C.intRouteId = P.intRouteId
+				LEFT JOIN tblSMCompanyLocationPricingLevel Q
+					ON C.intCompanyLocationPricingLevelId = Q.intCompanyLocationPricingLevelId
 				,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
 				WHERE H.strCurrentSeason IS NOT NULL 
 					AND vwcus_active_yn = ''Y'' 

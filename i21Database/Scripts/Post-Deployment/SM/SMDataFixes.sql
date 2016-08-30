@@ -152,3 +152,15 @@ GO
 		DEALLOCATE @CountryIdCursor
 	END
 GO
+	DECLARE @CashManagementParentMenuId INT
+	SELECT @CashManagementParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Cash Management' AND strModuleName = 'Cash Management' AND intParentMenuID = 0
+
+	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Batch Posting' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Batch Posting' AND strModuleName = 'Cash Management') > 1)
+	BEGIN
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId AND intMenuID NOT IN
+		(
+			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+		)
+	END
+
+GO

@@ -2,7 +2,8 @@
 @xmlParam NVARCHAR(MAX) = NULL
 AS
 	DECLARE @intPickListId			INT,
-			@idoc					INT 
+			@idoc					INT,
+			@intSalesOrderId		INT 
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -39,6 +40,12 @@ AS
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intPickListId'
 
+	SELECT	@intSalesOrderId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intSalesOrderId'
+
+	Set @intSalesOrderId = ISNULL(@intSalesOrderId,0)
+
 	Declare @intWorkOrderCount int  
 	SELECT  @intWorkOrderCount = COUNT(1) FROM tblMFWorkOrder WHERE intPickListId = @intPickListId 
    
@@ -54,13 +61,14 @@ Declare @intWorkOrderId int
 Declare @intMinRemainingItem int
 Declare @intBlendRequirementId int
 Declare @intKitStatusId int
-Declare @intSalesOrderId INT
 Declare @dblTotalCost NUMERIC(38,20)
 Declare @strUOM nvarchar(50)
 Declare @strSONo nvarchar(50)
 Declare @strShipTo nvarchar(max)
 Declare @strCustomerComments nvarchar(max)
+Declare @strFooterComments nvarchar(max)
 Declare @ysnShowCostInSalesOrderPickList bit=0
+Declare @intMaxOtherChargeId int
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -86,13 +94,6 @@ DECLARE @tblInputItem TABLE (
 	,intStorageLocationId INT
 	,intParentItemId INT
 	)
-
-DECLARE @tblRecipeInputItem TABLE (
-	intRecipeId INT,
-	intItemId INT,
-	intMarginById INT,
-	dblMargin NUMERIC(38,20)
-)
 
 Declare @tblItems AS TABLE
 (
@@ -134,7 +135,10 @@ Declare @tblItems AS TABLE
 	[strPhone] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[ysnShowCostInSalesOrderPickList] bit null default 0,
-	[ysnLotTracking] bit null default 0
+	[ysnLotTracking] bit null default 0,
+	[intSalesOrderDetailId] int null,
+	[strItemType] nvarchar(50) null,
+	[strFooterComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL
 )
 
 If ISNULL(@xmlParam,'')=''
@@ -143,16 +147,17 @@ Begin
 	Return
 End
 
-Select @intLocationId=intLocationId,@strPickListNo=strPickListNo,@strWorkOrderNo=strWorkOrderNo,@intSalesOrderId=ISNULL(intSalesOrderId,0) from tblMFPickList Where intPickListId=@intPickListId
-Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId,@intKitStatusId=intKitStatusId,
-@strUOM=um.strUnitMeasure 
-From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId 
-Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
-Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-Where intPickListId=@intPickListId
-Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
-Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
-Select @strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
+If @intSalesOrderId=0 --Kit Pick List
+Begin
+	Select @intLocationId=intLocationId,@strPickListNo=strPickListNo,@strWorkOrderNo=strWorkOrderNo from tblMFPickList Where intPickListId=@intPickListId
+	Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId,@intKitStatusId=intKitStatusId,
+	@strUOM=um.strUnitMeasure 
+	From tblMFWorkOrder w Join tblICItem i on w.intItemId=i.intItemId 
+	Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Where intPickListId=@intPickListId
+	Select @dblQtyToProduce=SUM(dblQuantity) From tblMFWorkOrder Where intPickListId=@intPickListId
+	Select @dblTotalPickQty=SUM(dblQuantity) From tblMFPickListDetail Where intPickListId=@intPickListId
 
 	SELECT @intRecipeId = intRecipeId
 	FROM tblMFWorkOrderRecipe
@@ -161,7 +166,7 @@ Select @strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@
 		AND intLocationId = @intLocationId
 		AND ysnActive = 1
 
-		INSERT INTO @tblInputItem (
+	INSERT INTO @tblInputItem (
 		intItemId
 		,dblRequiredQty
 		,ysnIsSubstitute
@@ -200,8 +205,6 @@ Select @strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@
 		AND r.intWorkOrderId = @intWorkOrderId
 		AND ri.intConsumptionMethodId IN (2,3)
 
-If @intSalesOrderId=0 --Kit Pick List
-Begin
 	SELECT pl.strPickListNo,  
 			bi.strItemNo + ' - '  + ISNULL(bi.strDescription,'')  AS strBlendItemNoDesc,  
 			pl.strWorkOrderNo,  
@@ -272,43 +275,15 @@ Begin --Sales Order Pick List
 	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnPrintPriceOnPrintTicket,0) From tblARCustomer 
 	Where intEntityCustomerId=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 
+	Select TOP 1 @intPickListId=ISNULL(intPickListId,0) From tblMFPickList Where intSalesOrderId=@intSalesOrderId
+
+	Select @dblTotalPickQty=SUM(dblQtyOrdered) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
+			 
 	Select TOP 1 @strUOM = um.strUnitMeasure 
-	From tblMFPickListDetail pld Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId 
-	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where pld.intPickListId=@intPickListId
+	From tblSOSalesOrderDetail sd Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId 
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId Where sd.intSalesOrderId=@intSalesOrderId
 
-	INSERT INTO @tblRecipeInputItem(intRecipeId,intItemId,intMarginById,dblMargin)
-	Select distinct r.intRecipeId,ri.intItemId,ri.intMarginById,ISNULL(ri.dblMargin,0)
-	From tblSOSalesOrderDetail sd Join tblMFRecipe r on sd.intRecipeId=r.intRecipeId
-	Join tblMFRecipeItem ri on r.intRecipeId=ri.intRecipeId AND ri.intItemId=sd.intItemId
-	Where sd.intSalesOrderId=@intSalesOrderId
-
-	Select @dblTotalCost=SUM(dblCost) From 
-	(
-	SELECT 
-			ISNULL(dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * (
-			CASE WHEN ISNULL(pld.intLotId,0) > 0 THEN 
-				CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
-					ISNULL(l.dblLastCost,0) 
-				ELSE
-					(Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId)
-				END		
-			ELSE 
-			CASE WHEN ri.intMarginById=1 THEN 
-			ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId),0) 
-			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ),0))/100
-			ELSE (Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ) + ISNULL(ri.dblMargin,0) End
-			End ),0) AS dblCost
-		FROM tblMFPickList pl  
-		JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
-		JOIN tblICItem i on pld.intItemId=i.intItemId
-		Left JOIN tblICLot l on l.intLotId=pld.intLotId
-		Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
-		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Left Join @tblRecipeInputItem ri on pld.intItemId=ri.intItemId
-		WHERE pl.intPickListId=@intPickListId 
-	) t
-
-	Set @dblTotalCost=@dblTotalCost + (Select ISNULL(SUM(dblLineTotal),0) From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId))
+	Select @intLocationId=intCompanyLocationId,@strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
 
 	Select @strShipTo= ISNULL(RTRIM(el.strAddress) + CHAR(13) + char(10), '')
 					 + ISNULL(RTRIM(el.strCity), '')
@@ -321,39 +296,116 @@ Begin --Sales Order Pick List
 	Select @strCustomerComments=COALESCE(@strCustomerComments, '') + dm.strMessage + CHAR(13)
 	From tblSMDocumentMaintenanceMessage dm 
 	Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
-	Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
-	AND dm.ysnPickList=1
+	Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId) AND d.intCompanyLocationId=@intLocationId
+	AND dm.ysnPickList=1 AND dm.strHeaderFooter='Header'
 
-	INSERT INTO @tblItems
-	SELECT pl.strPickListNo ,  
+	If ISNULL(@strCustomerComments,'')=''
+		Select @strCustomerComments=COALESCE(@strCustomerComments, '') + dm.strMessage + CHAR(13)
+		From tblSMDocumentMaintenanceMessage dm 
+		Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
+		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Header'
+
+	Select @strFooterComments=COALESCE(@strFooterComments, '') + dm.strMessage + CHAR(13)
+	From tblSMDocumentMaintenanceMessage dm 
+	Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
+	Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId) AND d.intCompanyLocationId=@intLocationId
+	AND dm.ysnPickList=1 AND dm.strHeaderFooter='Footer'
+
+	If ISNULL(@strFooterComments,'')=''
+		Select @strFooterComments=COALESCE(@strFooterComments, '') + dm.strMessage + CHAR(13)
+		From tblSMDocumentMaintenanceMessage dm 
+		Join tblSMDocumentMaintenance d on dm.intDocumentMaintenanceId=d.intDocumentMaintenanceId
+		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Footer'
+
+	Select @dblTotalCost=ISNULL(SUM(dblQtyOrdered * ISNULL(dblPrice,0)),0) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
+	
+	Set @dblTotalCost=@dblTotalCost + (Select ISNULL(SUM(dblLineTotal),0) From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId))
+
+	If @intPickListId>0
+		Begin
+			INSERT INTO @tblItems
+			SELECT pl.strPickListNo ,  
+					''  AS strBlendItemNoDesc,  
+					pl.strWorkOrderNo,  
+					l.strLotNumber,
+					l.strLotAlias,
+					sl.strName AS strStorageLocationName,
+					i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
+					ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+					dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
+					um.strUnitMeasure AS strPickUOM,
+					l.strGarden,
+					@intWorkOrderCount AS intWorkOrderCount,
+					'' strParentLotNumber,
+					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
+					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
+					pld.dblQuantity AS dblQuantity,
+					CASE WHEN ISNULL(pld.intLotId,0)>0 THEN dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0)
+					Else pld.dblQuantity * ISNULL(sd.dblPrice,0.0) END AS dblCost,
+					@dblTotalCost AS dblTotalCost
+					,@strCompanyName AS strCompanyName
+					,@strCompanyAddress AS strCompanyAddress
+					,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
+					,@strCountry AS strCompanyCountry
+					,c.strName AS strCustomerName
+					,cl.strLocationName
+					,so.strBOLNumber
+					,sp.strName AS strSalespersonName
+					,sv.strShipVia
+					,ft.strFreightTerm
+					,so.strPONumber
+					,tm.strTerm
+					,so.strOrderStatus
+					,so.dtmDate
+					,so.dtmDueDate
+					,so.strComments AS strSOComments
+					,@strShipTo AS strShipTo
+					,c.strPhone
+					,@strCustomerComments
+					,@ysnShowCostInSalesOrderPickList
+					,0
+					,sd.intSalesOrderDetailId
+					,i.strType
+					,@strFooterComments
+			FROM tblMFPickList pl  
+			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
+			JOIN tblICItem i on pld.intItemId=i.intItemId
+			Left JOIN tblICLot l on l.intLotId=pld.intLotId
+			Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
+			Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
+			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+			Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
+			Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
+			Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
+			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
+			Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+			WHERE pl.intPickListId=@intPickListId 
+		End
+	Else
+		Begin
+			INSERT INTO @tblItems
+			SELECT so.strSalesOrderNumber strPickListNo ,  
 			''  AS strBlendItemNoDesc,  
-			pl.strWorkOrderNo,  
-			l.strLotNumber,
-			l.strLotAlias,
-			sl.strName AS strStorageLocationName,
+			so.strSalesOrderNumber strWorkOrderNo,  
+			'' strLotNumber,
+			'' strLotAlias,
+			'' AS strStorageLocationName,
 			i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
 			ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
-			dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
+			dbo.fnRemoveTrailingZeroes(sd.dblQtyOrdered) AS dblPickQuantity,
 			um.strUnitMeasure AS strPickUOM,
-			l.strGarden,
+			'' strGarden,
 			@intWorkOrderCount AS intWorkOrderCount,
 			'' strParentLotNumber,
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
-			pld.dblQuantity AS dblQuantity,
-			dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * (
-			CASE WHEN ISNULL(pld.intLotId,0) > 0 THEN 
-				CASE WHEN ISNULL(l.dblLastCost,0) > 0 THEN
-					ISNULL(l.dblLastCost,0) 
-				ELSE
-					(Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId)
-				END		
-			ELSE 
-			CASE WHEN ri.intMarginById=1 THEN 
-			ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ),0) 
-			+ (ISNULL(ri.dblMargin,0) * ISNULL((Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ),0))/100
-			ELSE (Select TOP 1 ISNULL(ip.dblCost,0) From vyuMFGetItemByLocation ip Where ip.intLocationId=@intLocationId AND ip.intItemId=pld.intItemId ) + ISNULL(ri.dblMargin,0) End
-			End ) AS dblCost,
+			sd.dblQtyOrdered AS dblQuantity,
+			sd.dblQtyOrdered * ISNULL(sd.dblPrice,0) AS dblCost,
 			@dblTotalCost AS dblTotalCost
 			,@strCompanyName AS strCompanyName
 			,@strCompanyAddress AS strCompanyAddress
@@ -376,28 +428,46 @@ Begin --Sales Order Pick List
 			,@strCustomerComments
 			,@ysnShowCostInSalesOrderPickList
 			,0
-	FROM tblMFPickList pl  
-	JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
-	JOIN tblICItem i on pld.intItemId=i.intItemId
-	Left JOIN tblICLot l on l.intLotId=pld.intLotId
-	Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
-	Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
-	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-	Left Join @tblRecipeInputItem ri on pld.intItemId=ri.intItemId
-	Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
-	Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
-	Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
-	Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
-	Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
-	Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
-	Left Join tblSMTerm tm on so.intTermId=tm.intTermID
-	WHERE pl.intPickListId=@intPickListId 
-	ORDER BY dblQuantity
-	
+			,sd.intSalesOrderDetailId
+			,i.strType
+			,@strFooterComments
+			FROM tblSOSalesOrderDetail sd  
+			JOIN tblICItem i on sd.intItemId=i.intItemId
+			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
+			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+			Join tblSOSalesOrder so on sd.intSalesOrderId=so.intSalesOrderId
+			Join vyuARCustomer c on so.intEntityCustomerId=c.intEntityCustomerId
+			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.intEntitySalespersonId
+			Left Join tblSMShipVia sv on so.intShipViaId=sv.intEntityShipViaId
+			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
+			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
+			WHERE so.intSalesOrderId=@intSalesOrderId
+		End
+
+	--Get Comments From SO	
+	INSERT INTO @tblItems(strItemNo,strDescription,intSalesOrderDetailId,strItemType)
+	Select '',sd.strItemDescription,sd.intSalesOrderDetailId,i.strType
+	From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId
+	Where sd.intSalesOrderId=@intSalesOrderId AND sd.intCommentTypeId IN (1,2)
+
+	Update ti Set  ti.strPickListNo=t.strPickListNo,ti.strBlendItemNoDesc=t.strBlendItemNoDesc,ti.strWorkOrderNo=t.strWorkOrderNo,ti.intWorkOrderCount=t.intWorkOrderCount,
+	ti.dblReqQty=t.dblReqQty,ti.dblTotalPickQty=t.dblTotalPickQty,ti.dblTotalCost=t.dblTotalCost,ti.strCompanyName=t.strCompanyName,ti.strCompanyAddress=t.strCompanyAddress,
+	ti.strCompanyCityStateZip=t.strCompanyCityStateZip,ti.strCompanyCountry=t.strCompanyCountry,ti.strCustomerName=t.strCustomerName,ti.strLocationName=t.strLocationName,
+	ti.strBOLNumber=t.strBOLNumber,ti.strSalespersonName=t.strSalespersonName,ti.strShipVia=t.strShipVia,ti.strFreightTerm=t.strFreightTerm,ti.strPONumber=t.strPONumber,
+	ti.strTerm=t.strTerm,ti.strOrderStatus=t.strOrderStatus,ti.dtmDate=t.dtmDate,ti.dtmDueDate=t.dtmDueDate,ti.strSOComments=t.strSOComments,ti.strShipTo=t.strShipTo,
+	ti.strPhone=t.strPhone,ti.strCustomerComments=t.strCustomerComments,ti.ysnShowCostInSalesOrderPickList=t.ysnShowCostInSalesOrderPickList,ti.ysnLotTracking=t.ysnLotTracking,
+	ti.strFooterComments=t.strFooterComments
+	From @tblItems ti Cross Join (Select TOP 1 * From @tblItems) t
+	Where ISNULL(ti.strPickListNo,'')=''
+
 	--Other Charge
 	If @ysnShowCostInSalesOrderPickList=1
+		Begin
+		Select @intMaxOtherChargeId=MAX(intSalesOrderDetailId) + 1 From tblSOSalesOrderDetail
+
 		INSERT INTO @tblItems
-		Select @strPickListNo strPickListNo,  
+		Select ISNULL(@strPickListNo,@strSONo) strPickListNo,  
 				''  AS strBlendItemNoDesc,  
 				@strSONo strWorkOrderNo,  
 				'' strLotNumber,
@@ -419,14 +489,15 @@ Begin --Sales Order Pick List
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
-				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments
 		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
-	
+		End
+
 	If Exists (Select 1 From @tblItems Where ISNULL(LTRIM(RTRIM(strLotNumber)),'')<>'')
 		Update @tblItems set ysnLotTracking=1
 
 	If @ysnShowCostInSalesOrderPickList=0 
 		Update @tblItems set dblTotalCost=null
 
-	Select * from @tblItems
+	Select * from @tblItems Order By intSalesOrderDetailId
 End

@@ -3,6 +3,7 @@ AS
 SELECT 
 	REQ.intTimeOffRequestId
 	,REQ.strRequestId
+	,REQ.intEntityEmployeeId
 	,ENT.strEntityNo
 	,ENT.strName
 	,REQ.dtmRequestDate

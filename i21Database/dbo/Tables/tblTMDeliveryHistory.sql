@@ -71,6 +71,7 @@
     [intWillCallRouteId] INT NULL, 
     [intWillCallDispatchId] INT NULL, 
     [dtmCreatedDate] DATETIME NULL DEFAULT (GETDATE()), 
+    [ysnWillCallLeakCheckRequired] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDeliveryHistory_tblLGRoute] FOREIGN KEY ([intWillCallRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])
@@ -774,3 +775,13 @@ GO
 
 CREATE INDEX [IX_tblTMDeliveryHistory_strWillCallOrderNumber] ON [dbo].[tblTMDeliveryHistory] ([strWillCallOrderNumber])
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will Call Leak Check Required',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnWillCallLeakCheckRequired'

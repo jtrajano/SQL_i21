@@ -514,6 +514,7 @@ BEGIN
 							,intWillCallContractId
 							,intWillCallRouteId
 							,intWillCallDispatchId
+							,ysnWillCallLeakCheckRequired
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -563,6 +564,7 @@ BEGIN
 							,intWillCallContractId = NULL
 							,intWillCallRouteId = G.intRouteId
 							,intWillCallDispatchId = G.intDispatchID
+							,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -696,6 +698,7 @@ BEGIN
 						,dtmSiteLastReadingUpdate
 						,intWillCallRouteId
 						,intWillCallDispatchId
+						,ysnWillCallLeakCheckRequired
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -759,6 +762,7 @@ BEGIN
 						,dtmSiteLastReadingUpdate = ISNULL(A.dtmLastReadingUpdate,DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))
 						,intWillCallRouteId = G.intRouteId
 						,intWillCallDispatchId = G.intDispatchID
+						,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -949,6 +953,7 @@ BEGIN
 			,intInvoiceDetailId
 			,intWillCallRouteId
 			,intWillCallDispatchId
+			,ysnWillCallLeakCheckRequired
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -1001,6 +1006,7 @@ BEGIN
 			,intInvoiceDetailId = B.intInvoiceDetailId
 			,intWillCallRouteId = G.intRouteId
 			,intWillCallDispatchId = G.intDispatchID
+			,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId

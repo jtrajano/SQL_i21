@@ -55,7 +55,7 @@ DECLARE @tblPickedLot TABLE(
 Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId,strLotTracking)
 Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId,i.strLotTracking 
 From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
-Where intSalesOrderId=@intSalesOrderId Group By sd.intItemId,sd.intItemUOMId,i.strLotTracking
+Where intSalesOrderId=@intSalesOrderId AND i.strType NOT IN ('Comment','Other Charge') Group By sd.intItemId,sd.intItemUOMId,i.strLotTracking
 
 
 If Exists (Select 1 From tblMFPickList Where intSalesOrderId=@intSalesOrderId)

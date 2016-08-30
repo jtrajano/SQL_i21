@@ -6,6 +6,7 @@
     [ysnContract]              BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnContract] DEFAULT ((0)) NOT NULL,
     [ysnBuyback]               BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnBuyback] DEFAULT ((0)) NOT NULL,
     [ysnQuote]                 BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnQuote] DEFAULT ((0)) NOT NULL,
+	[ysnVolumeDiscount]		   BIT CONSTRAINT [DF_tblARCustomerGroupDetail_ysnVolumeDiscount] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]         INT NOT NULL,
     CONSTRAINT [PK_tblARCustomerGroupDetail_1] PRIMARY KEY CLUSTERED ([intCustomerGroupDetailId] ASC),	
 	CONSTRAINT [FK_tblARCustomerGroupDetail_tblARCustomerGroup] FOREIGN KEY ([intCustomerGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]) ON DELETE CASCADE,

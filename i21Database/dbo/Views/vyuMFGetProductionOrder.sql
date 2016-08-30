@@ -21,18 +21,18 @@ SELECT IsNULL(BR.intBlendRequirementId, 0) AS intBlendRequirementId
 	,W.strComment
 	,W.intLocationId
 	,W.intConcurrencyId
-	,ISNULL(SWD.dtmPlannedStartDate, W.dtmExpectedDate) dtmPlannedDate
+	,ISNULL(CD.dtmCalendarDate, W.dtmExpectedDate) dtmPlannedDate
 	,ISNULL(Round(SWD.dblPlannedQty, 0), W.dblQuantity) dblPlannedQty
 	,S.intShiftId
 	,S.strShiftName AS strPlannedShiftName
 	,MP.intManufacturingProcessId
 	,MP.strProcessName
 	,OH.intOrderHeaderId
-	,OH.strBOLNo
+	,OH.strOrderNo
 	,OS.strOrderStatus
-	,ROW_NUMBER() OVER (
-		ORDER BY W.intWorkOrderId DESC
-		) AS intRecordId
+	,Convert(INT, ROW_NUMBER() OVER (
+			ORDER BY W.intWorkOrderId DESC
+			)) AS intRecordId
 	,SW1.strComments AS strScheduleComments
 FROM dbo.tblMFWorkOrder W
 INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -47,12 +47,17 @@ LEFT JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON W.intWorkOrderId = SWD.intWork
 LEFT JOIN dbo.tblMFScheduleWorkOrder SW1 ON SW1.intScheduleWorkOrderId = SWD.intScheduleWorkOrderId
 LEFT JOIN dbo.tblMFSchedule S1 ON S1.intScheduleId = SW1.intScheduleId
 	AND S1.ysnStandard = 1
+LEFT JOIN tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = SWD.intPlannedShiftId
 LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
-	AND SW.dtmPlannedDate = ISNULL(SWD.dtmPlannedStartDate, W.dtmExpectedDate)
-	AND ISNULL(SW.intPlannnedShiftId, 0) = ISNULL(SWD.intPlannedShiftId, 0)
-LEFT JOIN dbo.tblWHOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
-LEFT JOIN dbo.tblWHOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
+	AND SW.dtmPlannedDate = ISNULL(CD.dtmCalendarDate, W.dtmExpectedDate)
+	AND CASE 
+		WHEN ISNULL(SW.intPlannnedShiftId, 0) = 0
+			THEN ISNULL(SWD.intPlannedShiftId, 0)
+		ELSE ISNULL(SW.intPlannnedShiftId, 0)
+		END = ISNULL(SWD.intPlannedShiftId, 0)
+LEFT JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
+LEFT JOIN dbo.tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 LEFT JOIN dbo.tblMFBlendRequirement BR ON W.intBlendRequirementId = BR.intBlendRequirementId
 WHERE W.intStatusId IN (
 		9

@@ -225,7 +225,6 @@
     <None Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <None Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
     <None Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
-    <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql" />
     <None Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
     <None Include="Scripts\TM\Customer.sql" />
   </ItemGroup>
@@ -344,5 +343,11 @@
     <None Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateUpdateRouteSequenceSP.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateCustomerConsumptionSiteInfoView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateOriginDegreeOptionView.sql" />
+    <None Include="Scripts\TM\AddOriginTableIndex.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateCategoryFromOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateDYMOCustomerLabelReportView.sql" />
   </ItemGroup>
 </Project>

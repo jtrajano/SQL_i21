@@ -223,3 +223,18 @@ BEGIN
 	
 	print 'end updating account data'
 END
+
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFTransactionTax')
+BEGIN
+	print 'remove orphan transaction tax'
+	IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblCFTransactionTax'AND COLUMN_NAME = 'intTaxCodeId')
+	BEGIN
+		IF EXISTS(SELECT 1 FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblSMTaxCode'AND COLUMN_NAME = 'intTaxCodeId')
+		BEGIN
+			EXEC ('delete from tblCFTransactionTax where intTaxCodeId not in (SELECT intTaxCodeId FROM tblSMTaxCode)')
+		END
+	END
+	
+	print 'remove orphan transaction tax'
+END

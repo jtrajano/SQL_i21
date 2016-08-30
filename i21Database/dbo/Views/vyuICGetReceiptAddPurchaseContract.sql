@@ -59,8 +59,8 @@ FROM (
 		, dblFranchise				= CAST(NULL AS NUMERIC(18, 6))
 		, dblContainerWeightPerQty	= CAST(NULL AS NUMERIC(18, 6))
 		, ysnSubCurrency			= CAST(ContractView.ysnSubCurrency AS BIT)
-		, intCurrencyId				= ISNULL( ISNULL(ContractView.intSeqCurrencyId, ContractView.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL'))
-		, strSubCurrency			= CASE WHEN ContractView.ysnSubCurrency = 1 THEN ContractView.strCurrency ELSE ISNULL(ContractView.strSeqCurrency, ISNULL(ContractView.strMainCurrency, ISNULL(ContractView.strCurrency, dbo.fnSMGetDefaultCurrency('FUNCTIONAL')))) END 
+		, intCurrencyId				= dbo.fnICGetCurrency(ContractView.intContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
+		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(ContractView.intContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(0 AS NUMERIC(38, 20))-- There is no gross from contracts.
 		, dblNet					= CAST(ContractView.dblAvailableNetWeight AS NUMERIC(38, 20))
 	FROM	vyuCTContractDetailView ContractView LEFT JOIN dbo.tblICItemUOM ItemUOM

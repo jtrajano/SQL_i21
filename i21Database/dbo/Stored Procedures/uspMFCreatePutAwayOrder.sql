@@ -8,15 +8,15 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intUserId INT
 		,@intLocationId INT
-		--,@intStorageLocationId INT
 		,@dtmCurrentDate DATETIME
-		,@intOwnerId INT
-		--,@strBlendProductionStagingLocation NVARCHAR(50)
-		,@intOrderTermsId INT
 		,@strUserName NVARCHAR(50)
-		,@strBOLNo NVARCHAR(50)
-		,@intEntityId INT
-		,@strItemNo NVARCHAR(50)
+		,@strOrderNo nvarchar(50) 
+		,@intStageLocationTypeId int
+		,@strStageLocationType nvarchar(50)
+		,@intProductionStagingId int
+		,@intProductionStageLocationId int
+		,@intStagingId int
+		,@intStageLocationId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -30,231 +30,175 @@ BEGIN TRY
 			,intUserId INT
 			) x
 
-	SELECT @intOwnerId = S.intOwnerId
-	FROM dbo.tblWHSKU S
-	JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
-	WHERE C.intContainerId IN (
-			SELECT x.intContainerId
-			FROM OPENXML(@idoc, 'root/Containers/Container', 2) WITH (intContainerId INT) x
-			)
-
-	--SELECT @strBlendProductionStagingLocation = strBlendProductionStagingLocation
-	--FROM dbo.tblMFCompanyPreference
-
-	--SELECT @intStorageLocationId = intStorageLocationId
-	--FROM dbo.tblICStorageLocation
-	--WHERE strName = @strBlendProductionStagingLocation
-	--	AND intLocationId = @intLocationId
-
 	DECLARE @intBlendProductionStagingUnitId INT
 
-	SELECT @intBlendProductionStagingUnitId=intBlendProductionStagingUnitId
+	SELECT @intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
 	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId=@intLocationId
-
-	SELECT @intEntityId = E.intEntityId
-	FROM dbo.tblEMEntity E
-	JOIN dbo.[tblEMEntityType] ET ON E.intEntityId = ET.intEntityId
-	WHERE ET.strType = 'Warehouse'
-		AND E.strName = 'Production'
-
-	SELECT @intOrderTermsId = intOrderTermsId
-	FROM tblWHOrderTerms
-	WHERE ysnDefault = 1
+	WHERE intCompanyLocationId = @intLocationId
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
 	WHERE intEntityUserSecurityId = @intUserId
 
-	--EXEC dbo.uspSMGetStartingNumber 75
-	--	,@strBOLNo OUTPUT
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-				,@intItemId = NULL
-				,@intManufacturingId = NULL
-				,@intSubLocationId = NULL
-				,@intLocationId = @intLocationId
-				,@intOrderTypeId = 7
-				,@intBlendRequirementId = NULL
-				,@intPatternCode = 75
-				,@ysnProposed = 0
-				,@strPatternString = @strBOLNo OUTPUT
+		,@intItemId = NULL
+		,@intManufacturingId = NULL
+		,@intSubLocationId = NULL
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = 7
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 75
+		,@ysnProposed = 0
+		,@strPatternString = @strOrderNo OUTPUT
 
-	DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
+	SELECT @intStageLocationTypeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Staging Location Type'
 
-	IF @intOwnerId IS NULL
-	BEGIN
-		SELECT @strItemNo = I.strItemNo
-		FROM dbo.tblWHSKU S
-		JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
-		JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
-		WHERE C.intContainerId IN (
-				SELECT x.intContainerId
-				FROM OPENXML(@idoc, 'root/Containers/Container', 2) WITH (intContainerId INT) x
-				)
+	SELECT @strStageLocationType = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intLocationId = @intLocationId
+		AND intAttributeId = @intStageLocationTypeId
 
-		RAISERROR (
-				90005
-				,14
-				,1
-				,@strItemNo
-				)
-	END
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
 
-	SELECT @strXML = '<root>'
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
 
-	SELECT @strXML += '<intOrderStatusId>1</intOrderStatusId>'
+	SELECT @intStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
 
-	SELECT @strXML += '<intOrderTypeId>7</intOrderTypeId>'
-
-	SELECT @strXML += '<intOrderDirectionId>1</intOrderDirectionId>'
-
-	SELECT @strXML += '<strBOLNo>' + @strBOLNo + '</strBOLNo>'
-
-	SELECT @strXML += '<dtmRAD>' + LTRIM(@dtmCurrentDate) + '</dtmRAD>'
-
-	SELECT @strXML += '<intOwnerAddressId>' + LTRIM(@intOwnerId) + '</intOwnerAddressId>'
-
-	SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intBlendProductionStagingUnitId) + '</intStagingLocationId>'
-
-	SELECT @strXML += '<intFreightTermId>' + LTRIM(@intOrderTermsId) + '</intFreightTermId>'
-
-	SELECT @strXML += '<intShipFromAddressId>' + LTRIM(@intEntityId) + '</intShipFromAddressId>'
-
-	SELECT @strXML += '<intShipToAddressId>' + LTRIM(@intLocationId) + '</intShipToAddressId>'
-
-	SELECT @strXML += '<strLastUpdateBy>' + LTRIM(@strUserName) + ' </strLastUpdateBy>'
-
-	SELECT @strXML += '</root>'
+	SELECT @intStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intLocationId = @intLocationId
+		AND intAttributeId = @intStagingId
 
 	BEGIN TRANSACTION
 
-	INSERT INTO @tblWHOrderHeader
-	EXEC dbo.uspWHCreateOutboundOrder @strXML = @strXML
+	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
+	DECLARE @tblMFOrderHeader TABLE (intOrderHeaderId INT)
+
+	INSERT INTO @OrderHeaderInformation (
+		intOrderStatusId
+		,intOrderTypeId
+		,intOrderDirectionId
+		,strOrderNo
+		,strReferenceNo
+		,intStagingLocationId
+		,strComment
+		,dtmOrderDate
+		,strLastUpdateBy
+		)
+	SELECT 1
+		,2
+		,1
+		,@strOrderNo
+		,''
+		,Case When @strStageLocationType='Alternate Staging Location' Then NULL
+				When @strStageLocationType='Production Staging Location' Then @intProductionStageLocationId
+				Else @intStageLocationId End
+		,''
+		,@dtmCurrentDate
+		,@strUserName
+
+	INSERT INTO @tblMFOrderHeader
+	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
-	FROM @tblWHOrderHeader
+	FROM @tblMFOrderHeader
 
-	INSERT INTO dbo.tblWHContainerInboundOrder (
-		intContainerId
-		,intOrderHeaderId
-		)
-	SELECT x.intContainerId
-		,@intOrderHeaderId
-	FROM OPENXML(@idoc, 'root/Containers/Container', 2) WITH (intContainerId INT) x
+	DECLARE @OrderDetailInformation AS OrderDetailInformation
 
-	INSERT INTO tblWHOrderLineItem (
+	INSERT INTO @OrderDetailInformation (
 		intOrderHeaderId
 		,intItemId
 		,dblQty
-		,intReceiptQtyUOMId
-		,intLastUpdateId
-		,dtmLastUpdateOn
-		--,intPreferenceId
-		,dblRequiredQty
+		,intItemUOMId
+		,dblWeight
+		,intWeightUOMId
+		,dblWeightPerUnit
+		,intLotId
+		,strLotAlias
 		,intUnitsPerLayer
 		,intLayersPerPallet
-		,intLineNo
-		,dblPhysicalCount
-		,intPhysicalCountUOMId
-		,dblWeightPerUnit
-		,intWeightPerUnitUOMId
+		,intPreferenceId
 		,dtmProductionDate
-		,strLotAlias
-		--,intSanitizationOrderDetailsId
-		,intLotId
-		,intConcurrencyId
-		,ysnIsWeightCertified
+		,intLineNo
+		,intSanitizationOrderDetailsId
+		,strLineItemNote
+		,strLastUpdateBy
 		)
 	SELECT @intOrderHeaderId
-		,I.intItemId
-		,SUM(S.dblQty)
-		,S.intUOMId
-		,@intUserId
-		,@dtmCurrentDate
-		,SUM(S.dblQty)
-		,ISNULL((
-				--SELECT MAX(intUnitPerLayer)
-				--FROM tblWHSKU S
-				--WHERE S.intLotId = CL.intLotId
-				NULL
-				), I.intUnitPerLayer)
-		,ISNULL((
-				--SELECT MAX(intLayerPerPallet)
-				--FROM tblWHSKU S1
-				--WHERE S1.intLotId = CL.intLotId
-				NULL
-				), I.intLayerPerPallet)
-		,0
-		,SUM(S.dblQty)
-		,S.intUOMId
-		,S.dblWeightPerUnit
-		,IU.intUnitMeasureId
-		,@dtmCurrentDate
-		,S.strLotCode
-		--,CL.intWorkOrderInputLotId
-		,S.intLotId
-		,1
-		,1
-	FROM dbo.tblWHSKU S
-	JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
-		AND IU.ysnStockUnit = 1
-	WHERE S.intContainerId IN (
-			SELECT x.intContainerId
-			FROM OPENXML(@idoc, 'root/Containers/Container', 2) WITH (intContainerId INT) x
+		,L.intItemId
+		,SUm(L.dblQty)
+		,L.intItemUOMId
+		,SUm(L.dblWeight)
+		,L.intWeightUOMId
+		,L.dblWeightPerQty
+		,L.intLotId
+		,L.strLotAlias
+		,I.intUnitPerLayer
+		,I.intLayerPerPallet
+		,(
+			SELECT TOP 1 intPickListPreferenceId
+			FROM tblMFPickListPreference
 			)
-	GROUP BY I.intItemId
-		,S.intUOMId
-		,ISNULL((
-				--SELECT MAX(intUnitPerLayer)
-				--FROM tblWHSKU S
-				--WHERE S.intLotId = CL.intLotId
-				NULL
-				), I.intUnitPerLayer)
-		,ISNULL((
-				--SELECT MAX(intLayerPerPallet)
-				--FROM tblWHSKU S1
-				--WHERE S1.intLotId = CL.intLotId
-				NULL
-				), I.intLayerPerPallet)
-		,IU.intUnitMeasureId
-		,S.dblWeightPerUnit
-		,IU.intUnitMeasureId
-		,S.strLotCode
-		--,CL.intWorkOrderInputLotId
-		,S.intLotId
+		,L.dtmDateCreated
+		,Row_Number() OVER (
+			ORDER BY L.intItemId
+			)
+		,NULL
+		,''
+		,@strUserName
+	FROM dbo.tblICLot L
+	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+	WHERE L.intLotId IN (
+			SELECT x.intLotId
+			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intLotId INT) x
+			)
+	GROUP BY L.intItemId
+		,L.intItemUOMId
+		,L.intWeightUOMId
+		,L.dblWeightPerQty
+		,L.intLotId
+		,L.strLotAlias
+		,I.intUnitPerLayer
+		,I.intLayerPerPallet
+		,L.dtmDateCreated
 
-	INSERT INTO dbo.tblWHOrderManifest (
+	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation =@OrderDetailInformation
+
+	INSERT INTO dbo.tblMFOrderManifest (
 		intConcurrencyId
-		,intOrderLineItemId
+		,intOrderDetailId
 		,intOrderHeaderId
-		,strManifestItemNote
-		,intSKUId
 		,intLotId
-		,strSSCCNo
+		,strManifestItemNote
 		,intLastUpdateId
 		,dtmLastUpdateOn
 		)
 	SELECT 1
 		,(
-			SELECT TOP 1 LI.intOrderLineItemId
-			FROM dbo.tblWHOrderLineItem LI
-			WHERE LI.intLotId = S.intLotId
-				AND LI.intOrderHeaderId = @intOrderHeaderId
+			SELECT TOP 1 OD.intOrderDetailId
+			FROM dbo.tblMFOrderDetail OD
+			WHERE OD.intLotId = L.intLotId
+				AND OD.intOrderHeaderId = @intOrderHeaderId
 			)
 		,@intOrderHeaderId
-		,''
-		,S.intSKUId
-		,S.intLotId
+		,L.intLotId
 		,''
 		,@intUserId
 		,@dtmCurrentDate
-	FROM dbo.tblWHSKU S
-	WHERE S.intContainerId IN (
-			SELECT x.intContainerId
-			FROM OPENXML(@idoc, 'root/Containers/Container', 2) WITH (intContainerId INT) x
+	FROM dbo.tblICLot L
+	WHERE L.intLotId IN (
+			SELECT x.intLotId
+			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intLotId INT) x
 			)
-
 
 	COMMIT TRANSACTION
 
@@ -278,6 +222,5 @@ BEGIN CATCH
 			)
 END CATCH
 GO
-
 
 

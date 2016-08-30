@@ -86,6 +86,9 @@ BEGIN
 					CROSS APPLY fnTMLastLeakGasCheckTable(A.intSiteID) G
 					WHERE ISNULL(I.ysnAppliance,0) = 0
 						AND K.strDeviceType = ''Tank''
+						AND A.ysnActive = 1
+						AND B.vwcus_active_yn = ''Y''
+
 				')
 		END
 		ELSE
@@ -125,6 +128,8 @@ BEGIN
 					ON A.intSiteID = H.intSiteID
 				INNER JOIN tblTMDevice I
 					ON H.intSiteDeviceID = I.intDeviceId
+				INNER JOIN tblARCustomer L
+					ON B.intEntityId = L.intEntityCustomerId
 				LEFT JOIN tblTMTankType J
 					ON I.intTankTypeId = J.intTankTypeId
 				LEFT JOIN tblTMDeviceType K
@@ -132,6 +137,8 @@ BEGIN
 				CROSS APPLY fnTMLastLeakGasCheckTable(A.intSiteID) G
 				WHERE ISNULL(I.ysnAppliance,0) = 0
 					AND K.strDeviceType = ''Tank''
+					AND A.ysnActive = 1
+					AND L.ysnActive = 1
 			
 		')
 	END

@@ -20,7 +20,10 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
         @total as int,
 		@intSurchargeItemId as int,
-		@intFreightItemId as int;
+		@intFreightItemId as int,
+		@intProcessingLocationId as int;
+
+select top 1 @intProcessingLocationId = intProcessingLocationId from tblSCTicket where intTicketId = @intMatchTicketId
 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
@@ -32,94 +35,164 @@ END
 BEGIN TRY
 	-- Insert Entries to Stagging table that needs to processed to Transport Load
 	INSERT into @ReceiptStagingTable(
+			-- Header
 			strReceiptType
 			,intEntityVendorId
-			,intShipFromId
+			,intTransferorId
+			,strBillOfLadding
+			,intCurrencyId
 			,intLocationId
+			,intShipFromId
+			,intShipViaId
+			,intDiscountSchedule
+				
+			-- Detail				
 			,intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,strBillOfLadding
+			,intGrossNetUOMId
+			,intCostUOMId				
 			,intContractHeaderId
 			,intContractDetailId
-			,dtmDate
-			,intShipViaId
+			,dtmDate				
 			,dblQty
-			,dblCost
-			,intCurrencyId
+			,dblCost				
 			,dblExchangeRate
 			,intLotId
 			,intSubLocationId
 			,intStorageLocationId
 			,ysnIsStorage
 			,dblFreightRate
-			,intSourceId	
-			,intSourceType		 	
 			,dblGross
 			,dblNet
-			,intInventoryReceiptId
-			,dblSurcharge
-			,ysnFreightInPrice
-			,strActualCostId
-			--,intTaxGroupId
-			,strVendorRefNo
-			,strSourceId
+			,intSourceId
+			,intSourceType	
 			,strSourceScreenName
+			--strReceiptType
+			--,intEntityVendorId
+			--,intShipFromId
+			--,intTransferorId
+			--,intLocationId
+			--,intItemId
+			--,intItemLocationId
+			--,intItemUOMId
+			--,strBillOfLadding
+			--,intContractHeaderId
+			--,intContractDetailId
+			--,dtmDate
+			--,intShipViaId
+			--,dblQty
+			--,dblCost
+			--,intCurrencyId
+			--,dblExchangeRate
+			--,intLotId
+			--,intSubLocationId
+			--,intStorageLocationId
+			--,ysnIsStorage
+			--,dblFreightRate
+			--,intSourceId	
+			--,intSourceType		 	
+			--,dblGross
+			--,dblNet
+			--,intInventoryReceiptId
+			--,dblSurcharge
+			--,ysnFreightInPrice
+			--,strActualCostId
+			----,intTaxGroupId
+			--,strVendorRefNo
+			--,strSourceId
+			--,strSourceScreenName
 	)	
 	SELECT 
-			strReceiptType				=	CASE	WHEN SC.intContractId IS NULL THEN 'Direct'
-													WHEN SC.intContractId IS NOT NULL THEN 'Purchase Contract'
-											END
+			strReceiptType				= 'Transfer Order'
 			,intEntityVendorId			= @intUserId
-			,intShipFromId				= (SELECT SS.intLocationId from tblSCTicket as ST JOIN tblSCScaleSetup as SS
-											ON ST.intScaleSetupId = SS.intScaleSetupId
-											WHERE ST.intMatchTicketId = @intMatchTicketId)
-			,intLocationId				= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
-			,intItemId					= SC.intItemId
-			,intItemLocationId			= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
-			,intItemUOMId				=	CASE	
-												WHEN SC.intContractId is NULL  
-													THEN (SELECT TOP 1 
-															IU.intItemUOMId											
-															FROM dbo.tblICItemUOM IU 
-															WHERE	IU.intItemId = SC.intItemId and IU.ysnStockUnit = 1)
-												WHEN SC.intContractId is NOT NULL 
-													THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = SC.intContractId)
-											END-- Need to add the Gallons UOM from Company Preference	   
+			,intTransferorId			= @intProcessingLocationId
 			,strBillOfLadding			= NULL
-			,intContractHeaderId		= (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = SC.intContractId)
-			,intContractDetailId		= SC.intContractId
-			,dtmDate					= SC.dtmTicketDateTime
+			,intCurrencyId				= SC.intCurrencyId
+			,intLocationId				= SC.intProcessingLocationId
+			,intShipFromId				= @intProcessingLocationId
 			,intShipViaId				= SC.intFreightCarrierId
+			,intDiscountSchedule		= SC.intDiscountId
+
+			--Detail
+			,intItemId					= SC.intItemId
+			,intItemLocationId			= SC.intProcessingLocationId
+			,intItemUOMId				= ItemUOM.intItemUOMId
+			,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
+												FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
+													ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
+												WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
+													AND ItemUOM.intItemId = SC.intItemId
+										 )
+			,intCostUOMId				= NULL
+			,intContractHeaderId		= NULL
+			,intContractDetailId		= NULL
+			,dtmDate					= SC.dtmTicketDateTime
 			,dblQty						= SC.dblNetUnits
-			,dblCost					= SC.dblUnitPrice
-			,intCurrencyId				= (
-											SELECT	TOP 1 
-													CP.intDefaultCurrencyId		
-											FROM	dbo.tblSMCompanyPreference CP
-											WHERE	CP.intCompanyPreferenceId = 1 												
-										) -- USD default from company Preference 
+			,dblCost					= SC.dblUnitPrice - SC.dblUnitBasis
 			,dblExchangeRate			= 1 -- Need to check this
 			,intLotId					= NULL --No LOTS from scale
 			,intSubLocationId			= SC.intSubLocationId
 			,intStorageLocationId		= SC.intStorageLocationId
 			,ysnIsStorage				= 0
 			,dblFreightRate				= SC.dblFreightRate
+			,dblGross					= SC.dblGrossWeight
+			,dblNet						= SC.dblGrossWeight - SC.dblTareWeight
 			,intSourceId				= SC.intTicketId
 			,intSourceType		 		= 1 -- Source type for scale is 1 
-			,dblGross					= SC.dblGrossUnits
-			,dblNet						= SC.dblNetUnits
-			,intInventoryReceiptId		= SC.intInventoryReceiptId
-			,dblSurcharge				= 0
-			,ysnFreightInPrice			= NULL
-			,strActualCostId			= NULL
-			--,intTaxGroupId				= NULL
-			,strVendorRefNo				= NULL
-			,strSourceId				= SC.intTicketId
 			,strSourceScreenName		= 'Scale Ticket'
-	FROM	tblSCTicket SC
-	WHERE	SC.intTicketId = @intTicketId 
-			AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0);
+			--strReceiptType				= 'Transfer Order'
+			--,intEntityVendorId			= SC.intEntityId
+			--,intShipFromId				= (SELECT SS.intLocationId from tblSCTicket as ST JOIN tblSCScaleSetup as SS
+			--								ON ST.intScaleSetupId = SS.intScaleSetupId
+			--								WHERE ST.intMatchTicketId = @intMatchTicketId)
+			--,intTransferorId			= (select top 1 intProcessingLocationId from tblSCTicket where intTicketId = SC.intMatchTicketId)
+			--,intLocationId				= SC.intProcessingLocationId
+			--,intItemId					= SC.intItemId
+			--,intItemLocationId			= (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
+			--,intItemUOMId				=	CASE	
+			--									WHEN SC.intContractId is NULL  
+			--										THEN (SELECT TOP 1 
+			--												IU.intItemUOMId											
+			--												FROM dbo.tblICItemUOM IU 
+			--												WHERE	IU.intItemId = SC.intItemId and IU.ysnStockUnit = 1)
+			--									WHEN SC.intContractId is NOT NULL 
+			--										THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = SC.intContractId)
+			--								END-- Need to add the Gallons UOM from Company Preference	   
+			--,strBillOfLadding			= NULL
+			--,intContractHeaderId		= (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = SC.intContractId)
+			--,intContractDetailId		= SC.intContractId
+			--,dtmDate					= SC.dtmTicketDateTime
+			--,intShipViaId				= SC.intFreightCarrierId
+			--,dblQty						= SC.dblNetUnits
+			--,dblCost					= SC.dblUnitPrice
+			--,intCurrencyId				= (
+			--								SELECT	TOP 1 
+			--										CP.intDefaultCurrencyId		
+			--								FROM	dbo.tblSMCompanyPreference CP
+			--								WHERE	CP.intCompanyPreferenceId = 1 												
+			--							) -- USD default from company Preference 
+			--,dblExchangeRate			= 1 -- Need to check this
+			--,intLotId					= NULL --No LOTS from scale
+			--,intSubLocationId			= SC.intSubLocationId
+			--,intStorageLocationId		= SC.intStorageLocationId
+			--,ysnIsStorage				= 0
+			--,dblFreightRate				= SC.dblFreightRate
+			--,intSourceId				= SC.intTicketId
+			--,intSourceType		 		= 1 -- Source type for scale is 1 
+			--,dblGross					= SC.dblGrossUnits
+			--,dblNet						= SC.dblNetUnits
+			--,intInventoryReceiptId		= SC.intInventoryReceiptId
+			--,dblSurcharge				= 0
+			--,ysnFreightInPrice			= NULL
+			--,strActualCostId			= NULL
+			----,intTaxGroupId				= NULL
+			--,strVendorRefNo				= NULL
+			--,strSourceId				= SC.intTicketId
+			--,strSourceScreenName		= 'Scale Ticket'
+	FROM	tblSCTicket SC INNER JOIN dbo.tblICItemUOM ItemUOM ON ItemUOM.intItemId = SC.intItemId 
+			INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId 
+	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ItemUOM.ysnStockUnit = 1
 
    SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
    SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId

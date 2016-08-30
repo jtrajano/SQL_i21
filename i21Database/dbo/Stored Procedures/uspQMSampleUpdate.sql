@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMSampleUpdate]
-	@strXml NVARCHAR(Max)
+     @strXml NVARCHAR(Max)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -35,7 +35,7 @@ BEGIN TRY
 	BEGIN TRAN
 
 	-- Sample Header Update
-	UPDATE dbo.tblQMSample
+	UPDATE tblQMSample
 	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intSampleTypeId = x.intSampleTypeId
 		,intProductTypeId = x.intProductTypeId

@@ -72,6 +72,7 @@ SELECT SO.intSalesOrderId
 	 , blbLogo					= dbo.fnSMGetCompanyLogo('Header')
 	 , intRecipeId				= SD.intRecipeId
 	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
+	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId

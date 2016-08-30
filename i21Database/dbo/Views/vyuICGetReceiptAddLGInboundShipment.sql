@@ -58,12 +58,12 @@ FROM (
 		, dblFranchise				= LogisticsView.dblFranchise
 		, dblContainerWeightPerQty	= LogisticsView.dblContainerWeightPerQty
 		, ysnSubCurrency			= CAST(LogisticsView.ysnSubCurrency AS BIT)
-		, intCurrencyId				= Currency.intCurrencyID
-		, strSubCurrency			= CASE WHEN LogisticsView.ysnSubCurrency = 1 THEN LogisticsView.strCurrency ELSE LogisticsView.strMainCurrency END 
+		, intCurrencyId				= dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
+		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView LEFT JOIN dbo.tblSMCurrency Currency 
-				ON Currency.strCurrency = ISNULL(LogisticsView.strMainCurrency, LogisticsView.strCurrency) 
+				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 
 				ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure 

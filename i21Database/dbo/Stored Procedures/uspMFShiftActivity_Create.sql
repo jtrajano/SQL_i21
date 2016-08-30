@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFShiftActivity_Create
-	@intShiftId INT
+     @intShiftId INT
 	,@dtmShiftDate DATETIME
 	,@strXML NVARCHAR(MAX)
 	,@intLocationId INT
@@ -22,6 +22,7 @@ BEGIN TRY
 		,@dtmActualShiftEdTime1 DATETIME
 		,@ysnUseProductionLine BIT
 		,@intDuration INT
+		,@strShiftActivityNumber NVARCHAR(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -123,10 +124,28 @@ BEGIN TRY
 
 		BEGIN TRANSACTION
 
+		IF (
+				@strShiftActivityNumber = ''
+				OR @strShiftActivityNumber IS NULL
+				)
+		BEGIN
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+				,@intItemId = NULL
+				,@intManufacturingId = NULL
+				,@intSubLocationId = NULL
+				,@intLocationId = NULL
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 102
+				,@ysnProposed = 0
+				,@strPatternString = @strShiftActivityNumber OUTPUT
+		END
+
 		IF @ysnUseProductionLine = 0
 		BEGIN
-			INSERT INTO dbo.tblMFShiftActivity (
-				intManufacturingCellId
+			INSERT INTO tblMFShiftActivity (
+				strShiftActivityNumber
+				,intManufacturingCellId
 				,dtmShiftDate
 				,intShiftId
 				,dtmShiftStartTime
@@ -145,7 +164,8 @@ BEGIN TRY
 				,intLastModifiedUserId
 				,dtmLastModified
 				)
-			SELECT @intManufacturingCellId
+			SELECT @strShiftActivityNumber
+				,@intManufacturingCellId
 				,@dtmShiftDate
 				,@intShiftId
 				,@dtmActualShiftStTime
@@ -210,7 +230,8 @@ BEGIN TRY
 		IF @ysnUseProductionLine = 1
 		BEGIN
 			INSERT INTO dbo.tblMFShiftActivity (
-				intManufacturingCellId
+				strShiftActivityNumber
+				,intManufacturingCellId
 				,dtmShiftDate
 				,intShiftId
 				,dtmShiftStartTime
@@ -229,7 +250,8 @@ BEGIN TRY
 				,intLastModifiedUserId
 				,dtmLastModified
 				)
-			SELECT @intManufacturingCellId
+			SELECT @strShiftActivityNumber
+				,@intManufacturingCellId
 				,@dtmShiftDate
 				,@intShiftId
 				,@dtmActualShiftStTime

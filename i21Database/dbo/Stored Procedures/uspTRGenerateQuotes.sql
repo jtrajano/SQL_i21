@@ -24,7 +24,6 @@ BEGIN TRY
 	DECLARE @DataForQuote TABLE(
 		intId INT IDENTITY PRIMARY KEY CLUSTERED
 		, intCustomerId INT
-		, intCustomerLocationId INT
 		, strQuoteNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	)
 
@@ -43,10 +42,8 @@ BEGIN TRY
 
 	INSERT INTO @DataForQuote(
 		intCustomerId
-		, intCustomerLocationId
 		, strQuoteNumber)
 	SELECT intEntityCustomerId
-		, EL.intEntityLocationId
 		, NULL
 	FROM tblARCustomerGroup CG
 	LEFT JOIN tblARCustomerGroupDetail CD ON CG.intCustomerGroupId = CD.intCustomerGroupId
@@ -56,7 +53,7 @@ BEGIN TRY
 		AND QS.ysnQuote = 1
 		AND (CG.intCustomerGroupId = @intCustomerGroupId OR ISNULL(@intCustomerGroupId, 0) = 0)
 		AND (ISNULL(@intCustomerId, 0) = 0 OR @intCustomerId = QS.intEntityCustomerId)
-	GROUP BY QS.intEntityCustomerId, EL.intEntityLocationId
+	GROUP BY QS.intEntityCustomerId
 
 	SELECT @total = COUNT(*) FROM @DataForQuote
 	SET @incval = 1
@@ -156,7 +153,7 @@ BEGIN TRY
 	LEFT JOIN vyuTRSupplyPointView SP ON QD.intSupplyPointId = SP.intSupplyPointId
 	CROSS APPLY(
 		SELECT TOP 1 intSpecialPriceId FROM tblARCustomerSpecialPrice ARPrice
-		WHERE ARPrice.intItemId = QD.intItemId AND ARPrice.intEntityCustomerId = QS.intCustomerId AND ARPrice.intCustomerLocationId = QS.intCustomerLocationId
+		WHERE ARPrice.intItemId = QD.intItemId AND ARPrice.intEntityCustomerId = QS.intCustomerId AND ARPrice.intCustomerLocationId = EL.intEntityLocationId
 			AND (
 				(ARPrice.strPriceBasis = 'O' AND ARPrice.intEntityVendorId = SP.intEntityVendorId AND ARPrice.intEntityLocationId = SP.intEntityLocationId)
 				OR

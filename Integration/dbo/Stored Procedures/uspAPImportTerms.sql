@@ -57,7 +57,14 @@ BEGIN
 				SELECT DISTINCT *
 				FROM (
 					SELECT
-						[strTerm] = CASE WHEN ISNULL(RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))),'''') = '''' THEN ssvnd_vnd_no ELSE RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))) END,
+						[strTerm] = CASE WHEN ISNULL(RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))),'''') = '''' 
+									THEN  (
+										CASE WHEN ssvnd_terms_type = ''P'' 
+												THEN ''Net '' + (CAST(ssvnd_terms_due_day AS NVARCHAR)) + ''th''
+												ELSE ''Net '' + (CAST(ssvnd_terms_due_day AS NVARCHAR))
+											END
+									)
+									ELSE RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))) END,
 						[strType] = CASE WHEN ssvnd_terms_type = ''P'' THEN ''Date Driven'' ELSE ''Standard'' END,
 						[dblDiscountEP] = ssvnd_terms_disc_pct,
 						[intBalanceDue] = ssvnd_terms_due_day,

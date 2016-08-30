@@ -320,6 +320,14 @@ GO
 	END
 
 GO
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerLicenseModule' AND ([COLUMN_NAME] = 'ysnEnabled' OR [COLUMN_NAME] = 'intModuleId')) 
+	BEGIN
+		PRINT N'RENAME GRAIN TO TICKET MANAGEMENT'
+		EXEC('UPDATE tblARCustomerLicenseModule SET strModuleName = ''Ticket Management'', ysnEnabled = 0 WHERE strModuleName = ''Grain''')
+	END
+
+GO
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCommentMaintenanceComment')
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMDocumentMaintenanceMessage')

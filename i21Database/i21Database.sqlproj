@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -2077,8 +2077,6 @@
     <Build Include="dbo\Tables\tblAROriginCompanies.sql" />
     <Build Include="dbo\User Defined Types\ReceiptOtherChargesTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
-    <Build Include="dbo\Views\vyuTRRackPrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRIndexContractsPrice.sql" />
     <Build Include="dbo\Views\vyuMFInventoryView.sql" />
     <Build Include="dbo\Views\vyuAPChargesForBilling.sql" />
     <Build Include="dbo\Functions\fnCTGetContractStatuses.sql" />
@@ -3575,7 +3573,7 @@
     <Build Include="dbo\Views\vyuQMCuppingReport.sql" />
     <Build Include="dbo\Tables\tblLGLoadDetailContainerCost.sql" />
     <Build Include="dbo\Tables\tblLGLoadContainerCost.sql" />
-    <Build Include="dbo\Views\vyuTRRackPriceDetail.sql" />
+    <Build Include="dbo\Views\vyuTRGetRackPriceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTTransferSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTTransferSequenceAttribute.sql" />
     <Build Include="dbo\Tables\tblHDOpportunitySource.sql" />
@@ -3980,8 +3978,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGetInvoiceTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGT103InventoryTax.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGT103InvoiceTax.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFRunTax.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGT103RunTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMF360.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateGT103.sql" />
     <Build Include="dbo\Stored Procedures\uspTFDefault.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRE.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckEarning.sql" />
@@ -4184,6 +4182,7 @@
     <Build Include="dbo\Views\vyuARGetRecipeDetailReport.sql" />
     <Build Include="dbo\Views\vyuARGetRecipeReport.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
+    <Build Include="dbo\Views\vyuCFAccountCreditThreshold.sql" />
     <Build Include="dbo\Views\vyuEMEntityContactLOB.sql" />
     <Build Include="dbo\Views\vyuEMUserAdmin.sql" />
     <None Include="Scripts\Post-Deployment\EM\033_UpdateUserSecurityAdmin.sql" />
@@ -4205,6 +4204,64 @@
     <Build Include="dbo\Functions\fnLGGetDefaultWeightItemUOM.sql" />
     <Build Include="dbo\Views\vyuSMDocumentMessageMaintenanceOption.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDocumentMessage.sql" />
+    <Build Include="dbo\Views\vyuRKFutureMatchedChart.sql" />
+    <Build Include="dbo\Views\vyuRKOptionTransactionChart.sql" />
+    <Build Include="dbo\Views\vyuRKFutureTransactionChart.sql" />
+    <Build Include="dbo\Views\vyuRKGetBalanceToReceipt.sql" />
+    <Build Include="dbo\Views\vyuRKGetSalesIntransitWOPickLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRepostCOGS.sql" />
+    <Build Include="dbo\Views\vyuTMDeliveryTicket.sql" />
+    <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
+    <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
+    <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
+    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
+    <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
+    <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFRefresh.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
+    <Build Include="dbo\Views\vyuEMBEExportCustomer.sql" />
+    <Build Include="dbo\Views\vyuCFSearchIndexPricingDetail.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailCost.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherDetailQty.sql" />
+    <Build Include="dbo\Views\vyuAPClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateClaim.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderInstructionReport.sql" />
+    <Build Include="dbo\Tables\tblTFTaxReportSProc.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportSProc.sql" />
+    <Build Include="dbo\Tables\tblCMBankTransactionBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMTransactionBatchEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMTransactionBatchEntryBatchPosting.sql" />
+    <Build Include="dbo\User Defined Types\BankTransactionBatchDetailTable.sql" />
+    <Build Include="dbo\Views\vyuCMBankTransactionBatchDetail.sql" />
+    <Build Include="dbo\Tables\tblLGRouteDirection.sql" />
+    <Build Include="dbo\Views\vyuTMDYMOCustomerLabelReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForOutbound.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucherForInbound.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateVoucher.sql" />
+    <Build Include="dbo\Views\vyuTRGetRackPriceHeader.sql" />
+    <Build Include="dbo\Views\vyuEMEntityBasicWithType.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportDispatch.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportConsumptionSite.sql" />
+    <Build Include="dbo\Tables\tblSMFileDownloadDetail.sql" />
+    <Build Include="dbo\Tables\tblSMFileDownload.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityChart.sql" />
+    <Build Include="dbo\Tables\tblMFUserRoleEventMap.sql" />
+    <Build Include="dbo\Functions\fnConvertToBaseCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateRequirement.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddSalesContractPickLot.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddSalesContract.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddSalesOrder.sql" />
+    <Build Include="dbo\Views\vyuMFItemDetails.sql" />
+    <Build Include="dbo\Views\vyuMFTaskDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCompleteTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMSettlementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseTicketOpenBalance.sql" />
+    <Build Include="dbo\Functions\fnICGetCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWastage_LotCreate.sql" />
     <Build Include="dbo\Views\vyuSMTransaction.sql" />
     <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
     <Build Include="dbo\Tables\tblSMTypeValue.sql" />

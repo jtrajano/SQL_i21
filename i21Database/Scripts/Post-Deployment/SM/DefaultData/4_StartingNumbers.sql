@@ -936,6 +936,24 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Time Off Request')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 101
+			,[strTransactionType]	= N'Claim'
+			,[strPrefix]			= N'CL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Claim')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 102
+			,[strTransactionType]	= N'Shift Activity Number'
+			,[strPrefix]			= N'SA-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Shift Activity Number')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 101

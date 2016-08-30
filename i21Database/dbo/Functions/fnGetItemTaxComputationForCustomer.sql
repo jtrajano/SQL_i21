@@ -12,6 +12,8 @@
 	,@IsCustomerSiteTaxable	BIT
 	,@SiteId				INT
 	,@FreightTermId			INT
+	,@CardId				INT
+	,@VehicleId				INT
 )
 RETURNS @returntable TABLE
 (
@@ -118,7 +120,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId)
 															
 			
 	-- Calculate Item Tax

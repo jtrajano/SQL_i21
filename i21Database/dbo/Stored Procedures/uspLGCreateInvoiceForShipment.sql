@@ -233,6 +233,7 @@ DECLARE
 		,[strSCBudgetDescription]
 		,[intInventoryShipmentItemId]
 		,[intLoadDetailId]
+		,[intLoadId]
 		,[strShipmentNumber]
 		,[intRecipeItemId] 
 		,[intSalesOrderDetailId]
@@ -259,9 +260,9 @@ DECLARE
 		,[intTempDetailIdForTaxes]
 		,[ysnSubCurrency])
 	SELECT
-		 [strSourceTransaction]					= 'Load/Shipment Schedules'
-		,[intSourceId]							= NULL
-		,[strSourceId]							= ''
+		 [strSourceTransaction]					= 'Load Schedule'
+		,[intSourceId]							= @intLoadId
+		,[strSourceId]							= ARSI.strLoadNumber
 		,[intInvoiceId]							= NULL
 		,[intEntityCustomerId]					= @EntityCustomerId 
 		,[intCompanyLocationId]					= @CompanyLocationId 
@@ -320,14 +321,14 @@ DECLARE
 		,[dblLicenseAmount]						= @ZeroDecimal
 		,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 		,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
-		--,[intCompanyLocationSubLocationId]		= ARSI.[intStorageLocationId] 
 		,[ysnRecomputeTax]						= 1
 		,[intSCInvoiceId]						= NULL
 		,[strSCInvoiceNumber]					= NULL
 		,[intSCBudgetId]						= NULL
 		,[strSCBudgetDescription]				= NULL
 		,[intInventoryShipmentItemId]			= NULL
-		,[intLoadDetailId]						= ARSI.[intInventoryShipmentItemId] 
+		,[intLoadDetailId]						= ARSI.[intLoadDetailId] 
+		,[intLoadId]							= @intLoadId
 		,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
 		,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
 		,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 
@@ -355,7 +356,7 @@ DECLARE
 		,[ysnSubCurrency]						= 0
 	FROM vyuARShippedItems ARSI
 	WHERE ARSI.[strTransactionType] = 'Load Schedule' 
-	  AND ARSI.[intInventoryShipmentId] = @intLoadId
+	  AND ARSI.[intLoadId] = @intLoadId
 
 	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice)

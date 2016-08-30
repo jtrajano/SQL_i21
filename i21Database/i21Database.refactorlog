@@ -5404,4 +5404,109 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intLoadDetailId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b59a792f-1350-4114-a6c5-c1a1fd1a26a4" ChangeDateTime="08/19/2016 14:22:02">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportSProc].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportSProc]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSPId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="eab0e784-0497-4742-bf9a-dd4144cc4450" ChangeDateTime="08/24/2016 09:26:26">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intTaxReportSummaryItems]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intReportTemplateId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c44c420f-f263-4c31-92c6-e34a26a96ed9" ChangeDateTime="08/24/2016 09:26:38">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intTaxReportSummaryItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTemplateItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="56247f20-f499-45bd-b0c7-7e0b3ed2da3a" ChangeDateTime="08/24/2016 09:26:46">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[strSummaryFormCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFormCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3c6b58ee-ebeb-4804-8d6e-c3f8757b07bc" ChangeDateTime="08/24/2016 09:26:53">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intSummaryTaxAuthorityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxAuthorityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f10480cd-e3bd-4844-b597-763069924e10" ChangeDateTime="08/24/2016 09:27:01">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[strSummaryTaxAuthority]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strTaxAuthority" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2a4e136d-cc1d-4c36-9549-bd7a6565e469" ChangeDateTime="08/24/2016 09:27:06">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[strSummarySection]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strReportSection" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f1cf35b4-6e5f-4110-9e2a-781003f713a9" ChangeDateTime="08/24/2016 09:27:12">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intSummaryItemSequenceNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intReportItemSequence" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4fd53c44-5464-4b4b-af03-bc194a5f5634" ChangeDateTime="08/24/2016 09:27:22">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intSummaryItemNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTemplateItemNumber" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fc8ecc1c-0193-448b-a2de-d0feacef751a" ChangeDateTime="08/24/2016 09:27:26">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[strSummaryItemDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c400f8e8-2242-42f0-9bda-66e8bee4ee7d" ChangeDateTime="08/24/2016 09:27:33">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[strSummaryScheduleCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strScheduleCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="54ae5ba6-f6e9-4158-a562-07f2d8097f0b" ChangeDateTime="08/24/2016 09:28:37">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[strTaxType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSegment" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="08abf8b9-a50a-499a-aecf-e1b142831b92" ChangeDateTime="08/24/2016 09:30:46">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportSummary].[strTaxType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportSummary]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSegment" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="34049f5f-69be-44a1-bd65-755d085cf55f" ChangeDateTime="08/24/2016 09:31:02">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportSummary].[intTaxReportSummary]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportSummary]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intReportSummaryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3d298866-9e30-4416-b5a7-3ab36ada477e" ChangeDateTime="08/24/2016 09:31:07">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportSummary].[uniqGuid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportSummary]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSummaryGuid" />
+  </Operation>
 </Operations>

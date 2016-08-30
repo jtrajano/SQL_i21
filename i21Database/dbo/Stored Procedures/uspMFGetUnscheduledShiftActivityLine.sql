@@ -26,6 +26,7 @@ BEGIN
 		AND SH.intShiftId = @intShiftId
 		AND MC.ysnActive = 1
 		AND MC.ysnIncludeEfficiency = 1
+		AND MC.ysnIncludeSchedule = 0
 		AND MC.intManufacturingCellId NOT IN (
 			SELECT DISTINCT (SA.intManufacturingCellId)
 			FROM dbo.tblMFShiftActivity SA

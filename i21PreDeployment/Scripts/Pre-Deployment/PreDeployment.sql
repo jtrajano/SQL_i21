@@ -45,6 +45,7 @@
 :r .\4_SM\3_DataMigration.sql
 :r .\4_SM\4_DataUpdateSecurityUserRequireApprovalFor.sql
 :r .\4_SM\5_EncryptUsersPassword.sql
+:r .\4_SM\6_TicketManagement.sql
 
 -- CM
 :r .\5_CM\1_DropTriggers.sql
@@ -92,6 +93,8 @@
 
 -- IC
 :r .\11_IC\1610_to_1620.sql
+:r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
+:r .\11_IC\01_Delete_Charges_No_Shipment.sql
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql
@@ -121,6 +124,7 @@
 :r .\12_EM\18_FixDuplicateLocationEntry.sql
 :r .\12_EM\19_CleanEntityPhoneNumber.sql
 
+:r .\12_EM\16_CleanCustomerProductVersion.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 

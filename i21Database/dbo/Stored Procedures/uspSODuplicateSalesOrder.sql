@@ -59,12 +59,15 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,[intEntityId]
+		   ,[intEntityContactId]
 		   ,[intQuoteTemplateId]
 		   ,[ysnPreliminaryQuote]
 		   ,[ysnQuote]
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
+		   ,[dblTotalWeight]
+		   ,[dblTotalTermDiscount]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -119,12 +122,15 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,@UserId
+		   ,[intEntityContactId]
 		   ,[intQuoteTemplateId]
 		   ,[ysnPreliminaryQuote]
 		   ,[ysnQuote]
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
+		   ,[dblTotalWeight]
+		   ,[dblTotalTermDiscount]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId

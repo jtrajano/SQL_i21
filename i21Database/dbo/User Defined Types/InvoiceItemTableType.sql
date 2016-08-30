@@ -48,5 +48,10 @@ CREATE TYPE [dbo].[InvoiceItemTableType] AS TABLE
 		,[dblLicenseAmount]             NUMERIC(18, 6)  NULL  
 		,[intContractDetailId]			INT				NULL 
 		,[intTicketId]					INT				NULL 
+		,[intTicketHoursWorkedId]		INT				NULL
+		,[intCustomerStorageId]			INT				NULL
+		,[intSiteDetailId]				INT				NULL
+		,[intLoadDetailId]				INT				NULL
+		,[intOriginalInvoiceDetailId]	INT				NULL
 		,[ysnLeaseBilling]				BIT				NULL
 )

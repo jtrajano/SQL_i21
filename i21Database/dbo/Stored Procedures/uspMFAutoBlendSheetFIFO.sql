@@ -4,6 +4,7 @@
 	,@strXml NVARCHAR(MAX) = NULL
 	,@ysnFromPickList bit = 0
 	,@strExcludedLotXml NVARCHAR(MAX) = NULL
+	,@strWorkOrderIds nvarchar(max) = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -60,6 +61,9 @@ BEGIN TRY
 	DECLARE @dblRecipeQty NUMERIC(38,20)
 	DECLARE @strLotTracking NVARCHAR(50)
 	DECLARE @intItemUOMId INT
+	Declare @index int
+	Declare @id int
+	Declare @ysnWOStagePick bit=0
 
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
@@ -262,7 +266,45 @@ BEGIN TRY
 		,intLotId INT
 	)
 
-	Select TOP 1 @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where intBlendRequirementId=@intBlendRequirementId AND ISNULL(intSalesOrderLineItemId,0)>0
+	Declare @tblWorkOrder AS table
+	(
+		intWorkOrderId int
+	)
+
+	Declare @tblWOStagingLocation AS table
+	(
+		intStagingLocationId int
+	)
+
+	--Get the Comma Separated Work Order Ids into a table
+	If ISNULL(@strWorkOrderIds,'')<>''
+	Begin
+		SET @index = CharIndex(',',@strWorkOrderIds)
+		WHILE @index > 0
+		BEGIN
+				SET @id = SUBSTRING(@strWorkOrderIds,1,@index-1)
+				SET @strWorkOrderIds = SUBSTRING(@strWorkOrderIds,@index+1,LEN(@strWorkOrderIds)-@index)
+
+				INSERT INTO @tblWorkOrder values (@id)
+				SET @index = CharIndex(',',@strWorkOrderIds)
+		END
+		SET @id=@strWorkOrderIds
+		INSERT INTO @tblWorkOrder values (@id)
+	End
+
+	If (Select Count(1) From @tblWorkOrder)=0
+		Select TOP 1 @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where intBlendRequirementId=@intBlendRequirementId AND ISNULL(intSalesOrderLineItemId,0)>0
+	Else
+		Begin
+			Select TOP 1 @intWorkOrderId=intWorkOrderId From @tblWorkOrder
+
+			INSERT INTO @tblWOStagingLocation
+			Select DISTINCT oh.intStagingLocationId From tblMFStageWorkOrder sw Join @tblWorkOrder w on sw.intWorkOrderId=w.intWorkOrderId
+			Join tblMFOrderHeader oh on sw.intOrderHeaderId=oh.intOrderHeaderId Where ISNULL(oh.intStagingLocationId,0)>0
+
+			If (Select Count(1) From @tblWOStagingLocation)>0 
+				Set @ysnWOStagePick=1
+		End
 
 	--Get Recipe Input Items
 	--@strXml (if it has value)- Used For Picking Specific Recipe Items with qty full or remaining qty
@@ -517,6 +559,9 @@ BEGIN TRY
 
 	IF LEN(@strOrderByFinal) > 0
 		SET @strOrderByFinal = LEFT(@strOrderByFinal, LEN(@strOrderByFinal) - 1)
+
+	IF ISNULL(@strOrderByFinal,'')=''
+		SET @strOrderByFinal='PL.dtmCreateDate ASC'
 
 	WHILE @intNoOfSheets > 0
 	BEGIN
@@ -1050,11 +1095,26 @@ BEGIN TRY
 			END
 
 			--Apply Business Rules
-			SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
-								   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId 
-								   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 ORDER BY ' + @strOrderByFinal
+			If ISNULL(@ysnWOStagePick,0)=0
+			Begin
+				SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
+									   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId 
+									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 ORDER BY ' + @strOrderByFinal
 
-			EXEC (@strSQL)
+				EXEC (@strSQL)
+			End
+			Else
+			Begin
+				INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
+				SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId
+				FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 AND PL.intStorageLocationId IN (Select intStagingLocationId From @tblWOStagingLocation)
+				Order By PL.dtmCreateDate
+
+				INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
+				SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId
+				FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty >= .01 AND PL.intStorageLocationId NOT IN (Select intStagingLocationId From @tblWOStagingLocation)
+				Order By PL.dtmCreateDate
+			End
 
 			--For Bulk Items Do not consider lot
 			If @intConsumptionMethodId IN (2, 3) --By Location/FIFO

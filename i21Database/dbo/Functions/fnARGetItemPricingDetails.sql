@@ -14,6 +14,7 @@
 	,@UnlimitedQuantity			BIT
 	,@OriginalQuantity			NUMERIC(18,6)
 	,@CustomerPricingOnly		BIT
+	,@ItemPricingOnly			BIT
 	,@ExcludeContractPricing	BIT
 	,@VendorId					INT
 	,@SupplyPointId				INT
@@ -51,12 +52,15 @@ DECLARE	 @Price			NUMERIC(18,6)
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
 	IF @CustomerPricingOnly IS NULL
-		SET @CustomerPricingOnly = 0	
+		SET @CustomerPricingOnly = 0
+
+	IF @ItemPricingOnly IS NULL
+		SET @ItemPricingOnly = 0
 		
 	IF @ExcludeContractPricing IS NULL
 		SET @ExcludeContractPricing = 0				
 		
-	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1)
+	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0
 	BEGIN
 		--Customer Contract Price		
 		SELECT TOP 1
@@ -93,7 +97,8 @@ DECLARE	 @Price			NUMERIC(18,6)
 		END	
 		
 	END			
-								
+
+	IF @ItemPricingOnly = 0								
 	BEGIN
 		--Customer Special Pricing		
 		SELECT TOP 1
@@ -157,6 +162,32 @@ DECLARE	 @Price			NUMERIC(18,6)
 		END	
 						
 	END
+
+	IF (@PricingLevelId IS NOT NULL)
+	BEGIN
+	SET @Price =
+		( 
+			SELECT 
+				P.dblUnitPrice 
+			FROM
+				tblICItemPricingLevel P
+			WHERE
+				P.intItemId = @ItemId
+				AND P.intItemPricingLevelId = @PricingLevelId								 
+		)
+	IF(@Price IS NOT NULL)
+		BEGIN
+			SET @Pricing = 'Inventory - Standard Pricing'
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+			RETURN
+		END	
+			
+
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+			RETURN
+	END
 	
 	DECLARE @ItemVendorId				INT
 			,@ItemLocationId			INT
@@ -182,6 +213,8 @@ DECLARE	 @Price			NUMERIC(18,6)
 		);		
 	
 	--Item Standard Pricing
+	IF ISNULL(@UOMQuantity,0) = 0
+		SET @UOMQuantity = 1
 	SET @Price = @UOMQuantity *	
 						( 
 							SELECT

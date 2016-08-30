@@ -21,19 +21,19 @@ AS
 	--VALIDATION
 	IF ISNULL(@arAccountId, 0) = 0
 		BEGIN
-			RAISERROR('There is no setup for AR Account in the Company Configuration.', 11, 1) 
+			RAISERROR(120005, 16, 1) 
 			RETURN 0
 		END
 
 	IF ISNULL(@scAccountId, 0) = 0
 		BEGIN
-			RAISERROR('There is no setup for Service Charge Account in the Company Configuration.', 11, 1) 
+			RAISERROR(120020, 16, 1) 
 			RETURN 0
 		END
 
 	IF ISNULL(@locationId, 0) = 0
 		BEGIN
-			RAISERROR('Please setup your Default Location.', 11, 1) 
+			RAISERROR(120021, 16, 1) 
 			RETURN 0
 		END
 

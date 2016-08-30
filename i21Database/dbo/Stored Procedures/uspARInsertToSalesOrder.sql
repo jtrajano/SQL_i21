@@ -25,6 +25,7 @@ BEGIN
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intEntitySalespersonId]
+		,[intEntityContactId]
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
@@ -60,7 +61,8 @@ BEGIN
 		,[intEntityId]
 		,[intOrderedById]
 		,[strBOLNumber]
-		,[intSplitId])
+		,[intSplitId]
+		,[dblTotalWeight])
 	SELECT 
 		 [strSalesOrderNumber]
 		,[intEntityCustomerId]
@@ -69,6 +71,7 @@ BEGIN
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intEntitySalespersonId]
+		,[intEntityContactId]
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
@@ -105,6 +108,7 @@ BEGIN
 		,[intOrderedById]
 		,[strBOLNumber]
 		,[intSplitId]
+		,[dblTotalWeight]
 	FROM tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
 
@@ -174,7 +178,10 @@ BEGIN
 	        ,[dblLicenseAmount]
 			,[intContractHeaderId]
 			,[intTaxGroupId]
-			,[intContractDetailId])
+			,[intContractDetailId]
+			,[intItemWeightUOMId]
+			,[dblItemWeight]
+			,[dblOriginalItemWeight])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -204,6 +211,9 @@ BEGIN
 			,NULL
 			,[intTaxGroupId]
 			,NULL
+			,[intItemWeightUOMId]
+			,[dblItemWeight]
+			,[dblOriginalItemWeight]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 

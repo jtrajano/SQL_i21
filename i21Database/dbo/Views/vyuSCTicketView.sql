@@ -41,8 +41,7 @@
        tblSCTicket.intTareUserId,
        tblSCTicket.dblGrossUnits,
        tblSCTicket.dblNetUnits,
-	   (tblSCTicket.dblGrossWeight - tblSCTicket.dblTareWeight)
-	   AS dblNetWeight,
+	   (tblSCTicket.dblGrossWeight - tblSCTicket.dblTareWeight) AS dblNetWeight,
        tblSCTicket.strItemNumber,
        tblSCTicket.strItemUOM,
        tblSCTicket.intCustomerId,
@@ -128,8 +127,8 @@
 	   tblGRStorageScheduleRule.strScheduleId,
 	   tblICInventoryReceipt.intInventoryReceiptId,
 	   tblICInventoryReceipt.strReceiptNumber,
-	   vyuICGetInventoryShipmentItem.intInventoryShipmentId,
-	   vyuICGetInventoryShipmentItem.strShipmentNumber,
+	   tblICInventoryShipment.intInventoryShipmentId,
+	   tblICInventoryShipment.strShipmentNumber,
 	   tblEMEntityFarm.strFarmDescription
   from ((tblSCTicket tblSCTicket
 	left join tblEMEntity tblEMEntity
@@ -156,7 +155,7 @@
        on tblGRStorageScheduleRule.intStorageScheduleRuleId = tblSCTicket.intStorageScheduleId
 	left join tblICInventoryReceipt tblICInventoryReceipt
 	   on  tblICInventoryReceipt.intInventoryReceiptId = tblSCTicket.intInventoryReceiptId
-	left join vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem
-	   on  vyuICGetInventoryShipmentItem.intSourceId = tblSCTicket.intTicketId
+	left join tblICInventoryShipment tblICInventoryShipment
+	   on  tblICInventoryShipment.intInventoryShipmentId = tblSCTicket.intInventoryShipmentId
 	left join tblEMEntityFarm tblEMEntityFarm
 	   on tblEMEntityFarm.intFarmFieldId = tblSCTicket.intFarmFieldId

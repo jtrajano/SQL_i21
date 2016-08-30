@@ -67,6 +67,21 @@ SELECT   L.intLoadId
 									 AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
+		,strShipmentStatus = CASE L.intShipmentStatus
+								WHEN 1
+									THEN 'Scheduled'
+								WHEN 2
+									THEN 'Dispatched'
+								WHEN 3
+									THEN 'Inbound transit'
+								WHEN 4
+									THEN 'Received'
+								WHEN 5
+									THEN 'Outbound transit'
+								WHEN 6
+									THEN 'Delivered'
+								ELSE ''
+							  END
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId

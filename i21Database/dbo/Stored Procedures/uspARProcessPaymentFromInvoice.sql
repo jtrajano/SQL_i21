@@ -8,6 +8,13 @@ AS
 
 BEGIN
 
+
+
+
+
+
+
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -17,16 +24,21 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
 
-BEGIN TRANSACTION
+	
+IF ISNULL(@RaiseError,0) = 0	
+	BEGIN TRANSACTION
+	
 	
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [intPaymentId] = @PaymentId) AND EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId)
 BEGIN
 	IF EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId AND [ysnPosted] = 1)
 		BEGIN
-			IF @@ERROR <> 0	GOTO _RollBackTransaction			
-			RAISERROR(120045, 16, 1)
-			GOTO _ExitTransaction
-		END
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120045, 16, 1);
+		RETURN 0;
+	END
 	
 	BEGIN TRY
 		UPDATE
@@ -38,18 +50,24 @@ BEGIN
 			[intInvoiceId] = @InvoiceId
 	END TRY
 	BEGIN CATCH
-		IF @@ERROR <> 0	GOTO _RollBackTransaction
-		SET @ErrorMessage = ERROR_MESSAGE()  
-		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = ERROR_MESSAGE();
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
 	END CATCH
 	
 	BEGIN TRY
 		DELETE FROM tblARPaymentDetail WHERE [intPaymentId] = @PaymentId
 	END TRY
 	BEGIN CATCH
-		IF @@ERROR <> 0	GOTO _RollBackTransaction
-		SET @ErrorMessage = ERROR_MESSAGE()  
-		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = ERROR_MESSAGE();
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
 	END CATCH
 
 
@@ -57,9 +75,12 @@ BEGIN
 		DELETE FROM tblARPayment WHERE [intPaymentId] = @PaymentId
 	END TRY
 	BEGIN CATCH
-		IF @@ERROR <> 0	GOTO _RollBackTransaction
-		SET @ErrorMessage = ERROR_MESSAGE()  
-		RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = ERROR_MESSAGE();
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
 	END CATCH
 		
 	
@@ -70,9 +91,11 @@ END
 
 IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [intPaymentId] IS NOT NULL)
 BEGIN
-	IF @@ERROR <> 0	GOTO _RollBackTransaction	
-	RAISERROR(120046, 16, 1)
-	GOTO _ExitTransaction
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION	
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(120046, 16, 1);
+	RETURN 0;
 END
 
 
@@ -103,9 +126,11 @@ BEGIN TRY
 		,@CurrencyId		= ARI.[intCurrencyId]
 		,@DatePaid			= ARI.[dtmPostDate]
 		,@AccountId			= NULL
-		,@BankAccountId		= NULL
+		,@BankAccountId		= CASE WHEN ARI.[strTransactionType] = 'Customer Prepayment' THEN 
+									(SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId IN (SELECT TOP 1 intDepositAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = ARI.intCompanyLocationId))
+								ELSE NULL END
 		,@AmountPaid		= ARI.[dblAmountDue] * (CASE WHEN ARI.[strTransactionType] IN ('Credit Memo','Overpayment','Customer Prepayment') THEN -1 ELSE 1 END)
-		,@PaymentMethodId	= ISNULL(ARI.[intPaymentMethodId], (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod ORDER BY [ysnActive] DESC, [strPaymentMethod]))
+		,@PaymentMethodId	=  ISNULL(ARI.[intPaymentMethodId], (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod ORDER BY [ysnActive] DESC, [strPaymentMethod]))
 		,@PaymentInfo		= ''
 		,@ApplytoBudget		= 0
 		,@ApplyOnAccount	= 0
@@ -122,9 +147,12 @@ BEGIN TRY
 		ARI.[intInvoiceId] = @InvoiceId
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 
@@ -159,15 +187,21 @@ BEGIN TRY
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
-				IF @@ERROR <> 0	GOTO _RollBackTransaction
-				SET @ErrorMessage = ERROR_MESSAGE()  
-				RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+				IF ISNULL(@RaiseError,0) = 0
+					ROLLBACK TRANSACTION
+				SET @ErrorMessage = @AddDetailError;
+				IF ISNULL(@RaiseError,0) = 1
+					RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
 			END
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 
@@ -180,17 +214,9 @@ WHERE
 		  
 SET @PaymentId = @NewId		                 
 
-IF @@ERROR = 0 GOTO _CommitTransaction
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION
+	SET @ErrorMessage = NULL;
 RETURN @NewId
-GOTO _ExitTransaction
-
-_RollBackTransaction:
-ROLLBACK TRANSACTION
-GOTO _ExitTransaction
-
-_CommitTransaction: 
-COMMIT TRANSACTION
-
-_ExitTransaction:
 
 END

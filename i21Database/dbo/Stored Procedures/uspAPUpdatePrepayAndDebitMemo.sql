@@ -35,6 +35,18 @@ CROSS APPLY
 	AND B.intBillId IN (SELECT intBillId FROM #tmpBillsId)
 	AND B.ysnApplied = 1
 	GROUP BY B.intTransactionId
+	UNION ALL
+	--when posting claims, make sure to update the amount due of prepayment
+	SELECT
+		DISTINCT C.dblTotal AS dblAmountApplied
+	FROM tblAPBill C
+	INNER JOIN tblAPBillDetail D ON C.intBillId = D.intBillId
+	INNER JOIN tblAPBillDetail E ON D.intContractDetailId = E.intContractDetailId AND D.intContractHeaderId = E.intContractHeaderId --prepayment
+	INNER JOIN tblAPBill F ON E.intBillId = F.intBillId --prepayment
+	WHERE C.intBillId IN (SELECT intBillId FROM #tmpBillsId)
+	AND F.intTransactionType = 2 --prepayment
+	AND F.intBillId = A.intBillId
+	AND C.intTransactionType = 11 --Claims
 ) AppliedPayments
 WHERE A.intTransactionType IN (2,3,8)
 AND 1 = CASE WHEN A.intTransactionType= 3 AND A.ysnPosted != 1 --DEBIT MEMO should be posted

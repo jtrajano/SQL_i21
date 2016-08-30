@@ -44,16 +44,18 @@ WHERE
 	ARID.[intInvoiceDetailId] = @InvoiceDetailId 
 
 IF NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId)
-BEGIN
-	RAISERROR(120008, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120008, 16, 1);
+		RETURN 0;
+	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMTaxCode WHERE [intTaxCodeId] = @TaxCodeId)
-BEGIN			
-	RAISERROR(120009, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120009, 16, 1);
+		RETURN 0;
+	END
 
 DECLARE @TaxCode NVARCHAR(100)
 SELECT TOP 1
@@ -66,10 +68,11 @@ WHERE
 	AND ISNULL(intSalesTaxAccountId,0) = 0
 
 IF LEN(LTRIM(RTRIM(ISNULL(@TaxCode,'')))) > 0
-BEGIN		
-	RAISERROR(120056, 16, 1, @TaxCode);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120056, 16, 1, @TaxCode);
+		RETURN 0;
+	END
 
 DECLARE @CalcMethod NVARCHAR(100)
 SELECT TOP 1
@@ -82,13 +85,20 @@ WHERE
 	[intTaxCodeId] = @TaxCodeId
 
 IF UPPER(LTRIM(RTRIM(ISNULL(@CalculationMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND UPPER(LTRIM(RTRIM(ISNULL(@CalcMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage'))
-BEGIN		
-	RAISERROR(120057, 16, 1, @CalculationMethod);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120057, 16, 1, @CalculationMethod);
+		RETURN 0;
+	END
 	
-BEGIN TRANSACTION	
+IF ISNULL(@RaiseError,0) = 0	
+	BEGIN TRANSACTION
+	
+
+	
+	
 BEGIN TRY
+
 	INSERT INTO [tblARInvoiceDetailTax]
 		([intInvoiceDetailId]
 		,[intTaxGroupId]
@@ -132,9 +142,12 @@ BEGIN TRY
 			
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT')  
+	IF ISNULL(@RaiseError,0) = 0	
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 	
 DECLARE @NewId INT
@@ -143,16 +156,10 @@ SET @NewId = SCOPE_IDENTITY()
 		
 SET @NewInvoiceTaxDetailId = @NewId
 
-IF @@ERROR = 0 GOTO _CommitTransaction
-
-_RollBackTransaction:
-ROLLBACK TRANSACTION
-GOTO _ExitTransaction
-
-_CommitTransaction: 
-COMMIT TRANSACTION
-Goto _ExitTransaction
-
-_ExitTransaction: 
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION
+SET @ErrorMessage = NULL;
+RETURN 1;
+	
 	
 END

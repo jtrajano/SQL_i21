@@ -9,6 +9,8 @@
 	,@ItemCategoryId		INT
 	,@ShipToLocationId		INT
 	,@IsCustomerSiteTaxable	BIT
+	,@CardId				INT
+	,@VehicleId				INT
 )
 --RETURNS NVARCHAR(500)
 RETURNS @returntable TABLE
@@ -138,6 +140,8 @@ BEGIN
 							 + ISNULL('Number: ' + CAST(TE.[intCustomerTaxingTaxExceptionId] AS NVARCHAR(250)) +  ' - ' + ISNULL(TE.[strException], ''), '') 
 							 + ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TE.[dtmStartDate], 101), '')
 							 + ISNULL('; End Date: ' + CONVERT(NVARCHAR(25), TE.[dtmEndDate], 101), '')
+							 + ISNULL('; Card: ' + CFC.[strCardNumber], '')
+							 + ISNULL('; Vehicle: ' + CFV.[strVehicleNumber], '')
 							 + ISNULL('; Customer Location: ' + EL.[strLocationName], '')
 							 + ISNULL('; Item No: ' + IC.[strItemNo], '')
 							 + ISNULL('; Item Category: ' + ICC.[strCategoryCode], '')
@@ -162,6 +166,12 @@ BEGIN
 	LEFT OUTER JOIN
 		tblICCategory ICC
 			ON TE.[intCategoryId] = ICC.[intCategoryId]
+	LEFT OUTER JOIN
+		tblCFCard CFC
+			ON TE.[intCardId] = CFC.[intCardId]
+	LEFT OUTER JOIN
+		tblCFVehicle CFV
+			ON TE.[intVehicleId] = CFV.[intVehicleId] 
 	WHERE
 		TE.[intEntityCustomerId] = @CustomerId
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(TE.[dtmStartDate], @TransactionDate) AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
@@ -170,9 +180,16 @@ BEGIN
 		AND (ISNULL(TE.[intCategoryId], 0) = 0 OR TE.[intCategoryId] = @ItemCategoryId)
 		AND (ISNULL(TE.[intTaxCodeId], 0) = 0 OR TE.[intTaxCodeId] = @TaxCodeId)
 		AND (ISNULL(TE.[intTaxClassId], 0) = 0 OR TE.[intTaxClassId] = @TaxClassId)
+		AND (ISNULL(TE.[intCardId], 0) = 0 OR TE.[intCardId] = @CardId)
+		AND (ISNULL(TE.[intVehicleId], 0) = 0 OR TE.[intVehicleId] = @VehicleId)
 		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
 	ORDER BY
 		(
+			(CASE WHEN ISNULL(TE.[intCardId],0) = 0 THEN 0 ELSE 1 END)
+			+
+			(CASE WHEN ISNULL(TE.[intVehicleId],0) = 0 THEN 0 ELSE 1 END)		
+		) DESC
+		,(
 			(CASE WHEN ISNULL(TE.[intEntityCustomerLocationId],0) = 0 THEN 0 ELSE 1 END)
 			+
 			(CASE WHEN ISNULL(TE.[intItemId],0) = 0 THEN 0 ELSE 1 END)

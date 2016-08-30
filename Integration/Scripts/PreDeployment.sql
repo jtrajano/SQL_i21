@@ -28,7 +28,6 @@
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
 :r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
-:r "..\dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginReallocation.sql"
 :r "..\dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql"
 :r "..\dbo\Views\vyuGLPTDrillDownDifference.sql"
@@ -175,6 +174,11 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateDeliveriesSearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateEfficiencySearchView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerConsumptionSiteInfoView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateOriginDegreeOptionView.sql"
+:r "..\Scripts\TM\AddOriginTableIndex.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDeliveryTicketView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateDYMOCustomerLabelReportView.sql"
+
 
 
 

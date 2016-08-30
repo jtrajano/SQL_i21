@@ -107,6 +107,7 @@ BEGIN
 								,NULL --@ContractSeq			
 								,NULL --@OriginalQuantity		
 								,NULL --@CustomerPricingOnly
+								,NULL --@ItemPricingOnly
 								,NULL --@ExcludeContractPricing	
 								,NULL --@VendorId			
 								,NULL --@SupplyPointId		

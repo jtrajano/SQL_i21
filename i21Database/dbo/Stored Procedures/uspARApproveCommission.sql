@@ -2,24 +2,25 @@
 	  @intCommissionId		INT
     , @intApprovalListId	INT
 	, @intApproverEntityId	INT
-	, @strReason			NVARCHAR(MAX) = NULL	
+	, @strReason			NVARCHAR(MAX) = NULL
+	, @nextApproverId		INT			  = NULL OUTPUT
 AS
 
 IF ISNULL(@intCommissionId, 0) = 0
 	BEGIN
-		RAISERROR('Commission Id is Required', 16, 1);
+		RAISERROR(120015, 16, 1);
 		RETURN 0;
 	END
 
 IF ISNULL(@intApprovalListId, 0) = 0
 	BEGIN
-		RAISERROR('Approval List Id is Required', 16, 1);
+		RAISERROR(120016, 16, 1);
 		RETURN 0;
 	END
 
 IF ISNULL(@intApproverEntityId, 0) = 0
 	BEGIN
-		RAISERROR('Approver Entity Id is Required', 16, 1);
+		RAISERROR(120017, 16, 1);
 		RETURN 0;
 	END
 
@@ -48,7 +49,8 @@ IF @intMaxApproverLevel = @intCurrentApproverLevel
 ELSE
 	BEGIN
 		SELECT TOP 1
-			@intNextApproverId = intEntityUserSecurityId
+			@intNextApproverId	= intEntityUserSecurityId
+		  , @nextApproverId		= intEntityUserSecurityId
 		FROM tblSMApprovalListUserSecurity
 		WHERE intApprovalListId = @intApprovalListId
 		AND intApproverLevel = @intCurrentApproverLevel + 1

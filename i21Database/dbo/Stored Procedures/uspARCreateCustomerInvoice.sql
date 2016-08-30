@@ -15,7 +15,8 @@
 	,@NewInvoiceId					INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@RaiseError					BIT				= 0			
-	,@EntitySalespersonId			INT				= NULL				
+	,@EntitySalespersonId			INT				= NULL
+	,@EntityContactId				INT				= NULL				
 	,@FreightTermId					INT				= NULL
 	,@ShipViaId						INT				= NULL
 	,@PaymentMethodId				INT				= NULL
@@ -70,6 +71,13 @@
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
+	,@ItemRecipeId					INT				= NULL
+	,@ItemSublocationId				INT				= NULL
+	,@ItemCostTypeId				INT				= NULL
+	,@ItemMarginById				INT				= NULL
+	,@ItemCommentTypeId				INT				= NULL
+	,@ItemMargin					NUMERIC(18,6)	= NULL
+	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
@@ -96,6 +104,7 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@SubCurrency					BIT				= 0
+	,@DocumentMaintenanceId			INT				= NULL
 AS
 
 BEGIN
@@ -117,16 +126,21 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE)
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
 	SET @DeliverPickUp = ISNULL((SELECT TOP 1 strDeliverPickupDefault FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId),'')
 	
-IF @Comment IS NULL
+IF ISNULL(@Comment, '') = ''
 	BEGIN
 		EXEC	[dbo].[uspARGetDefaultComment]
 					@intCompanyLocationId = @CompanyLocationId,
 					@intEntityCustomerId = @EntityCustomerId,
 					@strTransactionType = @TransactionType,
 					@strType = @Type,
-					@strDefaultComment = @Comment OUTPUT
+					@strDefaultComment = @Comment OUTPUT,
+					@DocumentMaintenanceId = @DocumentMaintenanceId
 	END
 
+IF ISNULL(@EntityContactId, 0) = 0
+	BEGIN
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
+	END
 
 IF ISNULL(@TransactionType, '') = ''
 	SET @TransactionType = 'Invoice'
@@ -142,104 +156,123 @@ ELSE
 
 
 IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
-BEGIN
-	RAISERROR(120005, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120005, 16, 1);
+		RETURN 0;
+	END
 
 IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @ARAccountId)
-BEGIN
-	RAISERROR(120062, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120062, 16, 1);
+		RETURN 0;
+	END
 
 DECLARE @CompanyLocation NVARCHAR(250)
-SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId
-
 IF @ARAccountId IS NULL AND @TransactionType IN ('Cash', 'Cash Refund')
-BEGIN				
-	RAISERROR(120063, 16, 1, @CompanyLocation);
-	GOTO _ExitTransaction
-END
+	BEGIN
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120063, 16, 1, @CompanyLocationId);
+		RETURN 0;
+	END
 
 IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Undeposited Funds' AND [intAccountId] =  @ARAccountId)
-BEGIN	
-	RAISERROR(120064, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120064, 16, 1);
+		RETURN 0;
+	END
+
 
 IF @ARAccountId IS NULL AND @TransactionType = 'Customer Prepayment'
-BEGIN		
-	RAISERROR(120065, 16, 1, @CompanyLocation);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120065, 16, 1, @CompanyLocation);
+		RETURN 0;
+	END
 
 IF  @TransactionType = 'Customer Prepayment' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Customer Prepayments' AND [intAccountId] =  @ARAccountId)
-BEGIN
-		RAISERROR(120066, 16, 1);
-		GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120066, 16, 1);
+		RETURN 0;
+	END
+
 	
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId)
-BEGIN
-	RAISERROR(120025, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120025, 16, 1);
+		RETURN 0;
+	END
 
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId AND ysnActive = 1)
-BEGIN
-	RAISERROR(120026, 16, 1);
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120026, 16, 1);
+		RETURN 0;
+	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
-BEGIN
-	RAISERROR(120027, 16, 1);		
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120027, 16, 1);		
+		RETURN 0;
+	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ysnLocationActive = 1)
-BEGIN
-	RAISERROR(120028, 16, 1);		
-	GOTO _ExitTransaction
-END	
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120028, 16, 1);		
+		RETURN 0;
+	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
-BEGIN
-	RAISERROR(120029, 16, 1);		
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120029, 16, 1);		
+		RETURN 0;
+	END
 
 IF @CurrencyId IS NOT NULL
 	SET @DefaultCurrency = @CurrencyId
 ELSE
 	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurreny](@EntityCustomerId)
 
+
 IF ISNULL(@CurrencyId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM tblSMCurrency WHERE [intCurrencyID] = @CurrencyId)
-BEGIN
-	RAISERROR(120030, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120030, 16, 1);
+		RETURN 0;
+	END
  
 IF ISNULL(@DefaultCurrency,0) = 0
-BEGIN
-	RAISERROR(120067, 16, 1);
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120067, 16, 1);
+		RETURN 0;
+	END
 
 IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment'))
-BEGIN
-	RAISERROR(120068, 16, 1, @TransactionType);		
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120068, 16, 1, @TransactionType);		
+		RETURN 0;
+	END
 
 IF (@Type NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional Invoice', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling'))
-BEGIN		
-	RAISERROR(120069, 16, 1, @TransactionType);		
-	GOTO _ExitTransaction
-END
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(120069, 16, 1, @TransactionType);		
+		RETURN 0;
+	END
 	
-BEGIN TRANSACTION
+IF ISNULL(@RaiseError,0) = 0	
+	BEGIN TRANSACTION
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -269,6 +302,7 @@ BEGIN TRY
 		,[dblAmountDue]
 		,[dblPayment]
 		,[intEntitySalespersonId]
+		,[intEntityContactId]
 		,[intFreightTermId]
 		,[intShipViaId]
 		,[intPaymentMethodId]
@@ -335,6 +369,7 @@ BEGIN TRY
 		,[dblPayment]					= @ZeroDecimal
 		
 		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
+		,[intEntityContactId]			= @EntityContactId
 		,[intFreightTermId]				= @FreightTermId
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
 		,[intPaymentMethodId]			= @PaymentMethodId
@@ -342,7 +377,7 @@ BEGIN TRY
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
 		,[strDeliverPickup]				= @DeliverPickUp
-		,[strComments]					= @Comment
+		,[strComments]					= CASE WHEN (@Comment IS NULL OR @Comment = '') THEN (SELECT TOP 1 strMessage FROM tblSMDocumentMaintenanceMessage WHERE intDocumentMaintenanceId = @DocumentMaintenanceId AND strHeaderFooter NOT IN ('Footer')) ELSE @Comment END
 		,[strFooterComments]			= dbo.fnARGetFooterComment(@CompanyLocationId, C.intEntityCustomerId, 'Invoice Footer')
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
@@ -410,16 +445,19 @@ BEGIN TRY
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
-			ON C.intBillToId = BL1.intEntityLocationId
+			ON C.intBillToId = BL1.intEntityLocationId	
 	WHERE C.[intEntityCustomerId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
 	
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 
@@ -488,7 +526,14 @@ BEGIN TRY
 		,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 		,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 		,@ItemShipmentNumber			= @ItemShipmentNumber
-		,@ItemRecipeItemId				= @ItemRecipeItemId		
+		,@ItemRecipeItemId				= @ItemRecipeItemId
+		,@ItemRecipeId					= @ItemRecipeId
+		,@ItemSublocationId				= @ItemSublocationId
+		,@ItemCostTypeId				= @ItemCostTypeId
+		,@ItemMarginById				= @ItemMarginById
+		,@ItemCommentTypeId				= @ItemCommentTypeId
+		,@ItemMargin					= @ItemMargin
+		,@ItemRecipeQty					= @ItemRecipeQty		
 		,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 		,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 		,@ItemContractHeaderId			= @ItemContractHeaderId
@@ -528,9 +573,12 @@ BEGIN TRY
 			END
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 	
@@ -548,23 +596,22 @@ BEGIN TRY
 	EXEC [dbo].[uspARReComputeInvoiceAmounts] @NewId
 END TRY
 BEGIN CATCH
-	IF @@ERROR <> 0	GOTO _RollBackTransaction
-	SET @ErrorMessage = ERROR_MESSAGE()  
-	RAISERROR (@ErrorMessage, 16, 1, 'WITH NOWAIT') 
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
 END CATCH
 
 SET @NewInvoiceId = @NewId
 
-IF @@ERROR = 0 GOTO _CommitTransaction
-
-_RollBackTransaction:
-ROLLBACK TRANSACTION
-GOTO _ExitTransaction
-
-_CommitTransaction: 
-COMMIT TRANSACTION
-GOTO _ExitTransaction
-
-_ExitTransaction:
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION
+SET @ErrorMessage = NULL;
+RETURN 1;
 	
 END
+GO
+
+

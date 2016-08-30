@@ -21,8 +21,8 @@
 			strExpenseAccount = i.strAccountId,--
 			d.intAllowance,
 			strSchool = Case WHEN f.strState = 'Ohio' then d.strVal1 when f.strState = 'Pennsylvania' then d.strVal2 else '' end,
-			strMunicipality = Case WHEN f.strState = 'Ohio' then d.strVal2 when f.strState = 'Pennsylvania' then d.strVal3 else '' end
-
+			strMunicipality = Case WHEN f.strState = 'Ohio' then d.strVal2 when f.strState = 'Pennsylvania' then d.strVal3 else '' end,
+			c.intRank
 
 		FROM 		
 				tblEMEntity a
