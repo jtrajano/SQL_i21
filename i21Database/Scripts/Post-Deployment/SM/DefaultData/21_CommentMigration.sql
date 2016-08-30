@@ -123,7 +123,8 @@ GO
 	SET tblSMComment.intTransactionId = C.intTransactionId,
 		tblSMComment.intActivityId = B.intActivityId,
 		strScreen = '',
-		strRecordNo = ''
+		strRecordNo = '',
+		ysnPublic = 1
 	FROM tblSMComment A 
 		INNER JOIN tblSMActivity B ON A.intTransactionId = B.intTransactionId
 		INNER JOIN tblSMTransaction C ON C.intScreenId = @screenId AND C.strRecordNo = CAST(B.intActivityId AS NVARCHAR(50))
