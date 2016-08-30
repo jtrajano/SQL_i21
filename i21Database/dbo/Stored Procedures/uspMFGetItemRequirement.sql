@@ -4,6 +4,10 @@
 	,@intLocationId INT
 AS
 BEGIN
+	SELECT @dtmStartDate = convert(DATETIME, Convert(CHAR, @dtmStartDate, 101))
+
+	SELECT @dtmEndDate = convert(DATETIME, Convert(CHAR, @dtmEndDate, 101)) + 1
+
 	SELECT W.intWorkOrderId
 		,W.strWorkOrderNo
 		,W.strSalesOrderNo
