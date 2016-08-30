@@ -2082,4 +2082,250 @@ Go
 UPDATE tblMFCompanyPreference
 SET ysnLotHistoryByStorageLocation = 1
 WHERE ysnLotHistoryByStorageLocation IS NULL
-Go
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderType WHERE strOrderType = 'WO PROD STAGING')
+BEGIN
+	INSERT INTO tblMFOrderType (intConcurrencyId,strInternalCode,strOrderType,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES(1,'PS','WO PROD STAGING',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderType WHERE strOrderType = 'WO PROD RETURN')
+BEGIN
+	INSERT INTO tblMFOrderType (intConcurrencyId,strInternalCode,strOrderType,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES(1,'PR','WO PROD RETURN',0,1,1,GETDATE())
+END
+GO	 
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderType WHERE strOrderType = 'SANITIZATION STAGING')
+BEGIN 
+	INSERT INTO tblMFOrderType (intConcurrencyId,strInternalCode,strOrderType,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES(1,'SS','SANITIZATION STAGING',0,1,1,GETDATE())
+END
+GO	 
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderType WHERE strOrderType = 'SANITIZATION PRODUCTION')
+BEGIN 
+	INSERT INTO tblMFOrderType (intConcurrencyId,strInternalCode,strOrderType,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES(1,'SP','SANITIZATION PRODUCTION',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'OPEN')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES(1,'OPEN','OPEN',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'RELEASED')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES(1,'RELEASED','RELEASED',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'CANCELED')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'CANCELED','CANCELED',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'INTRANSIT')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'INTRANSIT','INTRANSIT',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'PICKING')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'PROCESSING','PICKING',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'STAGED')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'PROCESSING','STAGED',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'LOADED')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'PROCESSING','LOADED',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'CHECK-IN')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'PROCESSING','CHECK-IN',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'PUT-AWAY')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'PROCESSING','PUT-AWAY',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'CLOSED')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'CLOSED','CLOSED',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderStatus WHERE strOrderStatus = 'LOADING')
+BEGIN 
+	INSERT INTO tblMFOrderStatus (intConcurrencyId,strInternalCode,strOrderStatus,ysnDefault,ysnLocked,intLastUpdateId,dtmLastUpdateOn)
+	VALUES (1,'PROCESSING','LOADING',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderDirection WHERE strOrderDirection = 'INBOUND')
+BEGIN 
+	INSERT INTO tblMFOrderDirection (intConcurrencyId,strInternalCode,strOrderDirection,ysnIsDefault,ysnLocked,intCreatedUserId,dtmCreated)
+	VALUES(1,'INBOUND','INBOUND',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFOrderDirection WHERE strOrderDirection = 'OUTBOUND')
+BEGIN 
+	INSERT INTO tblMFOrderDirection (intConcurrencyId,strInternalCode,strOrderDirection,ysnIsDefault,ysnLocked,intCreatedUserId,dtmCreated)
+	VALUES(1,'OUTBOUND','OUTBOUND',0,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFPickPreference WHERE strPickPreference = 'EXACT')
+BEGIN 
+	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,blnIsDefault)
+	VALUES(1,'EXACT',0)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFPickPreference WHERE strPickPreference = 'PARTIAL')
+BEGIN 
+	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,blnIsDefault)
+	VALUES(1,'PARTIAL',0)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFPickPreference WHERE strPickPreference = 'BEST MATCH')
+BEGIN 
+	INSERT INTO tblMFPickPreference(intConcurrencyId,strPickPreference,blnIsDefault)
+	VALUES(1,'BEST MATCH',1)
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskPriority WHERE strTaskPriority = 'LOW')
+BEGIN 
+	INSERT INTO tblMFTaskPriority(intConcurrencyId,strInternalCode,strTaskPriority,ysnIsDefault,ysnLocked,intCreatedUserId,dtmCreated)
+	VALUES(1,'LOW','LOW',1,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskPriority WHERE strTaskPriority = 'NORMAL')
+BEGIN 
+	INSERT INTO tblMFTaskPriority(intConcurrencyId,strInternalCode,strTaskPriority,ysnIsDefault,ysnLocked,intCreatedUserId,dtmCreated)
+	VALUES(1,'NORMAL','NORMAL',1,1,1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskPriority WHERE strTaskPriority = 'HIGH')
+BEGIN 
+	INSERT INTO tblMFTaskPriority(intConcurrencyId,strInternalCode,strTaskPriority,ysnIsDefault,ysnLocked,intCreatedUserId,dtmCreated)
+	VALUES(1,'HIGH','HIGH',1,1,1,GETDATE())
+END
+GO 
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskState WHERE strTaskState = 'UNASSIGNED')
+BEGIN 
+	INSERT INTO tblMFTaskState(intConcurrencyId,strInternalCode,strTaskState,intCreatedUserId,dtmCreated)
+	VALUES(1,'UNASSIGNED','UNASSIGNED',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskState WHERE strTaskState = 'ASSIGNED')
+BEGIN 
+	INSERT INTO tblMFTaskState(intConcurrencyId,strInternalCode,strTaskState,intCreatedUserId,dtmCreated)
+	VALUES(1,'ASSIGNED','ASSIGNED',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskState WHERE strTaskState = 'IN-PROGRESS')
+BEGIN 
+	INSERT INTO tblMFTaskState(intConcurrencyId,strInternalCode,strTaskState,intCreatedUserId,dtmCreated)
+	VALUES(1,'IN-PROGRESS','IN-PROGRESS',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskState WHERE strTaskState = 'COMPLETED')
+BEGIN 
+	INSERT INTO tblMFTaskState(intConcurrencyId,strInternalCode,strTaskState,intCreatedUserId,dtmCreated)
+	VALUES(1,'COMPLETED','COMPLETED',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskState WHERE strTaskState = 'CANCELLED')
+BEGIN 
+	INSERT INTO tblMFTaskState(intConcurrencyId,strInternalCode,strTaskState,intCreatedUserId,dtmCreated)
+	VALUES(1,'CANCELLED','CANCELLED',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'MOVE')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'MOVE','MOVE',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'PICK')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'PICK','PICK',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'LOAD')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'LOAD','LOAD',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'SHIP')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'SHIP','SHIP',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'PUT AWAY')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'PUT_AWAY','PUT AWAY',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'MERGE')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'MERGE','MERGE',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'SPLIT')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'SPLIT','SPLIT',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'COUNT')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'COUNT','COUNT',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'CHECK-IN')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'CHECK-IN','CHECK-IN',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'UPDATE')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'UPDATE','UPDATE',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'CREATE')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'CREATE','CREATE',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'DELETE')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'DELETE','DELETE',1,GETDATE())
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblMFTaskType WHERE strTaskType = 'PUT BACK')
+BEGIN 
+	INSERT INTO tblMFTaskType(intConcurrencyId,strInternalCode,strTaskType,intCreatedUserId,dtmCreated)
+	VALUES(1,'PUT_BACK','PUT BACK',1,GETDATE())
+END
+GO
