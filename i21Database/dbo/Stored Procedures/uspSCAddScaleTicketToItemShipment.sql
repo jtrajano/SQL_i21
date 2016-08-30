@@ -454,6 +454,9 @@ ELSE
 	--		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 	--WHERE	SC.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 END
+SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
+IF(@checkContract > 0)
+	UPDATE @ShipmentStagingTable SET intOrderType = 1
 
 SELECT @checkContract = COUNT(intOrderType) FROM @ShipmentStagingTable WHERE intOrderType = 1;
 IF(@checkContract > 0)
