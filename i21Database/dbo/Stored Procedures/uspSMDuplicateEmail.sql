@@ -4,33 +4,36 @@
 AS
 BEGIN
 
-	
 	DECLARE @newImageId NVARCHAR(50)
 	DECLARE @imageId NVARCHAR(50)
 	DECLARE @screen NVARCHAR(150)
 	DECLARE @recordNo NVARCHAR(50)
 	DECLARE @entityId INT
+	DECLARE @startingNo NVARCHAR(50)
 	
 	DECLARE @fileIdentifier NVARCHAR(50)
 	SELECT @newImageId = NEWID()
-	SELECT @imageId = [strImageId] FROM tblSMEmail WHERE intEmailId = @intEmailId
-	SELECT @screen = strScreen FROM tblSMEmail WHERE intEmailId = @intEmailId
-	SELECT @recordNo = CAST (intEmailId AS NVARCHAR(50)) FROM tblSMEmail WHERE intEmailId = @intEmailId
-	SELECT @entityId = intEntityId FROM tblSMEmail WHERE intEmailId = @intEmailId
+	SELECT @imageId = [strImageId] FROM tblSMActivity WHERE intActivityId = @intEmailId
+	SELECT @recordNo = CAST (intActivityId AS NVARCHAR(50)) FROM tblSMActivity WHERE intActivityId = @intEmailId
+	SELECT @entityId = intEntityId FROM tblSMActivity WHERE intActivityId = @intEmailId
 
-	-- DUPLICATE tblSMEmail
-	INSERT dbo.tblSMEmail([intEntityId], [strScreen], [strSubject], [strMessage], [strImageId], [strMessageType], [strStatus], [strFilter],[dtmDate])
+	EXEC uspSMGetStartingNumber 103, @startingNo OUT
+
+	-- DUPLICATE tblSMActivity
+	INSERT dbo.tblSMActivity([intEntityId], [intTransactionId], [strType], [strSubject], [strDetails], [strImageId], [strMessageType], [strStatus], [strFilter], [strActivityNo], [dtmCreated])
 	SELECT [intEntityId],
-	[strScreen],
+	[intTransactionId],
+	'Email',
     'FW: ' + [strSubject],
-    [strMessage],
+    [strDetails],
 	@newImageId as [strImageId],
 	[strMessageType],
 	'Forward' AS [strStatus],
 	[strFilter],
+	@startingNo,
 	CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) as [dtmDate]
-	FROM dbo.tblSMEmail
-	WHERE [intEmailId] = @intEmailId;
+	FROM dbo.tblSMActivity
+	WHERE [intActivityId] = @intEmailId;
 	
 	SELECT @newEmailId = SCOPE_IDENTITY();
 
