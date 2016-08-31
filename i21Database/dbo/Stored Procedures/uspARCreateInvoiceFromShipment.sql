@@ -398,7 +398,7 @@ FROM
 		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
 	INNER JOIN tblSOSalesOrderDetail SOD 
 		ON SO.intSalesOrderId = SOD.intSalesOrderId 
-		AND SOD.intCommentTypeId IN (0,1)
+		AND SOD.intCommentTypeId IN (0,1,3)
 WHERE 
 	ICIS.intInventoryShipmentId = @ShipmentId
 
