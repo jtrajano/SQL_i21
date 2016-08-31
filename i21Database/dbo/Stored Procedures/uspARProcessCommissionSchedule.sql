@@ -385,7 +385,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 								END
 						END
 					
-					SET @totalAmount = @totalAmount + ISNULL((SELECT ISNULL(SUM(dblTotalAmount), 0) FROM tblARCommissionRecap WHERE strBatchId = @batchId), 0)
+					SET @totalAmount = ISNULL((SELECT ISNULL(SUM(dblTotalAmount), 0) FROM tblARCommissionRecap WHERE strBatchId = @batchId), 0)
 					DELETE FROM @tblARCommissionSchedules WHERE intCommissionScheduleId = @intActiveCommSchedId
 				END
 		END
