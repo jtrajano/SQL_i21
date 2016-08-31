@@ -88,7 +88,14 @@ DECLARE
 	,@InboundShipmentId			INT
 	,@TransactionId				INT
 	,@OriginalInvoiceId			INT
-	
+	,@intARAccountId			INT
+
+	SELECT TOP 1 @intARAccountId = ISNULL(intARAccountId,0) FROM tblARCompanyPreference
+	IF @intARAccountId = 0
+	BEGIN
+		RAISERROR('Please configure ''AR Account'' in company preference.',16,1)
+	END
+
 	SELECT
 		 @ShipmentNumber			= L.strLoadNumber
 		,@TransactionType			= 'Invoice'
