@@ -85,7 +85,7 @@ BEGIN
 
 			SELECT * INTO #tmpaptrxmstimport
 			FROM aptrxmst A
-			WHERE A.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
+			WHERE A.aptrx_trans_type IN (''I'',''C'',''A'')
 				AND A.aptrx_orig_amt != 0
 				AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 							THEN
