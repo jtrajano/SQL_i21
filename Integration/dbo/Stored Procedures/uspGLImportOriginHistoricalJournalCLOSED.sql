@@ -370,7 +370,8 @@ IMPORT_EXIT:
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail'
  EXEC sp_executesql @sql, @ParmDefinition,@resultOut = @result OUTPUT
 END
-SELECT @result = ISNULL(@result,'')
+ELSE
+	SET @result = 'SUCCESS '
 
 
  
