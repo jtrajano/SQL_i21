@@ -9,9 +9,10 @@ DECLARE @invalidDatesUpdated VARCHAR(1)
 BEGIN TRANSACTION
 EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
 
-	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	IF @@ERROR <> 0	OR  CHARINDEX('SUCCESS', @result,1)= 0 
+		GOTO ROLLBACK_INSERT
 
-	IF CHARINDEX('SUCCESS', @result,1)= 0 RETURN
+	
 SELECT @result = REPLACE(@result , 'SUCCESS ','')
 
 	--+++++++++++++++++++++++++++++++++
@@ -378,6 +379,7 @@ SELECT @result = REPLACE(@result , 'SUCCESS ','')
 ---------------------------------------------------------------------------------------------------------------------------------------
 COMMIT_INSERT:
 	COMMIT TRANSACTION
+	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
 	GOTO IMPORT_EXIT
 ROLLBACK_INSERT:
 	ROLLBACK TRANSACTION		            
@@ -387,4 +389,4 @@ ROLLBACK_INSERT:
 IMPORT_EXIT:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
-	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans
+	
