@@ -4264,6 +4264,7 @@
     <Build Include="dbo\Functions\fnIsDue.sql" />
     <Build Include="dbo\Functions\fnGetDueDate.sql" />
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
