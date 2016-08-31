@@ -378,6 +378,7 @@ BEGIN TRY
 				)
 			)
 		AND ri.intRecipeItemTypeId = 1
+		AND ri.intConsumptionMethodId =1
 	
 	UNION
 	
@@ -398,6 +399,7 @@ BEGIN TRY
 				)
 			)
 		AND RI.intRecipeItemTypeId = 1
+		AND RI.intConsumptionMethodId =1
 		
 	if @ysnIncludeOutputItem=1
 	Begin
