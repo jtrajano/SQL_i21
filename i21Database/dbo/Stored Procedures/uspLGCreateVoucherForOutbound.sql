@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @intVendorEntityId AS INT;
 	DECLARE @intMinRecord AS INT
 	DECLARE @voucherDetailNonInvContract AS VoucherDetailNonInvContract
+	DECLARE @intAPAccount INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intItemRecordId INT Identity(1, 1)
@@ -25,6 +26,24 @@ BEGIN TRY
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
 		,intVendorEntityId INT)
+
+	DECLARE @distinctItem TABLE 
+		(intItemRecordId INT Identity(1, 1)
+		,intItemId INT)
+
+	SELECT @intAPAccount = ISNULL(intAPAccount,0)
+	FROM tblSMCompanyLocation CL
+	JOIN (
+		SELECT TOP 1 ISNULL(LD.intPCompanyLocationId, intSCompanyLocationId) intCompanyLocationId
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		WHERE L.intLoadId = @intLoadId
+		) t ON t.intCompanyLocationId = CL.intCompanyLocationId
+
+	IF @intAPAccount = 0
+	BEGIN
+		RAISERROR('Please configure ''AP Account'' for the company location.',16,1)
+	END
 
 	INSERT INTO @voucherDetailData (
 		intVendorEntityId
@@ -109,6 +128,20 @@ BEGIN TRY
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
 	FROM @voucherDetailData
+
+	INSERT INTO @distinctItem
+	SELECT DISTINCT intItemId
+	FROM @voucherDetailData
+
+	IF EXISTS (SELECT 1 
+		   FROM tblICItem I
+		   LEFT JOIN tblICItemAccount IA ON IA.intItemId = I.intItemId
+		   LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = IA.intAccountCategoryId
+		   WHERE strAccountCategory IS NULL
+			  AND I.intItemId IN (SELECT intItemId FROM @distinctItem))
+	BEGIN
+		RAISERROR ('''AP Clearing'' is not configured for one or more item(s).',11,1);
+	END
 
 	SELECT @total = COUNT(*)
 	FROM @voucherDetailData;
