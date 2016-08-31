@@ -4091,6 +4091,7 @@
     <Build Include="dbo\Views\vyuICBEExportProductPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspCMSettlementReport.sql" />
     <Build Include="dbo\Functions\fnICGetCurrency.sql" />
+    <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

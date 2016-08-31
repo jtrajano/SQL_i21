@@ -141,8 +141,8 @@ SELECT DISTINCT
 	,[strBillOfLading]							=	NULL
 	,[intContractHeaderId]						=	A.intContractHeaderId
 	,[intContractDetailId]						=	A.intContractDetailId
-	,[intScaleTicketId]							=	NULL
-	,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	,[intScaleTicketId]							=	A.intScaleTicketId
+	,[strScaleTicketNumber]						=	A.strScaleTicketNumber --CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[intShipmentId]							=	0      
 	,[intShipmentContractQtyId]					=	NULL
   	,[intUnitMeasureId]							=	NULL
