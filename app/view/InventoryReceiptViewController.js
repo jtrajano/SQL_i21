@@ -1176,7 +1176,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
         var currentReceiptItem = win.viewModel.data.currentReceiptItem;
         var record = Ext.create('Inventory.model.ReceiptItemLot');
-        var me = this;
+        var me = win.controller;
 
         record.set('strUnitMeasure', currentReceiptItem.get('strUnitMeasure'));
         record.set('intItemUnitMeasureId', currentReceiptItem.get('intUnitMeasureId'));
