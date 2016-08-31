@@ -439,39 +439,39 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		----------------------------------RECREATE VOLUME---------------------------------------------------------------------
-		SELECT	RCus.intCustomerId,
-		RCat.intPatronageCategoryId,
-		Ref.intFiscalYearId, 
-		RCat.dblVolume
-		INTO #tmpCustomerVolume
-		FROM tblPATRefund Ref
-		INNER JOIN tblPATRefundCustomer RCus
-		ON Ref.intRefundId = RCus.intRefundId
-		INNER JOIN tblPATRefundCategory RCat
-		ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
-		INNER JOIN tblPATPatronageCategory PCat
-		ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
-		INNER JOIN tblARCustomer ARC
-		ON RCus.intCustomerId = ARC.intEntityCustomerId
-		WHERE Ref.intRefundId = @intRefundId
+		--SELECT	RCus.intCustomerId,
+		--RCat.intPatronageCategoryId,
+		--Ref.intFiscalYearId, 
+		--RCat.dblVolume
+		--INTO #tmpCustomerVolume
+		--FROM tblPATRefund Ref
+		--INNER JOIN tblPATRefundCustomer RCus
+		--ON Ref.intRefundId = RCus.intRefundId
+		--INNER JOIN tblPATRefundCategory RCat
+		--ON RCus.intRefundCustomerId	 = RCat.intRefundCustomerId
+		--INNER JOIN tblPATPatronageCategory PCat
+		--ON RCat.intPatronageCategoryId = PCat.intPatronageCategoryId
+		--INNER JOIN tblARCustomer ARC
+		--ON RCus.intCustomerId = ARC.intEntityCustomerId
+		--WHERE Ref.intRefundId = @intRefundId
 
-		IF NOT EXISTS(SELECT * FROM #tmpCustomerVolume)
-		BEGIN
-			DROP TABLE #tmpCustomerVolume
-		END
-		ELSE
-		BEGIN
-			MERGE tblPATCustomerVolume AS PAT
-			USING #tmpCustomerVolume AS B
-			   ON (PAT.intCustomerPatronId = B.intCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.intFiscalYearId)
-			 WHEN MATCHED
-				  THEN UPDATE SET PAT.dblVolume = PAT.dblVolume + B.dblVolume, PAT.dtmLastActivityDate = GETDATE()
-			 WHEN NOT MATCHED BY TARGET
-				  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
-					   VALUES (B.intCustomerId, B.intPatronageCategoryId, B.intFiscalYearId, GETDATE(),  B.dblVolume, 1);
+		--IF NOT EXISTS(SELECT * FROM #tmpCustomerVolume)
+		--BEGIN
+		--	DROP TABLE #tmpCustomerVolume
+		--END
+		--ELSE
+		--BEGIN
+		--	MERGE tblPATCustomerVolume AS PAT
+		--	USING #tmpCustomerVolume AS B
+		--	   ON (PAT.intCustomerPatronId = B.intCustomerId AND PAT.intPatronageCategoryId = B.intPatronageCategoryId AND PAT.intFiscalYear = B.intFiscalYearId)
+		--	 WHEN MATCHED
+		--		  THEN UPDATE SET PAT.dblVolume = PAT.dblVolume + B.dblVolume, PAT.dtmLastActivityDate = GETDATE()
+		--	 WHEN NOT MATCHED BY TARGET
+		--		  THEN INSERT (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
+		--			   VALUES (B.intCustomerId, B.intPatronageCategoryId, B.intFiscalYearId, GETDATE(),  B.dblVolume, 1);
 
-			DROP TABLE #tmpCustomerVolume
-		END
+		--	DROP TABLE #tmpCustomerVolume
+		--END
 
 		----------------------------------------------------------------------------------------------------------------------------
 
