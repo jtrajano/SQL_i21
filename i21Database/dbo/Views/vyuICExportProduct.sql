@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuICExportProduct]
-	AS SELECT
+AS
+SELECT
 	CAST(item.strItemNo AS NVARCHAR(16)) code
 	, CAST(item.strDescription AS NVARCHAR(35)) name
 	, CAST(item.intItemId AS VARCHAR(16)) itemID
@@ -11,3 +12,5 @@
 	, 0 preOp
 	, 0 postOp
 FROM tblICItem item
+WHERE item.ysnAvailableTM = 1
+	OR item.strType = 'Service'
