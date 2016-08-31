@@ -42,6 +42,7 @@ DECLARE @EntityCustomerId		INT,
 		@PONumber				NVARCHAR(100),
 		@BOLNumber				NVARCHAR(100),
 		@DeliverPickup			NVARCHAR(100),
+		@SalesOrderComment		NVARCHAR(MAX),
 		@InvoiceComment			NVARCHAR(MAX),
 		@SoftwareComment		NVARCHAR(MAX),
 		@SalesOrderNumber		NVARCHAR(100),
@@ -306,14 +307,17 @@ SELECT TOP 1
 		@ShipToLocationId		=	intShipToLocationId,
 		@BillToLocationId		=	intBillToLocationId,
 		@SplitId				=	intSplitId,
-		@InvoiceComment			=   strComments,
+		@SalesOrderComment		=   strComments,
 		@EntityContactId		=	intEntityContactId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
 
-IF ISNULL(@InvoiceComment, '') = ''
-	EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
+IF EXISTS (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
+	BEGIN
+		SET @InvoiceComment = ISNULL(@InvoiceComment, '') + ' ' + ISNULL(@SalesOrderComment, '')
+	END
 
 --BEGIN TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
