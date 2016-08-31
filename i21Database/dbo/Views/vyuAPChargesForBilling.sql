@@ -68,6 +68,8 @@ SELECT
 	,[intSubCurrencyCents]						= TransCurrency.intCent
 	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
 	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
+	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
+	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -93,7 +95,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN dbo.tblSMCurrency MainCurrency
 		ON MainCurrency.intCurrencyID = TransCurrency.intMainCurrencyId
-	
+	 
 	LEFT JOIN tblICItemUOM ItemCostUOM 
 		ON ItemCostUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 
@@ -105,6 +107,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 		FROM tblICInventoryReceiptItem A
 		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	) ReceiptItem 
+
+	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
+
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
@@ -183,6 +188,8 @@ SELECT
 	,[intSubCurrencyCents]						= TransCurrency.intCent
 	,[strCostUnitMeasure]						= CostUOM.strUnitMeasure
 	,[intCostUnitMeasureId]                     = ItemCostUOM.intItemUOMId
+	,[intScaleTicketId]							= ScaleTicket.intScaleTicketId
+	,[strScaleTicketNumber]						= ScaleTicket.strScaleTicketNumber
 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -220,6 +227,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 		FROM tblICInventoryReceiptItem A
 		WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	) ReceiptItem
+
+	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
+
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId

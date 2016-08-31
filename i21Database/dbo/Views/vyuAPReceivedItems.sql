@@ -412,8 +412,8 @@ FROM
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
-		,[intScaleTicketId]							=	NULL
-		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
+		,[intScaleTicketId]							=	A.intScaleTicketId
+		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[intShipmentId]							=	0      
 		,[intLoadDetailId]					=	NULL
   		,[intUnitMeasureId]							=	NULL
