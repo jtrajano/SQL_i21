@@ -119,6 +119,7 @@
 	,SCTicket.intInventoryShipmentId
 	,SCTicket.strShipmentNumber
 	,SCTicket.strFreightSettlement
+	,SCTicket.strFarmDescription
 	FROM tblSCUncompletedTicketAlert SCAlert,vyuSCTicketView SCTicket
 	WHERE DATEDIFF(day,dtmTicketDateTime,GETDATE()) >= SCAlert.intTicketUncompletedDaysAlert
 	AND ysnHasGeneratedTicketNumber = 1
