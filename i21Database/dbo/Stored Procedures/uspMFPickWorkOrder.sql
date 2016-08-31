@@ -64,6 +64,8 @@ BEGIN TRY
 		,@intItemIssuedUOMId INT
 		,@intStorageLocationId1 NUMERIC(18, 6)
 		,@intRecipeItemUOMId INT
+		,@intProductionStagingId INT
+		,@intProductionStageLocationId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -80,6 +82,16 @@ BEGIN TRY
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -156,132 +168,130 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderRecipe a
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	INSERT INTO dbo.tblMFWorkOrderConsumedLot (
-		intWorkOrderId
-		,intItemId
-		,intLotId
-		,dblQuantity
-		,intItemUOMId
-		,dblIssuedQuantity
-		,intItemIssuedUOMId
-		,intBatchId
-		,intSequenceNo
-		,dtmCreated
-		,intCreatedUserId
-		,dtmLastModified
-		,intLastModifiedUserId
-		,intShiftId
-		,dtmActualInputDateTime
-		,intStorageLocationId
-		)
-	SELECT WI.intWorkOrderId
-		,WI.intItemId
-		,WI.intLotId
-		,CASE 
-			WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
-				THEN WI.dblQuantity
-			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
-			END
-		,WI.intItemUOMId
-		,(
-			CASE 
-				WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
-					THEN WI.dblQuantity
-				ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
-				END
-			) / (
-			CASE 
-				WHEN L.intWeightUOMId IS NULL
-					OR L.dblWeightPerQty = 0
-					THEN 1
-				ELSE L.dblWeightPerQty
-				END
-			)
-		,WI.intItemIssuedUOMId
-		,@intBatchId
-		,WI.intSequenceNo
-		,WI.dtmCreated
-		,WI.intCreatedUserId
-		,WI.dtmLastModified
-		,WI.intLastModifiedUserId
-		,WI.intShiftId
-		,WI.dtmProductionDate
-		,WI.intStorageLocationId
-	FROM dbo.tblMFWorkOrderInputLot WI
-	JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
-	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
-		AND r.intWorkOrderId = ri.intWorkOrderId
-	JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
-	WHERE ri.intWorkOrderId = @intWorkOrderId
-		AND ri.intRecipeItemTypeId = 1
-		AND (
-			(
-				ri.ysnYearValidationRequired = 1
-				AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
-					AND ri.dtmValidTo
-				)
-			OR (
-				ri.ysnYearValidationRequired = 0
-				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-					AND DATEPART(dy, ri.dtmValidTo)
-				)
-			)
-		AND ri.intConsumptionMethodId = 1
-		AND WI.intWorkOrderId = @intWorkOrderId
-		AND WI.ysnConsumptionReversed = 0
-
-	MERGE tblMFProductionSummary AS target
-	USING (
-		SELECT intWorkOrderId
-			,intItemId
-			,SUM(dblQuantity)
-		FROM tblMFWorkOrderConsumedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intBatchId = @intBatchId
-		GROUP BY intWorkOrderId
-			,intItemId
-		) AS source(intWorkOrderId, intItemId, dblQuantity)
-		ON (
-				target.intWorkOrderId = source.intWorkOrderId
-				AND target.intItemId = source.intItemId
-				)
-	WHEN MATCHED
-		THEN
-			UPDATE
-			SET dblConsumedQuantity = dblConsumedQuantity + source.dblQuantity
-	WHEN NOT MATCHED
-		THEN
-			INSERT (
-				intWorkOrderId
-				,intItemId
-				,dblOpeningQuantity
-				,dblOpeningOutputQuantity
-				,dblOpeningConversionQuantity
-				,dblInputQuantity
-				,dblConsumedQuantity
-				,dblOutputQuantity
-				,dblOutputConversionQuantity
-				,dblCountQuantity
-				,dblCountOutputQuantity
-				,dblCountConversionQuantity
-				,dblCalculatedQuantity
-				)
-			VALUES (
-				source.intWorkOrderId
-				,source.intItemId
-				,0
-				,0
-				,0
-				,0
-				,source.dblQuantity
-				,0
-				,0
-				,0
-				,0
-				,0
-				,0
-				);
-
+	--INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+	--	intWorkOrderId
+	--	,intItemId
+	--	,intLotId
+	--	,dblQuantity
+	--	,intItemUOMId
+	--	,dblIssuedQuantity
+	--	,intItemIssuedUOMId
+	--	,intBatchId
+	--	,intSequenceNo
+	--	,dtmCreated
+	--	,intCreatedUserId
+	--	,dtmLastModified
+	--	,intLastModifiedUserId
+	--	,intShiftId
+	--	,dtmActualInputDateTime
+	--	,intStorageLocationId
+	--	)
+	--SELECT WI.intWorkOrderId
+	--	,WI.intItemId
+	--	,WI.intLotId
+	--	,CASE 
+	--		WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
+	--			THEN WI.dblQuantity
+	--		ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
+	--		END
+	--	,WI.intItemUOMId
+	--	,(
+	--		CASE 
+	--			WHEN (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) > WI.dblQuantity
+	--				THEN WI.dblQuantity
+	--			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
+	--			END
+	--		) / (
+	--		CASE 
+	--			WHEN L.intWeightUOMId IS NULL
+	--				OR L.dblWeightPerQty = 0
+	--				THEN 1
+	--			ELSE L.dblWeightPerQty
+	--			END
+	--		)
+	--	,WI.intItemIssuedUOMId
+	--	,@intBatchId
+	--	,WI.intSequenceNo
+	--	,WI.dtmCreated
+	--	,WI.intCreatedUserId
+	--	,WI.dtmLastModified
+	--	,WI.intLastModifiedUserId
+	--	,WI.intShiftId
+	--	,WI.dtmProductionDate
+	--	,WI.intStorageLocationId
+	--FROM dbo.tblMFWorkOrderInputLot WI
+	--JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
+	--JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+	--	AND r.intWorkOrderId = ri.intWorkOrderId
+	--JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
+	--WHERE ri.intWorkOrderId = @intWorkOrderId
+	--	AND ri.intRecipeItemTypeId = 1
+	--	AND (
+	--		(
+	--			ri.ysnYearValidationRequired = 1
+	--			AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+	--				AND ri.dtmValidTo
+	--			)
+	--		OR (
+	--			ri.ysnYearValidationRequired = 0
+	--			AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+	--				AND DATEPART(dy, ri.dtmValidTo)
+	--			)
+	--		)
+	--	AND ri.intConsumptionMethodId = 1
+	--	AND WI.intWorkOrderId = @intWorkOrderId
+	--	AND WI.ysnConsumptionReversed = 0
+	--MERGE tblMFProductionSummary AS target
+	--USING (
+	--	SELECT intWorkOrderId
+	--		,intItemId
+	--		,SUM(dblQuantity)
+	--	FROM tblMFWorkOrderConsumedLot
+	--	WHERE intWorkOrderId = @intWorkOrderId
+	--		AND intBatchId = @intBatchId
+	--	GROUP BY intWorkOrderId
+	--		,intItemId
+	--	) AS source(intWorkOrderId, intItemId, dblQuantity)
+	--	ON (
+	--			target.intWorkOrderId = source.intWorkOrderId
+	--			AND target.intItemId = source.intItemId
+	--			)
+	--WHEN MATCHED
+	--	THEN
+	--		UPDATE
+	--		SET dblConsumedQuantity = dblConsumedQuantity + source.dblQuantity
+	--WHEN NOT MATCHED
+	--	THEN
+	--		INSERT (
+	--			intWorkOrderId
+	--			,intItemId
+	--			,dblOpeningQuantity
+	--			,dblOpeningOutputQuantity
+	--			,dblOpeningConversionQuantity
+	--			,dblInputQuantity
+	--			,dblConsumedQuantity
+	--			,dblOutputQuantity
+	--			,dblOutputConversionQuantity
+	--			,dblCountQuantity
+	--			,dblCountOutputQuantity
+	--			,dblCountConversionQuantity
+	--			,dblCalculatedQuantity
+	--			)
+	--		VALUES (
+	--			source.intWorkOrderId
+	--			,source.intItemId
+	--			,0
+	--			,0
+	--			,0
+	--			,0
+	--			,source.dblQuantity
+	--			,0
+	--			,0
+	--			,0
+	--			,0
+	--			,0
+	--			,0
+	--			);
 	INSERT INTO @tblItem (
 		intItemId
 		,dblReqQty
@@ -324,10 +334,7 @@ BEGIN TRY
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
-		AND ri.intConsumptionMethodId IN (
-			2
-			,3
-			)
+		AND ri.intConsumptionMethodId <> 4
 		AND NOT EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrderConsumedLot WC
@@ -382,10 +389,7 @@ BEGIN TRY
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
-		AND ri.intConsumptionMethodId IN (
-			2
-			,3
-			)
+		AND ri.intConsumptionMethodId <> 4
 		AND (
 			CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
@@ -423,10 +427,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId IN (
-				2
-				,3
-				)
+			AND ri.intConsumptionMethodId <> 4
 	END
 
 	SELECT @intItemRecordId = Min(intItemRecordId)
@@ -480,15 +481,11 @@ BEGIN TRY
 				AND IL.intLocationId = @intLocationId
 				AND S.intStorageLocationId = (
 					CASE 
-						WHEN @intStorageLocationId IS NULL
-							THEN S.intStorageLocationId
-						ELSE (
-								CASE 
-									WHEN @intConsumptionMethodId = 2
-										THEN @intStorageLocationId
-									ELSE S.intStorageLocationId
-									END
-								)
+						WHEN @intConsumptionMethodId = 1
+							THEN ISNULL(@intProductionStageLocationId, S.intStorageLocationId)
+						WHEN @intConsumptionMethodId = 2
+							THEN ISNULL(@intStorageLocationId, S.intStorageLocationId)
+						ELSE S.intStorageLocationId
 						END
 					)
 				AND S.dblOnHand - S.dblUnitReserved > 0
@@ -583,15 +580,11 @@ BEGIN TRY
 					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
-							WHEN @intStorageLocationId IS NULL
-								THEN L.intStorageLocationId
-							ELSE (
-									CASE 
-										WHEN @intConsumptionMethodId = 2
-											THEN @intStorageLocationId
-										ELSE L.intStorageLocationId
-										END
-									)
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
 							END
 						)
 					AND L.dblQty > 0
@@ -679,15 +672,11 @@ BEGIN TRY
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 				AND L.intStorageLocationId = (
 					CASE 
-						WHEN @intStorageLocationId IS NULL
-							THEN L.intStorageLocationId
-						ELSE (
-								CASE 
-									WHEN @intConsumptionMethodId = 2
-										THEN @intStorageLocationId
-									ELSE L.intStorageLocationId
-									END
-								)
+						WHEN @intConsumptionMethodId = 1
+							THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+						WHEN @intConsumptionMethodId = 2
+							THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+						ELSE L.intStorageLocationId
 						END
 					)
 				AND L.dblQty > 0
@@ -780,15 +769,11 @@ BEGIN TRY
 					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
-							WHEN @intStorageLocationId IS NULL
-								THEN L.intStorageLocationId
-							ELSE (
-									CASE 
-										WHEN @intConsumptionMethodId = 2
-											THEN @intStorageLocationId
-										ELSE L.intStorageLocationId
-										END
-									)
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
 							END
 						)
 					AND L.dblQty = 0
@@ -1076,15 +1061,11 @@ BEGIN TRY
 					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					AND L.intStorageLocationId = (
 						CASE 
-							WHEN @intStorageLocationId IS NULL
-								THEN L.intStorageLocationId
-							ELSE (
-									CASE 
-										WHEN @intConsumptionMethodId = 2
-											THEN @intStorageLocationId
-										ELSE L.intStorageLocationId
-										END
-									)
+							WHEN @intConsumptionMethodId = 1
+								THEN ISNULL(@intProductionStageLocationId, L.intStorageLocationId)
+							WHEN @intConsumptionMethodId = 2
+								THEN ISNULL(@intStorageLocationId, L.intStorageLocationId)
+							ELSE L.intStorageLocationId
 							END
 						)
 					AND L.dblQty > 0

@@ -309,6 +309,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
+			And ri.intConsumptionMethodId =1
 	END
 
 	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation =@OrderDetailInformation

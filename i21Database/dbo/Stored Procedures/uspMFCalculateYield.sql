@@ -22,6 +22,8 @@ BEGIN TRY
 		,@intShiftId INT
 		,@intManufacturingCellId INT
 		,@strWorkOrderNo NVARCHAR(50)
+		,@intProductionStagingId INT
+		,@intProductionStageLocationId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -55,6 +57,16 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderRecipe a
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
+
 	INSERT INTO @tblInputItem (
 		intItemId
 		,dblCalculatedQuantity
@@ -65,7 +77,11 @@ BEGIN TRY
 	SELECT ri.intItemId
 		,ri.dblCalculatedQuantity
 		,ri.ysnScaled
-		,ri.intStorageLocationId
+		,CASE 
+			WHEN ri.intConsumptionMethodId = 1
+				THEN @intProductionStageLocationId
+			ELSE ri.intStorageLocationId
+			END
 		,0
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	WHERE ri.intWorkOrderId = @intWorkOrderId
@@ -82,10 +98,7 @@ BEGIN TRY
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
-		AND ri.intConsumptionMethodId IN (
-			2
-			,3
-			)
+		AND ri.intConsumptionMethodId <> 4
 
 	INSERT INTO @tblInputItem (
 		intItemId
@@ -97,7 +110,11 @@ BEGIN TRY
 	SELECT rs.intSubstituteItemId
 		,ri.dblCalculatedQuantity
 		,ri.ysnScaled
-		,ri.intStorageLocationId
+		,CASE 
+			WHEN ri.intConsumptionMethodId = 1
+				THEN @intProductionStageLocationId
+			ELSE ri.intStorageLocationId
+			END
 		,1
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
@@ -116,10 +133,7 @@ BEGIN TRY
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
-		AND ri.intConsumptionMethodId IN (
-			2
-			,3
-			)
+		AND ri.intConsumptionMethodId <> 4
 
 	INSERT INTO @tblOutputItem (
 		intItemId
@@ -203,26 +217,16 @@ BEGIN TRY
 	JOIN @tblInputItem I ON I.intItemId = S.intItemId
 	WHERE S.intWorkOrderId = @intWorkOrderId
 
-	IF @intManufacturingProcessId = 6 --SD process
-	BEGIN
-		UPDATE tblMFProductionSummary
-		SET dblYieldQuantity = dblCountQuantity
-			,dblYieldPercentage = 100
-		WHERE intWorkOrderId = @intWorkOrderId
-	END
-	ELSE
-	BEGIN
-		UPDATE tblMFProductionSummary
-		SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)
-			,dblYieldPercentage = (
-				CASE 
-					WHEN dblInputQuantity > 0
-						THEN Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity) * 100, 2)
-					ELSE 100
-					END
-				)
-		WHERE intWorkOrderId = @intWorkOrderId
-	END
+	UPDATE tblMFProductionSummary
+	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)
+		,dblYieldPercentage = (
+			CASE 
+				WHEN dblInputQuantity > 0
+					THEN Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity) * 100, 2)
+				ELSE 100
+				END
+			)
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	DECLARE @intProductionSummaryId INT
 		,@dblYieldQuantity INT
@@ -262,12 +266,6 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 			AND ysnStockUnit = 1
 
-		SELECT TOP 1 @intSubLocationId = intSubLocationId
-			,@intStorageLocationId = intStorageLocationId
-		FROM tblICItemStockUOM
-		WHERE intItemId = @intItemId
-			AND intItemUOMId = @intItemUOMId
-
 		IF @strInventoryTracking = 'Item Level'
 		BEGIN
 			IF @dblYieldQuantity > 0
@@ -303,10 +301,10 @@ BEGIN TRY
 						AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 					)
 			BEGIN
-				PRINT 'CREATE STAGING LOT'
+				PRINT 'CREATE A LOT'
 
 				--*****************************************************
-				--Create staging lot
+				--Create a lot
 				--*****************************************************
 				DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
@@ -353,8 +351,6 @@ BEGIN TRY
 
 					IF @strLotTracking <> 'Yes - Serial Number'
 					BEGIN
-						--EXEC dbo.uspSMGetStartingNumber 55
-						--	,@strLotNumber OUTPUT
 						SELECT @intSubLocationId = @intSubLocationId
 						FROM dbo.tblICStorageLocation
 						WHERE intStorageLocationId = @intStorageLocationId
@@ -366,7 +362,7 @@ BEGIN TRY
 							,@intLocationId = @intLocationId
 							,@intOrderTypeId = NULL
 							,@intBlendRequirementId = NULL
-							,@intPatternCode = 55
+							,@intPatternCode = 24
 							,@ysnProposed = 0
 							,@strPatternString = @strLotNumber OUTPUT
 					END
@@ -439,7 +435,7 @@ BEGIN TRY
 						,@intUserId
 				END
 					--*****************************************************
-					--End of create staging lot
+					--End of create lot
 					--*****************************************************
 			END
 
@@ -563,21 +559,6 @@ BEGIN TRY
 					WHERE intLotId = @intLotId
 
 					PRINT 'Call Adjust Qty procedure'
-				END
-
-				IF EXISTS (
-						SELECT *
-						FROM tblICLot
-						WHERE intLotId = @intLotId
-							AND dblQty = 0
-						)
-				BEGIN
-					--UPDATE dbo.tblICLot
-					--SET intLotStatusId = 3
-					--WHERE intLotId = @intLotId
-					EXEC uspMFSetLotStatus @intLotId
-						,3
-						,@intUserId
 				END
 			END
 		END
