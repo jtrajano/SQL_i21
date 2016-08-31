@@ -17,7 +17,7 @@ GO
 		B.intConcurrencyId
 	FROM tblSMScreen A LEFT OUTER JOIN tblSMCustomField B
 		ON A.strScreenName = B.strScreen 
-	WHERE ISNULL(strTableName, '') <> '' AND ysnBuild = 1 
+	WHERE ysnCustomTab = 1 AND ysnBuild = 1 
 
 	-- INSERT 'Id' for each Custom Field
 	INSERT INTO tblSMCustomFieldDetail (
@@ -79,7 +79,7 @@ GO
 		A.ysnModified
 	FROM tblSMCustomFieldDetail A 
 		INNER JOIN tblSMCustomField B ON A.intCustomFieldId = B.intCustomFieldId 
-		INNER JOIN tblSMScreen C ON B.strScreen = C.strScreenName AND ISNULL(C.strTableName, '') <> ''
+		INNER JOIN tblSMScreen C ON B.strScreen = C.strScreenName AND ysnCustomTab = 1
 		INNER JOIN tblSMCustomTab D ON D.intScreenId = C.intScreenId
 
 	-- INSERT to tblSMComboBoxValue from tblSMCustomFieldValue
@@ -97,7 +97,7 @@ GO
 	FROM tblSMCustomFieldValue A 
 		INNER JOIN tblSMCustomFieldDetail B ON A.intCustomFieldDetailId = B.intCustomFieldDetailId
 		INNER JOIN tblSMCustomField C ON C.intCustomFieldId = B.intCustomFieldId
-		INNER JOIN tblSMScreen D ON C.strScreen = D.strScreenName AND ISNULL(D.strTableName, '') <> ''
+		INNER JOIN tblSMScreen D ON C.strScreen = D.strScreenName AND ysnCustomTab = 1
 		INNER JOIN tblSMCustomTab E ON D.intScreenId = E.intScreenId
 		INNER JOIN tblSMCustomTabDetail F ON E.intCustomTabId = F.intCustomTabId AND B.strFieldName = F.strFieldName
 
@@ -115,11 +115,11 @@ GO
 	SELECT	
 		A.intScreenId, 
 		C.intCustomTabId,
-		REPLACE(A.strTableName, 'tbl', 'cst') strTableName
+		REPLACE(REPLACE(A.strTableName, 'tbl', 'cst'), 'cstEM', 'cst') strTableName
 	FROM tblSMScreen A 
 		LEFT OUTER JOIN tblSMCustomField B ON A.strScreenName = B.strScreen 
 		INNER JOIN tblSMCustomTab C ON C.intScreenId = A.intScreenId
-	WHERE ISNULL(strTableName, '') <> '' AND B.ysnBuild = 1 
+	WHERE ysnCustomTab = 1 AND B.ysnBuild = 1 
 
 	WHILE EXISTS(SELECT TOP (1) 1 FROM @ScreenTemp)
 	BEGIN
