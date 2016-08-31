@@ -73,6 +73,7 @@ GO
 		strSubject,
 		dtmStartDate,
 		dtmCreated,
+		dtmModified,
 		intCreatedBy,
 		intAssignedTo,
 		intConcurrencyId
@@ -90,6 +91,7 @@ GO
 		0, 99) strSubject,
 		dtmAdded dtmStartDate,
 		dtmAdded dtmCreated,
+		dtmAdded dtmModified,
 		intEntityId intCreatedBy,
 		intEntityId intAssignedTo,
 		1 intConcurrenctId

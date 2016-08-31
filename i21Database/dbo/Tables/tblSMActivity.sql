@@ -26,6 +26,7 @@
 	[ysnPrivate] [bit] NULL,
 	[ysnPublic] [bit] NULL,
 	[dtmCreated] [datetime] NULL, 
+	[dtmModified] [datetime] NULL, 
 	[intCreatedBy] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMActivity_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]),
