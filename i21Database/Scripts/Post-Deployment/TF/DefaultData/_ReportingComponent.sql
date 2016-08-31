@@ -2066,6 +2066,7 @@ BEGIN
 
 		INSERT INTO [tblTFReportingComponent]([intTaxAuthorityId],[strFormCode],[strFormName],[strScheduleCode],[strScheduleName],[strNote],[intPositionId],[strType],[strTransactionType])
 		VALUES(@intTaxAuthorityId, 'MF-360',	'Consolidated Gasoline Monthly Tax Return',	'10A','Gallons Delivered to Marina Fuel Dealers','', 460, 'Gasoline / Aviation Gasoline / Gasohol','Invoice')
+		SELECT @MasterPk  = SCOPE_IDENTITY();
 		INSERT INTO [tblTFFilingPacket]([intTaxAuthorityId],[intReportingComponentId],[ysnStatus],[intFrequency])
 		VALUES(@intTaxAuthorityId, @MasterPk,1,2)
 		INSERT INTO [tblTFReportingComponentDetail] ([intReportingComponentId])

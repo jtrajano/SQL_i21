@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFDefault]
 
 @Guid NVARCHAR(150),
-@FormCodeParam NVARCHAR(500),
+@FormCodeParam NVARCHAR(MAX),
 @DateFrom DATETIME,
 @DateTo DATETIME
 

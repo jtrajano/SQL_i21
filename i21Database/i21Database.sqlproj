@@ -4266,6 +4266,10 @@
     <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
     <Build Include="dbo\Tables\tblSMTypeValue.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\22_TypeValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRGetRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
+    <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

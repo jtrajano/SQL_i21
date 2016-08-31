@@ -24,6 +24,7 @@
 	[strDetails] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strShowTimeAs] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPrivate] [bit] NULL,
+	[ysnPublic] [bit] NULL,
 	[dtmCreated] [datetime] NULL, 
 	[intCreatedBy] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 

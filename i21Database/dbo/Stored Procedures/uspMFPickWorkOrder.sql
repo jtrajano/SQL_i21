@@ -63,7 +63,7 @@ BEGIN TRY
 		,@intCategoryId INT
 		,@intItemIssuedUOMId INT
 		,@intStorageLocationId1 NUMERIC(18, 6)
-		,@intRecipeItemUOMId int
+		,@intRecipeItemUOMId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -115,7 +115,7 @@ BEGIN TRY
 		intItemRecordId INT Identity(1, 1)
 		,intItemId INT
 		,dblReqQty NUMERIC(18, 6)
-		,intItemUOMId int
+		,intItemUOMId INT
 		,intStorageLocationId INT
 		,intConsumptionMethodId INT
 		,strLotTracking NVARCHAR(50)
@@ -285,7 +285,7 @@ BEGIN TRY
 	INSERT INTO @tblItem (
 		intItemId
 		,dblReqQty
-		,intItemUOMId 
+		,intItemUOMId
 		,intStorageLocationId
 		,intConsumptionMethodId
 		,strLotTracking
@@ -300,7 +300,7 @@ BEGIN TRY
 				THEN CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS NUMERIC(38, 20))
 			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
 			END AS RequiredQty
-			,ri.intItemUOMId 
+		,ri.intItemUOMId
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 		,I.strLotTracking
@@ -352,7 +352,7 @@ BEGIN TRY
 				ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
-			,ri.intItemUOMId
+		,ri.intItemUOMId
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 		,I.strLotTracking
@@ -438,7 +438,7 @@ BEGIN TRY
 
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
-			,@intRecipeItemUOMId=intItemUOMId
+			,@intRecipeItemUOMId = intItemUOMId
 			,@intStorageLocationId = intStorageLocationId
 			,@intConsumptionMethodId = intConsumptionMethodId
 			,@strLotTracking = strLotTracking
@@ -794,14 +794,14 @@ BEGIN TRY
 					AND L.dblQty = 0
 				ORDER BY L.dtmDateCreated DESC
 
-				SELECT @dblAdjustByQuantity = @dblReqQty
-
 				SELECT @strLotNumber = strLotNumber
 					,@intWeightUOMId = intItemUOMId
 					,@dblWeightPerQty = dblWeightPerUnit
 					,@intStorageLocationId1 = intStorageLocationId
 					,@intItemIssuedUOMId = intItemIssuedUOMId
 				FROM @tblLot
+
+				SELECT @dblAdjustByQuantity = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intWeightUOMId, @dblReqQty)
 
 				IF @intConsumptionMethodId = 2
 				BEGIN
@@ -982,7 +982,7 @@ BEGIN TRY
 					,intItemLocationId = @intItemLocationId
 					,intSubLocationId = @intSubLocationId
 					,intStorageLocationId = @intStorageLocationId
-					,dblQty = @dblReqQty
+					,dblQty = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
 					,intItemUOMId = @intItemUOMId
 					,dblWeight = NULL
 					,intWeightUOMId = NULL
@@ -1116,7 +1116,7 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT SUM(dblQty)
 					FROM @tblLot
-					HAVING SUM(dblQty) < @dblReqQty
+					HAVING SUM(dblQty) < [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblReqQty)
 					)
 			BEGIN
 				IF @ysnExcessConsumptionAllowed = 0
@@ -1154,7 +1154,7 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					SELECT @dblAdjustByQuantity = @dblReqQty - SUM(dblQty)
+					SELECT @dblAdjustByQuantity = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, MIN(intItemUOMId), @dblReqQty) - SUM(dblQty)
 					FROM @tblLot
 
 					SELECT @strLotNumber = strLotNumber
@@ -1217,7 +1217,7 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrderConsumedLot
 			WHERE intWorkOrderId = @intWorkOrderId
 
-			IF (@dblQty >= @dblReqQty)
+			IF (@dblQty >= [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty))
 			BEGIN
 				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 					intWorkOrderId
@@ -1241,9 +1241,9 @@ BEGIN TRY
 				SELECT @intWorkOrderId
 					,@intItemId
 					,intLotId
-					,@dblReqQty
+					,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
 					,intItemUOMId
-					,@dblReqQty / (
+					,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty) / (
 						CASE 
 							WHEN dblWeightPerUnit = 0
 								OR dblWeightPerUnit IS NULL
@@ -1310,7 +1310,7 @@ BEGIN TRY
 				END
 
 				UPDATE @tblLot
-				SET dblQty = dblQty - @dblReqQty
+				SET dblQty = dblQty - [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
 				WHERE intLotRecordId = @intLotRecordId
 
 				IF @ysnSubstituteItem = 1
@@ -1425,7 +1425,7 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					SET @dblReqQty = @dblReqQty - @dblQty
+					SET @dblReqQty = @dblReqQty - [dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId, @intRecipeItemUOMId, @dblQty)
 				END
 			END
 

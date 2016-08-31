@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspTFGetInventoryTax]
 
 @Guid NVARCHAR(50),
-@ReportingComponentId NVARCHAR(20),
+@ReportingComponentId NVARCHAR(MAX),
 @DateFrom NVARCHAR(50),
 @DateTo NVARCHAR(50),
 @IsEdi NVARCHAR(50),

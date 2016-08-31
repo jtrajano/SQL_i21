@@ -183,9 +183,9 @@ BEGIN
 					AND PL.intItemId = @ItemId
 					AND PL.intItemLocationId = @ItemLocationId
 					AND PL.intItemUnitMeasureId = @ItemUOMId
-					AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
+					AND ((@Quantity BETWEEN PL.dblMin AND PL.dblMax) OR (PL.dblMin = 0 AND PL.dblMax = 0))
 				ORDER BY
-					PL.intItemPricingLevelId
+					PL.dblMin
 		
 				IF(ISNULL(@Price,0) <> 0)
 					BEGIN
@@ -197,26 +197,35 @@ BEGIN
 	END
 
 	SELECT TOP 1 
-		@Price			= @UOMQuantity * PL.dblUnitPrice
-		,@PriceBasis	= PL.dblUnitPrice		
+		@Price			= @UOMQuantity * ICPL.dblUnitPrice
+		,@PriceBasis	= ICPL.dblUnitPrice		
 		,@Deviation		= 0.00		
 		,@Pricing		= 'Inventory - Pricing Level'		
 	FROM
-		tblICItemPricingLevel PL
+		tblICItemPricingLevel ICPL
+	INNER JOIN vyuICGetItemStock ICGIS
+			ON ICPL.intItemId = ICGIS.intItemId
+			AND ICPL.intItemLocationId = ICGIS.intItemLocationId					
 	INNER JOIN
-		tblARCustomer C									
-			ON PL.strPriceLevel = C.strLevel																								
+		tblEMEntityLocation EMEL
+			ON ICGIS.intLocationId = EMEL.intWarehouseId 
+			AND EMEL.ysnDefaultLocation = 1
+	INNER JOIN
+		tblARCustomer ARC
+			ON EMEL.intEntityId = ARC.intEntityCustomerId 
+			AND ICPL.intItemPricingLevelId = ARC.intCompanyLocationPricingLevelId
+			
 	INNER JOIN vyuICGetItemStock VIS
-			ON PL.intItemId = VIS.intItemId
-			AND PL.intItemLocationId = VIS.intItemLocationId															
+			ON ICPL.intItemId = VIS.intItemId
+			AND ICPL.intItemLocationId = VIS.intItemLocationId												
 	WHERE
-		C.intEntityCustomerId = @CustomerId
-		AND PL.intItemId = @ItemId
-		AND PL.intItemLocationId = @ItemLocationId
-		AND PL.intItemUnitMeasureId = @ItemUOMId
-		AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
+		ARC.intEntityCustomerId = @CustomerId
+		AND ICPL.intItemId = @ItemId
+		AND ICPL.intItemLocationId = @ItemLocationId
+		AND ICPL.intItemUnitMeasureId = @ItemUOMId
+		AND ((@Quantity BETWEEN ICPL.dblMin AND ICPL.dblMax) OR (ICPL.dblMin = 0 AND ICPL.dblMax = 0))
 	ORDER BY
-		PL.intItemPricingLevelId
+		ICPL.dblMin
 		
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
@@ -239,9 +248,9 @@ BEGIN
 		PL.intItemId = @ItemId
 		AND PL.intItemLocationId = @ItemLocationId
 		AND PL.intItemUnitMeasureId = @ItemUOMId
-		AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
+		AND ((@Quantity BETWEEN PL.dblMin AND PL.dblMax) OR (PL.dblMin = 0 AND PL.dblMax = 0))
 	ORDER BY
-		PL.intItemPricingLevelId
+		PL.dblMin
 
 
 	IF(ISNULL(@Price,0) <> 0)

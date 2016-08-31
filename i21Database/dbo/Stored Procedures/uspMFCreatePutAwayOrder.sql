@@ -71,7 +71,7 @@ BEGIN TRY
 
 	SELECT @intStagingId = intAttributeId
 	FROM tblMFAttribute
-	WHERE strAttributeName = 'Production Staging Location'
+	WHERE strAttributeName = 'Staging Location'
 
 	SELECT @intStageLocationId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute

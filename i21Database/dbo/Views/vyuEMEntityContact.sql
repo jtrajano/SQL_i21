@@ -10,7 +10,7 @@ SELECT
 	E.strLocationName,   
 	phone.strPhone,   
 	strMobile = mob.strPhone,   
-	D.strTimezone,   
+	E.strTimezone,   
 	D.strTitle,
 	C.ysnPortalAccess,  
 	D.ysnActive,  	
