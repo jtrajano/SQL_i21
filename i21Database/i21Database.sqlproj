@@ -4263,6 +4263,7 @@
     <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
     <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetBudget.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
