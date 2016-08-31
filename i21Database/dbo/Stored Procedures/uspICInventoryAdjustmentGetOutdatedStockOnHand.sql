@@ -39,8 +39,8 @@ BEGIN
 	WHERE	Header.strAdjustmentNo = @strTransactionId	
 			AND Header.intAdjustmentType = @ADJUSTMENT_TYPE_QuantityChange
 			AND 1 = 
-				CASE	WHEN Detail.intLotId IS NOT NULL AND (Detail.dblQuantity <> Lot.dblQty) THEN 1
-						WHEN Detail.intLotId IS NULL AND (Detail.dblQuantity <> ItemStock.dblUnitOnHand) THEN 1
+				CASE	WHEN Detail.intLotId IS NOT NULL AND (ROUND(Detail.dblQuantity, 6) <> ROUND(Lot.dblQty, 6)) THEN 1
+						WHEN Detail.intLotId IS NULL AND (ROUND(Detail.dblQuantity, 6) <> ROUND(ItemStock.dblUnitOnHand, 6)) THEN 1
 						ELSE 0
 				END 
 
