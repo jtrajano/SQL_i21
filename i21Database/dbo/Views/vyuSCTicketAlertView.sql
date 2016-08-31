@@ -101,7 +101,6 @@
     ,SCTicket.ysnUseDestinationGrades
     ,SCTicket.ysnHasGeneratedTicketNumber
     ,SCTicket.intInventoryTransferId
-    ,SCTicket.dblGross
     ,SCTicket.dblShrink
     ,SCTicket.dblConvertedUOMQty
 	,SCTicket.strStorageTypeDescription
