@@ -69,6 +69,10 @@ BEGIN
 		,ysnSummaryByVehicle	   = CAST(0 AS BIT)
 		,ysnPrintTimeOnInvoices	   = CAST(0 AS BIT)
 		,ysnPrintTimeOnReports	   = CAST(0 AS BIT)
+		,strSiteCity			   = ''
+		,strSiteAddress			   = ''
+		,strState				   = ''
+		,strSiteType			   = ''
 		RETURN;
 	END
 	ELSE
