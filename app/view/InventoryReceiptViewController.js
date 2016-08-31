@@ -2871,16 +2871,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // If editing the open receive and unit cost, update the following too:
         // 1. Unit Retail
         // 2. Gross Margin. Set to zero.
-        if (context.field === 'dblOpenReceive' || context.field === 'dblUnitCost') {
+        if (context.field === 'dblUnitCost') {
             if (context.record) {
-                if (context.field === 'dblUnitCost') {
-                    context.record.set('dblUnitRetail', context.value);
-                    context.record.set('dblGrossMargin', 0);
-                }
+                context.record.set('dblUnitRetail', context.value);
+                context.record.set('dblGrossMargin', 0);
+            } 
+        }
+        
+        if (context.field === 'dblOpenReceive') {
+            if (context.record) { 
+                // Calculate the gross weight.
+                me.calculateGrossNet(context.record);
             }
-            
-           // Calculate the gross weight.
-           me.calculateGrossNet(context.record);
         }
         
         // If editing the unit retail, update the gross margin too.
