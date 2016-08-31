@@ -4260,6 +4260,9 @@
     <Build Include="dbo\Stored Procedures\uspTRGetRackPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
     <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
+    <Build Include="dbo\Functions\fnGetInterestBasedOnTerm.sql" />
+    <Build Include="dbo\Functions\fnIsDue.sql" />
+    <Build Include="dbo\Functions\fnGetDueDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
