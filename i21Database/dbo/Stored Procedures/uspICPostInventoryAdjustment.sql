@@ -149,6 +149,33 @@ IF @ysnPost = 1
 BEGIN  
 	DECLARE @ItemsForAdjust AS ItemCostingTableType  
 
+	-- Because of the rounding issue at JavaScript, recalculate the Adjust By Quantity field. 
+	-- Recalc by Pack Qty
+	UPDATE	ad
+	SET		ad.dblAdjustByQuantity = ad.dblNewQuantity - l.dblQty 
+			,ad.dblQuantity = l.dblQty
+	FROM	dbo.tblICInventoryAdjustment a INNER JOIN dbo.tblICInventoryAdjustmentDetail ad
+				ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+			INNER JOIN dbo.tblICLot l
+				ON l.intLotId = ad.intLotId 
+				AND l.intItemUOMId = ad.intItemUOMId
+	WHERE	a.strAdjustmentNo = @strTransactionId
+			AND ad.dblNewQuantity IS NOT NULL 			
+			AND a.ysnPosted = 0 
+	
+	-- Recalc by Weight Qty
+	UPDATE	ad
+	SET		ad.dblAdjustByQuantity = ad.dblNewQuantity - l.dblWeight
+			,ad.dblQuantity = l.dblQty
+	FROM	dbo.tblICInventoryAdjustment a INNER JOIN dbo.tblICInventoryAdjustmentDetail ad
+				ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+			INNER JOIN dbo.tblICLot l
+				ON l.intLotId = ad.intLotId 
+				AND l.intWeightUOMId = ad.intItemUOMId
+	WHERE	a.strAdjustmentNo = @strTransactionId
+			AND ad.dblNewQuantity IS NOT NULL 	
+			AND a.ysnPosted = 0 
+
 	-----------------------------------
 	--  Call Quantity Change 
 	-----------------------------------
