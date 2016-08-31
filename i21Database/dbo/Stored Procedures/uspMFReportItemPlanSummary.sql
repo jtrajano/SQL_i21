@@ -8,7 +8,7 @@ BEGIN
 		,@strBlendAttributeValue nvarchar(50)
 
 
-	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Blend Category'
+	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Category for Ingredient Demand Report'
 	
 	Select @strBlendAttributeValue=strAttributeValue
 	From tblMFManufacturingProcessAttribute
@@ -132,7 +132,10 @@ BEGIN
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 	JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
-		AND C.strCategoryCode = @strBlendAttributeValue
+		AND C.strCategoryCode in (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 	WHERE S.ysnStandard = 1
 		AND CD.dtmCalendarDate <= @dtmCurrentDate
 	GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
@@ -331,7 +334,10 @@ BEGIN
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
 		JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
-		AND C.strCategoryCode = @strBlendAttributeValue
+		AND C.strCategoryCode In (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	
 	UNION
@@ -344,7 +350,10 @@ BEGIN
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 	JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
-		AND C.strCategoryCode = @strBlendAttributeValue
+		AND C.strCategoryCode In (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+				)
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	WHERE L.dblWeight > 0
 
