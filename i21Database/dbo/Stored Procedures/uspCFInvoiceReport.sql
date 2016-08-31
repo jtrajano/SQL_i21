@@ -17,6 +17,7 @@ BEGIN
 		,intInvoiceCycle		   = 0
 		,intOdometerAging		   = 0
 		,strCustomerNumber		   = ''
+		,strDepartment			   = ''
 		,strShipTo				   = ''
 		,strBillTo				   = ''
 		,strCompanyName			   = ''
