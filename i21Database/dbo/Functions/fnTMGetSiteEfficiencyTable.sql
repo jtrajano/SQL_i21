@@ -82,12 +82,12 @@ BEGIN
 	SET @dtmStartDate = '1/1/' + CAST(YEAR(GETDATE()) AS NVARCHAR(4))
 	SET @dblDegreeTotal = NULL
 
-	SET @dtmLastEndDate = '12/31/' + CAST(YEAR(GETDATE() - 1) AS NVARCHAR(4))
-	SET @dtmLastStartDate = '1/1/' + CAST(YEAR(GETDATE()- 1) AS NVARCHAR(4))
+	SET @dtmLastEndDate = '12/31/' + CAST((YEAR(GETDATE()) - 1) AS NVARCHAR(4))
+	SET @dtmLastStartDate = '1/1/' + CAST((YEAR(GETDATE())- 1) AS NVARCHAR(4))
 	SET @dblLastDegreeTotal = NULL
 
-	SET @dtmLast2EndDate = '12/31/' + CAST(YEAR(GETDATE() - 2) AS NVARCHAR(4))
-	SET @dtmLast2StartDate = '1/1/' + CAST(YEAR(GETDATE()- 2) AS NVARCHAR(4))
+	SET @dtmLast2EndDate = '12/31/' + CAST((YEAR(GETDATE()) - 2) AS NVARCHAR(4))
+	SET @dtmLast2StartDate = '1/1/' + CAST((YEAR(GETDATE())- 2) AS NVARCHAR(4))
 	SET @dblLast2DegreeTotal = NULL
 
 
@@ -246,9 +246,9 @@ BEGIN
 				,dblChangePercent = CAST(((CASE WHEN ISNULL(dblLastQuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblQuantityDelivered,0.0) - ISNULL(dblLastQuantityDelivered,0.0))/ISNULL(dblLastQuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
 				,dblLastChangePercent = CAST(((CASE WHEN ISNULL(dblLast2QuantityDelivered,0.0) = 0 THEN 0 ELSE (ISNULL(dblLastQuantityDelivered,0.0) - ISNULL(dblLast2QuantityDelivered,0.0))/ISNULL(dblLast2QuantityDelivered,0.0) END) * 100) AS NUMERIC(18,6))
 			FROM @tblCurrentSeason A
-			LEFT JOIN @tblLastSeason B 
+			FULL OUTER JOIN @tblLastSeason B 
 				ON A.intSiteId = B.intSiteId
-			LEFT JOIN @tblLast2Season
+			FULL OUTER JOIN @tblLast2Season
 				ON A.intSiteId = B.intSiteId
 		END
 	END
