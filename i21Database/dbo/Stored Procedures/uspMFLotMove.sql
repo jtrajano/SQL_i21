@@ -38,6 +38,8 @@ BEGIN TRY
 			,@dblOldWeight NUMERIC(38,20)
 			,@dblOldSourceWeight NUMERIC(38,20)
 			,@intItemUOMId int
+	DECLARE @ysnAllowMultipleLots INT
+	DECLARE @ysnAllowMultipleItems INT
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -68,6 +70,11 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 		AND ysnStockUnit = 1
 
+	SELECT @ysnAllowMultipleLots = ysnAllowMultipleLot
+		  ,@ysnAllowMultipleItems = ysnAllowMultipleItem
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intNewStorageLocationId
+
 	SELECT @dblLotAvailableQty = (CASE 
 	WHEN ISNULL(@dblWeight, 0) = 0
 		THEN ISNULL(@dblLotQty, 0)
@@ -78,6 +85,30 @@ BEGIN TRY
 	BEGIN
 		SET @ErrMsg = 'Move qty '+ LTRIM(CONVERT(NUMERIC(38,4), @dblMoveQty)) + ' ' + @strUnitMeasure + ' is not available for lot ''' + @strLotNumber + ''' having item '''+ @strItemNumber + ''' in location ''' + @strStorageLocationName + '''.'
 		RAISERROR (@ErrMsg,11,1)
+	END
+
+	IF @ysnAllowMultipleLots=0 AND @ysnAllowMultipleItems=0    
+	BEGIN
+		IF EXISTS (SELECT intLotId  FROM tblICLot WHERE intStorageLocationId= @intNewStorageLocationId AND (dblQty> 0 OR dblWeight > 0))
+		BEGIN
+			RAISERROR ('The storage location is already used by another lot .',16,1)
+		END
+	END  
+	ELSE IF @ysnAllowMultipleLots = 0 AND @ysnAllowMultipleItems = 1
+	BEGIN
+		IF EXISTS (SELECT intLotId FROM tblICLot WHERE intStorageLocationId= @intNewStorageLocationId AND intItemId = @intItemId AND (dblQty> 0 OR dblWeight > 0))
+		BEGIN
+			SET @ErrMsg = 'The storage location is already used by other lot of item ' + @strItemNumber + '.'
+			RAISERROR (@ErrMsg,16,1)
+		END
+	END
+	ELSE IF @ysnAllowMultipleLots=1 AND @ysnAllowMultipleItems=0      
+	BEGIN
+		IF EXISTS (SELECT intLotId FROM tblICLot WHERE intStorageLocationId= @intNewStorageLocationId AND intItemId = @intItemId AND (dblQty> 0 OR dblWeight > 0))
+		BEGIN
+			SET @ErrMsg = 'The storage location is already used by another item.'
+			RAISERROR (@ErrMsg,16,1)
+		END
 	END
 
 	SELECT @strNewLotNumber = @strLotNumber
