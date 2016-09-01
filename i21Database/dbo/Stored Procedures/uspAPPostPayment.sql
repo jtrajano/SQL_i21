@@ -371,7 +371,10 @@ BEGIN
 	INNER JOIN tblAPPaymentDetail B
 		ON A.intId = B.intPaymentId
 	WHERE B.intInvoiceId > 0
-	EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @userId, @post = @post
+	IF EXISTS(SELECT 1 FROM @invoices)
+	BEGIN
+		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @userId, @post = @post
+	END
 
 	DECLARE @strDescription AS NVARCHAR(100),@actionType AS NVARCHAR(50),@PaymentId AS NVARCHAR(50);
 	DECLARE @paymentCounter INT = 0;
