@@ -1110,7 +1110,7 @@ namespace iRely.Inventory.Model
         public int? intOrderId { get; set; }
         public string strOrderNumber { get; set; }
         public int? intSourceId { get; set; }
-        public int? strSourceNumber { get; set; }
+        public string strSourceNumber { get; set; }
         public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
@@ -1156,7 +1156,7 @@ namespace iRely.Inventory.Model
         public int? intOrderId { get; set; }
         public string strOrderNumber { get; set; }
         public int? intSourceId { get; set; }
-        public int? strSourceNumber { get; set; }
+        public string strSourceNumber { get; set; }
         public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }

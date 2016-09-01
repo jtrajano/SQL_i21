@@ -19,6 +19,7 @@ namespace iRely.Inventory.BusinessLayer
         public InventoryShipmentBl(IRepository db) : base(db)
         {
             _db = db;
+            _db.ContextManager.Database.CommandTimeout = 180000;
         }
         #endregion
 
