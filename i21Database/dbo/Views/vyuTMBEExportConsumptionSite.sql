@@ -5,8 +5,8 @@ SELECT
 	 account = C.strEntityNo
 	 ,number = REPLACE(STR(intSiteNumber, 4), SPACE(1), '0')
 	 ,productCode = F.strItemNo
-	 ,size = A.dblTotalCapacity
-	 ,taxCode = H.strTaxGroup
+	 ,size = CAST(ROUND(A.dblTotalCapacity,2) AS NUMERIC(18,2))
+	 ,taxCode = A.intTaxStateID
 	 ,deliveryType = E.strFillMethod
 	 ,address1 = CAST((CASE WHEN CHARINDEX(CHAR(10),A.strSiteAddress,0) = 0 THEN A.strSiteAddress ELSE SUBSTRING(A.strSiteAddress,0,CHARINDEX(CHAR(10),A.strSiteAddress,0)) END) AS NVARCHAR(35))
 	 ,address2 = CAST((CASE WHEN CHARINDEX(CHAR(10),A.strSiteAddress,0) = 0 THEN '' ELSE SUBSTRING(A.strSiteAddress,CHARINDEX(CHAR(10),A.strSiteAddress,0) + 1, LEN(A.strSiteAddress) -  CHARINDEX(CHAR(10),A.strSiteAddress,0) + 1) END)  AS NVARCHAR(35))
@@ -71,7 +71,5 @@ LEFT JOIN (
 		AND A.intLocationId = F.intCompanyLocationId
 LEFT JOIN tblTMRoute G
 	ON A.intRouteId = G.intRouteId
-LEFT JOIN tblSMTaxGroup H
-	ON A.intTaxStateID = H.intTaxGroupId
 WHERE C.ysnActive = 1 AND A.ysnActive = 1
 GO
