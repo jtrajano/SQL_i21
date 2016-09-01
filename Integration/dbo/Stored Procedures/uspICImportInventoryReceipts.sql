@@ -135,7 +135,7 @@ BEGIN
 			SELECT
 					'Direct'--[strReceiptType]
 					,0--[intSourceType]
-					,Vnd.intEntityVendorId
+					,(select intEntityVendorId from tblAPVendor where strVendorId = Vnd.strVendorPayToId)
 					,NULL--[intTransferorId]
 					,(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = PHS.agphs_hdr_loc_no COLLATE Latin1_General_CI_AS)--[intLocationId]
 					,PHS.agphs_ord_no --[strReceiptNumber]
@@ -244,7 +244,7 @@ BEGIN
 			INSERT INTO [dbo].[tblICInventoryReceipt]
 			   ([strReceiptType]
 			   ,[intSourceType]
-			   ,[intEntityVendorId]
+			   ,(select intEntityVendorId from tblAPVendor where strVendorId = Vnd.strVendorPayToId)
 			   ,[intTransferorId]
 			   ,[intLocationId]
 			   ,[strReceiptNumber]
