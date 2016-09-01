@@ -64,6 +64,7 @@
 	[ysnRequireContractForInTransitTicket] BIT NOT NULL,
 	[intDefaultFeeItemId] INT NULL,
 	[intFreightItemId] INT NULL,
+	[ysnActive] BIT NOT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
     CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketPool] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 

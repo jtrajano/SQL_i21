@@ -3,6 +3,7 @@
 	[intTicketPoolId] INT NOT NULL  IDENTITY, 
     [strTicketPool] NVARCHAR(5) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intNextTicketNumber] INT NOT NULL DEFAULT ((0)), 
+	[ysnActive] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCTicketPool_intTicketPoolId] PRIMARY KEY ([intTicketPoolId]), 
     CONSTRAINT [UK_tblSCTicketPool_strTicketPool] UNIQUE ([strTicketPool])
