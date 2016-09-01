@@ -140,7 +140,7 @@ SELECT
 	,[dblQtyOrdered]						= POSDetail.dblQuantity
 	,[dblQtyShipped]						= POSDetail.dblQuantity 
 	,[dblDiscount]							= POSDetail.dblDiscount
-	,[dblPrice]								= POSDetail.dblExtendedPrice
+	,[dblPrice]								= POSDetail.dblPrice
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
     ,[strFrequency]							= ''
