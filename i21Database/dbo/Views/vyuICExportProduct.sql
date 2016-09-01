@@ -14,7 +14,7 @@ FROM tblICItem item
 	LEFT OUTER JOIN (
 		SELECT
 			Item.intItemId,
-			dblPrice = CAST(ISNULL(ItemPricing.dblStandardCost * ItemUOM.dblUnitQty, 0) AS NUMERIC(18, 6))
+			dblPrice = CAST(ISNULL(ItemPricing.dblSalePrice * ItemUOM.dblUnitQty, 0) AS NUMERIC(18, 6))
 		FROM vyuICGetItemStock Item
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = Item.intVendorId
 		LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId and ItemPricing.intItemLocationId = Item.intItemLocationId
