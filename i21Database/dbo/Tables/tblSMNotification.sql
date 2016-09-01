@@ -13,6 +13,6 @@
 	[intToEntityId]     INT              NULL,
     [intConcurrencyId]  INT              NOT NULL,
     CONSTRAINT [PK_dbo.tblSMNotification] PRIMARY KEY CLUSTERED ([intNotificationId] ASC), 
-	CONSTRAINT [FK_tblSMNotification_tblSMActivity] FOREIGN KEY ([intActivityId]) REFERENCES [tblSMActivity]([intActivityId]),
+	CONSTRAINT [FK_tblSMNotification_tblSMActivity] FOREIGN KEY ([intActivityId]) REFERENCES [tblSMActivity]([intActivityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMNotification_tblSMComment] FOREIGN KEY ([intCommentId]) REFERENCES [dbo].[tblSMComment] ([intCommentId]) ON DELETE CASCADE
 );
