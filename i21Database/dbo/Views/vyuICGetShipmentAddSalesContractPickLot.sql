@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesContractPickLot]
 AS
--- intKey - intLocationId, intEntityCustomerId, intLineNo
+-- intKey -intLocationId, intEntityCustomerId, intLineNo
 SELECT DISTINCT intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocationId, PickLot.intCustomerEntityId, PickLotDetail.intSContractDetailId) AS INT)
 	, strOrderType = 'Sales Contract'
 	, strSourceType = 'Pick Lot'
@@ -33,11 +33,11 @@ SELECT DISTINCT intKey = CAST(ROW_NUMBER() OVER(ORDER BY PickLot.intCompanyLocat
 	, strWeightUOM = PickLotDetail.strWeightUnitMeasure
 	, dblWeightItemUOMConv = PickLotDetail.dblWeightItemUOMConv
 	, dblQtyOrdered = PickLotDetail.dblDetailQuantity
-	, dblQtyAllocated = 0
-	, dblQtyShipped = 0
+	, CAST(0 AS NUMERIC(18, 6)) dblQtyAllocated
+	, CAST(0 AS NUMERIC(18, 6)) dblQtyShipped
 	, dblUnitPrice = ISNULL(dblCashPrice, 0)
-	, dblDiscount = 0
-	, dblTotal = 0
+	, CAST(0 AS NUMERIC(18, 6)) dblDiscount
+	, CAST(0 AS NUMERIC(18, 6)) dblTotal
 	, dblQtyToShip = ISNULL(dblDetailQuantity, 0)
 	, dblPrice = ISNULL(dblCashPrice, 0)
 	, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblCashPrice, 0)
