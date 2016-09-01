@@ -170,9 +170,19 @@ BEGIN
 			)strContactName
 		  ,L.dtmScheduledDate
 		  ,LW.dtmPickupDate
+		  ,LW.dtmLastFreeDate
 		  ,LW.dtmDeliveryDate AS dtmDODate
-		  ,(SELECT TOP 1 CH.strCustomerContract FROM tblCTContractDetail CD JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId WHERE CD.intContractDetailId = LD.intSContractDetailId) AS strBuyersPONo
-		  ,(SELECT ECN.strContactNumber FROM tblEMEntity ECN WHERE ECN.intEntityId = EM.intEntityId) strCustomerContactNumber
+		  ,(SELECT TOP 1 CH.strCustomerContract
+			FROM tblCTContractDetail CD
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			WHERE CD.intContractDetailId = LD.intSContractDetailId
+			) AS strBuyersPONo
+		  ,(SELECT E1.strPhone
+			FROM tblEMEntity E
+			JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
+			JOIN tblEMEntity E1 ON E1.intEntityId = EC.intEntityContactId
+			WHERE E.intEntityId = EM.intEntityId
+			) strCustomerContactNumber
 		  ,@strCompanyName AS strCompanyName
 		  ,@strCompanyAddress AS strCompanyAddress
 		  ,@strContactName AS strCompanyContactName 
