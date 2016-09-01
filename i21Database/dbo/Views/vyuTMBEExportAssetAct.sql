@@ -5,7 +5,7 @@ SELECT
 	 account = C.strEntityNo
 	 ,number = REPLACE(STR(intSiteNumber, 4), SPACE(1), '0')
 	 ,reference = ''
-	 ,priceID = dblStandardCost
+	 ,priceID = dblSalePrice
 	 ,priceDiscount = 0.0000
 	 ,cashCode = ''
 	 ,miscTranCode = ''
@@ -28,7 +28,7 @@ LEFT JOIN (
 		A.intItemId
 		,A.strItemNo 
 		,A.intLocationId
-		,A.dblStandardCost
+		,A.dblSalePrice
 	FROM vyuICGetItemPricing A
 	) F
 	ON 	F.intItemId = A.intProduct
