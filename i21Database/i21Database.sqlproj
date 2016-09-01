@@ -4283,7 +4283,6 @@
     <Build Include="dbo\Functions\fnGetDueDate.sql" />
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipeItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
