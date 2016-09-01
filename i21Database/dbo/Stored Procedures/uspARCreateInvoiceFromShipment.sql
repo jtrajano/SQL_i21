@@ -40,8 +40,10 @@ DECLARE
 	,@ShipViaId					INT
 	,@PONumber					NVARCHAR(25)
 	,@BOLNumber					NVARCHAR(50)
-	,@Comments					NVARCHAR(max)
+	,@Comments					NVARCHAR(MAX)
+	,@SalesOrderComments		NVARCHAR(MAX)
 	,@ShipToLocationId			INT
+	,@SalesOrderId				INT
 	
 SELECT
 	 @ShipmentNumber			= ICIS.[strShipmentNumber]
@@ -62,7 +64,9 @@ SELECT
 	,@PONumber					= SO.[strPONumber]
 	,@BOLNumber					= ICIS.[strBOLNumber]
 	,@Comments					= ICIS.[strShipmentNumber] + ' : '	+ ICIS.[strReferenceNumber]
+	,@SalesOrderComments		= SO.strComments
 	,@ShipToLocationId			= ICIS.intShipToLocationId
+	,@SalesOrderId				= SO.intSalesOrderId
 FROM 
 	[tblICInventoryShipment] ICIS
 INNER JOIN
@@ -72,6 +76,11 @@ LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
+
+IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
+	BEGIN
+		SET @Comments = @SalesOrderComments
+	END
 		
 DECLARE @UnsortedEntriesForInvoice AS InvoiceIntegrationStagingTable
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		
