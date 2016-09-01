@@ -17,10 +17,18 @@ BEGIN TRY
 	DECLARE @intItemId INT
 	DECLARE @intLotLocationId INT
 	DECLARE @intMinTaskRecordId INT
+	DECLARE @strOrderNo NVARCHAR(100)
+	DECLARE @intRemainingTasks INT
 	DECLARE @tblTasks TABLE 
 		(intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
 		,intOrderHeaderId INT)
+
+BEGIN TRANSACTION
+
+	SELECT @strOrderNo = strOrderNo
+	FROM tblMFOrderHeader
+	WHERE intOrderHeaderId = @intOrderHeaderId
 
 	IF ISNULL(@intTaskId,0) <> 0 
 	BEGIN
@@ -63,6 +71,29 @@ BEGIN TRY
 			,intLotId = @intNewLotId
 			,intFromStorageLocationId = @intNewStorageLocationId
 		WHERE intTaskId = @intTaskId
+
+		INSERT INTO tblMFPickForWOStaging (
+			intOrderHeaderId
+			,strOrderNo
+			,intTaskId
+			,intOrderLotId
+			,intPickedLotId
+			,dblOrderQty
+			,dblPickedQty
+			,intUserId
+			,strPickedFrom
+			)
+		VALUES (
+			 @intOrderHeaderId
+			,@strOrderNo
+			,@intTaskId
+			,@intLotId
+			,@intNewLotId
+			,@dblMoveQty
+			,@dblMoveQty
+			,@intUserId
+			,'Handheld'
+			)
 	END
 	ELSE 
 	BEGIN
@@ -126,13 +157,51 @@ BEGIN TRY
 				,intFromStorageLocationId = @intNewStorageLocationId
 			WHERE intTaskId = @intTaskId
 
+			INSERT INTO tblMFPickForWOStaging (
+				intOrderHeaderId
+				,strOrderNo
+				,intTaskId
+				,intOrderLotId
+				,intPickedLotId
+				,dblOrderQty
+				,dblPickedQty
+				,intUserId
+				,strPickedFrom
+				)
+			VALUES (
+				 @intOrderHeaderId
+				,@strOrderNo
+				,@intTaskId
+				,@intLotId
+				,@intNewLotId
+				,@dblMoveQty
+				,@dblMoveQty
+				,@intUserId
+				,'Desktop'
+				)
+
 			SELECT @intMinTaskRecordId = MIN(intTaskRecordId)
 			FROM @tblTasks WHERE intTaskRecordId > @intMinTaskRecordId
 		END
 	END
 
+	
+	SELECT @intRemainingTasks = COUNT(*)
+	FROM tblMFTask
+	WHERE intOrderHeaderId = @intOrderHeaderId
+		AND intTaskStateId <> 4
+
+	IF @intRemainingTasks = 0
+	BEGIN
+		UPDATE tblMFOrderHeader
+		SET intOrderStatusId = 6
+		WHERE intOrderHeaderId = @intOrderHeaderId
+	END
+
+COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
+	ROLLBACK TRANSACTION
 	SET @strErrMsg = ERROR_MESSAGE()
 	IF @strErrMsg != ''
 	BEGIN
