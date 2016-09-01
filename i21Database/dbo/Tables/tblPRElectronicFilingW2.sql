@@ -28,7 +28,7 @@
     [strContactFax]					NVARCHAR(10)	COLLATE Latin1_General_CI_AS NULL, 
     [strPreparerCode]				NVARCHAR(1)		COLLATE Latin1_General_CI_AS NULL, 
     [strAgentIndicatorCode]			NVARCHAR(1)		COLLATE Latin1_General_CI_AS NULL, 
-    [strAgentEIN]					NVARCHAR(9)		COLLATE Latin1_General_CI_AS NULL, 
+    [strEmployerEIN]				NVARCHAR(9)		COLLATE Latin1_General_CI_AS NULL, 
     [strAgentForEIN]				NVARCHAR(9)		COLLATE Latin1_General_CI_AS NULL, 
     [ysnTerminatingBusiness]		BIT				NOT NULL DEFAULT ((0)), 
     [strEstablishmentNo]			NVARCHAR(4)		COLLATE Latin1_General_CI_AS NULL, 
