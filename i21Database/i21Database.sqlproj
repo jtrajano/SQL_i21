@@ -4258,6 +4258,10 @@
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotCreate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
+    <Build Include="dbo\Functions\fnGetDueDate.sql" />
+    <Build Include="dbo\Functions\fnGetInterestBasedOnTerm.sql" />
+    <Build Include="dbo\Functions\fnIsDue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
