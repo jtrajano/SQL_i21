@@ -17,5 +17,5 @@
 		)
 	,CONSTRAINT [FK_tblMFStageWorkOrder_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES tblMFWorkOrder(intWorkOrderId)
 	,CONSTRAINT [FK_tblMFStageWorkOrder_tblMFShift_intPlannedShiftId] FOREIGN KEY (intPlannnedShiftId) REFERENCES tblMFShift(intShiftId)
-	,CONSTRAINT [FK_tblMFStageWorkOrder_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY (intOrderHeaderId) REFERENCES tblMFOrderHeader(intOrderHeaderId)
+	,CONSTRAINT [FK_tblMFStageWorkOrder_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY (intOrderHeaderId) REFERENCES tblMFOrderHeader(intOrderHeaderId) ON DELETE CASCADE
 	)
