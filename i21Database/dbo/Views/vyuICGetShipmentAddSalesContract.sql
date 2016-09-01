@@ -33,11 +33,11 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityI
 	, strWeightUOM = strItemUOM
 	, dblWeightItemUOMConv = dblItemUOMCF
 	, dblQtyOrdered = CASE WHEN ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
-	, dblQtyAllocated = ISNULL(dblAllocatedQty, 0)
-	, dblQtyShipped = 0
+	, dblQtyAllocated = CAST(ISNULL(dblAllocatedQty, 0) AS NUMERIC(18, 6))
+	, dblQtyShipped = CAST(0 AS NUMERIC(18, 6))
 	, dblUnitPrice = ISNULL(dblSeqPrice, 0)
-	, dblDiscount = 0
-	, dblTotal = 0
+	, dblDiscount = CAST(0 AS NUMERIC(18, 6))
+	, dblTotal = CAST(0 AS NUMERIC(18, 6))
 	, dblQtyToShip = ISNULL(dblDetailQuantity, 0)
 	, dblPrice = ISNULL(dblSeqPrice, 0)
 	, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblSeqPrice, 0)
