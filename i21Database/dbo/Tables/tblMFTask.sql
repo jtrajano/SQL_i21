@@ -30,8 +30,8 @@
 		,CONSTRAINT [FK_tblMFTask_tblMFTaskType_intTaskTypeId] FOREIGN KEY ([intTaskTypeId]) REFERENCES [tblMFTaskType]([intTaskTypeId])
 		,CONSTRAINT [FK_tblMFTask_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId])
 		,CONSTRAINT [FK_tblMFTask_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId])
-		,CONSTRAINT [FK_tblMFTask_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblMFOrderHeader]([intOrderHeaderId])
-		,CONSTRAINT [FK_tblMFTask_tblMFOrderDetail_intOrderDetailId] FOREIGN KEY ([intOrderDetailId]) REFERENCES [tblMFOrderDetail]([intOrderDetailId])
+		,CONSTRAINT [FK_tblMFTask_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblMFOrderHeader]([intOrderHeaderId]) ON DELETE CASCADE
+		,CONSTRAINT [FK_tblMFTask_tblMFOrderDetail_intOrderDetailId] FOREIGN KEY ([intOrderDetailId]) REFERENCES [tblMFOrderDetail]([intOrderDetailId]) 
 		,CONSTRAINT [FK_tblMFTask_tblMFTaskPriority_intTaskPriorityId] FOREIGN KEY ([intTaskPriorityId]) REFERENCES [tblMFTaskPriority]([intTaskPriorityId])
 		,CONSTRAINT [FK_tblMFTask_tblMFTaskState_intTaskStateId] FOREIGN KEY ([intTaskStateId]) REFERENCES [tblMFTaskState]([intTaskStateId])
 		,CONSTRAINT [FK_tblMFTask_tblICLot_intLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId])
