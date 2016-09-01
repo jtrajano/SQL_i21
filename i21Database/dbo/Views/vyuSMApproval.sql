@@ -14,5 +14,5 @@ FROM tblSMApproval Approval
 INNER JOIN tblSMTransaction Transactions ON Approval.intTransactionId = Transactions.intTransactionId
 INNER JOIN tblSMScreen Screen ON Transactions.intScreenId = Screen.intScreenId
 INNER JOIN tblEMEntity Entity ON Approval.intSubmittedById = Entity.intEntityId
-WHERE dtmDate = (SELECT MAX(dtmDate) FROM tblSMApproval WHERE intTransactionId = Transactions.intTransactionId)
+WHERE Approval.dtmDate = (SELECT MAX(dtmDate) FROM tblSMApproval WHERE intTransactionId = Transactions.intTransactionId)
 GO

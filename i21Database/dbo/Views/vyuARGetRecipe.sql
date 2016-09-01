@@ -17,23 +17,24 @@ SELECT DISTINCT
 	 , intEntityCustomerId		= R.intCustomerId
 	 , strCustomerNumber		= E.strEntityNo
 	 , strRecipeName			= R.strName
-	 , hasLotted = max(ysnLotted)
+	 , ysnHasLotted				= CONVERT(BIT, MAX(RII.ysnLotted))
 FROM tblMFRecipe R
 	INNER JOIN
 	(
-		select I.intItemId, RI.intRecipeId,
-			ysnLotted   = case when UPPER(I.strLotTracking) = 'NO' then 0 else 1 end
-		from tblMFRecipeItem RI
-		inner join tblICItem I on RI.intItemId = I.intItemId
-	)RII on R.intRecipeId = RII.intRecipeId
+		SELECT I.intItemId
+			 , RI.intRecipeId
+			 , ysnLotted		= CASE WHEN UPPER(I.strLotTracking) = 'NO' THEN 0 ELSE 1 END
+			 , I.strItemNo
+		FROM tblMFRecipeItem RI
+		INNER JOIN tblICItem I ON RI.intItemId = I.intItemId AND RI.intRecipeItemTypeId = 1  
+	) RII ON R.intRecipeId = RII.intRecipeId
 	LEFT JOIN tblICItem I ON R.intItemId = I.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON R.[intItemUOMId] = UOM.intItemUOMId
 	LEFT JOIN tblSMCompanyLocation L ON R.intLocationId = L.intCompanyLocationId
 	LEFT JOIN tblMFManufacturingProcess MP ON R.intManufacturingProcessId = MP.intManufacturingProcessId
 	LEFT JOIN (vyuARCustomer C INNER JOIN tblEMEntity E ON C.intEntityCustomerId = E.intEntityId) ON R.intCustomerId = C.intEntityCustomerId
 WHERE R.ysnActive = 1
-group by 
-	 R.intRecipeId
+GROUP BY R.intRecipeId
      , R.intItemId
 	 , I.strItemNo
 	 , I.strDescription
@@ -49,4 +50,3 @@ group by
 	 , R.intCustomerId
 	 , E.strEntityNo
 	 , R.strName
-having max(ysnLotted) = 0

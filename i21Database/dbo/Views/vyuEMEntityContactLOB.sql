@@ -12,7 +12,7 @@
 		E.strLocationName,   
 		phone.strPhone,   
 		strMobile = mob.strPhone,   
-		D.strTimezone,   
+		E.strTimezone,   
 		D.strTitle,
 		ysnContactActive = D.ysnActive,  	
 		C.ysnDefaultContact,

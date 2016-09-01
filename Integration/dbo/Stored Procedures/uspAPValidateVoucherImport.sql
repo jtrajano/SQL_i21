@@ -41,6 +41,16 @@ BEGIN
 	SELECT 'Please setup default location on user screen.'
 END
 
+--MAKE SURE apivc_gl_rev_dt IS VALID
+INSERT INTO @log
+SELECT TOP 1 
+	'There are invalid date value on apivc_gl_rev_dt of apivcmst.'
+FROM apivcmst A WHERE ISDATE(A.apivc_gl_rev_dt) = 1
+UNION ALL
+SELECT TOP 1 
+	'There are invalid date value on aptrx_gl_rev_dt of aptrxmst'
+FROM aptrxmst A WHERE ISDATE(A.aptrx_gl_rev_dt) = 1
+
 --VALIDATE THE AP ACCOUNT IF NO VALUE
 INSERT INTO @log
 SELECT DISTINCT
@@ -48,7 +58,7 @@ SELECT DISTINCT
 FROM apcbkmst A INNER JOIN aptrxmst B ON A.apcbk_no = B.aptrx_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 			THEN
-				CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+				CASE WHEN ISDATE(B.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 			ELSE 1 END)
 UNION ALL
 SELECT DISTINCT
@@ -56,7 +66,7 @@ SELECT DISTINCT
 FROM apcbkmst A INNER JOIN apivcmst B ON A.apcbk_no = B.apivc_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 			THEN
-				CASE WHEN CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+				CASE WHEN ISDATE(B.apivc_gl_rev_dt) = 1  AND CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 					AND B.apivc_comment = 'CCD Reconciliation' AND B.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 			ELSE 1 END)
 
@@ -71,7 +81,7 @@ AND A.apcbk_no IN (
 	SELECT apivc_cbk_no FROM apivcmst B
 	WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 					THEN
-						CASE WHEN CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+						CASE WHEN ISDATE(B.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 							AND B.apivc_comment = 'CCD Reconciliation' AND B.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 					ELSE 1 END)
 )
@@ -84,7 +94,7 @@ AND A.apcbk_no IN (
 	SELECT aptrx_cbk_no FROM aptrxmst C
 	WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 					THEN
-						CASE WHEN CONVERT(DATE, CAST(C.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+						CASE WHEN ISDATE(C.aptrx_gl_rev_dt) = 1  AND CONVERT(DATE, CAST(C.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 					ELSE 1 END)
 )
 
@@ -97,7 +107,7 @@ INNER JOIN aptrxmst B ON A.apegl_vnd_no = B.aptrx_vnd_no AND A.apegl_ivc_no = B.
 WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 		THEN
-			CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+			CASE WHEN ISDATE(B.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 		ELSE 1 END)
 UNION ALL
 SELECT DISTINCT
@@ -107,7 +117,7 @@ INNER JOIN apivcmst B ON A.aphgl_vnd_no = B.apivc_vnd_no AND A.aphgl_ivc_no = B.
 WHERE A.aphgl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 		THEN
-			CASE WHEN CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+			CASE WHEN ISDATE(B.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 				AND B.apivc_comment = 'CCD Reconciliation' AND B.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 		ELSE 1 END)
 
@@ -135,7 +145,7 @@ BEGIN
 	WHERE B.strCbkNo IS NULL
 	AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 		THEN
-			CASE WHEN CONVERT(DATE, CAST(C.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+			CASE WHEN ISDATE(C.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(C.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 				AND C.apivc_comment = 'CCD Reconciliation' AND C.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 		ELSE 1 END)
 END
@@ -155,7 +165,7 @@ CROSS APPLY (
 ) Vouchers
 WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 		THEN
-			CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+			CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 		ELSE 1 END)
 UNION ALL
 SELECT
@@ -171,7 +181,7 @@ CROSS APPLY (
 ) Vouchers
 WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 		THEN
-			CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
+			CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 				AND A.apivc_comment = 'CCD Reconciliation' AND A.apivc_status_ind = 'U' THEN 1 ELSE 0 END
 		ELSE 1 END)
 
@@ -183,7 +193,7 @@ FROM apivcmst A
 WHERE A.apivc_chk_no = '00000000' AND A.apivc_trans_type = 'A'
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 					THEN
-						CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
+						CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 					ELSE 1 END)
 
 INSERT INTO tblAPImportVoucherLog

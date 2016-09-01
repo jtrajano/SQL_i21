@@ -38,7 +38,7 @@ SELECT
 	,strLostQuoteComment	= SO.strLostQuoteComment
 	,ysnRecurring			= SO.ysnRecurring
 	,intEntityContactId		= SO.intEntityContactId
-	,strContactName			= EC.strName
+	,strContactName			= (SELECT TOP 1 strName FROM vyuEMEntityContact WHERE intEntityContactId = SO.intEntityContactId)
 	,ysnHasEmailSetup		= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = SO.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + SO.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM         
 	dbo.tblSOSalesOrder AS SO 
@@ -48,9 +48,6 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	dbo.tblEMEntity AS NTT 
 		ON CUS.[intEntityCustomerId] = NTT.intEntityId 
-LEFT OUTER JOIN
-	dbo.vyuEMEntityContact AS EC 
-		ON SO.intEntityContactId = EC.intEntityContactId 
 LEFT OUTER JOIN
 	dbo.tblSMTerm AS TERM 
 		ON SO.intTermId = TERM.intTermID 

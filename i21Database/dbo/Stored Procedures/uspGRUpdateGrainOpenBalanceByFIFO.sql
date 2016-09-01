@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRUpdateGrainOpenBalanceByFIFO]
 	 @strOptionType NVARCHAR(30)
-	,@strSourceType NVARCHAR(30)---[InventoryShipment,Scale]
+	,@strSourceType NVARCHAR(30)---[InventoryShipment,Invoice,Scale]
 	,@intEntityId INT
 	,@intItemId INT
 	,@intStorageTypeId INT
@@ -320,6 +320,7 @@ BEGIN TRY
 			[intConcurrencyId]
 			,[intCustomerStorageId]
 			,[intTicketId]
+			,[intInvoiceId]
 			,[intInventoryShipmentId]
 			,[dblUnits]
 			,[dtmHistoryDate]
@@ -331,11 +332,13 @@ BEGIN TRY
 			 [intConcurrencyId] = 1
 			,[intCustomerStorageId] = intCustomerStorageId
 			,[intTicketId] = CASE WHEN @strSourceType = 'Scale' THEN @IntSourceKey ELSE NULL END
+			,[intInvoiceId] = CASE WHEN @strSourceType = 'Invoice' THEN @IntSourceKey ELSE NULL END
 			,[intInventoryShipmentId] = CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
 			,[dblUnits] = dblOpenBalance
 			,[dtmHistoryDate] = GetDATE()
 			,[dblPaidAmount] = [dblCharge] * dblOpenBalance
-			,[strType] = CASE 
+			,[strType] = CASE
+							 WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 
 							 WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
 							 WHEN @strSourceType = 'Scale'      THEN 'Reduced By Scale'
 					     END

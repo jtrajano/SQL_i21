@@ -4143,9 +4143,14 @@
     <Build Include="dbo\Stored Procedures\uspPATUpdateRefundCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspCMRecurTransaction.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\20_CustomFieldMigration.sql" />
+    <Build Include="dbo\Tables\tblSMActivity.sql" />
+    <Build Include="dbo\Tables\tblSMActivityAttendee.sql" />
     <Build Include="dbo\Views\vyuPRReportWorkersCompensation.sql" />
     <Build Include="dbo\Views\vyuHDCustomerProspectVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspMBRecalculateMeterReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContract.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\21_CommentMigration.sql" />
+    <Build Include="dbo\Views\vyuARItemWUOM.sql" />
     <Build Include="dbo\Views\vyuMBSearchMeterReading.sql" />
     <Build Include="dbo\Tables\tblARLead.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityLead.sql" />
@@ -4157,6 +4162,7 @@
     <Build Include="dbo\Views\vyuLGLoadCostForCustomer.sql" />
     <Build Include="dbo\Views\vyuCTSearchCleanCost.sql" />
     <Build Include="dbo\Views\vyuARItemWUOM.sql" />
+    <Build Include="dbo\Functions\fnStripHtml.sql" />
     <Build Include="dbo\Views\vyuARDocumentMaintenanceMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessToInventoryShipment.sql" />
     <Build Include="dbo\Views\vyuSMDocumentMessage.sql" />
@@ -4264,6 +4270,20 @@
     <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetBudget.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipeItem.sql" />
+    <Build Include="dbo\Views\vyuSMTransaction.sql" />
+    <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
+    <Build Include="dbo\Tables\tblSMTypeValue.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\22_TypeValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryChart.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRGetRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
+    <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
+    <Build Include="dbo\Functions\fnGetInterestBasedOnTerm.sql" />
+    <Build Include="dbo\Functions\fnIsDue.sql" />
+    <Build Include="dbo\Functions\fnGetDueDate.sql" />
+    <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

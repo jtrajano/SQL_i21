@@ -5,7 +5,11 @@
 	, @ysnRecap					BIT				= 1
 	, @batchId					NVARCHAR(100)	= NULL OUTPUT
 	, @totalAmount				NUMERIC(18,6)	= NULL OUTPUT
+	, @ysnAllowCalculate		BIT				= 0
 AS
+
+DECLARE  @strCommissionSchedule	NVARCHAR(500)
+
 	--VALIDATE DATES
 	IF @dtmStartDate IS NULL
 		BEGIN
@@ -54,6 +58,17 @@ AS
 		, ysnAdjustPrevious			BIT
 	)
 
+	IF @ysnAllowCalculate = 0 AND @ysnRecap = 0
+	BEGIN
+		IF EXISTS(SELECT NULL FROM tblARCommission WHERE [intCommissionScheduleId] IN (SELECT intCommissionScheduleId FROM @tmpCommissionSchedule) 
+		AND [dtmStartDate] = @dtmStartDate AND [dtmEndDate] = @dtmEndDate) 
+			BEGIN
+				SELECT @strCommissionSchedule = strCommissionScheduleName FROM tblARCommissionSchedule WHERE intCommissionScheduleId IN (SELECT intCommissionScheduleId FROM @tmpCommissionSchedule) 
+				RAISERROR(120074, 16, 1, @strCommissionSchedule)
+				RETURN 0;
+			END
+	END
+	
 	INSERT INTO @tblARCommissionSchedules
 	SELECT intCommissionScheduleId
 		 , strEntityIds			= CASE WHEN strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN strEntityIds ELSE NULL END
@@ -370,7 +385,7 @@ AS
 								END
 						END
 					
-					SET @totalAmount = @totalAmount + ISNULL((SELECT ISNULL(SUM(dblTotalAmount), 0) FROM tblARCommissionRecap WHERE strBatchId = @batchId), 0)
+					SET @totalAmount = ISNULL((SELECT ISNULL(SUM(dblTotalAmount), 0) FROM tblARCommissionRecap WHERE strBatchId = @batchId), 0)
 					DELETE FROM @tblARCommissionSchedules WHERE intCommissionScheduleId = @intActiveCommSchedId
 				END
 		END

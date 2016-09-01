@@ -103,7 +103,6 @@
        tblSCTicket.ysnUseDestinationGrades,
        tblSCTicket.ysnHasGeneratedTicketNumber,
        tblSCTicket.intInventoryTransferId,
-       tblSCTicket.dblGross,
        tblSCTicket.dblShrink,
        tblSCTicket.dblConvertedUOMQty,
 	   tblSCTicket.strFreightSettlement,

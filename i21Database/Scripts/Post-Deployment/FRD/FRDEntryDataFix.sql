@@ -558,3 +558,17 @@ UPDATE tblFRReport SET ysnRoundingOption = 0 WHERE ysnRoundingOption IS NULL
 GO
 	PRINT N'DEFAULT Rounding Option (ysnRoundingOption) to 0'
 GO
+
+--=====================================================================================================================================
+-- 	COLUMN DESIGNER: Set existing data (strColumnType) to User Defined
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'Set existing data (strColumnType) to User Defined'
+GO
+
+UPDATE tblFRColumn SET strColumnType = 'User Defined' WHERE strColumnType IS NULL
+
+GO
+	PRINT N'Set existing data (strColumnType) to User Defined'
+GO

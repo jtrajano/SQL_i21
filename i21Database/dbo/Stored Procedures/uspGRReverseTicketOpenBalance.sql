@@ -15,6 +15,7 @@ BEGIN TRY
 	WHERE [intEntityUserSecurityId] = @intUserId
 
 	SELECT @strType= CASE 
+							 WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 
 							 WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
 							 WHEN @strSourceType = 'Scale'      THEN 'Reduced By Scale'
 					 END
@@ -31,6 +32,7 @@ BEGIN TRY
 			 [intConcurrencyId]
 			,[intCustomerStorageId]
 			,[intTicketId]
+			,[intInvoiceId]
 			,[intInventoryShipmentId]
 			,[dblUnits]
 			,[dtmHistoryDate]
@@ -42,6 +44,7 @@ BEGIN TRY
 			 [intConcurrencyId] = 1
 			,[intCustomerStorageId] = intCustomerStorageId
 			,[intTicketId] = intTicketId
+			,[intInvoiceId]=intInvoiceId
 			,[intInventoryShipmentId] = intInventoryShipmentId
 			,[dblUnits] = dblUnits
 			,[dtmHistoryDate] = GetDATE()
@@ -63,6 +66,7 @@ BEGIN TRY
 			 [intConcurrencyId]
 			,[intCustomerStorageId]
 			,[intTicketId]
+			,[intInvoiceId]
 			,[intInventoryShipmentId]
 			,[dblUnits]
 			,[dtmHistoryDate]
@@ -74,6 +78,7 @@ BEGIN TRY
 			 [intConcurrencyId] = 1
 			,[intCustomerStorageId] = intCustomerStorageId
 			,[intTicketId] = intTicketId
+			,[intInvoiceId]=intInvoiceId
 			,[intInventoryShipmentId] = intInventoryShipmentId
 			,[dblUnits] = dblUnits
 			,[dtmHistoryDate] = GetDATE()
@@ -81,6 +86,39 @@ BEGIN TRY
 			,[strType] = 'Reverse By Scale'
 			,[strUserName] = @strUserName
 		FROM tblGRStorageHistory WHERE intTicketId=@IntSourceKey AND strType=@strType
+	END
+	ELSE IF  @strType='Reduced By Invoice'
+	BEGIN
+		UPDATE CS
+		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
+		FROM tblGRCustomerStorage CS
+		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInvoiceId=@IntSourceKey AND SH.strType=@strType
+
+		INSERT INTO [dbo].[tblGRStorageHistory] 
+		(
+			 [intConcurrencyId]
+			,[intCustomerStorageId]
+			,[intTicketId]
+			,[intInvoiceId]
+			,[intInventoryShipmentId]
+			,[dblUnits]
+			,[dtmHistoryDate]
+			,[dblPaidAmount]
+			,[strType]
+			,[strUserName]
+		)
+		SELECT 
+			 [intConcurrencyId] = 1
+			,[intCustomerStorageId] = intCustomerStorageId
+			,[intTicketId] = intTicketId
+			,[intInvoiceId]=intInvoiceId
+			,[intInventoryShipmentId] = intInventoryShipmentId
+			,[dblUnits] = dblUnits
+			,[dtmHistoryDate] = GetDATE()
+			,[dblPaidAmount] = NULL 
+			,[strType] = 'Reverse By Invoice'
+			,[strUserName] = @strUserName
+		FROM tblGRStorageHistory WHERE intInvoiceId=@IntSourceKey AND strType=@strType
 	END
 	 
 END TRY

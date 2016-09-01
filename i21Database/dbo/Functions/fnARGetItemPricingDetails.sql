@@ -162,6 +162,32 @@ DECLARE	 @Price			NUMERIC(18,6)
 		END	
 						
 	END
+
+	IF (@PricingLevelId IS NOT NULL)
+	BEGIN
+	SET @Price =
+		( 
+			SELECT 
+				P.dblUnitPrice 
+			FROM
+				tblICItemPricingLevel P
+			WHERE
+				P.intItemId = @ItemId
+				AND P.intItemPricingLevelId = @PricingLevelId								 
+		)
+	IF(@Price IS NOT NULL)
+		BEGIN
+			SET @Pricing = 'Inventory - Standard Pricing'
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+			RETURN
+		END	
+			
+
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+			RETURN
+	END
 	
 	DECLARE @ItemVendorId				INT
 			,@ItemLocationId			INT

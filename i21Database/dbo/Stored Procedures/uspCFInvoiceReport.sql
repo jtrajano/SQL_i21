@@ -17,6 +17,7 @@ BEGIN
 		,intInvoiceCycle		   = 0
 		,intOdometerAging		   = 0
 		,strCustomerNumber		   = ''
+		,strDepartment			   = ''
 		,strShipTo				   = ''
 		,strBillTo				   = ''
 		,strCompanyName			   = ''
@@ -68,6 +69,10 @@ BEGIN
 		,ysnSummaryByVehicle	   = CAST(0 AS BIT)
 		,ysnPrintTimeOnInvoices	   = CAST(0 AS BIT)
 		,ysnPrintTimeOnReports	   = CAST(0 AS BIT)
+		,strSiteCity			   = ''
+		,strSiteAddress			   = ''
+		,strState				   = ''
+		,strSiteType			   = ''
 		RETURN;
 	END
 	ELSE

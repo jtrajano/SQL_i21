@@ -42,6 +42,7 @@ DECLARE @EntityCustomerId		INT,
 		@PONumber				NVARCHAR(100),
 		@BOLNumber				NVARCHAR(100),
 		@DeliverPickup			NVARCHAR(100),
+		@SalesOrderComment		NVARCHAR(MAX),
 		@InvoiceComment			NVARCHAR(MAX),
 		@SoftwareComment		NVARCHAR(MAX),
 		@SalesOrderNumber		NVARCHAR(100),
@@ -306,14 +307,17 @@ SELECT TOP 1
 		@ShipToLocationId		=	intShipToLocationId,
 		@BillToLocationId		=	intBillToLocationId,
 		@SplitId				=	intSplitId,
-		@InvoiceComment			=   strComments,
+		@SalesOrderComment		=   strComments,
 		@EntityContactId		=	intEntityContactId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
+EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
 
-IF ISNULL(@InvoiceComment, '') = ''
-	EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
+IF EXISTS (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
+	BEGIN
+		SET @InvoiceComment = ISNULL(@InvoiceComment, '') + ' ' + ISNULL(@SalesOrderComment, '')
+	END
 
 --BEGIN TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
@@ -737,7 +741,6 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								WHERE
 									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
 
-
 								INSERT INTO tblARInvoiceDetailComponent
 									([intInvoiceDetailId]
 									,[intComponentItemId]
@@ -757,10 +760,10 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								FROM
 									tblSOSalesOrderDetailComponent
 								WHERE
-									[intSalesOrderDetailId] = @ItemSalesOrderDetailId
-
-								DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId
+									[intSalesOrderDetailId] = @ItemSalesOrderDetailId								
 						END
+
+						DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId
 					END
 			END	
 	END
@@ -826,9 +829,11 @@ END
 
 IF (@SalesOrderNumber IS NOT NULL)
 BEGIN
-	UPDATE tblARInvoice SET dblTotalWeight = CopySO.dblTotalWeight
+	UPDATE tblARInvoice SET dblTotalWeight = CopySO.dblTotalWeight, dblTotalTermDiscount = CopySO.dblTotalTermDiscount
 	FROM(
-		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight FROM tblSOSalesOrder SO 
+		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight,
+			SO.dblTotalTermDiscount
+		FROM tblSOSalesOrder SO 
 		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId 
 					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
@@ -836,10 +841,13 @@ BEGIN
 	) CopySO
 	WHERE intInvoiceId = @NewInvoiceId
 
-	UPDATE tblARInvoiceDetail SET intItemWeightUOMId = CopySO.intItemWeightUOMId, dblItemWeight = CopySO.dblItemWeight, dblOriginalItemWeight = CopySO.dblOriginalItemWeight
+	UPDATE tblARInvoiceDetail SET intItemWeightUOMId = CopySO.intItemWeightUOMId, dblItemWeight = CopySO.dblItemWeight, dblOriginalItemWeight = CopySO.dblOriginalItemWeight,
+		dblItemTermDiscount = CopySO.dblItemTermDiscount
 	FROM(
-		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight FROM tblSOSalesOrder SO 
-		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId 
+		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight,
+			SOD.dblItemTermDiscount
+		FROM tblSOSalesOrder SO 
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount
 					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
 		WHERE strSalesOrderNumber = @SalesOrderNumber

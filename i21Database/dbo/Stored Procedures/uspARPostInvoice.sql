@@ -65,12 +65,10 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 
 DECLARE @UserEntityID				INT
 		,@DiscountAccountId			INT
-		,@ServiceChargesAccountId	INT
 		,@DeferredRevenueAccountId	INT
 
 SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 [intDiscountAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDiscountAccountId],0) <> 0)
-SET @ServiceChargesAccountId = (SELECT TOP 1 [intServiceChargeAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intServiceChargeAccountId],0) <> 0)
 SET @DeferredRevenueAccountId = (SELECT TOP 1 [intDeferredRevenueAccountId] FROM dbo.tblARCompanyPreference WHERE ISNULL([intDeferredRevenueAccountId],0) <> 0)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
@@ -649,32 +647,38 @@ END CATCH
 						OR
 						(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1 AND tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount <> 0 ))
 						)
-	
-				--Service Charge Account
+
+
+				--Sales Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT
-					CASE WHEN GLA.intAccountId IS NULL THEN 'The Service Charge account is not valid.' ELSE 'The Service Charge account in the Company Configuration was not set.' END,
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@batchId,
-					A.intInvoiceId
-				FROM 
-					tblARInvoice A 
-				INNER JOIN 
-					@PostInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
+				SELECT 
+					CASE WHEN GLA.intAccountId IS NULL THEN 'The Sales account of Company Location ' + SMCL.strLocationName + ' is not valid.' ELSE 'The Sales account of Company Location ' + SMCL.strLocationName + ' was not set.' END
+					,ARI.strTransactionType
+					,ARI.strInvoiceNumber
+					,@batchId
+					,ARI.intInvoiceId
+				FROM
+					tblARInvoice ARI
 				INNER JOIN
-					tblARInvoiceDetail D
-						ON A.intInvoiceId = D.intInvoiceId
+					tblARInvoiceDetail ARID
+						ON ARI.intInvoiceId = ARID.intInvoiceId 
+				INNER JOIN
+					@PostInvoiceData P
+						ON ARI.intInvoiceId = P.intInvoiceId						 
+				INNER JOIN
+					tblSMCompanyLocation SMCL
+						ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
 				LEFT OUTER JOIN
 					tblGLAccount GLA
-						ON ISNULL(D.intAccountId,@ServiceChargesAccountId) = GLA.intAccountId
+						ON SMCL.intSalesAccount = GLA.intAccountId						
 				WHERE
-					ISNULL(D.intAccountId,0) = 0
-					AND ISNULL(D.intItemId,0) = 0
-					AND ISNULL(@ServiceChargesAccountId,0) = 0
-					AND D.dblTotal <> @ZeroDecimal
-
+					(ISNULL(SMCL.intSalesAccount, 0) = 0 OR GLA.intAccountId IS NULL)
+					AND ISNULL(ARID.intServiceChargeAccountId,0) = 0
+					AND ISNULL(ARID.intSalesAccountId, 0) = 0
+					AND ISNULL(ARID.intItemId,0) = 0
+					AND ARID.dblTotal <> @ZeroDecimal
+	
+					
 				-- Accrual Not in Fiscal Year					
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
@@ -1414,6 +1418,59 @@ END CATCH
 				WHERE  
 					A.ysnPosted = 0
 
+				--Don't allow Imported Invoice from Origin to be unposted
+				DECLARE @IsAG BIT = 0
+				DECLARE @IsPT BIT = 0
+
+				IF EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'coctlmst')
+					SELECT TOP 1 
+						@IsAG	= CASE WHEN ISNULL(coctl_ag, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst') THEN 1 ELSE 0 END
+						,@IsPT	= CASE WHEN ISNULL(coctl_pt, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst') THEN 1 ELSE 0 END 
+					FROM
+						coctlmst
+
+				IF @IsAG = 1
+				BEGIN					
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						ARI.strInvoiceNumber + ' was imported from origin. Unpost is not allowed!',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						tblARInvoice ARI 
+					INNER JOIN 
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					INNER JOIN
+						agivcmst OI
+							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.agivc_ivc_no COLLATE Latin1_General_CI_AS
+					WHERE  
+						ARI.ysnPosted = 1
+				END
+
+				IF @IsPT = 1
+				BEGIN					
+					INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT 
+						ARI.strInvoiceNumber + ' was imported from origin. Unpost is not allowed!',
+						ARI.strTransactionType,
+						ARI.strInvoiceNumber,
+						@batchId,
+						ARI.intInvoiceId
+					FROM 
+						tblARInvoice ARI 
+					INNER JOIN 
+						@PostInvoiceData PID
+							ON ARI.intInvoiceId = PID.intInvoiceId
+					INNER JOIN
+						ptivcmst OI
+							ON ARI.strInvoiceOriginId COLLATE Latin1_General_CI_AS = OI.ptivc_invc_no COLLATE Latin1_General_CI_AS
+					WHERE  
+						ARI.ysnPosted = 1
+				END
+
 			END			
 		
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
@@ -1495,7 +1552,6 @@ IF @post = 1
 			EXEC	dbo.uspARGenerateEntriesForAccrual  
 						 @Invoices					= @Accruals
 						,@DeferredRevenueAccountId	= @DeferredRevenueAccountId
-						,@ServiceChargesAccountId	= @ServiceChargesAccountId
 						,@BatchId					= @batchId
 						,@Code						= @CODE
 						,@UserId					= @userId
@@ -1735,7 +1791,7 @@ IF @post = 1
 													THEN
 														IST.intOtherChargeIncomeAccountId
 													ELSE
-														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
+														ISNULL(ISNULL(B.intServiceChargeAccountId, B.intSalesAccountId), SMCL.intSalesAccount)
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
@@ -1777,7 +1833,10 @@ IF @post = 1
 			LEFT OUTER JOIN
 				vyuICGetItemStock ICIS
 					ON B.intItemId = ICIS.intItemId 
-					AND A.intCompanyLocationId = ICIS.intLocationId 						
+					AND A.intCompanyLocationId = ICIS.intLocationId
+			LEFT OUTER JOIN
+				tblSMCompanyLocation SMCL
+					ON A.intCompanyLocationId = SMCL.intCompanyLocationId 						
 			WHERE
 				B.dblTotal <> @ZeroDecimal 
 				AND ((B.intItemId IS NULL OR B.intItemId = 0)

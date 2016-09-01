@@ -33,7 +33,7 @@ BEGIN
 				INNER JOIN tblEMEntity B
 					ON A.intDriverEntityId = B.intEntityId
 				INNER JOIN vwslsmst C
-					ON B.strEntityNo COLLATE Latin1_General_CI_AS = RIGHT(''0000000000''+ISNULL(LTRIM(RTRIM(C.vwsls_slsmn_id)),''''),10) COLLATE Latin1_General_CI_AS
+					ON B.strEntityNo COLLATE Latin1_General_CI_AS = ISNULL(LTRIM(RTRIM(C.vwsls_slsmn_id)),'''') COLLATE Latin1_General_CI_AS
 				WHERE tblTMDispatch.intDispatchID = A.intOrderId
 
 				--Update Dispatch

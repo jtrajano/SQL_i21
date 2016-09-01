@@ -25,10 +25,12 @@ SELECT INV.intInvoiceId
 	 , strShipTo				= [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, E.strName, ysnIncludeEntityName)
 	 , strSalespersonName		= ESP.strName
 	 , INV.strPONumber
-	 , strBOLNumber				= (CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
-											THEN INV.strBOLNumber
-										ELSE SO.strBOLNumber
-									END)
+	 , strBOLNumber				= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
+									(CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
+										  THEN INV.strBOLNumber
+										ELSE SO.strBOLNumber									
+								    END)
+									ELSE NULL END
 	 , strShipVia				= ESV.strName
 	 , T.strTerm
 	 , INV.dtmShipDate
@@ -39,21 +41,33 @@ SELECT INV.intInvoiceId
 	 , strInvoiceFooterComment	= INV.strFooterComments
 	 , dblInvoiceSubtotal		= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceSubtotal, 0) END
 	 , dblShipping				= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblShipping, 0) * -1 ELSE ISNULL(INV.dblShipping, 0) END
-	 , dblTax					= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblTotalTax, 0) * -1 ELSE ISNULL(ID.dblTotalTax, 0) END
-	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) END
+	 , dblTax					= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
+									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblTotalTax, 0) * -1 ELSE ISNULL(ID.dblTotalTax, 0) END
+								  ELSE NULL END
+	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) END								  
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN I.strItemNo ELSE NULL END
 	 , ID.intInvoiceDetailId
-	 , dblContractBalance		= CASE WHEN ID.dblContractBalance = 0 THEN NULL ELSE ID.dblContractBalance END
-	 , CH.strContractNumber
+	 , dblContractBalance		= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
+									CASE WHEN ID.dblContractBalance = 0 THEN NULL ELSE ID.dblContractBalance END
+								  ELSE NULL END
+	 , strContractNumber		= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END				
 	 , strItemDescription		= ID.strItemDescription
 	 , UOM.strUnitMeasure
-	 , dblQtyShipped			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblQtyShipped, 0) * -1 ELSE ISNULL(ID.dblQtyShipped, 0) END
-	 , dblQtyOrdered			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblQtyOrdered, 0) * -1 ELSE ISNULL(ID.dblQtyOrdered, 0) END
-	 , dblDiscount				= ISNULL(ID.dblDiscount, 0) / 100
+	 , dblQtyShipped			= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
+									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblQtyShipped, 0) * -1 ELSE ISNULL(ID.dblQtyShipped, 0) END
+								  ELSE NULL END
+	 , dblQtyOrdered			= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
+									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblQtyOrdered, 0) * -1 ELSE ISNULL(ID.dblQtyOrdered, 0) END
+								  ELSE NULL END
+	 , dblDiscount				= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
+									ISNULL(ID.dblDiscount, 0) / 100
+								  ELSE NULL END
 	 , dblTotalTax				= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblTax, 0) * -1 ELSE ISNULL(INV.dblTax, 0) END
-	 , dblPrice					= ISNULL(ID.dblPrice, 0)
-	 , dblItemPrice				= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblTotal, 0) * -1 ELSE ISNULL(ID.dblTotal, 0) END
+	 , dblPrice					= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN ISNULL(ID.dblPrice, 0) ELSE NULL END
+	 , dblItemPrice				= CASE WHEN ISNULL(ID.intCommentTypeId, 0) = 0 THEN
+									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(ID.dblTotal, 0) * -1 ELSE ISNULL(ID.dblTotal, 0) END
+								  ELSE NULL END
 	 , strPaid					= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , strPosted				= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
 	 , IDT.intTaxCodeId
@@ -65,7 +79,7 @@ SELECT INV.intInvoiceId
 	 , intRecipeId				= ID.intRecipeId
 	 , intOneLinePrintId		= ISNULL(MFR.intOneLinePrintId, 1)
 	 , strInvoiceComments		= I.strInvoiceComments
-	 , INV.dblTotalWeight
+	 , dblTotalWeight			= ISNULL(INV.dblTotalWeight, 0)
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 
 	LEFT JOIN tblICItem I ON ID.intItemId = I.intItemId 
