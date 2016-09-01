@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUnpostActualCostOut]
 	@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
+	,@ysnRecap AS BIT 
 AS
 
 SET QUOTED_IDENTIFIER OFF

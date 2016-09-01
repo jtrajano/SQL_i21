@@ -100,7 +100,8 @@ FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.in
 		INNER JOIN tblICItemLocation ItemLocation ON Errors.intItemLocationId = ItemLocation.intItemLocationId
 		INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 WHERE	intErrorCode = 80066
-	AND Errors.intTransactionTypeId <> 23
+		AND Errors.intTransactionTypeId <> 23
+		AND ISNULL(@ysnRecap, 0) = 0
 
 IF @intItemId IS NOT NULL 
 BEGIN 

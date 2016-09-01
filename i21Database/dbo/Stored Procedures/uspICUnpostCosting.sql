@@ -147,10 +147,12 @@ BEGIN
 	EXEC dbo.uspICUnpostFIFOIn 
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 
 	EXEC dbo.uspICUnpostFIFOOut
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -160,10 +162,12 @@ BEGIN
 	EXEC dbo.uspICUnpostLIFOIn 
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 
 	EXEC dbo.uspICUnpostLIFOOut
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 END
 
 
@@ -174,10 +178,12 @@ BEGIN
 	EXEC dbo.uspICUnpostLotIn 
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 
 	EXEC dbo.uspICUnpostLotOut
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -187,10 +193,12 @@ BEGIN
 	EXEC dbo.uspICUnpostActualCostIn
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 
 	EXEC dbo.uspICUnpostActualCostOut
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -200,6 +208,7 @@ BEGIN
 	EXEC dbo.uspICUnpostAutoNegative
 		@strTransactionId
 		,@intTransactionId
+		,@ysnRecap
 END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
