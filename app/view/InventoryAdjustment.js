@@ -1137,14 +1137,14 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                         xtype: 'panel',
                                         itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Comments',
+                                        title: 'Activities',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'pgeComments'
                                         },
                                         items: [
                                             {
-                                                xtype: 'commentbox'
+                                                xtype: 'activitygrid'
                                             }
                                         ]
                                     },

@@ -1229,7 +1229,8 @@ Ext.define('Inventory.view.ItemViewController', {
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             enableAudit: true,
-            enableComment: true,
+            enableActivity: true,
+            createTransaction: Ext.bind(me.createTransaction, me),
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1456,6 +1457,18 @@ Ext.define('Inventory.view.ItemViewController', {
     StockSummaryRenderer: function (value, params, data) {
         return i21.ModuleMgr.Inventory.roundDecimalFormat(value, 2);
     },
+
+    createTransaction: function(config, action) {
+        var me = this,
+            current = me.getViewModel().get('current');
+
+        action({
+            strTransactionNo: current.get('strItemNo'), //Unique field
+            intEntityId: current.get('intEntityId'), //Entity Associated
+            dtmDate: current.get('dtmDate') // Date
+        })
+    },
+
 
     createRecord: function(config, action) {
         var me = this;

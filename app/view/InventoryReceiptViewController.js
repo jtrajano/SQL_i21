@@ -966,7 +966,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             validateRecord: me.validateRecord,
             onPageChange: me.onPageChange,
             binding: me.config.binding,
-            enableComment: true,
+            enableActivity: true,
+            createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             include: 'tblICInventoryReceiptInspections,' +
             'vyuICInventoryReceiptLookUp,' +
@@ -1057,7 +1058,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         return win.context;
     },
-    
+
+    createTransaction: function(config, action) {
+        var me = this,
+            current = me.getViewModel().get('current');
+
+        action({
+            strTransactionNo: current.get('strReceiptNumber'), //Unique field
+            intEntityId: current.get('intEntityId'), //Entity Associated
+            dtmDate: current.get('dtmDate') // Date
+        })
+    },
+
     orgValueLocation: '',
 
     onGridAfterLayout: function(grid) {

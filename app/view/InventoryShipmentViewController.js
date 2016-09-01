@@ -598,7 +598,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
-            enableComment: true,
+            enableActivity: true,
+            createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             include: 'vyuICGetInventoryShipment, ' +
             'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
@@ -645,6 +646,18 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         return win.context;
     },
+
+    createTransaction: function(config, action) {
+        var me = this,
+            current = me.getViewModel().get('current');
+
+        action({
+            strTransactionNo: current.get('strShipmentNumber'), //Unique field
+            intEntityId: current.get('intEntityId'), //Entity Associated
+            dtmDate: current.get('dtmDate') // Date
+        })
+    },
+
     
     orgValueShipFrom: '',
 

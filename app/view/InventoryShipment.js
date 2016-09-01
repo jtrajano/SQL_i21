@@ -1992,14 +1992,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         xtype: 'panel',
                                         itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Comments',
+                                        title: 'Activities',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgComments'
                                         },
                                         items: [
                                             {
-                                                xtype: 'commentbox'
+                                                xtype: 'activitygrid'
                                             }
                                         ]
                                     },

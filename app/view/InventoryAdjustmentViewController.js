@@ -520,7 +520,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
             store: store,
-            enableComment: true,
+            enableActivity: true,
+            createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
             include: 'tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
             createRecord: me.createRecord,
@@ -543,6 +544,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         return win.context;
     },
+
+    createTransaction: function(config, action) {
+        var me = this,
+            current = me.getViewModel().get('current');
+
+        action({
+            strTransactionNo: current.get('strAdjustmentNo'), //Unique field
+            intEntityId: current.get('intEntityId'), //Entity Associated
+            dtmDate: current.get('dtmDate') // Date
+        })
+    },
+
 
     show: function (config) {
         "use strict";

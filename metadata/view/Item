@@ -13876,7 +13876,7 @@
                             "userConfig": {
                                 "itemId": "pgeComments",
                                 "layout": "fit",
-                                "title": "Comments"
+                                "title": "Activities"
                             },
                             "name": "MyPanel40",
                             "designerId": "7825040e-0dc3-47d5-b2ec-844491293ff1",
@@ -13902,7 +13902,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "commentbox",
+                                        "designer|createAlias": "activitygrid",
                                         "designer|displayName": "comments"
                                     },
                                     "name": "MyContainer38",

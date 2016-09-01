@@ -1036,14 +1036,14 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                         xtype: 'panel',
                                         itemId: 'pgeComments',
                                         layout: 'fit',
-                                        title: 'Comments',
+                                        title: 'Activities',
                                         tabConfig: {
                                             xtype: 'tab',
                                             itemId: 'cfgComments'
                                         },
                                         items: [
                                             {
-                                                xtype: 'commentbox'
+                                                xtype: 'activitygrid'
                                             }
                                         ]
                                     },
