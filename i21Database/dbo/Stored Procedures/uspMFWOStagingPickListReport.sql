@@ -65,6 +65,8 @@ BEGIN
 		,T.dblQty
 		,TT.strTaskType
 		,UM.strUnitMeasure AS strPickQtyUnitMeasure
+		,T.dblWeight
+		,WUM.strUnitMeasure AS strPickWeightUnitMeasure
 		,L.strLotNumber
 		,L.intLotId
 		,PL.strParentLotNumber
@@ -91,6 +93,8 @@ BEGIN
 	JOIN tblICLot L ON L.intLotId = T.intLotId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = T.intItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = T.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WIU.intUnitMeasureId
 	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblICStorageLocation FSL ON FSL.intStorageLocationId = T.intFromStorageLocationId
 	LEFT JOIN tblICStorageLocation TSL ON TSL.intStorageLocationId = T.intToStorageLocationId
