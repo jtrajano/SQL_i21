@@ -72,7 +72,7 @@ BEGIN
 		END 
 	END 
 		
-	-- Check if the Item Receipt quantity matches the total Quantity in the Lot
+	-- Check if the Item Receipt Open Receive matches with the total Quantity from the Lots
 	SET @strItemNo = NULL 
 	SET @intItemId = NULL 
 
@@ -82,11 +82,7 @@ BEGIN
 			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
 			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
 			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
-			,@OpenReceiveQtyInItemUOM	= dbo.fnCalculateQtyBetweenUOM (
-											ReceiptItem.intUnitMeasureId
-											,ReceiptItem.intUnitMeasureId
-											,ReceiptItem.dblOpenReceive
-										)
+			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblOpenReceive
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -111,13 +107,9 @@ BEGIN
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 2) <>
-				ROUND(dbo.fnCalculateQtyBetweenUOM (
-					ReceiptItem.intUnitMeasureId
-					,ReceiptItem.intUnitMeasureId
-					,ReceiptItem.dblOpenReceive
-				), 2)
-				
+			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 2) <> ReceiptItem.dblOpenReceive
+			AND ReceiptItem.intWeightUOMId IS NULL 
+			
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		IF ISNULL(@strItemNo, '') = '' 
@@ -133,7 +125,10 @@ BEGIN
 	END 
 
 		
--- Check if the Item Receipt Net qty matches with the total Net qty from the lots. 
+	-- Check if the Item Receipt Net qty matches with the total Net qty from the lots. 
+	SET @strItemNo = NULL 
+	SET @intItemId = NULL 
+
 	SELECT	TOP 1 
 			@strItemNo					= Item.strItemNo
 			,@intItemId					= Item.intItemId
@@ -171,7 +166,7 @@ BEGIN
 		SET @FormattedReceiptItemNet =  CONVERT(NVARCHAR, CAST(@ReceiptItemNet AS MONEY), 1)
 		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
 		SET @FormattedDifference =  CAST(ABS(@ReceiptItemNet - @LotQtyInItemUOM) AS NVARCHAR(50))
-		
+
 		-- 'Net quantity mistmatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
 		RAISERROR(80081, 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
 		RETURN -1; 
