@@ -226,7 +226,7 @@ BEGIN
 		-- Net Hedge option end			
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries)
 
-	SELECT @strDescription,'Cash Exposure' [strType],'Physical' strContractType
+	SELECT @strDescription,'Price Risk' [strType],'Physical' strContractType
 		,isnull(invQty, 0)-isnull(PurBasisDelivary,0)  + (isnull(OpenPurQty, 0) - isnull(OpenSalQty, 0))+ isnull(dblCollatralSales,0) + isnull(SlsBasisDeliveries,0) AS dblTotal,
 		@intCommodityUnitMeasureId,@intCommodityId,
 		 isnull(invQty, 0) invQty ,-isnull(PurBasisDelivary,0) as PurBasisDelivary, isnull(OpenPurQty, 0) as OpenPurQty,
@@ -321,7 +321,7 @@ BEGIN
 		) t
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intNoOfContract,dblContractSize)	
-	SELECT @strDescription,'Cash Exposure2' [strType],'Future'
+	SELECT @strDescription,'Price Risk2' [strType],'Future'
 		,(((isnull(FutLBalTransQty, 0) - isnull(FutMatchedQty, 0)) - (isnull(FutSBalTransQty, 0) - isnull(FutMatchedQty, 0))) * isnull(dblContractSize,0)) AS dblTotal,
 		@intCommodityUnitMeasureId,@intCommodityId,
 		((isnull(FutLBalTransQty, 0) - isnull(FutMatchedQty, 0)) - (isnull(FutSBalTransQty, 0) - isnull(FutMatchedQty, 0))) intNoOfContract, isnull(dblContractSize,0) dblContractSize
@@ -359,7 +359,7 @@ BEGIN
 
 	-- Option NetHedge
 	INSERT INTO @tempFinal (strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intNoOfContract,dblContractSize)	
-		SELECT DISTINCT strCommodityCode,'Cash Exposure1','Option',
+		SELECT DISTINCT strCommodityCode,'Price Risk1','Option',
 	
 				CASE WHEN ft.strBuySell = 'Buy' THEN (
 						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
@@ -399,7 +399,7 @@ BEGIN
 	
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,strContractNumber,CompanyTitled,OpenPurQty,OpenSalQty)
 	SELECT @strDescription,
-		'Basis Exposure' [strType],'Physical'
+		'Basis Risk' [strType],'Physical'
 		,(isnull(CompanyTitled, 0) + (isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0))) AS dblTotal,
 		@intCommodityUnitMeasureId,@intCommodityId,null strContractNumber,isnull(CompanyTitled, 0) CompanyTitled,isnull(OpenPurchasesQty, 0) OpenPurchasesQty,-isnull(OpenSalesQty, 0)
 	FROM (
@@ -805,7 +805,7 @@ UNION
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-	WHERE t.intCommodityId= @intCommodityId and strType<>'Net Hedge' and strType <>'Cash Exposure1' and strType <>'Cash Exposure2' and strType not in('Net Payable  ($)','Net Receivable  ($)')
+	WHERE t.intCommodityId= @intCommodityId and strType<>'Net Hedge' and strType <>'Price Risk1' and strType <>'Price Risk2' and strType not in('Net Payable  ($)','Net Receivable  ($)')
 	UNION
 
 	SELECT strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strContractType,strContractEndMonth, 	
@@ -833,7 +833,7 @@ UNION
 		dblTotal,strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,
 		invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled)
 	
-	SELECT strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, 'Cash Exposure',strContractType,strContractEndMonth, 
+	SELECT strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, 'Price Risk',strContractType,strContractEndMonth, 
 	    dblTotal dblTotal,
 		case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,
 		invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled  
@@ -841,12 +841,12 @@ UNION
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-	WHERE t.intCommodityId= @intCommodityId and strType ='Cash Exposure1'
+	WHERE t.intCommodityId= @intCommodityId and strType ='Price Risk1'
 
 	INSERT INTO @Final (strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, strType,strContractType,strContractEndMonth, 
 		dblTotal,strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType,
 		invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled)
-	SELECT strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, 'Cash Exposure',strContractType,strContractEndMonth, 
+	SELECT strCommodityCode ,intContractHeaderId,strContractNumber,intFutOptTransactionHeaderId,strInternalTradeNo, 'Price Risk',strContractType,strContractEndMonth, 
 	    dblTotal dblTotal,
 		case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure,intInventoryReceiptItemId,strLocationName,strTicketNumber,dtmTicketDateTime,strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,strAccountNumber,strTranType,dblNoOfLot,dblDelta,intBrokerageAccountId,strInstrumentType  
 		,invQty,PurBasisDelivary,OpenPurQty,OpenSalQty,dblCollatralSales, SlsBasisDeliveries,intNoOfContract,dblContractSize,CompanyTitled 
@@ -854,7 +854,7 @@ UNION
 	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-	WHERE t.intCommodityId= @intCommodityId and strType ='Cash Exposure2'
+	WHERE t.intCommodityId= @intCommodityId and strType ='Price Risk2'
 
 
 END
@@ -1361,8 +1361,8 @@ UPDATE @Final set intSeqNo = 4 where strType='Sale Priced'
 UPDATE @Final set intSeqNo = 5 where strType='Sale Basis'
 UPDATE @Final set intSeqNo = 6 where strType='Sale HTA'
 UPDATE @Final set intSeqNo = 7 where strType='Net Hedge'
-UPDATE @Final set intSeqNo = 8 where strType='Cash Exposure'
-UPDATE @Final set intSeqNo = 9 where strType='Basis Exposure'
+UPDATE @Final set intSeqNo = 8 where strType='Price Risk'
+UPDATE @Final set intSeqNo = 9 where strType='Basis Risk'
 UPDATE @Final set intSeqNo = 10 where strType='Net Payable  ($)'
 UPDATE @Final set intSeqNo = 11 where strType='NP Un-Paid Quantity'
 UPDATE @Final set intSeqNo = 12 where strType='Net Receivable  ($)'
