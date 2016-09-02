@@ -100,6 +100,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                         {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
                         {dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string', drillDownText: 'View Item', drillDownClick: 'onViewItemNo'},
+
                         {dataIndex: 'strOrderNumber', text: 'Order Number', flex: 1, dataType: 'string'},
                         {dataIndex: 'strSourceNumber', text: 'Source Number', flex: 1, dataType: 'string'},
                         {dataIndex: 'strUnitMeasure', text: 'Ship UOM', flex: 1, dataType: 'string'},
@@ -306,14 +307,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber'
-                    //editor: {
-                    //    store: '{soDetails}',
-                    //    defaultFilters: [{
-                    //        column: 'intEntityCustomerId',
-                    //        value: '{current.intEntityCustomerId}',
-                    //        conjunction: 'and'
-                    //    }]
-                    //}
                 },
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
@@ -332,6 +325,24 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colDescription: 'strItemDescription',
+                colCustomerStorage: {
+                    dataIndex: 'strStorageTypeDescription',
+                    editor: {
+                        store: '{customerStorage}',
+                        defaultFilters: [
+                            {
+                                column: 'intEntityId',
+                                value: '{current.intEntityCustomerId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryShipment.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {

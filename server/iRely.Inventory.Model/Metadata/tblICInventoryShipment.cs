@@ -197,6 +197,7 @@ namespace iRely.Inventory.Model
         public int? intGradeId { get; set; }
         public int? intDiscountSchedule { get; set; }
         public int? intSort { get; set; }
+        public int? intCustomerStorageId { get; set; }
 
         private string _orderNumber;
         [NotMapped]
@@ -615,6 +616,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _storageTypeDescription; 
+        [NotMapped]
+        public string strStorageTypeDescription
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageTypeDescription))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strStorageTypeDescription;
+                    else
+                        return null;
+                else
+                    return _storageTypeDescription;
+            }
+            set
+            {
+                _storageTypeDescription = value;
+            }
+        }
+
         public vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem { get; set; }
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
@@ -669,6 +690,7 @@ namespace iRely.Inventory.Model
         public string strGrade { get; set; }
         public int? intDiscountSchedule { get; set; }
         public string strDiscountSchedule { get; set; }
+        public string strStorageTypeDescription { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }
