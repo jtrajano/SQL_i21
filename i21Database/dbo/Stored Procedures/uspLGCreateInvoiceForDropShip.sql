@@ -1,13 +1,33 @@
-﻿CREATE PROCEDURE uspLGCreateInvoiceForDropShip @intLoadId INT
+﻿CREATE PROCEDURE uspLGCreateInvoiceForDropShip 
+	 @intLoadId INT
 	,@intUserId INT
 	,@Post BIT = NULL
+	,@NewInvoiceId INT = NULL OUTPUT		
 AS
 BEGIN
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @LineItemTaxEntries AS LineItemTaxDetailStagingTable
+	DECLARE @strInvoiceNumber NVARCHAR(100)
+	DECLARE @strLoadNumber NVARCHAR(100)
+	DECLARE @ErrorMessage NVARCHAR(250)
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE intLoadId = @intLoadId)
+	BEGIN
+		SELECT TOP 1
+			@strInvoiceNumber		= ARI.[strInvoiceNumber]
+		   ,@strLoadNumber			= L.strLoadNumber 
+		FROM tblARInvoice ARI
+		JOIN tblLGLoad L ON L.intLoadId = ARI.intLoadId
+		WHERE ARI.intLoadId = @intLoadId 
+
+		SET @ErrorMessage = 'Invoice(' + @strInvoiceNumber + ') was already created for ' + @strLoadNumber;
+
+		RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
 
 	INSERT INTO @EntriesForInvoice (
-		[strSourceTransaction]
+		 [strSourceTransaction]
 		,[intSourceId]
 		,[strSourceId]
 		,[intInvoiceId]
@@ -38,6 +58,8 @@ BEGIN
 		,[intLoadDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
+		,[intLoadDetailId]
+		,[intLoadId]
 		,[intTransactionId]
 		,[intEntityId]
 		,[ysnResetDetails]
@@ -79,15 +101,14 @@ BEGIN
 		,[intPerformerId]
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
-		,[intLoadDetailId]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
 		)
 	SELECT [strSourceTransaction] = 'Load Schedule'
 		,[intSourceId] = L.intLoadId
-		,[strSourceId] = CAST(L.intLoadId AS NVARCHAR(250))
-		,[intInvoiceId] = I.intInvoiceId
+		,[strSourceId] = L.strLoadNumber
+		,[intInvoiceId] = NULL
 		,[intEntityCustomerId] = LD.intCustomerEntityId
 		,[intCompanyLocationId] = LD.intSCompanyLocationId
 		,[intCurrencyId] = C.intCurrencyId
@@ -114,15 +135,17 @@ BEGIN
 		,[intSplitId] = NULL
 		,[intLoadDistributionHeaderId] = NULL
 		,[strActualCostId] = NULL
-		,[intShipmentId] = L.intLoadId
+		,[intShipmentId] = NULL
+		,[intLoadDetailId]	= LD.[intLoadDetailId] 
+		,[intLoadId]		= L.intLoadId
 		,[intTransactionId] = NULL
 		,[intEntityId] = @intUserId
 		,[ysnResetDetails] = 1
-		,[ysnPost] = 1 --@Post
+		,[ysnPost] = @Post
 		,[intInvoiceDetailId] = ID.intInvoiceDetailId
 		,[intItemId] = LD.intItemId
 		,[ysnInventory] = 1
-		,[strItemDescription] = CB.strDescription
+		,[strItemDescription] = ITM.strDescription
 		,[intItemUOMId] = CD.intItemUOMId
 		,[dblQtyOrdered] = LD.dblQuantity
 		,[dblQtyShipped] = LD.dblQuantity
@@ -156,12 +179,12 @@ BEGIN
 		,[intPerformerId] = NULL
 		,[ysnLeaseBilling] = NULL
 		,[ysnVirtualMeterReading] = NULL
-		,LD.intLoadDetailId
 		,LD.dblGross
 		,LD.dblTare
 		,LD.dblNet
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblICItem ITM ON ITM.intItemId = LD.intItemId
 	JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = LD.intAllocationDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -187,8 +210,7 @@ BEGIN
 	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	WHERE LD.intLoadId = @intLoadId
 
-	DECLARE @ErrorMessage NVARCHAR(250)
-		,@CreatedIvoices NVARCHAR(MAX)
+	DECLARE @CreatedIvoices NVARCHAR(MAX)
 		,@UpdatedIvoices NVARCHAR(MAX)
 
 	EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries = @EntriesForInvoice
@@ -200,43 +222,6 @@ BEGIN
 		,@CreatedIvoices = @CreatedIvoices OUTPUT
 		,@UpdatedIvoices = @UpdatedIvoices OUTPUT
 
-	SELECT intShipmentId
-		,*
-	FROM tblARInvoice
-	WHERE intInvoiceId IN (
-			SELECT intID
-			FROM fnGetRowsFromDelimitedValues(@CreatedIvoices)
-			)
-
-	SELECT intShipmentPurchaseSalesContractId
-		,*
-	FROM tblARInvoiceDetail
-	WHERE intInvoiceId IN (
-			SELECT intInvoiceId
-			FROM tblARInvoice
-			WHERE intInvoiceId IN (
-					SELECT intID
-					FROM fnGetRowsFromDelimitedValues(@CreatedIvoices)
-					)
-			)
-
-	SELECT intShipmentId
-		,*
-	FROM tblARInvoice
-	WHERE intInvoiceId IN (
-			SELECT intID
-			FROM fnGetRowsFromDelimitedValues(@UpdatedIvoices)
-			)
-
-	SELECT intShipmentPurchaseSalesContractId
-		,*
-	FROM tblARInvoiceDetail
-	WHERE intInvoiceId IN (
-			SELECT intInvoiceId
-			FROM tblARInvoice
-			WHERE intInvoiceId IN (
-					SELECT intID
-					FROM fnGetRowsFromDelimitedValues(@UpdatedIvoices)
-					)
-			)
+	SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))			
+	RETURN @NewInvoiceId
 END

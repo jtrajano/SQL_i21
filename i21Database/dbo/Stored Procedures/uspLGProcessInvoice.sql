@@ -27,7 +27,8 @@ BEGIN TRY
 		EXEC uspLGCreateInvoiceForDropShip
 				@intLoadId = @intLoadId ,
 				@intUserId = @intEntityUserSecurityId ,
-				@Post = 1
+				@Post = 0,
+				@NewInvoiceId = @NewInvoiceId OUTPUT
 	END
 
 	SELECT @intNewInvoiceId = @NewInvoiceId
