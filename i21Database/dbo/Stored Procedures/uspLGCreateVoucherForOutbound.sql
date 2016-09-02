@@ -12,6 +12,7 @@ BEGIN TRY
 	DECLARE @intMinRecord AS INT
 	DECLARE @voucherDetailNonInvContract AS VoucherDetailNonInvContract
 	DECLARE @intAPAccount INT
+	DECLARE @strLoadNumber NVARCHAR(100)
 
 	DECLARE @voucherDetailData TABLE 
 		(intItemRecordId INT Identity(1, 1)
@@ -30,6 +31,20 @@ BEGIN TRY
 	DECLARE @distinctItem TABLE 
 		(intItemRecordId INT Identity(1, 1)
 		,intItemId INT)
+	
+	SELECT @strLoadNumber = strLoadNumber FROM tblLGLoad WHERE intLoadId = @intLoadId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
+	JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
+	WHERE LD.intLoadId = @intLoadId)
+	BEGIN
+		DECLARE @ErrorMessage NVARCHAR(250)
+
+		SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
+
+		RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
 
 	SELECT @intAPAccount = ISNULL(intAPAccount,0)
 	FROM tblSMCompanyLocation CL
