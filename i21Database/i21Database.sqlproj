@@ -4280,6 +4280,9 @@
     <Build Include="dbo\Views\vyuAPRptWeightClaims.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
     <Build Include="dbo\Views\vyuARCustomerItemPricing.sql" />
+    <Build Include="dbo\Views\vyuMFWastageLotStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuMFWastageWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuMFWastageItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
