@@ -59,7 +59,9 @@ Ext.define('Inventory.model.ShipmentItem', {
                 return qty * price;
             },
             depends: ['dblQuantity', 'dblUnitPrice']
-        }
+        },
+        { name: 'intCustomerStorageId', type: 'int', allowNull: true},
+        { name: 'strStorageTypeDescription', type: 'string' }
     ],
 
     validators: [

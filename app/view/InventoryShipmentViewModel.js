@@ -23,7 +23,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'ContractManagement.store.ContractDetailView',
         'ContractManagement.store.ContractHeaderViewBuffered',
         'i21.store.CurrencyBuffered',
-        'Logistics.store.PickedLots'
+        'Logistics.store.PickedLots',
+        'Grain.store.BufferedStorageTransferTicket'
     ],
 
     data: {
@@ -204,6 +205,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         pickedLotList: {
             type: 'lgpickedlots'
+        },
+        customerStorage: {
+            type: 'bufferedstoragetransferticket'
         }
     },
 
