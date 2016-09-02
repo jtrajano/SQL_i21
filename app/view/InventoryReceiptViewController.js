@@ -367,7 +367,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 text: '{getWeightLossText}'
             },
             lblWeightLossMsgValue: {
-                text: '{getWeightLossValueText}',
+                //text: '{getWeightLossValueText}',
                 hidden: '{hidelblWeightLossMsgValue}'
             },
             grdInventoryReceipt: {
@@ -1981,11 +1981,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var totalCharges = this.calculateOtherCharges(win);
         var grandTotal = totalAmount + totalCharges + totalTax;
 
-        lblSubTotal.setText('SubTotal: ' + Ext.util.Format.number(totalAmount, '0,000.00'));
-        lblTax.setText('Tax: ' + Ext.util.Format.number(totalTax, '0,000.00'));
-        lblGrossWgt.setText('Gross: ' + Ext.util.Format.number(totalGross, '0,000.00'));
-        lblNetWgt.setText('Net: ' + Ext.util.Format.number(totalNet, '0,000.00'));
-        lblTotal.setText('Total: ' + Ext.util.Format.number(grandTotal, '0,000.00'));
+        //Set Number Format
+        var formattedTotalAmount = Ext.util.Format.number(totalAmount, '0,000.00'),
+            formattedTotalTax = Ext.util.Format.number(totalTax, '0,000.00'),
+            formattedTotalGross = Ext.util.Format.number(totalGross, '0,000.00'),
+            formattedTotalNet = Ext.util.Format.number(totalNet, '0,000.00'),
+            formattedGrandTotal = Ext.util.Format.number(grandTotal, '0,000.00'); 
+                
+        if(iRely.Configuration.Application.NumberFormat == '1.234.567,89') {
+            formattedTotalAmount = formattedTotalAmount.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+            formattedTotalTax = formattedTotalTax.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+            formattedTotalGross = formattedTotalGross.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+            formattedTotalNet = formattedTotalNet.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+            formattedGrandTotal = formattedGrandTotal.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+        }
+        
+        lblSubTotal.setText('SubTotal: ' + formattedTotalAmount);
+        lblTax.setText('Tax: ' + formattedTotalTax);
+        lblGrossWgt.setText('Gross: ' + formattedTotalGross);
+        lblNetWgt.setText('Net: ' + formattedTotalNet);
+        lblTotal.setText('Total: ' + formattedGrandTotal);
     },
 
     getTaxableAmount: function (quantity, price, currentItemTax, itemTaxes) {
@@ -2034,7 +2049,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
-        lblCharges.setText('Charges: ' + Ext.util.Format.number(totalCharges, '0,000.00'));
+        
+        var formattedTotalCharges = Ext.util.Format.number(totalCharges, '0,000.00');
+                
+        if(iRely.Configuration.Application.NumberFormat == '1.234.567,89') {
+            formattedTotalCharges = formattedTotalCharges.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+        }
+        
+        lblCharges.setText('Charges: ' + formattedTotalCharges);
         return totalCharges;
     },
 
@@ -2044,9 +2066,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var totalCharges = me.calculateOtherCharges(win);
 
         if (lblCharges) {
-            lblCharges.setText('Charges: ' + Ext.util.Format.number(totalCharges, '0,000.00'));
+            var formattedTotalCharges = Ext.util.Format.number(totalCharges, '0,000.00');
+                
+            if(iRely.Configuration.Application.NumberFormat == '1.234.567,89') {
+                formattedTotalCharges = formattedTotalCharges.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+            }
+            
+            lblCharges.setText('Charges: ' + formattedTotalCharges);
         }
-
     },
 /*
     convertLotUOMToGross: function(lotCF, weightCF, lotQty){
@@ -4913,6 +4940,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         win.viewModel.data.weightLoss = 0;
         var action = function(weightLoss) {
             win.viewModel.set('weightLoss', weightLoss);
+            
+            if(weightLoss !== 0) {
+                var formattedValue = Ext.util.Format.number(weightLoss, '0,000.00');
+                
+                if(iRely.Configuration.Application.NumberFormat == '1.234.567,89') {
+                    formattedValue = formattedValue.replace(/,/g, '@').replace(/\./g, ',').replace(/@/g, '.');
+                  }
+
+                win.down('#lblWeightLossMsgValue').setText(formattedValue);
+            }
         };
 
         var ReceiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();

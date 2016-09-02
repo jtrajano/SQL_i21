@@ -722,7 +722,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return 'Wgt or Vol Gain/Loss: 0.00';  
             }
         },
-        getWeightLossValueText: function (get) {
+       /* getWeightLossValueText: function (get) {
             var weight = get('weightLoss');
             if (Ext.isNumeric(weight) && weight !== 0) {
                 return Ext.util.Format.number(weight, '0,000.00');
@@ -730,7 +730,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             else {
                  return '0.00';  
             }
-        },
+        },*/
         hidelblWeightLossMsgValue: function(get) {
              var weight = get('weightLoss');
             if (Ext.isNumeric(weight) && weight !== 0) {
