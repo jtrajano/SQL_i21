@@ -31,10 +31,10 @@ BEGIN
 			, @LocationId = intCompanyLocationId
 			, @TransactionDate = dtmTransaction
 			, @TaxGroupId = intTaxGroupId
-			, @Amount = (CASE WHEN strPriceType = 'Gross' THEN dblGrossPrice
-							ELSE dblNetPrice END)
+			, @Amount = (CASE WHEN strPriceType = 'Gross' THEN ISNULL(dblGrossPrice, 0)
+							ELSE ISNULL(dblNetPrice, 0) END)
 			, @Price = (CASE WHEN strPriceType = 'Gross' THEN 0
-							ELSE dblNetPrice END)
+							ELSE ISNULL(dblNetPrice, 0) END)
 			, @IsReversal = (CASE WHEN strPriceType = 'Gross' THEN 1
 							ELSE 0 END)
 			, @PriceType = strPriceType
@@ -61,7 +61,7 @@ BEGIN
 			, NULL
 		)
 
-		SELECT @TaxTotal = SUM(dblTax)
+		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
 		FROM #tmpTaxes 
 
 		IF (@PriceType = 'Gross')
