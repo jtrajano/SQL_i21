@@ -30,6 +30,7 @@ Type the overview for the table here.
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intGradeId] INT NULL,
 		[intDiscountSchedule] INT NULL,
+		[intCustomerStorageId] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
