@@ -49,6 +49,7 @@ AS
 			,NULL
 			,@InvoiceType
 			,@TermId
+			,0
 		)
 
 RETURN 0

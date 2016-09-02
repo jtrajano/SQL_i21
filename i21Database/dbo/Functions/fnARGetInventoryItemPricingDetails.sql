@@ -1,14 +1,15 @@
 ﻿CREATE FUNCTION [dbo].[fnARGetInventoryItemPricingDetails]
 (
-	 @ItemId				INT
-	,@CustomerId			INT	
-	,@LocationId			INT
-	,@ItemUOMId				INT
-	,@TransactionDate		DATETIME
-	,@Quantity				NUMERIC(18,6)
-	,@VendorId				INT
-	,@PricingLevelId		INT
-	,@TermId				INT
+	 @ItemId					INT
+	,@CustomerId				INT	
+	,@LocationId				INT
+	,@ItemUOMId					INT
+	,@TransactionDate			DATETIME
+	,@Quantity					NUMERIC(18,6)
+	,@VendorId					INT
+	,@PricingLevelId			INT
+	,@TermId					INT
+	,@GetAllAvailablePricing	BIT
 )
 RETURNS @returntable TABLE
 (
@@ -18,6 +19,7 @@ RETURNS @returntable TABLE
 	,dblPriceBasis		NUMERIC(18,6)
 	,dblDeviation		NUMERIC(18,6)
 	,dblUOMQuantity		NUMERIC(18,6)
+	,intSort				BIT
 )
 AS
 BEGIN
@@ -29,6 +31,7 @@ BEGIN
 			,@Deviation		NUMERIC(18,6)
 			,@DiscountBy	NVARCHAR(50)
 			,@PromotionType	NVARCHAR(50)
+			,@intSort		INT
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())	
 	
@@ -154,9 +157,10 @@ BEGIN
 					SET @TermDiscount = 0.00
 				END
 
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
-			RETURN;
+			SET @intSort = @intSort + 1
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
+			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity, @intSort
+			IF @GetAllAvailablePricing = 0 RETURN;
 		END
 	
 	--Item Pricing Level
@@ -189,9 +193,10 @@ BEGIN
 		
 				IF(ISNULL(@Price,0) <> 0)
 					BEGIN
-						INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-						SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
-						RETURN;
+						SET @intSort = @intSort + 1
+						INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
+						SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity, @intSort
+						IF @GetAllAvailablePricing = 0 RETURN;
 					END	
 			END	
 	END
@@ -229,9 +234,10 @@ BEGIN
 		
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
-			RETURN;
+			SET @intSort = @intSort + 1
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
+			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity, @intSort
+			IF @GetAllAvailablePricing = 0 RETURN;
 		END		
 		
 	SELECT TOP 1 
@@ -255,9 +261,10 @@ BEGIN
 
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
-			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
-			RETURN;
+			SET @intSort = @intSort + 1
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
+			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity, @intSort
+			IF @GetAllAvailablePricing = 0 RETURN;
 		END
 			
 	RETURN;				

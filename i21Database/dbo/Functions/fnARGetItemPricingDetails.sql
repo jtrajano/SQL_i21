@@ -25,6 +25,7 @@
 	,@AllowQtyToExceed			BIT
 	,@InvoiceType				NVARCHAR(200)
 	,@TermId					INT
+	,@GetAllAvailablePricing	BIT
 )
 RETURNS @returntable TABLE
 (
@@ -39,6 +40,7 @@ RETURNS @returntable TABLE
 	,dblAvailableQty        NUMERIC(18,6)
 	,ysnUnlimitedQty        BIT
 	,strPricingType			NVARCHAR(50)
+	,intSort				BIT
 )
 AS
 BEGIN
@@ -58,7 +60,10 @@ DECLARE	 @Price			NUMERIC(18,6)
 		SET @ItemPricingOnly = 0
 		
 	IF @ExcludeContractPricing IS NULL
-		SET @ExcludeContractPricing = 0				
+		SET @ExcludeContractPricing = 0		
+		
+	IF @GetAllAvailablePricing IS NULL
+		SET @GetAllAvailablePricing = 0					
 		
 	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0
 	BEGIN
@@ -93,41 +98,90 @@ DECLARE	 @Price			NUMERIC(18,6)
 		BEGIN
 			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
 			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
-			RETURN
+			IF @GetAllAvailablePricing = 0 RETURN
 		END	
 		
 	END			
 
 	IF @ItemPricingOnly = 0								
 	BEGIN
-		--Customer Special Pricing		
-		SELECT TOP 1
-			 @Price		= dblPrice
-			,@Pricing	= strPricing
-			,@Deviation	= dblDeviation
-		FROM
-			[dbo].[fnARGetCustomerPricingDetails](
-				 @ItemId
-				,@CustomerId
-				,@LocationId
-				,@ItemUOMId
-				,@TransactionDate
-				,@Quantity
-				,@VendorId
-				,@SupplyPointId
-				,@LastCost
-				,@ShipToLocationId
-				,@VendorLocationId
-				,@InvoiceType
-			);
+	--Customer Special Pricing		
+		IF @GetAllAvailablePricing = 0 
+			BEGIN
+				SELECT TOP 1
+					 @Price		= dblPrice
+					,@Pricing	= strPricing
+					,@Deviation	= dblDeviation
+				FROM
+					[dbo].[fnARGetCustomerPricingDetails](
+						 @ItemId
+						,@CustomerId
+						,@LocationId
+						,@ItemUOMId
+						,@TransactionDate
+						,@Quantity
+						,@VendorId
+						,@SupplyPointId
+						,@LastCost
+						,@ShipToLocationId
+						,@VendorLocationId
+						,@InvoiceType
+						,0
+					);
 			
 			
-		IF(@Price IS NOT NULL)
-		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
-			RETURN
-		END	
+				IF(@Price IS NOT NULL)
+				BEGIN
+					INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+					SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+					RETURN
+				END	
+			END
+		ELSE
+			BEGIN
+				INSERT @returntable(
+					 dblPrice
+					,dblTermDiscount
+					,strPricing
+					,dblDeviation
+					,intContractHeaderId
+					,intContractDetailId
+					,strContractNumber
+					,intContractSeq
+					,dblAvailableQty
+					,ysnUnlimitedQty
+					,strPricingType
+					,intSort)
+				SELECT 
+					 dblPrice				= dblPrice 
+					,dblTermDiscount		= 0
+					,strPricing				= strPricing 
+					,dblDeviation			= dblDeviation 
+					,intContractHeaderId	= NULL
+					,intContractDetailId	= NULL
+					,strContractNumber		= ''
+					,intContractSeq			= NULL
+					,dblAvailableQty		= 0
+					,ysnUnlimitedQty		= 0
+					,strPricingType			= ''
+					,intSort				= intSort + 10
+				FROM
+					[dbo].[fnARGetCustomerPricingDetails](
+						 @ItemId
+						,@CustomerId
+						,@LocationId
+						,@ItemUOMId
+						,@TransactionDate
+						,@Quantity
+						,@VendorId
+						,@SupplyPointId
+						,@LastCost
+						,@ShipToLocationId
+						,@VendorLocationId
+						,@InvoiceType
+						,@GetAllAvailablePricing
+					)
+			END				
 	END
 	
 	IF @CustomerPricingOnly = 1
@@ -135,58 +189,98 @@ DECLARE	 @Price			NUMERIC(18,6)
 	
 	BEGIN
 		--Inventory Special Pricing
-		SELECT TOP 1
-			 @Price			= dblPrice
-			,@Pricing		= strPricing
-			,@Deviation		= dblDeviation
-			,@TermDiscount	= dblTermDiscount 
-		FROM
-			[dbo].[fnARGetInventoryItemPricingDetails](
-				 @ItemId
-				,@CustomerId
-				,@LocationId
-				,@ItemUOMId
-				,@TransactionDate
-				,@Quantity
-				,@VendorId
-				,@PricingLevelId
-				,@TermId
-			);
+		IF @GetAllAvailablePricing = 0 
+			BEGIN
+				SELECT TOP 1
+					 @Price			= dblPrice
+					,@Pricing		= strPricing
+					,@Deviation		= dblDeviation
+					,@TermDiscount	= dblTermDiscount 
+				FROM
+					[dbo].[fnARGetInventoryItemPricingDetails](
+						 @ItemId
+						,@CustomerId
+						,@LocationId
+						,@ItemUOMId
+						,@TransactionDate
+						,@Quantity
+						,@VendorId
+						,@PricingLevelId
+						,@TermId
+						,0
+					);
 			
 			
-		IF(@Price IS NOT NULL)
-		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
-			RETURN
-		END	
-						
+				IF(@Price IS NOT NULL)
+				BEGIN
+					INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
+					SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
+					RETURN
+				END	
+			END
+		ELSE
+			BEGIN
+				INSERT @returntable(
+					 dblPrice
+					,dblTermDiscount
+					,strPricing
+					,dblDeviation
+					,intContractHeaderId
+					,intContractDetailId
+					,strContractNumber
+					,intContractSeq
+					,dblAvailableQty
+					,ysnUnlimitedQty
+					,strPricingType
+					,intSort)
+				SELECT 
+					 dblPrice				= dblPrice 
+					,dblTermDiscount		= dblTermDiscount
+					,strPricing				= strPricing 
+					,dblDeviation			= dblDeviation 
+					,intContractHeaderId	= NULL
+					,intContractDetailId	= NULL
+					,strContractNumber		= ''
+					,intContractSeq			= NULL
+					,dblAvailableQty		= 0
+					,ysnUnlimitedQty		= 0
+					,strPricingType			= ''
+					,intSort				= intSort + 100
+				FROM
+					[dbo].[fnARGetInventoryItemPricingDetails](
+						 @ItemId
+						,@CustomerId
+						,@LocationId
+						,@ItemUOMId
+						,@TransactionDate
+						,@Quantity
+						,@VendorId
+						,@PricingLevelId
+						,@TermId
+						,@GetAllAvailablePricing
+					);
+			END								
 	END
 
 	IF (@PricingLevelId IS NOT NULL)
 	BEGIN
-	SET @Price =
-		( 
-			SELECT 
-				P.dblUnitPrice 
-			FROM
-				tblICItemPricingLevel P
-			WHERE
-				P.intItemId = @ItemId
-				AND P.intItemPricingLevelId = @PricingLevelId								 
-		)
-	IF(@Price IS NOT NULL)
-		BEGIN
-			SET @Pricing = 'Inventory - Standard Pricing'
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
-			RETURN
-		END	
-			
-
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
-			RETURN
+		SET @Price =
+			( 
+				SELECT 
+					P.dblUnitPrice 
+				FROM
+					tblICItemPricingLevel P
+				WHERE
+					P.intItemId = @ItemId
+					AND P.intItemPricingLevelId = @PricingLevelId								 
+			)
+		IF(@Price IS NOT NULL)
+			BEGIN
+				SET @Pricing = 'Inventory - Standard Pricing'
+				INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intSort)
+				SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, 1000
+				IF @GetAllAvailablePricing = 0 RETURN
+			END	
 	END
 	
 	DECLARE @ItemVendorId				INT
@@ -228,11 +322,12 @@ DECLARE	 @Price			NUMERIC(18,6)
 	IF(@Price IS NOT NULL)
 		BEGIN
 			SET @Pricing = 'Inventory - Standard Pricing'
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
-			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
-			RETURN
+			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intSort)
+			SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, 2000
+			IF @GetAllAvailablePricing = 0 RETURN
 		END	
-			
+	
+	IF @GetAllAvailablePricing = 1 RETURN			
 	INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType)
 	SELECT @Price, @TermDiscount, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType
 	RETURN				

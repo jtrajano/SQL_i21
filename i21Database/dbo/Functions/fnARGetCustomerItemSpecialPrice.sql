@@ -34,6 +34,7 @@ BEGIN
 			,@ShipToLocationId
 			,@VendorLocationId
 			,@InvoiceType
+			,0
 		);
 
 	RETURN @ItemPrice

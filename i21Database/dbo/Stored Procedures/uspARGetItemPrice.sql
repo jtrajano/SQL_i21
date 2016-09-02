@@ -29,6 +29,7 @@
 	,@InvoiceType				NVARCHAR(200)	= NULL
 	,@TermId					INT				= NULL
 	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
+	,@GetAllAvailablePricing	BIT				= 0
 AS	
 
 	SELECT
@@ -70,6 +71,7 @@ AS
 			,@AllowQtyToExceedContract
 			,@InvoiceType
 			,@TermId
+			,@GetAllAvailablePricing
 		)
 
 RETURN 0

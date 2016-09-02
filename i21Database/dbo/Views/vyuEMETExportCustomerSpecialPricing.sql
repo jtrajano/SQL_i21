@@ -29,7 +29,8 @@
 			null,
 			b.intShipToId,
 			null,
-			'Standard'			
+			'Standard',
+			0	
 		) c
 	where a.intItemId is not null and a.intItemId > 0
 	
@@ -82,7 +83,8 @@
 			null,		
 			null,	
 			'Standard',
-			null				
+			null,
+			0			
 		) c
  
 	 WHERE g.strItemNo is not null
