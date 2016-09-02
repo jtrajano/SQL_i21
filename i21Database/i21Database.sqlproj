@@ -4266,11 +4266,13 @@
     <Build Include="dbo\Functions\fnGetDueDate.sql" />
     <Build Include="dbo\Functions\fnGetInterestBasedOnTerm.sql" />
     <Build Include="dbo\Functions\fnIsDue.sql" />
-	<Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
+    <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
     <Build Include="dbo\Views\vyuSMTransaction.sql" />
     <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
     <Build Include="dbo\Tables\tblSMTypeValue.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\22_TypeValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
+    <Build Include="dbo\Views\vyuAPRptWeightClaims.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
