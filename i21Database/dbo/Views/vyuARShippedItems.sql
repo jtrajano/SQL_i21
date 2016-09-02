@@ -78,6 +78,7 @@ SELECT
 	,[intCommentTypeId]					= SOD.[intCommentTypeId]
 	,[dblMargin]						= SOD.[dblMargin]
 	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
+	,[intStorageScheduleTypeId]			= SOD.[intStorageScheduleTypeId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -219,6 +220,7 @@ SELECT
 	,[intCommentTypeId]					= SOD.[intCommentTypeId]
 	,[dblMargin]						= SOD.[dblMargin]
 	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
+	,[intStorageScheduleTypeId]			= SOD.[intStorageScheduleTypeId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -355,6 +357,7 @@ SELECT
 	,[intCommentTypeId]					= SOD.[intCommentTypeId]
 	,[dblMargin]						= SOD.[dblMargin]
 	,[dblRecipeQuantity]				= SOD.[dblRecipeQuantity]
+	,[intStorageScheduleTypeId]			= SOD.[intStorageScheduleTypeId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -568,6 +571,7 @@ SELECT
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
 FROM
 	tblICInventoryShipmentItem ICISI
 INNER JOIN
@@ -737,6 +741,8 @@ SELECT
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
+
 FROM
 	tblICInventoryShipmentCharge ICISC
 INNER JOIN
@@ -849,6 +855,7 @@ SELECT
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
 FROM
 	vyuARShippedItemDetail ARSID
 INNER JOIN
@@ -972,6 +979,7 @@ SELECT
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
 FROM
 	tblSOSalesOrder SO
 CROSS APPLY
@@ -1093,6 +1101,7 @@ SELECT DISTINCT
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
 FROM
 	tblICInventoryShipmentItem ICISI
 CROSS APPLY
@@ -1212,6 +1221,7 @@ SELECT [strTransactionType]				= 'Load Schedule'
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId  = LD.intLoadId
 JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
@@ -1313,6 +1323,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
 FROM vyuLGLoadWarehouseServicesForInvoice LWS
 LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LWS.[intLoadDetailId]
 WHERE LWS.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0 AND ISNULL(LWS.intItemId,0) <> 0
@@ -1395,6 +1406,7 @@ SELECT  [strTransactionType]			= 'Load Schedule'
 	,[intCommentTypeId]					= NULL
 	,[dblMargin]						= NULL
 	,[dblRecipeQuantity]				= NULL
+	,[intStorageScheduleTypeId]			= NULL
 FROM vyuLGLoadCostForCustomer LC
 LEFT OUTER JOIN tblARInvoiceDetail ARID ON ARID.intLoadDetailId = LC.[intLoadDetailId]
 WHERE LC.[ysnPosted] = 1 AND ISNULL(ARID.[intLoadDetailId], 0) = 0

@@ -188,7 +188,8 @@ BEGIN
 				   ,[intTaxGroupId] 
 				   ,[dblItemWeight]	
 				   ,[dblOriginalItemWeight]
-				   ,[intItemWeightUOMId]	
+				   ,[intItemWeightUOMId]
+				   ,[intStorageScheduleTypeId]	
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -221,6 +222,7 @@ BEGIN
 				   ,[dblItemWeight]	
 				   ,[dblOriginalItemWeight]
 				   ,[intItemWeightUOMId] 	
+				   ,[intStorageScheduleTypeId]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

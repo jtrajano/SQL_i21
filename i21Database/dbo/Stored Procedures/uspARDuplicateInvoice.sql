@@ -70,6 +70,7 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@TotalWeight				NUMERIC(18,6)
 		,@EntityContactId			INT
 		,@TotalTermDiscount			NUMERIC(18,6)
+		,@StorageScheduleTypeId		INT
 		
 SELECT 
 	 @InvoiceNumber					= [strInvoiceNumber]
@@ -116,7 +117,7 @@ SELECT
 	,@IsImpactInventory				= [ysnImpactInventory]
 	,@TotalWeight					= [dblTotalWeight]
 	,@EntityContactId				= [intEntityContactId]
-	,@TotalTermDiscount				= [dblTotalTermDiscount]
+	,@TotalTermDiscount				= [dblTotalTermDiscount]	
 FROM
 	tblARInvoice
 WHERE
@@ -281,6 +282,7 @@ BEGIN TRY
 		,@ItemVirtualMeterReading				= 0
 		,@SubCurrency							= 0
 		,@EntityContactId						= @EntityContactId
+		,@StorageScheduleTypeId					= @StorageScheduleTypeId
 
 END TRY
 BEGIN CATCH
@@ -357,7 +359,8 @@ BEGIN TRY
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
 		,[intConcurrencyId]
-		,[dblOriginalItemWeight])
+		,[dblOriginalItemWeight]
+		,[intStorageScheduleTypeId])
 	SELECT 
 		 [intInvoiceId]					= @CreatedInvoiceId
 		,[strDocumentNumber]			= ''
@@ -425,6 +428,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]		= 0
 		,[intConcurrencyId]				= 1
 		,[dblOriginalItemWeight]		= ARID.dblOriginalItemWeight
+		,[intStorageScheduleTypeId]		= ARID.intStorageScheduleTypeId
 	FROM
 		tblARInvoiceDetail ARID
 	LEFT OUTER JOIN

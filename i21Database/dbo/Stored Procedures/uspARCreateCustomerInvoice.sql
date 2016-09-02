@@ -105,6 +105,7 @@
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@SubCurrency					BIT				= 0
 	,@DocumentMaintenanceId			INT				= NULL
+	,@StorageScheduleTypeId			INT				= NULL
 AS
 
 BEGIN
