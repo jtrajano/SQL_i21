@@ -184,12 +184,13 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					--11. Total special fuel tax due (Line 8 minus Line 9 plus or minus Line 10)
 						DECLARE @value NUMERIC(18, 6)
 						DECLARE @strvalue NVARCHAR(20)
+						--Line 8 minus Line 9 
 						DECLARE @val1 NUMERIC(18, 6) = (SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTaxReportSummary b WHERE b.intItemNumber IN ('8','9') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam) - (a.strColumnValue)) FROM   tblTFTaxReportSummary a WHERE a.intItemNumber IN ('8','9') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam)
-						PRINT @val1
+						--Get Line 10
 						DECLARE @val2 NUMERIC(18, 6) = (select strColumnValue from tblTFTaxReportSummary where intItemNumber IN ('10') AND strSummaryGuid = @Guid AND strFormCode = @FormCodeParam)
-						SET @value = (CASE WHEN sign(@val1)=sign(@val2) THEN @val1 + @val2 ELSE @val1 - @val2 END)
-						SET @strvalue = (convert(NVARCHAR(30), @value))
-
+						--plus line 10
+						SET @value = @val1 + @val2
+						SET @strvalue = (CONVERT(NVARCHAR(30), @value))
 						SET @Query  = 'SELECT ' + @strvalue
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
