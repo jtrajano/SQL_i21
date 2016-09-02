@@ -2,7 +2,8 @@
 
 AS
 
-SELECT DISTINCT ISNULL(dblBalance,0)+(isnull(dblQuantity,0)-(-isnull(dblAdjustByQuantity,0))) as dblDetailQuantity,(isnull(dblOpenReceive,0)-isnull(dblAdjustByQuantity,0)) OpenQty,
+SELECT DISTINCT ISNULL(dblBalance,0)+(isnull(dblQuantity,0)-(case when dblAdjustByQuantity > 0 then -(isnull(dblAdjustByQuantity,0)) else abs(isnull(dblAdjustByQuantity,0)) end)) as dblDetailQuantity,(isnull(dblOpenReceive,0)-isnull(dblAdjustByQuantity,0)
+) OpenQty,
 isnull(dblBalance,0) dblBalance,intContractDetailId FROM (
 SELECT sum(isnull(cd.dblBalance,0)) dblBalance,sum(isnull(il.dblQuantity,0)) dblQuantity,intContractDetailId,sum(ISNULL(ri.dblOpenReceive,0)) dblOpenReceive,
               ISNULL((SELECT SUM(ad.dblAdjustByQuantity) dblAdjustByQuantity from tblICInventoryAdjustmentDetail ad where  ad.intLotId=il.intLotId),0) dblAdjustByQuantity
