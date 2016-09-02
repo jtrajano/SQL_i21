@@ -594,3 +594,9 @@ GO
 		UPDATE tblSMUserSecurity SET intSecurityPolicyId = 1 WHERE intSecurityPolicyId IS NULL
 	END
 GO
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE intDefaultCountryId IS NULL)
+	BEGIN
+		PRINT N'ASSIGNING DEFAULT COUNTRY'
+		UPDATE tblSMCompanyPreference SET intDefaultCountryId = (SELECT TOP 1 intCountryID FROM tblSMCountry WHERE strCountry = 'United States')
+	END
+GO
