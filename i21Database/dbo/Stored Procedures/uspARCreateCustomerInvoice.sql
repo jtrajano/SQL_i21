@@ -65,7 +65,7 @@
 	,@ItemTaxGroupId				INT				= NULL
 	,@ItemStorageLocationId			INT				= NULL
 	,@ItemCompanyLocationSubLocationId	INT				= NULL
-	,@RecomputeTax					BIT				= 0
+	,@RecomputeTax					BIT				= 1
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemInventoryShipmentItemId	INT				= NULL
