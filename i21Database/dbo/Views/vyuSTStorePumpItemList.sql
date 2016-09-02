@@ -27,8 +27,7 @@ inner join tblSMCompanyLocation SMLoc on ICLoc.intLocationId = SMLoc.intCompanyL
 inner join tblSTStore STStore on SMLoc.intCompanyLocationId = STStore.intCompanyLocationId
 inner join tblSTPumpItem STPumpItem on STStore.intStoreId = STPumpItem.intStoreId
 left join tblICCategory ICCat on STPumpItem.intCategoryId = ICCat.intCategoryId
-where ICItem.ysnFuelItem = 1
-and ICItem.strType = 'Inventory'
+where ICItem.strType = 'Inventory'
 and ICItem.strStatus = 'Active'
 and STPumpItem.intItemUOMId =  ICUom.intItemUOMId
 
