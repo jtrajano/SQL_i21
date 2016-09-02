@@ -297,6 +297,20 @@ BEGIN
 		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
 			AND currentSnapshot.intContractDetailId != previousSnapshot.intContractDetailId
 
+
+		-- Check first instance of Load Schedule processed load
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRTransactionDetailLog WHERE intTransactionId = @LoadHeaderId AND strTransactionType = @TransactionType_TransportLoad)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '')
+			BEGIN
+				DECLARE @TransactionNo NVARCHAR(50)
+				SELECT TOP 1 @TransactionNo = strTransaction FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId
+				EXEC uspTRLoadProcessLogisticsLoad @TransactionNo, 'Added', @UserId
+
+				EXEC uspTRLoadProcessContracts @TransactionNo, 'Added', @UserId
+			END	
+		END
+
 	END
 
 	-- Iterate and process records
