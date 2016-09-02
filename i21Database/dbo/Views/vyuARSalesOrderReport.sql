@@ -26,13 +26,13 @@ SELECT SO.intSalesOrderId
 	 , strTerm					= T.strTerm
 	 , dtmDueDate				= SO.dtmDueDate
 	 , strFreightTerm			= FT.strFreightTerm
-	 , strItemNo				= I.strItemNo
+	 , strItemNo				= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN I.strItemNo ELSE NULL END
 	 , strType					= I.strType
 	 , intCategoryId			= CASE WHEN QT.strOrganization IN ('Product Type', 'Item Category') THEN I.intCategoryId ELSE NULL END
 	 , strCategoryCode			= ICC.strCategoryCode
 	 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 	 , intSalesOrderDetailId	= SD.intSalesOrderDetailId
-	 , strContractNumber		= CH.strContractNumber
+	 , strContractNumber		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END
 	 , strItemDescription		= SD.strItemDescription
 	 , strUnitMeasure			= UOM.strUnitMeasure
 	 , intTaxCodeId				= SDT.intTaxCodeId
@@ -54,14 +54,14 @@ SELECT SO.intSalesOrderId
 	 , strSOFooterComment		= SO.strFooterComments
 	 , dblSalesOrderSubtotal	= ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping				= ISNULL(SO.dblShipping, 0)
-	 , dblTax					= ISNULL(SD.dblTotalTax, 0)
+	 , dblTax					= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblTotalTax, 0) ELSE NULL END
 	 , dblSalesOrderTotal		= ISNULL(SO.dblSalesOrderTotal, 0)
-	 , dblQtyShipped			= ISNULL(SD.dblQtyShipped, 0)
-	 , dblQtyOrdered			= ISNULL(SD.dblQtyOrdered, 0)
-	 , dblDiscount				= ISNULL(SD.dblDiscount, 0) / 100
+	 , dblQtyShipped			= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblQtyShipped, 0) ELSE NULL END
+	 , dblQtyOrdered			= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblQtyOrdered, 0) ELSE NULL END
+	 , dblDiscount				= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblDiscount, 0) / 100 ELSE NULL END
 	 , dblTotalTax				= ISNULL(SO.dblTax, 0)
-	 , dblPrice					= ISNULL(SD.dblPrice, 0)
-	 , dblItemPrice				= ISNULL(SD.dblTotal, 0)
+	 , dblPrice					= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblPrice, 0) ELSE NULL END
+	 , dblItemPrice				= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblTotal, 0) ELSE NULL END
 	 , dblCategoryTotal			= CATEGORYTOTAL.dblCategoryTotal
 	 , dblProductTotal			= PRODUCTTYPETOTAL.dblProductTotal
 	 , strTaxCode				= SMT.strTaxCode
