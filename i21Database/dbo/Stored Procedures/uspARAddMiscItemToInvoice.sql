@@ -24,6 +24,7 @@
 	,@ItemCommentTypeId				INT				= NULL
 	,@ItemMargin					NUMERIC(18,6)	= NULL
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
+	,@RecomputeTax					BIT				= 1
 AS
 
 BEGIN
@@ -206,7 +207,8 @@ DECLARE @NewId INT
 SET @NewId = SCOPE_IDENTITY()
 		
 BEGIN TRY
-EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
+IF @RecomputeTax = 1
+	EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
 
 END TRY
 BEGIN CATCH
