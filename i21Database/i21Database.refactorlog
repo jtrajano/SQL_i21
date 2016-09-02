@@ -5390,6 +5390,13 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmDateModified" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9e1fd679-24e0-4f42-ae56-f19b14e2923c" ChangeDateTime="08/11/2016 04:22:37">
+    <Property Name="ElementName" Value="[dbo].[tblSMEmailRecipient].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMEmailRecipient]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="b1caa5f0-91ac-41a8-8bfe-378e7e9a7ead" ChangeDateTime="08/11/2016 11:17:45">
     <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[intShipmentContractQtyId]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
