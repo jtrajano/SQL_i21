@@ -246,7 +246,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (129, N'Check Register', N'Accounts Payable', 112, N'Check Register', N'Report', N'Report', N'Check Register', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (130, N'AP Transactions By GL Account', N'Accounts Payable', 112, N'AP Transactions By GL Account', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=APTransactionsByGLAccount&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+		VALUES (130, N'AP Transactions By GL Account', N'Accounts Payable', 112, N'AP Transactions By GL Account', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=APTransactionByGLAccount&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 
 		/* ACCOUNTS RECEIVABLE */
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1337,19 +1337,19 @@ BEGIN
 	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] ON
 
 	INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (130, N'AP Transactions By GL Account', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'AP Transactions By GL Account', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=APTransactionsByGLAccount&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+	VALUES (130, N'AP Transactions By GL Account', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'AP Transactions By GL Account', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=APTransactionByGLAccount&direct=true', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 
 	SET IDENTITY_INSERT [dbo].[tblSMMasterMenu] OFF
 	/* End of Re-insert */
 END
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=APTransactionsByGLAccount&direct=true', strDescription = 'AP Transactions By GL Account', strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'AP Transactions By GL Account' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId	
+	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=APTransactionByGLAccount&direct=true', strDescription = 'AP Transactions By GL Account', strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'AP Transactions By GL Account' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId	
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Clearing Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Open Clearing Detail', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Open Clearing Detail', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=OpenClearingDetail&direct=true', N'small-menu-report', 1, 0, 0, 1, NULL, 1)
+	VALUES (N'Open Clearing Detail', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Open Clearing Detail', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=OpenClearingDetails&direct=true', N'small-menu-report', 1, 0, 0, 1, NULL, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=OpenClearingDetail&direct=true', strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Open Clearing Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=OpenClearingDetails&direct=true', strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Open Clearing Detail' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Clearing' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
