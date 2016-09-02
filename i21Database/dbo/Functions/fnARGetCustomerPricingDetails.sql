@@ -22,7 +22,7 @@ RETURNS @returntable TABLE
 	,dblPriceBasis		NUMERIC(18,6)
 	,dblDeviation		NUMERIC(18,6)
 	,dblUOMQuantity		NUMERIC(18,6)
-	,intSort				BIT
+	,intSort			INT
 )
 AS
 BEGIN
