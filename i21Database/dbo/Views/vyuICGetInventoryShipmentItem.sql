@@ -47,6 +47,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strGrade = Grade.strDescription
 	, ShipmentItem.intDiscountSchedule
 	, strDiscountSchedule = DiscountSchedule.strDiscountId
+	, strStorageTypeDescription = StorageType.strStorageTypeDescription
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -60,3 +61,5 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ShipmentItem.intDiscountSchedule
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentItem.intCurrencyId
+	LEFT JOIN tblGRCustomerStorage CustomerStorage ON CustomerStorage.intCustomerStorageId = ShipmentItem.intCustomerStorageId
+	LEFT JOIN tblGRStorageType StorageType ON StorageType.intStorageScheduleTypeId = CustomerStorage.intStorageTypeId
