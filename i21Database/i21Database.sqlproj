@@ -4277,6 +4277,8 @@
     <Build Include="dbo\Views\vyuMFGetRecipeItem.sql" />
     <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetBudget.sql" />
+    <Build Include="dbo\Views\vyuAPRptWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
