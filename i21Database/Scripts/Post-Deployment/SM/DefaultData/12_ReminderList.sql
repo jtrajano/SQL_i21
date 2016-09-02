@@ -318,12 +318,12 @@
                 [intSort]           =        15
     END
 
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Due' AND [strType] = N'Activities')
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Activity' AND [strType] = N'Reminder')
     BEGIN
         INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
-        SELECT [strReminder]        =        N'Due',
-                [strType]           =        N'Activities',
-                [strMessage]        =        N'{0} Due Activities.',
+        SELECT [strReminder]        =        N'Activity',
+                [strType]           =        N'Reminder',
+                [strMessage]        =        N'{0} Activity Reminders.',
                 [strQuery]          =        N'SELECT	A.intActivityId, 
 														B.intEntityId,
 														strSubject, 
@@ -357,7 +357,7 @@
 															 WHEN strReminder = ''1 week'' THEN DATEADD(WEEK, -1, dtmStartDate)
 															 WHEN strReminder = ''2 weeks'' THEN DATEADD(WEEK, -2, dtmStartDate)
 														END <= GETUTCDATE()',
-                [strNamespace]      =        N'GlobalComponentEngine.view.DueActivity',
+                [strNamespace]      =        N'GlobalComponentEngine.view.ActivityReminder',
                 [intSort]           =        1
     END
 
