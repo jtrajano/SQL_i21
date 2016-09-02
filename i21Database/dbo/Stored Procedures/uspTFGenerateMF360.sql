@@ -111,7 +111,9 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 					END
 					ELSE IF @TemplateItemId = 'MF-360-Summary-002'
 					BEGIN
-						SET @Query = 'SELECT SUM(dblQtyShipped) FROM tblTFTransactions WHERE strScheduleCode IN (''' + @ScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
+						DECLARE @E1 NVARCHAR(50)
+						SET @E1 = (SELECT SUM(CAST(strConfiguration AS INT)) FROM tblTFTaxReportTemplate WHERE intTemplateItemId IN('MF-360-Summary-024','MF-360-Summary-025'))
+						SET @Query = 'SELECT SUM(dblQtyShipped) + ' + @E1 + ' FROM tblTFTransactions WHERE strScheduleCode IN (''' + @ScheduleCode + ''') AND uniqTransactionGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''  
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
