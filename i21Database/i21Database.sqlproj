@@ -4262,6 +4262,7 @@
     <Build Include="dbo\Functions\fnGetDueDate.sql" />
     <Build Include="dbo\Functions\fnGetInterestBasedOnTerm.sql" />
     <Build Include="dbo\Functions\fnIsDue.sql" />
+	<Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
