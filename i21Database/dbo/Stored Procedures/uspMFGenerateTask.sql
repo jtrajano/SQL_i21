@@ -30,6 +30,7 @@ BEGIN TRY
 	DECLARE @dblWeght NUMERIC(18, 6)
 	DECLARE @dblRemainingLotWeight NUMERIC(18,6)
 	DECLARE @intLotId INT
+	DECLARE @intTaskCount INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -310,7 +311,7 @@ BEGIN TRY
 					,@intLotId = @intLotId
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@dblSplitAndPickWeight = @dblPutbackWeight
-					,@intTaskTypeId = 13
+					,@intTaskTypeId = 2
 
 				SET @dblRequiredWeight = @dblRequiredWeight - @dblRemainingLotWeight
 
@@ -346,7 +347,7 @@ BEGIN TRY
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@dblSplitAndPickWeight = @dblRemainingLotWeight
-						,@intTaskTypeId = 7
+						,@intTaskTypeId = 2
 				END
 				ELSE
 				BEGIN
@@ -354,7 +355,7 @@ BEGIN TRY
 						,@intLotId = @intLotId
 						,@intEntityUserSecurityId = @intEntityUserSecurityId
 						,@dblSplitAndPickWeight = @dblRequiredWeight
-						,@intTaskTypeId = 7
+						,@intTaskTypeId = 2
 				END
 
 				SET @dblRequiredWeight = @dblRequiredWeight - @dblWeght
@@ -390,6 +391,12 @@ BEGIN TRY
 			WHERE intItemRecordId > @intItemRecordId
 	END
 
+	SELECT @intTaskCount = COUNT(*) FROM tblMFTask WHERE intOrderHeaderId = @intOrderHeaderId
+	IF @intTaskCount <= 0
+	BEGIN 
+		RAISERROR('System was unable to generate task for one or more item(s).',16,1)
+	END
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION		
 
@@ -398,7 +405,7 @@ BEGIN CATCH
 	SET @strErrMsg = ERROR_MESSAGE()
 	IF @strErrMsg != ''
 	BEGIN
-		SET @strErrMsg = 'uspMFGenerateTask: ' + @strErrMsg
+		SET @strErrMsg = @strErrMsg
 		RAISERROR (@strErrMsg, 16, 1, 'WITH NOWAIT')
 	END
 END CATCH
