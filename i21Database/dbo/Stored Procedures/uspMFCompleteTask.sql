@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @intMinTaskRecordId INT
 	DECLARE @strOrderNo NVARCHAR(100)
 	DECLARE @intRemainingTasks INT
+	DECLARE @intOrderDetailId INT
 	DECLARE @tblTasks TABLE 
 		(intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
@@ -48,6 +49,11 @@ BEGIN TRANSACTION
 			,@intLotLocationId = intLocationId
 		FROM tblICLot
 		WHERE intLotId = @intLotId
+		
+		SELECT @intOrderDetailId = intOrderDetailId
+		FROM tblMFOrderDetail
+		WHERE intOrderHeaderId = @intOrderHeaderId
+			AND intItemId = @intItemId
 
 		EXEC uspMFLotMove  @intLotId = @intLotId
 						  ,@intNewSubLocationId = @intNewSubLocationId
@@ -94,6 +100,26 @@ BEGIN TRANSACTION
 			,@intUserId
 			,'Handheld'
 			)
+
+
+		INSERT INTO tblMFOrderManifest (
+			intConcurrencyId
+			,intOrderDetailId
+			,intOrderHeaderId
+			,intLotId
+			,strManifestItemNote
+			,intLastUpdateId
+			,dtmLastUpdateOn
+			)
+		VALUES ( 
+			 1
+			,@intOrderDetailId
+			,@intOrderHeaderId
+			,@intNewLotId
+			,'Order Staged'
+			,@intUserId
+			,GetDate()
+			)
 	END
 	ELSE 
 	BEGIN
@@ -133,6 +159,11 @@ BEGIN TRANSACTION
 				,@intLotLocationId = intLocationId
 			FROM tblICLot
 			WHERE intLotId = @intLotId
+
+			SELECT @intOrderDetailId = intOrderDetailId
+			FROM tblMFOrderDetail
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intItemId = @intItemId
 
 			EXEC uspMFLotMove  @intLotId = @intLotId
 							  ,@intNewSubLocationId = @intNewSubLocationId
@@ -178,6 +209,25 @@ BEGIN TRANSACTION
 				,@dblMoveQty
 				,@intUserId
 				,'Desktop'
+				)
+
+			INSERT INTO tblMFOrderManifest (
+				intConcurrencyId
+				,intOrderDetailId
+				,intOrderHeaderId
+				,intLotId
+				,strManifestItemNote
+				,intLastUpdateId
+				,dtmLastUpdateOn
+				)
+			VALUES ( 
+			     1
+				,@intOrderDetailId
+				,@intOrderHeaderId
+				,@intNewLotId
+				,'Order Staged'
+				,@intUserId
+				,GetDate()
 				)
 
 			SELECT @intMinTaskRecordId = MIN(intTaskRecordId)
