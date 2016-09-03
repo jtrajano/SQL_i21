@@ -4286,6 +4286,7 @@
     <Build Include="dbo\Views\vyuMFWastageLotStorageLocation.sql" />
     <Build Include="dbo\Views\vyuMFWastageWorkOrder.sql" />
     <Build Include="dbo\Views\vyuMFWastageItem.sql" />
+    <Build Include="dbo\Views\vyuMFOrderManifest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
