@@ -315,7 +315,7 @@ BEGIN
 	DECLARE @tblMFFinalItemPlanSummary TABLE (
 		intItemId INT
 		,strItemNo NVARCHAR(50)
-		,strDescription NVARCHAR(50)
+		,strDescription NVARCHAR(100)
 		,intCompanyLocationId INT
 		,strLocationName NVARCHAR(50)
 		)
