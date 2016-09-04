@@ -4,15 +4,16 @@ BEGIN
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@xmlDocumentId INT
-		,@intBlendAttributeId int
-		,@strBlendAttributeValue nvarchar(50)
+		,@intBlendAttributeId INT
+		,@strBlendAttributeValue NVARCHAR(50)
 
+	SELECT @intBlendAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Category for Ingredient Demand Report'
 
-	Select @intBlendAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Category for Ingredient Demand Report'
-	
-	Select @strBlendAttributeValue=strAttributeValue
-	From tblMFManufacturingProcessAttribute
-	Where intAttributeId=@intBlendAttributeId
+	SELECT @strBlendAttributeValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intAttributeId = @intBlendAttributeId
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -71,6 +72,26 @@ BEGIN
 		,strMonthName NVARCHAR(50)
 		,intYearName INT
 		)
+	DECLARE @tblMFItemPlan TABLE (
+		intMonthId INT
+		,strStartingMonth NVARCHAR(50)
+		,strItemNo NVARCHAR(50)
+		,strDescription NVARCHAR(100)
+		,strCompanyLocationName NVARCHAR(50)
+		,dblMaxPoundsRequired NUMERIC(38, 20)
+		,intItemId INT
+		,dblSafetyStockPounds NUMERIC(38, 20)
+		,dblUnPackedPounds NUMERIC(38, 20)
+		,dblPoundsAvailable NUMERIC(38, 20)
+		,dblTotalPoundsAvailable NUMERIC(38, 20)
+		,strComments NVARCHAR(250)
+		,dblRunningTotal NUMERIC(38, 20)
+		,dblAvlQtyBreakUp NUMERIC(38, 20)
+		,intCompanyLocationId INT
+		,dblUnpackedBreakUp NUMERIC(38, 20)
+		,dblAvlBreakup NUMERIC(38, 20)
+		,strStartingYear NVARCHAR(50)
+		)
 	DECLARE @tblMFItemPlanSummary TABLE (
 		intRecordId INT IDENTITY(1, 1)
 		,intMonthId INT
@@ -96,28 +117,25 @@ BEGIN
 	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
 	SET @dtmCurrentDateTime = GetDate()
 
-	--SELECT @intCategoryId = intCategoryId
-	--FROM tblICCategory
-	--WHERE strCategoryCode = 'Blend'
-	INSERT INTO @tblMFItemPlanSummary
-	SELECT DATEPART(Month, CD.dtmShiftStartTime) dtmShiftStartTime
+	INSERT INTO @tblMFItemPlan
+	SELECT DATEPART(Month, CD.dtmShiftStartTime) intMonthId
 		,DATENAME(Month, CD.dtmShiftStartTime) dtmShiftStartTime
 		,II.strItemNo
 		,II.strDescription
 		,CL.strLocationName
-		,SUM(RI.dblCalculatedQuantity * SWD.dblPlannedQty)
+		,SUM(RI.dblCalculatedQuantity * SWD.dblPlannedQty) dblMaxPoundsRequired
 		,II.intItemId
-		,0
+		,0 dblSafetyStockPounds
 		,0 dblUnPackedPounds
 		,0 dblPoundsAvailable
 		,0 dblTotalPoundsAvailable
 		,'' strWorkInstruction
-		,0
-		,0
+		,0 dblRunningTotal
+		,0 dblAvlQtyBreakUp
 		,CL.intCompanyLocationId
-		,0
-		,0
-		,DATEPART(YEAR, CD.dtmShiftStartTime)
+		,0 dblUnpackedBreakUp
+		,0 dblAvlBreakup
+		,DATEPART(YEAR, CD.dtmShiftStartTime) strStartingYear
 	FROM dbo.tblMFSchedule S
 	JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
 		AND SW.intStatusId <> 13
@@ -127,17 +145,18 @@ BEGIN
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
+		AND R.intLocationId = W.intLocationId
 		AND R.ysnActive = 1
 	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-	JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
-		AND C.strCategoryCode in (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
-				)
+	JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+		AND C.strCategoryCode IN (
+			SELECT Item Collate Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			)
 	WHERE S.ysnStandard = 1
-		AND CD.dtmCalendarDate <= @dtmCurrentDate
+		AND CD.dtmCalendarDate >= @dtmCurrentDate
 	GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
 		,CD.dtmShiftStartTime
 		,II.strItemNo
@@ -147,9 +166,47 @@ BEGIN
 		--,II.strWorkInstruction
 		,CL.intCompanyLocationId
 		,DATEPART(YEAR, CD.dtmShiftStartTime)
-	ORDER BY II.strItemNo
-		,DATEPart(YEAR, CD.dtmShiftStartTime)
-		,DATEPart(MONTH, CD.dtmShiftStartTime)
+	ORDER BY strItemNo
+		,strStartingYear
+		,intMonthId
+
+	INSERT INTO @tblMFItemPlanSummary
+	SELECT intMonthId
+		,strStartingMonth
+		,strItemNo
+		,strDescription
+		,strCompanyLocationName
+		,SUM(dblMaxPoundsRequired)
+		,intItemId
+		,dblSafetyStockPounds
+		,dblUnPackedPounds
+		,dblPoundsAvailable
+		,dblTotalPoundsAvailable
+		,strComments
+		,dblRunningTotal
+		,dblAvlQtyBreakUp
+		,intCompanyLocationId
+		,dblUnpackedBreakUp
+		,dblAvlBreakup
+		,strStartingYear
+	FROM @tblMFItemPlan
+	GROUP BY intMonthId
+		,strStartingMonth
+		,strItemNo
+		,strDescription
+		,strCompanyLocationName
+		,intItemId
+		,dblSafetyStockPounds
+		,dblUnPackedPounds
+		,dblPoundsAvailable
+		,dblTotalPoundsAvailable
+		,strComments
+		,dblRunningTotal
+		,dblAvlQtyBreakUp
+		,intCompanyLocationId
+		,dblUnpackedBreakUp
+		,dblAvlBreakup
+		,strStartingYear
 
 	DECLARE @tblMFQtyOnHand TABLE (
 		intCompanyLocationId INT
@@ -165,7 +222,7 @@ BEGIN
 	JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
 	WHERE L.intLotStatusId = 1
-		AND ISNULL(dtmExpiryDate,@dtmCurrentDateTime) >= @dtmCurrentDateTime
+		AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 		AND CSL.strSubLocationName <> 'Intrasit'
 	GROUP BY L.intLocationId
 		,I.intItemId
@@ -333,11 +390,11 @@ BEGIN
 	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intRecipeItemTypeId = 1
 	JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		JOIN dbo.tblICCategory C on C.intCategoryId =II.intCategoryId
-		AND C.strCategoryCode In (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
-				)
+	JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+		AND C.strCategoryCode IN (
+			SELECT Item Collate Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			)
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 	
 	UNION
@@ -349,11 +406,11 @@ BEGIN
 		,CL.strLocationName
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-	JOIN dbo.tblICCategory C on C.intCategoryId =I.intCategoryId
-		AND C.strCategoryCode In (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
-				)
+	JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
+		AND C.strCategoryCode IN (
+			SELECT Item Collate Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+			)
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	WHERE L.dblWeight > 0
 
