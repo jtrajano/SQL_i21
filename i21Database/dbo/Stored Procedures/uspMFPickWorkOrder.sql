@@ -305,10 +305,10 @@ BEGIN TRY
 			WHEN C.strCategoryCode = @strPackagingCategory
 				AND @ysnProducedQtyByWeight = 1
 				AND P.dblMaxWeightPerPack > 0
-				THEN (CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+				THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
 			WHEN C.strCategoryCode = @strPackagingCategory
-				THEN CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS NUMERIC(38, 20))
-			ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
+				THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+			ELSE (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / r.dblQuantity))
 			END AS RequiredQty
 		,ri.intItemUOMId
 		,ri.intStorageLocationId
@@ -353,10 +353,10 @@ BEGIN TRY
 				WHEN C.strCategoryCode = @strPackagingCategory
 					AND @ysnProducedQtyByWeight = 1
 					AND P.dblMaxWeightPerPack > 0
-					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+					THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN CAST(CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS NUMERIC(38, 20))
-				ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
+					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / r.dblQuantity))) AS NUMERIC(38, 20))
+				ELSE (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / r.dblQuantity))
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
 		,ri.intItemUOMId
@@ -393,8 +393,8 @@ BEGIN TRY
 		AND (
 			CASE 
 				WHEN C.strCategoryCode = @strPackagingCategory
-					THEN (CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / P.dblMaxWeightPerPack))))
-				ELSE (ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))
+					THEN (CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / P.dblMaxWeightPerPack))))
+				ELSE (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId ,r.intItemUOMId ,@dblProduceQty) / r.dblQuantity))
 				END
 			) - WC.dblQuantity / rs.dblSubstituteRatio > 0
 
