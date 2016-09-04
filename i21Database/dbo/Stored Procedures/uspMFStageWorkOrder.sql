@@ -246,7 +246,7 @@ BEGIN TRY
 				)
 	END
 
-	IF @intConsumptionMethodId = 2
+	IF @intConsumptionMethodId = 1
 		AND (
 			@intConsumptionStorageLocationId IS NULL
 			OR @intConsumptionStorageLocationId = 0
