@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRLoadProcessLogisticsLoad]
-	 @strTransaction AS nvarchar(50),
-	 @action as nvarchar(50),
-	 @intUserId as int
+	 @intLoadHeaderId AS INT,
+	 @action AS NVARCHAR(50),
+	 @intUserId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -10,74 +10,73 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000);
-DECLARE @ErrorSeverity INT;
-DECLARE @ErrorState INT;
-DECLARE  @intLoadHeaderId AS INT,
-         @intLoadId as int,
-         @intLoadDetailId as int;
-DECLARE @intPContractDetailId as int,
-        @intSContractDetailId as int,
-		@total int,
-		@incval int,
-        @dblQuantity as float;
+DECLARE @ErrorMessage NVARCHAR(4000)
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
 
-DECLARE @LoadTable TABLE
-(
-    intId INT IDENTITY PRIMARY KEY CLUSTERED,
-	[intLoadDetailId] INT NULL
-)
+DECLARE  @intLoadId AS INT,
+         @intLoadDetailId AS INT,
+		 @intPContractDetailId AS INT,
+		 @intSContractDetailId AS INT,
+		 @dblQuantity AS NUMERIC(18,6)
 
 BEGIN TRY
-  select @intLoadHeaderId = intLoadHeaderId ,@intLoadId= intLoadId from tblTRLoadHeader where strTransaction = @strTransaction
 
-  insert into @LoadTable select distinct intLoadDetailId from tblTRLoadReceipt where intLoadHeaderId = @intLoadHeaderId and isNUll(intLoadDetailId ,0 ) !=0
---Update the Logistics Load for InProgress 
+	SELECT @intLoadId = intLoadId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId
+	SELECT DISTINCT intLoadDetailId
+	INTO #LoadTable
+	FROM tblTRLoadReceipt
+	WHERE intLoadHeaderId = @intLoadHeaderId AND ISNULL(intLoadDetailId,'') <> ''
 	
-select @total = count(*) from @LoadTable;
-set @incval = 1 
-WHILE @incval <=@total 
-BEGIN
-     select @intLoadDetailId =intLoadDetailId  from @LoadTable where @incval = intId
-
-    IF (isNull(@intLoadDetailId,0) != 0)
+	WHILE EXISTS (SELECT TOP 1 1 FROM #LoadTable)
 	BEGIN
-	   if (@action = 'Added')
-	   BEGIN
-        Exec dbo.uspLGUpdateLoadDetails @intLoadDetailId,1,@intLoadHeaderId,null,null
-       END
-		SELECT @intPContractDetailId = intPContractDetailId, @intSContractDetailId = intSContractDetailId,@dblQuantity = dblQuantity from tblLGLoadDetail WHERE intLoadDetailId=@intLoadDetailId
-		if (@action = 'Added')
-		    BEGIN
-		        set @dblQuantity = @dblQuantity * -1
-		    END
-		IF (isNull(@intPContractDetailId,0) != 0)
-		  Begin		    
-		     exec uspCTUpdateScheduleQuantity @intPContractDetailId, @dblQuantity,@intUserId,@intLoadDetailId,'Load Schedule'
-		  END
+		SELECT TOP 1 @intLoadDetailId = intLoadDetailId FROM #LoadTable
+		
+		IF (@action = 'Added')
+		BEGIN
+			EXEC uspLGUpdateLoadDetails @intLoadDetailId, 1, @intLoadHeaderId, null, null
+		END
+		
+		SELECT @intPContractDetailId = intPContractDetailId
+			, @intSContractDetailId = intSContractDetailId
+			, @dblQuantity = dblQuantity
+		FROM tblLGLoadDetail
+		WHERE intLoadDetailId = @intLoadDetailId
 
-	   IF (isNull(@intSContractDetailId,0) != 0)
-		  Begin		    
-		    exec uspCTUpdateScheduleQuantity @intSContractDetailId, @dblQuantity,@intUserId,@intLoadDetailId,'Load Schedule'
-		  END
+		IF (@action = 'Added')
+		BEGIN
+			SET @dblQuantity = @dblQuantity * -1
+		END
+		
+		IF (ISNULL(@intPContractDetailId, '') <> '')
+		BEGIN
+			EXEC uspCTUpdateScheduleQuantity @intPContractDetailId, @dblQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
+		END
+		
+		IF (ISNULL(@intSContractDetailId, '') <> '')
+		BEGIN
+			EXEC uspCTUpdateScheduleQuantity @intSContractDetailId, @dblQuantity, @intUserId, @intLoadDetailId, 'Load Schedule'
+		END
+		
+		IF (@action = 'Delete')
+		BEGIN
+			UPDATE tblLGLoad
+			SET intLoadHeaderId = NULL,
+				ysnInProgress = 0,
+				intConcurrencyId = intConcurrencyId + 1
+			WHERE intLoadId=@intLoadId
+			
+			UPDATE tblTRLoadReceipt
+			SET intLoadDetailId = NULL
+			WHERE intLoadDetailId = @intLoadDetailId
+			
+			UPDATE tblTRLoadDistributionDetail
+			SET intLoadDetailId = NULL
+			WHERE intLoadDetailId = @intLoadDetailId
+		END
 
-	   if (@action = 'Delete')
-	   BEGIN
-	      UPDATE tblLGLoad SET 
-			intLoadHeaderId=null,
-			ysnInProgress = 0,
-			intConcurrencyId	=	intConcurrencyId + 1
-		  WHERE intLoadId=@intLoadId
-		  UPDATE tblTRLoadReceipt SET 
-			intLoadDetailId = null
-		  WHERE intLoadDetailId=@intLoadDetailId
-		  UPDATE tblTRLoadDistributionDetail SET 
-			intLoadDetailId = null
-		  WHERE intLoadDetailId=@intLoadDetailId
-	   END
+		DELETE FROM #LoadTable WHERE intLoadDetailId = @intLoadDetailId
 	END
-	set @incval = @incval + 1;
-END
 END TRY
 BEGIN CATCH
 	SELECT 
