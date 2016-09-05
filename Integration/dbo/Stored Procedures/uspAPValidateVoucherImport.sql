@@ -23,6 +23,14 @@ DECLARE @log TABLE
 	[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 
+
+IF OBJECT_ID(N'dbo.apchkmst') IS NULL
+BEGIN
+	INSERT INTO @log
+	SELECT 'No AP origin integration found.'
+	GOTO INSERTLOG;
+END
+
 IF(NOT EXISTS(SELECT 1 FROM tblSMUserSecurity A WHERE A.intEntityUserSecurityId = @UserId))
 BEGIN
 	INSERT INTO @log
@@ -196,6 +204,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 						CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 					ELSE 1 END)
 
+INSERTLOG:
 INSERT INTO tblAPImportVoucherLog
 (
 	[strDescription], 
