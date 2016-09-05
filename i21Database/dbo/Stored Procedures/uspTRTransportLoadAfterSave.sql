@@ -183,6 +183,7 @@ BEGIN
 		WHERE
 			previousSnapshot.strSourceType = @SourceType_InventoryReceipt
 			AND previousSnapshot.intTransactionId IS NOT NULL
+			AND ISNULL(previousSnapshot.intSourceId, '') <> ''
 			AND previousSnapshot.intSourceId NOT IN (SELECT DISTINCT intInventoryReceiptId
 													FROM tblTRLoadReceipt 
 													WHERE intLoadHeaderId = @LoadHeaderId
@@ -201,6 +202,7 @@ BEGIN
 		WHERE
 			previousSnapshot.strSourceType = @SourceType_InventoryTransfer
 			AND previousSnapshot.intTransactionId IS NOT NULL
+			AND ISNULL(previousSnapshot.intSourceId, '') <> ''
 			AND previousSnapshot.intSourceId NOT IN (SELECT DISTINCT intInventoryTransferId
 													FROM tblTRLoadReceipt 
 													WHERE intLoadHeaderId = @LoadHeaderId
@@ -219,6 +221,7 @@ BEGIN
 		WHERE
 			previousSnapshot.strSourceType = @SourceType_Invoice
 			AND previousSnapshot.intTransactionId IS NOT NULL
+			AND ISNULL(previousSnapshot.intSourceId, '') <> ''
 			AND previousSnapshot.intSourceId NOT IN (SELECT DISTINCT intInvoiceId
 													FROM tblTRLoadDistributionHeader
 													WHERE intLoadHeaderId = @LoadHeaderId
@@ -299,17 +302,10 @@ BEGIN
 
 
 		-- Check first instance of Load Schedule processed load
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRTransactionDetailLog WHERE intTransactionId = @LoadHeaderId AND strTransactionType = @TransactionType_TransportLoad)
+		IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '' AND intConcurrencyId <= 1)
 		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '')
-			BEGIN
-				DECLARE @TransactionNo NVARCHAR(50)
-				SELECT TOP 1 @TransactionNo = strTransaction FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId
-				EXEC uspTRLoadProcessLogisticsLoad @TransactionNo, 'Added', @UserId
-
-				EXEC uspTRLoadProcessContracts @TransactionNo, 'Added', @UserId
-			END	
-		END
+			EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Added', @UserId
+		END			
 
 	END
 
@@ -405,5 +401,7 @@ BEGIN
 		UPDATE tblLGLoad
 		SET intLoadHeaderId = NULL
 		WHERE intLoadHeaderId = @LoadHeaderId
+
+		EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Delete', @UserId
 	END
 END

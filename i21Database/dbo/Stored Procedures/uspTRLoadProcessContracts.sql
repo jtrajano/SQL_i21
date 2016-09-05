@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRLoadProcessContracts]
-	 @strTransaction AS nvarchar(50),
-	 @action as nvarchar(50),
-	 @intUserId as int
+	 @intLoadHeaderId AS INT,
+	 @action AS NVARCHAR(50),
+	 @intUserId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -10,89 +10,71 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000);
-DECLARE @ErrorSeverity INT;
-DECLARE @ErrorState INT;
-DECLARE  @intLoadHeaderId AS INT;
-DECLARE @intContractDetailId as int,
-        @dblQuantity as float;
-Declare @incval int,
-        @total int,
-		@intReceiptId int,
-		@intDistributionId int;
+DECLARE @ErrorMessage NVARCHAR(4000)
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
 
+DECLARE @intContractDetailId AS INT,
+		@dblQuantity AS NUMERIC(18, 6),
+		@intReceiptId INT,
+		@intDistributionId INT
 
 BEGIN TRY
-  select @intLoadHeaderId = intLoadHeaderId from tblTRLoadHeader where strTransaction = @strTransaction
-
---Update the Logistics Load for InProgress 
 	
-DECLARE @tempReceipt TABLE
-    (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-	intReceiptContractId int,
-	dblQuantity float,
-	intReceiptId int
-    )	  
-DECLARE @tempDistribution TABLE
-    (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-	intDistributionContractId int,
-	dblQuantity float,
-	intDistributionId int
-    )     
-
 	--Receipts which used Contract
-	Insert into @tempReceipt(intReceiptContractId,
-	                 dblQuantity,
-					 intReceiptId)
-	select TR.intContractDetailId,
-	          dblQuantity = CASE
-								  WHEN SP.strGrossOrNet = 'Gross'
-								  THEN TR.dblGross
-								  WHEN SP.strGrossOrNet = 'Net'
-								  THEN TR.dblNet
-								  END,
-		      intLoadReceiptId
-	 from tblTRLoadHeader TL
-	           join tblTRLoadReceipt TR on TR.intLoadHeaderId = TL.intLoadHeaderId
-			   join tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId
-			    where TL.intLoadHeaderId = @intLoadHeaderId and isNull(TR.intContractDetailId,0) != 0
+	SELECT TR.intContractDetailId
+		, dblQuantity = CASE WHEN SP.strGrossOrNet = 'Gross' THEN TR.dblGross
+							WHEN SP.strGrossOrNet = 'Net' THEN TR.dblNet END
+		, intLoadReceiptId
+	INTO #tmpReceipt
+	FROM tblTRLoadReceipt TR
+	LEFT JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = TR.intLoadHeaderId
+	LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = TR.intSupplyPointId
+	WHERE TL.intLoadHeaderId = @intLoadHeaderId AND ISNULL(TR.intContractDetailId, '') <> ''
 				
-    select @total = count(*) from @tempReceipt;
-    set @incval = 1 
-    WHILE @incval <=@total 
-    BEGIN    
-      select @dblQuantity = dblQuantity,@intContractDetailId =intReceiptContractId,@intReceiptId = intReceiptId  from @tempReceipt where @incval = intId    
-	  if (@action = 'Delete')
-	  BEGIN 
-	     set @dblQuantity = @dblQuantity * -1
-	  END
-      exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity,@intUserId,@intReceiptId,'Transport Purchase'    
-      SET @incval = @incval + 1;
-    END;
+    WHILE EXISTS (SELECT TOP 1 1 FROM #tmpReceipt)
+    BEGIN
+		SELECT TOP 1 @dblQuantity = dblQuantity
+			, @intContractDetailId = intContractDetailId
+			, @intReceiptId = intLoadReceiptId
+		FROM #tmpReceipt
+		
+		IF (@action = 'Delete')
+		BEGIN
+			SET @dblQuantity = @dblQuantity * -1
+		END
+		
+		EXEC uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity, @intUserId, @intReceiptId, 'Transport Purchase'
+		
+		DELETE FROM #tmpReceipt WHERE intLoadReceiptId = @intReceiptId
+    END
   
---Distribution which used Contract	
-    Insert into @tempDistribution(intDistributionContractId,
-	                 dblQuantity,intDistributionId)
-	select DD.intContractDetailId,DD.dblUnits,DD.intLoadDistributionDetailId from tblTRLoadHeader TL	          
-			   join tblTRLoadDistributionHeader DH on DH.intLoadHeaderId = TL.intLoadHeaderId
-			   join tblTRLoadDistributionDetail DD on DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-			    where TL.intLoadHeaderId = @intLoadHeaderId and isNull(DD.intContractDetailId,0) != 0
+	--Distribution which used Contract
+	SELECT DD.intContractDetailId
+		,DD.dblUnits
+		,DD.intLoadDistributionDetailId
+	INTO #tmpDistribution
+	FROM tblTRLoadHeader TL
+	JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
+	JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	WHERE TL.intLoadHeaderId = @intLoadHeaderId AND ISNULL(DD.intContractDetailId, '') <> ''
 				
-    select @total = count(*) from @tempDistribution;
-    set @incval = 1 
-    WHILE @incval <=@total 
-    BEGIN    
-      select @dblQuantity = dblQuantity,@intContractDetailId = intDistributionContractId ,@intDistributionId = intDistributionId from @tempDistribution where @incval = intId
-	  if (@action = 'Delete')
-	  BEGIN 
-	     set @dblQuantity = @dblQuantity * -1
-	  END      
-      exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity ,@intUserId,@intDistributionId,'Transport Sale'   
-      SET @incval = @incval + 1;
-    END;
-
+    WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDistribution)
+    BEGIN
+		SELECT TOP 1 @dblQuantity = dblUnits
+			, @intContractDetailId = intContractDetailId
+			, @intDistributionId = intLoadDistributionDetailId
+		FROM #tmpDistribution
+		
+		IF (@action = 'Delete')
+		BEGIN
+			SET @dblQuantity = @dblQuantity * -1
+		END
+		
+		EXEC uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity, @intUserId, @intDistributionId, 'Transport Sale'
+		
+		DELETE FROM #tmpDistribution WHERE intLoadDistributionDetailId = @intDistributionId
+    END
 END TRY
 BEGIN CATCH
 	SELECT 
