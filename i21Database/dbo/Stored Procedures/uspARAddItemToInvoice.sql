@@ -69,6 +69,7 @@
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
 	,@SubCurrency					BIT				= 0	
+	,@StorageScheduleTypeId			INT				= NULL
 AS
 
 BEGIN
@@ -97,10 +98,12 @@ WHERE
 
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
+	
 
 IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 1
 	BEGIN
-		BEGIN TRY
+		BEGIN TRY		
+
 		EXEC [dbo].[uspARAddInventoryItemToInvoice]
 			 @InvoiceId						= @InvoiceId	
 			,@ItemId						= @ItemId
@@ -332,6 +335,7 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemMargin					= @ItemMargin
 			,@ItemRecipeQty					= @ItemRecipeQty
 			,@ItemConversionAccountId		= @ItemConversionAccountId
+			,@StorageScheduleTypeId			= @StorageScheduleTypeId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -355,6 +359,20 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 	
 		
 SET @NewInvoiceDetailId = @NewDetailId
+
+UPDATE tblARInvoiceDetail SET intStorageScheduleTypeId = ABC.intStorageScheduleTypeId
+FROM tblARInvoiceDetail
+INNER JOIN
+(
+SELECT intInvoiceId, intStorageScheduleTypeId FROM tblICInventoryShipment  ICIS
+INNER JOIN (SELECT intInventoryShipmentId, intItemId, intItemUOMId, intOrderId FROM tblICInventoryShipmentItem) ICISI ON ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
+INNER JOIN (SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, intStorageScheduleTypeId, intItemId, intItemUOMId FROM tblSOSalesOrder SO 
+			INNER JOIN (SELECT intSalesOrderId, intStorageScheduleTypeId, intItemId, intItemUOMId  FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId) SO ON ICIS.strReferenceNumber = SO.strSalesOrderNumber AND ICISI.intItemId = SO.intItemId AND ICISI.intItemUOMId = SO.intItemUOMId
+INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, intItemId, intItemUOMId FROM tblARInvoice ARI  
+			INNER JOIN (SELECT intInvoiceId, strDocumentNumber, intItemId, intItemUOMId FROM tblARInvoiceDetail) ARID ON ARI.intInvoiceId = ARID.intInvoiceId 
+						WHERE strDocumentNumber IS NOT NULL AND ISNULL(strDocumentNumber,'') <> '' AND ARI.intInvoiceId = @InvoiceId ) ARI ON ICIS.strShipmentNumber = ARI.strDocumentNumber AND ICISI.intItemId = ARI.intItemId AND ICISI.intItemUOMId = ARI.intItemUOMId
+) ABC ON tblARInvoiceDetail.intInvoiceId = ABC.intInvoiceId
+WHERE tblARInvoiceDetail.intInvoiceId = @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION

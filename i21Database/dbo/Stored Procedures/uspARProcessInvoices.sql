@@ -241,6 +241,7 @@ DECLARE  @Id									INT
 		,@SubCurrency							BIT			
 		,@ItemIsBlended							BIT
 		,@ItemConversionAccountId				INT
+		,@StorageScheduleTypeId					INT
 
 --INSERT
 BEGIN TRY
@@ -380,6 +381,7 @@ BEGIN
 		,@SubCurrency					= (CASE WHEN @GroupingOption = 0 THEN [ysnSubCurrency] ELSE 0 END)
 		,@ItemIsBlended					= [ysnBlended]
 		,@ItemConversionAccountId		= (CASE WHEN @GroupingOption = 0 THEN [intConversionAccountId] ELSE NULL END)
+		,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -581,6 +583,7 @@ BEGIN
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@ItemConversionAccountId		= @ItemConversionAccountId
 			,@SubCurrency					= @SubCurrency
+			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -713,6 +716,7 @@ BEGIN
 					,@ItemConversionAccountId		= [intConversionAccountId]
 					,@SubCurrency					= [ysnSubCurrency]
 					,@ItemIsBlended					= [ysnBlended]
+					,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -785,6 +789,7 @@ BEGIN
 						,@ItemConversionAccountId		= @ItemConversionAccountId
 						,@SubCurrency					= @SubCurrency
 						,@ItemIsBlended					= @ItemIsBlended
+						,@StorageScheduleTypeId			= @StorageScheduleTypeId
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1303,6 +1308,7 @@ BEGIN TRY
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 						,@ItemConversionAccountId		= [intConversionAccountId]
 						,@SubCurrency					= [ysnSubCurrency]
+						,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1371,6 +1377,7 @@ BEGIN TRY
 							,@SubCurrency					= @SubCurrency
 							,@ItemWeightUOMId				= @ItemWeightUOMId
 							,@ItemWeight					= @ItemWeight
+							,@StorageScheduleTypeId			= @StorageScheduleTypeId
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -1546,6 +1553,7 @@ BEGIN TRY
 					,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 					,@ItemConversionAccountId		= [intConversionAccountId]
 					,@SubCurrency					= [ysnSubCurrency]
+					,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1661,6 +1669,7 @@ BEGIN TRY
 						,[intConversionAccountId]				= @ItemConversionAccountId
 						,[ysnSubCurrency]						= @SubCurrency
 						,[intConcurrencyId]						= [intConcurrencyId] + 1
+						,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
 					WHERE
 						[intInvoiceId] = @ExistingInvoiceId
 						AND [intInvoiceDetailId] = @InvoiceDetailId						

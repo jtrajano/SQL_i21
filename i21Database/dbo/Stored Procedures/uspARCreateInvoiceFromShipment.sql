@@ -45,6 +45,7 @@ DECLARE
 	,@InvoiceComments			NVARCHAR(MAX)
 	,@ShipToLocationId			INT
 	,@SalesOrderId				INT
+	,@StorageScheduleTypeId		INT
 	
 SELECT
 	 @ShipmentNumber			= ICIS.[strShipmentNumber]
@@ -68,6 +69,7 @@ SELECT
 	,@SalesOrderComments		= SO.strComments
 	,@ShipToLocationId			= ICIS.intShipToLocationId
 	,@SalesOrderId				= SO.intSalesOrderId
+	,@StorageScheduleTypeId		= @StorageScheduleTypeId
 FROM 
 	[tblICInventoryShipment] ICIS
 INNER JOIN
@@ -77,6 +79,7 @@ LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
+
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
@@ -191,6 +194,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intTempDetailIdForTaxes]
 	,[ysnSubCurrency]
 	,[ysnBlended]
+	,[intStorageScheduleTypeId]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -294,6 +298,7 @@ SELECT
 	,[intTempDetailIdForTaxes]				= NULL
 	,[ysnSubCurrency]						= 0
 	,[ysnBlended]							= ARSI.[ysnBlended]
+	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
 FROM
 	vyuARShippedItems ARSI
 WHERE
@@ -404,6 +409,7 @@ SELECT
 	,[intTempDetailIdForTaxes]				= NULL
 	,[ysnSubCurrency]						= 0
 	,[ysnBlended]							= 0
+	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
 FROM 
 	tblICInventoryShipment ICIS
 	INNER JOIN tblSOSalesOrder SO 
@@ -515,7 +521,8 @@ INSERT INTO @EntriesForInvoice
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
 	,[ysnSubCurrency]
-	,[ysnBlended])
+	,[ysnBlended]
+	,[intStorageScheduleTypeId])
 SELECT 
 	 [strSourceTransaction]
 	,[intSourceId]
@@ -618,6 +625,7 @@ SELECT
 	,[intTempDetailIdForTaxes]
 	,[ysnSubCurrency]
 	,[ysnBlended]
+	,@StorageScheduleTypeId
  FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId
 	
 IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
@@ -645,14 +653,12 @@ BEGIN
 
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
-END
-	
+END	
 	
 DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
 		,@CurrentErrorMessage NVARCHAR(250)
 		,@CreatedIvoices NVARCHAR(MAX)
 		,@UpdatedIvoices NVARCHAR(MAX)	
-				
 
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries		= @EntriesForInvoice

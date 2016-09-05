@@ -26,6 +26,7 @@
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@RecomputeTax					BIT				= 1
 	,@ItemConversionAccountId		INT				= NULL
+	,@StorageScheduleTypeId			INT				= NULL
 AS
 
 BEGIN
@@ -76,6 +77,7 @@ IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGL
 		RETURN 0;
 	END
 		
+	
 SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
 --IF ISNULL(@ServiceChargesAccountId,0) = 0
 --	BEGIN
@@ -144,7 +146,8 @@ BEGIN TRY
 		,[dblMargin]
 		,[dblRecipeQuantity]
 		,[intConversionAccountId]
-		,[intConcurrencyId])
+		,[intConcurrencyId]
+		,[intStorageScheduleTypeId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -203,6 +206,7 @@ BEGIN TRY
 		,[dblRecipeQuantity]				= @ItemRecipeQty
 		,[intConversionAccountId]			= @ItemConversionAccountId
 		,[intConcurrencyId]					= 0
+		,[intStorageScheduleTypeId]			= @StorageScheduleTypeId
 			
 END TRY
 BEGIN CATCH
