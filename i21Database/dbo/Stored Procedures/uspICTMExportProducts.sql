@@ -34,5 +34,7 @@ FROM tblICItem item
 			AND ISNULL(ItemPricing.dblSalePrice * ItemUOM.dblUnitQty, 0) > 0
 		ORDER BY ysnStockUnit DESC, ItemLocation.intLocationId DESC
 	) prices
+WHERE item.ysnAvailableTM = 1
+	OR item.strType = 'Service'
 GROUP BY item.strItemNo, item.strShortName, prices.intLocationId
 ORDER BY prices.intLocationId DESC

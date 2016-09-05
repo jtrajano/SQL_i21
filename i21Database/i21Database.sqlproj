@@ -4066,7 +4066,6 @@
     <Build Include="dbo\Views\vyuEMETExportCustomerCSV.sql" />
     <Build Include="dbo\Views\vyuTMBEExportConsumptionSite.sql" />
     <Build Include="dbo\Functions\fnLGGetDefaultWeightItemUOM.sql" />
-    <Build Include="dbo\Views\vyuICExportProduct.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailCost.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailQty.sql" />
     <Build Include="dbo\Views\vyuAPClaims.sql" />
