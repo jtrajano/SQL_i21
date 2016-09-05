@@ -162,5 +162,6 @@ GO
 			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
 		)
 	END
-
+GO
+	UPDATE tblSMHomePanelDashboard SET strPanelName = 'Notifications' WHERE strPanelName = 'Alerts'
 GO
