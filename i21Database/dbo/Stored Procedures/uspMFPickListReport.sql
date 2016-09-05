@@ -69,6 +69,8 @@ Declare @strCustomerComments nvarchar(max)
 Declare @strFooterComments nvarchar(max)
 Declare @ysnShowCostInSalesOrderPickList bit=0
 Declare @intMaxOtherChargeId int
+Declare @ysnIncludeEntityName bit=0
+Declare @strCustomerName nvarchar(250)
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -272,7 +274,7 @@ Begin
 End
 Else
 Begin --Sales Order Pick List
-	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnPrintPriceOnPrintTicket,0) From tblARCustomer 
+	Select TOP 1 @ysnShowCostInSalesOrderPickList=ISNULL(ysnPrintPriceOnPrintTicket,0),@ysnIncludeEntityName=ISNULL(ysnIncludeEntityName,0) From tblARCustomer 
 	Where intEntityCustomerId=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 
 	Select TOP 1 @intPickListId=ISNULL(intPickListId,0) From tblMFPickList Where intSalesOrderId=@intSalesOrderId
@@ -285,7 +287,11 @@ Begin --Sales Order Pick List
 
 	Select @intLocationId=intCompanyLocationId,@strSONo=strSalesOrderNumber From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId
 
-	Select @strShipTo= ISNULL(RTRIM(el.strAddress) + CHAR(13) + char(10), '')
+	Select @strCustomerName=ISNULL(strName,'') From vyuARCustomer Where intEntityCustomerId=(Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
+
+	Select @strShipTo= ISNULL(RTRIM(CASE WHEN @ysnIncludeEntityName=1 THEN @strCustomerName + CHAR(13) ELSE '' END),'') 
+					 + ISNULL(RTRIM(so.strShipToLocationName),'') + CHAR(13)
+					 + ISNULL(RTRIM(el.strAddress) + CHAR(13) + char(10), '')
 					 + ISNULL(RTRIM(el.strCity), '')
 					 + ISNULL(', ' + RTRIM(el.strState), '')
 					 + ISNULL(', ' + RTRIM(el.strZipCode), '') + CHAR(13)
