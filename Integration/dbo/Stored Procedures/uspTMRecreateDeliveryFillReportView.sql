@@ -123,7 +123,7 @@ BEGIN
 					, O.strRouteId
 					, P.strFillMethod
 					, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
-											ELSE Cast((CONVERT(INT,C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
+											ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 										END)  		
 					, strLocation =  (CASE WHEN ISNUMERIC(C.strLocation) = 1 THEN C.strLocation
 										ELSE SUBSTRING(C.strLocation, PATINDEX(''%[^0]%'',C.strLocation), 50) 
@@ -275,7 +275,7 @@ BEGIN
 				, O.strRouteId
 				, P.strFillMethod
 				, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
-										ELSE CAST((CONVERT(INT,C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
+										ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 									END)  
 				, strLocation = (CASE WHEN ISNUMERIC(C.strLocation) = 1 THEN C.strLocation
 								 ELSE SUBSTRING(C.strLocation, PATINDEX(''%[^0]%'',C.strLocation), 50) 

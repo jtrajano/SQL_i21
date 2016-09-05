@@ -66,7 +66,7 @@ BEGIN
 		tblSMTaxGroup TG
 			ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
 	CROSS APPLY
-		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
+		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
 	CROSS APPLY
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate) R		
 	WHERE
