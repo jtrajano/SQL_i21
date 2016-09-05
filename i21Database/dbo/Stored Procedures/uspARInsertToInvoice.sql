@@ -49,7 +49,8 @@ DECLARE @EntityCustomerId		INT,
 		@ShipToLocationId		INT,
 		@BillToLocationId		INT,
 		@SplitId				INT,
-		@EntityContactId		INT
+		@EntityContactId		INT,
+		@StorageScheduleTypeId	INT
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -84,7 +85,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							strShipmentNumber			NVARCHAR(100),
 							dblContractBalance			INT,
 							dblContractAvailable		INT,
-							intEntityContactId			INT)
+							intEntityContactId			INT,
+							intStorageScheduleTypeId	INT)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -131,6 +133,7 @@ SELECT intItemId					= SI.intItemId
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
+	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARShippedItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -177,6 +180,7 @@ SELECT intItemId					= SOD.intItemId
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
+	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -217,6 +221,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , dblContractBalance			= SOD.dblContractBalance
 	 , dblContractAvailable			= SOD.dblContractAvailable
 	 , intEntityContactId			= SO.intEntityContactId
+	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
 FROM tblICInventoryShipmentItem ICSI 
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
@@ -260,7 +265,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblContractBalance			= 0
 	 , dblContractAvailable			= 0
 	 , intEntityCustomerId			= NULL
-	
+	 , intStorageScheduleTypeId		= ARSI.intStorageScheduleTypeId	
 FROM vyuARShippedItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -473,7 +478,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblLicenseAmount]
 					,[dtmMaintenanceDate]
 					,[intTaxGroupId]
-					,[intConcurrencyId])
+					,[intConcurrencyId]
+					,[intStorageScheduleTypeId])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -500,6 +506,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
 					,[intTaxGroupId]			--[intTaxGroupId]
 					,0
+					,[intStorageScheduleTypeId]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -604,7 +611,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemMargin				NUMERIC(18,6),
 						@ItemRecipeQty			NUMERIC(18,6),
 						@ContractBalance		INT,
-						@ContractAvailable		INT
+						@ContractAvailable		INT						
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -639,7 +646,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemMaintenanceDate	= dtmMaintenanceDate,
 						@ContractBalance		= dblContractBalance,
 						@ContractAvailable		= dblContractAvailable,	
-						@EntityContactId		= intEntityContactId											
+						@EntityContactId		= intEntityContactId,	
+						@StorageScheduleTypeId	= intStorageScheduleTypeId
 				FROM @tblItemsToInvoice ORDER BY intSalesOrderDetailId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -842,12 +850,12 @@ BEGIN
 	WHERE intInvoiceId = @NewInvoiceId
 
 	UPDATE tblARInvoiceDetail SET intItemWeightUOMId = CopySO.intItemWeightUOMId, dblItemWeight = CopySO.dblItemWeight, dblOriginalItemWeight = CopySO.dblOriginalItemWeight,
-		dblItemTermDiscount = CopySO.dblItemTermDiscount
+		dblItemTermDiscount = CopySO.dblItemTermDiscount, intStorageScheduleTypeId = CopySO.intStorageScheduleTypeId
 	FROM(
 		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight,
-			SOD.dblItemTermDiscount
+			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId
 		FROM tblSOSalesOrder SO 
-		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId
 					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
 		WHERE strSalesOrderNumber = @SalesOrderNumber

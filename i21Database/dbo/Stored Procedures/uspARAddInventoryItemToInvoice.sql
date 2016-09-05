@@ -51,6 +51,7 @@
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
+	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemSiteDetailId				INT				= NULL		
 	,@ItemLoadDetailId				INT				= NULL		
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
@@ -65,7 +66,7 @@
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
 	,@SubCurrency					BIT				= 0
-	,@ItemIsBlended					BIT				= 0
+	,@ItemIsBlended					BIT				= 0	
 AS
 
 BEGIN
@@ -263,7 +264,8 @@ BEGIN TRY
 				,[intPerformerId]
 				,[ysnLeaseBilling]
 				,[ysnVirtualMeterReading]
-				,[intEntitySalespersonId]				
+				,[intEntitySalespersonId]
+				,[intStorageScheduleTypeId]				
 				,[intConcurrencyId])
 			SELECT
 				 [intInvoiceId]						= @InvoiceId
@@ -336,6 +338,7 @@ BEGIN TRY
 				,[ysnLeaseBilling]					= @ItemLeaseBilling
 				,[ysnVirtualMeterReading]			= @ItemVirtualMeterReading
 				,[intEntitySalespersonId]			= @EntitySalespersonId
+				,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
 				,[intConcurrencyId]					= 0
 			FROM
 				tblICItem IC

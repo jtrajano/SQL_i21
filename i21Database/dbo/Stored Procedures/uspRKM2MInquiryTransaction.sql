@@ -409,7 +409,7 @@ convert(decimal(24,6),
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturePrice1,
                   dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate) as dblFuturesClosingPrice1,                              
                   CONVERT(int,ch.intContractTypeId) intContractTypeId ,0 as intConcurrencyId ,
-                   (SELECT sum(OpenQty)OpenQty from vyuRKGetInventoryAdjustQty aq where cd.intContractDetailId=aq.intContractDetailId)  dblOpenQty1,                  
+                   (SELECT sum(dblDetailQuantity)OpenQty from vyuRKGetInventoryAdjustQty aq where cd.intContractDetailId=aq.intContractDetailId)  dblOpenQty1,                  
                   cd.dblRate,
                   cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId intQuantityUOMId,cuc2.intCommodityUnitMeasureId intPriceUOMId,cd.intCurrencyId,
                   convert(int,cuc3.intCommodityUnitMeasureId) PriceSourceUOMId,
@@ -976,5 +976,4 @@ SELECT DISTINCT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC)) 
 strFutureMonth,dblOpenQty,strCommodityCode,intCommodityId,intItemId,strItemNo,strOrgin,strPosition,strPeriod,strPriOrNotPriOrParPriced,intPricingTypeId,strPricingType,
 dblContractBasis,dblFutures,dblCash,dblCosts,dblMarketBasis,dblFuturePrice,intContractTypeId,dblAdjustedContractPrice,dblCashPrice,dblMarketPrice,dblResult,dblResultBasis,
 dblMarketFuturesResult,dblResultCash,dblContractPrice from #Temp where dblOpenQty > 0
-
 GO

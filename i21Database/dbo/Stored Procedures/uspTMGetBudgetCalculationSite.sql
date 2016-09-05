@@ -115,6 +115,7 @@ BEGIN
 								,NULL --@ShipToLocationId  
 								,NULL --@VendorLocationId
 								,NULL --@InvoiceType
+								,0	  --@GetAllAvailablePricing
 								)
 						ELSE
 							B.dblPrice

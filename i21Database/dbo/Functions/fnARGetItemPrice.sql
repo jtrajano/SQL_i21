@@ -20,6 +20,7 @@
 	,@ShipToLocationId			INT
 	,@VendorLocationId			INT
 	,@InvoiceType				NVARCHAR(200)
+	,@GetAllAvailablePricing	BIT
 )
 RETURNS NUMERIC(18,6)
 AS
@@ -55,7 +56,7 @@ BEGIN
 			,NULL
 			,@InvoiceType
 			,NULL
-			,0
+			,@GetAllAvailablePricing
 		)
 
 	RETURN @ItemPrice

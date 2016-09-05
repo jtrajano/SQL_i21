@@ -19,7 +19,7 @@ RETURNS @returntable TABLE
 	,dblPriceBasis		NUMERIC(18,6)
 	,dblDeviation		NUMERIC(18,6)
 	,dblUOMQuantity		NUMERIC(18,6)
-	,intSort				BIT
+	,intSort			INT
 )
 AS
 BEGIN
@@ -34,6 +34,7 @@ BEGIN
 			,@intSort		INT
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())	
+	SET @intSort = 0
 	
 	DECLARE @ItemVendorId				INT
 			,@ItemLocationId			INT

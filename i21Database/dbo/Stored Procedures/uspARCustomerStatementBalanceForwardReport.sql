@@ -15,6 +15,8 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 -- Declare the variables.
 DECLARE  @dtmDateTo					AS DATETIME
 		,@dtmDateFrom				AS DATETIME
+		,@dtmDateToAging			AS DATETIME
+		,@dtmStartOfMonth			AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
 		,@xmlDocumentId				AS INT
@@ -146,8 +148,25 @@ BEGIN
 	END
 END
 
+IF (ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME)) = CAST(-53690 AS DATETIME)) OR (CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(CAST('01/01/1900' AS DATETIME) AS FLOAT)) AS DATETIME))
+	BEGIN
+		IF (ISNULL(@dtmDateTo, CAST(-53690 AS DATETIME)) = CAST(-53690 AS DATETIME))
+			SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+
+		SET @dtmStartOfMonth = DATEADD(MONTH, DATEDIFF(MONTH, 0, @dtmDateTo), 0)
+		SET @dtmDateToAging = DATEADD(DAY, -1, @dtmStartOfMonth)		
+	END
+ELSE
+	BEGIN
+		IF (ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME)) = CAST(-53690 AS DATETIME))
+			SET @dtmDateFrom = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+
+		SET @dtmStartOfMonth = DATEADD(MONTH, DATEDIFF(MONTH, 0, @dtmDateFrom), 0)
+		SET @dtmDateToAging = DATEADD(DAY, -1, @dtmStartOfMonth)
+	END
+
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom, @dtmDateTo
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateToAging
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -203,6 +222,7 @@ INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
 
 SELECT STATEMENTREPORT.*
+	  ,dblTotalAR			= ISNULL(AGINGREPORT.dblTotalAR, 0)
       ,dblCreditAvailable   = STATEMENTREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
       ,dbl0Days             = ISNULL(AGINGREPORT.dbl0Days, 0)
       ,dbl10Days            = ISNULL(AGINGREPORT.dbl10Days, 0)
@@ -211,7 +231,7 @@ SELECT STATEMENTREPORT.*
       ,dbl90Days            = ISNULL(AGINGREPORT.dbl90Days, 0)
       ,dbl91Days            = ISNULL(AGINGREPORT.dbl91Days, 0)
       ,dblCredits           = ISNULL(AGINGREPORT.dblCredits, 0)
-      ,dtmAsOfDate          = @dtmDateTo
+      ,dtmAsOfDate          = @dtmDateToAging
       ,blbLogo              = dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
 LEFT JOIN @temp_aging_table AS AGINGREPORT 

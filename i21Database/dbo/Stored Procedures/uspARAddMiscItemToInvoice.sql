@@ -25,6 +25,7 @@
 	,@ItemMargin					NUMERIC(18,6)	= NULL
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@RecomputeTax					BIT				= 1
+	,@ItemConversionAccountId		INT				= NULL
 AS
 
 BEGIN
@@ -66,7 +67,15 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 			RAISERROR(120003, 16, 1);
 		RETURN 0;
 	END	
-	
+
+IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'General' AND [strAccountType] = 'Asset' AND [intAccountId] = @ItemConversionAccountId)
+	BEGIN
+		SET @ErrorMessage = 'Invalid Conversion Account Id! Must be of type ''Asset'' and of category ''General'''
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
+		
 SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
 --IF ISNULL(@ServiceChargesAccountId,0) = 0
 --	BEGIN
@@ -134,6 +143,7 @@ BEGIN TRY
 		,[intCommentTypeId]
 		,[dblMargin]
 		,[dblRecipeQuantity]
+		,[intConversionAccountId]
 		,[intConcurrencyId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
@@ -191,6 +201,7 @@ BEGIN TRY
 		,[intCommentTypeId]					= @ItemCommentTypeId
 		,[dblMargin]						= @ItemMargin
 		,[dblRecipeQuantity]				= @ItemRecipeQty
+		,[intConversionAccountId]			= @ItemConversionAccountId
 		,[intConcurrencyId]					= 0
 			
 END TRY

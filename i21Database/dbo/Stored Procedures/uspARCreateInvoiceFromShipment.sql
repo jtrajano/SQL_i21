@@ -42,6 +42,7 @@ DECLARE
 	,@BOLNumber					NVARCHAR(50)
 	,@Comments					NVARCHAR(MAX)
 	,@SalesOrderComments		NVARCHAR(MAX)
+	,@InvoiceComments			NVARCHAR(MAX)
 	,@ShipToLocationId			INT
 	,@SalesOrderId				INT
 	
@@ -79,7 +80,9 @@ WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
-		SET @Comments = @SalesOrderComments
+		EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComments OUT
+
+		SET @Comments = ISNULL(@InvoiceComments,'') + ' ' + ISNULL(@SalesOrderComments, '')
 	END
 		
 DECLARE @UnsortedEntriesForInvoice AS InvoiceIntegrationStagingTable

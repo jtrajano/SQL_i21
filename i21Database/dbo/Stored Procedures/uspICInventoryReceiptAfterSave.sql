@@ -31,30 +31,21 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 BEGIN
 	IF (@ForDelete = 1)
 	BEGIN
-		SELECT @ReceiptType = 
-					CASE WHEN intOrderType = 1 THEN @ReceiptType_PurchaseContract
-						WHEN intOrderType = 2 THEN @ReceiptType_PurchaseOrder
-						WHEN intOrderType = 3 THEN @ReceiptType_TransferOrder
-						WHEN intOrderType = 4 THEN @ReceiptType_Direct
-					END 
-				,@SourceType = 
-					CASE WHEN intSourceType = 2 THEN @SourceType_InboundShipment END 
+		SELECT	@ReceiptType = intOrderType
+				,@SourceType = intSourceType 
 		FROM	tblICTransactionDetailLog
 		WHERE	intTransactionId = @ReceiptId
-				AND strTransactionType = 'Inventory Receipt'
-
-		EXEC uspGRReverseOnReceiptDelete @ReceiptId
+				AND strTransactionType = 'Inventory Receipt'		
 	END
 	ELSE
 	BEGIN
-		SELECT @ReceiptType = 
+		SELECT	@ReceiptType = 
 					CASE WHEN strReceiptType = 'Purchase Contract' THEN @ReceiptType_PurchaseContract
 						WHEN strReceiptType = 'Purchase Order' THEN @ReceiptType_PurchaseOrder
 						WHEN strReceiptType = 'Transfer Order' THEN @ReceiptType_TransferOrder
 						WHEN strReceiptType = 'Direct' THEN @ReceiptType_Direct
 					END 
-				,@SourceType = 
-					CASE WHEN intSourceType = 2 THEN @SourceType_InboundShipment END
+				,@SourceType = intSourceType 
 		FROM	tblICInventoryReceipt
 		WHERE	intInventoryReceiptId = @ReceiptId
 	END
@@ -71,7 +62,13 @@ BEGIN
 	IF ISNULL(@SourceType, @SourceType_None) = @SourceType_InboundShipment OR ISNULL(@SourceType, @SourceType_None) = @SourceType_Scale
 		GOTO _Exit;
 END
-	
+
+-- Call the grain sp when deleting the receipt. 
+IF @ForDelete = 1
+BEGIN 
+	EXEC uspGRReverseOnReceiptDelete @ReceiptId
+END 
+
 -- Get the deleted, new, or modified data. 
 BEGIN
 	-- Create current snapshot of Receipt Items after Save

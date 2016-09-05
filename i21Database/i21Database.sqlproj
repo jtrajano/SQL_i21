@@ -4281,6 +4281,13 @@
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
     <Build Include="dbo\Stored Procedures\uspGRShipped.sql" />
     <Build Include="dbo\Stored Procedures\uspICBeforePostInventoryShipmentIntegration.sql" />
+    <Build Include="dbo\Views\vyuARCustomerItemPricing.sql" />
+    <Build Include="dbo\Views\vyuMFWastageLotStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuMFWastageWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuMFWastageItem.sql" />
+    <Build Include="dbo\Views\vyuMFOrderManifest.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MInquiryTransactionChart.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertReverseGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

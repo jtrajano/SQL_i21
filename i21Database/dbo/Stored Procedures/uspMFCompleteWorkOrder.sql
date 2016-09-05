@@ -401,20 +401,20 @@ BEGIN TRY
 
 		SELECT @intItemUOMId = @intProduceUnitMeasureId
 
-		IF NOT EXISTS (
-				SELECT *
-				FROM dbo.tblICItemUOM
-				WHERE intItemId = @intItemId
-					AND intItemUOMId = @intItemUOMId
-					AND ysnStockUnit = 1
-				)
-		BEGIN
-			RAISERROR (
-					51094
-					,11
-					,1
-					)
-		END
+		--IF NOT EXISTS (
+		--		SELECT *
+		--		FROM dbo.tblICItemUOM
+		--		WHERE intItemId = @intItemId
+		--			AND intItemUOMId = @intItemUOMId
+		--			AND ysnStockUnit = 1
+		--		)
+		--BEGIN
+		--	RAISERROR (
+		--			51094
+		--			,11
+		--			,1
+		--			)
+		--END
 
 		SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 		FROM dbo.tblMFWorkOrder

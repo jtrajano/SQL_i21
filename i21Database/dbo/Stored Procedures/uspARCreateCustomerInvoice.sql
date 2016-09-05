@@ -103,8 +103,10 @@
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
+	,@ItemConversionAccountId		INT				= NULL
 	,@SubCurrency					BIT				= 0
 	,@DocumentMaintenanceId			INT				= NULL
+	,@StorageScheduleTypeId			INT				= NULL
 AS
 
 BEGIN
@@ -560,6 +562,7 @@ BEGIN TRY
 		,@ItemPerformerId				= @ItemPerformerId
 		,@ItemLeaseBilling				= @ItemLeaseBilling
 		,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
+		,@ItemConversionAccountId		= @ItemConversionAccountId
 		,@SubCurrency					= @SubCurrency
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0

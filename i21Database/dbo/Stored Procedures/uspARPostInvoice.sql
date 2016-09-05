@@ -344,6 +344,227 @@ BEGIN CATCH
 	GOTO Post_Exit
 END CATCH
 
+
+--Process Grain Bank Items
+BEGIN TRY
+	IF @recap = 0
+		BEGIN
+			DECLARE @GrainItems TABLE(
+									 intEntityCustomerId		INT
+									,intInvoiceId				INT	
+									,intInvoiceDetailId			INT
+									,intItemId					INT
+									,dblQuantity				NUMERIC(18,6)
+									,intItemUOMId				INT
+									,intLocationId				INT
+									,intStorageScheduleTypeId	INT
+									,intCustomerStorageId		INT)
+
+			INSERT INTO @GrainItems
+			SELECT
+				 I.intEntityCustomerId 
+				,I.intInvoiceId 
+				,ID.intInvoiceDetailId
+				,ID.intItemId
+				,dbo.fnCalculateStockUnitQty(ID.dblQtyShipped, ICIU.dblUnitQty)
+				,ID.intItemUOMId
+				,I.intCompanyLocationId
+				,ID.intStorageScheduleTypeId
+				,ID.intCustomerStorageId 
+			FROM tblARInvoice I
+			INNER JOIN 
+				tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+			INNER JOIN
+				tblICItemUOM ICIU 
+					ON ID.intItemId = ICIU.intItemId
+					AND ID.intItemUOMId = ICIU.intItemUOMId
+			WHERE
+				I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+				AND ID.intStorageScheduleTypeId IS NOT NULL
+
+
+			WHILE EXISTS (SELECT NULL FROM @GrainItems)
+				BEGIN
+					DECLARE
+						 @EntityCustomerId		INT
+						,@InvoiceId				INT 
+						,@InvoiceDetailId		INT
+						,@ItemId				INT
+						,@Quantity				NUMERIC(18,6)
+						,@ItemUOMId				INT
+						,@LocationId			INT
+						,@StorageScheduleTypeId	INT
+						,@CustomerStorageId		INT
+			
+					SELECT TOP 1 
+						  @InvoiceDetailId			= GI.intInvoiceDetailId
+						, @InvoiceId				= GI.intInvoiceId
+						, @EntityCustomerId			= GI.intEntityCustomerId 
+						, @ItemId					= GI.intItemId
+						, @Quantity					= GI.dblQuantity				
+						, @ItemUOMId				= GI.intItemUOMId
+						, @LocationId				= GI.intLocationId
+						, @StorageScheduleTypeId	= GI.intStorageScheduleTypeId
+						, @CustomerStorageId		= GI.intCustomerStorageId 
+					FROM @GrainItems GI
+
+				  
+					BEGIN TRY
+					IF @post = 1
+						BEGIN
+							
+							DECLARE @StorageTicketInfoByFIFO AS TABLE(
+								 [intId]					INT IDENTITY (1, 1)
+								,[intCustomerStorageId]		INT
+								,[strStorageTicketNumber]	NVARCHAR(40) COLLATE Latin1_General_CI_AS
+								,[dblOpenBalance]			NUMERIC(18, 6)
+								,[intUnitMeasureId]			INT
+								,[strUnitMeasure]			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+								,[strItemType]				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+								,[intItemId]				INT
+								,[strItem]					NVARCHAR(40) COLLATE Latin1_General_CI_AS
+								,[dblCharge]				DECIMAL(24, 10)						
+							)
+
+							INSERT INTO @StorageTicketInfoByFIFO(
+								 [intCustomerStorageId]
+								,[strStorageTicketNumber]
+								,[dblOpenBalance]
+								,[intUnitMeasureId]
+								,[strUnitMeasure]
+								,[strItemType]
+								,[intItemId]
+								,[strItem]
+								,[dblCharge]						
+							)				
+							EXEC uspGRUpdateGrainOpenBalanceByFIFO 
+								 @strOptionType		= 'Update'
+								,@strSourceType		= 'Invoice'
+								,@intEntityId		= @EntityCustomerId
+								,@intItemId			= @ItemId
+								,@intStorageTypeId	= @StorageScheduleTypeId
+								,@dblUnitsConsumed	= @Quantity
+								,@IntSourceKey		= @InvoiceId
+								,@intUserId			= @UserEntityID
+
+							DELETE FROM @StorageTicketInfoByFIFO WHERE intItemId = @ItemId
+
+							WHILE EXISTS (SELECT NULL FROM @StorageTicketInfoByFIFO)
+								BEGIN
+									DECLARE 
+										 @GrainId				INT
+										,@GrainItemId			INT										
+										,@GrainItemUOMId		INT
+										,@dblCharge				NUMERIC (18,6)
+										,@NewDetailId			INT		
+										,@ErrorMessage			NVARCHAR(250)				
+										,@CurrentErrorMessage	NVARCHAR(250)
+										,@ItemDesc				NVARCHAR(250)				
+
+									SELECT TOP 1 
+										 @GrainId			= STI.intId 
+										,@CustomerStorageId	= STI.intCustomerStorageId
+										,@GrainItemUOMId	= ICIU.[intItemUOMId]
+										,@GrainItemId		= STI.[intItemId]
+										,@dblCharge			= STI.[dblCharge]
+										,@ItemDesc			= ICI.strDescription
+									FROM 
+										@StorageTicketInfoByFIFO STI
+									INNER JOIN 
+										tblICItemUOM ICIU
+											ON STI.intItemId = ICIU.intItemId
+											AND STI.intUnitMeasureId = ICIU.intUnitMeasureId
+									INNER JOIN
+										tblICItem ICI
+											ON STI.intItemId = ICI.intItemId  
+										
+									
+									BEGIN TRY					
+										EXEC [dbo].[uspARAddItemToInvoice]
+											@InvoiceId						= @InvoiceId	
+											,@ItemId						= @GrainItemId										
+											,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
+											,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
+											,@RaiseError					= @raiseError							 
+											,@ItemCustomerStorageId			= @CustomerStorageId				
+											,@RecomputeTax					= 0
+											,@ItemUOMId						= @GrainItemUOMId
+											,@ItemQtyShipped				= 1
+											,@ItemPrice						= @dblCharge
+											,@ItemDescription				= @ItemDesc
+					
+
+										IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+											BEGIN
+												IF ISNULL(@raiseError,0) = 0
+													ROLLBACK TRANSACTION
+												SET @ErrorMessage = @CurrentErrorMessage;
+												IF ISNULL(@raiseError,0) = 1
+													RAISERROR(@ErrorMessage, 16, 1);
+												RETURN 0;
+											END
+									END TRY
+									BEGIN CATCH
+										IF ISNULL(@raiseError,0) = 0
+											ROLLBACK TRANSACTION
+										SET @ErrorMessage = ERROR_MESSAGE();
+										IF ISNULL(@raiseError,0) = 1
+											RAISERROR(@ErrorMessage, 16, 1);
+										RETURN 0;
+									END CATCH			
+
+									UPDATE tblARInvoiceDetail SET intCustomerStorageId = @CustomerStorageId WHERE intInvoiceDetailId = @NewDetailId
+									DELETE FROM @StorageTicketInfoByFIFO  WHERE intId  = @GrainId
+								END
+
+							END
+					ELSE
+						BEGIN
+							EXEC dbo.uspGRReverseTicketOpenBalance 
+									@strSourceType	= 'Invoice',
+									@IntSourceKey	= @InvoiceId,
+									@intUserId		= @UserEntityID
+
+							UPDATE tblARInvoiceDetail SET intCustomerStorageId = NULL WHERE intInvoiceDetailId = @InvoiceDetailId
+							DELETE FROM tblARInvoiceDetail WHERE intCustomerStorageId IS NOT NULL AND intInvoiceId = @InvoiceId
+						END						
+					END TRY
+					BEGIN CATCH
+						SELECT @ErrorMerssage = ERROR_MESSAGE()
+						IF @raiseError = 0
+							BEGIN
+								IF (XACT_STATE()) = -1
+									ROLLBACK TRANSACTION							
+								BEGIN TRANSACTION						
+								EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+								COMMIT TRANSACTION
+							END						
+						IF @raiseError = 1
+							RAISERROR(@ErrorMerssage, 11, 1)
+		
+						GOTO Post_Exit
+					END CATCH					
+
+					DELETE FROM @GrainItems WHERE intInvoiceDetailId = @InvoiceDetailId
+				END	
+		END	
+END TRY
+BEGIN CATCH
+	SELECT @ErrorMerssage = ERROR_MESSAGE()
+	IF @raiseError = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION							
+			BEGIN TRANSACTION						
+			EXEC dbo.uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param
+			COMMIT TRANSACTION
+		END						
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
+
 --------------------------------------------------------------------------------------------  
 -- Validations  
 ----------------------------------------------------------------------------------------------  
@@ -1791,7 +2012,7 @@ IF @post = 1
 													THEN
 														IST.intOtherChargeIncomeAccountId
 													ELSE
-														ISNULL(ISNULL(B.intServiceChargeAccountId, B.intSalesAccountId), SMCL.intSalesAccount)
+														ISNULL(B.intConversionAccountId,(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE B.intSalesAccountId END))
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END

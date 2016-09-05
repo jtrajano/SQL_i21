@@ -1,6 +1,29 @@
 ﻿GO
 	PRINT N'BEGIN Comments Migration'
 GO
+	-- INSERT to tblSMScreen all comments that has a screen that has no entry to tblSMScreen
+	INSERT [dbo].[tblSMScreen] (
+		[strScreenId], 
+		[strScreenName], 
+		[strNamespace], 
+		[strModule], 
+		[strTableName], 
+		[intConcurrencyId]
+	) 
+	SELECT 
+		SUBSTRING(tbl.strScreen, CHARINDEX('view.', tbl.strScreen,  0) + 5, LEN(tbl.strScreen) - (CHARINDEX('view.', tbl.strScreen,  0) + 4)) strScreenId,
+		SUBSTRING(tbl.strScreen, CHARINDEX('view.', tbl.strScreen,  0) + 5, LEN(tbl.strScreen) - (CHARINDEX('view.', tbl.strScreen,  0) + 4))  strScreenName,
+		tbl.strScreen strNamespace,
+		SUBSTRING(tbl.strScreen, 0, CHARINDEX('.view.', tbl.strScreen,  0)) strModule,
+		'' strTableName,
+		1
+	FROM (
+		SELECT DISTINCT strScreen
+		FROM tblSMComment A LEFT OUTER JOIN tblSMScreen B ON A.strScreen = B.strNamespace
+		WHERE ISNULL(B.intScreenId, 0) = 0
+	) tbl
+
+
 	-- INSERT to tblSMTransaction all comments' unique transaction link that are not existing yet
 	INSERT INTO tblSMTransaction (
 		intScreenId,
@@ -63,7 +86,7 @@ GO
 	   SELECT *,
 			 ROW_NUMBER() OVER (PARTITION BY intTransactionId ORDER BY dtmAdded ASC) AS RowNumber
 	   FROM tblSMComment 
-	   WHERE ISNULL(strScreen, '') <> '' AND ISNULL(strRecordNo, '') <> ''
+	   WHERE ISNULL(strScreen, '') <> '' AND ISNULL(strRecordNo, '') <> '' AND ISNULL(intTransactionId, 0) <> 0
 	)
 	-- INSERT to tblSMActivity all comments Grouped By Transaction Id
 	INSERT INTO tblSMActivity (

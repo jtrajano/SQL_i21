@@ -660,7 +660,7 @@ FROM
 		,[strVendorId]								=	LTRIM(CV.intEntityVendorId)
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
-		,[strContractNumber]						=	CV.strContractNumber
+		,[strContractNumber]						=	CAST(CV.strContractNumber AS NVARCHAR(50))
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	CV.intContractHeaderId
 		,[intContractDetailId]						=	CV.intContractDetailId
