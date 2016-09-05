@@ -4285,6 +4285,7 @@
     <Build Include="dbo\Views\vyuMFWastageItem.sql" />
     <Build Include="dbo\Views\vyuMFOrderManifest.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MInquiryTransactionChart.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertReverseGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
