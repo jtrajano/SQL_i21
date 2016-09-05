@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICPostInventoryShipmentIntegrations
+﻿CREATE PROCEDURE uspICAfterPostInventoryShipmentIntegration
 	@ysnPost BIT = 0  
 	,@intTransactionId INT = NULL   
 	,@intEntityUserSecurityId INT  = NULL      
@@ -15,9 +15,11 @@ DECLARE	-- Order Types
 		@STR_ORDER_TYPE_SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
 		,@STR_ORDER_TYPE_SALES_ORDER AS NVARCHAR(50) = 'Sales Order'
 		,@STR_ORDER_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+		,@STR_ORDER_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
 		,@INT_ORDER_TYPE_SALES_CONTRACT AS INT = 1
 		,@INT_ORDER_TYPE_SALES_ORDER AS INT = 2
 		,@INT_ORDER_TYPE_TRANSFER_ORDER AS INT = 3
+		,@INT_ORDER_TYPE_DIRECT AS INT = 4
 
 		-- Source Types
 		,@STR_SOURCE_TYPE_NONE AS NVARCHAR(50) = 'None'

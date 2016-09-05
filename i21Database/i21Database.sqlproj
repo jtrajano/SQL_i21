@@ -2076,7 +2076,7 @@
     <Build Include="dbo\Stored Procedures\uspSTInventoryMassUpdate.sql" />
     <Build Include="dbo\Tables\tblAROriginCompanies.sql" />
     <Build Include="dbo\User Defined Types\ReceiptOtherChargesTableType.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Views\vyuMFInventoryView.sql" />
     <Build Include="dbo\Views\vyuAPChargesForBilling.sql" />
     <Build Include="dbo\Functions\fnCTGetContractStatuses.sql" />
@@ -4279,6 +4279,8 @@
     <Build Include="dbo\Stored Procedures\uspGLGetBudget.sql" />
     <Build Include="dbo\Views\vyuAPRptWeightClaims.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBeforePostInventoryShipmentIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
