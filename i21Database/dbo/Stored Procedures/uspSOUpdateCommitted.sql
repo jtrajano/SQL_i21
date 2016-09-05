@@ -77,6 +77,7 @@ BEGIN
 		AND Detail.intItemId = TD.intItemId		
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyShipped))
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		AND ISNULL((@QuantityToPost),0) <> 0
 
 	UNION ALL
 
@@ -125,6 +126,7 @@ BEGIN
 		AND [dbo].[fnIsStockTrackingItem](SOSODC.intComponentItemId) = 1
 		AND (Detail.intItemUOMId <> TD.intItemUOMId OR Detail.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyShipped))
 		AND Header.strOrderStatus NOT IN ('Cancelled', 'Short Closed')
+		AND ISNULL((@QuantityToPost),0) <> 0
 
 	UNION ALL
 
@@ -181,7 +183,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	(CASE WHEN @Negate = 1 THEN (Detail.dblQtyShipped * -1) ELSE (CASE WHEN @QuantityToPost IS NULL OR @QuantityToPost = 0 THEN ((Detail.dblQtyOrdered - Detail.dblQtyShipped) - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, (TD.dblQtyOrdered - TD.dblQtyShipped))) ELSE @QuantityToPost END) END) * SOSODC.dblQuantity 
+		,[dblQty]					=	(Detail.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyOrdered)) * SOSODC.dblQuantity 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
