@@ -29,6 +29,15 @@ WHERE strPaycheckId = @strPaycheckId
 /****************************************
 	CREATING BANK TRANSACTION RECORD
 *****************************************/
+
+-- Check if transaction has Bank Account
+IF @ysnPost = 1
+BEGIN 
+	-- Bank Account is required to post the transaction
+	RAISERROR('Bank Account is required to post the transaction.', 11, 1)
+	GOTO Post_Exit
+END 
+
 DECLARE @PAYCHECK INT = 21,
 		@DIRECT_DEPOSIT INT = 23,
 		@BankTransactionTable BankTransactionTable,
