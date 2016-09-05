@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesAnalysisReport]
 AS
-
 SELECT 
 	 strRecordNumber			= SAR.strRecordNumber
 	,intTransactionId			= SAR.intTransactionId
@@ -108,12 +107,20 @@ FROM
 		LEFT JOIN 
 			vyuARGetItemAccount ARGIA 
 				ON ARID.intItemId = ARGIA.intItemId AND ARI.intCompanyLocationId = ARGIA.intLocationId
-		LEFT OUTER JOIN tblICInventoryTransaction NONSO
-			ON NONSO.ysnIsUnposted		= 0
-			AND ARI.intInvoiceId		= NONSO.intTransactionId
-			AND ARI.strInvoiceNumber	= NONSO.strTransactionId
-			AND ARID.intItemId			= NONSO.intItemId
-			AND ARID.intItemUOMId		= NONSO.intItemUOMId
+		LEFT OUTER JOIN (
+			SELECT intTransactionId
+				 , strTransactionId
+				 , intItemId
+				 , intItemUOMId
+				 , dblCost				= AVG(dblCost)
+			FROM
+				tblICInventoryTransaction 
+			WHERE ysnIsUnposted = 0
+			GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId) AS NONSO
+				ON ARI.intInvoiceId			= NONSO.intTransactionId
+				AND ARI.strInvoiceNumber	= NONSO.strTransactionId
+				AND ARID.intItemId			= NONSO.intItemId
+				AND ARID.intItemUOMId		= NONSO.intItemUOMId
 		LEFT OUTER JOIN (
 			SELECT ICISI.intInventoryShipmentItemId
 				 , ICISI.intLineNo
