@@ -1092,6 +1092,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onItemSelectionChange: function(selModel, selected, eOpts) {
         if (selModel) {
+            if (!selModel.view)
+                return;
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
             var grdLotTracking = win.down('#grdLotTracking');
