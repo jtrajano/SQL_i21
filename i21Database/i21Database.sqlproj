@@ -4095,6 +4095,7 @@
     <Build Include="dbo\Views\vyuTMBEExportAssetAct.sql" />
     <Build Include="dbo\Views\vyuSMBEExportTax.sql" />
     <Build Include="dbo\Views\vyuSMBEExportTaxCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertReverseGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
