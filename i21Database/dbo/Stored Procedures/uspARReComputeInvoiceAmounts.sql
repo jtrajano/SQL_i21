@@ -13,15 +13,17 @@ SET ANSI_WARNINGS OFF
 
 DECLARE  @ZeroDecimal		DECIMAL(18,6)
 		,@SubCurrencyCents	INT
+		,@InvoiceIdLocal	INT
 
 SET @ZeroDecimal = 0.000000	
+SET @InvoiceIdLocal = @InvoiceId
 						
 SELECT
 	@SubCurrencyCents		= ISNULL([intSubCurrencyCents], 1)
 FROM
 	tblARInvoice
 WHERE
-	[intInvoiceId] = @InvoiceId
+	[intInvoiceId] = @InvoiceIdLocal
 
 UPDATE
 	tblARInvoiceDetailTax
@@ -31,7 +33,7 @@ SET
 	,[dblAdjustedTax]	= ROUND(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,[ysnTaxAdjusted]	= ROUND(ISNULL([ysnTaxAdjusted], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 WHERE 
-	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
+	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceIdLocal)
 	
 	
 UPDATE
@@ -46,7 +48,7 @@ SET
 	,[dblTotalTax]		 = ISNULL([dblTotalTax], @ZeroDecimal)
 	,[dblTotal]			 = ISNULL([dblTotal], @ZeroDecimal)
 WHERE
-	[intInvoiceId] = @InvoiceId
+	[intInvoiceId] = @InvoiceIdLocal
 	
 	
 UPDATE
@@ -60,7 +62,7 @@ SET
 	,[dblAmountDue]			= ISNULL([dblAmountDue], @ZeroDecimal)
 	,[dblPayment]			= ISNULL([dblPayment], @ZeroDecimal)
 WHERE
-	[intInvoiceId] = @InvoiceId
+	[intInvoiceId] = @InvoiceIdLocal
 	
 	
 UPDATE
@@ -80,7 +82,7 @@ FROM
 	 T
 WHERE
 	tblARInvoiceDetail.[intInvoiceDetailId] = T.[intInvoiceDetailId]
-	AND tblARInvoiceDetail.[intInvoiceId] = @InvoiceId
+	AND tblARInvoiceDetail.[intInvoiceId] = @InvoiceIdLocal
 
 UPDATE
 	tblARInvoiceDetail
@@ -93,7 +95,7 @@ SET
 						END							
 					  )
 WHERE
-	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId
+	tblARInvoiceDetail.[intInvoiceId] = @InvoiceIdLocal
 		
 	
 UPDATE
@@ -110,14 +112,14 @@ FROM
 		FROM
 			tblARInvoiceDetail
 		WHERE
-			[intInvoiceId] = @InvoiceId
+			[intInvoiceId] = @InvoiceIdLocal
 		GROUP BY
 			[intInvoiceId]
 	)
 	 T
 WHERE
 	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
-	AND tblARInvoice.[intInvoiceId] = @InvoiceId
+	AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
 	
 	
 UPDATE
@@ -126,6 +128,6 @@ SET
 	[dblInvoiceTotal]	= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping])
 	,[dblAmountDue]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount])
 WHERE
-	[intInvoiceId] = @InvoiceId
+	[intInvoiceId] = @InvoiceIdLocal
 
 END

@@ -12,8 +12,10 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal	DECIMAL(18,6)
+       ,@InvoiceIdLocal INT
 
-SET @ZeroDecimal = 0.000000	
+SET @ZeroDecimal = 0.000000
+SET @InvoiceIdLocal = @InvoiceId	
 
 DECLARE  @CustomerId				INT
 		,@LocationId				INT
@@ -37,7 +39,7 @@ LEFT OUTER JOIN
 	tblSMFreightTerms F
 		ON I.[intFreightTermId] = F.[intFreightTermId] 
 WHERE
-	I.[intInvoiceId] = @InvoiceId
+	I.[intInvoiceId] = @InvoiceIdLocal
 
 
 DECLARE @InvoiceDetail AS TABLE  (
@@ -54,7 +56,7 @@ SELECT
 FROM
 	tblARInvoiceDetail
 WHERE
-	[intInvoiceId] = @InvoiceId
+	[intInvoiceId] = @InvoiceIdLocal
 ORDER BY
 	[intInvoiceDetailId]
 	
@@ -155,7 +157,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 	END
 	
 	
-EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
+EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceIdLocal
 
 
 END
