@@ -1065,12 +1065,16 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'strStorageTypeDescription',
                                                                                     dataType: 'string',
-                                                                                    text: 'Storage Type Description'
+                                                                                    text: 'Storage Type Description',
+                                                                                    flex: 1
                                                                                 },
                                                                                 {
+                                                                                    xtype: 'numbercolumn',
                                                                                     dataIndex: 'dblOpenBalance',
-                                                                                    dataType: 'float',
-                                                                                    text: 'Open Balance'
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Open Balance',
+                                                                                    format: '0,000.##',
+                                                                                    flex: 1
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboCustomerStorage',

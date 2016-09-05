@@ -1029,6 +1029,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                       }
             }
         }
+
+        else if (combo.itemId === 'cboCustomerStorage') {
+            current.set('intCustomerStorageId', records[0].get('intCustomerStorageId'));
+
+        }
     },
 
     onLotSelect: function(combo, records, eOpts) {
@@ -2516,6 +2521,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onItemNoSelect
             },
             "#cboStorageLocation": {
+                select: this.onItemNoSelect
+            },
+            "#cboCustomerStorage": {
                 select: this.onItemNoSelect
             }
         })

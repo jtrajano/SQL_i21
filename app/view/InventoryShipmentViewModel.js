@@ -207,7 +207,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             type: 'lgpickedlots'
         },
         customerStorage: {
-            type: 'bufferedstoragetransferticket'
+            type: 'bufferedstoragetransferticket',
+            pageSize: 25 // Override the pageSize of the Grain store.
         }
     },
 
