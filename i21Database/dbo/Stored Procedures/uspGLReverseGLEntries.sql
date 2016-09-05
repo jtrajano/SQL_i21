@@ -34,7 +34,7 @@ END
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
 		DECLARE @GLEntries RecapTableType
-		EXEC uspGLInsertReverseGLEntry @strTransactionId,@intEntityId,@dtmReverse
+		EXEC uspGLInsertReverseGLEntry @strTransactionId,@intEntityId,@dtmDateReverse
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 ELSE
