@@ -17,15 +17,17 @@ GO
 		BEGIN
 			IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='tblSMUserSecurity')
 			BEGIN
-				Update
-					a set
-					a.intUserSecurityEntityId = b.intEntityUserSecurityId
-					,a.intUserSecurityId = b.intEntityUserSecurityId
-				from
-					tblHDGroupUserConfig a, tblSMUserSecurity b
-				where
-					a.intUserSecurityId = b.intUserSecurityIdOld
-					and b.intUserSecurityIdOld is not null
+				exec(
+						'Update
+							a set
+							a.intUserSecurityEntityId = b.intEntityUserSecurityId
+							,a.intUserSecurityId = b.intEntityUserSecurityId
+						from
+							tblHDGroupUserConfig a, tblSMUserSecurity b
+						where
+							a.intUserSecurityId = b.intUserSecurityIdOld
+							and b.intUserSecurityIdOld is not null'
+					)
 			END
 		END
 	END
