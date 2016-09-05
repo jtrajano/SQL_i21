@@ -17,30 +17,32 @@ DECLARE @intPaycheckId INT
 		,@dtmPayDate DATETIME
 		,@strTransactionId NVARCHAR(50) = ''
 		,@intBankTransactionTypeId INT = 21
+		,@intCreatedEntityId AS INT
+		,@intBankAccountId AS INT
+		,@PAYCHECK INT = 21
+		,@DIRECT_DEPOSIT INT = 23
+		,@BankTransactionTable BankTransactionTable
+		,@BankTransactionDetail BankTransactionDetailTable
 
 /* Get Paycheck Details */
 SELECT @intPaycheckId = intPaycheckId
 	  ,@intEmployeeId = [intEntityEmployeeId]
 	  ,@strTransactionId = strPaycheckId
 	  ,@dtmPayDate = dtmPayDate
+	  ,@intCreatedEntityId = intCreatedUserId
+	  ,@intBankAccountId = intBankAccountId
+	  ,@intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END
 FROM tblPRPaycheck 
 WHERE strPaycheckId = @strPaycheckId
 
 /****************************************
 	CREATING BANK TRANSACTION RECORD
 *****************************************/
-DECLARE @PAYCHECK INT = 21,
-		@DIRECT_DEPOSIT INT = 23,
-		@BankTransactionTable BankTransactionTable,
-		@BankTransactionDetail BankTransactionDetailTable
-
-SELECT @intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END 
-FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
 
 -- Check if transaction has Bank Account
 IF @ysnPost = 1
 BEGIN 
-	IF ((SELECT TOP 1 intBankAccountId FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId) IS NULL)
+	IF (@intBankAccountId IS NULL)
 	BEGIN
 		-- Bank Account is required to post the transaction
 		RAISERROR('Bank Account is required to post the transaction.', 11, 1)
@@ -268,7 +270,7 @@ BEGIN
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -297,7 +299,7 @@ BEGIN
 		,[dblCredit]				= D.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -329,7 +331,7 @@ BEGIN
 		,[dblCredit]				= D.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -347,7 +349,7 @@ BEGIN
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -379,7 +381,7 @@ BEGIN
 		,[dblCredit]				= T.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -411,7 +413,7 @@ BEGIN
 		,[dblCredit]				= T.dblTotal
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -429,7 +431,7 @@ BEGIN
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intUserId
+		,[intCreatedUserId]			= @intCreatedEntityId
 		,[dtmCreated]				= GETDATE()
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
@@ -514,10 +516,8 @@ DECLARE
 	,@dblAmountDetailTotal AS NUMERIC(18,6)
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT	
-	,@intBankAccountId AS INT
 	,@ysnBankAccountIdInactive AS BIT
 	,@ysnCheckVoid AS BIT	
-	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
