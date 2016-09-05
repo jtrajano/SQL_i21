@@ -60,7 +60,7 @@ BEGIN
 				,[intJournalLineNo]
 				,ysnIsUnposted		= 1
 				,[intConcurrencyId]
-				,[intUserId]		= 0
+				,[intUserId]		= NULL
 				,[intEntityId]		= @intEntityId
 				,[strTransactionType]
 				,[strTransactionForm]
@@ -70,4 +70,8 @@ BEGIN
 		ORDER BY intGLDetailId		
 
 		EXEC uspGLBookEntries @GLEntries, 0
+
+		UPDATE	tblGLDetail
+		SET		ysnIsUnposted = 1
+		WHERE	strTransactionId = @strTransactionId
 END
