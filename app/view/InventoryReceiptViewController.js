@@ -4513,6 +4513,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 var currentReceipt  = win.viewModel.data.current;
                                 newReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, newReceiptItem));
                             }
+                        
+                        if (order.get('intWeightUOMId') !== null) {
+                             if (order.get('dblGross') === 0 && order.get('dblNet') !== 0) {
+                                 newReceiptItem.set('dblGross', order.get('dblNet'));
+                             }  
+                            
+                             else if (order.get('dblGross') !== 0 && order.get('dblNet') === 0) {
+                                 newReceiptItem.set('dblNet', order.get('dblGross'));
+                             }  
+                            
+                             else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
+                                var currentReceiptItem = win.viewModel.data.currentReceiptItem;
+                                me.calculateGrossNet(currentReceiptItem);
+                             }
+                        }
                     });
                     search.close();
                     //win.context.data.saveRecord();
