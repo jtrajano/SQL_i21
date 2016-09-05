@@ -157,5 +157,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
+    ,[intConversionAccountId]                INT                                                NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
+
 	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
 )
