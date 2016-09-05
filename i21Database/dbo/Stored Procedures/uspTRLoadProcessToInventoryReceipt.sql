@@ -240,9 +240,7 @@ END
 	        LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
 			LEFT JOIN (select TT.intLoadHeaderId, TT.strTransaction, RR.intLoadReceiptId from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
-					                                                 JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
-													                 JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-					                                                 where RR.strOrigin = 'Terminal' and HH.strDestination = 'Customer' and RR.intItemId = HD.intItemId
+					                                                 where RR.strOrigin = 'Terminal'
                       ) TLR on TLR.intLoadReceiptId = RE.intSourceId
 	WHERE	RE.dblFreightRate != 0
 	group by RE.intId 
@@ -295,11 +293,7 @@ END
 	LEFT JOIN tblSMShipVia SM on SM.intEntityShipViaId = RE.intShipViaId
 	LEFT JOIN (select TT.intLoadHeaderId, RR.intLoadReceiptId, TT.strTransaction from tblTRLoadHeader TT
 					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
-					                                                 JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
-													                 JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId and RR.intItemId = HD.intItemId
-					                                                 where RR.strOrigin = 'Terminal' 
-					                                                 	and HH.strDestination = 'Customer' 
-					                                                 	) LTE on LTE.intLoadReceiptId = RE.intSourceId
+					                                                 where RR.strOrigin = 'Terminal') LTE on LTE.intLoadReceiptId = RE.intSourceId
 	WHERE	RE.dblSurcharge != 0 
 	group by RE.intId 
 
