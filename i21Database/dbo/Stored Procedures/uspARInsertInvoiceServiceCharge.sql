@@ -49,6 +49,7 @@ AS
 				,[intCurrencyId]
 				,[intCompanyLocationId]
 				,[intEntitySalespersonId]
+				,[intEntityContactId]
 				,[dtmShipDate]
 				,[intShipViaId]
 				,[strPONumber]
@@ -90,6 +91,7 @@ AS
 				,@intCurrencyId
 				,@intCompanyLocationId
 				,[intSalespersonId]
+				,[intEntityContactId]
 				,ISNULL(@dtmAsOfDate, @dateNow)
 				,[intShipViaId]
 				,NULL --[strPONumber]
