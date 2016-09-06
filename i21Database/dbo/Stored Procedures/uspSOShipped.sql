@@ -22,6 +22,7 @@ BEGIN
     SELECT DISTINCT intOrderId, dblQuantity 
 		FROM tblICInventoryShipmentItem 
 	WHERE intInventoryShipmentId = @intTransactionId
+		AND intOrderId IS NOT NULL
 	
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)
 	BEGIN				
