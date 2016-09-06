@@ -131,6 +131,8 @@ DECLARE @dblRemainingQty AS NUMERIC(38,20)
 		,@AdjustableQty AS NUMERIC(38,20)
 		,@dblNewCost AS NUMERIC(38,20)
 		,@strLotNumber AS NVARCHAR(50)
+
+		,@dblAdjustQty AS NUMERIC(38,20)
 		
 -- Exit immediately if item is a non-lot type. 
 IF dbo.fnGetItemLotType(@intItemId) = 0 
@@ -150,14 +152,32 @@ WHERE	tblICInventoryLot.intItemId = @intItemId
 		AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
 		AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
 
+-- Convert the Remaining Qty to the UOM used in the cost bucket
+BEGIN 
 
--- Initialize the Remaining Qty 
-SET @dblRemainingQty = ISNULL(@dblQty, 0) 
+	SELECT	TOP 1 
+			@dblRemainingQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, il.intItemUOMId, @dblQty) 
+			--@dblRemainingQty  =  
+			--	CASE	WHEN l.intItemUOMId = @intItemUOMId AND l.intWeightUOMId IS NOT NULL AND l.dblWeightPerQty <> 0 THEN 
+			--				dbo.fnMultiply(@dblQty, l.dblWeightPerQty) 			
+			--			WHEN l.intWeightUOMId = @intItemUOMId THEN 
+			--				@dblQty
+			--			ELSE 
+			--				@dblQty
+			--	END 
+	FROM	dbo.tblICInventoryLot il 
+	WHERE	il.intItemId = @intItemId
+			AND il.intItemLocationId = @intItemLocationId
+			AND il.intTransactionId = @intSourceTransactionId
+			AND il.intTransactionDetailId = @intSourceTransactionDetailId
+			AND il.strTransactionId = @strSourceTransactionId
+			AND ISNULL(il.ysnIsUnposted, 0) = 0 
+END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start loop for the lot numbers. 
 -----------------------------------------------------------------------------------------------------------------------------
-WHILE ISNULL(@LotWithOldCost, 0) > 0 AND @dblRemainingQty > 0 
+WHILE ISNULL(@LotWithOldCost, 0) > 0 --AND @dblRemainingQty > 0 
 BEGIN 
 	SET @CostBucketId = NULL 
 
@@ -248,7 +268,7 @@ BEGIN
 			SET @AdjustableQty = @CostBucketStockInQty - ISNULL(@AdjustedQty, 0) 
 
 			-- Initialize the Qty
-			SET @dblQty = 
+			SET @dblAdjustQty = 
 				CASE	WHEN @dblRemainingQty >= @AdjustableQty THEN 
 							@AdjustableQty 
 						ELSE 
@@ -265,17 +285,17 @@ BEGIN
 		END 
 
 		-- Compute the new transaction value. 
-		SELECT	@NewTransactionValue = dbo.fnMultiply(@dblQty, @dblNewCost) 
+		SELECT	@NewTransactionValue = dbo.fnMultiply(@dblAdjustQty, @dblNewCost) 
 
 		-- Compute the original transaction value. 
-		SELECT	@OriginalTransactionValue = dbo.fnMultiply(@dblQty, @OriginalCost) 
+		SELECT	@OriginalTransactionValue = dbo.fnMultiply(@dblAdjustQty, @OriginalCost) 
 
 		-- Compute the new cost. 
 		SELECT @dblNewCalculatedCost =	@CostBucketCost 
 										+ dbo.fnDivide((@NewTransactionValue - @OriginalTransactionValue), @CostBucketStockInQty)	
 
 		-- Compute value to adjust the item valuation. 
-		SELECT @CostAdjustmentValue = dbo.fnMultiply(@dblQty, (@dblNewCost - @OriginalCost)) 
+		SELECT @CostAdjustmentValue = dbo.fnMultiply(@dblAdjustQty, (@dblNewCost - @OriginalCost)) 
 
 		-- Determine the transaction type to use. 
 		SELECT @CostAdjustmentTransactionType =		
@@ -359,7 +379,7 @@ BEGIN
 			SELECT	[intInventoryLotId]					= @CostBucketId
 					,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
 					,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_New_Cost
-					,[dblQty]							= @dblQty
+					,[dblQty]							= @dblAdjustQty
 					,[dblCost]							= @dblNewCost
 					,[dtmCreated]						= GETDATE()
 					,[intCreatedEntityUserId]			= @intEntityUserSecurityId
@@ -393,8 +413,8 @@ BEGIN
 				,@LotOutQty AS NUMERIC(38,20)
 				,@LotCostAdjustQty AS NUMERIC(38,20)
 
-				,@StockQtyAvailableToRevalue AS NUMERIC(38,20) = @dblQty
-				,@StockQtyToRevalue AS NUMERIC(38,20) = @dblQty
+				,@StockQtyAvailableToRevalue AS NUMERIC(38,20) = @dblAdjustQty
+				,@StockQtyToRevalue AS NUMERIC(38,20) = @dblAdjustQty
 
 		-----------------------------------------------------------------------------------------------------------------------------
 		-- Create the cursor
