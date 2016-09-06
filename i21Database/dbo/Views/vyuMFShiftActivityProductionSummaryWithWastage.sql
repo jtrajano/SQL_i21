@@ -54,6 +54,8 @@ SELECT SA.intShiftActivityId
 				THEN 1
 			ELSE SA.dblTotalWeightofProducedQty
 			END, 4) AS dblReClaimPercentage
+	,SA.intManufacturingCellId
+	,MC.ysnIncludeSchedule
 FROM dbo.tblMFShiftActivity SA
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = SA.intManufacturingCellId
 	AND SA.intShiftActivityStatusId = 3

@@ -39,6 +39,8 @@ SELECT SA.intShiftActivityId
 				ELSE ROUND((ISNULL(SA.dblTotalProducedQty, 0) / ((ISNULL(SA.intScheduledRuntime, 0) / 60) * ISNULL(SA.dblStdCapacity, 0))) * 100, 4)
 				END
 		END AS dblEfficiencyWithOutDowntimePercentage
+	,SA.intManufacturingCellId
+	,MC.ysnIncludeSchedule
 FROM dbo.tblMFShiftActivity SA
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = SA.intManufacturingCellId
 	AND SA.intShiftActivityStatusId = 3

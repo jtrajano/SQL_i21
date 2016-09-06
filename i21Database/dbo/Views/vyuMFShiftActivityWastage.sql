@@ -22,6 +22,9 @@ SELECT CONVERT(INT,ROW_NUMBER() OVER (
 					END), 0), 2) AS dblWastagePercent
 	,strWastageTypeName
 	,intLocationId
+	,intShiftActivityId
+	,intManufacturingCellId
+	,ysnIncludeSchedule
 FROM (
 	SELECT DISTINCT SA.dtmShiftDate
 		,SA.strShiftActivityNumber
@@ -34,6 +37,9 @@ FROM (
 		,ISNULL(MC.dblWastageFactor, 0) AS dblWastageFactor
 		,ISNULL(MC.dblWastageCost, 0) AS dblWastageCost
 		,MC.intLocationId
+		,SA.intShiftActivityId
+		,SA.intManufacturingCellId
+		,MC.ysnIncludeSchedule
 	FROM dbo.tblMFWastage WD
 	JOIN dbo.tblMFShiftActivity SA ON SA.intShiftActivityId = WD.intShiftActivityId
 	JOIN dbo.tblMFWastageType WT ON WT.intWastageTypeId = WD.intWastageTypeId
@@ -51,3 +57,6 @@ GROUP BY dtmShiftDate
 	,dblTotalWeightofProducedQty
 	,strWastageTypeName
 	,intLocationId
+	,intShiftActivityId
+	,intManufacturingCellId
+	,ysnIncludeSchedule
