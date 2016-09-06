@@ -57,6 +57,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@ErrorMessage					NVARCHAR(250)	= NULL
 			,@TermId						INT				= NULL
 			,@EntitySalespersonId			INT				= NULL
+			,@EntityContactId				INT				= NULL
 			,@DueDate						DATETIME		= NULL		
 			,@ShipDate						DATETIME		= NULL
 			,@PostDate						DATETIME		= NULL
@@ -355,6 +356,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Item''s location costing method should be either FIFO or LIFO.'
 			END
 
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityCustomerId = @EntityCustomerId
+
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
 			BEGIN TRY
 				IF @TransactionType <> 'Sales Order'
@@ -628,6 +631,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intCurrencyId]
 							,[intCompanyLocationId]
 							,[intEntitySalespersonId]
+							,[intEntityContactId]
+							,[intOrderedById]
 							,[intShipViaId]
 							,[strPONumber]
 							,[intTermId]
@@ -666,6 +671,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							, @DefaultCurrencyId
 							, @CompanyLocationId
 							, @EntitySalespersonId
+							, @EntityContactId
+							, @UserEntityId
 							, @ShipViaId
 							, @PONumber
 							, @TermId
