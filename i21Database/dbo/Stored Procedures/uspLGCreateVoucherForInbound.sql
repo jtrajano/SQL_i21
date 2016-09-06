@@ -109,7 +109,7 @@ BEGIN TRY
 			)
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
