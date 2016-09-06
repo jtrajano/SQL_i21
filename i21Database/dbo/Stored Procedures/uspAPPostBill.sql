@@ -216,7 +216,7 @@ FROM	tblAPBill A INNER JOIN tblAPBillDetail B
 		INNER JOIN tblICItemLocation D
 			ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
 		LEFT JOIN tblICItemUOM itemUOM
-			ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
+			ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		LEFT JOIN tblICItemUOM receiptCostUOM
