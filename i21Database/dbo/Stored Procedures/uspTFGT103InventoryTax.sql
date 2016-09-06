@@ -159,20 +159,21 @@ DECLARE @tblTempTransaction TABLE (
                          '''',tblSMCompanySetup.strCompanyName,tblSMCompanySetup.strAddress,tblSMCompanySetup.strCity,tblSMCompanySetup.strState,tblSMCompanySetup.strZip,tblSMCompanySetup.strPhone, 
                          tblSMCompanySetup.strStateTaxID,tblSMCompanySetup.strFederalTaxID,tblEMEntityLocation.strState AS strOriginState,
 						 tblSMCompanyLocation.strStateProvince AS strDestinationState,tblTFTerminalControlNumber.strTerminalControlNumber
-					FROM tblTRSupplyPoint INNER JOIN tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId=tblTFTerminalControlNumber.intTerminalControlNumberId RIGHT OUTER JOIN tblAPVendor INNER JOIN
+					FROM tblTRSupplyPoint INNER JOIN
+                         tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId=tblTFTerminalControlNumber.intTerminalControlNumberId RIGHT OUTER JOIN
+                         tblAPVendor INNER JOIN tblEMEntity ON tblEMEntity.intEntityId=tblAPVendor.intEntityVendorId INNER JOIN
+                         tblEMEntityLocation ON tblEMEntity.intEntityId=tblEMEntityLocation.intEntityId INNER JOIN
                          tblSMTaxCode INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId=tblTFTaxCategory.intTaxCategoryId INNER JOIN
                          tblICInventoryReceiptItem INNER JOIN tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId=tblICInventoryReceipt.intInventoryReceiptId INNER JOIN
                          tblICInventoryReceiptItemTax ON tblICInventoryReceiptItem.intInventoryReceiptItemId=tblICInventoryReceiptItemTax.intInventoryReceiptItemId INNER JOIN
                          tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId=tblSMCompanyLocation.intCompanyLocationId INNER JOIN
                          tblICItemMotorFuelTax INNER JOIN tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId=tblTFValidProductCode.intProductCode INNER JOIN
                          tblTFReportingComponentDetail ON tblTFValidProductCode.intReportingComponentDetailId=tblTFReportingComponentDetail.intReportingComponentDetailId ON 
-                         tblICInventoryReceiptItem.intItemId=tblICItemMotorFuelTax.intItemId ON tblSMTaxCode.intTaxCodeId=tblICInventoryReceiptItemTax.intTaxCodeId INNER JOIN
+                         tblICInventoryReceiptItem.intItemId = tblICItemMotorFuelTax.intItemId ON tblSMTaxCode.intTaxCodeId=tblICInventoryReceiptItemTax.intTaxCodeId INNER JOIN
                          tblTFReportingComponent ON tblTFReportingComponentDetail.intReportingComponentId=tblTFReportingComponent.intReportingComponentId ON 
-                         tblAPVendor.intEntityVendorId=tblICInventoryReceipt.intEntityVendorId INNER JOIN
-                         tblEMEntity ON tblEMEntity.intEntityId=tblAPVendor.intEntityVendorId INNER JOIN
-                         tblEMEntityLocation ON tblEMEntity.intEntityId=tblEMEntityLocation.intEntityId ON tblTRSupplyPoint.intEntityLocationId=tblICInventoryReceipt.intShipFromId FULL OUTER JOIN
-                         tblSMShipVia FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId=tblEMEntity_Transporter.intEntityId ON tblICInventoryReceipt.intShipViaId=tblSMShipVia.intEntityShipViaId CROSS JOIN
-                         tblSMCompanySetup 
+                         tblAPVendor.intShipFromId = tblICInventoryReceipt.intShipFromId ON tblTRSupplyPoint.intEntityLocationId=tblICInventoryReceipt.intShipFromId FULL OUTER JOIN
+                         tblSMShipVia FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId=tblEMEntity_Transporter.intEntityId 
+						 ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId CROSS JOIN tblSMCompanySetup
 						 WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
 						 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
 						 ' + @IncludeOriginState + ' ' + @ExcludeOriginState + '
