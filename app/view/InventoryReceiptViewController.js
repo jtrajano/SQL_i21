@@ -1721,7 +1721,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        this.calculateGrossNet(current);
+        this.calculateGrossNet(current, 1);
         win.viewModel.data.currentReceiptItem = current;
         this.calculateItemTaxes();
         
@@ -2062,7 +2062,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return result;
     },
 
-    calculateGrossNet: function (record) {
+    calculateGrossNet: function (record, calculateItemGrossNet) {
         if (!record) return;
 
         var totalGross = 0
@@ -2139,13 +2139,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 record.set('dblNet', totalNet);
             }
             else {
+                //Gross Net is not calculated based on Lot
                 ysnCalculatedInLot = 0;
             }
         }
             
         
-        //Use this calculation if the item has no lot
-        if(ysnCalculatedInLot === 0)
+        //Use this to calculate item's Gross/Net based on item grid
+        if(ysnCalculatedInLot === 0 && calculateItemGrossNet === 1)
             {
                  var receiptItemQty = record.get('dblOpenReceive');
                  var receiptUOMCF = record.get('dblItemUOMConvFactor');
@@ -2881,7 +2882,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (context.field === 'dblOpenReceive') {
             if (context.record) { 
                 // Calculate the gross weight.
-                me.calculateGrossNet(context.record);
+                me.calculateGrossNet(context.record, 1);
             }
         }
         
@@ -2897,7 +2898,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (context.field === 'strWeightUOM')
             {
                 // Calculate the gross weight.
-                me.calculateGrossNet(context.record);
+                me.calculateGrossNet(context.record, 1);
             }
 
         // Accept the data input.
@@ -2947,7 +2948,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         // Call this function to auto-calculate the Gross and Net at the item grid.
         if (receiptItem.get('dblGross') === 0 && receiptItem.get('dblNet') === 0) {
-            me.calculateGrossNet(receiptItem);
+            me.calculateGrossNet(receiptItem, 1);
         }
 
         //Calculate Line Total
@@ -2955,7 +2956,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         receiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, receiptItem));
         
         if(context.field === 'dblQuantity') {
-            me.calculateGrossNet(receiptItem);
+            me.calculateGrossNet(receiptItem, 0);
         }
     },
 
@@ -4151,7 +4152,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strUnitType', records[0].get('strUnitType'));
 
 			//Calculate the Line Gross Net Qty. 
-            me.calculateGrossNet(win.viewModel.data.currentReceiptItem);		
+            me.calculateGrossNet(win.viewModel.data.currentReceiptItem, 0);		
             
             //Calculate Line Total
             var currentReceiptItem = win.viewModel.data.currentReceiptItem;
@@ -4525,7 +4526,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             
                              else if (order.get('dblGross') === 0 && order.get('dblNet') === 0) {
                                 var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-                                me.calculateGrossNet(currentReceiptItem);
+                                me.calculateGrossNet(currentReceiptItem, 1);
                              }
                         }
                     });
@@ -4685,7 +4686,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             currentReceiptItem.tblICInventoryReceiptItemLots().add(newLot);
                             grdLotTracking.resumeEvents(true);
                             //Calculate Gross/Net
-                            me.calculateGrossNet(currentReceiptItem);
+                            me.calculateGrossNet(currentReceiptItem, 1);
 
                             //Calculate Line Total
                             var currentReceipt  = win.viewModel.data.current;
@@ -4792,7 +4793,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if ( ctr === replicaCount - 1){
                         grdLotTracking.resumeEvents(true);
                         //Calculate Gross/Net
-                        me.calculateGrossNet(currentReceiptItem);
+                        me.calculateGrossNet(currentReceiptItem, 1);
 
                         //Calculate Line Total
                         var currentReceipt  = win.viewModel.data.current;
