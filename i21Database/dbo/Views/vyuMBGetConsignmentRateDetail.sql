@@ -14,7 +14,7 @@ SELECT ConRateDetail.intConsignmentRateDetailId
 	, ConRateDetail.dblIntervalPumpPrice
 	, ConRateDetail.dblIntervalRate
 	, ConRateDetail.dblConsignmentFloor
-	, ConRateDetail.strRateType
+	, ConGroup.strRateType
 	, ConRateDetail.intSort
 FROM tblMBConsignmentRateDetail ConRateDetail
 LEFT JOIN tblMBConsignmentRate ConRate ON ConRate.intConsignmentRateId = ConRateDetail.intConsignmentRateId

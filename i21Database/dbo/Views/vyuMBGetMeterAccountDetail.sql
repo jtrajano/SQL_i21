@@ -20,6 +20,7 @@ SELECT MADetail.intMeterAccountDetailId
 	, MA.strPriceType
 	, MA.intConsignmentGroupId
 	, MA.strConsignmentGroup
+	, MA.strRateType
 	, MA.intCompanyLocationId
 	, MA.strCompanyLocation
 	, MADetail.strMeterKey

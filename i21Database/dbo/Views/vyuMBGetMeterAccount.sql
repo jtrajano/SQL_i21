@@ -21,6 +21,7 @@ SELECT MA.intMeterAccountId
 	)
 	, MA.intConsignmentGroupId
 	, ConGroup.strConsignmentGroup
+	, ConGroup.strRateType
 	, MA.intCompanyLocationId
 	, strCompanyLocation = Location.strLocationName
 	, EntityLocation.intTaxGroupId
