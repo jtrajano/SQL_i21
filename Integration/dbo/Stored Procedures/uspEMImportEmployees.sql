@@ -258,9 +258,9 @@ BEGIN
                 @strZip				= dbo.fnTrim(premp_zip),
                 --Employee
                 @originEmployee		= premp_emp,
-				@dtmOrigHireDate	= premp_orig_hire_dt,
-				@dtmLastHireDate	= premp_last_hire_dt,
-				@dtmBirthDate		= premp_birth_dt,
+				@dtmOrigHireDate	= case when premp_orig_hire_dt = 0 then null else premp_orig_hire_dt end,
+				@dtmLastHireDate	= case when premp_last_hire_dt = 0 then null else premp_last_hire_dt end,
+				@dtmBirthDate		= case when premp_last_hire_dt = 0 then null else premp_birth_dt end,
 				@strSex				= CASE WHEN premp_sex = ''M'' THEN ''Male'' 
 										WHEN premp_sex = ''F'' THEN ''Female'' end ,
 				@strType			= Case when premp_employment = ''F'' then ''Full-Time''
@@ -292,11 +292,11 @@ BEGIN
 										WHEN premp_eeo_code = ''10'' THEN ''1.1 - Executive/Senior Level Officials and Managers''				
 										END, 
 				@strSocialSecurity	= premp_ssn,
-				@dtmTerminated		= premp_term_dt,
-				@strTerminatedReason= premp_term_code,
-				@strEmergencyContact= premp_emer_contact,
-				@strEmergencyPhone	= premp_emer_phone,
-				@strEmergencyPhone2	= premp_doctor_phone,
+				@dtmTerminated		= case when premp_term_dt = 0 then null else premp_term_dt end,
+				@strTerminatedReason= case when len(premp_term_code) > 100 then SUBSTRING(premp_term_code, 0, 100) else premp_term_code end,
+				@strEmergencyContact= case when len(premp_emer_contact) > 25 then SUBSTRING(premp_emer_contact, 0, 25) else premp_emer_contact end,
+				@strEmergencyPhone	= case when len(premp_emer_phone) > 25 then SUBSTRING(premp_emer_phone, 0, 25) else premp_emer_phone end,
+				@strEmergencyPhone2	= case when len(premp_doctor_phone) > 25 then SUBSTRING(premp_doctor_phone, 0, 25) else premp_doctor_phone end,
 				@strPayPeriod		= CASE WHEN premp_pay_cycle = ''W'' then ''Weekly''
 										WHEN premp_pay_cycle = ''M'' then ''Monthly''
 										WHEN premp_pay_cycle = ''Q'' then ''Quarterly''
@@ -304,8 +304,8 @@ BEGIN
 										WHEN premp_pay_cycle = ''S'' then ''Semi-Monthly''
 										WHEN premp_pay_cycle = ''A'' then ''Annual''
 										WHEN premp_pay_cycle = ''D'' then ''Daily'' end,
-				@dtmReviewDate		= premp_last_review_dt,
-				@dtmNextReview		= premp_next_review_dt,
+				@dtmReviewDate		= case when premp_last_review_dt = 0 then null else premp_last_review_dt end,
+				@dtmNextReview		= case when premp_next_review_dt = 0 then null else premp_next_review_dt end ,
 				@ysnRetirementPlan	= premp_pension_flag_9,
 				@dblRegularHours	= premp_std_hrs,
 				@dtmLastModified	= premp_user_rev_dt
