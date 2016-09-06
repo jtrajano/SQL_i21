@@ -155,7 +155,7 @@ BEGIN
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ItemLot.TotalLotQtyInItemUOM <> ReceiptItem.dblNet
+			AND ROUND(ItemLot.TotalLotQtyInItemUOM,6) <> ROUND(ReceiptItem.dblNet,6)
 			AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 
 			
 	IF @intItemId IS NOT NULL 
@@ -167,7 +167,7 @@ BEGIN
 		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
 		SET @FormattedDifference =  CAST(ABS(@ReceiptItemNet - @LotQtyInItemUOM) AS NVARCHAR(50))
 
-		-- 'Net quantity mistmatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
+		-- 'Net quantity mismatch. It is {@FormattedReceiptItemNet} on item {@strItemNo} but the total net from the lot(s) is {@FormattedLotQty}.'
 		RAISERROR(80081, 11, 1, @FormattedReceiptItemNet, @strItemNo, @FormattedLotQty)  
 		RETURN -1; 
 	END 
