@@ -600,3 +600,5 @@ GO
 		UPDATE tblSMCompanyPreference SET intDefaultCountryId = (SELECT TOP 1 intCountryID FROM tblSMCountry WHERE strCountry = 'United States')
 	END
 GO
+	UPDATE tblSMEmailRecipient SET intEntityContactId = NULL WHERE intEntityContactId = -1
+GO
