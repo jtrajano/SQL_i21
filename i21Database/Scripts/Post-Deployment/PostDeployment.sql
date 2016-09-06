@@ -202,6 +202,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\18_FixInvalidInvoiceAmounts.sql
 :r .\AR\DefaultData\19_UpdateUsedCustomerBudget.sql
 :r .\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql
+:r .\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
