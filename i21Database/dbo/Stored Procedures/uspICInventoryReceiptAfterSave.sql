@@ -51,6 +51,12 @@ BEGIN
 	END
 END
 
+-- Call the grain sp when deleting the receipt. 
+IF @ForDelete = 1
+BEGIN 
+	EXEC uspGRReverseOnReceiptDelete @ReceiptId
+END 
+
 -- Validate. 
 BEGIN		
 	-- Do not proceed if receipt type is NOT a 'Purchase Contract' 
@@ -62,12 +68,6 @@ BEGIN
 	IF ISNULL(@SourceType, @SourceType_None) = @SourceType_InboundShipment OR ISNULL(@SourceType, @SourceType_None) = @SourceType_Scale
 		GOTO _Exit;
 END
-
--- Call the grain sp when deleting the receipt. 
-IF @ForDelete = 1
-BEGIN 
-	EXEC uspGRReverseOnReceiptDelete @ReceiptId
-END 
 
 -- Get the deleted, new, or modified data. 
 BEGIN
