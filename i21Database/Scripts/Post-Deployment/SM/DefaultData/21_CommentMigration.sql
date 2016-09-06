@@ -20,7 +20,7 @@ GO
 	FROM (
 		SELECT DISTINCT strScreen
 		FROM tblSMComment A LEFT OUTER JOIN tblSMScreen B ON A.strScreen = B.strNamespace
-		WHERE ISNULL(B.intScreenId, 0) = 0
+		WHERE ISNULL(B.intScreenId, 0) = 0 AND ISNULL(strScreen, '') <> ''
 	) tbl
 
 
