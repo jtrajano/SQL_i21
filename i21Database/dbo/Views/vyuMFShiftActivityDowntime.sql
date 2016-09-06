@@ -11,6 +11,9 @@ SELECT DM.intDowntimeMachineId
 	,D.strExplanation
 	,(D.intDowntime / 60) AS intDownTime
 	,MC.intLocationId
+	,SA.intShiftActivityId
+	,SA.intManufacturingCellId
+	,MC.ysnIncludeSchedule
 FROM dbo.tblMFDowntime D
 JOIN dbo.tblMFDowntimeMachines DM ON DM.intDowntimeId = D.intDowntimeId
 JOIN dbo.tblMFReasonCode RC ON RC.intReasonCodeId = D.intReasonCodeId
