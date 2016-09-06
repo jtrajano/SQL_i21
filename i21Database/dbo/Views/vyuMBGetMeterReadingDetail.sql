@@ -18,6 +18,8 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MR.intInvoiceId
 	, MR.strInvoiceNumber
 	, MADetail.intConsignmentGroupId
+	, MADetail.strConsignmentGroup
+	, MADetail.strRateType
 	, MADetail.strPriceType
 	, MADetail.intTaxGroupId
 	, MADetail.intItemId
