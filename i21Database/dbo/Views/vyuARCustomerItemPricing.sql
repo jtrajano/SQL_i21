@@ -9,8 +9,10 @@ SELECT
 	,[intEntityCustomerId]		= ARI.[intEntityCustomerId]									--CAST(NULL AS INT)
 	,[intItemId]				= ARID.[intItemId]											--CAST(NULL AS INT)
 	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= ARPH.[dblOriginalPrice]									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[strPricing]				= ARPH.[strPricing]            COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
+	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= ARID.[intContractHeaderId]								--CAST(NULL AS INT)
 	,[intContractDetailId]		= ARID.[intContractDetailId]								--CAST(NULL AS INT) 
@@ -44,8 +46,10 @@ SELECT
 	,[intEntityCustomerId]		= ARI.[intEntityCustomerId]	--CAST(NULL AS INT)
 	,[intItemId]				= ARID.[intItemId]			--CAST(NULL AS INT)
 	,[dblPrice]					= IP.[dblPrice]				--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= CAST(0 AS NUMERIC(18,6))	--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= IP.[dblTermDiscount]		--CAST(0 AS NUMERIC(18,6))
 	,[strPricing]				= IP.[strPricing]			--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
+	,[strOriginalPricing]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= IP.[dblDeviation]			--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= IP.[intContractHeaderId]	--CAST(NULL AS INT)
 	,[intContractDetailId]		= IP.[intContractDetailId]	--CAST(NULL AS INT) 
@@ -91,6 +95,17 @@ CROSS APPLY
 		,ARI.[intTermId]			--@TermId
 		,1							--@GetAllAvailablePricing
 		) AS IP
+--WHERE
+--	NOT EXISTS(	SELECT NULL 
+--				FROM tblARPricingHistory ARPH 
+--				WHERE
+--					ARID.[intInvoiceDetailId] = ARPH.[intTransactionDetailId] 
+--					AND ARI.[intInvoiceId] = ARPH.[intTransactionId]
+--					AND ARID.[dblPrice] = ARPH.[dblPrice] 
+--					AND ARID.[strPricing] = ARPH.[strPricing] 
+--					AND ARPH.[intSourceTransactionId] = 2
+--					AND ARPH.[ysnApplied] = 1
+--					AND ARPH.[ysnDeleted] = 0)
 		
 UNION ALL
 
@@ -101,8 +116,10 @@ SELECT
 	,[intEntityCustomerId]		= SO.[intEntityCustomerId]									--CAST(NULL AS INT)
 	,[intItemId]				= SOSOD.[intItemId]											--CAST(NULL AS INT)
 	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= ARPH.[dblOriginalPrice]									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[strPricing]				= ARPH.[strPricing]			   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
+	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= SOSOD.[intContractHeaderId]								--CAST(NULL AS INT)
 	,[intContractDetailId]		= SOSOD.[intContractDetailId]								--CAST(NULL AS INT) 
@@ -136,8 +153,10 @@ SELECT
 	,[intTransactionDetailId]	= SOSOD.[intSalesOrderDetailId]	--CAST(NULL AS INT)
 	,[intItemId]				= SOSOD.[intItemId]				--CAST(NULL AS INT)
 	,[dblPrice]					= IP.[dblPrice]					--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= CAST(0 AS NUMERIC(18,6))		--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= IP.[dblTermDiscount]			--CAST(0 AS NUMERIC(18,6))
 	,[strPricing]				= IP.[strPricing]				--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
+	,[strOriginalPricing]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= IP.[dblDeviation]				--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= IP.[intContractHeaderId]		--CAST(NULL AS INT)
 	,[intContractDetailId]		= IP.[intContractDetailId]		--CAST(NULL AS INT) 
@@ -147,7 +166,7 @@ SELECT
 	,[ysnUnlimitedQty]			= IP.[ysnUnlimitedQty]			--CAST(NULL AS BIT)
 	,[strPricingType]			= IP.[strPricingType]			--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[intSourceTransactionId]	= CAST(1 AS INT)				--CAST(NULL AS INT)
-	,[ysnApplied]				= CAST(0 AS BIT)			--CAST(NULL AS BIT)
+	,[ysnApplied]				= CAST(0 AS BIT)				--CAST(NULL AS BIT)
 	,[intSort]					= IP.[intSort]					--CAST(NULL AS INT)
 FROM
 	tblSOSalesOrderDetail SOSOD
@@ -183,4 +202,15 @@ CROSS APPLY
 		,SO.[intTermId]				--@TermId
 		,1							--@GetAllAvailablePricing
 		) AS IP
+--WHERE
+--	NOT EXISTS(	SELECT NULL 
+--				FROM tblARPricingHistory ARPH 
+--				WHERE
+--					SOSOD.[intSalesOrderDetailId] = ARPH.[intTransactionDetailId] 
+--					AND SO.[intSalesOrderId] = ARPH.[intTransactionId]
+--					AND SOSOD.[dblPrice] = ARPH.[dblPrice] 
+--					AND SOSOD.[strPricing] = ARPH.[strPricing] 
+--					AND ARPH.[intSourceTransactionId] = 2
+--					AND ARPH.[ysnApplied] = 1
+--					AND ARPH.[ysnDeleted] = 0)
 
