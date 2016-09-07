@@ -23,7 +23,8 @@
     CONSTRAINT [PK_tblARCustomerSpecialPrice] PRIMARY KEY CLUSTERED ([intSpecialPriceId] ASC),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Rack] FOREIGN KEY ([intRackLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
-	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Customer] FOREIGN KEY ([intCustomerLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId])    
+	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Customer] FOREIGN KEY ([intCustomerLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),	
+	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]) ON DELETE CASCADE,
 );
 
 
