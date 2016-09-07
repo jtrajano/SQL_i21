@@ -53,11 +53,11 @@ END
 INSERT INTO @log
 SELECT TOP 1 
 	'There are invalid date value on apivc_gl_rev_dt of apivcmst.'
-FROM apivcmst A WHERE ISDATE(A.apivc_gl_rev_dt) = 1
+FROM apivcmst A WHERE ISDATE(A.apivc_gl_rev_dt) = 0
 UNION ALL
 SELECT TOP 1 
 	'There are invalid date value on aptrx_gl_rev_dt of aptrxmst'
-FROM aptrxmst A WHERE ISDATE(A.aptrx_gl_rev_dt) = 1
+FROM aptrxmst A WHERE ISDATE(A.aptrx_gl_rev_dt) = 0
 
 --VALIDATE THE AP ACCOUNT IF NO VALUE
 INSERT INTO @log
