@@ -1791,15 +1791,14 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
-				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount
-				,tblARInvoice.dblDiscountAvailable = 0
+				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscountAvailable,0.00)				
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) - P.dblInterest				
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) dblPayment
 						, SUM(A.dblDiscount) dblDiscount
-						, SUM(A.dblInterest) dblInterest
+						, SUM(A.dblInterest) dblInterest						
 						,A.intInvoiceId 
 					FROM
 						tblARPaymentDetail A
@@ -2044,8 +2043,7 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
-				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount
-				,tblARInvoice.dblDiscountAvailable = ISNULL(tblARInvoice.dblDiscountAvailable,0.00) + P.dblDiscountAvailable
+				,tblARInvoice.dblDiscount =P.dblDiscount				
 				,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
 			FROM
 				(
