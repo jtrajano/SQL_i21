@@ -12,6 +12,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @createdBillId INT;
 DECLARE @billId INT, @vendorId INT;
+DECLARE @generatedBillBatchRecordId NVARCHAR(50);
 DECLARE @shipFromId INT, @shipToId INT;
 DECLARE @tmpBillData TABLE(
 	[intBillId] [int] PRIMARY KEY,
@@ -33,11 +34,14 @@ BEGIN
 	SET @shipToId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation)
 END
 
+EXEC uspSMGetStartingNumber 7, @generatedBillBatchRecordId OUT
+
 INSERT INTO tblAPBillBatch(
 	[intAccountId],
     [ysnPosted],
 	[dtmBatchDate],
     [strReference],
+	[strBillBatchNumber],
     [dblTotal],
     [intConcurrencyId], 
     [intEntityId], 
@@ -48,6 +52,7 @@ SELECT
     [ysnPosted]				=	0,
 	[dtmBatchDate]			=	GETDATE(),
     [strReference]			=	A.strReference + ' Duplicate of ' + A.strBillBatchNumber,
+	[strBillBatchNumber]	=	@generatedBillBatchRecordId,
     [dblTotal]				=	A.dblTotal,
     [intConcurrencyId]		=	0, 
     [intEntityId]			=	@userId, 
