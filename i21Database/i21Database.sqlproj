@@ -4293,6 +4293,9 @@
     <Build Include="dbo\Views\vyuARServiceChargeRecap.sql" />
     <Build Include="dbo\Views\vyuARCommissionRecap.sql" />
     <Build Include="dbo\Views\vyuARCommissionDetailRecap.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportAssetAct.sql" />
+    <Build Include="dbo\Views\vyuSMBEExportTax.sql" />
+    <Build Include="dbo\Views\vyuSMBEExportTaxCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
