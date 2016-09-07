@@ -146,7 +146,6 @@ BEGIN
 				ON tblICInventoryFIFO.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryFIFO.intItemId = @intItemId
 			AND tblICInventoryFIFO.intItemLocationId = @intItemLocationId
-			--AND tblICInventoryFIFO.intItemUOMId = @intItemUOMId
 			AND tblICInventoryFIFO.intTransactionId = @intSourceTransactionId
 			AND tblICInventoryFIFO.intTransactionDetailId = @intSourceTransactionDetailId
 			AND tblICInventoryFIFO.strTransactionId = @strSourceTransactionId

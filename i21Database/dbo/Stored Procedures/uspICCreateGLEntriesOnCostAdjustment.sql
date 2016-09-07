@@ -34,6 +34,11 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
+		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 35
+		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 36
+		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 37
+		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 38
+
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 
@@ -51,6 +56,10 @@ INSERT INTO @GLAccounts (
 		,intRevalueProduced 
 		,intRevalueTransfer 
 		,intRevalueBuildAssembly 
+		--,intRevalueAdjItemChange 
+		--,intRevalueAdjSplitLot 
+		--,intRevalueAdjLotMerge
+		--,intRevalueAdjLotMove
 		,intTransactionTypeId
 )
 SELECT	Query.intItemId
@@ -65,6 +74,12 @@ SELECT	Query.intItemId
 		,intRevalueProduced = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Revalue_WIP) 
 		,intRevalueTransfer = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
 		,intRevalueBuildAssembly = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
+
+		--,intRevalueAdjItemChange = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory)
+		--,intRevalueAdjSplitLot = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory)
+		--,intRevalueAdjLotMerge = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory)
+		--,intRevalueAdjLotMove = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory)
+
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
@@ -227,37 +242,37 @@ BEGIN
 END 
 ;
 
--- Check for missing Revalue WIP account id.
-IF EXISTS (
-	SELECT	TOP 1 1 	
-	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-	WHERE	TRANS.strBatchId = @strBatchId
-			AND TRANS.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_WIP
-)
-BEGIN 
-	SET @strItemNo = NULL
-	SET @intItemId = NULL
+---- Check for missing Revalue WIP account id.
+--IF EXISTS (
+--	SELECT	TOP 1 1 	
+--	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+--				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+--	WHERE	TRANS.strBatchId = @strBatchId
+--			AND TRANS.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_WIP
+--)
+--BEGIN 
+--	SET @strItemNo = NULL
+--	SET @intItemId = NULL
 
-	SELECT	TOP 1 
-			@intItemId = Item.intItemId 
-			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-			INNER JOIN dbo.tblICInventoryTransaction TRANS 
-				ON TRANS.intItemId = Item.intItemId			
-			INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
-				AND TRANS.intItemId = Item.intItemId
-	WHERE	ItemGLAccount.intRevalueWIP IS NULL 
+--	SELECT	TOP 1 
+--			@intItemId = Item.intItemId 
+--			,@strItemNo = Item.strItemNo
+--	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+--				ON Item.intItemId = ItemGLAccount.intItemId
+--			INNER JOIN dbo.tblICInventoryTransaction TRANS 
+--				ON TRANS.intItemId = Item.intItemId			
+--			INNER JOIN dbo.tblICInventoryTransactionType TransType
+--				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+--				AND TRANS.intItemId = Item.intItemId
+--	WHERE	ItemGLAccount.intRevalueWIP IS NULL 
 	
-	IF @intItemId IS NOT NULL 
-	BEGIN 
-		-- {Item} is missing a GL account setup for {Revalue WIP} account category.
-		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Revalue_WIP) 	
-		RETURN -1;
-	END 
-END 
+--	IF @intItemId IS NOT NULL 
+--	BEGIN 
+--		-- {Item} is missing a GL account setup for {Revalue WIP} account category.
+--		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Revalue_WIP) 	
+--		RETURN -1;
+--	END 
+--END 
 ;
 
 /*-------------------------------------------------------------------------------------------
@@ -1123,5 +1138,210 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
 		) Credit
 WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Build_Assembly
+
+-----------------------------------------------------------------------------------
+-- This part is for Revalue Item Change. 
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'RIC' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= NULL  
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,[dblDebitForeign]			= NULL
+		,[dblDebitReport]			= NULL
+		,[dblCreditForeign]			= NULL
+		,[dblCreditReport]			= NULL
+		,[dblReportingRate]			= NULL
+		,[dblForeignRate]			= NULL
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Item_Change
+
+-----------------------------------------------------------------------------------
+-- This part is for Revalue Split Lot. 
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'RSL' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= NULL  
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,[dblDebitForeign]			= NULL
+		,[dblDebitReport]			= NULL
+		,[dblCreditForeign]			= NULL
+		,[dblCreditReport]			= NULL
+		,[dblReportingRate]			= NULL
+		,[dblForeignRate]			= NULL
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Split_Lot
+
+-----------------------------------------------------------------------------------
+-- This part is for Revalue Lot Merge. 
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'RLMG' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= NULL  
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,[dblDebitForeign]			= NULL
+		,[dblDebitReport]			= NULL
+		,[dblCreditForeign]			= NULL
+		,[dblCreditReport]			= NULL
+		,[dblReportingRate]			= NULL
+		,[dblForeignRate]			= NULL
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Lot_Merge
+
+-----------------------------------------------------------------------------------
+-- This part is for Revalue Lot Move. 
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'RLMV' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= NULL  
+		,intEntityId				= @intEntityUserSecurityId
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,[dblDebitForeign]			= NULL
+		,[dblDebitReport]			= NULL
+		,[dblCreditForeign]			= NULL
+		,[dblCreditReport]			= NULL
+		,[dblReportingRate]			= NULL
+		,[dblForeignRate]			= NULL
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Lot_Move
+
 
 ;

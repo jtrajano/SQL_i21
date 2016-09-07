@@ -146,7 +146,6 @@ BEGIN
 				ON tblICInventoryActualCost.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryActualCost.intItemId = @intItemId
 			AND tblICInventoryActualCost.intItemLocationId = @intItemLocationId
-			--AND tblICInventoryActualCost.intItemUOMId = @intItemUOMId
 			AND tblICInventoryActualCost.intTransactionId = @intSourceTransactionId
 			AND tblICInventoryActualCost.intTransactionDetailId = @intSourceTransactionDetailId
 			AND tblICInventoryActualCost.strTransactionId = @strSourceTransactionId

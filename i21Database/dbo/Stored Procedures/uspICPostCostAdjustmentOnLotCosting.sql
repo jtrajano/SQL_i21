@@ -88,10 +88,20 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 30
 		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 31
 
+		,@INV_TRANS_TYPE_Revalue_Item_Change AS INT = 35
+		,@INV_TRANS_TYPE_Revalue_Split_Lot AS INT = 36
+		,@INV_TRANS_TYPE_Revalue_Lot_Merge AS INT = 37
+		,@INV_TRANS_TYPE_Revalue_Lot_Move AS INT = 38
+
 		,@INV_TRANS_TYPE_Consume AS INT = 8
 		,@INV_TRANS_TYPE_Produce AS INT = 9
 		,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
 		,@INV_TRANS_Inventory_Transfer AS INT = 12
+
+		,@INV_TRANS_TYPE_ADJ_Item_Change AS INT = 15
+		,@INV_TRANS_TYPE_ADJ_Split_Lot AS INT = 17
+		,@INV_TRANS_TYPE_ADJ_Lot_Merge AS INT = 19
+		,@INV_TRANS_TYPE_ADJ_Lot_Move AS INT = 20
 
 DECLARE @CostBucketId AS INT
 		,@CostBucketCost AS NUMERIC(38,20)
@@ -200,14 +210,12 @@ BEGIN
 		FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
 					ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
 		WHERE	tblICInventoryLot.intItemId = @intItemId
-				--AND tblICInventoryLot.intItemUOMId = @intItemUOMId
 				AND tblICInventoryLot.intItemLocationId = @intItemLocationId
 				AND tblICInventoryLot.intTransactionId = @intSourceTransactionId
 				AND tblICInventoryLot.intTransactionDetailId = @intSourceTransactionDetailId
 				AND tblICInventoryLot.strTransactionId = @strSourceTransactionId
 				AND ISNULL(tblICInventoryLot.ysnIsUnposted, 0) = 0 
 				AND tblICInventoryLot.intLotId > ISNULL(@intLotId, 0) 
-				AND tblICInventoryLot.dblCost <> dbo.fnCalculateCostBetweenUOM(@intCostUOMId, tblICInventoryLot.intItemUOMId, @dblVoucherCost) --@dblNewCost
 	END 
 
 	-- Validate the cost bucket
@@ -450,7 +458,7 @@ BEGIN
 		-----------------------------------------------------------------------------------------------------------------------------
 		-- Start of the loop for sold/produced items. 
 		-----------------------------------------------------------------------------------------------------------------------------
-		WHILE @@FETCH_STATUS = 0
+		WHILE @@FETCH_STATUS = 0 AND @StockQtyToRevalue > 0 
 		BEGIN 
 		
 			-- Initialize the variables
@@ -504,10 +512,19 @@ BEGIN
 											, (@dblNewCost - @InvTranCost) 
 										) 
 
-				----------------------------------------------------------
-				-- 7. If stock was sold, then do the "Revalue Sold". 
-				----------------------------------------------------------
-				IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
+				---------------------------------------------------------------------------
+				-- 7. If stock was shipped or reduced from adj, then do the "Revalue Sold". 
+				---------------------------------------------------------------------------
+				IF	@InvTranTypeId NOT IN (
+						@INV_TRANS_TYPE_Consume
+						, @INV_TRANS_TYPE_Build_Assembly
+						, @INV_TRANS_Inventory_Transfer
+						, @INV_TRANS_TYPE_ADJ_Item_Change
+						, @INV_TRANS_TYPE_ADJ_Split_Lot
+						, @INV_TRANS_TYPE_ADJ_Lot_Merge
+						, @INV_TRANS_TYPE_ADJ_Lot_Move
+					)
+					AND @InvTranValue <> 0 
 				BEGIN 
 					EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId								= @intItemId
@@ -538,20 +555,40 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 				END 	
 
-				---------------------------------------------------------------
-				-- 8. If stock was consumed in a production or transfer
-				---------------------------------------------------------------
-				ELSE IF @InvTranTypeId IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
+				---------------------------------------------------------------------------
+				-- 8. If stock was consumed in a production, transfer, or lot adjustment
+				---------------------------------------------------------------------------
+				ELSE IF @InvTranTypeId IN (
+							@INV_TRANS_TYPE_Consume
+							, @INV_TRANS_TYPE_Build_Assembly
+							, @INV_TRANS_Inventory_Transfer
+							, @INV_TRANS_TYPE_ADJ_Item_Change
+							, @INV_TRANS_TYPE_ADJ_Split_Lot
+							, @INV_TRANS_TYPE_ADJ_Lot_Merge
+							, @INV_TRANS_TYPE_ADJ_Lot_Move
+						
+						)
+						AND @InvTranValue <> 0 
 				BEGIN 
 					SELECT	@CostAdjustmentTransactionType 
 								= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_WIP
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
+
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Item_Change	THEN @INV_TRANS_TYPE_Revalue_Item_Change
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Merge		THEN @INV_TRANS_TYPE_Revalue_Lot_Merge
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Move		THEN @INV_TRANS_TYPE_Revalue_Lot_Move
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Split_Lot		THEN @INV_TRANS_TYPE_Revalue_Split_Lot
 								END
 							,@LoopTransactionTypeId
 								= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_Produced
 										WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
+
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Item_Change	THEN @INV_TRANS_TYPE_Revalue_Item_Change
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Merge		THEN @INV_TRANS_TYPE_Revalue_Lot_Merge
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Lot_Move		THEN @INV_TRANS_TYPE_Revalue_Lot_Move
+										WHEN @InvTranTypeId = @INV_TRANS_TYPE_ADJ_Split_Lot		THEN @INV_TRANS_TYPE_Revalue_Split_Lot
 								END
 
 					EXEC [dbo].[uspICPostInventoryTransaction]
@@ -642,11 +679,12 @@ BEGIN
 								@INV_TRANS_TYPE_Produce
 								, @INV_TRANS_TYPE_Build_Assembly
 								, @INV_TRANS_Inventory_Transfer
+								, @INV_TRANS_TYPE_ADJ_Item_Change
+								, @INV_TRANS_TYPE_ADJ_Split_Lot
+								, @INV_TRANS_TYPE_ADJ_Lot_Merge
+								, @INV_TRANS_TYPE_ADJ_Lot_Move
 							)
 				END 
-
-				-- Compute the remaining Revalued Qty. 
-				SET @StockQtyToRevalue = @StockQtyToRevalue - @StockQtyAvailableToRevalue
 
 				-- Update the dblCostAdjustQty field in the Lot Out table. 
 				UPDATE	LotOut
@@ -658,6 +696,9 @@ BEGIN
 											END 	
 				FROM	dbo.tblICInventoryLotOut LotOut
 				WHERE	intId = @LotOutId
+
+				-- Compute the remaining Revalued Qty. 
+				SET @StockQtyToRevalue = @StockQtyToRevalue - @StockQtyAvailableToRevalue
 			END 				
 
 			-- Attempt to fetch the next row from cursor. 

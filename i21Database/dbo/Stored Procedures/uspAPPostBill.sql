@@ -180,7 +180,30 @@ ORDER BY intBillId
 --CREATE DATA FOR COST ADJUSTMENT
 DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
 
-INSERT INTO @adjustedEntries
+INSERT INTO @adjustedEntries (
+	[intItemId] 
+	,[intItemLocationId] 
+	,[intItemUOMId] 
+	,[dtmDate] 
+	,[dblQty] 
+	,[dblUOMQty] 
+	,[intCostUOMId] 
+	,[dblVoucherCost] 
+	,[intCurrencyId] 
+	,[dblExchangeRate] 
+	,[intTransactionId] 
+	,[intTransactionDetailId] 
+	,[strTransactionId] 
+	,[intTransactionTypeId] 
+	,[intLotId] 
+	,[intSubLocationId] 
+	,[intStorageLocationId] 
+	,[ysnIsStorage] 
+	,[strActualCostId] 
+	,[intSourceTransactionId] 
+	,[intSourceTransactionDetailId] 
+	,[strSourceTransactionId] 
+)
 SELECT
 		[intItemId]							=	B.intItemId
 		,[intItemLocationId]				=	D.intItemLocationId
