@@ -18,6 +18,7 @@
     [dblTax]					NUMERIC (18, 6) NULL,
     [dblSalesOrderTotal]		NUMERIC (18, 6) NULL,
     [dblDiscount]				NUMERIC (18, 6) NULL,
+	[dblDiscountAvailable]		NUMERIC(18, 6)	NULL DEFAULT 0,	
     [dblAmountDue]				NUMERIC (18, 6) NULL,
     [dblPayment]				NUMERIC (18, 6) NULL,
     [strTransactionType]		NVARCHAR (25)   COLLATE Latin1_General_CI_AS NOT NULL,
