@@ -4,6 +4,8 @@
 SELECT DISTINCT RackPriceDetail.intRackPriceDetailId
 	, RackPriceDetail.intRackPriceHeaderId
 	, RackPriceHeader.intSupplyPointId
+	, Entity.intEntityId
+	, EntityLocation.intEntityLocationId
 	, RackPriceDetail.intItemId
 	, Item.strItemNo
 	, Item.strType
@@ -21,4 +23,4 @@ LEFT JOIN tblICItem Item ON Item.intItemId = RackPriceDetail.intItemId
 LEFT JOIN vyuTRRackPriceEquation PriceEquation ON PriceEquation.intSupplyPointId = RackPriceHeader.intSupplyPointId AND PriceEquation.intItemId = RackPriceDetail.intItemId
 INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intSupplyPointId = RackPriceHeader.intSupplyPointId
 INNER JOIN tblEMEntity Entity ON SupplyPoint.intEntityVendorId = Entity.intEntityId
-INNER JOIN [tblEMEntityLocation] EntityLocation ON SupplyPoint.intEntityLocationId = EntityLocation.intEntityLocationId
+INNER JOIN tblEMEntityLocation EntityLocation ON SupplyPoint.intEntityLocationId = EntityLocation.intEntityLocationId
