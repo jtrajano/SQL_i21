@@ -109,7 +109,6 @@ BEGIN
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
 			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 2) <> ReceiptItem.dblOpenReceive
-			AND ReceiptItem.intWeightUOMId IS NULL 
 			
 	IF @intItemId IS NOT NULL 
 	BEGIN 
@@ -125,10 +124,15 @@ BEGIN
 		RETURN -1; 
 	END 
 
-		
-	-- Check if the Item Receipt Net qty matches with the total Net qty from the lots. 
-	SET @strItemNo = NULL 
-	SET @intItemId = NULL 
+	-------------------------------------------------------------------------------------
+	-- Note: Need to change this validation as a settable configuration in IC. 
+	-- Dallmayr seems to use Item Net weight as the "received weight". 
+	-- They clean the coffee per lot. Net wgt at Lot is the actual wgt. 
+	-- See IC-2176 and IC-2341 for more info. 
+	-------------------------------------------------------------------------------------		
+	---- Check if the Item Receipt Net qty matches with the total Net qty from the lots. 
+	--SET @strItemNo = NULL 
+	--SET @intItemId = NULL 
 
 	SELECT	TOP 1 
 			@strItemNo					= Item.strItemNo
