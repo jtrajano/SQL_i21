@@ -4144,9 +4144,9 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strVendorId",
+                                                        "displayField": "strName",
                                                         "itemId": "cboCostVendor",
-                                                        "valueField": "strVendorId"
+                                                        "valueField": "strName"
                                                     },
                                                     "name": "MyComboBox83",
                                                     "configAlternates": {

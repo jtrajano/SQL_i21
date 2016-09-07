@@ -1969,8 +1969,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 }
                                                             ],
                                                             itemId: 'cboCostVendor',
-                                                            displayField: 'strVendorId',
-                                                            valueField: 'strVendorId'
+                                                            displayField: 'strName',
+                                                            valueField: 'strName'
                                                         }
                                                     },
                                                     {

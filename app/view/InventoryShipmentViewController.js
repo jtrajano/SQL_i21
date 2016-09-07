@@ -580,10 +580,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colAccrue: {
-                    dataIndex: 'ysnAccrue'
+                    dataIndex: 'ysnAccrue',
+                    disabled: '{current.ysnPosted}',
                 },
                 colCostVendor: {
-                    dataIndex: 'strVendorId',
+                    dataIndex: 'strVendorName',
                     editor: {
                         readOnly: '{readOnlyAccrue}',
                         origValueField: 'intEntityVendorId',
@@ -2443,6 +2444,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             }
         });
     },
+    
+    onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnAccrue') {
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = grid.view.getRecord(rowIndex);
+
+            if (checked === false) {
+                current.set('intEntityVendorId', null);
+                current.set('strVendorName', null);
+            }
+        }
+    },
 
     init: function(application) {
         this.control({
@@ -2531,6 +2545,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#btnCalculateCharges": {
                 click: this.onCalculateChargeClick
             },
+            "#colAccrue": {
+                beforecheckchange: this.onAccrueCheckChange
+            }
         })
     }
 
