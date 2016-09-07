@@ -22,6 +22,7 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@voucherDetailStorage AS VoucherDetailStorage READONLY,
 	@voucherDetailCC AS VoucherDetailCC READONLY,
 	@voucherDetailClaim AS VoucherDetailClaim READONLY,
+	@voucherDetailLoadNonInv AS VoucherDetailLoadNonInv READONLY,
 	@shipTo INT= NULL,
 	@vendorOrderNumber NVARCHAR(50) = NULL,
 	@voucherDate DATETIME = NULL,
