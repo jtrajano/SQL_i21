@@ -488,10 +488,10 @@ BEGIN
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
-		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON Header.intLocationId = ItemLocation.intLocationId
-				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
+		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+				INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intLocationId = Header.intLocationId 
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
@@ -842,10 +842,10 @@ BEGIN
 				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
-		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON Header.intLocationId = ItemLocation.intLocationId
-				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
-					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
+					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 					
+				INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intLocationId = Header.intLocationId 
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
