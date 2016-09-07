@@ -125,6 +125,7 @@
 :r .\12_EM\19_CleanEntityPhoneNumber.sql
 
 :r .\12_EM\16_CleanCustomerProductVersion.sql
+:r .\12_EM\20_CleanCustomerSpecialPrice.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 
