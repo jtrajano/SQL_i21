@@ -72,7 +72,7 @@ BEGIN
 						,vwcnt_lc4_yn =agcnt_lc4_yn
 						,vwcnt_lc5_yn =agcnt_lc5_yn
 						,vwcnt_lc6_yn =agcnt_lc6_yn
-						,vwcnt_ppd_yndm =agcnt_ppd_yndm
+						,vwcnt_ppd_yndm = CASE WHEN agcnt_ppd_yndm = ''M'' THEN ''Y'' ELSE ''N'' END
 						,vwcnt_un_prc=agcnt_un_prc
 						,vwcnt_prc_lvl = agcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
