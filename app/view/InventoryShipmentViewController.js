@@ -198,11 +198,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             cboCustomer: {
                 value: '{current.intEntityCustomerId}',
                 store: '{customer}',
-                readOnly: '{current.ysnPosted}',
-                defaultFilters: [{
-                    column: 'ysnActive',
-                    value: true
-                }]
+                readOnly: '{current.ysnPosted}'
             },
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
@@ -300,6 +296,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             btnRemoveItem: {
                 hidden: '{readOnlyOnPickLots}'
+            },
+            btnCalculateCharges: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnQuality: {
+                hidden: '{current.ysnPosted}'
             },
             grdInventoryShipment: {
                 readOnly: '{readOnlyOnPickLots}',
@@ -403,6 +405,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
                         defaultFilters: [
                             {
@@ -1894,41 +1898,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onQualityClick: function(button, e, eOpts) {
         var grid = button.up('grid');
+
         var selected = grid.getSelectionModel().getSelection();
-        
-        var win = button.up('window');
-        var vm = win.viewModel;
-        var currentShipmentItem = vm.data.current;
 
         if (selected) {
             if (selected.length > 0){
                 var current = selected[0];
                 if (!current.dummy)
-                    if(currentShipmentItem.get('ysnPosted') === true)
-                        {
-                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', 
-                                { 
-                                    strSourceType: 'Inventory Shipment', 
-                                    intTicketFileId: current.get('intInventoryShipmentItemId'),
-                                    viewConfig:{
-                                        modal: true, 
-                                        listeners:
-                                        {
-                                            show: function(win) {
-                                                Ext.defer(function(){
-                                                    win.context.screenMgr.securityMgr.screen.setViewOnlyAccess();
-                                                }, 100);
-                                            }
-                                        }
-                                    }
-                                }
-                            );
-                            
-                        }
-                    else
-                        {
-                            iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
-                        }
+                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');
@@ -2424,6 +2401,48 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         
         Inventory.view.InventoryShipmentViewController.orgValueShipFrom = current.get('intShipFromLocationId');
     },
+    
+    onCalculateChargeClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        var doPost = function () {
+            if (current) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryShipment/CalculateCharges?id=' + current.get('intInventoryShipmentId'),
+                    method: 'post',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        if (!jsonData.success) {
+                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        }
+                        else {
+                            context.configuration.paging.store.load();
+                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    }
+                });
+            }
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function () {
+                doPost();
+            }
+        });
+    },
 
     init: function(application) {
         this.control({
@@ -2508,7 +2527,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboStorageLocation": {
                 select: this.onItemNoSelect
-            }
+            },
+            "#btnCalculateCharges": {
+                click: this.onCalculateChargeClick
+            },
         })
     }
 
