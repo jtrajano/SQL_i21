@@ -4294,6 +4294,8 @@
     <Build Include="dbo\Views\vyuPATCancelEquityDetails.sql" />
     <Build Include="dbo\Views\vyuPATCustomerStock.sql" />
     <Build Include="dbo\Views\vyuPATEquityRefundDetails.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailLoadNonInv.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailLoadNonInv.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
