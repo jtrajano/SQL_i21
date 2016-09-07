@@ -4298,6 +4298,7 @@
     <Build Include="dbo\Views\vyuSMBEExportTaxCode.sql" />
     <Build Include="dbo\Tables\tblARPricingHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePricingHistory.sql" />
+    <Build Include="dbo\Views\vyuARImportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
