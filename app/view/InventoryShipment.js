@@ -1736,7 +1736,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 text: 'Remove'
                                                             },
                                                             {
-                                                                xtype: 'filter1'
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnCalculateCharges',
+                                                                iconCls: 'small-calculator',
+                                                                text: 'Calculate'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1',
+                                                                width: 198
                                                             }
                                                         ]
                                                     }

@@ -314,5 +314,29 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public SaveResult CalculateCharges(int shipmentId)
+        {
+            SaveResult saveResult = new SaveResult();
+
+            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            {
+                var connection = _db.ContextManager.Database.Connection;
+                try
+                {
+                    var idParameter = new SqlParameter("@intInventoryShipmentId", shipmentId);
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICCalculateShipmentOtherCharges @intInventoryShipmentId", idParameter);
+                    saveResult = _db.Save(false);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                }
+            }
+            return saveResult;
+        }
     }
 }

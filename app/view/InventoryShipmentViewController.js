@@ -297,6 +297,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnRemoveItem: {
                 hidden: '{readOnlyOnPickLots}'
             },
+            btnCalculateCharges: {
+                hidden: '{current.ysnPosted}'
+            },
             btnQuality: {
                 hidden: '{current.ysnPosted}'
             },
@@ -2398,6 +2401,48 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         
         Inventory.view.InventoryShipmentViewController.orgValueShipFrom = current.get('intShipFromLocationId');
     },
+    
+    onCalculateChargeClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        var doPost = function () {
+            if (current) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryShipment/CalculateCharges?id=' + current.get('intInventoryShipmentId'),
+                    method: 'post',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        if (!jsonData.success) {
+                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        }
+                        else {
+                            context.configuration.paging.store.load();
+                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    }
+                });
+            }
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function () {
+                doPost();
+            }
+        });
+    },
 
     init: function(application) {
         this.control({
@@ -2482,7 +2527,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboStorageLocation": {
                 select: this.onItemNoSelect
-            }
+            },
+            "#btnCalculateCharges": {
+                click: this.onCalculateChargeClick
+            },
         })
     }
 
