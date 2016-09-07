@@ -16,6 +16,10 @@ CREATE TYPE [dbo].[ItemGLAccount] AS TABLE
 	,intRevalueProduced INT
 	,intRevalueTransfer INT
 	,intRevalueBuildAssembly INT
+	--,intRevalueAdjItemChange INT
+	--,intRevalueAdjSplitLot INT
+	--,intRevalueAdjLotMerge INT
+	--,intRevalueAdjLotMove INT 
 	,intTransactionTypeId INT 
 	,PRIMARY KEY CLUSTERED (intItemId, intItemLocationId, intTransactionTypeId) 
 )

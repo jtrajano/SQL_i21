@@ -12,6 +12,6 @@ CREATE TYPE [dbo].[ItemReservationTableType] AS TABLE
 	,[intStorageLocationId] INT NULL			-- Place holder field for Storage Location 
     ,[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0 -- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
     ,[intTransactionId] INT NOT NULL			-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
-	,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL		-- The string id of the source transaction. 
+	,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL			-- The string id of the source transaction. 
 	,[intTransactionTypeId] INT NOT NULL											-- The transaction type. Source table for the types are found in tblICInventoryTransactionType	
 )

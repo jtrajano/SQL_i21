@@ -561,7 +561,8 @@ BEGIN
 	-- Clear the contents of the @Internal_ItemsToAdjust table variable. 
 	DELETE FROM @Internal_ItemsToAdjust
 
-	-- Transfer the data from the temp table into @Internal_ItemsToAdjust. These are the 'Produced' items inserted into #tmpRevalueProducedItems by the costing SP's above. (ex: uspICPostCostAdjustmentOnAverageCosting)
+	-- Transfer the data from the temp table into @Internal_ItemsToAdjust. 
+	-- These are the 'Produced' items inserted into #tmpRevalueProducedItems by the costing SP's above. (ex: uspICPostCostAdjustmentOnAverageCosting)
 	INSERT INTO @Internal_ItemsToAdjust (
 			[intItemId] 
 			,[intItemLocationId] 

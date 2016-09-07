@@ -100,14 +100,17 @@ BEGIN
 		WHERE	intInventoryLotId = @CostBucketId
 
 		-- Compute the new transaction value. 
-		SELECT	@NewTransactionValue = @CostAdjQty * @CostAdjNewCost
+		SELECT	@NewTransactionValue = dbo.fnMultiply(@CostAdjQty, @CostAdjNewCost) 
 
 		-- Compute the original transaction value. 
-		SELECT	@OriginalTransactionValue = @CostAdjQty * @OriginalCost
+		SELECT	@OriginalTransactionValue = dbo.fnMultiply(@CostAdjQty, @OriginalCost) 
 
 		-- Compute the new cost. 
 		SELECT @dblNewCalculatedCost =	@CostBucketCost 
-										- ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
+										- dbo.fnDivide(
+											(@NewTransactionValue - @OriginalTransactionValue)
+											, @CostBucketStockInQty
+										)	
 
 		-- Calculate the new cost
 		UPDATE	CostBucket
