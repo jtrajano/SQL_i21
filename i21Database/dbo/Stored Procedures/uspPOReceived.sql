@@ -91,7 +91,7 @@ BEGIN
 	)
 	SELECT	dtmDate					= ReceiptItems.dtmDate
 			,intItemId				= ReceiptItems.intItemId
-			,intItemLocationId		= PO.intShipToId--ReceiptItems.intItemLocationId
+			,intItemLocationId		= il.intItemLocationId --PO.intShipToId--ReceiptItems.intItemLocationId
 			,intItemUOMId			= ReceiptItems.intItemUOMId
 			,intSubLocationId		= ReceiptItems.intSubLocationId
 			--IC send this data as is, posted or unposted, they are the one doing the logic if on order will be deducted or added
@@ -102,8 +102,11 @@ BEGIN
 			,intTransactionDetailId = ReceiptItems.intInventoryReceiptDetailId
 			,strTransactionId		= ReceiptItems.strInventoryReceiptId
 			,intTransactionTypeId	= -1 -- Any value
-	FROM	@ItemsFromInventoryReceipt ReceiptItems
-	INNER JOIN tblPOPurchase PO ON ReceiptItems.intOrderId = PO.intPurchaseId
+	FROM	@ItemsFromInventoryReceipt ReceiptItems INNER JOIN tblPOPurchase PO 
+				ON ReceiptItems.intOrderId = PO.intPurchaseId
+			LEFT JOIN tblICItemLocation il
+				ON ReceiptItems.intItemId = il.intItemId
+				AND ReceiptItems.intLocationId = PO.intShipToId
 	WHERE	ReceiptItems.intOrderId IS NOT NULL 
 
 	-- Call the stored procedure that updates the on order qty. 
