@@ -54,6 +54,7 @@ BEGIN
 		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. The integer id of INVRCT-10001 is 1934). 
 		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
+		,[intRelatedInventoryTransactionId] INT NULL 
 	)
 END 
 
@@ -84,6 +85,7 @@ DECLARE @intId AS INT
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS NUMERIC(38,20)
 		,@strActualCostId NVARCHAR(50)
+		,@intRelatedInventoryTransactionId INT 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionTypeName AS NVARCHAR(200) 
@@ -133,7 +135,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 	
+			,[strSourceTransactionId]
+			,[intRelatedInventoryTransactionId]	
 	)
 	SELECT 
 			[intItemId] 
@@ -157,7 +160,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 	 
+			,[strSourceTransactionId] 
+			,[intRelatedInventoryTransactionId]
 	FROM	@ItemsToAdjust
 END 
 
@@ -191,6 +195,7 @@ SELECT  intId
 		,intCurrencyId
 		,dblExchangeRate
 		,strActualCostId
+		,intRelatedInventoryTransactionId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -217,6 +222,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intCurrencyId
 	,@dblExchangeRate
 	,@strActualCostId
+	,@intRelatedInventoryTransactionId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -256,8 +262,9 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@intCurrencyId
-			,@dblExchangeRate			
+			,@dblExchangeRate
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -286,6 +293,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -314,6 +322,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -342,6 +351,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -371,6 +381,7 @@ BEGIN
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
 			,@strActualCostId
+			,@intRelatedInventoryTransactionId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -397,6 +408,7 @@ BEGIN
 		,@intCurrencyId
 		,@dblExchangeRate
 		,@strActualCostId
+		,@intRelatedInventoryTransactionId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -430,6 +442,7 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,strActualCostId
+			,intRelatedInventoryTransactionId
 	FROM	@Internal_ItemsToAdjust
 
 	OPEN loopItemsToAdjustForAutoNegative;
@@ -450,6 +463,7 @@ BEGIN
 		,@strTransactionId
 		,@intTransactionTypeId
 		,@strActualCostId
+		,@intRelatedInventoryTransactionId
 	;
 
 	DECLARE @AutoNegativeAmount AS NUMERIC(38, 20)
@@ -503,8 +517,8 @@ BEGIN
 						,@strBatchId							= @strBatchId
 						,@intTransactionTypeId					= @INVENTORY_AUTO_NEGATIVE
 						,@intLotId								= NULL
-						,@intRelatedInventoryTransactionId		= NULL
-						,@intRelatedTransactionId				= NULL
+						,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId
+						,@intRelatedTransactionId				= NULL 
 						,@strRelatedTransactionId				= NULL						
 						,@strTransactionForm					= @TransactionTypeName
 						,@intEntityUserSecurityId				= @intEntityUserSecurityId
@@ -528,6 +542,7 @@ BEGIN
 			,@strTransactionId
 			,@intTransactionTypeId
 			,@strActualCostId
+			,@intRelatedInventoryTransactionId
 		;
 	END 
 
@@ -569,7 +584,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 		
+			,[strSourceTransactionId]
+			,[intRelatedInventoryTransactionId]
 	)
 	SELECT 
 			[intItemId] 
@@ -593,7 +609,8 @@ BEGIN
 			,[strActualCostId] 
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
-			,[strSourceTransactionId] 	
+			,[strSourceTransactionId] 
+			,[intRelatedInventoryTransactionId]
 	FROM	#tmpRevalueProducedItems
 
 	-- Clear the contents of the temp table.
