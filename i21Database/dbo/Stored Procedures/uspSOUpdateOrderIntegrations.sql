@@ -11,7 +11,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-
+EXEC dbo.[uspARUpdatePricingHistory] 1, @SalesOrderId, @UserId
 EXEC dbo.[uspSOUpdateItemComponent] @SalesOrderId, 0
 EXEC dbo.[uspSOUpdateCommitted] @SalesOrderId, @ForDelete
 EXEC dbo.[uspSOUpdateItemComponent] @SalesOrderId, 1

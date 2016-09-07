@@ -10,6 +10,7 @@
     [dblQtyOrdered]							NUMERIC (18, 6) NULL,
     [dblQtyShipped]							NUMERIC (18, 6) NULL,
     [dblPrice]								NUMERIC (18, 6) NULL,
+	[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[intInventoryShipmentItemId]			INT				NULL,
 	[intSalesOrderDetailId]					INT				NULL,
 	[intContractHeaderId]					INT				NULL,    
