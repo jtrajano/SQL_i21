@@ -71,16 +71,36 @@ BEGIN
 		,strCompanyDelivery = LEFT(COM.strAddress, 22)
 		,strCompanyCity = LEFT(COM.strCity, 22)
 		,strCompanyState = LEFT(COM.strState, 23)
-		,strCompanyZipCode = LEFT(COM.strZip, 15)
-		,strCompanyZipCodeExt = ''
+		,strCompanyZipCode = CASE WHEN (COM.strCountry <> 'United States') 
+								   THEN LEFT(REPLACE(COM.strZip, '-', ''), 15) 
+								   ELSE LEFT(REPLACE(COM.strZip, '-', ''), 5) 
+							  END
+		,strCompanyZipCodeExt = CASE WHEN (COM.strCountry <> 'United States') 
+									  THEN '' 
+									  ELSE 
+										   CASE WHEN (LEN(REPLACE(COM.strZip, '-', '')) > 5)
+												THEN SUBSTRING(COM.strZip, 5, 4) 
+												ELSE '' 
+										   END 
+								  END
 		,strCompanyCountry = LEFT(COM.strCountry, 50)
 		,strSubmitterName = LEFT(SUB.strName, 57)
 		,strSubmitterAddress = LEFT(SUB.strAddress, 22)
 		,strSubmitterDelivery = LEFT(SUB.strAddress, 22)
 		,strSubmitterCity = LEFT(SUB.strCity, 22)
 		,strSubmitterState = LEFT(SUB.strState, 23)
-		,strSubmitterZipCode = LEFT(SUB.strZipCode, 15)
-		,strSubmitterZipCodeExt = ''
+		,strSubmitterZipCode = CASE WHEN (SUB.strCountry <> 'United States') 
+								   THEN LEFT(REPLACE(SUB.strZipCode, '-', ''), 15) 
+								   ELSE LEFT(REPLACE(SUB.strZipCode, '-', ''), 5) 
+							  END
+		,strSubmitterZipCodeExt = CASE WHEN (SUB.strCountry <> 'United States') 
+									  THEN '' 
+									  ELSE 
+										   CASE WHEN (LEN(REPLACE(SUB.strZipCode, '-', '')) > 5)
+												THEN SUBSTRING(SUB.strZipCode, 5, 4) 
+												ELSE '' 
+										   END 
+								  END
 		,strSubmitterCountry = LEFT(SUB.strCountry, 50)
 		,strContactName = LEFT(COM.strContactName, 27)
 		,strContactPhone = LEFT(COM.strPhone, 15)
@@ -98,8 +118,18 @@ BEGIN
 		,strEmployerDelivery = LEFT(COM.strAddress, 22)
 		,strEmployerCity = LEFT(COM.strCity, 22)
 		,strEmployerState = LEFT(COM.strState, 23)
-		,strEmployerZipCode = LEFT(COM.strZip, 15)
-		,strEmployerZipCodeExt = ''
+		,strEmployerZipCode = CASE WHEN (COM.strCountry <> 'United States') 
+								   THEN LEFT(REPLACE(COM.strZip, '-', ''), 15) 
+								   ELSE LEFT(REPLACE(COM.strZip, '-', ''), 5) 
+							  END
+		,strEmployerZipCodeExt = CASE WHEN (COM.strCountry <> 'United States') 
+									  THEN '' 
+									  ELSE 
+										   CASE WHEN (LEN(REPLACE(COM.strZip, '-', '')) > 5)
+												THEN SUBSTRING(COM.strZip, 5, 4) 
+												ELSE '' 
+										   END 
+								  END
 		,strEmployerCountry = LEFT(COM.strCountry, 50)
 		,strEmployerKind = 'N'
 		,strEmploymentCode = 'R'
