@@ -4289,6 +4289,9 @@
     <Build Include="dbo\Views\vyuMFOrderManifest.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MInquiryTransactionChart.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertReverseGLEntry.sql" />
+    <Build Include="dbo\Tables\tblPREFileFormat.sql" />
+    <Build Include="dbo\Tables\tblPREFileFormatRecord.sql" />
+    <Build Include="dbo\Tables\tblPREFileFormatField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
