@@ -4619,11 +4619,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
                 lastQty = Math.ceil(lastQty);
                 addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
-                addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 6);
+              // addedTareWeight = i21.ModuleMgr.Inventory.roundDecimalValue(addedTareWeight, 6);
             }
-            else {
+           /* else {
                 lastQty = i21.ModuleMgr.Inventory.roundDecimalValue(lastQty, 6);
-            }
+            }*/
 
             // Calculate how many times to loop.
             var replicaCount = (convertedItemQty - lastQty) / lotQty;
