@@ -49,7 +49,7 @@ IF @SourceTransactionId = 1 -- SALES ORDER
 		UPDATE  ARPH
 		SET
 			 [ysnApplied]	= 0
-			,[ysnDeleted]	= 0
+			,[ysnDeleted]	= 1
 		FROM
 			tblARPricingHistory ARPH
 		INNER JOIN
@@ -200,7 +200,7 @@ IF @SourceTransactionId = 2 -- INVOICE
 		UPDATE  ARPH
 		SET
 			 [ysnApplied]	= 0
-			,[ysnDeleted]	= 0
+			,[ysnDeleted]	= 1
 		FROM
 			tblARPricingHistory ARPH
 		INNER JOIN
