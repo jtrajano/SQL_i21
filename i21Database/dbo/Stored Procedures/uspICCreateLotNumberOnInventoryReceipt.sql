@@ -40,6 +40,7 @@ BEGIN
 	DECLARE @LotQtyInItemUOM AS NUMERIC(38,20)
 	DECLARE @ReceiptItemNet  AS NUMERIC(38,20)
 
+	DECLARE @CleanWgtCount AS INT = 0
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
 	DECLARE @FormattedLotQty AS NVARCHAR(50)
 	DECLARE @FormattedDifference AS NVARCHAR(50)
@@ -137,6 +138,7 @@ BEGIN
 			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
 			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
 			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblNet
+			,@CleanWgtCount				= ISNULL(clean.CleanCount, 0)
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -152,14 +154,21 @@ BEGIN
 				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
 				GROUP BY AggregrateLot.intInventoryReceiptItemId
 			) ItemLot
-				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			LEFT OUTER JOIN (
+					SELECT COUNT(intInventoryReceiptItemLotId) CleanCount, intInventoryReceiptItemId
+					FROM dbo.tblICInventoryReceiptItemLot
+					WHERE strCondition = 'Clean Wgt'
+					GROUP BY intInventoryReceiptItemId
+			) clean ON clean.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId										
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
 			AND ROUND(ItemLot.TotalLotQtyInItemUOM,6) <> ROUND(ReceiptItem.dblNet,6)
 			AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 
 			
-	IF @intItemId IS NOT NULL 
+	IF @intItemId IS NOT NULL AND @CleanWgtCount = 0
 	BEGIN 
+		
 		IF ISNULL(@strItemNo, '') = '' 
 			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
