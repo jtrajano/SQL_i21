@@ -147,10 +147,10 @@ INNER JOIN
 UNION ALL
 
 SELECT
-	 [strTransactionNumber]		= SO.[strSalesOrderNumber]		--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
-	,[intEntityCustomerId]		= SO.[intEntityCustomerId]		--CAST(NULL AS INT)
+	 [strTransactionNumber]		= SO.[strSalesOrderNumber]		--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	
 	,[intTransactionId]			= SO.[intSalesOrderId] 			--CAST(NULL AS INT)
 	,[intTransactionDetailId]	= SOSOD.[intSalesOrderDetailId]	--CAST(NULL AS INT)
+	,[intEntityCustomerId]		= SO.[intEntityCustomerId]		--CAST(NULL AS INT)
 	,[intItemId]				= SOSOD.[intItemId]				--CAST(NULL AS INT)
 	,[dblPrice]					= IP.[dblPrice]					--CAST(0 AS NUMERIC(18,6))
 	,[dblOriginalPrice]			= CAST(0 AS NUMERIC(18,6))		--CAST(0 AS NUMERIC(18,6))
