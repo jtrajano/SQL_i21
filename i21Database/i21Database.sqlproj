@@ -4096,6 +4096,7 @@
     <Build Include="dbo\Views\vyuSMBEExportTaxCode.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertReverseGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspICTMExportProducts.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTransferOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -344,5 +344,7 @@ FROM (
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 
 	WHERE h.ysnPosted = 1
+		AND h.ysnShipmentRequired = 1
+		AND (h.intStatusId = 1 OR h.intStatusId = 2)
 	
 ) tblAddOrders

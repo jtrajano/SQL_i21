@@ -1173,6 +1173,15 @@ BEGIN
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 END
 
+IF @ysnPost = 1
+BEGIN
+	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 3 -- Set status of the transfer order to 'Closed'
+END
+ELSE
+BEGIN
+	EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 1 -- Set status of the transfer order to 'Open'
+END
+
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
 -- 1.	Store all the GL entries in a holding table. It will be used later as data  

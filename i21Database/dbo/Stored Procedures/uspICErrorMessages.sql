@@ -414,3 +414,8 @@ EXEC sp_addmessage 80083,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80084) EXEC sp_dropmessage 80084, 'us_english'	
 SET @strmessage = 'Check the Rebuild Valuation GL Snapshot. The original GL values changed when compared against the rebuild values. To check the discrepancies, run: SELECT * FROM vyuICCompareRebuildValuationSnapshot WHERE dtmRebuildDate = ''%s'''
 EXEC sp_addmessage 80084,11,@strmessage,'us_english','False'
+
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80086) EXEC sp_dropmessage 80086, 'us_english'	
+SET @strmessage = 'Cannot post this Inventory Receipt. The transfer order "%s" was already posted in "%s".'
+EXEC sp_addmessage 80086,11,@strmessage,'us_english','False'
