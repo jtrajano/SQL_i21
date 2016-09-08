@@ -312,6 +312,8 @@ BEGIN
 	WHERE cfIndexPricingHeader.intPriceIndexId = @intPriceIndexId 
 	AND cfIndexPricingHeader.intSiteGroupId = @intSiteGroupId
 	AND cfIndexPricingDetail.intARItemID = @intItemId
+	AND cfIndexPricingHeader.dtmDate <= @dtmTransactionDate
+	ORDER BY cfIndexPricingHeader.dtmDate DESC
 
 	SELECT TOP 1
 	@strSiteGroup = strSiteGroup
