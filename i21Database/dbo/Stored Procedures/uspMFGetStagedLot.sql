@@ -12,7 +12,7 @@ Declare 	@intProductionStagingId int
 	SELECT @intProductionStageLocationId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intLocationId = @intLocationId
-		AND intAttributeId = @intProductionStagingId
+		AND intAttributeId = @intProductionStagingId and strAttributeValue<>''
 
 	SELECT L.intLotId
 		,L.strLotNumber
