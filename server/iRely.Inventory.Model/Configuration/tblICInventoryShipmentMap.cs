@@ -199,6 +199,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
             this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
+            this.Property(t => t.strVendorName).HasColumnName("strVendorName");
         }
     }
 
