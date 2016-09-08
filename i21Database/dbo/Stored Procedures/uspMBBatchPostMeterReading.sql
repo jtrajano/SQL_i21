@@ -32,6 +32,8 @@ BEGIN
 	DECLARE @intRecordKey INT
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
+	SET @SuccessfulCount = 0
+
 	WHILE (EXISTS(SELECT 1 FROM #tmpMeterReadings))
 	BEGIN
 		SELECT @intRecordKey = RecordKey FROM #tmpMeterReadings
