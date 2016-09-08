@@ -60,13 +60,13 @@ BEGIN
 		--zero amount
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'You cannot post a bill with zero amount.',
+			'You cannot post a bill with no details.',
 			'Bill',
 			A.strBillId,
 			A.intBillId
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
-		AND A.dblTotal = 0
+		AND NOT EXISTS(SELECT 1 FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId)
 
 		--No Terms specified
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
