@@ -1200,6 +1200,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dblTareWeight', 0.00);
         record.set('dblNetWeight', 0.00);
         record.set('dblQuantity', config.dummy.get('dblQuantity'));
+        record.set('strCondition', i21.ModuleMgr.Inventory.getCompanyPreference('strLotCondition'));
 
         //Expiry Date Calculation
         var receiptDate = current.get('dtmReceiptDate');

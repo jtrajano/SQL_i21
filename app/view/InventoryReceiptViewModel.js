@@ -317,6 +317,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 },
                 {
                     strDescription: 'Damaged'
+                },
+                {
+                    strDescription: 'Clean Wgt'
                 }
             ],
             fields: {
