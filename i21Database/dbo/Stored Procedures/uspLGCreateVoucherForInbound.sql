@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspLGCreateVoucherForInbound @intLoadId INT
+﻿CREATE PROCEDURE uspLGCreateVoucherForInbound 
+	 @intLoadId INT
 	,@intEntityUserSecurityId INT
 	,@intBillId INT OUTPUT
 AS
@@ -8,28 +9,26 @@ BEGIN TRY
 	DECLARE @intErrorState INT;
 	DECLARE @total AS INT
 	DECLARE @intVendorEntityId AS INT;
-	DECLARE @intVendorEntityIdForReceipt AS INT;
 	DECLARE @intMinRecord AS INT
-	DECLARE @voucherDetailNonInvContract AS VoucherDetailNonInvContract
-	DECLARE @VoucherDetailReceipt AS VoucherDetailReceipt
+	DECLARE @VoucherDetailLoadNonInv AS VoucherDetailLoadNonInv
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 
-	DECLARE @voucherDetailData TABLE (
-		intItemRecordId INT Identity(1, 1)
+	DECLARE @voucherDetailData TABLE 
+		(intItemRecordId INT Identity(1, 1)
 		,intVendorEntityId INT
+		,intLoadId INT
+		,intLoadDetailId INT
 		,intContractHeaderId INT
 		,intContractDetailId INT
 		,intItemId INT
 		,intAccountId INT
 		,dblQtyReceived NUMERIC(18, 6)
-		,dblCost NUMERIC(18, 6)
-		)
+		,dblCost NUMERIC(18, 6))
 
-	DECLARE @distinctVendor TABLE (
-		intRecordId INT Identity(1, 1)
-		,intVendorEntityId INT
-		)
+	DECLARE @distinctVendor TABLE 
+		(intRecordId INT Identity(1, 1)
+		,intVendorEntityId INT)
 
 	DECLARE @distinctItem TABLE 
 		(intItemRecordId INT Identity(1, 1)
@@ -63,30 +62,10 @@ BEGIN TRY
 		RAISERROR('Please configure ''AP Account'' for the company location.',16,1)
 	END
 
-	SELECT @intVendorEntityIdForReceipt = intVendorEntityId
-	FROM tblLGLoadDetail
-	WHERE intLoadId = @intLoadId
-
-	INSERT INTO @VoucherDetailReceipt (
-		intInventoryReceiptItemId
-		,dblQtyReceived
-		,dblCost
-		,intTaxGroupId
-		)
-	SELECT IRI.intInventoryReceiptItemId
-		,IRI.dblNet
-		,CD.dblCashPrice * (dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, CD.intPriceItemUOMId, IRI.dblNet))
-		,IR.intTaxGroupId
-	FROM tblLGLoad L
-	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	JOIN tblICInventoryReceiptItem IRI ON IRI.intSourceId = LD.intLoadDetailId
-	JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-	WHERE L.intLoadId = @intLoadId
-
 	INSERT INTO @voucherDetailData (
-		intVendorEntityId
+		 intVendorEntityId
+		,intLoadId
+		,intLoadDetailId
 		,intContractHeaderId
 		,intContractDetailId
 		,intItemId
@@ -95,6 +74,8 @@ BEGIN TRY
 		,dblCost
 		)
 	SELECT WRMH.intVendorEntityId
+		,L.intLoadId
+		,LD.intLoadDetailId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,Item.intItemId
@@ -134,6 +115,8 @@ BEGIN TRY
 	UNION ALL
 	
 	SELECT V.intEntityVendorId
+		,LD.intLoadId
+		,LD.intLoadDetailId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,V.intItemId
@@ -164,6 +147,8 @@ BEGIN TRY
 		,V.intLoadId
 		,V.strLoadNumber
 		,V.dblNet
+		,LD.intLoadId
+		,LD.intLoadDetailId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -184,26 +169,15 @@ BEGIN TRY
 	END
 
 	SELECT @total = COUNT(*)
-	FROM @VoucherDetailReceipt;
+	FROM @voucherDetailData;
 
 	IF (@total = 0)
 	BEGIN
-		RAISERROR (
-				'Bill process failure #1'
-				,11
-				,1
-				);
-
+		RAISERROR ('Bill process failure #1',11,1);
 		RETURN;
 	END
 
-	--EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
-	--	,@vendorId = @intVendorEntityIdForReceipt
-	--	,@voucherDetailReceiptPO = @VoucherDetailReceipt
-	--	,@billId = @intBillId OUTPUT
-
-	SELECT @intMinRecord = MIN(intRecordId)
-	FROM @distinctVendor
+	SELECT @intMinRecord = MIN(intRecordId) FROM @distinctVendor
 
 	WHILE ISNULL(@intMinRecord, 0) <> 0
 	BEGIN
@@ -213,11 +187,12 @@ BEGIN TRY
 		FROM @distinctVendor
 		WHERE intRecordId = @intMinRecord
 
-		INSERT INTO @voucherDetailNonInvContract (
+		INSERT INTO @VoucherDetailLoadNonInv (
 			intContractHeaderId
 			,intContractDetailId
 			,intItemId
 			,intAccountId
+			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
 			)
@@ -225,6 +200,7 @@ BEGIN TRY
 			,intContractDetailId
 			,intItemId
 			,intAccountId
+			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
 		FROM @voucherDetailData
@@ -232,11 +208,11 @@ BEGIN TRY
 
 		EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
 			,@vendorId = @intVendorEntityId
-			,@voucherDetailNonInvContract = @voucherDetailNonInvContract
+			,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 			,@billId = @intBillId OUTPUT
 
 		DELETE
-		FROM @voucherDetailNonInvContract
+		FROM @VoucherDetailLoadNonInv
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
@@ -245,13 +221,6 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	SELECT @strErrorMessage = ERROR_MESSAGE()
-		,@intErrorSeverity = ERROR_SEVERITY()
-		,@intErrorState = ERROR_STATE();
-
-	RAISERROR (
-			@strErrorMessage
-			,@intErrorSeverity
-			,@intErrorState
-			)
+	SELECT @strErrorMessage = ERROR_MESSAGE(),@intErrorSeverity = ERROR_SEVERITY(),@intErrorState = ERROR_STATE();
+	RAISERROR (@strErrorMessage,@intErrorSeverity,@intErrorState)
 END CATCH
