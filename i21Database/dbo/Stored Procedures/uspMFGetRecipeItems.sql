@@ -38,13 +38,13 @@ Begin
 	--only use the items where cost > 0
 	Insert Into @tblRecipeItemCostWithMargin(intRecipeItemId,dblQuantity,dblCost)
 	Select ri.intRecipeItemId,(ri.dblCalculatedQuantity * (@dblQuantity/r.dblQuantity)) AS dblQuantity,
-	ISNULL(dbo.fnMFConvertCostToTargetItemUOM(iu.intItemUOMId,ri.intItemUOMId,
+	ISNULL(dbo.fnMFConvertCostToTargetItemUOM((Select intItemUOMId From tblICItemUOM Where intItemId=ri.intItemId AND ysnStockUnit=1),ri.intItemUOMId,
 	CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
 	When @intCostTypeId=3 AND ISNULL(ip.dblLastCost,0) > 0 THEN ISNULL(ip.dblLastCost,0)
 	Else ISNULL(ip.dblStandardCost,0) End
 	),0) AS dblCost
 	From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
-	Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId AND iu.ysnStockUnit=1
+	Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId --AND iu.ysnStockUnit=1
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Left Join tblMFMarginBy mg on ri.intMarginById=mg.intMarginById
 	Join tblICItemLocation il on ri.intItemId=il.intItemId AND il.intLocationId=@intLocationId 
@@ -81,7 +81,7 @@ ri.dblCalculatedQuantity,
 ri.intItemUOMId,um.strUnitMeasure AS strUOM,ri.intMarginById,mg.strName AS strMarginBy,ISNULL(ri.dblMargin,0) AS dblMargin,
 CASE WHEN ISNULL(sd.intContractDetailId,0)=0 THEN
 CASE When @dblMargin = 0 Then
-ISNULL(dbo.fnMFConvertCostToTargetItemUOM(iu.intItemUOMId,ri.intItemUOMId,
+ISNULL(dbo.fnMFConvertCostToTargetItemUOM((Select intItemUOMId From tblICItemUOM Where intItemId=ri.intItemId AND ysnStockUnit=1),ri.intItemUOMId,
 CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
 When @intCostTypeId=3 AND ISNULL(ip.dblLastCost,0) > 0 THEN ISNULL(ip.dblLastCost,0)
 Else ISNULL(ip.dblStandardCost,0) End
@@ -98,10 +98,13 @@ ri.dblCalculatedLowerTolerance * (@dblQuantity/@dblRecipeQty) AS dblCalculatedLo
 ri.dblCalculatedUpperTolerance * (@dblQuantity/@dblRecipeQty) AS dblCalculatedUpperTolerance,
 ri.dblLowerTolerance,ri.dblUpperTolerance,
 0 intCommentTypeId,'' strCommentType,
-sd.intContractHeaderId,sd.intContractDetailId,cv.strContractNumber,cv.intContractSeq,cv.strSequenceNumber,ISNULL(ip.dblStandardCost,0.0) AS dblStandardCost,
+sd.intContractHeaderId,sd.intContractDetailId,cv.strContractNumber,cv.intContractSeq,cv.strSequenceNumber,
+ISNULL(dbo.fnMFConvertCostToTargetItemUOM((Select intItemUOMId From tblICItemUOM Where intItemId=ri.intItemId AND ysnStockUnit=1),ri.intItemUOMId,
+ISNULL(ip.dblStandardCost,0.0)
+),0) AS dblStandardCost, 
 ISNULL(cm.dblUnitMargin,0.0) AS dblUnitMargin
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
-Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId AND iu.ysnStockUnit=1
+Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId --AND iu.ysnStockUnit=1
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Left Join tblMFMarginBy mg on ri.intMarginById=mg.intMarginById
 Join tblICItemLocation il on ri.intItemId=il.intItemId AND il.intLocationId=@intLocationId 
