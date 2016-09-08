@@ -238,9 +238,9 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, NULL
 		, NULL
 		, strReceiptType = 'Transfer Order'
-		, intLineNo = intInventoryTransferDetailId
-		, intOrderId = intInventoryTransferId
-		, strOrderNumber = strTransferNo
+		, intLineNo = TransferView.intInventoryTransferDetailId
+		, intOrderId = TransferView.intInventoryTransferId
+		, strOrderNumber = TransferView.strTransferNo
 		, dblOrdered = dblQuantity
 		, dblReceived = NULL
 		, intSourceType = 0
@@ -292,6 +292,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from transfer
 
 	FROM	vyuICGetInventoryTransferDetail TransferView
+			LEFT JOIN dbo.tblICInventoryTransfer TransferViewHeader
+				ON TransferViewHeader.intInventoryTransferId = TransferView.intInventoryTransferId
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON TransferView.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -309,5 +311,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 
 			,tblSMCompanyPreference
 
-	WHERE TransferView.ysnPosted = 1)
+	WHERE TransferView.ysnPosted = 1
+		AND TransferViewHeader.ysnShipmentRequired = 1
+		AND (TransferViewHeader.intStatusId = 1 OR TransferViewHeader.intStatusId = 2))
 tblAddOrders

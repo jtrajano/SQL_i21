@@ -4297,6 +4297,7 @@
     <Build Include="dbo\Views\vyuSMBEExportTax.sql" />
     <Build Include="dbo\Views\vyuSMBEExportTaxCode.sql" />
     <Build Include="dbo\Tables\tblARPricingHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTransferOrderStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePricingHistory.sql" />
     <Build Include="dbo\Views\vyuARImportLog.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailLoadNonInv.sql" />
