@@ -3,7 +3,7 @@ AS
 
 SELECT 
 	 account = C.strEntityNo
-	 ,number = REPLACE(STR(intSiteNumber, 4), SPACE(1), '0')
+	 ,number = REPLACE(STR(intSiteNumber, 4), SPACE(1), '0') + '-' + ISNULL(H.strSerialNumber,'')
 	 ,productCode = F.strItemNo
 	 ,size = CAST(ROUND(A.dblTotalCapacity,2) AS NUMERIC(18,2))
 	 ,taxCode = A.intTaxStateID
@@ -14,11 +14,11 @@ SELECT
 	 ,"state" = CAST(A.strState AS NVARCHAR(2))
 	 ,"zip" = A.strZipCode
 	 ,"country" = A.strCountry
-	 ,"zone" = 0
-	 ,"applications"= '0001'
+	 ,"zone" = ''
+	 ,"applications"= 'FFFF'
 	 ,"longitude" = dblLongitude
 	 ,"latitude" = A.dblLatitude
-	 ,"altitude" = 0.0
+	 ,"altitude" = ''
 	 ,"directions" = A.strInstruction
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
@@ -71,5 +71,17 @@ LEFT JOIN (
 		AND A.intLocationId = F.intCompanyLocationId
 LEFT JOIN tblTMRoute G
 	ON A.intRouteId = G.intRouteId
+LEFT JOIN (
+	SELECT 
+		AA.intSiteID
+		,BB.strSerialNumber
+		,intCntId = ROW_NUMBER() OVER (PARTITION BY AA.intSiteID ORDER BY AA.intSiteDeviceID ASC)
+	FROM tblTMSiteDevice AA
+	INNER JOIN tblTMDevice BB
+		ON AA.intDeviceId = BB.intDeviceId
+	WHERE ISNULL(BB.ysnAppliance,0) = 0
+) H
+	ON A.intSiteID = H.intSiteID
+	AND H.intCntId = 1
 WHERE C.ysnActive = 1 AND A.ysnActive = 1
 GO
