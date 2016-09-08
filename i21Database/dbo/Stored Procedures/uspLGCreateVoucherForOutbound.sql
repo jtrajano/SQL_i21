@@ -10,13 +10,15 @@ BEGIN TRY
 	DECLARE @total AS INT
 	DECLARE @intVendorEntityId AS INT;
 	DECLARE @intMinRecord AS INT
-	DECLARE @voucherDetailNonInvContract AS VoucherDetailNonInvContract
+	DECLARE @VoucherDetailLoadNonInv AS VoucherDetailLoadNonInv
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 
 	DECLARE @voucherDetailData TABLE 
 		(intItemRecordId INT Identity(1, 1)
 		,intVendorEntityId INT
+		,intLoadId INT
+		,intLoadDetailId INT
 		,intContractHeaderId INT
 		,intContractDetailId INT
 		,intItemId INT
@@ -61,7 +63,9 @@ BEGIN TRY
 	END
 
 	INSERT INTO @voucherDetailData (
-		intVendorEntityId
+		 intVendorEntityId
+		,intLoadId
+		,intLoadDetailId 
 		,intContractHeaderId
 		,intContractDetailId
 		,intItemId
@@ -70,6 +74,8 @@ BEGIN TRY
 		,dblCost
 		)
 	SELECT WRMH.intVendorEntityId
+		,L.intLoadId
+		,LD.intLoadDetailId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,Item.intItemId
@@ -109,6 +115,8 @@ BEGIN TRY
 	UNION ALL
 	
 	SELECT V.intEntityVendorId
+		,LD.intLoadId
+		,LD.intLoadDetailId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,V.intItemId
@@ -139,6 +147,8 @@ BEGIN TRY
 		,V.intLoadId
 		,V.strLoadNumber
 		,V.dblNet
+		,LD.intLoadId
+		,LD.intLoadDetailId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -176,11 +186,12 @@ BEGIN TRY
 		FROM @distinctVendor
 		WHERE intRecordId = @intMinRecord
 
-		INSERT INTO @voucherDetailNonInvContract (
+		INSERT INTO @VoucherDetailLoadNonInv (
 			intContractHeaderId
 			,intContractDetailId
 			,intItemId
 			,intAccountId
+			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
 			)
@@ -188,6 +199,7 @@ BEGIN TRY
 			,intContractDetailId
 			,intItemId
 			,intAccountId
+			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
 		FROM @voucherDetailData
@@ -195,11 +207,11 @@ BEGIN TRY
 
 		EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
 			,@vendorId = @intVendorEntityId
-			,@voucherDetailNonInvContract = @voucherDetailNonInvContract
+			,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 			,@billId = @intBillId OUTPUT
 
 		DELETE
-		FROM @voucherDetailNonInvContract
+		FROM @VoucherDetailLoadNonInv
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
