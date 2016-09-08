@@ -4302,7 +4302,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var VendorId = null;
         var ReceiptType = currentRecord.get('strReceiptType');
         var SourceType = currentRecord.get('intSourceType').toString();
-        var CurrencyId = currentRecord.get('intCurrencyId').toString();
+        var CurrencyId = currentRecord.get('intCurrencyId') === null ? 0 : currentRecord.get('intCurrencyId').toString();
         var ContractStore = win.viewModel.storeInfo.purchaseContractList;
         if (ReceiptType === 'Transfer Order') {
             VendorId = currentRecord.get('intTransferorId').toString();
