@@ -504,7 +504,21 @@ END
 -- 4. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
-BEGIN 
+BEGIN
+	-- Check if blank GL entries are allowed
+	-- If there is a company owned stock, do not allow blank gl entries. 
+	SELECT	TOP 1 
+			@ysnAllowBlankGLEntries = 0
+	FROM	dbo.tblICInventoryShipment Header INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON Header.intShipFromLocationId = ItemLocation.intLocationId
+			INNER JOIN dbo.tblICInventoryShipmentItem DetailItem 
+				ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId 
+				AND ItemLocation.intItemId = DetailItem.intItemId
+			LEFT JOIN dbo.tblICInventoryShipmentItemLot DetailItemLot
+				ON DetailItem.intInventoryShipmentItemId = DetailItemLot.intInventoryShipmentItemId
+	WHERE	Header.intInventoryShipmentId = @intTransactionId   
+			AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
+			 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
