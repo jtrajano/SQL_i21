@@ -417,6 +417,30 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return isDirect;
             }
         },
+        locationCheckReadOnlyWithOrder: function (get) {
+            if (get('current.ysnPosted') === true) {
+                return true
+            }
+            else {
+                if (get('current.strReceiptType') !== 'Direct' && get('current.strReceiptType') !== 'Transfer Order') {
+                    if (get('current.tblICInventoryReceiptItems').data.items.length > 0) {
+                        var current = get('current.tblICInventoryReceiptItems').data.items[0];
+                        if (current.get('intOrderId') !== null) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        },
         checkReadOnlyWithOrder: function (get) {
             if (get('current.ysnPosted') === true) {
                 return true

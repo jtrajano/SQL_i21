@@ -241,7 +241,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
-                readOnly: '{checkReadOnlyWithOrder}',
+                readOnly: '{locationCheckReadOnlyWithOrder}',
                 disabled: '{current.ysnOrigin}'
             },
             dtmReceiptDate: {
