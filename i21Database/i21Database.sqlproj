@@ -4303,6 +4303,11 @@
     <Build Include="dbo\Views\vyuARImportLog.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailLoadNonInv.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailLoadNonInv.sql" />
+    <Build Include="dbo\User Defined Types\TMGPSUpdateTable.sql" />
+    <Build Include="dbo\User Defined Types\ETTranslateBaseToInvoiceTable.sql" />
+    <Build Include="dbo\Tables\tblETImportBaseEngineering.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPS.sql" />
+    <Build Include="dbo\Stored Procedures\uspETImportBaseEngineeringToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
