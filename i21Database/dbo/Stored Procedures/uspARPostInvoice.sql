@@ -3146,7 +3146,11 @@ IF @recap = 0
 
 					UPDATE ARI
 					SET
-						ARI.dblPayment	= ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+						ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = 0.00 OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+												THEN @ZeroDecimal 
+												ELSE 
+													ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
+											END)
 					FROM
 						@PostInvoiceData PID
 					INNER JOIN
@@ -3256,7 +3260,7 @@ IF @recap = 0
 						 ARI.ysnPosted				= 1
 						,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = 0.00 OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN 1 ELSE 0 END)
 						,ARI.dblInvoiceTotal		= ARI.dblInvoiceTotal
-						,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) END) - (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+						,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 						,ARI.dblDiscount			= @ZeroDecimal
 						,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
 						,ARI.dblInterest			= @ZeroDecimal
