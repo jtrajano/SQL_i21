@@ -60,9 +60,6 @@ BEGIN
 		,intInventoryReceiptId INT
 	)
 END 
-SELECT TOP 1 @dblTicketGross = ((SCS.dblSplitPercent * SC.dblGrossWeight) / 100) , @dblTicketTare = ((SCS.dblSplitPercent * SC.dblTareWeight) / 100)  FROM tblSCTicket SC
-INNER JOIN tblSCTicketSplit SCS ON SCS.intTicketId = SC.intTicketId AND SCS.intCustomerId = 8
-order by intTicketSplitId desc
 -- Insert Entries to Stagging table that needs to processed to Transport Load
 INSERT into @ReceiptStagingTable(
 		-- Header
