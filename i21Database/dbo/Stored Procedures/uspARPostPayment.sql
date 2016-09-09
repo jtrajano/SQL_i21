@@ -16,6 +16,7 @@
 	,@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@raiseError		AS BIT				= 0
+	,@bankAccountId	AS INT				= NULL
 AS
   
 SET QUOTED_IDENTIFIER OFF  
@@ -1170,6 +1171,8 @@ IF @post = 1
 		END 
 	ELSE
 		BEGIN
+		IF (@bankAccountId IS NULL)
+		BEGIN
 			UPDATE 
 				tblARPayment
 			SET 
@@ -1182,6 +1185,25 @@ IF @post = 1
 			WHERE
 				P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 				AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+		END
+		ELSE
+		BEGIN
+			DECLARE @intNewAccountID INT 
+			SELECT @intNewAccountID = intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccountId
+
+				UPDATE 
+					tblARPayment
+				SET 
+					intAccountId = @intNewAccountID
+				FROM
+					tblARPayment P								
+				INNER JOIN 
+					tblSMCompanyLocation C
+						ON P.intLocationId = C.intCompanyLocationId
+				WHERE
+					P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+					AND ISNULL(C.intUndepositedFundsId,0) <> 0	
+			END
 		END
 					
 	END TRY
