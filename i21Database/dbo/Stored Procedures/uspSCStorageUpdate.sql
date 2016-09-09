@@ -179,55 +179,24 @@ BEGIN TRY
 					BEGIN
 					IF @dblRunningBalance >= @dblUnits
 						BEGIN
-						UPDATE tblGRCustomerStorage 
-						SET dblOpenBalance = @dblRunningBalance - @dblUnits
-						WHERE intCustomerStorageId = @intStorageTicketId
-						INSERT INTO [dbo].[tblGRStorageHistory]
-							([intConcurrencyId]
-							,[intCustomerStorageId]
-							,[intTicketId]
-							,[intInventoryReceiptId]
-							,[intInvoiceId]
-							,[intContractHeaderId]
-							,[dblUnits]
-							,[dtmHistoryDate]
-							,[dblPaidAmount]
-							,[strPaidDescription]
-							,[dblCurrencyRate]
-							,[strType]
-							,[strUserName])
-						VALUES
-							(1
-							,@intStorageTicketId
-							,@intTicketId
-							,NULL
-							,NULL
-							,NULL
-							,@dblUnits
-							,dbo.fnRemoveTimeOnDate(GETDATE())
-							,0
-							,'TakeOut From Scale'
-							,1
-							,'TakeOut'
-							,@strUserName)
 						INSERT INTO @ItemsForItemShipment (
 							intItemId
-						,intItemLocationId
-						,intItemUOMId
-						,dtmDate
-						,dblQty
-						,dblUOMQty
-						,dblCost
-						,dblSalesPrice
-						,intCurrencyId
-						,dblExchangeRate
-						,intTransactionId
-						,strTransactionId
-						,intTransactionTypeId
-						,intLotId
-						,intSubLocationId
-						,intStorageLocationId 
-						,ysnIsStorage
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId 
+							,ysnIsStorage
 						)
 						SELECT	intItemId = ScaleTicket.intItemId
 								,intLocationId = ItemLocation.intItemLocationId 
@@ -256,57 +225,25 @@ BEGIN TRY
 						END
 					IF @dblRunningBalance <= @dblUnits
 						BEGIN
-						UPDATE tblGRCustomerStorage 
-						SET dblOpenBalance = 0
-						WHERE intCustomerStorageId = @intStorageTicketId
-						SELECT dblOpenBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intStorageTicketId
 						SET @dblUnits = @dblUnits - @dblRunningBalance
-						INSERT INTO [dbo].[tblGRStorageHistory]
-							([intConcurrencyId]
-							,[intCustomerStorageId]
-							,[intTicketId]
-							,[intInventoryReceiptId]
-							,[intInvoiceId]
-							,[intContractHeaderId]
-							,[dblUnits]
-							,[dtmHistoryDate]
-							,[dblPaidAmount]
-							,[strPaidDescription]
-							,[dblCurrencyRate]
-							,[strType]
-							,[strUserName])
-						VALUES
-							(1
-							,@intStorageTicketId
-							,@intTicketId
-							,NULL
-							,NULL
-							,NULL
-							,@dblRunningBalance
-							,dbo.fnRemoveTimeOnDate(GETDATE())
-							,0
-							,'TakeOut From Scale'
-							,1
-							,'TakeOut'
-							,@strUserName)
 						INSERT INTO @ItemsForItemShipment (
 							intItemId
-						,intItemLocationId
-						,intItemUOMId
-						,dtmDate
-						,dblQty
-						,dblUOMQty
-						,dblCost
-						,dblSalesPrice
-						,intCurrencyId
-						,dblExchangeRate
-						,intTransactionId
-						,strTransactionId
-						,intTransactionTypeId
-						,intLotId
-						,intSubLocationId
-						,intStorageLocationId 
-						,ysnIsStorage
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId 
+							,ysnIsStorage
 						)
 						SELECT	intItemId = ScaleTicket.intItemId
 								,intLocationId = ItemLocation.intItemLocationId 
