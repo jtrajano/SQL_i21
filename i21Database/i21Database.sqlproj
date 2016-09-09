@@ -4292,6 +4292,8 @@
     <Build Include="dbo\Tables\tblPREFileFormat.sql" />
     <Build Include="dbo\Tables\tblPREFileFormatRecord.sql" />
     <Build Include="dbo\Tables\tblPREFileFormatField.sql" />
+    <Build Include="dbo\Views\vyuPATCustomerPatronage.sql" />
+    <Build Include="dbo\Views\vyuPATEquityPatronageDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

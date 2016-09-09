@@ -7,7 +7,7 @@
 	@dtmCutoffDate DATETIME = NULL
 AS
 BEGIN
-		SELECT DISTINCT CS.intCustomerPatronId,
+		SELECT DISTINCT CS.intCustomerPatronId AS intCustomerId,
 			   CS.intStockId,
 			   SC.strStockName,
 			   CS.strCertificateNo,
