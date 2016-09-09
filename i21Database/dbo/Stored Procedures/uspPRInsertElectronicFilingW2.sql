@@ -30,6 +30,7 @@ BEGIN
 		,strSubmitterCountry
 		,strContactName
 		,strContactPhone
+		,strContactPhoneExt
 		,strContactEmail
 		,strContactFax
 		,strPreparerCode
@@ -53,6 +54,7 @@ BEGIN
 		,ysnThirdPartySickPay
 		,strEmployerContactName
 		,strEmployerContactPhone
+		,strEmployerContactPhoneExt
 		,strEmployerContactFax
 		,strEmployerContactEmail
 		,dtmGenerated
@@ -103,12 +105,18 @@ BEGIN
 								  END
 		,strSubmitterCountry = LEFT(SUB.strCountry, 50)
 		,strContactName = LEFT(COM.strContactName, 27)
-		,strContactPhone = LEFT(COM.strPhone, 15)
+		,strContactPhone = LEFT(dbo.fnAPRemoveSpecialChars(
+									CASE WHEN (CHARINDEX ('x', COM.strPhone) > 0)
+										 THEN SUBSTRING(COM.strPhone, 1, CHARINDEX('x', COM.strPhone))
+										 ELSE COM.strPhone END), 15)
+		,strContactPhoneExt = LEFT(CASE WHEN (CHARINDEX ('x', COM.strPhone) > 0)
+								   THEN SUBSTRING(COM.strPhone, CHARINDEX('x', COM.strPhone) + 1, len (COM.strPhone))
+								   ELSE '' END, 5) 
 		,strContactEmail = LEFT(COM.strEmail, 40)
-		,strContactFax = LEFT(COM.strFax, 10)
+		,strContactFax = LEFT(dbo.fnAPRemoveSpecialChars(COM.strFax), 10)
 		,strPreparerCode = 'L'
-		,strAgentIndicatorCode = ''
-		,strEmployerEIN = LEFT(COM.strEin, 9)
+		,strAgentIndicatorCode = ' '
+		,strEmployerEIN = LEFT(dbo.fnAPRemoveSpecialChars(COM.strEin), 9)
 		,strAgentForEIN = ''
 		,ysnTerminatingBusiness = 0
 		,strEstablishmentNo = ''
@@ -133,12 +141,18 @@ BEGIN
 		,strEmployerCountry = LEFT(COM.strCountry, 50)
 		,strEmployerKind = 'N'
 		,strEmploymentCode = 'R'
-		,strTaxJurisdictionCode= ''
+		,strTaxJurisdictionCode = ' '
 		,ysnThirdPartySickPay = 0
 		,strEmployerContactName = LEFT(COM.strContactName, 27)
-		,strEmployerContactPhone = LEFT(COM.strPhone, 15)
+		,strEmployerContactPhone = LEFT(dbo.fnAPRemoveSpecialChars(
+									CASE WHEN (CHARINDEX ('x', COM.strPhone) > 0)
+										 THEN SUBSTRING(COM.strPhone, 1, CHARINDEX('x', COM.strPhone))
+										 ELSE COM.strPhone END), 15)
+		,strEmployerContactPhoneExt = LEFT(CASE WHEN (CHARINDEX ('x', COM.strPhone) > 0)
+												THEN SUBSTRING(COM.strPhone, CHARINDEX('x', COM.strPhone) + 1, len (COM.strPhone))
+												ELSE '' END, 5) 
+		,strEmployerContactFax = LEFT(dbo.fnAPRemoveSpecialChars(COM.strFax), 10)
 		,strEmployerContactEmail = LEFT(COM.strEmail, 40)
-		,strEmployerContactFax = LEFT(COM.strFax, 10)
 		,dtmGenerated = NULL
 		,intCreatedUserId = @intUserId
 		,dtmCreated = GETDATE()
