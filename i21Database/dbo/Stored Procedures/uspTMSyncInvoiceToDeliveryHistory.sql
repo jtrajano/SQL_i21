@@ -564,7 +564,7 @@ BEGIN
 							,intWillCallContractId = NULL
 							,intWillCallRouteId = G.intRouteId
 							,intWillCallDispatchId = G.intDispatchID
-							,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
+							,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -762,7 +762,7 @@ BEGIN
 						,dtmSiteLastReadingUpdate = ISNULL(A.dtmLastReadingUpdate,DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))
 						,intWillCallRouteId = G.intRouteId
 						,intWillCallDispatchId = G.intDispatchID
-						,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
+						,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -1006,7 +1006,7 @@ BEGIN
 			,intInvoiceDetailId = B.intInvoiceDetailId
 			,intWillCallRouteId = G.intRouteId
 			,intWillCallDispatchId = G.intDispatchID
-			,ysnWillCallLeakCheckRequired = G.ysnLeakCheckRequired
+			,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId
