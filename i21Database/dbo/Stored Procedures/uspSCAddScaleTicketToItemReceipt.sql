@@ -170,15 +170,9 @@ BEGIN
 	RETURN;
 END
 
---SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTIicket.intHaulerId FROM tblSCScaleSetup SCSetup
---LEFT JOIN tblSCTicket SCTIicket
---ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
---WHERE intTicketId = @intTicketId
-
-SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTIicket.intHaulerId, @ysnDeductFreightFarmer = SCTIicket.ysnFarmerPaysFreight FROM tblSCScaleSetup SCSetup
-LEFT JOIN tblSCTicket SCTIicket
-ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
-WHERE intTicketId = @intTicketId
+SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.intHaulerId, @ysnDeductFreightFarmer = SCTicket.ysnFarmerPaysFreight 
+FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
+WHERE SCTicket.intTicketId = @intTicketId
 
 		INSERT INTO @OtherCharges
 		(
