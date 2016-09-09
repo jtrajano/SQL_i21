@@ -142,3 +142,8 @@ BEGIN
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
 			AND (SODetail.dblQtyOrdered - ISNULL(InvoiceDetail.dblQtyShipped, SODetail.dblQtyShipped)) > 0
 END 
+
+-- Increase Item Stock Reservation
+BEGIN
+	EXEC dbo.uspICReserveStockForInventoryShipment @intTransactionId = @InventoryShipmentId
+END

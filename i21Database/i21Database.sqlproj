@@ -4097,6 +4097,7 @@
     <Build Include="dbo\Stored Procedures\uspGLInsertReverseGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspICTMExportProducts.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateTransferOrderStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnshipInventoryItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

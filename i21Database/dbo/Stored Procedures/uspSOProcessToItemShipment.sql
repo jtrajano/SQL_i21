@@ -48,11 +48,16 @@ IF @Unship = 1
 			END
 		ELSE
 			BEGIN
-				--DELETE SHIPMENT RECORD								
-				DELETE FROM tblICInventoryShipment 
-				WHERE intInventoryShipmentId IN (SELECT DISTINCT ISH.intInventoryShipmentId FROM tblICInventoryShipmentItem ISHI
-													INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
-													WHERE intOrderId = @SalesOrderId)
+				-- Delete shipment and decrease Item Stock Reservation
+				BEGIN
+					DECLARE @intInventoryShipmentId INT
+					SELECT DISTINCT TOP 1 @intInventoryShipmentId = ISH.intInventoryShipmentId
+					FROM tblICInventoryShipmentItem ISHI
+						INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
+					WHERE intOrderId = @SalesOrderId
+					
+					EXEC dbo.uspICUnshipInventoryItem @intInventoryShipmentId, @UserId
+				END
 			
 				--UPDATE ORDER STATUS
 				EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId, 0, 1
