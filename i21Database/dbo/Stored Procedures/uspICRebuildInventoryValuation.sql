@@ -165,6 +165,22 @@ BEGIN
 			AND ActualCostCostBucket.intItemId = ISNULL(@intItemId, ActualCostCostBucket.intItemId) 
 END 
 
+-- Restore the original costs
+BEGIN 
+	UPDATE	CostBucket
+	SET		dblCost = CostAdjustment.dblCost
+	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
+				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryLot CostBucket
+				ON CostBucket.intInventoryLotId = CostAdjustment.intInventoryLotId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
+			AND CostAdjustment.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+END 
+
 -- Clear the cost adjustments
 BEGIN 
 	DELETE	CostAdjustment
@@ -606,7 +622,7 @@ BEGIN
 			-- Process the cost adjustments
 			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment'))
 			BEGIN 
-				PRINT 'Reposting Cost Adjustments'
+				PRINT 'Reposting Cost Adjustments: ' + @strTransactionId
 				
 				-- uspICRepostCostAdjustment creates and posts it own g/l entries 
 				EXEC dbo.uspICRepostCostAdjustment

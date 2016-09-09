@@ -63,7 +63,17 @@ END
 
 -- Generate a new cost adjustment 
 BEGIN 		
-	DELETE FROM @adjustedEntries
+	-- CLEAR THE G/L ENTRIES ON THE BILL
+	DELETE	FROM tblGLDetail 
+	WHERE	strBatchId = @strBatchId
+			AND strTransactionId = @strBillId
+			AND strCode <> 'AP'
+
+	-- Delete the inventory transaction records
+	DELETE	t 
+	FROM	tblICInventoryTransaction t 
+	WHERE	t.strTransactionId = @strBillId
+			AND t.strBatchId = @strBatchId
 		
 	INSERT INTO @adjustedEntries (
 		[intItemId] 
@@ -94,7 +104,7 @@ BEGIN
 			,[intItemLocationId]				=	D.intItemLocationId
 			,[intItemUOMId]						=   itemUOM.intItemUOMId
 			,[dtmDate] 							=	A.dtmDate
-			,[dblQty] 							=	B.dblQtyReceived
+			,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 			,[dblUOMQty] 						=	itemUOM.dblUnitQty
 			,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
 			,[dblVoucherCost] 					=	B.dblCost 
@@ -124,7 +134,7 @@ BEGIN
 			INNER JOIN tblICItemLocation D
 				ON D.intLocationId = A.intShipToId AND D.intItemId = item.intItemId
 			LEFT JOIN tblICItemUOM itemUOM
-				ON itemUOM.intItemUOMId = B.intUnitOfMeasureId
+				ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
 			LEFT JOIN tblICItemUOM voucherCostUOM
 				ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 			LEFT JOIN tblICItemUOM receiptCostUOM
@@ -138,7 +148,7 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
-		INSERT INTO @billGLEntries
+		INSERT INTO @billGLEntries 
 		EXEC uspICPostCostAdjustment 
 			@adjustedEntries
 			, @strBatchId

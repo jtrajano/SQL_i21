@@ -25,9 +25,12 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @returnValue AS INT 
 
--- Clean-up for the temp table. 
+-- Clean-up for the temp tables. 
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
 	DROP TABLE #tmpRevalueProducedItems  
+
+IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevaluedInventoryTransaction')) 
+	DROP TABLE #tmpRevaluedInventoryTransaction
 
 -- Create the temp table if it does not exists. 
 BEGIN 
@@ -55,6 +58,14 @@ BEGIN
 		,[intSourceTransactionDetailId] INT NULL				-- The integer id for the cost bucket in terms of tblICInventoryReceiptItem.intInventoryReceiptItemId (Ex. The value of tblICInventoryReceiptItem.intInventoryReceiptItemId is 1230). 
 		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. "INVRCT-10001"). 
 		,[intRelatedInventoryTransactionId] INT NULL 
+	)
+END 
+
+-- Create the temp table if it does not exists. 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevaluedInventoryTransaction')) 
+BEGIN 
+	CREATE TABLE #tmpRevaluedInventoryTransaction (
+		[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED 
 	)
 END 
 
@@ -86,6 +97,7 @@ DECLARE @intId AS INT
 		,@dblExchangeRate AS NUMERIC(38,20)
 		,@strActualCostId NVARCHAR(50)
 		,@intRelatedInventoryTransactionId INT 
+		,@intLotId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionTypeName AS NVARCHAR(200) 
@@ -196,6 +208,7 @@ SELECT  intId
 		,dblExchangeRate
 		,strActualCostId
 		,intRelatedInventoryTransactionId
+		,intLotId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -223,6 +236,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@dblExchangeRate
 	,@strActualCostId
 	,@intRelatedInventoryTransactionId
+	,@intLotId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -352,6 +366,7 @@ BEGIN
 			,@dblExchangeRate			
 			,@intEntityUserSecurityId
 			,@intRelatedInventoryTransactionId
+			,@intLotId
 
 		IF @returnValue < 0 RETURN -1;
 	END
@@ -409,6 +424,7 @@ BEGIN
 		,@dblExchangeRate
 		,@strActualCostId
 		,@intRelatedInventoryTransactionId
+		,@intLotId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -627,3 +643,4 @@ END
 EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 	@strBatchId
 	,@intEntityUserSecurityId
+
