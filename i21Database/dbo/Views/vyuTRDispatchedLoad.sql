@@ -69,7 +69,8 @@ SELECT LG.intLoadId
 	, dblInboundAdjustment = ISNULL(CASE WHEN (LG.strType != 'Outbound') THEN PurchaseContract.dblAdjustment
 									ELSE NULL END, 0)
 	, dblOutboundAdjustment = ISNULL(SalesContract.dblAdjustment, 0)
-	, strZipCode = VendorLocation.strZipCode
+	, strZipCode = (CASE WHEN ISNULL(LG.intVendorEntityLocationId, '') <> '' THEN VendorLocation.strZipCode
+						ELSE ReceiptLocation.strZipPostalCode END)
 	, intRackPriceSupplyPointId = CASE WHEN (LG.strType != 'Outbound') THEN SP.intRackPriceSupplyPointId
 										ELSE NULL END
 	, intItemUOMId = ItemUOM.intItemUOMId
@@ -94,6 +95,7 @@ SELECT LG.intLoadId
 	, intOutboundTaxGroupId = CustomerLocation.intTaxGroupId
 	, strOutboundTaxGroup = CustomerTax.strTaxGroup
 FROM vyuLGLoadDetailView LG
+LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ISNULL(LG.intSCompanyLocationId, LG.intPCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
 LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId

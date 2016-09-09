@@ -3,7 +3,7 @@ CREATE PROCEDURE [dbo].[uspTRGetCustomerFreight]
 	 @intItemId AS INT,
 	 @strZipCode NVARCHAR (MAX),
 	 @intShipViaId as int,
-	 @intShipToId as int,
+	 @intShipToId as int = NULL,
 	 @dblReceiptGallons as decimal(18,6),
 	 @dblInvoiceGallons as decimal(18,6),
 	 @dtmReceiptDate as DATETIME,

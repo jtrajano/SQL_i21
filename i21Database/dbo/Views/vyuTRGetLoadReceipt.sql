@@ -36,7 +36,8 @@ SELECT Receipt.intLoadReceiptId
 	, Receipt.strReceiptLine
 	, Receipt.intLoadDetailId
 	, LoadSchedule.strLoadNumber
-	, strZipCode = ISNULL(SupplyPoint.strZipCode, CompanyLocation.strZipPostalCode)
+	, strZipCode = (CASE WHEN ISNULL(Receipt.intSupplyPointId, '') <> '' THEN ISNULL(SupplyPoint.strZipCode, CompanyLocation.strZipPostalCode)
+						ELSE CompanyLocation.strZipPostalCode END)
 FROM tblTRLoadReceipt Receipt
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = Receipt.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = Receipt.intTerminalId
