@@ -15,6 +15,7 @@
 	intStorageLocationId INT,
 	intLotId INT,
 	strLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBatchId INT,
 
 	intCreatedUserId int NULL,
 	dtmCreated datetime NULL CONSTRAINT DF_tblMFWastage_dtmCreated DEFAULT GetDate(),

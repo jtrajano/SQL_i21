@@ -4307,6 +4307,8 @@
     <Build Include="dbo\Tables\tblETImportBaseEngineering.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPS.sql" />
     <Build Include="dbo\Stored Procedures\uspETImportBaseEngineeringToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWastage_LotUpdate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWastage_LotDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
