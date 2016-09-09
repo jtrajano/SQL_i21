@@ -120,7 +120,8 @@ BEGIN TRY
 			ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +
+			ISNULL( CHAR(13)+CHAR(10) +'FLO ID: '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
 			AS	strOtherPartyAddress,
 			CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END AS strBuyer,
 			CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END AS strSeller,
@@ -130,7 +131,9 @@ BEGIN TRY
 			CH.strPrintableRemarks,
 			AN.strComment	AS strArbitrationComment,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
-			PR.strName AS strProducer
+			PR.strName AS strProducer,
+			PO.strPosition,
+			CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' strCaller
 
 	FROM	tblCTContractHeader CH
 	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
@@ -147,6 +150,11 @@ BEGIN TRY
 	JOIN	tblSMCountry		RY	ON	RY.intCountryID			=	AB.intCountryId			LEFT
 	JOIN	tblCTInsuranceBy	IB	ON	IB.intInsuranceById		=	CH.intInsuranceById		LEFT	
 	JOIN	tblEMEntity			PR	ON	PR.intEntityId			=	CH.intProducerId		LEFT
+	JOIN	tblCTPosition		PO	ON	PO.intPositionId		=	CH.intPositionId		LEFT
+	JOIN	tblSMCountry		CO	ON	CO.intCountryID			=	CH.intCountryId			LEFT
+	JOIN	tblAPVendor			VR	ON	VR.intEntityVendorId	=	CH.intEntityId			LEFT
+	JOIN	tblARCustomer		CR	ON	CR.intEntityCustomerId	=	CH.intEntityId			LEFT
+	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intINCOLocationTypeId LEFT
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
 							CD.intContractHeaderId,
@@ -156,14 +164,17 @@ BEGIN TRY
 							'Destination ' + CD.strLoadingPointType AS	srtDestinationPoint,
 							DP.strCity								AS	strDestinationPointName,
 							TT.strName								AS	strShipper,
-							CY.strCurrency
+							CY.strCurrency,
+							CD.strFixationBy,
+							MA.strFutMarketName
 
 				FROM		tblCTContractDetail		CD
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
 				JOIN		tblSMCity				LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 				JOIN		tblSMCity				DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
 				JOIN		tblEMEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
-				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId
+				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId			LEFT
+				JOIN		tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
 			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1			
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
