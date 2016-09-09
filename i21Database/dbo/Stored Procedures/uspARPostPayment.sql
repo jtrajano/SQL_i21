@@ -1133,17 +1133,18 @@ IF @post = 1
 	BEGIN TRY
 
 	SET @intWriteOff = (SELECT TOP 1 intPaymentMethodId FROM tblARPayment WHERE intPaymentMethodId IN (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Write Off') AND intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData) )		
-	
+		
 	IF (@intWriteOff IS NOT NULL)
 		BEGIN 
 			SELECT TOP 1 @intWriteOffAccount = intWriteOffAccountId FROM tblARPayment WHERE intPaymentId IN  (SELECT intPaymentId FROM @ARReceivablePostData)	
 
-			IF (@intWriteOffAccount IS NOT NULL)
+			IF (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0)
 				BEGIN
 					UPDATE 
 						tblARPayment
 					SET 
-						intAccountId = @intWriteOffAccount
+						intAccountId = @ARAccount
+						,intWriteOffAccountId = @intWriteOffAccount
 					FROM
 						tblARPayment P								
 					INNER JOIN 
@@ -1158,7 +1159,8 @@ IF @post = 1
 					UPDATE 
 						tblARPayment
 					SET 
-						intAccountId = @WriteOffAccount
+						intAccountId = @ARAccount
+						,intWriteOffAccountId = @WriteOffAccount
 					FROM
 						tblARPayment P								
 					INNER JOIN 
@@ -1245,7 +1247,7 @@ IF @post = 1
 		SELECT
 			 dtmDate					= CAST(A.dtmDatePaid AS DATE)
 			,strBatchID					= @batchId			
-			,intAccountId			=	CASE WHEN @intWriteOff IS NOT NULL THEN 
+			,intAccountId			=	CASE WHEN (@intWriteOffAccount IS NOT NULL AND @intWriteOffAccount > 0) THEN 
 											CASE WHEN @intWriteOffAccount IS NOT NULL THEN @intWriteOffAccount ELSE @WriteOffAccount END
 										ELSE A.intAccountId END
 			,dblDebit					= A.dblAmountPaid
