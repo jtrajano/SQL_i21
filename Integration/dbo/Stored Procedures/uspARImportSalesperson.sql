@@ -33,7 +33,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				agsls_city = SUBSTRING(D.strCity,1,20),
 				agsls_state = SUBSTRING(D.strState,1,2),
 				agsls_country = (CASE WHEN LEN(D.strCountry) = 3 THEN D.strCountry ELSE '''' END),
-				agsls_phone = SUBSTRING(F.strPhone,1,15),
+				agsls_phone = SUBSTRING(P.strPhone,1,15),
 				agsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEMEntity E
@@ -44,6 +44,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
@@ -74,7 +75,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				SUBSTRING(D.strCity,1,20),
 				SUBSTRING(D.strState,1,2),
 				(CASE WHEN LEN(D.strCountry) = 3 THEN D.strCountry ELSE '''' END),
-				SUBSTRING(F.strPhone,1,15),
+				SUBSTRING(P.strPhone,1,15),
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEMEntity E
@@ -85,6 +86,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId
 	
 
@@ -172,9 +174,14 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
 			select @EntityId, @EntityContactId, 0, 1, 1
 
+			declare @intCountryId int
+			select top 1 @intCountryId = intCountryID from tblSMCountry where strCountry = ''United States''
+			INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
+			select top 1 @EntityContactId,ISNULL(LTRIM(RTRIM(@strPhone)),''''), isnull(intDefaultCountryId, @intCountryId) from tblSMCompanyPreference
+
 			insert into tblEMEntityType(intEntityId, strType, intConcurrencyId)
 			select @EntityId, ''Salesperson'', 0
-		
+			
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
 			   ([intEntitySalespersonId]
@@ -284,7 +291,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				ptsls_city = SUBSTRING(D.strCity,1,20),
 				ptsls_state = SUBSTRING(D.strState,1,2),
 				--ptsls_country = (CASE WHEN LEN(D.strCountry) = 3 THEN D.strCountry ELSE '''' END),
-				ptsls_phone = SUBSTRING(F.strPhone,1,15),
+				ptsls_phone = SUBSTRING(P.strPhone,1,15),
 				ptsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEMEntity E
@@ -295,6 +302,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
@@ -325,7 +333,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				SUBSTRING(D.strCity,1,20),
 				SUBSTRING(D.strState,1,2),
 				--S.strCountry,
-				SUBSTRING(F.strPhone,1,15),
+				SUBSTRING(P.strPhone,1,15),
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEMEntity E
@@ -336,6 +344,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				JOIN tblEMEntityLocation D
 					on E.intEntityId = D.intEntityId and ysnDefaultLocation = 1
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
+				LEFT JOIN tblEMEntityPhoneNumber P ON P.intEntityId = F.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId
 	
 
@@ -418,6 +427,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 			
 			insert into tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact, intConcurrencyId)		
 			select @EntityId, @EntityContactId, 0, 1, 1
+
+			declare @intCountryId int
+			select top 1 @intCountryId = intCountryID from tblSMCountry where strCountry = ''United States''
+			INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
+			select top 1 @EntityContactId,ISNULL(LTRIM(RTRIM(@strPhone)),''''), isnull(intDefaultCountryId, @intCountryId) from tblSMCompanyPreference
 
 			insert into tblEMEntityType(intEntityId, strType, intConcurrencyId)
 			select @EntityId, ''Salesperson'', 0
