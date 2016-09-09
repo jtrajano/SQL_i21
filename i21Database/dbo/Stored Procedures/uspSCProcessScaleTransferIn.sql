@@ -22,15 +22,15 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int,
 		@intProcessingLocationId as int,
+		@intItemUOMId as int,
 		@intHaulerId AS INT,
 		@ysnAccrue AS BIT,
 		@ysnPrice AS BIT;
 
 select top 1 @intProcessingLocationId = intProcessingLocationId from tblSCTicket where intTicketId = @intMatchTicketId
 
-SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTIicket.intHaulerId, @intSurchargeItemId = SCSetup.intDefaultFeeItemId FROM tblSCScaleSetup SCSetup
-LEFT JOIN tblSCTicket SCTIicket
-ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
+SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.intHaulerId, @intSurchargeItemId = SCSetup.intDefaultFeeItemId, @intItemUOMId = SCTicket.intItemUOMIdTo
+FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId WHERE SCTicket.intTicketId = @intTicketId
 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
 BEGIN 
@@ -91,12 +91,7 @@ BEGIN TRY
 			,intItemId					= SC.intItemId
 			,intItemLocationId			= SC.intProcessingLocationId
 			,intItemUOMId				= ItemUOM.intItemUOMId
-			,intGrossNetUOMId			= ( SELECT TOP 1 ItemUOM.intItemUOMId
-												FROM dbo.tblICItemUOM ItemUOM INNER JOIN tblSCScaleSetup SCSetup 
-													ON ItemUOM.intUnitMeasureId = SCSetup.intUnitMeasureId
-												WHERE SCSetup.intScaleSetupId = SC.intScaleSetupId 
-													AND ItemUOM.intItemId = SC.intItemId
-										 )
+			,intGrossNetUOMId			= 0
 			,intCostUOMId				= NULL
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
@@ -127,7 +122,8 @@ BEGIN TRY
 			,[intLocationId] 
 			,[intShipViaId] 
 			,[intShipFromId] 
-			,[intCurrencyId]  	
+			,[intCurrencyId]
+			,[intCostCurrencyId]   	
 			,[intChargeId] 
 			,[ysnInventoryCost] 
 			,[strCostMethod] 
@@ -147,11 +143,12 @@ BEGIN TRY
 			,[intShipViaId]						= RE.intShipViaId
 			,[intShipFromId]					= RE.intShipFromId
 			,[intCurrencyId]  					= RE.intCurrencyId
+			,[intCostCurrencyId]  				= RE.intCurrencyId
 			,[intChargeId]						= @intFreightItemId
 			,[ysnInventoryCost]					= 0
 			,[strCostMethod]					= 'Per Unit'
 			,[dblRate]							= RE.dblFreightRate
-			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+			,[intCostUOMId]						= RE.intItemUOMId
 			,[intOtherChargeEntityVendorId]		= @intHaulerId
 			,[dblAmount]						= 0
 			,[strAllocateCostBy]				=  NULL
@@ -188,15 +185,6 @@ BEGIN TRY
     SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
     IF (@total = 0)
 	   RETURN;
-
-	-- Create the temp table if it does not exists. 
-	--IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
-	--BEGIN 
-	--	CREATE TABLE #tmpAddItemReceiptResult (
-	--		intSourceId INT
-	--		,intInventoryReceiptId INT
-	--	)
-	--END 
 
     EXEC dbo.uspICAddItemReceipt 
 			@ReceiptStagingTable
