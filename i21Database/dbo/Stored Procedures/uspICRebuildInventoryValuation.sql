@@ -23,6 +23,8 @@ BEGIN
 	RETURN -1; 
 END
 
+PRINT 'Rebuild stock for ' + ISNULL(@strItemNo, 'ALL items')
+
 -- 'Unable to find an open fiscal year period to match the transaction date.'
 IF (dbo.isOpenAccountingDate(@dtmStartDate) = 0) 
 BEGIN 

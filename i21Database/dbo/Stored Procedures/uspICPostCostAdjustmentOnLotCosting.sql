@@ -167,7 +167,11 @@ END
 
 -- Get the number of Lots to process. 
 DECLARE @LotWithOldCost AS INT = 0 
-SELECT	@LotWithOldCost = COUNT(intLotId) 
+SELECT	@LotWithOldCost = 
+			CASE	WHEN @intAdjustLotId IS NOT NULL AND COUNT(intLotId) > 0 AND @dblNewValue IS NOT NULL THEN 1 -- If a specific lot id and value is specified, we can assume it will only process one cost bucket  
+					ELSE COUNT(intLotId) -- Otherwise, the count will tell how many cost buckets this sp needs to cost adj.
+			END 
+ 
 FROM	dbo.tblICInventoryLot LEFT JOIN dbo.tblICItemUOM 
 			ON tblICInventoryLot.intItemUOMId = tblICItemUOM.intItemUOMId
 WHERE	tblICInventoryLot.intItemId = @intItemId
@@ -559,10 +563,6 @@ BEGIN
 		
 			-- If there are available out stocks, then revalue it.  
 			IF	@InvTranId IS NOT NULL 
-				AND 1 = CASE	WHEN @dblNewValue IS NULL AND @StockQtyAvailableToRevalue > 0 AND @StockQtyToRevalue > 0  THEN 1 
-								WHEN @dblNewValue IS NOT NULL THEN 1
-								ELSE 0 
-						END
 			BEGIN 
 				-- Calculate the revalue amount for the inventory transaction. 
 				SELECT @InvTranValue =	
@@ -714,7 +714,7 @@ BEGIN
 								AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
 								AND ISNULL(InvTran.dblQty, 0) > 0 
 								AND InvTran.intTransactionTypeId = @INV_TRANS_TYPE_Produce
-					END 
+					END 					
 					ELSE 
 					BEGIN 
 						SELECT	TOP 1 
@@ -724,27 +724,26 @@ BEGIN
 								AND InvTran.intTransactionId = @InvTranIntTransactionId
 								AND InvTran.strTransactionId = @InvTranStringTransactionId
 								AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
-								AND ISNULL(InvTran.dblQty, 0) > 0 
+								AND ISNULL(InvTran.dblQty, 0) > 0 								
+								AND InvTran.dblQty = @LotOutQty
 								AND InvTran.intTransactionTypeId IN (
-									@INV_TRANS_TYPE_Build_Assembly
-									, @INV_TRANS_Inventory_Transfer
+									@INV_TRANS_Inventory_Transfer
 									, @INV_TRANS_TYPE_ADJ_Item_Change
 									, @INV_TRANS_TYPE_ADJ_Split_Lot
 									, @INV_TRANS_TYPE_ADJ_Lot_Merge
 									, @INV_TRANS_TYPE_ADJ_Lot_Move
 								)
-								AND NOT EXISTS (
-									SELECT	TOP 1 1 
-									FROM	#tmpRevaluedInventoryTransaction x 
-									WHERE	x.intInventoryTransactionId = InvTran.intInventoryTransactionId
-								)
+						--		AND NOT EXISTS (
+						--			SELECT	TOP 1 1 
+						--			FROM	#tmpRevaluedInventoryTransaction x 
+						--			WHERE	x.intInventoryTransactionId = InvTran.intInventoryTransactionId
+						--		)
 
-						-- Insert the inventory transaction id into the x list. 
-						INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
-						SELECT @intInventoryTrnasactionId_EscalateValue 
-						WHERE @intInventoryTrnasactionId_EscalateValue IS NOT NULL
+						---- Insert the inventory transaction id into the x list. 
+						--INSERT INTO #tmpRevaluedInventoryTransaction (intInventoryTransactionId) 
+						--SELECT @intInventoryTrnasactionId_EscalateValue 
+						--WHERE @intInventoryTrnasactionId_EscalateValue IS NOT NULL
 					END
-
 					
 					IF @intInventoryTrnasactionId_EscalateValue IS NOT NULL 
 					BEGIN 												

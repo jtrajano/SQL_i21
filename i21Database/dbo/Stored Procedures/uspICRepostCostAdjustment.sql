@@ -24,6 +24,14 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- Clean-up for the temp tables. 
+IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
+	DROP TABLE #tmpRevalueProducedItems  
+
+IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevaluedInventoryTransaction')) 
+	DROP TABLE #tmpRevaluedInventoryTransaction
+
+
 DECLARE @billGLEntries AS RecapTableType 
 		,@adjustedEntries AS ItemCostAdjustmentTableType
 
