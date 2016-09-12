@@ -37,6 +37,12 @@ SELECT Receipt.intLoadReceiptId
 	, Receipt.intLoadDetailId
 	, LoadSchedule.strLoadNumber
 	, strZipCode = ISNULL(SupplyPoint.strZipCode, CompanyLocation.strZipPostalCode)
+	, dblOrderedQuantity  = CASE WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Net' THEN Receipt.dblNet
+								WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Gross' THEN Receipt.dblGross
+								WHEN ISNULL(LoadSchedule.dblQuantity,0) != 0 THEN LoadSchedule.dblQuantity END
+	, dblReceivedQuantity = CASE WHEN SupplyPoint.strGrossOrNet = 'Gross' THEN Receipt.dblGross
+								WHEN SupplyPoint.strGrossOrNet = 'Net' THEN Receipt.dblNet END
+
 FROM tblTRLoadReceipt Receipt
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = Receipt.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = Receipt.intTerminalId

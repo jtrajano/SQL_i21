@@ -169,16 +169,11 @@ SELECT LoadDetail.intLoadDetailId
 								 THEN 
 									CAST(ST.strTicketNumber AS VARCHAR(100))
 								 ELSE 
-									CASE WHEN IsNull(Load.intTransportLoadId, 0) <> 0 
+									CASE WHEN IsNull(Load.intLoadHeaderId, 0) <> 0 
 										THEN 
-											TL.strTransaction
+											TR.strTransaction
 										ELSE 
-											CASE WHEN IsNull(Load.intLoadHeaderId, 0) <> 0 
-												THEN 
-													TR.strTransaction
-												ELSE 
-													NULL 
-												END 
+											NULL 
 										END 
 								 END
         ,Load.dtmDeliveredDate
@@ -227,7 +222,6 @@ LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
 LEFT JOIN vyuCTContractDetailView PDetail ON PDetail.intContractDetailId = LoadDetail.intPContractDetailId
 LEFT JOIN vyuCTContractDetailView SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
-LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId

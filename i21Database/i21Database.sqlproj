@@ -1646,8 +1646,6 @@
     <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessToInventoryShipment.sql" />
-    <Build Include="dbo\Tables\tblTRDistributionDetail.sql" />
-    <Build Include="dbo\Tables\tblTRDistributionHeader.sql" />
     <Build Include="dbo\Tables\tblTRQuotePriceAdjustmentDetail.sql" />
     <Build Include="dbo\Tables\tblTRQuotePriceAdjustmentHeader.sql" />
     <Build Include="dbo\Tables\tblTRRackPriceDetail.sql" />
@@ -1656,8 +1654,6 @@
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchDetail.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchHeader.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointRackPriceEquation.sql" />
-    <Build Include="dbo\Tables\tblTRTransportLoad.sql" />
-    <Build Include="dbo\Tables\tblTRTransportReceipt.sql" />
     <Build Include="dbo\Views\vyuTRRackItems.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
     <Build Include="dbo\Views\vyuTRTerminal.sql" />
@@ -1854,7 +1850,6 @@
     <Build Include="dbo\Stored Procedures\uspLGReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspTRReceived.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemReceipt.sql" />
     <Build Include="dbo\User Defined Types\ReceiptStagingTable.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
@@ -1884,8 +1879,6 @@
     <Build Include="dbo\Tables\tblWHTaskPriority.sql" />
     <Build Include="dbo\Tables\tblWHTaskState.sql" />
     <Build Include="dbo\Tables\tblWHTaskType.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRProcessToInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddInvoice.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
@@ -1986,7 +1979,6 @@
     <Build Include="dbo\Tables\tblPRCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuTRDispatchedLoad.sql" />
     <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceServiceCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspARCalculateServiceCharge.sql" />
     <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
@@ -2032,7 +2024,6 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
     <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
-    <Build Include="dbo\Views\vyuTRTransportReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignFutureTransaction.sql" />
@@ -2045,7 +2036,6 @@
     <Build Include="dbo\Tables\tblCTSequenceUsageHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateSequenceUsageHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetCustomerFreight.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
     <Build Include="dbo\Stored Procedures\uspIUAuditRemoveDefendencies.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
@@ -2107,7 +2097,6 @@
     <Build Include="dbo\Tables\tblMFScheduleWorkOrderDetail.sql" />
     <Build Include="dbo\Tables\tblMFScheduleMachineDetail.sql" />
     <Build Include="dbo\Tables\tblMFScheduleConstraintDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRProcessLoadContracts.sql" />
     <Build Include="dbo\Views\vyuLGWarehouseRateMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspSTXMLToIntermediateTable.sql" />
     <Build Include="dbo\Views\vyuQMGetLotQuality.sql" />
@@ -2155,7 +2144,6 @@
     <Build Include="dbo\Stored Procedures\uspCFImportCard.sql" />
     <Build Include="dbo\Stored Procedures\uspPODuplicate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRPostingValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleOverflowReport.sql" />
     <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalYearStatus.sql" />
@@ -2226,7 +2214,6 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
     <None Include="Scripts\Post-Deployment\GL\InventoryCategoryFix.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRPosting.sql" />
     <Build Include="dbo\Tables\tblSTRadiantItemTypeCode.sql" />
     <Build Include="dbo\Views\vyuARDepositAccount.sql" />
     <Build Include="dbo\Tables\tblICCommodityProductLine.sql" />
@@ -2362,7 +2349,6 @@
     <Build Include="dbo\Tables\tblSMDocumentMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetDefaultComment.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateDocumentMaintenance.sql" />
-    <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryTransfer.sql" />
     <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
     <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
@@ -2573,7 +2559,6 @@
     <Build Include="dbo\Stored Procedures\uspGRProcessSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckIfOriginVendor.sql" />
     <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
-    <Build Include="dbo\Views\vyuTRTansportLoad.sql" />
     <Build Include="dbo\Functions\fnARGetContractPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetInventoryItemPricingDetails.sql" />
@@ -3563,8 +3548,6 @@
     <Build Include="dbo\Tables\tblTMLeaseDevice.sql" />
     <Build Include="dbo\Tables\tblGLCompanyPreferenceOption.sql" />
     <Build Include="dbo\Tables\tblARCustomerLineOfBusiness.sql" />
-    <Build Include="dbo\Views\vyuTRTransportReceipt_New.sql" />
-    <Build Include="dbo\Views\vyuTRTransportReceipt_Old.sql" />
     <Build Include="dbo\Views\vyuICInventoryReceiptLookUp.sql" />
     <Build Include="dbo\Views\vyuICInventoryReceiptItemLookUp.sql" />
     <Build Include="dbo\Views\vyuPRMonthlyTaxTotal.sql" />
@@ -4294,7 +4277,6 @@
     <Build Include="dbo\Tables\tblPREFileFormatField.sql" />
     <Build Include="dbo\Views\vyuPATCustomerPatronage.sql" />
     <Build Include="dbo\Views\vyuPATEquityPatronageDetails.sql" />
-	
     <Build Include="dbo\Views\vyuSMTransaction.sql" />
     <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
     <Build Include="dbo\Tables\tblSMTypeValue.sql" />

@@ -74,17 +74,12 @@ SELECT L.intLoadId
 								THEN 
 								CAST(ST.strTicketNumber AS VARCHAR(100))
 								ELSE 
-								CASE WHEN IsNull(L.intTransportLoadId, 0) <> 0 
-									THEN 
-										TL.strTransaction
-									ELSE 
-										CASE WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
-											THEN 
-												TR.strTransaction
-											ELSE 
-												NULL 
-											END 
-									END 
+									CASE WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
+										THEN 
+											TR.strTransaction
+										ELSE 
+											NULL 
+										END 
 								END
 	,L.dtmDeliveredDate
 	,L.dtmDispatchedDate
@@ -99,5 +94,4 @@ LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
-LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = L.intTransportLoadId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId

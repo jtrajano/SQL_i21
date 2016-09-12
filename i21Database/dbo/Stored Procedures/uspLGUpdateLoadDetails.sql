@@ -16,12 +16,9 @@ BEGIN TRY
 
 	IF NOT EXISTS(SELECT 1 FROM tblSCTicket WHERE intTicketId=@intTicketId) AND @intTicketId IS NOT NULL
 	BEGIN
-		IF NOT EXISTS(SELECT 1 FROM tblTRTransportLoad WHERE intTransportLoadId=@intTicketId) AND @intTicketId IS NOT NULL
+		IF NOT EXISTS(SELECT 1 FROM tblTRLoadHeader WHERE intLoadHeaderId=@intTicketId) AND @intTicketId IS NOT NULL
 		BEGIN
-			IF NOT EXISTS(SELECT 1 FROM tblTRLoadHeader WHERE intLoadHeaderId=@intTicketId) AND @intTicketId IS NOT NULL
-			BEGIN
-				RAISERROR('Invalid Ticket/TransportId', 16, 1)
-			END
+			RAISERROR('Invalid Ticket/TransportId', 16, 1)
 		END
 	END
 
@@ -29,12 +26,6 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblLGLoad SET 
 			intTicketId=@intTicketId
-		WHERE intLoadId=@intLoadId
-	END
-	IF EXISTS(SELECT 1 FROM tblTRTransportLoad WHERE intTransportLoadId=@intTicketId)
-	BEGIN
-		UPDATE tblLGLoad SET 
-			intTransportLoadId=@intTicketId
 		WHERE intLoadId=@intLoadId
 	END
 	IF EXISTS(SELECT 1 FROM tblTRLoadHeader WHERE intLoadHeaderId=@intTicketId)

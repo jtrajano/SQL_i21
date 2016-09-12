@@ -130,8 +130,8 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
 			AND Shipment.intOrderType = 1
 			-- AND Shipment.intSourceType IN (0, 1) 
-		LEFT JOIN vyuTRTransportReceipt TransportView
-			ON TransportView.intTransportReceiptId = ShipmentItem.intSourceId
+		LEFT JOIN vyuTRGetLoadReceipt TransportView
+			ON TransportView.intLoadReceiptId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 3
 		LEFT JOIN tblSCTicket ScaleView
 			ON ScaleView.intTicketId = ShipmentItem.intSourceId

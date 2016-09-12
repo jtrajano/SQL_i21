@@ -63,15 +63,10 @@ SELECT -- Load Header
 	,strScaleTicketNo = CASE 
 		WHEN IsNull(LOAD.intTicketId, 0) <> 0
 			THEN CAST(ST.strTicketNumber AS VARCHAR(100))
-		ELSE CASE 
-				WHEN IsNull(LOAD.intTransportLoadId, 0) <> 0
-					THEN TL.strTransaction
-				ELSE CASE 
-						WHEN IsNull(LOAD.intLoadHeaderId, 0) <> 0
-							THEN TR.strTransaction
-						ELSE NULL
-						END
-				END
+		ELSE CASE WHEN IsNull(LOAD.intLoadHeaderId, 0) <> 0
+				THEN TR.strTransaction
+			ELSE NULL
+			END
 		END
 	,LOAD.dtmDeliveredDate
 	,strEquipmentType = EQ.strEquipmentType
@@ -213,7 +208,6 @@ LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = LOAD.intDocPresentationId AN
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = LOAD.intInsuranceCurrencyId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = LOAD.intContainerTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = LOAD.intTicketId
-LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = LOAD.intTransportLoadId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = LOAD.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId] = LOAD.intDispatcherId

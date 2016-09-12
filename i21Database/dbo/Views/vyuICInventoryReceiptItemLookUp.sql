@@ -17,7 +17,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
 		, dblGrossMargin = (
 			CASE	WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
-					ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
+					ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(ReceiptItem.dblUnitCost, 0)) / dblUnitRetail) * 100 END
 		)
 		, Item.strLifeTimeType
 		, Item.intLifeTime
@@ -47,7 +47,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 					ISNULL(LogisticsView.strLoadNumber, '')
 
 				WHEN Receipt.intSourceType = 3 -- Transport
-					THEN ISNULL(TransportView_New.strTransaction, TransportView_Old.strTransaction) 
+					THEN LoadReceipt.strTransaction 
 					
 				ELSE CAST(NULL AS NVARCHAR(50)) 
 				END
@@ -103,7 +103,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 									WHEN Receipt.intSourceType = 2 THEN -- Inbound Shipment
 										ISNULL(LogisticsView.dblQuantity, 0)
 									WHEN Receipt.intSourceType = 3 THEN -- Transport
-										ISNULL(ISNULL(TransportView_New.dblOrderedQuantity, TransportView_Old.dblOrderedQuantity), 0) 
+										ISNULL(LoadReceipt.dblOrderedQuantity, 0) 
 									ELSE 
 										NULL
 							END
@@ -129,7 +129,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 									WHEN Receipt.intSourceType = 2 THEN -- Inbound Shipment
 										ISNULL(LogisticsView.dblDeliveredQuantity, 0)
 									WHEN Receipt.intSourceType = 3 THEN -- Transport
-										ISNULL(ISNULL(TransportView_New.dblReceivedQuantity, TransportView_Old.dblReceivedQuantity), 0) 
+										ISNULL(LoadReceipt.dblGross, 0) 
 									ELSE NULL
 							END
 						WHEN Receipt.strReceiptType = 'Purchase Order' THEN 
@@ -236,11 +236,6 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			AND Receipt.intSourceType = 1 -- Scale 
 
 		-- 6. Transport Loads (New tables)
-		LEFT JOIN vyuTRTransportReceipt_New TransportView_New
-			ON TransportView_New.intTransportReceiptId = ReceiptItem.intSourceId
-			AND Receipt.intSourceType = 3
-
-		-- 7. Transport Loads (Old tables) 
-		LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
-			ON TransportView_Old.intTransportReceiptId = ReceiptItem.intSourceId
+		LEFT JOIN vyuTRGetLoadReceipt LoadReceipt
+			ON LoadReceipt.intLoadReceiptId = ReceiptItem.intSourceId
 			AND Receipt.intSourceType = 3
