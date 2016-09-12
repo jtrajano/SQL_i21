@@ -5,7 +5,7 @@ ISNULL(SubRole.intUserRoleId, RoleMenu.intUserRoleId) AS intUserRoleId,
 RoleMenu.intMenuId,
 Menu.intParentMenuID as intParentMenuId,
 RoleMenu.ysnVisible,
-RoleMenu.intSort,
+Sort.intSort,--RoleMenu.intSort,
 strMenuName,
 strModuleName,
 Menu.strDescription,
@@ -19,4 +19,5 @@ ysnLeaf
 FROM vyuSMUserRoleSubRole SubRole
 RIGHT JOIN tblSMUserRoleMenu RoleMenu ON SubRole.intUserRoleID = RoleMenu.intUserRoleId
 LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
+CROSS APPLY (SELECT intSort FROM tblSMUserRoleMenu WHERE intUserRoleId = ISNULL(SubRole.intUserRoleId, RoleMenu.intUserRoleId) AND intMenuId = RoleMenu.intMenuId) Sort
 WHERE RoleMenu.ysnVisible = 1
