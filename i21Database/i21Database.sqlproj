@@ -4299,6 +4299,7 @@
     <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
     <Build Include="dbo\Tables\tblSMTypeValue.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\22_TypeValue.sql" />
+    <Build Include="dbo\Views\vyuLGLoadPickLotDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
