@@ -6,5 +6,5 @@
 	[intSort]					INT	 NOT NULL DEFAULT (0),
     [intConcurrencyId]			INT	 NOT NULL DEFAULT (1),
 	CONSTRAINT [FK_tblSMGridRow_tblSMCustomGridTab] FOREIGN KEY ([intCustomTabDetailId]) REFERENCES [tblSMCustomTabDetail]([intCustomTabDetailId]),
-	CONSTRAINT [FK_tblSMGridRow_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId])
+	CONSTRAINT [FK_tblSMGridRow_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE
 )
