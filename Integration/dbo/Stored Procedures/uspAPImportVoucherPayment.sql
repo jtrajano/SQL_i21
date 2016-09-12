@@ -134,7 +134,7 @@ AS (
 									WHEN ISDATE(A.apivc_gl_rev_dt) = 1 
 										THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) --USE VOUCHER DATE IF CHECK DATE IS INVALID
 									ELSE GETDATE() END,
-	[dblAmountPaid]			= ISNULL(E.apchk_chk_amt, A.apivc_net_amt), --IF MISSING PAYMENT, USE THE NET AMOUNT (THE DISCOUNT IS DEDUCTED)
+	[dblAmountPaid]			= ABS(ISNULL(E.apchk_chk_amt, A.apivc_net_amt)), --IF MISSING PAYMENT, USE THE NET AMOUNT (THE DISCOUNT IS DEDUCTED)
 	[dblUnapplied]			= 0,
 	[ysnPosted]				= 1,
 	[dblWithheld]			= 0,
@@ -169,7 +169,7 @@ SELECT
 											ELSE @withdrawal
 										END
 									WHEN ISNULL(E.apchk_chk_amt, A.apivc_net_amt) < 0 THEN @deposit
-									WHEN E.apchk_chk_amt = 0 THEN @debitmemosandpayments
+									WHEN ISNULL(E.apchk_chk_amt, A.apivc_net_amt) = 0 THEN @debitmemosandpayments
 								END,
 	[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = D.intBankAccountId), @defaultCurrencyId),
 	[intEntityVendorId]		= B.intEntityVendorId,
