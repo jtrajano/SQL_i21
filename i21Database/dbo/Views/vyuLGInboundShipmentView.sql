@@ -9,11 +9,11 @@ SELECT
 		L.strLoadNumber,
 		L.strLoadNumber AS strTrackingNumber,
 		L.intCompanyLocationId,
-		PCT.strLocationName,
-		PCT.strCommodityDescription as strCommodity,
-		PCT.strPosition,
+		CL.strLocationName,
+		CY.strDescription as strCommodity,
+		PO.strPosition,
 		LD.intVendorEntityId,
-		PCT.strEntityName as strVendor,
+		EY.strEntityName as strVendor,
 		LD.intCustomerEntityId,
 		Customer.strName as strCustomer,
 		intWeightUOMId = L.intWeightUnitMeasureId,
@@ -56,25 +56,25 @@ SELECT
 ---- Purchase Contract Details
 		PCT.intContractDetailId,
 		PCT.intContractHeaderId,
-		PCT.strContractNumber,
+		PCH.strContractNumber,
 		PCT.intContractSeq,
-		strPContractNumber = CAST(PCT.strContractNumber as VARCHAR(100)) + '/' + CAST(PCT.intContractSeq AS VARCHAR(100)),
+		strPContractNumber = CAST(PCH.strContractNumber as VARCHAR(100)) + '/' + CAST(PCT.intContractSeq AS VARCHAR(100)),
 		PCT.dblCashPrice,
-		PCT.dblCashPriceInQtyUOM,
-		PCT.strCurrency,
-		PCT.strPriceUOM,
+		dblCashPriceInQtyUOM = dbo.fnCTConvertQtyToTargetItemUOM(PCT.intItemUOMId,PCT.intPriceItemUOMId,PCT.dblCashPrice),
+		CU.strCurrency,
+		strPriceUOM = U2.strUnitMeasure,
 		PCT.intItemId,
 		PCT.intItemUOMId,
-		PCT.strItemNo,
-		PCT.strItemDescription,
-		PCT.strLotTracking,
-		PCT.strItemUOM,
+		IM.strItemNo,
+		strItemDescription = IM.strDescription,
+		IM.strLotTracking,
+		strItemUOM = U1.strUnitMeasure,
 		LD.dblQuantity as dblPurchaseContractShippedQty,
 		LD.dblGross as dblPurchaseContractShippedGrossWt,
 		LD.dblTare as dblPurchaseContractShippedTareWt,
 		LD.dblNet as dblPurchaseContractShippedNetWt,
 		IsNull(LD.dblDeliveredQuantity, 0) as dblPurchaseContractReceivedQty,
-		PCT.intWeightId,
+		PCH.intWeightId,
 		IsNull(WG.dblFranchise, 0) as dblFranchise,
 		PCT.dtmStartDate,
 		PCT.dtmEndDate,
@@ -87,25 +87,25 @@ SELECT
 ---- Sales Contract Details
 		SCT.intContractDetailId AS intSContractDetailId,
 		SCT.intContractHeaderId AS intSContractHeaderId,
-		SCT.strContractNumber AS strSalesContractNumber,
+		SCH.strContractNumber AS strSalesContractNumber,
 		SCT.intContractSeq AS intSContractSeq,
-		strSContractNumber = CAST(SCT.strContractNumber as VARCHAR(100)) + '/' + CAST(SCT.intContractSeq AS VARCHAR(100)),
+		strSContractNumber = CAST(SCH.strContractNumber as VARCHAR(100)) + '/' + CAST(SCT.intContractSeq AS VARCHAR(100)),
 		SCT.dblCashPrice AS dblSCashPrice,
-		SCT.dblCashPriceInQtyUOM AS dblSCashPriceInQtyUOM,
-		SCT.strCurrency AS strSCurrency,
-		SCT.strPriceUOM AS strSPriceUOM,
+		dblSCashPriceInQtyUOM = dbo.fnCTConvertQtyToTargetItemUOM(SCT.intItemUOMId,SCT.intPriceItemUOMId,SCT.dblCashPrice),
+		CUS.strCurrency AS strSCurrency,
+		SU2.strUnitMeasure AS strSPriceUOM,
 		SCT.intItemId AS intSItemId,
 		SCT.intItemUOMId AS intSItemUOMId,
-		SCT.strItemNo AS strSItemNo,
-		SCT.strItemDescription AS strSItemDescription,
-		SCT.strLotTracking AS strSLotTracking,
-		SCT.strItemUOM AS strSItemUOM ,
+		IMS.strItemNo AS strSItemNo,
+		IMS.strDescription AS strSItemDescription,
+		IMS.strLotTracking AS strSLotTracking,
+		SU1.strUnitMeasure AS strSItemUOM ,
 		LD.dblQuantity as dblSPurchaseContractShippedQty,
 		LD.dblGross as dblSPurchaseContractShippedGrossWt,
 		LD.dblTare as dblSPurchaseContractShippedTareWt,
 		LD.dblNet as dblSPurchaseContractShippedNetWt,
 		IsNull(LD.dblDeliveredQuantity, 0) as dblSPurchaseContractReceivedQty,
-		SCT.intWeightId AS intSWeightId,
+		SCH.intWeightId AS intSWeightId,
 		IsNull(WG.dblFranchise, 0) as dblSFranchise,
 		SCT.dtmStartDate AS dtmSStartDate,
 		SCT.dtmEndDate AS dtmSEndDate,
@@ -162,12 +162,30 @@ SELECT
 FROM tblLGLoadDetailContainerLink LDCL --  tblLGShipmentBLContainerContract SC
 JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId--tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId -- tblLGShipment S ON S.intShipmentId = SC.intShipmentId
-JOIN vyuCTContractDetailView PCT ON PCT.intContractDetailId = LD.intPContractDetailId
-LEFT JOIN vyuCTContractDetailView SCT ON SCT.intContractDetailId = LD.intSContractDetailId
+JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intPContractDetailId
+JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHeaderId
+JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= PCT.intCompanyLocationId
+JOIN vyuCTEntity EY ON EY.intEntityId = PCH.intEntityId AND EY.strEntityType = (CASE WHEN PCH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = PCT.intPriceItemUOMId
+LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = PCT.intItemUOMId
+LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItem	IM ON IM.intItemId = PCT.intItemId
+LEFT JOIN tblICCommodity CY ON CY.intCommodityId = PCH.intCommodityId
+LEFT JOIN tblCTPosition PO ON PO.intPositionId = PCH.intPositionId
+LEFT JOIN tblSMCurrency	CU ON CU.intCurrencyID = PCT.intCurrencyId
+LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = LD.intSContractDetailId
+LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
+LEFT JOIN tblSMCurrency	CUS ON CUS.intCurrencyID = SCT.intCurrencyId
+LEFT JOIN tblICItemUOM PUS ON PUS.intItemUOMId = SCT.intPriceItemUOMId
+LEFT JOIN tblICUnitMeasure SU2 ON SU2.intUnitMeasureId = PUS.intUnitMeasureId
+LEFT JOIN tblICItem	IMS ON IMS.intItemId = SCT.intItemId
+LEFT JOIN tblICItemUOM IUS ON IUS.intItemUOMId = SCT.intItemUOMId
+LEFT JOIN tblICUnitMeasure SU1 ON SU1.intUnitMeasureId = IUS.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = L.intWeightUnitMeasureId
-LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId --tblLGShipmentBLContainer Container ON Container.intShipmentBLContainerId = SC.intShipmentBLContainerId
+LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId 
 LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
-LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = PCT.intWeightId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = PCH.intWeightId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShipLine ON ShipLine.intEntityId = L.intShippingLineEntityId

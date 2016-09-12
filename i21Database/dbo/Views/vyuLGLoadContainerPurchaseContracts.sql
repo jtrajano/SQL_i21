@@ -11,7 +11,7 @@ SELECT
 	,LD.intPContractDetailId
 	,CT.intContractHeaderId
 	,CT.intContractSeq
-	,CT.strContractNumber
+	,CH.strContractNumber
 	,Item.intCommodityId
 	,LD.intItemId
 	,CT.intItemUOMId
@@ -22,11 +22,11 @@ SELECT
 	,dblGrossWt = (LC.dblGrossWt / LC.dblQuantity) * LDCL.dblQuantity
 	,dblTareWt = (LC.dblTareWt / LC.dblQuantity) * LDCL.dblQuantity
 	,dblNetWt = (LC.dblNetWt / LC.dblQuantity) * LDCL.dblQuantity
-	,dblCost = CT.dblSeqPrice
+	,dblCost = AD.dblSeqPrice
 	,intWeightUOMId = L.intWeightUnitMeasureId
 	,WTUOM.strUnitMeasure AS strWeightUOM
 	,intEntityVendorId = LD.intVendorEntityId
-	,CT.strEntityName AS strVendor
+	,EY.strEntityName AS strVendor
 	,Item.strItemNo
 	,strItemDescription = Item.strDescription
 	,Item.strLotTracking
@@ -79,18 +79,18 @@ SELECT
 	,LC.strOtherMarks
 	,LC.strSealNumber
 	,ContType.strContainerType
-	,intCostUOMId = CT.intSeqPriceUOMId
-	,strCostUOM = CT.strSeqPriceUOM
+	,intCostUOMId = AD.intSeqPriceUOMId
+	,strCostUOM = AD.strSeqPriceUOM
 	,dblCostUOMCF = ISNULL((
 			SELECT TOP 1 dblUnitQty
 			FROM tblICItemUOM ItemUOM
 			WHERE ItemUOM.intItemUOMId = CT.intPriceItemUOMId
 			), 0)
 	,intWeightItemUOMId = (SELECT WeightItem.intItemUOMId FROM tblICItemUOM WeightItem WHERE WeightItem.intItemId=LD.intItemId AND WeightItem.intUnitMeasureId=L.intWeightUnitMeasureId)
-	,strCurrency = CT.strSeqCurrency
-	,CT.strMainCurrency
-	,ysnSubCurrency = CT.ysnSeqSubCurrency
-	,CT.dblMainCashPrice
+	,strCurrency = AD.strSeqCurrency
+	,strMainCurrency = CY.strCurrency
+	,ysnSubCurrency = AD.ysnSeqSubCurrency
+	,dblMainCashPrice = CT.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
 	,dblFranchise = CASE WHEN WG.dblFranchise > 0 THEN WG.dblFranchise / 100 ELSE 0 END
 	,dblContainerWeightPerQty = (LC.dblNetWt / LC.dblQuantity)
 	,LW.intLoadWarehouseId
@@ -109,12 +109,17 @@ SELECT
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intPContractDetailId
+JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
+JOIN vyuCTEntity EY ON	EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CT.intContractDetailId) AD
 JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = LDCL.intItemUOMId
+LEFT JOIN tblSMCurrency	CU ON CU.intCurrencyID = CT.intCurrencyId
+LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = L.intWeightUnitMeasureId
-LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CT.intWeightId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId 
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId

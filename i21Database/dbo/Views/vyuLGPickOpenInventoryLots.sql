@@ -63,15 +63,15 @@ SELECT Lot.intLotId
 	, ReceiptLot.intInventoryReceiptItemLotId
 	, ReceiptLot.strCondition
 	, ReceiptItem.intSourceId
-	, CTDetail.strContractNumber
+	, CTHeader.strContractNumber
 	, CTDetail.intContractDetailId
 	, CTDetail.intContractSeq
-	, CTDetail.dblDetailQuantity as dblOriginalQty
+	, CTDetail.dblQuantity as dblOriginalQty
 	, dblAllocatedQty = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0)
 	, dblReservedQty = IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
 	, LC.strContainerNumber
 	, L.strBLNumber
-	, CTDetail.strEntityName as strVendor
+	, EY.strEntityName as strVendor
 	, L.strLoadNumber
 	, L.dtmPostedDate
 
@@ -83,7 +83,9 @@ LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId AND LDCL.intLoadContainerId = LC.intLoadContainerId
-LEFT JOIN vyuCTContractDetailView CTDetail ON CTDetail.intContractDetailId = LD.intPContractDetailId
+LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = LD.intPContractDetailId 
+LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = CTDetail.intContractDetailId
+LEFT JOIN vyuCTEntity EY ON	EY.intEntityId = CTHeader.intEntityId AND EY.strEntityType = (CASE WHEN CTHeader.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Lot.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lot.intItemUOMId
