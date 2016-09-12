@@ -14,7 +14,7 @@
 	[ysnCurrent] [bit] NULL,
 	[ysnEmail] [bit] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 
-    CONSTRAINT [FK_tblSMApproval_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]), 
+    CONSTRAINT [FK_tblSMApproval_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_Approver] FOREIGN KEY ([intApproverId]) REFERENCES [tblEMEntity]([intEntityId]), 
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_SubmitterBy] FOREIGN KEY ([intSubmittedById]) REFERENCES [tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblSMApproval_tblEMEntity_AlternateApprover] FOREIGN KEY ([intAlternateApproverId]) REFERENCES [tblEMEntity]([intEntityId])
