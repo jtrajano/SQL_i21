@@ -4282,6 +4282,7 @@
     <Build Include="dbo\Tables\tblSMTypeValue.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\22_TypeValue.sql" />
     <Build Include="dbo\Views\vyuLGLoadPickLotDetails.sql" />
+    <Build Include="dbo\Views\vyuPRElectronicFilingW2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
