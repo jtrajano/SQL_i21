@@ -253,7 +253,8 @@ BEGIN
 											,NULL --@ContractNumber		
 											,NULL --@ContractSeq			
 											,NULL --@OriginalQuantity		
-											,NULL --@CustomerPricingOnly	
+											,NULL --@CustomerPricingOnly
+											,NULL --@ItemPricingOnly
 											,NULL --@ExcludeContractPricing	
 											,NULL --@VendorId			
 											,NULL --@SupplyPointId		
@@ -261,6 +262,7 @@ BEGIN
 											,NULL --@ShipToLocationId  
 											,NULL --@VendorLocationId
 											,NULL --@InvoiceType
+											,0	  --@GetAllAvailablePricing
 											)
 									ELSE
 										B.dblPrice
