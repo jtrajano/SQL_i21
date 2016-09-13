@@ -67,8 +67,10 @@ IF @Unship = 1
 	END
 
 --VALIDATE IF THERE ARE STOCK ITEMS TO SHIP
-IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD WHERE intSalesOrderId = @SalesOrderId 
-		AND dbo.fnIsStockTrackingItem(intItemId) = 1 
+IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD
+				LEFT JOIN tblICItem IC ON SOD.intItemId = IC.intItemId 
+		WHERE intSalesOrderId = @SalesOrderId 
+		AND (dbo.fnIsStockTrackingItem(SOD.intItemId) = 1 OR (dbo.fnIsStockTrackingItem(SOD.intItemId) = 0 AND IC.strType = 'Bundle')) 
 		AND (dblQtyOrdered - dblQtyShipped > 0)
 		AND SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 				FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
