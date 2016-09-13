@@ -238,7 +238,7 @@ BEGIN
 										END,
 		[dblOldCost]				=	NULL,
 		[dblNetWeight]				=	ISNULL(B.dblNet,0),
-		[dblNetShippedWeight]		=	ISNULL(B.dblNet,0),
+		[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0),
 		[dblWeightLoss]				=	ISNULL(B.dblGross - B.dblNet,0),
 		[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END,
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
@@ -280,6 +280,15 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	LEFT JOIN tblCTWeightGrade J ON E.intWeightId = J.intWeightGradeId
+	OUTER APPLY (
+		SELECT 
+			K.dblNet
+		FROM tblLGLoadDetail K
+		WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
+							AND K.intLoadDetailId = B.intSourceId AND K.intPContractDetailId = B.intLineNo AND B.intItemId = K.intItemId
+						THEN 1
+						ELSE 0 END)
+	) Loads
 	OUTER APPLY (
 		SELECT
 			PODetails.intContractDetailId
