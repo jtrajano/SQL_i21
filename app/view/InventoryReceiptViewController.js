@@ -1830,8 +1830,36 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             unitCost = unitCost / costCentsFactor;
         }
-
+       
         currentReceiptItem.tblICInventoryReceiptItemTaxes().removeAll();
+        
+         //Calculate Cost UOM Conversion Factor
+        var costCF = currentReceiptItem.get('dblCostUOMConvFactor'),
+            qtyCF = currentReceiptItem.get('dblItemUOMConvFactor'),
+            netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor'),
+            valueCostCF;
+        
+        // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
+         if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
+            // Sanitize the cost conversion factor.
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+            unitCost = unitCost * (qtyCF/costCF);
+        }
+
+        // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
+        else {
+            var qtyOrdered = currentReceiptItem.get('dblNet');
+            var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
+
+            // Sanitize the cost conversion factor.
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
+            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+            
+            unitCost = unitCost * (netWgtCF/costCF);
+        }
+
 
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
             var taxableAmount,
