@@ -127,7 +127,7 @@ UNION --Non Lot Tracked
 Select pld.intPickListId,pld.intPickListDetailId,0,'',0,pld.intItemId,0,
 pld.dblQuantity,pld.intItemUOMId,0,1,pld.intItemUOMId,pld.intItemUOMId,pld.dblQuantity
 From tblMFPickListDetail pld Join tblICItem i on pld.intItemId=i.intItemId 
-Where i.strLotTracking='No'
+Where i.strLotTracking='No' AND pld.intPickListId=@intPickListId
 
 --Only Active lots are allowed to stage
 SELECT @strInActiveLots = COALESCE(@strInActiveLots + ', ', '') + l.strLotNumber
