@@ -29,7 +29,7 @@ SELECT
 	,A.dblShipping
 	,D.intItemId
 	,D.strItemNo
-	,D.strDescription
+	,B.strMiscDescription AS strDescription
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 FROM dbo.tblPOPurchase A
 	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEMEntity C1 ON C.intEntityVendorId = C1.intEntityId)
