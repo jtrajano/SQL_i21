@@ -626,7 +626,7 @@ SELECT
 	,[ysnSubCurrency]
 	,[ysnBlended]
 	,@StorageScheduleTypeId
- FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId
+ FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId ASC, ysnInventory DESC
 	
 IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
 BEGIN
