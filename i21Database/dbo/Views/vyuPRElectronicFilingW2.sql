@@ -87,5 +87,6 @@ SELECT
 	,strEmployerContactPhoneExt
 	,strEmployerContactFax
 	,strEmployerContactEmail
+	,intConcurrencyId
 FROM
 	tblPRElectronicFilingW2
