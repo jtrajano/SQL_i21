@@ -46,7 +46,7 @@ BEGIN
 				,K.strRouteId
 				,strItemNo = I.vwitm_no COLLATE Latin1_General_CI_AS
 				,J.dtmRequestedDate
-				,strTerm = L.vwtrm_key_n 
+				,strTerm = CAST(L.vwtrm_key_n AS NVARCHAR(20))
 				,dblARBalance = C.vwcus_balance 
 				,J.dblPrice
 				,dblTaxRate = dbo.[fnTMGetSalesTax](L.vwtrm_key_n,A.intTaxStateID)
@@ -55,8 +55,14 @@ BEGIN
 				,strSiteCity = A.strCity
 				,strSiteState = A.strState
 				,strSiteZipCode = A.strZipCode
-				,dblRequestedQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+				,dblRequestedQuantity = ISNULL(J.dblMinimumQuantity,0.0)
+				,dblQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
 				,K.intRouteId
+				,intDispatchId = J.intDispatchID
+				,strReportType = M.strDeliveryTicketFormat
+				,intConcurrencyId = J.intConcurrencyId
+				,strCustomerPhone = ISNULL(vwcus_phone,'''')
+				,strOrderNumber = ISNULL(J.strOrderNumber,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -121,8 +127,14 @@ BEGIN
 				,strSiteCity = A.strCity
 				,strSiteState = A.strState
 				,strSiteZipCode = A.strZipCode
-				,dblRequestedQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+				,dblRequestedQuantity = ISNULL(J.dblMinimumQuantity,0.0)
+				,dblQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
 				,K.intRouteId
+				,intDispatchId = J.intDispatchID
+				,strReportType = M.strDeliveryTicketFormat
+				,intConcurrencyId = J.intConcurrencyId
+				,strCustomerPhone = ISNULL(ConPhone.strPhone,'''')
+				,strOrderNumber = ISNULL(J.strOrderNumber,'''')
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -138,6 +150,8 @@ BEGIN
 			INNER JOIN tblEMEntityLocation Loc 
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1
+			LEFT JOIN tblEMEntityPhoneNumber ConPhone
+				ON Con.intEntityId = ConPhone.intEntityId
 			INNER JOIN tblTMDispatch J
 				ON A.intSiteID = J.intSiteID
 			INNER JOIN tblICItem I

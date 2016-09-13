@@ -40,7 +40,13 @@ SELECT
 	,strSiteCity = A.strCity
 	,strSiteState = A.strState
 	,strSiteZipCode = A.strZipCode
-	,dblRequestedQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+	,dblRequestedQuantity = ISNULL(J.dblMinimumQuantity,0.0)
+	,dblQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+	,intDispatchId = J.intDispatchID
+	,strReportType = M.strDeliveryTicketFormat
+	,intConcurrencyId = J.intConcurrencyId
+	,strCustomerPhone = ISNULL(ConPhone.strPhone,'')
+	,strOrderNumber = ISNULL(J.strOrderNumber,'')
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
@@ -56,6 +62,8 @@ INNER JOIN tblEMEntity Con
 INNER JOIN tblEMEntityLocation Loc 
 	ON Ent.intEntityId = Loc.intEntityId 
 		and Loc.ysnDefaultLocation = 1
+LEFT JOIN tblEMEntityPhoneNumber ConPhone
+	ON Con.intEntityId = ConPhone.intEntityId
 INNER JOIN tblTMDispatch J
 	ON A.intSiteID = J.intSiteID
 INNER JOIN tblICItem I
