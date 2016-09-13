@@ -38,8 +38,10 @@ as	select tblSCTicket.intTicketId, (CASE WHEN
 	tblSCTicket.strTicketComment, tblSCTicket.strCustomerReference,
 	tblSCTicket.ysnTicketPrinted,
 	tblSCTicket.ysnPlantTicketPrinted,
-	tblSCTicket.ysnGradingTagPrinted, tblSCTicket.intHaulerId,
-	tblSCTicket.intFreightCarrierId, tblSCTicket.dblFreightRate,
+	tblSCTicket.ysnGradingTagPrinted,
+	tblSCTicket.intHaulerId,
+	tblSCTicket.intFreightCarrierId,
+	tblSCTicket.dblFreightRate,
 	tblSCTicket.dblFreightAdjustment,
 	tblSCTicket.intFreightCurrencyId,
 	tblSCTicket.dblFreightCurrencyRate,
@@ -87,9 +89,11 @@ as	select tblSCTicket.intTicketId, (CASE WHEN
 	vyuICGetInventoryShipmentItem.intInventoryShipmentId,
 	vyuICGetInventoryShipmentItem.strShipmentNumber,
 	(SELECT strCompanyName FROM tblSMCompanySetup) AS strCompanyName,
-	(SELECT strAddress FROM tblSMCompanySetup) AS strAddress
+	(SELECT strAddress FROM tblSMCompanySetup) AS strAddress,
+	vyuEMSearchShipVia.strName as strHaulerName
   from tblSCTicket tblSCTicket
   left join tblEMEntity tblEMEntity on tblEMEntity.intEntityId = tblSCTicket.intEntityId
+  left join vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityShipViaId = tblSCTicket.intHaulerId
   left join tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = tblSCTicket.intSplitId
   left join tblSCScaleSetup tblSCScaleSetup on tblSCScaleSetup.intScaleSetupId = tblSCTicket.intScaleSetupId
   left join tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = tblSCTicket.intProcessingLocationId
