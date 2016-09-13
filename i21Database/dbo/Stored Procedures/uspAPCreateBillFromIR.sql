@@ -224,11 +224,11 @@ BEGIN
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	CASE WHEN B.ysnSubCurrency > 0 --SubCur True
 											 THEN (CASE WHEN B.dblNet > 0 
-														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)  * (B.dblNet ) * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
+														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)  * CAST(B.dblNet AS DECIMAL(18,6)) * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6))  / CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,6)))  AS DECIMAL(18,2)) --Calculate Sub-Cur Base Gross/Net UOM
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * (CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END / ISNULL(A.intSubCurrencyCents,1)) *  (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2))  --Calculate Sub-Cur 
 												   END) 
 											 ELSE (CASE WHEN B.dblNet > 0 --SubCur False
-														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END *(B.dblNet ) * (ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) AS DECIMAL(18,2)) --Base Gross/Net UOM 
+														THEN CAST(CASE WHEN (E1.dblCashPrice > 0 AND B.dblUnitCost = 0) THEN E1.dblCashPrice ELSE B.dblUnitCost END * CAST(B.dblNet AS DECIMAL(18,6)) * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6))  / CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,6))) AS DECIMAL(18,2))--Base Gross/Net UOM 
 														ELSE CAST((B.dblOpenReceive - B.dblBillQty) * CASE WHEN E1.dblCashPrice > 0 THEN E1.dblCashPrice ELSE B.dblUnitCost END * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  AS DECIMAL(18,2))  --Orig Calculation
 												   END)
 										END,
