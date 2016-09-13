@@ -116,10 +116,18 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
-                        defaultFilters: [{
-                            column: 'intAccountCategoryId',
-                            value: '{grdGlAccounts.selection.intAccountCategoryId}'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intAccountCategoryId',
+                                value: '{grdGlAccounts.selection.intAccountCategoryId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strAccountCategory',
+                                value: '{otherChargeAcct}',
+                                conjunction: 'or'
+                            }
+                        ]
                     }
                 },
                 colAccountDescription: 'strDescription'

@@ -168,6 +168,15 @@ Ext.define('Inventory.view.CategoryViewModel', {
     },
 
     formulas: {
+        otherChargeAcct: function(get) {
+            var category = get('grdGlAccounts.selection.strAccountCategory');
+            /** If selected category is Other Charge Income or Other Charge Expenses,
+             * display accounts under General category **/
+            if (category == 'Other Charge Expense' || // Other Charge Expenses
+                category == 'Other Charge Income')   // Other Charge Income
+                return 'General'; // General
+            return '';
+        },
         checkMaterialFee: function(get){
             if (iRely.Functions.isEmpty(get('current.strMaterialFee')) || get('current.strMaterialFee') === 'No'){
                 this.data.current.set('intMaterialItemId', null);
