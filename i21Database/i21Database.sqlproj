@@ -4310,6 +4310,7 @@
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotDelete.sql" />
     <Build Include="dbo\Views\vyuLGLoadPickLotDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMBEExportPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

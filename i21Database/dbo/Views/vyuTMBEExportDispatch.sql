@@ -7,7 +7,7 @@ SELECT
 	 ,account = CAST(C.strEntityNo AS NVARCHAR(16))
 	 ,asset = REPLACE(STR(A.intSiteNumber, 4), SPACE(1), '0') + '-' + ISNULL(K.strSerialNumber,'')
 	 ,orderQty = CAST(ROUND((CASE WHEN ISNULL(D.dblMinimumQuantity,0) = 0 THEN ISNULL(D.dblQuantity,0.0) ELSE D.dblMinimumQuantity END),0) AS INT)
-	 ,priceID = CAST(D.dblPrice AS NVARCHAR(16))
+	 ,priceID = CAST(CAST(ROUND(D.dblPrice,4) AS NUMERIC(18,4)) AS NVARCHAR(16))
 	 ,invoice = ''
 	 ,"message" = CAST(D.strComments AS NVARCHAR(64))
 	 ,reference = D.intDispatchID
