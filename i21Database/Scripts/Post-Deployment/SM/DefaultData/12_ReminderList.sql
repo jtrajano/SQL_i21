@@ -238,9 +238,19 @@
                                                 FROM tblSMApproval 
                                                 WHERE  ysnCurrent = 1 AND 
                                                         strStatus IN (''Waiting for Approval'') AND 
-                                                        intApproverId = {0}',
+                                                        (intApproverId = {0} OR intAlternateApproverId = {0})',
 				[strNamespace]		=        N'i21.view.Approval?activeTab=Pending',
 				[intSort]			=        11
+	END
+	ELSE
+	BEGIN
+		UPDATE [dbo].[tblSMReminderList]
+		SET	[strQuery] =        N'SELECT intTransactionId 
+                                 FROM tblSMApproval 
+                                 WHERE  ysnCurrent = 1 AND 
+										strStatus IN (''Waiting for Approval'') AND
+										(intApproverId = {0} OR intAlternateApproverId = {0})'
+		WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction'
 	END
 
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMReminderList] WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction')
