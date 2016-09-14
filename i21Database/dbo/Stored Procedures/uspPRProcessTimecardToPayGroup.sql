@@ -75,6 +75,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,intEmployeeEarningId
 			,intTypeEarningId
 			,intDepartmentId
+			,intWorkersCompensationId
 			,strCalculationType
 			,dblDefaultHours
 			,dblHoursToProcess
@@ -90,6 +91,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.intEmployeeEarningId
 			,EE.intTypeEarningId
 			,TC.intEmployeeDepartmentId
+			,CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount')) THEN EMP.intWorkersCompensationId ELSE NULL END
 			,EE.strCalculationType
 			,TC.dblRegularHours
 			,TC.dblRegularHours
@@ -99,8 +101,11 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,@dtmEnd
 			,1
 			,1
-		FROM #tmpTimecard TC INNER JOIN tblPREmployeeEarning EE 
-			ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
+		FROM #tmpTimecard TC 
+			INNER JOIN tblPREmployeeEarning EE 
+				ON TC.intEmployeeEarningId = EE.intEmployeeEarningId
+			INNER JOIN tblPREmployee EMP
+				ON EMP.intEntityEmployeeId = EE.intEntityEmployeeId
 			LEFT JOIN tblPREmployeeEarning EL
 				ON EE.intEmployeeEarningLinkId = EL.intTypeEarningId
 				AND EE.intEntityEmployeeId = EL.intEntityEmployeeId
