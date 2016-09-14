@@ -4314,6 +4314,7 @@
     <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetLineQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetLineQualityCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
