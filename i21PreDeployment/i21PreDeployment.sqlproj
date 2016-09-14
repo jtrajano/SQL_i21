@@ -85,6 +85,7 @@
     <Folder Include="Scripts\Pre-Deployment\18_IU" />
     <Folder Include="Scripts\Pre-Deployment\19_MF" />
     <Folder Include="Scripts\Pre-Deployment\20_CF" />
+    <Folder Include="Scripts\Pre-Deployment\21_PR" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -146,6 +147,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\01_Delete_Charges_No_Shipment.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\20_CleanCustomerSpecialPrice.sql" />
+    <None Include="Scripts\Pre-Deployment\21_PR\1_1620_to_1630.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
