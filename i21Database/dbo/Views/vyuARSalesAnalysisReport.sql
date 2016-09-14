@@ -176,7 +176,7 @@ FROM
 				AND ISNULL(ICI.strLotTracking, 'No')			<> 'No'
 			INNER JOIN tblICLot ICL
 				ON ICIT.intLotId = ICL.intLotId
-				AND ICISI.intItemUOMId = ICL.intItemUOMId
+				AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
 			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
 					ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 					AND ARID.intItemId					= LOTTED.intItemId
@@ -312,7 +312,7 @@ FROM
 			AND ICISI.intItemId								= ICIT.intItemId
 		INNER JOIN tblICLot ICL
 			ON ICIT.intLotId = ICL.intLotId
-			AND ICISI.intItemUOMId = ICL.intItemUOMId
+			AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
