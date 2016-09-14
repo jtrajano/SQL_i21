@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspTRLoadPosting]
 	,@intUserId AS INT	
 	,@ysnRecap AS BIT
 	,@ysnPostOrUnPost AS BIT
+	,@BatchId NVARCHAR(20) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -48,10 +49,10 @@ ELSE
                   @fromValue = '',                                       -- Previous Value
                   @toValue = ''                                          -- New Value
          END
-         EXEC uspTRLoadPostingValidation @intLoadHeaderId,@ysnPostOrUnPost,@intUserId
-         EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-         EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-         EXEC uspTRLoadProcessToInvoice @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+         EXEC uspTRLoadPostingValidation @intLoadHeaderId, @ysnPostOrUnPost, @intUserId
+         EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
+         EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
+         EXEC uspTRLoadProcessToInvoice @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
     END
 if @ysnRecap = 0 
 BEGIN

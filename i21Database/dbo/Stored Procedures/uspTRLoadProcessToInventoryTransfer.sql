@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspTRLoadProcessToInventoryTransfer]
 	,@intUserId AS INT	
 	,@ysnRecap AS BIT
 	,@ysnPostOrUnPost AS BIT
+	,@BatchId NVARCHAR(20) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
