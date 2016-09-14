@@ -11,7 +11,7 @@ SELECT
 	 ,miscTranCode = ''
 	 ,misPriceID = ''
 	 ,lastDate =  CONVERT(VARCHAR(10), dtmLastDeliveryDate, 112)
-	 ,lastAmount = dblLastDeliveredGal
+	 ,lastAmount = CAST(ROUND(dblLastDeliveredGal,2) AS NUMERIC(18,2))
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID =B.intCustomerID
