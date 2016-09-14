@@ -4099,6 +4099,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateTransferOrderStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnshipInventoryItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
+    <Build Include="dbo\Stored Procedures\vyuRKUnrealizedPnL_Copy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

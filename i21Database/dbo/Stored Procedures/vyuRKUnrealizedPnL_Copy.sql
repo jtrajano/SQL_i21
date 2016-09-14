@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKUnrealizedPnL  
+﻿CREATE VIEW vyuRKUnrealizedPnL_Copy
 AS  
  
 SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,* from 
@@ -49,5 +49,5 @@ SELECT  intFutOptTransactionId,
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId = 1 
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId 
-  )t1)t1  where intNet > 0 and dblLong <> 0
+  )t1)t1  
 )t1 ORDER BY RowNum ASC 
