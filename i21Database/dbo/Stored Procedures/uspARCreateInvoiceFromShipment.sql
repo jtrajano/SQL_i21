@@ -40,8 +40,11 @@ DECLARE
 	,@ShipViaId					INT
 	,@PONumber					NVARCHAR(25)
 	,@BOLNumber					NVARCHAR(50)
-	,@Comments					NVARCHAR(max)
+	,@Comments					NVARCHAR(MAX)
+	,@SalesOrderComments		NVARCHAR(MAX)
+	,@InvoiceComments			NVARCHAR(MAX)
 	,@ShipToLocationId			INT
+	,@SalesOrderId				INT
 	
 SELECT
 	 @ShipmentNumber			= ICIS.[strShipmentNumber]
@@ -62,7 +65,9 @@ SELECT
 	,@PONumber					= SO.[strPONumber]
 	,@BOLNumber					= ICIS.[strBOLNumber]
 	,@Comments					= ICIS.[strShipmentNumber] + ' : '	+ ICIS.[strReferenceNumber]
+	,@SalesOrderComments		= SO.strComments
 	,@ShipToLocationId			= ICIS.intShipToLocationId
+	,@SalesOrderId				= SO.intSalesOrderId
 FROM 
 	[tblICInventoryShipment] ICIS
 INNER JOIN
@@ -72,6 +77,13 @@ LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON ICIS.strReferenceNumber = SO.strSalesOrderNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
+
+IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
+	BEGIN
+		EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComments OUT
+
+		SET @Comments = ISNULL(@InvoiceComments,'') + ' ' + ISNULL(@SalesOrderComments, '')
+	END
 		
 DECLARE @UnsortedEntriesForInvoice AS InvoiceIntegrationStagingTable
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		
@@ -606,7 +618,7 @@ SELECT
 	,[intTempDetailIdForTaxes]
 	,[ysnSubCurrency]
 	,[ysnBlended]
- FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId
+ FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId ASC, ysnInventory DESC
 	
 IF NOT EXISTS(SELECT TOP 1 NULL FROM @EntriesForInvoice)
 BEGIN

@@ -186,7 +186,7 @@ SELECT
 		,[intItemLocationId]				=	D.intItemLocationId
 		,[intItemUOMId]						=   itemUOM.intItemUOMId
 		,[dtmDate] 							=	A.dtmDate
-		,[dblQty] 							=	B.dblQtyReceived
+		,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
 		,[dblUOMQty] 						=	itemUOM.dblUnitQty
 		,[intCostUOMId]						=	voucherCostUOM.intItemUOMId 
 		,[dblNewCost] 						=	B.dblCost

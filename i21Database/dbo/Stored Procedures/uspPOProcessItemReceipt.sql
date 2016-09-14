@@ -31,6 +31,15 @@ BEGIN
 		RAISERROR('There is no receivable item on this purchase order.', 16, 1);
 		RETURN;
 	END
+  
+   IF  EXISTS(SELECT 1 FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
+				ON PO.intPurchaseId = PODetail.intPurchaseId
+				AND PODetail.intPurchaseId = @poId WHERE intUnitOfMeasureId IS NULL AND intItemId IS NOT NULL)
+	BEGIN
+		RAISERROR('Cannot process to inventory, Item UOM is missing.', 16, 1);
+		RETURN;
+	END
+    
 END 
 
 -- Process the PO to IR 
@@ -96,7 +105,7 @@ BEGIN
 			,intContractDetailId	= PODetail.intPurchaseDetailId -- As intLineNo. Link between PO Detail id and IR detail. 
 			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 			,intShipViaId			= PO.intShipViaId
-			,dblQty					= PODetail.dblQtyOrdered
+			,dblQty					= ISNULL(PODetail.dblQtyOrdered,0) - ISNULL(PODetail.dblQtyReceived,0)
 			,intGrossNetUOMId		= NULL 
 			,dblGross				= PODetail.dblQtyOrdered
 			,dblNet					= PODetail.dblQtyOrdered
@@ -144,4 +153,4 @@ BEGIN
 
 	-- Update the PO Status 
 	EXEC dbo.uspPOUpdateStatus @poId
-END 
+END

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -4262,7 +4262,7 @@
     <Build Include="dbo\Stored Procedures\uspMFWOStagingPickListReport.sql" />
     <Build Include="dbo\Tables\tblMFPickForWOStaging.sql" />
     <Build Include="dbo\Functions\fnGetInterestBasedOnTerm.sql" />
-    <Build Include="dbo\Functions\fnIsDue.sql" />
+    <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
     <Build Include="dbo\Functions\fnGetDueDate.sql" />
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipeItem.sql" />
@@ -4280,9 +4280,10 @@
     <Build Include="dbo\Views\vyuSMTransaction.sql" />
     <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
     <Build Include="dbo\Tables\tblSMTypeValue.sql" />
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\22_TypeValue.sql" />
     <Build Include="dbo\Views\vyuLGLoadPickLotDetails.sql" />
     <Build Include="dbo\Views\vyuPRElectronicFilingW2.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -20,6 +20,14 @@ GO
 		end
 	end
 
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='tblHDModule')
+	begin
+		IF EXISTS(SELECT * FROM   INFORMATION_SCHEMA.COLUMNS WHERE  TABLE_NAME = 'tblHDModule' AND COLUMN_NAME = 'intSMModuleId')
+		begin
+			update tblHDModule set tblHDModule.intSMModuleId = 15 where tblHDModule.intSMModuleId = 92
+		end
+	end
+
 GO
 	PRINT N'End fixing HD Opportunity Source existing data.'
 GO

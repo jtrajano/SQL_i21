@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUnpostFIFOIn]
 	@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
+	,@ysnRecap AS BIT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -28,26 +29,28 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 
 -- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
-DECLARE @strItemNo AS NVARCHAR(50)
-		,@strRelatedTransactionId AS NVARCHAR(50)
+IF @ysnRecap = 0
+	BEGIN 
+	DECLARE @strItemNo AS NVARCHAR(50)
+			,@strRelatedTransactionId AS NVARCHAR(50)
 
-SELECT TOP 1 
-		@strItemNo = Item.strItemNo
-		,@strRelatedTransactionId = InvTrans.strTransactionId
-FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
-			ON InvTrans.intItemId = Item.intItemId
-WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
-		AND InvTrans.strRelatedTransactionId = @strTransactionId
-		AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-		AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
+	SELECT TOP 1 
+			@strItemNo = Item.strItemNo
+			,@strRelatedTransactionId = InvTrans.strTransactionId
+	FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
+				ON InvTrans.intItemId = Item.intItemId
+	WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
+			AND InvTrans.strRelatedTransactionId = @strTransactionId
+			AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+			AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
 
-IF @strRelatedTransactionId IS NOT NULL 
-BEGIN 
-	-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
-	RAISERROR(80063, 11, 1, @strItemNo, @strRelatedTransactionId)  
-	RETURN -1
-END 
-
+	IF @strRelatedTransactionId IS NOT NULL 
+	BEGIN 
+		-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
+		RAISERROR(80063, 11, 1, @strItemNo, @strRelatedTransactionId)  
+		RETURN -1
+	END 
+END
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
 -- Then grab the updated records and store it into the @InventoryToReverse variable

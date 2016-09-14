@@ -454,6 +454,9 @@ ELSE
 	--		LEFT JOIN dbo.tblCTContractDetail CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 	--WHERE	SC.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 END
+SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
+IF(@checkContract > 0)
+	UPDATE @ShipmentStagingTable SET intOrderType = 1
 
 SELECT @checkContract = COUNT(intOrderType) FROM @ShipmentStagingTable WHERE intOrderType = 1;
 IF(@checkContract > 0)
@@ -463,41 +466,41 @@ SELECT @total = COUNT(*) FROM @ShipmentStagingTable;
 IF (@total = 0)
 	RETURN;
 
-SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
-IF @intLotType != 0
-BEGIN 
-	INSERT INTO @ShipmentItemLotStagingTable(
-		intOrderType
-		, intSourceType
-		, intEntityCustomerId
-		, dtmShipDate
-		, intShipFromLocationId
-		, intShipToLocationId
-		, intFreightTermId
-		, intItemLotGroup
-		, intLotId
-		, dblQuantityShipped
-		, dblGrossWeight
-		, dblTareWeight
-		, dblWeightPerQty
-		, strWarehouseCargoNumber)
-	SELECT 
-		intOrderType				= SE.intOrderType
-		, intSourceType 			= SE.intSourceType
-		, intEntityCustomerId		= SE.intEntityCustomerId
-		, dtmShipDate				= SE.dtmShipDate
-		, intShipFromLocationId		= SE.intShipFromLocationId
-		, intShipToLocationId		= SE.intShipToLocationId
-		, intFreightTermId			= SE.intFreightTermId
-		, intItemLotGroup			= SE.intItemLotGroup
-		, intLotId					= NULL
-		, dblQuantityShipped		= SE.dblQuantity
-		, dblGrossWeight			= SC.dblGrossWeight
-		, dblTareWeight				= SC.dblTareWeight
-		, dblWeightPerQty			= 0
-		, strWarehouseCargoNumber	= SC.strTicketNumber
-		FROM @ShipmentStagingTable SE INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
-END
+--SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+--IF @intLotType != 0
+--BEGIN 
+--	INSERT INTO @ShipmentItemLotStagingTable(
+--		intOrderType
+--		, intSourceType
+--		, intEntityCustomerId
+--		, dtmShipDate
+--		, intShipFromLocationId
+--		, intShipToLocationId
+--		, intFreightTermId
+--		, intItemLotGroup
+--		, intLotId
+--		, dblQuantityShipped
+--		, dblGrossWeight
+--		, dblTareWeight
+--		, dblWeightPerQty
+--		, strWarehouseCargoNumber)
+--	SELECT 
+--		intOrderType				= SE.intOrderType
+--		, intSourceType 			= SE.intSourceType
+--		, intEntityCustomerId		= SE.intEntityCustomerId
+--		, dtmShipDate				= SE.dtmShipDate
+--		, intShipFromLocationId		= SE.intShipFromLocationId
+--		, intShipToLocationId		= SE.intShipToLocationId
+--		, intFreightTermId			= SE.intFreightTermId
+--		, intItemLotGroup			= SE.intItemLotGroup
+--		, intLotId					= NULL
+--		, dblQuantityShipped		= SE.dblQuantity
+--		, dblGrossWeight			= SC.dblGrossWeight
+--		, dblTareWeight				= SC.dblTareWeight
+--		, dblWeightPerQty			= 0
+--		, strWarehouseCargoNumber	= SC.strTicketNumber
+--		FROM @ShipmentStagingTable SE INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
+--END
 
 EXEC dbo.uspICAddItemShipment
 		@ShipmentStagingTable
