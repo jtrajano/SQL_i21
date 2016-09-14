@@ -5,16 +5,22 @@
 	select
 		account = a.strEntityNo,
 		fullname = a.strName,
+		lastname = '',
+		firstname = '',
 		address1 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),1),
 		address2 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),2),
 		city = c.strCity,
 		[state] = c.strState,
 		zip = c.strZipCode,
 		country = c.strCountry,
+		zone = 0,
 		phone = f.strPhone,
 		email = e.strEmail,
+		applications = 'FFFF',	
 		longitude = c.dblLongitude,
-		latitude = c.dblLatitude
+		latitude = c.dblLatitude,
+		altitude = 0,
+		directions = ''
 	from tblEMEntity a
 		join tblEMEntityType b
 			on a.intEntityId = b.intEntityId and b.strType = 'Customer'
