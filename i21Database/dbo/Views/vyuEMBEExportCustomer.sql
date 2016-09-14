@@ -18,6 +18,8 @@
 	from tblEMEntity a
 		join tblEMEntityType b
 			on a.intEntityId = b.intEntityId and b.strType = 'Customer'
+	INNER JOIN tblARCustomer G
+	ON b.intEntityId = G.intEntityCustomerId
 		join tblEMEntityLocation c
 			on a.intEntityId = c.intEntityId and c.ysnDefaultLocation = 1
 		join tblEMEntityToContact d
@@ -26,3 +28,5 @@
 			on d.intEntityContactId = e.intEntityId
 		left join tblEMEntityPhoneNumber f
 			on f.intEntityId = e.intEntityId
+	WHERE G.ysnActive = 1
+	
