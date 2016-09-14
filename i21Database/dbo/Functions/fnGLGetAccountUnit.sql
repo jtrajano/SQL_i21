@@ -1,0 +1,16 @@
+﻿CREATE FUNCTION dbo.fnGLGetAccountUnit(
+	@Unit NUMERIC(18,6),
+	@LbsPerUnit DECIMAL(16,4)
+)
+RETURNS @result TABLE 
+(
+	Unit NUMERIC(18,6) 
+)
+AS
+BEGIN
+INSERT INTO @result SELECT CASE WHEN (ISNULL(@Unit, 0) = 0) OR (ISNULL(@LbsPerUnit, 0) = 0) THEN 0
+					ELSE CAST(ISNULL(ISNULL(@Unit, 0) / ISNULL(@LbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
+
+RETURN
+END
+

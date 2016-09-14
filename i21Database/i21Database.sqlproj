@@ -4440,6 +4440,7 @@
     <None Include="Scripts\Post-Deployment\AP\MigratePOForApprovals.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
