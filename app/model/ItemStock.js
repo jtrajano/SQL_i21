@@ -59,7 +59,7 @@ Ext.define('Inventory.model.ItemStock', {
                 var dblUnitReserved = iRely.Functions.isEmpty(record.get('dblUnitReserved')) ? 0 : record.get('dblUnitReserved');
                 var dblInTransitOutbound = iRely.Functions.isEmpty(record.get('dblInTransitOutbound')) ? 0 : record.get('dblInTransitOutbound');
                 var dblConsignedSale = iRely.Functions.isEmpty(record.get('dblConsignedSale')) ? 0 : record.get('dblConsignedSale');
-                var dblAvailable = (dblUnitOnHand - (dblUnitReserved + dblInTransitOutbound + dblConsignedSale));
+                var dblAvailable = (dblUnitOnHand - (dblUnitReserved + dblConsignedSale));
                 return dblAvailable;
             },
             depends: ['dblUnitOnHand', 'dblUnitReserved', 'dblInTransitOutbound', 'dblConsignedSale']
