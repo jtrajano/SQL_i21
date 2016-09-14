@@ -338,10 +338,7 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		IF 	@intPricingTypeId	IN	(1,6)
-		BEGIN	
-			EXEC uspICUpdateInventoryReceiptUnitCost @intContractDetailId,@dblCashPrice
-		END
+		EXEC	uspCTSequencePriceChanged @intContractDetailId
 
 		IF	@ysnMultiplePriceFixation = 1
 		BEGIN

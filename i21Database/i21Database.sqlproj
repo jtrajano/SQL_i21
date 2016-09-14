@@ -4285,6 +4285,7 @@
     <Build Include="dbo\Stored Procedures\uspARSettleInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaims.sql" />
     <Build Include="dbo\Stored Procedures\uspTRBatchLoadPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSequencePriceChanged.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

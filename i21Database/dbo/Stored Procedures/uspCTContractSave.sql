@@ -36,10 +36,7 @@ BEGIN TRY
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
-		IF 		@intPricingTypeId	IN	(1,6)
-		BEGIN	
-			EXEC uspICUpdateInventoryReceiptUnitCost @intContractDetailId,@dblCashPrice
-		END
+		EXEC	uspCTSequencePriceChanged @intContractDetailId
 		
 		IF @dblOriginalBasis IS NOT NULL AND  @dblBasis <> @dblOriginalBasis
 		BEGIN
