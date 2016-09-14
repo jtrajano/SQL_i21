@@ -6,7 +6,7 @@ SubRolePermimssion.intCompanyLocationId
 ,RoleMenu.intMenuId
 ,Menu.intParentMenuID as intParentMenuId
 ,RoleMenu.ysnVisible
-,MAX(RoleMenu.intSort) as intSort
+,MIN(RoleMenu.intSort) as intSort
 ,strMenuName
 ,strModuleName
 ,strDescription
