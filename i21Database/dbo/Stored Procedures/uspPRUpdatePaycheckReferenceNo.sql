@@ -7,7 +7,6 @@ UPDATE tblPRPaycheck
 SET strReferenceNo = ISNULL((SELECT TOP 1 strReferenceNo FROM tblCMBankTransaction 
 						WHERE strTransactionId = tblPRPaycheck.strPaycheckId
 						  AND intBankTransactionTypeId = 21
-						  AND strSourceSystem = 'PR'
 						  AND intBankAccountId = ISNULL(@intBankAccountId, intBankAccountId)
 						  AND dtmCheckPrinted IS NOT NULL), ''),
 	ysnPrinted = 1
@@ -19,7 +18,6 @@ SET ysnPrinted = 1
 WHERE strPaycheckId IN (SELECT strTransactionId FROM tblCMBankTransaction
 						WHERE intBankAccountId = ISNULL(@intBankAccountId, intBankAccountId)
 							AND intBankTransactionTypeId = 23
-							AND strSourceSystem = 'PR'
 							AND dtmCheckPrinted IS NOT NULL)
 	  AND ysnPrinted = 0 AND ysnPosted = 1 AND ysnVoid = 0
 
