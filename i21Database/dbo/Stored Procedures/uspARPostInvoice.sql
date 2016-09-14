@@ -2947,7 +2947,7 @@ IF @post = 0
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
-		END CATCH	  
+		END CATCH
 		
 		BEGIN TRY			
 			DECLARE @UnPostInvoiceData TABLE  (
@@ -2957,6 +2957,46 @@ IF @post = 0
 			);
 			
 			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
+			SELECT DISTINCT
+				 PID.intInvoiceId
+				,PID.strTransactionId
+			FROM
+				@PostInvoiceData PID				
+			INNER JOIN
+				dbo.tblARInvoice ARI
+					ON PID.intInvoiceId = ARI.intInvoiceId
+
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
+				BEGIN
+				
+					DECLARE @intTransactionId INT
+							,@strTransactionId NVARCHAR(80);
+					
+					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId					
+
+					EXEC	dbo.uspGLInsertReverseGLEntry
+								@strTransactionId	= @strTransactionId
+								,@intEntityId		= @UserEntityID
+								,@dtmDateReverse	= @PostDate
+										
+					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
+												
+				END							 
+																
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH				  
+		
+		BEGIN TRY			
+			DECLARE @UnPostICInvoiceData TABLE  (
+				intInvoiceId int PRIMARY KEY,
+				strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+				UNIQUE (intInvoiceId)
+			);
+			
+			INSERT INTO @UnPostICInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
 				 PID.intInvoiceId
 				,PID.strTransactionId
@@ -2983,50 +3023,23 @@ IF @post = 0
 				AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostICInvoiceData ORDER BY intInvoiceId)
 				BEGIN
 				
-					DECLARE @intTransactionId INT
-							,@strTransactionId NVARCHAR(80);
+					DECLARE @intTransactionIdIC INT
+							,@strTransactionIdIC NVARCHAR(80);
 					
-					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId
+					SELECT TOP 1 @intTransactionIdIC = intInvoiceId, @strTransactionIdIC = strTransactionId FROM @UnPostICInvoiceData ORDER BY intInvoiceId
 
-					-- Call the post routine 
-					--INSERT INTO @GLEntries (
-					--	 dtmDate
-					--	,strBatchId
-					--	,intAccountId
-					--	,dblDebit
-					--	,dblCredit
-					--	,dblDebitUnit
-					--	,dblCreditUnit
-					--	,strDescription
-					--	,strCode
-					--	,strReference
-					--	,intCurrencyId
-					--	,dblExchangeRate
-					--	,dtmDateEntered
-					--	,dtmTransactionDate
-					--	,strJournalLineDescription
-					--	,intJournalLineNo
-					--	,ysnIsUnposted
-					--	,intUserId
-					--	,intEntityId
-					--	,strTransactionId
-					--	,intTransactionId
-					--	,strTransactionType
-					--	,strTransactionForm
-					--	,strModuleName
-					--	,intConcurrencyId
-					--)
 					EXEC	dbo.uspICUnpostCosting
-							@intTransactionId
-							,@strTransactionId
-							,@batchId
-							,@UserEntityID
-							,@recap 
+								 @intTransactionIdIC
+								,@strTransactionIdIC
+								,@batchId
+								,@UserEntityID
+								,@recap 
+
 										
-					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
+					DELETE FROM @UnPostICInvoiceData WHERE intInvoiceId = @intTransactionIdIC AND strTransactionId = @strTransactionIdIC 
 												
 				END							 
 																
@@ -3174,15 +3187,15 @@ IF @recap = 0
 						dbo.tblARInvoice ARI
 							ON PID.intInvoiceId = ARI.intInvoiceId 					
 
-					UPDATE GLD						
-					SET
-						GLD.ysnIsUnposted = 1
-					FROM
-						@PostInvoiceData PID
-					INNER JOIN
-						dbo.tblGLDetail GLD
-							ON PID.intInvoiceId = GLD.intTransactionId
-							AND PID.strTransactionId = GLD.strTransactionId
+					--UPDATE GLD						
+					--SET
+					--	GLD.ysnIsUnposted = 1
+					--FROM
+					--	@PostInvoiceData PID
+					--INNER JOIN
+					--	dbo.tblGLDetail GLD
+					--		ON PID.intInvoiceId = GLD.intTransactionId
+					--		AND PID.strTransactionId = GLD.strTransactionId
 
 					--Insert Successfully unposted transactions.
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
