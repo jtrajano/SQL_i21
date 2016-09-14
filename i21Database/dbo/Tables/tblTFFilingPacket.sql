@@ -7,7 +7,6 @@
     [intConcurrencyId]        INT CONSTRAINT [DF_tblTFFilingPAckety_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblTFFilingPAckety] PRIMARY KEY CLUSTERED ([intFilingPacketId] ASC),
     CONSTRAINT [FK_tblTFFilingPacket_tblTFFrequency] FOREIGN KEY ([intFrequency]) REFERENCES [dbo].[tblTFFrequency] ([intFrequencyId]),
-    CONSTRAINT [FK_tblTFFilingPacket_tblTFReportingComponent] FOREIGN KEY ([intReportingComponentId]) REFERENCES [dbo].[tblTFReportingComponent] ([intReportingComponentId]),
     CONSTRAINT [FK_tblTFFilingPacket_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [dbo].[tblTFTaxAuthority] ([intTaxAuthorityId])
 );
 
