@@ -78,7 +78,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {
                     text: 'Customer',
                     itemId: 'btnCustomer',
-                    clickHandler: 'onCustomerClick',
+                    clickHandler: 'onViewCustomerClick',
                     width: 80
                 }
             ],
@@ -1413,7 +1413,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 itemId: 'cboOrderNumber',
                 displayField: 'strSalesOrderNumber',
                 valueField: 'strSalesOrderNumber',
-                itemId: 'cboOrderNumber',
                 store: win.viewModel.storeInfo.soDetails,
                 defaultFilters: [{
                     column: 'intEntityCustomerId',
@@ -1800,20 +1799,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             case 'colOrderNumber' :
                                 //return controller.salesOrderDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         };
                     }
                     break;
@@ -1824,34 +1819,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             case 'colOrderNumber' :
                                 //return controller.salesContractDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 switch (current.get('intSourceType')) {
                                     case 2:
                                         return false;
-                                        break;
                                     default:
                                         return false;
-                                        break;
                                 }
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 switch (current.get('intSourceType')) {
                                     case 2:
                                         return false;
-                                        break;
                                     default:
                                         return false;
-                                        break;
                                 }
-                                break;
                         };
                     }
                     break;
@@ -1862,20 +1849,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             case 'colOrderNumber' :
                                 //return controller.transferOrderDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         };
                     }
                     break;
@@ -2094,7 +2077,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         iRely.Functions.openScreen('Inventory.view.StorageUnit', { action: 'new', viewConfig: { modal: true }});
     },
 
-    onCustomerClick: function () {
+    onViewCustomerClick: function () {
         iRely.Functions.openScreen('EntityManagement.view.Entity:searchEntityCustomer',{ action: 'view' });
     },
 
