@@ -267,7 +267,7 @@ FROM
 	AND ((Billed.dblQty < B.dblQtyReceived) OR Billed.dblQty IS NULL)
 	UNION ALL
 	--DIRECT TYPE
-	SELECT
+	SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
@@ -371,7 +371,7 @@ FROM
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
-	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL AND B.dblUnitCost != 0) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE AND 0 RECEIPT COST
+	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
 	UNION ALL
 
 	--OTHER CHARGES
