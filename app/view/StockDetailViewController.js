@@ -62,7 +62,6 @@ Ext.define('Inventory.view.StockDetailViewController', {
                         { dataIndex: 'dblPhysicalReading',  xtype: 'numbercolumn', text: 'Physical Reading', width: 100, flex: 1, summaryType: 'sum' },
                         { dataIndex: 'dblStockVariance',  xtype: 'numbercolumn', text: 'Stock Variance', width: 100, flex: 1, summaryType: 'sum' },
                         { dataIndex: 'strUOM', text: 'UOM', width: 100, flex: 1, drillDownText: 'View Item', drillDownClick: 'onViewBinUOM' },
-                        { dataIndex: 'dblCapacity',  xtype: 'numbercolumn', text: 'Capacity', width: 100, flex: 1, summaryType: 'sum' },
                         { dataIndex: 'dtmReadingDate', xtype: 'datecolumn', dataType: 'date', text: 'Reading Date', width: 100, flex: 1, hidden: false },
                         { dataIndex: 'dblCapacity',  xtype: 'numbercolumn', text: 'Capacity', width: 100, flex: 1, summaryType: 'sum' },
                         { dataIndex: 'dblAvailable', xtype: 'numbercolumn', summaryType: 'sum', text: 'Space Available', width: 100, flex: 1 },
@@ -131,7 +130,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
                             }
                         ],
                         legend: {
-                            enabled: false,
+                            enabled: true,
                             useGraphSettings: true,
                             position: 'right'
                         },
