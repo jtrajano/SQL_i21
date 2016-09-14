@@ -592,13 +592,45 @@ BEGIN
 				-- Fields used in the calculation of the taxes
 
 				SELECT TOP 1
-					 @Amount = ReceiptItem.dblUnitCost
-					,@Qty	 = ReceiptItem.dblOpenReceive 
+					 @Amount = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+										 dbo.fnMultiply(
+											 dbo.fnDivide(
+												 ISNULL(dblUnitCost, 0) 
+												 ,ISNULL(Receipt.intSubCurrencyCents, 1) 
+											 )
+											 ,dbo.fnDivide(
+												  GrossNetUOM.dblUnitQty
+												  ,CostUOM.dblUnitQty 
+											 )
+										 )
+									ELSE 
+										 dbo.fnMultiply(
+											 dbo.fnDivide(
+												 ISNULL(dblUnitCost, 0) 
+												 ,ISNULL(Receipt.intSubCurrencyCents, 1) 
+											 )
+											 ,dbo.fnDivide(
+												  ReceiveUOM.dblUnitQty
+												  ,CostUOM.dblUnitQty 
+											 )
+										)																	
+								END 
+					,@Qty	 = CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+										ReceiptItem.dblNet 
+									ELSE 
+										ReceiptItem.dblOpenReceive 
+								END 
 
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 						--INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
 						--	ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+						LEFT JOIN dbo.tblICItemUOM ReceiveUOM 
+							ON ReceiveUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+						LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
+							ON GrossNetUOM.intItemUOMId = ReceiptItem.intWeightUOMId
+						LEFT JOIN dbo.tblICItemUOM CostUOM
+							ON CostUOM.intItemUOMId = ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId) 	
 				WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 						AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 
@@ -738,7 +770,7 @@ BEGIN
 
 					-- Get the computed tax. 
 					UPDATE	ItemTax
-					SET		dblTax = ComputedTax.dblCalculatedTaxAmount
+					SET		dblTax = ComputedTax.dblTax
 					FROM	dbo.tblICInventoryReceiptItemTax ItemTax INNER JOIN #tmpComputeItemTaxes ComputedTax
 								ON ItemTax.intInventoryReceiptItemId = ComputedTax.intDetailId
 								AND ItemTax.intInventoryReceiptItemTaxId = ComputedTax.intTaxDetailId
