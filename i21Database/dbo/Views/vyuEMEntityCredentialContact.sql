@@ -29,7 +29,8 @@ SELECT
 	vEntityContact.strEmailDistributionOption,
 	vEntityContact.imgPhoto,
 	vEntityContact.papit,
-	ysnReqTwoFactorAuth = Cast(isnull(SecurityPolicy.ysnReqTwoFactorAuth, 0) as bit)
+	ysnReqTwoFactorAuth = Cast(isnull(SecurityPolicy.ysnReqTwoFactorAuth, 0) as bit),
+	UserSecurity.ysnDisabled
 FROM tblEMEntityCredential AS EntityCredential
 INNER JOIN vyuEMEntityContact AS vEntityContact
 ON EntityCredential.intEntityId = (
