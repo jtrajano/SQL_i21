@@ -4098,6 +4098,7 @@
     <Build Include="dbo\Stored Procedures\uspICTMExportProducts.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateTransferOrderStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnshipInventoryItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
