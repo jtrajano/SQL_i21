@@ -4312,6 +4312,8 @@
     <Build Include="dbo\Views\vyuLGLoadPickLotDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBEExportPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetLineQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetLineQualityCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
