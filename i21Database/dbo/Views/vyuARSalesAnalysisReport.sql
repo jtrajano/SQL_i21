@@ -81,7 +81,10 @@ FROM
 												THEN ARGIA.intSalesAccountId 
 											WHEN ARGIA.strType = 'Other Charge'
 												THEN ARGIA.intOtherChargeIncomeAccountId
-											ELSE ARGIA.intGeneralAccountId 
+											WHEN ARID.intItemId IS NULL
+												THEN ARGIA.intGeneralAccountId
+											ELSE
+												ARID.intSalesAccountId
 										END)
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
@@ -200,7 +203,10 @@ SELECT strRecordNumber				= SO.strSalesOrderNumber
 												THEN IA.intSalesAccountId 
 											WHEN IA.strType = 'Other Charge'
 												THEN IA.intOtherChargeIncomeAccountId
-											ELSE IA.intGeneralAccountId 
+											WHEN SOD.intItemId IS NULL
+												THEN IA.intGeneralAccountId
+											ELSE
+												SOD.intSalesAccountId 
 									   END)
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyShipped				= SOD.dblQtyShipped
