@@ -4288,6 +4288,8 @@
     <Build Include="dbo\Stored Procedures\uspCTSequencePriceChanged.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetLineQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetLineQualityCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
