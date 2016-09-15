@@ -1,11 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuSMUserRoleMenuSubRole]
 AS 
-SELECT DISTINCT
-ISNULL(SubRole.intUserRoleId, RoleMenu.intUserRoleId) AS intUserRoleId
+SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  as intUserRoleId
 ,RoleMenu.intMenuId
 ,Menu.intParentMenuID as intParentMenuId
-,RoleMenu.ysnVisible
-,Sort.intSort--RoleMenu.intSort,
+,CAST(MAX(CAST(RoleMenu.ysnVisible as INT)) as BIT) as ysnVisible
+,MIN(RoleMenu.intSort) as intSort
 ,strMenuName
 ,strModuleName
 ,Menu.strDescription
@@ -17,7 +16,6 @@ ISNULL(SubRole.intUserRoleId, RoleMenu.intUserRoleId) AS intUserRoleId
 ,ysnIsLegacy
 ,ysnLeaf
 FROM vyuSMUserRoleSubRole SubRole
-RIGHT JOIN tblSMUserRoleMenu RoleMenu ON SubRole.intUserRoleID = RoleMenu.intUserRoleId
-LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
-CROSS APPLY (SELECT intSort FROM tblSMUserRoleMenu WHERE intUserRoleId = ISNULL(SubRole.intUserRoleId, RoleMenu.intUserRoleId) AND intMenuId = RoleMenu.intMenuId) Sort
-WHERE RoleMenu.ysnVisible = 1
+RIGHT JOIN tblSMUserRoleMenu RoleMenu ON SubRole.intSubRoleId = RoleMenu.intUserRoleId
+INNER JOIN tblSMMasterMenu Menu ON RoleMenu.intMenuId = Menu.intMenuID
+GROUP BY ISNULL(intUserRoleID, RoleMenu.intUserRoleId), RoleMenu.intMenuId, Menu.intParentMenuID, strMenuName, strModuleName, Menu.strDescription, Menu.strCategory, strType, strCommand, strIcon, ysnExpanded, ysnIsLegacy, ysnLeaf

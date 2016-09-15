@@ -3,8 +3,9 @@ AS
 SELECT Permission.intUserSecurityCompanyLocationRolePermissionId, 
 Permission.intEntityUserSecurityId, 
 Permission.intEntityId, 
-ISNULL(SubRole.intUserRoleID, Permission.intUserRoleId) AS intUserRoleId, 
+ISNULL(SubRole.intSubRoleId, Permission.intUserRoleId) as intUserRoleId,
 Permission.intCompanyLocationId, 
 Permission.intConcurrencyId
 FROM tblSMUserSecurityCompanyLocationRolePermission Permission
-LEFT JOIN vyuSMUserRoleSubRole SubRole ON Permission.intUserRoleId = SubRole.intUserRoleId
+LEFT JOIN vyuSMUserRoleSubRole SubRole ON Permission.intUserRoleId = SubRole.intUserRoleID
+
