@@ -4290,6 +4290,10 @@
     <Build Include="dbo\Stored Procedures\uspMFWastage_LotDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetLineQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetLineQualityCount.sql" />
+    <Build Include="dbo\Views\vyuPATGetCustomerEquityRefundDetails.sql" />
+    <Build Include="dbo\Views\vyuPATCancelEquityDetails.sql" />
+    <Build Include="dbo\Views\vyuPATCustomerStock.sql" />
+    <Build Include="dbo\Views\vyuPATEquityRefundDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
