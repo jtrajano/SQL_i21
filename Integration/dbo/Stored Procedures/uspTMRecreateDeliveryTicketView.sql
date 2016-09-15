@@ -46,7 +46,7 @@ BEGIN
 				,K.strRouteId
 				,strItemNo = I.vwitm_no COLLATE Latin1_General_CI_AS
 				,J.dtmRequestedDate
-				,strTerm = CAST(L.vwtrm_key_n AS NVARCHAR(20))
+				,strTerm = CAST(L.vwtrm_desc AS NVARCHAR(20))
 				,dblARBalance = C.vwcus_balance 
 				,J.dblPrice
 				,dblTaxRate = dbo.[fnTMGetSalesTax](L.vwtrm_key_n,A.intTaxStateID)
