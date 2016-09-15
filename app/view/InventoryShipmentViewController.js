@@ -654,8 +654,30 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             currentrecordchanged: me.currentRecordChanged,
             scope: win
         });
-
+        
+        var colShipQty = grdLotTracking.columns[2];
+        var txtShipQty = colShipQty.getEditor();
+        if (txtShipQty) {
+            txtShipQty.on('change', me.onCalculateGrossWeight);
+        }
         return win.context;
+    },
+
+    onCalculateGrossWeight: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var grid = win.down('#grdLotTracking');
+        var plugin = grid.getPlugin('cepLotTracking');
+        var current = plugin.getActiveRecord();
+
+        if (!current) return;
+        
+        var record = grid.selection;
+        var availQty = record.get('dblAvailableQty');
+        var shipQty = newValue;
+        var lotDefaultQty = shipQty > availQty ? availQty : shipQty;
+        var wgtPerQty = record.get('dblWeightPerQty');
+        grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
+        current.set('dblGrossWeight', grossWgt);
     },
 
     createTransaction: function(config, action) {
@@ -1067,11 +1089,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('dblQuantityShipped', lotDefaultQty);
                 
                 // Calculate the Gross Wgt based on the default lot qty.
-                //var wgtPerQty = records[0].get('dblWeightPerQty');
-                //var grossWgt;
+                var wgtPerQty = records[0].get('dblWeightPerQty');
+                var grossWgt;
                 //
-                //grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
-                //current.set('dblGrossWeight', grossWgt);
+                grossWgt = Ext.isNumeric(wgtPerQty) && Ext.isNumeric(lotDefaultQty) ? wgtPerQty * lotDefaultQty : 0;
+                current.set('dblGrossWeight', grossWgt);
             }
             
                 var grdInventoryShipment = win.down('#grdInventoryShipment');
