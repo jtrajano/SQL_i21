@@ -476,6 +476,27 @@ namespace iRely.Inventory.BusinessLayer
                     .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intLocationId == VendorId)
                     .Filter(param, true);
 
+                var sorts = new List<SearchSort>();
+
+                foreach (var ps in param.sort)
+                {
+                    // Use the direction specified by the caller. 
+                    if (ps.property.ToLower() == "strordernumber" && ps.direction == "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "ASC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "ASC" });
+                    }
+
+                    else if (ps.property.ToLower() == "strordernumber" && ps.direction != "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "DESC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "DESC" });
+                    }
+                }
+
+                sorts.AddRange(param.sort.ToList());
+                param.sort = sorts;
+
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
 
                 return new SearchResult()
@@ -491,6 +512,27 @@ namespace iRely.Inventory.BusinessLayer
                     .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
                     .Filter(param, true);
 
+                var sorts = new List<SearchSort>();
+
+                foreach (var ps in param.sort)
+                {
+                    // Use the direction specified by the caller. 
+                    if (ps.property.ToLower() == "strordernumber" && ps.direction == "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "ASC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "ASC" });
+                    }
+
+                    else if (ps.property.ToLower() == "strordernumber" && ps.direction != "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "DESC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "DESC" });
+                    }
+                }
+
+                sorts.AddRange(param.sort.ToList());
+                param.sort = sorts;
+
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
 
                 return new SearchResult() {
@@ -504,6 +546,27 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetReceiptAddLGInboundShipment>()
                     .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
                     .Filter(param, true);
+
+                var sorts = new List<SearchSort>();
+
+                foreach (var ps in param.sort)
+                {
+                    // Use the direction specified by the caller. 
+                    if (ps.property.ToLower() == "strordernumber" && ps.direction == "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "ASC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "ASC" });
+                    }
+
+                    else if (ps.property.ToLower() == "strordernumber" && ps.direction != "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "DESC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "DESC" });
+                    }
+                }
+
+                sorts.AddRange(param.sort.ToList());
+                param.sort = sorts;
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
 
@@ -519,6 +582,27 @@ namespace iRely.Inventory.BusinessLayer
                 var query = _db.GetQuery<vyuICGetReceiptAddPurchaseOrder>()
                     .Where(p => p.strReceiptType == ReceiptType && p.intSourceType == SourceType && p.intCurrencyId == CurrencyId && p.intEntityVendorId == VendorId)
                     .Filter(param, true);
+
+                var sorts = new List<SearchSort>();
+
+                foreach (var ps in param.sort)
+                {
+                    // Use the direction specified by the caller. 
+                    if (ps.property.ToLower() == "strordernumber" && ps.direction == "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "ASC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "ASC" });
+                    }
+
+                    else if (ps.property.ToLower() == "strordernumber" && ps.direction != "ASC")
+                    {
+                        sorts.Add(new SearchSort() { property = "intOrderId", direction = "DESC" });
+                        sorts.Add(new SearchSort() { property = "intKey", direction = "DESC" });
+                    }
+                }
+
+                sorts.AddRange(param.sort.ToList());
+                param.sort = sorts;
 
                 var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
 
