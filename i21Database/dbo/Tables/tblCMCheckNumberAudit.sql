@@ -11,7 +11,7 @@
     [dtmCheckPrinted]       DATETIME       NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMCheckNumberAudit] PRIMARY KEY CLUSTERED ([intCheckNumberAuditId] ASC),
-    CONSTRAINT [FK_tblCMBankAccounttblCMCheckNumberAudit] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
+    CONSTRAINT [FK_tblCMBankAccounttblCMCheckNumberAudit] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]) ON DELETE CASCADE
 );
 
 
