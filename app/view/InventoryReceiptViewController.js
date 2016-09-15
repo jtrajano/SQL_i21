@@ -1142,7 +1142,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var me = win.controller;
         var current = win.viewModel.data.current;
+        
+
         if (current){
+            if(current.phantom === false) {
+                current.set('locationFromTransferOrder', current.strLocationName);    
+            }
             var ReceiptItems = current.tblICInventoryReceiptItems();
 
             me.validateWeightLoss(win, ReceiptItems.data.items);
@@ -1180,6 +1185,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dtmReceiptDate', today);
         record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);
+        config.viewModel.set('locationFromTransferOrder', null);
         action(record);
     },
 
@@ -4362,8 +4368,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 {dataIndex: 'strLotTracking', text: 'Lot Tracking', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'strContainer', text: 'Container', width: 100, dataType: 'string'},
-                {dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string'},
-                {dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string'},
+                {dataIndex: 'strSubLocationName', text: 'SubLocation', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order')},
+                {dataIndex: 'strStorageLocationName', text: 'Storage Location', width: 100, dataType: 'string', hidden: (ReceiptType === 'Transfer Order')},
 
                 {dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string'},
                 {dataIndex: 'strUnitType', text: 'Item UOM Type', width: 100, dataType: 'string', hidden: true},
@@ -4469,7 +4475,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             dblNet: order.get('dblNet')
                         };
                         currentVM.set('strBillOfLading', order.get('strBOL'));
-
+                        
+                        if(ReceiptType === 'Transfer Order') {
+                            if((me.getViewModel().data.locationFromTransferOrder === null && currentVM.phantom)|| (me.getViewModel().data.locationFromTransferOrder === null && 
+                                    currentVM.get('intLocationId') === null)) {
+                                currentVM.set('intLocationId', order.get('intEntityVendorId'));
+                                currentVM.set('strLocationName', order.get('strVendorName'));
+                                me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));
+                            } else {
+                                if(currentVM.get('intLocationId') === null) {
+                                    currentVM.set('intLocationId', order.get('intEntityVendorId'));
+                                    currentVM.set('strLocationName', order.get('strVendorName'));
+                                    me.getViewModel().set('locationFromTransferOrder', order.get('strVendorName'));       
+                                }
+                            }
+                        }
                         // Add the item record.
                         var newReceiptItems = currentVM.tblICInventoryReceiptItems().add(newRecord);
 
