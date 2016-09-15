@@ -172,6 +172,8 @@ BEGIN TRY
 	GOTO uspCMAddPayment_Commit
 END TRY
 BEGIN CATCH
+	DECLARE @ErrorMessage NVARCHAR(MAX), @ErrorSeverity INT, @ErrorState INT;
+    SELECT @ErrorMessage = ERROR_MESSAGE(), @ErrorSeverity = ERROR_SEVERITY(), @ErrorState = ERROR_STATE();
 	GOTO uspCMAddPayment_Rollback
 END CATCH
 
@@ -186,5 +188,6 @@ uspCMAddPayment_Commit:
 uspCMAddPayment_Rollback:
 	SET @isAddSuccessful = 0
 	ROLLBACK TRANSACTION 
+	RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
 
 uspCMAddPayment_Exit:
