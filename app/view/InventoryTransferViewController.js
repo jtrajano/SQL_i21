@@ -645,7 +645,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
     onDetailSelectionChange: function(selModel, selected, eOpts) {
         if (selModel) {
-            var win = selModel.view.grid.up('window');
+            var view = selModel.view;
+            if (view == null) return;
+            
+            var win = view.grid.up('window');
             var vm = win.viewModel;
 
             if (selected.length > 0) {
