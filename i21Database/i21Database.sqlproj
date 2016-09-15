@@ -4317,6 +4317,7 @@
     <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSequencePriceChanged.sql" />
     <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
+    <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
