@@ -4345,7 +4345,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             search.scope = me;
             search.url = '../Inventory/api/InventoryReceipt/GetAddOrders?VendorId=' + VendorId + '&ReceiptType=' + ReceiptType + '&SourceType=' + SourceType + '&CurrencyId=' + CurrencyId;
             search.columns = [
-                {dataIndex: 'intKey', text: "Key", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'intKey', text: "Key", flex: 1, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strOrderNumber', text: 'Order Number', width: 100, dataType: 'string', drillDownText: 'View Receipt', drillDownClick: 'onViewReceiptNo'},
                 {dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string'},
                 { xtype: 'numbercolumn', dataIndex: 'dblOrderUOMConvFactor', text: 'Order UOM Conversion Factor', width: 100, dataType: 'float', hidden: true},
@@ -4383,7 +4383,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'strVendorName', text: 'Vendor Name', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'strReceiptType', text: 'Transaction Type', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intLineNo', text: 'Line No', width: 100, dataType: 'numeric', hidden: true},
-                {dataIndex: 'intOrderId', text: 'Order Id', width: 100, dataType: 'numeric', hidden: true},
+                {dataIndex: 'intOrderId', text: 'Order Id', defaultSort: true, sortOrder: 'DESC', width: 100, dataType: 'numeric', hidden: true},
                 {dataIndex: 'intSourceType', text: 'Source Type', width: 100, dataType: 'numeric', hidden: true},
                 {dataIndex: 'intSourceId', text: 'Source Id', width: 100, dataType: 'string', hidden: true},
                 {dataIndex: 'intItemId', text: 'Item Id', width: 100, dataType: 'string', hidden: true},
