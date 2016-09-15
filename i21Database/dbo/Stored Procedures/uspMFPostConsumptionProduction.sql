@@ -47,6 +47,7 @@ BEGIN
 		,@dblDefaultResidueQty NUMERIC(18, 6)
 		,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 		,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
+		,@ACCOUNT_CATEGORY_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
 		,@intItemId1 INT
 		,@strItemNo1 AS NVARCHAR(50)
@@ -385,7 +386,7 @@ BEGIN
 		SELECT intChargeId = @intItemId
 			,intItemLocationId = @intItemLocationId
 			,intOtherChargeExpense = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)
-			,intOtherChargeIncome = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome)
+			,intOtherChargeIncome = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Inventory)
 			,intTransactionTypeId = @INVENTORY_PRODUCE
 
 		SELECT TOP 1 @intItemId1 = Item.intItemId
@@ -408,26 +409,23 @@ BEGIN
 			RETURN;
 		END
 
-		SELECT TOP 1 @intItemId1 = Item.intItemId
-			,@strItemNo1 = Item.strItemNo
-		FROM dbo.tblICItem Item
-		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
-		WHERE ChargesGLAccounts.intOtherChargeIncome IS NULL
-
-		IF @intItemId1 IS NOT NULL
-		BEGIN
-			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR (
-					80008
-					,11
-					,1
-					,@strItemNo1
-					,@ACCOUNT_CATEGORY_OtherChargeIncome
-					)
-
-			RETURN;
-		END
-
+		--SELECT TOP 1 @intItemId1 = Item.intItemId
+		--	,@strItemNo1 = Item.strItemNo
+		--FROM dbo.tblICItem Item
+		--INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
+		--WHERE ChargesGLAccounts.intOtherChargeIncome IS NULL
+		--IF @intItemId1 IS NOT NULL
+		--BEGIN
+		--	-- {Item} is missing a GL account setup for {Account Category} account category.
+		--	RAISERROR (
+		--			80008
+		--			,11
+		--			,1
+		--			,@strItemNo1
+		--			,@ACCOUNT_CATEGORY_OtherChargeIncome
+		--			)
+		--	RETURN;
+		--END
 		SELECT @intRecipeItemUOMId = intItemUOMId
 		FROM tblMFWorkOrderRecipe
 		WHERE intWorkOrderId = @intWorkOrderId
@@ -499,8 +497,8 @@ BEGIN
 		SELECT dtmDate = GLEntriesForOtherCost.dtmDate
 			,strBatchId = @strBatchId
 			,intAccountId = GLAccount.intAccountId
-			,dblDebit = Debit.Value
-			,dblCredit = Credit.Value
+			,dblDebit = Credit.Value
+			,dblCredit = Debit.Value
 			,dblDebitUnit = 0
 			,dblCreditUnit = 0
 			,strDescription = GLAccount.strDescription
@@ -536,52 +534,49 @@ BEGIN
 		WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
-		
-		UNION ALL
-		
-		SELECT dtmDate = GLEntriesForOtherCost.dtmDate
-			,strBatchId = @strBatchId
-			,intAccountId = GLAccount.intAccountId
-			,dblDebit = Credit.Value
-			,dblCredit = Debit.Value
-			,dblDebitUnit = 0
-			,dblCreditUnit = 0
-			,strDescription = GLAccount.strDescription
-			,strCode = 'IC'
-			,strReference = ''
-			,intCurrencyId = GLEntriesForOtherCost.intCurrencyId
-			,dblExchangeRate = GLEntriesForOtherCost.dblExchangeRate
-			,dtmDateEntered = GETDATE()
-			,dtmTransactionDate = GLEntriesForOtherCost.dtmDate
-			,strJournalLineDescription = ''
-			,intJournalLineNo = GLEntriesForOtherCost.intTransactionDetailId
-			,ysnIsUnposted = 0
-			,intUserId = NULL
-			,intEntityId = @intUserId
-			,strTransactionId = GLEntriesForOtherCost.strTransactionId
-			,intTransactionId = GLEntriesForOtherCost.intTransactionId
-			,strTransactionType = GLEntriesForOtherCost.strInventoryTransactionTypeName
-			,strTransactionForm = GLEntriesForOtherCost.strTransactionForm
-			,strModuleName = 'Inventory'
-			,intConcurrencyId = 1
-			,dblDebitForeign = NULL
-			,dblDebitReport = NULL
-			,dblCreditForeign = NULL
-			,dblCreditReport = NULL
-			,dblReportingRate = NULL
-			,dblForeignRate = NULL
-		FROM @GLEntriesForOtherCost GLEntriesForOtherCost
-		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON GLEntriesForOtherCost.intChargeId = OtherChargesGLAccounts.intChargeId
-			AND GLEntriesForOtherCost.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
-		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
-		CROSS APPLY dbo.fnGetDebit(GLEntriesForOtherCost.dblCost) Debit
-		CROSS APPLY dbo.fnGetCredit(GLEntriesForOtherCost.dblCost) Credit
-		WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
-			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
-			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
-
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,1
+			--UNION ALL
+			--SELECT dtmDate = GLEntriesForOtherCost.dtmDate
+			--	,strBatchId = @strBatchId
+			--	,intAccountId = GLAccount.intAccountId
+			--	,dblDebit = Debit.Value
+			--	,dblCredit = Credit.Value
+			--	,dblDebitUnit = 0
+			--	,dblCreditUnit = 0
+			--	,strDescription = GLAccount.strDescription
+			--	,strCode = 'IC'
+			--	,strReference = ''
+			--	,intCurrencyId = GLEntriesForOtherCost.intCurrencyId
+			--	,dblExchangeRate = GLEntriesForOtherCost.dblExchangeRate
+			--	,dtmDateEntered = GETDATE()
+			--	,dtmTransactionDate = GLEntriesForOtherCost.dtmDate
+			--	,strJournalLineDescription = ''
+			--	,intJournalLineNo = GLEntriesForOtherCost.intTransactionDetailId
+			--	,ysnIsUnposted = 0
+			--	,intUserId = NULL
+			--	,intEntityId = @intUserId
+			--	,strTransactionId = GLEntriesForOtherCost.strTransactionId
+			--	,intTransactionId = GLEntriesForOtherCost.intTransactionId
+			--	,strTransactionType = GLEntriesForOtherCost.strInventoryTransactionTypeName
+			--	,strTransactionForm = GLEntriesForOtherCost.strTransactionForm
+			--	,strModuleName = 'Inventory'
+			--	,intConcurrencyId = 1
+			--	,dblDebitForeign = NULL
+			--	,dblDebitReport = NULL
+			--	,dblCreditForeign = NULL
+			--	,dblCreditReport = NULL
+			--	,dblReportingRate = NULL
+			--	,dblForeignRate = NULL
+			--FROM @GLEntriesForOtherCost GLEntriesForOtherCost
+			--INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON GLEntriesForOtherCost.intChargeId = OtherChargesGLAccounts.intChargeId
+			--	AND GLEntriesForOtherCost.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+			--INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
+			--CROSS APPLY dbo.fnGetDebit(GLEntriesForOtherCost.dblCost) Debit
+			--CROSS APPLY dbo.fnGetCredit(GLEntriesForOtherCost.dblCost) Credit
+			--WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
+			--	AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
+			--	AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
+			--EXEC dbo.uspGLBookEntries @GLEntries
+			--	,1
 	END
 
 	DELETE
@@ -639,14 +634,14 @@ BEGIN
 		,intSourceTransactionId = @INVENTORY_PRODUCE
 		,strSourceTransactionId = @strWorkOrderNo
 		,intTransactionDetailId = @intTransactionDetailId
-			EXEC dbo.uspICPostCosting @ItemsForPost
+
+	EXEC dbo.uspICPostCosting @ItemsForPost
 		,@strBatchId
 		,NULL
 		,@intUserId
 
-	DELETE
-	FROM @GLEntries
-
+	--DELETE
+	--FROM @GLEntries
 	INSERT INTO @GLEntries (
 		[dtmDate]
 		,[strBatchId]
@@ -680,11 +675,9 @@ BEGIN
 		,[dblReportingRate]
 		,[dblForeignRate]
 		)
-		EXEC dbo.uspICCreateGLEntries @strBatchId
-			,NULL
-			,@intUserId
-
-
+	EXEC dbo.uspICCreateGLEntries @strBatchId
+		,NULL
+		,@intUserId
 
 	UPDATE @GLEntries
 	SET dblDebit = (
@@ -730,29 +723,29 @@ BEGIN
 		WHERE intRecordId = @intRecordId
 
 		IF (
-		(
-			SELECT dblWeight
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId1
-			) < 0.00001
-		AND (
-			SELECT dblWeight
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId1
-			) > 0
-		)
-	OR (
-		(
-			SELECT dblQty
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId1
-			) < 0.00001
-		AND (
-			SELECT dblQty
-			FROM dbo.tblICLot
-			WHERE intLotId = @intLotId1
-			) > 0
-		)
+				(
+					SELECT dblWeight
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId1
+					) < 0.00001
+				AND (
+					SELECT dblWeight
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId1
+					) > 0
+				)
+			OR (
+				(
+					SELECT dblQty
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId1
+					) < 0.00001
+				AND (
+					SELECT dblQty
+					FROM dbo.tblICLot
+					WHERE intLotId = @intLotId1
+					) > 0
+				)
 		BEGIN
 			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId1
 				,@dblNewLotQty = 0
