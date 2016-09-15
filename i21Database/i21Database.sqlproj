@@ -4316,6 +4316,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetLineQualityCount.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSequencePriceChanged.sql" />
+    <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
