@@ -235,8 +235,8 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 	SELECT
 		intLocationId = TransferView.intFromLocationId
 		, intEntityVendorId = TransferView.intToLocationId
-		, NULL
-		, NULL
+		, strVendorId = Loc.strLocationName
+		, strVendorName = Loc.strLocationName
 		, strReceiptType = 'Transfer Order'
 		, intLineNo = TransferView.intInventoryTransferDetailId
 		, intOrderId = TransferView.intInventoryTransferId
@@ -308,7 +308,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 				ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(TransferView.intItemId, TransferView.intItemUOMId)
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-
+			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = TransferView.intToLocationId
 			,tblSMCompanyPreference
 
 	WHERE TransferView.ysnPosted = 1
