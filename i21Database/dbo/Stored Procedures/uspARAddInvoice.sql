@@ -364,6 +364,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[strDocumentNumber]
 	,[intOrderUOMId]
 	,[dblQtyOrdered]
+	,[dblContractBalance]
 	,[intItemUOMId]
 	,[dblQtyShipped]
 	,[dblPrice]
@@ -383,6 +384,7 @@ SELECT
 	,IE.strSourceId												--[strDocumentNumber]
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
+	,CD.dblBalance												--[dblContractBalance]
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty  												--[dblQtyShipped]		
 	,dblPrice = CASE WHEN IE.ysnFreightInPrice = 0  
@@ -418,10 +420,13 @@ FROM
     INNER JOIN
 	 	tblICItem IC
 	 		ON IE.[intItemId] = IC.[intItemId] 
-	 LEFT OUTER JOIN
+	LEFT OUTER JOIN
 	 	vyuARGetItemAccount Acct
 	 		ON IE.[intItemId] = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
+	LEFT JOIN 
+		tblCTContractDetail CD
+			ON IE.intContractDetailId = CD.intContractDetailId					
 
 --VALIDATE FREIGHT AND SURCHARGE ITEM				
 SELECT TOP 1

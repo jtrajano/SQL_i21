@@ -181,6 +181,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[intContractDetailId]
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
+				,[dblContractBalance]
 				,[dblDiscount]
 				,[dblPrice]
 				,[strPricing]
@@ -202,7 +203,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,[ysnBlended])
 			SELECT TOP 1
 				 @InvoiceId
-				,intItemId
+				,I.intItemId
 				,@ItemPrepayTypeId
 				,@ItemPrepayRate 
 				,@ItemDescription
@@ -213,6 +214,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemContractDetailId
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
+				,ISNULL(CD.dblBalance, 0)
 				,@ItemDiscount
 				,@ItemPrice
 				,@ItemPricing
@@ -232,7 +234,12 @@ ELSE IF ISNULL(@ItemId, 0) > 0
 				,@ItemMaintenanceDate
 				,@SubCurrency
 				,@ItemIsBlended
-			FROM tblICItem WHERE intItemId = @ItemId
+			FROM tblICItem I
+				LEFT JOIN tblCTContractDetail CD
+					ON I.intItemId = CD.intItemId 
+					AND CD.intContractDetailId = @ItemContractDetailId
+			WHERE I.intItemId = @ItemId
+				
 
 			SET @NewDetailId = SCOPE_IDENTITY()
 

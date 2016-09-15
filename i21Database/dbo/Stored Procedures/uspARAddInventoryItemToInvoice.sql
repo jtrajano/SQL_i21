@@ -198,6 +198,7 @@ BEGIN TRY
 				,[strItemDescription]
 				,[intOrderUOMId]
 				,[dblQtyOrdered]
+				,[dblContractBalance]
 				,[intItemUOMId]
 				,[dblQtyShipped]
 				,[dblDiscount]
@@ -263,6 +264,7 @@ BEGIN TRY
 				,[strItemDescription]				= (CASE WHEN ISNULL(@ItemDescription, '') = '' THEN IC.[strDescription] ELSE ISNULL(@ItemDescription, '') END)
 				,[intOrderUOMId]					= @OrderUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
+				,[dblContractBalance]				= ISNULL(CD.dblBalance, @ZeroDecimal)
 				,[intItemUOMId]						= ISNULL(@ItemUOMId, IL.intIssueUOMId)
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
@@ -328,6 +330,9 @@ BEGIN TRY
 				vyuARGetItemAccount Acct
 					ON IC.[intItemId] = Acct.[intItemId]
 					AND IL.[intLocationId] = Acct.[intLocationId]
+			LEFT JOIN tblCTContractDetail CD
+					ON IC.intItemId = CD.intItemId 
+					AND CD.intContractDetailId = @ItemContractDetailId
 			WHERE
 				IC.[intItemId] = @ItemId
 				AND IL.[intLocationId] = @CompanyLocationId
