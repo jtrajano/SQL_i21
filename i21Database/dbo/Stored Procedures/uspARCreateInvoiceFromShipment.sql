@@ -255,7 +255,7 @@ SELECT
 	,[dblLicenseAmount]						= @ZeroDecimal
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
-	,[ysnRecomputeTax]						= 1
+	,[ysnRecomputeTax]						= 0
 	,[intSCInvoiceId]						= NULL
 	,[strSCInvoiceNumber]					= NULL
 	,[intSCBudgetId]						= NULL
@@ -291,7 +291,7 @@ SELECT
 	,[ysnLeaseBilling]						= 0
 	,[ysnVirtualMeterReading]				= 0
 	,[ysnClearDetailTaxes]					= 0
-	,[intTempDetailIdForTaxes]				= NULL
+	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
 	,[ysnSubCurrency]						= 0
 	,[ysnBlended]							= ARSI.[ysnBlended]
 FROM
@@ -401,7 +401,7 @@ SELECT
 	,[ysnLeaseBilling]						= 0
 	,[ysnVirtualMeterReading]				= 0
 	,[ysnClearDetailTaxes]					= 0
-	,[intTempDetailIdForTaxes]				= NULL
+	,[intTempDetailIdForTaxes]				= SOD.intSalesOrderDetailId
 	,[ysnSubCurrency]						= 0
 	,[ysnBlended]							= 0
 FROM 
@@ -648,11 +648,60 @@ BEGIN
 END
 	
 	
+
+
+
 DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
 		,@CurrentErrorMessage NVARCHAR(250)
 		,@CreatedIvoices NVARCHAR(MAX)
 		,@UpdatedIvoices NVARCHAR(MAX)	
 				
+
+INSERT INTO @LineItemTaxEntries(
+	 [intDetailId]
+	,[intDetailTaxId]
+	,[intTaxGroupId]
+	,[intTaxCodeId]
+	,[intTaxClassId]
+	,[strTaxableByOtherTaxes]
+	,[strCalculationMethod]
+	,[dblRate]
+	,[intTaxAccountId]
+	,[dblTax]
+	,[dblAdjustedTax]
+	,[ysnTaxAdjusted]
+	,[ysnSeparateOnInvoice]
+	,[ysnCheckoffTax]
+	,[ysnTaxExempt]
+	,[strNotes]
+	,[intTempDetailIdForTaxes]
+)
+SELECT
+	 [intDetailId]				= NULL
+	,[intDetailTaxId]			= NULL
+	,[intTaxGroupId]			= SOSODT.[intTaxGroupId]
+	,[intTaxCodeId]				= SOSODT.[intTaxCodeId]
+	,[intTaxClassId]			= SOSODT.[intTaxClassId]
+	,[strTaxableByOtherTaxes]	= SOSODT.[strTaxableByOtherTaxes] 
+	,[strCalculationMethod]		= SOSODT.[strCalculationMethod]
+	,[dblRate]					= SOSODT.[dblRate]
+	,[intTaxAccountId]			= SOSODT.[intSalesTaxAccountId]
+	,[dblTax]					= SOSODT.[dblTax]
+	,[dblAdjustedTax]			= SOSODT.[dblAdjustedTax]
+	,[ysnTaxAdjusted]			= SOSODT.[ysnTaxAdjusted]
+	,[ysnSeparateOnInvoice]		= SOSODT.[ysnSeparateOnInvoice]
+	,[ysnCheckoffTax]			= SOSODT.[ysnCheckoffTax]
+	,[ysnTaxExempt]				= SOSODT.[ysnTaxExempt]
+	,[strNotes]					= SOSODT.[strNotes]
+	,[intTempDetailIdForTaxes]	= EFI.[intTempDetailIdForTaxes]
+FROM
+	@UnsortedEntriesForInvoice  EFI
+INNER JOIN
+	tblSOSalesOrderDetailTax SOSODT
+		ON EFI.[intTempDetailIdForTaxes] = SOSODT.[intSalesOrderDetailId] 
+ORDER BY 
+	 EFI.[intSalesOrderDetailId] ASC
+	,SOSODT.[intSalesOrderDetailTaxId] ASC
 
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries		= @EntriesForInvoice
