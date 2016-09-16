@@ -19,7 +19,6 @@ BEGIN
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwtrmmst') = 1 
-		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwslsmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwlclmst') = 1 
 	)
 	BEGIN
@@ -65,10 +64,11 @@ BEGIN
 				,intConcurrencyId = J.intConcurrencyId
 				,strCustomerPhone = ISNULL(vwcus_phone,'''')
 				,strOrderNumber = ISNULL(J.strOrderNumber,'''')
+				,dblSiteEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 				,H.strFillMethod
 				,A.dtmLastDeliveryDate
 				,J.dtmCallInDate
-				,strUserCreated = P.vwsls_slsmn_id
+				,strUserCreated = P.strUserName
 				,strSerialNumber = Q.strSerialNumber
 				,strTaxGroup = R.vwlcl_tax_state
 				,A.dblYTDGalsThisSeason
@@ -89,8 +89,8 @@ BEGIN
 				ON J.intDeliveryTermID = L.A4GLIdentity
 			LEFT JOIN tblTMClock M
 				ON A.intClockID = M.intClockID
-			LEFT JOIN vwslsmst P
-				ON J.intUserID = P.A4GLIdentity
+			LEFT JOIN tblSMUserSecurity P
+				ON J.intUserID = P.intEntityUserSecurityId
 			LEFT JOIN (
 				SELECT 
 					AA.intSiteID
