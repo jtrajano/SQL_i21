@@ -41,7 +41,9 @@ FROM
 		,D.dblRateFactor
 		,D.dblMaxEarned 
 		,D.dblMaxCarryover
-		,dblHoursAccrued	= CASE WHEN (C.intEmployeeAccrueTimeOffId = D.intTypeTimeOffId) THEN B.dblHours * D.dblRate * D.dblPerPeriod * D.dblRateFactor ELSE 0 END
+		,dblHoursAccrued	= CASE WHEN (C.intEmployeeAccrueTimeOffId = D.intTypeTimeOffId AND D.strPeriod = 'Hour')
+								   THEN B.dblHours * D.dblRate * D.dblPerPeriod * D.dblRateFactor 
+								   ELSE 0 END
 		,dblHoursUsed		= CASE WHEN (C.intEmployeeTimeOffId = D.intTypeTimeOffId) THEN B.dblHours ELSE 0 END
 		,dblHoursYTD		= D.dblHoursEarned - D.dblHoursUsed
 	FROM
@@ -51,7 +53,10 @@ FROM
 		LEFT JOIN tblPREmployeeTimeOff D 
 			 ON C.intEntityEmployeeId = D.intEntityEmployeeId AND
 			 (D.intTypeTimeOffId = C.intEmployeeTimeOffId OR D.intTypeTimeOffId = C.intEmployeeAccrueTimeOffId)
-	WHERE D.intEmployeeTimeOffId IS NOT NULL AND B.intPaycheckId = @intPaycheckId AND A.ysnPosted = 1) TimeOff
+	WHERE 
+		D.intEmployeeTimeOffId IS NOT NULL AND B.intPaycheckId = @intPaycheckId AND A.ysnPosted = 1) TimeOff
+WHERE 
+	dblHoursAccrued > 0 OR dblHoursUsed > 0
 GROUP BY
 	intEmployeeTimeOffId 
 	,intTypeTimeOffId
