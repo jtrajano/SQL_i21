@@ -49,7 +49,7 @@ BEGIN TRY
 			,@intItemId = NULL
 			,@intManufacturingId = NULL
 			,@intSubLocationId = NULL
-			,@intLocationId = NULL
+			,@intLocationId = @intLocationId
 			,@intOrderTypeId = NULL
 			,@intBlendRequirementId = NULL
 			,@intPatternCode = 62
