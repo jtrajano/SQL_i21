@@ -13,6 +13,8 @@
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@RefreshPrice					BIT				= 0
@@ -81,7 +83,6 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@EntityCustomerId		INT
 		,@CompanyLocationId		INT
 		,@InvoiceDate			DATETIME
-		,@TermDiscount			NUMERIC(18, 6)
 		,@SubCurrencyCents		INT
 		,@existingInvoiceDetail INT
 
@@ -154,7 +155,8 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			,@ContractDetailId			= @ItemContractDetailId	OUTPUT
 			,@ContractNumber			= @ContractNumber		OUTPUT
 			,@ContractSeq				= @ContractSeq			OUTPUT
-			,@TermDiscount				= @TermDiscount			OUTPUT
+			,@TermDiscount				= @ItemTermDiscount		OUTPUT
+			,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
 			--,@AvailableQuantity			= NULL OUTPUT
 			--,@UnlimitedQuantity			= 0    OUTPUT
 			--,@OriginalQuantity			= NULL
@@ -207,6 +209,7 @@ BEGIN TRY
 				,[dblQtyShipped]
 				,[dblDiscount]
 				,[dblItemTermDiscount]
+				,[strItemTermDiscountBy]
 				,[dblPrice]
 				,[strPricing]
 				,[dblTotalTax]
@@ -279,7 +282,8 @@ BEGIN TRY
 				,[intItemUOMId]						= ISNULL(ISNULL(@ItemUOMId, IL.intIssueUOMId), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = IC.[intItemId] ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
-				,[dblItemTermDiscount]				= ISNULL(@TermDiscount, @ZeroDecimal)
+				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
+				,[strItemTermDiscountBy]			= @ItemTermDiscountBy
 				,[dblPrice]							= (CASE WHEN (ISNULL(@SubCurrency,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @SubCurrency ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal

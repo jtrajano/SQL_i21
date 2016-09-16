@@ -16,6 +16,7 @@ RETURNS @returntable TABLE
 	 dblPrice			NUMERIC(18,6)
 	,strPricing			NVARCHAR(250)
 	,dblTermDiscount	NUMERIC(18,6)
+	,strTermDiscountBy	NVARCHAR(50)
 	,dblPriceBasis		NUMERIC(18,6)
 	,dblDeviation		NUMERIC(18,6)
 	,dblUOMQuantity		NUMERIC(18,6)
@@ -24,14 +25,14 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE  @Price			NUMERIC(18,6)
-			,@TermDiscount	NUMERIC(18,6)
-			,@Pricing		NVARCHAR(250)
-			,@PriceBasis	NUMERIC(18,6)
-			,@Deviation		NUMERIC(18,6)
-			,@DiscountBy	NVARCHAR(50)
-			,@PromotionType	NVARCHAR(50)
-			,@intSort		INT
+	DECLARE  @Price				NUMERIC(18,6)
+			,@TermDiscount		NUMERIC(18,6)
+			,@Pricing			NVARCHAR(250)
+			,@PriceBasis		NUMERIC(18,6)
+			,@Deviation			NUMERIC(18,6)
+			,@DiscountBy		NVARCHAR(50)
+			,@PromotionType		NVARCHAR(50)
+			,@intSort			INT
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())	
 	SET @intSort = 0
@@ -62,42 +63,40 @@ BEGIN
 	--Item Promotional Pricing
 	SELECT TOP 1 
 		@Price			= @UOMQuantity *
-							(CASE WHEN strPromotionType = 'Terms Discount' THEN dblUnitAfterDiscount
+							(CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICIP.dblSalePrice
 							ELSE
 								(CASE
-									WHEN strDiscountBy = 'Amount'
-										THEN dblUnitAfterDiscount - ISNULL(dblDiscount, 0.00)
+									WHEN ICISP.strDiscountBy = 'Amount'
+										THEN ICIP.dblSalePrice - ISNULL(ICISP.dblDiscount, 0.00)
 									ELSE	
-										dblUnitAfterDiscount - (dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
+										ICIP.dblSalePrice - (ICIP.dblSalePrice * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) )
 								END)
 							END)
-		,@PriceBasis	= dblUnitAfterDiscount		
-		,@Deviation		= (CASE WHEN strPromotionType = 'Terms Discount' THEN dblDiscount
+		,@PriceBasis	= ICIP.dblSalePrice		
+		,@Deviation		= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount
 							ELSE
 								(CASE
-									WHEN strDiscountBy = 'Amount'
-										THEN ISNULL(dblDiscount, 0.00)
+									WHEN ICISP.strDiscountBy = 'Amount'
+										THEN ISNULL(ICISP.dblDiscount, 0.00)
 									ELSE	
-										(dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
+										(ICIP.dblSalePrice * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) )
 								END)
 							END) 									
-		,@DiscountBy	= strDiscountBy
-		,@PromotionType	= strPromotionType
-		,@TermDiscount	= @Quantity *
-								(CASE
-									WHEN strDiscountBy = 'Amount'
-										THEN ISNULL(dblDiscount, 0.00)
-									ELSE	
-										(@Price * (ISNULL(dblDiscount, 0.00)/100.00) )
-								END)
-		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + strPromotionType + ')','')	
+		,@DiscountBy	= ICISP.strDiscountBy
+		,@PromotionType	= ICISP.strPromotionType
+		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblDiscount ELSE 0.000000 END)
+		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
 	FROM
-		tblICItemSpecialPricing 
+		tblICItemSpecialPricing ICISP
+	INNER JOIN
+		tblICItemPricing ICIP
+			ON ICISP.intItemId = ICIP.intItemId 
+			AND ICISP.intItemLocationId = ICIP.intItemLocationId 
 	WHERE
-		intItemId = @ItemId 
-		AND intItemLocationId = @ItemLocationId 
-		AND intItemUnitMeasureId = @ItemUOMId
-		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmBeginDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
+		ICISP.intItemId = @ItemId 
+		AND ICISP.intItemLocationId = @ItemLocationId 
+		AND ICISP.intItemUnitMeasureId = @ItemUOMId
+		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
 	ORDER BY
 		dtmBeginDate DESC
 	
@@ -128,7 +127,7 @@ BEGIN
 								BEGIN
 									IF (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = (@Quantity * (@Price * (@DiscountEP / 100)))
+											SET @TermDiscount = @DiscountEP
 										END
 								END	
 							ELSE IF (@Type = 'Date Driven')
@@ -141,26 +140,26 @@ BEGIN
 			
 									IF (@TempDiscountDate >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = (@Quantity * (@Price * (@DiscountEP / 100)))
+											SET @TermDiscount = @DiscountEP
 										END		
 								END	
 							ELSE
 								BEGIN
 									IF (@DiscountDate >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = (@Quantity * (@Price * (@DiscountEP / 100)))
+											SET @TermDiscount = @DiscountEP
 										END
 								END
 						END					
 				END
 			ELSE
 				BEGIN
-					SET @TermDiscount = 0.00
+					SET @TermDiscount = 0.000000
 				END
 
 			SET @intSort = @intSort + 1
-			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
-			SELECT @Price, @TermDiscount, @Pricing, @PriceBasis, @Deviation, @UOMQuantity, @intSort
+			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
+			SELECT @Price, @TermDiscount, @DiscountBy, @Pricing, @PriceBasis, @Deviation, @UOMQuantity, @intSort
 			IF @GetAllAvailablePricing = 0 RETURN;
 		END
 	

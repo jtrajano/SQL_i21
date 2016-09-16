@@ -11,6 +11,7 @@ SELECT
 	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
 	,[dblOriginalPrice]			= ARPH.[dblOriginalPrice]									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[strTermDiscountBy]		= CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= ARPH.[strPricing]            COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
@@ -48,6 +49,7 @@ SELECT
 	,[dblPrice]					= IP.[dblPrice]				--CAST(0 AS NUMERIC(18,6))
 	,[dblOriginalPrice]			= CAST(0 AS NUMERIC(18,6))	--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= IP.[dblTermDiscount]		--CAST(0 AS NUMERIC(18,6))
+	,[strTermDiscountBy]		= IP.[strTermDiscountBy] 	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= IP.[strPricing]			--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= IP.[dblDeviation]			--CAST(0 AS NUMERIC(18,6))
@@ -118,6 +120,7 @@ SELECT
 	,[dblPrice]					= ARPH.[dblPrice]											--CAST(0 AS NUMERIC(18,6))
 	,[dblOriginalPrice]			= ARPH.[dblOriginalPrice]									--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[strTermDiscountBy]		= CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= ARPH.[strPricing]			   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
@@ -155,6 +158,7 @@ SELECT
 	,[dblPrice]					= IP.[dblPrice]					--CAST(0 AS NUMERIC(18,6))
 	,[dblOriginalPrice]			= CAST(0 AS NUMERIC(18,6))		--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= IP.[dblTermDiscount]			--CAST(0 AS NUMERIC(18,6))
+	,[strTermDiscountBy]		= IP.[strTermDiscountBy] 	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= IP.[strPricing]				--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= IP.[dblDeviation]				--CAST(0 AS NUMERIC(18,6))

@@ -64,6 +64,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dblQtyRemaining				NUMERIC(18,6),
 							dblMaintenanceAmount		NUMERIC(18,6),
 							dblDiscount					NUMERIC(18,6),
+							dblItemTermDiscount			NUMERIC(18,6),
+							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
 							intTaxGroupId				INT,
@@ -111,6 +113,8 @@ SELECT intItemId					= SI.intItemId
 	 , dblQtyRemaining				= CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
 	 , dblMaintenanceAmount			= CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , dblDiscount					= SI.dblDiscount
+	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
+	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
 	 , strPricing					= SOD.strPricing 
 	 , intTaxGroupId				= SI.intTaxGroupId
@@ -158,6 +162,8 @@ SELECT intItemId					= SOD.intItemId
 	 , dblQtyRemaining				= 0
 	 , dblMaintenanceAmount			= 0
 	 , dblDiscount					= 0
+	 , dblItemTermDiscount			= 0
+	 , strItemTermDiscountBy		= 0
 	 , dblPrice						= 0
 	 , strPricing					= NULL 
 	 , intTaxGroupId				= NULL
@@ -199,6 +205,8 @@ SELECT intItemId					= ICSI.intItemId
 	 , dblQtyRemaining				= ICSI.dblQuantity
 	 , dblMaintenanceAmount			= @dblZeroAmount
 	 , dblDiscount					= SOD.dblDiscount
+	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
+	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= ICSI.dblUnitPrice
 	 , strPricing					= SOD.strPricing 
 	 , intTaxGroupId				= SOD.intTaxGroupId
@@ -243,6 +251,8 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblQtyRemaining				= ARSI.dblQtyRemaining  
 	 , dblMaintenanceAmount			= 0 
 	 , dblDiscount					= ARSI.dblDiscount
+	 , dblItemTermDiscount			= 0
+	 , strItemTermDiscountBy		= NULL
 	 , dblPrice						= ARSI.dblPrice 
 	 , strPricing					= ''
 	 , intTaxGroupId				= NULL
@@ -592,6 +602,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyOrdered			NUMERIC(18,6),
 						@ItemQtyShipped			NUMERIC(18,6),
 						@ItemDiscount			NUMERIC(18,6),
+						@ItemTermDiscount		NUMERIC(18,6),
+						@ItemTermDiscountBy		NVARCHAR(50),
 						@ItemPrice				NUMERIC(18,6),
 						@ItemPricing			NVARCHAR(250),
 						@ItemTaxGroupId			INT,		
@@ -626,6 +638,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemQtyOrdered			= dblQtyOrdered,
 						@ItemQtyShipped			= dblQtyRemaining,
 						@ItemDiscount			= dblDiscount,
+						@ItemTermDiscount		= dblItemTermDiscount,
+						@ItemTermDiscountBy		= strItemTermDiscountBy,
 						@ItemPrice				= dblPrice,
 						@ItemPricing			= strPricing,
 						@ItemTaxGroupId			= intTaxGroupId,
@@ -667,6 +681,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
+							,@ItemTermDiscount				= @ItemTermDiscount
+							,@ItemTermDiscountBy			= @ItemTermDiscountBy
 							,@ItemPrice						= @ItemPrice
 							,@ItemPricing					= @ItemPricing
 							,@RefreshPrice					= 0
