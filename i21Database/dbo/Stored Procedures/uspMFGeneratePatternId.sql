@@ -68,6 +68,7 @@ BEGIN
 	BEGIN
 		EXEC dbo.uspSMGetStartingNumber @intPatternCode
 			,@strPatternString OUTPUT
+			,@intLocationId
 
 		--SELECT @strPatternString AS strPatternString
 
