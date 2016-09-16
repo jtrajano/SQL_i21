@@ -4325,6 +4325,7 @@
     <Build Include="dbo\Views\vyuPATCalculateNoRefundSummary.sql" />
     <Build Include="dbo\Views\vyuPATCalculateFiscalSummaryHistory.sql" />
     <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -4449,6 +4450,7 @@
     <None Include="Scripts\Post-Deployment\AP\MigratePOForApprovals.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
