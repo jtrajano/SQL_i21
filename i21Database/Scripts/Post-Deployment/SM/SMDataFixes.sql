@@ -165,3 +165,16 @@ GO
 GO
 	UPDATE tblSMHomePanelDashboard SET strPanelName = 'Notifications' WHERE strPanelName = 'Alerts'
 GO
+	/* ARRANGE USER ROLE MENUS */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Arrange User Role Menus - Role Menu')
+	BEGIN
+		UPDATE RoleMenu SET intSort = MasterMenu.intSort
+		FROM tblSMUserRoleMenu RoleMenu
+		INNER JOIN tblSMMasterMenu MasterMenu ON RoleMenu.intMenuId = MasterMenu.intMenuID
+		WHERE intParentMenuID = 0 AND ysnIsLegacy = 0
+		
+		PRINT N'ARRANGE USER ROLE MENUS'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Arrange User Role Menus - Role Menu', 'Arrange User Role Menus - Role Menu', GETDATE())
+	END
+GO
