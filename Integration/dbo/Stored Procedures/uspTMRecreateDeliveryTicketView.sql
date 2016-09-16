@@ -19,6 +19,8 @@ BEGIN
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwitmmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwtrmmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwslsmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwlclmst') = 1 
 	)
 	BEGIN
 		EXEC('
@@ -46,7 +48,7 @@ BEGIN
 				,K.strRouteId
 				,strItemNo = I.vwitm_no COLLATE Latin1_General_CI_AS
 				,J.dtmRequestedDate
-				,strTerm = CAST(L.vwtrm_key_n AS NVARCHAR(20))
+				,strTerm = CAST(L.vwtrm_desc AS NVARCHAR(20))
 				,dblARBalance = C.vwcus_balance 
 				,J.dblPrice
 				,dblTaxRate = dbo.[fnTMGetSalesTax](L.vwtrm_key_n,A.intTaxStateID)
@@ -55,8 +57,21 @@ BEGIN
 				,strSiteCity = A.strCity
 				,strSiteState = A.strState
 				,strSiteZipCode = A.strZipCode
-				,dblRequestedQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+				,dblRequestedQuantity = ISNULL(J.dblMinimumQuantity,0.0)
+				,dblQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
 				,K.intRouteId
+				,intDispatchId = J.intDispatchID
+				,strReportType = M.strDeliveryTicketFormat
+				,intConcurrencyId = J.intConcurrencyId
+				,strCustomerPhone = ISNULL(vwcus_phone,'''')
+				,strOrderNumber = ISNULL(J.strOrderNumber,'''')
+				,H.strFillMethod
+				,A.dtmLastDeliveryDate
+				,J.dtmCallInDate
+				,strUserCreated = P.vwsls_slsmn_id
+				,strSerialNumber = Q.strSerialNumber
+				,strTaxGroup = R.vwlcl_tax_state
+				,A.dblYTDGalsThisSeason
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -74,6 +89,22 @@ BEGIN
 				ON J.intDeliveryTermID = L.A4GLIdentity
 			LEFT JOIN tblTMClock M
 				ON A.intClockID = M.intClockID
+			LEFT JOIN vwslsmst P
+				ON J.intUserID = P.A4GLIdentity
+			LEFT JOIN (
+				SELECT 
+					AA.intSiteID
+					,BB.strSerialNumber
+					,intCntId = ROW_NUMBER() OVER (PARTITION BY AA.intSiteID ORDER BY AA.intSiteDeviceID ASC)
+				FROM tblTMSiteDevice AA
+				INNER JOIN tblTMDevice BB
+					ON AA.intDeviceId = BB.intDeviceId
+				WHERE ISNULL(BB.ysnAppliance,0) = 0
+			) Q
+				ON A.intSiteID = Q.intSiteID
+				AND Q.intCntId = 1
+			LEFT JOIN vwlclmst R
+				ON A.intTaxStateID = R.A4GLIdentity
 		')
 	END
 	ELSE
@@ -121,8 +152,22 @@ BEGIN
 				,strSiteCity = A.strCity
 				,strSiteState = A.strState
 				,strSiteZipCode = A.strZipCode
-				,dblRequestedQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
+				,dblRequestedQuantity = ISNULL(J.dblMinimumQuantity,0.0)
+				,dblQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
 				,K.intRouteId
+				,intDispatchId = J.intDispatchID
+				,strReportType = M.strDeliveryTicketFormat
+				,intConcurrencyId = J.intConcurrencyId
+				,strCustomerPhone = ISNULL(ConPhone.strPhone,'''')
+				,strOrderNumber = ISNULL(J.strOrderNumber,'''')
+				,dblSiteEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
+				,H.strFillMethod
+				,A.dtmLastDeliveryDate
+				,J.dtmCallInDate
+				,strUserCreated = P.strUserName
+				,strSerialNumber = Q.strSerialNumber
+				,R.strTaxGroup
+				,A.dblYTDGalsThisSeason
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -138,6 +183,8 @@ BEGIN
 			INNER JOIN tblEMEntityLocation Loc 
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1
+			LEFT JOIN tblEMEntityPhoneNumber ConPhone
+				ON Con.intEntityId = ConPhone.intEntityId
 			INNER JOIN tblTMDispatch J
 				ON A.intSiteID = J.intSiteID
 			INNER JOIN tblICItem I
@@ -154,6 +201,22 @@ BEGIN
 				ON J.intDeliveryTermID = L.intTermID
 			LEFT JOIN tblTMClock M
 				ON A.intClockID = M.intClockID
+			LEFT JOIN tblSMUserSecurity P
+				ON J.intUserID = P.intEntityUserSecurityId
+			LEFT JOIN (
+				SELECT 
+					AA.intSiteID
+					,BB.strSerialNumber
+					,intCntId = ROW_NUMBER() OVER (PARTITION BY AA.intSiteID ORDER BY AA.intSiteDeviceID ASC)
+				FROM tblTMSiteDevice AA
+				INNER JOIN tblTMDevice BB
+					ON AA.intDeviceId = BB.intDeviceId
+				WHERE ISNULL(BB.ysnAppliance,0) = 0
+			) Q
+				ON A.intSiteID = Q.intSiteID
+				AND Q.intCntId = 1
+			LEFT JOIN tblSMTaxGroup R
+				ON A.intTaxStateID = R.intTaxGroupId
 		')
 	END
 END
