@@ -60,9 +60,6 @@ BEGIN
 		,intInventoryReceiptId INT
 	)
 END 
-SELECT TOP 1 @dblTicketGross = ((SCS.dblSplitPercent * SC.dblGrossWeight) / 100) , @dblTicketTare = ((SCS.dblSplitPercent * SC.dblTareWeight) / 100)  FROM tblSCTicket SC
-INNER JOIN tblSCTicketSplit SCS ON SCS.intTicketId = SC.intTicketId AND SCS.intCustomerId = 8
-order by intTicketSplitId desc
 -- Insert Entries to Stagging table that needs to processed to Transport Load
 INSERT into @ReceiptStagingTable(
 		-- Header
@@ -170,15 +167,9 @@ BEGIN
 	RETURN;
 END
 
---SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTIicket.intHaulerId FROM tblSCScaleSetup SCSetup
---LEFT JOIN tblSCTicket SCTIicket
---ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
---WHERE intTicketId = @intTicketId
-
-SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTIicket.intHaulerId, @ysnDeductFreightFarmer = SCTIicket.ysnFarmerPaysFreight FROM tblSCScaleSetup SCSetup
-LEFT JOIN tblSCTicket SCTIicket
-ON SCSetup.intScaleSetupId = SCTIicket.intScaleSetupId
-WHERE intTicketId = @intTicketId
+SELECT @intFreightItemId = SCSetup.intFreightItemId, @intHaulerId = SCTicket.intHaulerId, @ysnDeductFreightFarmer = SCTicket.ysnFarmerPaysFreight 
+FROM tblSCScaleSetup SCSetup LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId 
+WHERE SCTicket.intTicketId = @intTicketId
 
 		INSERT INTO @OtherCharges
 		(
@@ -1067,10 +1058,16 @@ ELSE
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
 								,[strCostMethod]                    = ContractCost.strCostMethod
-								,[dblRate]							= RE.dblFreightRate
+								,[dblRate]							= CASE
+																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN RE.dblFreightRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 0
+																	END
 								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
-								,[dblAmount]						= 0
+								,[dblAmount]						= CASE
+																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN RE.dblFreightRate
+																	END
 								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= RE.intContractHeaderId
 								,[intContractDetailId]				= RE.intContractDetailId
@@ -1119,10 +1116,16 @@ ELSE
 								,[intChargeId]						= @intFreightItemId
 								,[ysnInventoryCost]					= 0
                                 ,[strCostMethod]                    = ContractCost.strCostMethod
-								,[dblRate]							= RE.dblFreightRate
+								,[dblRate]							= CASE
+																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN RE.dblFreightRate
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 0
+																	END
 								,[intCostUOMId]						= ContractCost.intItemUOMId
 								,[intOtherChargeEntityVendorId]		= @intHaulerId
-								,[dblAmount]						= 0
+								,[dblAmount]						= CASE
+																		WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN RE.dblFreightRate
+																	END
 								,[strAllocateCostBy]				=  NULL
 								,[intContractHeaderId]				= RE.intContractHeaderId
 								,[intContractDetailId]				= RE.intContractDetailId
@@ -1172,7 +1175,10 @@ ELSE
 						,[intChargeId]						= ContractCost.intItemId
 						,[ysnInventoryCost]					= 0
 						,[strCostMethod]					= ContractCost.strCostMethod
-						,[dblRate]							= ContractCost.dblRate
+						,[dblRate]							= CASE
+																WHEN ContractCost.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
+																WHEN ContractCost.strCostMethod = 'Amount' THEN 0
+															END
 						,[intCostUOMId]						= ContractCost.intItemUOMId
 						,[intOtherChargeEntityVendorId]		= CASE 
 																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
@@ -1182,7 +1188,10 @@ ELSE
 																WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
 																	RE.intShipViaId
 															  END
-						,[dblAmount]						= 0
+						,[dblAmount]						= CASE
+																WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
+																WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+															END
 						,[strAllocateCostBy]				=  NULL
 						,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 						,[intContractDetailId]				= ContractCost.intContractDetailId
@@ -1230,10 +1239,16 @@ ELSE
 				,[intChargeId]						= ContractCost.intItemId
 				,[ysnInventoryCost]					= 0
 				,[strCostMethod]					= ContractCost.strCostMethod
-				,[dblRate]							= ContractCost.dblRate
+				,[dblRate]							= CASE
+														WHEN ContractCost.strCostMethod = 'Per Unit' THEN ContractCost.dblRate
+														WHEN ContractCost.strCostMethod = 'Amount' THEN 0
+													END
 				,[intCostUOMId]						= ContractCost.intItemUOMId
 				,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
-				,[dblAmount]						= 0
+				,[dblAmount]						= CASE
+														WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
+														WHEN ContractCost.strCostMethod = 'Amount' THEN ContractCost.dblRate
+													END
 				,[strAllocateCostBy]				=  NULL
 				,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 				,[intContractDetailId]				= ContractCost.intContractDetailId
