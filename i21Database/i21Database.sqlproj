@@ -4319,6 +4319,7 @@
     <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
     <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
+    <Build Include="dbo\Views\vyuCTContractSequence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
