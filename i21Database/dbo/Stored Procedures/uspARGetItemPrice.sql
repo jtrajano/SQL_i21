@@ -15,6 +15,7 @@
 	,@UnlimitedQuantity			BIT             = 0    OUTPUT
 	,@Deviation					NUMERIC(18,6)	= NULL OUTPUT
 	,@TermDiscount				NUMERIC(18,6)	= NULL OUTPUT
+	,@TermDiscountBy			NVARCHAR(50)	= NULL OUTPUT	
 	,@OriginalQuantity			NUMERIC(18,6)	= NULL
 	,@CustomerPricingOnly		BIT				= 0
 	,@ItemPricingOnly			BIT				= 0
@@ -43,6 +44,7 @@ AS
 		,@Deviation			= dblDeviation
 		,@TermDiscount		= dblTermDiscount  
 		,@PricingType		= strPricingType
+		,@TermDiscountBy	= strTermDiscountBy 
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId

@@ -55,6 +55,8 @@
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
@@ -511,6 +513,8 @@ BEGIN TRY
 		,@ItemUOMId						= @ItemUOMId
 		,@ItemQtyShipped				= @ItemQtyShipped
 		,@ItemDiscount					= @ItemDiscount
+		,@ItemTermDiscount				= @ItemTermDiscount
+		,@ItemTermDiscountBy			= @ItemTermDiscountBy
 		,@ItemPrice						= @ItemPrice
 		,@RefreshPrice					= @RefreshPrice
 		,@ItemMaintenanceType			= @ItemMaintenanceType

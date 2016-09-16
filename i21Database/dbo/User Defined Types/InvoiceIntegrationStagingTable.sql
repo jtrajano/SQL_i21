@@ -101,6 +101,10 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intItemUOMId]							INT												NULL		-- The UOM Id
     ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
+	,[dblItemTermDiscount]					NUMERIC(18, 6)									NULL		-- The Term discount to apply to a line item upon payment
+	,[strItemTermDiscountBy]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values(Term Discount Calculation Method) 
+																											-- 1. "Amount"
+																											-- 2. "Percentage"	
 	,[dblItemWeight]						NUMERIC(18, 6)									NULL
 	,[intItemWeightUOMId]					INT												NULL	
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
