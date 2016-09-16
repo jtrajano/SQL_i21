@@ -24,6 +24,5 @@
 	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRShrinkCalculationOption_intValueFieldId_intShrinkCalculationOptionId] FOREIGN KEY ([intShrinkCalculationOptionId]) REFERENCES [tblGRShrinkCalculationOption]([intValueFieldId]),
 	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRStorageType_intStorageScheduleTypeId_intStorageTypeId] FOREIGN KEY ([intStorageTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
-	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-	CONSTRAINT [UK_tblGRDiscountScheduleCode_intDiscountScheduleId_intItemId_intStorageTypeId_intCompanyLocationId] UNIQUE ([intDiscountScheduleId], [intItemId], [intStorageTypeId],[intCompanyLocationId])
+	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )
