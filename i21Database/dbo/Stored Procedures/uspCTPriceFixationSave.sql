@@ -41,7 +41,8 @@ BEGIN TRY
 			@dblFutures					NUMERIC(18,6),
 			@intTotalLots				INT,
 			@intTotalPFDetailNoOfLots	INT,
-			@ysnUnlimitedQuantity		BIT
+			@ysnUnlimitedQuantity		BIT,
+			@intFirstPFDetailId			INT
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -161,14 +162,28 @@ BEGIN TRY
 		IF ISNULL(@ysnSplit,0) = 1
 		BEGIN				
 		
+			SELECT	@intFirstPFDetailId = MIN(intPriceFixationDetailId) 
+			FROM	tblCTPriceFixationDetail
+			WHERE	intPriceFixationId = @intPriceFixationId
+
+			UPDATE	PF
+			SET		PF.intTotalLots			=	FD.intNoOfLots,
+					PF.intLotsFixed			=	FD.intNoOfLots,
+					PF.intLotsHedged		=	CASE WHEN @ysnHedge = 1 THEN FD.intNoOfLots ELSE NULL END,
+					PF.dblPriceWORollArb	=	FD.dblFutures,
+					PF.dblFinalPrice		=	PF.dblFinalPrice - PF.dblPriceWORollArb + FD.dblFutures
+			FROM	tblCTPriceFixation			PF 
+			JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
+			WHERE	FD.intPriceFixationDetailId	=	@intFirstPFDetailId 
+
+			UPDATE	tblCTContractDetail	
+			SET		dblNoOfLots				=	 (SELECT SUM(intNoOfLots) FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intFirstPFDetailId) 
+			WHERE	intContractDetailId		=	 @intContractDetailId
+
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
 			FROM	tblCTPriceFixationDetail 
 			WHERE	intPriceFixationId = @intPriceFixationId AND 
-					intPriceFixationDetailId > (
-													SELECT	MIN(intPriceFixationDetailId) 
-													FROM	tblCTPriceFixationDetail
-													WHERE	intPriceFixationId = @intPriceFixationId
-												)
+					intPriceFixationDetailId > @intFirstPFDetailId
 		
 
 			WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
@@ -190,7 +205,8 @@ BEGIN TRY
 					IF	@dblNewQuantity > 0
 					BEGIN
 						EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract', @intNewContractDetailId OUTPUT
-						EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId, @intNewPriceFixationId OUTPUT,'<root><toUpdate><ysnSplit>0</ysnSplit></toUpdate><child><tblCTSpreadArbitrage></tblCTSpreadArbitrage></child></root>' 
+						SET @XML = '<root><toUpdate><ysnSplit>0</ysnSplit><intContractDetailId>'+LTRIM(@intNewContractDetailId)+'</intContractDetailId></toUpdate><child><tblCTSpreadArbitrage></tblCTSpreadArbitrage></child></root>' 
+						EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId, @intNewPriceFixationId OUTPUT,@XML
 						
 						UPDATE	tblCTPriceFixation 
 						SET		intContractDetailId =	@intNewContractDetailId,
