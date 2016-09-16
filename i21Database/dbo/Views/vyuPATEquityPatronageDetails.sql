@@ -1,6 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuPATEquityPatronageDetails]
 	AS 
-SELECT	RRD.intRefundTypeId,
+SELECT	
+		newid() as id,
+		CV.intCustomerVolumeId,
+		RRD.intRefundTypeId,
 		PC.strCategoryCode,
 		PC.strPurchaseSale,
 		PC.strUnitAmount,

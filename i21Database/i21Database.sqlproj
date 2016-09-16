@@ -4297,6 +4297,8 @@
     <Build Include="dbo\User Defined Types\VoucherDetailLoadNonInv.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailLoadNonInv.sql" />
     <Build Include="dbo\Views\vyuSCTicketSplitView.sql" />
+    <Build Include="dbo\Views\vyuPATRefundCustomer.sql" />
+    <Build Include="dbo\Views\vyuPATTransferDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

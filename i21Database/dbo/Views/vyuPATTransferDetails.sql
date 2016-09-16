@@ -1,39 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuPATTransfer]
+﻿CREATE VIEW [dbo].[vyuPATTransferDetails]
 	AS
-WITH PTD (
-	intTransferDetailId,
-	intTransferId,
-	intTransferorId,
-	strTransferorName,
-	strEquityType,
-	intFiscalYearId,
-	strTransferorFiscal,
-	intPatronageCategoryId,
-	strCategoryCode,
-	intRefundTypeId,
-	strTransferorRefundType,
-	intCustomerStockId,
-	dtmIssueDate,
-    strStockStatus,
-    dblParValue,
-    strCertificateNo,
-    strStockName,
-    intTransfereeId,
-	strTransfereeName,
-	intToStockId,
-	strToStockName,
-	intToFiscalYearId,
-	strTransfereeFiscal,
-	strToStockStatus,
-	strToCertificateNo,
-	dtmToIssueDate,
-	intToRefundTypeId,
-	strTransfereeRefundType,
-	dblTransferPercentage,
-	dblQuantityAvailable,
-	dblQuantityTransferred,
-	intConcurrencyId
-) AS (
 SELECT	TD.intTransferDetailId,
 		TD.intTransferId,
 		TD.intTransferorId,
@@ -87,27 +53,4 @@ SELECT	TD.intTransferDetailId,
 		ON transfereeRR.intRefundTypeId = TD.intRefundTypeId
 	LEFT OUTER JOIN tblPATRefundRate transferorRR
 		ON transferorRR.intRefundTypeId = TD.intToRefundTypeId
-)
-SELECT	PT.intTransferId,
-		PT.strTransferNo,
-		PT.dtmTransferDate,
-		PT.intTransferType,
-		'' AS strTransferType,
-		PTD.intTransferorId,
-		PTD.strTransferorName,
-		PTD.strEquityType,
-		PTD.strTransferorRefundType AS strRefundType,
-		PTD.strCertificateNo,
-		PTD.strStockName,
-		PTD.dblQuantityAvailable,
-		PTD.intTransfereeId,
-		PTD.strTransfereeName,
-		PTD.strToCertificateNo,
-		PTD.strToStockName,
-		PTD.dblQuantityTransferred,
-		PTD.strTransfereeFiscal AS strFiscalYear,
-		PT.intConcurrencyId
-	FROM tblPATTransfer PT
-	INNER JOIN PTD
-		ON PTD.intTransferId = PT.intTransferId
 GO
