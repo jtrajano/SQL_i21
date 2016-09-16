@@ -8,7 +8,6 @@ SELECT
 ,ST.strStorageTypeDescription
 ,S.intCommodity
 ,Com.strCommodityCode  
-,S.strFeeType
 ,S.intCurrencyID
 ,Cur.strCurrency  
 FROM tblGRStorageScheduleRule S

@@ -9,8 +9,6 @@ SELECT
 ,S.intAllowanceDays
 ,S.dtmEffectiveDate
 ,S.dtmTerminationDate
-,S.dblFeeRate
-,S.strFeeType
 ,S.intCurrencyID
 ,S.strStorageRate
 ,S.strFirstMonth
