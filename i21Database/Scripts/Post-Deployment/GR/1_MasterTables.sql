@@ -146,3 +146,9 @@ IF EXISTS(SELECT intStorageScheduleTypeId FROM tblSCDistributionOption)
 BEGIN
 	update tblSCDistributionOption set intStorageScheduleTypeId = (SELECT intStorageScheduleTypeId  from tblGRStorageType WHERE strStorageTypeCode = strDistributionOption)
 END
+GO
+IF EXISTS(SELECT 1 FROM tblGRStorageSchedulePeriod WHERE strFeeType IN('Price','Weight'))
+BEGIN
+	UPDATE tblGRStorageSchedulePeriod SET strFeeType='Per Unit' WHERE strFeeType IN('Price','Weight')
+END
+GO
