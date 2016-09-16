@@ -122,6 +122,7 @@ BEGIN
 					UPDATE tblTRRackPriceDetail
 					SET dblVendorRack = @VendorPrice
 						, dblJobberRack = @JobberPrice
+					WHERE intRackPriceHeaderId = @RackPriceId AND intItemId = @ItemId
 				END
 				ELSE
 				BEGIN
