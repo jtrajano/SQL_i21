@@ -17,7 +17,7 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
-					dblDetailQuantity AS dblQuantity,
+					dblQuantity AS dblQuantity,
 					strItemUOM AS strUOM,
 					CAST(dblNoOfLots AS INT) AS dblNoOfLots,
 					strLocationName,
@@ -45,7 +45,7 @@ AS
 					CD.intDiscountScheduleCodeId,
 					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId
 
-		FROM		vyuCTContractDetailView		CD
+		FROM		vyuCTContractSequence		CD
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
@@ -67,8 +67,8 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					CD.ysnMultiplePriceFixation,
-					CAST(NULL AS NUMERIC(12,4)) AS dblHeaderQuantity,
-					strHeaderUnitMeasure,
+					CAST(NULL AS NUMERIC(12,4)) AS	dblHeaderQuantity,
+					QM.strUnitMeasure			AS	strHeaderUnitMeasure,
 					ISNULL(CH.dblNoOfLots,SUM(CD.dblNoOfLots))			AS	dblNoOfLots,
 					LTRIM(NULL)					AS	strLocationName,
 					CAST (NULL AS INT)			AS	intItemId,
@@ -95,8 +95,10 @@ AS
 					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId,
 					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
 
-		FROM		vyuCTContractDetailView		CD
+		FROM		vyuCTContractSequence		CD
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
+		JOIN		tblICUnitMeasure			QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId			
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
 		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		AND			CD.intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
@@ -109,8 +111,8 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					CD.ysnMultiplePriceFixation,
-					dblHeaderQuantity,
-					strHeaderUnitMeasure,
+					CH.dblQuantity,
+					QM.strUnitMeasure,
 					CD.intSalespersonId,
 					CU.intCommodityUnitMeasureId,
 					CH.dblNoOfLots
@@ -129,7 +131,7 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
-					dblDetailQuantity AS dblQuantity,
+					CD.dblQuantity,
 					strItemUOM AS strUOM,
 					PF.intTotalLots AS dblNoOfLots,
 					strLocationName,
@@ -162,7 +164,7 @@ AS
 					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId
 
 		FROM		tblCTPriceFixation			PF
-		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId = PF.intContractDetailId
+		JOIN		vyuCTContractSequence		CD	ON	CD.intContractDetailId = PF.intContractDetailId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
@@ -184,7 +186,7 @@ AS
 					strCommodityDescription,
 					CD.ysnMultiplePriceFixation,
 					CAST(NULL AS NUMERIC(12,4)) AS  dblHeaderQuantity,
-					strHeaderUnitMeasure,
+					QM.strUnitMeasure			AS	strHeaderUnitMeasure,
 					PF.intTotalLots				AS	dblNoOfLots,
 					LTRIM(NULL)					AS	strLocationName,
 					CAST (NULL AS INT)			AS	intItemId,
@@ -216,8 +218,10 @@ AS
 					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
 
 		FROM		tblCTPriceFixation			PF
-		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
+		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
+		JOIN		tblICUnitMeasure			QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId		
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
 		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		GROUP BY	CD.intContractHeaderId,
@@ -229,8 +233,8 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					CD.ysnMultiplePriceFixation,
-					dblHeaderQuantity,
-					strHeaderUnitMeasure,
+					CH.dblQuantity,
+					QM.strUnitMeasure,
 					CD.intSalespersonId,
 					PF.intLotsFixed,
 					PF.intTotalLots,

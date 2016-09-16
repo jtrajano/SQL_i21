@@ -4299,6 +4299,7 @@
     <Build Include="dbo\Views\vyuSCTicketSplitView.sql" />
     <Build Include="dbo\Views\vyuPATRefundCustomer.sql" />
     <Build Include="dbo\Views\vyuPATTransferDetails.sql" />
+    <Build Include="dbo\Views\vyuCTContractSequence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
