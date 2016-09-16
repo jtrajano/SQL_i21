@@ -36,6 +36,8 @@ SELECT IsNULL(BR.intBlendRequirementId, 0) AS intBlendRequirementId
 	,SW1.strComments AS strScheduleComments
 	,W.intPickListId 
 	,CL.strLocationName
+	,PL.strPickListNo
+	,WS1.strName as strPickListStatus
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblSMCompanyLocation CL on CL.intCompanyLocationId =W.intLocationId 
 INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -62,6 +64,8 @@ LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 LEFT JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
 LEFT JOIN dbo.tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 LEFT JOIN dbo.tblMFBlendRequirement BR ON W.intBlendRequirementId = BR.intBlendRequirementId
+Left JOIN dbo.tblMFPickList PL on PL.intPickListId=W.intPickListId
+Left JOIN dbo.tblMFWorkOrderStatus WS1 ON WS1.intStatusId = W.intKitStatusId
 WHERE W.intStatusId IN (
 		9
 		,10
