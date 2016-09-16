@@ -34,7 +34,10 @@ SELECT IsNULL(BR.intBlendRequirementId, 0) AS intBlendRequirementId
 			ORDER BY W.intWorkOrderId DESC
 			)) AS intRecordId
 	,SW1.strComments AS strScheduleComments
+	,W.intPickListId 
+	,CL.strLocationName
 FROM dbo.tblMFWorkOrder W
+JOIN dbo.tblSMCompanyLocation CL on CL.intCompanyLocationId =W.intLocationId 
 INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	AND W.intStatusId <> 13
 INNER JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
