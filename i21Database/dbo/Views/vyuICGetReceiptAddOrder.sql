@@ -99,7 +99,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId
 		, intLoadToReceive = intNoOfLoad - intLoadReceived
 		, dblSeqPrice
 		, dblTax = 0
-		, dblLineTotal = 0
+		, dblLineTotal = CAST((dblDetailQuantity - (dblDetailQuantity - dblBalance)) * dblSeqPrice AS NUMERIC(18, 6))
 		, strLotTracking
 		, intCommodityId
 		, intContainerId = NULL
