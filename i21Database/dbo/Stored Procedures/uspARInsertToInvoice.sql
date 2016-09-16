@@ -138,7 +138,7 @@ FROM tblSOSalesOrder SO
 	LEFT JOIN tblICInventoryShipmentItem ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
 WHERE ISNULL(I.strLotTracking, 'No') = 'No'
 	AND SO.intSalesOrderId = @SalesOrderId
-	AND SI.dblQtyRemaining > 0
+	AND SI.dblQtyRemaining <> @dblZeroAmount
 	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
 	AND (ISNULL(SI.intRecipeItemId, 0) = 0)	
 
