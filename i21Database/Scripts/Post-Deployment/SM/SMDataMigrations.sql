@@ -17,7 +17,7 @@ GO
 	DECLARE @totalRows INT
 
 	SET @currentRow = 1
-	SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE strRoleType NOT IN ('Contact Admin', 'Contact') AND intUserRoleID <> 999
+	SELECT @totalRows = Count(*) FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
 
 	WHILE (@currentRow <= @totalRows)
 	BEGIN
@@ -25,7 +25,7 @@ GO
 	Declare @roleId INT
 	SELECT @roleId = intUserRoleID FROM (  
 		SELECT ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID', *
-		FROM [tblSMUserRole] WHERE strRoleType NOT IN ('Contact Admin', 'Contact') AND intUserRoleID <> 999
+		FROM [tblSMUserRole] WHERE (strRoleType NOT IN ('Contact Admin', 'Contact') OR strRoleType IS NULL) AND intUserRoleID <> 999
 	) a
 	WHERE ROWID = @currentRow
 
