@@ -477,6 +477,8 @@ BEGIN
 				,@StockQtyAvailableToRevalue AS NUMERIC(38,20) = @dblAdjustQty
 				,@StockQtyToRevalue AS NUMERIC(38,20) = @dblAdjustQty
 
+				,@dblCostAdjId AS INT 
+
 		-----------------------------------------------------------------------------------------------------------------------------
 		-- Create the cursor
 		-- Make sure the following options are used: 
@@ -564,21 +566,14 @@ BEGIN
 			-- If there are available out stocks, then revalue it.  
 			IF	@InvTranId IS NOT NULL 
 			BEGIN 
-				-- Calculate the revalue amount for the inventory transaction. 
-				SELECT @InvTranValue =	
-							CASE WHEN @dblNewValue IS NULL THEN 				
-									dbo.fnMultiply(
-										-
-										CASE WHEN ISNULL(@StockQtyAvailableToRevalue, 0) > @StockQtyToRevalue THEN 
-													@StockQtyToRevalue
-												ELSE 
-													ISNULL(@StockQtyAvailableToRevalue, 0)
-										END
-										, (@dblNewCost - @InvTranCost) 
-									) 
-								ELSE 
-									-@dblNewValue
-							END 
+				-- Calculate the revalue amount for the lot-out qty. 
+				SET @InvTranValue = NULL 
+				SELECT	@InvTranValue =
+							-
+							(
+								dbo.fnMultiply(@LotOutQty, @dblNewCalculatedCost) -- New cost
+								- dbo.fnMultiply(@LotOutQty, @CostBucketCost) -- minus by the original cost. 
+							)
 
 				---------------------------------------------------------------------------
 				-- 7. If stock was shipped or reduced from adj, then do the "Revalue Sold". 
