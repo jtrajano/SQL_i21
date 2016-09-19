@@ -36,7 +36,7 @@ SELECT DISTINCT
 	  CASE
 		WHEN Receipt.dblQtyToReceive = 0
 		THEN 0
-		ELSE (Receipt.dblLineTotal/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0))
+		ELSE (ISNULL(Receipt.dblLineTotal,0)/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0))
 	  END
 	
 FROM vyuICGetInventoryReceiptItem Receipt
@@ -60,7 +60,8 @@ FROM vyuICGetInventoryReceiptItem Receipt
 	OUTER APPLY (
 		SELECT SUM(dblLineTotal) AS dblLineTotal FROM dbo.tblICInventoryReceiptItem A WHERE A.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	) LineTotal
-WHERE Receipt.ysnPosted = 1 AND ((Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) != 0 OR (Receipt.dblLineTotal/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) != 0)
+WHERE Receipt.ysnPosted = 1 AND ((Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0)) != 0 OR (CASE WHEN Receipt.dblQtyToReceive = 0  THEN 0  
+																										ELSE (ISNULL(Receipt.dblLineTotal,0)/Receipt.dblQtyToReceive)*(Receipt.dblQtyToReceive - ISNULL(Receipt.dblBillQty,0))END) != 0)
 
 --SELECT 
 --	  Receipt.dtmReceiptDate
