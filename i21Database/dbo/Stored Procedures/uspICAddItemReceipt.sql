@@ -378,12 +378,39 @@ BEGIN
 				,intItemId				= RawData.intItemId
 				,intSubLocationId		= RawData.intSubLocationId
 				,intStorageLocationId	= RawData.intStorageLocationId
-				,dblOrderQty			= ISNULL(RawData.dblQty, 0)
+				,dblOrderQty			= --ISNULL(RawData.dblQty, 0)
+										(
+											CASE	WHEN RawData.strReceiptType = 'Purchase Contract' THEN 
+														CASE	WHEN RawData.intSourceType = 0 THEN -- None
+																	CASE	WHEN (ContractView.ysnLoad = 1) THEN 
+																				ISNULL(ContractView.intNoOfLoad, 0)
+																			ELSE 
+																				ISNULL(ContractView.dblDetailQuantity, 0) 
+																	END
+																WHEN RawData.intSourceType = 1 THEN -- Scale
+																	0 
+																WHEN RawData.intSourceType = 2 THEN -- Inbound Shipment
+																	ISNULL(LogisticsView.dblQuantity, 0)
+																WHEN RawData.intSourceType = 3 THEN -- Transport
+																	ISNULL(ISNULL(TransportView_New.dblOrderedQuantity, TransportView_Old.dblOrderedQuantity), 0) 
+																ELSE 
+																	NULL
+														END
+						
+													WHEN RawData.strReceiptType = 'Purchase Order' THEN 
+														ISNULL(POView.dblQtyOrdered, 0.00)
+													WHEN RawData.strReceiptType = 'Transfer Order' THEN 
+														ISNULL(TransferView.dblQuantity, 0.00)
+													WHEN RawData.strReceiptType = 'Direct' THEN 
+														0.00
+													ELSE 0.00
+											END
+									)
 				,dblOpenReceive			= ISNULL(RawData.dblQty, 0)
 				,dblReceived			= ISNULL(RawData.dblQty, 0)
 				,intUnitMeasureId		= ItemUOM.intItemUOMId
 				,intWeightUOMId			= 
-										CASE	WHEN RawData.intGrossNetUOMId < 1 THEN NULL 
+										CASE	WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL 
 												WHEN GrossNetUnitMeasure.intUnitMeasureId IS NOT NULL THEN GrossNetUOM.intItemUOMId
 												ELSE (
 														SELECT	TOP 1 
@@ -405,8 +432,8 @@ BEGIN
 												WHEN RawData.ysnIsStorage = 1 THEN @OWNERSHIP_TYPE_Storage
 												ELSE @OWNERSHIP_TYPE_Own
 										  END
-				,dblGross				= RawData.dblGross
-				,dblNet					= RawData.dblNet
+				,dblGross				= CASE WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL ELSE RawData.dblGross END
+				,dblNet					= CASE WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL ELSE RawData.dblNet END
 				,intCostUOMId			= RawData.intCostUOMId
 				,intDiscountSchedule	= RawData.intDiscountSchedule
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0) 
@@ -428,6 +455,39 @@ BEGIN
                 LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure    
                     ON GrossNetUOM.intUnitMeasureId = GrossNetUnitMeasure.intUnitMeasureId
                     AND GrossNetUnitMeasure.strUnitType IN ('Weight', 'Volume')
+
+				-- Integrations with the other modules: 
+				-- 1. Purchase Order
+				LEFT JOIN vyuPODetails POView
+					ON POView.intPurchaseId = RawData.intContractHeaderId -- intOrderId
+					AND intPurchaseDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
+					AND RawData.strReceiptType = 'Purchase Order'
+
+				-- 2. Contracts
+				LEFT JOIN vyuCTContractDetailView ContractView
+					ON ContractView.intContractDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
+					AND RawData.strReceiptType = 'Purchase Contract'
+
+				-- 3. Inventory Transfer
+				LEFT JOIN vyuICGetInventoryTransferDetail TransferView
+					ON TransferView.intInventoryTransferDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
+					AND RawData.strReceiptType = 'Transfer Order'
+
+				-- 4. Logistics
+				LEFT JOIN vyuICLoadContainerReceiptContracts LogisticsView
+					ON LogisticsView.intLoadDetailId = RawData.intSourceId
+					AND RawData.strReceiptType = 'Purchase Contract'
+					AND RawData.intSourceType = 2
+
+				-- 5. Transport Loads (New tables)
+				LEFT JOIN vyuTRTransportReceipt_New TransportView_New
+					ON TransportView_New.intTransportReceiptId = RawData.intSourceId
+					AND RawData.intSourceType = 3
+
+				-- 6. Transport Loads (Old tables) 
+				LEFT JOIN vyuTRTransportReceipt_Old TransportView_Old
+					ON TransportView_Old.intTransportReceiptId = RawData.intSourceId
+					AND RawData.intSourceType = 3
 
 		WHERE RawHeaderData.intId = @intId
 
