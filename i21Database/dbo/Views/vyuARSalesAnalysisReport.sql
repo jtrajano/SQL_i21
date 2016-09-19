@@ -158,7 +158,8 @@ FROM
 				 , ICISI.intLineNo
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
-				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
+				 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
+				 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS
@@ -295,7 +296,8 @@ FROM
 			 , ICISI.intLineNo
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
-			 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
+			 --, dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
+			 , dblCost = ABS(AVG(ICIT.dblQty * ICIT.dblCost))
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
