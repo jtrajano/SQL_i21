@@ -30,6 +30,7 @@
 	[strTaxAuthorityId2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnOverridePatronage] BIT NULL DEFAULT (1),
 	[ysnHostLocation] BIT NULL DEFAULT (0),
+	[ysnTrackMFTActivity] BIT NULL DEFAULT (0),
 	[strOutOfStockWarning] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL , 
 	[strLotOverdrawnWarning] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL , 
 	[strDefaultCarrier] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
