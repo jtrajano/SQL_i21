@@ -30,5 +30,5 @@
 			,strSalesPersonType = 'Sales Rep Contact'
 	from tblARSalesperson, tblEMEntity e, tblEMEntityToContact
 	where
-		e.intEntityId = tblARSalesperson.intEntitySalespersonId
-		and tblEMEntityToContact.intEntityId = e.intEntityId
+		tblEMEntityToContact.intEntityId = tblARSalesperson.intEntitySalespersonId
+		and e.intEntityId = tblEMEntityToContact.intEntityContactId
