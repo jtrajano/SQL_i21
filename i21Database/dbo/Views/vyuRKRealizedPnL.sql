@@ -1,7 +1,9 @@
 ﻿CREATE VIEW vyuRKRealizedPnL  
 AS  
-SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,* from (
-SELECT *,(dblGrossPL1-dblFutCommission1) / case when ysnSubCurrency = 'true' then intCent else 1 end AS dblNetPL,-dblFutCommission1/ case when ComSubCurrency = 'true' then ComCent else 1 end as dblFutCommission FROM(  
+SELECT TOP 100 PERCENT dblGrossPL1 a, dblFutCommission1 b, convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,
+dblGrossPL+dblFutCommission  AS dblNetPL,
+* from (
+SELECT *,-dblFutCommission1/ case when ComSubCurrency = 'true' then ComCent else 1 end as dblFutCommission FROM(  
 SELECT   
 ((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize) as dblGrossPL1,((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL,* FROM  
 (  
@@ -18,7 +20,7 @@ SELECT psh.intMatchFuturesPSHeaderId,
     ot.strInternalTradeNo strLBrokerTradeNo,  
     ot1.strInternalTradeNo strSBrokerTradeNo,  
     fm.dblContractSize dblContractSize,0 as intConcurrencyId,  
-    CASE WHEN bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end as dblFutCommission1,  
+    CASE WHEN bc.intFuturesRateType= 2 then isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0)*2 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end as dblFutCommission1,  
     fm.strFutMarketName,  
     om.strFutureMonth,  
     psh.intMatchNo,  
@@ -43,4 +45,4 @@ SELECT psh.intMatchFuturesPSHeaderId,
   JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId AND ot.intInstrumentTypeId =1
   )t)t1
-  )t ORDER BY RowNum ASC
+  )t  ORDER BY RowNum ASC
