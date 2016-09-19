@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuRKUnrealizedPnL]  
+﻿CREATE VIEW vyuRKUnrealizedPnL_Copy
 AS  
  
 SELECT TOP 100 PERCENT convert(int,DENSE_RANK() OVER(ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth))) RowNum, strFutMarketName+ ' - ' + strFutureMonth + ' - ' + strName MonthOrder,* from 
@@ -24,8 +24,8 @@ SELECT  intFutOptTransactionId,
 		icc.strCommodityCode,  
 		sl.strLocationName,     
 		ot.intNoOfContract as intOriginalQty,  
-		isnull(Case WHEN ot.strBuySell='Buy' THEN isnull(ot.intNoOfContract,0) ELSE null end,0) Long1 ,  
-		isnull(Case WHEN ot.strBuySell='Sell' THEN isnull(ot.intNoOfContract,0) ELSE null end,0) Sell1,
+		Case WHEN ot.strBuySell='Buy' THEN isnull(ot.intNoOfContract,0) ELSE null end Long1 ,  
+		Case WHEN ot.strBuySell='Sell' THEN isnull(ot.intNoOfContract,0) ELSE null end Sell1,   
 		ot.intNoOfContract as intNet1,  
 		ot.dblPrice as dblActual,  
 		null as dblClosing,    
@@ -49,7 +49,5 @@ SELECT  intFutOptTransactionId,
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId = 1 
  LEFT JOIN tblCTBook cb on cb.intBookId= ot.intBookId  
  LEFT join tblCTSubBook csb on csb.intSubBookId=ot.intSubBookId 
-  )t1)t1 
-)t1 where (dblLong<>0 or dblShort <>0) ORDER BY RowNum ASC
-
-GO
+  )t1)t1  
+)t1 ORDER BY RowNum ASC 
