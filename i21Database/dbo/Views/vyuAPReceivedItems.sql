@@ -68,9 +68,12 @@ FROM
 		,[str1099Type]				=	D2.str1099Type
 		,[intStorageLocationId]		=	tblReceived.intStorageLocationId		 
 		,[strStorageLocationName]	=	tblReceived.strStorageLocationName
+	
 		,[dblNetShippedWeight]		=	0.00
 		,[dblWeightLoss]			=	0.00
 		,[dblFranchiseWeight]		=	0.00
+		,[intLocationId]			=	tblReceived.intLocationId
+	
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -116,6 +119,7 @@ FROM
 				,EL.strLocationName AS strVendorLocation
 				,B1.intStorageLocationId
 				,ISL.strName AS strStorageLocationName
+				,intLocationId = A1.intLocationId
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -167,6 +171,7 @@ FROM
 				,A1.intCurrencyId
 				,B1.intStorageLocationId
 				,ISL.strName
+				,A1.intLocationId
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -249,6 +254,7 @@ FROM
 	,[dblNetShippedWeight]		=	0.00
 	,[dblWeightLoss]			=	0.00
 	,[dblFranchiseWeight]		=	0.00 
+	,[intLocationId]			=	A.intShipToId
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
@@ -342,6 +348,7 @@ FROM
 	,[dblNetShippedWeight]		=	ISNULL(Loads.dblNet,0)
 	,[dblWeightLoss]			=	ISNULL(B.dblGross - B.dblNet,0)
 	,[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END
+	,[intLocationId]			=	A.intLocationId
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -462,6 +469,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[intLocationId]							=	A.intLocationId
 	FROM [vyuAPChargesForBilling] A
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
 																																						   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
@@ -551,6 +559,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[intLocationId]							=	A.intLocationId
 	FROM vyuLGShipmentPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -636,6 +645,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[intLocationId]							=	NULL --Contract doesn't have location
 	FROM		vyuCTContractCostView		CC
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -718,6 +728,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[intLocationId]							=	A.intLocationId
 	FROM vyuLGLoadPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -792,6 +803,7 @@ FROM
 		,[dblNetShippedWeight]						=	0.00
 		,[dblWeightLoss]							=	0.00
 		,[dblFranchiseWeight]						=	0.00
+		,[intLocationId]							=	CV.intCompanyLocationId
 	FROM vyuLGLoadCostForVendor CV
 	JOIN tblAPVendor V ON CV.intEntityVendorId = V.intEntityVendorId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = CV.intItemUOMId 
