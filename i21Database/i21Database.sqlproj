@@ -4323,6 +4323,7 @@
     <Build Include="dbo\Views\vyuRKUnrealizedPnL_Copy.sql" />
     <Build Include="dbo\Views\vyuLGStockSaleSearch.sql" />
     <Build Include="dbo\Views\vyuLGStockSalesAllocation.sql" />
+    <Build Include="dbo\Views\vyuTMForPrintDeliveryTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
