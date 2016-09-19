@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceAmounts]
-	 @InvoiceId		AS INT
+	 @InvoiceId				AS INT
+	,@AvailableDiscountOnly	AS BIT = 0
 AS
 
 BEGIN
@@ -25,6 +26,7 @@ FROM
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
+
 UPDATE
 	tblARInvoiceDetailTax
 SET
@@ -39,14 +41,16 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	 [dblQtyOrdered]	 = ISNULL([dblQtyOrdered], @ZeroDecimal)
-	,[dblQtyShipped]	 = ISNULL([dblQtyShipped], @ZeroDecimal)
-	,[dblDiscount]		 = ISNULL([dblDiscount], @ZeroDecimal)
-	,[dblItemWeight]	 = ISNULL([dblItemWeight], 1.00)
-	,[dblShipmentNetWt]	 = ISNULL([dblShipmentNetWt], [dblQtyShipped])
-	,[dblPrice]			 = ISNULL([dblPrice], @ZeroDecimal)
-	,[dblTotalTax]		 = ISNULL([dblTotalTax], @ZeroDecimal)
-	,[dblTotal]			 = ISNULL([dblTotal], @ZeroDecimal)
+	 [dblQtyOrdered]			= ISNULL([dblQtyOrdered], @ZeroDecimal)
+	,[dblQtyShipped]			= ISNULL([dblQtyShipped], @ZeroDecimal)
+	,[dblDiscount]				= ISNULL([dblDiscount], @ZeroDecimal)
+	,[dblItemWeight]			= ISNULL([dblItemWeight], 1.00)
+	,[dblShipmentNetWt]			= ISNULL([dblShipmentNetWt], [dblQtyShipped])
+	,[dblPrice]					= ISNULL([dblPrice], @ZeroDecimal)
+	,[dblTotalTax]				= ISNULL([dblTotalTax], @ZeroDecimal)
+	,[dblTotal]					= ISNULL([dblTotal], @ZeroDecimal)
+	,[dblItemTermDiscount]		= ISNULL([dblItemTermDiscount], @ZeroDecimal)
+	,[strItemTermDiscountBy]	= ISNULL([strItemTermDiscountBy], 'Amount') 
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	
@@ -61,9 +65,46 @@ SET
 	,[dblDiscount]			= ISNULL([dblDiscount], @ZeroDecimal)
 	,[dblAmountDue]			= ISNULL([dblAmountDue], @ZeroDecimal)
 	,[dblPayment]			= ISNULL([dblPayment], @ZeroDecimal)
+	,[dblDiscountAvailable]	= ISNULL([dblDiscountAvailable], @ZeroDecimal)
+	,[dblTotalTermDiscount]	= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
+	,[dblInterest]			= ISNULL([dblInterest], @ZeroDecimal)
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
-	
+
+
+UPDATE
+	tblARInvoice
+SET
+	  [dblDiscountAvailable]	= [dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal]
+	 ,[dblTotalTermDiscount]	= T.[dblItemTermDiscountTotal]
+FROM
+	(
+		SELECT 
+			 SUM(
+				CASE WHEN [strItemTermDiscountBy] = 'Percent'
+					THEN
+						([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000)
+					ELSE
+						[dblItemTermDiscount]
+				END
+				)	AS [dblItemTermDiscountTotal]
+			,[intInvoiceId]
+		FROM
+			tblARInvoiceDetail
+		WHERE
+			[intInvoiceId] = @InvoiceIdLocal
+		GROUP BY
+			[intInvoiceId]
+	)
+	 T
+WHERE
+	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
+	AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
+
+
+IF (@AvailableDiscountOnly = 1)
+	RETURN 1;
+
 	
 UPDATE
 	tblARInvoiceDetail

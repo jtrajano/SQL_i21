@@ -84,6 +84,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
+	,[ysnUpdateAvailableDiscount]			BIT												NULL		-- If [ysnUpdateAvailableDiscount] = 1 > Updates existing Posted/Unposted Invoice Available Discount Amount
+
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
     ,[intItemId]							INT												NULL		-- The Item Id 
@@ -161,7 +163,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
-    ,[intConversionAccountId]                INT                                                NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
+    ,[intConversionAccountId]                INT                                            NULL        -- Key Value from tblGLAccount with category = 'General' and type = 'Asset'
 
 	,[intStorageScheduleTypeId]				INT												NULL		-- Indicates the Grain Bank of an Item
 )
