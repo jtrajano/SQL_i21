@@ -11,7 +11,7 @@
 		  ,strPhone = ph.strPhone
 		  ,strMobile = mob.strPhone
 		  ,el.strLocationName
-		  ,ec.strTimezone
+		  ,elc.strTimezone
 		  ,intConcurrencyId = 1
 		  ,intTicketProductId = (select top 1 intProductId from tblARCustomerProductVersion where intCustomerId = c.[intEntityCustomerId])
 		  ,intVersionId = (select top 1 intVersionId from tblARCustomerProductVersion where intCustomerId = c.[intEntityCustomerId])
@@ -28,6 +28,8 @@
 		  inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 		  inner join tblEMEntity e on e.intEntityId = c.[intEntityCustomerId]
 		  left outer join tblEMEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
+		  left outer join tblEMEntityToContact etcc on etcc.intEntityContactId = etc.intEntityContactId
+		  left outer join tblEMEntityLocation elc on elc.intEntityLocationId = etcc.intEntityLocationId
 		  left join tblEMEntityPhoneNumber ph 
 		   on ec.intEntityId = ph.intEntityId
 		  left join tblEMEntityMobileNumber mob
