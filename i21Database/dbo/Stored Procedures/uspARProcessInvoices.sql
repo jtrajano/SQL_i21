@@ -1162,7 +1162,7 @@ BEGIN TRY
 			,[intEntitySalespersonId]	= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 			,[intFreightTermId]			= @FreightTermId
 			,[intShipViaId]				= ISNULL(@ShipViaId, EL.[intShipViaId])
-			,[intPaymentMethodId]		= @PaymentMethodId
+			,[intPaymentMethodId]		= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
 			,[strInvoiceOriginId]		= @InvoiceOriginId
 			,[strPONumber]				= @PONumber
 			,[strBOLNumber]				= @BOLNumber
