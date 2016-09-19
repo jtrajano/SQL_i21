@@ -2,6 +2,8 @@
 	 @ImportLogId			INT
 	,@IsRecap				BIT = 0
 	,@UserEntityId			INT	= NULL
+	,@PaymentFrom			INT = NULL OUTPUT
+	,@PaymentTo				INT = NULL OUTPUT	
 AS
 
 BEGIN
@@ -13,9 +15,12 @@ SET ANSI_WARNINGS OFF
 	
 DECLARE @DateNow			DATETIME
 	  , @DefaultCurrencyId	INT
+	  , @TotalPayments		INT
 
 SET @DateNow = CAST(GETDATE() AS DATE)
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+SET @PaymentFrom = 0
+SET @PaymentTo = 0
 
 DECLARE @PaymentsForImport AS TABLE(intImportLogDetailId INT UNIQUE)
 
@@ -24,8 +29,9 @@ SELECT intImportLogDetailId FROM tblARImportLogDetail
 WHERE intImportLogId = @ImportLogId
 	AND ISNULL(ysnSuccess,0) = 1
 	AND ISNULL(ysnImported,0) = 0
-	--AND ISNULL(ysnRecap,0) = 0
 ORDER BY intImportLogDetailId
+
+SELECT @TotalPayments = COUNT(*) FROM @PaymentsForImport
 
 WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 	BEGIN
@@ -39,10 +45,11 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 			  , @dtmDatePaid				DATETIME
 			  , @dblAmountPaid				DECIMAL(18, 6)
 			  , @strPaymentInfo				NVARCHAR(50)
-			  , @ErrorMessage				NVARCHAR(250)
-		
-		SELECT TOP 1 @intImportLogDetailId = intImportLogDetailId FROM @PaymentsForImport ORDER BY intImportLogDetailId
-		     
+			  , @ErrorMessage				NVARCHAR(250)			  
+			  , @intCurrentPaymentCount     INT
+
+		SELECT TOP 1 @intImportLogDetailId	= intImportLogDetailId FROM @PaymentsForImport ORDER BY intImportLogDetailId
+		SELECT @intCurrentPaymentCount		= COUNT(*) FROM @PaymentsForImport     
 		SELECT  @intEntityCustomerId		= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = ILD.strCustomerNumber)
 			  , @intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = ILD.strLocationName)
 			  , @intUndepositedAccountId	= (SELECT TOP 1 intUndepositedFundsId FROM tblSMCompanyLocation WHERE strLocationName = ILD.strLocationName)
@@ -110,6 +117,12 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 				   ,ysnSuccess			= 1
 				   ,strEventResult		= (SELECT 'Payment #:' + strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentId) + ' Imported.'
 				WHERE intImportLogDetailId = @intImportLogDetailId
+
+				IF @TotalPayments = @intCurrentPaymentCount
+					SET @PaymentFrom = @intPaymentId
+
+				IF @TotalPayments > 1 AND @intCurrentPaymentCount = 1
+					SET @PaymentTo = @intPaymentId
 			END
 		ELSE IF (LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1) AND @IsRecap = 1
 			BEGIN
@@ -123,8 +136,5 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 
 		DELETE FROM @PaymentsForImport WHERE intImportLogDetailId = @intImportLogDetailId
 	END
-
---UPDATE tblARImportLogDetail SET ysnRecap = 0
---WHERE intImportLogId = @ImportLogId
-
+	
 END
