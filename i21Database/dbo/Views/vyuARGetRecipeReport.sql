@@ -17,7 +17,7 @@ FROM
 	 , intRecipeId
 	 , dblQtyOrdered
 	 , dblQtyShipped	 
-	 , dblDiscount
+	 , dblDiscount				= ISNULL(dblDiscount, 0) / 100
 	 , dblTotalTax
 	 , dblPrice
 	 , dblTotal
@@ -31,7 +31,7 @@ SELECT strTransactionType		= 'Invoice'
 	 , intRecipeId
 	 , dblQtyOrdered
 	 , dblQtyShipped	 
-	 , dblDiscount
+	 , dblDiscount				= ISNULL(dblDiscount, 0) / 100
 	 , dblTotalTax
 	 , dblPrice
 	 , dblTotal	 
