@@ -2,7 +2,7 @@
 	PRINT N'BEGIN INSERT VERSION UPDATE'
 GO
 	INSERT INTO tblSMBuildNumber (strVersionNo, dtmLastUpdate)
-	SELECT '16.3', getdate()
+	SELECT '16.4', getdate()
 GO
 	PRINT N'END INSERT VERSION UPDATE'
 GO
