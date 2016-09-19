@@ -1751,6 +1751,119 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (reset !== false) reset = true;
 
+        var computeItemTax = function (itemTaxes, me, reset) {
+
+            if (!detailRecord) {
+                return;
+            }
+
+            var totalItemTax = 0.00,
+                qtyOrdered = detailRecord.get('dblOpenReceive'),
+                unitCost = detailRecord.get('dblUnitCost');
+
+            if (reset !== false) reset = true;
+
+            // Adjust the item price by the sub currency
+            {
+                var isSubCurrency = detailRecord.get('ysnSubCurrency');
+                var costCentsFactor = masterRecord.get('intSubCurrencyCents');
+
+                // sanitize the value for the sub currency.
+                costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
+
+                // check if there is a need to compute for the sub currency.
+                if (!isSubCurrency) {
+                    costCentsFactor = 1;
+                }
+
+                unitCost = unitCost / costCentsFactor;
+            }
+        
+            detailRecord.tblICInventoryReceiptItemTaxes().removeAll();
+            
+            //Calculate Cost UOM Conversion Factor
+            var costCF = detailRecord.get('dblCostUOMConvFactor'),
+                qtyCF = detailRecord.get('dblItemUOMConvFactor'),
+                netWgtCF = detailRecord.get('dblWeightUOMConvFactor'),
+                valueCostCF;
+            
+            // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
+            if (iRely.Functions.isEmpty(detailRecord.get('intWeightUOMId'))) {
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+                unitCost = unitCost * (qtyCF/costCF);
+            }
+
+            // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
+            else {
+                var qtyOrdered = detailRecord.get('dblNet');
+                var netWgtCF = detailRecord.get('dblWeightUOMConvFactor');
+
+                // Sanitize the cost conversion factor.
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
+                costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+                
+                unitCost = unitCost * (netWgtCF/costCF);
+            }
+
+
+            Ext.Array.each(itemTaxes, function (itemDetailTax) {
+                var taxableAmount,
+                    taxAmount;
+                
+
+                taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
+                if (itemDetailTax.strCalculationMethod === 'Percentage') {
+                    taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
+                } else {
+                    taxAmount = qtyOrdered * itemDetailTax.dblRate;
+                }
+
+                if (itemDetailTax.ysnCheckoffTax){
+                    taxAmount = taxAmount * -1;
+                }
+
+                taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
+
+                if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
+                    if (itemDetailTax.ysnTaxExempt)
+                        taxAmount = 0.00;
+                    itemDetailTax.dblTax = taxAmount;
+                    itemDetailTax.dblAdjustedTax = taxAmount;
+                }
+                else {
+                    itemDetailTax.dblTax = taxAmount;
+                    itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
+                    itemDetailTax.ysnTaxAdjusted = true;
+                }
+                totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
+
+                var newItemTax = Ext.create('Inventory.model.ReceiptItemTax', {
+                    intTaxGroupMasterId: itemDetailTax.intTaxGroupMasterId,
+                    intTaxGroupId: itemDetailTax.intTaxGroupId,
+                    intTaxCodeId: itemDetailTax.intTaxCodeId,
+                    intTaxClassId: itemDetailTax.intTaxClassId,
+                    strTaxCode: itemDetailTax.strTaxCode,
+                    strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
+                    strCalculationMethod: itemDetailTax.strCalculationMethod,
+                    dblRate: itemDetailTax.dblRate,
+                    dblTax: itemDetailTax.dblTax,
+                    dblAdjustedTax: itemDetailTax.dblAdjustedTax,
+                    intTaxAccountId: itemDetailTax.intTaxAccountId,
+                    ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
+                    ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
+                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                });
+                detailRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
+            });
+
+            detailRecord.set('dblTax', totalItemTax);
+            detailRecord.set('dblLineTotal', me.calculateLineTotal(masterRecord, detailRecord));
+        }
+
+
         if (detailRecord) {
             var current = {
                 ItemId: detailRecord.get('intItemId'),
@@ -1764,7 +1877,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             };
 
             if (reset)
-                iRely.Functions.getItemTaxes(current, me.computeItemTax, me);
+                iRely.Functions.getItemTaxes(current, computeItemTax, me);
             else {
                 var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
                 if (receiptItemTaxes) {
@@ -1790,129 +1903,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             ItemTaxes.push(taxes);
                         });
 
-                        me.computeItemTax(ItemTaxes, me, reset);
+                        computeItemTax(ItemTaxes, me, reset);
                     }
                     else {
-                        iRely.Functions.getItemTaxes(current, me.computeItemTax, me);
+                        iRely.Functions.getItemTaxes(current, computeItemTax, me);
                     }
                 }
             }
         }
-    },
-
-    computeItemTax: function (itemTaxes, me, reset) {
-        var win = me.getView();
-        var currentReceipt  = win.viewModel.data.current;
-        var currentReceiptItem = win.viewModel.data.currentReceiptItem;
-
-        if (!currentReceiptItem) {
-            return;
-        }
-
-        var totalItemTax = 0.00,
-            qtyOrdered = currentReceiptItem.get('dblOpenReceive'),
-            unitCost = currentReceiptItem.get('dblUnitCost');
-
-        if (reset !== false) reset = true;
-
-        // Adjust the item price by the sub currency
-        {
-            var isSubCurrency = currentReceiptItem.get('ysnSubCurrency');
-            var costCentsFactor = currentReceipt.get('intSubCurrencyCents');
-
-            // sanitize the value for the sub currency.
-            costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
-
-            // check if there is a need to compute for the sub currency.
-            if (!isSubCurrency) {
-                costCentsFactor = 1;
-            }
-
-            unitCost = unitCost / costCentsFactor;
-        }
-       
-        currentReceiptItem.tblICInventoryReceiptItemTaxes().removeAll();
-        
-         //Calculate Cost UOM Conversion Factor
-        var costCF = currentReceiptItem.get('dblCostUOMConvFactor'),
-            qtyCF = currentReceiptItem.get('dblItemUOMConvFactor'),
-            netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor'),
-            valueCostCF;
-        
-        // Calculate Cost UOM Conversion Factor with respect to the Item UOM..
-         if (iRely.Functions.isEmpty(currentReceiptItem.get('intWeightUOMId'))) {
-            // Sanitize the cost conversion factor.
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-
-            unitCost = unitCost * (qtyCF/costCF);
-        }
-
-        // Calculate Cost UOM Conversion Factor with respect to the Gross UOM..
-        else {
-            var qtyOrdered = currentReceiptItem.get('dblNet');
-            var netWgtCF = currentReceiptItem.get('dblWeightUOMConvFactor');
-
-            // Sanitize the cost conversion factor.
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : netWgtCF;
-            costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
-            
-            unitCost = unitCost * (netWgtCF/costCF);
-        }
-
-
-        Ext.Array.each(itemTaxes, function (itemDetailTax) {
-            var taxableAmount,
-                taxAmount;
-               
-
-            taxableAmount = me.getTaxableAmount(qtyOrdered, unitCost, itemDetailTax, itemTaxes);
-            if (itemDetailTax.strCalculationMethod === 'Percentage') {
-                taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
-            } else {
-                taxAmount = qtyOrdered * itemDetailTax.dblRate;
-            }
-
-            if (itemDetailTax.ysnCheckoffTax){
-                taxAmount = taxAmount * -1;
-            }
-
-            taxAmount = i21.ModuleMgr.Inventory.roundDecimalFormat(taxAmount, 2);
-
-            if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
-                if (itemDetailTax.ysnTaxExempt)
-                    taxAmount = 0.00;
-                itemDetailTax.dblTax = taxAmount;
-                itemDetailTax.dblAdjustedTax = taxAmount;
-            }
-            else {
-                itemDetailTax.dblTax = taxAmount;
-                itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
-                itemDetailTax.ysnTaxAdjusted = true;
-            }
-            totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
-
-            var newItemTax = Ext.create('Inventory.model.ReceiptItemTax', {
-                intTaxGroupMasterId: itemDetailTax.intTaxGroupMasterId,
-                intTaxGroupId: itemDetailTax.intTaxGroupId,
-                intTaxCodeId: itemDetailTax.intTaxCodeId,
-                intTaxClassId: itemDetailTax.intTaxClassId,
-                strTaxCode: itemDetailTax.strTaxCode,
-                strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
-                strCalculationMethod: itemDetailTax.strCalculationMethod,
-                dblRate: itemDetailTax.dblRate,
-                dblTax: itemDetailTax.dblTax,
-                dblAdjustedTax: itemDetailTax.dblAdjustedTax,
-                intTaxAccountId: itemDetailTax.intTaxAccountId,
-                ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
-                ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
-                ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
-            });
-            currentReceiptItem.tblICInventoryReceiptItemTaxes().add(newItemTax);
-        });
-
-        currentReceiptItem.set('dblTax', totalItemTax);
-        currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
     },
 
     calculateLineTotal: function (currentReceipt, currentReceiptItem){
