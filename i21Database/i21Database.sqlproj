@@ -4313,6 +4313,7 @@
     <Build Include="dbo\Tables\tblCRMPriority.sql" />
     <Build Include="dbo\Tables\tblCRMMilestone.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountIdByLocation.sql" />
+    <Build Include="dbo\Views\vyuTMForPrintDeliveryTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
