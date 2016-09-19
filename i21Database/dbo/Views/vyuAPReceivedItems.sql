@@ -715,6 +715,9 @@ FROM
 		,[str1099Type]								=	D2.str1099Type 
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
 	FROM vyuLGLoadPurchaseContracts A
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -786,6 +789,9 @@ FROM
 		,[str1099Type]								=	CV.str1099Type 	
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
+		,[dblNetShippedWeight]						=	0.00
+		,[dblWeightLoss]							=	0.00
+		,[dblFranchiseWeight]						=	0.00
 	FROM vyuLGLoadCostForVendor CV
 	JOIN tblAPVendor V ON CV.intEntityVendorId = V.intEntityVendorId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = CV.intItemUOMId 
