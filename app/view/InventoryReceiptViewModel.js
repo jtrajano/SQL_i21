@@ -330,6 +330,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     },
 
     formulas: {
+        receiptTitle: function(get) {
+            if(get('current.ysnOrigin')) {
+                return get('current.strReceiptNumber') + ' (Origin)';
+            }
+            return get('current.strReceiptNumber');
+        },
         checkTransportPosting: function(get) {
             if (get('current.intSourceType') === 3) {
                 return true;

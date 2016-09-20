@@ -184,7 +184,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         },
         binding: {
             bind: {
-                title: 'Inventory Receipt - {current.strReceiptNumber}'
+                title: 'Inventory Receipt - {receiptTitle}'
             },
             btnSave: {
                 disabled: '{isReceiptReadonly}'
