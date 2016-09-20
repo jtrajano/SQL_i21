@@ -2020,6 +2020,12 @@ BEGIN
     VALUES(2,'Sales Contract')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFCostSource WHERE intCostSourceId = 3)
+BEGIN
+    INSERT INTO tblMFCostSource(intCostSourceId,strName)
+    VALUES(3,'Customer Storage')
+END
+GO
 IF NOT EXISTS(SELECT * FROM tblMFCostType WHERE intCostTypeId = 1)
 BEGIN
     INSERT INTO tblMFCostType(intCostTypeId,strName)
