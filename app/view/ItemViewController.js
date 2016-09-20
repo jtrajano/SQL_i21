@@ -394,6 +394,18 @@ Ext.define('Inventory.view.ItemViewController', {
                         defaultFilters: [{
                             column: 'strAccountCategoryGroupCode',
                             value: 'INV'
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Write-Off Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'    
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Revalue Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'    
                         }]
                     }
                 },
@@ -2463,8 +2475,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Raw Material":
@@ -2476,8 +2488,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Finished Good":
@@ -2488,8 +2500,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 me.addAccountCategory(current, 'Inventory Adjustment', accountCategoryList);
                 me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
                 me.addAccountCategory(current, 'Auto-Variance', accountCategoryList);
-                me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
-                me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Revalue Sold', accountCategoryList);
+                //me.addAccountCategory(current, 'Write-Off Sold', accountCategoryList);
                 break;
 
             case "Other Charge":

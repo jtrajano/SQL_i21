@@ -110,6 +110,18 @@ Ext.define('Inventory.view.CategoryViewController', {
                         defaultFilters: [{
                             column: 'strAccountCategoryGroupCode',
                             value: 'INV'
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Write-Off Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'    
+                        },
+                        {
+                            column: 'strAccountCategory',
+                            value: 'Revalue Sold',
+                            conjunction: 'and',
+                            condition: 'noteq'    
                         }]
                     }
                 },
