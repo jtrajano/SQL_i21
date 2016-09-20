@@ -879,7 +879,8 @@ BEGIN
 	WHERE intInvoiceId = @NewInvoiceId AND tblARInvoiceDetail.intItemId = CopySO.intItemId AND tblARInvoiceDetail.intItemUOMId = CopySO.intItemUOMId AND tblARInvoiceDetail.strSalesOrderNumber = CopySO.strSalesOrderNumber
 END
 
- 
+IF ISNULL(@NewInvoiceId, 0) > 0
+	UPDATE tblARInvoice SET strType = 'Software' WHERE intInvoiceId = @NewInvoiceId
 
 --COMMIT TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
