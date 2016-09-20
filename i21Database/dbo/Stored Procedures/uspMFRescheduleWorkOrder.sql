@@ -525,7 +525,27 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT @dtmPlannedStartDate = @dtmShiftStartTime
+				IF EXISTS (
+						SELECT *
+						FROM dbo.tblMFScheduledMaintenanceDetail
+						WHERE intShiftId = @intShiftId
+							AND dtmCalendarDate = @dtmCalendarDate
+							AND dtmStartTime = @dtmShiftStartTime
+						)
+				BEGIN
+					SELECT @dtmPlannedStartDate = dtmEndTime
+						,@intDuration = @intDuration - (DATEDIFF(MINUTE, dtmStartTime, dtmEndTime) * @intNoOfMachine)
+						,@intRemainingDuration = @intRemainingDuration - DATEDIFF(MINUTE, dtmStartTime, dtmEndTime)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND dtmCalendarDate = @dtmCalendarDate
+						AND dtmStartTime = @dtmShiftStartTime
+				END
+				ELSE
+				BEGIN
+					SELECT @dtmPlannedStartDate = @dtmShiftStartTime
+				END
+				
 			END
 
 			IF @dtmEarliestStartDate IS NOT NULL
@@ -668,6 +688,18 @@ BEGIN TRY
 						AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
 							AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
 
+					SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + SUM(intDuration)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND dtmStartTime >= @dtmPlannedStartDate
+						AND dtmEndTime <= @dtmPlannedEndDate
+
+					SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE,dtmStartTime, @dtmPlannedEndDate)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND @dtmPlannedEndDate BETWEEN dtmStartTime
+							AND dtmEndTime
+
 					IF @intShiftBreakTypeDuration IS NOT NULL
 						SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
 
@@ -757,6 +789,18 @@ BEGIN TRY
 							WHERE intShiftId = @intShiftId
 								AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
 									AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
+
+							SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + SUM(intDuration)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND dtmStartTime >= @dtmPlannedStartDate
+						AND dtmEndTime <= @dtmPlannedEndDate
+
+					SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE,dtmStartTime, @dtmPlannedEndDate)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND @dtmPlannedEndDate BETWEEN dtmStartTime
+							AND dtmEndTime
 
 							IF @intShiftBreakTypeDuration IS NOT NULL
 								SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
@@ -861,6 +905,18 @@ BEGIN TRY
 						AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
 							AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
 
+					SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + SUM(intDuration)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND dtmStartTime >= @dtmPlannedStartDate
+						AND dtmEndTime <= @dtmPlannedEndDate
+
+					SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE,dtmStartTime, @dtmPlannedEndDate)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND @dtmPlannedEndDate BETWEEN dtmStartTime
+							AND dtmEndTime
+
 					IF @intShiftBreakTypeDuration IS NOT NULL
 						SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
 
@@ -921,6 +977,35 @@ BEGIN TRY
 				WHERE intShiftId = @intShiftId
 					AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
 						AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
+
+				IF ISNULL((
+								SELECT SUM(intDuration)
+								FROM dbo.tblMFScheduledMaintenanceDetail
+								WHERE intShiftId = @intShiftId
+									AND dtmStartTime >= @dtmShiftStartTime
+									AND dtmEndTime <= @dtmShiftEndTime
+								), 0) - @intDuration = 0
+					BEGIN
+						SELECT @intCalendarDetailId = Min(intCalendarDetailId)
+							FROM @tblMFScheduleWorkOrderCalendarDetail
+							WHERE intCalendarDetailId > @intCalendarDetailId
+
+							SELECT @intAllottedNoOfMachine = 0
+
+						BREAK
+					END
+
+					SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + SUM(intDuration)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND dtmStartTime >= @dtmPlannedStartDate
+						AND dtmEndTime <= @dtmPlannedEndDate
+
+					SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE,dtmStartTime, @dtmPlannedEndDate)
+					FROM dbo.tblMFScheduledMaintenanceDetail
+					WHERE intShiftId = @intShiftId
+						AND @dtmPlannedEndDate BETWEEN dtmStartTime
+							AND dtmEndTime
 
 				IF @intShiftBreakTypeDuration IS NOT NULL
 					SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
