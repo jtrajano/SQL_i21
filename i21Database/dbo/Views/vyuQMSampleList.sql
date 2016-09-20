@@ -4,6 +4,7 @@ SELECT S.intSampleId
 	,S.strSampleNumber
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
+	,CH.strCustomerContract
 	,IC.strContractItemName
 	,I1.strItemNo AS strBundleItemNo
 	,I.strItemNo
