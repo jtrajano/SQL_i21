@@ -861,6 +861,11 @@ BEGIN TRY
 					,1
 					,0
 			END
+
+			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
+			FROM [#SettleStorage]
+			WHERE intSettleStorageKey > @SettleStorageKey AND dblStorageUnits > 0
+
 		END
 		ELSE
 			BREAK;
