@@ -64,3 +64,8 @@ CREATE INDEX [IX_tblQMTestResult_intPropertyId] ON [dbo].[tblQMTestResult] ([int
 GO
 
 CREATE INDEX [IX_tblQMTestResult_intSampleId_intPropertyId] ON [dbo].[tblQMTestResult] ([intSampleId], [intPropertyId])
+
+GO
+
+CREATE INDEX [IX_tblQMTestResult_intTestId] ON [dbo].[tblQMTestResult] ([intTestId])
+

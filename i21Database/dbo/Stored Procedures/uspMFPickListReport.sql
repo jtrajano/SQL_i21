@@ -325,10 +325,6 @@ Begin --Sales Order Pick List
 		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Footer'
 
-	Select @dblTotalCost=ISNULL(SUM(dblQtyOrdered * ISNULL(dblPrice,0)),0) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
-	
-	Set @dblTotalCost=@dblTotalCost + (Select ISNULL(SUM(dblLineTotal),0) From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId))
-
 	If @intPickListId>0
 		Begin
 			INSERT INTO @tblItems
@@ -348,8 +344,9 @@ Begin --Sales Order Pick List
 					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
 					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
 					pld.dblQuantity AS dblQuantity,
-					CASE WHEN ISNULL(pld.intLotId,0)>0 THEN dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0)
-					Else pld.dblQuantity * ISNULL(sd.dblPrice,0.0) END AS dblCost,
+					CASE WHEN ISNULL(pld.intLotId,0)>0 THEN (dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0))
+					- ((dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0) * ISNULL(sd.dblDiscount,0.0))/100)
+					Else (pld.dblQuantity * ISNULL(sd.dblPrice,0.0)) - ((pld.dblQuantity * ISNULL(sd.dblPrice,0.0) * ISNULL(sd.dblDiscount,0.0))/100) END AS dblCost,
 					@dblTotalCost AS dblTotalCost
 					,@strCompanyName AS strCompanyName
 					,@strCompanyAddress AS strCompanyAddress
@@ -411,7 +408,7 @@ Begin --Sales Order Pick List
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
 			sd.dblQtyOrdered AS dblQuantity,
-			sd.dblQtyOrdered * ISNULL(sd.dblPrice,0) AS dblCost,
+            (sd.dblQtyOrdered * ISNULL(sd.dblPrice,0)) - ((sd.dblQtyOrdered * ISNULL(sd.dblPrice,0) * ISNULL(sd.dblDiscount,0.0))/100)  AS dblCost,
 			@dblTotalCost AS dblTotalCost
 			,@strCompanyName AS strCompanyName
 			,@strCompanyAddress AS strCompanyAddress
@@ -450,6 +447,12 @@ Begin --Sales Order Pick List
 			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 			WHERE so.intSalesOrderId=@intSalesOrderId
 		End
+
+	Select @dblTotalCost=SUM(ISNULL(dblCost,0.0)) From @tblItems
+
+	Set @dblTotalCost=@dblTotalCost + (Select ISNULL(SUM(dblLineTotal),0) From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId))
+
+	Update @tblItems Set dblTotalCost=@dblTotalCost
 
 	--Get Comments From SO	
 	INSERT INTO @tblItems(strItemNo,strDescription,intSalesOrderDetailId,strItemType)

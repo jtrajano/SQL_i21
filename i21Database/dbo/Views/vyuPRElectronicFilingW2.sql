@@ -52,6 +52,7 @@ SELECT
 	,strContactPhoneExt
 	,strContactEmail
 	,strContactFax
+	,strPreparerCode
 	,strAgentIndicatorCode
 	,strEmployerEIN
 	,strAgentForEIN

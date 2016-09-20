@@ -16,28 +16,70 @@ BEGIN
 	IF @IsDefaultPortal = 1
 	BEGIN
 		-- Get all contact admins
-		-- Loop through it
-		DECLARE @currentRow1 INT
-		DECLARE @totalRows1 INT
+		-- Loop through it		
+		IF OBJECT_ID('tempdb..#TempContacts') IS NOT NULL DROP TABLE #TempContacts
+		SELECT intUserRoleID INTO #TempContacts FROM [tblSMUserRole] WHERE strRoleType = 'Contact Admin'
 
-		SET @currentRow1 = 1
-		SELECT @totalRows1 = Count(*) FROM [dbo].[tblSMUserRole] WHERE strRoleType = 'Contact Admin'
+		DECLARE @contactAdminRoleId INT
 
-		WHILE (@currentRow1 <= @totalRows1)
+		WHILE EXISTS(SELECT TOP 1 1 FROM #TempContacts)
 		BEGIN
-			DECLARE @roleId1 INT
-			SELECT @roleId1 = intUserRoleID FROM (  
-				SELECT UserRole.intUserRoleID,  ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID'
-				FROM [dbo].[tblSMUserRole] UserRole WHERE strRoleType = 'Contact Admin'
-			) a
-			WHERE ROWID = @currentRow1
+			SELECT TOP 1 @contactAdminRoleId = intUserRoleID FROM #TempContacts
 
-			-- Add all menus by executing uspSMUpdateUserRoleMenus
-			PRINT N'Executing uspSMUpdateUserRoleMenus'
-			Exec uspSMUpdateUserRoleMenus @roleId1, 1, 0
+			INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
+			SELECT @contactAdminRoleId, 
+			intMenuID, 0, Menu.intSort
+			FROM tblSMMasterMenu Menu
+			INNER JOIN tblSMContactMenu ContactMenu ON Menu.intMenuID = ContactMenu.intMasterMenuId
+			INNER JOIN tblSMUserRoleMenu RoleMenu ON RoleMenu.intMenuId = Menu.intMenuID AND RoleMenu.intUserRoleId = 999 AND RoleMenu.ysnVisible = 1
+			WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @contactAdminRoleId)
 
-			SET @currentRow1 = @currentRow1 + 1
-		END	
+			UPDATE tblSMUserRoleMenu
+			SET intParentMenuId = tblPatch.intRoleParentID
+			FROM (
+				SELECT 
+					RoleMenu.intUserRoleMenuId,
+					intRoleParentID = ISNULL((SELECT ISNULL(intUserRoleMenuId, 0) FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @contactAdminRoleId), 0)
+				FROM tblSMUserRoleMenu RoleMenu
+				LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
+				WHERE RoleMenu.intUserRoleId = @contactAdminRoleId
+				)tblPatch 
+			WHERE tblPatch.intUserRoleMenuId = tblSMUserRoleMenu.intUserRoleMenuId
+			AND intUserRoleId = @contactAdminRoleId
+
+			DELETE FROM #TempContacts WHERE intUserRoleID = @contactAdminRoleId
+		END
+
+		DELETE RoleMenu FROM tblSMUserRoleMenu RoleMenu
+		INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
+		WHERE strRoleType in ('Contact', 'Contact Admin') AND intMenuId IN 
+		(
+			SELECT intMenuId from tblSMUserRoleMenu RoleMenu
+			INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
+			WHERE UserRole.strRoleType = 'Portal Default' AND ysnVisible = 0
+		)
+
+		--DECLARE @currentRow1 INT
+		--DECLARE @totalRows1 INT
+
+		--SET @currentRow1 = 1
+		--SELECT @totalRows1 = Count(*) FROM [dbo].[tblSMUserRole] WHERE strRoleType = 'Contact Admin'
+
+		--WHILE (@currentRow1 <= @totalRows1)
+		--BEGIN
+		--	DECLARE @roleId1 INT
+		--	SELECT @roleId1 = intUserRoleID FROM (  
+		--		SELECT UserRole.intUserRoleID,  ROW_NUMBER() OVER(ORDER BY intUserRoleID ASC) AS 'ROWID'
+		--		FROM [dbo].[tblSMUserRole] UserRole WHERE strRoleType = 'Contact Admin'
+		--	) a
+		--	WHERE ROWID = @currentRow1
+
+		--	-- Add all menus by executing uspSMUpdateUserRoleMenus
+		--	PRINT N'Executing uspSMUpdateUserRoleMenus'
+		--	Exec uspSMUpdateUserRoleMenus @roleId1, 1, 0
+
+		--	SET @currentRow1 = @currentRow1 + 1
+		--END
 	END
 	-- If role is for contact
 	ELSE IF @isContact = 1

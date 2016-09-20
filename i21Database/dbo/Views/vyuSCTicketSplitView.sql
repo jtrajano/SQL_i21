@@ -136,7 +136,8 @@
 			WHEN tblSCTicketSplit.strDistributionOption = 'CNT' THEN 'Contract'
 			WHEN tblSCTicketSplit.strDistributionOption = 'SPT' THEN 'Spot Sale'
 		END) AS strSplitEntityDistribution,
-	   tblSCTicketSplit.dblSplitPercent
+	   tblSCTicketSplit.dblSplitPercent,
+	   ((tblSCTicket.dblNetUnits * tblSCTicketSplit.dblSplitPercent) / 100) as dblSplitUnit
   from tblSCTicketSplit tblSCTicketSplit
 	left join tblSCTicket tblSCTicket on tblSCTicketSplit.intTicketId = tblSCTicket.intTicketId
 	left join tblEMEntity tblEMEntity on tblEMEntity.intEntityId = tblSCTicket.intEntityId

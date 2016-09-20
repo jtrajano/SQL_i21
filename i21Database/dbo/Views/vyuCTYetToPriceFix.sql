@@ -43,7 +43,10 @@ AS
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
 					CD.intDiscountScheduleCodeId,
-					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId
+					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId,
+					CD.strEntityContract,
+					CD.dtmStartDate,
+					CD.dtmEndDate
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
@@ -93,7 +96,10 @@ AS
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
 					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId,
-					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
+					CAST (NULL AS INT)			AS	intBasisCommodityUOMId,
+					CD.strEntityContract,
+					MAX(CD.dtmStartDate)		AS	dtmStartDate,
+					MAX(CD.dtmEndDate)			AS	dtmEndDate
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -115,7 +121,8 @@ AS
 					QM.strUnitMeasure,
 					CD.intSalespersonId,
 					CU.intCommodityUnitMeasureId,
-					CH.dblNoOfLots
+					CH.dblNoOfLots,
+					CD.strEntityContract
 
 		UNION ALL
 
@@ -161,7 +168,10 @@ AS
 					PF.dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
 					CD.intDiscountScheduleCodeId,
-					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId
+					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId,
+					CD.strEntityContract,
+					CD.dtmStartDate,
+					CD.dtmEndDate
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractDetailId = PF.intContractDetailId
@@ -215,7 +225,10 @@ AS
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
 					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId,
-					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
+					CAST (NULL AS INT)			AS	intBasisCommodityUOMId,
+					CD.strEntityContract,
+					MAX(CD.dtmStartDate)		AS	dtmStartDate,
+					MAX(CD.dtmEndDate)			AS	dtmEndDate
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
@@ -240,5 +253,6 @@ AS
 					PF.intTotalLots,
 					PF.intLotsHedged,
 					PF.intPriceFixationId,
-					CU.intCommodityUnitMeasureId
+					CU.intCommodityUnitMeasureId,
+					CD.strEntityContract
 	)t

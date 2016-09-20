@@ -4298,6 +4298,14 @@
     <Build Include="dbo\Views\vyuPATRefundCustomer.sql" />
     <Build Include="dbo\Views\vyuPATTransferDetails.sql" />
     <Build Include="dbo\Views\vyuCTContractSequence.sql" />
+    <Build Include="dbo\Views\vyuRKUnrealizedPnL_Copy.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateCustomerRefund.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAutoExpireMonth.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateRefundType.sql" />
+    <Build Include="dbo\Tables\tblRKSettlementPriceImport.sql" />
+    <Build Include="dbo\Tables\tblRKSettlementPriceImport_ErrLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
