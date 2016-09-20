@@ -4338,6 +4338,8 @@
     <Build Include="dbo\Tables\tblRKSettlementPriceImport_ErrLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
+    <Build Include="dbo\Views\vyuAPBatchPostTransaction.sql" />
+    <Build Include="dbo\Views\vyuAPForApprovalTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
