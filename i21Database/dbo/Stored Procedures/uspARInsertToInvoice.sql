@@ -426,7 +426,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblPayment]
 					,'Invoice'
 					,'Software'
-					,0 --Payment Method
+					,NULL --Payment Method
 					,[intAccountId]
 					,[intFreightTermId]
 					,@UserId
