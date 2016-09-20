@@ -81,7 +81,7 @@ BEGIN TRY
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
 	SELECT @ysnConsiderSumOfChangeoverTime = ysnConsiderSumOfChangeoverTime
-		,@strSchedulingCutOffTime = strSchedulingCutOffTime
+		,@strSchedulingCutOffTime = ISNULL(strSchedulingCutOffTime,'0:00')
 	FROM dbo.tblMFCompanyPreference
 
 	DECLARE @tblMFScheduleWorkOrderCalendarDetail TABLE (
