@@ -13,7 +13,8 @@
 			,tblEMEntityToContact
 			,tblARCustomer
 		where
-			tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
+			tblSOSalesOrder.strTransactionType = 'Order'
+			and tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
 			and tblEMEntityToContact.intEntityId = tblEMEntity.intEntityId
 			and tblEMEntityToContact.ysnDefaultContact = 1
 			and tblARCustomer.intEntityCustomerId = tblEMEntity.intEntityId
