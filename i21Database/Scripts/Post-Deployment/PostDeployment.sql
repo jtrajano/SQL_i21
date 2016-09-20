@@ -358,12 +358,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_ScheduleFieldTemplate.sql
 :r .\TF\DefaultData\_TaxReportSProc.sql
 
---Transports
-:R .\TR\01_OldTransportLoadConversion.sql
-
---Transports
-:R .\TR\01_OldTransportLoadConversion.sql
-
 --Integration
 :R .\IP\1_MasterTables.sql
 

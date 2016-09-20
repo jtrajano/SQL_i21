@@ -171,7 +171,6 @@
     <Folder Include="Scripts\Utility\IC\Query tools" />
     <Folder Include="Scripts\Post-Deployment\TF" />
     <Folder Include="Scripts\Post-Deployment\TF\DefaultData" />
-    <Folder Include="Scripts\Post-Deployment\TR" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports" />
     <Folder Include="Scripts\Post-Deployment\PR\Reports\SubReports" />
     <Folder Include="Scripts\Post-Deployment\CF" />
@@ -3142,7 +3141,6 @@
     <Build Include="dbo\Views\vyuICGetReceiptAddOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemRequirement.sql" />
     <Build Include="dbo\Tables\tblLGLoadDetail.sql" />
-    <None Include="Scripts\Post-Deployment\TR\01_OldTransportLoadConversion.sql" />
     <Build Include="dbo\Tables\tblEMEntityImportSchemaCSV.sql" />
     <Build Include="dbo\Tables\tblEMEntityImportFile.sql" />
     <Build Include="dbo\Tables\tblEMEntityImportError.sql" />
