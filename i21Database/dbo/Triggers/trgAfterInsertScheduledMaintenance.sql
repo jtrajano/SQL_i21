@@ -64,9 +64,9 @@ BEGIN
 			AND Convert(TIME, dtmShiftEndTime)
 		OR Convert(TIME, @dtmEndTime) BETWEEN Convert(TIME, dtmShiftStartTime)
 			AND Convert(TIME, dtmShiftEndTime))
-		--AND intLocationId = @intLocationId
+		AND intLocationId = @intLocationId
 
-	WHILE @dtmEndDate > @dtmStartDate
+	WHILE @dtmEndDate >= @dtmStartDate
 	BEGIN
 		INSERT INTO dbo.tblMFScheduledMaintenanceDetail (
 			intScheduledMaintenanceId
@@ -83,6 +83,7 @@ BEGIN
 			,@dtmStartDate+dtmEndTime
 			,DateDiff(Minute, dtmStartTime, dtmEndTime)
 		FROM @tblMFShift
+		Where DateDiff(Minute, dtmStartTime, dtmEndTime)>0
 
 		SELECT @dtmStartDate = @dtmStartDate + 1
 	END
