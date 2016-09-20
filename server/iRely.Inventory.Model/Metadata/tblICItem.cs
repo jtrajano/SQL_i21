@@ -683,6 +683,10 @@ namespace iRely.Inventory.Model
         public string strSubLocationName { get; set; }
         public int? intStorageLocationId { get; set; }
         public string strStorageLocationName { get; set; }
+        public string strBOLNumber { get; set; }
+        public string strEntity { get; set; }
+        public string strLotNumber { get; set; }
+        public string strAdjustedTransaction { get; set; }
         public DateTime? dtmDate { get; set; }
         public string strTransactionType { get; set; }
         public string strTransactionForm { get; set; }
