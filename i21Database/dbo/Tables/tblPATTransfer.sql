@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPATTransfer]
 (
 	[intTransferId] INT NOT NULL IDENTITY,
-	[intTransferType] INT NULL,
+	[strTransferType] NVARCHAR(MAX) NULL,
 	[strTransferNo] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strTransferDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [dtmTransferDate] DATETIME NULL, 

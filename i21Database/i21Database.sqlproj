@@ -4301,6 +4301,7 @@
     <Build Include="dbo\Views\vyuPATTransferDetails.sql" />
     <Build Include="dbo\Views\vyuCTContractSequence.sql" />
     <Build Include="dbo\Views\vyuRKUnrealizedPnL_Copy.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateCustomerRefund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
