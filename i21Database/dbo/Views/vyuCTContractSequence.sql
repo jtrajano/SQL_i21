@@ -11,30 +11,31 @@ AS
 			CD.dblScheduleQty,		CD.intPriceItemUOMId,	CD.intNetWeightUOMId,								
 			CD.dblNoOfLots,			CD.intItemUOMId,		CD.dblNetWeight,	
 			CD.intBookId,			CD.intSubBookId,		CD.intDiscountScheduleCodeId,
-							
+
 			--Detail Join
-			IM.strItemNo,			PT.strPricingType,		IM.strDescription		AS	strItemDescription,
-			FM.strFutMarketName,	MO.strFutureMonth,		QM.strUnitMeasure		AS	strItemUOM,
-			CL.strLocationName,		IM.strShortName,		PM.strUnitMeasure		AS	strPriceUOM,			
-			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId		AS	intPriceUnitMeasureId,
-			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure		AS	strNetWeightUOM,
+			IM.strItemNo,			PT.strPricingType,		IM.strDescription			AS	strItemDescription,
+			FM.strFutMarketName,	MO.strFutureMonth,		QM.strUnitMeasure			AS	strItemUOM,
+			CL.strLocationName,		IM.strShortName,		PM.strUnitMeasure			AS	strPriceUOM,			
+			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId			AS	intPriceUnitMeasureId,
+			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,
 			
 			--Detail Computed Columns
-			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)								AS	ysnSubCurrency,
-			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)				AS	dblAvailableQty,
+			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)									AS	ysnSubCurrency,
+			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)					AS	dblAvailableQty,
 			CASE	WHEN	CH.ysnLoad = 1
 					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
 					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
-			END																		AS	dblAppliedQty,
-			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)					AS	strSequenceNumber,
+			END																			AS	dblAppliedQty,
+			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)						AS	strSequenceNumber,
 			
 			--Header
 			CH.intContractHeaderId,	CH.intContractTypeId,		CH.intCommodityId,								
 			CH.strContractNumber,	CH.dtmContractDate,			CH.ysnSigned,					
-			CH.ysnPrinted,			CH.intSalespersonId,		CH.ysnMultiplePriceFixation,						
+			CH.ysnPrinted,			CH.intSalespersonId,		CH.ysnMultiplePriceFixation,			
+																CH.strCustomerContract	AS	strEntityContract,		
 			--Header Join
-			TP.strContractType,		CO.strCommodityCode,		EY.strName			AS	strEntityName,
-			EY.intEntityId,										CO.strDescription	AS	strCommodityDescription
+			TP.strContractType,		CO.strCommodityCode,		EY.strName				AS	strEntityName,
+			EY.intEntityId,										CO.strDescription		AS	strCommodityDescription
 			
 			
 	FROM	tblCTContractDetail		CD	
