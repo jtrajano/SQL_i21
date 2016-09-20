@@ -3058,7 +3058,6 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationTemplate.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ConfigurationType.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ProductCode.sql" />
-    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TerminalControlNumber.sql" />
     <Build Include="dbo\Tables\tblWHPickForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportFGLotLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateADuplicateRecord.sql" />
