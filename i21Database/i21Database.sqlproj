@@ -4303,6 +4303,7 @@
     <Build Include="dbo\Views\vyuRKUnrealizedPnL_Copy.sql" />
     <Build Include="dbo\Views\vyuPATCalculateCustomerRefund.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoExpireMonth.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateRefundType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
