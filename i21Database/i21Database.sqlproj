@@ -4333,6 +4333,7 @@
     <Build Include="dbo\Views\vyuEMEntityVendorApproval.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoExpireMonth.sql" />
+    <Build Include="dbo\Views\vyuLGDeliveredNotInvoiced.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
