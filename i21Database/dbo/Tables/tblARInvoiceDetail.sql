@@ -19,7 +19,8 @@
 	[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblTotalTax]							NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblTotal]								NUMERIC(18, 6)									NULL DEFAULT 0,
-	[ysnSubCurrency]						BIT												NULL DEFAULT 0,	
+	[intSubCurrencyId]						INT												NULL,
+	[dblSubCurrencyRate]					NUMERIC(18, 6)									NULL DEFAULT 1,
 	[ysnRestricted]							BIT												NULL DEFAULT 0,
 	[ysnBlended]							BIT												NULL DEFAULT 0,	
 	[intAccountId]							INT												NULL,
@@ -106,7 +107,8 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblCCSiteDetail_intSiteDetailId] FOREIGN KEY ([intSiteDetailId]) REFERENCES [tblCCSiteDetail]([intSiteDetailId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [tblLGLoadDetail]([intLoadDetailId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblMFRecipeItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId])
+	CONSTRAINT [FK_tblARInvoiceDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
+	CONSTRAINT [FK_tblARInvoice_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 );
 
 GO

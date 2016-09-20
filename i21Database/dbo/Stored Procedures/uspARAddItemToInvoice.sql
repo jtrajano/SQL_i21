@@ -70,7 +70,8 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
-	,@SubCurrency					BIT				= 0	
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@StorageScheduleTypeId			INT				= NULL
 AS
 
@@ -83,16 +84,18 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 	
-DECLARE  @ZeroDecimal NUMERIC(18, 6)
-		,@NewDetailId INT
-		,@AddDetailError NVARCHAR(MAX)
-		,@CompanyLocationId		INT	
+DECLARE  @ZeroDecimal			NUMERIC(18, 6)
+		,@NewDetailId			INT
+		,@AddDetailError		NVARCHAR(MAX)
+		,@CompanyLocationId		INT
+		,@CurrencyId			INT
 
 		 
 SET @ZeroDecimal = 0.000000
 
 SELECT 
-	 @CompanyLocationId = [intCompanyLocationId]	
+	 @CompanyLocationId = [intCompanyLocationId]
+	 ,@CurrencyId		= [intCurrencyId]	
 FROM
 	tblARInvoice
 WHERE
@@ -174,7 +177,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@SubCurrency					= @SubCurrency
+			,@ItemSubCurrencyId				= @ItemSubCurrencyId
+			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemIsBlended					= @ItemIsBlended
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 
@@ -232,7 +236,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strMaintenanceType]
 				,[strFrequency]
 				,[dtmMaintenanceDate]
-				,[ysnSubCurrency]
+				,[intSubCurrencyId]
+				,[dblSubCurrencyRate]
 				,[ysnBlended]
 				,[intRecipeId]
 				,[intSubLocationId]
@@ -274,7 +279,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemMaintenanceType
 				,@ItemFrequency
 				,@ItemMaintenanceDate
-				,@SubCurrency
+				,ISNULL(@ItemSubCurrencyId, @CurrencyId)
+				,CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 				,@ItemIsBlended
 				,@ItemRecipeId
 				,@ItemSublocationId
@@ -333,7 +339,8 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@SubCurrency					= @SubCurrency
+			,@ItemSubCurrencyId				= @ItemSubCurrencyId
+			,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
 			,@ItemSublocationId				= @ItemSublocationId

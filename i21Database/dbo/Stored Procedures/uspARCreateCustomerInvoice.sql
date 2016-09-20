@@ -2,7 +2,6 @@
 	 @EntityCustomerId				INT
 	,@CompanyLocationId				INT
 	,@CurrencyId					INT				= NULL
-	,@SubCurrencyCents				INT				= NULL
 	,@TermId						INT				= NULL
 	,@AccountId						INT				= NULL
 	,@EntityId						INT
@@ -106,7 +105,8 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@ItemConversionAccountId		INT				= NULL
-	,@SubCurrency					BIT				= 0
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@DocumentMaintenanceId			INT				= NULL
 	,@StorageScheduleTypeId			INT				= NULL
 AS
@@ -290,7 +290,6 @@ BEGIN TRY
 		,[intCompanyLocationId]
 		,[intAccountId]
 		,[intCurrencyId]
-		,[intSubCurrencyCents]
 		,[intTermId]
 		,[intSourceId]
 		,[intPeriodsToAccrue] 
@@ -356,7 +355,6 @@ BEGIN TRY
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= @DefaultCurrency
-		,[intSubCurrencyCents]			= (CASE WHEN ISNULL(@SubCurrencyCents,0) = 0 THEN ISNULL((SELECT intCent FROM tblSMCurrency WHERE intCurrencyID = @DefaultCurrency),1) ELSE @SubCurrencyCents END)
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[intSourceId]					= @SourceId
 		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
@@ -567,7 +565,8 @@ BEGIN TRY
 		,@ItemLeaseBilling				= @ItemLeaseBilling
 		,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 		,@ItemConversionAccountId		= @ItemConversionAccountId
-		,@SubCurrency					= @SubCurrency
+		,@ItemSubCurrencyId				= @ItemSubCurrencyId
+		,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

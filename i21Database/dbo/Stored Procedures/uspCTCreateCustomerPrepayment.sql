@@ -34,7 +34,6 @@ INSERT INTO @EntriesForInvoice
 	,[intEntityCustomerId]
 	,[intCompanyLocationId]
 	,[intCurrencyId]
-	,[intSubCurrencyCents]
 	,[intTermId]
 	,[intPeriodsToAccrue]
 	,[dtmDate]
@@ -119,7 +118,6 @@ INSERT INTO @EntriesForInvoice
 	,[ysnVirtualMeterReading]
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
-	,[ysnSubCurrency]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Sales Contract'
@@ -130,7 +128,6 @@ SELECT
 	,[intEntityCustomerId]					= CTCHV.[intEntityId] 
 	,[intCompanyLocationId]					= CTCDV.[intCompanyLocationId] 
 	,[intCurrencyId]						= CTCDV.[intCurrencyId] 
-	,[intSubCurrencyCents]					= NULL
 	,[intTermId]							= CTCDV.[intTermId] 
 	,[intPeriodsToAccrue]					= 1
 	,[dtmDate]								= CTCDV.[dtmContractDate] 
@@ -215,7 +212,6 @@ SELECT
 	,[ysnVirtualMeterReading]				= 0
 	,[ysnClearDetailTaxes]					= 0
 	,[intTempDetailIdForTaxes]				= NULL
-	,[ysnSubCurrency]						= 0
 FROM
 	vyuCTContractDetailView CTCDV
 INNER JOIN

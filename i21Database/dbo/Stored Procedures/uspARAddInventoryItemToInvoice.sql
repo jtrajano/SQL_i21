@@ -67,7 +67,8 @@
 	,@ItemLeaseBilling				BIT				= 0
 	,@ItemVirtualMeterReading		BIT				= 0
 	,@EntitySalespersonId			INT				= NULL
-	,@SubCurrency					BIT				= 0
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@ItemIsBlended					BIT				= 0	
 AS
 
@@ -83,8 +84,8 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@EntityCustomerId		INT
 		,@CompanyLocationId		INT
 		,@InvoiceDate			DATETIME
-		,@SubCurrencyCents		INT
 		,@existingInvoiceDetail INT
+		,@CurrencyId			INT
 
 SET @ZeroDecimal = 0.000000
 
@@ -99,7 +100,7 @@ SELECT
 	 @EntityCustomerId	= [intEntityCustomerId]
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
-	,@SubCurrencyCents	= ISNULL([intSubCurrencyCents], 1)
+	,@CurrencyId		= [intCurrencyId]
 FROM
 	tblARInvoice
 WHERE
@@ -195,7 +196,7 @@ BEGIN TRY
 			WHERE intInvoiceDetailId = @existingInvoiceDetail
 		END
 	ELSE
-		BEGIN
+		BEGIN		
 			INSERT INTO [tblARInvoiceDetail]
 				([intInvoiceId]
 				,[intItemId]
@@ -214,7 +215,8 @@ BEGIN TRY
 				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
-				,[ysnSubCurrency]
+				,[intSubCurrencyId]
+				,[dblSubCurrencyRate]
 				,[ysnBlended]
 				,[intAccountId]
 				,[intCOGSAccountId]
@@ -284,11 +286,12 @@ BEGIN TRY
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
 				,[strItemTermDiscountBy]			= @ItemTermDiscountBy
-				,[dblPrice]							= (CASE WHEN (ISNULL(@SubCurrency,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @SubCurrency ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+				,[dblPrice]							= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
-				,[ysnSubCurrency]					= @SubCurrency
+				,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
+				,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 				,[ysnBlended]						= @ItemIsBlended
 				,[intAccountId]						= Acct.[intAccountId] 
 				,[intCOGSAccountId]					= Acct.[intCOGSAccountId] 

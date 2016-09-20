@@ -13,14 +13,14 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE  @ZeroDecimal		DECIMAL(18,6)
-		,@SubCurrencyCents	INT
 		,@InvoiceIdLocal	INT
+		,@CurrencyId		INT
 
 SET @ZeroDecimal = 0.000000	
 SET @InvoiceIdLocal = @InvoiceId
 						
 SELECT
-	@SubCurrencyCents		= ISNULL([intSubCurrencyCents], 1)
+	@CurrencyId		= [intCurrencyId]
 FROM
 	tblARInvoice
 WHERE
@@ -51,6 +51,8 @@ SET
 	,[dblTotal]					= ISNULL([dblTotal], @ZeroDecimal)
 	,[dblItemTermDiscount]		= ISNULL([dblItemTermDiscount], @ZeroDecimal)
 	,[strItemTermDiscountBy]	= ISNULL([strItemTermDiscountBy], 'Amount') 
+	,[intSubCurrencyId]			= ISNULL([intSubCurrencyId], @CurrencyId)
+	,[dblSubCurrencyRate]		= ISNULL([dblSubCurrencyRate], 1.000000)
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	
@@ -130,9 +132,9 @@ UPDATE
 SET
 	[dblTotal]		= (	CASE WHEN ((ISNULL([intShipmentId],0) <> 0 OR ISNULL([intShipmentPurchaseSalesContractId],0) <> 0) AND ISNULL([intItemWeightUOMId],0) <> 0)
 							THEN
-								ROUND(ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN @SubCurrencyCents ELSE 1 END)) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+								ROUND(ROUND((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / [dblSubCurrencyRate]) * ([dblItemWeight] * [dblShipmentNetWt])) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 							ELSE
-								ROUND(ROUND((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN 1 ELSE 1 END)) * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / (CASE WHEN ISNULL([ysnSubCurrency],0) = 1 THEN 1 ELSE 1 END)) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+								ROUND(ROUND((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - ROUND(((([dblPrice] / [dblSubCurrencyRate]) * [dblQtyShipped]) * (dblDiscount/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 						END							
 					  )
 WHERE

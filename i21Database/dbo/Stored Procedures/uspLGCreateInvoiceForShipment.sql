@@ -31,7 +31,6 @@ DECLARE
 	,@CompanyLocationId			INT
 	,@AccountId					INT
 	,@CurrencyId				INT
-	,@SubCurrencyCents			INT
 	,@TermId					INT
 	,@SourceId					INT
 	,@PeriodsToAccrue			INT
@@ -104,7 +103,6 @@ DECLARE
 		,@CompanyLocationId			= LD.intSCompanyLocationId 	
 		,@AccountId					= NULL
 		,@CurrencyId				= ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))
-		,@SubCurrencyCents			= NULL
 		,@TermId					= NULL
 		,@SourceId					= @intLoadId
 		,@PeriodsToAccrue			= 1
@@ -179,7 +177,6 @@ DECLARE
 		,[intEntityCustomerId]
 		,[intCompanyLocationId]
 		,[intCurrencyId]
-		,[intSubCurrencyCents]
 		,[intTermId]
 		,[intPeriodsToAccrue]
 		,[dtmDate]
@@ -264,8 +261,7 @@ DECLARE
 		,[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]
 		,[ysnClearDetailTaxes]
-		,[intTempDetailIdForTaxes]
-		,[ysnSubCurrency])
+		,[intTempDetailIdForTaxes])
 	SELECT
 		 [strSourceTransaction]					= 'Load Schedule'
 		,[intSourceId]							= @intLoadId
@@ -274,7 +270,6 @@ DECLARE
 		,[intEntityCustomerId]					= @EntityCustomerId 
 		,[intCompanyLocationId]					= @CompanyLocationId 
 		,[intCurrencyId]						= @CurrencyId 
-		,[intSubCurrencyCents]					= @SubCurrencyCents 
 		,[intTermId]							= @TermId 
 		,[intPeriodsToAccrue]					= @PeriodsToAccrue 
 		,[dtmDate]								= @Date 
@@ -360,7 +355,6 @@ DECLARE
 		,[ysnVirtualMeterReading]				= 0
 		,[ysnClearDetailTaxes]					= 0
 		,[intTempDetailIdForTaxes]				= NULL
-		,[ysnSubCurrency]						= 0
 	FROM vyuARShippedItems ARSI
 	WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 	  AND ARSI.[intLoadId] = @intLoadId
