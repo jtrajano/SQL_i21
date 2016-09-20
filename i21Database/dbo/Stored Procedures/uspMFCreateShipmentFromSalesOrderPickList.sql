@@ -43,9 +43,6 @@ DECLARE @tblInputItem TABLE (
 		Where sh.intOrderType=2 AND sd.intOrderId=@intSalesOrderId)
 		RaisError('Shipment is alredy created for the sales order.',16,1)
 
-	If (Select ISNULL(strBOLNumber,'') From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)=''
-		RaisError('Please enter BOL number in Sales Order before shipping.',16,1)
-
 	If (Select ISNULL(intFreightTermId,0) From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)=0
 		RaisError('Please enter freight term in Sales Order before shipping.',16,1)
 
