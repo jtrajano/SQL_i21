@@ -4334,6 +4334,10 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoExpireMonth.sql" />
     <Build Include="dbo\Views\vyuLGDeliveredNotInvoiced.sql" />
+    <Build Include="dbo\Tables\tblRKSettlementPriceImport.sql" />
+    <Build Include="dbo\Tables\tblRKSettlementPriceImport_ErrLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
