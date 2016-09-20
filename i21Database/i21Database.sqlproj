@@ -4330,6 +4330,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateClaim.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailClaim.sql" />
+    <Build Include="dbo\Views\vyuEMEntityVendorApproval.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
