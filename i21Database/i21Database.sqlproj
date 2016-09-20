@@ -4314,6 +4314,8 @@
     <Build Include="dbo\Tables\tblCRMMilestone.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountIdByLocation.sql" />
     <Build Include="dbo\Views\vyuTMForPrintDeliveryTicket.sql" />
+    <Build Include="dbo\Views\vyuAPBatchPostTransaction.sql" />
+    <Build Include="dbo\Views\vyuAPForApprovalTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
