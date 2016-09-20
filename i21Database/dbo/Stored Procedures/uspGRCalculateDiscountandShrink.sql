@@ -88,14 +88,22 @@ BEGIN TRY
 			,dblShrink
 		)
 		SELECT 
-			 dblRangeStartingValue
+		 dblRangeStartingValue
+		,dblRangeEndingValue
+		,dblIncrementValue
+		,dblDiscountValue
+		,dblShrinkValue 
+		FROM
+		(SELECT TOP 100 PERCENT
+			 intDiscountScheduleLineId
+			,dblRangeStartingValue
 			,dblRangeEndingValue
 			,dblIncrementValue
 			,dblDiscountValue
 			,dblShrinkValue
 		FROM tblGRDiscountScheduleLine
 		WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId
-		ORDER BY 1
+		ORDER BY intDiscountScheduleLineId)t
 
 		SELECT @intIncrementalKey = MIN(intIncrementalKey)
 		FROM @tblIncrementalTab
