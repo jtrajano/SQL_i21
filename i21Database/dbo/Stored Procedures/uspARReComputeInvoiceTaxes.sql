@@ -22,7 +22,7 @@ DECLARE  @CustomerId				INT
 		,@TransactionDate			DATETIME
 		,@DistributionHeaderId		INT
 		,@CustomerLocationId		INT
-		,@SubCurrencyCents			INT
+		,@SubCurrencyRate			DECIMAL(18,6)
 		,@FreightTermId				INT
 						
 SELECT
@@ -31,7 +31,6 @@ SELECT
 	,@TransactionDate		= I.[dtmDate]
 	,@DistributionHeaderId	= I.[intDistributionHeaderId]
 	,@CustomerLocationId	= (CASE WHEN ISNULL(F.[strFobPoint],'Destination') = 'Origin ' THEN I.[intBillToLocationId] ELSE I.[intShipToLocationId] END)
-	,@SubCurrencyCents		= ISNULL(I.[intSubCurrencyCents],1)
 	,@FreightTermId			= I.[intFreightTermId] 
 FROM
 	tblARInvoice I
@@ -71,7 +70,6 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@TaxGroupId		INT
 				,@ItemType			NVARCHAR(100)
 				,@SiteId			INT
-				,@SubCurrency		BIT
 
 		SELECT TOP 1
 			 @InvoiceDetailId		= [intInvoiceDetailId]
@@ -82,11 +80,11 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			
 		SELECT
 			 @ItemId				= tblARInvoiceDetail.[intItemId]
-			,@ItemPrice				= tblARInvoiceDetail.[dblPrice]
+			,@ItemPrice				= tblARInvoiceDetail.[dblPrice] / ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
 			,@QtyShipped			= tblARInvoiceDetail.[dblQtyShipped]
 			,@TaxGroupId			= tblARInvoiceDetail.[intTaxGroupId]
 			,@SiteId				= tblARInvoiceDetail.[intSiteId]
-			,@SubCurrency			= ISNULL(tblARInvoiceDetail.[ysnSubCurrency],0)
+			,@SubCurrencyRate		= ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
 		FROM
 			tblARInvoiceDetail
 		WHERE
@@ -105,10 +103,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
 				CONTINUE
 			END
-			
-		IF @SubCurrency = 1
-			SET @ItemPrice = @ItemPrice / @SubCurrencyCents		
-										
+												
 		
 	INSERT INTO [tblARInvoiceDetailTax]
            ([intInvoiceDetailId]

@@ -99,7 +99,6 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intEntityCustomerId]
 	,[intCompanyLocationId]
 	,[intCurrencyId]
-	,[intSubCurrencyCents]
 	,[intTermId]
 	,[intPeriodsToAccrue]
 	,[dtmDate]
@@ -192,7 +191,6 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[ysnVirtualMeterReading]
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
-	,[ysnSubCurrency]
 	,[ysnBlended]
 	,[intStorageScheduleTypeId]
 	)
@@ -204,7 +202,6 @@ SELECT
 	,[intEntityCustomerId]					= @EntityCustomerId 
 	,[intCompanyLocationId]					= @CompanyLocationId 
 	,[intCurrencyId]						= @CurrencyId 
-	,[intSubCurrencyCents]					= NULL 
 	,[intTermId]							= NULL 
 	,[intPeriodsToAccrue]					= @PeriodsToAccrue 
 	,[dtmDate]								= @Date 
@@ -296,7 +293,6 @@ SELECT
 	,[ysnVirtualMeterReading]				= 0
 	,[ysnClearDetailTaxes]					= 0
 	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
-	,[ysnSubCurrency]						= 0
 	,[ysnBlended]							= ARSI.[ysnBlended]
 	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
 FROM
@@ -315,7 +311,6 @@ SELECT
 	,[intEntityCustomerId]					= @EntityCustomerId 
 	,[intCompanyLocationId]					= @CompanyLocationId 
 	,[intCurrencyId]						= @CurrencyId 
-	,[intSubCurrencyCents]					= NULL 
 	,[intTermId]							= NULL 
 	,[intPeriodsToAccrue]					= @PeriodsToAccrue 
 	,[dtmDate]								= @Date 
@@ -407,7 +402,6 @@ SELECT
 	,[ysnVirtualMeterReading]				= 0
 	,[ysnClearDetailTaxes]					= 0
 	,[intTempDetailIdForTaxes]				= SOD.intSalesOrderDetailId
-	,[ysnSubCurrency]						= 0
 	,[ysnBlended]							= 0
 	,[intStorageScheduleTypeId]				= SOD.intStorageScheduleTypeId
 FROM 
@@ -428,7 +422,6 @@ INSERT INTO @EntriesForInvoice
 	,[intEntityCustomerId]
 	,[intCompanyLocationId]
 	,[intCurrencyId]
-	,[intSubCurrencyCents]
 	,[intTermId]
 	,[intPeriodsToAccrue]
 	,[dtmDate]
@@ -520,7 +513,6 @@ INSERT INTO @EntriesForInvoice
 	,[ysnVirtualMeterReading]
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
-	,[ysnSubCurrency]
 	,[ysnBlended]
 	,[intStorageScheduleTypeId])
 SELECT 
@@ -531,7 +523,6 @@ SELECT
 	,[intEntityCustomerId]
 	,[intCompanyLocationId]
 	,[intCurrencyId]
-	,[intSubCurrencyCents]
 	,[intTermId]
 	,[intPeriodsToAccrue]
 	,[dtmDate]
@@ -623,7 +614,6 @@ SELECT
 	,[ysnVirtualMeterReading]
 	,[ysnClearDetailTaxes]
 	,[intTempDetailIdForTaxes]
-	,[ysnSubCurrency]
 	,[ysnBlended]
 	,@StorageScheduleTypeId
  FROM @UnsortedEntriesForInvoice ORDER BY intSalesOrderDetailId ASC, ysnInventory DESC

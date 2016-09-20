@@ -203,6 +203,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\19_UpdateUsedCustomerBudget.sql
 :r .\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql
 :r .\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql
+:r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

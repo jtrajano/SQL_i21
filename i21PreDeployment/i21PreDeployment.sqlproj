@@ -277,4 +277,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\4_InvoicePaymentMethodCleanUp.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\5_InvoiceCurrencyCleanUp.sql" />
+  </ItemGroup>
 </Project>

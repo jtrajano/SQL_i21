@@ -15,7 +15,8 @@
 	,@ItemSalesOrderDetailId		INT				= NULL	
 	,@ItemTaxGroupId				INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
-	,@SubCurrency					BIT				= 0
+	,@ItemSubCurrencyId				INT				= NULL
+	,@ItemSubCurrencyRate			NUMERIC(18,8)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
@@ -38,11 +39,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@EntityCustomerId INT
-		,@CompanyLocationId INT
-		,@InvoiceDate DATETIME
-		,@ServiceChargesAccountId INT
+DECLARE @ZeroDecimal				NUMERIC(18, 6)
+		,@EntityCustomerId			INT
+		,@CompanyLocationId			INT
+		,@InvoiceDate				DATETIME
+		,@ServiceChargesAccountId	INT
+		,@CurrencyId				INT
 		
 SET @ZeroDecimal = 0.000000
 
@@ -57,6 +59,7 @@ SELECT
 	 @EntityCustomerId	= [intEntityCustomerId]
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
+	,@CurrencyId		= [intCurrencyId]
 FROM
 	tblARInvoice
 WHERE
@@ -103,7 +106,8 @@ BEGIN TRY
 		,[dblPrice]
 		,[dblTotalTax]
 		,[dblTotal]
-		,[ysnSubCurrency]
+		,[intSubCurrencyId]
+		,[dblSubCurrencyRate]
 		,[intAccountId]
 		,[intCOGSAccountId]
 		,[intSalesAccountId]
@@ -162,7 +166,8 @@ BEGIN TRY
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
 		,[dblTotalTax]						= @ZeroDecimal
 		,[dblTotal]							= @ZeroDecimal
-		,[ysnSubCurrency]					= @SubCurrency
+		,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
+		,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
 		,[intAccountId]						= NULL 
 		,[intCOGSAccountId]					= NULL
 		,[intSalesAccountId]				= NULL

@@ -46,8 +46,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
 	,[intEntityCustomerId]					INT												NOT NULL	-- Entity Id of Customer (tblARCustomer.intEntityCustomerId)	
 	,[intCompanyLocationId]					INT												NOT NULL	-- Company Location Id (tblSMCompanyLocation.intCompanyLocationId)
-	,[intCurrencyId]						INT												NULL		-- Currency Id	
-	,[intSubCurrencyCents]					INT												NULL		-- Subcurrency Rate
+	,[intCurrencyId]						INT												NULL		-- Currency Id (tblSMCurrency.intCurrencyID)
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
 	,[intPeriodsToAccrue]					INT												NULL		-- Default(1) Period to Accrue	
 	,[dtmDate]								DATETIME										NOT NULL	-- Invoice Date
@@ -159,7 +158,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnVirtualMeterReading]				BIT												NULL
 	,[ysnClearDetailTaxes]					BIT												NULL		-- Indicate whether to clear tax details before inserting tax details from LineItemTaxDetailStagingTable
 	,[intTempDetailIdForTaxes]				INT												NULL		-- Temporary Id for linking line item detail taxes (LineItemTaxDetailStagingTable) which are also fro processing
-	,[ysnSubCurrency]						BIT												NULL		-- Indicates whether the line item price is on sub currency
+	,[intSubCurrencyId]						INT												NULL		-- SubCurrency Id (tblSMCurrency.intCurrencyID) == tblARInvoice.[intCurrencyId] || tblSMCurrency.[intCurrencyID] WHERE tblSMCurrency.[intMainCurrencyId] = tblARInvoice.[intCurrencyId]
+	,[dblSubCurrencyRate]					NUMERIC(18, 6)									NULL		-- SubCurrency Rate
 	,[ysnBlended]							BIT												NULL		-- Indicates if a Finished Good item is already blended
 	,[strImportFormat]						NVARCHAR(50)									NULL		-- Format Type used for importing invoices Carquest\Tank\Standard
 	,[dblCOGSAmount]						NUMERIC(18, 6)									NULL		-- COGS Amount used for an item
