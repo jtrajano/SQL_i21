@@ -4332,6 +4332,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailClaim.sql" />
     <Build Include="dbo\Views\vyuEMEntityVendorApproval.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAutoExpireMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
