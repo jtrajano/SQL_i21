@@ -141,6 +141,7 @@ FROM
 			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
 			AND A1.strReceiptType = 'Purchase Order'
+			AND ISNULL(A1.ysnOrigin, 0) = 0
 			GROUP BY
 				A1.strReceiptNumber
 				,A1.strBillOfLading
@@ -397,6 +398,7 @@ FROM
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
 	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
+	AND ISNULL(A.ysnOrigin, 0) = 0
 	UNION ALL
 
 	--OTHER CHARGES
