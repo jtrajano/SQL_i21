@@ -25,8 +25,11 @@ SELECT A.dtmDatePaid AS dtmDate,
 	 B.intBillId,   
 	 C.strBillId ,
 	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0
-				THEN (CASE WHEN E.intBankTransactionTypeId <> 19 THEN B.dblPayment * -1 ELSE B.dblPayment END)
-				ELSE B.dblPayment END AS dblAmountPaid,     
+			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId IS NULL)
+						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+			WHEN C.intTransactionType != 1 AND B.dblPayment < 0 AND E.intBankTransactionTypeId = 19
+				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
+			ELSE B.dblPayment END AS dblAmountPaid,   
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -46,3 +49,26 @@ LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
+	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
+--PREPAYMENT
+UNION ALL
+SELECT
+	A.dtmDate
+	,B.intTransactionId
+	,C.strBillId
+	,B.dblAmountApplied
+	,0 AS dblTotal
+	,0 AS dblAmountDue
+	,0 AS dblWithheld
+	,0 AS dblDiscount
+	,0 AS dblInterest
+	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	,D.strVendorId
+	,A.dtmDueDate
+	,A.ysnPosted
+	,C.ysnPaid
+FROM dbo.tblAPBill A
+INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+INNER JOIN dbo.tblAPBill C ON B.intTransactionId = B.intBillId
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEntity D2 ON D.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityVendorId
+WHERE A.ysnPosted = 1

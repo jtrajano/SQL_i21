@@ -2335,30 +2335,13 @@ IF @post = 0
 			
 			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
 			SELECT DISTINCT
-				 P.intInvoiceId
-				,P.strTransactionId
+				 PID.intInvoiceId
+				,PID.strTransactionId
 			FROM
-				tblARInvoiceDetail Detail
+				@PostInvoiceData PID				
 			INNER JOIN
-				tblARInvoice Header
-					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND  Header.strTransactionType IN ('Invoice', 'Credit Memo')
-			INNER JOIN
-				@PostInvoiceData P
-					ON Header.intInvoiceId = P.intInvoiceId	
-			INNER JOIN
-				tblICItemUOM ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-			LEFT OUTER JOIN
-				vyuICGetItemStock IST
-					ON Detail.intItemId = IST.intItemId 
-					AND Header.intCompanyLocationId = IST.intLocationId 
-			WHERE 
-				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-				--AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
-				--AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
-				AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+				dbo.tblARInvoice ARI
+					ON PID.intInvoiceId = ARI.intInvoiceId
 
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
 				BEGIN
@@ -2366,42 +2349,12 @@ IF @post = 0
 					DECLARE @intTransactionId INT
 							,@strTransactionId NVARCHAR(80);
 					
-					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId
+					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId					
 
-					-- Call the post routine 
-					--INSERT INTO @GLEntries (
-					--	 dtmDate
-					--	,strBatchId
-					--	,intAccountId
-					--	,dblDebit
-					--	,dblCredit
-					--	,dblDebitUnit
-					--	,dblCreditUnit
-					--	,strDescription
-					--	,strCode
-					--	,strReference
-					--	,intCurrencyId
-					--	,dblExchangeRate
-					--	,dtmDateEntered
-					--	,dtmTransactionDate
-					--	,strJournalLineDescription
-					--	,intJournalLineNo
-					--	,ysnIsUnposted
-					--	,intUserId
-					--	,intEntityId
-					--	,strTransactionId
-					--	,intTransactionId
-					--	,strTransactionType
-					--	,strTransactionForm
-					--	,strModuleName
-					--	,intConcurrencyId
-					--)
-					EXEC	dbo.uspICUnpostCosting
-							@intTransactionId
-							,@strTransactionId
-							,@batchId
-							,@UserEntityID
-							,@recap 
+					EXEC	dbo.uspGLInsertReverseGLEntry
+								@strTransactionId	= @strTransactionId
+								,@intEntityId		= @UserEntityID
+								,@dtmDateReverse	= @PostDate
 										
 					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
@@ -2411,7 +2364,67 @@ IF @post = 0
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
 			GOTO Do_Rollback
-		END CATCH										
+		END CATCH				  
+		
+		BEGIN TRY			
+			DECLARE @UnPostICInvoiceData TABLE  (
+				intInvoiceId int PRIMARY KEY,
+				strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+				UNIQUE (intInvoiceId)
+			);
+			
+			INSERT INTO @UnPostICInvoiceData(intInvoiceId, strTransactionId)
+			SELECT DISTINCT
+				 PID.intInvoiceId
+				,PID.strTransactionId
+			FROM
+				@PostInvoiceData PID
+			INNER JOIN
+				dbo.tblARInvoiceDetail ARID
+					ON PID.intInvoiceId = ARID.intInvoiceId					
+			INNER JOIN
+				dbo.tblARInvoice ARI
+					ON ARID.intInvoiceId = ARI.intInvoiceId
+					AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Cash', 'Cash Refund')			
+			INNER JOIN
+				dbo.tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = ARID.intItemUOMId
+			LEFT OUTER JOIN
+				dbo.vyuICGetItemStock IST
+					ON ARID.intItemId = IST.intItemId 
+					AND ARI.intCompanyLocationId = IST.intLocationId 
+			WHERE 
+				(ARID.intInventoryShipmentItemId IS NULL OR ARID.intInventoryShipmentItemId = 0)
+				--AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
+				--AND (Detail.intShipmentPurchaseSalesContractId IS NULL OR Detail.intShipmentPurchaseSalesContractId = 0)
+				AND (ARID.intItemId IS NOT NULL OR ARID.intItemId <> 0)
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
+
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostICInvoiceData ORDER BY intInvoiceId)
+				BEGIN
+				
+					DECLARE @intTransactionIdIC INT
+							,@strTransactionIdIC NVARCHAR(80);
+					
+					SELECT TOP 1 @intTransactionIdIC = intInvoiceId, @strTransactionIdIC = strTransactionId FROM @UnPostICInvoiceData ORDER BY intInvoiceId
+
+					EXEC	dbo.uspICUnpostCosting
+								 @intTransactionIdIC
+								,@strTransactionIdIC
+								,@batchId
+								,@UserEntityID
+								,@recap 
+
+										
+					DELETE FROM @UnPostICInvoiceData WHERE intInvoiceId = @intTransactionIdIC AND strTransactionId = @strTransactionIdIC 
+												
+				END							 
+																
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
+		END CATCH									
 				
 	END   
 

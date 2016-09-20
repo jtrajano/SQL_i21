@@ -76,7 +76,10 @@ FROM
 														THEN ARGIA.intSalesAccountId 
 													  WHEN ARGIA.strType = 'Other Charge'
 														THEN ARGIA.intOtherChargeIncomeAccountId
-													ELSE ARGIA.intGeneralAccountId 
+													WHEN ARID.intItemId IS NULL
+														THEN ARGIA.intGeneralAccountId
+													ELSE
+														ARID.intSalesAccountId
 												 END)
 			,dblQtyOrdered					= ARID.dblQtyOrdered
 			,dblQtyShipped					= ARID.dblQtyShipped
@@ -151,7 +154,7 @@ FROM
 				 , ICISI.intLineNo
 				 , ICISI.intItemId
 				 , ICISI.intItemUOMId
-				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(ICIT.dblCost))
+				 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
 			FROM
 				tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS
@@ -169,8 +172,8 @@ FROM
 				AND ISNULL(ICI.strLotTracking, 'No')			<> 'No'
 			INNER JOIN tblICLot ICL
 				ON ICIT.intLotId = ICL.intLotId
-				AND ICISI.intItemUOMId = ICL.intItemUOMId
-			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId, ICIT.intItemUOMId) AS LOTTED
+				AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
+			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
 					ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 					AND ARID.intItemId					= LOTTED.intItemId
 					AND ARID.intItemUOMId				= LOTTED.intItemUOMId
@@ -197,7 +200,10 @@ FROM
 											THEN IA.intSalesAccountId 
 										WHEN IA.strType = 'Other Charge'
 											THEN IA.intOtherChargeIncomeAccountId
-										ELSE IA.intGeneralAccountId 
+										WHEN SOD.intItemId IS NULL
+											THEN IA.intGeneralAccountId
+										ELSE
+											SOD.intSalesAccountId
 									 END)
 		,dblQtyOrdered				= SOD.dblQtyOrdered
 		,dblQtyShipped				= SOD.dblQtyShipped
@@ -287,7 +293,7 @@ FROM
 			 , ICISI.intLineNo
 			 , ICISI.intItemId
 			 , ICISI.intItemUOMId
-			 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ICIT.intItemUOMId, AVG(ICIT.dblCost))
+			 , dblCost = dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, MAX(ICIT.intItemUOMId), AVG(ICIT.dblCost))
 		FROM
 			tblICInventoryShipmentItem ICISI
 		INNER JOIN tblICInventoryShipment ICIS
@@ -304,8 +310,8 @@ FROM
 			AND ICISI.intItemId								= ICIT.intItemId
 		INNER JOIN tblICLot ICL
 			ON ICIT.intLotId = ICL.intLotId
-			AND ICISI.intItemUOMId = ICL.intItemUOMId
-		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId, ICIT.intItemUOMId) AS LOTTED
+			AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
+		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
 				ON SOD.intItemId					= LOTTED.intItemId
 				AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId		= LOTTED.intLineNo

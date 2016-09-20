@@ -1,7 +1,7 @@
 ﻿CREATE  PROCEDURE [dbo].[uspGLGetAccountDetailReport]
        (@xmlParam NVARCHAR(MAX)= '')
 AS
-   BEGIN
+BEGIN
    SET NOCOUNT ON;
    IF (ISNULL(@xmlParam,'')  = '')
    BEGIN
@@ -183,41 +183,46 @@ AS
 
    DECLARE @colsWithoutBalance NVARCHAR(MAX)
 
-   SELECT @colsWithoutBalance = REPLACE(@cols,',strUOMCode,dblBeginBalance,dblBeginBalanceUnit','')
+   SELECT @colsWithoutBalance = REPLACE(@cols,',strUOMCode',',ISNULL(U.strUOMCode,'''') strUOMCode')
+   SELECT @colsWithoutBalance = REPLACE(@colsWithoutBalance,',dblBeginBalanceUnit',',Balance.Unit dblBeginBalanceUnit')
+   SELECT @colsWithoutBalance = REPLACE(@colsWithoutBalance,',dblBeginBalance',',ISNULL(ROUND(B.beginBalance,2),0) dblBeginBalance')
+   SELECT @colsWithoutBalance = REPLACE(@colsWithoutBalance,',dblDebitUnit,dblCreditUnit',', Debit.Unit dblDebitUnit,Credit.Unit dblCreditUnit')
 
    SELECT @sqlCte+= '
+   ,MinDate as (
+	SELECT min(dtmDate) mDate from cteBase1
+   )
+   ,MinDate1 as (
+	SELECT ISNULL(mDate,''' + @dtmDateFrom + ''') mDate from MinDate
+   )
    ,cteBase as (SELECT '+ @colsWithoutBalance +'
-   ,ISNULL(U.strUOMCode,'''') AS strUOMCode
-   ,ISNULL(ROUND(B.beginBalance,2),0) AS dblBeginBalance
-   ,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.beginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
-					ELSE CAST(ISNULL(ISNULL(B.beginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
-
    from cteBase1 A
+   OUTER APPLY (SELECT mDate from MinDate1) M
    OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) U
-   OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnit( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''))) B
+   OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnit( A.strAccountId,M.mDate)) B
+   OUTER APPLY dbo.fnGLGetAccountUnit(B.beginBalanceUnit, U.dblLbsPerUnit) Balance
+   OUTER APPLY dbo.fnGLGetAccountUnit(A.dblDebitUnit, U.dblLbsPerUnit) Debit
+   OUTER APPLY dbo.fnGLGetAccountUnit(A.dblCreditUnit, U.dblLbsPerUnit) Credit
    ' +  CASE WHEN  @multiFiscal <> 0 THEN ' UNION ALL SELECT ' + @colsWithoutBalance + '
-   ,ISNULL(U.strUOMCode,'''') AS strUOMCode
-   ,ISNULL(ROUND(B.beginBalance,2),0) AS dblBeginBalance
-   ,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.beginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
-					ELSE CAST(ISNULL(ISNULL(B.beginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
-
-
-   FROM  cteRetain2
+   FROM  cteRetain2 A
+   OUTER APPLY (SELECT mDate from MinDate1) M
    OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM Units WHERE [intAccountId] = [intAccountId]) U
    OUTER APPLY (SELECT TOP 1 convert(varchar(10), dtmDateFrom,111) dtmDateFrom from tblGLFiscalYear where ''' + @dtmFromDateRetain + ''' BETWEEN dtmDateFrom and dtmDateTo) F
-   OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''),F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) B
+   OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( strAccountId,M.mDate,F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) B
+   OUTER APPLY dbo.fnGLGetAccountUnit(B.beginBalanceUnit, U.dblLbsPerUnit) Balance
+   OUTER APPLY dbo.fnGLGetAccountUnit(A.dblDebitUnit, U.dblLbsPerUnit) Debit
+   OUTER APPLY dbo.fnGLGetAccountUnit(A.dblCreditUnit, U.dblLbsPerUnit) Credit
    ' ELSE ' ' END +
 
    'UNION ALL SELECT ' + @colsWithoutBalance + '
-   ,ISNULL(U.strUOMCode,'''') AS strUOMCode
-   ,ISNULL(ROUND(B.beginBalance,2),0) AS dblBeginBalance
-   ,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.beginBalanceUnit, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
-					ELSE CAST(ISNULL(ISNULL(B.beginBalanceUnit, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
-
    FROM cteRetainAccount A
+   OUTER APPLY (SELECT mDate from MinDate1) M
    OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) U
    OUTER APPLY (SELECT TOP 1 convert(varchar(10), dtmDateFrom,111) dtmDateFrom from tblGLFiscalYear where ''' + @dtmFromDateRetain + ''' BETWEEN dtmDateFrom and dtmDateTo) F
-   OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''),F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) B
+   OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( A.strAccountId,M.mDate,F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) B
+   OUTER APPLY dbo.fnGLGetAccountUnit(B.beginBalanceUnit, U.dblLbsPerUnit) Balance
+   OUTER APPLY dbo.fnGLGetAccountUnit(A.dblDebitUnit, U.dblLbsPerUnit) Debit
+   OUTER APPLY dbo.fnGLGetAccountUnit(A.dblCreditUnit, U.dblLbsPerUnit) Credit
    )'
 
    IF @dtmDateFrom = '' OR @dtmDateFrom IS NULL
@@ -253,9 +258,10 @@ AS
 	,[dblBeginBalanceUnit] = CASE WHEN (ISNULL( CASE WHEN ' + @intRetainAccount + '= A.intAccountId  THEN C.beginBalanceUnit ELSE B.beginBalanceUnit END, 0) = 0) OR (ISNULL(U.dblLbsPerUnit, 0) = 0) THEN 0
 					ELSE CAST(ISNULL(ISNULL(CASE WHEN ' + @intRetainAccount + '= A.intAccountId  THEN C.beginBalanceUnit ELSE B.beginBalanceUnit END, 0) / ISNULL(U.dblLbsPerUnit, 0),0) AS NUMERIC(18, 6)) END
 	 FROM cte1 A
-	 OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnit( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''))) B
+	 OUTER APPLY (SELECT mDate from MinDate1) M
+	 OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnit( A.strAccountId,M.mDate)) B
 	 OUTER APPLY (SELECT TOP 1 convert(varchar(10), dtmDateFrom,111) dtmDateFrom from tblGLFiscalYear where ''' + @dtmFromDateRetain + ''' BETWEEN dtmDateFrom and dtmDateTo) F
-	 OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( A.strAccountId,ISNULL((SELECT min(dtmDate) from cteBase1),  ''' + @dtmDateFrom + '''),F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) C
+	 OUTER APPLY (SELECT beginBalance,beginBalanceUnit from dbo.fnGLGetBeginningBalanceAndUnitRE( A.strAccountId,M.mDate,F.dtmDateFrom ,''' + CONVERT(VARCHAR(1),@multiFiscal) + ''' )) C
 	 OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) U
 	 UNION ALL SELECT ' + @cols + ' from cteBase '
 	END
