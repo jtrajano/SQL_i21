@@ -154,7 +154,7 @@ DECLARE @tblTempTransaction TABLE (
 			DECLARE @QueryInventory2 NVARCHAR(MAX)
 	     
 			SET @QueryInventory1 = 'SELECT DISTINCT 
-                         0, tblICInventoryReceiptItem.intInventoryReceiptItemId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponent.strScheduleCode, 
+                         0,tblICInventoryReceiptItem.intInventoryReceiptItemId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode,tblTFReportingComponent.intReportingComponentId,tblTFReportingComponent.strScheduleCode, 
                          tblTFReportingComponent.strType, tblTFValidProductCode.intProductCode, tblTFValidProductCode.strProductCode, tblICInventoryReceipt.strBillOfLading, tblICInventoryReceiptItem.dblReceived, 
                          tblICInventoryReceiptItem.dblGross, tblICInventoryReceiptItem.dblNet, tblICInventoryReceiptItem.dblBillQty, 0, tblICInventoryReceipt.dtmReceiptDate, tblSMShipVia.strShipVia, 
                          tblSMShipVia.strTransporterLicense, tblSMShipVia.strTransportationMode, tblEMEntity.strName AS strVendorName, tblEMEntity_Transporter.strName AS strTransporterName, 
@@ -172,7 +172,7 @@ DECLARE @tblTempTransaction TABLE (
                          tblEMEntityLocation.intEntityLocationId = tblICInventoryReceipt.intShipFromId INNER JOIN
                          tblTFReportingComponent ON tblTFValidProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
                          tblTRSupplyPoint.intEntityLocationId = tblICInventoryReceipt.intShipFromId FULL OUTER JOIN
-                         tblSMShipVia FULL OUTER JOINtblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId = tblEMEntity_Transporter.intEntityId ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId CROSS JOIN
+                         tblSMShipVia FULL OUTER JOIN tblEMEntity AS tblEMEntity_Transporter ON tblSMShipVia.intEntityShipViaId = tblEMEntity_Transporter.intEntityId ON tblICInventoryReceipt.intShipViaId = tblSMShipVia.intEntityShipViaId CROSS JOIN
                          tblSMCompanySetup '
 			SET @QueryInventory2 = 'WHERE tblTFReportingComponent.intReportingComponentId IN(' + @RCId + ') 
 						 AND tblICInventoryReceipt.dtmReceiptDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + '''
