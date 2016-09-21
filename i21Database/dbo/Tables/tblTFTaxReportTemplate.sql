@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblTFTaxReportTemplate](
 	[intReportTemplateId] [int] IDENTITY(1,1) NOT NULL,
-	[intReportingComponentDetailId] [int] NULL,
+	[intReportingComponentId] [int] NULL,
 	[intTemplateItemId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[strFormCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intTaxAuthorityId] [int] NULL,

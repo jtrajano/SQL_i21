@@ -3,7 +3,7 @@
 --BEGIN
 		INSERT INTO [tblTFScheduleFieldTemplate]
 		(
-			[intReportingComponentDetailId],[strColumn],[intConcurrencyId]
+			[intReportingComponentId],[strColumn],[intConcurrencyId]
 		)
 		VALUES
 		 (0, N'strCustomerName', 0)

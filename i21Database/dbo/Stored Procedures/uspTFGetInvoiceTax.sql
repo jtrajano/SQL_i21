@@ -76,8 +76,6 @@ DECLARE @tblTempTransaction TABLE (
 			strTransportationMode NVARCHAR(50),
 			strTransporterName NVARCHAR(250),
 			strTransporterFEIN NVARCHAR(50),
-			strConsignorName NVARCHAR(250),
-			strConsignorFEIN NVARCHAR(50),
 			strTaxCode NVARCHAR(200),
 			strTerminalControlNumber NVARCHAR(50),
 			strVendorName NVARCHAR(50),
@@ -191,11 +189,11 @@ DECLARE @tblTempTransaction TABLE (
 				SET @QueryInvoiceWCriteriaPart1 = 'SELECT DISTINCT 
                          tblARInvoiceDetail.intInvoiceDetailId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponent.intReportingComponentId, 
                          tblTFReportingComponent.strScheduleCode, tblTFReportingComponent.strType, tblTFValidProductCode.intProductCode, tblTFValidProductCode.strProductCode, tblARInvoiceDetail.intItemId, 
-                         tblARInvoiceDetail.dblQtyShipped,tblARInvoiceDetail.dblQtyShipped AS dblNet, tblARInvoiceDetail.dblQtyShipped AS dblGross,tblARInvoiceDetail.dblQtyShipped AS dblBillQty,tblARInvoiceDetailTax.dblTax, tblARInvoice.strInvoiceNumber, tblARInvoice.strPONumber, tblARInvoice.strBOLNumber, 
+                         tblARInvoiceDetail.dblQtyShipped, NULL, NULL, NULL, tblARInvoiceDetailTax.dblTax, tblARInvoice.strInvoiceNumber, tblARInvoice.strPONumber, tblARInvoice.strBOLNumber, 
                          tblARInvoice.dtmDate, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity, 
                          (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState, tblSMCompanyLocation.strCity AS strOriginCity, 
                          tblSMCompanyLocation.strStateProvince AS strOriginState, tblEMEntity.strName, tblEMEntity.strFederalTaxId AS strCustomerFEIN, tblARAccountStatus.strAccountStatusCode, tblSMShipVia.strShipVia, 
-                         tblSMShipVia.strTransporterLicense, tblSMShipVia.strTransportationMode, tblEMEntity_Transporter.strName AS strTransporterName, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN,NULL,NULL,
+                         tblSMShipVia.strTransporterLicense, tblSMShipVia.strTransportationMode, tblEMEntity_Transporter.strName AS strTransporterName, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN, 
                          tblSMTaxCode.strTaxCode, NULL, NULL, NULL, tblSMCompanySetup.strCompanyName, tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity, 
                          tblSMCompanySetup.strState, tblSMCompanySetup.strZip, tblSMCompanySetup.strPhone, tblSMCompanySetup.strStateTaxID, tblSMCompanySetup.strFederalTaxID '
 
@@ -229,11 +227,11 @@ DECLARE @tblTempTransaction TABLE (
 
 				SET @QueryInvoicePart1 = 'SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponent.intReportingComponentId, 
                          tblTFReportingComponent.strScheduleCode, tblTFReportingComponent.strType, tblTFValidProductCode.intProductCode, tblTFValidProductCode.strProductCode, tblARInvoiceDetail.intItemId, 
-                         tblARInvoiceDetail.dblQtyShipped,tblARInvoiceDetail.dblQtyShipped AS dblNet, tblARInvoiceDetail.dblQtyShipped AS dblGross,tblARInvoiceDetail.dblQtyShipped AS dblBillQty,tblARInvoiceDetailTax.dblTax, tblARInvoice.strInvoiceNumber, tblARInvoice.strPONumber, tblARInvoice.strBOLNumber, 
+                         tblARInvoiceDetail.dblQtyShipped, NULL, NULL, NULL, tblARInvoiceDetailTax.dblTax, tblARInvoice.strInvoiceNumber, tblARInvoice.strPONumber, tblARInvoice.strBOLNumber, 
                          tblARInvoice.dtmDate, (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity, 
                          (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strStateProvince ELSE tblARInvoice.strShipToState END) AS strDestinationState, tblSMCompanyLocation.strCity AS strOriginCity, 
                          tblSMCompanyLocation.strStateProvince AS strOriginState, tblEMEntity.strName, tblEMEntity.strFederalTaxId AS strCustomerFEIN, tblARAccountStatus.strAccountStatusCode, tblSMShipVia.strShipVia, 
-                         tblSMShipVia.strTransporterLicense, tblSMShipVia.strTransportationMode, tblEMEntity_Transporter.strName AS strTransporterName, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN,NULL,NULL,
+                         tblSMShipVia.strTransporterLicense, tblSMShipVia.strTransportationMode, tblEMEntity_Transporter.strName AS strTransporterName, tblEMEntity_Transporter.strFederalTaxId AS strTransporterFEIN, 
                          tblSMTaxCode.strTaxCode, NULL, NULL, NULL, tblSMCompanySetup.strCompanyName, tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity, 
                          tblSMCompanySetup.strState, tblSMCompanySetup.strZip, tblSMCompanySetup.strPhone, tblSMCompanySetup.strStateTaxID, tblSMCompanySetup.strFederalTaxID '
 
@@ -326,56 +324,22 @@ DECLARE @tblTempTransaction TABLE (
 				DECLARE @InvTransferQuery NVARCHAR(MAX)
 				DECLARE @InvQueryPart1 NVARCHAR(MAX)
 				DECLARE @InvQueryPart2 NVARCHAR(MAX)
-
-				SET @InvQueryPart1 = 'SELECT DISTINCT NULL AS intInvoiceDetailId,                                  
-						 tblTFReportingComponent.intTaxAuthorityId, 
-						 tblTFReportingComponent.strFormCode, 
-						 tblTFReportingComponent.intReportingComponentId, 
-						 tblTFReportingComponent.strScheduleCode, 
-                         tblTFReportingComponent.strType, 
-						 tblTFValidProductCode.intProductCode, 
-						 tblTFValidProductCode.strProductCode, 
-						 tblICInventoryTransferDetail.intItemId, 
-                         tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped, 
-						 tblICInventoryTransferDetail.dblQuantity AS dblGross, 
-						 tblICInventoryTransferDetail.dblQuantity AS dblNet, 
-                         tblICInventoryTransferDetail.dblQuantity, 
-						 NULL AS dblTax, 
-						 NULL AS strInvoiceNumber, 
-						 NULL AS strPONumber, 
-						 tblTRLoadReceipt.strBillOfLading AS strBOLNumber,
-						 tblTRLoadHeader.dtmLoadDateTime AS dtmDate,
-						 tblSMCompanyLocation.strCity AS strDestinationCity,
-						 tblSMCompanyLocation.strStateProvince AS strDestinationState,
-						 tblEMEntityLocation.strCity AS strOriginCity, 
-                         tblEMEntityLocation.strState AS strOriginState, 
-						 tblSMCompanyLocation.strLocationName AS strCustomerName, 
-                         NULL AS strCustomerFEIN, 
-						 NULL AS strAccountStatusCode, 
-						 tblSMShipVia.strShipVia, 
-						 tblSMShipVia.strTransporterLicense, 
-						 tblSMShipVia.strTransportationMode, 
-                         NULL,
-						 NULL,
-                         tblEMEntity.strName AS strConsignorName, 
-						 tblEMEntity.strFederalTaxId AS strConsignorFEIN, 
-						 NULL AS strTaxCode, 
-						 tblTFTerminalControlNumber.strTerminalControlNumber, 
-                         EntityAPVendor.strName AS strVendorName, 
-						 EntityAPVendor.strFederalTaxId AS strVendorFEIN, 
-						 tblSMCompanySetup.strCompanyName, 
-						 tblSMCompanySetup.strAddress, 
-						 tblSMCompanySetup.strCity, 
-                         tblSMCompanySetup.strState, 
-						 tblSMCompanySetup.strZip, 
-						 tblSMCompanySetup.strPhone, 
-						 tblSMCompanySetup.strStateTaxID, 
-						 tblSMCompanySetup.strFederalTaxID '
+		
+				SET @InvQueryPart1 = 'SELECT DISTINCT 
+                         NULL AS intInvoiceDetailId, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponent.intReportingComponentId, tblTFReportingComponent.strScheduleCode, 
+                         tblTFReportingComponent.strType, tblTFValidProductCode.intProductCode, tblTFValidProductCode.strProductCode, tblICInventoryTransferDetail.intItemId, NULL AS dblQtyShipped, 
+                         tblICInventoryTransferDetail.dblQuantity AS dblGross, tblICInventoryTransferDetail.dblQuantity AS dblNet, tblICInventoryTransferDetail.dblQuantity, NULL AS dblTax, NULL AS strInvoiceNumber, NULL 
+                         AS strPONumber, tblTRLoadReceipt.strBillOfLading AS strBOLNumber, tblICInventoryTransfer.dtmTransferDate AS dtmDate, tblSMCompanyLocation.strCity AS strDestinationCity, 
+                         tblSMCompanyLocation.strStateProvince AS strDestinationState, tblEMEntityLocation.strCity AS strOriginCity, tblEMEntityLocation.strState AS strOriginState, 
+                         tblSMCompanyLocation.strLocationName AS strCustomerName, tblEMEntity_1.strFederalTaxId AS strCustomerFEIN, NULL AS strAccountStatusCode, tblSMShipVia.strShipVia, tblSMShipVia.strTransporterLicense, 
+                         tblSMShipVia.strTransportationMode, tblEMEntity.strName AS strTransporterName, tblEMEntity.strFederalTaxId AS strTransporterFEIN, NULL AS strTaxCode, 
+                         tblTFTerminalControlNumber.strTerminalControlNumber, EntityAPVendor.strName AS strVendorName, EntityAPVendor.strFederalTaxId AS strVendorFEIN, tblSMCompanySetup.strCompanyName, 
+                         tblSMCompanySetup.strAddress, tblSMCompanySetup.strCity, tblSMCompanySetup.strState, tblSMCompanySetup.strZip, tblSMCompanySetup.strPhone, tblSMCompanySetup.strStateTaxID, 
+                         tblSMCompanySetup.strFederalTaxID '
 
 				SET @InvQueryPart2 = 'FROM tblICInventoryTransferDetail INNER JOIN
                          tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId INNER JOIN
-                         tblICItemMotorFuelTax INNER JOIN
-                         tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFValidProductCode.intProductCode INNER JOIN
+                         tblICItemMotorFuelTax INNER JOIN tblTFValidProductCode ON tblICItemMotorFuelTax.intProductCodeId = tblTFValidProductCode.intProductCode INNER JOIN
                          tblTFReportingComponent ON tblTFValidProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId ON 
                          tblICInventoryTransferDetail.intItemId = tblICItemMotorFuelTax.intItemId INNER JOIN
                          tblTRLoadReceipt ON tblICInventoryTransfer.intInventoryTransferId = tblTRLoadReceipt.intInventoryTransferId INNER JOIN
@@ -387,19 +351,19 @@ DECLARE @tblTempTransaction TABLE (
                          tblEMEntity AS EntityAPVendor ON tblAPVendor.intEntityVendorId = EntityAPVendor.intEntityId INNER JOIN
                          tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId INNER JOIN
                          tblEMEntityLocation ON tblTRSupplyPoint.intEntityLocationId = tblEMEntityLocation.intEntityLocationId INNER JOIN
+                         tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId INNER JOIN
                          tblTFTerminalControlNumber ON tblTRSupplyPoint.intTerminalControlNumberId = tblTFTerminalControlNumber.intTerminalControlNumberId INNER JOIN
-                         tblSMCompanyLocation ON tblTRLoadDistributionHeader.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId LEFT OUTER JOIN
-                         tblARInvoice ON tblTRLoadDistributionHeader.intInvoiceId = tblARInvoice.intInvoiceId CROSS JOIN
+                         tblEMEntity AS tblEMEntity_1 ON tblICInventoryTransfer.intEntityId = tblEMEntity_1.intEntityId CROSS JOIN
                          tblSMCompanySetup
 					WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + ')) 
-					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
-					AND (tblARInvoice.strBOLNumber IS NULL)
-					AND (tblTRLoadHeader.dtmLoadDateTime BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
+					AND (tblICInventoryTransfer.intSourceType = 3) 
+					AND (tblICInventoryTransfer.dtmTransferDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
 					AND (tblICInventoryTransfer.ysnPosted = 1)'
 
 					SET @InvTransferQuery = @InvQueryPart1 + @InvQueryPart2
 					INSERT INTO @tblTempTransaction
 					EXEC(@InvTransferQuery)
+
 
 				IF (@ReportingComponentId <> '')
 					BEGIN
@@ -432,8 +396,6 @@ DECLARE @tblTempTransaction TABLE (
 																	   strTransportationMode,
 																	   strTransporterName,
 																	   strTransporterFederalTaxId,
-																	   strConsignorName,
-																	   strConsignorFederalTaxId,
 																	   strType,
 																	   strTerminalControlNumber,
 																	   strVendorName,
@@ -481,8 +443,6 @@ DECLARE @tblTempTransaction TABLE (
 																		strTransportationMode,
 																		strTransporterName,
 																		strTransporterFEIN,
-																		strConsignorName,
-																	    strConsignorFEIN,
 																		strType,
 																		strTerminalControlNumber,
 																		strVendorName,
