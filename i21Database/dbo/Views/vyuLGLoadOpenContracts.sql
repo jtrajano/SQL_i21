@@ -60,6 +60,8 @@ SELECT CD.intContractDetailId
 	,S.strSampleTypeName
 	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
 	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
+	,S.intCompanyLocationSubLocationId
+	,S.strSubLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -82,9 +84,12 @@ LEFT JOIN (SELECT * FROM (
 				,SS.strStatus AS strSampleStatus
 				,S.dtmTestingStartDate
 				,S.dtmTestingEndDate
+				,S.intCompanyLocationSubLocationId
+				,CLSL.strSubLocationName
 			FROM tblQMSample S
 			JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 			JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 			WHERE S.intContractDetailId IS NOT NULL
 			) t
 		WHERE intRowNum = 1
