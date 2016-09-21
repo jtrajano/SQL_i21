@@ -30,6 +30,7 @@ LEFT JOIN (
 		,A.intLocationId
 		,A.dblSalePrice
 	FROM vyuICGetItemPricing A
+	WHERE strUnitMeasure = 'Gallon'
 	) F
 	ON 	F.intItemId = A.intProduct
 		AND A.intLocationId = F.intLocationId
