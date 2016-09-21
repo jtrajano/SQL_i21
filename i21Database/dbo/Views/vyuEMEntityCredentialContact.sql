@@ -19,7 +19,7 @@ SELECT
 	vEntityContact.Vendor,
 	vEntityContact.Employee,
 	vEntityContact.Salesperson,
-	CASE WHEN ISNULL(UserSecurity.ysnDisabled, 2) = 2 THEN 0 ELSE vEntityContact.[User] END [User],
+	CASE WHEN ISNULL(UserSecurity.intEntityUserSecurityId, 0) = 0 THEN 0 ELSE vEntityContact.[User] END [User],
 	vEntityContact.FuturesBroker,
 	vEntityContact.ForwardingAgent,
 	vEntityContact.Terminal,
