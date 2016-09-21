@@ -120,7 +120,7 @@ WITH (
 --select * from @temp_xml_table
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SET @innerQuery = 'SELECT 
+SET @innerQuery = 'SELECT DISTINCT
 			intBillId
 			,dblTotal
 			,dblAmountDue
