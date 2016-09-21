@@ -4342,6 +4342,7 @@
     <Build Include="dbo\Views\vyuAPForApprovalTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickListForProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransferPickListForProduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
