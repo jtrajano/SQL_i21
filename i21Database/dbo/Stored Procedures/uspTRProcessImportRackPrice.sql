@@ -28,6 +28,7 @@ BEGIN
 			, @Comments = strComments
 		FROM #tmpValidRackPrices
 
+		SET @RackPriceId = NULL
 		SELECT TOP 1 @RackPriceId = intRackPriceHeaderId FROM tblTRRackPriceHeader WHERE intSupplyPointId = @SupplyPointId AND dtmEffectiveDateTime = @EffectiveDate
 
 
