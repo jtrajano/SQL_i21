@@ -1,0 +1,4 @@
+﻿CREATE TABLE [dbo].[tblCRMStatus]
+(
+	[Id] INT NOT NULL PRIMARY KEY
+)
