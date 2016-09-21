@@ -246,6 +246,14 @@ namespace iRely.Inventory.BusinessLayer
                     // Process the newly saved data. 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
+                        // Validate locations
+                        var rid = new SqlParameter("intTransactionId", receipt.intInventoryReceiptId);
+                        var ysnValidLocation = new SqlParameter("ysnValidLocation", SqlDbType.Bit);
+                        ysnValidLocation.Direction = ParameterDirection.Output;
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT", rid, ysnValidLocation);
+                        if ((bool)ysnValidLocation.Value == false)
+                            throw new Exception("Please ensure that the line items and lots are located in the receipt's origin.");
+
                         await _db.ContextManager.Database.ExecuteSqlCommandAsync(
                             "uspICUpdateStatusOnReceiptSave @intReceiptNo"
                             , new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId)
