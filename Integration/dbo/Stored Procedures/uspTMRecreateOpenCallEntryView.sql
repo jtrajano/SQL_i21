@@ -58,6 +58,7 @@ BEGIN
 				,intCustomerID = B.intCustomerID
 				,intLocationId = B.intLocationId
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
+				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 			,strLocation = B.strLocation
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
@@ -109,6 +110,7 @@ BEGIN
 				,intLocationId = B.intLocationId
 				,strLocation = B.strLocation
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
+				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
