@@ -4,6 +4,7 @@
 
 	select
 		account = a.strEntityNo,
+		code =  a.strEntityNo,
 		fullname = a.strName,
 		lastname = '',
 		firstname = '',
