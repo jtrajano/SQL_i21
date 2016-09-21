@@ -129,7 +129,7 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SET @innerQuery = 'SELECT 
+SET @innerQuery = 'SELECT DISTINCT 
 					intBillId
 					,dblTotal
 					,dblAmountDue
@@ -313,7 +313,7 @@ SET @query = '
 		FROM ('
 				+ @innerQuery +
 			') tmpAPPayables 
-		--WHERE dblAmountDue <> 0
+		WHERE dblAmountDue <> 0
 		GROUP BY intBillId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
