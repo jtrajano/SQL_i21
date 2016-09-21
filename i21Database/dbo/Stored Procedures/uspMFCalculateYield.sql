@@ -299,7 +299,7 @@ BEGIN TRY
 						AND intItemId = @intItemId
 						AND intLotStatusId = 1
 						AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					)
+					) AND NOT EXISTS(SELECT *FROM tblMFWorkOrderInputLot WHERE intWorkOrderId =@intWorkOrderId AND intItemId=@intItemId)
 			BEGIN
 				PRINT 'CREATE A LOT'
 
@@ -447,20 +447,43 @@ BEGIN TRY
 				,@intWeightUOMId = NULL
 				,@dblWeightPerQty = NULL
 
-			SELECT TOP 1 @strLotNumber = strLotNumber
-				,@intLotId = intLotId
-				,@dblQty = dblQty
-				,@intItemUOMId = intItemUOMId
-				,@intSubLocationId = intSubLocationId
-				,@intWeightUOMId = intWeightUOMId
-				,@dblWeightPerQty = dblWeightPerQty
+			SELECT @intLotId = intLotId
+			FROM tblMFWorkOrderInputLot
+			WHERE intWorkOrderId=@intWorkOrderId and intItemId = @intItemId
+
+			SELECT @strLotNumber = strLotNumber
 			FROM dbo.tblICLot
-			WHERE intStorageLocationId = @intStorageLocationId
-				AND intItemId = @intItemId
-				AND intLotStatusId = 1
-				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-				AND dblQty > 0
-			ORDER BY dtmDateCreated DESC
+			Where intLotId=@intLotId
+
+			Select @intLotId=intLotId from tblICLot Where strLotNumber=@strLotNumber and intStorageLocationId = @intStorageLocationId
+
+			SELECT @strLotNumber = strLotNumber
+					,@intLotId = intLotId
+					,@dblQty = dblQty
+					,@intItemUOMId = intItemUOMId
+					,@intSubLocationId = intSubLocationId
+					,@intWeightUOMId = intWeightUOMId
+					,@dblWeightPerQty = dblWeightPerQty
+				FROM dbo.tblICLot
+				Where intLotId=@intLotId
+
+			IF @intLotId IS NULL
+			BEGIN
+				SELECT TOP 1 @strLotNumber = strLotNumber
+					,@intLotId = intLotId
+					,@dblQty = dblQty
+					,@intItemUOMId = intItemUOMId
+					,@intSubLocationId = intSubLocationId
+					,@intWeightUOMId = intWeightUOMId
+					,@dblWeightPerQty = dblWeightPerQty
+				FROM dbo.tblICLot
+				WHERE intStorageLocationId = @intStorageLocationId
+					AND intItemId = @intItemId
+					AND intLotStatusId = 1
+					AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+					AND dblQty > 0
+				ORDER BY dtmDateCreated DESC
+			END
 
 			IF @intLotId IS NULL
 				--AND @dblYieldQuantity > 0
@@ -543,21 +566,18 @@ BEGIN TRY
 						,intProcessId
 						,intShiftId
 						)
-					SELECT TOP 1 WP.intWorkOrderId
-						,WP.intLotId
-						,@dblNewQty - @dblQty
+					SELECT @intWorkOrderId
+						,@intLotId
+						,@dblAdjustByQuantity
 						,@intItemUOMId
-						,WP.intItemId
+						,@intItemId
 						,@intInventoryAdjustmentId
 						,25
 						,'Cycle Count Adj'
 						,GetDate()
-						,intManufacturingProcessId
+						,@intManufacturingProcessId
 						,@intShiftId
-					FROM dbo.tblMFWorkOrderProducedLot WP
-					JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
-					WHERE intLotId = @intLotId
-
+					
 					PRINT 'Call Adjust Qty procedure'
 				END
 			END
