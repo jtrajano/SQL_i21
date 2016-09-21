@@ -971,15 +971,18 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceId]
+		EFP.[intInvoiceId]
 	FROM
-		#EntriesForProcessing
+		#EntriesForProcessing EFP
+	INNER JOIN
+		@InvoiceEntries IE
+			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
 	WHERE
-		ISNULL([ysnForUpdate],0) = 1
-		AND ISNULL([ysnProcessed],0) = 0
-		AND ISNULL([intInvoiceId],0) <> 0
-		AND [ysnPost] IS NOT NULL AND [ysnPost] = 0
-		AND ISNULL([ysnUpdateAvailableDiscount], 0) = 0
+		ISNULL(EFP.[ysnForUpdate],0) = 1
+		AND ISNULL(EFP.[ysnProcessed],0) = 0
+		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 0
+		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
 
 	SELECT
 		@IdsForUnPosting = COALESCE(@IdsForUnPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
