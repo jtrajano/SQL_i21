@@ -411,6 +411,7 @@ FROM
 	INNER JOIN tblSOSalesOrderDetail SOD 
 		ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		AND SOD.intCommentTypeId IN (0,1,3)
+		AND SOD.dblQtyOrdered = 0
 WHERE 
 	ICIS.intInventoryShipmentId = @ShipmentId
 
