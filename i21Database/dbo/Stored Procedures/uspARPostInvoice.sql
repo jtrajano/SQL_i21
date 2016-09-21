@@ -1609,6 +1609,30 @@ END CATCH
 					@PostInvoiceData D
 						ON C.intInvoiceId = D.intInvoiceId
 
+
+				--Invoice with created Bank Deposit
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					'You cannot unpost invoice with created Bank Deposit.'
+					,ARI.strTransactionType
+					,ARI.strInvoiceNumber
+					,@batchId
+					,ARI.intInvoiceId
+				FROM
+					tblARInvoice ARI
+				INNER JOIN
+					@PostInvoiceData P
+						ON ARI.intInvoiceId = P.intInvoiceId
+				INNER JOIN
+					tblCMUndepositedFund B 
+						ON ARI.intInvoiceId = B.intSourceTransactionId 
+						AND ARI.strInvoiceNumber = B.strSourceTransactionId
+				INNER JOIN
+					tblCMBankTransactionDetail TD
+						ON B.intUndepositedFundId = TD.intUndepositedFundId
+				WHERE 
+					B.strSourceSystem = 'AR'
+
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'Unable to find an open fiscal year period to match the transaction date.',
