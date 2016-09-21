@@ -79,6 +79,8 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblICCategory ICC ON I.intCategoryId = ICC.intCategoryId
 	LEFT JOIN (tblARProductTypeDetail PDD INNER JOIN tblARProductType PD ON PDD.intProductTypeId = PD.intProductTypeId) ON PDD.intCategoryId = ICC.intCategoryId
 	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId
+										  AND SDT.ysnTaxExempt = 0
+										  AND SDT.dblAdjustedTax <> 0.000000
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
 	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId
