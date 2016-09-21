@@ -241,7 +241,8 @@ FROM tblARInvoice I
 		) PD ON I.intInvoiceId = PD.intInvoiceId
 WHERE I.ysnPosted = 1
  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
- AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Prepayment')
+ AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+ AND I.dblInvoiceTotal - ISNULL(PD.dblPayment, 0) <> 0
  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 
