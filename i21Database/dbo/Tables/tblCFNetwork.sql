@@ -46,7 +46,6 @@
     [strRemoteUploadPath]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strDecryptKeyFilePath]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strDecryptPassphrase]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strComment]					   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId]                 INT             CONSTRAINT [DF_tblCFNetwork_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
     CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
