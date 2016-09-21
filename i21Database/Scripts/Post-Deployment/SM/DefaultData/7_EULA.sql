@@ -1,5 +1,12 @@
 ﻿GO
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '15.4' AND strText like '%EVALUATION AGREEMENT%')
+BEGIN
+	DELETE FROM tblSMEULA WHERE strVersionNumber = '15.4'
+END
+
+GO
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '15.4')
 BEGIN
 INSERT INTO tblSMEULA(strVersionNumber, strText)
@@ -1135,6 +1142,93 @@ Software, Hosting Services and SaaS Services, as applicable, are provided with �
 Rights” and that their use, duplication or disclosure is governed by DFARS 
 252.227-7103 (c)(1)(ii) or FAR 52.227-19m, as applicable. 
 </span></h3>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
+margin-bottom:.0001pt;text-align:justify''><span style=''font-size:10.0pt''>10.<span 
+style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>EVALUATION AGREEMENT</span></h1>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h3 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
+margin-bottom:.0001pt;text-align:justify;text-indent:-.25in''><a
+name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>10.1 iRely Evaluation Offering.</span></b></a><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> iRely grants you a nonexclusive, nontransferable, revocable, time-limited 
+license to use the software product(s) ("Software"), in object code format, and any included documentation, free of charge for the 
+Evaluation Term for the sole and limited purpose of evaluating the Software. 
+</span></h3>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h3 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
+margin-bottom:.0001pt;text-align:justify;text-indent:-.25in''><a
+name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>10.2 Evaluation Term.</span></b></a><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> The evaluation right and license terminates as of the date agreed to in the 
+proposal or other form of written documentation, but terminates no later than one year from the date of first access.  Upon or prior 
+to termination, user agrees to either: (a) Purchase a full license for the Software or purchase a SaaS offering pursuant to the 
+terms in this Customer Master Agreement; or (b) Return any access information provided; or upon request by iRely, destroy the 
+access information of Software and all copies of any accompanying documentation and certify in writing that it has been destroyed.  
+At the end of the Evaluation Term, iRely will terminate access to the environment if a SaaS offering.  iRely may immediately terminate 
+this Agreement upon written notice if breach of any terms or conditions of this Agreement occurs.  In such event, user will cease 
+using the service or return or destroy the access information and software, as specified above. 
+</span></h3>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h3 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
+margin-bottom:.0001pt;text-align:justify;text-indent:-.25in''><a
+name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>10.3 Ownership; Confidentiality.</span></b></a><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> The Software and SaaS Offering is owned and copyrighted by Vendor.  All right, title, 
+and interest, including all intellectual property, are and shall remain the sole property of Vendor.  Other than as specified in this Agreement, user 
+obtains no right in and to the Software.  User agrees not to remove from view ay copyright legend, trademark or confiedentiality notice appearing on 
+the Software or SaaS offering.  User further agrees not to reverse engineer, reverse compile, translate the Software or make any attempt to discover 
+the source code of teh Software, now will user permit any third party to do the same.  The iRely Software and SaaS Offering are confidential 
+information of iRely and user agrees not to disclose the Software or SaaS Offering or the results of any performance or functional 
+evaluation or test of the Software or SaaS Offering to any third party without the prior written approval of iRely. 
+</span></h3>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h3 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
+margin-bottom:.0001pt;text-align:justify;text-indent:-.25in''><a
+name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>10.4 Content.</span></b></a><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> User assumes sole responsibility for acquiring any authorization(s) necessary for interfaces and hypertext 
+links to third party systems or websites and the accuracy of materials published via iRely''s Software and SaaS Offering, including without limitation, user''s content, 
+descriptive claims, warranties, guarantees, nature of business and the address of where business is conducted. User assumes sole responsibility that the content 
+uploaded and published via iRely''s Software and SaaS Offering does not infringe upon or violate any third party rights or includes the intellectual property of 
+a third party without the prior written consent of such third party. In no event shall iRely or its licensors be responsible for any content, products, or other 
+materials on or available from third-party sites which is not provided by iRely.  Notwithstanding the foregoing, iRely reserves the right, in its sole discretion, 
+to exclude or remove from the iRely Software and SaaS Offering any interfaces or hypertext links to third party systems, websites, any content or other content not 
+supplied by iRely which, in iRely’s sole reasonable discretion, may violate or infringe any law or third party rights, provided that such right shall not place an 
+obligation on iRely to monitor or exert editorial control over the iRely Software and SaaS Offering. iRely does not own any data, information or material that you 
+submit to and publish via iRely''s Software and SaaS Offering in the course of using the iRely Software and SaaS Offering.  You shall have sole responsibility for 
+the accuracy, quality, integrity, legality, reliability, appropriateness, and intellectual property ownership or right to use of all your content, and iRely shall 
+not be responsible or liable for the deletion, correction, destruction, damage, loss or failure to store any content.  iRely reserves the right to withhold, remove 
+and/or discard content without notice for any breach, including, without limitation, non-payment.  Upon termination for cause, your right to access or use content 
+immediately ceases, and iRely shall have no obligation to maintain or forward any your content. 
+</span></h3>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h3 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
+margin-bottom:.0001pt;text-align:justify;text-indent:-.25in''><a
+name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>10.5 Limited Warranty and Limitations of Liability.</span></b></a><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> Please refer to Section 6 of this agreement. 
+</span></h3>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h3 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
+margin-bottom:.0001pt;text-align:justify;text-indent:-.25in''><a
+name="_Ref456628893"><b><span style=''font-size:10.0pt;font-family:"Arial","sans-serif"''>10.6 General.</span></b></a><span
+style=''font-size:10.0pt;font-family:"Arial","sans-serif"''> User may not assign or otherwise transfer, by operation of law or otherwise, any rights under this Agreement without iRely''s 
+prior written consent. This Agreement constitutes the entire understanding between the parties regarding the subject matter hereof and supersedes any prior agreements or understandings, 
+whether written or oral. This Agreement shall be governed by the laws of the State of Indiana without regard to conflicts of law provisions and both parties submit to the exclusive 
+jurisdiction of courts of the State of Indiana.
+</span></h3>
+
 
 <h1 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:.5in;
 margin-bottom:.0001pt;text-align:justify;text-indent:0in''>&nbsp;</h1>
