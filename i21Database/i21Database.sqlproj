@@ -4309,6 +4309,9 @@
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
     <Build Include="dbo\Tables\tblCRMStatus.sql" />
+    <Build Include="dbo\Tables\tblCRMType.sql" />
+    <Build Include="dbo\Tables\tblCRMPriority.sql" />
+    <Build Include="dbo\Tables\tblCRMMilestone.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
