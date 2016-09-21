@@ -34,6 +34,8 @@ Declare @intLocationId int
 Declare @intBlendItemId int
 Declare @intWorkOrderId int
 Declare @strBulkItemXml nvarchar(max)
+Declare @intAttributeTypeId int
+Declare @intManufacturingProcessId int
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -109,7 +111,9 @@ INSERT INTO @tblPickListDetail(
 Select TOP 1 @intPickListId=intPickListId,@strWorkOrderNos=strWorkOrderNo,@intAssignedToId=intAssignedToId,@strPickListNo=strPickListNo,@intLocationId=intLocationId 
 From @tblPickList
 
-Select TOP 1 @intBlendItemId=intItemId From tblMFWorkOrder Where intPickListId=@intPickListId
+Select TOP 1 @intBlendItemId=intItemId,@intManufacturingProcessId=intManufacturingProcessId From tblMFWorkOrder Where intPickListId=@intPickListId
+
+Select @intAttributeTypeId=intAttributeTypeId From tblMFManufacturingProcess Where intManufacturingProcessId=@intManufacturingProcessId
 
 --Get the Comma Separated Work Order Nos into a table
 SET @index = CharIndex(',',@strWorkOrderNos)
@@ -131,6 +135,9 @@ If (Select count(1) from @tblWorkOrder)=0
 	Raiserror('No Blend Sheet(s) are selected for picking.',16,1)
 
 Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
+
+If @intAttributeTypeId<>2
+	Set @ysnBlendSheetRequired=0
 
 Declare @intManufacturingCellId int
 		,@intSubLocationId int

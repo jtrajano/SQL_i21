@@ -4329,6 +4329,8 @@
     <Build Include="dbo\Views\vyuPATCalculateRefundPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateCustomerPatronageHistory.sql" />
     <Build Include="dbo\Views\vyuPATCalculateCustomerPatronage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransferPickListForProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickListForProduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

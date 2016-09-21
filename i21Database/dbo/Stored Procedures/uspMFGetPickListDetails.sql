@@ -14,6 +14,7 @@ Declare @intKitStagingLocationId int
 Declare @strKitStagingLocationName nvarchar(50)
 DECLARE @intBlendStagingLocationId INT
 Declare @intManufacturingProcessId int
+Declare @intAttributeTypeId int
 Declare @intWorkOrderId int
 DECLARE @intInventoryTransactionType AS INT=34
 Declare @intMinItemCount int,
@@ -28,6 +29,8 @@ Declare @intMinItemCount int,
 
 Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId,@intWorkOrderId=intWorkOrderId
 From tblMFWorkOrder Where intPickListId=@intPickListId
+
+Select @intAttributeTypeId=intAttributeTypeId From tblMFManufacturingProcess Where intManufacturingProcessId=@intManufacturingProcessId
 
 Select @intKitStatusId=intKitStatusId,@intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
 Select TOP 1 @intBlendItemId=intItemId,@intBlendRequirementId=intBlendRequirementId
@@ -44,7 +47,10 @@ and at.strAttributeName='Kit Staging Location'
 
 Select @strKitStagingLocationName=strName From tblICStorageLocation Where intStorageLocationId=@intKitStagingLocationId
 
-Select @intBlendStagingLocationId=ISNULL(intBlendProductionStagingUnitId,0) From tblSMCompanyLocation Where intCompanyLocationId=@intLocationId
+Select @intBlendStagingLocationId=pa.strAttributeValue 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Production Staging Location'
 
 Declare @tblReservedQty table
 (
@@ -216,6 +222,37 @@ Declare @tblPickedLotsFinal AS table
 	strParentLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS
 )
 
+Declare @tblRemainingPickedItemsForProduction AS table --For Process Production
+( 
+	[intItemId] [int] NULL,
+	[strItemNo] [nvarchar](50) NOT NULL,
+	[strDescription] [nvarchar](250) NULL,
+	[intLotId] [int] NULL,
+	[strLotNumber] [nvarchar](50) NULL,
+	[intStorageLocationId] [int] NULL,
+	[strStorageLocationName] [nvarchar](50) NULL,
+	[dblPickQuantity] [numeric](38, 20) NULL,
+	[intPickUOMId] [int] NULL,
+	[strPickUOM] [nvarchar](50) NULL,
+	[intParentLotId] [int] NULL,
+	[strParentLotNumber] [nvarchar](50) NULL,
+	[intSubLocationId] [int] NULL,
+	[strSubLocationName] [nvarchar](50) NULL,
+	[intLocationId] [int] NULL,
+	[strLotTracking] [nvarchar](50) NULL,
+	[dblQuantity] [numeric](38, 20) NULL,
+	[intItemUOMId] [int] NULL,
+	[strUOM] [nvarchar](50) NULL,
+	[dblIssuedQuantity] [numeric](38, 20) NULL,
+	[intItemIssuedUOMId] [int] NULL,
+	[strIssuedUOM] nvarchar(50) NULL,
+	[dblAvailableQty] [numeric](38, 20) NULL,
+	[dblReservedQty] [numeric](38, 20) NULL,
+	[dblWeightPerUnit] [numeric](38, 20) NULL
+)
+
+
+
 	SELECT @intRecipeId = intRecipeId
 	FROM tblMFWorkOrderRecipe
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -223,7 +260,7 @@ Declare @tblPickedLotsFinal AS table
 		AND intLocationId = @intLocationId
 		AND ysnActive = 1
 
-		INSERT INTO @tblInputItem (
+	INSERT INTO @tblInputItem (
 		intItemId
 		,dblRequiredQty
 		,ysnIsSubstitute
@@ -256,6 +293,9 @@ Declare @tblPickedLotsFinal AS table
 	WHERE r.intRecipeId = @intRecipeId
 		AND rs.intRecipeItemTypeId = 1
 		AND r.intWorkOrderId = @intWorkOrderId
+
+If @intAttributeTypeId=2 --Kit Pick List
+Begin
 
 --WO created from Blend Management Screen if Lots are there input lot table when kitting enabled
 If (Select TOP 1 ISNULL(intSalesOrderLineItemId,0) From tblMFWorkOrder Where intPickListId=@intPickListId)=0
@@ -769,4 +809,53 @@ Begin
 	Left Join @tblInputItem ti on pld.intItemId=ti.intItemId
 	Where pld.intPickListId=@intPickListId AND ISNULL(pld.intLotId,0)=0
 	ORDER BY a.strItemNo,a.strLotNumber DESC	
+End
+
+End
+Else --Process Production Pick List
+Begin
+
+	If @intKitStatusId = 7
+	Begin
+		Insert @tblReservedQty(intLotId,dblReservedQty)
+		Select sr.intLotId,sum(distinct sr.dblQty) 
+		from tblMFPickListDetail pld join tblICStockReservation sr on pld.intStageLotId=sr.intLotId 
+		Where pld.intPickListId=@intPickListId AND ISNULL(sr.ysnPosted,0)=0
+		Group by sr.intLotId
+
+		Insert Into @tblPickList
+		Select pld.intPickListDetailId,pld.intPickListId,pld.intLotId,l.strLotNumber,l.strLotAlias,l.intParentLotId,pl.strParentLotNumber,
+		l.intItemId,i.strItemNo,i.strDescription,sl.intStorageLocationId,sl.strName AS strStorageLocationName,
+		pld.dblQuantity,pld.intItemUOMId,um.strUnitMeasure AS strUOM,pld.dblIssuedQuantity,pld.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM, 
+		dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) - ISNULL(rq.dblReservedQty,0) AS dblAvailableQty,ISNULL(rq.dblReservedQty,0) AS dblReservedQty,
+		pld.dblPickQuantity,pld.intPickUOMId,um1.strUnitMeasure AS strPickUOM,
+		pld.intStageLotId,dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,pld.intItemUOMId,l.dblQty) - ISNULL(rq.dblReservedQty,0) AS dblAvailableUnit,
+		um1.strUnitMeasure AS strAvailableUnitUOM,l.dblWeightPerQty AS dblWeightPerUnit,Case When l.intStorageLocationId IN (@intBlendStagingLocationId) Then 'Staged' Else 'Picking' End AS strStatus
+		From tblMFPickListDetail pld Join tblICLot l on pld.intStageLotId=l.intLotId 
+		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 
+		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
+		Join tblICItemUOM iu on pld.intItemUOMId=iu.intItemUOMId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+		Join tblICItemUOM iu1 on pld.intItemIssuedUOMId=iu1.intItemUOMId
+		Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+		Left Join @tblReservedQty rq on pld.intLotId=rq.intLotId
+		Where pld.intPickListId=@intPickListId
+
+		Insert Into @tblRemainingPickedItemsForProduction
+		Exec uspMFCreatePickListForProduction @intWorkOrderId,@dblQtyToProduce
+
+		If Exists (Select 1 From @tblRemainingPickedItemsForProduction)
+		Begin
+			Insert Into @tblPickList
+			Select 0,@intPickListId,tpl.intLotId,tpl.strLotNumber,'',tpl.intParentLotId,tpl.strParentLotNumber,
+			tpl.intItemId,tpl.strItemNo,tpl.strDescription,tpl.intStorageLocationId,tpl.strStorageLocationName,
+			tpl.dblQuantity,tpl.intItemUOMId,tpl.strUOM,tpl.dblIssuedQuantity,tpl.intItemIssuedUOMId,tpl.strIssuedUOM,
+			tpl.dblAvailableQty,tpl.dblReservedQty,tpl.dblPickQuantity,tpl.intPickUOMId,tpl.strPickUOM,
+			null,0.0,'',tpl.dblWeightPerUnit,''
+			From @tblRemainingPickedItemsForProduction tpl
+		End
+
+		Select tpl.*,ti.intConsumptionMethodId from @tblPickList tpl Left Join @tblInputItem ti on tpl.intItemId=ti.intItemId
+	End
 End
