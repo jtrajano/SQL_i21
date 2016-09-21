@@ -76,7 +76,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId = ARTD.intItemId		
 		AND (ARID.intItemUOMId <> ARTD.intItemUOMId OR ARID.dblQtyShipped <> dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped))
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -126,7 +126,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId = ARTD.intItemId		
 		AND (ARID.intItemUOMId <> ARTD.intItemUOMId OR (ARID.dblQtyShipped * ARIDC.[dblQuantity]) <> (dbo.fnCalculateQtyBetweenUOM(ARTD.intItemUOMId, ARID.intItemUOMId, ARTD.dblQtyShipped) * ARIDC.[dblQuantity]))
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
@@ -175,7 +175,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARTD.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0		
@@ -224,7 +224,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0		
@@ -272,7 +272,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0
@@ -320,7 +320,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0
@@ -363,8 +363,8 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = ARI.strTransactionType)	
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 
@@ -407,8 +407,8 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
-		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = 'Invoice')	
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
+		AND ARID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @InvoiceId AND strTransactionType = ARI.strTransactionType)	
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 
@@ -450,7 +450,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARTD.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
 		AND ISNULL(ARTD.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0
@@ -494,7 +494,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARTD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)	
 		AND ISNULL(ARTD.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARTD.intSalesOrderDetailId, 0) = 0
@@ -801,7 +801,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)							
 
@@ -848,7 +848,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ARID.intItemId <> ARTD.intItemId		
 		AND (ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 OR ISNULL(ARID.intSalesOrderDetailId, 0) <> 0)							
 
@@ -936,7 +936,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 1
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 		
@@ -978,7 +978,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 1
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) = 0	
 		
@@ -1029,7 +1029,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 1
 		AND [dbo].[fnIsStockTrackingItem](ARID.intItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 
@@ -1078,7 +1078,7 @@ BEGIN
 		ISNULL(@FromPosting,0) = 1
 		AND [dbo].[fnIsStockTrackingItem](ARIDC.intComponentItemId) = 1
 		AND ARI.intInvoiceId = @InvoiceId
-		AND ARI.strTransactionType = 'Invoice'
+		AND ARI.strTransactionType IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.intInventoryShipmentItemId, 0) = 0 
 		AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
 				
