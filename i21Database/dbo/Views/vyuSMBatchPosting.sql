@@ -20,11 +20,7 @@ FROM
 	FROM tblGLJournal Journal CROSS APPLY(SELECT SUM(dblDebit) dblDebit FROM tblGLJournalDetail Detail WHERE Detail.intJournalId = Journal.intJournalId) Total 
 	WHERE Journal.strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal') AND Journal.strTransactionType <> 'Recurring' AND Journal.ysnPosted = 0
 	UNION ALL
-	SELECT 'Voucher', intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strComment as strReference, NULL AS intCompanyLocationId FROM tblAPBill WHERE intTransactionType = 1 AND intTransactionType != 6 AND ysnForApproval != 1 AND ISNULL(ysnPosted, 0) = 0 AND intBillId NOT IN (SELECT intBillId FROM tblAPBill WHERE (dtmApprovalDate IS NOT NULL AND ysnApproved = 0 AND ysnForApprovalSubmitted = 1))
-	UNION ALL
-	SELECT 'Payable', intPaymentId, strPaymentRecordNum, dblAmountPaid, '' as strVendorInvoiceNumber, intEntityVendorId as intEntityVendorId, intEntityId, dtmDatePaid, strNotes as strReference, NULL AS intCompanyLocationId FROM tblAPPayment WHERE ysnPosted = 0
-	UNION ALL
-	SELECT 'Debit Memo', intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strComment as strReference,NULL AS intCompanyLocationId FROM tblAPBill WHERE intTransactionType = 3 AND ISNULL(ysnPosted, 0) = 0 AND intTransactionType != 6 
+	SELECT strTransactionType, intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strReference, intCompanyLocationId FROM vyuAPBatchPostTransaction
 	UNION ALL
 	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, dblInvoiceTotal, strPONumber, intEntityCustomerId, intEntityId, dtmDate, strComments, intCompanyLocationId FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo') AND ysnPosted = 0  AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) AND ISNULL(ysnRecurring,0) = 0 AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	UNION ALL
