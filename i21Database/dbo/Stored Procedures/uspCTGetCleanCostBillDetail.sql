@@ -90,8 +90,7 @@ BEGIN TRY
 				
 				UNION ALL 
 				
-				SELECT	DISTINCT
-						BD.intItemId,
+				SELECT	BD.intItemId,
 						CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal
 								ELSE CAST(NULL AS NUMERIC(18,0)) 
 						END		AS dblValueInCCCurrency,
@@ -121,9 +120,9 @@ BEGIN TRY
 				FROM	tblAPBillDetail				BD
 				JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
 				JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID				=	BL.intCurrencyId
-				JOIN	tblCTContractDetail			CD	ON	CD.intContractHeaderId			=	BD.intContractHeaderId
+				JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	BD.intContractDetailId
 				JOIN	tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId
-				WHERE	BD.intContractHeaderId	=	@intContractHeaderId AND BL.intTransactionType = 2
+				WHERE	BD.intContractDetailId	=	@intContractDetailId AND BL.intTransactionType = 2
 		)t
 		GROUP BY	intItemId,
 					intCCCurrencyId,
