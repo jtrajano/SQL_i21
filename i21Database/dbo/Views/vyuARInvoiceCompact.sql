@@ -46,7 +46,7 @@ SELECT
 	,dtmTermDueDate					= SMT.dtmDueDate
 	,dblTermAPR						= SMT.dblAPR	
 	,ysnHasEmailSetup				= CASE WHEN (SELECT COUNT(*) FROM vyuARCustomerContacts CC WHERE CC.intCustomerEntityId = ARI.intEntityCustomerId AND ISNULL(CC.strEmail, '') <> '' AND CC.strEmailDistributionOption LIKE '%' + ARI.strTransactionType + '%') > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
-	,dblItemTermDiscountTotal		= (SELECT SUM(ISNULL(dblItemTermDiscount,0)) FROM tblARInvoiceDetail ARID WHERE ARID.intInvoiceId = ARI.intInvoiceId)
+	,dblTotalTermDiscount			= ARI.dblTotalTermDiscount
 FROM         
 	dbo.tblARInvoice AS ARI 
 INNER JOIN
