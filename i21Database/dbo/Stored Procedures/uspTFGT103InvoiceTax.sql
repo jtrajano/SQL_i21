@@ -158,7 +158,7 @@ DECLARE @tblTempTransaction TABLE (
 				SET @ExcludeDestinationState = ''
 			END
 
-					SET @QueryInvoice = 'SELECT DISTINCT 0,tblARInvoiceDetail.intInvoiceDetailId,tblTFReportingComponent.intTaxAuthorityId,tblTFReportingComponent.strFormCode,tblTFReportingComponent.strScheduleCode, 
+					SET @QueryInvoice = 'SELECT DISTINCT 0,tblARInvoiceDetail.intInvoiceDetailId,tblTFReportingComponent.intTaxAuthorityId,tblTFReportingComponent.strFormCode,tblTFReportingComponent.intReportingComponentId,tblTFReportingComponent.strScheduleCode, 
                          tblTFReportingComponent.strType,tblTFValidProductCode.intProductCode,tblTFValidProductCode.strProductCode,tblARInvoiceDetail.intItemId,tblARInvoiceDetail.dblQtyShipped, NULL,NULL,NULL,0,0 AS dblTaxExempt,
 						 tblARInvoice.strInvoiceNumber, tblARInvoice.strPONumber, tblARInvoice.strBOLNumber, tblARInvoice.dtmDate, 
                          (CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity ELSE tblARInvoice.strShipToCity END) AS strDestinationCity, 
@@ -226,7 +226,7 @@ DECLARE @tblTempTransaction TABLE (
 				DECLARE @InvQueryPart2 NVARCHAR(MAX)
 		
 				SET @InvQueryPart1 = 'SELECT DISTINCT 
-                         0, NULL, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode, tblTFReportingComponent.strScheduleCode, tblTFReportingComponent.strType, 
+                         0, NULL, tblTFReportingComponent.intTaxAuthorityId, tblTFReportingComponent.strFormCode,tblTFReportingComponent.intReportingComponentId,tblTFReportingComponent.strScheduleCode, tblTFReportingComponent.strType, 
                          tblTFValidProductCode.intProductCode, tblTFValidProductCode.strProductCode, tblICInventoryTransferDetail.intItemId, NULL AS dblQtyShipped, tblICInventoryTransferDetail.dblQuantity AS dblGross, 
                          tblICInventoryTransferDetail.dblQuantity AS dblNet, tblICInventoryTransferDetail.dblQuantity, NULL, NULL, NULL, NULL AS strPONumber, 
                          tblTRLoadReceipt.strBillOfLading AS strBOLNumber, tblICInventoryTransfer.dtmTransferDate AS dtmDate, tblSMCompanyLocation.strCity AS strDestinationCity, 
