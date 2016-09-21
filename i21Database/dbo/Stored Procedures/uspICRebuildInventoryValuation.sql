@@ -309,6 +309,30 @@ BEGIN
 			) = 1
 			AND intItemId = ISNULL(@intItemId, intItemId) 
 
+	-- Backup the created dates. 
+	BEGIN 
+		IF OBJECT_ID('tblICInventoryTransaction_BackupCreatedDate') IS NOT NULL 
+		BEGIN 
+			DROP TABLE tblICInventoryTransaction_BackupCreatedDate
+		END 	
+
+		SELECT	DISTINCT 
+				t.strBatchId 
+				,t.dtmCreated
+		INTO	tblICInventoryTransaction_BackupCreatedDate
+		FROM	tblICInventoryTransaction t 
+				CROSS APPLY (
+					SELECT	TOP 1 *
+					FROM	tblICInventoryTransaction 
+					WHERE	strBatchId = t.strBatchId
+				) result
+		WHERE	dbo.fnDateGreaterThanEquals(
+					CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+					, @dtmStartDate
+				) = 1
+				AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+	END 
+
 	-- Intialize #tmpICInventoryTransaction
 	SELECT	id = CAST(0 AS INT) 
 			,id2 = CAST(0 AS INT) 
@@ -1653,6 +1677,18 @@ BEGIN
 	WHERE ysnIsUnposted = 0	
 	GROUP BY intAccountId, dtmDate, strCode
 END
+
+-- Restore the created dates
+BEGIN 
+	IF OBJECT_ID('tblICInventoryTransaction_BackupCreatedDate') IS NOT NULL 
+	BEGIN 
+		UPDATE	t
+		SET		t.dtmCreated = t_CreatedDate.dtmCreated
+		FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransaction_BackupCreatedDate t_CreatedDate
+					ON t.strBatchId = t_CreatedDate.strBatchId				
+	END 
+END 
+
 
 -- Compare the snapshot of the gl entries 
 BEGIN
