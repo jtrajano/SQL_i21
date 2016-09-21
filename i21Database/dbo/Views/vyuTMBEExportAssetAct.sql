@@ -29,8 +29,9 @@ LEFT JOIN (
 		,A.strItemNo 
 		,A.intLocationId
 		,A.dblSalePrice
+		,A.intUnitMeasureId
 	FROM vyuICGetItemPricing A
-	WHERE strUnitMeasure = 'Gallon'
+	WHERE intUnitMeasureId = (SELECT TOP 1 intIssueUOMId FROM tblICItemLocation WHERE intItemId = A.intItemId AND intLocationId = A.intLocationId)
 	) F
 	ON 	F.intItemId = A.intProduct
 		AND A.intLocationId = F.intLocationId
