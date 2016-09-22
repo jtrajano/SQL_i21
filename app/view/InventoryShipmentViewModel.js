@@ -293,12 +293,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         readOnlyAccrue: function (get) {
             switch (get('grdCharges.selection.ysnAccrue')) {
-                case false:
-                    return true;
-                    break;
-                default:
+                case true:
                     return false;
-                    break;
+                default:
+                    return true;
             }
         },
         readOnlyOnPickLots: function (get) {

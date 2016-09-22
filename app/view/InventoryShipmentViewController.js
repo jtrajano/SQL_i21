@@ -516,11 +516,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         store: '{contract}',
                         defaultFilters: [{
                             column: 'strContractType',
-                            value: 'Purchase',
+                            value: 'Sale',
                             conjunction: 'and'
                         },{
                             column: 'intEntityId',
-                            value: '{current.intEntityVendorId}',
+                            value: '{current.intEntityCustomerId}',
                             conjunction: 'and'
                         }]
                     }
