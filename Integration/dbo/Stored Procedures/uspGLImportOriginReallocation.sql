@@ -10,6 +10,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportOriginReallocation]
 )
 AS
 	BEGIN TRY
+	IF NOT EXISTS(SELECT TOP 1 1 FROM glragmst) BEGIN SELECT ''No reallocation to import from origin.''  RETURN END
 	BEGIN TRANSACTION
 		DECLARE @sql VARCHAR (max)
 		DECLARE @jump INT
@@ -50,11 +51,13 @@ AS
 		BEGIN
 			INSERT INTO tblSMPreferences (strPreference, strValue, intUserID) VALUES(''isReallocationImported'',''true'', @intUserId)
 		END
-		COMMIT TRANSACTION
+		IF @@TRANCOUNT > 0
+			COMMIT TRANSACTION
 		SELECT ''Success''
 	END TRY
 	BEGIN CATCH
-		ROLLBACK TRANSACTION
+		IF @@TRANCOUNT > 0
+			ROLLBACK TRANSACTION
 		SELECT ERROR_MESSAGE()
 	END CATCH')
 END
