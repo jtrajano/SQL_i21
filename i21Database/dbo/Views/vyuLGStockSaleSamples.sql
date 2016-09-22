@@ -10,7 +10,7 @@ SELECT L.strLotNumber
 	,SS.strStatus
 	,L.intEntityVendorId
 	,E.strName AS strVendor
-	,L.strMarkings AS strMarks
+	,S.strMarks AS strMarks
 	,S.dtmTestingStartDate
 	,S.dtmTestingEndDate
 FROM tblICLot L
