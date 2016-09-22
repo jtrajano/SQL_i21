@@ -4316,6 +4316,11 @@
     <Build Include="dbo\Views\vyuTMForPrintDeliveryTicket.sql" />
     <Build Include="dbo\Views\vyuAPBatchPostTransaction.sql" />
     <Build Include="dbo\Views\vyuAPForApprovalTransaction.sql" />
+    <Build Include="dbo\Functions\fnPATCountStockStatus.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateRefundTypeHistory.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateFiscalSummary.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateRefundSummary.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateRefundSummaryHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
