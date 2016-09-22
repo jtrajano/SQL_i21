@@ -205,13 +205,15 @@ BEGIN
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intItemId
 	END
+	Declare @intAttributeTypeId int, @intManufacturingProcessId int
 
-	IF EXISTS (
-			SELECT *
-			FROM tblMFWorkOrder
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND intBlendRequirementId IS NOT NULL
-			)
+	Select @intManufacturingProcessId=intManufacturingProcessId from tblMFWorkOrder Where intWorkOrderId =@intWorkOrderId 
+
+	Select @intAttributeTypeId=intAttributeTypeId
+	from dbo.tblMFManufacturingProcess 
+	Where intManufacturingProcessId=@intManufacturingProcessId
+
+	IF @intAttributeTypeId=2
 		OR @ysnPostProduction = 1
 	BEGIN
 		EXEC uspMFPostProduction 1

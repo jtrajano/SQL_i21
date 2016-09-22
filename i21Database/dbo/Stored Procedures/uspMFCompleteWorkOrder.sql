@@ -286,10 +286,22 @@ BEGIN TRY
 	BEGIN
 		PRINT 'Move the selected lot''s container to Audit container'
 	END
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Is Instant Consumption'
 
-	SELECT @intBatchId = intBatchID
-	FROM tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
+	SELECT @strInstantConsumption = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @strInstantConsumption = 'False'
+	Begin
+		SELECT @intBatchId = intBatchID
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+	End
 
 	IF @intBatchId IS NULL
 		OR @intBatchId = 0
@@ -683,9 +695,12 @@ BEGIN TRY
 			,3
 			)
 	BEGIN
-		SELECT @strRetBatchId = strBatchId
-		FROM tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+		IF @strInstantConsumption = 'False'
+		Begin
+			SELECT @strRetBatchId = strBatchId
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+		End
 
 		IF @strRetBatchId IS NULL
 		BEGIN
