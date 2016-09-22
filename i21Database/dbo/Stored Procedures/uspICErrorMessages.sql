@@ -426,3 +426,11 @@ EXEC sp_addmessage 80086,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80087) EXEC sp_dropmessage 80087, 'us_english'	
 SET @strmessage = 'Please ensure that the line items and lots are located in the receipt''s location.'
 EXEC sp_addmessage 80087,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80088) EXEC sp_dropmessage 80088, 'us_english'	
+SET @strmessage = 'Other Vendor for Other Charge item %s is required to accrue.'
+EXEC sp_addmessage 80088,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80089) EXEC sp_dropmessage 80089, 'us_english'	
+SET @strmessage = 'Unable to Unship. The inventory shipment has already an invoice.'
+EXEC sp_addmessage 80089,11,@strmessage,'us_english','False'

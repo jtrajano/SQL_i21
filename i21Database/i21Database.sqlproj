@@ -4326,6 +4326,22 @@
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewUniqueValue.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewGain.sql" />
     <Build Include="dbo\Tables\tblCRMQuote.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentItemAllocatedCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByContractAndPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByContractAndStockUnit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByContractAndUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByStockUnit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryShipmentOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateShipmentOtherCharges.sql" />
+    <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
