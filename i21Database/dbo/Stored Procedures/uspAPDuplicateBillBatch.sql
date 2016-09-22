@@ -10,6 +10,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @generatedBillBatchRecordId NVARCHAR(50);
 DECLARE @createdBillId INT;
 DECLARE @billId INT, @vendorId INT;
 DECLARE @shipFromId INT, @shipToId INT;
@@ -27,6 +28,8 @@ BEGIN
 	GOTO UNDO;
 END
 
+EXEC uspSMGetStartingNumber 7, @generatedBillBatchRecordId OUT
+
 SET @shipToId = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId)
 IF (@shipToId IS NULL)
 BEGIN
@@ -38,6 +41,7 @@ INSERT INTO tblAPBillBatch(
     [ysnPosted],
 	[dtmBatchDate],
     [strReference],
+	[strBillBatchNumber],
     [dblTotal],
     [intConcurrencyId], 
     [intEntityId], 
@@ -48,6 +52,7 @@ SELECT
     [ysnPosted]				=	0,
 	[dtmBatchDate]			=	GETDATE(),
     [strReference]			=	A.strReference + ' Duplicate of ' + A.strBillBatchNumber,
+	[strBillBatchNumber]	=	@generatedBillBatchRecordId,
     [dblTotal]				=	A.dblTotal,
     [intConcurrencyId]		=	0, 
     [intEntityId]			=	@userId, 
