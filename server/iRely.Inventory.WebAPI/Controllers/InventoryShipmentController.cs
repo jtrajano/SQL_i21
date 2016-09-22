@@ -99,5 +99,22 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAddOrders(param, CustomerId, OrderType, SourceType));
         }
 
+        [HttpPost]
+        [ActionName("CalculateCharges")]
+        public HttpResponseMessage CalculateCharges(int id)
+        {
+            var result = _bl.CalculateCharges(id);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }

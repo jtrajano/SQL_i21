@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4602f8a76eeddc31c60eb29ec11b2c44cc4a2a48c0d05990fc3cc9e0ed1b6d05))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb2acfcc7391b6d6e371239e588c5a794e48789075c6606e33b46452dbf216550))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets4602f8a76eeddc31c60eb29ec11b2c44cc4a2a48c0d05990fc3cc9e0ed1b6d05 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsb2acfcc7391b6d6e371239e588c5a794e48789075c6606e33b46452dbf216550 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "4602f8a76eeddc31c60eb29ec11b2c44cc4a2a48c0d05990fc3cc9e0ed1b6d05"; }
+            get { return "b2acfcc7391b6d6e371239e588c5a794e48789075c6606e33b46452dbf216550"; }
         }
 
         /// <summary>
@@ -9051,7 +9051,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentCharge
-        [CodeFirstDatabaseSchema.tblICInventoryShipmentCharge](T1.tblICInventoryShipmentCharge_intInventoryShipmentChargeId, T1.tblICInventoryShipmentCharge_intInventoryShipmentId, T1.tblICInventoryShipmentCharge_intContractId, T1.tblICInventoryShipmentCharge_intChargeId, T1.tblICInventoryShipmentCharge_strCostMethod, T1.tblICInventoryShipmentCharge_dblRate, T1.tblICInventoryShipmentCharge_intCostUOMId, T1.tblICInventoryShipmentCharge_intCurrencyId, T1.tblICInventoryShipmentCharge_dblAmount, T1.tblICInventoryShipmentCharge_ysnAccrue, T1.tblICInventoryShipmentCharge_intEntityVendorId, T1.tblICInventoryShipmentCharge_ysnPrice, T1.tblICInventoryShipmentCharge_intSort, T1.tblICInventoryShipmentCharge_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryShipmentCharge](T1.tblICInventoryShipmentCharge_intInventoryShipmentChargeId, T1.tblICInventoryShipmentCharge_intInventoryShipmentId, T1.tblICInventoryShipmentCharge_intContractId, T1.tblICInventoryShipmentCharge_intChargeId, T1.tblICInventoryShipmentCharge_strCostMethod, T1.tblICInventoryShipmentCharge_dblRate, T1.tblICInventoryShipmentCharge_intCostUOMId, T1.tblICInventoryShipmentCharge_intCurrencyId, T1.tblICInventoryShipmentCharge_dblAmount, T1.tblICInventoryShipmentCharge_strAllocatePriceBy, T1.tblICInventoryShipmentCharge_ysnAccrue, T1.tblICInventoryShipmentCharge_intEntityVendorId, T1.tblICInventoryShipmentCharge_ysnPrice, T1.tblICInventoryShipmentCharge_intSort, T1.tblICInventoryShipmentCharge_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentChargeId AS tblICInventoryShipmentCharge_intInventoryShipmentChargeId, 
@@ -9063,6 +9063,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCostUOMId AS tblICInventoryShipmentCharge_intCostUOMId, 
             T.intCurrencyId AS tblICInventoryShipmentCharge_intCurrencyId, 
             T.dblAmount AS tblICInventoryShipmentCharge_dblAmount, 
+            T.strAllocatePriceBy AS tblICInventoryShipmentCharge_strAllocatePriceBy, 
             T.ysnAccrue AS tblICInventoryShipmentCharge_ysnAccrue, 
             T.intEntityVendorId AS tblICInventoryShipmentCharge_intEntityVendorId, 
             T.ysnPrice AS tblICInventoryShipmentCharge_ysnPrice, 
@@ -9081,7 +9082,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryShipmentCharge
-        [CodeFirstDatabaseSchema.vyuICGetInventoryShipmentCharge](T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentChargeId, T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentId, T1.vyuICGetInventoryShipmentCharge_intContractId, T1.vyuICGetInventoryShipmentCharge_strContractNumber, T1.vyuICGetInventoryShipmentCharge_strItemNo, T1.vyuICGetInventoryShipmentCharge_strItemDescription, T1.vyuICGetInventoryShipmentCharge_strCostMethod, T1.vyuICGetInventoryShipmentCharge_dblRate, T1.vyuICGetInventoryShipmentCharge_strCostUOM, T1.vyuICGetInventoryShipmentCharge_strUnitType, T1.vyuICGetInventoryShipmentCharge_intCurrencyId, T1.vyuICGetInventoryShipmentCharge_strCurrency, T1.vyuICGetInventoryShipmentCharge_intOnCostTypeId, T1.vyuICGetInventoryShipmentCharge_ysnPrice, T1.vyuICGetInventoryShipmentCharge_strOnCostType, T1.vyuICGetInventoryShipmentCharge_dblAmount, T1.vyuICGetInventoryShipmentCharge_ysnAccrue, T1.vyuICGetInventoryShipmentCharge_intEntityVendorId, T1.vyuICGetInventoryShipmentCharge_strVendorId)
+        [CodeFirstDatabaseSchema.vyuICGetInventoryShipmentCharge](T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentChargeId, T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentId, T1.vyuICGetInventoryShipmentCharge_intContractId, T1.vyuICGetInventoryShipmentCharge_strContractNumber, T1.vyuICGetInventoryShipmentCharge_strItemNo, T1.vyuICGetInventoryShipmentCharge_strItemDescription, T1.vyuICGetInventoryShipmentCharge_strCostMethod, T1.vyuICGetInventoryShipmentCharge_dblRate, T1.vyuICGetInventoryShipmentCharge_strCostUOM, T1.vyuICGetInventoryShipmentCharge_strUnitType, T1.vyuICGetInventoryShipmentCharge_intCurrencyId, T1.vyuICGetInventoryShipmentCharge_strCurrency, T1.vyuICGetInventoryShipmentCharge_intOnCostTypeId, T1.vyuICGetInventoryShipmentCharge_ysnPrice, T1.vyuICGetInventoryShipmentCharge_strOnCostType, T1.vyuICGetInventoryShipmentCharge_dblAmount, T1.vyuICGetInventoryShipmentCharge_strAllocatePriceBy, T1.vyuICGetInventoryShipmentCharge_ysnAccrue, T1.vyuICGetInventoryShipmentCharge_intEntityVendorId, T1.vyuICGetInventoryShipmentCharge_strVendorId, T1.vyuICGetInventoryShipmentCharge_strVendorName)
     FROM (
         SELECT 
             T.intInventoryShipmentChargeId AS vyuICGetInventoryShipmentCharge_intInventoryShipmentChargeId, 
@@ -9100,9 +9101,11 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnPrice AS vyuICGetInventoryShipmentCharge_ysnPrice, 
             T.strOnCostType AS vyuICGetInventoryShipmentCharge_strOnCostType, 
             T.dblAmount AS vyuICGetInventoryShipmentCharge_dblAmount, 
+            T.strAllocatePriceBy AS vyuICGetInventoryShipmentCharge_strAllocatePriceBy, 
             T.ysnAccrue AS vyuICGetInventoryShipmentCharge_ysnAccrue, 
             T.intEntityVendorId AS vyuICGetInventoryShipmentCharge_intEntityVendorId, 
             T.strVendorId AS vyuICGetInventoryShipmentCharge_strVendorId, 
+            T.strVendorName AS vyuICGetInventoryShipmentCharge_strVendorName, 
             True AS _from0
         FROM InventoryEntities.vyuICGetInventoryShipmentCharges AS T
     ) AS T1");
@@ -9411,7 +9414,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentCharges
-        [iRely.Inventory.Model.tblICInventoryShipmentCharge](T1.tblICInventoryShipmentCharge_intInventoryShipmentChargeId, T1.tblICInventoryShipmentCharge_intInventoryShipmentId, T1.tblICInventoryShipmentCharge_intContractId, T1.tblICInventoryShipmentCharge_intChargeId, T1.tblICInventoryShipmentCharge_strCostMethod, T1.tblICInventoryShipmentCharge_dblRate, T1.tblICInventoryShipmentCharge_intCostUOMId, T1.tblICInventoryShipmentCharge_intCurrencyId, T1.tblICInventoryShipmentCharge_dblAmount, T1.tblICInventoryShipmentCharge_ysnAccrue, T1.tblICInventoryShipmentCharge_intEntityVendorId, T1.tblICInventoryShipmentCharge_ysnPrice, T1.tblICInventoryShipmentCharge_intSort, T1.tblICInventoryShipmentCharge_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryShipmentCharge](T1.tblICInventoryShipmentCharge_intInventoryShipmentChargeId, T1.tblICInventoryShipmentCharge_intInventoryShipmentId, T1.tblICInventoryShipmentCharge_intContractId, T1.tblICInventoryShipmentCharge_intChargeId, T1.tblICInventoryShipmentCharge_strCostMethod, T1.tblICInventoryShipmentCharge_dblRate, T1.tblICInventoryShipmentCharge_intCostUOMId, T1.tblICInventoryShipmentCharge_intCurrencyId, T1.tblICInventoryShipmentCharge_dblAmount, T1.tblICInventoryShipmentCharge_strAllocatePriceBy, T1.tblICInventoryShipmentCharge_ysnAccrue, T1.tblICInventoryShipmentCharge_intEntityVendorId, T1.tblICInventoryShipmentCharge_ysnPrice, T1.tblICInventoryShipmentCharge_intSort, T1.tblICInventoryShipmentCharge_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentChargeId AS tblICInventoryShipmentCharge_intInventoryShipmentChargeId, 
@@ -9423,6 +9426,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCostUOMId AS tblICInventoryShipmentCharge_intCostUOMId, 
             T.intCurrencyId AS tblICInventoryShipmentCharge_intCurrencyId, 
             T.dblAmount AS tblICInventoryShipmentCharge_dblAmount, 
+            T.strAllocatePriceBy AS tblICInventoryShipmentCharge_strAllocatePriceBy, 
             T.ysnAccrue AS tblICInventoryShipmentCharge_ysnAccrue, 
             T.intEntityVendorId AS tblICInventoryShipmentCharge_intEntityVendorId, 
             T.ysnPrice AS tblICInventoryShipmentCharge_ysnPrice, 
@@ -9441,7 +9445,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetInventoryShipmentCharges
-        [iRely.Inventory.Model.vyuICGetInventoryShipmentCharge](T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentChargeId, T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentId, T1.vyuICGetInventoryShipmentCharge_intContractId, T1.vyuICGetInventoryShipmentCharge_strContractNumber, T1.vyuICGetInventoryShipmentCharge_strItemNo, T1.vyuICGetInventoryShipmentCharge_strItemDescription, T1.vyuICGetInventoryShipmentCharge_strCostMethod, T1.vyuICGetInventoryShipmentCharge_dblRate, T1.vyuICGetInventoryShipmentCharge_strCostUOM, T1.vyuICGetInventoryShipmentCharge_strUnitType, T1.vyuICGetInventoryShipmentCharge_intCurrencyId, T1.vyuICGetInventoryShipmentCharge_strCurrency, T1.vyuICGetInventoryShipmentCharge_intOnCostTypeId, T1.vyuICGetInventoryShipmentCharge_ysnPrice, T1.vyuICGetInventoryShipmentCharge_strOnCostType, T1.vyuICGetInventoryShipmentCharge_dblAmount, T1.vyuICGetInventoryShipmentCharge_ysnAccrue, T1.vyuICGetInventoryShipmentCharge_intEntityVendorId, T1.vyuICGetInventoryShipmentCharge_strVendorId)
+        [iRely.Inventory.Model.vyuICGetInventoryShipmentCharge](T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentChargeId, T1.vyuICGetInventoryShipmentCharge_intInventoryShipmentId, T1.vyuICGetInventoryShipmentCharge_intContractId, T1.vyuICGetInventoryShipmentCharge_strContractNumber, T1.vyuICGetInventoryShipmentCharge_strItemNo, T1.vyuICGetInventoryShipmentCharge_strItemDescription, T1.vyuICGetInventoryShipmentCharge_strCostMethod, T1.vyuICGetInventoryShipmentCharge_dblRate, T1.vyuICGetInventoryShipmentCharge_strCostUOM, T1.vyuICGetInventoryShipmentCharge_strUnitType, T1.vyuICGetInventoryShipmentCharge_intCurrencyId, T1.vyuICGetInventoryShipmentCharge_strCurrency, T1.vyuICGetInventoryShipmentCharge_intOnCostTypeId, T1.vyuICGetInventoryShipmentCharge_ysnPrice, T1.vyuICGetInventoryShipmentCharge_strOnCostType, T1.vyuICGetInventoryShipmentCharge_dblAmount, T1.vyuICGetInventoryShipmentCharge_strAllocatePriceBy, T1.vyuICGetInventoryShipmentCharge_ysnAccrue, T1.vyuICGetInventoryShipmentCharge_intEntityVendorId, T1.vyuICGetInventoryShipmentCharge_strVendorId, T1.vyuICGetInventoryShipmentCharge_strVendorName)
     FROM (
         SELECT 
             T.intInventoryShipmentChargeId AS vyuICGetInventoryShipmentCharge_intInventoryShipmentChargeId, 
@@ -9460,9 +9464,11 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnPrice AS vyuICGetInventoryShipmentCharge_ysnPrice, 
             T.strOnCostType AS vyuICGetInventoryShipmentCharge_strOnCostType, 
             T.dblAmount AS vyuICGetInventoryShipmentCharge_dblAmount, 
+            T.strAllocatePriceBy AS vyuICGetInventoryShipmentCharge_strAllocatePriceBy, 
             T.ysnAccrue AS vyuICGetInventoryShipmentCharge_ysnAccrue, 
             T.intEntityVendorId AS vyuICGetInventoryShipmentCharge_intEntityVendorId, 
             T.strVendorId AS vyuICGetInventoryShipmentCharge_strVendorId, 
+            T.strVendorName AS vyuICGetInventoryShipmentCharge_strVendorName, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryShipmentCharge AS T
     ) AS T1");

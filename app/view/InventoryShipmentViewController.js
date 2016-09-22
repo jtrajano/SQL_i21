@@ -302,6 +302,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnRemoveItem: {
                 hidden: '{readOnlyOnPickLots}'
             },
+            btnCalculateCharges: {
+                hidden: '{current.ysnPosted}'
+            },
             grdInventoryShipment: {
                 readOnly: '{readOnlyOnPickLots}',
                 colOrderNumber: {
@@ -523,11 +526,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         store: '{contract}',
                         defaultFilters: [{
                             column: 'strContractType',
-                            value: 'Purchase',
+                            value: 'Sale',
                             conjunction: 'and'
                         },{
                             column: 'intEntityId',
-                            value: '{current.intEntityVendorId}',
+                            value: '{current.intEntityCustomerId}',
                             conjunction: 'and'
                         }]
                     }
@@ -579,11 +582,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colChargeAmount: 'dblAmount',
+                colAllocatePriceBy: {
+                    dataIndex: 'strAllocatePriceBy',
+                    editor: {
+                        readOnly: '{checkInventoryPrice}',
+                        store: '{allocateBy}'
+                    }
+                },
                 colAccrue: {
-                    dataIndex: 'ysnAccrue'
+                    dataIndex: 'ysnAccrue',
+                    disabled: '{current.ysnPosted}',
                 },
                 colCostVendor: {
-                    dataIndex: 'strVendorId',
+                    dataIndex: 'strVendorName',
                     editor: {
                         readOnly: '{readOnlyAccrue}',
                         origValueField: 'intEntityVendorId',
@@ -644,7 +655,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     key: 'tblICInventoryShipmentCharges',
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdCharges,
-                        deleteButton: grdCharges.down('#btnRemoveCharge')
+                        deleteButton: grdCharges.down('#btnRemoveCharge'),
+                        createRecord: me.onChargeCreateRecord
                     })
                 }
             ]
@@ -754,6 +766,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var record = Ext.create('Inventory.model.ShipmentItemLot');
         // record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
         record.set('dblQuantityShipped', config.dummy.get('dblQuantityShipped'));
+        action(record);
+    },
+    
+    onChargeCreateRecord: function (config, action) {
+        var win = config.grid.up('window');
+        var record = Ext.create('Inventory.model.ShipmentCharge');
+        record.set('strAllocatePriceBy', 'Unit');
         action(record);
     },
 
@@ -2366,7 +2385,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                                             intCostUOMId: otherCharge.intItemUOMId,
                                                             intEntityVendorId: otherCharge.intVendorId,
                                                             dblAmount: 0,
-                                                            strAllocateCostBy: '',
+                                                            strAllocatePriceBy: 'Unit',
                                                             ysnAccrue: otherCharge.ysnAccrue,
                                                             ysnPrice: otherCharge.ysnPrice,
                                                             strItemNo: otherCharge.strItemNo,
@@ -2444,6 +2463,61 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var current = win.viewModel.data.current;
         
         Inventory.view.InventoryShipmentViewController.orgValueShipFrom = current.get('intShipFromLocationId');
+    },
+    
+    onCalculateChargeClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        var doPost = function () {
+            if (current) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryShipment/CalculateCharges?id=' + current.get('intInventoryShipmentId'),
+                    method: 'post',
+                    success: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        if (!jsonData.success) {
+                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        }
+                        else {
+                            context.configuration.paging.store.load();
+                        }
+                    },
+                    failure: function (response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                    }
+                });
+            }
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function () {
+                doPost();
+            }
+        });
+    },
+    
+    onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnAccrue') {
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = grid.view.getRecord(rowIndex);
+
+            if (checked === false) {
+                current.set('intEntityVendorId', null);
+                current.set('strVendorName', null);
+            }
+        }
     },
 
     init: function(application) {
@@ -2532,6 +2606,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboCustomerStorage": {
                 select: this.onItemNoSelect
+            },
+            "#btnCalculateCharges": {
+                click: this.onCalculateChargeClick
+            },
+            "#colAccrue": {
+                beforecheckchange: this.onAccrueCheckChange
             }
         })
     }

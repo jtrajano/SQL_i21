@@ -13,6 +13,7 @@ namespace iRely.Inventory.BusinessLayer
     {
         SaveResult PostTransaction(Common.Posting_RequestModel shipment, bool isRecap);
         SaveResult ProcessInvoice(int shipmentId, out int? newInvoice);
+        SaveResult CalculateCharges(int shipmentId);
         void SetUser(int UserId);
         Task<SearchResult> SearchShipmentItems(GetParameter param);
         Task<SearchResult> SearchShipmentItemLots(GetParameter param);

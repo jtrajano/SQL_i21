@@ -1771,7 +1771,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 text: 'Remove'
                                                             },
                                                             {
-                                                                xtype: 'filter1'
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnCalculateCharges',
+                                                                iconCls: 'small-calculator',
+                                                                text: 'Calculate'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1',
+                                                                width: 198
                                                             }
                                                         ]
                                                     }
@@ -1844,7 +1852,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCostMethod',
-                                                        text: 'Cost Method',
+                                                        text: 'Price Method',
                                                         flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -1996,8 +2004,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 }
                                                             ],
                                                             itemId: 'cboCostVendor',
-                                                            displayField: 'strVendorId',
-                                                            valueField: 'strVendorId'
+                                                            displayField: 'strName',
+                                                            valueField: 'strName'
                                                         }
                                                     },
                                                     {
@@ -2005,6 +2013,25 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         itemId: 'colPrice',
                                                         text: 'Price',
                                                         flex: 0.7
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colAllocatePriceBy',
+                                                        text: 'Allocate Price By',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'strAllocatePriceBy',
+                                                                    dataType: 'string',
+                                                                    text: 'Allocate Cost By',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboAllocatePriceBy',
+                                                            displayField: 'strAllocatePriceBy',
+                                                            valueField: 'strAllocatePriceBy'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
