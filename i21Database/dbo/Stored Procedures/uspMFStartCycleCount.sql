@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].uspMFStartCycleCount (@strXML NVARCHAR(MAX))
 AS
 BEGIN TRY
-
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
@@ -18,19 +17,23 @@ BEGIN TRY
 		,@intItemId INT
 		,@intUserId INT
 		,@intCycleCountSessionId INT
-		,@ysnIncludeOutputItem bit
-		,@strExcludeItemType nvarchar(MAX)
-		,@strWorkOrderNo nvarchar(MAX)
-		,@dtmCurrentDate datetime
-		,@dtmCurrentDateTime datetime
-		,@intDayOfYear int
-		,@TRANCOUNT int
+		,@ysnIncludeOutputItem BIT
+		,@strExcludeItemType NVARCHAR(MAX)
+		,@strWorkOrderNo NVARCHAR(MAX)
+		,@dtmCurrentDate DATETIME
+		,@dtmCurrentDateTime DATETIME
+		,@intDayOfYear INT
+		,@TRANCOUNT INT
+		,@intProductionStagingId INT
+		,@intProductionStageLocationId INT
 
-	Select @TRANCOUNT			=@@TRANCOUNT
-	
-	Select @dtmCurrentDateTime	=GETDATE()
-	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
-	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
+	SELECT @TRANCOUNT = @@TRANCOUNT
+
+	SELECT @dtmCurrentDateTime = GETDATE()
+
+	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
+
+	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDateTime)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -39,15 +42,15 @@ BEGIN TRY
 		,@intSubLocationId = intSubLocationId
 		,@intUserId = intUserId
 		,@intWorkOrderId = intWorkOrderId
-		,@ysnIncludeOutputItem=ysnIncludeOutputItem
-		,@strExcludeItemType=strExcludeItemType
+		,@ysnIncludeOutputItem = ysnIncludeOutputItem
+		,@strExcludeItemType = strExcludeItemType
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLocationId INT
 			,intSubLocationId INT
 			,intUserId INT
 			,intWorkOrderId INT
-			,ysnIncludeOutputItem bit
-			,strExcludeItemType nvarchar(MAX)
+			,ysnIncludeOutputItem BIT
+			,strExcludeItemType NVARCHAR(MAX)
 			)
 
 	DECLARE @intUserSecurityID INT
@@ -59,7 +62,7 @@ BEGIN TRY
 		,@intStartOffset INT
 		,@strUserName NVARCHAR(50)
 		,@intPriorWorkOrderId INT
-		,@strPriorWorkOrderNo nvarchar(50)
+		,@strPriorWorkOrderNo NVARCHAR(50)
 		,@strProductItem NVARCHAR(50)
 		,@strInputItem NVARCHAR(50)
 		,@strPlannedDate NVARCHAR(50)
@@ -167,12 +170,13 @@ BEGIN TRY
 				)
 	END
 
-	SELECT TOP 1 @intPriorWorkOrderId = intWorkOrderId,@strPriorWorkOrderNo =strWorkOrderNo 
+	SELECT TOP 1 @intPriorWorkOrderId = intWorkOrderId
+		,@strPriorWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder W
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intItemId = @intItemId
 		AND intManufacturingProcessId = @intManufacturingProcessId
-		AND intStatusId<>13
+		AND intStatusId <> 13
 		AND (
 			CASE 
 				WHEN intPlannedShiftId IS NOT NULL
@@ -223,10 +227,10 @@ BEGIN TRY
 						)
 					)
 				AND intCountStatusId <> 13
-				AND intStatusId<>13
+				AND intStatusId <> 13
 			)
 	BEGIN
-		SELECT TOP 1 @strWorkOrderNo=strWorkOrderNo
+		SELECT TOP 1 @strWorkOrderNo = strWorkOrderNo
 			,@strProductItem = Product.strItemNo + ' - ' + Product.strDescription
 			,@strInputItem = Input.strItemNo + ' - ' + Input.strDescription
 			,@strPlannedDate = ltrim(W.dtmPlannedDate) + (
@@ -258,7 +262,7 @@ BEGIN TRY
 					)
 				)
 			AND intCountStatusId <> 13
-			AND intStatusId<>13
+			AND intStatusId <> 13
 		ORDER BY W.dtmPlannedDate DESC
 			,W.intPlannedShiftId DESC
 
@@ -278,9 +282,10 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrder W
 			LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 			JOIN dbo.tblMFWorkOrderRecipe Product ON Product.intItemId = W.intItemId
-			JOIN dbo.tblMFWorkOrderRecipeItem ProductItem ON ProductItem.intRecipeId = Product.intRecipeId and ProductItem.intWorkOrderId = Product.intWorkOrderId
+			JOIN dbo.tblMFWorkOrderRecipeItem ProductItem ON ProductItem.intRecipeId = Product.intRecipeId
+				AND ProductItem.intWorkOrderId = Product.intWorkOrderId
 			JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = ProductItem.intItemId
-			WHERE ri.intWorkOrderId =@intWorkOrderId 
+			WHERE ri.intWorkOrderId = @intWorkOrderId
 				AND ri.intRecipeItemTypeId = 1
 				AND (
 					(
@@ -295,7 +300,7 @@ BEGIN TRY
 						)
 					)
 				AND intCountStatusId <> 13
-				AND intStatusId<>13
+				AND intStatusId <> 13
 				AND (
 					CASE 
 						WHEN intPlannedShiftId IS NOT NULL
@@ -315,11 +320,12 @@ BEGIN TRY
 					ELSE ' - ' + S.strShiftName
 					END
 				)
-			,@strWorkOrderNo=strWorkOrderNo
+			,@strWorkOrderNo = strWorkOrderNo
 		FROM dbo.tblMFWorkOrder W
 		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 		JOIN dbo.tblMFWorkOrderRecipe P ON P.intItemId = W.intItemId
-		JOIN dbo.tblMFWorkOrderRecipeItem PI ON PI.intRecipeId = P.intRecipeId and PI.intWorkOrderId = P.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderRecipeItem PI ON PI.intRecipeId = P.intRecipeId
+			AND PI.intWorkOrderId = P.intWorkOrderId
 		JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = PI.intItemId
 		JOIN dbo.tblICItem Product ON Product.intItemId = W.intItemId
 		JOIN dbo.tblICItem Input ON Input.intItemId = PI.intItemId
@@ -338,7 +344,7 @@ BEGIN TRY
 					)
 				)
 			AND intCountStatusId <> 13
-			AND intStatusId<>13
+			AND intStatusId <> 13
 			AND (
 				CASE 
 					WHEN intPlannedShiftId IS NOT NULL
@@ -378,13 +384,14 @@ BEGIN TRY
 				)
 			)
 		AND ri.intRecipeItemTypeId = 1
-		AND ri.intConsumptionMethodId =1
+		AND ri.intConsumptionMethodId = 1
 	
 	UNION
 	
 	SELECT RSI.intSubstituteItemId
-	FROM dbo.tblMFWorkOrderRecipeItem RI 
-	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId and RI.intWorkOrderId =RSI.intWorkOrderId 
+	FROM dbo.tblMFWorkOrderRecipeItem RI
+	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
+		AND RI.intWorkOrderId = RSI.intWorkOrderId
 	WHERE RI.intWorkOrderId = @intWorkOrderId
 		AND (
 			(
@@ -399,24 +406,78 @@ BEGIN TRY
 				)
 			)
 		AND RI.intRecipeItemTypeId = 1
-		AND RI.intConsumptionMethodId =1
-		
-	if @ysnIncludeOutputItem=1
-	Begin
+		AND RI.intConsumptionMethodId = 1
+
+	IF @ysnIncludeOutputItem = 1
+	BEGIN
 		INSERT INTO @tblICItem (intItemId)
 		SELECT ri.intItemId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 2
-	End
+	END
 
-	DELETE tempItem 
-	FROM @tblICItem tempItem 
-	JOIN tblICItem I on I.intItemId=tempItem.intItemId
-	Where I.strType in (Select Item COLLATE Latin1_General_CI_AS from dbo.fnSplitString(@strExcludeItemType,','))
-	
+	DELETE tempItem
+	FROM @tblICItem tempItem
+	JOIN tblICItem I ON I.intItemId = tempItem.intItemId
+	WHERE I.strType IN (
+			SELECT Item COLLATE Latin1_General_CI_AS
+			FROM dbo.fnSplitString(@strExcludeItemType, ',')
+			)
+
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
+
+	DECLARE @tblMFStagedQty TABLE (
+		intItemId INT
+		,dblStagedQty NUMERIC(18, 6)
+		)
+
+	INSERT INTO @tblMFStagedQty (
+		intItemId
+		,dblStagedQty
+		)
+	SELECT I.intItemId
+		,SUM(WI.dblQuantity)
+	FROM @tblICItem I
+	LEFT JOIN tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
+		AND WI.intWorkOrderId = @intWorkOrderId
+	GROUP BY I.intItemId
+
+	DECLARE @tblMFQtyInProductionStagingLocation TABLE (
+		intItemId INT
+		,dblQtyInProductionStagingLocation NUMERIC(18, 6)
+		)
+
+	INSERT INTO @tblMFQtyInProductionStagingLocation (
+		intItemId
+		,dblQtyInProductionStagingLocation
+		)
+	SELECT I.intItemId
+		,SUM(IsNULL((
+					CASE 
+						WHEN L.intWeightUOMId IS NULL
+							THEN L.dblQty
+						ELSE L.dblWeight
+						END
+					), 0)) - IsNULL(SQ.dblStagedQty, 0)
+	FROM @tblICItem I
+	LEFT JOIN tblICLot L ON L.intItemId = I.intItemId
+		AND L.intLotStatusId = 1
+		AND L.dtmExpiryDate > GETDATE()
+		AND L.intStorageLocationId = @intProductionStageLocationId
+	LEFT JOIN @tblMFStagedQty SQ ON SQ.intItemId = I.intItemId
+	GROUP BY I.intItemId
+		,SQ.dblStagedQty
+
 	--BEGIN TRANSACTION
-
 	INSERT INTO dbo.tblMFProcessCycleCountSession (
 		intSubLocationId
 		,intUserId
@@ -453,10 +514,15 @@ BEGIN TRY
 		,I.intItemId
 		,NULL
 		,(
-			SELECT TOP 1 CC.dblQuantity
+			SELECT TOP 1 CASE 
+					WHEN CC.dblQuantity >= PS.dblQtyInProductionStagingLocation
+						THEN PS.dblQtyInProductionStagingLocation
+					ELSE CC.dblQuantity
+					END
 			FROM dbo.tblMFProcessCycleCount AS CC
 			JOIN dbo.tblMFProcessCycleCountSession AS CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
 			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = CS.intWorkOrderId
+			LEFT JOIN @tblMFQtyInProductionStagingLocation PS ON PS.intItemId = CC.intItemId
 			WHERE CC.intItemId = I.intItemId
 				AND CC.intMachineId = MP.intMachineId
 				AND W.dtmPlannedDate <= @dtmPlannedDate
@@ -473,27 +539,32 @@ BEGIN TRY
 	WHERE MP.intManufacturingProcessId = @intManufacturingProcessId
 
 	UPDATE dbo.tblMFWorkOrder
-	SET intCountStatusId  = 10
+	SET intCountStatusId = 10
 		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	UPDATE tblMFProductionSummary 
-	SET dblOpeningQuantity=CASE 
-			WHEN RI.intRecipeItemTypeId =1 OR RSI.intRecipeItemTypeId =1
-				THEN ISNULL(CC.dblSystemQty,0)
+	UPDATE tblMFProductionSummary
+	SET dblOpeningQuantity = CASE 
+			WHEN RI.intRecipeItemTypeId = 1
+				OR RSI.intRecipeItemTypeId = 1
+				THEN ISNULL(CC.dblSystemQty, 0)
 			ELSE 0
 			END
-			,dblOpeningOutputQuantity=CASE 
-			WHEN RI.intRecipeItemTypeId =2
-				THEN ISNULL(CC.dblSystemQty,0)
+		,dblOpeningOutputQuantity = CASE 
+			WHEN RI.intRecipeItemTypeId = 2
+				THEN ISNULL(CC.dblSystemQty, 0)
 			ELSE 0
 			END
-	FROM dbo.tblMFProcessCycleCount CC 
-	JOIN dbo.tblMFProcessCycleCountSession CCS ON CCS.intCycleCountSessionId=CC.intCycleCountSessionId AND CCS.intWorkOrderId =@intWorkOrderId
-	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
-	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId =CC.intItemId AND RSI.intWorkOrderId=@intWorkOrderId 
-	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId=CC.intItemId AND PS.intWorkOrderId=@intWorkOrderId 
+	FROM dbo.tblMFProcessCycleCount CC
+	JOIN dbo.tblMFProcessCycleCountSession CCS ON CCS.intCycleCountSessionId = CC.intCycleCountSessionId
+		AND CCS.intWorkOrderId = @intWorkOrderId
+	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+		AND RI.intWorkOrderId = @intWorkOrderId
+	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId = CC.intItemId
+		AND RSI.intWorkOrderId = @intWorkOrderId
+	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId = CC.intItemId
+		AND PS.intWorkOrderId = @intWorkOrderId
 
 	INSERT INTO dbo.tblMFProductionSummary (
 		intWorkOrderId
@@ -513,13 +584,14 @@ BEGIN TRY
 	SELECT DISTINCT @intWorkOrderId
 		,CC.intItemId
 		,CASE 
-			WHEN RI.intRecipeItemTypeId =1 OR RI.intRecipeItemTypeId IS NULL
-				THEN ISNULL(CC.dblSystemQty,0)
+			WHEN RI.intRecipeItemTypeId = 1
+				OR RI.intRecipeItemTypeId IS NULL
+				THEN ISNULL(CC.dblSystemQty, 0)
 			ELSE 0
 			END
 		,CASE 
-			WHEN RI.intRecipeItemTypeId =2
-				THEN ISNULL(CC.dblSystemQty,0)
+			WHEN RI.intRecipeItemTypeId = 2
+				THEN ISNULL(CC.dblSystemQty, 0)
 			ELSE 0
 			END
 		,0
@@ -531,13 +603,19 @@ BEGIN TRY
 		,0
 		,0
 		,0
-	FROM dbo.tblMFProcessCycleCount CC 
-	JOIN dbo.tblMFProcessCycleCountSession S ON S.intCycleCountSessionId = CC.intCycleCountSessionId AND S.intWorkOrderId = @intWorkOrderId
-	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
-	WHERE NOT EXISTS (SELECT *FROM dbo.tblMFProductionSummary PS WHERE PS.intWorkOrderId=@intWorkOrderId AND PS.intItemId=CC.intItemId)
-	
-	--COMMIT TRANSACTION
+	FROM dbo.tblMFProcessCycleCount CC
+	JOIN dbo.tblMFProcessCycleCountSession S ON S.intCycleCountSessionId = CC.intCycleCountSessionId
+		AND S.intWorkOrderId = @intWorkOrderId
+	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId = CC.intItemId
+		AND RI.intWorkOrderId = @intWorkOrderId
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFProductionSummary PS
+			WHERE PS.intWorkOrderId = @intWorkOrderId
+				AND PS.intItemId = CC.intItemId
+			)
 
+	--COMMIT TRANSACTION
 	EXEC sp_xml_removedocument @idoc
 END TRY
 
@@ -545,8 +623,7 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	--IF XACT_STATE() != 0 
-		--ROLLBACK TRANSACTION
-
+	--ROLLBACK TRANSACTION
 	IF @idoc <> 0
 		EXEC sp_xml_removedocument @idoc
 
