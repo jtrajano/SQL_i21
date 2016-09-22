@@ -50,7 +50,7 @@
 				'Legacy' as strCompanyId,
 				1
 		FROM tblGLTempAccount B
-		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference)	
+		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE strCompanyId='Legacy')	
 		ORDER BY strAccountId
 	END
 	ELSE
@@ -65,10 +65,10 @@
 				CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort)) + '-' + 
 					REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment' and intAccountStructureId <> (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = 'Segment' order by intSort))) +  
 					SUBSTRING(B.strSegment,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort),(select SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) as strCurrentExternalId,
-				'Origin' as strCompanyId,
+				'Legacy' as [strCompanyIdFrom],
 				1
 		FROM tblGLTempAccount B
-		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference)	
+		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference where strCompanyId = 'Legacy')	
 		ORDER BY strAccountId
 	END
 

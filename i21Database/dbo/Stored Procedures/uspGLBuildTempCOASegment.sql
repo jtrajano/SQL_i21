@@ -144,7 +144,7 @@ BEGIN
 			UPDATE A
 				SET A.strDescription = C.glact_desc
 				FROM tblGLAccount A
-				INNER JOIN tblGLCOACrossReference B ON A.intAccountId = B.inti21Id
+				INNER JOIN tblGLCOACrossReference B ON A.intAccountId = B.inti21Id AND B.strCompanyId = 'Legacy'
 				INNER JOIN glactmst C ON C.A4GLIdentity = B.intLegacyReferenceId	 
 		END
 	

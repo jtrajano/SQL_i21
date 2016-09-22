@@ -24,7 +24,10 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 		-- VALIDATIONS
 		--+++++++++++++++++++++++++++++++++
 		DECLARE @inti21Id int
-		SELECT @inti21Id = 1 FROM glarcmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16 WHERE inti21Id IS NULL
+		SELECT @inti21Id = 1 FROM glarcmst 
+			LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16 
+			WHERE inti21Id IS NULL
+			AND strCompanyId =''Legacy''
 		IF (SELECT isnull(@inti21Id, 0)) > 0
 		 SET @resultOut = ''There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.''
 		ELSE
@@ -169,6 +172,7 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
 				AND tblGLJournal.strSourceId  COLLATE Latin1_General_CI_AS  = glarc_src_seq COLLATE Latin1_General_CI_AS 
 			OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM tblGLAccountUnit Unit WHERE intAccountUnitId = tblGLAccount.[intAccountUnitId]) U
 			OUTER APPLY dbo.fnGLGetAccountUnit(ABS(glarc_units), U.dblLbsPerUnit) AccountUnits
+			WHERE tblGLCOACrossReference.strCompanyId = ''Legacy''
 		)
 		
 		SELECT intLineNo,intJournalId,dtmDate,glarc_trans_dt ,

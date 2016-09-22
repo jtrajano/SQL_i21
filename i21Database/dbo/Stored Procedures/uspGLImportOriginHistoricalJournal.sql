@@ -136,12 +136,13 @@ BEGIN
 			FROM  glhstmst 
 			INNER JOIN tblGLCOACrossReference ON 
 			SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16 
-			INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
+			INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id AND strCompanyId = 'Legacy'
 			INNER JOIN tblGLJournal ON
 				tblGLJournal.strJournalId COLLATE Latin1_General_CI_AS  = CONVERT(VARCHAR(3),glhst_src_id ) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),(glhst_period)) COLLATE Latin1_General_CI_AS 
 				AND tblGLJournal.strSourceId  COLLATE Latin1_General_CI_AS  = glhst_src_seq COLLATE Latin1_General_CI_AS 
 			OUTER APPLY (SELECT dblLbsPerUnit,[strUOMCode] FROM tblGLAccountUnit Unit WHERE intAccountUnitId = tblGLAccount.[intAccountUnitId]) U
 			OUTER APPLY dbo.fnGLGetAccountUnit(ABS(glhst_units), U.dblLbsPerUnit) AccountUnits
+			
 		)
 		
 		SELECT intLineNo,intJournalId,dtmDate,glhst_trans_dt ,
