@@ -153,7 +153,10 @@ SELECT   Load.intLoadId
 												END 
 										END 
 								 END
-
+		,PLH.intPickLotHeaderId
+		,PLH.strPickLotNumber
+		,ALH.intAllocationHeaderId
+		,ALH.strAllocationNumber
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
@@ -181,3 +184,7 @@ LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId
+LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LoadDetail.intPickLotDetailId
+LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
+LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LoadDetail.intAllocationDetailId
+LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId	
