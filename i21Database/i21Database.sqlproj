@@ -4321,6 +4321,9 @@
     <Build Include="dbo\Views\vyuPATCalculateFiscalSummary.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundSummary.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundSummaryHistory.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateNoRefundSummaryHistory.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateNoRefundSummary.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateFiscalSummaryHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

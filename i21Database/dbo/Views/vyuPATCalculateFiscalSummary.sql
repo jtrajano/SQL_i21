@@ -15,14 +15,14 @@ SELECT DISTINCT CV.intFiscalYear,
 			dblRefundAmount = Total.dblRefundAmount,
 			dblNonRefundAmount = Total.dblNonRefundAmount,
 			dblCashRefund = Total.dblCashRefund,
-			dbLessFWT =	Total.dbLessFWT,
+			dblLessFWT = Total.dblLessFWT,
 			dblLessServiceFee =  Total.dblCashRefund * (ComPref.dblServiceFee/100),
-			dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dbLessFWT - (Total.dblCashRefund * (ComPref.dblServiceFee/100.0)) < 0) THEN 0 ELSE (Total.dblCashRefund) - (Total.dbLessFWT) - (Total.dblCashRefund * (ComPref.dblServiceFee/100.0)) END,
+			dblCheckAmount =  CASE WHEN (Total.dblCashRefund - Total.dblLessFWT - (Total.dblCashRefund * (ComPref.dblServiceFee/100.0)) < 0) THEN 0 ELSE (Total.dblCashRefund) - (Total.dblLessFWT) - (Total.dblCashRefund * (ComPref.dblServiceFee/100.0)) END,
 			dblEquityRefund = CASE WHEN (Total.dblRefundAmount - Total.dblCashRefund) < 0 THEN 0 ELSE Total.dblRefundAmount - Total.dblCashRefund END,
-			intVoting = [dbo].[fnPATCountStockStatus]('Voting'),
-			intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting'),
-			intProducers = [dbo].[fnPATCountStockStatus]('Producer'),
-			intOthers = [dbo].[fnPATCountStockStatus]('Other')
+			intVoting = [dbo].[fnPATCountStockStatus]('Voting', default),
+			intNonVoting = [dbo].[fnPATCountStockStatus]('Non-Voting', default),
+			intProducers = [dbo].[fnPATCountStockStatus]('Producer', default),
+			intOthers = [dbo].[fnPATCountStockStatus]('Other', default)
 		    FROM tblPATCustomerVolume CV
      INNER JOIN tblPATRefundRateDetail RRD
 			 ON RRD.intPatronageCategoryId = CV.intPatronageCategoryId 
@@ -37,7 +37,7 @@ SELECT DISTINCT CV.intFiscalYear,
 					dblRefundAmount = ISNULL((RRD.dblRate * dblVolume),0),
 					dblNonRefundAmount = CASE WHEN ISNULL((RRD.dblRate * dblVolume),0) >= ComPref.dblMinimumRefund THEN 0 ELSE ISNULL((RRD.dblRate * dblVolume),0) END,
 					dblCashRefund = ((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)),
-					dbLessFWT = CASE WHEN AC.ysnSubjectToFWT = 1 THEN (((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) * (ComPref.dblFederalBackup/100)) ELSE 0 END
+					dblLessFWT = CASE WHEN AC.ysnSubjectToFWT = 1 THEN (((RRD.dblRate * dblVolume) * (RR.dblCashPayout/100)) * (ComPref.dblFederalBackup/100)) ELSE 0 END
 			FROM tblPATCustomerVolume B
 			INNER JOIN tblPATRefundRateDetail RRD
 					ON RRD.intPatronageCategoryId = B.intPatronageCategoryId 
@@ -55,7 +55,7 @@ SELECT	intFiscalYear AS intFiscalYearId,
 		dblRefundAmount = SUM(dblRefundAmount),
 		dblNonRefundAmount = SUM(dblNonRefundAmount),
 		dblCashRefund = SUM(dblCashRefund),
-		dbLessFWT = SUM(dbLessFWT),
+		dblLessFWT = SUM(dblLessFWT),
 		dblLessServiceFee = SUM(dblLessServiceFee),
 		dblCheckAmount = SUM(dblCheckAmount),
 		dblEquityRefund = SUM(dblEquityRefund),

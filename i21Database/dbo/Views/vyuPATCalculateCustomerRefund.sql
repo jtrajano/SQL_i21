@@ -13,6 +13,7 @@ WITH ComPref AS (
 SELECT	intCustomerId = CV.intCustomerPatronId,
 		NEWID() as id,
 		intFiscalYearId = CV.intFiscalYear,
+		RR.intRefundTypeId,
 		strCustomerName = ENT.strName,
 		strStockStatus = AC.strStockStatus,
 		dtmLastActivityDate = CV.dtmLastActivityDate,
