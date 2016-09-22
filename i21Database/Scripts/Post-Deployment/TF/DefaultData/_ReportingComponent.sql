@@ -56,7 +56,7 @@ GO
 			IF EXISTS(SELECT 1 FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID(N'dbo.tblTFValidOriginDestinationState'))
 			 BEGIN 
 					ALTER TABLE tblTFValidOriginDestinationState
-					DROP CONSTRAINT FK_tblTFValidOriginDestinationState_tblTFReportingComponent
+					DROP CONSTRAINT FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail
 			END 
 		END
 	ELSE
@@ -130,10 +130,10 @@ IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblTFVal
 			--IF EXISTS(SELECT 1 FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID(N'dbo.tblTFValidOriginDestinationState'))
 			-- BEGIN 
 					 ALTER TABLE tblTFValidOriginDestinationState ADD CONSTRAINT
-					FK_tblTFValidOriginDestinationState_tblTFReportingComponent FOREIGN KEY
-					( intReportingComponentId )
-					REFERENCES tblTFReportingComponent
-					( intReportingComponentId )
+					FK_tblTFValidOriginDestinationState_tblTFReportingComponentDetail FOREIGN KEY
+					( intReportingComponentDetailId )
+					REFERENCES tblTFReportingComponentDetail
+					( intReportingComponentDetailId )
 					PRINT 'SUCCESSFULLY TRUNCATED tblTFReportingComponent'
 			--END 
 		END
