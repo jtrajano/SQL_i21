@@ -145,11 +145,11 @@ End
 		Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
 		And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intProductionStagingLocationId --And dblQty > 0
 
-		IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
-		BEGIN
-			SELECT @dblPickQuantity=@dblReqQty
-			SELECT @intPickUOMId=@intQtyItemUOMId
-		END
+		--IF NOT EXISTS(SELECT *FROM dbo.tblICLot WHERE intLotId=@intLotId AND (intItemUOMId=@intPickUOMId OR intWeightUOMId =@intPickUOMId ))
+		--BEGIN
+		--	SELECT @dblPickQuantity=@dblReqQty
+		--	SELECT @intPickUOMId=@intQtyItemUOMId
+		--END
 
 		If ISNULL(@intNewLotId,0) = 0 --Move
 			Begin
