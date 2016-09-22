@@ -4344,6 +4344,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCreatePickListForProduction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFTransferPickListForProduction.sql" />
     <Build Include="dbo\Views\vyuLGStockSaleSamples.sql" />
+    <Build Include="dbo\vyuARTaxDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

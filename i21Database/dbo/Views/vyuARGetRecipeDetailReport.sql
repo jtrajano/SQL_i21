@@ -4,6 +4,11 @@ SELECT RECIPEITEMS.*
 	 , intOneLinePrintId			= ISNULL(R.intOneLinePrintId, 1)
 	 , R.strName
 	 , R.ysnActive
+	 , strItem						= CASE WHEN ISNULL(RECIPEITEMS.intCommentTypeId, 0) = 0 THEN 
+												CASE WHEN ISNULL(I.strItemNo, '') = '' THEN RECIPEITEMS.strItemDescription ELSE LTRIM(RTRIM(I.strItemNo)) + ' - ' + ISNULL(RECIPEITEMS.strItemDescription, '') END 
+										   ELSE 
+												RECIPEITEMS.strItemDescription 
+									  END
 	 , strItemNo					= CASE WHEN ISNULL(RECIPEITEMS.intCommentTypeId, 0) = 0 THEN I.strItemNo ELSE NULL END
 	 , I.strInvoiceComments
 	 , UOM.strUnitMeasure 
