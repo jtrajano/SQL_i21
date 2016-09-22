@@ -313,7 +313,7 @@ SET @query = '
 		FROM ('
 				+ @innerQuery +
 			') tmpAPPayables 
-		WHERE dblAmountDue <> 0
+		--WHERE dblAmountDue <> 0
 		GROUP BY intBillId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
