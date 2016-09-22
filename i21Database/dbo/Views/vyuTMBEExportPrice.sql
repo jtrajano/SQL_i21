@@ -44,6 +44,7 @@ CROSS APPLY (
         ,A.intCustomerNumber
         ,A.intLocationId
         ,NULL
+		,NULL
         ,GETDATE()
         ,1
         ,NULL  --@ContractHeaderId		INT

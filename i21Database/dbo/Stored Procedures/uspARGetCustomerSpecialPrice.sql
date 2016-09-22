@@ -16,6 +16,7 @@
 	,@VendorLocationId  INT				= NULL
 	,@InvoiceType		NVARCHAR(200)	= NULL
 	,@TermId			INT				= NULL
+	,@CurrencyId		INT				= NULL
 AS		
 	
 	SELECT
@@ -28,6 +29,7 @@ AS
 			,@CustomerId
 			,@LocationId
 			,@ItemUOMId
+			,@CurrencyId
 			,@TransactionDate
 			,@Quantity
 			,NULL

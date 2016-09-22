@@ -4372,6 +4372,7 @@
     <Build Include="dbo\Views\vyuARCollectionOverdueReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
+    <Build Include="dbo\Views\vyuARCustomerContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

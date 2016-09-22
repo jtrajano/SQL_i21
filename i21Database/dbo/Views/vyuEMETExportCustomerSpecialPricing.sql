@@ -63,6 +63,7 @@
 			b.intEntityCustomerId,
 			d.intWarehouseId,
 			g.intItemUOMId,
+			NULL,
 			cast(GetDate() as date),
 			1,
 			null,		

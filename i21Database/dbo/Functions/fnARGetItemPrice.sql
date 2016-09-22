@@ -4,6 +4,7 @@
 	,@CustomerId				INT	
 	,@LocationId				INT
 	,@ItemUOMId					INT
+	,@CurrencyId				INT
 	,@TransactionDate			DATETIME
 	,@Quantity					NUMERIC(18,6)
 	,@ContractHeaderId			INT
@@ -35,6 +36,7 @@ BEGIN
 			,@CustomerId
 			,@LocationId
 			,@ItemUOMId
+			,@CurrencyId
 			,@TransactionDate
 			,@Quantity
 			,@ContractHeaderId

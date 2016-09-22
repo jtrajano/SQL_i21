@@ -4,6 +4,7 @@
 	,@CustomerId				INT	
 	,@LocationId				INT
 	,@ItemUOMId					INT
+	,@CurrencyId				INT
 	,@TransactionDate			DATETIME
 	,@Quantity					NUMERIC(18,6)
 	,@ContractHeaderId			INT
@@ -33,6 +34,11 @@ RETURNS @returntable TABLE
 	,dblTermDiscount		NUMERIC(18,6)
 	,strTermDiscountBy		NVARCHAR(50)
 	,strPricing				NVARCHAR(250)
+	,intSubCurrencyId		INT
+	,dblSubCurrencyRate		NUMERIC(18,6)
+	,strSubCurrency			NVARCHAR(40)
+	,intPriceUOMId			INT
+	,strPriceUOM			NVARCHAR(50)
 	,dblDeviation			NUMERIC(18,6)
 	,intContractHeaderId	INT
 	,intContractDetailId	INT
@@ -52,6 +58,9 @@ DECLARE	 @Price				NUMERIC(18,6)
 		,@TermDiscount		NUMERIC(18,6)
 		,@PricingType		NVARCHAR(50)
 		,@TermDiscountBy	NVARCHAR(50)
+		,@SubCurrencyRate	NUMERIC(18,6)
+		,@SubCurrency		NVARCHAR(40)
+		,@PriceUOM			NVARCHAR(50)
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
@@ -81,12 +90,18 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,@AvailableQuantity = dblAvailableQty
 			,@UnlimitedQuantity = ysnUnlimitedQty
 			,@PricingType		= strPricingType
+			,@CurrencyId		= intSubCurrencyId
+			,@SubCurrencyRate	= dblSubCurrencyRate
+			,@SubCurrency		= strSubCurrency
+			,@ItemUOMId			= intPriceUOMId 
+			,@PriceUOM			= strPriceUOM
 		FROM
 			[dbo].[fnARGetContractPricingDetails](
 				 @ItemId
 				,@CustomerId
 				,@LocationId
 				,@ItemUOMId
+				,@CurrencyId
 				,@TransactionDate
 				,@Quantity
 				,@ContractHeaderId
@@ -98,8 +113,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 			
 		IF(@Price IS NOT NULL)
 		BEGIN
-			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intSort)
-			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, 1
+			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intSort)
+			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @CurrencyId, @SubCurrencyRate, @SubCurrency, @ItemUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, 1
 			IF @GetAllAvailablePricing = 0 RETURN
 		END	
 		

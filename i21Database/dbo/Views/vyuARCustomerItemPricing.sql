@@ -74,6 +74,7 @@ CROSS APPLY
 		,ARI.[intEntityCustomerId]	--@CustomerId
 		,ARI.[intCompanyLocationId]	--@LocationId
 		,ARID.[intItemUOMId]		--@ItemUOMId
+		,ARI.[intCurrencyId]		--@CurrencyId
 		,ARI.[dtmDate]				--@TransactionDate
 		,ARID.[dblQtyShipped]		--@Quantity
 		,NULL						--@ContractHeaderId
@@ -183,6 +184,7 @@ CROSS APPLY
 		,SO.[intEntityCustomerId]	--@CustomerId
 		,SO.[intCompanyLocationId]	--@LocationId
 		,SOSOD.[intItemUOMId]		--@ItemUOMId
+		,SO.[intCurrencyId]			--@CurrencyId
 		,SO.[dtmDate]				--@TransactionDate
 		,SOSOD.[dblQtyOrdered] 		--@Quantity
 		,NULL						--@ContractHeaderId

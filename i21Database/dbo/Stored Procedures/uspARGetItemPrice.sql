@@ -29,6 +29,7 @@
 	,@AllowQtyToExceedContract	BIT				= 0
 	,@InvoiceType				NVARCHAR(200)	= NULL
 	,@TermId					INT				= NULL
+	,@CurrencyId				INT				= NULL
 	,@PricingType				NVARCHAR(50)	= NULL OUTPUT
 	,@GetAllAvailablePricing	BIT				= 0
 AS	
@@ -52,6 +53,7 @@ AS
 			,@CustomerId
 			,@LocationId
 			,@ItemUOMId
+			,@CurrencyId
 			,@TransactionDate
 			,@Quantity
 			,@ContractHeaderId
