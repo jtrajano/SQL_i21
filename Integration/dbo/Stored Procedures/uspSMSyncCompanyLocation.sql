@@ -30,14 +30,17 @@ BEGIN
 
 	   DECLARE @TopLocId int  
        SELECT @TopLocId = intCompanyLocationId FROM #Temp ORDER BY intCompanyLocationId  
-       SELECT @MaxNumber1 = MAX([agloc_loc_no]) FROM aglocmst  
-	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  
-	   SET @Unused = (SELECT TOP 1 l.agloc_loc_no + 1 AS start FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no + 1 = r.agloc_loc_no WHERE r.agloc_loc_no IS NULL AND l.agloc_loc_no + 1 NOT IN (SELECT CAST(ISNULL(strLocationNumber, ''0'') AS INT) FROM tblSMCompanyLocation))
+       SELECT @MaxNumber1 = MAX([agloc_loc_no]) FROM aglocmst WHERE [agloc_loc_no] NOT LIKE ''%[^0-9]%''
+	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  WHERE [strLocationNumber] NOT LIKE ''%[^0-9]%''
+
+	   SELECT l.agloc_loc_no + 1 AS start INTO #Available FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no = r.agloc_loc_no AND r.agloc_loc_no NOT LIKE ''%[^0-9]%'' WHERE l.[agloc_loc_no] NOT LIKE ''%[^0-9]%'' AND l.agloc_loc_no + 1 NOT IN (SELECT CAST(ISNULL(strLocationNumber, ''0'') AS INT) FROM tblSMCompanyLocation WHERE [strLocationNumber] NOT LIKE ''%[^0-9]%'') --r.agloc_loc_no IS NULL
 
 	   IF @MaxNumber2 IS NULL
 	   BEGIN
 		SET @MaxNumber2 = 0
 	   END
+
+	   SELECT TOP 1 @Unused = start FROM #Available WHERE start NOT IN (SELECT agloc_loc_no FROM aglocmst WHERE [agloc_loc_no] NOT LIKE ''%[^0-9]%'')
 
 	   SELECT @GreaterNumber = CASE WHEN @MaxNumber1 > @MaxNumber2 THEN @MaxNumber1 ELSE @MaxNumber2 END
 	   SELECT @GreaterNumber = CASE WHEN @GreaterNumber >= 999 THEN @Unused - 1 ELSE @GreaterNumber END
@@ -55,8 +58,9 @@ BEGIN
         --END  
           
        DELETE FROM #Temp WHERE intCompanyLocationId = @TopLocId  
+	   DROP TABLE #Available
       END   
-        
+
      DROP TABLE #Temp         
     END  
       
