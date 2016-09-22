@@ -65,121 +65,151 @@ END
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
--- Validate if the Inventory Shipment exists   
-IF @intTransactionId IS NULL  
-BEGIN   
-	-- Cannot find the transaction.  
-	RAISERROR(50004, 11, 1)  
-	GOTO Post_Exit  
-END   
-  
--- Validate the date against the FY Periods  
-IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
-BEGIN   
-	-- Unable to find an open fiscal year period to match the transaction date.  
-	RAISERROR(50005, 11, 1)  
-	GOTO Post_Exit  
-END  
-  
--- Check if the transaction is already posted  
-IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
-BEGIN   
-	-- The transaction is already posted.  
-	RAISERROR(50007, 11, 1)  
-	GOTO Post_Exit  
-END   
-  
--- Check if the transaction is already posted  
-IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
-BEGIN   
-	-- The transaction is already unposted.  
-	RAISERROR(50008, 11, 1)  
-	GOTO Post_Exit  
-END   
+BEGIN 
+	DECLARE @strInvoiceNumber AS NVARCHAR(50)
+	DECLARE @strChargeItem AS NVARCHAR(50)
 
--- Check Company preference: Allow User Self Post  
-IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
-	AND @intEntityUserSecurityId <> @intCreatedEntityId 
-	AND @ysnRecap = 0 
-BEGIN   
-	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
-	IF @ysnPost = 1   
+	-- Validate if the Inventory Shipment exists   
+	IF @intTransactionId IS NULL  
 	BEGIN   
-		RAISERROR(50013, 11, 1, 'Post')  
+		-- Cannot find the transaction.  
+		RAISERROR(50004, 11, 1)  
+		GOTO Post_Exit  
+	END   
+  
+	-- Validate the date against the FY Periods  
+	IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) = 0) 
+	BEGIN   
+		-- Unable to find an open fiscal year period to match the transaction date.  
+		RAISERROR(50005, 11, 1)  
+		GOTO Post_Exit  
+	END  
+  
+	-- Check if the transaction is already posted  
+	IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1  
+	BEGIN   
+		-- The transaction is already posted.  
+		RAISERROR(50007, 11, 1)  
+		GOTO Post_Exit  
+	END   
+  
+	-- Check if the transaction is already posted  
+	IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
+	BEGIN   
+		-- The transaction is already unposted.  
+		RAISERROR(50008, 11, 1)  
 		GOTO Post_Exit  
 	END   
 
-	IF @ysnPost = 0  
-	BEGIN  
-		RAISERROR(50013, 11, 1, 'Unpost')  
-		GOTO Post_Exit    
-	END  
-END   
+	-- Check Company preference: Allow User Self Post  
+	IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
+		AND @intEntityUserSecurityId <> @intCreatedEntityId 
+		AND @ysnRecap = 0 
+	BEGIN   
+		-- 'You cannot %s transactions you did not create. Please contact your local administrator.'  
+		IF @ysnPost = 1   
+		BEGIN   
+			RAISERROR(50013, 11, 1, 'Post')  
+			GOTO Post_Exit  
+		END   
 
--- Check if the Shipment quantity matches the total Quantity in the Lot
-BEGIN 
-	SET @strItemNo = NULL 
-	SET @intItemId = NULL 
+		IF @ysnPost = 0  
+		BEGIN  
+			RAISERROR(50013, 11, 1, 'Unpost')  
+			GOTO Post_Exit    
+		END  
+	END   
 
-	DECLARE @dblQuantityShipped AS NUMERIC(38,20)
-			--,@LotQty AS NUMERIC(38,20)
-			,@LotQtyInItemUOM AS NUMERIC(38,20)
-			,@QuantityShippedInItemUOM AS NUMERIC(38,20)
+		-- Do not allow unpost if other charge is already included in invoice. 
+		IF @ysnPost = 0 AND @ysnRecap = 0 
+		BEGIN 
+			SET @strInvoiceNumber = NULL 
+			SELECT	TOP 1 
+					@strInvoiceNumber = Invoice.strInvoiceNumber
+					,@strChargeItem = Item.strItemNo
+			FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge
+						ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
+					INNER JOIN dbo.tblICItem Item
+						ON Item.intItemId = Charge.intChargeId				
+					LEFT JOIN dbo.tblARInvoiceDetail InvoiceItems
+						ON InvoiceItems.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId
+					INNER JOIN dbo.tblARInvoice Invoice
+						ON Invoice.intInvoiceId = InvoiceItems.intInvoiceId
+			WHERE	Shipment.intInventoryShipmentId = @intTransactionId
+					AND InvoiceItems.intInvoiceId IS NOT NULL
 
-	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
-	DECLARE @FormattedLotQty AS NVARCHAR(50)
-	DECLARE @FormattedDifference AS NVARCHAR(50)
+			IF ISNULL(@strInvoiceNumber, '') <> ''
+			BEGIN 
+				RAISERROR(80087, 11, 1)  
+				GOTO Post_Exit    
+			END 
 
-	SELECT	TOP 1 
-			@strItemNo					= Item.strItemNo
-			,@intItemId					= Item.intItemId
-			,@dblQuantityShipped		= Detail.dblQuantity
-			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0)
-	FROM	tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem Detail 
-				ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId	
-			INNER JOIN dbo.tblICItem Item
-				ON Item.intItemId = Detail.intItemId
-			LEFT JOIN (
-				SELECT  AggregrateLot.intInventoryShipmentItemId
-						,TotalLotQtyInDetailItemUOM = SUM(
-							dbo.fnCalculateQtyBetweenUOM(
-								ISNULL(Lot.intItemUOMId, tblICInventoryShipmentItem.intItemUOMId)
-								,tblICInventoryShipmentItem.intItemUOMId
-								,AggregrateLot.dblQuantityShipped
-							)
-						)
-				FROM	dbo.tblICInventoryShipment INNER JOIN dbo.tblICInventoryShipmentItem 
-							ON tblICInventoryShipment.intInventoryShipmentId = tblICInventoryShipmentItem.intInventoryShipmentId
-						INNER JOIN dbo.tblICInventoryShipmentItemLot AggregrateLot
-							ON AggregrateLot.intInventoryShipmentItemId = tblICInventoryShipmentItem.intInventoryShipmentItemId
-						INNER JOIN tblICLot Lot
-							ON Lot.intLotId = AggregrateLot.intLotId
-				WHERE	tblICInventoryShipment.strShipmentNumber = @strTransactionId				
-				GROUP BY AggregrateLot.intInventoryShipmentItemId
-			) ItemLot
-				ON ItemLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId	
+		END 
 
-	WHERE	dbo.fnGetItemLotType(Detail.intItemId) IN (@LotType_Manual, @LotType_Serial)	
-			AND Header.strShipmentNumber = @strTransactionId
-			AND ROUND(ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0), 2) <>
-				ROUND(Detail.dblQuantity, 2)
-
-	IF @intItemId IS NOT NULL 
+	-- Check if the Shipment quantity matches the total Quantity in the Lot
 	BEGIN 
-		IF ISNULL(@strItemNo, '') = '' 
-			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+		SET @strItemNo = NULL 
+		SET @intItemId = NULL 
 
-		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@dblQuantityShipped AS MONEY), 1)
-		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
-		SET @FormattedDifference =  CAST(ABS(@dblQuantityShipped - @LotQtyInItemUOM) AS NVARCHAR(50))
+		DECLARE @dblQuantityShipped AS NUMERIC(38,20)
+				--,@LotQty AS NUMERIC(38,20)
+				,@LotQtyInItemUOM AS NUMERIC(38,20)
+				,@QuantityShippedInItemUOM AS NUMERIC(38,20)
 
-		-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-		RAISERROR(80047, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		DECLARE @FormattedReceivedQty AS NVARCHAR(50)
+		DECLARE @FormattedLotQty AS NVARCHAR(50)
+		DECLARE @FormattedDifference AS NVARCHAR(50)
 
-		RETURN -1; 
-	END 
+		SELECT	TOP 1 
+				@strItemNo					= Item.strItemNo
+				,@intItemId					= Item.intItemId
+				,@dblQuantityShipped		= Detail.dblQuantity
+				,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0)
+		FROM	tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem Detail 
+					ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId	
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = Detail.intItemId
+				LEFT JOIN (
+					SELECT  AggregrateLot.intInventoryShipmentItemId
+							,TotalLotQtyInDetailItemUOM = SUM(
+								dbo.fnCalculateQtyBetweenUOM(
+									ISNULL(Lot.intItemUOMId, tblICInventoryShipmentItem.intItemUOMId)
+									,tblICInventoryShipmentItem.intItemUOMId
+									,AggregrateLot.dblQuantityShipped
+								)
+							)
+					FROM	dbo.tblICInventoryShipment INNER JOIN dbo.tblICInventoryShipmentItem 
+								ON tblICInventoryShipment.intInventoryShipmentId = tblICInventoryShipmentItem.intInventoryShipmentId
+							INNER JOIN dbo.tblICInventoryShipmentItemLot AggregrateLot
+								ON AggregrateLot.intInventoryShipmentItemId = tblICInventoryShipmentItem.intInventoryShipmentItemId
+							INNER JOIN tblICLot Lot
+								ON Lot.intLotId = AggregrateLot.intLotId
+					WHERE	tblICInventoryShipment.strShipmentNumber = @strTransactionId				
+					GROUP BY AggregrateLot.intInventoryShipmentItemId
+				) ItemLot
+					ON ItemLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId	
+
+		WHERE	dbo.fnGetItemLotType(Detail.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+				AND Header.strShipmentNumber = @strTransactionId
+				AND ROUND(ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0), 2) <>
+					ROUND(Detail.dblQuantity, 2)
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			IF ISNULL(@strItemNo, '') = '' 
+				SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+			SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@dblQuantityShipped AS MONEY), 1)
+			SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
+			SET @FormattedDifference =  CAST(ABS(@dblQuantityShipped - @LotQtyInItemUOM) AS NVARCHAR(50))
+
+			-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
+			RAISERROR(80047, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+
+			RETURN -1; 
+		END 
+	END
 END
-
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
@@ -206,6 +236,51 @@ BEGIN
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 	DECLARE @StorageItemsForPost AS ItemCostingTableType  
+
+	-- Process the Other Charges
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+		)	
+		EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
+			@intTransactionId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INVENTORY_SHIPMENT_TYPE
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			
+	END 	
 
 	-- Get company owned items to post. 
 	BEGIN
@@ -252,18 +327,18 @@ BEGIN
 				,dblCost					=  ISNULL(
 												CASE	WHEN Lot.dblLastCost IS NULL THEN 
 															(
-																SELECT	TOP 1 dblLastCost 
+																SELECT	TOP 1 dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
 																FROM	tblICItemPricing 
 																WHERE	intItemId = DetailItem.intItemId 
 																		AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
 															)
 														ELSE 
-															Lot.dblLastCost 
-												END, 0)
+															Lot.dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
+												END, 0 + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId))
 												* CASE	WHEN  Lot.intLotId IS NULL THEN 
-														ItemUOM.dblUnitQty
+														ItemUOM.dblUnitQty + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
 													ELSE
-														LotItemUOM.dblUnitQty
+														LotItemUOM.dblUnitQty + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
 												END
 
 				,dblSalesPrice              = 0.00
@@ -382,10 +457,10 @@ BEGIN
 
 				,dblCost					=  ISNULL(
 												CASE	WHEN Lot.dblLastCost IS NULL THEN 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
+														(SELECT TOP 1 dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId) FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
 													ELSE 
-														Lot.dblLastCost 
-												END, 0)
+														Lot.dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
+												END, 0 + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId))
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = @DefaultCurrencyId 
 				,dblExchangeRate            = 1
@@ -481,6 +556,51 @@ BEGIN
 				,@ysnRecap
 		
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+		-- Unpost the Other Charges
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+			)	
+			EXEC @intReturnValue = dbo.uspICUnpostInventoryShipmentOtherCharges 
+				@intTransactionId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@INVENTORY_SHIPMENT_TYPE	
+				
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		END
+
 	END 
 END   
 

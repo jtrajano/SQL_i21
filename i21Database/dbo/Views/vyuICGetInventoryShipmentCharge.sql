@@ -17,13 +17,15 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, Charge.ysnPrice
 	, strOnCostType = Charge.strOnCostType
 	, ShipmentCharge.dblAmount
+	, ShipmentCharge.strAllocatePriceBy
 	, ShipmentCharge.ysnAccrue
 	, ShipmentCharge.intEntityVendorId
 	, Vendor.strVendorId
+	, strVendorName = Vendor.strName
 FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ShipmentCharge.intChargeId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = ShipmentCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CostUOM.intUnitMeasureId
-	LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = ShipmentCharge.intEntityVendorId
+	LEFT JOIN vyuAPVendor Vendor ON Vendor.intEntityVendorId = ShipmentCharge.intEntityVendorId
 	LEFT JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ShipmentCharge.intContractId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ShipmentCharge.intCurrencyId
