@@ -36,6 +36,7 @@ Declare @intWorkOrderId int
 Declare @strBulkItemXml nvarchar(max)
 Declare @intAttributeTypeId int
 Declare @intManufacturingProcessId int
+Declare @intUserId int
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -108,12 +109,8 @@ INSERT INTO @tblPickListDetail(
 	intUserId int
 	)
 
-Select TOP 1 @intPickListId=intPickListId,@strWorkOrderNos=strWorkOrderNo,@intAssignedToId=intAssignedToId,@strPickListNo=strPickListNo,@intLocationId=intLocationId 
+Select TOP 1 @intPickListId=intPickListId,@strWorkOrderNos=strWorkOrderNo,@intAssignedToId=intAssignedToId,@strPickListNo=strPickListNo,@intLocationId=intLocationId,@intUserId=intUserId 
 From @tblPickList
-
-Select TOP 1 @intBlendItemId=intItemId,@intManufacturingProcessId=intManufacturingProcessId From tblMFWorkOrder Where intPickListId=@intPickListId
-
-Select @intAttributeTypeId=intAttributeTypeId From tblMFManufacturingProcess Where intManufacturingProcessId=@intManufacturingProcessId
 
 --Get the Comma Separated Work Order Nos into a table
 SET @index = CharIndex(',',@strWorkOrderNos)
@@ -136,13 +133,16 @@ If (Select count(1) from @tblWorkOrder)=0
 
 Select TOP 1 @ysnBlendSheetRequired=ISNULL(ysnBlendSheetRequired,0) From tblMFCompanyPreference
 
-If @intAttributeTypeId<>2
-	Set @ysnBlendSheetRequired=0
-
 Declare @intManufacturingCellId int
 		,@intSubLocationId int
 
-Select TOP 1 @intBlendItemId=intItemId,@intManufacturingCellId=intManufacturingCellId,@intSubLocationId =intSubLocationId  From tblMFWorkOrder Where strWorkOrderNo in (Select strWorkOrderNo From @tblWorkOrder)
+Select TOP 1 @intBlendItemId=intItemId,@intManufacturingCellId=intManufacturingCellId,@intSubLocationId =intSubLocationId,@intManufacturingProcessId=intManufacturingProcessId  
+From tblMFWorkOrder Where strWorkOrderNo in (Select strWorkOrderNo From @tblWorkOrder)
+
+Select @intAttributeTypeId=intAttributeTypeId From tblMFManufacturingProcess Where intManufacturingProcessId=@intManufacturingProcessId
+
+If @intAttributeTypeId<>2
+		Set @ysnBlendSheetRequired=0
 
 If @ysnBlendSheetRequired = 1
 Begin
@@ -224,6 +224,9 @@ If ISNULL(@strPickListNo,'') = ''
 	End
 
 Select @intWorkOrderId=intWorkOrderId From tblMFWorkOrder Where strWorkOrderNo = (Select TOP 1 strWorkOrderNo From @tblWorkOrder)
+
+If @intAttributeTypeId<>2
+	Exec uspMFCopyRecipe @intBlendItemId,@intLocationId,@intUserId,@intWorkOrderId
 
 --Xml for Bulk Items for Reservation
 Set @strBulkItemXml='<root>'
