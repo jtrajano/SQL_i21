@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMInspectionSaveResult]
-     @intControlPointId INT -- 3 / 8 (Inspection / Shipping)
+	@intControlPointId INT -- 3 / 8 (Inspection / Shipping)
 	,@intProductTypeId INT -- 3 (Receipt)
 	,@intProductValueId INT -- intInventoryReceiptId
 	,@intUserId INT
-	,@strXML NVARCHAR(MAX)
+	,@strQualityInspectionTable QualityInspectionTable READONLY
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -12,7 +12,6 @@ BEGIN TRY
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE @idoc INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intProductId INT
 	DECLARE @intTestResultId INT
@@ -24,9 +23,6 @@ BEGIN TRY
 	SET @intValidDate = (
 			SELECT DATEPART(dy, GETDATE())
 			)
-
-	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@strXML
 
 	IF @intProductTypeId = 3 -- Receipt
 		OR @intProductTypeId = 4 -- Shipment
@@ -70,15 +66,15 @@ BEGIN TRY
 			,intLastModifiedUserId
 			,dtmLastModified
 			)
-		SELECT 0
+		SELECT 1
 			,@intProductTypeId
 			,@intProductValueId
 			,PP.intTestId
 			,PP.intPropertyId
 			,CASE 
-				WHEN ISNULL(PPV.strPropertyRangeText, '') = ''
-					THEN 'false'
-				ELSE PPV.strPropertyRangeText
+				WHEN LOWER(PPV.strPropertyRangeText) = 'true'
+					THEN 'true'
+				ELSE 'false'
 				END AS strPropertyValue
 			,GETDATE()
 			,0
@@ -97,7 +93,7 @@ BEGIN TRY
 				AND DATEPART(dy, PPV.dtmValidTo)
 		ORDER BY PP.intSequenceNo
 
-	SELECT @intTestResultId = TR.intTestResultId
+	SELECT TOP 1 @intTestResultId = TR.intTestResultId
 	FROM dbo.tblQMTestResult TR
 	WHERE TR.intProductTypeId = @intProductTypeId
 		AND TR.intProductValueId = @intProductValueId
@@ -105,30 +101,19 @@ BEGIN TRY
 
 	IF @intTestResultId <> 0
 	BEGIN
-		UPDATE dbo.tblQMTestResult
-		SET strPropertyValue = x.strValue
-			,intConcurrencyId = intConcurrencyId + 1
+		UPDATE TR
+		SET strPropertyValue = QIT.strPropertyValue
+			,intConcurrencyId = TR.intConcurrencyId + 1
 			,intLastModifiedUserId = @intUserId
 			,dtmLastModified = GETDATE()
-		FROM OPENXML(@idoc, 'root/Inspections/Inspection', 2) WITH (
-				strInspectionName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strValue NVARCHAR(10)
-				) x
+		FROM tblQMTestResult TR
+		JOIN @strQualityInspectionTable QIT ON QIT.intPropertyId = TR.intPropertyId
+		JOIN tblQMProperty P ON P.intPropertyId = QIT.intPropertyId
 		WHERE intProductTypeId = @intProductTypeId
 			AND intProductValueId = @intProductValueId
 			AND intControlPointId = @intControlPointId
-			AND intPropertyId IN (
-				SELECT P.intPropertyId
-				FROM (
-					SELECT strInspectionName
-					FROM OPENXML(@idoc, 'root/Inspections/Inspection', 2) WITH (strInspectionName NVARCHAR(50) COLLATE Latin1_General_CI_AS)
-					) a
-				JOIN dbo.tblQMProperty P ON P.strPropertyName = a.strInspectionName
-					AND x.strInspectionName = a.strInspectionName
-				)
+			AND TR.strPropertyValue <> QIT.strPropertyValue
 	END
-
-	EXEC sp_xml_removedocument @idoc
 
 	COMMIT TRAN
 END TRY
@@ -137,9 +122,6 @@ BEGIN CATCH
 	IF XACT_STATE() != 0
 		AND @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
-
-	IF @idoc <> 0
-		EXEC sp_xml_removedocument @idoc
 
 	SET @ErrMsg = ERROR_MESSAGE()
 

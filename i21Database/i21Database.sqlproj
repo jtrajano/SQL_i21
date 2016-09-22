@@ -4373,6 +4373,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
     <Build Include="dbo\Views\vyuARCustomerContract.sql" />
+    <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

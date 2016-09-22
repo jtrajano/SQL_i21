@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMInspectionGetResult]
-     @intControlPointId INT -- 3 / 8 (Inspection / Shipping)
+	@intControlPointId INT -- 3 / 8 (Inspection / Shipping)
 	,@intProductTypeId INT -- 3 (Receipt)
 	,@intProductValueId INT -- 0 / intInventoryReceiptId
 AS
@@ -21,9 +21,9 @@ BEGIN
 		SELECT DISTINCT PR.strPropertyName
 			,PR.intPropertyId
 			,CASE 
-				WHEN ISNULL(PPV.strPropertyRangeText, '') = ''
-					THEN 'false'
-				ELSE PPV.strPropertyRangeText
+				WHEN LOWER(PPV.strPropertyRangeText) = 'true'
+					THEN 'true'
+				ELSE 'false'
 				END AS strPropertyValue
 			,PP.intSequenceNo
 		FROM dbo.tblQMProduct AS P
