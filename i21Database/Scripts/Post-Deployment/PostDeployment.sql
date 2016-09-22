@@ -204,6 +204,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\20_UpdateCommissionScheduleDetailSort.sql
 :r .\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql
 :r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
+:r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
+:r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

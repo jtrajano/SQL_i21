@@ -4362,6 +4362,16 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Tables\tblARLetterPlaceHolder.sql" />
+    <Build Include="dbo\User Defined Types\PlaceHolderTable.sql" />
+    <Build Include="dbo\Functions\fnARRemoveWhiteSpace.sql" />
+    <Build Include="dbo\Functions\fnARConvertLetterMessage.sql" />
+    <Build Include="dbo\Functions\fnARGetRowsFromDelimitedValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCollectionLetter.sql" />
+    <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
+    <Build Include="dbo\Views\vyuARCollectionOverdueReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\23_AddDefaultCollectionLetters.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
