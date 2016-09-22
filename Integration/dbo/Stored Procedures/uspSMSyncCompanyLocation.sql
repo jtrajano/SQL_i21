@@ -30,9 +30,9 @@ BEGIN
 
 	   DECLARE @TopLocId int  
        SELECT @TopLocId = intCompanyLocationId FROM #Temp ORDER BY intCompanyLocationId  
-       SELECT @MaxNumber1 = MAX([agloc_loc_no]) FROM aglocmst  
-	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  
-	   SET @Unused = (SELECT TOP 1 l.agloc_loc_no + 1 AS start FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no + 1 = r.agloc_loc_no WHERE r.agloc_loc_no IS NULL)
+       SELECT @MaxNumber1 = MAX([agloc_loc_no]) FROM aglocmst WHERE [agloc_loc_no] NOT LIKE ''%[^0-9]%''
+	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  WHERE [strLocationNumber] NOT LIKE ''%[^0-9]%''
+	   SET @Unused = (SELECT TOP 1 l.agloc_loc_no + 1 AS start FROM aglocmst AS l LEFT OUTER JOIN aglocmst AS r ON l.agloc_loc_no = r.agloc_loc_no AND r.agloc_loc_no NOT LIKE ''%[^0-9]%'' WHERE l.[agloc_loc_no] NOT LIKE ''%[^0-9]%'') --r.agloc_loc_no IS NULL
 
 	   SELECT @GreaterNumber = CASE WHEN @MaxNumber1 > @MaxNumber2 THEN @MaxNumber1 ELSE @MaxNumber2 END
 	   SELECT @GreaterNumber = CASE WHEN @GreaterNumber >= 999 THEN @Unused - 1 ELSE @GreaterNumber END
@@ -53,7 +53,7 @@ BEGIN
       END   
         
      DROP TABLE #Temp         
-    END  
+    END   
       
    DECLARE @RecordsToProcess table(strNumber varchar(3), strName varchar(30))  
    DECLARE @RecordsToAdd table(strNumber varchar(3), strName varchar(30))  
