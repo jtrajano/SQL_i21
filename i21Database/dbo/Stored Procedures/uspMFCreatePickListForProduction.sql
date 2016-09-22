@@ -20,6 +20,8 @@ Declare @intManufacturingProcessId int
 DECLARE @intDayOfYear INT
 DECLARE @dtmDate DATETIME=Convert(DATE, GetDate())
 DECLARE @dblReservedQty NUMERIC(38,20)
+DECLARE @ysnWOStagePick bit=0
+DECLARE @intConsumptionMethodId int
 
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY(1, 1)
@@ -66,6 +68,20 @@ DECLARE @tblLot TABLE (
 	,intSubLocationId INT
 	,intStorageLocationId INT
 	,dblReservedQty NUMERIC(38,20)
+	,dtmDateCreated DATETIME
+	)
+
+DECLARE @tblLotCopy TABLE (
+	 intRowNo INT IDENTITY
+	,intLotId INT
+	,intItemId INT
+	,dblQty NUMERIC(38,20)
+	,intItemUOMId INT
+	,intLocationId INT
+	,intSubLocationId INT
+	,intStorageLocationId INT
+	,dblReservedQty NUMERIC(38,20)
+	,dtmDateCreated DATETIME
 	)
 
 DECLARE @tblPickedLot TABLE(
@@ -80,6 +96,11 @@ DECLARE @tblPickedLot TABLE(
 	,dblItemRequiredQty NUMERIC(38,20)
 	,dblAvailableQty NUMERIC(38,20)
 	,dblReservedQty NUMERIC(38,20)
+)
+
+Declare @tblWOStagingLocation AS table
+(
+	intStagingLocationId int
 )
 
 Select @intLocationId=intLocationId,@intOutputItemId=intItemId,@intPickListId=ISNULL(intPickListId,0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
@@ -235,11 +256,19 @@ Insert Into @tblInputItem(intRecipeId,intRecipeItemId,intItemId,dblRequiredQty,y
 	Delete From @tblInputItem Where ISNULL(dblRequiredQty,0)=0
 End
 
+INSERT INTO @tblWOStagingLocation
+Select DISTINCT oh.intStagingLocationId From tblMFStageWorkOrder sw
+Join tblMFOrderHeader oh on sw.intOrderHeaderId=oh.intOrderHeaderId 
+Where ISNULL(oh.intStagingLocationId,0)>0 AND sw.intWorkOrderId=@intWorkOrderId
+
+If (Select Count(1) From @tblWOStagingLocation)>0 
+	Set @ysnWOStagePick=1
+
 Select @intMinItem = MIN(intRowNo) From @tblInputItem
 
 While @intMinItem is not null
 Begin
-	Select @intItemId=intItemId,@dblRequiredQty=dblRequiredQty,@dblItemRequiredQty=dblRequiredQty,@intItemUOMId=intItemUOMId,@strLotTracking=strLotTracking 
+	Select @intItemId=intItemId,@dblRequiredQty=dblRequiredQty,@dblItemRequiredQty=dblRequiredQty,@intItemUOMId=intItemUOMId,@strLotTracking=strLotTracking,@intConsumptionMethodId=intConsumptionMethodId 
 	From @tblInputItem Where intRowNo=@intMinItem
 
 	DELETE FROM @tblLot
@@ -269,6 +298,7 @@ Begin
 		,intSubLocationId
 		,intStorageLocationId
 		,dblReservedQty
+		,dtmDateCreated
 		)
 	SELECT L.intLotId
 		,L.intItemId
@@ -281,6 +311,7 @@ Begin
 		,L.intStorageLocationId
 		,(Select ISNULL(SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(sr.intItemUOMId,@intItemUOMId,sr.dblQty),0)),0) 
 		From tblICStockReservation sr Where sr.intLotId=L.intLotId AND ISNULL(sr.ysnPosted,0)=0) AS dblReservedQty
+		,L.dtmDateCreated
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 	WHERE L.intItemId = @intItemId
@@ -293,6 +324,47 @@ Begin
 		ORDER BY L.dtmDateCreated
 
 	Delete From @tblLot Where dblQty < .01
+
+	--if WO has associated Pick Order, pick lots from Order Staging Location
+	If @ysnWOStagePick=1
+	Begin
+		Delete From @tblLotCopy
+
+		INSERT INTO @tblLotCopy(intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated)
+		Select intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated 
+		from @tblLot tl Where tl.intStorageLocationId IN (Select intStagingLocationId From @tblWOStagingLocation) Order By tl.dtmDateCreated
+
+		INSERT INTO @tblLotCopy(intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated)
+		Select intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated 
+		from @tblLot tl Where tl.intStorageLocationId NOT IN (Select intStagingLocationId From @tblWOStagingLocation) Order By tl.dtmDateCreated
+
+		Delete From @tblLot
+
+		INSERT INTO @tblLot(intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated)
+		Select intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated from @tblLotCopy
+	End
+
+	--For Bulk Items Do not consider lot
+	If @intConsumptionMethodId IN (2, 3) --By Location/FIFO
+	Begin
+		SET @dblAvailableQty = (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblLot)
+		- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=@intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0)
+
+		Select @dblReservedQty = ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intItemId=@intItemId AND intLocationId = @intLocationId AND ISNULL(ysnPosted,0)=0
+
+		If @dblAvailableQty >= .01
+		Begin
+			Delete From @tblLotCopy
+
+			INSERT INTO @tblLotCopy(intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated)
+			Select intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated from @tblLot
+
+			Delete From @tblLot
+
+			INSERT INTO @tblLot(intLotId,intItemId,dblQty,intItemUOMId,intLocationId,intSubLocationId,intStorageLocationId,dblReservedQty,dtmDateCreated)
+			Select TOP 1 -2 intLotId,intItemId,@dblAvailableQty,intItemUOMId,intLocationId,0 intSubLocationId,0 intStorageLocationId,@dblReservedQty,dtmDateCreated from @tblLotCopy
+		End
+	End
 
 	Select @intMinLot=MIN(intRowNo) From @tblLot
 	While @intMinLot is not null
@@ -328,7 +400,7 @@ Begin
 
 End
 
-Select p.intItemId,i.strItemNo,i.strDescription,l.intLotId,l.strLotNumber,p.intStorageLocationId,sl.strName AS strStorageLocationName,
+Select p.intItemId,i.strItemNo,i.strDescription,p.intLotId,l.strLotNumber,p.intStorageLocationId,sl.strName AS strStorageLocationName,
 p.dblQty AS dblPickQuantity,p.intItemUOMId AS intPickUOMId,um.strUnitMeasure AS strPickUOM,
 pl.intParentLotId,pl.strParentLotNumber,p.intSubLocationId,sbl.strSubLocationName,p.intLocationId,i.strLotTracking,
 p.dblItemRequiredQty AS dblQuantity,p.intItemUOMId,um.strUnitMeasure AS strUOM,
