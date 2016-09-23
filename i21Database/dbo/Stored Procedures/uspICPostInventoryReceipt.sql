@@ -210,6 +210,21 @@ BEGIN
 		END 
 	END 
 
+	-- Do not allow post if no lot entry in a lotted item
+	SET @strItemNo = NULL
+	SELECT TOP 1 @strItemNo = item.strItemNo
+	FROM tblICInventoryReceipt receipt
+		INNER JOIN tblICInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
+		INNER JOIN tblICItem item ON item.intItemId = receiptItem.intItemId
+		LEFT JOIN tblICInventoryReceiptItemLot itemLot ON itemLot.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+	WHERE dbo.fnGetItemLotType(item.intItemId) <> 0
+		AND itemLot.intLotId IS NULL
+	IF @strItemNo IS NOT NULL
+	BEGIN
+		-- 'Lotted item {Item No} should should have lot(s) specified.'
+		RAISERROR(80090, 11, 1, @strItemNo)  
+		GOTO Post_Exit  
+	END
 END
 
 -- Check if locations are valid
