@@ -18,6 +18,7 @@ BEGIN TRY
 		,@intRowCount int
 		,@intPickListId int
 		,@strWorkOrderNos nvarchar(max)
+		,@strPickListNo nvarchar(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -62,6 +63,15 @@ BEGIN TRY
 				@intUserId=intUserId from @tblWO where intRowNo=@intRowCount
 
 		Select @intPickListId=ISNULL(intPickListId,0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
+		If (Select COUNT(1) From tblMFWorkOrder Where intPickListId=@intPickListId)>1 
+			AND Exists (Select intKitStatusId From tblMFPickList Where intPickListId=@intPickListId AND intKitStatusId IN (7,12))
+		Begin
+			Select @strPickListNo=strPickListNo From tblMFPickList Where intPickListId=@intPickListId
+			Set @strErrMsg='The blend sheet (' + @strWorkOrderNo + ') belongs to a pick list (' + @strPickListNo 
+			+ ') that has multiple blend sheets associated with it. Please delete the pick list from Kit Manager before deleting the blend sheet.'
+			RaisError(@strErrMsg,16,1)
+		End
 
 		If @intStatusId in (2,9)
 		Begin			
