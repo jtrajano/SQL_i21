@@ -34,7 +34,7 @@ BEGIN
 	FROM
 		@TempPlaceHolderTable
 
-	SET @newHTMLMessage =  (REPLACE(@newHTMLMessage, @strPlaceHolder, @strPlaceValue))	
+	SET @newHTMLMessage =  (REPLACE(dbo.fnARRemoveWhiteSpace(@newHTMLMessage), dbo.fnARRemoveWhiteSpace(@strPlaceHolder), @strPlaceValue))	
  
 	DELETE FROM @TempPlaceHolderTable WHERE intPlaceHolderId = @intPlaceHolderId	
 END
