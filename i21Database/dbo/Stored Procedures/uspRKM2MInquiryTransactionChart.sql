@@ -65,24 +65,27 @@ EXEC [uspRKM2MInquiryTransaction]   @intM2MBasisId  = @intM2MBasisId,
                   @intLocationId = @intLocationId,
                   @intMarketZoneId = @intMarketZoneId
 
+
 DECLARE @tblMonthFinal TABLE (
   intRowNum INT identity(1, 1)
  ,strFutureMonth NVARCHAR(500) COLLATE Latin1_General_CI_AS
  ,dblResult DECIMAL(24, 10)
  ,dblResultBasis DECIMAL(24, 10)
  ,dblMarketFuturesResult DECIMAL(24, 10)
+ ,dblResultCash DECIMAL(24, 10)
  )
  SET DATEFORMAT dmy
 
- INSERT INTO @tblMonthFinal (strFutureMonth,dblResult,dblResultBasis,dblMarketFuturesResult)
-	SELECT strFutureMonth,sum(dblResult),sum(dblResultBasis), sum(dblMarketFuturesResult) from (
+ INSERT INTO @tblMonthFinal (strFutureMonth,dblResult,dblResultBasis,dblMarketFuturesResult,dblResultCash)
+	SELECT strFutureMonth,sum(dblResult),sum(dblResultBasis), sum(dblMarketFuturesResult),sum(dblResultCash) from (
 		SELECT RIGHT(CONVERT(VARCHAR(10),CONVERT(DATETIME,'01/' +RIGHT(strPeriod,5)),6),6) strFutureMonth,
 		dblResult,
 		dblResultBasis, 
-		dblMarketFuturesResult
+		dblMarketFuturesResult,
+		dblResultCash
 		FROM @tblFinalDetail ) t
-	GROUP BY strFutureMonth
+	GROUP BY strFutureMonth 
 	ORDER BY CONVERT(DATETIME,'01 ' +strFutureMonth) ASC
 SET DATEFORMAT mdy
 
-SELECT intRowNum,strFutureMonth,dblResult,dblResultBasis,dblMarketFuturesResult from @tblMonthFinal
+SELECT intRowNum,strFutureMonth,dblResult,dblResultBasis,dblMarketFuturesResult,dblResultCash from @tblMonthFinal
