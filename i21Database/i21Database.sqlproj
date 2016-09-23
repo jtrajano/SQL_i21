@@ -4274,7 +4274,6 @@
     <Build Include="dbo\Tables\tblPREFileFormat.sql" />
     <Build Include="dbo\Tables\tblPREFileFormatRecord.sql" />
     <Build Include="dbo\Tables\tblPREFileFormatField.sql" />
-    <Build Include="dbo\Views\vyuPATCustomerPatronage.sql" />
     <Build Include="dbo\Views\vyuPATEquityPatronageDetails.sql" />
     <Build Include="dbo\Views\vyuSMTransaction.sql" />
     <Build Include="dbo\Views\vyuSMTransactionRaw.sql" />
@@ -4326,6 +4325,10 @@
     <Build Include="dbo\Views\vyuPATCalculateFiscalSummaryHistory.sql" />
     <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateFiscalPatronage.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateRefundPatronage.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateCustomerPatronageHistory.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateCustomerPatronage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
