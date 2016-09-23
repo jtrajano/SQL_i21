@@ -91,7 +91,5 @@ END
 
 SET IDENTITY_INSERT [dbo].[tblARLetterPlaceHolder] OFF
 
-
-SELECT * FROM tblARLetterPlaceHolder
-
+ 
 
