@@ -286,7 +286,7 @@ BEGIN
 		,@CurrencyId					= [intCurrencyId]
 		,@TermId						= [intTermId]
 		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
-		,@DueDate						= CAST(ISNULL([dtmDueDate], @DateNow) AS DATE)
+		,@DueDate						= [dtmDueDate]
 		,@ShipDate						= CAST(ISNULL([dtmShipDate], @DateNow) AS DATE)
 		,@EntitySalespersonId			= [intEntitySalespersonId]
 		,@FreightTermId					= [intFreightTermId]
