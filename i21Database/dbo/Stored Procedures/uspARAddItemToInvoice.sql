@@ -220,6 +220,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblDiscount]
 				,[dblItemTermDiscount]
 				,[strItemTermDiscountBy]
+				,[dblLicenseAmount]
 				,[dblPrice]
 				,[strPricing]
 				,[intSiteId]
@@ -263,6 +264,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemDiscount
 				,@ItemTermDiscount
 				,@ItemTermDiscountBy
+				,@ItemLicenseAmount
 				,@ItemPrice
 				,@ItemPricing
 				,@ItemSiteId

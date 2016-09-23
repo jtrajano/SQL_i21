@@ -62,6 +62,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intContractDetailId			INT,
 							dblQtyOrdered				NUMERIC(18,6),
 							dblQtyRemaining				NUMERIC(18,6),
+							dblLicenseAmount			NUMERIC(18,6),
 							dblMaintenanceAmount		NUMERIC(18,6),
 							dblDiscount					NUMERIC(18,6),
 							dblItemTermDiscount			NUMERIC(18,6),
@@ -111,6 +112,7 @@ SELECT intItemId					= SI.intItemId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= SI.dblQtyOrdered
 	 , dblQtyRemaining				= CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
+	 , dblLicenseAmount				= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
 	 , dblMaintenanceAmount			= CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
 	 , dblDiscount					= SI.dblDiscount
 	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
@@ -160,6 +162,7 @@ SELECT intItemId					= SOD.intItemId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= 0
 	 , dblQtyRemaining				= 0
+	 , dblLicenseAmount				= 0
 	 , dblMaintenanceAmount			= 0
 	 , dblDiscount					= 0
 	 , dblItemTermDiscount			= 0
@@ -203,6 +206,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
 	 , dblQtyRemaining				= ICSI.dblQuantity
+	 , dblLicenseAmount				= @dblZeroAmount
 	 , dblMaintenanceAmount			= @dblZeroAmount
 	 , dblDiscount					= SOD.dblDiscount
 	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
@@ -248,7 +252,8 @@ SELECT intItemId					= ARSI.intItemId
 	 , intContractHeaderId			= ARSI.intContractHeaderId
 	 , intContractDetailId			= ARSI.intContractDetailId
 	 , dblQtyOrdered				= 0
-	 , dblQtyRemaining				= ARSI.dblQtyRemaining  
+	 , dblQtyRemaining				= ARSI.dblQtyRemaining
+	 , dblLicenseAmount				= 0  
 	 , dblMaintenanceAmount			= 0 
 	 , dblDiscount					= ARSI.dblDiscount
 	 , dblItemTermDiscount			= 0
@@ -512,7 +517,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strMaintenanceType]		--[strMaintenanceType]
 					,[strFrequency]		        --[strFrequency]
 					,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
-					,0							--[dblLicenseAmount]
+					,CASE WHEN strMaintenanceType IN ('License Only', 'License/Maintenance') THEN [dblLicenseAmount] ELSE 0 END	--[dblLicenseAmount]
 					,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
 					,[intTaxGroupId]			--[intTaxGroupId]
 					,0
@@ -604,6 +609,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemDiscount			NUMERIC(18,6),
 						@ItemTermDiscount		NUMERIC(18,6),
 						@ItemTermDiscountBy		NVARCHAR(50),
+						@ItemLicenseAmount		NUMERIC(18,6),
 						@ItemPrice				NUMERIC(18,6),
 						@ItemPricing			NVARCHAR(250),
 						@ItemTaxGroupId			INT,		
@@ -640,6 +646,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemDiscount			= dblDiscount,
 						@ItemTermDiscount		= dblItemTermDiscount,
 						@ItemTermDiscountBy		= strItemTermDiscountBy,
+						@ItemLicenseAmount      = dblLicenseAmount,
 						@ItemPrice				= dblPrice,
 						@ItemPricing			= strPricing,
 						@ItemTaxGroupId			= intTaxGroupId,
@@ -683,6 +690,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemTermDiscount				= @ItemTermDiscount
 							,@ItemTermDiscountBy			= @ItemTermDiscountBy
+							,@ItemLicenseAmount				= @ItemLicenseAmount
 							,@ItemPrice						= @ItemPrice
 							,@ItemPricing					= @ItemPricing
 							,@RefreshPrice					= 0
