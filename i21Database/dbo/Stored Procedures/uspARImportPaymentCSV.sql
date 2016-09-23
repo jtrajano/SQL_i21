@@ -45,9 +45,9 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 			  , @dtmDatePaid				DATETIME
 			  , @dblAmountPaid				DECIMAL(18, 6)
 			  , @strPaymentInfo				NVARCHAR(50)
-			  , @ErrorMessage				NVARCHAR(250)			  
+			  , @ErrorMessage				NVARCHAR(250) = ''	  
 			  , @intCurrentPaymentCount     INT
-
+			  		
 		SELECT TOP 1 @intImportLogDetailId	= intImportLogDetailId FROM @PaymentsForImport ORDER BY intImportLogDetailId
 		SELECT @intCurrentPaymentCount		= COUNT(*) FROM @PaymentsForImport     
 		SELECT  @intEntityCustomerId		= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = ILD.strCustomerNumber)
@@ -62,18 +62,20 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 			tblARImportLogDetail ILD
 		WHERE ILD.intImportLogDetailId = @intImportLogDetailId
 
+		SET @ErrorMessage = ''
+
 		--VALIDATIONS
 		IF ISNULL(@intEntityCustomerId, 0) = 0
-			SELECT @ErrorMessage = 'Failed: Customer ' + strCustomerNumber + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId
+			SET @ErrorMessage = (SELECT TOP 1 'Failed: Customer ' + strCustomerNumber + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId)
 
 		IF ISNULL(@intCompanyLocationId, 0) = 0
-			SELECT @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Failed: Location ' + strLocationName + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId
+			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + (SELECT TOP 1 'Failed: Location ' + strLocationName + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId)
 		
 		IF ISNULL(@intBankAccountId, 0) = 0
-			SELECT @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Failed: Bank Account # ' + strBankAccountNo + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId
+			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + (SELECT TOP 1 'Failed: Bank Account # ' + strBankAccountNo + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId)
 
 		IF ISNULL(@intPaymentMethodId, 0) = 0
-			SELECT @ErrorMessage = ISNULL(@ErrorMessage, '') + 'Failed: Payment Method ' + strPaymentMethod + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId
+			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + (SELECT TOP 1 'Failed: Payment Method ' + strPaymentMethod + ' does not exist. ' FROM tblARImportLogDetail WHERE intImportLogDetailId = @intImportLogDetailId)
 
 		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1 AND @IsRecap = 0
 			BEGIN TRY
