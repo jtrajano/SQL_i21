@@ -46,15 +46,9 @@ BEGIN
 				, [endgroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				, [datatype]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				)
-		--SELECT 
-		--	@strCustomerIds = [from]
-		--FROM 
-		--	@temp_params 
-		--WHERE 
-		--	[fieldname] = 'intEntityCustomerId' 
-
 		SELECT 
-			@strCustomerIds = '8|^|'
+			@strCustomerIds = [from]
+			--@strCustomerIds = '8|^|'
 		FROM 
 			@temp_params 
 		WHERE 
@@ -81,8 +75,8 @@ BEGIN
 		FROM
 			tblSMLetter
 		WHERE
-			--intLetterId  = @strLetterId
-			intLetterId  = 2
+			intLetterId  = @strLetterId
+			--intLetterId  = 2
 
 		DECLARE @SelectedPlaceHolderTable TABLE  (
 			intPlaceHolderId	INT
@@ -150,7 +144,6 @@ BEGIN
 		WHERE 
 			CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
 			
-		--SELECT * FROM @SelectedPlaceHolderTable
 		WHILE EXISTS(SELECT NULL FROM @SelectedCustomer)
 		BEGIN
 			DECLARE @CustomerId INT
