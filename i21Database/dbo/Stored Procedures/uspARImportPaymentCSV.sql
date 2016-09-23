@@ -138,5 +138,8 @@ WHILE EXISTS(SELECT NULL FROM @PaymentsForImport)
 
 		DELETE FROM @PaymentsForImport WHERE intImportLogDetailId = @intImportLogDetailId
 	END
-	
+
+IF @IsRecap = 0
+	UPDATE tblARImportLog SET ysnRecap = 0
+
 END
