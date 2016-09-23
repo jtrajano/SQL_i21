@@ -25,6 +25,7 @@ BEGIN TRY
 		,@strInstantConsumption nvarchar(50)
 		,@strWorkOrderNo nvarchar(50)
 		,@intBatchId int
+		,@strUndoXML nvarchar(MAX)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -120,10 +121,11 @@ BEGIN TRY
 	DECLARE @tblMFLot TABLE (
 		intRecordId INT identity(1, 1)
 		,intBatchId INT
+		,intLotId int
 		)
 
-	INSERT INTO @tblMFLot (intBatchId)
-	SELECT PL.intBatchId
+	INSERT INTO @tblMFLot (intBatchId,intLotId)
+	SELECT PL.intBatchId,PL.intLotId
 	FROM dbo.tblMFWorkOrderProducedLot PL
 	JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -135,76 +137,15 @@ BEGIN TRY
 
 	WHILE @intRecordId IS NOT NULL AND @strAttributeValue='True'
 	BEGIN
-		SELECT @intBatchId=NULL
+		SELECT @intBatchId=NULL,@intLotId=NULL
 
-		SELECT @intBatchId = intBatchId
+		SELECT @intBatchId = intBatchId,@intLotId=intLotId
 		FROM @tblMFLot
 		WHERE intRecordId = @intRecordId
 
-		DECLARE @STARTING_NUMBER_BATCH AS INT = 3
+		Select @strUndoXML=N'<root><intWorkOrderId>'+Ltrim(@intWorkOrderId)+'</intWorkOrderId><intLotId>'+Ltrim(@intLotId)+'</intLotId><intBatchId>'+Ltrim(@intBatchId)+'</intBatchId><ysnForceUndo>True</ysnForceUndo><intUserId>'+Ltrim(@intUserId)+'</intUserId></root>'
 
-		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
-			,@strBatchId OUTPUT
-
-		DECLARE @GLEntries AS RecapTableType
-
-		INSERT INTO @GLEntries (
-			[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]	
-			,[dblDebitReport]	
-			,[dblCreditForeign]	
-			,[dblCreditReport]	
-			,[dblReportingRate]	
-			,[dblForeignRate]
-			)
-		EXEC dbo.uspICUnpostCosting @intBatchId
-			,@strWorkOrderNo
-			,@strBatchId
-			,@intUserId
-			,0
-
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
-
-		UPDATE dbo.tblMFWorkOrderProducedLot
-		SET ysnProductionReversed = 1
-			,dtmLastModified = @dtmCurrentDate
-			,intLastModifiedUserId = @intUserId
-		WHERE intBatchId = @intBatchId
-			AND intWorkOrderId = @intWorkOrderId
-
-		SELECT @dblQuantity = dblQuantity
-		FROM tblMFWorkOrderProducedLot
-		WHERE intBatchId = @intBatchId
-			AND intWorkOrderId = @intWorkOrderId
-
-		UPDATE tblMFWorkOrder
-		SET dblProducedQuantity = dblProducedQuantity - @dblQuantity
-		WHERE intWorkOrderId = @intWorkOrderId
+		EXEC uspMFUndoPallet @strUndoXML
 
 		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblMFLot
