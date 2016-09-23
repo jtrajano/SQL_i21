@@ -4341,7 +4341,9 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateShipmentOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
-    </Build>
+    <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
+    <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
+	</Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
