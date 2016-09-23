@@ -829,6 +829,26 @@ IF ISNULL(@RaiseError,0) = 0
 --INSERT TO RECURRING TRANSACTION
 IF ISNULL(@SoftwareInvoiceId, 0) > 0
 	BEGIN
+		DECLARE @ysnHasMaintenanceItem  BIT = 0
+		      , @strFrequency			NVARCHAR(50)
+
+		IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceDetail WHERE intInvoiceId = @SoftwareInvoiceId AND strMaintenanceType <> 'License Only' ORDER BY intInvoiceDetailId DESC)
+			BEGIN
+				SET @ysnHasMaintenanceItem = 1
+				SET @strFrequency = (SELECT TOP 1 strFrequency FROM tblARInvoiceDetail WHERE intInvoiceId = @SoftwareInvoiceId AND strMaintenanceType <> 'License Only' ORDER BY intInvoiceDetailId DESC)
+			END			
+			
+		UPDATE tblARInvoice
+		SET intPeriodsToAccrue = CASE WHEN @ysnHasMaintenanceItem = 1 THEN
+									CASE WHEN @strFrequency = 'Monthly' THEN 1
+										 WHEN @strFrequency = 'Bi-Monthly' THEN 2
+										 WHEN @strFrequency = 'Quarterly' THEN 3
+										 WHEN @strFrequency = 'Semi-Annually' THEN 6
+										 WHEN @strFrequency = 'Annually' THEN 12
+									ELSE 1 END
+								 ELSE 1 END
+		WHERE intInvoiceId = @SoftwareInvoiceId
+
 		IF NOT EXISTS (SELECT NULL FROM tblSMRecurringTransaction WHERE intTransactionId = @SoftwareInvoiceId AND strTransactionType = 'Invoice')
 			BEGIN
 				EXEC dbo.uspARInsertRecurringInvoice @SoftwareInvoiceId, @UserId
