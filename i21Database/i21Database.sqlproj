@@ -4374,6 +4374,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\24_AddDefaultPlaceHolders.sql" />
     <Build Include="dbo\Views\vyuARCustomerContract.sql" />
     <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
+    <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
+    <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
