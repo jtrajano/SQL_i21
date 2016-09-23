@@ -4,15 +4,23 @@
 	@intCurrencyExchangeRateTypeId INT,
 	@dtmDate DATETIME
 )
-RETURNS NUMERIC(18,6)
+RETURNS @tbl TABLE
+(
+  dblRate NUMERIC(18,6)
+)
 AS
 BEGIN
 	DECLARE @dblRate NUMERIC(18,6)
-	SELECT TOP 1 @dblRate = dblRate FROM vyuGLExchangeRate
-	CROSS APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
-	WHERE intFromCurrencyId = @intFromCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
-	AND intCurrencyExchangeRateTypeId = @intCurrencyExchangeRateTypeId
-	AND dtmValidFromDate<=@dtmDate
-	ORDER BY dtmValidFromDate DESC
-	RETURN ISNULL(@dblRate,0)
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE intDefaultCurrencyId = @intFromCurrencyId)
+		INSERT INTO @tbl SELECT 1
+	ELSE
+		INSERT INTO @tbl
+		SELECT TOP 1 dblRate FROM vyuGLExchangeRate
+		OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
+		WHERE intFromCurrencyId = @intFromCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
+		AND intCurrencyExchangeRateTypeId = @intCurrencyExchangeRateTypeId
+		AND dtmValidFromDate<=@dtmDate
+		ORDER BY dtmValidFromDate DESC
+	RETURN
 END
+
