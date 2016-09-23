@@ -463,9 +463,10 @@ BEGIN
 			FROM [dbo].tblGLJournal A
 			WHERE A.intJournalId = @intJournalId
 			
-			DECLARE @intJournalId_NEW INT = (SELECT TOP 1 intJournalId FROM tblGLJournal WHERE strJournalId = @strJournalId)
-			DECLARE @dtmDate_NEW DATETIME = (SELECT TOP 1 dtmDate FROM tblGLJournal WHERE strJournalId = @strJournalId)
-			INSERT INTO @tmpValidJournals (intJournalId) SELECT @intJournalId_NEW
+		DECLARE @intJournalId_NEW INT = (SELECT TOP 1 intJournalId FROM tblGLJournal WHERE strJournalId = @strJournalId)
+		DECLARE @intCurrencylId INT = (SELECT TOP 1 intCurrencyId FROM tblGLJournal WHERE strJournalId = @strJournalId)
+		DECLARE @dtmDate_NEW DATETIME = (SELECT TOP 1 dtmDate FROM tblGLJournal WHERE strJournalId = @strJournalId)
+		INSERT INTO @tmpValidJournals (intJournalId) SELECT @intJournalId_NEW
 		 
 		 INSERT INTO tblGLJournalDetail (
 				 [intLineNo]
@@ -493,16 +494,17 @@ BEGIN
 				,[strSourcePgm]
 				,[strCheckBookNo]
 				,[strWorkArea]
+				,[intCurrencyExchangeRateTypeId]
 				)
 			SELECT 
 				 [intLineNo]
 				,@intJournalId_NEW
 				,@dtmDate_NEW
 				,[intAccountId]			
-				,[dblCredit]
-				,[dblCreditRate]
-				,[dblDebit]
-				,[dblDebitRate]			
+				,[dblCredit] = (dblCredit * B.dblRate)
+				,[dblCreditRate] = B.dblRate
+				,[dblDebit] =  (dblDebit * B.dblRate)
+				,[dblDebitRate]	 = B.dblRate
 				,[dblCreditUnit]
 				,[dblDebitUnit]
 				,[dblCreditForeign]
@@ -520,7 +522,9 @@ BEGIN
 				,[strSourcePgm]
 				,[strCheckBookNo]
 				,[strWorkArea]
+				,[intCurrencyExchangeRateTypeId]
 			FROM [dbo].tblGLJournalDetail A
+			OUTER APPLY dbo.fnGLGetExchangeRate(@intCurrencylId,A.intCurrencyExchangeRateTypeId,@dtmDate_NEW) B
 			WHERE A.intJournalId = @intJournalId
 							
 		DELETE FROM @tmpReverseJournals WHERE intJournalId = @intJournalId
