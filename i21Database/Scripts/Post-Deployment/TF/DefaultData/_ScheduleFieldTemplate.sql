@@ -10,8 +10,6 @@
 		,(0, N'strCustomerFederalTaxId', 0)
 		,(0, N'strVendorName', 0)
 		,(0, N'strVendorFederalTaxId', 0)
-		,(0, N'strVendorName', 0)
-		,(0, N'strVendorFederalTaxId', 0)
 		,(0, N'strVendorLicenseNumber', 0)
 		,(0, N'strTransporterName', 0)
 		,(0, N'strTransporterFederalTaxId', 0)
