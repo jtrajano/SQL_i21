@@ -3,7 +3,7 @@ PRINT 'START TF CLEAR TEST DATA'
 
 TRUNCATE TABLE tblTFScheduleFieldTemplate
 TRUNCATE TABLE tblTFScheduleFields
---TRUNCATE TABLE tblTFTaxReportTemplate
+TRUNCATE TABLE tblTFTaxReportTemplate
 TRUNCATE TABLE tblTFTransactions
 -- CONFIGS
 TRUNCATE TABLE tblTFValidAccountStatusCode
@@ -4930,10 +4930,10 @@ BEGIN
 		--END
 
 		--REPORT GENERATION TEMPLATE
-		DECLARE @FormCode NVARCHAR(50)
-		SELECT @FormCode = strFormCode FROM tblTFTaxReportTemplate WHERE strFormCode = 'MF-360'
-		IF (@FormCode IS NULL)
-			BEGIN
+		--DECLARE @FormCode NVARCHAR(50)
+		--SELECT @FormCode = strFormCode FROM tblTFTaxReportTemplate WHERE strFormCode = 'MF-360'
+		--IF (@FormCode IS NULL)
+		--	BEGIN
 				INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [intTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId]) VALUES (NULL, NULL, N'MF-360', 14, N'IN', N'1', 0, 0, N'Filing Type', N'', NULL, 0, NULL, N'Filing Type', NULL, 0)
 				INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [intTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId]) VALUES (NULL, N'MF-360-Summary-001', N'MF-360', 14, N'IN', N'Section 2:    Calculation of Gasoline Taxes Due', 1, 1, N'1. Total receipts (From Section A, Line 8, Column D on back of return)', N'1A,2,2K,2X,3,4', NULL, 0, NULL, N'Summary', NULL, 0)
 				INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [intTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId]) VALUES (NULL, N'MF-360-Summary-002', N'MF-360', 14, N'IN', N'Section 2:    Calculation of Gasoline Taxes Due', 2, 2, N'2. Total non-taxable disbursements (From Section B, Line 10, Column D on back of return)', N'11,6D,6X,7,8,10A,10B', NULL, 0, NULL, N'Summary', NULL, 0)
@@ -5082,7 +5082,7 @@ BEGIN
 				INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [intTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId]) VALUES (70, N'EDI-FileName1st', N'EDI', 14, N'IN', N'EDI', 7, 23, N'EDI File Name - 1st part (TST or PRD)', NULL, N'T', 0, NULL, N'Summary', 160, 3)
 				INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [intTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId]) VALUES (70, N'EDI-FileName2nd', N'EDI', 14, N'IN', N'EDI', 7, 23, N'EDI File Name - 2nd part (Tax Payer Code)', NULL, N'FREE', 0, NULL, N'Summary', 165, 4)
 				INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [intTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId]) VALUES (70, N'EDI-FileName3rd', N'EDI', 14, N'IN', N'EDI', 7, 23, N'EDI File Name - 3rd part (Next Sequence Number)', NULL, N'2237', 0, NULL,N'Summary', 170, 24)
-			END
+			--END
 	END
 END
 
