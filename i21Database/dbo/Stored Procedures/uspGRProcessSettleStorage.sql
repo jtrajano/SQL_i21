@@ -874,7 +874,8 @@ BEGIN TRY
 	---Creating Receipt and Voucher.
 		
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3  	
-	DECLARE @ItemsToStorage AS ItemCostingTableType 
+	DECLARE @ItemsToStorage AS ItemCostingTableType
+		   ,@ItemsToPost  AS ItemCostingTableType
 		   ,@strBatchId AS NVARCHAR(20)
 		   ,@ReceiptStagingTable ReceiptStagingTable 
 		   ,@OtherCharges ReceiptOtherChargesTableType 
@@ -901,7 +902,9 @@ BEGIN TRY
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
 		END
 		
-		DELETE FROM @ItemsToStorage	 
+		DELETE FROM @ItemsToStorage
+		
+		DELETE FROM @ItemsToPost	 
 		
 		INSERT INTO @ItemsToStorage
 		(
@@ -921,6 +924,7 @@ BEGIN TRY
 		 ,intTransactionTypeId
 		 ,intSubLocationId
 		 ,intStorageLocationId
+		 ,ysnIsStorage
 		)
 		SELECT  
 		 SV.[intItemId]
@@ -928,7 +932,7 @@ BEGIN TRY
 		,@intSourceItemUOMId
 		,GetDATE()
 		,-SV.[dblUnits]
-		,-SV.[dblUnits]	
+		,SV.[dblUnits]	
 		,SV.[dblCashPrice]
 		,0.00
 		,@intDefaultCurrencyId
@@ -939,17 +943,71 @@ BEGIN TRY
 		,4
 		,CS.intCompanyLocationSubLocationId
 		,CS.intStorageLocationId
+		,1
 		FROM @SettleVoucherCreate SV
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=0
 		WHERE SV.intCompanyLocationId = @LocationId AND SV.intItemSort=1 AND SV.IsProcessed = 0  
 		ORDER BY SV.intItemSort
-				
-		--Reduce the On-Storage Quantity
-		
+
+		INSERT INTO @ItemsToPost
+		(
+		  intItemId  
+		 ,intItemLocationId	
+		 ,intItemUOMId  
+		 ,dtmDate  
+		 ,dblQty  
+		 ,dblUOMQty  
+		 ,dblCost  
+		 ,dblSalesPrice  
+		 ,intCurrencyId  
+		 ,dblExchangeRate  
+		 ,intTransactionId  
+		 ,intTransactionDetailId 
+		 ,strTransactionId  
+		 ,intTransactionTypeId
+		 ,intSubLocationId
+		 ,intStorageLocationId
+		 ,ysnIsStorage
+		)
+		SELECT  
+		 SV.[intItemId]
+		,@intItemLocationId	
+		,@intSourceItemUOMId
+		,GetDATE()
+		,-SV.[dblUnits]
+		,SV.[dblUnits]	
+		,SV.[dblCashPrice]
+		,0.00
+		,@intDefaultCurrencyId
+		,1
+		,1
+		,SV.[intCustomerStorageId]
+		,@strStorageAdjustment
+		,4
+		,CS.intCompanyLocationSubLocationId
+		,CS.intStorageLocationId
+		,0
+		FROM @SettleVoucherCreate SV
+		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+		JOIN tblGRStorageType St ON St.intStorageScheduleTypeId=CS.intStorageTypeId AND St.ysnDPOwnedType=1
+		WHERE SV.intCompanyLocationId = @LocationId AND SV.intItemSort=1 AND SV.IsProcessed = 0  
+		ORDER BY SV.intItemSort
+						
+		--Reduce the On-Storage Quantity		
 		BEGIN
 			 EXEC uspICPostStorage 
 				  @ItemsToStorage
 				, @strBatchId
+				, @UserKey
+			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
+		END
+
+		BEGIN
+			 EXEC uspICPostCosting 
+				  @ItemsToPost
+				, @strBatchId
+				,'Cost of Goods'
 				, @UserKey
 			IF @@ERROR <> 0 GOTO SettleStorage_Exit;
 		END
