@@ -5607,4 +5607,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[PK_tblCRMSettings]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a437f37a-0478-4179-a7aa-16c1fca8ef28" ChangeDateTime="09/26/2016 09:32:25">
+    <Property Name="ElementName" Value="[dbo].[tblHDOpportunitySource]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMSource]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c0c9fa15-bcc0-483d-999e-8fc90c7c3878" ChangeDateTime="09/26/2016 09:33:01">
+    <Property Name="ElementName" Value="[dbo].[tblCRMSource].[intOpportunitySourceId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSource]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intSourceId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a539af99-9e9e-43a7-a680-211bb2939c1b" ChangeDateTime="09/26/2016 09:33:37">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDOpportunitySource]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSource]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCRMSource]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="adc3fcaa-eb78-4da9-91cb-13ebf67761fb" ChangeDateTime="09/26/2016 09:34:41">
+    <Property Name="ElementName" Value="[dbo].[AK_tblHDOpportunitySource_strSource]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSource]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCRMSource_strSource]" />
+  </Operation>
 </Operations>

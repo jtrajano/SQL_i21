@@ -66,7 +66,7 @@
 					,proj.dtmCreated
 					,proj.intCustomerId
 					,proj.dtmClose
-					,tblHDOpportunitySource.strSource
+					,[tblCRMSource].strSource
 					,proj.strLinesOfBusiness
 					,proj.strCurrentSolution
 					,proj.strCompetitorEntity
@@ -82,7 +82,7 @@
 					left outer join tblEMEntity con on con.[intEntityId] = proj.intCustomerContactId
 					left outer join tblHDTicketType typ on typ.intTicketTypeId = proj.intTicketTypeId
 					left outer join tblHDSalesPipeStatus pipe on pipe.intSalesPipeStatusId = proj.intSalesPipeStatusId
-					left outer join tblHDOpportunitySource tblHDOpportunitySource on tblHDOpportunitySource.intOpportunitySourceId = proj.intOpportunitySourceId
+					left outer join [tblCRMSource] tblHDOpportunitySource on [tblCRMSource].intOpportunitySourceId = proj.intOpportunitySourceId
 					left outer join tblHDOpportunityCampaign cam on cam.intOpportunityCampaignId = proj.intOpportunityCampaignId
 					left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = proj.intCompanyLocationId
 					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
