@@ -2,6 +2,7 @@
 	[intTypeTaxStateId] [int] NOT NULL,
 	[strState] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCode] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+	[strFIPSCode] [nvarchar](2) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTaxState] PRIMARY KEY ([intTypeTaxStateId]),
 ) ON [PRIMARY]
@@ -46,3 +47,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'FIPS state code',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTaxState',
+    @level2type = N'COLUMN',
+    @level2name = N'strFIPSCode'
