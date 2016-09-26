@@ -1,7 +1,8 @@
 ﻿GO
 PRINT 'START TF TA'
 GO
-	DECLARE @strTaxAuthority NVARCHAR(5)
+DECLARE @strTaxAuthority NVARCHAR(5)
+
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AL')
 		IF @strTaxAuthority IS NULL
@@ -11,7 +12,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'AL'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AL', strDescription = 'Alabama', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'AL'
 		END
 
 
@@ -23,7 +24,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE  strTaxAuthorityCode = 'AK'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AK', strDescription = 'Alaska', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE  strTaxAuthorityCode = 'AK'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AZ')
@@ -34,7 +35,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE  strTaxAuthorityCode = 'AZ'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AZ', strDescription = 'Arizona', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE  strTaxAuthorityCode = 'AZ'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'AR')
@@ -45,7 +46,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'AR'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'AR', strDescription = 'Arkansas', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'AR'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'CA')
@@ -56,7 +57,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'CA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'CA', strDescription = 'California', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'CA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'CO')
@@ -67,7 +68,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'CO'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'CO', strDescription = 'Colorado', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'CO'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'CT')
@@ -78,7 +79,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'CT'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'CT', strDescription = 'Connecticut', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'CT'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'DE')
@@ -89,7 +90,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'DE'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'DE', strDescription = 'Delaware', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'DE'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'FL')
@@ -100,7 +101,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'FL'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'FL', strDescription = 'Florida', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'FL'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'GA')
@@ -111,7 +112,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'GA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'GA', strDescription = 'Georgia', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'GA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'HI')
@@ -122,7 +123,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'HI'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'HI', strDescription = 'Hawaii', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'HI'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'ID')
@@ -133,7 +134,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'ID'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'ID', strDescription = 'Idaho', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'ID'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IL')
@@ -144,7 +145,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IL'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IL', strDescription = 'Illinois', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IL'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IN')
@@ -155,7 +156,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IN'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IN', strDescription = 'Indiana', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'IN'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'IA')
@@ -166,7 +167,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'IA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'IA', strDescription = 'Iowa', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'IA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'KS')
@@ -177,7 +178,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'KS'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'KS', strDescription = 'Kansas', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'KS'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'KY')
@@ -188,7 +189,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'KY'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'KY', strDescription = 'Kentucky', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'KY'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'LA')
@@ -199,7 +200,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'LA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'LA', strDescription = 'Louisiana', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'LA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'ME')
@@ -210,7 +211,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'ME'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'ME', strDescription = 'Maine', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'ME'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MD')
@@ -221,7 +222,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'MD'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'MD', strDescription = 'Maryland', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'MD'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MA')
@@ -232,7 +233,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'MA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'MA', strDescription = 'Massachusetts', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'MA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MI')
@@ -243,7 +244,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MI'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'MI', strDescription = 'Michigan', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MI'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MN')
@@ -254,7 +255,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MN'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'MN', strDescription = 'Minnesota', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MN'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MS')
@@ -265,7 +266,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MS'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'MS', strDescription = 'Mississippi', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MS'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MO')
@@ -276,7 +277,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MO'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'MO', strDescription = 'Missouri', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MO'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MT')
@@ -287,7 +288,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MT'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'MT', strDescription = 'Montana', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'MT'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NE')
@@ -298,7 +299,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'NE'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'NE', strDescription = 'Nebraska', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'NE'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NV')
@@ -309,7 +310,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NV'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'NV', strDescription = 'Nevada', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NV'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NH')
@@ -320,7 +321,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NH'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'NH', strDescription = 'New Hampshire', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NH'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NJ')
@@ -331,7 +332,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NJ'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'NJ', strDescription = 'New Jersey', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NJ'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NM')
@@ -342,7 +343,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NM'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'NM', strDescription = 'New Mexico', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NM'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NY')
@@ -353,7 +354,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NY'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'NY', strDescription = 'New York', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'NY'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NC')
@@ -364,7 +365,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'NC'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'NC', strDescription = 'North Carolina', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'NC'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'ND')
@@ -375,7 +376,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'ND'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'ND', strDescription = 'North Dakota', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'ND'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OH')
@@ -386,7 +387,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'OH'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'OH', strDescription = 'Ohio', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'OH'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OK')
@@ -397,7 +398,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'OK'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'OK', strDescription = 'Oklahoma', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'OK'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OR')
@@ -408,7 +409,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'OR'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'OR', strDescription = 'Oregon', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'OR'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'PA')
@@ -419,7 +420,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'PA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'PA', strDescription = 'Pennsylvania', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'PA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'RI')
@@ -430,7 +431,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'RI'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'RI', strDescription = 'Rhode Island', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'RI'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'SC')
@@ -441,7 +442,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'SC'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'SC', strDescription = 'South Carolina', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'SC'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'SD')
@@ -452,7 +453,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'SD'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'SD', strDescription = 'South Dakota', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'SD'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'TN')
@@ -463,7 +464,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'TN'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'TN', strDescription = 'Tennessee', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'TN'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'TX')
@@ -474,7 +475,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'TX'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'TX', strDescription = 'Texas', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'TX'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'UT')
@@ -485,7 +486,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'UT'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'UT', strDescription = 'Utah', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'UT'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'VT')
@@ -496,7 +497,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'VT'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'VT', strDescription = 'Vermont', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'VT'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'VA')
@@ -507,7 +508,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'VA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'VA', strDescription = 'Virginia', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'TRUE' WHERE strTaxAuthorityCode = 'VA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'WA')
@@ -518,7 +519,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WA'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'WA', strDescription = 'Washington', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WA'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'WV')
@@ -529,7 +530,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WV'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'WV', strDescription = 'West Virginia', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WV'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'WI')
@@ -540,7 +541,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WI'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'WI', strDescription = 'Wisconsin', ysnPaperVersionAvailable = 'FALSE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WI'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'WY')
@@ -551,7 +552,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WY'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'WY', strDescription = 'Wyoming', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'WY'
 		END
 
 		SET @strTaxAuthority = (SELECT TOP 1 strTaxAuthorityCode FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'WY')
@@ -562,7 +563,7 @@ GO
 			END
 		ELSE
 		BEGIN
-			UPDATE tblTFTaxAuthority SET ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'US'
+			UPDATE tblTFTaxAuthority SET strTaxAuthorityCode = 'US', strDescription = 'Federal Government', ysnPaperVersionAvailable = 'TRUE', ysnElectronicVersionAvailable = 'FALSE' WHERE strTaxAuthorityCode = 'US'
 		END
 GO
 PRINT 'END TF TA'
