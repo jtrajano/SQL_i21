@@ -94,7 +94,7 @@
 :r .\10_RPT\1_1430_to_1430.sql
 
 -- IC
-:r .\11_IC\1610_to_1620.sql
+:r .\11_IC\1620_to_1630.sql
 :r .\11_IC\Remove_Duplicate_Feed_Stock_UOM.sql
 :r .\11_IC\01_Delete_Charges_No_Shipment.sql
 

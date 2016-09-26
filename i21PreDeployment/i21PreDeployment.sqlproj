@@ -266,7 +266,7 @@
     <None Include="Scripts\Pre-Deployment\1_TM\8_DropFunctions.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\11_IC\1610_to_1620.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\1620_to_1630.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\19_CleanEntityPhoneNumber.sql" />

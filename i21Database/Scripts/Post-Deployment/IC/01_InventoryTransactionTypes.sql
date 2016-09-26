@@ -120,11 +120,11 @@ USING	(
 				,form = 'Bill'
 		UNION ALL 
 		SELECT	id = 28
-				,name = 'Revalue WIP'
+				,name = 'Revalue Consume'
 				,form = NULL
 		UNION ALL 
 		SELECT	id = 29
-				,name = 'Revalue Produced'
+				,name = 'Revalue Produce'
 				,form = NULL
 		UNION ALL 
 		SELECT	id = 30
