@@ -15,8 +15,6 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 -- Declare the variables.
 DECLARE  @dtmDateTo					AS DATETIME
 		,@dtmDateFrom				AS DATETIME
-		,@dtmDateToAging			AS DATETIME
-		,@dtmStartOfMonth			AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
 		,@xmlDocumentId				AS INT
@@ -47,6 +45,27 @@ DECLARE @temp_xml_table TABLE (
 )
 
 DECLARE @temp_aging_table TABLE(
+     [strCustomerName]          NVARCHAR(100)
+    ,[strEntityNo]              NVARCHAR(100)
+    ,[intEntityCustomerId]      INT
+    ,[dblCreditLimit]			NUMERIC(18,6)
+    ,[dblTotalAR]               NUMERIC(18,6)
+    ,[dblFuture]                NUMERIC(18,6)
+    ,[dbl0Days]                 NUMERIC(18,6)
+    ,[dbl10Days]                NUMERIC(18,6)
+    ,[dbl30Days]                NUMERIC(18,6)
+    ,[dbl60Days]                NUMERIC(18,6)
+    ,[dbl90Days]                NUMERIC(18,6)
+    ,[dbl91Days]                NUMERIC(18,6)
+    ,[dblTotalDue]              NUMERIC(18,6)
+    ,[dblAmountPaid]            NUMERIC(18,6)
+    ,[dblCredits]               NUMERIC(18,6)
+    ,[dblPrepaids]              NUMERIC(18,6)
+    ,[dtmAsOfDate]              DATETIME
+    ,[strSalespersonName]		NVARCHAR(100)
+)
+
+DECLARE @temp_balanceforward_table TABLE(
      [strCustomerName]          NVARCHAR(100)
     ,[strEntityNo]              NVARCHAR(100)
     ,[intEntityCustomerId]      INT
@@ -148,25 +167,11 @@ BEGIN
 	END
 END
 
-IF (ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME)) = CAST(-53690 AS DATETIME)) OR (CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(CAST('01/01/1900' AS DATETIME) AS FLOAT)) AS DATETIME))
-	BEGIN
-		IF (ISNULL(@dtmDateTo, CAST(-53690 AS DATETIME)) = CAST(-53690 AS DATETIME))
-			SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
-
-		SET @dtmStartOfMonth = DATEADD(MONTH, DATEDIFF(MONTH, 0, @dtmDateTo), 0)
-		SET @dtmDateToAging = DATEADD(DAY, -1, @dtmStartOfMonth)		
-	END
-ELSE
-	BEGIN
-		IF (ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME)) = CAST(-53690 AS DATETIME))
-			SET @dtmDateFrom = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
-
-		SET @dtmStartOfMonth = DATEADD(MONTH, DATEDIFF(MONTH, 0, @dtmDateFrom), 0)
-		SET @dtmDateToAging = DATEADD(DAY, -1, @dtmStartOfMonth)
-	END
-
 INSERT INTO @temp_aging_table
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateToAging
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateTo
+
+INSERT INTO @temp_balanceforward_table
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] NULL, @dtmDateFrom
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 (SELECT intEntityCustomerId	= C.intEntityCustomerId
@@ -215,11 +220,35 @@ FROM vyuARCustomer C
 
 IF ISNULL(@filter,'') != ''
 BEGIN
-	SET @query = @query + ' WHERE dblBalance IS NOT NULL AND ' + @filter
+	SET @query = @query + ' WHERE ' + @filter
 END
 
 INSERT INTO @temp_statement_table
 EXEC sp_executesql @query
+
+INSERT INTO @temp_statement_table(
+	  intEntityCustomerId
+	, strCustomerName
+	, strCustomerNumber
+	, strTransactionType
+	, dblCreditLimit
+	, dtmDate
+	, intInvoiceId
+	, dblBalance
+	, dblPayment
+)
+SELECT
+	  B.intEntityCustomerId
+	, B.strCustomerName
+	, B.strEntityNo
+	, 'Balance Forward'
+	, B.dblCreditLimit
+	, @dtmDateFrom
+	, 0
+	, B.dblTotalAR
+	, 0
+FROM @temp_balanceforward_table B
+	WHERE B.intEntityCustomerId IN (SELECT DISTINCT intEntityCustomerId FROM @temp_statement_table)
 
 SELECT STATEMENTREPORT.*
 	  ,dblTotalAR			= ISNULL(AGINGREPORT.dblTotalAR, 0)
@@ -231,9 +260,9 @@ SELECT STATEMENTREPORT.*
       ,dbl90Days            = ISNULL(AGINGREPORT.dbl90Days, 0)
       ,dbl91Days            = ISNULL(AGINGREPORT.dbl91Days, 0)
       ,dblCredits           = ISNULL(AGINGREPORT.dblCredits, 0)
-      ,dtmAsOfDate          = @dtmDateToAging
+      ,dtmAsOfDate          = @dtmDateTo
       ,blbLogo              = dbo.fnSMGetCompanyLogo('Header')
 FROM @temp_statement_table AS STATEMENTREPORT
-LEFT JOIN @temp_aging_table AS AGINGREPORT 
+LEFT JOIN @temp_aging_table AS AGINGREPORT
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
-WHERE ISNULL(dblTotalAR, 0) <> 0
+WHERE ISNULL(AGINGREPORT.dblTotalAR, 0) <> 0
