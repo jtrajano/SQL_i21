@@ -4333,6 +4333,8 @@
     <Build Include="dbo\Stored Procedures\uspMFCreatePickListForProduction.sql" />
     <Build Include="dbo\Views\vyuPRElectronicFilingW2Detail.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunity.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateDividend.sql" />
+    <Build Include="dbo\Views\vyuPATCalculateCustomerDividend.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
