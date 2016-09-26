@@ -22,6 +22,7 @@
 	[strTaxPayerIdentificationNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxPayerFEIN] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxPayerDBA] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strMotorCarrier] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strLicenseNumber] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strEmail] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[strFEINSSN] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
