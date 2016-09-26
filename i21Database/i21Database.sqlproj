@@ -4378,6 +4378,7 @@
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
     <Build Include="dbo\Functions\fnARSplitValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateSF401.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
