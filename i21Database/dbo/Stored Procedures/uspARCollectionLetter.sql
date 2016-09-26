@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCollectionLetter]  
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
+
 BEGIN
 	DECLARE @idoc						INT
 			, @strCustomerIds			NVARCHAR(MAX)		
@@ -24,7 +25,7 @@ BEGIN
 				, [join]			NVARCHAR(10) COLLATE Latin1_General_CI_AS
 				, [begingroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				, [endgroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				, [datatype]		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				, [datatype]		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 				) 
 	INSERT INTO 
 		@temp_params
@@ -87,6 +88,7 @@ BEGIN
 		, strPlaceHolderDescription	NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strSourceTable	NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, ysnTable			INT
+		, strDataType		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	);
 				
  	DECLARE @SelectedCustomer TABLE  (
@@ -133,6 +135,7 @@ BEGIN
 		, strPlaceHolderDescription
 		, strSourceTable
 		, ysnTable
+		, strDataType
 	)			
 	SELECT 
 		intPlaceHolderId
@@ -141,6 +144,7 @@ BEGIN
 		,strPlaceHolderDescription
 		, strSourceTable
 		, ysnTable
+		, strDataType
 	FROM 
 		tblARLetterPlaceHolder 
 	WHERE 
@@ -153,25 +157,27 @@ BEGIN
 						
 		WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
 		BEGIN
-			DECLARE @PlaceHolderId	INT
-					,@PlaceHolder	VARCHAR(MAX)
-					,@SourceColumn	VARCHAR(MAX)
+			DECLARE @PlaceHolderId				INT
+					,@PlaceHolder				VARCHAR(MAX)
+					,@SourceColumn				VARCHAR(MAX)
 					,@PlaceHolderDescription	VARCHAR(MAX)
-					,@SourceTable	VARCHAR(MAX)
-					,@Table			BIT
-					,@PlaceHolderValue	VARCHAR(MAX)
+					,@SourceTable				VARCHAR(MAX)
+					,@Table						BIT
+					,@PlaceHolderValue			VARCHAR(MAX)
+					,@DataType					NVARCHAR(100)
 
 			SELECT TOP 1 
-					@PlaceHolderId = [intPlaceHolderId]
-				,@PlaceHolder	= [strPlaceHolder]
-				,@SourceColumn	= [strSourceColumn]
+				@PlaceHolderId				= [intPlaceHolderId]
+				,@PlaceHolder				= [strPlaceHolder]
+				,@SourceColumn				= [strSourceColumn]
 				,@PlaceHolderDescription	= [strPlaceHolderDescription]
-				,@SourceTable	= [strSourceTable]
-				,@Table			= [ysnTable]
+				,@SourceTable				= [strSourceTable]
+				,@Table						= [ysnTable]
+				,@DataType					= [strDataType]
 			FROM
 				@SelectedPlaceHolderTable 
-			ORDER BY [intPlaceHolderId]
-				
+			ORDER BY [intPlaceHolderId]				
+		 
 			IF @Table = 0
 			BEGIN
 				DECLARE @PHQuery		VARCHAR(MAX)
@@ -207,8 +213,7 @@ BEGIN
 				INTO 
 					#TempTableColumnHeaders
 				FROM 
-					fnARGetRowsFromDelimitedValues(@PlaceHolderDescription)
-											
+					fnARGetRowsFromDelimitedValues(@PlaceHolderDescription)											
 
 				SET @HTMLTable = '<table  id="t01" style="width:100%" border="1"><tbody><tr>'
 
@@ -236,13 +241,25 @@ BEGIN
 
 				IF OBJECT_ID('tempdb..#TempTableColumns') IS NOT NULL DROP TABLE #TempTableColumns
 				SELECT 
-					RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
+					RowId			= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
 					,strValues 
+					,strDataType	= @DataType
 				INTO 
 					#TempTableColumns
 				FROM 
 					fnARGetRowsFromDelimitedValues(@SourceColumn)
 
+				IF OBJECT_ID('tempdb..#TempDataType') IS NOT NULL DROP TABLE #TempDataType
+				SELECT RowId	= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))			
+						, * 
+				INTO  
+					#TempDataType 
+				FROM dbo.fnARSplitValues(@DataType, ',')			
+
+				UPDATE #TempTableColumns SET strDataType = TDT.strDataType
+				FROM #TempDataType TDT
+				INNER JOIN #TempTableColumns  TDC ON TDT.RowId = TDC.RowId				 
+				
 				DECLARE @Declaration	VARCHAR(MAX)
 						,@Select		VARCHAR(MAX)
 				SET @Declaration = ''
@@ -261,7 +278,7 @@ BEGIN
 						RowId = @ColumnCounter
 							
 					SET @Declaration = @Declaration + '@' + @Colunm + ' AS NVARCHAR(200)'  + (CASE WHEN @ColumnCount = @ColumnCounter THEN '' ELSE ',' END)
-					SET @Select = @Select + '@' + @Colunm + '= CONVERT(NVARCHAR(200), ' + @Colunm + ')'  + (CASE WHEN @ColumnCount = @ColumnCounter THEN '' ELSE ',' END)
+					SET @Select = @Select + '@' + @Colunm + '= CONVERT(NVARCHAR(200), ' + @Colunm + ')'  + (CASE WHEN @ColumnCount = @ColumnCounter THEN '' ELSE ',' END)					 
 					SET @ColumnCounter = @ColumnCounter + 1
 				END
 						
@@ -270,8 +287,10 @@ BEGIN
 					strTableBody VARCHAR(MAX)
 				)
 
-				INSERT INTO #TempTable
-				SELECT @HTMLTable					 
+				INSERT INTO 
+					#TempTable
+				SELECT 
+					@HTMLTable					 
 
 				SET @PHQueryTable = '
 				DECLARE @HTMLTableValue NVARCHAR(MAX)
@@ -279,8 +298,8 @@ BEGIN
 				SELECT RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL)), ' + @SourceColumn + ' INTO #Records
 				FROM ' + @SourceTable + ' 
 				WHERE [intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
-				+ ' 
-
+				+ ' 			
+												
 				DECLARE @HTMLTableRows VARCHAR(MAX)
 				SET @HTMLTableRows = ''''
 
@@ -301,38 +320,69 @@ BEGIN
 					DECLARE @ColumnCounter1		INT
 							,@ColumnCount1		INT
 					SET @ColumnCounter1 = 1
-					SELECT @ColumnCount1 = COUNT(RowId) FROM #TempTableColumns
+					SELECT 
+						@ColumnCount1 = COUNT(RowId) 
+					FROM 
+						#TempTableColumns
 				 
 					WHILE (@ColumnCount1 >=  @ColumnCounter1)
 					BEGIN
 						DECLARE @Colunm1 VARCHAR(MAX)
+							 ,@DataType1 VARCHAR(MAX)
 
-						SELECT TOP 1
-							@Colunm1 = strValues
+						SELECT TOP 1						 
+							@Colunm1 = strValues	
+							, @DataType1 = strDataType 				
 						FROM
 							#TempTableColumns
 						WHERE
-							RowId = @ColumnCounter1
+							RowId = @ColumnCounter1		
 
 						DECLARE @SetQuery VARCHAR(MAX)
 						
 						IF OBJECT_ID(''tempdb..#Field'') IS NOT NULL DROP TABLE #Field
 						CREATE TABLE #Field(
-						strField VARCHAR(MAX)
-						)
-
-						SET @SetQuery = ''INSERT INTO #Field SELECT '' + @Colunm1 +  '' FROM #Records WHERE RowId = '' + CAST(@RowId AS NVARCHAR(100)) 
+							strDataType		VARCHAR(MAX), 
+							strField		VARCHAR(MAX)
+						)						
 						
-						EXEC sp_sqlexec @SetQuery
-							
-						SET @HTMLTableRows = @HTMLTableRows + ''<td>'' + (SELECT TOP 1 strField FROM #Field) + ''</td>''
+						SET @SetQuery = ''INSERT INTO #Field (strDataType, strField) 
+						SELECT   
+							'''''' +  @DataType1 + '''''' ,
+							'' +  @Colunm1 + '' 
+						FROM 
+							#Records 
+						WHERE 
+							RowId = '' + CAST(@RowId AS NVARCHAR(100)) 		
+
+						EXEC sp_sqlexec @SetQuery	
+
+						 					UPDATE 
+												#Field 
+											SET strField = 
+												CASE WHEN strDataType = ''datetime'' 
+													THEN CAST(month(strField) AS VARCHAR(2)) + ''/'' + CAST(day(strField) AS VARCHAR(2)) + ''/'' + CAST(year(strField) AS VARCHAR(4)) 
+												ELSE strField END
+
+						 					UPDATE 
+												#Field 
+											SET 
+												strField = CONVERT(DECIMAL(10,2), (CONVERT(VARCHAR(200), strField)))
+											WHERE 
+												ISNUMERIC(strField) = 1						
+												
+						SET @HTMLTableRows = @HTMLTableRows + ''<td>'' + (SELECT TOP 1 strField FROM #Field) + ''</td>''																									
 
 						SET @ColumnCounter1 = @ColumnCounter1 + 1
 					END
 
 					SET @HTMLTableRows = @HTMLTableRows + ''</tr>''
 						
-					DELETE FROM #Records WHERE RowId = @RowId
+					DELETE 
+					FROM 
+						#Records 
+					WHERE 
+						RowId = @RowId
 				END
 
 				UPDATE #TempTable
@@ -353,17 +403,47 @@ BEGIN
 										,[intEntityCustomerId]	= ' + CAST(@CustomerId AS VARCHAR(200)) + '
 										,[strValue]				= ''' +  (SELECT TOP 1 strTableBody FROM #TempTable) 	  + ''''
  
-
+ 
 				EXEC sp_sqlexec @InsertQueryTable 	
 			END
 				
-			DELETE FROM @SelectedPlaceHolderTable WHERE  [intPlaceHolderId] = @PlaceHolderId
+			DELETE 
+			FROM 
+				@SelectedPlaceHolderTable 
+			WHERE
+				[intPlaceHolderId] = @PlaceHolderId
 		END
 
-		DELETE FROM @SelectedCustomer WHERE intEntityCustomerId = @CustomerId 
+		DELETE 
+		FROM 
+			@SelectedCustomer 
+		WHERE 
+			intEntityCustomerId = @CustomerId 
+
+		INSERT INTO @SelectedPlaceHolderTable
+		(
+			intPlaceHolderId
+			, strPlaceHolder
+			, strSourceColumn 
+			, strPlaceHolderDescription
+			, strSourceTable
+			, ysnTable
+			, strDataType
+		)			
+		SELECT 
+			intPlaceHolderId
+			, strPlaceHolder
+			, strSourceColumn
+			,strPlaceHolderDescription
+			, strSourceTable
+			, ysnTable
+			, strDataType
+		FROM 
+			tblARLetterPlaceHolder 
+		WHERE 
+			CHARINDEX ( dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML) ) <> 0
 	END
-
-
+	
 	DECLARE @PlaceHolderTable AS PlaceHolderTable
 
 	INSERT INTO @PlaceHolderTable(
@@ -373,7 +453,7 @@ BEGIN
 		,strPlaceValue
 	)
 	SELECT
-			intPlaceHolderId		= [intPlaceHolderId]
+		intPlaceHolderId		= [intPlaceHolderId]
 		,strPlaceHolder			= [strPlaceHolder]
 		,intEntityCustomerId	= [intEntityCustomerId]
 		,strPlaceValue			= [strValue]
@@ -386,9 +466,20 @@ BEGIN
 		* 
 	FROM 
 		fnGetRowsFromDelimitedValues(@strCustomerIds)
+
 	SELECT
 		SC.*
-		,blbMessage = dbo.[fnARConvertLetterMessage](@strMessage, @PlaceHolderTable)
+		, blbMessage			= dbo.[fnARConvertLetterMessage](@strMessage, SC.intEntityCustomerId , @PlaceHolderTable)
+		, strCompanyAddress		= (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, strCompanyName, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) FROM tblSMCompanySetup)
+		, strCompanyPhone		= (SELECT TOP 1 strPhone FROM tblSMCompanySetup)
+		, strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, Cus.strName, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, NULL, NULL)
+		, strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = SC.intEntityCustomerId)
 	FROM
 		@SelectedCustomer SC
+	INNER JOIN 
+		(SELECT 
+			intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId, strName
+		FROM 
+			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
+
 END

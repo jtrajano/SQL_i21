@@ -16,7 +16,7 @@ BEGIN
 	BEGIN
 		DECLARE @char INT
 		SET @char = ASCII(SUBSTRING(@data, @charounter, 1))
-		IF @char BETWEEN 33 AND 127 
+		IF @char BETWEEN 32 AND 127 
 			SET @result = @result + CHAR(@char)
 			SET @charounter = @charounter + 1
 	END

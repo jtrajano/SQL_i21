@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnARConvertLetterMessage]
 (
 	@LetterMessage			VARCHAR(MAX)
+	,@CustomerId			INT
 	,@PlaceHolderTable		PlaceHolderTable	READONLY
 )
 RETURNS VARBINARY(MAX)
@@ -22,6 +23,7 @@ DECLARE @TempPlaceHolderTable TABLE  (
 
 INSERT INTO @TempPlaceHolderTable
 SELECT * FROM @PlaceHolderTable
+WHERE intEntityCustomerId = @CustomerId
 
 SET @newHTMLMessage = @LetterMessage
 
