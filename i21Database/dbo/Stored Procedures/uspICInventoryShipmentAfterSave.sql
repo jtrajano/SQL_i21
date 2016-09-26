@@ -50,6 +50,20 @@ BEGIN
 			LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 		WHERE ShipmentItem.intInventoryShipmentId = @ShipmentId
 
+		-- If For Delete and has invoice, show error message
+		DECLARE @InvoiceNo VARCHAR(50)
+		SELECT @InvoiceNo = i.strInvoiceNumber
+		FROM tblARInvoiceDetail d
+			INNER JOIN tblARInvoice i ON i.intInvoiceId = d.intInvoiceId
+			INNER JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentItemId = d.intInventoryShipmentItemId
+		WHERE si.intInventoryShipmentId = @ShipmentId
+
+		IF @InvoiceNo IS NOT NULL
+		BEGIN
+			RAISERROR(80092, 11, 1, @InvoiceNo)
+			GOTO Post_Exit;
+		END
+
 		-- Create snapshot of Shipment Items before Save
 		SELECT 
 			intInventoryShipmentId = intTransactionId,
@@ -294,3 +308,4 @@ BEGIN
 
 END
 
+Post_Exit:
