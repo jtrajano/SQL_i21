@@ -382,9 +382,8 @@ BEGIN
 		,@ItemPerformerId				= (CASE WHEN @GroupingOption = 0 THEN [intPerformerId] ELSE NULL END)
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
-		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE 0 END)
-		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE 0 END)
-		,@ItemSubCurrencyRate			= (CASE WHEN @GroupingOption = 0 THEN [dblSubCurrencyRate] ELSE 0 END)
+		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE NULL END)
+		,@ItemSubCurrencyRate			= (CASE WHEN @GroupingOption = 0 THEN [dblSubCurrencyRate] ELSE 1 END)
 		,@ItemIsBlended					= [ysnBlended]
 		,@ItemConversionAccountId		= (CASE WHEN @GroupingOption = 0 THEN [intConversionAccountId] ELSE NULL END)
 		,@StorageScheduleTypeId			= [intStorageScheduleTypeId]
@@ -1809,7 +1808,7 @@ END CATCH
 
 --Re-Compute
 BEGIN TRY
-	WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnRecomputed],0) = 0 AND ISNULL([ysnProcessed],0) = 1 AND ISNULL([intInvoiceId],0) <> 0 AND ISNULL([intInvoiceId],0) = 0)
+	WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnRecomputed],0) = 0 AND ISNULL([ysnProcessed],0) = 1 AND ISNULL([intInvoiceId],0) <> 0)
 	BEGIN
 		SELECT TOP 1 @InvoiceId = [intInvoiceId], @Id = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnRecomputed],0) = 0 AND ISNULL([ysnProcessed],0) = 1 AND ISNULL([intInvoiceId],0) <> 0 ORDER BY [intId]
 		SELECT TOP 1 @RecomputeTax = ISNULL([ysnRecomputeTax],0), @UpdateAvailableDiscount = ISNULL([ysnUpdateAvailableDiscount],0) FROM @InvoiceEntries WHERE [intId] = @Id 
