@@ -4332,6 +4332,7 @@
     <Build Include="dbo\Stored Procedures\uspMFTransferPickListForProduction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickListForProduction.sql" />
     <Build Include="dbo\Views\vyuPRElectronicFilingW2Detail.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
