@@ -5656,4 +5656,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intTypeId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0e7f823e-029b-4e5c-9d5a-f42262e0aae6" ChangeDateTime="09/26/2016 09:49:03">
+    <Property Name="ElementName" Value="[dbo].[tblHDSalesPipeStatus]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMSalesPipeStatus]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0abd88ef-7795-440d-bc38-07bf7c598187" ChangeDateTime="09/26/2016 09:50:14">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDSalesPipeStatus]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSalesPipeStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCRMSalesPipeStatus_intSalesPipeStatusId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="63a82870-74cf-468e-847d-1d0cb8765cb2" ChangeDateTime="09/26/2016 09:51:08">
+    <Property Name="ElementName" Value="[dbo].[UNQ_tblHDSalesPipeStatus]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSalesPipeStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCRMSalesPipeStatus_strStatus]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="389cf6ee-4f6e-42fd-a5d2-2c51b004ad09" ChangeDateTime="09/26/2016 09:51:57">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDSalesPipeStatus_tblHDTicketStatus]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSalesPipeStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMSalesPipeStatus_tblCRMStatus_intStatusId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6e41e93e-e69a-4ac1-bfe0-f4ad94ea2408" ChangeDateTime="09/26/2016 09:52:22">
+    <Property Name="ElementName" Value="[dbo].[tblCRMSalesPipeStatus].[intTicketStatusId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSalesPipeStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStatusId" />
+  </Operation>
 </Operations>

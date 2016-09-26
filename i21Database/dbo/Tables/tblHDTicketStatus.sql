@@ -114,7 +114,7 @@ CREATE TRIGGER [dbo].[trgHDTicketStatus]
 
 			update tblHDProject set tblHDProject.strProjectStatus = @newStatus where tblHDProject.intTicketStatusId = @newTicketStatusId;
 
-			update tblHDSalesPipeStatus set tblHDSalesPipeStatus.strProjectStatus = @newStatus where tblHDSalesPipeStatus.intTicketStatusId = @newTicketStatusId;
+			update [tblCRMSalesPipeStatus] set [tblCRMSalesPipeStatus].strProjectStatus = @newStatus where [tblCRMSalesPipeStatus].intTicketStatusId = @newTicketStatusId;
 			
 
 		end try

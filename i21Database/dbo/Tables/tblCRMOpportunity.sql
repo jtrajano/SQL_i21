@@ -66,7 +66,7 @@
 	CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intInternalSalesPerson] FOREIGN KEY ([intInternalSalesPerson]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerProjectManager] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerLeadershipSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblCRMSalesPipeStatus_intSalesPipeStatusId] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblHDSalesPipeStatus] ([intSalesPipeStatusId]),
+	CONSTRAINT [FK_tblCRMOpportunity_tblCRMSalesPipeStatus_intSalesPipeStatusId] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblCRMSalesPipeStatus] ([intSalesPipeStatusId]),
 	CONSTRAINT [FK_tblCRMOpportunity_tblCRMStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [dbo].[tblCRMStatus] ([intStatusId]),
 	CONSTRAINT [FK_tblCRMOpportunity_tblCRMCampaign_intCampaignId] FOREIGN KEY ([intCampaignId]) REFERENCES [dbo].[tblCRMCampaign] ([intCampaignId]),
 	CONSTRAINT [FK_tblCRMOpportunity_tblCRMSource_intSourceId] FOREIGN KEY (intSourceId) REFERENCES [dbo].[tblCRMSource] ([intSourceId]),

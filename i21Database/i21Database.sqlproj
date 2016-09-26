@@ -3152,7 +3152,7 @@
     <Build Include="dbo\Tables\tblHDProjectContactInfo.sql" />
     <Build Include="dbo\Views\vyuHDProjectContactInfo.sql" />
     <Build Include="dbo\Views\vyuHDProjectCustomerContact.sql" />
-    <Build Include="dbo\Tables\tblHDSalesPipeStatus.sql" />
+    <Build Include="dbo\Tables\tblCRMSalesPipeStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostRefund.sql" />
     <Build Include="dbo\Views\vyuSMAccountDetail.sql" />
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />

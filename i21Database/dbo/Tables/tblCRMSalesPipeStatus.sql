@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblHDSalesPipeStatus]
+﻿CREATE TABLE [dbo].[tblCRMSalesPipeStatus]
 (
 	[intSalesPipeStatusId] [int] IDENTITY(1,1) NOT NULL,
 	[strStatus] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -6,11 +6,11 @@
 	[strOrder] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strProjectStatus] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[dblProbability] NUMERIC(18, 6) NULL,
-	[intTicketStatusId] [int] NULL,
+	[intStatusId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
- CONSTRAINT [PK_tblHDSalesPipeStatus] PRIMARY KEY CLUSTERED ([intSalesPipeStatusId] ASC),
- CONSTRAINT [UNQ_tblHDSalesPipeStatus] UNIQUE ([strStatus]),
- CONSTRAINT [FK_tblHDSalesPipeStatus_tblHDTicketStatus] FOREIGN KEY ([intTicketStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId])
+ CONSTRAINT [PK_tblCRMSalesPipeStatus_intSalesPipeStatusId] PRIMARY KEY CLUSTERED ([intSalesPipeStatusId] ASC),
+ CONSTRAINT [UQ_tblCRMSalesPipeStatus_strStatus] UNIQUE ([strStatus]),
+ CONSTRAINT [FK_tblCRMSalesPipeStatus_tblCRMStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [dbo].[tblCRMStatus] ([intStatusId])
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -18,7 +18,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDSalesPipeStatus',
+    @level1name = N'tblCRMSalesPipeStatus',
     @level2type = N'COLUMN',
     @level2name = N'intSalesPipeStatusId'
 GO
@@ -27,7 +27,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDSalesPipeStatus',
+    @level1name = N'tblCRMSalesPipeStatus',
     @level2type = N'COLUMN',
     @level2name = N'strStatus'
 GO
@@ -36,7 +36,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDSalesPipeStatus',
+    @level1name = N'tblCRMSalesPipeStatus',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
 GO
@@ -45,7 +45,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDSalesPipeStatus',
+    @level1name = N'tblCRMSalesPipeStatus',
     @level2type = N'COLUMN',
     @level2name = N'strOrder'
 GO
@@ -54,7 +54,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDSalesPipeStatus',
+    @level1name = N'tblCRMSalesPipeStatus',
     @level2type = N'COLUMN',
     @level2name = N'dblProbability'
 GO
@@ -63,6 +63,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDSalesPipeStatus',
+    @level1name = N'tblCRMSalesPipeStatus',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
