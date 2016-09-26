@@ -17,13 +17,13 @@ BEGIN
 	SELECT	@intCleanCostUOMId	= intCleanCostUOMId 
 	FROM	tblCTCompanyPreference
 	
-	SELECT	@dblUncleanWeight = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,UM.intUnitMeasureId, 3, RI.dblNet))
+	SELECT	@dblUncleanWeight = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,UM.intUnitMeasureId, @intCleanCostUOMId, RI.dblNet))
 			
 	FROM	tblICInventoryReceiptItem		RI  
 	JOIN	tblICItemUOM					UM ON UM.intItemUOMId				=	RI.intWeightUOMId  
 	WHERE	RI.intInventoryReceiptId = @intInventoryReceiptId
 
-	SELECT	@dblCleanWeight = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,UM.intUnitMeasureId, 3, ISNULL(IL.dblGrossWeight,0) - ISNULL(dblTareWeight,0)))  
+	SELECT	@dblCleanWeight = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(RI.intItemId,UM.intUnitMeasureId, @intCleanCostUOMId, ISNULL(IL.dblGrossWeight,0) - ISNULL(dblTareWeight,0)))  
 	
 	FROM	tblICInventoryReceiptItem		RI  
 	JOIN	tblICInventoryReceiptItemLot	IL ON IL.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
