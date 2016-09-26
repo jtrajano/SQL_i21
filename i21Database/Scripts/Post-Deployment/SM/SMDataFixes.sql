@@ -178,3 +178,7 @@ GO
 		VALUES('System Manager', 'Arrange User Role Menus - Role Menu', 'Arrange User Role Menus - Role Menu', GETDATE())
 	END
 GO
+	/* REPLACE ActivityEmail-1 TO 1 */
+	UPDATE tblSMTransaction SET strRecordNo = '0'
+	WHERE strRecordNo = 'ActivityEmail-1'
+GO
