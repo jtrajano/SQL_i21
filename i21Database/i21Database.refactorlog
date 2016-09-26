@@ -5544,4 +5544,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblCRMCampaignEntity_tblCTContractHeader]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="311c3fe1-6500-47b5-b424-501d7670d65d" ChangeDateTime="09/26/2016 09:16:41">
+    <Property Name="ElementName" Value="[dbo].[tblHDCampainStatus]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMCampainStatus]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ff741d93-8fb1-4a71-8311-fa3eff342c6c" ChangeDateTime="09/26/2016 09:17:16">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDCampainStatus]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampainStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblRMCampainStatus]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9c3ecfec-350c-4bda-9e5c-9cb7c1ae3fc0" ChangeDateTime="09/26/2016 09:17:53">
+    <Property Name="ElementName" Value="[dbo].[UQ_tblHDCampainStatus_strStatus]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampainStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCRMCampainStatus_strStatus]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7e903fb6-6933-4bb8-952f-cb9f869ae0d1" ChangeDateTime="09/26/2016 09:18:25">
+    <Property Name="ElementName" Value="[dbo].[PK_tblRMCampainStatus]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampainStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCRMCampainStatus]" />
+  </Operation>
 </Operations>

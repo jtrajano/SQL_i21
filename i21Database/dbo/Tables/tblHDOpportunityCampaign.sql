@@ -22,7 +22,7 @@
 	CONSTRAINT [PK_tblHDOpportunityCampaign] PRIMARY KEY CLUSTERED ([intOpportunityCampaignId] ASC),
 	CONSTRAINT [UQ_tblHDOpportunityCampaign] UNIQUE ([strCampaignName]),
 	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDTicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
-	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDCampaignStatus] FOREIGN KEY (intCampaignStatusId) REFERENCES [dbo].[tblHDCampainStatus] (intCampaignStatusId),
+	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDCampaignStatus] FOREIGN KEY (intCampaignStatusId) REFERENCES [dbo].[tblCRMCampainStatus] (intCampaignStatusId),
 	CONSTRAINT [FK_tblHDOpportunityCampaign_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
