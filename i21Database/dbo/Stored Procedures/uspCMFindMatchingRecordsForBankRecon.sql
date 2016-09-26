@@ -98,7 +98,7 @@ WHERE	 A.intBankAccountId = @intBankAccountId
 		AND A.ysnPosted = 1
 		AND A.ysnCheckVoid = 0
 		AND A.ysnClr = 0
-		AND A.dtmDate <= @dtmStatementDate
+		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= @dtmStatementDate
 		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
 					SELECT strLink FROM [dbo].[fnGetDepositEntry]()
 			)
@@ -192,7 +192,7 @@ BEGIN
 				--		END 
 							 --WITHDRAWAL ENTRY
 				AND 1 = CASE WHEN @dblAmount < 0 AND A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@BANK_TRANSACTION,@ORIGIN_WITHDRAWAL, @BANK_TRANSFER_WD,  @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)THEN
-							CASE WHEN A.intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK) AND ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 --Bank Transfer WD has a (+) value so need to make it absolute
+							CASE WHEN A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @BANK_TRANSACTION, @BANK_TRANSFER_WD, @MISC_CHECKS, @ORIGIN_CHECKS, @ORIGIN_EFT,  @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK) AND ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 --Bank Transfer WD has a (+) value so need to make it absolute
 								 WHEN A.dblAmount = @dblAmount THEN 1 
 								 ELSE 0 END
 							--DEPOSIT ENTRY
