@@ -5509,4 +5509,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strSummaryGuid" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e8c12d26-6801-4bbc-999f-78581d3de211" ChangeDateTime="09/26/2016 08:58:16">
+    <Property Name="ElementName" Value="[dbo].[tblHDCampaignCompetitor]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMCampaignCompetitor]" />
+  </Operation>
 </Operations>

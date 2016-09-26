@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblHDCampaignCompetitor]
+﻿CREATE TABLE [dbo].[tblCRMCampaignCompetitor]
 (
 	[intCampaignCompetitorId] [int] IDENTITY(1,1) NOT NULL,
 	[intOpportunityCampaignId] [int] NOT NULL,
@@ -16,7 +16,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDCampaignCompetitor',
+    @level1name = N'tblCRMCampaignCompetitor',
     @level2type = N'COLUMN',
     @level2name = N'intCampaignCompetitorId'
 GO
@@ -25,7 +25,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDCampaignCompetitor',
+    @level1name = N'tblCRMCampaignCompetitor',
     @level2type = N'COLUMN',
     @level2name = N'intOpportunityCampaignId'
 GO
@@ -34,7 +34,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDCampaignCompetitor',
+    @level1name = N'tblCRMCampaignCompetitor',
     @level2type = N'COLUMN',
     @level2name = N'intEntityId'
 GO
@@ -43,6 +43,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDCampaignCompetitor',
+    @level1name = N'tblCRMCampaignCompetitor',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
