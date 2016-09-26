@@ -356,7 +356,7 @@ DECLARE @tblTempTransaction TABLE (
                          tblEMEntity AS tblEMEntity_1 ON tblICInventoryTransfer.intEntityId = tblEMEntity_1.intEntityId CROSS JOIN
                          tblSMCompanySetup
 					WHERE (tblTFReportingComponent.intReportingComponentId IN (' + @RCId + ')) 
-					AND (tblICInventoryTransfer.intSourceType = 3) 
+					AND (tblSMCompanyLocation.ysnTrackMFTActivity = 1)
 					AND (tblICInventoryTransfer.dtmTransferDate BETWEEN ''' + @DateFrom + ''' AND ''' + @DateTo + ''')
 					AND (tblICInventoryTransfer.ysnPosted = 1)'
 
