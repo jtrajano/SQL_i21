@@ -5593,4 +5593,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intWinLossReasonId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3a8f3e50-6725-445a-8b05-d09b969cdc00" ChangeDateTime="09/26/2016 09:29:18">
+    <Property Name="ElementName" Value="[dbo].[tblHDCrmSetting]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMSetting]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ec2cb457-edb1-4306-82c7-990187ebae41" ChangeDateTime="09/26/2016 09:29:51">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDCrmSettings]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMSetting]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCRMSettings]" />
+  </Operation>
 </Operations>
