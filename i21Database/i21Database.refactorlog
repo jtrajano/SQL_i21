@@ -5516,4 +5516,32 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblCRMCampaignCompetitor]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1e67c2da-dad3-47de-934b-ef0c56c93993" ChangeDateTime="09/26/2016 09:11:25">
+    <Property Name="ElementName" Value="[dbo].[tblHDCampaignEntity]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMCampaignEntity]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dd130c84-c858-4492-9f7a-d9802a57ca2c" ChangeDateTime="09/26/2016 09:13:13">
+    <Property Name="ElementName" Value="[dbo].[UQ_tblHDCampaignEntity_intOpportunityCampaignId_intEntityCustomerId]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignEntity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCRMCampaignEntity_intOpportunityCampaignId_intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3ba1e712-656b-4304-9369-8c210122880a" ChangeDateTime="09/26/2016 09:13:47">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDCampaignEntity_tblHDProject]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignEntity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMCampaignEntity_tblHDProject]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d0642e8f-f33f-43cc-8aad-148297266def" ChangeDateTime="09/26/2016 09:14:34">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDCampaignEntity_tblCTContractHeader]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignEntity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMCampaignEntity_tblCTContractHeader]" />
+  </Operation>
 </Operations>
