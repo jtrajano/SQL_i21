@@ -103,7 +103,9 @@ INSERT INTO tblCMBankTransaction(
 	,strLink
 	,ysnClr
 	,dtmDateReconciled
+	,intEntityId
 	,intCreatedUserId
+	,intCompanyLocationId
 	,dtmCreated
 	,intLastModifiedUserId
 	,dtmLastModified
@@ -112,7 +114,7 @@ INSERT INTO tblCMBankTransaction(
 SELECT	strTransactionId			= @strTransactionId
 		,intBankTransactionTypeId	= @BANK_TRANSACTION
 		,intBankAccountId			= @intBankAccountId
-		,intCurrencyId				= NULL
+		,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId)
 		,dblExchangeRate			= 1
 		,dtmDate					= @dtmDate
 		,strPayee					= ''
@@ -133,7 +135,9 @@ SELECT	strTransactionId			= @strTransactionId
 		,strLink					= ''
 		,ysnClr						= 0
 		,dtmDateReconciled			= NULL
+		,intEntityId				= @intUserId
 		,intCreatedUserId			= @intUserId
+		,intCompanyLocationId		= (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @intUserId)
 		,dtmCreated					= GETDATE()
 		,intLastModifiedUserId		= @intUserId
 		,dtmLastModified			= GETDATE()
