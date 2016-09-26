@@ -5691,4 +5691,60 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStatusId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6f553d71-d101-4a01-9916-c2dcddaaa42d" ChangeDateTime="09/26/2016 10:03:45">
+    <Property Name="ElementName" Value="[dbo].[tblHDOpportunityCampaignCommunication]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMCampaignCommunication]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bad3bc6c-90e4-4a8c-b1c4-fda11b233597" ChangeDateTime="09/26/2016 10:04:25">
+    <Property Name="ElementName" Value="[dbo].[tblCRMCampaignCommunication].[intOpportunityCampaignCommunicationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignCommunication]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intCampaignCommunicationId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c1aa3ad5-27dd-4e02-83ac-dc5ece9ea79d" ChangeDateTime="09/26/2016 10:04:58">
+    <Property Name="ElementName" Value="[dbo].[tblCRMCampaignCommunication].[intOpportunityCampaignId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignCommunication]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intCampaignId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cd4ac416-1d16-4a65-a061-0e25bf7cffba" ChangeDateTime="09/26/2016 10:05:33">
+    <Property Name="ElementName" Value="[dbo].[tblCRMCampaignCommunication].[intTicketTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignCommunication]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="10663343-783e-4da3-8b6e-683bcbbc7754" ChangeDateTime="09/26/2016 10:06:26">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDOpportunityCampaignCommunication]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignCommunication]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCRMCampaignCommunication_intCampaignCommunicationId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3f7679ff-9065-4872-96d1-af6ff73c0702" ChangeDateTime="09/26/2016 10:07:19">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDOpportunityCampaignCommunication_tblHDOpportunityCampaign]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignCommunication]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMCampaignCommunication_tblCRMCampaign_intCampaignId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5991b2e9-6eeb-4659-810a-94ca4d36c664" ChangeDateTime="09/26/2016 10:08:05">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDOpportunityCampaignCommunication_tblSMLetter]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignCommunication]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMCampaignCommunication_tblSMLetter_intLetterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5a634ca9-bd81-4dc6-9e18-8897c7e76c7e" ChangeDateTime="09/26/2016 10:08:49">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDOpportunityCampaignCommunication_tblHDTicketType]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaignCommunication]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMCampaignCommunication_tblCRMType_intTicketId]" />
+  </Operation>
 </Operations>
