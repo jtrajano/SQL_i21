@@ -3682,8 +3682,8 @@
     <Build Include="dbo\Tables\tblLGRouteMileage.sql" />
     <Build Include="dbo\Tables\tblLGRouteOrder.sql" />
     <Build Include="dbo\Views\vyuLGRouteOpenOrders.sql" />
-    <Build Include="dbo\Tables\tblHDCampainStatus.sql" />
-    <Build Include="dbo\Tables\tblHDCampaignEntity.sql" />
+    <Build Include="dbo\Tables\tblCRMCampainStatus.sql" />
+    <Build Include="dbo\Tables\tblCRMCampaignEntity.sql" />
     <Build Include="dbo\Views\vyuTMGeneratedCallEntry.sql" />
     <Build Include="dbo\Views\vyuARPaymentReport.sql" />
     <Build Include="dbo\Views\vyuHDCustomerProspectType.sql" />
@@ -4027,7 +4027,7 @@
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM2.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailView2.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntitySalesEntityContact.sql" />
-    <Build Include="dbo\Tables\tblHDOpportunityWinLossReason.sql" />
+    <Build Include="dbo\Tables\tblCRMWinLossReason.sql" />
     <Build Include="dbo\Views\vyuEMSearchVendorMin.sql" />
     <Build Include="dbo\Views\vyuSTRetailPriceAdjustmentDetailView.sql" />
     <Build Include="dbo\Views\vyuTMCallEntryPrintOutReport.sql" />

@@ -5572,4 +5572,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[PK_tblCRMCampainStatus]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fd0e4139-11fd-4019-8f04-b0499e1e2a62" ChangeDateTime="09/26/2016 09:24:10">
+    <Property Name="ElementName" Value="[dbo].[tblHDOpportunityWinLossReason]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMWinLossReason]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e971c0f1-ff96-4969-afaa-cd5b575a4296" ChangeDateTime="09/26/2016 09:25:43">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDOpportunityWinLossReason]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMWinLossReason]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCRMWinLossReason]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5f978b73-4494-4f1d-b950-fa05ac2ccbd0" ChangeDateTime="09/26/2016 09:26:27">
+    <Property Name="ElementName" Value="[dbo].[tblCRMWinLossReason].[intOpportunityWinLossReasonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMWinLossReason]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intWinLossReasonId]" />
+  </Operation>
 </Operations>
