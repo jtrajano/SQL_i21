@@ -82,7 +82,7 @@
 					left outer join tblEMEntity con on con.[intEntityId] = proj.intCustomerContactId
 					left outer join tblHDTicketType typ on typ.intTicketTypeId = proj.intTicketTypeId
 					left outer join [tblCRMSalesPipeStatus] pipe on pipe.intSalesPipeStatusId = proj.intSalesPipeStatusId
-					left outer join [tblCRMSource] tblHDOpportunitySource on [tblCRMSource].intOpportunitySourceId = proj.intOpportunitySourceId
+					left outer join [tblCRMSource]  on [tblCRMSource].intSourceId = proj.intOpportunitySourceId
 					left outer join [tblCRMCampaign] cam on cam.[intCampaignId] = proj.intOpportunityCampaignId
 					left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = proj.intCompanyLocationId
 					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
