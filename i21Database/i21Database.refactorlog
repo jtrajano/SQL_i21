@@ -5635,4 +5635,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[UQ_tblCRMSource_strSource]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a7e2c54f-8ffe-43c2-adea-d9717952ae9f" ChangeDateTime="09/26/2016 09:37:23">
+    <Property Name="ElementName" Value="[dbo].[tblHDOpportunityCampaign]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMCampaign]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="30b850a9-6a3c-4386-af4f-3e35f6e9e05e" ChangeDateTime="09/26/2016 09:38:26">
+    <Property Name="ElementName" Value="[dbo].[tblCRMCampaign].[intOpportunityCampaignId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaign]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intCampaignId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ede1ac62-88a1-4759-8628-f2f7f5e66713" ChangeDateTime="09/26/2016 09:39:27">
+    <Property Name="ElementName" Value="[dbo].[tblCRMCampaign].[intTicketTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMCampaign]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intTypeId]" />
+  </Operation>
 </Operations>

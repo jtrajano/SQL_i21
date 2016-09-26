@@ -11,7 +11,7 @@
 	[strSendTo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDOpportunityCampaignCommunication] PRIMARY KEY CLUSTERED ([intOpportunityCampaignCommunicationId] ASC),
-	CONSTRAINT [FK_tblHDOpportunityCampaignCommunication_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId]),
+	CONSTRAINT [FK_tblHDOpportunityCampaignCommunication_tblHDOpportunityCampaign] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblCRMCampaign] ([intCampaignId]),
 	CONSTRAINT [FK_tblHDOpportunityCampaignCommunication_tblSMLetter] FOREIGN KEY ([intLetterId]) REFERENCES [dbo].[tblSMLetter] ([intLetterId]),
 	CONSTRAINT [FK_tblHDOpportunityCampaignCommunication_tblHDTicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId])
 )

@@ -1,9 +1,9 @@
-﻿CREATE TABLE [dbo].[tblHDOpportunityCampaign]
+﻿CREATE TABLE [dbo].[tblCRMCampaign]
 (
-	[intOpportunityCampaignId] [int] IDENTITY(1,1) NOT NULL,
+	[intCampaignId] [int] IDENTITY(1,1) NOT NULL,
 	[strCampaignName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
-	[intTicketTypeId] [int] NULL,
+	[intTypeId] [int] NULL,
 	[intLineOfBusinessId] [int] NULL,
 	[dtmStartDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
@@ -19,11 +19,11 @@
 	[strRetrospective] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strImageId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblHDOpportunityCampaign] PRIMARY KEY CLUSTERED ([intOpportunityCampaignId] ASC),
-	CONSTRAINT [UQ_tblHDOpportunityCampaign] UNIQUE ([strCampaignName]),
-	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDTicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
-	CONSTRAINT [FK_tblHDOpportunityCampaign_tblHDCampaignStatus] FOREIGN KEY (intCampaignStatusId) REFERENCES [dbo].[tblCRMCampainStatus] (intCampaignStatusId),
-	CONSTRAINT [FK_tblHDOpportunityCampaign_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
+	CONSTRAINT [PK_tblCRMCampaign_intCampaignId] PRIMARY KEY CLUSTERED ([intCampaignId] ASC),
+	CONSTRAINT [UQ_tblCRMCampaign_strCampaignName] UNIQUE ([strCampaignName]),
+	CONSTRAINT [FK_tblCRMCampaign_tblCRMType_intTypeId] FOREIGN KEY ([intTypeId]) REFERENCES [dbo].[tblCRMType] ([intTypeId]),
+	CONSTRAINT [FK_tblCRMCampaign_tblCRMCampaignStatus_intCampaignStatusId] FOREIGN KEY (intCampaignStatusId) REFERENCES [dbo].[tblCRMCampainStatus] (intCampaignStatusId),
+	CONSTRAINT [FK_tblCRMCampaign_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
 GO
@@ -32,16 +32,16 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
-    @level2name = N'intOpportunityCampaignId'
+    @level2name = N'intCampaignId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Campaign Name',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'strCampaignName'
 GO
@@ -50,7 +50,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
 GO
@@ -59,7 +59,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'intLineOfBusinessId'
 GO
@@ -68,7 +68,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'dtmStartDate'
 GO
@@ -77,7 +77,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'dtmEndDate'
 GO
@@ -86,7 +86,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'dblOpenRate'
 GO
@@ -95,7 +95,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'dtmCreateDate'
 GO
@@ -104,7 +104,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'ysnHold'
 GO
@@ -113,7 +113,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'ysnActive'
 GO
@@ -122,7 +122,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'intEntityId'
 GO
@@ -131,6 +131,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityCampaign',
+    @level1name = N'tblCRMCampaign',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'

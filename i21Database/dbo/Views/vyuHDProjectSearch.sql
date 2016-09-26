@@ -83,7 +83,7 @@
 					left outer join tblHDTicketType typ on typ.intTicketTypeId = proj.intTicketTypeId
 					left outer join tblHDSalesPipeStatus pipe on pipe.intSalesPipeStatusId = proj.intSalesPipeStatusId
 					left outer join [tblCRMSource] tblHDOpportunitySource on [tblCRMSource].intOpportunitySourceId = proj.intOpportunitySourceId
-					left outer join tblHDOpportunityCampaign cam on cam.intOpportunityCampaignId = proj.intOpportunityCampaignId
+					left outer join [tblCRMCampaign] cam on cam.[intCampaignId] = proj.intOpportunityCampaignId
 					left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = proj.intCompanyLocationId
 					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
 				) as query1

@@ -8,7 +8,7 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCampaignEntity] PRIMARY KEY CLUSTERED ([intCampaignEntityId] ASC),
 	CONSTRAINT [UQ_tblCRMCampaignEntity_intOpportunityCampaignId_intEntityCustomerId] UNIQUE ([intOpportunityCampaignId],[intEntityId]),
-    CONSTRAINT [FK_tblCRMCampaignEntity_tblHDProject] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblHDOpportunityCampaign] ([intOpportunityCampaignId]),
+    CONSTRAINT [FK_tblCRMCampaignEntity_tblHDProject] FOREIGN KEY ([intOpportunityCampaignId]) REFERENCES [dbo].[tblCRMCampaign] ([intCampaignId]),
     CONSTRAINT [FK_tblCRMCampaignEntity_tblCTContractHeader] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 

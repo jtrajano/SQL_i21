@@ -1,14 +1,14 @@
 ﻿CREATE VIEW [dbo].[vyuHDOpportunityCampaignSearch]
 	AS
 	select
-		tblHDOpportunityCampaign.*
+		[tblCRMCampaign].*
 		,tblEMEntity.strName
 		,[tblSMLineOfBusiness].strLineOfBusiness
 		,tblHDTicketType.strType
 		,[tblCRMCampainStatus].strStatus
 	from
-		tblHDOpportunityCampaign
-		left outer join tblEMEntity on tblEMEntity.intEntityId = tblHDOpportunityCampaign.intEntityId
-		left outer join [tblSMLineOfBusiness] on [tblSMLineOfBusiness].intLineOfBusinessId = tblHDOpportunityCampaign.intLineOfBusinessId
-		left outer join tblHDTicketType on tblHDTicketType.intTicketTypeId = tblHDOpportunityCampaign.intTicketTypeId
-		left outer join [tblCRMCampainStatus] on [tblCRMCampainStatus].intCampaignStatusId = tblHDOpportunityCampaign.intCampaignStatusId
+		[tblCRMCampaign]
+		left outer join tblEMEntity on tblEMEntity.intEntityId = [tblCRMCampaign].intEntityId
+		left outer join [tblSMLineOfBusiness] on [tblSMLineOfBusiness].intLineOfBusinessId = [tblCRMCampaign].intLineOfBusinessId
+		left outer join tblHDTicketType on tblHDTicketType.intTicketTypeId = [tblCRMCampaign].[intTypeId]
+		left outer join [tblCRMCampainStatus] on [tblCRMCampainStatus].intCampaignStatusId = [tblCRMCampaign].intCampaignStatusId

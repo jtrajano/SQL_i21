@@ -363,11 +363,11 @@ GO
 GO
 
 	update
-		tblHDOpportunityCampaign
+		[tblCRMCampaign]
 		set
-			tblHDOpportunityCampaign.strImageId = LOWER(NEWID())
+			[tblCRMCampaign].strImageId = LOWER(NEWID())
 	where
-		tblHDOpportunityCampaign.strImageId is null
+		[tblCRMCampaign].strImageId is null
 
 GO
 	PRINT N'End updating HD Opportunity Campaign Image Id.'

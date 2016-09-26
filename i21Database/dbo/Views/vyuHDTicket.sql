@@ -52,6 +52,6 @@ AS
 		left outer join tblSMModule smmo on smmo.intModuleId = mo.intSMModuleId
 		left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
 		left outer join tblHDProject proj on proj.intProjectId = (select top 1 projt.intProjectId from tblHDProjectTask projt where projt.intTicketId = tic.intTicketId)
-		left outer join tblHDOpportunityCampaign cam on cam.intOpportunityCampaignId = tic.intOpportunityCampaignId
+		left outer join [tblCRMCampaign] cam on cam.[intCampaignId] = tic.intOpportunityCampaignId
 		left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = tic.intCompanyLocationId
 		left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = tic.intEntityLocationId
