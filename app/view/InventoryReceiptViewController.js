@@ -3941,22 +3941,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             case 'colOrderNumber' :
                                 //return controller.purchaseOrderDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
-                        }
-                        ;
+                        };
                     }
                     break;
                 case 'Purchase Contract' :
@@ -3967,7 +3962,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 return false;
                             else
                                 return false;
-                            break;
                         case 'colSourceNumber' :
                             switch (current.get('intSourceType')) {
                                 case 2:
@@ -3975,12 +3969,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         return controller.inboundShipmentDropdown(win, record);
                                     else
                                         return false;
-                                    break;
                                 default:
                                     return false;
-                                    break;
                             }
-                            break;
                     }
                     break;
                 case 'Transfer Order' :
@@ -3989,22 +3980,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             case 'colOrderNumber' :
                                 //return controller.transferOrderDropdown(win);
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
                                 return false;
-                                break;
                             case 'colSourceNumber' :
                                 return false;
-                                break;
-                        }
-                        ;
+                        };
                     }
                     break;
             }
@@ -4085,7 +4071,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
 
-            switch (UOMType) {
+          /*  switch (UOMType) {
                 case 'Weight':
                     switch (columnId) {
                         case 'colLotUOM' :
@@ -4102,7 +4088,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             break;
                     }
                     break;
-            }
+            } */
+
+              if(columnId === 'colLotUOM') {
+                  return Ext.create('Ext.grid.CellEditor', {field: cboLotUOM});
+              }
         };
     },
 
@@ -5125,9 +5115,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnInsertLot": {
                 click: this.onInsertChargeClick
-            },
-            "#btnReplicateBalanceLots": {
-                click: this.onReplicateBalanceLotsClick
             },
             "#btnPrintLabel": {
                 click: this.onPrintLabelClick
