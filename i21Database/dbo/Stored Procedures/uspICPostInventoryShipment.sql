@@ -67,7 +67,9 @@ END
 --------------------------------------------------------------------------------------------  
 BEGIN 
 	DECLARE @strInvoiceNumber AS NVARCHAR(50)
-	DECLARE @strChargeItem AS NVARCHAR(50)
+			,@strChargeItem AS NVARCHAR(50)
+			,@strBillNumber AS NVARCHAR(50)
+
 
 	-- Validate if the Inventory Shipment exists   
 	IF @intTransactionId IS NULL  
@@ -140,7 +142,34 @@ BEGIN
 
 			IF ISNULL(@strInvoiceNumber, '') <> ''
 			BEGIN 
-				RAISERROR(80087, 11, 1)  
+				RAISERROR(80089, 11, 1)  
+				GOTO Post_Exit    
+			END 
+
+		END
+		
+		-- Do not allow unpost if other charge is already billed. 
+		IF @ysnPost = 0 AND @ysnRecap = 0 
+		BEGIN 
+			SET @strBillNumber = NULL 
+			SELECT	TOP 1 
+					@strBillNumber = Bill.strBillId
+					,@strChargeItem = Item.strItemNo
+			FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge Charge
+						ON Shipment.intInventoryShipmentId = Charge.intInventoryShipmentId
+					INNER JOIN dbo.tblICItem Item
+						ON Item.intItemId = Charge.intChargeId				
+					LEFT JOIN dbo.tblAPBillDetail BillItems
+						ON BillItems.intInventoryShipmentChargeId = Charge.intInventoryShipmentChargeId
+					INNER JOIN dbo.tblAPBill Bill
+						ON Bill.intBillId = BillItems.intBillId
+			WHERE	Shipment.intInventoryShipmentId = @intTransactionId
+					AND BillItems.intBillDetailId IS NOT NULL
+
+			IF ISNULL(@strBillNumber, '') <> ''
+			BEGIN 
+				-- 'Unable to unpost the Inventory Shipment. The {Other Charge} was billed.'
+				RAISERROR(80091, 11, 1, @strChargeItem)  
 				GOTO Post_Exit    
 			END 
 

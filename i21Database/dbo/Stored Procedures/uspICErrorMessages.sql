@@ -438,3 +438,7 @@ EXEC sp_addmessage 80089,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80090) EXEC sp_dropmessage 80090, 'us_english'	
 SET @strmessage = 'Lotted item %s should have lot(s) specified.'
 EXEC sp_addmessage 80090,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80091) EXEC sp_dropmessage 80091, 'us_english'	
+SET @strmessage = 'Unable to unpost the Inventory Shipment. The %s was billed.'
+EXEC sp_addmessage 80091,11,@strmessage,'us_english','False'
