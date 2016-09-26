@@ -5747,4 +5747,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblCRMCampaignCommunication_tblCRMType_intTicketId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="97156c46-c054-4bab-aec7-9f62dcced7f4" ChangeDateTime="09/26/2016 10:14:41">
+    <Property Name="ElementName" Value="[dbo].[tblHDOpportunityContract]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblCRMContract]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e9c16bff-520d-44f4-b98c-02ad83aa43a7" ChangeDateTime="09/26/2016 10:15:15">
+    <Property Name="ElementName" Value="[dbo].[tblCRMContract].[intOpportunityContractId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMContract]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intContractId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9161747c-0e8f-482a-abf0-2d5added8aac" ChangeDateTime="09/26/2016 10:15:51">
+    <Property Name="ElementName" Value="[dbo].[tblCRMContract].[intProjectId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMContract]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intOpportunityId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="45657055-cdb8-4719-bfda-90653292be16" ChangeDateTime="09/26/2016 10:16:32">
+    <Property Name="ElementName" Value="[dbo].[PK_tblHDOpportunityContract]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMContract]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCRMContract_intContractId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3be72e83-03c6-4afd-946d-95d207418e44" ChangeDateTime="09/26/2016 10:18:22">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDOpportunityContract_tblHDProject]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMContract]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMContract_tblCRMOpportunity]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="574aad50-a656-4477-b9df-6c7cd183ab88" ChangeDateTime="09/26/2016 10:19:29">
+    <Property Name="ElementName" Value="[dbo].[FK_tblHDOpportunityContract_tblCTContractHeader]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCRMContract]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCRMContract_tblCTContractHeader_intContractHeaderId]" />
+  </Operation>
 </Operations>

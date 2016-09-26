@@ -1,13 +1,13 @@
-﻿CREATE TABLE [dbo].[tblHDOpportunityContract]
+﻿CREATE TABLE [dbo].[tblCRMContract]
 (
-	[intOpportunityContractId] [int] IDENTITY(1,1) NOT NULL,
-	[intProjectId] [int] NOT NULL,
+	[intContractId] [int] IDENTITY(1,1) NOT NULL,
+	[intOpportunityId] [int] NOT NULL,
 	[intContractHeaderId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblHDOpportunityContract] PRIMARY KEY CLUSTERED ([intOpportunityContractId] ASC),
-	CONSTRAINT [AK_tblHDOpportunityContract_intProjectId_intSalesOrderId] UNIQUE ([intProjectId],[intContractHeaderId]),
-    CONSTRAINT [FK_tblHDOpportunityContract_tblHDProject] FOREIGN KEY ([intProjectId]) REFERENCES [dbo].[tblHDProject] ([intProjectId]),
-    CONSTRAINT [FK_tblHDOpportunityContract_tblCTContractHeader] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
+	CONSTRAINT [PK_tblCRMContract_intContractId] PRIMARY KEY CLUSTERED ([intContractId] ASC),
+	CONSTRAINT [UQ_tblCRMContract_intContractHeaderId] UNIQUE ([intContractHeaderId]),
+    CONSTRAINT [FK_tblCRMContract_tblCRMOpportunity] FOREIGN KEY ([intOpportunityId]) REFERENCES [dbo].[tblCRMOpportunity] ([intOpportunityId]),
+    CONSTRAINT [FK_tblCRMContract_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
 )
 
 GO
@@ -16,25 +16,25 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityContract',
+    @level1name = N'tblCRMContract',
     @level2type = N'COLUMN',
-    @level2name = N'intOpportunityContractId'
+    @level2name = N'intContractId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Reference Project Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityContract',
+    @level1name = N'tblCRMContract',
     @level2type = N'COLUMN',
-    @level2name = N'intProjectId'
+    @level2name = N'intOpportunityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Reference Contract Header Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityContract',
+    @level1name = N'tblCRMContract',
     @level2type = N'COLUMN',
     @level2name = N'intContractHeaderId'
 GO
@@ -43,6 +43,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblHDOpportunityContract',
+    @level1name = N'tblCRMContract',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
