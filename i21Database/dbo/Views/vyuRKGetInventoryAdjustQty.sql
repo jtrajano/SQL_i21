@@ -11,5 +11,5 @@ FROM tblCTContractDetail cd
 LEFT JOIN tblICInventoryReceiptItem ri on cd.intContractDetailId=ri.intLineNo
 LEFT JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId 
 LEFT JOIN tblICInventoryReceiptItemLot il on ri.intInventoryReceiptItemId=il.intInventoryReceiptItemId 
-WHERE  r.ysnPosted=1 group by cd.intContractDetailId , il.intLotId
+group by cd.intContractDetailId , il.intLotId
 )t 

@@ -65,8 +65,8 @@ SELECT * FROM(
          AND ici.intProductLineId=pl.intCommodityProductLineId)  
   LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  
   LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=cv.intUnitMeasureId    
-  WHERE fm.ysnExpired=1 and intPricingTypeId <> 1 AND cv.strContractType='Purchase'  
-   AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
+  WHERE intPricingTypeId <> 1 AND cv.strContractType='Purchase'  
+   AND dtmFutureMonthsDate < @dtmFutureMonthsDate   
    AND cv.intCommodityId=@intCommodityId  
    AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
    AND cv.intFutureMarketId=@intFutureMarketId   
@@ -120,11 +120,11 @@ SELECT * FROM(
          AND ici.intProductLineId=pl.intCommodityProductLineId)   
       LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  
       LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=cv.intUnitMeasureId  
-  WHERE fm.ysnExpired=1 and intPricingTypeId <> 1 AND cv.strContractType='sale'   
+  WHERE  intPricingTypeId <> 1 AND cv.strContractType='sale'   
      AND cv.intCommodityId=@intCommodityId 
          AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
          AND cv.intFutureMarketId=@intFutureMarketId   
-     AND dtmFutureMonthsDate <= @dtmFutureMonthsDate        
+     AND dtmFutureMonthsDate < @dtmFutureMonthsDate        
   UNION    
   SELECT DISTINCT case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,'a. Unpriced - (Balance to be Priced)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,-dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, isnull(dblBalance,0)) as dblNoOfContract,  
@@ -143,26 +143,26 @@ SELECT * FROM(
         LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId  
         LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=cv.intUnitMeasureId  
   WHERE fm.ysnExpired=0 and strContractType='sale' AND intPricingTypeId <> 1   
-     AND cv.intCommodityId=@intCommodityId 
-         AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
-         AND cv.intFutureMarketId=@intFutureMarketId   
-     and dtmFutureMonthsDate >= @dtmFutureMonthsDate  
+		AND cv.intCommodityId=@intCommodityId 
+		AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
+		AND cv.intFutureMarketId=@intFutureMarketId   
+		AND dtmFutureMonthsDate >= @dtmFutureMonthsDate  
 )T1  
   
 UNION   
   
 SELECT * FROM(  
-  SELECT  DISTINCT case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
+  SELECT  DISTINCT CASE WHEN @strRiskView='Processor' then 'Physical position / Differential cover' ELSE 'Physical position / Basis risk' END AS Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,'Previous' as strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,
- (select dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)end) from vyuRKGetInventoryAdjustQty aq where aq.intContractDetailId=cv.intContractDetailId) as dblNoOfContract,  
+ (SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)end) from vyuRKGetInventoryAdjustQty aq where aq.intContractDetailId=cv.intContractDetailId) as dblNoOfContract,  
   Left(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, dtmStartDate as TransactionDate,  
   strContractType as TranType, strEntityName  as CustVendor,
   -(select dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)end) from vyuRKGetInventoryAdjustQty aq where aq.intContractDetailId=cv.intContractDetailId)/dbo.fnCTConvertQuantityToTargetCommodityUOM(um1.intCommodityUnitMeasureId,@intUOMId,@dblContractSize)   as dblNoOfLot,   
    (select dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId, case when @ysnIncludeInventoryHedge = 0 then isnull(dblBalance,0) else isnull(dblDetailQuantity,0)end) from vyuRKGetInventoryAdjustQty aq where aq.intContractDetailId=cv.intContractDetailId) as dblQuantity   
     ,cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   FROM vyuCTContractDetailView cv  
-    JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
-     JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
+  JOIN tblRKFutureMarket ffm on ffm.intFutureMarketId=cv.intFutureMarketId and cv.intContractStatusId <> 3
+  JOIN tblICCommodityUnitMeasure um1 on um1.intCommodityId=cv.intCommodityId and um1.intUnitMeasureId=ffm.intUnitMeasureId  
   JOIN tblRKFuturesMonth fm on cv.intFutureMarketId=fm.intFutureMarketId and cv.intFutureMonthId=fm.intFutureMonthId  
   JOIN tblICItemUOM u on cv.intItemUOMId=u.intItemUOMId  
   JOIN tblICItem ic on ic.intItemId=cv.intItemId and cv.intItemId not in(select intItemId from tblICItem ici    
@@ -170,11 +170,11 @@ SELECT * FROM(
          AND ici.intProductLineId=pl.intCommodityProductLineId)   
            LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId   
            LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=cv.intUnitMeasureId     
-  WHERE fm.ysnExpired=1 and intPricingTypeId = 1 AND cv.strContractType='Purchase'   
+  WHERE  intPricingTypeId = 1 AND cv.strContractType='Purchase'   
      AND cv.intCommodityId=@intCommodityId 
          AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
          AND cv.intFutureMarketId=@intFutureMarketId   
-     AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
+     AND dtmFutureMonthsDate < @dtmFutureMonthsDate   
   UNION    
   SELECT DISTINCT case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
   strContractType+' - '+isnull(ca.strDescription,'') as strAccountNumber,
@@ -221,11 +221,11 @@ SELECT * FROM(
          AND ici.intProductLineId=pl.intCommodityProductLineId)  
              LEFT JOIN tblICCommodityAttribute ca on ca.intCommodityAttributeId=ic.intProductTypeId   
              LEFT JOIN tblICCommodityUnitMeasure um on um.intCommodityId=cv.intCommodityId and um.intUnitMeasureId=cv.intUnitMeasureId  
-  WHERE fm.ysnExpired=1 and intPricingTypeId = 1 AND cv.strContractType='sale'   
+  WHERE  intPricingTypeId = 1 AND cv.strContractType='sale'   
      AND cv.intCommodityId=@intCommodityId 
          AND cv.intCompanyLocationId= case when isnull(@intCompanyLocationId,0)=0 then cv.intCompanyLocationId else @intCompanyLocationId end
          AND cv.intFutureMarketId=@intFutureMarketId   
-     AND dtmFutureMonthsDate <= @dtmFutureMonthsDate   
+     AND dtmFutureMonthsDate < @dtmFutureMonthsDate   
   UNION    
     
   SELECT DISTINCT case when @strRiskView='Processor' then 'Physical position / Differential cover' else 'Physical position / Basis risk' end as Selection,'b. Priced / Outright - (Outright position)' as PriceStatus,cv.strFutureMonth,  
