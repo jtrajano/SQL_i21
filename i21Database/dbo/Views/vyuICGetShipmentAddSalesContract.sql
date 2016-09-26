@@ -46,3 +46,4 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityI
 FROM vyuCTContractDetailView ContractView
 WHERE ysnAllowedToShow = 1
 	AND strContractType = 'Sale'
+	AND ContractView.dblAvailableQty > 0
