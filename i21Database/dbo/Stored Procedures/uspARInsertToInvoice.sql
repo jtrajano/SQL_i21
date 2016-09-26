@@ -866,7 +866,7 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 			BEGIN
 				DECLARE @invoiceToPost NVARCHAR(MAX)
 				SET @invoiceToPost = CONVERT(NVARCHAR(MAX), @NewInvoiceId)
-				UPDATE tblARInvoice SET strType = 'Software' WHERE intInvoiceId = @NewInvoiceId
+				UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
 
 				EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @invoiceToPost, @userId = @UserId, @transType = N'Invoice'
 			END
@@ -908,7 +908,7 @@ BEGIN
 END
 
 IF ISNULL(@NewInvoiceId, 0) > 0
-	UPDATE tblARInvoice SET strType = 'Software' WHERE intInvoiceId = @NewInvoiceId
+	UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
 
 --COMMIT TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
