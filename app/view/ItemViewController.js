@@ -1874,6 +1874,7 @@ Ext.define('Inventory.view.ItemViewController', {
     },
     
     onUOMStockUnitCheckChange: function(obj, rowIndex, checked, eOpts ) {
+        var me = this;
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
             var win = obj.up('window');
@@ -1947,6 +1948,10 @@ Ext.define('Inventory.view.ItemViewController', {
                                         else
                                             {
                                                 iRely.Functions.showCustomDialog('information', 'ok', 'Conversion to new stock unit has been completed.');
+                                                var context = me.view.context;
+                                                var vm = me.getViewModel();
+                                                vm.data.current.dirty = false;
+                                                context.screenMgr.toolbarMgr.provideFeedBack(iRely.Msg.SAVED);
                                             }
                                 },
                                 failure: function(response)
