@@ -3805,7 +3805,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetSalesOrderPickListAvailableLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateShipmentFromSalesOrderPickList.sql" />
     <Build Include="dbo\Views\vyuCCCustomer.sql" />
-    <Build Include="dbo\Tables\tblHDOpportunityCampaignCommunication.sql" />
+    <Build Include="dbo\Tables\tblCRMCampaignCommunication.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPrice.sql" />
     <Build Include="dbo\Tables\tblTRImportRackPriceDetail.sql" />
     <Build Include="dbo\Functions\fnEMSplitWithGetByIdx.sql" />
