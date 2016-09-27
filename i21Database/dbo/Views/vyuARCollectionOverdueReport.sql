@@ -8,10 +8,10 @@ SELECT
 	 , A.intEntityCustomerId     
 	 , A.strCustomerName
 	 , strCustomerAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, E.strName, NULL)
-	 , strCustomerPhone		= EnPhoneNo.strPhone 
+	 , strCustomerPhone			= EnPhoneNo.strPhone 
 	 , A.strInvoiceNumber
      , A.intInvoiceId
-	 , Cus.intTermsId	 
+	 , intTermsId				= A.intTermId 	 
 	 , A.strBOLNumber	 
 	 , A.dblCreditLimit
 	 , dblTotalAR
@@ -30,6 +30,7 @@ SELECT
 	 , dtmDate
 	 , dtmDueDate
 	 , strAccountNumber		= (SELECT strAccountNumber FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 
 FROM 
 (
 SELECT A.strInvoiceNumber
@@ -54,6 +55,7 @@ SELECT A.strInvoiceNumber
 	 , dtmDate
 	 , dtmDueDate
 	 , intCompanyLocationId  
+	 , A.intTermId
 	
 FROM
 (SELECT dtmDate				= I.dtmPostDate
@@ -78,7 +80,7 @@ FROM
 					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) <= 90 THEN '61 - 90 Days'    
 					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 90 THEN 'Over 90' END
 	, I.ysnPosted
-	, dblAvailableCredit = 0	
+	, dblAvailableCredit = 0	    
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -113,7 +115,7 @@ SELECT dtmDate					= ISNULL(P.dtmDatePaid, I.dtmPostDate)
 				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) <= 90 THEN '61 - 90 Days'    
 				     WHEN DATEDIFF(DAYOFYEAR, ISNULL(P.dtmDatePaid, I.dtmDueDate), GETDATE()) > 90 THEN 'Over 90' END
 	 , I.ysnPosted
-	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) 
+	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)      
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId
@@ -155,7 +157,7 @@ SELECT P.dtmDatePaid
                       WHEN DATEDIFF(DAYOFYEAR, P.dtmDatePaid, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, P.dtmDatePaid, GETDATE()) <= 90 THEN '61 - 90 Days'
                       WHEN DATEDIFF(DAYOFYEAR, P.dtmDatePaid, GETDATE()) > 90 THEN 'Over 90' END
      , I.ysnPosted
-     , dblAvailableCredit        = ISNULL(PD.dblPayment, 0)	 
+     , dblAvailableCredit        = ISNULL(PD.dblPayment, 0)	 	 
 FROM tblARPayment P
     INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
     LEFT JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
@@ -194,7 +196,7 @@ SELECT dtmDate				= I.dtmPostDate
 				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) <= 90 THEN '61 - 90 Days'
 				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 90 THEN 'Over 90' END
      , ysnPosted			= ISNULL(I.ysnPosted, 1)
-	 , dblAvailableCredit	= 0 	 
+	 , dblAvailableCredit	= 0 	 	 
 FROM tblARInvoice I 
 	 INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
 	 INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityCustomerId    
@@ -229,7 +231,8 @@ LEFT JOIN
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, GETDATE()) <= 90     
 		 THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl90Days    
   , CASE WHEN DATEDIFF(DAYOFYEAR, TBL.dtmDueDate, GETDATE()) > 90      
-	     THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl91Days    
+	     THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL((TBL.dblAmountPaid + TBL.dblDiscount - TBL.dblInterest), 0) ELSE 0 END dbl91Days  
+  , intTermId  
 FROM
 (SELECT I.strInvoiceNumber
 	  , I.intInvoiceId
@@ -242,6 +245,7 @@ FROM
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= 0
+	  , I.intTermId
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 WHERE I.ysnPosted = 1
@@ -263,6 +267,7 @@ SELECT I.strInvoiceNumber
 	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	  , I.intTermId
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	LEFT JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId AND P.ysnPosted = 1 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= GETDATE()
@@ -291,6 +296,7 @@ SELECT I.strInvoiceNumber
      , dtmDueDate               = P.dtmDatePaid
      , I.intEntityCustomerId
      , dblAvailableCredit		= ISNULL(PD.dblPayment, 0)
+	 , I.intTermId
 FROM tblARPayment P
     INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
     LEFT JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
@@ -317,6 +323,7 @@ SELECT I.strInvoiceNumber
   , dtmDueDate				= ISNULL(I.dtmDueDate, GETDATE())
   , I.intEntityCustomerId
   , dblAvailableCredit		= 0
+  , I.intTermId
 FROM tblARInvoice I 
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
@@ -331,10 +338,10 @@ AND A.strInvoiceNumber		= B.strInvoiceNumber
 AND A.dblInvoiceTotal		= B.dblInvoiceTotal
 AND A.dblAmountPaid			= B.dblAmountPaid
 AND A.dblAvailableCredit	= B.dblAvailableCredit
-GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.strCustomerName, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId 
+GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.strCustomerName, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId , A.intTermId
 ) A 
 INNER JOIN (SELECT intEntityId, strName FROM tblEMEntity) E ON A.intEntityCustomerId = E.intEntityId 
 INNER JOIN (SELECT intCompanyLocationId, strUseLocationAddress, strAddress, strCity, strStateProvince, strZipPostalCode, strCountry, strPhone FROM tblSMCompanyLocation) L ON A.intCompanyLocationId = L.intCompanyLocationId
 INNER JOIN (SELECT intEntityId, [intEntityContactId], ysnDefaultContact FROM [tblEMEntityToContact]) as CusToCon ON A.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
 LEFT JOIN (SELECT intEntityId, strPhone FROM tblEMEntityPhoneNumber) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
-INNER JOIN (SELECT intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId FROM vyuARCustomer) Cus ON A.intEntityCustomerId = Cus.intEntityCustomerId 
+INNER JOIN (SELECT intEntityCustomerId, strBillToAddress, strBillToCity, strBillToCountry, strBillToLocationName, strBillToState, strBillToZipCode, intTermsId FROM vyuARCustomer) Cus ON A.intEntityCustomerId = Cus.intEntityCustomerId

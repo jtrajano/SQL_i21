@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCollectionLetter]  
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
-
 BEGIN
 	DECLARE @idoc						INT
 			, @strCustomerIds			NVARCHAR(MAX)		
@@ -182,29 +181,66 @@ BEGIN
 			BEGIN
 				DECLARE @PHQuery		VARCHAR(MAX)
 						,@InsertQuery	VARCHAR(MAX)
-				
-				SET @PHQuery = 'SELECT TOP 1 ' + @SourceColumn + ' FROM ' + @SourceTable + ' WHERE [intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
-									
-				SET @InsertQuery= '
-									INSERT INTO	#CustomerPlaceHolder(
-										[intPlaceHolderId],
-										[strPlaceHolder],
-										[intEntityCustomerId],
-										[strValue]
-									)
-									SELECT
-										[intPlaceHolderId]		= ' + CAST(@PlaceHolderId AS VARCHAR(200)) + '
-										,[strPlaceHolder]		= ''' + @PlaceHolder + '''
-										,[intEntityCustomerId]	= ' + CAST(@CustomerId AS VARCHAR(200)) + '
-										,[strValue]				= '
-									+ '(' + @PHQuery + ')'	
-				EXEC sp_sqlexec @InsertQuery 			
+						,@NotTableQuery	VARCHAR(MAX)
+
+				SET @NotTableQuery = 'DECLARE @SetQuery			VARCHAR(MAX)
+												,@InsertQuery	VARCHAR(MAX)
+
+										IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
+										CREATE TABLE #Records(
+											RowId			INT,
+											intEntityCustomerId		INT,
+											strValues		VARCHAR(MAX),
+											strDataType		VARCHAR(MAX)								
+										)																	
+										INSERT INTO #Records (RowId, intEntityCustomerId, strValues, strDataType)
+										SELECT TOP 1
+											RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL)), intEntityCustomerId = ' + CAST(@CustomerId AS VARCHAR(200)) + ', strValues =' + @SourceColumn + ', strDataType = ''' + @DataType + '''										
+										FROM 
+											' + @SourceTable + ' 
+										WHERE 
+											[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))	+ '  
+											
+						 				UPDATE 
+											#Records
+										SET strValues = 
+											CASE WHEN strDataType = ''datetime'' 
+												THEN CAST(month(strValues) AS VARCHAR(2)) + ''/'' + CAST(day(strValues) AS VARCHAR(2)) + ''/'' + CAST(year(strValues) AS VARCHAR(4)) 
+											ELSE strValues END
+
+						 				UPDATE 
+											#Records
+										SET 												
+											strValues = CONVERT(varchar, CAST(strValues AS money), 1)
+										WHERE 
+											ISNUMERIC(strValues) = 1
+											
+										SELECT 
+											TOP 1 @SetQuery = strValues 
+										FROM 
+											#Records	
+										 
+									SET @InsertQuery= ''''
+										INSERT INTO	#CustomerPlaceHolder(
+											[intPlaceHolderId],
+											[strPlaceHolder],
+											[intEntityCustomerId],
+											[strValue]
+										)
+										SELECT
+											[intPlaceHolderId]		= ' + CAST(@PlaceHolderId AS VARCHAR(200)) + '
+											,[strPlaceHolder]		= ''' + @PlaceHolder + '''
+											,[intEntityCustomerId]	= ' + CAST(@CustomerId AS VARCHAR(200)) + ' 
+											,[strValue]				= '''' +  @SetQuery  + '''''
+				EXEC sp_sqlexec @NotTableQuery 			 
 			END
 		ELSE
 			BEGIN
 				DECLARE @PHQueryTable		VARCHAR(MAX)
 						,@InsertQueryTable	VARCHAR(MAX)
-						,@HTMLTable			VARCHAR(MAX)											
+						,@HTMLTable			VARCHAR(MAX)
+						,@ColumnCount		INT
+						,@ColumnCounter		INT											
 
 				IF OBJECT_ID('tempdb..#TempTableColumnHeaders') IS NOT NULL DROP TABLE #TempTableColumnHeaders
 				SELECT 
@@ -216,10 +252,9 @@ BEGIN
 					fnARGetRowsFromDelimitedValues(@PlaceHolderDescription)											
 
 				SET @HTMLTable = '<table  id="t01" style="width:100%" border="1"><tbody><tr>'
-
-				DECLARE @ColumnCount	INT
-						,@ColumnCounter INT
+								
 				SET @ColumnCounter = 1
+				
 				SELECT @ColumnCount = COUNT(RowId) FROM #TempTableColumnHeaders
 				 
 				WHILE (@ColumnCount >= @ColumnCounter)
@@ -230,14 +265,21 @@ BEGIN
 					FROM
 						#TempTableColumnHeaders
 					WHERE
-						RowId = @ColumnCounter
+						RowId = @ColumnCounter					 
 							
-					SET @HTMLTable = @HTMLTable + '<th>' + @Header + '</th>'
-
+					IF (@Header = 'Amount Due')
+					BEGIN
+						SET @HTMLTable = @HTMLTable + '<th style="text-align:right"> <span style="font-family: Arial; font-size:9">' + @Header + ' </span> </th> '
+					END
+					ELSE
+					BEGIN
+						SET @HTMLTable = @HTMLTable + '<th> <span style="font-family: Arial; font-size:9">' + @Header + ' </span> </th> '
+					END
+	
 					SET @ColumnCounter = @ColumnCounter + 1
 				END
 
-				SET @HTMLTable = @HTMLTable + '</tr>'
+				SET @HTMLTable = @HTMLTable + '</tr> '
 
 				IF OBJECT_ID('tempdb..#TempTableColumns') IS NOT NULL DROP TABLE #TempTableColumns
 				SELECT 
@@ -250,22 +292,32 @@ BEGIN
 					fnARGetRowsFromDelimitedValues(@SourceColumn)
 
 				IF OBJECT_ID('tempdb..#TempDataType') IS NOT NULL DROP TABLE #TempDataType
-				SELECT RowId	= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))			
-						, * 
+				SELECT 
+					RowId	= ROW_NUMBER() OVER (ORDER BY (SELECT NULL))			
+					, * 
 				INTO  
 					#TempDataType 
 				FROM dbo.fnARSplitValues(@DataType, ',')			
 
-				UPDATE #TempTableColumns SET strDataType = TDT.strDataType
-				FROM #TempDataType TDT
-				INNER JOIN #TempTableColumns  TDC ON TDT.RowId = TDC.RowId				 
+				UPDATE 
+					#TempTableColumns 
+				SET 
+					strDataType = TDT.strDataType
+				FROM 
+					#TempDataType TDT
+				INNER JOIN 
+					#TempTableColumns TDC ON TDT.RowId = TDC.RowId				 
 				
 				DECLARE @Declaration	VARCHAR(MAX)
 						,@Select		VARCHAR(MAX)
 				SET @Declaration = ''
 				SET @Select = ''
 				SET @ColumnCounter = 1
-				SELECT @ColumnCount = COUNT(RowId) FROM #TempTableColumns
+
+				SELECT 
+					@ColumnCount = COUNT(RowId) 
+				FROM 
+					#TempTableColumns
 					 
 				WHILE (@ColumnCount >= @ColumnCounter)
 				BEGIN
@@ -295,9 +347,15 @@ BEGIN
 				SET @PHQueryTable = '
 				DECLARE @HTMLTableValue NVARCHAR(MAX)
 				IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
-				SELECT RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL)), ' + @SourceColumn + ' INTO #Records
-				FROM ' + @SourceTable + ' 
-				WHERE [intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
+				SELECT 
+					RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))
+					, ' + @SourceColumn + ' 
+				INTO 
+					#Records
+				FROM 
+					' + @SourceTable + ' 
+				WHERE 
+					[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
 				+ ' 			
 												
 				DECLARE @HTMLTableRows VARCHAR(MAX)
@@ -315,7 +373,7 @@ BEGIN
 					ORDER BY
 						RowId		 
 
-					SET @HTMLTableRows = @HTMLTableRows + ''<tr>''
+					SET @HTMLTableRows = @HTMLTableRows + ''<tr> ''
 
 					DECLARE @ColumnCounter1		INT
 							,@ColumnCount1		INT
@@ -327,8 +385,9 @@ BEGIN
 				 
 					WHILE (@ColumnCount1 >=  @ColumnCounter1)
 					BEGIN
-						DECLARE @Colunm1 VARCHAR(MAX)
-							 ,@DataType1 VARCHAR(MAX)
+						DECLARE @Colunm1	VARCHAR(MAX)
+							 ,@DataType1	VARCHAR(MAX)
+							 ,@SetQuery		VARCHAR(MAX)
 
 						SELECT TOP 1						 
 							@Colunm1 = strValues	
@@ -336,9 +395,7 @@ BEGIN
 						FROM
 							#TempTableColumns
 						WHERE
-							RowId = @ColumnCounter1		
-
-						DECLARE @SetQuery VARCHAR(MAX)
+							RowId = @ColumnCounter1								
 						
 						IF OBJECT_ID(''tempdb..#Field'') IS NOT NULL DROP TABLE #Field
 						CREATE TABLE #Field(
@@ -366,17 +423,34 @@ BEGIN
 
 						 					UPDATE 
 												#Field 
-											SET 
-												strField = CONVERT(DECIMAL(10,2), (CONVERT(VARCHAR(200), strField)))
+											SET 												
+												strField = CONVERT(varchar, CAST(strField AS money), 1)
 											WHERE 
 												ISNUMERIC(strField) = 1						
 												
-						SET @HTMLTableRows = @HTMLTableRows + ''<td>'' + (SELECT TOP 1 strField FROM #Field) + ''</td>''																									
+						DECLARE @isNumeric BIT 
+						SET  @isNumeric = 0 
+						SELECT 
+							TOP 1 @isNumeric = 1  
+						FROM 
+							#Field 
+						WHERE
+							ISNUMERIC(strField) = 1		
+
+						IF  (@isNumeric = 1)
+						BEGIN
+							SET @HTMLTableRows = @HTMLTableRows + ''<td align="right"> <span style="font-family: Arial; font-size:9"> '' + (SELECT TOP 1 strField FROM #Field) + '' </span> </td>''																									
+						END
+						ELSE
+						BEGIN
+							SET @HTMLTableRows = @HTMLTableRows + ''<td> <span style="font-family: Arial; font-size:9"> '' + (SELECT TOP 1 strField FROM #Field) + '' </span> </td>''																									
+						END
+						
 
 						SET @ColumnCounter1 = @ColumnCounter1 + 1
 					END
 
-					SET @HTMLTableRows = @HTMLTableRows + ''</tr>''
+					SET @HTMLTableRows = @HTMLTableRows + '' </tr>''
 						
 					DELETE 
 					FROM 
@@ -483,3 +557,6 @@ BEGIN
 			vyuARCustomer) Cus ON SC.intEntityCustomerId = Cus.intEntityCustomerId 
 
 END
+ 
+
+
