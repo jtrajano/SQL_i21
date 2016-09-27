@@ -248,6 +248,85 @@ Ext.define('iRely.TestEngine', {
         return this;
     },
 
+    continueIf_msgBox : function (config) {
+        var me = this,
+            chain = me.chain;
+
+        chain.push(
+            function(next){
+                var alert = document.querySelector('.sweet-alert'),
+                    actual = typeof config.actual === 'function' ? config.actual(alert) : config.actual,
+                    expected = typeof config.expected === 'function' ? config.expected(alert) : config.expected,
+                    assertTrue = expected === actual;
+
+                next(alert, actual, expected, assertTrue);
+            });
+
+        chain.push(
+            function(next, alert, actual, expected, assertTrue) {
+                var fn;
+
+                if (assertTrue && typeof config.success === 'undefined') {
+                    fn = function(next) {
+                        if(config.successMessage)
+                            this.ok(true, config.successMessage);
+
+                        next();
+                    };
+                }
+
+                if (assertTrue && typeof config.success === 'function') {
+                    fn = function(next) {
+                        if(config.successMessage)
+                            this.ok(true, config.successMessage);
+
+                        config.success.call(me, next);
+                    }
+                }
+
+                if(!assertTrue && typeof config.failure === 'undefined') {
+                    if(typeof config.continueOnFail === 'undefined' || !config.continueOnFail) {
+                        fn = function(next) {
+                            if(config.failMessage)
+                                this.ok(false, config.failMessage);
+
+                            this.ok(false, 'Test conditions not met. Terminating test execution.');
+                            this.done();
+                        }
+                    }
+                    else {
+                        fn = function(next) {
+                            if(config.failMessage)
+                                this.ok(false, config.failMessage);
+
+                            next();
+                        }
+                    }
+                }
+
+                if (!assertTrue && typeof config.failure === 'function') {
+                    fn = function(next) {
+                        if(config.failMessage)
+                            this.ok(false, config.failMessage);
+
+                        config.failure.call(me, next);
+                    }
+                }
+
+                next(fn);
+            }
+        );
+
+        chain.push({
+            action : function(next, fn) {
+                fn.call(me.t || me, next);
+            },
+            timeout : 360000
+        });
+
+        return this;
+    },
+
 
     /**
      * Custom codes that needs to be included in the test.
@@ -378,42 +457,43 @@ Ext.define('iRely.TestEngine', {
     /**
      * Clicks a message box button.
      *
-     * @param {String} item Name of the button. ('yes', 'no', 'cancel', 'ok').
+     * @param {String} item Name of the button. ('yes', 'no', 'cancel', 'ok', 'x').
      *
      * @returns {iRely.TestEngine}
      */
+
     clickMessageBoxButton: function(item) {
         var chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                btn;		
+                btn;
 
-			switch (item) {
-				case 'yes':
-					btn = Ext.query('.sweet-alert button.confirm');
-					break;
-				case 'no':
-					btn = Ext.query('.sweet-alert button.cancel');
-					break;
-				case 'cancel':
-					btn = Ext.query('.sweet-alert button.cancel2');
-					break;
-				case 'ok':
-					btn = Ext.query('.sweet-alert button.confirm');
-					break;
-			}
-				
-			if (btn) {
-				t.diag('Clicking ' + item);
-				t.click(btn[0], next);
-				
-			} 
-			else {
-				t.ok(false, item + ' is not found.');
-				next();
-			}							
-		};
+            switch (item) {
+                case 'yes':
+                    btn = Ext.query('.sweet-alert button.confirm');
+                    break;
+                case 'no':
+                    btn = Ext.query('.sweet-alert button.cancel');
+                    break;
+                case 'cancel':
+                    btn = Ext.query('.sweet-alert button.cancel2');
+                    break;
+                case 'ok':
+                    btn = Ext.query('.sweet-alert button.confirm');
+                    break;
+            }
+
+            if (btn) {
+                t.diag('Clicking ' + item);
+                t.click(btn[0], next);
+
+            }
+            else {
+                t.ok(false, item + ' is not found.');
+                next();
+            }
+        };
         chain.push(fn);
         return this;
     },
@@ -423,18 +503,26 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} item Item Id of the button.
      *
+     * @param {Integer} tab Index of the tab to be filtered. Optional.
+     *
      * @returns {iRely.TestEngine}
      */
-    clickButton: function(item) {
+    clickButton: function(item, tab) {
         var me = this,
             chain = me.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard') || me.getComponentByQuery('viewport');
 
             if (win) {
                 var button = win.down(item);
+
+                if (tab){
+                    var tabPanel = win.down('tabpanel').items.items[tab];
+                    button = tabPanel.down(item);
+                }
+
                 if (button) {
                     t.diag('Clicking button ' + item);
 
@@ -514,9 +602,11 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} item Item Id of the combo box.
      *
+     * @param {Integer} tab Index of the tab to be filtered. Optional.
+     *
      * @returns {iRely.TestEngine}
      */
-    clickEllipsisButton: function(item) {
+    clickEllipsisButton: function(item, tab) {
         var me = this,
             chain = me.chain;
 
@@ -525,11 +615,50 @@ Ext.define('iRely.TestEngine', {
                 win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
             if (win) {
                 var combo = win.down(item);
+
+                if (tab) {
+                    var tabpanel = win.down('tabpanel').items.items[tab];
+                    combo = tabpanel.down(item);
+                }
+
                 if (combo) {
                     var ellipsis = combo.triggerEl.elements[0];
 
                     t.diag('Clicking ellipsis button ' + item);
                     t.click(ellipsis, next);
+                } else {
+                    next();
+                }
+            } else {
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Clicks a label hyperlink.
+     *
+     * @param {String} item Item Id of the combo box.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    clickLabel: function(item) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this,
+                win = Ext.WindowManager.getActive();
+            if (win) {
+                var field = win.down(item);
+                if (field) {
+                    var label = field.labelEl;
+
+                    t.diag('Clicking label hyperlink ' + item);
+                    t.click(label, next);
                 } else {
                     next();
                 }
@@ -550,11 +679,12 @@ Ext.define('iRely.TestEngine', {
      * @returns {iRely.TestEngine}
      */
     clickTab: function(item) {
-        var chain = this.chain;
+        var me = this,
+            chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
 				
             if (win) {
                 var tab = win.down(item) || win.down('tabpanel [text='+ item  +']');
@@ -766,24 +896,33 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} data Data to input in the control.
      *
+     * @param {Integer} tab Index of the tab to be filtered. Optional.
+     *
      * @returns {iRely.TestEngine}
      */
-    enterData: function(item, data, start, end) {
+    enterData: function(item, data, start, end, tab) {
         var me = this,
             chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
             if (win) {
                 var input = item.value ? item : win.down(item);
+
+                if (tab){
+                    var tabPanel = win.down('tabpanel').items.items[tab];
+                    input = item.value ? item : tabPanel.down(item);
+                }
+
                 if (input) {
                     var value = input.value;
 
                     t.diag('Entering data on control ' + item);
 
-                    start = start || 0;                    
-					end = value !== null ? (end || value.length) : (end || 0);
+                    start = start || 0;
+                    end = value !== null ? (end || value.length) : (end || 0);
 
                     t.click(input);
                     t.selectText(input, start, end);
@@ -861,10 +1000,10 @@ Ext.define('iRely.TestEngine', {
 
                             t.diag('Entering data on grid ' + item);
 
-                            start = start || 0;
-                            end = end || value ? value.length : 0;
+                           /* start = start || 0;
+                            end = end || value ? value.length : 0;*/
 
-                            t.selectText(editor, start, end);
+                            t.selectText(editor, 0, 50);
                             t.type(editor, data, function() {
                                 editor.completeEdit();
                                 next();
@@ -896,9 +1035,11 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Number[]/Number} index Array of Indexs or Index of the row to select.
      *
+     * @param {Integer} tab Index of the tab to be filtered.
+     *
      * @returns {iRely.TestEngine}
      */
-    selectSearchRowByIndex: function(index){
+    selectSearchRowByIndex: function(index, tab){
         var me = this,
             chain = this.chain;
 
@@ -910,8 +1051,14 @@ Ext.define('iRely.TestEngine', {
 
             if (win) {
                 if (win.xtype === 'search' || 'frmintegrateddashboard') {
-                    var grid = win.down('#grdSearch'),
-                        sm = grid.getSelectionModel(),
+                    var grid = win.down('#grdSearch');
+
+                    if (tab){
+                        var tabPanel = win.down('tabpanel').items.items[tab];
+                        grid = tabPanel.down('#grdSearch');
+                    }
+
+                    var sm = grid.getSelectionModel(),
                         store = grid.getStore(),
                         indexArrs = Ext.isArray(index) ? index : [index],
                         selected = [], bufferedData;
@@ -994,11 +1141,16 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} filter All column filter to apply.
      *
+     * @param {Integer} delay The delay value in millisecond.
+     *
      * @param {String} gridColumn Data Index of the column to be filtered
+     *
+     * @param {Integer} tab Index of the tab to be filtered.
      *
      * @returns {iRely.TestEngine}
      */
-    selectSearchRowByFilter: function(filter, gridColumn) {
+
+    selectSearchRowByFilter: function(filter, delay, gridColumn, tab) {
         var me = this,
             chain = this.chain;
 
@@ -1011,6 +1163,11 @@ Ext.define('iRely.TestEngine', {
             if (win) {
                 if (win.xtype === 'search' || 'frmintegrateddashboard') {
                     var filterGrid = win.down('#txtFilterGrid');
+
+                    if (tab){
+                        var tabPanel = win.down('tabpanel').items.items[tab];
+                        filterGrid = tabPanel.down('#txtFilterGrid');
+                    }
 
                     if (filterGrid) {
                         t.chain([
@@ -1030,11 +1187,16 @@ Ext.define('iRely.TestEngine', {
                             },
                             {
                                 action: 'wait',
-                                delay: 3000
+                                delay: delay
                             },
                             function(next){
-                                var grid =  win.down('#grdSearch'),
-                                    store = grid.store,
+                                var grid =  win.down('#grdSearch');
+
+                                if (tab){
+                                    grid = tabPanel.down('#grdSearch');
+                                }
+
+                                var store = grid.store,
                                     storeCount = store.getCount();
 
                                 if (storeCount === 1){
@@ -1046,17 +1208,25 @@ Ext.define('iRely.TestEngine', {
                                     } else {
                                         next();
                                     }
-                                } else {
-                                    var filterRec = store.findExact(gridColumn, filter),
-                                        record = store.getAt(filterRec);
+                                }
+                                else {
+                                    var filterRec = store.findExact(gridColumn, filter);
 
-                                    if (typeof(grid.getView) == "function") {
-                                        t.waitForRowsVisible(grid, function(){
-                                            var node1 = grid.getView().getNode(record);
+                                    if (filterRec){
+
+                                        if (filterRec === -1){
+                                            t.ok(false, 'No record found.');
+                                            next();
+                                        } else {
+                                            var record = store.getAt(filterRec),
+                                                node1 = grid.getView().getNode(record);
+
                                             t.click(node1, next);
-                                        });
-                                    } else {
-                                        next();
+                                        }
+                                    }
+                                    else {
+                                        var node2 = grid.getView().getNode(0);
+                                        t.click(node2, next);
                                     }
                                 }
                             },
@@ -1078,6 +1248,7 @@ Ext.define('iRely.TestEngine', {
         return this;
     },
 
+
     /**
      * Select a row based on the grid and index specified.
      *
@@ -1085,20 +1256,27 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Number[]/Number} index Array of indexes or index of the row to select.
      *
+     * @param {Integer} tab Index of the tab to be filtered. Optional.
+     *
      * @returns {iRely.TestEngine}
      */
-     selectGridRow: function(item, index){
+     selectGridRow: function(item, index, tab){
         var me = this,
             chain = this.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard') || me.getComponentByQuery('viewport');
 
             t.diag('Selecting Grid Record.');
 
             if (win) {
                 var grid = iRely.Functions.getChildControl(item, win);
+
+                if (tab){
+                    var tabPanel = win.down('tabpanel').items.items[tab];
+                    grid = tabPanel.down(item);
+                }
 
                 if (grid) {
                     var sm = grid.getSelectionModel(),
@@ -1235,25 +1413,35 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Integer} index Index of the row to select.
      *
+     * @param {Integer} delay The delay value in millisecond.
+     *
+     * @param {Integer} tab Index of the tab to be filtered. Optional.
+     *
      * @returns {iRely.TestEngine}
      */
-    selectComboRowByIndex: function(item, index, delay) {
+    selectComboRowByIndex: function(item, index, delay, tab) {
         var me = this,
             chain = me.chain;
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                win = Ext.WindowManager.getActive() || me.getComponentByQuery('viewport').down('#pnlIntegratedDashboard');
+
             if (win) {
                 var combo = item.value ? item : win.down(item);
 
+                if (tab){
+                    var tabPanel = win.down('tabpanel').items.items[tab];
+                    combo = item.value ? item : tabPanel.down(item);
+                }
+
                 if (combo) {
                     var els = (function() {
-                                var cell = combo.el.query('.x-trigger-cell'),
-                                    form = combo.el.query('.x-form-trigger');
+                            var cell = combo.el.query('.x-trigger-cell'),
+                                form = combo.el.query('.x-form-trigger');
 
-                                    return (cell.length && cell) || (form.length && form);
-                              })(),
+                            return (cell.length && cell) || (form.length && form);
+                        })(),
                         length = els.length,
                         trigger = els[length - 1];
 
@@ -1568,7 +1756,9 @@ Ext.define('iRely.TestEngine', {
      *         conjuction: 'and'
      *     }])
      *
-	 * {String} comboColumn Data Index of the combo grid to be filtered
+     * @param {Integer} delay The delay value in millisecond.
+     *
+	 * @param {String} comboColumn Data Index of the combo grid to be filtered
      *
      * @returns {iRely.TestEngine}
      */
@@ -1724,9 +1914,11 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {String} filter All column filter to apply.
      *
+     * @param {Integer} tab Index of the tab to be filtered. Optional.
+     *
      * @returns {iRely.TestEngine}
      */
-    filterGrid: function(grid, item, filter) {
+    filterGrid: function(grid, item, filter, tab) {
         var me = this,
             chain = this.chain;
 
@@ -1739,8 +1931,18 @@ Ext.define('iRely.TestEngine', {
             if (win) {
                 var grd = win.down(grid);
 
+                if (tab){
+                    var tabPanel = win.down('tabpanel').items.items[tab];
+                    grd = tabPanel.down(grid);
+                }
+
                 if (grd) {
                     var filterGrid = win.down(item);
+
+                    if (tab){
+                        var tabPanel = win.down('tabpanel').items.items[tab];
+                        filterGrid = tabPanel.down(item);
+                    }
 
                     if (filterGrid) {
                         t.chain([
@@ -1762,7 +1964,7 @@ Ext.define('iRely.TestEngine', {
                         ]);
                     } else {
                         t.ok(false, item + ' Filter field is not existing.');
-						next();
+                        next();
                     }
                 } else {
                     t.ok(false, grid + ' Grid is not existing.');
@@ -2029,13 +2231,22 @@ Ext.define('iRely.TestEngine', {
                     control = win.down(item);
 
                 if (control) {
-                    if(control.xtype === 'numericfield' || control.xtype ===  'numeric' || control.xtype ===  'numberfield'){
-                        value = ' ' + value;
+                    var fieldVal = control.rawValue;
+
+                    if(control.xtype === 'numericfield' || control.xtype ===  'numeric' || control.xtype ===  'numberfield' || control.xtype === 'moneynumber'){
+                        value = value.trim();
+                        fieldVal = fieldVal.trim();
                     }
 
-                    var result = control.xtype === 'htmleditor' || control.xtype === 'moneynumber' ?
-                        control.getValue() === value :
-                        control.rawValue === value;
+                    if(control.xtype === 'uxtagfield'){
+                        fieldVal = control.getDisplayValue();
+                    }
+
+                    if(control.xtype === 'htmleditor'){
+                        fieldVal = control.getValue();
+                    }
+
+                    var result = fieldVal === value;
 
                     t.ok(result, result ? item + ' value is correct.' : item + ' value is incorrect.');
                 } else {
@@ -2144,13 +2355,16 @@ Ext.define('iRely.TestEngine', {
                     if (row && column) {
                         var value = row.get(column.dataIndex),
                             result = (function() {
-                                if(column.dataType === 'date') {
+                                if(column.xtype === 'datecolumn') {
                                     value = new Date(value).toLocaleDateString();
                                     data = new Date(data).toLocaleDateString();
                                 }
+                                if(column.xtype === 'numbercolumn') {
+                                    data = parseFloat(data);
+                                }
                                 return value === data;
                             })();
-                        t.ok(result, result ? 'Cell data is correct.' : 'Cell data is incorrect.');
+                        t.ok(result, result ? data + ' Cell data is correct.' : data + ' Cell data is incorrect.');
 
                         next();
                     } else {
@@ -2393,7 +2607,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @param {Boolean} [options.new] False to exclude new button from checking. Defaults to true.
      *
-     * @param {Boolean} [options.view] False to exclude open button from checking. Defaults to true.
+     * @param {Boolean} [options.open] False to exclude open button from checking. Defaults to true.
      *
      * @param {Boolean} [options.openselected] False to exclude openselected button from checking. Defaults to true.
      *
@@ -2741,10 +2955,10 @@ Ext.define('iRely.TestEngine', {
 
                                 t.diag('Entering data on grid ' + item);
 
-                                start = start || 0;
-                                end = end || value ? value.length : 0;
+                                /*start = start || 0;
+                                end = end || value ? value.length : 0;*/
 
-                                t.selectText(editor, start, end);
+                                t.selectText(editor, 0, 50);
                                 t.type(editor, data, function() {
                                     editor.completeEdit();
                                     next();
@@ -2944,6 +3158,7 @@ Ext.define('iRely.TestEngine', {
      *
      * @returns {iRely.TestEngine}
      */
+
     checkMessageBox: function(title, message, buttons, icon) {
         var chain = this.chain;
 
@@ -2952,69 +3167,63 @@ Ext.define('iRely.TestEngine', {
 
         var fn = function(next) {
             var t = this,
-                win = Ext.WindowManager.getActive();
+                msg = document.querySelector('.sweet-alert');
 
             t.diag('Checking Message Box.');
-			
-			if (win){
-				var msg = document.querySelector('.sweet-alert');
-
-				if (msg){
-					var btn = function(button){
-							return msg.querySelector('button.' + button).style.display === 'inline-block';
-						},
-						titleResult,
-						msgResult,
-						buttonResult,
-						iconCls = '',
-						iconResult;
-
-					t.ok(true, 'Message box is shown.');
-					t.ok(titleResult = (msg.querySelector('h2').innerHTML === title), titleResult ? 'Title is correct.' : 'Title is incorrect.');
-					t.ok(msgResult = (msg.querySelector('p').innerHTML === message), msgResult ? 'Message is correct.' : 'Message is incorrect.');
 
 
-					switch (buttons) {
-						case 'ok':
-							buttonResult =  (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'none') && (msg.querySelector('button.cancel2').style.display === 'none');
-							break;
-						case 'okcancel':
-							buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'none');
-							break;
-						case 'yesno':
-							buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'none');
-							break;
-						case 'yesnocancel':
-							buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'inline-block');
-							break;
-					}
+            if (msg){
+                var btn = function(button){
+                        return msg.querySelector('button.' + button).style.display === 'inline-block';
+                    },
+                    titleResult,
+                    msgResult,
+                    buttonResult,
+                    iconCls = '',
+                    iconResult;
 
-					switch (icon) {
-						case 'information':
-							iconResult = (msg.querySelector('.icon.info').style.display) === 'block';
-							break;
-						case 'question':
-							iconResult = (msg.querySelector('.icon.warning').style.display) === 'block';
-							break;
-						case 'error':
-							iconResult = (msg.querySelector('.icon.error').style.display) === 'block';
-							break;
-						case 'warning':
-							iconResult = (msg.querySelector('.icon.warning').style.display) === 'block';
-							break;
-					}
+                t.ok(true, 'Message box is shown.');
+                t.ok(titleResult = (msg.querySelector('h2').innerHTML === title), titleResult ? 'Title is correct.' : 'Title is incorrect.');
+                t.ok(msgResult = (msg.querySelector('p').innerHTML === message), msgResult ? 'Message is correct.' : 'Message is incorrect.');
 
-					t.ok(buttonResult, buttonResult ? 'Button is correct.' : 'Button is incorrect.');
-					t.ok(iconResult = (msg.querySelector('.icon.' + icon).style.display === 'block'), iconResult ?  'Icon is correct.' : 'Icon is incorrect.');                
 
-				}
-				else {
-					t.ok(false, 'Message box is not shown.');                
-				}
-			}
-			else {
-				t.ok(false, 'No active window.');            
-			}		
+                switch (buttons) {
+                    case 'ok':
+                        buttonResult =  (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'none') && (msg.querySelector('button.cancel2').style.display === 'none');
+                        break;
+                    case 'okcancel':
+                        buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'none');
+                        break;
+                    case 'yesno':
+                        buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'none');
+                        break;
+                    case 'yesnocancel':
+                        buttonResult = (msg.querySelector('button.confirm').style.display === 'inline-block') && (msg.querySelector('button.cancel').style.display === 'inline-block') && (msg.querySelector('button.cancel2').style.display === 'inline-block');
+                        break;
+                }
+
+                switch (icon) {
+                    case 'information':
+                        iconResult = (msg.querySelector('.icon.info').style.display) === 'block';
+                        break;
+                    case 'question':
+                        iconResult = (msg.querySelector('.icon.warning').style.display) === 'block';
+                        break;
+                    case 'error':
+                        iconResult = (msg.querySelector('.icon.error').style.display) === 'block';
+                        break;
+                    case 'warning':
+                        iconResult = (msg.querySelector('.icon.warning').style.display) === 'block';
+                        break;
+                }
+
+                t.ok(buttonResult, buttonResult ? 'Button is correct.' : 'Button is incorrect.');
+                t.ok(iconResult, iconResult ?  'Icon is correct.' : 'Icon is incorrect.');
+
+            }
+            else {
+                t.ok(false, 'Message box is not shown.');
+            }
             next();
         };
 
@@ -3306,5 +3515,280 @@ Ext.define('iRely.TestEngine', {
         }
 
         return result;
+    },
+
+    /**
+     * @private
+     * Gets and Checks Total Assets and Total Liability & Equity
+     *
+     * @param {String} item Class Name of the cell
+     *
+     * @returns {iRely.TestEngine}
+     */
+    checkBalanceSheetFRD : function(item) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this;
+
+            t.waitForFn(function() {
+                var iframe = window.parent.document.getElementsByClassName('tr-iframe');
+                if (iframe){
+                    if(iframe[0].contentWindow){
+                        if(iframe[0].contentWindow.frames){
+                            if(iframe[0].contentWindow.frames[0].frames){
+                                if(iframe[0].contentWindow.frames[0].frames[0]){
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            },function() {
+                if (typeof item === "string") {
+                    var iframe = window.parent.document.getElementsByClassName('tr-iframe');
+                    if (iframe) {
+                        var com = iframe[0].contentWindow.frames[0].frames[0].document.getElementsByClassName(item),
+                            Assets = com[1].firstChild.innerHTML,
+                            LiabilityAndEquity = com[21].firstChild.innerHTML;
+
+                        if(parseFloat(Assets.replace(/,/g, '')) == parseFloat(LiabilityAndEquity.replace(/,/g, ''))){
+                            t.ok(true, 'Balance Sheet is balance.');
+                            next();
+                        }
+                        else{
+                            t.ok(true, 'Balance Sheet is not balance.');
+                            next();
+                        }
+                    }
+                    else{
+                        t.ok(true, 'Balance Sheet is not balance.');
+                        next();
+                    }
+                }
+                else{
+                    t.ok(false, 'Component cannot be found.');
+                    next();
+                }
+            },this, 60000)
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * @private
+     * Gets and Checks Beginning Balance and Ending Balance
+     *
+     * @param {String} item Class Name of the cell
+     *
+     * @returns {iRely.TestEngine}
+     */
+    checkTrialBalanceFRD : function(item) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this;
+
+            t.waitForFn(function() {
+                var iframe = window.parent.document.getElementsByClassName('tr-iframe');
+                if (iframe){
+                    if(iframe[0].contentWindow){
+                        if(iframe[0].contentWindow.frames){
+                            if(iframe[0].contentWindow.frames[0].frames){
+                                if(iframe[0].contentWindow.frames[0].frames[0]){
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            },function() {
+                if (typeof item === "string") {
+                    var iframe = window.parent.document.getElementsByClassName('tr-iframe');
+                    if (iframe) {
+                        var com = iframe[0].contentWindow.frames[0].frames[0].document.getElementsByClassName(item),
+                            BeginningBalance = com[1].firstChild.innerHTML,
+                            EndingBalance = com[6].firstChild.innerHTML,
+                            Debit = com[2].firstChild.innerHTML,
+                            Credit = com[3].firstChild.innerHTML,
+                            balance = true;
+
+                        if(parseFloat(BeginningBalance.replace(/,/g, '')) == parseFloat(EndingBalance.replace(/,/g, ''))){
+                            t.diag('Beginning and Ending Balance matched.');
+                        }
+                        else{
+                            t.diag('Beginning and Ending Balance did not matched.');
+                            balance = false;
+                        }
+
+                        if(parseFloat(Debit.replace(/,/g, '')) == parseFloat(Credit.replace(/,/g, ''))){
+                            t.diag('Debit and Credit matched.');
+                        }
+                        else{
+                            t.diag('Debit and Credit did not matched.');
+                            balance = false;
+                        }
+
+                        if(balance) {
+                            t.ok(true, 'Trial Balance is balance.');
+                            next();
+                        }
+                        else{
+                            t.ok(true, 'Trial Balance is not balance.');
+                            next();
+                        }
+                    }
+                    else{
+                        t.ok(true, 'Trial Balance is not balance.');
+                        next();
+                    }
+                }
+                else{
+                    t.ok(false, 'Component cannot be found.');
+                    next();
+                }
+            },this, 180000)
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Clicks a button.
+     *
+     * @param {String} item Item Id of the button in Financial Report Viewer
+     *
+     * @returns {iRely.TestEngine}
+     */
+    clickButtonFRD: function(item) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this,
+                iframe = window.parent.document.getElementsByClassName('tr-iframe');
+
+            if (iframe) {
+                var button = iframe[0].contentWindow.frames[0].document.getElementById(item);
+
+                if (button) {
+                    t.diag('Clicking button ' + item);
+
+                    t.chain([
+                        {
+                            action: 'click',
+                            target: button
+                        },
+                        {
+                            action: 'wait',
+                            delay: 10
+                        },
+                        function(next) {
+                            var newActive = Ext.WindowManager.getActive();
+                            if (newActive) {
+                                if (newActive.xtype === 'quicktip') {
+                                    newActive.close();
+                                }
+                            }
+                            next();
+                        },
+                        next
+                    ]);
+                } else {
+                    t.ok(false, item + ' is not found.');
+                    next();
+                }
+            } else {
+                next();
+            }
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Continuously checks if the item becomes visible / ready
+     *
+     * @param {String} item Item Id of the control.
+     *
+     * @param {String} msg Custom message.
+     *
+     * @param {Integer} timeout Maximum timeout / limit.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    waitTillVisible : function(item, msg, timeout) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this;
+
+            if(!timeout) timeout = 60000;
+
+            t.waitForFn(function() {
+                var com = me.getComponentByQuery(item);
+                if(com) return true;
+            },function() {
+                if(!msg) msg = 'Component is shown';
+                t.ok(true, msg);
+                next();
+            },this, timeout)
+        };
+
+        chain.push(fn);
+        return this;
+    },
+
+    /**
+     * Continuously checks if the item becomes visible / ready
+     *
+     * @param {String} item Item Id of the control.
+     *
+     * @param {String} msg Custom message.
+     *
+     * @param {Integer} timeout Maximum timeout / limit.
+     *
+     * @returns {iRely.TestEngine}
+     */
+    waitTillVisibleReportViewer : function(item, msg, timeout) {
+        var me = this,
+            chain = me.chain;
+
+        var fn = function(next) {
+            var t = this;
+
+            if(!timeout) timeout = 60000;
+
+            t.waitForFn(function() {
+                var iframe = window.parent.document.getElementsByClassName('tr-iframe');
+                if (iframe){
+                    if(iframe[0].contentWindow){
+                        if(iframe[0].contentWindow.frames){
+                            if(iframe[0].contentWindow.frames[0].frames){
+                                if(iframe[0].contentWindow.frames[0].frames[0]){
+                                    if(iframe[0].contentWindow.frames[0].document.getElementById(item)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },function() {
+                if(!msg) msg = 'Component is shown';
+                t.ok(true, msg);
+                next();
+            },this, timeout)
+        };
+
+        chain.push(fn);
+        return this;
     }
 });

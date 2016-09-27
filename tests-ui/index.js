@@ -22,6 +22,19 @@ Harness.configure({
     //autoRun: true
 });
 Harness.start(
+
+    { group: 'SmokeTesting',
+        items: [
+            {
+                url: 'SmokeTesting/ICSmokeTests.js',
+                preload: [
+                    testEnginePath,
+                    commonSM
+
+                ]
+            }
+        ]
+    },
     { group: 'Item',
         items: [
             {
