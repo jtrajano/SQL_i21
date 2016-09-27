@@ -954,10 +954,15 @@ IF (@isSuccessful <> 0)
 						/* Update the Employee Time Off Hours Used */
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed + A.dblHours
-							FROM tblPRPaycheckEarning A
+							FROM (SELECT 
+									intPaycheckId
+									,intEmployeeTimeOffId
+									,dblHours = SUM(dblHours)
+								  FROM tblPRPaycheckEarning
+								  WHERE intPaycheckId = @intPaycheckId
+								  GROUP BY intPaycheckId, intEmployeeTimeOffId) A
 							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
 								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
-								AND A.intPaycheckId = @intPaycheckId
 
 						/* Update Paycheck Direct Deposit Distribution */
 						IF (@intBankTransactionTypeId = @DIRECT_DEPOSIT)
@@ -977,10 +982,15 @@ IF (@isSuccessful <> 0)
 						/* Update the Employee Time Off Hours Used */
 						UPDATE tblPREmployeeTimeOff
 							SET	dblHoursUsed = dblHoursUsed - A.dblHours
-							FROM tblPRPaycheckEarning A
+							FROM (SELECT 
+									intPaycheckId
+									,intEmployeeTimeOffId
+									,dblHours = SUM(dblHours)
+								  FROM tblPRPaycheckEarning
+								  WHERE intPaycheckId = @intPaycheckId
+								  GROUP BY intPaycheckId, intEmployeeTimeOffId) A
 							WHERE tblPREmployeeTimeOff.intTypeTimeOffId = A.intEmployeeTimeOffId
 								AND tblPREmployeeTimeOff.[intEntityEmployeeId] = @intEmployeeId
-								AND A.intPaycheckId = @intPaycheckId
 
 						SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
 						DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
