@@ -4071,7 +4071,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptCheckRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettleStorage.sql" />
-    <Build Include="dbo\Views\vyuCTContractDetails.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailGrid.sql" />
     <Build Include="dbo\Views\vyuCTContractSearchView2.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderView2.sql" />
     <Build Include="dbo\Views\vyuICLoadContainerReceiptContracts.sql" />
