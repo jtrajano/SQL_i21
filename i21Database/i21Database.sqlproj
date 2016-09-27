@@ -2624,11 +2624,6 @@
     <Build Include="dbo\Stored Procedures\uspTRGenerateQuotes.sql" />
     <Build Include="dbo\Views\vyuTRQuoteSelection.sql" />
     <Build Include="dbo\Functions\fnICGetRunningQuantity.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetCustomerCalculation.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetCustomerRefundCalculation.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetFiscalSummary.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetNoRefundCalculation.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetRefundCalculation.sql" />
     <Build Include="dbo\Tables\tblSMLetterUpload.sql" />
     <Build Include="dbo\Views\vyuTMVirtualMeterBilling.sql" />
     <Build Include="dbo\Functions\fnTMGetSpecialPricingPriceTable.sql" />
@@ -2709,7 +2704,6 @@
     <Build Include="dbo\Functions\fnCTGetBrokerageCommission.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetItemUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetLastSettlementPrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetPatronageDetails.sql" />
     <Build Include="dbo\Views\vyuPATVolumeDetails.sql" />
     <Build Include="dbo\Tables\tblMFReportCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryCount.sql" />
@@ -2717,7 +2711,6 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateWriteOff.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostWriteOff.sql" />
     <Build Include="dbo\Functions\fnAPCreateWriteOffGLEntries.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetEquityPatronageDetails.sql" />
     <Build Include="dbo\Views\vyuPATEquityDetails.sql" />
     <Build Include="dbo\Tables\tblSCLastScaleSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspCFProcessTransactionToInvoice.sql" />
@@ -2763,7 +2756,6 @@
     <Build Include="dbo\Functions\fnICCheckAllowSale.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetBudgetLetter.sql" />
     <Build Include="dbo\Tables\tblEMEntityTariffType.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetDividends.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateProvisionalOnStandardInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateScaleDeviceInterface.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreatePickOrder.sql" />
@@ -2778,7 +2770,6 @@
     <Build Include="dbo\Functions\fnARGetCustomerBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessSplitInvoice.sql" />
     <Build Include="dbo\Functions\fnGetEntityNumberByEntityIds.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetEquityRefundDetails.sql" />
     <Build Include="dbo\Views\vyuEMETExportCustomer.sql" />
     <Build Include="dbo\Functions\fnAPContractHasUnappliedPrepaid.sql" />
     <Build Include="dbo\Views\vyuARShipmentItemUOM.sql" />
@@ -2911,7 +2902,6 @@
     <Build Include="dbo\Stored Procedures\uspPATPostCancelEquity.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateInventoryShipmentItemLot.sql" />
     <Build Include="dbo\Tables\tblCTBagMarkLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetDividendsCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteInvoice.sql" />
@@ -2925,9 +2915,6 @@
     <Build Include="dbo\Stored Procedures\uspWHPickFlexibilityValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspWHMBLSplitSKUForOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateOrderLineItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetCustomerPatronage.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetRefundPatronage.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetFiscalPatronage.sql" />
     <Build Include="dbo\Tables\tblEMEntitySplitExceptionCategory.sql" />
     <Build Include="dbo\Functions\fnCalculateCostBetweenUOM.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityRequireApprovalFor.sql" />
@@ -3026,7 +3013,6 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_Frequency.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFields.sql" />
     <Build Include="dbo\Tables\tblTFScheduleFieldTemplate.sql" />
@@ -3035,7 +3021,6 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_ReportingComponent.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxAuthority.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATUpdateVolumeAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspWHConfirmPickForShipment.sql" />
     <Build Include="dbo\Views\vyuGRGetActionEntity.sql" />
@@ -3846,7 +3831,6 @@
     <Build Include="dbo\Functions\fnARGetCustomerDefaultCurreny.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspPATGetPostedRefundFromAPBill.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />
     <Build Include="dbo\Tables\tblSMSecurityPolicy.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityPasswordHistory.sql" />

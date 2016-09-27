@@ -34,3 +34,6 @@ GO
 --System Manager
 :r "..\Scripts\SM\FixCompanyLocationNumber.sql"
 :r "..\Scripts\SM\SetDefaultValues.sql"
+
+--Patronage
+:r "..\Scripts\PAT\DropStoredProcedures.sql"

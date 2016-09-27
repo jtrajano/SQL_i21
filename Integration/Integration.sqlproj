@@ -70,6 +70,7 @@
     <Folder Include="Scripts\TM" />
     <Folder Include="Scripts\NR" />
     <Folder Include="Scripts\SM" />
+    <Folder Include="Scripts\PAT" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -148,6 +149,7 @@
     <None Include="Scripts\AP\BackupImportedUnpostedBillDetail.sql" />
     <None Include="dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql" />
     <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
+    <None Include="Scripts\PAT\DropStoredProcedures.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
