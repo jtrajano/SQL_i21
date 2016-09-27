@@ -4380,6 +4380,8 @@
     <Build Include="dbo\Functions\fnARSplitValues.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateSF401.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingZeroStockTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSaveReceiptInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTableReceiptInspection.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
