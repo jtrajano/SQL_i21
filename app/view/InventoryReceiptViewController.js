@@ -5083,6 +5083,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onSelectClearGridInspectionClick: function (button, e, eOpts) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+
+        if(button.itemId === 'btnSelectAll') {
+            if (current.tblICInventoryReceiptInspections()) {
+                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function(row) {
+                    if (!row.dummy) {
+                            row.set('ysnSelected', true);
+                        }
+                    });
+            }
+        }
+
+        if(button.itemId === 'btnClearAll') {
+            if (current.tblICInventoryReceiptInspections()) {
+                Ext.Array.each(current.tblICInventoryReceiptInspections().data.items, function(row) {
+                    if (!row.dummy) {
+                            row.set('ysnSelected', false);
+                        }
+                    });
+            }
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5239,6 +5264,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#tabInventoryReceipt": {
                 tabChange: this.onReceiptTabChange
+            },
+            "#btnSelectAll": {
+                click: this.onSelectClearGridInspectionClick
+            },
+            "#btnClearAll": {
+                click: this.onSelectClearGridInspectionClick
             }
         })
     }
