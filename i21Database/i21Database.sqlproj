@@ -4339,6 +4339,7 @@
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewProblem.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewConcern.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewSolution.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityOverviewUniqueValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
