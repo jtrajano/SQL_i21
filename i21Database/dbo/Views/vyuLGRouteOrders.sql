@@ -47,8 +47,8 @@ SELECT
           THEN LD.strCustomer
          WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery'
           THEN TMH.strCustomerName
-         WHEN IsNull(Rte.intCustomerID, 0) <> 0 
-          THEN TMSite.strCustomerName
+         --WHEN IsNull(Rte.intCustomerID, 0) <> 0 
+         -- THEN TMSite.strCustomerName
          WHEN IsNull(Rte.intEntityLocationId, 0) <> 0
           THEN EN.strName
          END Collate Latin1_General_CI_AS
@@ -97,8 +97,8 @@ SELECT
           THEN CompLoc.strAddress + ', ' + CompLoc.strCity + ', ' + CompLoc.strStateProvince + ' ' + CompLoc.strZipPostalCode
          WHEN IsNull(TMH.intDispatchId, 0) <> 0 AND Rte.strLocationType = 'Delivery' 
           THEN TMH.strSiteAddress + ', ' + TMH.strSiteCity + ', ' + TMH.strSiteState + ' ' + TMH.strSiteZipCode 
-         WHEN IsNull(Rte.intCustomerID, 0) <> 0 
-          THEN TMSite.strSiteAddress + ', ' + TMSite.strSiteCity + ', ' + TMSite.strSiteState + ' ' + TMSite.strSiteZip
+         --WHEN IsNull(Rte.intCustomerID, 0) <> 0 
+         -- THEN TMSite.strSiteAddress + ', ' + TMSite.strSiteCity + ', ' + TMSite.strSiteState + ' ' + TMSite.strSiteZip
          WHEN IsNull(Rte.intEntityLocationId, 0) <> 0 
           THEN EL.strAddress + ', ' + EL.strCity + ', ' + EL.strState + ' ' + EL.strZipCode 
         END Collate Latin1_General_CI_AS
@@ -134,6 +134,6 @@ LEFT JOIN vyuLGLoadView LGL ON LGL.intLoadId = LD.intLoadId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Rte.intEntityLocationId
 LEFT JOIN tblEMEntityType ET ON ET.intEntityTypeId = Rte.intEntityTypeId
 LEFT JOIN tblEMEntity EN ON EN.intEntityId = EL.intEntityId
-LEFT JOIN vyuTMCustomerConsumptionSiteInfo TMSite ON TMSite.intCustomerId = Rte.intCustomerID and TMSite.intSiteId = Rte.intSiteID
+--LEFT JOIN vyuTMCustomerConsumptionSiteInfo TMSite ON TMSite.intCustomerId = Rte.intCustomerID and TMSite.intSiteId = Rte.intSiteID
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = Rte.intCompanyLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubCompLoc ON SubCompLoc.intCompanyLocationSubLocationId = Rte.intCompanyLocationSubLocationId
