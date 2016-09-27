@@ -34,8 +34,9 @@ BEGIN TRY
 		,[strTransactionId]
 		,[intTransactionTypeId]
 		)
-	SELECT LD.intItemId
-		,intItemLocationId = (SELECT TOP (1) intItemLocationId FROM tblICItemLocation WHERE intItemId = LD.intItemId)
+	SELECT 
+		 LD.intItemId
+		,intItemLocationId = IL.intItemLocationId
 		,CT.intItemUOMId
 		,NULL
 		,LW.intSubLocationId
@@ -55,7 +56,8 @@ BEGIN TRY
 	LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 	LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intPContractDetailId
-	WHERE L.intLoadId = @intLoadId;
+	LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CT.intCompanyLocationId 
+	WHERE L.intLoadId = @intLoadId AND IL.intItemId = LD.intItemId;
 
     SELECT @total = COUNT(*) FROM @ItemsToIncreaseInTransitInBound;
     IF (@total = 0)
