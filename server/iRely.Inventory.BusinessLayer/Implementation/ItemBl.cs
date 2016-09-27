@@ -145,6 +145,14 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "Motor Fuel Taxes must be unique per Item.";
                 }
+                else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemLocation_tblICUnitMeasure_Issue\""))
+                {
+                    msg = "Units of measurement that are used as default Sale UOM in this Item's location(s) cannot be removed.";
+                }
+                else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemLocation_tblICUnitMeasure_Receive\""))
+                {
+                    msg = "Units of measurement that are used as default Purchase UOM in this Item's location(s) cannot be removed.";
+                }
             }
 
             return new BusinessResult<tblICItem>()
