@@ -245,6 +245,7 @@ BEGIN
 			,[intCreatedEntityId]
 			,[intConcurrencyId]
 			,[intCostingMethod]
+			,[strDescription]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -275,6 +276,7 @@ BEGIN
 			,[intCreatedEntityId]					= @intEntityUserSecurityId
 			,[intConcurrencyId]						= 1
 			,[intCostingMethod]						= ActualTransaction.intCostingMethod
+			,[strDescription]						= ActualTransaction.strDescription
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	

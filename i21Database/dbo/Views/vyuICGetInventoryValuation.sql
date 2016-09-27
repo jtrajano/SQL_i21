@@ -28,7 +28,7 @@ SELECT	intInventoryValuationKeyId  =
 		,dblRunningQtyBalance		= CAST(0 AS NUMERIC(38, 20))
 		,dblCost					= t.dblCost
 		,dblBeginningBalance		= CAST(0 AS NUMERIC(38, 20))
-		,dblValue					= ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2) 
+		,dblValue					= ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0) , 2) --ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2) 
 		,dblRunningBalance			= CAST(0 AS NUMERIC(38, 20))
 		,strBatchId
 		,CostingMethod.strCostingMethod
