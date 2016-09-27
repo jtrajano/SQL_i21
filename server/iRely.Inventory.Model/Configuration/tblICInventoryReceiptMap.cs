@@ -641,10 +641,11 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intQAPropertyId).HasColumnName("intQAPropertyId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnSelected).HasColumnName("ysnSelected");
+            this.Property(t => t.strPropertyName).HasColumnName("strPropertyName");
 
-            this.HasOptional(t => t.tblMFQAProperty)
+           /* this.HasOptional(t => t.tblMFQAProperty)
                 .WithMany(t => t.tblICInventoryReceiptInspections)
-                .HasForeignKey(t => t.intQAPropertyId);
+                .HasForeignKey(t => t.intQAPropertyId);*/
         }
     }
 

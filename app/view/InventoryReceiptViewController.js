@@ -1012,7 +1012,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     key: 'tblICInventoryReceiptInspections',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdIncomingInspection,
-                        position: 'none'
+                       // position: 'none'
                     })
                 }
             ]
@@ -5037,6 +5037,52 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         Inventory.view.InventoryReceiptViewController.orgValueLocation = current.get('intLocationId');
     },
 
+    onReceiptTabChange: function(tabPanel, newCard, oldCard, eOpts) {
+        switch (newCard.itemId) { 
+            case 'pgeIncomingInspection':
+                var win = tabPanel.up('window');
+                var context = win.context;
+                var current = win.viewModel.data.current;
+
+                var doPost = function () {
+                    if (current) {
+                        Ext.Ajax.request({
+                            timeout: 120000,
+                            url: '../Inventory/api/InventoryReceipt/UpdateReceiptInspection?id=' + current.get('intInventoryReceiptId'),
+                            method: 'post',
+                            success: function (response) {
+                                var jsonData = Ext.decode(response.responseText);
+                                if (!jsonData.success) {
+                                    iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                                }
+                                else {
+                                    context.configuration.paging.store.load();
+                                }
+                            },
+                            failure: function (response) {
+                                var jsonData = Ext.decode(response.responseText);
+                                iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                            }
+                        });
+                    }
+                };
+
+                // If there is no data change, do the post.
+                if (!context.data.hasChanges()){
+                    doPost();
+                    return;
+                }
+
+                // Save has data changes first before doing the post.
+                context.data.saveRecord({
+                    successFn: function () {
+                        doPost();
+                    }
+                });
+            break;
+        }
+    },
+
     init: function (application) {
         this.control({
             "#cboVendor": {
@@ -5190,6 +5236,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colLoadContract": {
                 beforecheckchange: this.onPostedTransactionBeforeCheckChange
+            },
+            "#tabInventoryReceipt": {
+                tabChange: this.onReceiptTabChange
             }
         })
     }

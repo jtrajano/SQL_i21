@@ -1345,8 +1345,8 @@ namespace iRely.Inventory.Model
         public int? intQAPropertyId { get; set; }
         public bool ysnSelected { get; set; }
         public int intSort { get; set; }
-
-        private string _propertyName;
+        public string strPropertyName { get; set; }
+       /* private string _propertyName;
         [NotMapped]
         public string strPropertyName
         {
@@ -1383,10 +1383,10 @@ namespace iRely.Inventory.Model
             {
                 _description = value;
             }
-        }
+        }*/
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
-        public tblMFQAProperty tblMFQAProperty { get; set; }
+        //public tblMFQAProperty tblMFQAProperty { get; set; }
     }
 
     public class vyuICGetReceiptAddOrder
