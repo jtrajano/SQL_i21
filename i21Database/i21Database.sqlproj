@@ -4343,6 +4343,8 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSaveReceiptInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTableReceiptInspection.sql" />
 	</Build>
   </ItemGroup>
   <ItemGroup>

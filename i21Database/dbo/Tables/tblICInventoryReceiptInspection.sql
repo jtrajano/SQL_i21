@@ -17,6 +17,7 @@ Type the overview for the table here.
 		[intQAPropertyId] INT NOT NULL, 
 		[ysnSelected] BIT NOT NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
+		[strPropertyName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryReceiptInspection] PRIMARY KEY ([intInventoryReceiptInspectionId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptInspection_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE
