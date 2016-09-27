@@ -55,4 +55,16 @@ AS
 	ON (A.intPurchaseDetailId = Items.intPurchaseDetailId AND A.intInventoryReceiptItemId IS NULL)
 	OR (A.intInventoryReceiptItemId = Items.intInventoryReceiptItemId AND A.intPurchaseDetailId IS NULL)
 	OR (A.intInventoryReceiptItemId = Items.intInventoryReceiptItemId AND A.intPurchaseDetailId = Items.intPurchaseDetailId)
+  
+	UNION ALL
+	--IS TYPE
+	SELECT
+	A.strShipmentNumber AS strSourceNumber
+	,NULL
+	,NULL  
+	,C.intBillDetailId 
+	FROM dbo.tblICInventoryShipment A  
+	INNER JOIN dbo.tblICInventoryShipmentCharge B ON B.intInventoryShipmentId = A.intInventoryShipmentId
+	INNER JOIN dbo.tblAPBillDetail C ON B.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId
 --) BillDetailSource
+GO
