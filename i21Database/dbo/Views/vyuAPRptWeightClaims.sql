@@ -6,6 +6,7 @@ CAST(ROW_NUMBER() OVER(ORDER BY intContractDetailId) AS INT) AS intClaimId,
 (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName,
 (SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress,
 (dblWeightLoss - dblFranchiseWeight) * dblCost AS dblClaim,
+((dblWeightLoss - dblFranchiseWeight) * dblCost  - dblTotalClaimAmount) * -1 AS  dblFranchiseAmount,
 (dblWeightLoss - dblFranchiseWeight) AS dblQtyToBill ,
 * 
 FROM (
@@ -64,7 +65,8 @@ FROM (
 			 BillClaim.intBillId 
 			,Receipts.dblNetQtyReceived
 			,J.dblAmountApplied AS dblAppliedPrepayment
-			,B.dblCost
+			,CASE WHEN B.dblNetWeight > 0 THEN B.dblCost * (B.dblWeightUnitQty / B.dblCostUnitQty)
+					 WHEN B.intCostUOMId > 0 THEN B.dblCost * (B.dblUnitQty / B.dblCostUnitQty) ELSE B.dblCost END AS dblCost
 			,B.dblQtyReceived
 			,B.dblQtyOrdered AS dblQtyBillCreated
 			,B.intCostUOMId AS intUnitOfMeasureId
