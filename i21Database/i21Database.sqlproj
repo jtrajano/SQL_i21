@@ -4507,6 +4507,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\_TaxReportTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

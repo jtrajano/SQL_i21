@@ -5509,4 +5509,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strSummaryGuid" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1bae406b-f26b-4169-a2ea-2016898d1c14" ChangeDateTime="09/27/2016 19:46:53">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[intTemplateItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="inTemplateItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="61305045-5aa7-47d1-93ed-56009265fdd0" ChangeDateTime="09/27/2016 19:49:27">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxReportTemplate].[inTemplateItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxReportTemplate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strTemplateItemId" />
+  </Operation>
 </Operations>

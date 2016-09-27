@@ -68,8 +68,8 @@ SET @TACode = (SELECT TOP 1 strTaxAuthority FROM tblTFTransactions WHERE uniqTra
 SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-SET @LicenseNumber = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND intTemplateItemId = 'License Number')
-SET @MotorCarrier = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND intTemplateItemId = 'Motor Carrier / IFTA Number')
+SET @LicenseNumber = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'SF-401-LicenseNumber')
+SET @MotorCarrier = (SELECT TOP 1 strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'SF-401-MotorCarrier')
 SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 
 
@@ -134,7 +134,7 @@ SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 									
 									-- GAS
 									DECLARE @SmryDetailItemId NVARCHAR(MAX)
-									SET @SmryDetailItemId = (SELECT intTemplateItemId FROM tblTFTaxReportTemplate WHERE strSegment = 'Summary' and intTemplateItemNumber = @CountItems AND strFormCode = @FormCodeParam)
+									SET @SmryDetailItemId = (SELECT strTemplateItemId FROM tblTFTaxReportTemplate WHERE strSegment = 'Summary' and intTemplateItemNumber = @CountItems AND strFormCode = @FormCodeParam)
 							
 									INSERT INTO tblTFTaxReportSummary (strSummaryGuid,intTaxAuthorityId,strTaxAuthority,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strDescription, dtmDateRun)		
 									VALUES(@Guid,@TA,@TACode,@FormCodeParam,@tplScheduleCode, 1, 'Summary','Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)', '',@DetailColumnValue_gas, @ItemDescription, CAST(GETDATE() AS DATE))
