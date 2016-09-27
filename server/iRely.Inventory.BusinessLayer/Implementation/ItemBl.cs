@@ -147,11 +147,11 @@ namespace iRely.Inventory.BusinessLayer
                 }
                 else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemLocation_tblICUnitMeasure_Issue\""))
                 {
-                    msg = "Units of measurement that are used as default Sale UOM in this Item's location(s) cannot be removed.";
+                    msg = "UOMs that are used as default Sale UOM in this Item's location(s) cannot be removed. To remove the UOMs, clear the Sale UOMs that were assigned to the Item's location(s).";
                 }
                 else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemLocation_tblICUnitMeasure_Receive\""))
                 {
-                    msg = "Units of measurement that are used as default Purchase UOM in this Item's location(s) cannot be removed.";
+                    msg = "UOMs that are used as default Purchase UOM in this Item's location(s) cannot be removed. To remove the UOMs, clear the Purchase UOMs that were assigned to the Item's location(s).";
                 }
             }
 
