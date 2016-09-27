@@ -841,7 +841,7 @@ group by  strContractOrInventoryType,strCommodityCode,intCommodityId, strItemNo,
 
 )t WHERE strContractOrInventoryType= case when @ysnIncludeInventoryM2M = 1 then strContractOrInventoryType else '' end )t2
 
-IF (@strRateType='Exchange')
+IF (@strRateType='Configuration')
 BEGIN
 SELECT intContractHeaderId,
     convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,isnull(PriceSourceUOMId,intPriceUOMId),dblFuturePrice)) as dblFuturePrice,
