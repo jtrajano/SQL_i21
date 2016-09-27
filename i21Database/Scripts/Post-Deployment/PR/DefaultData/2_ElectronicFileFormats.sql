@@ -1,5 +1,11 @@
-﻿/* Begin Insert EFW2 Format */
+﻿/* Begin Delete E-File Format Tables for clean insert */
 
+DELETE FROM tblPREFileFormat
+GO
+
+/* End Delete E-File Format Tables for clean insert */
+
+/* Begin Insert EFW2 Format */
 SET IDENTITY_INSERT [dbo].[tblPREFileFormat] ON 
 INSERT [dbo].[tblPREFileFormat] ([intEFileFormatId], [strName], [strDescription], [intFormat], [ysnDefault], [intConcurrencyId]) VALUES (1, N'EFW2', N'Electronic Filing W-2', 1, 1, 1)
 SET IDENTITY_INSERT [dbo].[tblPREFileFormat] OFF
