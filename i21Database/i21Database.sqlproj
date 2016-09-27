@@ -4337,6 +4337,7 @@
     <Build Include="dbo\Views\vyuPATCalculateCustomerDividend.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetPriceHistory.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityOverviewProblem.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityOverviewConcern.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
