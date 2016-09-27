@@ -9,8 +9,8 @@ SELECT
 	,strMiddleName = LEFT(ISNULL(EMP.strMiddleName, ''), 15)
 	,strLastName = LEFT(ISNULL(EMP.strLastName, ''), 20)
 	,strSuffix = LEFT(ISNULL(EMP.strNameSuffix, ''), 4)
-	,strEmployeeAddress = LEFT(ISNULL(ENL.strAddress, ''), 22)
-	,strEmployeeDelivery = LEFT(ISNULL(ENL.strAddress, ''), 22)
+	,strEmployeeAddress = LEFT(REPLACE(REPLACE(ISNULL(ENL.strAddress, ''), CHAR(13), ''), CHAR(10), ''), 22)
+	,strEmployeeDelivery = LEFT(REPLACE(REPLACE(ISNULL(ENL.strAddress, ''), CHAR(13), ''), CHAR(10), ''), 22)
 	,strEmployeeCity = LEFT(ISNULL(ENL.strCity, ''), 22)
 	,strEmployeeState = CASE WHEN (ISNULL(ENL.strCountry, '') <> 'United States') THEN '' 
 							ELSE 

@@ -276,6 +276,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
+:r .\PR\DefaultData\2_ElectronicFileFormats.sql
 :r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
 :r .\PR\DataFixes\AddPaycheckDirectDepositEntries.sql
 :r .\PR\DataFixes\ResetEaningHoursToProcess.sql
