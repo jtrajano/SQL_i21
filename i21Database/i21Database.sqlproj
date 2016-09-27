@@ -4340,12 +4340,11 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateShipmentOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryShipment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql">
+    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryShipmentOtherCharges.sql"/>
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
     <Build Include="dbo\Stored Procedures\uspICSaveReceiptInspection.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateTableReceiptInspection.sql" />
-	</Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
