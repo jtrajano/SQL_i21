@@ -450,3 +450,7 @@ EXEC sp_addmessage 80092,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80093) EXEC sp_dropmessage 80093, 'us_english'	
 SET @strmessage = 'Stock quantity is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
 EXEC sp_addmessage 80093,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80094) EXEC sp_dropmessage 80094, 'us_english'	
+SET @strmessage = 'Costing method mismatch. %s is set to use Ave Costing. %s is going to use Actual costing. It can''t be used together. You can fix it by changing the costing method to FIFO or LIFO.'
+EXEC sp_addmessage 80094,11,@strmessage,'us_english','False'
