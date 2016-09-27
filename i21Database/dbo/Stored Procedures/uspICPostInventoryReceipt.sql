@@ -219,6 +219,8 @@ BEGIN
 		LEFT JOIN tblICInventoryReceiptItemLot itemLot ON itemLot.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 	WHERE dbo.fnGetItemLotType(item.intItemId) <> 0
 		AND itemLot.intLotId IS NULL
+		AND receipt.intInventoryReceiptId = @intTransactionId
+
 	IF @strItemNo IS NOT NULL
 	BEGIN
 		-- 'Lotted item {Item No} should should have lot(s) specified.'
