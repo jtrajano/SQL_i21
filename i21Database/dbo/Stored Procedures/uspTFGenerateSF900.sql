@@ -61,7 +61,7 @@ SET @TA = (SELECT TOP 1 intTaxAuthorityId FROM tblTFTransactions WHERE uniqTrans
 SET @DatePeriod = (SELECT TOP 1 dtmDate FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 SET @DateBegin = (SELECT TOP 1 dtmReportingPeriodBegin FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 SET @DateEnd = (SELECT TOP 1 dtmReportingPeriodEnd FROM tblTFTransactions WHERE uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
-SET @LicenseNumber = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND intTemplateItemId = 'License Number')
+SET @LicenseNumber = (SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strFormCode = @FormCodeParam AND strTemplateItemId = 'SF-900-LicenseNumber')
 SET @EIN = (SELECT TOP 1 strEin FROM tblSMCompanySetup)
 
 INSERT INTO tblTFTaxReportSummary (strSummaryGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strSegment, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, 
@@ -92,7 +92,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 			-- GET SCHEDULE CODE PARAMETERS FOR FILTERING
 			SET @ParamId = (SELECT TaxReportSummaryItemId FROM @tblTempSummaryItem WHERE Id = @SummaryItemCount)
 			SET @TemplateScheduleCode = (SELECT strScheduleCode FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ParamId AND strFormCode = @FormCodeParam)
-			SET @TemplateItemId = (SELECT intTemplateItemId FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ParamId AND strFormCode = @FormCodeParam)
+			SET @TemplateItemId = (SELECT strTemplateItemId FROM tblTFTaxReportTemplate WHERE intReportTemplateId = @ParamId AND strFormCode = @FormCodeParam)
 
 			SET @TemplateScheduleCode = REPLACE(@TemplateScheduleCode,',',''',''')
 
@@ -153,7 +153,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-007'
 					BEGIN
 					--7. Amount of Tax Uncollectible from Eligible Purchasers - Complete Schedule 10E
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intTemplateItemId = ''SF-900-Summary-007''' 
+						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-007''' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -174,7 +174,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-010'
 					BEGIN
 					--10. Adjustment - Complete Schedule E-1 (Dollar amount only)
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intTemplateItemId = ''SF-900-Summary-010''' 
+						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-010''' 
 						INSERT INTO @tblTempSummaryTotal
 					
 						EXEC(@Query)
@@ -213,7 +213,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-014'
 					BEGIN
 					--3. Adjustments (Schedule E-1 must be attached and is subject to Department approval)
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intTemplateItemId = ''SF-900-Summary-014''' 
+						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-014''' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -234,7 +234,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-017'
 					BEGIN
 					--2. Penalty
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intTemplateItemId = ''SF-900-Summary-017''' 
+						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-017''' 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -242,7 +242,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-018'
 					BEGIN
 					--3. Interest
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intTemplateItemId = ''SF-900-Summary-018'''    
+						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-018'''    
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)
 					END
@@ -256,7 +256,7 @@ SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@D
 				ELSE IF @TemplateItemId = 'SF-900-Summary-020'
 					BEGIN
 					--5. Payment(s)
-						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE intTemplateItemId = ''SF-900-Summary-020''' 
+						SET @Query = 'SELECT strConfiguration FROM tblTFTaxReportTemplate WHERE strTemplateItemId = ''SF-900-Summary-020''' 
 
 						INSERT INTO @tblTempSummaryTotal
 						EXEC(@Query)

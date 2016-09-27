@@ -1,11 +1,5 @@
 ﻿DECLARE @TemplateId NVARCHAR(250)
 
-DELETE FROM tblTFTaxReportTemplate WHERE strTemplateItemId IS NULL
-OR strTemplateItemId = 'TID' OR strTemplateItemId = 'License Number' 
-OR strTemplateItemId = 'Filing Type' 
-OR strTemplateItemId = 'License Holder Name' 
-OR strTemplateItemId = 'TaxPayerName'
-
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-FilingType-001')
 IF (@TemplateId IS NULL)
 		BEGIN
@@ -69,7 +63,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '5. Licensed gasoline distributor deduction (Multiply Line 4 by 0.016)' WHERE strTemplateItemId = 'MF-360-Summary-005'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '5. Licensed gasoline distributor deduction (Multiply Line 4 by 0.016)' WHERE strTemplateItemId = 'MF-360-Summary-005'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-006')
@@ -91,7 +85,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '7. Gasoline tax due (Multiply Line 6 by $0.18)' WHERE strTemplateItemId = 'MF-360-Summary-007'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '7. Gasoline tax due (Multiply Line 6 by $0.18)' WHERE strTemplateItemId = 'MF-360-Summary-007'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-008')
@@ -102,7 +96,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '8. Adjustments (Schedule E-1 must be attached and is subject to Department approval)' WHERE strTemplateItemId = 'MF-360-Summary-008'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '8. Adjustments (Schedule E-1 must be attached and is subject to Department approval)' WHERE strTemplateItemId = 'MF-360-Summary-008'
 		END
 	
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-009')
@@ -168,7 +162,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '5. Oil inspection fees due (Multiply Line 4 by $0.01)' WHERE strTemplateItemId = 'MF-360-Summary-014'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '5. Oil inspection fees due (Multiply Line 4 by $0.01)' WHERE strTemplateItemId = 'MF-360-Summary-014'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-015')
@@ -179,7 +173,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '6. Adjustments (Schedule E-1 must be attached and is subject to Department approval)' WHERE strTemplateItemId = 'MF-360-Summary-015'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '6. Adjustments (Schedule E-1 must be attached and is subject to Department approval)' WHERE strTemplateItemId = 'MF-360-Summary-015'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-016')
@@ -212,7 +206,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '2. Penalty (Penalty must be added if report is filed after the due date. 10% of tax due or $5.00, whichever is greater. Five dollars ($5.00) is due on a late report showing no tax due.)' WHERE strTemplateItemId = 'MF-360-Summary-018'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '2. Penalty (Penalty must be added if report is filed after the due date. 10% of tax due or $5.00, whichever is greater. Five dollars ($5.00) is due on a late report showing no tax due.)' WHERE strTemplateItemId = 'MF-360-Summary-018'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-019')
@@ -223,7 +217,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '3. Interest (Interest must be added if report is filed after the due date. Contact the Department for daily interest rates.)' WHERE strTemplateItemId = 'MF-360-Summary-019'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '3. Interest (Interest must be added if report is filed after the due date. Contact the Department for daily interest rates.)' WHERE strTemplateItemId = 'MF-360-Summary-019'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-020')
@@ -245,7 +239,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '5. Payment(s)' WHERE strTemplateItemId = 'MF-360-Summary-021'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '5. Payment(s)' WHERE strTemplateItemId = 'MF-360-Summary-021'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-022')
@@ -259,16 +253,15 @@ IF (@TemplateId IS NULL)
 			UPDATE tblTFTaxReportTemplate SET strDescription = '6. Balance due (Line 4 minus Line 5)' WHERE strTemplateItemId = 'MF-360-Summary-022'
 		END
 
-
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-023')
 IF (@TemplateId IS NULL)
 		BEGIN
 			INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [strTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId]) 
-			VALUES (NULL, N'MF-360-Summary-023', N'MF-360', 14, N'IN', N'Section 4:    Calculation of Total Amount Due', 7, 23, N'7. Gallons of gasoline sold to taxable marina', N'0', N'0', 0, NULL, N'Summary', 36, 0)
+			VALUES (40, N'MF-360-Summary-023', N'MF-360', 14, N'IN', N'Section 4:    Calculation of Total Amount Due', 7, 23, N'7. Gallons of gasoline sold to taxable marina', N'0', N'0', 1, NULL, N'Summary', 36, 0)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, intTemplateItemNumber = 23, strDescription = '7. Gallons of gasoline sold to taxable marina', strScheduleCode = '0' WHERE strTemplateItemId = 'MF-360-Summary-023'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '7. Gallons of gasoline sold to taxable marina' WHERE strTemplateItemId = 'MF-360-Summary-023'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Detail-001')
@@ -466,7 +459,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '9. Miscelleaneous deduction - theft/loss' WHERE strTemplateItemId = 'MF-360-Summary-024'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '9. Miscelleaneous deduction - theft/loss' WHERE strTemplateItemId = 'MF-360-Summary-024'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Summary-025')
@@ -477,7 +470,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = '9a. Miscellaneous deduction - off road, other' WHERE strTemplateItemId = 'MF-360-Summary-025'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '9a. Miscellaneous deduction - off road, other' WHERE strTemplateItemId = 'MF-360-Summary-025'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Detail-019')
@@ -510,7 +503,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = 'License Number' WHERE strTemplateItemId = 'MF-360-LicenseNumber'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'License Number' WHERE strTemplateItemId = 'MF-360-LicenseNumber'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Header-01')
@@ -521,7 +514,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = 'FilingType - Gasoline' WHERE strTemplateItemId = 'MF-360-Header-01'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'FilingType - Gasoline' WHERE strTemplateItemId = 'MF-360-Header-01'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Header-02')
@@ -532,7 +525,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = 'FilingType - Oil Inspection' WHERE strTemplateItemId = 'MF-360-Header-02'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'FilingType - Oil Inspection' WHERE strTemplateItemId = 'MF-360-Header-02'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-Header-03')
@@ -543,7 +536,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = 'FilingType - Gasohol Blender' WHERE strTemplateItemId = 'MF-360-Header-03'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'FilingType - Gasohol Blender' WHERE strTemplateItemId = 'MF-360-Header-03'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'MF-360-LicenseHolderName')
@@ -554,7 +547,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 40, strDescription = 'Name of License Holder' WHERE strTemplateItemId = 'MF-360-LicenseHolderName'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Name of License Holder' WHERE strTemplateItemId = 'MF-360-LicenseHolderName'
 		END
 
 -- SF900
@@ -644,7 +637,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '6. Tax Due (Multiply Line 5 by $0.16)' WHERE strTemplateItemId = 'SF-900-Summary-006'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '6. Tax Due (Multiply Line 5 by $0.16)' WHERE strTemplateItemId = 'SF-900-Summary-006'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-007')
@@ -655,7 +648,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '7. Amount of Tax Uncollectible from Eligible Purchasers - Complete Schedule 10E' WHERE strTemplateItemId = 'SF-900-Summary-007'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '7. Amount of Tax Uncollectible from Eligible Purchasers - Complete Schedule 10E' WHERE strTemplateItemId = 'SF-900-Summary-007'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-008')
@@ -677,7 +670,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '9. Collection Allowance (Multiply Line 8 by 0.016). If return filed or tax paid after due date enter zero (0)' WHERE strTemplateItemId = 'SF-900-Summary-009'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '9. Collection Allowance (Multiply Line 8 by 0.016). If return filed or tax paid after due date enter zero (0)' WHERE strTemplateItemId = 'SF-900-Summary-009'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-010')
@@ -688,7 +681,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '10. Adjustment - Complete Schedule E-1 (Dollar amount only)' WHERE strTemplateItemId = 'SF-900-Summary-010'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '10. Adjustment - Complete Schedule E-1 (Dollar amount only)' WHERE strTemplateItemId = 'SF-900-Summary-010'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-011')
@@ -721,7 +714,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '2. Oil inspection fees due (Multiply Line 1 by $0.01)' WHERE strTemplateItemId = 'SF-900-Summary-013'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '2. Oil inspection fees due (Multiply Line 1 by $0.01)' WHERE strTemplateItemId = 'SF-900-Summary-013'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-014')
@@ -732,7 +725,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '3. Adjustments (Schedule E-1 must be attached and is subject to Department approval)' WHERE strTemplateItemId = 'SF-900-Summary-014'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '3. Adjustments (Schedule E-1 must be attached and is subject to Department approval)' WHERE strTemplateItemId = 'SF-900-Summary-014'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-015')
@@ -765,7 +758,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '2. Penalty (Penalty must be added if report is filed after the due date. 10% of tax due or $5.00, whichever is greater. Five dollars ($5.00) is due on a late report showing no tax due.)' WHERE strTemplateItemId = 'SF-900-Summary-017'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '2. Penalty (Penalty must be added if report is filed after the due date. 10% of tax due or $5.00, whichever is greater. Five dollars ($5.00) is due on a late report showing no tax due.)' WHERE strTemplateItemId = 'SF-900-Summary-017'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-018')
@@ -776,7 +769,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '3. Interest (Interest must be added if report is filed after the due date. Contact the Department for daily interest rates.)' WHERE strTemplateItemId = 'SF-900-Summary-018'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '3. Interest (Interest must be added if report is filed after the due date. Contact the Department for daily interest rates.)' WHERE strTemplateItemId = 'SF-900-Summary-018'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-019')
@@ -798,7 +791,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = '5. Payment(s)' WHERE strTemplateItemId = 'SF-900-Summary-020'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '5. Payment(s)' WHERE strTemplateItemId = 'SF-900-Summary-020'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Summary-021')
@@ -1018,7 +1011,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'Supplier' WHERE strTemplateItemId = 'SF-900-Header-01'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Supplier' WHERE strTemplateItemId = 'SF-900-Header-01'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Header-02')
@@ -1029,7 +1022,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'Permissive Supplier' WHERE strTemplateItemId = 'SF-900-Header-02'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Permissive Supplier' WHERE strTemplateItemId = 'SF-900-Header-02'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Header-03')
@@ -1040,7 +1033,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'Importer' WHERE strTemplateItemId = 'SF-900-Header-03'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Importer' WHERE strTemplateItemId = 'SF-900-Header-03'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Header-04')
@@ -1051,7 +1044,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'Exporter' WHERE strTemplateItemId = 'SF-900-Header-04'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Exporter' WHERE strTemplateItemId = 'SF-900-Header-04'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Header-05')
@@ -1062,7 +1055,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'Blender' WHERE strTemplateItemId = 'SF-900-Header-05'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Blender' WHERE strTemplateItemId = 'SF-900-Header-05'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-Header-06')
@@ -1073,7 +1066,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'Dyed Fuel User' WHERE strTemplateItemId = 'SF-900-Header-06'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Dyed Fuel User' WHERE strTemplateItemId = 'SF-900-Header-06'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-LicenseHolderName')
@@ -1084,7 +1077,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'Name of License Holder' WHERE strTemplateItemId = 'SF-900-LicenseHolderName'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Name of License Holder' WHERE strTemplateItemId = 'SF-900-LicenseHolderName'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-900-LicenseNumber')
@@ -1095,7 +1088,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 59, strDescription = 'License Number' WHERE strTemplateItemId = 'SF-900-LicenseNumber'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'License Number' WHERE strTemplateItemId = 'SF-900-LicenseNumber'
 		END
 
 --GT-103
@@ -1141,7 +1134,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = '4. Gasoline Use Tax Due. (Line 3 multiplied by the current rate. See Departmental Notice #2' WHERE strTemplateItemId = 'GT-103-Summary-004'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '4. Gasoline Use Tax Due. (Line 3 multiplied by the current rate. See Departmental Notice #2' WHERE strTemplateItemId = 'GT-103-Summary-004'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-Summary-005')
@@ -1152,7 +1145,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = '5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 1%' WHERE strTemplateItemId = 'GT-103-Summary-005'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '5. Collection Allowance. Do not calculate this allowance if your return and payment are late. Collection allowance rate is 1%' WHERE strTemplateItemId = 'GT-103-Summary-005'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-Summary-006')
@@ -1174,7 +1167,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = '7. Penalty Due. If late, the penalty is 10% of the tax due on Line 6 or $5, whichever is greater.' WHERE strTemplateItemId = 'GT-103-Summary-007'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '7. Penalty Due. If late, the penalty is 10% of the tax due on Line 6 or $5, whichever is greater.' WHERE strTemplateItemId = 'GT-103-Summary-007'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-Summary-008')
@@ -1185,7 +1178,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = '8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #)' WHERE strTemplateItemId = 'GT-103-Summary-008'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #)' WHERE strTemplateItemId = 'GT-103-Summary-008'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-Summary-009')
@@ -1196,7 +1189,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = '9. Electronic Funds Transfer Credit' WHERE strTemplateItemId = 'GT-103-Summary-009'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '9. Electronic Funds Transfer Credit' WHERE strTemplateItemId = 'GT-103-Summary-009'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-Summary-010')
@@ -1207,7 +1200,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = '10. Adjustments. If negative entry, use a negative sign. (You must provide an explanation and supporting documentation to the Fuel Tax section.)' WHERE strTemplateItemId = 'GT-103-Summary-010'
+			UPDATE tblTFTaxReportTemplate SET strDescription = '10. Adjustments. If negative entry, use a negative sign. (You must provide an explanation and supporting documentation to the Fuel Tax section.)' WHERE strTemplateItemId = 'GT-103-Summary-010'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-Summary-011')
@@ -1306,7 +1299,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = 'Taxpayer Identification Number' WHERE strTemplateItemId = 'GT-103-TID'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Taxpayer Identification Number' WHERE strTemplateItemId = 'GT-103-TID'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-TaxPayerName')
@@ -1317,7 +1310,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 45, strDescription = 'Tax Payer Name' WHERE strTemplateItemId = 'GT-103-TaxPayerName'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Tax Payer Name' WHERE strTemplateItemId = 'GT-103-TaxPayerName'
 		END
 
 --SF-401
@@ -1384,7 +1377,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 69, strDescription = 'License Number' WHERE strTemplateItemId = 'SF-401-LicenseNumber'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'License Number' WHERE strTemplateItemId = 'SF-401-LicenseNumber'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'SF-401-MotorCarrier')
@@ -1395,7 +1388,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 69, strDescription = 'Motor Carrier / IFTA Number' WHERE strTemplateItemId = 'SF-401-MotorCarrier'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'Motor Carrier / IFTA Number' WHERE strTemplateItemId = 'SF-401-MotorCarrier'
 		END
 
 --EDI
@@ -1407,7 +1400,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA01 - Authorization Information Qualifier' WHERE strTemplateItemId = 'EDI-ISA01'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA01 - Authorization Information Qualifier' WHERE strTemplateItemId = 'EDI-ISA01'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA02')
@@ -1418,7 +1411,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA02 - Authorization Information' WHERE strTemplateItemId = 'EDI-ISA02'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA02 - Authorization Information' WHERE strTemplateItemId = 'EDI-ISA02'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA03')
@@ -1429,7 +1422,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA03 - Security Information Qualifier' WHERE strTemplateItemId = 'EDI-ISA03'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA03 - Security Information Qualifier' WHERE strTemplateItemId = 'EDI-ISA03'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA04')
@@ -1440,7 +1433,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA04 - Security Information' WHERE strTemplateItemId = 'EDI-ISA04'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA04 - Security Information' WHERE strTemplateItemId = 'EDI-ISA04'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA05')
@@ -1451,7 +1444,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA07 - Interchange ID Qualifier' WHERE strTemplateItemId = 'EDI-ISA05'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA07 - Interchange ID Qualifier' WHERE strTemplateItemId = 'EDI-ISA05'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA06')
@@ -1462,7 +1455,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA06 - Interchange Sender ID' WHERE strTemplateItemId = 'EDI-ISA06'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA06 - Interchange Sender ID' WHERE strTemplateItemId = 'EDI-ISA06'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA07')
@@ -1473,7 +1466,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA07 - Interchange ID Qualifier' WHERE strTemplateItemId = 'EDI-ISA07'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA07 - Interchange ID Qualifier' WHERE strTemplateItemId = 'EDI-ISA07'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA08')
@@ -1484,7 +1477,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA08 - Interchange Receiver ID' WHERE strTemplateItemId = 'EDI-ISA08'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA08 - Interchange Receiver ID' WHERE strTemplateItemId = 'EDI-ISA08'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA11')
@@ -1495,7 +1488,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA11 - Repetition Separator' WHERE strTemplateItemId = 'EDI-ISA11'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA11 - Repetition Separator' WHERE strTemplateItemId = 'EDI-ISA11'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA12')
@@ -1506,7 +1499,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA12 - Interchange Control Version Number' WHERE strTemplateItemId = 'EDI-ISA12'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA12 - Interchange Control Version Number' WHERE strTemplateItemId = 'EDI-ISA12'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA13')
@@ -1517,7 +1510,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA13 - Interchange Control Number (for next transmission)' WHERE strTemplateItemId = 'EDI-ISA13'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA13 - Interchange Control Number (for next transmission)' WHERE strTemplateItemId = 'EDI-ISA13'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA14')
@@ -1528,7 +1521,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA14 - Acknowledgement Requested' WHERE strTemplateItemId = 'EDI-ISA14'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA14 - Acknowledgement Requested' WHERE strTemplateItemId = 'EDI-ISA14'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA15')
@@ -1539,7 +1532,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA15 - Usage Indicator' WHERE strTemplateItemId = 'EDI-ISA15'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA15 - Usage Indicator' WHERE strTemplateItemId = 'EDI-ISA15'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ISA16')
@@ -1550,7 +1543,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ISA16 - Component Sub-element Separator' WHERE strTemplateItemId = 'EDI-ISA16'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ISA16 - Component Sub-element Separator' WHERE strTemplateItemId = 'EDI-ISA16'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-GS01')
@@ -1561,7 +1554,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'GS01 - Functional Identifier Code' WHERE strTemplateItemId = 'EDI-GS01'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'GS01 - Functional Identifier Code' WHERE strTemplateItemId = 'EDI-GS01'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-GS02')
@@ -1572,7 +1565,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'GS02 - Application Sender''s Code' WHERE strTemplateItemId = 'EDI-GS02'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'GS02 - Application Sender''s Code' WHERE strTemplateItemId = 'EDI-GS02'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-GS03')
@@ -1583,7 +1576,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'GS03 - Receiver''s Code' WHERE strTemplateItemId = 'EDI-GS03'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'GS03 - Receiver''s Code' WHERE strTemplateItemId = 'EDI-GS03'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-GS06')
@@ -1594,7 +1587,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'GS06 - Group Control Number (for next transmission)' WHERE strTemplateItemId = 'EDI-GS06'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'GS06 - Group Control Number (for next transmission)' WHERE strTemplateItemId = 'EDI-GS06'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-GS07')
@@ -1605,7 +1598,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'GS07 - Responsible Agency Code' WHERE strTemplateItemId = 'EDI-GS07'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'GS07 - Responsible Agency Code' WHERE strTemplateItemId = 'EDI-GS07'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-GS08')
@@ -1616,7 +1609,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'GS08 - Version/Release/Industry ID Code' WHERE strTemplateItemId = 'EDI-GS08'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'GS08 - Version/Release/Industry ID Code' WHERE strTemplateItemId = 'EDI-GS08'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ST01')
@@ -1627,7 +1620,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ST01 - Transaction Set Code' WHERE strTemplateItemId = 'EDI-ST01'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ST01 - Transaction Set Code' WHERE strTemplateItemId = 'EDI-ST01'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-ST02')
@@ -1638,7 +1631,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'ST02 - Transaction Set Control Number (for next transmission)' WHERE strTemplateItemId = 'EDI-ST02'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'ST02 - Transaction Set Control Number (for next transmission)' WHERE strTemplateItemId = 'EDI-ST02'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-BTI13')
@@ -1649,7 +1642,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'BTI13 - Transaction Set Purpose Code' WHERE strTemplateItemId = 'EDI-BTI13'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'BTI13 - Transaction Set Purpose Code' WHERE strTemplateItemId = 'EDI-BTI13'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-BTI14')
@@ -1660,7 +1653,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'BTI14 - Transaction Type Code' WHERE strTemplateItemId = 'EDI-BTI14'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'BTI14 - Transaction Type Code' WHERE strTemplateItemId = 'EDI-BTI14'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-FilePath')
@@ -1671,7 +1664,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'EDI File Path' WHERE strTemplateItemId = 'EDI-FilePath'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'EDI File Path' WHERE strTemplateItemId = 'EDI-FilePath'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-FileName1st')
@@ -1682,7 +1675,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'EDI File Name - 1st part (TST or PRD)' WHERE strTemplateItemId = 'EDI-FileName1st'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'EDI File Name - 1st part (TST or PRD)' WHERE strTemplateItemId = 'EDI-FileName1st'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-FileName2nd')
@@ -1693,7 +1686,7 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'EDI File Name - 2nd part (Tax Payer Code)' WHERE strTemplateItemId = 'EDI-FileName2nd'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'EDI File Name - 2nd part (Tax Payer Code)' WHERE strTemplateItemId = 'EDI-FileName2nd'
 		END
 
 SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'EDI-FileName3rd')
@@ -1704,29 +1697,5 @@ IF (@TemplateId IS NULL)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 70, strDescription = 'EDI File Name - 3rd part (Next Sequence Number)' WHERE strTemplateItemId = 'EDI-FileName3rd'
-		END
-
---GT-103 GUT Rate Config
-SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-2DGasoline')
-IF (@TemplateId IS NULL)
-		BEGIN
-			INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [strTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId])
-			VALUES (43, N'GT-103-2DGasoline', N'GT-103', 14, N'IN', N'Schedule', 0, 0, N'Reporting Period GUT Rate', NULL, N'0', 0, NULL, N'Summary', 0, 0)
-			
-		END
-	ELSE
-		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 43, strDescription = 'Reporting Period GUT Rate' WHERE strTemplateItemId = 'GT-103-2DGasoline'
-		END
-
-SET @TemplateId = (SELECT TOP 1 strTemplateItemId FROM tblTFTaxReportTemplate WHERE strTemplateItemId = 'GT-103-2DGasohol')
-IF (@TemplateId IS NULL)
-		BEGIN
-			INSERT [dbo].[tblTFTaxReportTemplate] ([intReportingComponentId], [strTemplateItemId], [strFormCode], [intTaxAuthorityId], [strTaxAuthority], [strReportSection], [intReportItemSequence], [intTemplateItemNumber], [strDescription], [strScheduleCode], [strConfiguration], [ysnDynamicConfiguration], [strLastIndexOf], [strSegment], [intConfigurationSequence], [intConcurrencyId])
-			VALUES (44, N'GT-103-2DGasohol', N'GT-103', 14, N'IN', N'Schedule', 0, 0, N'Reporting Period GUT Rate', NULL, N'0', 0, NULL, N'Summary', 0, 0)
-		END
-	ELSE
-		BEGIN
-			UPDATE tblTFTaxReportTemplate SET intReportingComponentId = 44, strDescription = 'EDI File Name - 3rd part (Next Sequence Number)' WHERE strTemplateItemId = 'GT-103-2DGasohol'
+			UPDATE tblTFTaxReportTemplate SET strDescription = 'EDI File Name - 3rd part (Next Sequence Number)' WHERE strTemplateItemId = 'EDI-FileName3rd'
 		END

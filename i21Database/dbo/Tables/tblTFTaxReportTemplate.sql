@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblTFTaxReportTemplate](
 	[intReportTemplateId] [int] IDENTITY(1,1) NOT NULL,
 	[intReportingComponentId] [int] NULL,
-	[intTemplateItemId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[strTemplateItemId] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
 	[strFormCode] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intTaxAuthorityId] [int] NULL,
 	[strTaxAuthority] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
@@ -11,7 +11,6 @@
 	[strDescription] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strScheduleCode] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strConfiguration] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[ysnConfiguration] BIT NULL,
 	[ysnDynamicConfiguration] BIT NOT NULL,
 	[strLastIndexOf] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strSegment] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
