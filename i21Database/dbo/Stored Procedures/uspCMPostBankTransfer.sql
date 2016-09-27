@@ -388,7 +388,7 @@ BEGIN
 	SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_WD_PREFIX
 			,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 			,intBankAccountId			= A.intBankAccountIdFrom
-			,intCurrencyId				= NULL
+			,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdFrom)
 			,dblExchangeRate			= 1
 			,dtmDate					= A.dtmDate
 			,strPayee					= ''
@@ -426,7 +426,7 @@ BEGIN
 	SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX
 			,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 			,intBankAccountId			= A.intBankAccountIdTo
-			,intCurrencyId				= NULL
+			,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdTo)
 			,dblExchangeRate			= 1
 			,dtmDate					= A.dtmDate
 			,strPayee					= ''
