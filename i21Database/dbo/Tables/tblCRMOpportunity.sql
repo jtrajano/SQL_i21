@@ -57,24 +57,24 @@
 	[intLostToCompetitorId] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
-	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
-	CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerContactId] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblCRMType_intTypeId] FOREIGN KEY ([intTypeId]) REFERENCES [dbo].[tblCRMType] ([intTypeId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intInternalProjectManager] FOREIGN KEY ([intInternalProjectManager]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intInternalSalesPerson] FOREIGN KEY ([intInternalSalesPerson]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerProjectManager] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerLeadershipSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblCRMSalesPipeStatus_intSalesPipeStatusId] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblCRMSalesPipeStatus] ([intSalesPipeStatusId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblCRMStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [dbo].[tblCRMStatus] ([intStatusId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblCRMCampaign_intCampaignId] FOREIGN KEY ([intCampaignId]) REFERENCES [dbo].[tblCRMCampaign] ([intCampaignId]),
-	CONSTRAINT [FK_tblCRMOpportunity_tblCRMSource_intSourceId] FOREIGN KEY (intSourceId) REFERENCES [dbo].[tblCRMSource] ([intSourceId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblCRMMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblCRMMilestone] ([intMilestoneId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
-    CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
+	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC)
+	--CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerContactId] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblCRMType_intTypeId] FOREIGN KEY ([intTypeId]) REFERENCES [dbo].[tblCRMType] ([intTypeId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intInternalProjectManager] FOREIGN KEY ([intInternalProjectManager]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	--CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intInternalSalesPerson] FOREIGN KEY ([intInternalSalesPerson]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	--CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerProjectManager] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	--CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerLeadershipSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+	--CONSTRAINT [FK_tblCRMOpportunity_tblCRMSalesPipeStatus_intSalesPipeStatusId] FOREIGN KEY ([intSalesPipeStatusId]) REFERENCES [dbo].[tblCRMSalesPipeStatus] ([intSalesPipeStatusId]),
+	--CONSTRAINT [FK_tblCRMOpportunity_tblCRMStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [dbo].[tblCRMStatus] ([intStatusId]),
+	--CONSTRAINT [FK_tblCRMOpportunity_tblCRMCampaign_intCampaignId] FOREIGN KEY ([intCampaignId]) REFERENCES [dbo].[tblCRMCampaign] ([intCampaignId]),
+	--CONSTRAINT [FK_tblCRMOpportunity_tblCRMSource_intSourceId] FOREIGN KEY (intSourceId) REFERENCES [dbo].[tblCRMSource] ([intSourceId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intReferredByEntityId] FOREIGN KEY ([intReferredByEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblCRMMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblCRMMilestone] ([intMilestoneId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
+ --   CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
 
 GO
