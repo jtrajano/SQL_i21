@@ -29,7 +29,7 @@ BEGIN
 	END
 
 	-- Insert values for #tmpGetQMInspectionResult
-	IF EXISTS (SELECT 1 FROM dbo.tblQMTestResult where intProductValueId = @ReceiptId)
+	IF EXISTS (SELECT 1 FROM dbo.tblQMTestResult where intProductTypeId = 3 AND intProductValueId = @ReceiptId)
 		--Do this if Receipt Number is a valid Receipt Id
 		BEGIN
 			INSERT INTO #tmpGetQMInspectionResult (
