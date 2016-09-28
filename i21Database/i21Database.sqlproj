@@ -4390,6 +4390,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetContractQualityColumns.sql" />
     <Build Include="dbo\Views\vyuHDCustomerContactList.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetTaxGroupIdOnInventoryReceipt.sql" />
+    <Build Include="dbo\Functions\fnSCCalculateDiscount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

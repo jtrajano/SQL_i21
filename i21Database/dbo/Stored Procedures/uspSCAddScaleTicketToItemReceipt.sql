@@ -220,8 +220,8 @@ WHERE SCTicket.intTicketId = @intTicketId
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
 												CASE 
-													WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-													WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+													WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId) * -1)
+													WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId)
 												END
 											END
 		,[strAllocateCostBy]				= NULL
