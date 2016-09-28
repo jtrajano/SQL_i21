@@ -57,14 +57,6 @@ BEGIN
 	EXEC uspGRReverseOnReceiptDelete @ReceiptId
 END 
 
--- Remove values from Quality Table for Incoming Inspection Result
-DELETE
-FROM tblQMTestResult
-WHERE intSampleId IS NULL
-    AND intControlPointId = 3
-    AND intProductTypeId = 3
-    AND intProductValueId = @ReceiptId
-
 -- Validate. 
 BEGIN		
 	-- Do not proceed if receipt type is NOT a 'Purchase Contract' 
@@ -316,3 +308,10 @@ DELETE	FROM tblICTransactionDetailLog
 WHERE	strTransactionType = 'Inventory Receipt' 
 		AND intTransactionId = @ReceiptId
 
+-- Remove values from Quality Table for Incoming Inspection Result
+DELETE
+FROM tblQMTestResult
+WHERE intSampleId IS NULL
+    AND intControlPointId = 3
+    AND intProductTypeId = 3
+    AND intProductValueId = @ReceiptId
