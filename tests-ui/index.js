@@ -1,5 +1,5 @@
 
-var Harness = Siesta.Harness.Browser.ExtJS,
+var Harness = new Siesta.Harness.Browser.ExtJS (),
     testEnginePath = '../../TestEngine/TestEngine.js',
     commonSM =  '../../i21/test-ui/CommonSM.js';
 
