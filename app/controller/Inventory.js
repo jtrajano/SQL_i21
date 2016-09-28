@@ -88,6 +88,8 @@ Ext.define('Inventory.controller.Inventory', {
     },
 
     init: function() {
+        Ext.Loader.loadScript("../Inventory/app/lib/underscore.js");
+
         Ext.Ajax.request({
             timeout: 120000,
             url: '../Inventory/api/Item/GetEmpty',

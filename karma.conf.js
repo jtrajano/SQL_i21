@@ -212,7 +212,12 @@ var inventoryFiles = [
 var testFiles = [
     {pattern: 'test/specs/**/*.js', watched: true}
 ];
-var files = extJs.concat(inventoryFiles).concat(testFiles);
+
+var libs = [
+    {pattern: 'app/lib/**/*.js', watched: true }
+];
+
+var files = libs.concat(extJs).concat(inventoryFiles).concat(testFiles);
 
 module.exports = function (config) {
     config.set({
