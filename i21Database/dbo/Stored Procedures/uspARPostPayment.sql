@@ -64,7 +64,7 @@ DECLARE @ZeroPayment TABLE (
 );
 
 DECLARE @PostDate AS DATETIME
-SET @PostDate = CAST(GETDATE() AS DATE)
+SET @PostDate = GETDATE()
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
