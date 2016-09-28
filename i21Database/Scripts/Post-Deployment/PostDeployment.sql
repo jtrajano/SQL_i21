@@ -359,6 +359,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\_TaxCategory.sql
 :r .\TF\DefaultData\_ScheduleFieldTemplate.sql
 :r .\TF\DefaultData\_TaxReportSProc.sql
+:r .\TF\DefaultData\_TaxReportTemplate.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql
