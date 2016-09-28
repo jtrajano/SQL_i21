@@ -127,7 +127,7 @@ ELSE
 BEGIN
       IF ISNULL(@strInternalTradeNo,'') = ''
       BEGIN
-            SELECT @strInternalTradeNo = strPrefix + LTRIM(intNumber) FROM tblSMStartingNumber WHERE strTransactionType = 'FutOpt Transaction'
+            SELECT @strInternalTradeNo = strPrefix + LTRIM(intNumber)+'-H' FROM tblSMStartingNumber WHERE strTransactionType = 'FutOpt Transaction'
             UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE strTransactionType = 'FutOpt Transaction'
       END
 
