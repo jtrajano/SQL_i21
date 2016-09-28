@@ -91,7 +91,8 @@ SELECT	TD.intTransferDetailId,
 SELECT	PT.intTransferId,
 		PT.strTransferNo,
 		PT.dtmTransferDate,
-		PT.strTransferType,
+		PT.intTransferType,
+		T.strTransferType,
 		PTD.intTransferorId,
 		PTD.strTransferorName,
 		PTD.strEquityType,
@@ -109,4 +110,6 @@ SELECT	PT.intTransferId,
 	FROM tblPATTransfer PT
 	INNER JOIN PTD
 		ON PTD.intTransferId = PT.intTransferId
+	INNER JOIN tblPATTransferType T
+		ON T.intTransferType = PT.intTransferType
 GO
