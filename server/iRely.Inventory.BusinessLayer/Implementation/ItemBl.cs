@@ -153,6 +153,10 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "UOMs that are used as default Purchase UOM in this Item's location(s) cannot be removed. To remove the UOMs, clear the Purchase UOMs that were assigned to the Item's location(s).";
                 }
+                else if (result.BaseException.Message.Contains("The DELETE statement conflicted with the REFERENCE constraint \"FK_tblICItemPricing_tblICItemLocation\""))
+                {
+                    msg = "The location(s) you are trying to remove were being used in Pricing tab.";
+                }
             }
 
             return new BusinessResult<tblICItem>()
