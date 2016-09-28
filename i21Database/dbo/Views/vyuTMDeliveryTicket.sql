@@ -23,7 +23,7 @@ SELECT
                                                         ISNULL(O.intItemId, I.intItemId)
                                                         ,Ent.intEntityId
                                                         ,J.dtmCallInDate
-                                                        ,J.dblPrice
+                                                        ,J.dblPrice * (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
                                                         ,(CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
                                                         ,A.intTaxStateID
                                                         ,A.intLocationId

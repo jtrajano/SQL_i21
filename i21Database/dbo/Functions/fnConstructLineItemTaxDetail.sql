@@ -100,7 +100,7 @@ BEGIN
 						 @ItemId				--@ItemId
 						,@EntityCustomerId		--@CustomerId
 						,@TransactionDate		--@TransactionDate
-						,@Price					--@ItemPrice
+						,@Price	* @Quantity		--@Amount
 						,@Quantity				--@QtyShipped
 						,@TaxGroupId			--@TaxGroupId
 						,@CompanyLocationId		--@CompanyLocationId
