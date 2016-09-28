@@ -286,6 +286,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecima
 			,@EntitySalespersonId			= @EntitySalespersonId
 			,@SubCurrency					= @SubCurrency
 			,@ItemConversionAccountId		= @ItemConversionAccountId
+			,@RecomputeTax					= @RecomputeTax
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

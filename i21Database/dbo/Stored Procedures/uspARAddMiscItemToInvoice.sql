@@ -16,6 +16,7 @@
 	,@ItemConversionAccountId		INT				= NULL
 	,@EntitySalespersonId			INT				= NULL	
 	,@SubCurrency					BIT				= 0
+	,@RecomputeTax					BIT				= 1
 AS
 
 BEGIN
@@ -194,7 +195,8 @@ DECLARE @NewId INT
 SET @NewId = SCOPE_IDENTITY()
 		
 BEGIN TRY
-EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
+IF @RecomputeTax = 1
+	EXEC dbo.[uspARReComputeInvoiceTaxes] @InvoiceId  
 
 END TRY
 BEGIN CATCH
